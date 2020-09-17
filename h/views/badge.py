@@ -22,25 +22,40 @@ def _has_uri_ever_been_annotated(db, uri):
     return result[0] is True
 
 
+def _regex_or_clause(options):
+    return "|".join(f"(?:{re.escape(part)})" for part in options)
+
+
 class Blocklist:
     """Block URLs which we know are not worth replying to for the badge."""
 
     BLOCKED_DOMAINS = {"facebook.com", "www.facebook.com", "mail.google.com"}
+    BLOCKED_SCHEMES = {"chrome"}
 
     # This is much faster to do with a regex than URL lib. This might
-    # change if the number of domains to block becomes very large. In which case
-    # a Trie might be more efficient.
+    # change if the number of domains to block becomes very large. In which
+    # case a Trie (like marisa-trie) might be more efficient.
 
     # The main OR clause which looks like this (?:option_1)|(?:option_2)...
-    _DOMAIN_PATTERN = "|".join(f"(?:{re.escape(part)})" for part in BLOCKED_DOMAINS)
-    # The above wrapped in something which allows http prefixes and asserts a boundary
-    _DOMAIN_PATTERN = re.compile(rf"^(?:http[sx]?:)?//(?:{_DOMAIN_PATTERN})(?:/|$)")
+    # The above wrapped in something which allows http prefixes and asserts
+    # we either have a slash or the end of the string
+    _DOMAIN_PATTERN = (
+        rf"(?:http[sx]?:)?//(?:{_regex_or_clause(BLOCKED_DOMAINS)})(?:/|$)"
+    )
+
+    # Just the bad schemes
+    _SCHEME_PATTERN = rf"(?:{_regex_or_clause(BLOCKED_SCHEMES)})://"
+
+    # A combo pattern of the bad schemes and the bad domains
+    _PATTERN = re.compile(
+        rf"^(?:{_SCHEME_PATTERN})|(?:{_DOMAIN_PATTERN})", re.IGNORECASE
+    )
 
     @classmethod
     def is_blocked(cls, url):
         """Check if a URL is blocked."""
 
-        return cls._DOMAIN_PATTERN.match(url)
+        return cls._PATTERN.match(url)
 
 
 @json_view(route_name="badge")
