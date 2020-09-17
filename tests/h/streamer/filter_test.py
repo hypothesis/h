@@ -60,6 +60,14 @@ class TestFilterHandler:
         assert filter_matches(filter_, ann_matching)
         assert not filter_matches(filter_, ann_non_matching)
 
+    def test_it_does_not_crash_without_filter_rows(self, factories):
+        ann = factories.Annotation()
+
+        socket_no_rows = FakeSocket()
+
+        result = tuple(SocketFilter.matching([socket_no_rows], ann))
+        assert not result
+
     def test_it_matches_parent_id(self, factories, filter_matches):
         parent_ann = factories.Annotation()
         other_ann = factories.Annotation()

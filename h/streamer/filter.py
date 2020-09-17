@@ -45,6 +45,11 @@ class SocketFilter:
         }
 
         for socket in sockets:
+            # Some sockets might not yet have the filter applied (or had a non
+            # parsable filter etc.)
+            if not hasattr(socket, "filter_rows"):
+                continue
+
             # Iterate over the filter_rows added by `set_filter()`
             for field, value in socket.filter_rows:
                 if value in values[field]:
