@@ -71,12 +71,9 @@ def badge(request):
         cache_control.max_age = 86400  # 1 day
 
         # `pyramid_authsanity` sets a response callback which adds Vary=Cookie
-        # which will totally break our caching. To get around this we add
-        # another callback which should be called after to disable it.
-        def disable_vary_header(_request, response):
-            response.vary = None
-
-        request.add_response_callback(disable_vary_header)
+        # which will totally break our caching. So far there doesn't seem to be
+        # much we can do about this, but browsers will still individually
+        # respect the caching headers.
 
     elif not _has_uri_ever_been_annotated(request.db, uri):
         # Do a cheap check to see if this URI has ever been annotated. If not,
