@@ -12,13 +12,11 @@ from h.streamer import messages
 
 class FakeSocket:
     client_id = None
-    filter = None
     terminated = None
 
     def __init__(self, client_id):
         self.client_id = client_id
         self.terminated = False
-        self.filter = mock.MagicMock()
         self.send = mock.MagicMock()
 
         self.authenticated_userid = None
@@ -238,11 +236,11 @@ class TestHandleAnnotationEvent:
 
         assert socket.send_json_payloads == []
 
+    @pytest.mark.usefixtures("no_matching_sockets")
     def test_no_send_if_no_socket_filter(self, presenter_asdict):
         """Should return None if the socket has no filter."""
         message = {"src_client_id": "_", "annotation_id": "_", "action": "_"}
         socket = FakeSocket("giraffe")
-        socket.filter = None
         session = mock.sentinel.db_session
         settings = {"foo": "bar"}
         presenter_asdict.return_value = self.serialized_annotation()
@@ -263,11 +261,12 @@ class TestHandleAnnotationEvent:
 
         assert socket.send_json_payloads == []
 
+    @pytest.mark.usefixtures("no_matching_sockets")
     def test_no_send_if_filter_does_not_match(self, presenter_asdict):
         """Should return None if the socket filter doesn't match the message."""
         message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
         socket = FakeSocket("giraffe")
-        socket.filter.match.return_value = False
+
         session = mock.sentinel.db_session
         settings = {"foo": "bar"}
         presenter_asdict.return_value = self.serialized_annotation()
@@ -371,6 +370,16 @@ class TestHandleAnnotationEvent:
         fetch = patch("h.streamer.messages.storage.fetch_annotation")
         fetch.return_value = factories.Annotation()
         return fetch
+
+    @pytest.fixture(autouse=True)
+    def SocketFilter(self, patch):
+        SocketFilter = patch("h.streamer.messages.SocketFilter")
+        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)
+        return SocketFilter
+
+    @pytest.fixture
+    def no_matching_sockets(self, SocketFilter):
+        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(())
 
     @pytest.fixture
     def presenters(self, patch):

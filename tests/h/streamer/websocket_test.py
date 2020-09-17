@@ -270,35 +270,31 @@ class TestHandleClientIDMessage:
 
 
 class TestHandleFilterMessage:
-    def test_sets_socket_filter(self, socket):
-        message = websocket.Message(
-            socket=socket,
-            payload={
-                "filter": {
-                    "actions": {},
-                    "match_policy": "include_any",
-                    "clauses": [
-                        {
-                            "field": "/uri",
-                            "operator": "equals",
-                            "value": "http://example.com",
-                        }
-                    ],
-                }
-            },
-        )
+    def test_sets_socket_filter(self, socket, SocketFilter):
+        filter = {
+            "actions": {},
+            "match_policy": "include_any",
+            "clauses": [
+                {"field": "/uri", "operator": "equals", "value": "http://example.com"}
+            ],
+        }
+
+        message = websocket.Message(socket=socket, payload={"filter": filter},)
 
         websocket.handle_filter_message(message)
 
-        assert socket.filter is not None
+        SocketFilter.set_filter.assert_called_once_with(socket, filter)
 
     @mock.patch("h.streamer.websocket.storage.expand_uri")
-    def test_expands_uris_in_uri_filter_with_session(self, expand_uri, socket):
+    def test_expands_uris_in_uri_filter_with_session(
+        self, expand_uri, socket, SocketFilter
+    ):
         expand_uri.return_value = [
             "http://example.com",
             "http://example.com/alter",
             "http://example.com/print",
         ]
+
         session = mock.sentinel.db_session
         message = websocket.Message(
             socket=socket,
@@ -319,12 +315,14 @@ class TestHandleFilterMessage:
 
         websocket.handle_filter_message(message, session=session)
 
-        uri_filter = socket.filter.filter["clauses"][0]
-        uri_values = uri_filter["value"]
-        assert len(uri_values) == 3
-        assert "http://example.com" in uri_values
-        assert "http://example.com/alter" in uri_values
-        assert "http://example.com/print" in uri_values
+        # Use Any.list to do order insensitive matching
+        expected_values = Any.list.containing(expand_uri.return_value).only()
+        SocketFilter.set_filter.assert_called_once_with(
+            socket,
+            Any.dict.containing(
+                {"clauses": [Any.dict.containing({"value": expected_values})]}
+            ),
+        )
 
     @mock.patch("h.streamer.websocket.storage.expand_uri")
     def test_expands_uris_using_passed_session(self, expand_uri, socket):
@@ -370,6 +368,10 @@ class TestHandleFilterMessage:
             websocket.handle_filter_message(message)
 
         mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
+
+    @pytest.fixture
+    def SocketFilter(self, patch):
+        return patch("h.streamer.websocket.SocketFilter")
 
     @pytest.fixture
     def socket(self):

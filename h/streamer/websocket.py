@@ -11,7 +11,7 @@ from gevent.queue import Full
 from ws4py.websocket import WebSocket as _WebSocket
 
 from h import storage
-from h.streamer import filter
+from h.streamer.filter import FILTER_SCHEMA, SocketFilter
 
 log = logging.getLogger(__name__)
 
@@ -151,9 +151,10 @@ def handle_filter_message(message, session=None):
             ok=False,
         )
         return
+
     filter_ = message.payload["filter"]
     try:
-        jsonschema.validate(filter_, filter.SCHEMA)
+        jsonschema.validate(filter_, FILTER_SCHEMA)
     except jsonschema.ValidationError:
         message.reply(
             {
@@ -166,10 +167,12 @@ def handle_filter_message(message, session=None):
             ok=False,
         )
         return
+
     if session is not None:
         # Add backend expands for clauses
         _expand_clauses(session, filter_)
-    message.socket.filter = filter.FilterHandler(filter_)
+
+    SocketFilter.set_filter(message.socket, filter_)
 
 
 MESSAGE_HANDLERS["filter"] = handle_filter_message  # noqa: E305
