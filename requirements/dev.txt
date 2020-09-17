@@ -58,7 +58,7 @@ psycogreen==1.0.2         # via -r requirements/requirements.txt
 psycopg2==2.8.6           # via -r requirements/requirements.txt
 ptyprocess==0.6.0         # via pexpect
 pycparser==2.20           # via -r requirements/requirements.txt, cffi
-pygments==2.7.0           # via ipython
+pygments==2.7.1           # via ipython
 pyjwt==1.7.1              # via -r requirements/requirements.txt
 pyparsing==2.4.7          # via -r requirements/requirements.txt, packaging
 pyramid-authsanity==1.1.0  # via -r requirements/requirements.txt
