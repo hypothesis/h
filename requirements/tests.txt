@@ -9,7 +9,7 @@ amqp==2.6.1               # via -r requirements/requirements.txt, kombu
 attrs==20.2.0             # via -r requirements/requirements.txt, hypothesis, jsonschema, pytest
 bcrypt==3.2.0             # via -r requirements/requirements.txt
 billiard==3.6.3.0         # via -r requirements/requirements.txt, celery
-bleach==3.1.5             # via -r requirements/requirements.txt
+bleach==3.2.0             # via -r requirements/requirements.txt
 celery==4.4.7             # via -r requirements/requirements.txt
 certifi==2020.6.20        # via -r requirements/requirements.txt, sentry-sdk
 cffi==1.14.2              # via -r requirements/requirements.txt, bcrypt
