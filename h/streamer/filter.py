@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from functools import lru_cache
-from operator import attrgetter
-
 from h.util.uri import normalize as normalize_uri
 
-SCHEMA = {
+FILTER_SCHEMA = {
     "type": "object",
     "properties": {
         # Ignored, but kept here for backwards compatibility.
@@ -29,122 +26,53 @@ SCHEMA = {
 }
 
 
-def _normalize_uri_multi(items):
-    """
-    Normalise uri's for comparison.
+class SocketFilter:
+    @classmethod
+    def matching(cls, sockets, annotation):
+        """Find sockets with matching filters for the given annotation.
 
-    :param items: A list or single item
-    :return: A list of mapped values, or a single value (if passed)
-    """
-    if isinstance(items, list):
-        return [normalize_uri(item) for item in items]
+        For this to work, the sockets must have first had `set_filter()` called
+        on them.
 
-    return normalize_uri(items)
+        :param sockets: Iterable of sockets to check
+        :param annotation: Annotation to match
+        :return: A generator of matching socket objects
+        """
+        values = {
+            "/id": [annotation.id],
+            "/uri": [normalize_uri(annotation.target_uri)],
+            "/references": set(annotation.references),
+        }
 
-
-class FilterHandler:
-    FIELDS = {
-        # Fields we accept mapped to a getter, and a normalization function
-        "/uri": [attrgetter("target_uri"), _normalize_uri_multi],
-        "/references": [attrgetter("references"), None],
-        "/id": [attrgetter("id"), None],
-    }
-
-    def __init__(self, filter_json):
-        self.filter = filter_json
-
-        # Pre-compile as much as is sensible about our filters, so we can do
-        # this work once, and then apply it over and over
-        self._clause_filters = [
-            clause_filter
-            for clause_filter in (
-                self._get_filter(clause) for clause in self.filter.get("clauses", [])
-            )
-            if clause_filter
-        ]
-
-    def match(self, annotation):
-        if not self._clause_filters:
-            return True
-
-        for clause_filter in self._clause_filters:
-            if clause_filter(annotation):
-                return True
-
-        return False
+        for socket in sockets:
+            # Iterate over the filter_rows added by `set_filter()`
+            for field, value in socket.filter_rows:
+                if value in values[field]:
+                    yield socket
+                    break
 
     @classmethod
-    def _get_filter(cls, clause):
-        """Get a filter function for a given clause.
+    def set_filter(cls, socket, filter):
+        """Add filtering information to a socket for use with `matching()`.
 
-        :param clause: The decoded JSON clause
-        :return: A function which accepts an annotation and returns a truth
-            value depending on whether the value applies
+        :param socket: Socket to add filtering information too
+        :param filter: Filter JSON to process
         """
-        field_path = clause["field"]
+        socket.filter_rows = tuple(cls._rows_for(filter))
 
-        try:
-            field_getter, normalize = cls.FIELDS[field_path]
-        except KeyError:
-            return
+    @classmethod
+    def _rows_for(cls, filter):
+        """Convert a filter to field value pairs."""
+        for clause in filter["clauses"]:
+            values = clause["value"]
 
-        filter_term = clause["value"]
-        if normalize is not None:
-            filter_term = normalize(filter_term)
+            # Normalise to an iterable of distinct values
+            values = set(values) if isinstance(values, list) else [values]
 
-        def clause_filter(annotation):
-            # Extract the annotation property that corresponds to the "field"
-            # path in the filter.
-            field_value = field_getter(annotation)
+            field = clause["field"]
 
-            if field_value is None:
-                return False
+            for value in values:
+                if field == "/uri":
+                    value = normalize_uri(value)
 
-            if normalize:
-                field_value = normalize(field_value)
-
-            if clause["operator"] == "one_of":
-                # The `one_of` operator behaves differently depending on
-                # whether the annotation's field value is a list (eg. tags)
-                # or atom (eg. id). This is not ideal but the client currently
-                # relies on it.
-                if isinstance(field_value, list):
-                    return filter_term in field_value
-
-                return field_value in filter_term
-
-            return field_value == filter_term
-
-        return clause_filter
-
-
-class NormalizedAnnotation:
-    """A normalized and caching version of an annotation.
-
-    This version proxies, normalises and caches the fields used in the filter
-    algorithm to speed up processing. The result can be quite dramatic over
-    a large number of clients.
-
-    The intended use is to wrap an annotation before passing to a filter
-    `match()` method.
-    """
-
-    def __init__(self, annotation):
-        self._annotation = annotation
-
-    @property
-    @lru_cache(1)
-    def target_uri(self):
-        return normalize_uri(self._annotation.target_uri)
-
-    @property
-    @lru_cache(1)
-    def references(self):
-        # Ids require no normalisation, so just pass through
-        return self._annotation.references
-
-    @property
-    @lru_cache(1)
-    def id(self):
-        # Ids require no normalisation, so just pass through
-        return self._annotation.id
+                yield field, value
