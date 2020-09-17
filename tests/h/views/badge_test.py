@@ -14,8 +14,13 @@ class TestBlocklist:
     @pytest.mark.parametrize("domain", Blocklist.BLOCKED_DOMAINS)
     @pytest.mark.parametrize("prefix", ("http://", "https://", "httpx://", "//"))
     @pytest.mark.parametrize("suffix", ("", "/", "/path?a=b"))
-    def test_it_blocks(self, domain, prefix, suffix):
+    def test_it_blocks_bad_domains(self, domain, prefix, suffix):
         assert Blocklist.is_blocked(f"{prefix}{domain}{suffix}")
+
+    @pytest.mark.parametrize("scheme", Blocklist.BLOCKED_SCHEMES)
+    @pytest.mark.parametrize("suffix", ("://about", "://newtab"))
+    def test_it_blocks_bad_schema(self, scheme, suffix):
+        assert Blocklist.is_blocked(f"{scheme}://{suffix}")
 
     @pytest.mark.parametrize(
         "acceptable_url",
@@ -23,6 +28,8 @@ class TestBlocklist:
             "http://example.com/this/is/fine",
             "http://example.com//facebook.com",
             "http://facebook.com.om.nom",
+            "file://c/my/magical_file.pdf",
+            "chrome-extension://blah",
         ),
     )
     def test_it_allows_non_blocked_items(self, acceptable_url):
@@ -43,10 +50,12 @@ class TestBlocklist:
 
         # Handy to know while tinkering
         # print(
-        #     f"Calls per second: {calls_per_second}, {1000000 / calls_per_second:.03f} μs/call"
+        #     f"Calls per second: {calls_per_second}, "
+        #     f"{1000000 / calls_per_second:.03f} μs/call"
         # )
 
-        # It should be above this number by quite a margin (20x), but we don't want flaky tests
+        # It should be above this number by quite a margin (20x), but we
+        # don't want flaky tests
         assert calls_per_second > 50000
 
 
