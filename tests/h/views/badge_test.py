@@ -35,6 +35,18 @@ class TestBlocklist:
     def test_it_allows_non_blocked_items(self, acceptable_url):
         assert not Blocklist.is_blocked(acceptable_url)
 
+    def test_regex_golden_master(self):
+
+        # This is a golden master test intended to facilitate refactoring
+        # It just states that the regex is what it last was, this allows you
+        # to change how it's generated and test if you have changed what is
+        # generated
+        assert Blocklist._PATTERN.pattern == (
+            r"^(?:(?:chrome)://)|(?:(?:http[sx]?:)?//"
+            r"(?:(?:facebook\.com)|(?:www\.facebook\.com)|(?:mail\.google\.com))"
+            r"(?:/|$))"
+        )
+
     def test_its_fast(self):
         # Check any modifications haven't made this significantly slower
         reps = 10000
