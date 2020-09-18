@@ -7,6 +7,7 @@ import weakref
 from collections import namedtuple
 
 import jsonschema
+import newrelic.agent
 from gevent.queue import Full
 from ws4py.websocket import WebSocket as _WebSocket
 
@@ -62,6 +63,8 @@ class WebSocket(_WebSocket):
         self.registry = environ["h.ws.registry"]
 
         self._work_queue = environ["h.ws.streamer_work_queue"]
+        self.messages_received = 0
+        self.messages_sent = 0
 
     def __new__(cls, *args, **kwargs):
         instance = super(WebSocket, cls).__new__(cls)
@@ -69,6 +72,8 @@ class WebSocket(_WebSocket):
         return instance
 
     def received_message(self, msg):
+        self.messages_received += 1
+
         try:
             payload = json.loads(msg.data)
         except ValueError:
@@ -90,6 +95,7 @@ class WebSocket(_WebSocket):
 
     def send_json(self, payload):
         if not self.terminated:
+            self.messages_sent += 1
             self.send(json.dumps(payload))
 
 
@@ -229,3 +235,58 @@ def _expand_uris(session, clause):
         expanded.update(storage.expand_uri(session, item))
 
     clause["value"] = list(expanded)
+
+
+class NumericMetric:
+    """Helper for tracking changes in a numeric metric over time."""
+
+    def __init__(self, get_metric):
+        """
+        :param get_metric: Callable which returns the current value of the metric
+        """
+        self.get_metric = get_metric
+        self.prev_value = get_metric()
+
+    def delta(self):
+        """Update the metric and return the difference between current and previous values"""
+        new_value = self.get_metric()
+        delta = new_value - self.prev_value
+        self.prev_value = new_value
+        return delta
+
+
+@newrelic.agent.data_source_factory(name="WebSocket Connections")
+def websocket_metrics(settings, environ):
+    """
+    A New Relic metric data source which provides metrics about WebSocket
+    connections.
+
+    See https://docs.newrelic.com/docs/agents/python-agent/supported-features/python-custom-metrics.
+    """
+
+    socket_list = environ.get("socket_list", WebSocket.instances)  # Test seam
+
+    messages_sent_metric = NumericMetric(
+        lambda: sum([ws.messages_sent for ws in socket_list])
+    )
+    messages_received_metric = NumericMetric(
+        lambda: sum([ws.messages_received for ws in socket_list])
+    )
+    prefix = "Custom/WebSocket"
+
+    def generate_metrics():
+        active_connections = len(socket_list)
+        authenticated_connections = len(
+            [ws for ws in socket_list if ws.authenticated_userid]
+        )
+
+        yield (f"{prefix}/ActiveConnections", active_connections)
+        yield (f"{prefix}/AuthenticatedConnections", authenticated_connections)
+        yield (
+            f"{prefix}/AnonymousConnections",
+            active_connections - authenticated_connections,
+        )
+        yield (f"{prefix}/ClientMessagesReceived", messages_received_metric.delta())
+        yield (f"{prefix}/ClientMessagesSent", messages_sent_metric.delta())
+
+    return generate_metrics

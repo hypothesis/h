@@ -421,3 +421,72 @@ class TestUnknownMessage:
             websocket.handle_unknown_message(message)
 
         mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
+
+
+class TestWebsocketMetrics:
+    def test_metrics(self, generate_metrics):
+        metrics = list(generate_metrics())
+
+        assert metrics == [
+            ("Custom/WebSocket/ActiveConnections", 3),
+            ("Custom/WebSocket/AuthenticatedConnections", 1),
+            ("Custom/WebSocket/AnonymousConnections", 2),
+            ("Custom/WebSocket/ClientMessagesReceived", 0),
+            ("Custom/WebSocket/ClientMessagesSent", 0),
+        ]
+
+    def test_received_metric(self, get_metric, sockets):
+        message = mock.Mock(data="{}")
+        sockets[0].received_message(message)
+        sockets[1].received_message(message)
+
+        assert get_metric("ClientMessagesReceived") == 2
+
+        sockets[0].received_message(message)
+
+        assert get_metric("ClientMessagesReceived") == 1
+
+    def test_sent_metric(self, get_metric, sockets):
+        message = {"foo": "bar"}
+        sockets[0].send_json(message)
+        sockets[1].send_json(message)
+
+        assert get_metric("ClientMessagesSent") == 2
+
+        sockets[0].send_json(message)
+
+        assert get_metric("ClientMessagesSent") == 1
+
+    @pytest.fixture
+    def get_metric(self, generate_metrics):
+        def _get_metric(name_match):
+            for name, value in generate_metrics():
+                if name_match in name:
+                    return value
+            return None
+
+        return _get_metric
+
+    @pytest.fixture
+    def generate_metrics(self, sockets):
+        metrics_factory = websocket.websocket_metrics(settings={})["factory"]
+        return metrics_factory(environ={"socket_list": sockets})
+
+    @pytest.fixture
+    def sockets(self):
+        anon_environ = {
+            "h.ws.authenticated_userid": None,
+            "h.ws.effective_principals": [],
+            "h.ws.registry": {},
+            "h.ws.streamer_work_queue": mock.Mock(),
+        }
+        authenticated_environ = anon_environ.copy()
+        authenticated_environ["h.ws.authenticated_userid"] = (
+            "acct:jimsmith@hypothes.is",
+        )
+
+        return [
+            websocket.WebSocket(sock=mock.Mock(), environ=anon_environ),
+            websocket.WebSocket(sock=mock.Mock(), environ=anon_environ),
+            websocket.WebSocket(sock=mock.Mock(), environ=authenticated_environ),
+        ]

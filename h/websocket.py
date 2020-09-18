@@ -38,6 +38,7 @@ license distributed with the ws4py project. Such code remains copyright (c)
 import logging
 import os
 
+import newrelic.agent
 import pyramid
 from gevent.pool import Pool
 from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler, PyWSGIServer
@@ -45,6 +46,7 @@ from ws4py import format_addresses
 
 from h.config import configure
 from h.sentry_filters import SENTRY_FILTERS
+from h.streamer.websocket import websocket_metrics
 
 log = logging.getLogger(__name__)
 
@@ -205,5 +207,8 @@ def create_app(_global_config, **settings):
     # Add support for logging exceptions whenever they arise
     config.include("pyramid_exclog")
     config.add_settings({"exclog.extra_info": True})
+
+    # Set up metrics collection
+    newrelic.agent.register_data_source(websocket_metrics)
 
     return config.make_wsgi_app()
