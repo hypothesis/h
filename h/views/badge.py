@@ -22,33 +22,47 @@ def _has_uri_ever_been_annotated(db, uri):
     return result[0] is True
 
 
-def _regex_or_clause(options):
-    return "|".join(f"(?:{re.escape(part)})" for part in options)
+def _regex_or(options):
+    """Create a regex pattern matching any of the provided strings."""
+
+    # An or joining non capturing groups of escaped strings
+    clause = "|".join(f"(?:{re.escape(part)})" for part in options)
+
+    if len(options) > 1:
+        # Wrap the whole thing in another non-capturing group if we have
+        # multiple clauses to make it easy to 'or'
+        return f"(?:{clause})"
+
+    return clause
 
 
 class Blocklist:
     """Block URLs which we know are not worth replying to for the badge."""
 
-    BLOCKED_DOMAINS = {"facebook.com", "www.facebook.com", "mail.google.com"}
-    BLOCKED_SCHEMES = {"chrome"}
+    BLOCKED_DOMAINS = ("facebook.com", "www.facebook.com", "mail.google.com")
+    BLOCKED_SCHEMES = ("chrome",)
 
     # This is much faster to do with a regex than URL lib. This might
     # change if the number of domains to block becomes very large. In which
     # case a Trie (like marisa-trie) might be more efficient.
 
-    # The main OR clause which looks like this (?:option_1)|(?:option_2)...
-    # The above wrapped in something which allows http prefixes and asserts
-    # we either have a slash or the end of the string
     _DOMAIN_PATTERN = (
-        rf"(?:http[sx]?:)?//(?:{_regex_or_clause(BLOCKED_DOMAINS)})(?:/|$)"
+        f"(?:http[sx]?:)?//"  # An HTTP scheme (or just //)
+        f"{_regex_or(BLOCKED_DOMAINS)}"  # Any of our bad domains
+        "(?:/|$)"  # Followed with slash or end of string '$'
+        # This part stops us from matching 'bad.com' against 'bad.com.more'
     )
 
-    # Just the bad schemes
-    _SCHEME_PATTERN = rf"(?:{_regex_or_clause(BLOCKED_SCHEMES)})://"
+    # Any of the bad schema, followed by '://'
+    _SCHEME_PATTERN = f"{_regex_or(BLOCKED_SCHEMES)}://"
 
     # A combo pattern of the bad schemes and the bad domains
     _PATTERN = re.compile(
-        rf"^(?:{_SCHEME_PATTERN})|(?:{_DOMAIN_PATTERN})", re.IGNORECASE
+        # All of the '(?:)' are non capturing groups. These group things
+        # together but don't remember them. This just matches either the
+        # scheme pattern above or the domain pattern
+        f"^(?:{_SCHEME_PATTERN})|(?:{_DOMAIN_PATTERN})",
+        re.IGNORECASE,
     )
 
     @classmethod
