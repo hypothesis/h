@@ -2,6 +2,7 @@ from datetime import datetime
 from random import random
 
 import pytest
+from h_matchers import Any
 
 from h.streamer.filter import SocketFilter
 
@@ -45,28 +46,59 @@ class TestFilterHandler:
 
         assert filter_matches(filter_, ann) is should_match
 
-    def test_it_matches_id(self, factories, filter_matches):
-        ann_matching = factories.Annotation()
-        ann_non_matching = factories.Annotation()
+    def test_it_matches_id(self, factories, filter_matches, annotation):
+        other_annotation = factories.Annotation()
 
         filter_ = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [
-                {"field": "/id", "operator": "equals", "value": ann_matching.id}
-            ],
+            "clauses": [{"field": "/id", "operator": "equals", "value": annotation.id}],
         }
 
-        assert filter_matches(filter_, ann_matching)
-        assert not filter_matches(filter_, ann_non_matching)
+        assert filter_matches(filter_, annotation)
+        assert not filter_matches(filter_, other_annotation)
 
-    def test_it_does_not_crash_without_filter_rows(self, factories):
-        ann = factories.Annotation()
-
+    def test_it_does_not_crash_without_filter_rows(self, annotation):
         socket_no_rows = FakeSocket()
 
-        result = tuple(SocketFilter.matching([socket_no_rows], ann))
+        result = tuple(SocketFilter.matching([socket_no_rows], annotation))
         assert not result
+
+    def test_it_does_not_crash_with_unexpected_fields(self, annotation):
+        socket = FakeSocket()
+        socket.filter_rows = (("/not_a_thing", "value"),)
+
+        result = tuple(SocketFilter.matching([socket], annotation))
+        assert not result
+
+    @pytest.mark.parametrize(
+        "field,value,expected",
+        (
+            ("/id", "v1", [("/id", "v1")]),
+            ("/references", "v1", [("/references", "v1")]),
+            ("/uri", "v1", [("/uri", "v1")]),
+            # Mapping
+            ("/uri", "http://example.com", [("/uri", "httpx://example.com")]),
+            # Multiple values
+            ("/id", ["v1", "v2"], [("/id", "v1"), ("/id", "v2")]),
+            ("/id", ["same", "same"], [("/id", "same")]),
+            # Ignored
+            ("/group", "v1", []),
+            ("/random", "v1", []),
+        ),
+    )
+    def test_set_filter(self, field, value, expected):
+        socket = FakeSocket()
+
+        filter_ = {
+            "match_policy": "include_any",
+            "actions": {},
+            "clauses": [{"field": field, "operator": "one_of", "value": value}],
+        }
+
+        SocketFilter.set_filter(socket, filter_)
+
+        assert socket.filter_rows == Any.iterable.containing(expected).only()
 
     def test_it_matches_parent_id(self, factories, filter_matches):
         parent_ann = factories.Annotation()
@@ -136,6 +168,10 @@ class TestFilterHandler:
                 },
             ],
         }
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation()
 
     @pytest.fixture
     def filter_matches(self):

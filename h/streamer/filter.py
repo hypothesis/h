@@ -27,6 +27,8 @@ FILTER_SCHEMA = {
 
 
 class SocketFilter:
+    KNOWN_FIELDS = {"/id", "/uri", "/references"}
+
     @classmethod
     def matching(cls, sockets, annotation):
         """Find sockets with matching filters for the given annotation.
@@ -52,9 +54,12 @@ class SocketFilter:
 
             # Iterate over the filter_rows added by `set_filter()`
             for field, value in socket.filter_rows:
-                if value in values[field]:
-                    yield socket
-                    break
+                try:
+                    if value in values[field]:
+                        yield socket
+                        break
+                except KeyError:
+                    continue
 
     @classmethod
     def set_filter(cls, socket, filter):
@@ -69,12 +74,14 @@ class SocketFilter:
     def _rows_for(cls, filter):
         """Convert a filter to field value pairs."""
         for clause in filter["clauses"]:
+            field = clause["field"]
+            if field not in cls.KNOWN_FIELDS:
+                continue
+
             values = clause["value"]
 
             # Normalise to an iterable of distinct values
             values = set(values) if isinstance(values, list) else [values]
-
-            field = clause["field"]
 
             for value in values:
                 if field == "/uri":
