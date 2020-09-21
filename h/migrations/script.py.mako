@@ -1,4 +1,3 @@
-<%text># -*- coding: utf-8 -*-</%text>
 """${message}"""
 from alembic import op
 ${imports if imports else ""}
