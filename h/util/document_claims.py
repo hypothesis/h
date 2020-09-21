@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 """
 Functions for parsing document claims data from the client.
 
