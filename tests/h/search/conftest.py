@@ -27,7 +27,7 @@ def moderation_service(pyramid_config):
 
 
 @pytest.fixture
-def Annotation(factories, index):
+def Annotation(factories, index_annotations):
     """Create and index an annotation.
 
     Looks like factories.Annotation() but automatically uses the build()
@@ -37,18 +37,19 @@ def Annotation(factories, index):
 
     def _Annotation(**kwargs):
         annotation = factories.Annotation.build(**kwargs)
-        index(annotation)
+        index_annotations(annotation)
         return annotation
 
     return _Annotation
 
 
 @pytest.fixture
-def index(es_client, pyramid_request, moderation_service):
+def index_annotations(es_client, pyramid_request, moderation_service):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
             h.search.index.index(es_client, annotation, pyramid_request)
+
         es_client.conn.indices.refresh(index=es_client.index)
 
     return _index

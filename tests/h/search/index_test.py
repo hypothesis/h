@@ -15,11 +15,11 @@ from tests.common.matchers import Matcher
 @pytest.mark.usefixtures("annotations")
 class TestIndex:
     def test_annotation_ids_are_used_as_elasticsearch_ids(
-        self, es_client, factories, index
+        self, es_client, factories, index_annotations
     ):
         annotation = factories.Annotation.build()
 
-        index(annotation)
+        index_annotations(annotation)
 
         result = es_client.conn.get(
             index=es_client.index, doc_type=es_client.mapping_type, id=annotation.id
@@ -30,7 +30,7 @@ class TestIndex:
         self,
         factories,
         get_indexed_ann,
-        index,
+        index_annotations,
         pyramid_request,
         AnnotationSearchIndexPresenter,
     ):
@@ -41,7 +41,7 @@ class TestIndex:
             "some_other_field": "a_value",
         }
 
-        index(annotation)
+        index_annotations(annotation)
         indexed_ann = get_indexed_ann(annotation.id)
 
         AnnotationSearchIndexPresenter.assert_called_once_with(
@@ -50,16 +50,16 @@ class TestIndex:
         assert indexed_ann == presenter.asdict.return_value
 
     def test_it_can_index_an_annotation_with_no_document(
-        self, factories, index, get_indexed_ann
+        self, factories, index_annotations, get_indexed_ann
     ):
         annotation = factories.Annotation.build(document=None)
 
-        index(annotation)
+        index_annotations(annotation)
 
         assert get_indexed_ann(annotation.id)["document"] == {}
 
     def test_it_indexes_the_annotations_document_web_uri(
-        self, factories, index, get_indexed_ann
+        self, factories, index_annotations, get_indexed_ann
     ):
         annotation = factories.Annotation.build(
             document=factories.Document.build(
@@ -67,7 +67,7 @@ class TestIndex:
             )
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         # *Searching* for an annotation by ``annotation.document`` (e.g. by
         # document ``title`` or ``web_uri``) isn't enabled.  But you can
@@ -81,37 +81,37 @@ class TestIndex:
         )
 
     def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(
-        self, factories, index, get_indexed_ann
+        self, factories, index_annotations, get_indexed_ann
     ):
         annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri=None)
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         assert "web_uri" not in get_indexed_ann(annotation.id)["document"]
 
     def test_it_indexes_the_annotations_document_title(
-        self, factories, index, get_indexed_ann
+        self, factories, index_annotations, get_indexed_ann
     ):
         annotation = factories.Annotation.build(
             document=factories.Document.build(title="test_document_title")
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         assert get_indexed_ann(annotation.id)["document"]["title"] == [
             "test_document_title"
         ]
 
     def test_it_can_index_an_annotation_with_a_document_with_no_title(
-        self, factories, index, get_indexed_ann
+        self, factories, index_annotations, get_indexed_ann
     ):
         annotation = factories.Annotation.build(
             document=factories.Document.build(title=None)
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         assert "title" not in get_indexed_ann(annotation.id)["document"]
 
@@ -121,12 +121,12 @@ class TestIndex:
         factories,
         pyramid_request,
         notify,
-        index,
+        index_annotations,
         search,
     ):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
 
-        index(annotation)
+        index_annotations(annotation)
 
         event = AnnotationTransformEvent.return_value
 
@@ -135,40 +135,46 @@ class TestIndex:
         )
         notify.assert_called_once_with(event)
 
-    def test_you_can_filter_annotations_by_authority(self, factories, index, search):
+    def test_you_can_filter_annotations_by_authority(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", authority="example.com").execute()
         assert SearchResponseWithIDs([annotation.id]) == response
 
     def test_you_can_filter_annotations_by_creation_time(
-        self, factories, index, search
+        self, factories, index_annotations, search
     ):
         before = datetime.datetime.now()
         annotation = factories.Annotation.build()
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("range", created={"gte": before}).execute()
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_updated_time(self, factories, index, search):
+    def test_you_can_filter_annotations_by_updated_time(
+        self, factories, index_annotations, search
+    ):
         update_time = datetime.datetime.now()
         annotation = factories.Annotation.build(
             id="test_annotation_id", updated=update_time
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("range", updated={"gte": update_time}).execute()
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_id(self, factories, index, search):
+    def test_you_can_filter_annotations_by_id(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(id="test_ann_id")
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", id="test_ann_id").execute()
 
@@ -179,21 +185,23 @@ class TestIndex:
         ["acct:someone@example.com", "someone", "someone@example.com"],
     )
     def test_you_can_filter_annotations_by_user(
-        self, factories, index, search, user_search_str
+        self, factories, index_annotations, search, user_search_str
     ):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", user=user_search_str).execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_make_aggregations_on_user_raw(self, factories, index, search):
+    def test_you_can_make_aggregations_on_user_raw(
+        self, factories, index_annotations, search
+    ):
         annotation_1 = factories.Annotation.build(userid="acct:someone@example.com")
         annotation_2 = factories.Annotation.build(userid="acct:Someone@example.com")
 
-        index(annotation_1, annotation_2)
+        index_annotations(annotation_1, annotation_2)
 
         user_aggregation = elasticsearch_dsl.A("terms", field="user_raw")
         search.aggs.bucket("user_raw_terms", user_aggregation)
@@ -214,12 +222,14 @@ class TestIndex:
         assert user_bucket_1["doc_count"] == 1
         assert user_bucket_2["doc_count"] == 1
 
-    def test_you_can_filter_annotations_by_tags(self, factories, index, search):
+    def test_you_can_filter_annotations_by_tags(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(
             id="test_annotation_id", tags=["ญหฬ", "tag"]
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         response1 = search.filter("terms", tags=["ญหฬ"]).execute()
         response2 = search.filter("terms", tags=["tag"]).execute()
@@ -227,7 +237,9 @@ class TestIndex:
         assert SearchResponseWithIDs([annotation.id]) == response1
         assert SearchResponseWithIDs([annotation.id]) == response2
 
-    def test_you_can_make_aggregations_on_tags_raw(self, factories, index, search):
+    def test_you_can_make_aggregations_on_tags_raw(
+        self, factories, index_annotations, search
+    ):
         annotation_1 = factories.Annotation.build(
             id="test_annotation_id_1", tags=["Hello"]
         )
@@ -235,7 +247,7 @@ class TestIndex:
             id="test_annotation_id_2", tags=["hello"]
         )
 
-        index(annotation_1, annotation_2)
+        index_annotations(annotation_1, annotation_2)
 
         tags_aggregation = elasticsearch_dsl.A("terms", field="tags_raw")
         search.aggs.bucket("tags_raw_terms", tags_aggregation)
@@ -256,74 +268,86 @@ class TestIndex:
         assert tag_bucket_1["doc_count"] == 1
         assert tag_bucket_2["doc_count"] == 1
 
-    def test_you_can_filter_annotations_by_uri(self, factories, index, search):
+    def test_you_can_filter_annotations_by_uri(
+        self, factories, index_annotations, search
+    ):
         my_uri = "http://example.com/anything/i/like?ex=something"
         annotation = factories.Annotation.build(
             id="test_annotation_id", target_uri=my_uri
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", uri="example.com/anything/i/like").execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_text(self, factories, index, search):
+    def test_you_can_filter_annotations_by_text(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(
             id="test_annotation_id", text="text to search"
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", text="text").execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_unicode_text(self, factories, index, search):
+    def test_you_can_filter_annotations_by_unicode_text(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(
             id="test_annotation_id", text="test ลข ญหฬ"
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", text="ลข").execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_group(self, factories, index, search):
+    def test_you_can_filter_annotations_by_group(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(
             id="test_annotation_id", groupid="some_group"
         )
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", group="some_group").execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_shared(self, factories, index, search):
+    def test_you_can_filter_annotations_by_shared(
+        self, factories, index_annotations, search
+    ):
         annotation = factories.Annotation.build(id="test_annotation_id", shared=False)
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.filter("term", shared=False).execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_thread_ids(self, factories, index, search):
+    def test_you_can_filter_annotations_by_thread_ids(
+        self, factories, index_annotations, search
+    ):
         annotation1 = factories.Annotation.build(id="test_annotation_id1")
         annotation2 = factories.Annotation.build(
             id="test_annotation_id2", thread=[annotation1]
         )
 
-        index(annotation1, annotation2)
+        index_annotations(annotation1, annotation2)
 
         response = search.filter("terms", thread_ids=[annotation1.id]).execute()
 
         assert SearchResponseWithIDs([annotation2.id]) == response
 
     def test_you_can_filter_annotations_by_hidden(
-        self, AnnotationSearchIndexPresenter, factories, index, search
+        self, AnnotationSearchIndexPresenter, factories, index_annotations, search
     ):
         annotation1 = factories.Annotation.build()
         annotation2 = factories.Annotation.build()
@@ -331,12 +355,12 @@ class TestIndex:
         presenter = AnnotationSearchIndexPresenter.return_value
         presenter.asdict.return_value = {"id": annotation1.id, "hidden": True}
 
-        index(annotation1)
+        index_annotations(annotation1)
 
         presenter = AnnotationSearchIndexPresenter.return_value
         presenter.asdict.return_value = {"id": annotation2.id, "hidden": False}
 
-        index(annotation2)
+        index_annotations(annotation2)
 
         response = search.filter("term", hidden=True).execute()
 
@@ -351,7 +375,7 @@ class TestIndex:
         ],
     )
     def test_you_can_search_within_the_quote(
-        self, factories, index, search, quote, query
+        self, factories, index_annotations, search, quote, query
     ):
         """Verify that the "TextQuoteSelector" selector is indexed as the "quote" field."""
         quote_selector = {
@@ -363,13 +387,13 @@ class TestIndex:
         selectors = [quote_selector]
         annotation = factories.Annotation.build(target_selectors=selectors)
 
-        index(annotation)
+        index_annotations(annotation)
 
         response = search.query("match", quote=query)
         assert SearchResponseWithIDs([annotation.id]) == response
 
     @pytest.fixture
-    def annotations(self, factories, index):
+    def annotations(self, factories, index_annotations):
         """
         Add some annotations to Elasticsearch as "noise".
 
@@ -379,7 +403,7 @@ class TestIndex:
         not, for example, simply returning *all* annotations.
 
         """
-        index(
+        index_annotations(
             factories.Annotation.build(),
             factories.Annotation.build(),
             factories.Annotation.build(),
@@ -388,11 +412,11 @@ class TestIndex:
 
 class TestDelete:
     def test_annotation_is_marked_deleted(
-        self, es_client, factories, get_indexed_ann, index
+        self, es_client, factories, get_indexed_ann, index_annotations
     ):
         annotation = factories.Annotation.build(id="test_annotation_id")
 
-        index(annotation)
+        index_annotations(annotation)
 
         assert "deleted" not in get_indexed_ann(annotation.id)
 
