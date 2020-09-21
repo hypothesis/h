@@ -8,6 +8,7 @@ import factory
 from sqlalchemy import orm
 
 from h import models
+from h.db.types import URLSafeUUID
 from h.models.document import update_document_metadata
 
 from .base import FAKER, ModelFactory
@@ -127,7 +128,8 @@ class Annotation(ModelFactory):
         if getattr(self, "id", None):
             return
 
-        self.id = uuid.uuid4().hex
+        # Ids in the DB are in hex, but in the code they should be URL safe
+        self.id = URLSafeUUID().process_result_value(uuid.uuid4().hex, None)
 
     @factory.post_generation
     def timestamps(self, create, extracted, **kwargs):
