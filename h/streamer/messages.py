@@ -138,6 +138,13 @@ def _generate_annotation_event(message, socket, annotation):
             "options": {"action": action},
         }
         request = env["request"]
+
+        # Propagate the authenticated user from the WebSocket to the request.
+        #
+        # This relies on the auth policy to look for the `websocket_userid`
+        # attr when determining the userid for the request.
+        request.websocket_userid = socket.authenticated_userid
+
         nipsa_service = request.find_service(name="nipsa")
         user_nipsad = nipsa_service.is_flagged(annotation.userid)
 

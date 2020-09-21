@@ -337,6 +337,13 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :returns: the userid authenticated for the passed request or None
         :rtype: unicode or None
         """
+
+        if hasattr(request, "websocket_userid"):
+            # This is a dummy request created while generating a WebSocket
+            # notification message in response to an event. In this case return
+            # the userid that was determined when the WebSocket client connected.
+            return request.websocket_userid
+
         token_str = None
         if _is_ws_request(request):
             token_str = request.GET.get("access_token", None)
