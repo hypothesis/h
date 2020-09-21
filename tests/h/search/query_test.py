@@ -702,7 +702,7 @@ class TestHiddenFilter:
     )
     def test_visibility_of_moderated_and_nipsaed_annotations(
         self,
-        index,
+        index_annotations,
         Annotation,
         pyramid_request,
         search,
