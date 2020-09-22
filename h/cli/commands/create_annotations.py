@@ -3,13 +3,13 @@ import random
 
 import click
 
-from tests.common import factories
-
 
 @click.command()
 @click.pass_context
 @click.option("--number", default=100)
 def create_annotations(ctx, number):
+    from tests.common import factories
+
     request = ctx.obj["bootstrap"]()
     db = request.db
     tm = request.tm
