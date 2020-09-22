@@ -41,7 +41,7 @@ mako==1.1.3               # via -r requirements/requirements.txt, alembic
 markupsafe==1.1.1         # via -r requirements/requirements.txt, jinja2, mako, pyramid-jinja2
 mistune==0.8.4            # via -r requirements/requirements.txt
 more-itertools==8.5.0     # via pytest
-newrelic==5.18.0.148      # via -r requirements/requirements.txt
+newrelic==5.20.0.149      # via -r requirements/requirements.txt
 oauthlib==3.1.0           # via -r requirements/requirements.txt
 packaging==20.4           # via -r requirements/requirements.txt, bleach, pytest
 passlib==1.7.2            # via -r requirements/requirements.txt
