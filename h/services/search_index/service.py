@@ -8,19 +8,19 @@ class SearchIndexService:
         self.request = request
 
     def add_annotation(self, annotation, target_index=None):
-        return add_annotation(
+        return _add_annotation(
             self.es_client, annotation, self.request, target_index=target_index
         )
 
     def delete_annotation_by_id(self, annotation_id, target_index=None, refresh=False):
-        return delete_annotation(self.es_client, annotation_id, target_index, refresh)
+        return _delete_annotation(self.es_client, annotation_id, target_index, refresh)
 
 
 def factory(_context, request):
     return SearchIndexService(request.es, request)
 
 
-def add_annotation(es, annotation, request, target_index=None):
+def _add_annotation(es, annotation, request, target_index=None):
     """
     Index an annotation into the search index.
 
@@ -49,7 +49,7 @@ def add_annotation(es, annotation, request, target_index=None):
     )
 
 
-def delete_annotation(es, annotation_id, target_index=None, refresh=False):
+def _delete_annotation(es, annotation_id, target_index=None, refresh=False):
     """
     Mark an annotation as deleted in the search index.
 

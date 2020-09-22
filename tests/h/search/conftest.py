@@ -4,7 +4,7 @@ import pytest
 
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.group import GroupService
-from h.services.search_index import add_annotation
+from h.services.search_index.service import SearchIndexService
 
 
 @pytest.fixture
@@ -43,14 +43,20 @@ def Annotation(factories, index_annotations):
 
 
 @pytest.fixture
-def index_annotations(es_client, pyramid_request, moderation_service):
+def index_annotations(es_client, search_index):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
-            add_annotation(es_client, annotation, pyramid_request)
+            search_index.add_annotation(annotation)
+
         es_client.conn.indices.refresh(index=es_client.index)
 
     return _index
+
+
+@pytest.fixture
+def search_index(es_client, pyramid_request, moderation_service):
+    return SearchIndexService(es_client, pyramid_request)
 
 
 @pytest.fixture
