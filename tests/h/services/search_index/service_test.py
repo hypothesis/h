@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec, patch, sentinel
+from unittest.mock import call, create_autospec, patch, sentinel
 
 import pytest
 from h_matchers import Any
@@ -6,6 +6,61 @@ from h_matchers import Any
 from h.search.client import Client
 from h.services.search_index.service import SearchIndexService
 from h.services.settings import SettingsService
+
+
+class TestAddAnnotationById:
+    def test_it(self, search_index, root_annotation, storage, add_annotation):
+        storage.fetch_annotation.return_value = root_annotation
+
+        search_index.add_annotation_by_id(root_annotation.id)
+
+        storage.fetch_annotation.assert_called_once_with(
+            search_index.session, root_annotation.id
+        )
+
+        add_annotation.assert_called_once_with(root_annotation)
+
+    def test_it_returns_with_no_annotation(self, search_index, storage, add_annotation):
+        storage.fetch_annotation.return_value = None
+
+        search_index.add_annotation_by_id(sentinel.any_id)
+
+        add_annotation.assert_not_called()
+
+    def test_it_also_adds_the_thread_root(
+        self, search_index, reply_annotation, root_annotation, storage, add_annotation
+    ):
+        storage.fetch_annotation.side_effect = [reply_annotation, root_annotation]
+
+        search_index.add_annotation_by_id(reply_annotation.id)
+
+        storage.fetch_annotation.assert_has_calls(
+            [
+                call(search_index.session, reply_annotation.id),
+                call(search_index.session, root_annotation.id),
+            ]
+        )
+
+        add_annotation.assert_has_calls([call(reply_annotation), call(root_annotation)])
+
+    @pytest.fixture(autouse=True)
+    def storage(self, patch):
+        return patch("h.services.search_index.service.storage")
+
+    @pytest.fixture
+    def root_annotation(self, factories):
+        return factories.Annotation.build(references=[])
+
+    @pytest.fixture
+    def reply_annotation(self, factories, root_annotation):
+        return factories.Annotation.build(references=[root_annotation.id])
+
+    @pytest.fixture
+    def add_annotation(self, search_index):
+        # We test the behavior of add_annotation elsewhere, so we just
+        # need to make sure we call it correctly
+        with patch.object(search_index, "add_annotation") as add_annotation:
+            yield add_annotation
 
 
 class TestAddAnnotation:
@@ -139,7 +194,12 @@ def settings_service(pyramid_config):
 
 @pytest.fixture
 def search_index(es_client, pyramid_request, settings_service):
-    return SearchIndexService(es_client, pyramid_request, settings_service)
+    return SearchIndexService(
+        session=pyramid_request.db,
+        es_client=es_client,
+        request=pyramid_request,
+        settings=settings_service,
+    )
 
 
 @pytest.fixture(autouse=True)

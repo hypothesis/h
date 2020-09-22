@@ -1,3 +1,4 @@
+from h import storage
 from h.events import AnnotationTransformEvent
 from h.presenters import AnnotationSearchIndexPresenter
 
@@ -6,10 +7,21 @@ class SearchIndexService:
     # The DB setting that stores whether a full re-index is taking place
     REINDEX_SETTING_KEY = "reindex.new_index"
 
-    def __init__(self, es_client, request, settings=None):
-        self.es_client = es_client
+    def __init__(self, request, es_client, session, settings):
         self.request = request
+        self.es_client = es_client
+        self.session = session
         self.settings = settings
+
+    def add_annotation_by_id(self, annotation_id):
+        annotation = storage.fetch_annotation(self.session, annotation_id)
+        if not annotation:
+            return
+
+        self.add_annotation(annotation)
+
+        if annotation.is_reply:
+            self.add_annotation_by_id(annotation.thread_root_id)
 
     def add_annotation(self, annotation):
         """
@@ -60,25 +72,17 @@ class SearchIndexService:
         if target_index is not None:
             return
 
-        future_index = self._future_index
+        future_index = self.settings.get(self.REINDEX_SETTING_KEY)
         if future_index:
             self._index_annotation_body(
                 annotation_id, body, refresh, target_index=future_index,
             )
 
-    @property
-    def _future_index(self):
-        # The tests use this class directly for indexing and deletion, we are
-        # never indexing in this situation
-        if not self.settings:
-            return
-
-        return self.settings.get(self.REINDEX_SETTING_KEY)
-
 
 def factory(_context, request):
     return SearchIndexService(
-        es_client=request.es,
         request=request,
+        es_client=request.es,
+        session=request.db,
         settings=request.find_service(name="settings"),
     )
