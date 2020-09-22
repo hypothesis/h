@@ -1,1 +1,1 @@
-from h.services.search_index.service import add_annotation, delete_annotation, factory
+from h.services.search_index.service import factory  # noqa: F401

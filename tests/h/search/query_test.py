@@ -5,7 +5,6 @@ import pytest
 import webob
 
 from h.search import Search, query
-from h.services.search_index import delete_annotation
 
 MISSING = object()
 ES_VERSION = (1, 7, 0)
@@ -668,13 +667,15 @@ class TestUriCombinedWildcardFilter:
 
 
 class TestDeletedFilter:
-    def test_excludes_deleted_annotations(self, search, es_client, Annotation):
+    def test_excludes_deleted_annotations(
+        self, search, es_client, Annotation, search_index
+    ):
         deleted_ids = [Annotation(deleted=True).id]
         not_deleted_ids = [Annotation(deleted=False).id]
 
         # Deleted annotations need to be marked in the index using `h.search.index.delete`.
         for id_ in deleted_ids:
-            delete_annotation(es_client, id_, refresh=True)
+            search_index.delete_annotation_by_id(id_, refresh=True)
 
         result = search.run(webob.multidict.MultiDict({}))
 
