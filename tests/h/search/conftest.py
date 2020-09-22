@@ -56,7 +56,9 @@ def index_annotations(es_client, search_index):
 
 @pytest.fixture
 def search_index(es_client, pyramid_request, moderation_service):
-    return SearchIndexService(es_client, pyramid_request)
+    return SearchIndexService(
+        pyramid_request, es_client, session=pyramid_request.db, settings={}
+    )
 
 
 @pytest.fixture

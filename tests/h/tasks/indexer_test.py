@@ -9,61 +9,29 @@ from h.services.search_index.service import SearchIndexService
 from h.tasks import indexer
 
 
-class TestAddAnnotation:
-    def test_it_fetches_the_annotation(self, storage, annotation, celery):
-        id_ = "test-annotation-id"
-        storage.fetch_annotation.return_value = annotation
+class TestSearchIndexServicesWrapperTasks:
+    """Tests for tasks that just wrap SearchIndexServices functions."""
 
-        indexer.add_annotation(id_)
+    def test_add_annotation(self, search_index):
+        indexer.add_annotation(sentinel.annotation_id)
 
-        storage.fetch_annotation.assert_called_once_with(celery.request.db, id_)
-
-    def test_it_calls_index_with_annotation(self, storage, annotation, search_index):
-        id_ = "test-annotation-id"
-        storage.fetch_annotation.return_value = annotation
-
-        indexer.add_annotation(id_)
-
-        search_index.add_annotation.assert_any_call(annotation)
-
-    def test_it_skips_indexing_when_annotation_cannot_be_loaded(
-        self, storage, search_index
-    ):
-        storage.fetch_annotation.return_value = None
-
-        indexer.add_annotation("test-annotation-id")
-
-        assert search_index.add_annotation.called is False
-
-    def test_it_indexes_thread_root(self, storage, reply, delay):
-        storage.fetch_annotation.return_value = reply
-
-        indexer.add_annotation("test-annotation-id")
-
-        delay.assert_called_once_with("root-id")
-
-    @pytest.fixture
-    def annotation(self):
-        return mock.Mock(spec_set=["is_reply"], is_reply=False)
-
-    @pytest.fixture
-    def reply(self):
-        return mock.Mock(
-            spec_set=["is_reply", "thread_root_id"],
-            is_reply=True,
-            thread_root_id="root-id",
+        search_index.add_annotation_by_id.assert_called_once_with(
+            sentinel.annotation_id
         )
 
-    @pytest.fixture
-    def delay(self, patch):
-        return patch("h.tasks.indexer.add_annotation.delay")
-
-
-class TestDeleteAnnotation:
-    def test_it_calls_search_index(self, search_index):
+    def test_delete_annotation(self, search_index):
         indexer.delete_annotation(sentinel.annotation_id)
 
-        search_index.delete_annotation_by_id.assert_any_call(sentinel.annotation_id)
+        search_index.delete_annotation_by_id.assert_called_once_with(
+            sentinel.annotation_id
+        )
+
+    @pytest.fixture(autouse=True)
+    def search_index(self, pyramid_config):
+        search_index = create_autospec(SearchIndexService, instance=True)
+        pyramid_config.register_service(search_index, name="search_index")
+
+        return search_index
 
 
 class TestReindexUserAnnotations:
@@ -138,14 +106,6 @@ class TestReindexAnnotationsInDateRange:
 
 
 @pytest.fixture(autouse=True)
-def search_index(pyramid_config):
-    search_index = create_autospec(SearchIndexService, instance=True)
-    pyramid_config.register_service(search_index, name="search_index")
-
-    return search_index
-
-
-@pytest.fixture(autouse=True)
 def BatchIndexer(patch):
     return patch("h.tasks.indexer.BatchIndexer")
 
@@ -161,8 +121,3 @@ def celery(patch, pyramid_request):
 def pyramid_request(pyramid_request):
     pyramid_request.es = mock.Mock()
     return pyramid_request
-
-
-@pytest.fixture(autouse=True)
-def storage(patch):
-    return patch("h.tasks.indexer.storage")

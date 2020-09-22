@@ -1,4 +1,4 @@
-from h import models, storage
+from h import models
 from h.celery import celery, get_task_logger
 from h.models import Annotation
 from h.search.index import BatchIndexer
@@ -9,13 +9,7 @@ log = get_task_logger(__name__)
 @celery.task
 def add_annotation(id_):
     search_index = celery.request.find_service(name="search_index")
-
-    annotation = storage.fetch_annotation(celery.request.db, id_)
-    if annotation:
-        search_index.add_annotation(annotation)
-
-        if annotation.is_reply:
-            add_annotation.delay(annotation.thread_root_id)
+    search_index.add_annotation_by_id(id_)
 
 
 @celery.task
