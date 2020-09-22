@@ -3,11 +3,15 @@ from h.presenters import AnnotationSearchIndexPresenter
 
 
 class SearchIndexService:
-    def __init__(self, es_client, request):
+    # The DB setting that stores whether a full re-index is taking place
+    REINDEX_SETTING_KEY = "reindex.new_index"
+
+    def __init__(self, es_client, request, settings=None):
         self.es_client = es_client
         self.request = request
+        self.settings = settings
 
-    def add_annotation(self, annotation, target_index=None):
+    def add_annotation(self, annotation):
         """
         Index an annotation into the search index.
 
@@ -16,7 +20,7 @@ class SearchIndexService:
         the given annotation then it will be updated.
 
         :param annotation: the annotation to index
-        :param target_index: the index name, uses default index if not given
+
         """
         body = AnnotationSearchIndexPresenter(annotation, self.request).asdict()
 
@@ -24,9 +28,9 @@ class SearchIndexService:
             AnnotationTransformEvent(self.request, annotation, body)
         )
 
-        self._index_annotation_body(annotation.id, body, target_index)
+        self._index_annotation_body(annotation.id, body, refresh=False)
 
-    def delete_annotation_by_id(self, annotation_id, target_index=None, refresh=False):
+    def delete_annotation_by_id(self, annotation_id, refresh=False):
         """
         Mark an annotation as deleted in the search index.
 
@@ -36,15 +40,15 @@ class SearchIndexService:
 
         :param annotation_id: the annotation id whose corresponding document to
             delete from the search index
-        :param target_index: the index name, uses default index if not given
         :param refresh: Force this deletion to be immediately visible to search operations
         """
 
-        self._index_annotation_body(
-            annotation_id, {"deleted": True}, target_index, refresh
-        )
+        self._index_annotation_body(annotation_id, {"deleted": True}, refresh=refresh)
 
-    def _index_annotation_body(self, annotation_id, body, target_index, refresh=False):
+    def _index_annotation_body(
+        self, annotation_id, body, refresh, target_index=None,
+    ):
+
         self.es_client.conn.index(
             index=self.es_client.index if target_index is None else target_index,
             doc_type=self.es_client.mapping_type,
@@ -53,6 +57,28 @@ class SearchIndexService:
             refresh=refresh,
         )
 
+        if target_index is not None:
+            return
+
+        future_index = self._future_index
+        if future_index:
+            self._index_annotation_body(
+                annotation_id, body, refresh, target_index=future_index,
+            )
+
+    @property
+    def _future_index(self):
+        # The tests use this class directly for indexing and deletion, we are
+        # never indexing in this situation
+        if not self.settings:
+            return
+
+        return self.settings.get(self.REINDEX_SETTING_KEY)
+
 
 def factory(_context, request):
-    return SearchIndexService(request.es, request)
+    return SearchIndexService(
+        es_client=request.es,
+        request=request,
+        settings=request.find_service(name="settings"),
+    )

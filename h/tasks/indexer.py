@@ -14,12 +14,6 @@ def add_annotation(id_):
     if annotation:
         search_index.add_annotation(annotation)
 
-        # If a reindex is running at the moment, add annotation to the new index
-        # as well.
-        future_index = _current_reindex_new_name(celery.request, "reindex.new_index")
-        if future_index is not None:
-            search_index.add_annotation(annotation, target_index=future_index)
-
         if annotation.is_reply:
             add_annotation.delay(annotation.thread_root_id)
 
@@ -28,12 +22,6 @@ def add_annotation(id_):
 def delete_annotation(id_):
     search_index = celery.request.find_service(name="search_index")
     search_index.delete_annotation_by_id(id_)
-
-    # If a reindex is running at the moment, delete annotation from the
-    # new index as well.
-    future_index = _current_reindex_new_name(celery.request, "reindex.new_index")
-    if future_index is not None:
-        search_index.delete_annotation_by_id(id_, target_index=future_index)
 
 
 @celery.task
@@ -75,10 +63,3 @@ def reindex_annotations_in_date_range(start_date, end_date, max_annotations=2500
     log.info(
         "Re-index from %s to %s complete.", start_date, end_date,
     )
-
-
-def _current_reindex_new_name(request, new_index_setting_name):
-    settings = celery.request.find_service(name="settings")
-    new_index = settings.get(new_index_setting_name)
-
-    return new_index

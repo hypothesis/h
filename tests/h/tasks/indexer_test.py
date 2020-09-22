@@ -1,23 +1,12 @@
 import datetime
 from unittest import mock
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 from h_matchers import Any
 
 from h.services.search_index.service import SearchIndexService
 from h.tasks import indexer
-
-
-class FakeSettingsService:
-    def __init__(self):
-        self._data = {}
-
-    def get(self, key):
-        return self._data.get(key)
-
-    def put(self, key, value):
-        self._data[key] = value
 
 
 class TestAddAnnotation:
@@ -46,30 +35,6 @@ class TestAddAnnotation:
 
         assert search_index.add_annotation.called is False
 
-    def test_during_reindex_adds_to_current_index(
-        self, storage, annotation, search_index, settings_service
-    ):
-        settings_service.put("reindex.new_index", "hypothesis-xyz123")
-        storage.fetch_annotation.return_value = annotation
-
-        indexer.add_annotation("test-annotation-id")
-
-        search_index.add_annotation.assert_any_call(
-            annotation, target_index="hypothesis-xyz123",
-        )
-
-    def test_during_reindex_adds_to_new_index(
-        self, storage, annotation, search_index, settings_service
-    ):
-        settings_service.put("reindex.new_index", "hypothesis-xyz123")
-        storage.fetch_annotation.return_value = annotation
-
-        indexer.add_annotation("test-annotation-id")
-
-        search_index.add_annotation.assert_any_call(
-            annotation, target_index="hypothesis-xyz123",
-        )
-
     def test_it_indexes_thread_root(self, storage, reply, delay):
         storage.fetch_annotation.return_value = reply
 
@@ -95,33 +60,10 @@ class TestAddAnnotation:
 
 
 class TestDeleteAnnotation:
-    def test_it_deletes_from_index(self, search_index):
-        id_ = "test-annotation-id"
-        indexer.delete_annotation(id_)
+    def test_it_calls_search_index(self, search_index):
+        indexer.delete_annotation(sentinel.annotation_id)
 
-        search_index.delete_annotation_by_id.assert_any_call(id_)
-
-    def test_during_reindex_deletes_from_current_index(
-        self, search_index, settings_service
-    ):
-        settings_service.put("reindex.new_index", "hypothesis-xyz123")
-
-        indexer.delete_annotation("test-annotation-id")
-
-        search_index.delete_annotation_by_id.assert_any_call(
-            "test-annotation-id", target_index="hypothesis-xyz123"
-        )
-
-    def test_during_reindex_deletes_from_new_index(
-        self, search_index, settings_service
-    ):
-        settings_service.put("reindex.new_index", "hypothesis-xyz123")
-
-        indexer.delete_annotation("test-annotation-id")
-
-        search_index.delete_annotation_by_id.assert_any_call(
-            "test-annotation-id", target_index="hypothesis-xyz123"
-        )
+        search_index.delete_annotation_by_id.assert_any_call(sentinel.annotation_id)
 
 
 class TestReindexUserAnnotations:
@@ -195,9 +137,6 @@ class TestReindexAnnotationsInDateRange:
         return before_annotations + after_annotations
 
 
-pytestmark = pytest.mark.usefixtures("settings_service")
-
-
 @pytest.fixture(autouse=True)
 def search_index(pyramid_config):
     search_index = create_autospec(SearchIndexService, instance=True)
@@ -222,13 +161,6 @@ def celery(patch, pyramid_request):
 def pyramid_request(pyramid_request):
     pyramid_request.es = mock.Mock()
     return pyramid_request
-
-
-@pytest.fixture
-def settings_service(pyramid_config):
-    service = FakeSettingsService()
-    pyramid_config.register_service(service, name="settings")
-    return service
 
 
 @pytest.fixture(autouse=True)
