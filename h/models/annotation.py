@@ -37,6 +37,26 @@ class Annotation(Base):
         types.URLSafeUUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
     )
 
+    _sequence_id_sequence = sa.Sequence(
+        "annotation_sequence_id_seq", metadata=Base.metadata, start=15000000
+    )
+
+    #: A sequential ID for this annotation.
+    #:
+    #: This is a secondary ID that has the property that it always increments:
+    #: each new annotation that gets added to the DB will have a sequence_id
+    #: that's higher than all previous annotations. (Note that there may be
+    #: gaps in the sequence.)
+    #:
+    #: An ID with the property always incrementing is useful to have for
+    #: implementing certain tasks, and the UUID-based ID above lacks this
+    #: property.
+    sequence_id = sa.Column(
+        sa.Integer,
+        _sequence_id_sequence,
+        server_default=_sequence_id_sequence.next_value(),
+    )
+
     #: The timestamp when the annotation was created.
     created = sa.Column(
         sa.DateTime,
