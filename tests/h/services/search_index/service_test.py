@@ -5,6 +5,7 @@ from h_matchers import Any
 
 from h.search.client import Client
 from h.services.search_index.service import SearchIndexService
+from h.services.settings import SettingsService
 
 
 class TestAddAnnotation:
@@ -49,17 +50,31 @@ class TestAddAnnotation:
                 AnnotationTransformEvent.return_value
             )
 
-    @pytest.mark.parametrize("target_index", (None, "another"))
     def test_it_calls_elasticsearch_as_expected(
-        self, search_index, annotation, target_index, es_client
+        self, search_index, annotation, es_client
     ):
-        search_index.add_annotation(annotation, target_index=target_index)
+        search_index.add_annotation(annotation)
 
         es_client.conn.index.assert_called_once_with(
-            index=es_client.index if target_index is None else target_index,
+            index=es_client.index,
             doc_type=es_client.mapping_type,
             body=Any(),
             id=Any(),
+            refresh=False,
+        )
+
+    @pytest.mark.usefixtures("with_reindex_in_progress")
+    def test_it_calls_elasticsearch_again_for_a_reindex(
+        self, search_index, annotation, es_client
+    ):
+        search_index.add_annotation(annotation)
+
+        assert es_client.conn.index.call_count == 2
+        es_client.conn.index.assert_called_with(
+            index="another_index",
+            doc_type=es_client.mapping_type,
+            body=Any(),
+            id=annotation.id,
             refresh=False,
         )
 
@@ -77,25 +92,54 @@ class TestAddAnnotation:
 
 
 class TestDeleteAnnotationById:
-    @pytest.mark.parametrize("target_index", (None, "another"))
     @pytest.mark.parametrize("refresh", (True, False))
-    def test_delete_annotation(self, search_index, es_client, target_index, refresh):
-        search_index.delete_annotation_by_id(
-            sentinel.annotation_id, target_index, refresh
-        )
+    def test_delete_annotation(self, search_index, es_client, refresh):
+        search_index.delete_annotation_by_id(sentinel.annotation_id, refresh)
 
         es_client.conn.index.assert_called_once_with(
-            index=es_client.index if target_index is None else target_index,
+            index=es_client.index,
             doc_type=es_client.mapping_type,
             body={"deleted": True},
             id=sentinel.annotation_id,
             refresh=refresh,
         )
 
+    @pytest.mark.usefixtures("with_reindex_in_progress")
+    @pytest.mark.parametrize("refresh", (True, False))
+    def test_it_calls_elasticsearch_again_for_a_reindex(
+        self, search_index, es_client, refresh
+    ):
+        search_index.delete_annotation_by_id(sentinel.annotation_id, refresh)
+
+        assert es_client.conn.index.call_count == 2
+        es_client.conn.index.assert_called_with(
+            index="another_index",
+            doc_type=es_client.mapping_type,
+            body=Any(),
+            id=sentinel.annotation_id,
+            refresh=refresh,
+        )
+
 
 @pytest.fixture
-def search_index(es_client, pyramid_request):
-    return SearchIndexService(es_client, pyramid_request)
+def with_reindex_in_progress(settings_service):
+    settings_service.get.side_effect = {
+        SearchIndexService.REINDEX_SETTING_KEY: "another_index"
+    }.get
+
+
+@pytest.fixture
+def settings_service(pyramid_config):
+    settings_service = create_autospec(SettingsService)
+    settings_service.get.return_value = False
+
+    pyramid_config.register_service(settings_service, name="settings")
+    return settings_service
+
+
+@pytest.fixture
+def search_index(es_client, pyramid_request, settings_service):
+    return SearchIndexService(es_client, pyramid_request, settings_service)
 
 
 @pytest.fixture(autouse=True)
