@@ -77,6 +77,7 @@ def includeme(config):
     config.register_service_factory(
         ".rename_user.rename_user_factory", name="rename_user"
     )
+    config.register_service_factory(".search_index.factory", name="search_index")
     config.register_service_factory(".settings.settings_factory", name="settings")
     config.register_service_factory(".user.user_service_factory", name="user")
     config.register_service_factory(
