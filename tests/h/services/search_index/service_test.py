@@ -4,19 +4,19 @@ import pytest
 from h_matchers import Any
 
 from h.search.client import Client
-from h.services.search_index import add_annotation, delete_annotation
+from h.services.search_index.service import SearchIndexService
 
 
 class TestAddAnnotation:
     def test_it_serialises(
         self,
-        add_one,
+        search_index,
         annotation,
         pyramid_request,
         es_client,
         AnnotationSearchIndexPresenter,
     ):
-        add_one(annotation)
+        search_index.add_annotation(annotation)
 
         AnnotationSearchIndexPresenter.assert_called_once_with(
             annotation, pyramid_request
@@ -30,14 +30,14 @@ class TestAddAnnotation:
 
     def test_it_notifies_of_annotation_transformation(
         self,
-        add_one,
+        search_index,
         annotation,
         pyramid_request,
         AnnotationTransformEvent,
         AnnotationSearchIndexPresenter,
     ):
         with patch.object(pyramid_request, "registry") as registry:
-            add_one(annotation)
+            search_index.add_annotation(annotation)
 
             AnnotationTransformEvent.assert_called_once_with(
                 pyramid_request,
@@ -50,9 +50,9 @@ class TestAddAnnotation:
 
     @pytest.mark.parametrize("target_index", (None, "another"))
     def test_it_calls_elasticsearch_as_expected(
-        self, add_one, annotation, target_index, es_client
+        self, search_index, annotation, target_index, es_client
     ):
-        add_one(annotation, target_index=target_index)
+        search_index.add_annotation(annotation, target_index=target_index)
 
         es_client.conn.index.assert_called_once_with(
             index=es_client.index if target_index is None else target_index,
@@ -60,13 +60,6 @@ class TestAddAnnotation:
             body=Any(),
             id=Any(),
         )
-
-    @pytest.fixture
-    def add_one(self, factories, es_client, pyramid_request):
-        def add_one(annotation, target_index=None):
-            add_annotation(es_client, annotation, pyramid_request, target_index)
-
-        return add_one
 
     @pytest.fixture
     def annotation(self, factories):
@@ -81,11 +74,13 @@ class TestAddAnnotation:
         return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
 
 
-class TestDeleteAnnotation:
+class TestDeleteAnnotationById:
     @pytest.mark.parametrize("target_index", (None, "another"))
     @pytest.mark.parametrize("refresh", (True, False))
-    def test_delete_annotation(self, es_client, target_index, refresh):
-        delete_annotation(es_client, sentinel.annotation_id, target_index, refresh)
+    def test_delete_annotation(self, search_index, es_client, target_index, refresh):
+        search_index.delete_annotation_by_id(
+            sentinel.annotation_id, target_index, refresh
+        )
 
         es_client.conn.index.assert_called_once_with(
             index=es_client.index if target_index is None else target_index,
@@ -94,6 +89,11 @@ class TestDeleteAnnotation:
             id=sentinel.annotation_id,
             refresh=refresh,
         )
+
+
+@pytest.fixture
+def search_index(es_client, pyramid_request):
+    return SearchIndexService(es_client, pyramid_request)
 
 
 @pytest.fixture(autouse=True)
