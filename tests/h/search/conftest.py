@@ -4,7 +4,7 @@ import pytest
 
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.group import GroupService
-from h.services.search_index.service import SearchIndexService
+from h.services.search_index import SearchIndexService
 
 
 @pytest.fixture
