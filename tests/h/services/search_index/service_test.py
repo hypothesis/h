@@ -26,6 +26,7 @@ class TestAddAnnotation:
             doc_type=Any(),
             body=AnnotationSearchIndexPresenter.return_value.asdict.return_value,
             id=annotation.id,
+            refresh=Any(),
         )
 
     def test_it_notifies_of_annotation_transformation(
@@ -59,6 +60,7 @@ class TestAddAnnotation:
             doc_type=es_client.mapping_type,
             body=Any(),
             id=Any(),
+            refresh=False,
         )
 
     @pytest.fixture
