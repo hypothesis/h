@@ -27,32 +27,34 @@ class TestAddAnnotation:
 
         storage.fetch_annotation.assert_called_once_with(celery.request.db, id_)
 
-    def test_it_calls_index_with_annotation(self, storage, annotation, index, celery):
+    def test_it_calls_index_with_annotation(
+        self, storage, annotation, add_annotation, celery
+    ):
         id_ = "test-annotation-id"
         storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation(id_)
 
-        index.assert_any_call(celery.request.es, annotation, celery.request)
+        add_annotation.assert_any_call(celery.request.es, annotation, celery.request)
 
     def test_it_skips_indexing_when_annotation_cannot_be_loaded(
-        self, storage, index, celery
+        self, storage, add_annotation, celery
     ):
         storage.fetch_annotation.return_value = None
 
         indexer.add_annotation("test-annotation-id")
 
-        assert index.called is False
+        assert add_annotation.called is False
 
     def test_during_reindex_adds_to_current_index(
-        self, storage, annotation, index, celery, settings_service
+        self, storage, annotation, add_annotation, celery, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
         storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation("test-annotation-id")
 
-        index.assert_any_call(
+        add_annotation.assert_any_call(
             celery.request.es,
             annotation,
             celery.request,
@@ -60,14 +62,14 @@ class TestAddAnnotation:
         )
 
     def test_during_reindex_adds_to_new_index(
-        self, storage, annotation, index, celery, settings_service
+        self, storage, annotation, add_annotation, celery, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
         storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation("test-annotation-id")
 
-        index.assert_any_call(
+        add_annotation.assert_any_call(
             celery.request.es,
             annotation,
             celery.request,
@@ -97,35 +99,43 @@ class TestAddAnnotation:
     def delay(self, patch):
         return patch("h.tasks.indexer.add_annotation.delay")
 
+    @pytest.fixture(autouse=True)
+    def add_annotation(self, patch):
+        return patch("h.tasks.indexer.add_annotation_")
+
 
 class TestDeleteAnnotation:
-    def test_it_deletes_from_index(self, delete, celery):
+    def test_it_deletes_from_index(self, delete_annotation, celery):
         id_ = "test-annotation-id"
         indexer.delete_annotation(id_)
 
-        delete.assert_any_call(celery.request.es, id_)
+        delete_annotation.assert_any_call(celery.request.es, id_)
 
     def test_during_reindex_deletes_from_current_index(
-        self, delete, celery, settings_service
+        self, delete_annotation, celery, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
 
         indexer.delete_annotation("test-annotation-id")
 
-        delete.assert_any_call(
+        delete_annotation.assert_any_call(
             celery.request.es, "test-annotation-id", target_index="hypothesis-xyz123"
         )
 
     def test_during_reindex_deletes_from_new_index(
-        self, delete, celery, settings_service
+        self, delete_annotation, celery, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
 
         indexer.delete_annotation("test-annotation-id")
 
-        delete.assert_any_call(
+        delete_annotation.assert_any_call(
             celery.request.es, "test-annotation-id", target_index="hypothesis-xyz123"
         )
+
+    @pytest.fixture(autouse=True)
+    def delete_annotation(self, patch):
+        return patch("h.tasks.indexer.delete_annotation_")
 
 
 class TestReindexUserAnnotations:
@@ -212,16 +222,6 @@ def celery(patch, pyramid_request):
     cel = patch("h.tasks.indexer.celery")
     cel.request = pyramid_request
     return cel
-
-
-@pytest.fixture(autouse=True)
-def delete(patch):
-    return patch("h.tasks.indexer.delete")
-
-
-@pytest.fixture(autouse=True)
-def index(patch):
-    return patch("h.tasks.indexer.index")
 
 
 @pytest.fixture
