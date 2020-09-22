@@ -4,7 +4,8 @@ import elasticsearch_dsl
 import pytest
 import webob
 
-from h.search import Search, index, query
+from h.search import Search, query
+from h.services.search_index import delete_annotation
 
 MISSING = object()
 ES_VERSION = (1, 7, 0)
@@ -673,7 +674,7 @@ class TestDeletedFilter:
 
         # Deleted annotations need to be marked in the index using `h.search.index.delete`.
         for id_ in deleted_ids:
-            index.delete(es_client, id_, refresh=True)
+            delete_annotation(es_client, id_, refresh=True)
 
         result = search.run(webob.multidict.MultiDict({}))
 
@@ -714,15 +715,18 @@ class TestHiddenFilter:
     ):
         pyramid_request.user = user
         search.append_modifier(query.HiddenFilter(pyramid_request))
+
         presenter = AnnotationSearchIndexPresenter.return_value
         presenter.asdict.return_value = {"id": "ann1", "hidden": hidden, "nipsa": nipsa}
         Annotation(id="ann1")
         presenter.asdict.return_value = {"id": "ann2", "hidden": False, "nipsa": False}
         Annotation(id="ann2", userid=user.userid)
+
+        result = search.run({})
+
         expected_ids = ["ann2"]
         if should_show_annotation:
             expected_ids.append("ann1")
-        result = search.run({})
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_hides_banned_users_annotations_from_other_users(
@@ -788,6 +792,10 @@ class TestHiddenFilter:
     def group_service(self, group_service):
         group_service.groupids_created_by.return_value = []
         return group_service
+
+    @pytest.fixture
+    def AnnotationSearchIndexPresenter(self, patch):
+        return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
 
 
 class TestAnyMatcher:
@@ -1064,12 +1072,3 @@ def es_dsl_search(pyramid_request):
     return elasticsearch_dsl.Search(
         using=pyramid_request.es.conn, index=pyramid_request.es.index
     )
-
-
-@pytest.fixture
-def AnnotationSearchIndexPresenter(patch):
-    AnnotationSearchIndexPresenter = patch(
-        "h.search.index.presenters.AnnotationSearchIndexPresenter"
-    )
-    AnnotationSearchIndexPresenter.return_value.asdict.return_value = {"test": "val"}
-    return AnnotationSearchIndexPresenter

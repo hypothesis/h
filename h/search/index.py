@@ -2,7 +2,6 @@
 
 import logging
 import time
-from collections import namedtuple
 
 import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
@@ -16,79 +15,6 @@ log = logging.getLogger(__name__)
 
 ES_CHUNK_SIZE = 100
 PG_WINDOW_SIZE = 2000
-
-
-class Window(namedtuple("Window", ["start", "end"])):
-    pass
-
-
-def index(es, annotation, request, target_index=None):
-    """
-    Index an annotation into the search index.
-
-    A new annotation document will be created in the search index or,
-    if the index already contains an annotation document with the same ID as
-    the given annotation then it will be updated.
-
-    :param es: the Elasticsearch client object to use
-    :type es: h.search.Client
-
-    :param annotation: the annotation to index
-    :type annotation: h.models.Annotation
-
-    :param target_index: the index name, uses default index if not given
-    :type target_index: unicode
-    """
-    presenter = presenters.AnnotationSearchIndexPresenter(annotation, request)
-    annotation_dict = presenter.asdict()
-
-    event = AnnotationTransformEvent(request, annotation, annotation_dict)
-    request.registry.notify(event)
-
-    if target_index is None:
-        target_index = es.index
-
-    es.conn.index(
-        index=target_index,
-        doc_type=es.mapping_type,
-        body=annotation_dict,
-        id=annotation_dict["id"],
-    )
-
-
-def delete(es, annotation_id, target_index=None, refresh=False):
-    """
-    Mark an annotation as deleted in the search index.
-
-    This will write a new body that only contains the ``deleted`` boolean field
-    with the value ``true``. It allows us to rely on Elasticsearch to complain
-    about dubious operations while re-indexing when we use `op_type=create`.
-
-    :param es: the Elasticsearch client object to use
-    :type es: h.search.Client
-
-    :param annotation_id: the annotation id whose corresponding document to
-        delete from the search index
-    :type annotation_id: str
-
-    :param target_index: the index name, uses default index if not given
-    :type target_index: unicode
-
-    :param refresh: Force this deletion to be immediately visible to search operations
-    :type refresh: bool
-
-    """
-
-    if target_index is None:
-        target_index = es.index
-
-    es.conn.index(
-        index=target_index,
-        doc_type=es.mapping_type,
-        body={"deleted": True},
-        id=annotation_id,
-        refresh=refresh,
-    )
 
 
 class BatchIndexer:
