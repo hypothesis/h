@@ -2,6 +2,24 @@ from h.events import AnnotationTransformEvent
 from h.presenters import AnnotationSearchIndexPresenter
 
 
+class SearchIndexService:
+    def __init__(self, es_client, request):
+        self.es_client = es_client
+        self.request = request
+
+    def add_annotation(self, annotation, target_index=None):
+        return add_annotation(
+            self.es_client, annotation, self.request, target_index=target_index
+        )
+
+    def delete_annotation_by_id(self, annotation_id, target_index=None, refresh=False):
+        return delete_annotation(self.es_client, annotation_id, target_index, refresh)
+
+
+def factory(_context, request):
+    return SearchIndexService(request.es, request)
+
+
 def add_annotation(es, annotation, request, target_index=None):
     """
     Index an annotation into the search index.

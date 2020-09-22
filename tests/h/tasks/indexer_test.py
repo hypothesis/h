@@ -1,9 +1,11 @@
 import datetime
 from unittest import mock
+from unittest.mock import create_autospec
 
 import pytest
 from h_matchers import Any
 
+from h.services.search_index.service import SearchIndexService
 from h.tasks import indexer
 
 
@@ -27,53 +29,45 @@ class TestAddAnnotation:
 
         storage.fetch_annotation.assert_called_once_with(celery.request.db, id_)
 
-    def test_it_calls_index_with_annotation(
-        self, storage, annotation, add_annotation, celery
-    ):
+    def test_it_calls_index_with_annotation(self, storage, annotation, search_index):
         id_ = "test-annotation-id"
         storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation(id_)
 
-        add_annotation.assert_any_call(celery.request.es, annotation, celery.request)
+        search_index.add_annotation.assert_any_call(annotation)
 
     def test_it_skips_indexing_when_annotation_cannot_be_loaded(
-        self, storage, add_annotation, celery
+        self, storage, search_index
     ):
         storage.fetch_annotation.return_value = None
 
         indexer.add_annotation("test-annotation-id")
 
-        assert add_annotation.called is False
+        assert search_index.add_annotation.called is False
 
     def test_during_reindex_adds_to_current_index(
-        self, storage, annotation, add_annotation, celery, settings_service
+        self, storage, annotation, search_index, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
         storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation("test-annotation-id")
 
-        add_annotation.assert_any_call(
-            celery.request.es,
-            annotation,
-            celery.request,
-            target_index="hypothesis-xyz123",
+        search_index.add_annotation.assert_any_call(
+            annotation, target_index="hypothesis-xyz123",
         )
 
     def test_during_reindex_adds_to_new_index(
-        self, storage, annotation, add_annotation, celery, settings_service
+        self, storage, annotation, search_index, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
         storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation("test-annotation-id")
 
-        add_annotation.assert_any_call(
-            celery.request.es,
-            annotation,
-            celery.request,
-            target_index="hypothesis-xyz123",
+        search_index.add_annotation.assert_any_call(
+            annotation, target_index="hypothesis-xyz123",
         )
 
     def test_it_indexes_thread_root(self, storage, reply, delay):
@@ -99,43 +93,35 @@ class TestAddAnnotation:
     def delay(self, patch):
         return patch("h.tasks.indexer.add_annotation.delay")
 
-    @pytest.fixture(autouse=True)
-    def add_annotation(self, patch):
-        return patch("h.tasks.indexer.add_annotation_")
-
 
 class TestDeleteAnnotation:
-    def test_it_deletes_from_index(self, delete_annotation, celery):
+    def test_it_deletes_from_index(self, search_index):
         id_ = "test-annotation-id"
         indexer.delete_annotation(id_)
 
-        delete_annotation.assert_any_call(celery.request.es, id_)
+        search_index.delete_annotation_by_id.assert_any_call(id_)
 
     def test_during_reindex_deletes_from_current_index(
-        self, delete_annotation, celery, settings_service
+        self, search_index, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
 
         indexer.delete_annotation("test-annotation-id")
 
-        delete_annotation.assert_any_call(
-            celery.request.es, "test-annotation-id", target_index="hypothesis-xyz123"
+        search_index.delete_annotation_by_id.assert_any_call(
+            "test-annotation-id", target_index="hypothesis-xyz123"
         )
 
     def test_during_reindex_deletes_from_new_index(
-        self, delete_annotation, celery, settings_service
+        self, search_index, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
 
         indexer.delete_annotation("test-annotation-id")
 
-        delete_annotation.assert_any_call(
-            celery.request.es, "test-annotation-id", target_index="hypothesis-xyz123"
+        search_index.delete_annotation_by_id.assert_any_call(
+            "test-annotation-id", target_index="hypothesis-xyz123"
         )
-
-    @pytest.fixture(autouse=True)
-    def delete_annotation(self, patch):
-        return patch("h.tasks.indexer.delete_annotation_")
 
 
 class TestReindexUserAnnotations:
@@ -210,6 +196,14 @@ class TestReindexAnnotationsInDateRange:
 
 
 pytestmark = pytest.mark.usefixtures("settings_service")
+
+
+@pytest.fixture(autouse=True)
+def search_index(pyramid_config):
+    search_index = create_autospec(SearchIndexService, instance=True)
+    pyramid_config.register_service(search_index, name="search_index")
+
+    return search_index
 
 
 @pytest.fixture(autouse=True)
