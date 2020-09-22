@@ -1,7 +1,9 @@
 from h import models, storage
 from h.celery import celery, get_task_logger
 from h.models import Annotation
-from h.search.index import BatchIndexer, delete, index
+from h.search.index import BatchIndexer
+from h.services.search_index import add_annotation as add_annotation_
+from h.services.search_index import delete_annotation as delete_annotation_
 
 log = get_task_logger(__name__)
 
@@ -10,13 +12,13 @@ log = get_task_logger(__name__)
 def add_annotation(id_):
     annotation = storage.fetch_annotation(celery.request.db, id_)
     if annotation:
-        index(celery.request.es, annotation, celery.request)
+        add_annotation_(celery.request.es, annotation, celery.request)
 
         # If a reindex is running at the moment, add annotation to the new index
         # as well.
         future_index = _current_reindex_new_name(celery.request, "reindex.new_index")
         if future_index is not None:
-            index(
+            add_annotation_(
                 celery.request.es, annotation, celery.request, target_index=future_index
             )
 
@@ -26,13 +28,13 @@ def add_annotation(id_):
 
 @celery.task
 def delete_annotation(id_):
-    delete(celery.request.es, id_)
+    delete_annotation_(celery.request.es, id_)
 
     # If a reindex is running at the moment, delete annotation from the
     # new index as well.
     future_index = _current_reindex_new_name(celery.request, "reindex.new_index")
     if future_index is not None:
-        delete(celery.request.es, id_, target_index=future_index)
+        delete_annotation_(celery.request.es, id_, target_index=future_index)
 
 
 @celery.task
