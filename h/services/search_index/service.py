@@ -4,16 +4,37 @@ from h.presenters import AnnotationSearchIndexPresenter
 
 
 class SearchIndexService:
+    """Service for manipulating the search index."""
+
     # The DB setting that stores whether a full re-index is taking place
     REINDEX_SETTING_KEY = "reindex.new_index"
 
     def __init__(self, request, es_client, session, settings):
+        """
+        Create an instance of the service.
+
+        :param request: Pyramid request object
+        :param es_client: Elasticsearch client
+        :param session: DB session
+        :param settings: Instance of settings (or other object with `get()`)
+        """
         self.request = request
         self.es_client = es_client
         self.session = session
         self.settings = settings
 
     def add_annotation_by_id(self, annotation_id):
+        """
+        Add an annotation into the search index by id.
+
+        A new annotation document will be created in the search index or,
+        if the index already contains an annotation document with the same Id
+        as the given annotation then it will be updated.
+
+        If no annotation is found, nothing happens.
+
+        :param annotation_id: Id of the annotation to add.
+        """
         annotation = storage.fetch_annotation(self.session, annotation_id)
         if not annotation:
             return
@@ -25,14 +46,13 @@ class SearchIndexService:
 
     def add_annotation(self, annotation):
         """
-        Index an annotation into the search index.
+        Add an annotation into the search index.
 
         A new annotation document will be created in the search index or,
-        if the index already contains an annotation document with the same ID as
-        the given annotation then it will be updated.
+        if the index already contains an annotation document with the same Id
+        as the given annotation then it will be updated.
 
-        :param annotation: the annotation to index
-
+        :param annotation: Annotation object to index
         """
         body = AnnotationSearchIndexPresenter(annotation, self.request).asdict()
 
@@ -46,13 +66,15 @@ class SearchIndexService:
         """
         Mark an annotation as deleted in the search index.
 
-        This will write a new body that only contains the ``deleted`` boolean field
-        with the value ``true``. It allows us to rely on Elasticsearch to complain
-        about dubious operations while re-indexing when we use `op_type=create`.
+        This will write a new body that only contains the `deleted` boolean
+        field with the value `true`. It allows us to rely on Elasticsearch to
+        complain about dubious operations while re-indexing when we use
+        `op_type=create`.
 
-        :param annotation_id: the annotation id whose corresponding document to
+        :param annotation_id: Annotation id whose corresponding document to
             delete from the search index
-        :param refresh: Force this deletion to be immediately visible to search operations
+        :param refresh: Force this deletion to be immediately visible to search
+            operations
         """
 
         self._index_annotation_body(annotation_id, {"deleted": True}, refresh=refresh)
@@ -77,12 +99,3 @@ class SearchIndexService:
             self._index_annotation_body(
                 annotation_id, body, refresh, target_index=future_index,
             )
-
-
-def factory(_context, request):
-    return SearchIndexService(
-        request=request,
-        es_client=request.es,
-        session=request.db,
-        settings=request.find_service(name="settings"),
-    )
