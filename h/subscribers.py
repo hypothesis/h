@@ -1,6 +1,7 @@
 from h import __version__, emails, storage
 from h.notification import reply
 from h.tasks import mailer
+from h.tasks.indexer import add_annotation, delete_annotation
 
 
 def includeme(config):
@@ -17,6 +18,10 @@ def includeme(config):
     # written into annotations on save.
     config.add_subscriber(
         "h.subscribers.nipsa_transform_annotation", "h.events.AnnotationTransformEvent",
+    )
+
+    config.add_subscriber(
+        "h.subscribers.subscribe_annotation_event", "h.events.AnnotationEvent"
     )
 
 
@@ -64,6 +69,7 @@ def send_reply_notifications(
         notification = get_notification(request, annotation, event.action)
         if notification is None:
             return
+
         send_params = generate_mail(request, notification)
         send(*send_params)
 
@@ -80,3 +86,13 @@ def nipsa_transform_annotation(event):
     nipsa_service = event.request.find_service(name="nipsa")
     if nipsa_service.is_flagged(user):
         event.annotation_dict["nipsa"] = True
+
+
+def sync_annotation(event):
+    """Ensure an annotation is synchronised to Elasticsearch."""
+
+    if event.action in ["create", "update"]:
+        add_annotation.delay(event.annotation_id)
+
+    elif event.action == "delete":
+        delete_annotation.delay(event.annotation_id)

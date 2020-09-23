@@ -195,3 +195,34 @@ class TestNipsaTransformAnnotation:
         nipsa_service.is_flagged.return_value = False
         pyramid_config.register_service(nipsa_service, name="nipsa")
         return nipsa_service
+
+
+class TestSyncAnnotation:
+    @pytest.mark.parametrize("action", ["create", "update"])
+    def test_it_enqueues_add_annotation_celery_task(
+        self, action, add_annotation, delete_annotation, pyramid_request
+    ):
+        event = AnnotationEvent(pyramid_request, {"id": "test_annotation_id"}, action)
+
+        subscribers.sync_annotation(event)
+
+        add_annotation.delay.assert_called_once_with(event.annotation_id)
+        assert not delete_annotation.delay.called
+
+    def test_it_enqueues_delete_annotation_celery_task_for_delete(
+        self, add_annotation, delete_annotation, pyramid_request
+    ):
+        event = AnnotationEvent(pyramid_request, {"id": "test_annotation_id"}, "delete")
+
+        subscribers.sync_annotation(event)
+
+        delete_annotation.delay.assert_called_once_with(event.annotation_id)
+        assert not add_annotation.delay.called
+
+    @pytest.fixture(autouse=True)
+    def add_annotation(self, patch):
+        return patch("h.subscribers.add_annotation")
+
+    @pytest.fixture(autouse=True)
+    def delete_annotation(self, patch):
+        return patch("h.subscribers.delete_annotation")
