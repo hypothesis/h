@@ -11,6 +11,12 @@ class TestDocumentSearchIndexPresenter:
             (models.Document(title="Foo"), {"title": ["Foo"]}),
             (models.Document(title=""), {}),
             (models.Document(title=None), {}),
+            # *Searching* for an annotation by `annotation.document` (e.g. by
+            # document `title`` or `web_uri`) isn't enabled.  But you can
+            # retrieve an annotation by ID, or by searching on other field(s),
+            # and then access its `document`. Bouncer
+            # (https://github.com/hypothesis/bouncer) accesses h's
+            # Elasticsearch index directly and uses this `document` field.
             (models.Document(web_uri="http://foo.org"), {"web_uri": "http://foo.org"}),
             (models.Document(web_uri=""), {}),
             (models.Document(web_uri=None), {}),
