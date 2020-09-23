@@ -39,16 +39,7 @@ def includeme(config):
     settings = config.registry.settings
 
     config.set_root_factory("h.traversal:Root")
-
-    config.add_subscriber(
-        "h.subscribers.add_renderer_globals", "pyramid.events.BeforeRender"
-    )
-    config.add_subscriber(
-        "h.subscribers.publish_annotation_event", "h.events.AnnotationEvent"
-    )
-    config.add_subscriber(
-        "h.subscribers.send_reply_notifications", "h.events.AnnotationEvent"
-    )
+    config.include("h.subscribers")
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)
     config.add_tween("h.tweens.rollback_db_session_on_exception_factory", under=EXCVIEW)
