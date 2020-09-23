@@ -15,7 +15,7 @@ class TestAddAnnotationById:
         search_index.add_annotation_by_id(root_annotation.id)
 
         storage.fetch_annotation.assert_called_once_with(
-            search_index.session, root_annotation.id
+            search_index._db, root_annotation.id
         )
 
         add_annotation.assert_called_once_with(root_annotation)
@@ -36,8 +36,8 @@ class TestAddAnnotationById:
 
         storage.fetch_annotation.assert_has_calls(
             [
-                call(search_index.session, reply_annotation.id),
-                call(search_index.session, root_annotation.id),
+                call(search_index._db, reply_annotation.id),
+                call(search_index._db, root_annotation.id),
             ]
         )
 

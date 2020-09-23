@@ -18,10 +18,10 @@ class SearchIndexService:
         :param session: DB session
         :param settings: Instance of settings (or other object with `get()`)
         """
-        self.request = request
-        self.es_client = es_client
-        self.session = session
-        self.settings = settings
+        self._request = request
+        self._es = es_client
+        self._db = session
+        self._settings = settings
 
     def add_annotation_by_id(self, annotation_id):
         """
@@ -35,7 +35,7 @@ class SearchIndexService:
 
         :param annotation_id: Id of the annotation to add.
         """
-        annotation = storage.fetch_annotation(self.session, annotation_id)
+        annotation = storage.fetch_annotation(self._db, annotation_id)
         if not annotation:
             return
 
@@ -54,10 +54,10 @@ class SearchIndexService:
 
         :param annotation: Annotation object to index
         """
-        body = AnnotationSearchIndexPresenter(annotation, self.request).asdict()
+        body = AnnotationSearchIndexPresenter(annotation, self._request).asdict()
 
-        self.request.registry.notify(
-            AnnotationTransformEvent(self.request, annotation, body)
+        self._request.registry.notify(
+            AnnotationTransformEvent(self._request, annotation, body)
         )
 
         self._index_annotation_body(annotation.id, body, refresh=False)
@@ -83,9 +83,9 @@ class SearchIndexService:
         self, annotation_id, body, refresh, target_index=None,
     ):
 
-        self.es_client.conn.index(
-            index=self.es_client.index if target_index is None else target_index,
-            doc_type=self.es_client.mapping_type,
+        self._es.conn.index(
+            index=self._es.index if target_index is None else target_index,
+            doc_type=self._es.mapping_type,
             body=body,
             id=annotation_id,
             refresh=refresh,
@@ -94,7 +94,7 @@ class SearchIndexService:
         if target_index is not None:
             return
 
-        future_index = self.settings.get(self.REINDEX_SETTING_KEY)
+        future_index = self._settings.get(self.REINDEX_SETTING_KEY)
         if future_index:
             self._index_annotation_body(
                 annotation_id, body, refresh, target_index=future_index,
