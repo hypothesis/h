@@ -13,6 +13,11 @@ def includeme(config):
     config.add_subscriber(
         "h.subscribers.send_reply_notifications", "h.events.AnnotationEvent"
     )
+    # Register the transform_annotation subscriber so that nipsa fields are
+    # written into annotations on save.
+    config.add_subscriber(
+        "h.subscribers.nipsa_transform_annotation", "h.events.AnnotationTransformEvent",
+    )
 
 
 def add_renderer_globals(event):
@@ -61,3 +66,17 @@ def send_reply_notifications(
             return
         send_params = generate_mail(request, notification)
         send(*send_params)
+
+
+def nipsa_transform_annotation(event):
+    """Mark moderated or flagged annotations.
+
+    Adds `{"nipsa": True}` to an annotation.
+    """
+    user = event.annotation_dict.get("user")
+    if user is None:
+        return
+
+    nipsa_service = event.request.find_service(name="nipsa")
+    if nipsa_service.is_flagged(user):
+        event.annotation_dict["nipsa"] = True
