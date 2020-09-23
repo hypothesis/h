@@ -3,6 +3,18 @@ from h.notification import reply
 from h.tasks import mailer
 
 
+def includeme(config):
+    config.add_subscriber(
+        "h.subscribers.add_renderer_globals", "pyramid.events.BeforeRender"
+    )
+    config.add_subscriber(
+        "h.subscribers.publish_annotation_event", "h.events.AnnotationEvent"
+    )
+    config.add_subscriber(
+        "h.subscribers.send_reply_notifications", "h.events.AnnotationEvent"
+    )
+
+
 def add_renderer_globals(event):
     request = event["request"]
 
