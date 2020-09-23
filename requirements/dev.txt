@@ -21,8 +21,8 @@ decorator==4.4.2          # via ipython, traitlets
 deform==2.0.14            # via -r requirements/requirements.txt
 elasticsearch-dsl==6.3.1  # via -r requirements/requirements.txt
 elasticsearch==6.8.1      # via -r requirements/requirements.txt, elasticsearch-dsl
-gevent==20.6.2            # via -r requirements/requirements.txt
-greenlet==0.4.16          # via -r requirements/requirements.txt, gevent
+gevent==20.9.0            # via -r requirements/requirements.txt
+greenlet==0.4.17          # via -r requirements/requirements.txt, gevent
 gunicorn==20.0.4          # via -r requirements/requirements.txt
 h-api==1.0.0              # via -r requirements/requirements.txt
 h-matchers==1.2.9         # via -r requirements/requirements.txt
@@ -99,7 +99,6 @@ zope.deprecation==4.1.2   # via -r requirements/requirements.txt, deform, pyrami
 zope.event==4.4           # via -r requirements/requirements.txt, gevent
 zope.interface==5.1.0     # via -r requirements/requirements.txt, gevent, pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
 zope.sqlalchemy==1.1      # via -r requirements/requirements.txt
-factory_boy
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
