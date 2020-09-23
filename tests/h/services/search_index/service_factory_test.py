@@ -2,7 +2,7 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.services.search_index._factory import factory
+from h.services.search_index.service_factory import factory
 
 
 class TestFactory:
@@ -31,4 +31,4 @@ class TestFactory:
 
     @pytest.fixture
     def SearchIndexService(self, patch):
-        return patch("h.services.search_index._factory.SearchIndexService")
+        return patch("h.services.search_index.service_factory.SearchIndexService")
