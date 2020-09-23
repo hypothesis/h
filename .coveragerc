@@ -8,6 +8,7 @@ omit =
     h/debug.py
     h/migrations/*
     h/cli/commands/create_annotations.py
+    h/tasks.temp.py
 
 [report]
 show_missing = True
