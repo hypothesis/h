@@ -1,77 +1,43 @@
-from collections import namedtuple
-from unittest import mock
+from unittest.mock import create_autospec
 
 import pytest
 
-from h.nipsa import subscribers
-
-FakeEvent = namedtuple("FakeEvent", ["request", "annotation", "annotation_dict"])
-
-
-class FakeAnnotation:
-    def __init__(self, data):
-        self.data = data
-
-    @property
-    def id(self):
-        return self.data["id"]
+from h.events import AnnotationTransformEvent
+from h.nipsa.subscribers import nipsa_transform_annotation
+from h.services.nipsa import NipsaService
 
 
-@pytest.mark.usefixtures("nipsa_service", "moderation_service")
 class TestTransformAnnotation:
-    @pytest.mark.parametrize(
-        "ann,flagged",
-        [
-            (FakeAnnotation({"id": "ann-1", "user": "george"}), True),
-            (FakeAnnotation({"id": "ann-2", "user": "georgia"}), False),
-            (FakeAnnotation({"id": "ann-3"}), False),
-        ],
-    )
-    def test_with_user_nipsa(self, ann, flagged, nipsa_service, pyramid_request):
-        nipsa_service.is_flagged.return_value = flagged
-        event = FakeEvent(
-            request=pyramid_request, annotation=ann, annotation_dict=ann.data
-        )
+    def test_if_user_is_missing_nothing_happens(self, event, nipsa_service):
+        event.annotation_dict.pop("user")
 
-        subscribers.transform_annotation(event)
+        nipsa_transform_annotation(event)
 
-        if flagged:
-            assert ann.data["nipsa"] is True
-        else:
-            assert "nipsa" not in ann.data
+        assert "nipsa" not in event.annotation_dict
+        nipsa_service.is_flagged.assert_not_called()
 
-    @pytest.mark.parametrize(
-        "ann,moderated",
-        [
-            (FakeAnnotation({"id": "normal"}), False),
-            (FakeAnnotation({"id": "moderated"}), True),
-        ],
-    )
-    def test_with_moderated_annotation(
-        self, ann, moderated, moderation_service, pyramid_request
+    @pytest.mark.parametrize("flagged", [True, False])
+    def test_nipsa_status_is_added_based_on_flagged(
+        self, event, nipsa_service, flagged
     ):
-        moderation_service.hidden.return_value = moderated
-        event = FakeEvent(
-            request=pyramid_request, annotation=ann, annotation_dict=ann.data
+        nipsa_service.is_flagged.return_value = flagged
+
+        nipsa_transform_annotation(event)
+
+        nipsa_service.is_flagged.assert_called_once_with(event.annotation_dict["user"])
+        assert bool(event.annotation_dict.get("nipsa")) == flagged
+
+    @pytest.fixture
+    def event(self, pyramid_request, factories):
+        return AnnotationTransformEvent(
+            request=pyramid_request,
+            annotation=factories.Annotation(),
+            annotation_dict={"user": "username"},
         )
 
-        subscribers.transform_annotation(event)
-
-        if moderated:
-            assert "nipsa" not in ann.data
-        else:
-            assert "nipsa" not in ann.data
-
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def nipsa_service(self, pyramid_config):
-        service = mock.Mock(spec_set=["is_flagged"])
-        service.is_flagged.return_value = False
-        pyramid_config.register_service(service, name="nipsa")
-        return service
-
-    @pytest.fixture
-    def moderation_service(self, pyramid_config):
-        service = mock.Mock(spec_set=["hidden"])
-        service.hidden.return_value = False
-        pyramid_config.register_service(service, name="annotation_moderation")
-        return service
+        nipsa_service = create_autospec(NipsaService, instance=True)
+        nipsa_service.is_flagged.return_value = False
+        pyramid_config.register_service(nipsa_service, name="nipsa")
+        return nipsa_service
