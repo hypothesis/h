@@ -689,114 +689,108 @@ class TestDeletedFilter:
 
 @pytest.mark.usefixtures("pyramid_config")
 class TestHiddenFilter:
-    @pytest.mark.parametrize(
-        "nipsa,hidden,should_show_annotation",
-        [
-            # both nipsa and hidden fields are set, so don't show the annotation
-            (True, True, False),
-            # nipsa field is set, so don't show the annotation
-            (True, False, False),
-            # hidden field is set, so don't show the annotation
-            (False, True, False),
-            # neither field is set, show the annotation
-            (False, False, True),
-        ],
-    )
-    def test_visibility_of_moderated_and_nipsaed_annotations(
-        self,
-        index_annotations,
-        Annotation,
-        pyramid_request,
-        search,
-        user,
-        AnnotationSearchIndexPresenter,
-        nipsa,
-        hidden,
-        should_show_annotation,
+    @pytest.mark.usefixtures("as_user")
+    def test_visibility_annotations_by_others(
+        self, search, make_annotation, banned_user, is_nipsaed, is_hidden
     ):
-        pyramid_request.user = user
-        search.append_modifier(query.HiddenFilter(pyramid_request))
-
-        presenter = AnnotationSearchIndexPresenter.return_value
-        presenter.asdict.return_value = {"id": "ann1", "hidden": hidden, "nipsa": nipsa}
-        Annotation(id="ann1")
-        presenter.asdict.return_value = {"id": "ann2", "hidden": False, "nipsa": False}
-        Annotation(id="ann2", userid=user.userid)
+        annotation = make_annotation(banned_user)
 
         result = search.run({})
 
-        expected_ids = ["ann2"]
-        if should_show_annotation:
-            expected_ids.append("ann1")
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
+        if is_nipsaed or is_hidden:
+            # We should not see the annotation
+            assert not result.annotation_ids
+        else:
+            assert result.annotation_ids == [annotation.id]
 
-    def test_hides_banned_users_annotations_from_other_users(
-        self, pyramid_request, search, banned_user, user, Annotation
+    @pytest.mark.usefixtures("as_banned_user")
+    def test_visibility_annotations_to_self(
+        self,
+        pyramid_request,
+        search,
+        banned_user,
+        make_annotation,
+        is_nipsaed,
+        is_hidden,
     ):
-        pyramid_request.user = user
-        search.append_modifier(query.HiddenFilter(pyramid_request))
-        Annotation(userid=banned_user.userid)
-        expected_ids = [Annotation(userid=user.userid).id]
+        annotation = make_annotation(banned_user)
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run({})
 
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
+        assert result.annotation_ids == [annotation.id]
 
-    def test_shows_banned_users_annotations_to_banned_user(
-        self, pyramid_request, search, banned_user, user, Annotation
-    ):
-        pyramid_request.user = banned_user
-        search.append_modifier(query.HiddenFilter(pyramid_request))
-        expected_ids = [Annotation(userid=banned_user.userid).id]
-
-        result = search.run(webob.multidict.MultiDict({}))
-
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
-
+    @pytest.mark.usefixtures("as_user")
     def test_shows_banned_users_annotations_in_groups_they_created(
-        self, pyramid_request, search, banned_user, user, Annotation, group_service
+        self, pyramid_request, search, banned_user, group_service, make_annotation
     ):
-        pyramid_request.user = user
         group_service.groupids_created_by.return_value = ["created_by_banneduser"]
+        annotation = make_annotation(banned_user, groupid="created_by_banneduser")
+
+        result = search.run({})
+
+        assert result.annotation_ids == [annotation.id]
+
+    @pytest.fixture(params=[True, False], ids=["nipsa", "not nipsa"])
+    def is_nipsaed(self, request):
+        return request.param
+
+    @pytest.fixture(params=[True, False], ids=["hidden", "not hidden"])
+    def is_hidden(self, request):
+        return request.param
+
+    @pytest.fixture
+    def make_annotation(
+        self,
+        factories,
+        index_annotations,
+        nipsa_service,
+        moderation_service,
+        is_nipsaed,
+        is_hidden,
+    ):
+        def make_annotation(user, **kwargs):
+            annotation = factories.Annotation.build(userid=user.userid, **kwargs)
+
+            # Here we attempt to change how AnnotationSearchIndexPresenter will
+            # serialise the annotation when we index it
+            nipsa_service.is_flagged.return_value = is_nipsaed
+            moderation_service.all_hidden.return_value = (
+                [annotation.id] if is_hidden else []
+            )
+
+            index_annotations(annotation)
+
+            return annotation
+
+        return make_annotation
+
+    @pytest.fixture
+    def search(self, search, pyramid_request):
+        # This filter is the code under test
         search.append_modifier(query.HiddenFilter(pyramid_request))
-        expected_ids = [
-            Annotation(groupid="created_by_banneduser", userid=banned_user.userid).id
-        ]
 
-        result = search.run(webob.multidict.MultiDict({}))
+        return search
 
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
+    @pytest.fixture
+    def user(self, factories, pyramid_request):
+        return factories.User(username="notbanned")
 
     @pytest.fixture
     def banned_user(self, factories):
-        return factories.User(username="banned", nipsa=True)
+        return factories.User(username="banned")
 
     @pytest.fixture
-    def user(self, factories):
-        return factories.User(username="notbanned", nipsa=False)
+    def as_user(self, pyramid_request, user):
+        pyramid_request.user = user
 
     @pytest.fixture
-    def pyramid_config(self, pyramid_config, banned_user):
-        # Fake implementation of the `AnnotationTransformEvent` subscriber
-        # which adds the "nipsa" flag to annotations during indexing.
-        def add_nipsa_flag(event):
-            if event.annotation.userid == banned_user.userid:
-                event.annotation_dict["nipsa"] = True
-
-        pyramid_config.add_subscriber(
-            add_nipsa_flag, "h.events.AnnotationTransformEvent"
-        )
-
-        return pyramid_config
+    def as_banned_user(self, pyramid_request, banned_user):
+        pyramid_request.user = banned_user
 
     @pytest.fixture
     def group_service(self, group_service):
         group_service.groupids_created_by.return_value = []
         return group_service
-
-    @pytest.fixture
-    def AnnotationSearchIndexPresenter(self, patch):
-        return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
 
 
 class TestAnyMatcher:
@@ -1058,6 +1052,9 @@ class TestUsersAggregation:
         assert len(users_results) == bucket_limit
         assert count_pb == 3
         assert count_pc == 2
+
+
+pytestmark = pytest.mark.usefixtures("nipsa_service")
 
 
 @pytest.fixture

@@ -8,7 +8,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 
 
 @pytest.mark.usefixtures(
-    "DocumentSearchIndexPresenter", "moderation_service", "thread_ids"
+    "DocumentSearchIndexPresenter", "moderation_service", "thread_ids", "nipsa_service"
 )
 class TestAnnotationSearchIndexPresenter:
     def test_asdict(self, DocumentSearchIndexPresenter, pyramid_request, thread_ids):
