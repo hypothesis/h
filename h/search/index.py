@@ -8,7 +8,6 @@ from elasticsearch import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
 from h import models, presenters
-from h.events import AnnotationTransformEvent
 from h.util.query import column_windows
 
 log = logging.getLogger(__name__)
@@ -88,14 +87,12 @@ class BatchIndexer:
                 "_id": annotation.id,
             }
         }
+
         data = presenters.AnnotationSearchIndexPresenter(
             annotation, self.request
         ).asdict()
 
-        event = AnnotationTransformEvent(self.request, annotation, data)
-        self.request.registry.notify(event)
-
-        return (action, data)
+        return action, data
 
 
 def _all_annotations(session, windowsize=2000):

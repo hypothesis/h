@@ -1,7 +1,7 @@
 from pyramid.events import BeforeRender, subscriber
 
 from h import __version__, emails, storage
-from h.events import AnnotationEvent, AnnotationTransformEvent
+from h.events import AnnotationEvent
 from h.notification import reply
 from h.tasks import mailer
 from h.tasks.indexer import add_annotation, delete_annotation
@@ -57,21 +57,6 @@ def send_reply_notifications(
 
         send_params = generate_mail(request, notification)
         send(*send_params)
-
-
-@subscriber(AnnotationTransformEvent)
-def nipsa_transform_annotation(event):
-    """Mark moderated or flagged annotations before they are saved.
-
-    Adds `{"nipsa": True}` to an annotation.
-    """
-    user = event.annotation_dict.get("user")
-    if user is None:
-        return
-
-    nipsa_service = event.request.find_service(name="nipsa")
-    if nipsa_service.is_flagged(user):
-        event.annotation_dict["nipsa"] = True
 
 
 @subscriber(AnnotationEvent)
