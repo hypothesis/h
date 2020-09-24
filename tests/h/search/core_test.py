@@ -14,7 +14,7 @@ from webob.multidict import MultiDict
 from h import search
 
 
-@pytest.mark.usefixtures("group_service")
+@pytest.mark.usefixtures("group_service", "nipsa_service")
 class TestSearch:
     """Unit tests for search.Search when no separate_replies argument is given."""
 
@@ -161,7 +161,7 @@ class TestSearch:
         return patch("h.search.core.query.UriCombinedWildcardFilter")
 
 
-@pytest.mark.usefixtures("group_service")
+@pytest.mark.usefixtures("group_service", "nipsa_service")
 class TestSearchWithSeparateReplies:
     """Unit tests for search.Search when separate_replies=True is given."""
 

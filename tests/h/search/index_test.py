@@ -7,6 +7,7 @@ import pytest
 import h.search.index
 
 
+@pytest.mark.usefixtures("nipsa_service")
 class TestBatchIndexer:
     def test_it_indexes_all_annotations(
         self, batch_indexer, factories, get_indexed_ann
@@ -49,33 +50,6 @@ class TestBatchIndexer:
 
         with pytest.raises(elasticsearch.exceptions.NotFoundError):
             get_indexed_ann(ann_del.id)
-
-    def test_it_notifies(
-        self,
-        AnnotationSearchIndexPresenter,
-        AnnotationTransformEvent,
-        batch_indexer,
-        factories,
-        pyramid_request,
-        notify,
-    ):
-        annotations = factories.Annotation.create_batch(3)
-
-        batch_indexer.index()
-
-        event = AnnotationTransformEvent.return_value
-
-        for annotation in annotations:
-            AnnotationTransformEvent.assert_has_calls(
-                [
-                    mock.call(
-                        pyramid_request,
-                        annotation,
-                        AnnotationSearchIndexPresenter.return_value.asdict.return_value,
-                    )
-                ]
-            )
-            notify.assert_has_calls([mock.call(event)])
 
     def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
         num_annotations = 10
@@ -155,11 +129,6 @@ def batch_indexer(db_session, es_client, pyramid_request, moderation_service):
     return h.search.index.BatchIndexer(
         db_session, es_client, pyramid_request, es_client.index
     )
-
-
-@pytest.fixture
-def AnnotationTransformEvent(patch):
-    return patch("h.search.index.AnnotationTransformEvent")
 
 
 @pytest.fixture

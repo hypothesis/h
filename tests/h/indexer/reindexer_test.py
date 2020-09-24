@@ -4,7 +4,6 @@ import pytest
 
 from h.indexer.reindexer import reindex
 from h.search import client
-from h.services.nipsa import NipsaService
 
 
 @pytest.mark.usefixtures(
@@ -169,12 +168,6 @@ class TestReindex:
     def settings_service(self, pyramid_config):
         service = mock.Mock()
         pyramid_config.register_service(service, name="settings")
-        return service
-
-    @pytest.fixture
-    def nipsa_service(self, pyramid_config):
-        service = mock.create_autospec(NipsaService, spec_set=True, instance=True)
-        pyramid_config.register_service(service, name="nipsa")
         return service
 
     @pytest.fixture

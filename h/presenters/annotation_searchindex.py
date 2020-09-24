@@ -48,9 +48,11 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         parents_and_replies = [self.annotation.id] + self.annotation.thread_ids
 
         ann_mod_svc = self.request.find_service(name="annotation_moderation")
-        result["hidden"] = len(ann_mod_svc.all_hidden(parents_and_replies)) == len(
+        is_hidden = len(ann_mod_svc.all_hidden(parents_and_replies)) == len(
             parents_and_replies
         )
+
+        result["hidden"] = is_hidden
 
     def _add_nipsa(self, result, user_id=None):
         if user_id is None:

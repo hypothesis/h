@@ -85,26 +85,6 @@ class TestAddAnnotation:
             refresh=Any(),
         )
 
-    def test_it_notifies_of_annotation_transformation(
-        self,
-        search_index,
-        annotation,
-        pyramid_request,
-        AnnotationTransformEvent,
-        AnnotationSearchIndexPresenter,
-    ):
-        with patch.object(pyramid_request, "registry") as registry:
-            search_index.add_annotation(annotation)
-
-            AnnotationTransformEvent.assert_called_once_with(
-                pyramid_request,
-                annotation,
-                AnnotationSearchIndexPresenter.return_value.asdict.return_value,
-            )
-            registry.notify.assert_called_once_with(
-                AnnotationTransformEvent.return_value
-            )
-
     def test_it_calls_elasticsearch_as_expected(
         self, search_index, annotation, es_client
     ):
@@ -136,10 +116,6 @@ class TestAddAnnotation:
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation.build()
-
-    @pytest.fixture(autouse=True)
-    def AnnotationTransformEvent(self, patch):
-        return patch("h.services.search_index.service.AnnotationTransformEvent")
 
     @pytest.fixture(autouse=True)
     def AnnotationSearchIndexPresenter(self, patch):
