@@ -22,7 +22,7 @@ class TestAnnotationJSONPresentationService:
 
     def test_initializes_hidden_formatter(self, services, formatters, svc):
         formatters.AnnotationHiddenFormatter.assert_called_once_with(
-            services["annotation_moderation"], Any.function(), mock.sentinel.user,
+            services["annotation_moderation"], Any.function(), mock.sentinel.user
         )
 
     def test_hidden_status_included_if_user_can_moderate_group(

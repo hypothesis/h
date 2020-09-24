@@ -54,6 +54,4 @@ def reindex_annotations_in_date_range(start_date, end_date, max_annotations=2500
     if errored:
         log.warning("Failed to re-index annotations into ES6 %s", errored)
 
-    log.info(
-        "Re-index from %s to %s complete.", start_date, end_date,
-    )
+    log.info("Re-index from %s to %s complete.", start_date, end_date)

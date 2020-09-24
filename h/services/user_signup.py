@@ -16,7 +16,7 @@ class UserSignupService:
     """A service for registering users."""
 
     def __init__(
-        self, default_authority, mailer, session, signup_email, password_service,
+        self, default_authority, mailer, session, signup_email, password_service
     ):
         """
         Create a new user signup service.

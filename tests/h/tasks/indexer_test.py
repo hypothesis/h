@@ -77,7 +77,7 @@ class TestReindexAnnotationsInDateRange:
         )
 
         BatchIndexer.assert_called_once_with(
-            celery.request.db, celery.request.es, celery.request,
+            celery.request.db, celery.request.es, celery.request
         )
         BatchIndexer.return_value.index.assert_called_once_with(Any())
         indexed_annotations = list(BatchIndexer.return_value.index.call_args[0][0])

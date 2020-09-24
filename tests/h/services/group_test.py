@@ -104,8 +104,8 @@ class TestFilterByName:
 
 class TestGroupServiceGroupIds:
     """Unit tests for methods related to group IDs:
-        - :py:meth:`GroupService.groupids_readable_by`
-        - :py:meth:`GroupService.groupids_created_by`
+    - :py:meth:`GroupService.groupids_readable_by`
+    - :py:meth:`GroupService.groupids_created_by`
     """
 
     @pytest.mark.parametrize("with_user", [True, False])
