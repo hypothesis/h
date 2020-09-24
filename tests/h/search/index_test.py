@@ -1,10 +1,11 @@
 import logging
 from unittest import mock
+from unittest.mock import sentinel
 
 import elasticsearch
 import pytest
 
-import h.search.index
+from h.search.index import BatchIndexer
 
 
 @pytest.mark.usefixtures("nipsa_service")
@@ -19,6 +20,19 @@ class TestBatchIndexer:
 
         for _id in ids:
             assert get_indexed_ann(_id) is not None
+
+    @pytest.mark.parametrize("target_index", (None, "custom_index"))
+    def test_it_accepts_different_indexes(self, target_index, es_client):
+        indexer = BatchIndexer(
+            session=sentinel.db,
+            es_client=es_client,
+            request=sentinel.request,
+            target_index=target_index,
+        )
+
+        assert (
+            indexer._target_index == target_index if target_index else es_client.index
+        )
 
     def test_it_indexes_specific_annotations(
         self, batch_indexer, factories, get_indexed_ann
@@ -117,7 +131,7 @@ class TestBatchIndexer:
             ),
         ]
 
-        errored = h.search.index.BatchIndexer(
+        errored = BatchIndexer(
             db_session, es_client, pyramid_request, es_client.index, "create"
         ).index()
 
@@ -126,9 +140,7 @@ class TestBatchIndexer:
 
 @pytest.fixture
 def batch_indexer(db_session, es_client, pyramid_request, moderation_service):
-    return h.search.index.BatchIndexer(
-        db_session, es_client, pyramid_request, es_client.index
-    )
+    return BatchIndexer(db_session, es_client, pyramid_request)
 
 
 @pytest.fixture

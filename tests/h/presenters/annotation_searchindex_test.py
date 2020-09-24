@@ -9,7 +9,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 
 @pytest.mark.usefixtures("nipsa_service")
 class TestAnnotationSearchIndexPresenter:
-    def test_asdict(self, DocumentSearchIndexPresenter, pyramid_request):
+    def test_asdict(self, DocumentSearchIndexPresenter, pyramid_request, factories):
         annotation = mock.MagicMock(
             id="xyz123",
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -65,6 +65,7 @@ class TestAnnotationSearchIndexPresenter:
     ):
         # Annotation reply ids are referred to as thread_ids in our code base.
         reply_ids = ["thread-id-1", "thread-id-2"]
+
         annotation = mock.MagicMock(
             userid="acct:luke@hypothes.is", thread_ids=reply_ids
         )
@@ -83,6 +84,22 @@ class TestAnnotationSearchIndexPresenter:
 
         # We are hidden if both we, and all of our replies are moderated
         assert annotation_dict["hidden"] == bool(is_moderated and replies_moderated)
+
+    @pytest.mark.parametrize("is_nipsaed", [True, False])
+    def test_it_marks_annotation_nipsaed_correctly(
+        self, pyramid_request, nipsa_service, is_nipsaed, factories
+    ):
+        annotation = factories.Annotation.build()
+        nipsa_service.is_flagged.return_value = is_nipsaed
+
+        annotation_dict = AnnotationSearchIndexPresenter(
+            annotation, pyramid_request
+        ).asdict()
+
+        if is_nipsaed:
+            assert annotation_dict["nipsa"]
+        else:
+            assert "nipsa" not in annotation_dict
 
     @pytest.fixture(autouse=True)
     def DocumentSearchIndexPresenter(self, patch):
