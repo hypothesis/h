@@ -54,10 +54,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
 
         result["hidden"] = is_hidden
 
-    def _add_nipsa(self, result, user_id=None):
-        if user_id is None:
-            return
-
+    def _add_nipsa(self, result, user_id):
         nipsa_service = self.request.find_service(name="nipsa")
         if nipsa_service.is_flagged(user_id):
             result["nipsa"] = True
