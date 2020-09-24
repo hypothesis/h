@@ -37,7 +37,7 @@ class SignupController:
         return {"form": self.form.render()}
 
     @view_config(
-        request_method="POST", renderer="h:templates/accounts/signup-post.html.jinja2",
+        request_method="POST", renderer="h:templates/accounts/signup-post.html.jinja2"
     )
     def post(self):
         """Handle submission of the new user registration form."""

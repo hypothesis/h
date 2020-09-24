@@ -26,9 +26,9 @@ class GroupListService:
     def _authority(self, user=None, authority=None):
         """Determine which authority to use.
 
-           Determine the appropriate authority to use for querying groups.
-           User's authority will always supersede if present; otherwise provide
-           default value—request.default_authority—if no authority specified.
+        Determine the appropriate authority to use for querying groups.
+        User's authority will always supersede if present; otherwise provide
+        default value—request.default_authority—if no authority specified.
         """
 
         if user is not None:

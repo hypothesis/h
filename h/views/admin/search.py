@@ -4,16 +4,12 @@ from pyramid.view import view_config, view_defaults
 from h.tasks.indexer import reindex_annotations_in_date_range
 
 
-@view_defaults(
-    route_name="admin.search", permission="admin_search",
-)
+@view_defaults(route_name="admin.search", permission="admin_search")
 class SearchAdminViews:
     def __init__(self, request):
         self.request = request
 
-    @view_config(
-        request_method="GET", renderer="h:templates/admin/search.html.jinja2",
-    )
+    @view_config(request_method="GET", renderer="h:templates/admin/search.html.jinja2")
     def get(self):
         return {}
 

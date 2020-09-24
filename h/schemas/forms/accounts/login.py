@@ -28,7 +28,7 @@ class LoginSchema(CSRFSchema):
         widget=_deferred_username_widget,
     )
     password = colander.SchemaNode(
-        colander.String(), title=_("Password"), widget=_deferred_password_widget,
+        colander.String(), title=_("Password"), widget=_deferred_password_widget
     )
 
     def validator(self, node, value):

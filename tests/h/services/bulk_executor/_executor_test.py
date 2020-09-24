@@ -37,9 +37,7 @@ class TestDBExecutor:
 
         # These commands aren't actually the right type, but it doesn't
         # matter for this test
-        executor.execute_batch(
-            command_type, data_type, {"config_option": 2}, commands,
-        )
+        executor.execute_batch(command_type, data_type, {"config_option": 2}, commands)
 
         bulk_upsert = handler.return_value
         bulk_upsert.execute.assert_called_once_with(

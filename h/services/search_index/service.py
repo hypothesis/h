@@ -79,9 +79,7 @@ class SearchIndexService:
 
         self._index_annotation_body(annotation_id, {"deleted": True}, refresh=refresh)
 
-    def _index_annotation_body(
-        self, annotation_id, body, refresh, target_index=None,
-    ):
+    def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
 
         self._es.conn.index(
             index=self._es.index if target_index is None else target_index,
@@ -97,5 +95,5 @@ class SearchIndexService:
         future_index = self._settings.get(self.REINDEX_SETTING_KEY)
         if future_index:
             self._index_annotation_body(
-                annotation_id, body, refresh, target_index=future_index,
+                annotation_id, body, refresh, target_index=future_index
             )

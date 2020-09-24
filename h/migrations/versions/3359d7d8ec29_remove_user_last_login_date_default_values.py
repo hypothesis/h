@@ -14,5 +14,5 @@ def upgrade():
 
 def downgrade():
     op.alter_column(
-        "user", "last_login_date", server_default=sa.func.now(), nullable=False,
+        "user", "last_login_date", server_default=sa.func.now(), nullable=False
     )

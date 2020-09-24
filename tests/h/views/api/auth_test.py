@@ -32,8 +32,8 @@ class TestOAuthAuthorizeController:
 
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
     def test_get_raises_for_invalid_request(self, controller, view_name):
-        controller.oauth.validate_authorization_request.side_effect = InvalidRequestFatalError(
-            "boom!"
+        controller.oauth.validate_authorization_request.side_effect = (
+            InvalidRequestFatalError("boom!")
         )
 
         with pytest.raises(OAuthAuthorizeError) as exc:
@@ -168,8 +168,8 @@ class TestOAuthAuthorizeController:
     @pytest.mark.usefixtures("authenticated_user")
     @pytest.mark.parametrize("view_name", ["post", "post_web_message"])
     def test_post_raises_for_invalid_request(self, controller, view_name):
-        controller.oauth.create_authorization_response.side_effect = InvalidRequestFatalError(
-            "boom!"
+        controller.oauth.create_authorization_response.side_effect = (
+            InvalidRequestFatalError("boom!")
         )
 
         with pytest.raises(OAuthAuthorizeError) as exc:
@@ -356,8 +356,8 @@ class TestOAuthRevocationController:
         assert exc.value.body == body.encode()
 
     def test_get_raises_for_invalid_request(self, controller):
-        controller.oauth.create_revocation_response.side_effect = InvalidRequestFatalError(
-            "boom!"
+        controller.oauth.create_revocation_response.side_effect = (
+            InvalidRequestFatalError("boom!")
         )
 
         with pytest.raises(OAuthAuthorizeError) as exc:

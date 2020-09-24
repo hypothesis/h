@@ -277,7 +277,7 @@ class TestHandleFilterMessage:
             ],
         }
 
-        message = websocket.Message(socket=socket, payload={"filter": filter},)
+        message = websocket.Message(socket=socket, payload={"filter": filter})
 
         websocket.handle_filter_message(message)
 

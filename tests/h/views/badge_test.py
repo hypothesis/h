@@ -70,9 +70,7 @@ class TestBlocklist:
 
 
 class TestBadge:
-    def test_it_returns_0_if_blocked(
-        self, badge_request, Blocklist, search_run,
-    ):
+    def test_it_returns_0_if_blocked(self, badge_request, Blocklist, search_run):
         result = badge_request("http://example.com", annotated=True, blocked=True)
 
         Blocklist.is_blocked.assert_called_with("http://example.com")

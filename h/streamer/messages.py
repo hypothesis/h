@@ -45,7 +45,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
             )
 
     conn = realtime.get_connection(settings)
-    consumer = Consumer(connection=conn, routing_key=routing_key, handler=_handler,)
+    consumer = Consumer(connection=conn, routing_key=routing_key, handler=_handler)
     consumer.run()
 
     if raise_error:

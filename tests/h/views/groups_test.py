@@ -26,7 +26,7 @@ class TestGroupCreateController:
         controller.post()
 
         handle_form_submission.assert_called_once_with(
-            controller.request, controller.form, Any.function(), Any.function(),
+            controller.request, controller.form, Any.function(), Any.function()
         )
 
     def test_post_returns_handle_form_submission(

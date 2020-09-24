@@ -226,7 +226,7 @@ class TestExecute:
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         Search.assert_called_once_with(
-            pyramid_request, separate_wildcard_uri_keys=False,
+            pyramid_request, separate_wildcard_uri_keys=False
         )
 
     def test_it_only_returns_top_level_annotations(

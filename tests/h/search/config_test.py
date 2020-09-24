@@ -176,8 +176,8 @@ class TestGetAliasedIndex:
 
     def test_returns_none_when_no_alias(self, client):
         """If ``index`` is a concrete index, return None."""
-        client.conn.indices.get_alias.side_effect = elasticsearch.exceptions.NotFoundError(
-            "test", "test desc"
+        client.conn.indices.get_alias.side_effect = (
+            elasticsearch.exceptions.NotFoundError("test", "test desc")
         )
 
         assert get_aliased_index(client) is None
@@ -212,8 +212,8 @@ class TestUpdateAliasedIndex:
 
     def test_raises_if_called_for_concrete_index(self, client):
         """Raise if called for a concrete index."""
-        client.conn.indices.get_alias.side_effect = elasticsearch.exceptions.NotFoundError(
-            "test", "test desc"
+        client.conn.indices.get_alias.side_effect = (
+            elasticsearch.exceptions.NotFoundError("test", "test desc")
         )
 
         with pytest.raises(RuntimeError):
@@ -259,8 +259,8 @@ class TestUpdateIndexSettings:
         client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}
         }
-        client.conn.indices.put_mapping.side_effect = elasticsearch.exceptions.RequestError(
-            "test", "MergeMappingException"
+        client.conn.indices.put_mapping.side_effect = (
+            elasticsearch.exceptions.RequestError("test", "MergeMappingException")
         )
 
         with pytest.raises(RuntimeError):

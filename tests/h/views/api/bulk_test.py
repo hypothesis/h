@@ -14,7 +14,7 @@ class TestBulk:
         bulk(pyramid_request)
 
         BulkAPI.from_byte_stream.assert_called_once_with(
-            pyramid_request.body_file, executor=bulk_executor.return_value,
+            pyramid_request.body_file, executor=bulk_executor.return_value
         )
 
         bulk_executor.assert_called_once_with(pyramid_request.db)
