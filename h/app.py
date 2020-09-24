@@ -39,7 +39,7 @@ def includeme(config):
     settings = config.registry.settings
 
     config.set_root_factory("h.traversal:Root")
-    config.include("h.subscribers")
+    config.scan("h.subscribers")
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)
     config.add_tween("h.tweens.rollback_db_session_on_exception_factory", under=EXCVIEW)

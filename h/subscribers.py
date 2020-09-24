@@ -1,30 +1,13 @@
+from pyramid.events import BeforeRender, subscriber
+
 from h import __version__, emails, storage
+from h.events import AnnotationEvent, AnnotationTransformEvent
 from h.notification import reply
 from h.tasks import mailer
 from h.tasks.indexer import add_annotation, delete_annotation
 
 
-def includeme(config):
-    config.add_subscriber(
-        "h.subscribers.add_renderer_globals", "pyramid.events.BeforeRender"
-    )
-    config.add_subscriber(
-        "h.subscribers.publish_annotation_event", "h.events.AnnotationEvent"
-    )
-    config.add_subscriber(
-        "h.subscribers.send_reply_notifications", "h.events.AnnotationEvent"
-    )
-    # Register the transform_annotation subscriber so that nipsa fields are
-    # written into annotations on save.
-    config.add_subscriber(
-        "h.subscribers.nipsa_transform_annotation", "h.events.AnnotationTransformEvent",
-    )
-
-    config.add_subscriber(
-        "h.subscribers.subscribe_annotation_event", "h.events.AnnotationEvent"
-    )
-
-
+@subscriber(BeforeRender)
 def add_renderer_globals(event):
     request = event["request"]
 
@@ -46,6 +29,7 @@ def add_renderer_globals(event):
         }
 
 
+@subscriber(AnnotationEvent)
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
     data = {
@@ -56,6 +40,7 @@ def publish_annotation_event(event):
     event.request.realtime.publish_annotation(data)
 
 
+@subscriber(AnnotationEvent)
 def send_reply_notifications(
     event,
     get_notification=reply.get_notification,
@@ -74,8 +59,9 @@ def send_reply_notifications(
         send(*send_params)
 
 
+@subscriber(AnnotationTransformEvent)
 def nipsa_transform_annotation(event):
-    """Mark moderated or flagged annotations.
+    """Mark moderated or flagged annotations before they are saved.
 
     Adds `{"nipsa": True}` to an annotation.
     """
@@ -88,6 +74,7 @@ def nipsa_transform_annotation(event):
         event.annotation_dict["nipsa"] = True
 
 
+@subscriber(AnnotationEvent)
 def sync_annotation(event):
     """Ensure an annotation is synchronised to Elasticsearch."""
 
