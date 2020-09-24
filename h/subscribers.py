@@ -63,8 +63,24 @@ def send_reply_notifications(
 def sync_annotation(event):
     """Ensure an annotation is synchronised to Elasticsearch."""
 
-    if event.action in ["create", "update"]:
-        add_annotation.delay(event.annotation_id)
+    synchronous_indexing = event.request.feature("synchronous_indexing")
 
-    elif event.action == "delete":
-        delete_annotation.delay(event.annotation_id)
+    if not synchronous_indexing:
+        # This is exactly the same outcome as below, but just run through
+        # celery instead. These tasks just call the search index service.
+        if event.action in ["create", "update"]:
+            add_annotation.delay(event.annotation_id)
+
+        elif event.action == "delete":
+            delete_annotation.delay(event.annotation_id)
+
+        return
+
+    with event.request.tm:
+        search_index = event.request.find_service(name="search_index")
+
+        if event.action in ["create", "update"]:
+            search_index.add_annotation_by_id(event.annotation_id)
+
+        elif event.action == "delete":
+            search_index.delete_annotation_by_id(event.annotation_id)

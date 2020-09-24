@@ -160,17 +160,19 @@ class TestSendReplyNotifications:
 
 
 class TestSyncAnnotation:
+    @pytest.mark.usefixtures("without_synchronous_flag")
     @pytest.mark.parametrize("action", ["create", "update"])
     def test_it_enqueues_add_annotation_celery_task(
-        self, action, add_annotation, delete_annotation, pyramid_request
+        self, pyramid_request, action, add_annotation, delete_annotation
     ):
-        event = AnnotationEvent(pyramid_request, {"id": "test_annotation_id"}, action)
+        event = AnnotationEvent(pyramid_request, {"id": "any"}, action)
 
         subscribers.sync_annotation(event)
 
         add_annotation.delay.assert_called_once_with(event.annotation_id)
         assert not delete_annotation.delay.called
 
+    @pytest.mark.usefixtures("without_synchronous_flag")
     def test_it_enqueues_delete_annotation_celery_task_for_delete(
         self, add_annotation, delete_annotation, pyramid_request
     ):
@@ -180,6 +182,39 @@ class TestSyncAnnotation:
 
         delete_annotation.delay.assert_called_once_with(event.annotation_id)
         assert not add_annotation.delay.called
+
+    @pytest.mark.parametrize(
+        "action,method",
+        (
+            ("create", "add_annotation_by_id"),
+            ("update", "add_annotation_by_id"),
+            ("delete", "delete_annotation_by_id"),
+        ),
+    )
+    @pytest.mark.usefixtures("with_synchronous_flag")
+    def test_it_calls_sync_service(
+        self, action, pyramid_request, search_index, method, transaction_manager
+    ):
+        event = AnnotationEvent(pyramid_request, {"id": "any"}, action)
+
+        subscribers.sync_annotation(event)
+
+        transaction_manager.__enter__.assert_called_once()
+        getattr(search_index, method).assert_called_once_with(event.annotation_id)
+        transaction_manager.__exit__.assert_called_once()
+
+    @pytest.fixture(autouse=True)
+    def transaction_manager(self, pyramid_request):
+        pyramid_request.tm = mock.MagicMock(spec=["__enter__", "__exit__"])
+        return pyramid_request.tm
+
+    @pytest.fixture
+    def with_synchronous_flag(self, pyramid_request):
+        pyramid_request.feature.flags = {"synchronous_indexing": True}
+
+    @pytest.fixture
+    def without_synchronous_flag(self, pyramid_request):
+        pyramid_request.feature.flags = {"synchronous_indexing": False}
 
     @pytest.fixture(autouse=True)
     def add_annotation(self, patch):
