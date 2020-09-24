@@ -1,5 +1,4 @@
 from h import storage
-from h.events import AnnotationTransformEvent
 from h.presenters import AnnotationSearchIndexPresenter
 
 
@@ -55,10 +54,6 @@ class SearchIndexService:
         :param annotation: Annotation object to index
         """
         body = AnnotationSearchIndexPresenter(annotation, self._request).asdict()
-
-        self._request.registry.notify(
-            AnnotationTransformEvent(self._request, annotation, body)
-        )
 
         self._index_annotation_body(annotation.id, body, refresh=False)
 

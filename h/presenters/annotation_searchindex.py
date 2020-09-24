@@ -4,7 +4,6 @@ from h.util.user import split_user
 
 
 class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
-
     """Present an annotation in the JSON format used in the search index."""
 
     def __init__(self, annotation, request):
@@ -38,6 +37,12 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         if self.annotation.references:
             result["references"] = self.annotation.references
 
+        self._add_hidden(result)
+        self._add_nipsa(result, self.annotation.userid)
+
+        return result
+
+    def _add_hidden(self, result):
         # Mark an annotation as hidden if it and all of it's children have been
         # moderated and hidden.
         parents_and_replies = [self.annotation.id] + self.annotation.thread_ids
@@ -47,7 +52,13 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             parents_and_replies
         )
 
-        return result
+    def _add_nipsa(self, result, user_id=None):
+        if user_id is None:
+            return
+
+        nipsa_service = self.request.find_service(name="nipsa")
+        if nipsa_service.is_flagged(user_id):
+            result["nipsa"] = True
 
     @property
     def links(self):
