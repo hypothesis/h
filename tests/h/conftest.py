@@ -20,7 +20,7 @@ from h import db, models
 from h.settings import database_url
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
-from tests.common.fixtures.services import nipsa_service  # noqa: F401
+from tests.common.fixtures.services import *  # noqa: F403,F401
 
 TEST_AUTHORITY = "example.com"
 TEST_DATABASE_URL = database_url(

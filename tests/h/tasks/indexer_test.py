@@ -1,11 +1,10 @@
 import datetime
 from unittest import mock
-from unittest.mock import create_autospec, sentinel
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
 
-from h.services.search_index.service import SearchIndexService
 from h.tasks import indexer
 
 
@@ -25,13 +24,6 @@ class TestSearchIndexServicesWrapperTasks:
         search_index.delete_annotation_by_id.assert_called_once_with(
             sentinel.annotation_id
         )
-
-    @pytest.fixture(autouse=True)
-    def search_index(self, pyramid_config):
-        search_index = create_autospec(SearchIndexService, instance=True)
-        pyramid_config.register_service(search_index, name="search_index")
-
-        return search_index
 
 
 class TestReindexUserAnnotations:
