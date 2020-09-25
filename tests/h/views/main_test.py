@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import All, Any
 from pyramid import httpexceptions
 
 from h.models import Annotation
@@ -22,13 +23,18 @@ def test_og_document(
 
     ctx = main.annotation_page(context, pyramid_request)
 
-    def test(d):
-        return (
-            "foo@example.com" in d["content"]
-            and annotation.document.title in d["content"]
-        )
+    expected = Any.dict.containing(
+        {
+            "content": All.of(
+                [
+                    Any.string.containing("foo@example.com"),
+                    Any.string.containing(annotation.document.title),
+                ]
+            )
+        }
+    )
 
-    assert any(test(d) for d in ctx["meta_attrs"])
+    assert expected in ctx["meta_attrs"]
 
 
 @pytest.mark.usefixtures("routes")
@@ -39,10 +45,9 @@ def test_og_no_document(pyramid_request, group_service, links_service, sidebar_a
 
     ctx = main.annotation_page(context, pyramid_request)
 
-    def test(d):
-        return "foo" in d["content"]
+    expected = Any.dict.containing({"content": Any.string.containing("foo")})
 
-    assert any(test(d) for d in ctx["meta_attrs"])
+    assert expected in ctx["meta_attrs"]
 
 
 @pytest.mark.usefixtures("sidebar_app", "routes")

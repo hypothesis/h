@@ -178,13 +178,6 @@ def form_validating_to(appstruct):
     return form
 
 
-def invalid_form():
-    form = mock.Mock()
-    form.validate.side_effect = deform.ValidationFailure(None, None, None)
-    form.render.return_value = "invalid form"
-    return form
-
-
 @pytest.fixture
 def group_create_service(pyramid_config):
     service = mock.create_autospec(GroupCreateService, spec_set=True, instance=True)
