@@ -10,9 +10,6 @@ from h.schemas import ValidationError
 
 
 class FakeGroup:
-    def __acl__(self):
-        return []
-
     @property
     def scopes(self):
         return []

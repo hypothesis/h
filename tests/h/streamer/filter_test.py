@@ -140,7 +140,7 @@ class TestFilterHandler:
         ms = diff.seconds * 1000 + diff.microseconds / 1000
         print(ms, "ms")
 
-    def get_randomized_filter(self):
+    def get_randomized_filter(self):  # pragma: no cover
         return {
             "match_policy": "include_any",
             "actions": {},

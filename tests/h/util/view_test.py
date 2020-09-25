@@ -21,15 +21,6 @@ class TestHandleException:
         return Exception("Last exception raised in thread")
 
     @pytest.fixture
-    def old_exception(self):
-        try:
-            # Create exception and populate `__traceback__`.
-            raise Exception("An earlier exception raised in thread")
-        except Exception as exc:
-            result = exc
-        return result
-
-    @pytest.fixture
     def sys_exc_info(self, patch, latest_exception):
         sys_exc_info = patch("h.util.view._exc_info")
         sys_exc_info.return_value = (type(latest_exception), latest_exception, None)

@@ -27,11 +27,7 @@ class FakeSubscription:
 
 
 class FakeSerializer:
-    def dumps(self, obj):
-        return "faketoken"
-
-    def loads(self, token):
-        return {"username": "foo@bar.com"}
+    ...
 
 
 @pytest.mark.usefixtures("routes")

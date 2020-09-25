@@ -107,11 +107,6 @@ class TestGetGroups:
     def open_groups(self, factories):
         return [factories.OpenGroup(), factories.OpenGroup()]
 
-    @pytest.fixture
-    def authenticated_request(self, pyramid_request, factories):
-        pyramid_request.user = factories.User()
-        return pyramid_request
-
 
 @pytest.mark.usefixtures(
     "CreateGroupAPISchema",

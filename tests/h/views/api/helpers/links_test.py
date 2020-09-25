@@ -86,6 +86,10 @@ class TestRegisterLink:
 #         assert "3" in formatted["1"]["2"]
 #         assert "A" in formatted["1"]["2"]
 
+# @pytest.fixture
+# def templater():
+#     return mock.create_autospec(AngularRouteTemplater, spec_set=True, instance=True)
+
 
 def _service_link(name="api.example_service"):
     return links.ServiceLink(
@@ -94,11 +98,6 @@ def _service_link(name="api.example_service"):
         method="POST",
         description="Create a new Foo",
     )
-
-
-@pytest.fixture
-def templater():
-    return mock.create_autospec(AngularRouteTemplater, spec_set=True, instance=True)
 
 
 @pytest.fixture

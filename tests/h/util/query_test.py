@@ -5,6 +5,8 @@ import sqlalchemy as sa
 
 from h.util.query import column_windows
 
+ASCII_LOWERCASE = string.ascii_lowercase
+
 meta = sa.MetaData()
 
 test_cw = sa.Table(
@@ -14,11 +16,6 @@ test_cw = sa.Table(
     sa.Column("name", sa.UnicodeText, nullable=False),
     sa.Column("enabled", sa.Boolean, nullable=False),
 )
-
-try:
-    ASCII_LOWERCASE = string.ascii_lowercase
-except AttributeError:
-    ASCII_LOWERCASE = string.lowercase
 
 
 @pytest.mark.usefixtures("cw_table")

@@ -5,10 +5,6 @@ import pytest
 from h.settings import SettingError, SettingsManager, database_url
 
 
-def asutf8(string):
-    return string.encode()
-
-
 def test_database_url():
     url = "postgres://postgres:1234/database"
     expected = "postgresql+psycopg2://postgres:1234/database"
