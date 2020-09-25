@@ -4,6 +4,7 @@ import pytest
 
 from h import subscribers
 from h.events import AnnotationEvent
+from h.exceptions import RealtimeMessageQueueError
 
 
 class FakeMailer:
@@ -83,6 +84,19 @@ class TestPublishAnnotationEvent:
                 "src_client_id": "client_id",
             }
         )
+
+    def test_it_exits_cleanly_when_RealtimeMessageQueueError_is_raised(self, event):
+        event.request.realtime.publish_annotation.side_effect = (
+            RealtimeMessageQueueError
+        )
+
+        subscribers.publish_annotation_event(event)
+
+    def test_it_raises_for_other_errors(self, event):
+        event.request.realtime.publish_annotation.side_effect = EnvironmentError
+
+        with pytest.raises(EnvironmentError):
+            subscribers.publish_annotation_event(event)
 
     @pytest.fixture
     def event(self, pyramid_request):

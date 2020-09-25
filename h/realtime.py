@@ -1,10 +1,16 @@
 import base64
 import random
 import struct
+from logging import getLogger
 
 import kombu
+from kombu.exceptions import LimitExceeded, OperationalError
 from kombu.mixins import ConsumerMixin
 from kombu.pools import producers as producer_pool
+
+from h.exceptions import RealtimeMessageQueueError
+
+LOG = getLogger(__name__)
 
 
 class Consumer(ConsumerMixin):
@@ -64,29 +70,45 @@ class Publisher:
     """
 
     def __init__(self, request):
-        self.connection = get_connection(request.registry.settings)
+        self.connection = get_connection(request.registry.settings, fail_fast=True)
         self.exchange = get_exchange()
 
     def publish_annotation(self, payload):
-        """Publish an annotation message with the routing key 'annotation'."""
+        """Publish an annotation message with the routing key 'annotation'.
+
+        :raise RealtimeMessageQueueError: When we cannot queue the message
+        """
         self._publish("annotation", payload)
 
     def publish_user(self, payload):
-        """Publish a user message with the routing key 'user'."""
+        """Publish a user message with the routing key 'user'.
+
+        :raise RealtimeMessageQueueError: When we cannot queue the message
+        """
         self._publish("user", payload)
 
     def _publish(self, routing_key, payload):
         retry_policy = {"max_retries": 5, "interval_start": 0.2, "interval_step": 0.3}
 
-        with producer_pool[self.connection].acquire(block=True) as producer:
-            producer.publish(
-                payload,
-                exchange=self.exchange,
-                declare=[self.exchange],
-                routing_key=routing_key,
-                retry=True,
-                retry_policy=retry_policy,
-            )
+        try:
+            with producer_pool[self.connection].acquire(
+                block=True, timeout=1
+            ) as producer:
+                producer.publish(
+                    payload,
+                    exchange=self.exchange,
+                    declare=[self.exchange],
+                    routing_key=routing_key,
+                    retry=True,
+                    retry_policy=retry_policy,
+                )
+
+        except (OperationalError, LimitExceeded) as err:
+            # If we fail to connect (OperationalError), or we don't get a
+            # producer from the pool in time (LimitExceeded) raise
+            LOG.error("Failed to queue realtime message with error %s", err)
+            LOG.debug("Failed message payload was: %s", payload)
+            raise RealtimeMessageQueueError() from err
 
 
 def get_exchange():
@@ -97,11 +119,35 @@ def get_exchange():
     )
 
 
-def get_connection(settings):
-    """Returns a `kombu.Connection` based on the application's settings."""
+def get_connection(settings, fail_fast=False):
+    """Returns a `kombu.Connection` based on the application's settings.
+
+    :param settings: Application settings
+    :param fail_fast: Make the connection fail if we cannot get a connection
+        quickly.
+    """
 
     conn = settings.get("broker_url", "amqp://guest:guest@localhost:5672//")
-    return kombu.Connection(conn)
+
+    kwargs = {}
+
+    if fail_fast:
+        kwargs["transport_options"] = {
+            # Connection fallback set by`kombu.connection._extract_failover_opts`
+            # Which are used when retrying a connection as sort of documented here:
+            # https://kombu.readthedocs.io/en/latest/reference/kombu.connection.html#kombu.connection.Connection.ensure_connection
+            # Maximum number of times to retry. If this limit is exceeded the
+            # connection error will be re-raised
+            "max_retries": 2,
+            # The number of seconds we start sleeping for (when retrying)
+            "interval_start": 0.1,
+            #  How many seconds added to the interval for each retry
+            "interval_step": 0.1,
+            # Maximum number of seconds to sleep between each retry
+            "interval_max": 1.0,
+        }
+
+    return kombu.Connection(conn, **kwargs)
 
 
 def includeme(config):

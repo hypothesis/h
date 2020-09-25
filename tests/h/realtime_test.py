@@ -1,8 +1,11 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
+from kombu.exceptions import LimitExceeded, OperationalError
 
 from h import realtime
+from h.exceptions import RealtimeMessageQueueError
 
 
 class TestConsumer:
@@ -78,12 +81,9 @@ class TestConsumer:
 
 
 class TestPublisher:
-    def test_publish_annotation(self, producer_pool, pyramid_request, retry_policy):
+    def test_publish_annotation(self, producer, publisher, exchange, retry_policy):
         payload = {"action": "create", "annotation": {"id": "foobar"}}
-        producer = producer_pool["foobar"].acquire().__enter__()
-        exchange = realtime.get_exchange()
 
-        publisher = realtime.Publisher(pyramid_request)
         publisher.publish_annotation(payload)
 
         producer.publish.assert_called_once_with(
@@ -95,12 +95,9 @@ class TestPublisher:
             retry_policy=retry_policy,
         )
 
-    def test_publish_user(self, producer_pool, pyramid_request, retry_policy):
+    def test_publish_user(self, producer, publisher, exchange, retry_policy):
         payload = {"action": "create", "user": {"id": "foobar"}}
-        producer = producer_pool["foobar"].acquire().__enter__()
-        exchange = realtime.get_exchange()
 
-        publisher = realtime.Publisher(pyramid_request)
         publisher.publish_user(payload)
 
         producer.publish.assert_called_once_with(
@@ -112,13 +109,31 @@ class TestPublisher:
             retry_policy=retry_policy,
         )
 
+    @pytest.mark.parametrize("exception", (OperationalError, LimitExceeded))
+    def test_it_raises_RealtimeMessageQueueError_on_errors(
+        self, publisher, producer, exception
+    ):
+        producer.publish.side_effect = exception
+
+        with pytest.raises(RealtimeMessageQueueError):
+            publisher.publish_user({})
+
+    @pytest.fixture
+    def producer(self, patch):
+        producer_pool = patch("h.realtime.producer_pool")
+        return producer_pool["foobar"].acquire().__enter__()
+
+    @pytest.fixture
+    def publisher(self, pyramid_request):
+        return realtime.Publisher(pyramid_request)
+
+    @pytest.fixture
+    def exchange(self):
+        return realtime.get_exchange()
+
     @pytest.fixture
     def retry_policy(self):
         return {"max_retries": 5, "interval_start": 0.2, "interval_step": 0.3}
-
-    @pytest.fixture
-    def producer_pool(self, patch):
-        return patch("h.realtime.producer_pool")
 
 
 class TestGetExchange:
@@ -155,6 +170,19 @@ class TestGetConnection:
         broker_url = "amqp://alice:bob@rabbitmq.int:5673/prj"
         realtime.get_connection({"broker_url": broker_url})
         Connection.assert_called_once_with(broker_url)
+
+    def test_it_adds_timeout_options_for_failfast(self, Connection):
+        realtime.get_connection({}, fail_fast=True)
+
+        Connection.assert_called_once_with(
+            Any.string(),
+            transport_options={
+                "max_retries": Any.int(),
+                "interval_start": Any(),
+                "interval_step": Any(),
+                "interval_max": Any(),
+            },
+        )
 
     @pytest.fixture
     def Connection(self, patch):
