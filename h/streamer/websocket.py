@@ -52,7 +52,10 @@ class WebSocket(_WebSocket):
             protocols=protocols,
             extensions=extensions,
             environ=environ,
-            heartbeat_freq=30.0,
+            # As per CloudAMPQ suggestions, don't run a heartbeat as it sends
+            # many additional requests we don't need:
+            # https://www.cloudamqp.com/docs/celery.html
+            heartbeat_freq=None,
         )
 
         self.authenticated_userid = environ["h.ws.authenticated_userid"]

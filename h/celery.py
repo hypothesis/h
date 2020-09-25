@@ -55,6 +55,23 @@ celery.conf.update(
     # (especially not for, say, a search indexer task) but it makes the
     # behaviour consistent with the previous NSQ-based worker:
     worker_prefetch_multiplier=1,
+    # Suggestions from: https://www.cloudamqp.com/docs/celery.html
+    # Will decrease connection usage
+    broker_pool_limit=1,
+    # We're using TCP keep-alive instead
+    broker_heartbeat=None,
+    # May require a long timeout due to Linux DNS timeouts etc
+    broker_connection_timeout=30,
+    # AMQP is not recommended as result backend as it creates thousands of
+    # queues
+    result_backend=None,
+    # Will delete all celeryev. queues without consumers after 1 minute.
+    event_queue_expires=60,
+    # Disable prefetching, it's causes problems and doesn't help performance
+    # worker_prefetch_multiplier=1, (duplicated above)
+    # If you tasks are CPU bound, then limit to the number of cores, otherwise
+    # increase substainally
+    worker_concurrency=50,
 )
 
 
