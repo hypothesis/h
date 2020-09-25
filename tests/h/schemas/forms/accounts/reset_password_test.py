@@ -65,14 +65,12 @@ class TestResetPasswordSchema:
         assert appstruct["user"] == user
 
     class FakeSerializer:
-        def dumps(self, obj):
-            return "faketoken"
-
         def loads(self, token, max_age=0, return_timestamp=False):
             payload = {"username": "foo@bar.com"}
-            if return_timestamp:
-                return payload, 1
-            return payload
+
+            assert return_timestamp
+
+            return payload, 1
 
     class FakeExpiredSerializer(FakeSerializer):
         def loads(self, token, max_age=0, return_timestamp=False):
