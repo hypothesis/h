@@ -1,10 +1,15 @@
+from logging import getLogger
+
 from pyramid.events import BeforeRender, subscriber
 
 from h import __version__, emails, storage
 from h.events import AnnotationEvent
+from h.exceptions import RealtimeMessageQueueError
 from h.notification import reply
 from h.tasks import mailer
 from h.tasks.indexer import add_annotation, delete_annotation
+
+LOG = getLogger(__name__)
 
 
 @subscriber(BeforeRender)
@@ -27,17 +32,6 @@ def add_renderer_globals(event):
             "release": __version__,
             "userid": request.authenticated_userid,
         }
-
-
-@subscriber(AnnotationEvent)
-def publish_annotation_event(event):
-    """Publish an annotation event to the message queue."""
-    data = {
-        "action": event.action,
-        "annotation_id": event.annotation_id,
-        "src_client_id": event.request.headers.get("X-Client-Id"),
-    }
-    event.request.realtime.publish_annotation(data)
 
 
 @subscriber(AnnotationEvent)
@@ -87,3 +81,22 @@ def sync_annotation(event):
 
         elif event.action == "delete":
             search_index.delete_annotation_by_id(event.annotation_id)
+
+
+@subscriber(AnnotationEvent)
+def publish_annotation_event(event):
+    """Publish an annotation event to the message queue."""
+    data = {
+        "action": event.action,
+        "annotation_id": event.annotation_id,
+        "src_client_id": event.request.headers.get("X-Client-Id"),
+    }
+    try:
+        event.request.realtime.publish_annotation(data)
+
+    except RealtimeMessageQueueError:
+        LOG.warning(
+            "Failed to publish annotation %s event for annotation '%s'",
+            event.action,
+            event.annotation_id,
+        )
