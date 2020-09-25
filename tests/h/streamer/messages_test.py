@@ -361,14 +361,8 @@ class TestHandleAnnotationEvent:
         )
         assert len(socket.send_json_payloads) == 1
 
-    def serialized_annotation(self, data=None):
-        if data is None:
-            data = {}
-
-        serialized = {"permissions": {"read": ["group:__world__"]}}
-        serialized.update(data)
-
-        return serialized
+    def serialized_annotation(self):
+        return {"permissions": {"read": ["group:__world__"]}}
 
     @pytest.fixture
     def fetch_annotation(self, factories, patch):

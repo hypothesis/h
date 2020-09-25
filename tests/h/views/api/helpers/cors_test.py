@@ -190,9 +190,6 @@ class TestCorsViewDecorator:
 
 class TestAddPreflightView:
     def test_it_adds_preflight_view(self, pyramid_config):
-        def view(request):
-            pass  # noop
-
         cors_policy = policy()
         pyramid_config.add_route("api.read_thing", "/api/thing")
         add_preflight_view(pyramid_config, "api.read_thing", cors_policy)
@@ -209,9 +206,6 @@ class TestAddPreflightView:
         assert resp.body == b""
 
     def test_preflight_view_uses_cors_decorator(self, pyramid_config):
-        def view(request):
-            pass  # noop
-
         cors_policy = policy()
         pyramid_config.add_route("api.read_thing", "/api/thing")
         pyramid_config.add_view = mock.Mock()
@@ -225,9 +219,6 @@ class TestAddPreflightView:
         cors_policy = policy()
         pyramid_config.add_route("api.read_thing", "/api/thing")
         pyramid_config.add_view = mock.Mock()
-
-        def view(request):
-            pass  # noop
 
         add_preflight_view(pyramid_config, "api.read_thing", cors_policy)
         add_preflight_view(pyramid_config, "api.read_thing", cors_policy)

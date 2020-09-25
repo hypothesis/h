@@ -298,12 +298,7 @@ class FakeRequest:
         self.user.sidebar_tutorial_dismissed = dismissed
 
     def find_service(self, **kwargs):
-        if kwargs == {"name": "group_list"}:
-            return self._group_list_service
-        else:
-            raise AssertionError(
-                "find_service called with unrecognised args " "{}".format(kwargs)
-            )
+        return {"group_list": self._group_list_service}[kwargs["name"]]
 
 
 @pytest.fixture
