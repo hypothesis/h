@@ -1,6 +1,5 @@
 from unittest import mock
 
-import deform
 import pytest
 from h_matchers import Any
 from pyramid.httpexceptions import HTTPMovedPermanently

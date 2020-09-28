@@ -1,9 +1,6 @@
-from unittest import mock
-
 import pytest
 
 from h.views.api.helpers import links
-from h.views.api.helpers.angular import AngularRouteTemplater
 
 
 class TestServiceLink:
