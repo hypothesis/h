@@ -41,7 +41,6 @@ kombu==4.6.11             # via -r requirements/requirements.txt, celery
 mako==1.1.3               # via -r requirements/requirements.txt, alembic
 markupsafe==1.1.1         # via -r requirements/requirements.txt, jinja2, mako, pyramid-jinja2
 mistune==0.8.4            # via -r requirements/requirements.txt
-more-itertools==8.5.0     # via pytest
 newrelic==5.20.0.149      # via -r requirements/requirements.txt
 oauthlib==3.1.0           # via -r requirements/requirements.txt
 packaging==20.4           # via -r requirements/requirements.txt, bleach, pytest
@@ -68,7 +67,7 @@ pyramid-services==2.2     # via -r requirements/requirements.txt, pyramid-authsa
 pyramid-tm==2.4           # via -r requirements/requirements.txt
 pyramid==1.10.4           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-sanity, pyramid-services, pyramid-tm
 pyrsistent==0.17.3        # via -r requirements/requirements.txt, jsonschema
-pytest==6.0.2             # via -r requirements/tests.in
+pytest==6.1.0             # via -r requirements/tests.in
 python-dateutil==2.8.1    # via -r requirements/requirements.txt, alembic, elasticsearch-dsl, faker
 python-editor==1.0.4      # via -r requirements/requirements.txt, alembic
 python-slugify==4.0.1     # via -r requirements/requirements.txt
