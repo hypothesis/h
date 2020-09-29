@@ -1,7 +1,6 @@
 import base64
 import random
 import struct
-from logging import getLogger
 
 import kombu
 from kombu.exceptions import LimitExceeded, OperationalError
@@ -9,8 +8,6 @@ from kombu.mixins import ConsumerMixin
 from kombu.pools import producers as producer_pool
 
 from h.exceptions import RealtimeMessageQueueError
-
-LOG = getLogger(__name__)
 
 
 class Consumer(ConsumerMixin):
@@ -106,8 +103,6 @@ class Publisher:
         except (OperationalError, LimitExceeded) as err:
             # If we fail to connect (OperationalError), or we don't get a
             # producer from the pool in time (LimitExceeded) raise
-            LOG.error("Failed to queue realtime message with error %s", err)
-            LOG.debug("Failed message payload was: %s", payload)
             raise RealtimeMessageQueueError() from err
 
 
