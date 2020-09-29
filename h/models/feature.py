@@ -15,7 +15,7 @@ FEATURES = {
     "client_search_input": "Show redesigned search/filter input in client",
     "synchronous_indexing": (
         "Index annotations to Elasticsearch synchronously without involving "
-        "Rabbit MQ or Celery"
+        "RabbitMQ or Celery"
     ),
 }
 

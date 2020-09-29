@@ -205,7 +205,11 @@ class TestSyncAnnotation:
 
     @pytest.fixture(autouse=True)
     def transaction_manager(self, pyramid_request):
-        pyramid_request.tm = mock.MagicMock(spec=["__enter__", "__exit__"])
+        from transaction import TransactionManager
+
+        pyramid_request.tm = mock.create_autospec(
+            TransactionManager, instance=True, spec_set=True
+        )
         return pyramid_request.tm
 
     @pytest.fixture
