@@ -25,6 +25,7 @@ class timeframe_with:  # noqa: N801
         )
 
     def __repr__(self):
+        # pragma: no cover
         return '{class_} "{label}" with {n} document buckets'.format(
             class_=self.__class__, label=self.label, n=len(self.document_buckets)
         )
