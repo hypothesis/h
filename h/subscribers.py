@@ -67,7 +67,7 @@ def sync_annotation(event):
 
     if not synchronous_indexing:
         # This is exactly the same outcome as below, but just run through
-        # celery instead. These tasks just call the search index service.
+        # Celery instead. These tasks just call the search index service.
         if event.action in ["create", "update"]:
             add_annotation.delay(event.annotation_id)
 
