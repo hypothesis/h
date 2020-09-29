@@ -1,5 +1,4 @@
-from logging import getLogger
-
+from h_pyramid_sentry import report_exception
 from pyramid.events import BeforeRender, subscriber
 
 from h import __version__, emails, storage
@@ -8,8 +7,6 @@ from h.exceptions import RealtimeMessageQueueError
 from h.notification import reply
 from h.tasks import mailer
 from h.tasks.indexer import add_annotation, delete_annotation
-
-LOG = getLogger(__name__)
 
 
 @subscriber(BeforeRender)
@@ -94,9 +91,5 @@ def publish_annotation_event(event):
     try:
         event.request.realtime.publish_annotation(data)
 
-    except RealtimeMessageQueueError:
-        LOG.warning(
-            "Failed to publish annotation %s event for annotation '%s'",
-            event.action,
-            event.annotation_id,
-        )
+    except RealtimeMessageQueueError as err:
+        report_exception(err)
