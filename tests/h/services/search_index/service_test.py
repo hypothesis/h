@@ -3,6 +3,7 @@ from unittest.mock import call, create_autospec, patch, sentinel
 import pytest
 from h_matchers import Any
 
+from h.events import AnnotationEvent
 from h.search.client import Client
 from h.services.search_index.service import SearchIndexService
 from h.services.settings import SettingsService
@@ -150,6 +151,87 @@ class TestDeleteAnnotationById:
             id=sentinel.annotation_id,
             refresh=refresh,
         )
+
+
+class TestHandleAnnotationEvent:
+    def test_we_dispatch_correctly(
+        self, search_index, pyramid_request, action, synchronous, handler_for
+    ):
+        event = AnnotationEvent(pyramid_request, {"id": "any"}, action)
+
+        result = search_index.handle_annotation_event(event, synchronous=synchronous)
+
+        handler = handler_for(action, synchronous)
+        handler.assert_called_once_with(event.annotation_id)
+        assert result == handler.return_value
+
+    def test_we_do_nothing_for_unexpected_actions(
+        self, search_index, pyramid_request, synchronous
+    ):
+        event = AnnotationEvent(pyramid_request, {"id": "any"}, "strange_action")
+
+        result = search_index.handle_annotation_event(event, synchronous=synchronous)
+
+        assert result is False
+
+    def test_we_fallback_to_async_if_sync_fails(
+        self, search_index, pyramid_request, action, handler_for
+    ):
+        event = AnnotationEvent(pyramid_request, {"id": "any"}, action)
+        sync_handler = handler_for(action, synchronous=True)
+        sync_handler.side_effect = ValueError
+
+        result = search_index.handle_annotation_event(event, synchronous=True)
+
+        sync_handler.assert_called_once_with(event.annotation_id)
+        async_handler = handler_for(action, synchronous=False)
+        async_handler.assert_called_once_with(event.annotation_id)
+        assert result == async_handler.return_value
+
+    @pytest.fixture(autouse=True)
+    def handler_for(self, patch, add_annotation_by_id, delete_annotation_by_id):
+        add_annotation_task = patch("h.services.search_index.service.add_annotation")
+        delete_annotation_task = patch(
+            "h.services.search_index.service.delete_annotation"
+        )
+
+        handler_map = {
+            True: {
+                "create": add_annotation_by_id,
+                "update": add_annotation_by_id,
+                "delete": delete_annotation_by_id,
+            },
+            False: {
+                "create": add_annotation_task.delay,
+                "update": add_annotation_task.delay,
+                "delete": delete_annotation_task.delay,
+            },
+        }
+
+        def handler_for(action, synchronous):
+            return handler_map[synchronous].get(action)
+
+        return handler_for
+
+    @pytest.fixture(params=("create", "update", "delete"))
+    def action(self, request):
+        return request.param
+
+    @pytest.fixture(params=(True, False))
+    def synchronous(self, request):
+        return request.param
+
+    @pytest.fixture(autouse=True)
+    def add_annotation_by_id(self, search_index):
+        with patch.object(search_index, "add_annotation_by_id") as add_annotation_by_id:
+            yield add_annotation_by_id
+
+    @pytest.fixture(autouse=True)
+    def delete_annotation_by_id(self, search_index):
+        with patch.object(
+            search_index, "delete_annotation_by_id"
+        ) as delete_annotation_by_id:
+            yield delete_annotation_by_id
 
 
 @pytest.fixture

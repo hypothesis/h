@@ -1,5 +1,8 @@
+from h_pyramid_sentry import report_exception
+
 from h import storage
 from h.presenters import AnnotationSearchIndexPresenter
+from h.tasks.indexer import add_annotation, delete_annotation
 
 
 class SearchIndexService:
@@ -74,8 +77,34 @@ class SearchIndexService:
 
         self._index_annotation_body(annotation_id, {"deleted": True}, refresh=refresh)
 
-    def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
+    def handle_annotation_event(self, event, synchronous=False):
+        """
+        Process an annotation event, taking appropriate action to the event.
 
+        This will attempt to fulfill the request synchronously if asked, or
+        fall back on a delayed celery task if not or if this fails.
+
+        :param event: AnnotationEvent object
+        :synchronous: Try synchronous indexing before async
+        """
+        if event.action in ["create", "update"]:
+            sync_handler, async_task = self.add_annotation_by_id, add_annotation
+        elif event.action == "delete":
+            sync_handler, async_task = self.delete_annotation_by_id, delete_annotation
+        else:
+            return False
+
+        if synchronous:
+            try:
+                return sync_handler(event.annotation_id)
+
+            except Exception as err:
+                report_exception(err)
+
+        # Either the synchronous method was disabled, or failed...
+        return async_task.delay(event.annotation_id)
+
+    def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
         self._es.conn.index(
             index=self._es.index if target_index is None else target_index,
             doc_type=self._es.mapping_type,
