@@ -183,6 +183,20 @@ class TestSyncAnnotation:
         delete_annotation.delay.assert_called_once_with(event.annotation_id)
         assert not add_annotation.delay.called
 
+    @pytest.mark.usefixtures("search_index")
+    @pytest.mark.parametrize("synchronous", (True, False))
+    def test_nothing_happens_with_an_unrecognised_action(
+        self, add_annotation, delete_annotation, pyramid_request, synchronous
+    ):
+        pyramid_request.feature.flags = {"synchronous_indexing": synchronous}
+        event = AnnotationEvent(
+            pyramid_request, {"id": "test_annotation_id"}, "something_strange"
+        )
+        subscribers.sync_annotation(event)
+
+        assert not delete_annotation.delay.called
+        assert not add_annotation.delay.called
+
     @pytest.mark.parametrize(
         "action,method",
         (
