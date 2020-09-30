@@ -1,3 +1,5 @@
+from celery import Task
+
 from h import models
 from h.celery import celery, get_task_logger
 from h.models import Annotation
@@ -6,13 +8,23 @@ from h.search.index import BatchIndexer
 log = get_task_logger(__name__)
 
 
-@celery.task
+# See: https://docs.celeryproject.org/en/stable/userguide/tasks.html#automatic-retry-for-known-exceptions
+class _BaseTaskWithRetry(Task):
+    autoretry_for = (Exception,)
+    retry_kwargs = {"max_retries": 5}
+    # Add exponential back-off
+    retry_backoff = True
+    # Shuffle the times a bit to prevent the thundering herd problem
+    retry_jitter = True
+
+
+@celery.task(base=_BaseTaskWithRetry)
 def add_annotation(id_):
     search_index = celery.request.find_service(name="search_index")
     search_index.add_annotation_by_id(id_)
 
 
-@celery.task
+@celery.task(base=_BaseTaskWithRetry)
 def delete_annotation(id_):
     search_index = celery.request.find_service(name="search_index")
     search_index.delete_annotation_by_id(id_)

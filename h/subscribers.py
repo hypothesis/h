@@ -6,7 +6,6 @@ from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 from h.notification import reply
 from h.tasks import mailer
-from h.tasks.indexer import add_annotation, delete_annotation
 
 
 @subscriber(BeforeRender)
@@ -58,26 +57,10 @@ def sync_annotation(event):
     # is processed after the main transaction has closed, we must open a new
     # transaction to ensure we don't leave an un-closed transaction
     with event.request.tm:
-        synchronous_indexing = event.request.feature("synchronous_indexing")
-
-        if not synchronous_indexing:
-            # This is exactly the same outcome as below, but just run through
-            # Celery instead. These tasks just call the search index service.
-            if event.action in ["create", "update"]:
-                add_annotation.delay(event.annotation_id)
-
-            elif event.action == "delete":
-                delete_annotation.delay(event.annotation_id)
-
-            return
-
         search_index = event.request.find_service(name="search_index")
-
-        if event.action in ["create", "update"]:
-            search_index.add_annotation_by_id(event.annotation_id)
-
-        elif event.action == "delete":
-            search_index.delete_annotation_by_id(event.annotation_id)
+        search_index.handle_annotation_event(
+            event, synchronous=event.request.feature("synchronous_indexing")
+        )
 
 
 @subscriber(AnnotationEvent)
