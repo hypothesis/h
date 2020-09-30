@@ -63,20 +63,23 @@ def send_reply_notifications(
 def sync_annotation(event):
     """Ensure an annotation is synchronised to Elasticsearch."""
 
-    synchronous_indexing = event.request.feature("synchronous_indexing")
-
-    if not synchronous_indexing:
-        # This is exactly the same outcome as below, but just run through
-        # Celery instead. These tasks just call the search index service.
-        if event.action in ["create", "update"]:
-            add_annotation.delay(event.annotation_id)
-
-        elif event.action == "delete":
-            delete_annotation.delay(event.annotation_id)
-
-        return
-
+    # Checking feature flags opens a connection to the database. As this event
+    # is processed after the main transaction has closed, we must open a new
+    # transaction to ensure we don't leave an un-closed transaction
     with event.request.tm:
+        synchronous_indexing = event.request.feature("synchronous_indexing")
+
+        if not synchronous_indexing:
+            # This is exactly the same outcome as below, but just run through
+            # Celery instead. These tasks just call the search index service.
+            if event.action in ["create", "update"]:
+                add_annotation.delay(event.annotation_id)
+
+            elif event.action == "delete":
+                delete_annotation.delay(event.annotation_id)
+
+            return
+
         search_index = event.request.find_service(name="search_index")
 
         if event.action in ["create", "update"]:

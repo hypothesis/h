@@ -163,13 +163,20 @@ class TestSyncAnnotation:
     @pytest.mark.usefixtures("without_synchronous_flag")
     @pytest.mark.parametrize("action", ["create", "update"])
     def test_it_enqueues_add_annotation_celery_task(
-        self, pyramid_request, action, add_annotation, delete_annotation
+        self,
+        pyramid_request,
+        action,
+        add_annotation,
+        delete_annotation,
+        transaction_manager,
     ):
         event = AnnotationEvent(pyramid_request, {"id": "any"}, action)
 
         subscribers.sync_annotation(event)
 
+        transaction_manager.__enter__.assert_called_once()
         add_annotation.delay.assert_called_once_with(event.annotation_id)
+        transaction_manager.__exit__.assert_called_once()
         assert not delete_annotation.delay.called
 
     @pytest.mark.usefixtures("without_synchronous_flag")
