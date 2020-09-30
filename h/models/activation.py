@@ -1,5 +1,5 @@
 import hashlib
-import random
+import secrets
 import string
 
 import sqlalchemy as sa
@@ -12,7 +12,7 @@ def _generate_random_string(length=12):
     msg = hashlib.sha256()
     word = ""
     for _ in range(length):
-        word += random.choice(string.ascii_letters)
+        word += secrets.choice(string.ascii_letters)
     msg.update(word.encode("ascii"))
     return msg.hexdigest()[:length]
 
