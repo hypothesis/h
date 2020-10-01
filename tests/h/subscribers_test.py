@@ -7,14 +7,6 @@ from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 
 
-class FakeMailer:
-    def __init__(self):
-        self.lastcall = None
-
-    def __call__(self, recipients, subject, body, html):
-        self.lastcall = (recipients, subject, body, html)
-
-
 @pytest.mark.usefixtures("routes")
 class TestAddRendererGlobals:
     def test_adds_base_url(self, event):
@@ -107,65 +99,62 @@ class TestPublishAnnotationEvent:
 
 @pytest.mark.usefixtures("fetch_annotation")
 class TestSendReplyNotifications:
-    def test_calls_get_notification_with_request_annotation_and_action(
-        self, fetch_annotation, pyramid_request
+    def test_it_sends_emails(
+        self,
+        event,
+        pyramid_request,
+        fetch_annotation,
+        get_notification,
+        reply_notification,
+        mailer_task,
     ):
-        send = FakeMailer()
-        get_notification = mock.Mock(spec_set=[], return_value=None)
-        generate_mail = mock.Mock(spec_set=[], return_value=[])
-        event = AnnotationEvent(
-            pyramid_request, mock.sentinel.annotation_id, mock.sentinel.action
-        )
 
-        subscribers.send_reply_notifications(
-            event,
-            get_notification=get_notification,
-            generate_mail=generate_mail,
-            send=send,
-        )
+        subscribers.send_reply_notifications(event)
 
+        # This is a pure plumbing test, checking everything is connected to
+        # everything else as we expect
         fetch_annotation.assert_called_once_with(
-            pyramid_request.db, mock.sentinel.annotation_id
+            pyramid_request.db, event.annotation_id
         )
-
+        annotation = fetch_annotation.return_value
         get_notification.assert_called_once_with(
-            pyramid_request, fetch_annotation.return_value, mock.sentinel.action
+            pyramid_request, annotation, event.action
         )
+        notification = get_notification.return_value
+        reply_notification.generate.assert_called_once_with(
+            pyramid_request, notification
+        )
+        send_params = reply_notification.generate.return_value
+        mailer_task.delay.assert_called_once_with(*send_params)
 
-    def test_generates_and_sends_mail_for_any_notification(self, pyramid_request):
-        send = FakeMailer()
-        get_notification = mock.Mock(
-            spec_set=[], return_value=mock.sentinel.notification
-        )
-        generate_mail = mock.Mock(spec_set=[])
-        generate_mail.return_value = (
-            ["foo@example.com"],
-            "Your email",
-            "Text body",
-            "HTML body",
-        )
-        event = AnnotationEvent(pyramid_request, None, None)
+    def test_it_does_nothing_if_no_notification_is_required(
+        self, event, get_notification, mailer_task
+    ):
+        get_notification.return_value = None
 
-        subscribers.send_reply_notifications(
-            event,
-            get_notification=get_notification,
-            generate_mail=generate_mail,
-            send=send,
-        )
+        subscribers.send_reply_notifications(event)
 
-        generate_mail.assert_called_once_with(
-            pyramid_request, mock.sentinel.notification
-        )
-        assert send.lastcall == (
-            ["foo@example.com"],
-            "Your email",
-            "Text body",
-            "HTML body",
-        )
+        mailer_task.delay.assert_not_called()
 
     @pytest.fixture
+    def event(self, pyramid_request):
+        return AnnotationEvent(pyramid_request, {"id": "any"}, "action")
+
+    @pytest.fixture(autouse=True)
+    def mailer_task(self, patch):
+        return patch("h.subscribers.mailer.send")
+
+    @pytest.fixture(autouse=True)
     def fetch_annotation(self, patch):
         return patch("h.subscribers.storage.fetch_annotation")
+
+    @pytest.fixture(autouse=True)
+    def get_notification(self, patch):
+        return patch("h.subscribers.reply.get_notification")
+
+    @pytest.fixture(autouse=True)
+    def reply_notification(self, patch):
+        return patch("h.subscribers.emails.reply_notification")
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

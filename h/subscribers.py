@@ -31,22 +31,20 @@ def add_renderer_globals(event):
 
 
 @subscriber(AnnotationEvent)
-def send_reply_notifications(
-    event,
-    get_notification=reply.get_notification,
-    generate_mail=emails.reply_notification.generate,
-    send=mailer.send.delay,
-):
+def send_reply_notifications(event):
     """Queue any reply notification emails triggered by an annotation event."""
+
     request = event.request
+
     with request.tm:
-        annotation = storage.fetch_annotation(event.request.db, event.annotation_id)
-        notification = get_notification(request, annotation, event.action)
+        annotation = storage.fetch_annotation(request.db, event.annotation_id)
+        notification = reply.get_notification(request, annotation, event.action)
+
         if notification is None:
             return
 
-        send_params = generate_mail(request, notification)
-        send(*send_params)
+        send_params = emails.reply_notification.generate(request, notification)
+        mailer.send.delay(*send_params)
 
 
 @subscriber(AnnotationEvent)
