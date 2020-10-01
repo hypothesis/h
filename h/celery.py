@@ -15,6 +15,8 @@ from kombu import Exchange, Queue
 
 __all__ = ("celery", "get_task_logger")
 
+from h.tasks import RETRY_POLICY_QUICK
+
 log = logging.getLogger(__name__)
 
 celery = Celery("h")
@@ -23,6 +25,8 @@ celery.conf.update(
         "CELERY_BROKER_URL",
         os.environ.get("BROKER_URL", "amqp://guest:guest@localhost:5672//"),
     ),
+    # What options should we have when sending messages to the queue?
+    broker_transport_options=RETRY_POLICY_QUICK,
     accept_content=["json"],
     # Enable at-least-once delivery mode. This probably isn't actually what we
     # want for all of our queues, but it makes the failure-mode behaviour of
