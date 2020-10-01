@@ -28,6 +28,15 @@ class TestAddAnnotationById:
 
         add_annotation.assert_not_called()
 
+    def test_it_does_nothing_if_the_annotation_is_deleted(
+        self, search_index, root_annotation, es_client
+    ):
+        root_annotation.deleted = True
+
+        search_index.add_annotation_by_id(root_annotation.id)
+
+        es_client.conn.index.assert_not_called()
+
     def test_it_also_adds_the_thread_root(
         self, search_index, reply_annotation, root_annotation, storage, add_annotation
     ):
@@ -113,6 +122,15 @@ class TestAddAnnotation:
             id=annotation.id,
             refresh=False,
         )
+
+    def test_it_does_nothing_if_the_annotation_is_deleted(
+        self, search_index, annotation, es_client
+    ):
+        annotation.deleted = True
+
+        search_index.add_annotation(annotation)
+
+        es_client.conn.index.assert_not_called()
 
     @pytest.fixture
     def annotation(self, factories):
