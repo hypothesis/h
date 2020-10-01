@@ -8,6 +8,7 @@ from kombu.mixins import ConsumerMixin
 from kombu.pools import producers as producer_pool
 
 from h.exceptions import RealtimeMessageQueueError
+from h.tasks import RETRY_POLICY_QUICK, RETRY_POLICY_VERY_QUICK
 
 
 class Consumer(ConsumerMixin):
@@ -85,8 +86,6 @@ class Publisher:
         self._publish("user", payload)
 
     def _publish(self, routing_key, payload):
-        retry_policy = {"max_retries": 5, "interval_start": 0.2, "interval_step": 0.3}
-
         try:
             with producer_pool[self.connection].acquire(
                 block=True, timeout=1
@@ -97,7 +96,9 @@ class Publisher:
                     declare=[self.exchange],
                     routing_key=routing_key,
                     retry=True,
-                    retry_policy=retry_policy,
+                    # This is the retry for the producer, the connection
+                    # retry is separate
+                    retry_policy=RETRY_POLICY_VERY_QUICK,
                 )
 
         except (OperationalError, LimitExceeded) as err:
@@ -125,22 +126,13 @@ def get_connection(settings, fail_fast=False):
     conn = settings.get("broker_url", "amqp://guest:guest@localhost:5672//")
 
     kwargs = {}
-
     if fail_fast:
-        kwargs["transport_options"] = {
-            # Connection fallback set by`kombu.connection._extract_failover_opts`
-            # Which are used when retrying a connection as sort of documented here:
-            # https://kombu.readthedocs.io/en/latest/reference/kombu.connection.html#kombu.connection.Connection.ensure_connection
-            # Maximum number of times to retry. If this limit is exceeded the
-            # connection error will be re-raised
-            "max_retries": 2,
-            # The number of seconds we start sleeping for (when retrying)
-            "interval_start": 0.2,
-            #  How many seconds added to the interval for each retry
-            "interval_step": 0.2,
-            # Maximum number of seconds to sleep between each retry
-            "interval_max": 0.6,
-        }
+        # Connection fallback set by`kombu.connection._extract_failover_opts`
+        # Which are used when retrying a connection as sort of documented here:
+        # https://kombu.readthedocs.io/en/latest/reference/kombu.connection.html#kombu.connection.Connection.ensure_connection
+        # Maximum number of times to retry. If this limit is exceeded the
+        # connection error will be re-raised.
+        kwargs["transport_options"] = RETRY_POLICY_QUICK
 
     return kombu.Connection(conn, **kwargs)
 
