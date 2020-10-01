@@ -38,7 +38,7 @@ class SearchIndexService:
         :param annotation_id: Id of the annotation to add.
         """
         annotation = storage.fetch_annotation(self._db, annotation_id)
-        if not annotation:
+        if not annotation or annotation.deleted:
             return
 
         self.add_annotation(annotation)
@@ -56,6 +56,9 @@ class SearchIndexService:
 
         :param annotation: Annotation object to index
         """
+        if annotation.deleted:
+            return
+
         body = AnnotationSearchIndexPresenter(annotation, self._request).asdict()
 
         self._index_annotation_body(annotation.id, body, refresh=False)
