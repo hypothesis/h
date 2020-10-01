@@ -177,7 +177,7 @@ class TestSyncAnnotation:
         pyramid_request.feature.flags = {"synchronous_indexing": synchronous}
         event = AnnotationEvent(pyramid_request, {"id": "any"}, "action")
 
-        subscribers.sync_annotation(event)
+        subscribers.annotation_sync(event)
 
         transaction_manager.__enter__.assert_called_once()
         search_index.handle_annotation_event.assert_called_once_with(

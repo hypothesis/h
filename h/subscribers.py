@@ -31,30 +31,14 @@ def add_renderer_globals(event):
         }
 
 
-@subscriber(AnnotationEvent)
-def send_reply_notifications(event):
-    """Queue any reply notification emails triggered by an annotation event."""
-
-    request = event.request
-
-    with request.tm:
-        annotation = storage.fetch_annotation(request.db, event.annotation_id)
-        notification = reply.get_notification(request, annotation, event.action)
-
-        if notification is None:
-            return
-
-        send_params = emails.reply_notification.generate(request, notification)
-
-        try:
-            mailer.send.delay(*send_params)
-        except OperationalError as err:
-            # We could not connect to rabbit! So carry on
-            report_exception(err)
+# The docs say the order isn't guaranteed but pyramid appears to execute the
+# subscribers in alphabetical order. We'd like the annotation_sync() event
+# first, as it's the most important. If # we have Celery problems, we don't
+# want to wait behind other tasks resolving it.
 
 
 @subscriber(AnnotationEvent)
-def sync_annotation(event):
+def annotation_sync(event):
     """Ensure an annotation is synchronised to Elasticsearch."""
 
     # Checking feature flags opens a connection to the database. As this event
@@ -80,3 +64,25 @@ def publish_annotation_event(event):
 
     except RealtimeMessageQueueError as err:
         report_exception(err)
+
+
+@subscriber(AnnotationEvent)
+def send_reply_notifications(event):
+    """Queue any reply notification emails triggered by an annotation event."""
+
+    request = event.request
+
+    with request.tm:
+        annotation = storage.fetch_annotation(request.db, event.annotation_id)
+        notification = reply.get_notification(request, annotation, event.action)
+
+        if notification is None:
+            return
+
+        send_params = emails.reply_notification.generate(request, notification)
+
+        try:
+            mailer.send.delay(*send_params)
+        except OperationalError as err:
+            # We could not connect to rabbit! So carry on
+            report_exception(err)
