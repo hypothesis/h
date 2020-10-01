@@ -135,11 +135,11 @@ def get_connection(settings, fail_fast=False):
             # connection error will be re-raised
             "max_retries": 2,
             # The number of seconds we start sleeping for (when retrying)
-            "interval_start": 0.1,
+            "interval_start": 0.2,
             #  How many seconds added to the interval for each retry
-            "interval_step": 0.1,
+            "interval_step": 0.2,
             # Maximum number of seconds to sleep between each retry
-            "interval_max": 1.0,
+            "interval_max": 0.6,
         }
 
     return kombu.Connection(conn, **kwargs)
