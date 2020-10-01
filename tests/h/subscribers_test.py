@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from kombu.exceptions import OperationalError
 
 from h import subscribers
 from h.events import AnnotationEvent
@@ -135,6 +136,12 @@ class TestSendReplyNotifications:
         subscribers.send_reply_notifications(event)
 
         mailer_task.delay.assert_not_called()
+
+    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer_task):
+        mailer_task.side_effect = OperationalError
+
+        # No explosions please
+        subscribers.send_reply_notifications(event)
 
     @pytest.fixture
     def event(self, pyramid_request):

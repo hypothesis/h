@@ -1,4 +1,5 @@
 from h_pyramid_sentry import report_exception
+from kombu.exceptions import OperationalError
 from pyramid.events import BeforeRender, subscriber
 
 from h import __version__, emails, storage
@@ -44,7 +45,12 @@ def send_reply_notifications(event):
             return
 
         send_params = emails.reply_notification.generate(request, notification)
-        mailer.send.delay(*send_params)
+
+        try:
+            mailer.send.delay(*send_params)
+        except OperationalError as err:
+            # We could not connect to rabbit! So carry on
+            report_exception(err)
 
 
 @subscriber(AnnotationEvent)
