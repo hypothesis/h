@@ -6,6 +6,7 @@ from kombu.exceptions import LimitExceeded, OperationalError
 
 from h import realtime
 from h.exceptions import RealtimeMessageQueueError
+from h.tasks import RETRY_POLICY_QUICK, RETRY_POLICY_VERY_QUICK
 
 
 class TestConsumer:
@@ -81,7 +82,7 @@ class TestConsumer:
 
 
 class TestPublisher:
-    def test_publish_annotation(self, producer, publisher, exchange, retry_policy):
+    def test_publish_annotation(self, producer, publisher, exchange):
         payload = {"action": "create", "annotation": {"id": "foobar"}}
 
         publisher.publish_annotation(payload)
@@ -92,10 +93,10 @@ class TestPublisher:
             declare=[exchange],
             routing_key="annotation",
             retry=True,
-            retry_policy=retry_policy,
+            retry_policy=RETRY_POLICY_VERY_QUICK,
         )
 
-    def test_publish_user(self, producer, publisher, exchange, retry_policy):
+    def test_publish_user(self, producer, publisher, exchange):
         payload = {"action": "create", "user": {"id": "foobar"}}
 
         publisher.publish_user(payload)
@@ -106,7 +107,7 @@ class TestPublisher:
             declare=[exchange],
             routing_key="user",
             retry=True,
-            retry_policy=retry_policy,
+            retry_policy=RETRY_POLICY_VERY_QUICK,
         )
 
     @pytest.mark.parametrize("exception", (OperationalError, LimitExceeded))
@@ -130,10 +131,6 @@ class TestPublisher:
     @pytest.fixture
     def exchange(self):
         return realtime.get_exchange()
-
-    @pytest.fixture
-    def retry_policy(self):
-        return {"max_retries": 5, "interval_start": 0.2, "interval_step": 0.3}
 
 
 class TestGetExchange:
@@ -175,13 +172,7 @@ class TestGetConnection:
         realtime.get_connection({}, fail_fast=True)
 
         Connection.assert_called_once_with(
-            Any.string(),
-            transport_options={
-                "max_retries": Any.int(),
-                "interval_start": Any(),
-                "interval_step": Any(),
-                "interval_max": Any(),
-            },
+            Any.string(), transport_options=RETRY_POLICY_QUICK
         )
 
     @pytest.fixture
