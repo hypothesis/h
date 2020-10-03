@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-flake8==3.8.3             # via -r requirements/lint.in
+flake8==3.8.4             # via -r requirements/lint.in
 importlib-metadata==1.7.0  # via flake8
 mccabe==0.6.1             # via flake8
 pycodestyle==2.6.0        # via flake8
