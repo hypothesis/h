@@ -20,7 +20,7 @@ colander==1.8.2           # via -r requirements/requirements.txt, deform
 deform==2.0.14            # via -r requirements/requirements.txt
 elasticsearch-dsl==6.3.1  # via -r requirements/requirements.txt
 elasticsearch==6.8.1      # via -r requirements/requirements.txt, elasticsearch-dsl
-factory-boy==3.0.1        # via -r requirements/functests.in
+factory-boy==3.1.0        # via -r requirements/functests.in
 faker==4.1.3              # via factory-boy
 gevent==20.9.0            # via -r requirements/requirements.txt
 greenlet==0.4.17          # via -r requirements/requirements.txt, gevent
