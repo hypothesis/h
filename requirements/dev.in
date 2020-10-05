@@ -1,3 +1,4 @@
 ipython
 ipdb
+factory_boy
 -r requirements.txt
