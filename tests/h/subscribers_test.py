@@ -147,22 +147,6 @@ class TestSendReplyNotifications:
     def event(self, pyramid_request):
         return AnnotationEvent(pyramid_request, {"id": "any"}, "action")
 
-    @pytest.fixture(autouse=True)
-    def mailer_task(self, patch):
-        return patch("h.subscribers.mailer.send")
-
-    @pytest.fixture(autouse=True)
-    def fetch_annotation(self, patch):
-        return patch("h.subscribers.storage.fetch_annotation")
-
-    @pytest.fixture(autouse=True)
-    def get_notification(self, patch):
-        return patch("h.subscribers.reply.get_notification")
-
-    @pytest.fixture(autouse=True)
-    def reply_notification(self, patch):
-        return patch("h.subscribers.emails.reply_notification")
-
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.tm = mock.MagicMock()
@@ -190,3 +174,23 @@ class TestSyncAnnotation:
             TransactionManager, instance=True, spec_set=True
         )
         return pyramid_request.tm
+
+
+@pytest.fixture(autouse=True)
+def fetch_annotation(patch):
+    return patch("h.subscribers.storage.fetch_annotation")
+
+
+@pytest.fixture(autouse=True)
+def get_notification(patch):
+    return patch("h.subscribers.reply.get_notification")
+
+
+@pytest.fixture(autouse=True)
+def mailer_task(patch):
+    return patch("h.subscribers.mailer.send")
+
+
+@pytest.fixture(autouse=True)
+def reply_notification(patch):
+    return patch("h.subscribers.emails.reply_notification")
