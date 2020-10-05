@@ -1,7 +1,7 @@
 from dateutil.parser import isoparse
 from pyramid.view import view_config, view_defaults
 
-from h.tasks.indexer import reindex_annotations_in_date_range
+from h.models import Annotation
 
 
 @view_defaults(route_name="admin.search", permission="admin_search")
@@ -23,9 +23,19 @@ class SearchAdminViews:
         start_date = isoparse(self.request.params["start"].strip())
         end_date = isoparse(self.request.params["end"].strip())
 
-        task = reindex_annotations_in_date_range.delay(start_date, end_date)
-        self.request.session.flash(
-            f"Began reindexing from {start_date} to {end_date}", "success"
+        annotation_ids = [
+            row[0]
+            for row in self.request.db.query(Annotation.id)
+            .filter(Annotation.updated >= start_date)
+            .filter(Annotation.updated <= end_date)
+        ]
+
+        self.request.find_service(name="job_queue").add_sync_annotation_jobs(
+            annotation_ids, "reindex_date"
         )
 
-        return {"indexing": True, "task_id": task.id}
+        self.request.session.flash(
+            f"Scheduled reindexing of {len(annotation_ids)} annotations", "success"
+        )
+
+        return {}

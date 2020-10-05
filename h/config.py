@@ -100,6 +100,7 @@ def configure(environ=None, settings=None):
     # *not* toggle functionality based on this value. It is intended as a
     # label only.
     settings_manager.set("h.env", "ENV")
+    settings_manager.set("h.es_sync_job_limit", "ES_SYNC_JOB_LIMIT", default=1000)
     # Where should logged-out users visiting the homepage be redirected?
     settings_manager.set("h.homepage_redirect_url", "HOMEPAGE_REDIRECT_URL")
     settings_manager.set("h.proxy_auth", "PROXY_AUTH", type_=asbool)
