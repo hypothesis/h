@@ -191,3 +191,8 @@ def mailer(patch):
 @pytest.fixture(autouse=True)
 def emails(patch):
     return patch("h.subscribers.emails")
+
+
+@pytest.fixture(autouse=True)
+def report_exception(patch):
+    return patch("h.subscribers.report_exception")
