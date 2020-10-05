@@ -98,7 +98,6 @@ class TestPublishAnnotationEvent:
         return event
 
 
-@pytest.mark.usefixtures("fetch_annotation")
 class TestSendReplyNotifications:
     def test_it_sends_emails(
         self,
