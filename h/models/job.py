@@ -42,6 +42,9 @@ class Job(Base):
     name = Column(UnicodeText, nullable=False)
     enqueued_at = Column(DateTime, nullable=False, server_default=func.now())
     scheduled_at = Column(DateTime, nullable=False, server_default=func.now())
+    expires_at = Column(
+        DateTime, nullable=False, server_default=text("now() + interval '30 days'")
+    )
     tag = Column(UnicodeText, nullable=False)
     kwargs = Column(
         JSONB,
