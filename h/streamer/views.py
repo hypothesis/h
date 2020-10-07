@@ -12,7 +12,6 @@ def websocket_view(request):
         {
             "h.ws.authenticated_userid": request.authenticated_userid,
             "h.ws.effective_principals": request.effective_principals,
-            "h.ws.registry": request.registry,
             "h.ws.streamer_work_queue": streamer.WORK_QUEUE,
         }
     )
