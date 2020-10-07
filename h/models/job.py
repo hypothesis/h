@@ -18,16 +18,3 @@ class Job(Base):
         server_default=text("'{}'::jsonb"),
         nullable=False,
     )
-
-    def __repr__(self):
-        attrs = ", ".join(
-            f"{attr}={getattr(self, attr)}"
-            for attr in (
-                "id",
-                "enqueued_at",
-                "scheduled_at",
-                "tag",
-                "kwargs",
-            )
-        )
-        return f"Job({attrs})"
