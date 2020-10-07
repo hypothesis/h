@@ -235,7 +235,7 @@ class TestSyncAnnotations:
             (
                 Any(),
                 Any(),
-                "Syncing 10 annotations that are outdated in Elasticsearch",
+                "Syncing 10 annotations that are different in Elasticsearch",
             )
         ]
         batch_indexer.index.assert_called_once_with(annotation_ids[:limit])

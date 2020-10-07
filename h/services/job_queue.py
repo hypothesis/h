@@ -98,7 +98,7 @@ class JobQueue:
 
         missing_from_db = []
         missing_from_es = []
-        outdated_in_es = []
+        different_in_es = []
         up_to_date_in_es = []
 
         for job in jobs:
@@ -111,7 +111,7 @@ class JobQueue:
             elif not annotation_from_es:
                 missing_from_es.append(job)
             elif annotation_from_es["updated"] != annotation_from_db.updated:
-                outdated_in_es.append(job)
+                different_in_es.append(job)
             else:
                 up_to_date_in_es.append(job)
 
@@ -132,16 +132,16 @@ class JobQueue:
                 f"Syncing {len(missing_from_es)} annotations that are missing from Elasticsearch"
             )
 
-        if outdated_in_es:
+        if different_in_es:
             logger.info(
-                f"Syncing {len(outdated_in_es)} annotations that are outdated in Elasticsearch"
+                f"Syncing {len(different_in_es)} annotations that are different in Elasticsearch"
             )
 
-        if missing_from_es or outdated_in_es:
+        if missing_from_es or different_in_es:
             self._batch_indexer.index(
                 [
                     job.kwargs["annotation_id"]
-                    for job in missing_from_es + outdated_in_es
+                    for job in missing_from_es + different_in_es
                 ]
             )
 
