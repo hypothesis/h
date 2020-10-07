@@ -117,11 +117,13 @@ class TestHandleAnnotationEvent:
         assert result is None
 
     def test_it_initializes_groupfinder_service(
-        self, groupfinder_service, handle_annotation_event, settings, session
+        self, groupfinder_service, handle_annotation_event, registry, session
     ):
-        handle_annotation_event(settings=settings, session=session)
+        handle_annotation_event(registry=registry, session=session)
 
-        groupfinder_service.assert_called_once_with(session, settings["h.authority"])
+        groupfinder_service.assert_called_once_with(
+            session, registry.settings["h.authority"]
+        )
 
     def test_it_serializes_the_annotation(
         self,
@@ -237,23 +239,26 @@ class TestHandleAnnotationEvent:
         assert bool(socket.send_json.call_count) == can_see
 
     @pytest.fixture
-    def handle_annotation_event(self, message, socket, settings, session):
+    def handle_annotation_event(self, message, socket, registry, session):
         def handle_annotation_event(
-            message=message, sockets=None, settings=settings, session=session
+            message=message, sockets=None, registry=registry, session=session
         ):
             if sockets is None:
                 sockets = [socket]
 
-            return messages.handle_annotation_event(message, sockets, settings, session)
+            return messages.handle_annotation_event(message, sockets, registry, session)
 
         return handle_annotation_event
 
     @pytest.fixture
-    def settings(self):
-        return {
+    def registry(self, pyramid_request):
+        registry = pyramid_request.registry
+        registry.settings = {
             "h.app_url": "http://streamer",
             "h.authority": "example.org",
         }
+
+        return registry
 
     @pytest.fixture
     def session(self):
