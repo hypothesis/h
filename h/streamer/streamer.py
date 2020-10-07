@@ -20,6 +20,11 @@ WORK_QUEUE = gevent.queue.Queue(maxsize=4096)
 ANNOTATION_TOPIC = "annotation"
 USER_TOPIC = "user"
 
+TOPIC_HANDLERS = {
+    ANNOTATION_TOPIC: messages.handle_annotation_event,
+    USER_TOPIC: messages.handle_user_event,
+}
+
 
 class UnknownMessageType(Exception):
     """Raised if a message in the work queue if of an unknown type."""
@@ -34,6 +39,7 @@ def start(event):
     The function does not block.
     """
     settings = event.app.registry.settings
+
     greenlets = [
         # Start greenlets to process messages from RabbitMQ
         gevent.spawn(messages.process_messages, settings, ANNOTATION_TOPIC, WORK_QUEUE),
@@ -47,7 +53,7 @@ def start(event):
     gevent.spawn(supervise, greenlets)
 
 
-def process_work_queue(settings, queue, session_factory=None):
+def process_work_queue(settings, queue):
     """
     Process each message from the queue in turn, handling exceptions.
 
@@ -56,27 +62,22 @@ def process_work_queue(settings, queue, session_factory=None):
     code that ensures the database session is appropriately committed and
     closed between messages.
     """
-    if session_factory is None:
-        session_factory = _get_session
-    session = session_factory(settings)
-    topic_handlers = {
-        ANNOTATION_TOPIC: messages.handle_annotation_event,
-        USER_TOPIC: messages.handle_user_event,
-    }
+
+    session = db.Session(bind=db.make_engine(settings))
 
     for msg in queue:
         try:
             # All access to the database in the streamer is currently
             # read-only, so enforce that:
             session.execute(
-                "SET TRANSACTION "
-                "ISOLATION LEVEL SERIALIZABLE "
+                "SET TRANSACTION ISOLATION LEVEL "
+                "SERIALIZABLE "
                 "READ ONLY "
                 "DEFERRABLE"
             )
 
             if isinstance(msg, messages.Message):
-                messages.handle_message(msg, settings, session, topic_handlers)
+                messages.handle_message(msg, settings, session, TOPIC_HANDLERS)
             elif isinstance(msg, websocket.Message):
                 websocket.handle_message(msg, session)
             else:
@@ -106,8 +107,3 @@ def supervise(greenlets):
     # If the worker greenlets exit early, our best option is to kill the worker
     # process and let the app server take care of restarting it.
     sys.exit(1)
-
-
-def _get_session(settings):
-    engine = db.make_engine(settings)
-    return db.Session(bind=engine)

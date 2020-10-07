@@ -1,115 +1,100 @@
 from unittest import mock
 
 import pytest
-from h_matchers import Any
 
 from h.streamer import messages, streamer, websocket
+from h.streamer.streamer import TOPIC_HANDLERS
 
 
-def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(session):
-    message = messages.Message(topic="foo", payload="bar")
-    queue = [message]
-    settings = {"foo": "bar"}
+class TestProcessWorkQueue:
+    def test_it_sends_realtime_messages_to_messages_handle_message(
+        self, process_work_queue, message, session, registry
+    ):
+        process_work_queue(queue=[message])
 
-    streamer.process_work_queue(settings, queue, session_factory=lambda _: session)
+        messages.handle_message.assert_called_once_with(
+            message, registry, session, topic_handlers=TOPIC_HANDLERS
+        )
 
-    messages.handle_message.assert_called_once_with(
-        message, settings, session, topic_handlers=Any()
-    )
+    def test_it_sends_websocket_messages_to_websocket_handle_message(
+        self, process_work_queue, ws_message, session
+    ):
+        process_work_queue(queue=[ws_message])
 
+        websocket.handle_message.assert_called_once_with(ws_message, session)
 
-def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_messages(
-    session,
-):
-    message = messages.Message(topic="user", payload="bar")
-    queue = [message]
-    settings = {"foo": "bar"}
+    def test_it_commits_after_each_message(
+        self, process_work_queue, message, ws_message, session
+    ):
+        process_work_queue(queue=[message, ws_message])
 
-    streamer.process_work_queue(settings, queue, session_factory=lambda _: session)
+        assert session.commit.call_count == 2
 
-    topic_handlers = {
-        "annotation": messages.handle_annotation_event,
-        "user": messages.handle_user_event,
-    }
+    def test_it_calls_close_after_commit(self, process_work_queue, session):
+        process_work_queue()
 
-    messages.handle_message.assert_called_once_with(
-        Any(), settings, session, topic_handlers=topic_handlers
-    )
+        assert session.method_calls[-2:] == [mock.call.commit(), mock.call.close()]
 
+    def test_it_rolls_back_on_handler_exception(self, process_work_queue, session):
+        messages.handle_message.side_effect = RuntimeError("explosion")
 
-def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message(
-    session,
-):
-    message = websocket.Message(socket=mock.sentinel.SOCKET, payload="bar")
-    queue = [message]
+        process_work_queue()
 
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
+        self._assert_rollback_and_close(session)
 
-    websocket.handle_message.assert_called_once_with(message, session)
+    @pytest.mark.parametrize("exception", (KeyboardInterrupt, SystemExit))
+    def test_it_reraises_certain_exceptions(
+        self, process_work_queue, session, exception
+    ):
+        messages.handle_message.side_effect = exception
 
+        with pytest.raises(exception):
+            process_work_queue()
 
-def test_process_work_queue_commits_after_each_message(session):
-    message1 = websocket.Message(socket=mock.sentinel.SOCKET, payload="bar")
-    message2 = messages.Message(topic="user", payload="bar")
-    queue = [message1, message2]
+        self._assert_rollback_and_close(session)
 
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
+    def test_it_rolls_back_on_unknown_message_type(self, process_work_queue, session):
+        process_work_queue(queue=["something that is not a message"])
 
-    assert session.commit.call_count == 2
+        self._assert_rollback_and_close(session)
 
+    def _assert_rollback_and_close(self, session):
+        session.commit.assert_not_called()
+        assert session.method_calls[-2:] == [mock.call.rollback(), mock.call.close()]
 
-def test_process_work_queue_rolls_back_on_handler_exception(session):
-    message = messages.Message(topic="foo", payload="bar")
-    queue = [message]
+    @pytest.fixture
+    def process_work_queue(self, session, registry, message):
+        def process_work_queue(queue=None):
+            return streamer.process_work_queue(registry, queue or [message])
 
-    messages.handle_message.side_effect = RuntimeError("explosion")
+        return process_work_queue
 
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
+    @pytest.fixture
+    def message(self):
+        return messages.Message(topic="foo", payload="bar")
 
-    session.commit.assert_not_called()
-    session.rollback.assert_called_once_with()
+    @pytest.fixture
+    def ws_message(self):
+        return websocket.Message(socket=mock.sentinel.SOCKET, payload="bar")
 
+    @pytest.fixture
+    def registry(self, pyramid_request):
+        return pyramid_request.registry
 
-def test_process_work_queue_rolls_back_on_unknown_message_type(session):
-    message = "something that is not a message"
-    queue = [message]
+    @pytest.fixture
+    def session(self):
+        return mock.Mock(spec_set=["close", "commit", "execute", "rollback"])
 
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
+    @pytest.fixture(autouse=True)
+    def db(self, patch, session):
+        db = patch("h.streamer.streamer.db")
+        db.Session.return_value = session
+        return db
 
-    session.commit.assert_not_called()
-    session.rollback.assert_called_once_with()
+    @pytest.fixture(autouse=True)
+    def websocket_handle_message(self, patch):
+        return patch("h.streamer.websocket.handle_message")
 
-
-def test_process_work_queue_calls_close_after_commit(session):
-    message = messages.Message(topic="annotation", payload="bar")
-    queue = [message]
-
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
-
-    assert session.method_calls[-2:] == [mock.call.commit(), mock.call.close()]
-
-
-def test_process_work_queue_calls_close_after_rollback(session):
-    message = messages.Message(topic="foo", payload="bar")
-    queue = [message]
-
-    messages.handle_message.side_effect = RuntimeError("explosion")
-
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
-
-    assert session.method_calls[-2:] == [mock.call.rollback(), mock.call.close()]
-
-
-@pytest.fixture
-def session():
-    return mock.Mock(spec_set=["close", "commit", "execute", "rollback"])
-
-
-@pytest.fixture(autouse=True)
-def websocket_handle_message(patch):
-    return patch("h.streamer.websocket.handle_message")
-
-
-@pytest.fixture(autouse=True)
-def messages_handle_message(patch):
-    return patch("h.streamer.messages.handle_message")
+    @pytest.fixture(autouse=True)
+    def messages_handle_message(self, patch):
+        return patch("h.streamer.messages.handle_message")
