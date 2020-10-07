@@ -156,7 +156,9 @@ class TestSyncAnnotations:
                 "Syncing 10 annotations that are missing from Elasticsearch",
             )
         ]
-        batch_indexer.index.assert_called_once_with(annotation_ids[:limit])
+        batch_indexer.index.assert_called_once_with(
+            Any.iterable.containing(annotation_ids[:limit]).only()
+        )
 
     def test_if_the_annotation_is_already_in_Elastic_it_removes_the_job_from_the_queue(
         self,
@@ -193,7 +195,7 @@ class TestSyncAnnotations:
             (
                 Any(),
                 Any(),
-                "Deleting 10 successfully synced annotations from job queue",
+                "Deleting 10 successfully completed jobs from the queue",
             )
         ]
         assert db_session.query(Job).all() == []
@@ -238,7 +240,91 @@ class TestSyncAnnotations:
                 "Syncing 10 annotations that are different in Elasticsearch",
             )
         ]
-        batch_indexer.index.assert_called_once_with(annotation_ids[:limit])
+        batch_indexer.index.assert_called_once_with(
+            Any.iterable.containing(annotation_ids[:limit]).only()
+        )
+
+    def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
+        self,
+        annotation_ids,
+        batch_indexer,
+        caplog,
+        es,
+        job_queue,
+    ):
+        job_queue.add_sync_annotation_jobs(
+            [annotation_ids[0], annotation_ids[0], annotation_ids[0]],
+            tag="test",
+            scheduled_at=five_minutes_ago,
+        )
+
+        job_queue.sync_annotations()
+
+        # It only retrieves the annotation from Elasticsearch once.
+        es.conn.search.assert_called_once_with(
+            body=Any.dict.containing(
+                {
+                    "query": Any.dict.containing(
+                        {
+                            "ids": {
+                                "values": {annotation_ids[0]},
+                            },
+                        },
+                    ),
+                },
+            ),
+        )
+
+        # It only syncs the annotation to Elasticsearch once.
+        assert caplog.record_tuples == [
+            (
+                Any(),
+                Any(),
+                "Syncing 1 annotations that are missing from Elasticsearch",
+            )
+        ]
+        batch_indexer.index.assert_called_once_with(
+            Any.iterable.containing([annotation_ids[0]]).only()
+        )
+
+    def test_deleting_multiple_jobs_with_the_same_annotation_id(
+        self,
+        annotations,
+        batch_indexer,
+        caplog,
+        db_session,
+        es,
+        job_queue,
+    ):
+        job_queue.add_sync_annotation_jobs(
+            [annotations[0].id, annotations[0].id, annotations[0].id],
+            tag="test",
+            scheduled_at=five_minutes_ago,
+        )
+        es.conn.search.return_value = {
+            "hits": {
+                "hits": [
+                    {
+                        "_id": annotations[0].id,
+                        "_source": {
+                            "updated": (annotations[0].updated).isoformat(),
+                        },
+                    }
+                ],
+            },
+        }
+
+        job_queue.sync_annotations()
+
+        assert caplog.record_tuples == [
+            (
+                Any(),
+                Any(),
+                "Deleting 3 successfully completed jobs from the queue",
+            )
+        ]
+        assert db_session.query(Job).all() == []
+        batch_indexer.index.assert_not_called()
 
 
 class TestFactory:

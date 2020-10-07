@@ -92,14 +92,21 @@ class JobQueue:
         if not jobs:
             return
 
-        annotation_ids = [job.kwargs["annotation_id"] for job in jobs]
+        annotation_ids = {job.kwargs["annotation_id"] for job in jobs}
         annotations_from_db = self._get_annotations_from_db(annotation_ids)
         annotations_from_es = self._get_annotations_from_es(annotation_ids)
 
+        # Jobs whose annotation is missing from marked as deleted in the DB.
         missing_from_db = []
-        missing_from_es = []
-        different_in_es = []
+
+        # Jobs whose annotation is the same in Elasticsearch as in the DB.
         up_to_date_in_es = []
+
+        # Annotation IDs that're in the DB but from Elasticsearch.
+        missing_from_es = set()
+
+        # IDs of annotations that are different in Elasticsearch than in the DB.
+        different_in_es = set()
 
         for job in jobs:
             annotation_id = job.kwargs["annotation_id"]
@@ -109,9 +116,9 @@ class JobQueue:
             if not annotation_from_db:
                 missing_from_db.append(job)
             elif not annotation_from_es:
-                missing_from_es.append(job)
+                missing_from_es.add(job.kwargs["annotation_id"])
             elif annotation_from_es["updated"] != annotation_from_db.updated:
-                different_in_es.append(job)
+                different_in_es.add(job.kwargs["annotation_id"])
             else:
                 up_to_date_in_es.append(job)
 
@@ -121,7 +128,7 @@ class JobQueue:
             )
         if up_to_date_in_es:
             logger.info(
-                f"Deleting {len(up_to_date_in_es)} successfully synced annotations from job queue"
+                f"Deleting {len(up_to_date_in_es)} successfully completed jobs from the queue"
             )
 
         for job in missing_from_db + up_to_date_in_es:
@@ -138,12 +145,7 @@ class JobQueue:
             )
 
         if missing_from_es or different_in_es:
-            self._batch_indexer.index(
-                [
-                    job.kwargs["annotation_id"]
-                    for job in missing_from_es + different_in_es
-                ]
-            )
+            self._batch_indexer.index(missing_from_es.union(different_in_es))
 
     def _get_jobs_from_queue(self):
         return (
