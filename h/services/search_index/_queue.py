@@ -107,7 +107,7 @@ class Queue:
             )
 
         if missing_from_es or different_in_es:
-            self._batch_indexer.index(missing_from_es.union(different_in_es))
+            self._batch_indexer.index(list(missing_from_es.union(different_in_es)))
 
     def _get_jobs_from_queue(self):
         return (
@@ -133,7 +133,7 @@ class Queue:
         hits = self._es.conn.search(
             body={
                 "_source": ["updated"],
-                "query": {"ids": {"values": annotation_ids}},
+                "query": {"ids": {"values": list(annotation_ids)}},
                 "size": len(annotation_ids),
             }
         )["hits"]["hits"]

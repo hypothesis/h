@@ -22,7 +22,7 @@ class TestSearchAdminViews:
             datetime.datetime(year=2020, month=9, day=11),
         )
         assert pyramid_request.session.peek_flash("success") == [
-            "Queued annotations for background reindexing"
+            "Began reindexing from 2020-09-09 00:00:00 to 2020-09-11 00:00:00"
         ]
 
     @pytest.fixture

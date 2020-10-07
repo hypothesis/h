@@ -152,7 +152,7 @@ class TestSyncAnnotations:
             )
         ]
         batch_indexer.index.assert_called_once_with(
-            Any.iterable.containing(annotation_ids[:limit]).only()
+            Any.list.containing(annotation_ids[:limit]).only()
         )
 
     def test_if_the_annotation_is_already_in_Elastic_it_removes_the_job_from_the_queue(
@@ -236,7 +236,7 @@ class TestSyncAnnotations:
             )
         ]
         batch_indexer.index.assert_called_once_with(
-            Any.iterable.containing(annotation_ids[:limit]).only()
+            Any.list.containing(annotation_ids[:limit]).only()
         )
 
     def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
@@ -262,7 +262,7 @@ class TestSyncAnnotations:
                     "query": Any.dict.containing(
                         {
                             "ids": {
-                                "values": {annotation_ids[0]},
+                                "values": [annotation_ids[0]],
                             },
                         },
                     ),
@@ -279,7 +279,7 @@ class TestSyncAnnotations:
             )
         ]
         batch_indexer.index.assert_called_once_with(
-            Any.iterable.containing([annotation_ids[0]]).only()
+            Any.list.containing([annotation_ids[0]]).only()
         )
 
     def test_deleting_multiple_jobs_with_the_same_annotation_id(
