@@ -39,6 +39,7 @@ class Job(Base):
     __tablename__ = "job"
 
     id = Column(UUID, server_default=func.uuid_generate_v1mc(), primary_key=True)
+    name = Column(UnicodeText, nullable=False)
     enqueued_at = Column(DateTime, nullable=False, server_default=func.now())
     scheduled_at = Column(DateTime, nullable=False, server_default=func.now())
     tag = Column(UnicodeText, nullable=False)

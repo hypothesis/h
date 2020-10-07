@@ -26,6 +26,7 @@ class Queue:
         self._db.add_all(
             Job(
                 tag=tag,
+                name="sync_annotation",
                 scheduled_at=scheduled_at,
                 kwargs={"annotation_id": annotation_id},
             )
@@ -114,6 +115,7 @@ class Queue:
             self._db.query(Job)
             .filter(
                 Job.scheduled_at < datetime.datetime.utcnow(),
+                Job.name == "sync_annotation",
             )
             .order_by(Job.enqueued_at)
             .limit(self._limit)
