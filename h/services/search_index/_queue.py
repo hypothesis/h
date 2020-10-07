@@ -4,24 +4,25 @@ import logging
 from dateutil.parser import isoparse
 
 from h.models import Annotation, Job
-from h.search.index import BatchIndexer
 
 logger = logging.getLogger(__name__)
 
 
-class JobQueue:
+class Queue:
+    """A job queue for synchronizing annotations from Postgres to Elastic."""
+
     def __init__(self, db, es, batch_indexer, limit):
         self._db = db
         self._es = es
         self._batch_indexer = batch_indexer
         self._limit = limit
 
-    def add_sync_annotation_job(self, annotation_id, tag, scheduled_at=None):
-        """Add an annotation to be synced to Elasticsearch."""
-        self.add_sync_annotation_jobs([annotation_id], tag, scheduled_at)
+    def add(self, annotation_id, tag, scheduled_at=None):
+        """Queue an annotation to be synced to Elasticsearch."""
+        self.add_all([annotation_id], tag, scheduled_at)
 
-    def add_sync_annotation_jobs(self, annotation_ids, tag, scheduled_at=None):
-        """Add a list of annotations to the queue to be synced to Elasticsearch."""
+    def add_all(self, annotation_ids, tag, scheduled_at=None):
+        """Queue a list of annotations to be synced to Elasticsearch."""
         self._db.add_all(
             Job(
                 tag=tag,
@@ -31,9 +32,9 @@ class JobQueue:
             for annotation_id in annotation_ids
         )
 
-    def sync_annotations(self):
+    def sync(self):
         """
-        Synchronize annotations from Postgres to Elasticsearch.
+        Synchronize a batch of annotations from Postgres to Elasticsearch.
 
         Called periodically by a Celery task (see h-periodic).
 
@@ -143,12 +144,3 @@ class JobQueue:
             hit["_source"]["updated"] = updated
 
         return {hit["_id"]: hit["_source"] for hit in hits}
-
-
-def factory(context, request):
-    return JobQueue(
-        db=request.db,
-        es=request.es,
-        batch_indexer=BatchIndexer(request.db, request.es, request),
-        limit=request.registry.settings["h.es_sync_job_limit"],
-    )

@@ -1,8 +1,6 @@
 from dateutil.parser import isoparse
 from pyramid.view import view_config, view_defaults
 
-from h.models import Annotation
-
 
 @view_defaults(route_name="admin.search", permission="admin_search")
 class SearchAdminViews:
@@ -20,22 +18,13 @@ class SearchAdminViews:
         renderer="h:templates/admin/search.html.jinja2",
     )
     def reindex_date(self):
-        start_date = isoparse(self.request.params["start"].strip())
-        end_date = isoparse(self.request.params["end"].strip())
-
-        annotation_ids = [
-            row[0]
-            for row in self.request.db.query(Annotation.id)
-            .filter(Annotation.updated >= start_date)
-            .filter(Annotation.updated <= end_date)
-        ]
-
-        self.request.find_service(name="job_queue").add_sync_annotation_jobs(
-            annotation_ids, "reindex_date"
+        self.request.find_service(name="search_index").add_annotations_between_times(
+            isoparse(self.request.params["start"].strip()),
+            isoparse(self.request.params["end"].strip()),
         )
 
         self.request.session.flash(
-            f"Scheduled reindexing of {len(annotation_ids)} annotations", "success"
+            "Queued annotations for background reindexing", "success"
         )
 
         return {}

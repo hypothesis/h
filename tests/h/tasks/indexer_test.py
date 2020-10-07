@@ -59,6 +59,16 @@ class TestReindexUserAnnotations:
         }
 
 
+class TestSyncAnnotations:
+    def test_it(self, search_index):
+        indexer.sync_annotations()
+
+        search_index.sync.assert_called_once_with()
+
+
+pytestmark = pytest.mark.usefixtures("search_index")
+
+
 @pytest.fixture(autouse=True)
 def BatchIndexer(patch):
     return patch("h.tasks.indexer.BatchIndexer")

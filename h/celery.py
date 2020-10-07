@@ -39,7 +39,6 @@ celery.conf.update(
         "h.tasks.cleanup",
         "h.tasks.indexer",
         "h.tasks.mailer",
-        "h.tasks.job_queue",
     ),
     task_routes={
         "h.tasks.indexer.add_annotation": "indexer",
