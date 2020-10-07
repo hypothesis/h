@@ -129,20 +129,20 @@ class TestHandleAnnotationEvent:
         fetch_annotation,
         links_service,
         groupfinder_service,
-        AnnotationContext,
+        AnnotationNotificationContext,
         AnnotationUserInfoFormatter,
         AnnotationJSONPresenter,
     ):
         handle_annotation_event()
 
-        AnnotationContext.assert_called_once_with(
+        AnnotationNotificationContext.assert_called_once_with(
             fetch_annotation.return_value,
             groupfinder_service.return_value,
             links_service.return_value,
         )
 
         AnnotationJSONPresenter.assert_called_once_with(
-            AnnotationContext.return_value,
+            AnnotationNotificationContext.return_value,
             formatters=[AnnotationUserInfoFormatter.return_value],
         )
         assert AnnotationJSONPresenter.return_value.asdict.called
@@ -222,7 +222,7 @@ class TestHandleAnnotationEvent:
         handle_annotation_event,
         user_principals,
         can_see,
-        AnnotationContext,
+        AnnotationNotificationContext,
         principals_allowed_by_permission,
         socket,
     ):
@@ -232,7 +232,7 @@ class TestHandleAnnotationEvent:
         handle_annotation_event(sockets=[socket])
 
         principals_allowed_by_permission.assert_called_with(
-            AnnotationContext.return_value, "read"
+            AnnotationNotificationContext.return_value, "read"
         )
         assert bool(socket.send_json.call_count) == can_see
 
@@ -284,8 +284,8 @@ class TestHandleAnnotationEvent:
         return patch("h.streamer.messages.AnnotationUserInfoFormatter")
 
     @pytest.fixture
-    def AnnotationContext(self, patch):
-        return patch("h.streamer.messages.AnnotationContext")
+    def AnnotationNotificationContext(self, patch):
+        return patch("h.streamer.messages.AnnotationNotificationContext")
 
     @pytest.fixture(autouse=True)
     def AnnotationJSONPresenter(self, patch):
