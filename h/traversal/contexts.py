@@ -43,6 +43,13 @@ class AnnotationContext:
     def link(self, name):
         return self.links_service.get(self.annotation, name)
 
+    def _read_principals(self):
+        if self.annotation.shared:
+            for principal in self._group_principals(self.group, "read"):
+                yield Allow, principal, "read"
+        else:
+            yield Allow, self.annotation.userid, "read"
+
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
         # If the annotation has been deleted, nobody has any privileges on it
@@ -50,15 +57,12 @@ class AnnotationContext:
         if self.annotation.deleted:
             return [DENY_ALL]
 
-        acl = []
+        acl = list(self._read_principals())
 
         # For shared annotations, some permissions are derived from the
         # permissions for this annotation's containing group.
         # Otherwise they are derived from the annotation's creator
         if self.annotation.shared:
-            for principal in self._group_principals(self.group, "read"):
-                acl.append((Allow, principal, "read"))
-
             for principal in self._group_principals(self.group, "flag"):
                 acl.append((Allow, principal, "flag"))
 
@@ -66,7 +70,6 @@ class AnnotationContext:
                 acl.append((Allow, principal, "moderate"))
 
         else:
-            acl.append((Allow, self.annotation.userid, "read"))
             # Flagging one's own private annotations is nonsensical,
             # but from an authz perspective, allowed. It is up to services/views
             # to handle these situations appropriately

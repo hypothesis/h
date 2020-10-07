@@ -14,8 +14,8 @@ from h.services.links import LinksService
 from h.services.nipsa import NipsaService
 from h.services.user import UserService
 from h.streamer import websocket
+from h.streamer.contexts import AnnotationNotificationContext
 from h.streamer.filter import SocketFilter
-from h.traversal import AnnotationContext
 
 log = logging.getLogger(__name__)
 
@@ -156,7 +156,9 @@ def _generate_annotation_event(
 
         base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
         links_service = LinksService(base_url, socket.registry)
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationNotificationContext(
+            annotation, group_service, links_service
+        )
 
         # Check whether client is authorized to read this annotation.
         read_principals = principals_allowed_by_permission(resource, "read")
