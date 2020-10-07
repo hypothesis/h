@@ -9,5 +9,5 @@ def not_found(_exc, _request):
     return Response(status="429 Offline", headerlist=[])
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     config.scan(__name__)

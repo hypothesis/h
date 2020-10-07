@@ -3,7 +3,7 @@ from h.streamer.tweens import close_db_session_tween_factory
 __all__ = ["close_db_session_tween_factory"]
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     config.include("h.streamer.views")
 
     config.add_subscriber(
