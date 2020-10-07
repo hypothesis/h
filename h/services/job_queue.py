@@ -10,42 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class JobQueue:
-    """
-    A simple transactional job queue that consumes jobs from a DB table.
-
-    This home-grown job queue differs from our Celery task queue in a few ways:
-
-    1. The job queue is stored in Postgres so jobs can be added as part of a
-       Postgres transaction.
-
-       For example a new annotation can be added to the annotations table
-       and a job to synchronize that annotation into Elasticsearch can be added
-       to the job queue as part of the same Postgres transaction. This way it's
-       not possible to add an annotation to Postgres and fail to add it to the
-       job queue or vice-versa. The two can't get out of sync because they're
-       part of a single Postgres transaction.
-
-    2. The job queue is less immediate.
-
-       Jobs are processed in batch by a periodic Celery task that runs every N
-       minutes (see h-periodic for how frequently the task is run) so a job
-       added to the job queue might not get processed until N minutes later (or
-       even longer: if the job queue is currently long then the periodic task
-       may have to run multiple times before it gets to your job).
-
-       In contrast tasks added to Celery can be processed by a worker almost
-       immediately.
-
-    3. The job queue is very simple and has far fewer features than Celery.
-
-    Celery should be the default task queue for almost all tasks, and only jobs
-    that really need Postgres transactionality should use this custom job
-    queue.
-
-    At the time of writing this job queue only supports a single type of job:
-    synchronizing annotations from Postgres to Elasticsearch.
-    """
-
     def __init__(self, db, es, batch_indexer, limit):
         self._db = db
         self._es = es
@@ -71,21 +35,18 @@ class JobQueue:
         """
         Synchronize annotations from Postgres to Elasticsearch.
 
-        This method is meant to be run periodically. It's called by a Celery
-        task that's scheduled periodically by h-periodic.
+        Called periodically by a Celery task (see h-periodic).
 
         Each time this method runs it considers a fixed number of sync
-        annotation jobs from the job queue. For each job, if the annotation is
-        already present and up to date in Elasticsearch, then it removes the
-        job from the queue. If the annotation is missing from Elasticsearch or
-        out of date in Elasticsearch then the method re-syncs the annotation
-        into Elasticsearch, and leaves the job on the queue to be re-checked
-        and removed the next time the method runs.
+        annotation jobs from the queue and for each job:
 
-        If the DB somehow contains an annotation that always fails to index
-        into Elasticsearch, then a job for that annotation will never be
-        removed from the queue! As far as I know it isn't possible for the DB
-        to contain such an annotation.
+        * If the annotation is already the same in Elastic as in the DB then
+          remove the job from the queue
+
+        * If the annotation is missing from Elastic or different in Elastic
+          than in the DB then re-sync the annotation into Elastic. Leave the
+          job on the queue to be re-checked and removed the next time the
+          method runs.
         """
         jobs = self._get_jobs_from_queue()
 
