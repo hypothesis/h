@@ -75,7 +75,11 @@ def handle_message(message, registry, session, topic_handlers):
     # happens Python will throw a "Set changed size during iteration" error.
     sockets = list(websocket.WebSocket.instances)
 
-    handler(message.payload, sockets, registry, session)
+    # The `prepare` function sets the active registry which is an implicit
+    # dependency of some of the authorization logic used to look up annotation
+    # and group permissions.
+    with pyramid.scripting.prepare(registry=registry):
+        handler(message.payload, sockets, registry, session)
 
 
 def handle_annotation_event(message, sockets, registry, session):
@@ -152,35 +156,29 @@ def _generate_annotation_event(
     if user_nipsad and socket.authenticated_userid != annotation.userid:
         return None
 
-    # The `prepare` function sets the active registry which is an implicit
-    # dependency of some of the authorization logic used to look up annotation
-    # and group permissions.
-    with pyramid.scripting.prepare(registry=registry):
-        base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
-        links_service = LinksService(base_url, socket.registry)
-        resource = AnnotationNotificationContext(
-            annotation, group_service, links_service
-        )
+    base_url = registry.settings.get("h.app_url", "http://localhost:5000")
+    links_service = LinksService(base_url, registry)
+    resource = AnnotationNotificationContext(annotation, group_service, links_service)
 
-        # Check whether client is authorized to read this annotation.
-        read_principals = principals_allowed_by_permission(resource, "read")
-        if not set(read_principals).intersection(socket.effective_principals):
-            return None
+    # Check whether client is authorized to read this annotation.
+    read_principals = principals_allowed_by_permission(resource, "read")
+    if not set(read_principals).intersection(socket.effective_principals):
+        return None
 
-        serialized = presenters.AnnotationJSONPresenter(
-            resource, formatters=formatters
-        ).asdict()
+    serialized = presenters.AnnotationJSONPresenter(
+        resource, formatters=formatters
+    ).asdict()
 
-        notification = {
-            "type": "annotation-notification",
-            "options": {"action": action},
-            "payload": [serialized],
-        }
+    notification = {
+        "type": "annotation-notification",
+        "options": {"action": action},
+        "payload": [serialized],
+    }
 
-        if action == "delete":
-            notification["payload"] = [{"id": annotation.id}]
+    if action == "delete":
+        notification["payload"] = [{"id": annotation.id}]
 
-        return notification
+    return notification
 
 
 def _generate_user_event(message, socket):
