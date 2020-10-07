@@ -132,6 +132,7 @@ class SearchIndexService:
         return async_task.delay(event.annotation_id)
 
     def sync(self):
+        """Synchronize a batch of queued annotations from Postgres to Elasticsearch."""
         self._queue.sync()
 
     def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
