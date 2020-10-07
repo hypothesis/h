@@ -38,14 +38,15 @@ def start(event):
     greenlets running `process_queue` for each message queue we subscribe to.
     The function does not block.
     """
-    settings = event.app.registry.settings
+    registry = event.app.registry
+    settings = registry.settings
 
     greenlets = [
         # Start greenlets to process messages from RabbitMQ
         gevent.spawn(messages.process_messages, settings, ANNOTATION_TOPIC, WORK_QUEUE),
         gevent.spawn(messages.process_messages, settings, USER_TOPIC, WORK_QUEUE),
         # And one to process the queued work
-        gevent.spawn(process_work_queue, settings, WORK_QUEUE),
+        gevent.spawn(process_work_queue, registry, WORK_QUEUE),
     ]
 
     # Start a "greenlet of last resort" to monitor the worker greenlets and
@@ -53,7 +54,7 @@ def start(event):
     gevent.spawn(supervise, greenlets)
 
 
-def process_work_queue(settings, queue):
+def process_work_queue(registry, queue):
     """
     Process each message from the queue in turn, handling exceptions.
 
@@ -63,7 +64,7 @@ def process_work_queue(settings, queue):
     closed between messages.
     """
 
-    session = db.Session(bind=db.make_engine(settings))
+    session = db.Session(bind=db.make_engine(registry.settings))
 
     for msg in queue:
         try:
@@ -77,7 +78,7 @@ def process_work_queue(settings, queue):
             )
 
             if isinstance(msg, messages.Message):
-                messages.handle_message(msg, settings, session, TOPIC_HANDLERS)
+                messages.handle_message(msg, registry, session, TOPIC_HANDLERS)
             elif isinstance(msg, websocket.Message):
                 websocket.handle_message(msg, session)
             else:

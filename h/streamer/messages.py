@@ -52,7 +52,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
         raise RuntimeError("Realtime consumer quit unexpectedly!")
 
 
-def handle_message(message, settings, session, topic_handlers):
+def handle_message(message, registry, session, topic_handlers):
     """
     Deserialize and process a message from the reader.
 
@@ -74,10 +74,11 @@ def handle_message(message, settings, session, topic_handlers):
     # to stop connections being added or dropped during iteration, and if that
     # happens Python will throw a "Set changed size during iteration" error.
     sockets = list(websocket.WebSocket.instances)
-    handler(message.payload, sockets, settings, session)
+
+    handler(message.payload, sockets, registry, session)
 
 
-def handle_annotation_event(message, sockets, settings, session):
+def handle_annotation_event(message, sockets, registry, session):
     id_ = message["annotation_id"]
     annotation = storage.fetch_annotation(session, id_)
 
@@ -101,21 +102,27 @@ def handle_annotation_event(message, sockets, settings, session):
     nipsa_service = NipsaService(session)
     user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
-    authority = settings.get("h.authority", "localhost")
+    authority = registry.settings.get("h.authority", "localhost")
     group_service = GroupfinderService(session, authority)
     user_service = UserService(authority, session)
     formatters = [AnnotationUserInfoFormatter(session, user_service)]
 
     for socket in matching_sockets:
         reply = _generate_annotation_event(
-            message, socket, annotation, user_nipsad, group_service, formatters
+            message,
+            socket,
+            annotation,
+            user_nipsad,
+            group_service,
+            formatters,
+            registry,
         )
         if reply is None:
             continue
         socket.send_json(reply)
 
 
-def handle_user_event(message, sockets, settings, session):
+def handle_user_event(message, sockets, registry, session):
     for socket in sockets:
         reply = _generate_user_event(message, socket)
         if reply is None:
@@ -124,7 +131,7 @@ def handle_user_event(message, sockets, settings, session):
 
 
 def _generate_annotation_event(
-    message, socket, annotation, user_nipsad, group_service, formatters
+    message, socket, annotation, user_nipsad, group_service, formatters, registry
 ):
     """
     Get message about annotation event `message` to be sent to `socket`.
@@ -148,12 +155,7 @@ def _generate_annotation_event(
     # The `prepare` function sets the active registry which is an implicit
     # dependency of some of the authorization logic used to look up annotation
     # and group permissions.
-    with pyramid.scripting.prepare(registry=socket.registry):
-        notification = {
-            "type": "annotation-notification",
-            "options": {"action": action},
-        }
-
+    with pyramid.scripting.prepare(registry=registry):
         base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
         links_service = LinksService(base_url, socket.registry)
         resource = AnnotationNotificationContext(
@@ -169,9 +171,15 @@ def _generate_annotation_event(
             resource, formatters=formatters
         ).asdict()
 
-        notification["payload"] = [serialized]
+        notification = {
+            "type": "annotation-notification",
+            "options": {"action": action},
+            "payload": [serialized],
+        }
+
         if action == "delete":
             notification["payload"] = [{"id": annotation.id}]
+
         return notification
 
 
