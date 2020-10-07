@@ -39,7 +39,7 @@ mistune==0.8.4            # via -r requirements/requirements.in
 newrelic==5.20.0.149      # via -r requirements/requirements.in
 oauthlib==3.1.0           # via -r requirements/requirements.in
 packaging==20.4           # via bleach
-passlib==1.7.2            # via -r requirements/requirements.in
+passlib==1.7.3            # via -r requirements/requirements.in
 pastedeploy==2.1.0        # via plaster-pastedeploy
 peppercorn==0.6           # via deform
 plaster-pastedeploy==0.7  # via pyramid
