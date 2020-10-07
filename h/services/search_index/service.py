@@ -68,7 +68,7 @@ class SearchIndexService:
 
     def add_annotations_between_times(self, start_time, end_time):
         """
-        Add all annotations between two dates to the search index.
+        Add all annotations between two times to the search index.
 
         All annotations whose updated time is between the given start_time and
         end_time (inclusive) will be queued for background indexing into

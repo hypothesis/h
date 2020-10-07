@@ -18,15 +18,15 @@ class SearchAdminViews:
         renderer="h:templates/admin/search.html.jinja2",
     )
     def reindex_date(self):
-        start_date = isoparse(self.request.params["start"].strip())
-        end_date = isoparse(self.request.params["end"].strip())
+        start_time = isoparse(self.request.params["start"].strip())
+        end_time = isoparse(self.request.params["end"].strip())
 
         self.request.find_service(name="search_index").add_annotations_between_times(
-            start_date, end_date
+            start_time, end_time
         )
 
         self.request.session.flash(
-            f"Began reindexing from {start_date} to {end_date}", "success"
+            f"Began reindexing from {start_time} to {end_time}", "success"
         )
 
         return {}
