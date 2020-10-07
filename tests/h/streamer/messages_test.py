@@ -353,8 +353,7 @@ class TestHandleUserEvent:
 
 
 @pytest.fixture
-def socket(pyramid_request):
+def socket():
     socket = create_autospec(WebSocket, instance=True)
     socket.effective_principals = [security.Everyone, "group:__world__"]
-    socket.registry = pyramid_request.registry
     return socket

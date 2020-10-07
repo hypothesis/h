@@ -57,7 +57,6 @@ class WebSocket(_WebSocket):
 
         self.authenticated_userid = environ["h.ws.authenticated_userid"]
         self.effective_principals = environ["h.ws.effective_principals"]
-        self.registry = environ["h.ws.registry"]
 
         self._work_queue = environ["h.ws.streamer_work_queue"]
 

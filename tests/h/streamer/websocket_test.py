@@ -138,9 +138,6 @@ class TestWebSocket:
             "group:__world__",
         ]
 
-    def test_socket_sets_registry_from_environ(self, client):
-        assert client.registry == mock.sentinel.registry
-
     def test_socket_send_json(self, client, fake_socket_send):
         payload = {"foo": "bar"}
 
