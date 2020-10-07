@@ -96,13 +96,13 @@ class JobQueue:
         annotations_from_db = self._get_annotations_from_db(annotation_ids)
         annotations_from_es = self._get_annotations_from_es(annotation_ids)
 
-        # Jobs whose annotation is missing from marked as deleted in the DB.
+        # Jobs whose annotation is missing from or marked as deleted in the DB.
         missing_from_db = []
 
         # Jobs whose annotation is the same in Elasticsearch as in the DB.
         up_to_date_in_es = []
 
-        # Annotation IDs that're in the DB but from Elasticsearch.
+        # Annotation IDs that're in the DB but missing from Elasticsearch.
         missing_from_es = set()
 
         # IDs of annotations that are different in Elasticsearch than in the DB.
