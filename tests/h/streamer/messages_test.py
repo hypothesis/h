@@ -1,374 +1,295 @@
-from unittest import mock
+from unittest.mock import Mock, create_autospec, sentinel
 
 import pytest
 from gevent.queue import Queue
 from h_matchers import Any
-from pyramid import registry, security
+from pyramid import security
 
 from h.streamer import messages
-
-
-class FakeSocket:
-    client_id = None
-    terminated = None
-
-    def __init__(self, client_id):
-        self.client_id = client_id
-        self.terminated = False
-        self.send = mock.MagicMock()
-
-        self.authenticated_userid = None
-        self.effective_principals = [security.Everyone, "group:__world__"]
-        self.registry = registry.Registry("streamer_test")
-        self.registry.settings = {"h.app_url": "http://streamer"}
-
-        self.send_json_payloads = []
-
-    def send_json(self, payload):
-        self.send_json_payloads.append(payload)
+from h.streamer.websocket import WebSocket
 
 
 class TestProcessMessages:
-    def test_passes_routing_key_to_consumer(self, fake_consumer, queue):
-        messages.process_messages({}, "foobar", queue, raise_error=False)
-
-        fake_consumer.assert_called_once_with(
-            connection=Any(), routing_key="foobar", handler=Any()
+    def test_it_creates_and_runs_a_consumer(self, Consumer, realtime, work_queue):
+        settings = {}
+        messages.process_messages(
+            settings, "routing_key", work_queue, raise_error=False
         )
 
-    def test_initializes_new_connection(self, fake_realtime, fake_consumer, queue):
-        settings = {}
-        messages.process_messages(settings, "foobar", queue, raise_error=False)
-
-        fake_realtime.get_connection.assert_called_once_with(settings)
-
-    def test_passes_connection_to_consumer(self, fake_realtime, fake_consumer, queue):
-        messages.process_messages({}, "foobar", queue, raise_error=False)
-
-        fake_consumer.assert_called_once_with(
-            connection=fake_realtime.get_connection.return_value,
-            routing_key=Any(),
+        realtime.get_connection.assert_called_once_with(settings)
+        Consumer.assert_called_once_with(
+            connection=realtime.get_connection.return_value,
+            routing_key="routing_key",
             handler=Any(),
         )
-
-    def test_runs_consumer(self, fake_consumer, queue):
-        messages.process_messages({}, "foobar", queue, raise_error=False)
-
-        consumer = fake_consumer.return_value
+        consumer = Consumer.return_value
         consumer.run.assert_called_once_with()
 
-    def test_message_handler_puts_message_on_queue(self, fake_consumer, queue):
-        messages.process_messages({}, "foobar", queue, raise_error=False)
-        message_handler = fake_consumer.call_args[1]["handler"]
-        message_handler({"foo": "bar"})
-        result = queue.get_nowait()
+    def test_it_puts_message_on_queue(self, _handler, work_queue):
+        _handler({"foo": "bar"})
 
-        assert result.topic == "foobar"
+        result = work_queue.get_nowait()
+        assert result.topic == "routing_key"  # Set by _handler fixture
         assert result.payload == {"foo": "bar"}
 
-    @pytest.fixture
-    def fake_consumer(self, patch):
-        return patch("h.streamer.messages.Consumer")
+    def test_it_handles_a_full_queue(self, _handler, work_queue):
+        work_queue.put(messages.Message(topic="queue_is_full", payload={}))
+
+        _handler({"foo": "bar"})
+
+        result = work_queue.get_nowait()
+        assert result.topic == "queue_is_full"
+
+    def test_it_raises_if_the_consumer_exits(self, work_queue):
+        with pytest.raises(RuntimeError):
+            messages.process_messages({}, "routing_key", work_queue)
 
     @pytest.fixture
-    def fake_realtime(self, patch):
+    def _handler(self, Consumer, work_queue):
+        messages.process_messages({}, "routing_key", work_queue, raise_error=False)
+        return Consumer.call_args[1]["handler"]
+
+    @pytest.fixture(autouse=True)
+    def Consumer(self, patch):
+        return patch("h.streamer.messages.Consumer")
+
+    @pytest.fixture(autouse=True)
+    def realtime(self, patch):
         return patch("h.streamer.messages.realtime")
 
     @pytest.fixture
-    def queue(self):
-        return Queue()
+    def work_queue(self):
+        return Queue(maxsize=1)
 
 
 class TestHandleMessage:
-    def test_calls_handler_with_list_of_sockets(self, websocket):
-        handler = mock.Mock(return_value=None)
-        session = mock.sentinel.db_session
-        settings = mock.sentinel.settings
+    def test_calls_handler_with_list_of_sockets(self, websocket, registry):
+        handler = Mock(return_value=None)
+        session = sentinel.db_session
         message = messages.Message(topic="foo", payload={"foo": "bar"})
-        websocket.instances = [FakeSocket("a"), FakeSocket("b")]
+        websocket.instances = [sentinel.socket_1, sentinel.socket_2]
 
         messages.handle_message(
-            message, settings, session, topic_handlers={"foo": handler}
+            message, registry, session, topic_handlers={"foo": handler}
         )
 
         handler.assert_called_once_with(
-            message.payload, list(websocket.instances), settings, session
+            message.payload, websocket.instances, registry, session
         )
+
+    def test_it_raises_RuntimeError_for_bad_topics(self, registry):
+        message = messages.Message(topic="unknown", payload={})
+        topic_handlers = {"known": sentinel.handler}
+
+        with pytest.raises(RuntimeError):
+            messages.handle_message(
+                message,
+                registry,
+                session=sentinel.db_session,
+                topic_handlers=topic_handlers,
+            )
+
+    @pytest.fixture
+    def registry(self, pyramid_request):
+        return pyramid_request.registry
 
     @pytest.fixture
     def websocket(self, patch):
         return patch("h.streamer.websocket.WebSocket")
 
 
-@pytest.mark.usefixtures(
-    "fetch_annotation",
-    "user_service",
-    "groupfinder_service",
-    "links_service",
-    "nipsa_service",
-)
+@pytest.mark.usefixtures("nipsa_service")
 class TestHandleAnnotationEvent:
-    def test_it_fetches_the_annotation(self, fetch_annotation, presenter_asdict):
-        message = {
-            "annotation_id": "panda",
-            "action": "update",
-            "src_client_id": "pigeon",
-        }
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
+    def test_it_fetches_the_annotation(
+        self, fetch_annotation, handle_annotation_event, session, message
+    ):
+        handle_annotation_event(message=message, session=session)
 
-        messages.handle_annotation_event(message, [socket], settings, session)
+        fetch_annotation.assert_called_once_with(session, message["annotation_id"])
 
-        fetch_annotation.assert_called_once_with(session, "panda")
-
-    def test_it_skips_notification_when_fetch_failed(self, fetch_annotation):
-        """
-        When a create/update and a delete event happens in quick succession
-        we could fail to load the annotation, even though the event action is
-        update/create. This tests that in that case we silently abort and don't
-        sent a notification to the client.
-        """
-        message = {
-            "annotation_id": "panda",
-            "action": "update",
-            "src_client_id": "pigeon",
-        }
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
+    def test_it_skips_notification_when_fetch_failed(
+        self, fetch_annotation, handle_annotation_event
+    ):
         fetch_annotation.return_value = None
 
-        result = messages.handle_annotation_event(message, [socket], settings, session)
+        result = handle_annotation_event()
 
         assert result is None
 
-    def test_it_initializes_groupfinder_service(self, groupfinder_service):
-        message = {"action": "_", "annotation_id": "_", "src_client_id": "_"}
-        session = mock.sentinel.db_session
-        socket = FakeSocket("giraffe")
-        settings = {"h.authority": "example.org"}
+    def test_it_initializes_groupfinder_service(
+        self, groupfinder_service, handle_annotation_event, settings, session
+    ):
+        handle_annotation_event(settings=settings, session=session)
 
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        groupfinder_service.assert_called_once_with(session, "example.org")
+        groupfinder_service.assert_called_once_with(session, settings["h.authority"])
 
     def test_it_serializes_the_annotation(
         self,
+        handle_annotation_event,
         fetch_annotation,
         links_service,
         groupfinder_service,
-        annotation_resource,
-        presenters,
+        AnnotationContext,
         AnnotationUserInfoFormatter,
+        AnnotationJSONPresenter,
     ):
-        message = {"action": "_", "annotation_id": "_", "src_client_id": "_"}
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenters.AnnotationJSONPresenter.return_value.asdict.return_value = (
-            self.serialized_annotation()
-        )
+        handle_annotation_event()
 
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        annotation_resource.assert_called_once_with(
+        AnnotationContext.assert_called_once_with(
             fetch_annotation.return_value,
             groupfinder_service.return_value,
             links_service.return_value,
         )
 
-        presenters.AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource.return_value,
+        AnnotationJSONPresenter.assert_called_once_with(
+            AnnotationContext.return_value,
             formatters=[AnnotationUserInfoFormatter.return_value],
         )
-        assert presenters.AnnotationJSONPresenter.return_value.asdict.called
+        assert AnnotationJSONPresenter.return_value.asdict.called
 
-    def test_notification_format(self, presenter_asdict):
-        """Check the format of the returned notification in the happy case."""
-        message = {
-            "annotation_id": "panda",
-            "action": "update",
-            "src_client_id": "pigeon",
-        }
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
+    @pytest.mark.parametrize("action", ["create", "update", "delete"])
+    def test_notification_format(
+        self, handle_annotation_event, action, message, socket, AnnotationJSONPresenter
+    ):
+        message["action"] = action
 
-        messages.handle_annotation_event(message, [socket], settings, session)
+        handle_annotation_event(sockets=[socket])
 
-        assert socket.send_json_payloads[0] == {
-            "payload": [self.serialized_annotation()],
-            "type": "annotation-notification",
-            "options": {"action": "update"},
-        }
+        if action == "delete":
+            expected_payload = {"id": message["annotation_id"]}
+        else:
+            expected_payload = AnnotationJSONPresenter.return_value.asdict.return_value
 
-    def test_notification_format_delete(self, fetch_annotation, presenter_asdict):
-        """Check the format of the returned notification for deletes."""
-        message = {"annotation_id": "_", "action": "delete", "src_client_id": "pigeon"}
-        annotation = fetch_annotation.return_value
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
+        socket.send_json.assert_called_once_with(
+            {
+                "payload": [expected_payload],
+                "type": "annotation-notification",
+                "options": {"action": action},
+            }
+        )
 
-        messages.handle_annotation_event(message, [socket], settings, session)
+    def test_no_send_for_sender_socket(self, handle_annotation_event, socket, message):
+        message["src_client_id"] = socket.client_id
 
-        assert socket.send_json_payloads[0] == {
-            "payload": [{"id": annotation.id}],
-            "type": "annotation-notification",
-            "options": {"action": "delete"},
-        }
+        handle_annotation_event(message=message, sockets=[socket])
 
-    def test_no_send_for_sender_socket(self, presenter_asdict):
-        """Should return None if the socket's client_id matches the message's."""
-        message = {"src_client_id": "pigeon", "annotation_id": "_", "action": "_"}
-        socket = FakeSocket("pigeon")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
+        socket.send_json.assert_not_called()
 
-        messages.handle_annotation_event(message, [socket], settings, session)
+    def test_no_send_if_filter_does_not_match(
+        self, handle_annotation_event, socket, SocketFilter
+    ):
+        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(())
+        handle_annotation_event(sockets=[socket])
 
-        assert socket.send_json_payloads == []
+        socket.send_json.assert_not_called()
 
-    @pytest.mark.usefixtures("no_matching_sockets")
-    def test_no_send_if_no_socket_filter(self, presenter_asdict):
-        """Should return None if the socket has no filter."""
-        message = {"src_client_id": "_", "annotation_id": "_", "action": "_"}
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
-
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        assert socket.send_json_payloads == []
-
-    def test_no_send_if_action_is_read(self, presenter_asdict):
-        """Should return None if the message action is 'read'."""
-        message = {"action": "read", "src_client_id": "_", "annotation_id": "_"}
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
-
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        assert socket.send_json_payloads == []
-
-    @pytest.mark.usefixtures("no_matching_sockets")
-    def test_no_send_if_filter_does_not_match(self, presenter_asdict):
-        """Should return None if the socket filter doesn't match the message."""
-        message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
-        socket = FakeSocket("giraffe")
-
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
-
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        assert socket.send_json_payloads == []
-
-    def test_no_send_if_annotation_nipsad(self, nipsa_service, presenter_asdict):
+    @pytest.mark.parametrize(
+        "userid,can_see",
+        (
+            ("other_user", False),
+            ("nipsaed_user", True),
+        ),
+    )
+    def test_nipsaed_content_visibility(
+        self,
+        handle_annotation_event,
+        userid,
+        can_see,
+        socket,
+        nipsa_service,
+        fetch_annotation,
+    ):
         """Should return None if the annotation is from a NIPSA'd user."""
-        message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
         nipsa_service.return_value.is_flagged.return_value = True
+        fetch_annotation.return_value.userid = "nipsaed_user"
+        socket.authenticated_userid = userid
 
-        messages.handle_annotation_event(message, [socket], settings, session)
+        handle_annotation_event(sockets=[socket])
 
-        assert socket.send_json_payloads == []
+        assert bool(socket.send_json.call_count) == can_see
 
-    def test_sends_nipsad_annotations_to_owners(
-        self, fetch_annotation, nipsa_service, presenter_asdict
+    @pytest.mark.parametrize(
+        "user_principals,can_see",
+        (
+            [[], False],
+            [["wrong_principal"], False],
+            [["principal"], True],
+            [["principal", "user_noise"], True],
+        ),
+    )
+    def test_visibility_is_based_on_acl(
+        self,
+        handle_annotation_event,
+        user_principals,
+        can_see,
+        AnnotationContext,
+        principals_allowed_by_permission,
+        socket,
     ):
-        """NIPSA'd users should see their own annotations."""
-        message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
-        fetch_annotation.return_value.userid = "fred"
-        socket = FakeSocket("giraffe")
-        socket.authenticated_userid = "fred"
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
-        nipsa_service.return_value.is_flagged.return_value = True
+        principals_allowed_by_permission.return_value = ["principal", "acl_noise"]
+        socket.effective_principals = user_principals
 
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        assert len(socket.send_json_payloads) == 1
-
-    def test_sends_if_annotation_public(self, presenter_asdict):
-        """
-        Everyone should see annotations which are public.
-
-        When logged-out, effective principals contains only
-        `pyramid.security.Everyone`. This test ensures that the system
-        principal is correctly equated with the annotation principal
-        'group:__world__', ensuring that everyone (including logged-out users)
-        receives all public annotations.
-        """
-        message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
-        socket = FakeSocket("giraffe")
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
-
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        assert len(socket.send_json_payloads) == 1
-
-    def test_no_send_if_not_in_group(
-        self, annotation_resource, presenters, principals_allowed_by_permission
-    ):
-        """Users shouldn't see annotations in groups they aren't members of."""
-        message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
-        socket = FakeSocket("giraffe")
-        socket.authenticated_userid = "fred"
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-        principals_allowed_by_permission.return_value = ["group:private-group"]
-
-        messages.handle_annotation_event(message, [socket], settings, session)
+        handle_annotation_event(sockets=[socket])
 
         principals_allowed_by_permission.assert_called_with(
-            annotation_resource.return_value, "read"
+            AnnotationContext.return_value, "read"
         )
-        assert socket.send_json_payloads == []
-
-    def test_sends_if_in_group(
-        self, annotation_resource, presenters, principals_allowed_by_permission
-    ):
-        """Users should see annotations in groups they are members of."""
-        message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
-        socket = FakeSocket("giraffe")
-        socket.authenticated_userid = "fred"
-        session = mock.sentinel.db_session
-        settings = {"foo": "bar"}
-
-        principals_allowed_by_permission.return_value = ["group:private-group"]
-        socket.effective_principals.append("group:private-group")
-
-        messages.handle_annotation_event(message, [socket], settings, session)
-
-        principals_allowed_by_permission.assert_called_with(
-            annotation_resource.return_value, "read"
-        )
-        assert len(socket.send_json_payloads) == 1
-
-    def serialized_annotation(self):
-        return {"permissions": {"read": ["group:__world__"]}}
+        assert bool(socket.send_json.call_count) == can_see
 
     @pytest.fixture
+    def handle_annotation_event(self, message, socket, settings, session):
+        def handle_annotation_event(
+            message=message, sockets=None, settings=settings, session=session
+        ):
+            if sockets is None:
+                sockets = [socket]
+
+            return messages.handle_annotation_event(message, sockets, settings, session)
+
+        return handle_annotation_event
+
+    @pytest.fixture
+    def settings(self):
+        return {
+            "h.app_url": "http://streamer",
+            "h.authority": "example.org",
+        }
+
+    @pytest.fixture
+    def session(self):
+        return sentinel.db_session
+
+    @pytest.fixture
+    def message(self, fetch_annotation):
+        return {
+            # This is a bit backward from how things really work, but it
+            # ensures the id we look up gives us an annotation that matches
+            "annotation_id": fetch_annotation.return_value.id,
+            "action": "update",
+            "src_client_id": "source_socket",
+        }
+
+    @pytest.fixture(autouse=True)
     def fetch_annotation(self, factories, patch):
         fetch = patch("h.streamer.messages.storage.fetch_annotation")
         fetch.return_value = factories.Annotation()
         return fetch
+
+    @pytest.fixture
+    def principals_allowed_by_permission(self, patch):
+        return patch("h.streamer.messages.principals_allowed_by_permission")
+
+    @pytest.fixture
+    def AnnotationUserInfoFormatter(self, patch):
+        return patch("h.streamer.messages.AnnotationUserInfoFormatter")
+
+    @pytest.fixture
+    def AnnotationContext(self, patch):
+        return patch("h.streamer.messages.AnnotationContext")
+
+    @pytest.fixture(autouse=True)
+    def AnnotationJSONPresenter(self, patch):
+        return patch("h.streamer.messages.presenters.AnnotationJSONPresenter")
 
     @pytest.fixture(autouse=True)
     def SocketFilter(self, patch):
@@ -376,31 +297,15 @@ class TestHandleAnnotationEvent:
         SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)
         return SocketFilter
 
-    @pytest.fixture
-    def no_matching_sockets(self, SocketFilter):
-        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(())
-
-    @pytest.fixture
-    def presenters(self, patch):
-        return patch("h.streamer.messages.presenters")
-
-    @pytest.fixture
-    def AnnotationUserInfoFormatter(self, patch):
-        return patch("h.streamer.messages.AnnotationUserInfoFormatter")
-
-    @pytest.fixture
-    def presenter_asdict(self, patch):
-        return patch("h.streamer.messages.presenters.AnnotationJSONPresenter.asdict")
-
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def user_service(self, patch):
         return patch("h.streamer.messages.UserService")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def links_service(self, patch):
         return patch("h.streamer.messages.LinksService")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def groupfinder_service(self, patch):
         return patch("h.streamer.messages.GroupfinderService")
 
@@ -410,41 +315,41 @@ class TestHandleAnnotationEvent:
         service.return_value.is_flagged.return_value = False
         return service
 
-    @pytest.fixture
-    def annotation_resource(self, patch):
-        return patch("h.streamer.messages.AnnotationContext")
-
-    @pytest.fixture
-    def principals_allowed_by_permission(self, patch):
-        return patch("h.streamer.messages.principals_allowed_by_permission")
-
 
 class TestHandleUserEvent:
-    def test_sends_session_change_when_joining_or_leaving_group(self):
-        session_model = mock.Mock()
+    def test_sends_session_change_when_joining_or_leaving_group(self, socket):
+        session_model = Mock()
         message = {
             "type": "group-join",
             "userid": "amy",
             "group": "groupid",
             "session_model": session_model,
         }
-        socket = FakeSocket("clientid")
         socket.authenticated_userid = "amy"
 
         messages.handle_user_event(message, [socket], None, None)
 
-        assert socket.send_json_payloads[0] == {
-            "type": "session-change",
-            "action": "group-join",
-            "model": session_model,
-        }
+        socket.send_json.assert_called_once_with(
+            {
+                "type": "session-change",
+                "action": "group-join",
+                "model": session_model,
+            }
+        )
 
-    def test_no_send_when_socket_is_not_event_users(self):
+    def test_no_send_when_socket_is_not_event_users(self, socket):
         """Don't send session-change events if the event user is not the socket user."""
         message = {"type": "group-join", "userid": "amy", "group": "groupid"}
-        socket = FakeSocket("clientid")
         socket.authenticated_userid = "bob"
 
         messages.handle_user_event(message, [socket], None, None)
 
-        assert socket.send_json_payloads == []
+        socket.send_json.assert_not_called()
+
+
+@pytest.fixture
+def socket(pyramid_request):
+    socket = create_autospec(WebSocket, instance=True)
+    socket.effective_principals = [security.Everyone, "group:__world__"]
+    socket.registry = pyramid_request.registry
+    return socket

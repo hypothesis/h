@@ -137,9 +137,6 @@ def _generate_annotation_event(
     """
     action = message["action"]
 
-    if action == "read":
-        return None
-
     if message["src_client_id"] == socket.client_id:
         return None
 
