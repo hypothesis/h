@@ -31,7 +31,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
     def annotation(self, factories):
         return factories.Annotation()
 
-    @pytest.fixture()
+    @pytest.fixture
     def message(self, annotation):
         return {
             "annotation_id": annotation.id,
