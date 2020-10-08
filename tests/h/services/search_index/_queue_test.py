@@ -6,7 +6,7 @@ import pytest
 from h_matchers import Any
 
 from h.models import Job
-from h.search.client import Client
+from h.presenters import AnnotationSearchIndexPresenter
 from h.search.index import BatchIndexer
 from h.services.search_index._queue import Queue
 
@@ -37,11 +37,7 @@ class TestSyncAnnotations:
     def test_it_ignores_jobs_that_arent_scheduled_yet(
         self, annotation_ids, batch_indexer, caplog, queue
     ):
-        queue.add_all(
-            annotation_ids,
-            tag="test",
-            scheduled_at=ONE_WEEK,
-        )
+        queue.add_all(annotation_ids, tag="test", scheduled_at=ONE_WEEK)
 
         queue.sync()
 
@@ -49,11 +45,7 @@ class TestSyncAnnotations:
         assert caplog.records == []
 
     def test_it_ignores_jobs_beyond_limit(self, annotation_ids, batch_indexer, queue):
-        queue.add_all(
-            annotation_ids,
-            tag="test",
-            scheduled_at=MINUS_FIVE_MINUTES,
-        )
+        queue.add_all(annotation_ids, tag="test", scheduled_at=MINUS_FIVE_MINUTES)
 
         queue.sync()
 
@@ -61,20 +53,13 @@ class TestSyncAnnotations:
             assert annotation_id not in batch_indexer.index.call_args[0][0]
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
-        self,
-        annotations,
-        annotation_ids,
-        caplog,
-        db_session,
-        queue,
+        self, annotations, annotation_ids, caplog, db_session, queue
     ):
         for annotation in annotations[:LIMIT]:
             db_session.delete(annotation)
 
         queue.add_all(
-            annotation_ids[:LIMIT],
-            tag="test",
-            scheduled_at=MINUS_FIVE_MINUTES,
+            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
         )
 
         queue.sync()
@@ -89,20 +74,13 @@ class TestSyncAnnotations:
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
-        self,
-        annotations,
-        annotation_ids,
-        caplog,
-        db_session,
-        queue,
+        self, annotations, annotation_ids, caplog, db_session, queue
     ):
         for annotation in annotations[:LIMIT]:
             annotation.deleted = True
 
         queue.add_all(
-            annotation_ids[:LIMIT],
-            tag="test",
-            scheduled_at=MINUS_FIVE_MINUTES,
+            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
         )
 
         queue.sync()
@@ -117,26 +95,16 @@ class TestSyncAnnotations:
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
-        self,
-        annotation_ids,
-        batch_indexer,
-        caplog,
-        queue,
+        self, annotation_ids, batch_indexer, caplog, queue
     ):
         queue.add_all(
-            annotation_ids[:LIMIT],
-            tag="test",
-            scheduled_at=MINUS_FIVE_MINUTES,
+            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
         )
 
         queue.sync()
 
         assert caplog.record_tuples == [
-            (
-                Any(),
-                Any(),
-                "Syncing 10 annotations that are missing from Elasticsearch",
-            )
+            (Any(), Any(), "Syncing 10 annotations that are missing from Elasticsearch")
         ]
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids[:LIMIT]).only()
@@ -149,90 +117,41 @@ class TestSyncAnnotations:
         batch_indexer,
         caplog,
         db_session,
-        es,
+        index,
         queue,
     ):
-        es.conn.search.return_value = {
-            "hits": {
-                "hits": [
-                    {
-                        "_id": annotation.id,
-                        "_source": {
-                            "updated": (annotation.updated).isoformat(),
-                        },
-                    }
-                    for annotation in annotations[:LIMIT]
-                ],
-            },
-        }
+        index(annotations[:LIMIT])
         queue.add_all(
-            annotation_ids[:LIMIT],
-            tag="test",
-            scheduled_at=MINUS_FIVE_MINUTES,
+            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
         )
 
         queue.sync()
 
         assert caplog.record_tuples == [
-            (
-                Any(),
-                Any(),
-                "Deleting 10 successfully completed jobs from the queue",
-            )
+            (Any(), Any(), "Deleting 10 successfully completed jobs from the queue")
         ]
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
 
     def test_if_the_annotation_has_a_different_updated_time_in_Elastic_it_indexes_it(
-        self,
-        annotations,
-        annotation_ids,
-        batch_indexer,
-        caplog,
-        es,
-        queue,
+        self, annotations, annotation_ids, batch_indexer, caplog, index, now, queue
     ):
-        es.conn.search.return_value = {
-            "hits": {
-                "hits": [
-                    {
-                        "_id": annotation.id,
-                        "_source": {
-                            "updated": (
-                                annotation.updated - datetime_.timedelta(minutes=5)
-                            ).isoformat(),
-                        },
-                    }
-                    for annotation in annotations[:LIMIT]
-                ],
-            },
-        }
+        index(annotations[:LIMIT], updated=now - datetime_.timedelta(minutes=5))
         queue.add_all(
-            annotation_ids[:LIMIT],
-            tag="test",
-            scheduled_at=MINUS_FIVE_MINUTES,
+            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
         )
 
         queue.sync()
 
         assert caplog.record_tuples == [
-            (
-                Any(),
-                Any(),
-                "Syncing 10 annotations that are different in Elasticsearch",
-            )
+            (Any(), Any(), "Syncing 10 annotations that are different in Elasticsearch")
         ]
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids[:LIMIT]).only()
         )
 
     def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
-        self,
-        annotation_ids,
-        batch_indexer,
-        caplog,
-        es,
-        queue,
+        self, annotation_ids, batch_indexer, caplog, queue
     ):
         queue.add_all(
             [annotation_ids[0], annotation_ids[0], annotation_ids[0]],
@@ -242,68 +161,28 @@ class TestSyncAnnotations:
 
         queue.sync()
 
-        # It only retrieves the annotation from Elasticsearch once.
-        es.conn.search.assert_called_once_with(
-            body=Any.dict.containing(
-                {
-                    "query": Any.dict.containing(
-                        {
-                            "ids": {
-                                "values": [annotation_ids[0]],
-                            },
-                        },
-                    ),
-                },
-            ),
-        )
-
         # It only syncs the annotation to Elasticsearch once.
         assert caplog.record_tuples == [
-            (
-                Any(),
-                Any(),
-                "Syncing 1 annotations that are missing from Elasticsearch",
-            )
+            (Any(), Any(), "Syncing 1 annotations that are missing from Elasticsearch")
         ]
         batch_indexer.index.assert_called_once_with(
             Any.list.containing([annotation_ids[0]]).only()
         )
 
     def test_deleting_multiple_jobs_with_the_same_annotation_id(
-        self,
-        annotations,
-        batch_indexer,
-        caplog,
-        db_session,
-        es,
-        queue,
+        self, annotations, batch_indexer, caplog, db_session, index, queue
     ):
         queue.add_all(
             [annotations[0].id, annotations[0].id, annotations[0].id],
             tag="test",
             scheduled_at=MINUS_FIVE_MINUTES,
         )
-        es.conn.search.return_value = {
-            "hits": {
-                "hits": [
-                    {
-                        "_id": annotations[0].id,
-                        "_source": {
-                            "updated": (annotations[0].updated).isoformat(),
-                        },
-                    }
-                ],
-            },
-        }
+        index([annotations[0]])
 
         queue.sync()
 
         assert caplog.record_tuples == [
-            (
-                Any(),
-                Any(),
-                "Deleting 3 successfully completed jobs from the queue",
-            )
+            (Any(), Any(), "Deleting 3 successfully completed jobs from the queue")
         ]
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
@@ -335,6 +214,7 @@ def batch_indexer():
 
 @pytest.fixture
 def caplog(caplog):
+    caplog.set_level(logging.CRITICAL, "elasticsearch")
     caplog.set_level(logging.INFO)
     return caplog
 
@@ -347,17 +227,33 @@ def datetime(patch, now):
 
 
 @pytest.fixture
-def es():
-    es = mock.create_autospec(Client, spec_set=True, instance=True)
-    es.conn.search.return_value = {"hits": {"hits": []}}
-    return es
-
-
-@pytest.fixture
 def now():
     return datetime_.datetime.utcnow()
 
 
 @pytest.fixture
-def queue(batch_indexer, db_session, es):
-    return Queue(db_session, es, batch_indexer, LIMIT)
+def queue(batch_indexer, db_session, es_client):
+    return Queue(db_session, es_client, batch_indexer, LIMIT)
+
+
+@pytest.fixture
+def index(es_client, moderation_service, nipsa_service, pyramid_request):
+    """A function for adding annotations to Elasticsearch."""
+
+    def index(annotations, updated=None):
+        """Add `annotations` to the Elasticsearch index."""
+        for annotation in annotations:
+            body = AnnotationSearchIndexPresenter(annotation, pyramid_request).asdict()
+
+            if updated is not None:
+                body["updated"] = updated
+
+            es_client.conn.index(
+                index=es_client.index,
+                doc_type=es_client.mapping_type,
+                body=body,
+                id=annotation.id,
+            )
+        es_client.conn.indices.refresh(index=es_client.index)
+
+    return index
