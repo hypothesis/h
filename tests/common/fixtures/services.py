@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services.annotation_moderation import AnnotationModerationService
 from h.services.groupfinder import GroupfinderService
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService
@@ -14,6 +15,7 @@ __all__ = (
     "user_service",
     "links_service",
     "groupfinder_service",
+    "moderation_service",
 )
 
 from h.services.user import UserService
@@ -59,3 +61,8 @@ def groupfinder_service(pyramid_config):
     pyramid_config.register_service(service, iface="h.interfaces.IGroupService")
 
     return service
+
+
+@pytest.fixture
+def moderation_service(mock_service):
+    return mock_service(AnnotationModerationService, name="annotation_moderation")
