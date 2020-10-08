@@ -124,32 +124,36 @@ def handle_annotation_event(message, sockets, registry, session):
     # Create a generator which has the first socket back again
     matching_sockets = chain((first_socket,), matching_sockets)
 
-    nipsa_service = NipsaService(session)
-    user_nipsad = nipsa_service.is_flagged(annotation.userid)
-
     authority = registry.settings.get("h.authority", "localhost")
-    group_service = GroupfinderService(session, authority)
-    user_service = UserService(authority, session)
-    formatters = [AnnotationUserInfoFormatter(session, user_service)]
+    base_url = registry.settings.get("h.app_url", "http://localhost:5000")
+
+    resource = AnnotationNotificationContext(
+        annotation,
+        group_service=GroupfinderService(session, authority),
+        links_service=LinksService(base_url, registry),
+    )
+    read_principals = principals_allowed_by_permission(resource, "read")
+    reply = _generate_annotation_event(session, authority, message, resource)
+
+    annotator_nipsad = NipsaService(session).is_flagged(annotation.userid)
 
     for socket in matching_sockets:
-        reply = _generate_annotation_event(
-            message,
-            socket,
-            annotation,
-            user_nipsad,
-            group_service,
-            formatters,
-            registry,
-        )
-        if reply is None:
+        # Don't send notifications back to the person who sent them
+        if message["src_client_id"] == socket.client_id:
             continue
+
+        # Only send NIPSA'd annotations to the author
+        if annotator_nipsad and socket.authenticated_userid != annotation.userid:
+            continue
+
+        # Check whether client is authorized to read this annotation.
+        if not set(read_principals).intersection(socket.effective_principals):
+            continue
+
         socket.send_json(reply)
 
 
-def _generate_annotation_event(
-    message, socket, annotation, user_nipsad, group_service, formatters, registry
-):
+def _generate_annotation_event(session, authority, message, resource):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -159,36 +163,18 @@ def _generate_annotation_event(
     Returns None if the socket should not receive any message about this
     annotation event, otherwise a dict containing information about the event.
     """
-    action = message["action"]
 
-    if message["src_client_id"] == socket.client_id:
-        return None
+    if message["action"] == "delete":
+        payload = {"id": message["annotation_id"]}
+    else:
+        user_service = UserService(authority, session)
+        formatters = [AnnotationUserInfoFormatter(session, user_service)]
+        payload = presenters.AnnotationJSONPresenter(
+            resource, formatters=formatters
+        ).asdict()
 
-    # Don't sent annotations from NIPSA'd users to anyone other than that
-    # user.
-    if user_nipsad and socket.authenticated_userid != annotation.userid:
-        return None
-
-    base_url = registry.settings.get("h.app_url", "http://localhost:5000")
-    links_service = LinksService(base_url, registry)
-    resource = AnnotationNotificationContext(annotation, group_service, links_service)
-
-    # Check whether client is authorized to read this annotation.
-    read_principals = principals_allowed_by_permission(resource, "read")
-    if not set(read_principals).intersection(socket.effective_principals):
-        return None
-
-    serialized = presenters.AnnotationJSONPresenter(
-        resource, formatters=formatters
-    ).asdict()
-
-    notification = {
+    return {
         "type": "annotation-notification",
-        "options": {"action": action},
-        "payload": [serialized],
+        "options": {"action": message["action"]},
+        "payload": [payload],
     }
-
-    if action == "delete":
-        notification["payload"] = [{"id": annotation.id}]
-
-    return notification
