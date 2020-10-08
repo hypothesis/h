@@ -1,4 +1,4 @@
-import datetime
+import datetime as datetime_
 import logging
 from unittest import mock
 
@@ -12,30 +12,16 @@ from h.services.search_index._queue import Queue
 
 
 class TestAddSyncAnnotationJob:
-    def test_it(self, db_session, queue):
-        queue.add("test_annotation_id", "test_tag", scheduled_at=ONE_WEEK_FROM_NOW)
+    def test_it(self, db_session, queue, now):
+        queue.add("test_annotation_id", "test_tag", scheduled_at=ONE_WEEK)
 
         assert db_session.query(Job).all() == [
             Any.instance_of(Job).with_attrs(
                 dict(
-                    enqueued_at=Any.instance_of(datetime.datetime),
-                    scheduled_at=ONE_WEEK_FROM_NOW,
+                    enqueued_at=Any.instance_of(datetime_.datetime),
+                    scheduled_at=now + ONE_WEEK,
                     tag="test_tag",
                     kwargs={"annotation_id": "test_annotation_id"},
-                )
-            ),
-        ]
-
-    def test_scheduled_at_defaults_to_now(self, db_session, queue):
-        queue.add("test_annotation_id", "test_tag")
-
-        assert db_session.query(Job).all() == [
-            Any.instance_of(Job).with_attrs(
-                dict(
-                    enqueued_at=Any(),
-                    scheduled_at=Any.instance_of(datetime.datetime),
-                    tag=Any(),
-                    kwargs=Any(),
                 )
             ),
         ]
@@ -54,7 +40,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids,
             tag="test",
-            scheduled_at=ONE_WEEK_FROM_NOW,
+            scheduled_at=ONE_WEEK,
         )
 
         queue.sync()
@@ -66,6 +52,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids,
             tag="test",
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -87,7 +74,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -115,7 +102,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -139,7 +126,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -181,7 +168,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -212,7 +199,7 @@ class TestSyncAnnotations:
                         "_id": annotation.id,
                         "_source": {
                             "updated": (
-                                annotation.updated - datetime.timedelta(minutes=5)
+                                annotation.updated - datetime_.timedelta(minutes=5)
                             ).isoformat(),
                         },
                     }
@@ -223,7 +210,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -250,7 +237,7 @@ class TestSyncAnnotations:
         queue.add_all(
             [annotation_ids[0], annotation_ids[0], annotation_ids[0]],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
 
         queue.sync()
@@ -294,7 +281,7 @@ class TestSyncAnnotations:
         queue.add_all(
             [annotations[0].id, annotations[0].id, annotations[0].id],
             tag="test",
-            scheduled_at=FIVE_MINUTES_AGO,
+            scheduled_at=MINUS_FIVE_MINUTES,
         )
         es.conn.search.return_value = {
             "hits": {
@@ -322,10 +309,10 @@ class TestSyncAnnotations:
         batch_indexer.index.assert_not_called()
 
 
-ONE_WEEK_FROM_NOW = datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
+ONE_WEEK = datetime_.timedelta(weeks=1)
 
 
-FIVE_MINUTES_AGO = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
 
 
 LIMIT = 10
@@ -352,11 +339,23 @@ def caplog(caplog):
     return caplog
 
 
+@pytest.fixture(autouse=True)
+def datetime(patch, now):
+    datetime = patch("h.services.search_index._queue.datetime")
+    datetime.utcnow.return_value = now
+    return datetime
+
+
 @pytest.fixture
 def es():
     es = mock.create_autospec(Client, spec_set=True, instance=True)
     es.conn.search.return_value = {"hits": {"hits": []}}
     return es
+
+
+@pytest.fixture
+def now():
+    return datetime_.datetime.utcnow()
 
 
 @pytest.fixture

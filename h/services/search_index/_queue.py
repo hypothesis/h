@@ -1,5 +1,5 @@
-import datetime
 import logging
+from datetime import datetime
 
 from dateutil.parser import isoparse
 
@@ -23,6 +23,10 @@ class Queue:
 
     def add_all(self, annotation_ids, tag, scheduled_at=None):
         """Queue a list of annotations to be synced to Elasticsearch."""
+
+        if scheduled_at is not None:
+            scheduled_at = datetime.utcnow() + scheduled_at
+
         self._db.add_all(
             Job(
                 tag=tag,
@@ -114,7 +118,7 @@ class Queue:
         return (
             self._db.query(Job)
             .filter(
-                Job.scheduled_at < datetime.datetime.utcnow(),
+                Job.scheduled_at < datetime.utcnow(),
                 Job.name == "sync_annotation",
             )
             .order_by(Job.enqueued_at)
