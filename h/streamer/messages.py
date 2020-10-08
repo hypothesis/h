@@ -82,6 +82,27 @@ def handle_message(message, registry, session, topic_handlers):
         handler(message.payload, sockets, registry, session)
 
 
+def handle_user_event(message, sockets, registry, session):
+    # for session state change events, the full session model
+    # is included so that clients can update themselves without
+    # further API requests
+
+    reply = None
+
+    for socket in sockets:
+        if socket.authenticated_userid != message["userid"]:
+            continue
+
+        if reply is None:
+            reply = {
+                "type": "session-change",
+                "action": message["type"],
+                "model": message["session_model"],
+            }
+
+        socket.send_json(reply)
+
+
 def handle_annotation_event(message, sockets, registry, session):
     id_ = message["annotation_id"]
     annotation = storage.fetch_annotation(session, id_)
@@ -121,14 +142,6 @@ def handle_annotation_event(message, sockets, registry, session):
             formatters,
             registry,
         )
-        if reply is None:
-            continue
-        socket.send_json(reply)
-
-
-def handle_user_event(message, sockets, registry, session):
-    for socket in sockets:
-        reply = _generate_user_event(message, socket)
         if reply is None:
             continue
         socket.send_json(reply)
@@ -179,26 +192,3 @@ def _generate_annotation_event(
         notification["payload"] = [{"id": annotation.id}]
 
     return notification
-
-
-def _generate_user_event(message, socket):
-    """
-    Get message about user event `message` to be sent to `socket`.
-
-    Inspects the embedded user event and decides whether or not the passed
-    socket should receive notification of the event.
-
-    Returns None if the socket should not receive any message about this user
-    event, otherwise a dict containing information about the event.
-    """
-    if socket.authenticated_userid != message["userid"]:
-        return None
-
-    # for session state change events, the full session model
-    # is included so that clients can update themselves without
-    # further API requests
-    return {
-        "type": "session-change",
-        "action": message["type"],
-        "model": message["session_model"],
-    }

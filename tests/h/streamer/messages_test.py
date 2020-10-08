@@ -322,15 +322,8 @@ class TestHandleAnnotationEvent:
 
 
 class TestHandleUserEvent:
-    def test_sends_session_change_when_joining_or_leaving_group(self, socket):
-        session_model = Mock()
-        message = {
-            "type": "group-join",
-            "userid": "amy",
-            "group": "groupid",
-            "session_model": session_model,
-        }
-        socket.authenticated_userid = "amy"
+    def test_sends_session_change_when_joining_or_leaving_group(self, socket, message):
+        socket.authenticated_userid = message["userid"]
 
         messages.handle_user_event(message, [socket], None, None)
 
@@ -338,18 +331,27 @@ class TestHandleUserEvent:
             {
                 "type": "session-change",
                 "action": "group-join",
-                "model": session_model,
+                "model": message["session_model"],
             }
         )
 
-    def test_no_send_when_socket_is_not_event_users(self, socket):
+    def test_no_send_when_socket_is_not_event_users(self, socket, message):
         """Don't send session-change events if the event user is not the socket user."""
-        message = {"type": "group-join", "userid": "amy", "group": "groupid"}
+        message["userid"] = "amy"
         socket.authenticated_userid = "bob"
 
         messages.handle_user_event(message, [socket], None, None)
 
         socket.send_json.assert_not_called()
+
+    @pytest.fixture
+    def message(self):
+        return {
+            "type": "group-join",
+            "userid": "amy",
+            "group": "groupid",
+            "session_model": sentinel.session_model,
+        }
 
 
 @pytest.fixture
