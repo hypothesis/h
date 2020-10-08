@@ -3,8 +3,7 @@ import sys
 
 import gevent
 
-from h import db
-from h.streamer import messages, websocket
+from h.streamer import db, messages, websocket
 
 log = logging.getLogger(__name__)
 
@@ -64,36 +63,16 @@ def process_work_queue(registry, queue):
     closed between messages.
     """
 
-    session = db.Session(bind=db.make_engine(registry.settings))
+    session = db.get_session(registry.settings)
 
     for msg in queue:
-        try:
-            # All access to the database in the streamer is currently
-            # read-only, so enforce that:
-            session.execute(
-                "SET TRANSACTION ISOLATION LEVEL "
-                "SERIALIZABLE "
-                "READ ONLY "
-                "DEFERRABLE"
-            )
-
+        with db.read_only_transaction(session):
             if isinstance(msg, messages.Message):
                 messages.handle_message(msg, registry, session, TOPIC_HANDLERS)
             elif isinstance(msg, websocket.Message):
                 websocket.handle_message(msg, session)
             else:
                 raise UnknownMessageType(repr(msg))
-
-        except (KeyboardInterrupt, SystemExit):
-            session.rollback()
-            raise
-        except Exception as exc:
-            log.warning("Caught exception handling streamer message:", exc_info=exc)
-            session.rollback()
-        else:
-            session.commit()
-        finally:
-            session.close()
 
 
 def supervise(greenlets):
