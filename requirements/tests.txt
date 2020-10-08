@@ -44,7 +44,7 @@ mistune==0.8.4            # via -r requirements/requirements.txt
 newrelic==5.20.1.150      # via -r requirements/requirements.txt
 oauthlib==3.1.0           # via -r requirements/requirements.txt
 packaging==20.4           # via -r requirements/requirements.txt, bleach, pytest
-passlib==1.7.2            # via -r requirements/requirements.txt
+passlib==1.7.4            # via -r requirements/requirements.txt
 pastedeploy==2.1.0        # via -r requirements/requirements.txt, plaster-pastedeploy
 peppercorn==0.6           # via -r requirements/requirements.txt, deform
 plaster-pastedeploy==0.7  # via -r requirements/requirements.txt, pyramid
