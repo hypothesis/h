@@ -3,11 +3,15 @@ from unittest.mock import create_autospec
 import pytest
 
 from h.services.annotation_moderation import AnnotationModerationService
-from h.services.job_queue import JobQueue
 from h.services.nipsa import NipsaService
 from h.services.search_index import SearchIndexService
 
-__all__ = ("mock_service", "search_index", "nipsa_service", "moderation_service", "job_queue")
+__all__ = (
+    "mock_service",
+    "search_index",
+    "nipsa_service",
+    "moderation_service",
+)
 
 
 @pytest.fixture
@@ -37,8 +41,3 @@ def nipsa_service(mock_service):
 @pytest.fixture
 def moderation_service(mock_service):
     return mock_service(AnnotationModerationService, name="annotation_moderation")
-
-
-@pytest.fixture
-def job_queue(mock_service):
-    return mock_service(JobQueue, name="job_queue")
