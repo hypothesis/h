@@ -13,13 +13,13 @@ from h.services.search_index._queue import Queue
 
 class TestAddSyncAnnotationJob:
     def test_it(self, db_session, queue):
-        queue.add("test_annotation_id", "test_tag", scheduled_at=one_week_from_now)
+        queue.add("test_annotation_id", "test_tag", scheduled_at=ONE_WEEK_FROM_NOW)
 
         assert db_session.query(Job).all() == [
             Any.instance_of(Job).with_attrs(
                 dict(
                     enqueued_at=Any.instance_of(datetime.datetime),
-                    scheduled_at=one_week_from_now,
+                    scheduled_at=ONE_WEEK_FROM_NOW,
                     tag="test_tag",
                     kwargs={"annotation_id": "test_annotation_id"},
                 )
@@ -54,7 +54,7 @@ class TestSyncAnnotations:
         queue.add_all(
             annotation_ids,
             tag="test",
-            scheduled_at=one_week_from_now,
+            scheduled_at=ONE_WEEK_FROM_NOW,
         )
 
         queue.sync()
@@ -70,7 +70,7 @@ class TestSyncAnnotations:
 
         queue.sync()
 
-        for annotation_id in annotation_ids[limit:]:
+        for annotation_id in annotation_ids[LIMIT:]:
             assert annotation_id not in batch_indexer.index.call_args[0][0]
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
@@ -81,13 +81,13 @@ class TestSyncAnnotations:
         db_session,
         queue,
     ):
-        for annotation in annotations[:limit]:
+        for annotation in annotations[:LIMIT]:
             db_session.delete(annotation)
 
         queue.add_all(
-            annotation_ids[:limit],
+            annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
 
         queue.sync()
@@ -109,13 +109,13 @@ class TestSyncAnnotations:
         db_session,
         queue,
     ):
-        for annotation in annotations[:limit]:
+        for annotation in annotations[:LIMIT]:
             annotation.deleted = True
 
         queue.add_all(
-            annotation_ids[:limit],
+            annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
 
         queue.sync()
@@ -137,9 +137,9 @@ class TestSyncAnnotations:
         queue,
     ):
         queue.add_all(
-            annotation_ids[:limit],
+            annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
 
         queue.sync()
@@ -152,7 +152,7 @@ class TestSyncAnnotations:
             )
         ]
         batch_indexer.index.assert_called_once_with(
-            Any.list.containing(annotation_ids[:limit]).only()
+            Any.list.containing(annotation_ids[:LIMIT]).only()
         )
 
     def test_if_the_annotation_is_already_in_Elastic_it_removes_the_job_from_the_queue(
@@ -174,14 +174,14 @@ class TestSyncAnnotations:
                             "updated": (annotation.updated).isoformat(),
                         },
                     }
-                    for annotation in annotations[:limit]
+                    for annotation in annotations[:LIMIT]
                 ],
             },
         }
         queue.add_all(
-            annotation_ids[:limit],
+            annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
 
         queue.sync()
@@ -216,14 +216,14 @@ class TestSyncAnnotations:
                             ).isoformat(),
                         },
                     }
-                    for annotation in annotations[:limit]
+                    for annotation in annotations[:LIMIT]
                 ],
             },
         }
         queue.add_all(
-            annotation_ids[:limit],
+            annotation_ids[:LIMIT],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
 
         queue.sync()
@@ -236,7 +236,7 @@ class TestSyncAnnotations:
             )
         ]
         batch_indexer.index.assert_called_once_with(
-            Any.list.containing(annotation_ids[:limit]).only()
+            Any.list.containing(annotation_ids[:LIMIT]).only()
         )
 
     def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
@@ -250,7 +250,7 @@ class TestSyncAnnotations:
         queue.add_all(
             [annotation_ids[0], annotation_ids[0], annotation_ids[0]],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
 
         queue.sync()
@@ -294,7 +294,7 @@ class TestSyncAnnotations:
         queue.add_all(
             [annotations[0].id, annotations[0].id, annotations[0].id],
             tag="test",
-            scheduled_at=five_minutes_ago,
+            scheduled_at=FIVE_MINUTES_AGO,
         )
         es.conn.search.return_value = {
             "hits": {
@@ -322,13 +322,13 @@ class TestSyncAnnotations:
         batch_indexer.index.assert_not_called()
 
 
-one_week_from_now = datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
+ONE_WEEK_FROM_NOW = datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
 
 
-five_minutes_ago = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+FIVE_MINUTES_AGO = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
 
 
-limit = 10
+LIMIT = 10
 
 
 @pytest.fixture
@@ -361,4 +361,4 @@ def es():
 
 @pytest.fixture
 def queue(batch_indexer, db_session, es):
-    return Queue(db_session, es, batch_indexer, limit)
+    return Queue(db_session, es, batch_indexer, LIMIT)
