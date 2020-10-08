@@ -154,6 +154,12 @@ class TestWebSocket:
 
         assert not fake_socket_send.called
 
+    @pytest.fixture(autouse=True)
+    def with_no_socket_instances(self):
+        # The instances set is automatically populated when web sockets are
+        # created and can couple different tests together
+        websocket.WebSocket.instances.clear()
+
     @pytest.fixture
     def client(self, fake_environ):
         sock = mock.Mock(spec_set=["sendall"])
