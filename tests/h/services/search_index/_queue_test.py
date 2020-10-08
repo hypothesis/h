@@ -183,6 +183,47 @@ class TestSyncAnnotations:
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
 
+    @pytest.fixture
+    def annotations(self, factories):
+        return factories.Annotation.create_batch(size=20)
+
+    @pytest.fixture
+    def annotation_ids(self, annotations):
+        return [annotation.id for annotation in annotations]
+
+    @pytest.fixture
+    def caplog(self, caplog):
+        caplog.set_level(logging.CRITICAL, "elasticsearch")
+        caplog.set_level(logging.INFO)
+        return caplog
+
+    @pytest.fixture
+    def index(self, es_client, moderation_service, nipsa_service, pyramid_request):
+        """A function for adding annotations to Elasticsearch."""
+
+        def index(annotations, updated=None):
+            """Add `annotations` to the Elasticsearch index."""
+            for annotation in annotations:
+                body = AnnotationSearchIndexPresenter(
+                    annotation, pyramid_request
+                ).asdict()
+
+                if updated is not None:
+                    body["updated"] = updated
+
+                es_client.conn.index(
+                    index=es_client.index,
+                    doc_type=es_client.mapping_type,
+                    body=body,
+                    id=annotation.id,
+                )
+            es_client.conn.indices.refresh(index=es_client.index)
+
+        return index
+
+
+LIMIT = 10
+
 
 ONE_WEEK = datetime_.timedelta(weeks=1)
 
@@ -190,29 +231,9 @@ ONE_WEEK = datetime_.timedelta(weeks=1)
 MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
 
 
-LIMIT = 10
-
-
-@pytest.fixture
-def annotations(factories):
-    return factories.Annotation.create_batch(size=20)
-
-
-@pytest.fixture
-def annotation_ids(annotations):
-    return [annotation.id for annotation in annotations]
-
-
 @pytest.fixture
 def batch_indexer():
     return mock.create_autospec(BatchIndexer, spec_set=True, instance=True)
-
-
-@pytest.fixture
-def caplog(caplog):
-    caplog.set_level(logging.CRITICAL, "elasticsearch")
-    caplog.set_level(logging.INFO)
-    return caplog
 
 
 @pytest.fixture(autouse=True)
@@ -230,26 +251,3 @@ def now():
 @pytest.fixture
 def queue(batch_indexer, db_session, es_client):
     return Queue(db_session, es_client, batch_indexer, LIMIT)
-
-
-@pytest.fixture
-def index(es_client, moderation_service, nipsa_service, pyramid_request):
-    """A function for adding annotations to Elasticsearch."""
-
-    def index(annotations, updated=None):
-        """Add `annotations` to the Elasticsearch index."""
-        for annotation in annotations:
-            body = AnnotationSearchIndexPresenter(annotation, pyramid_request).asdict()
-
-            if updated is not None:
-                body["updated"] = updated
-
-            es_client.conn.index(
-                index=es_client.index,
-                doc_type=es_client.mapping_type,
-                body=body,
-                id=annotation.id,
-            )
-        es_client.conn.indices.refresh(index=es_client.index)
-
-    return index
