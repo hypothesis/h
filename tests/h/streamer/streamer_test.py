@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from h.streamer import messages, streamer, websocket
-from h.streamer.streamer import TOPIC_HANDLERS
+from h.streamer.streamer import TOPIC_HANDLERS, UnknownMessageType
 
 
 class TestProcessWorkQueue:
@@ -23,44 +23,24 @@ class TestProcessWorkQueue:
 
         websocket.handle_message.assert_called_once_with(ws_message, session)
 
-    def test_it_commits_after_each_message(
-        self, process_work_queue, message, ws_message, session
+    def test_it_raises_UnknownMessageType_for_strange_messages(
+        self, process_work_queue
     ):
-        process_work_queue(queue=[message, ws_message])
+        # Technically we don't actually raise in practice, as the transaction
+        # wrapper will catch it
+        with pytest.raises(UnknownMessageType):
+            process_work_queue(queue=["not a message"])
 
-        assert session.commit.call_count == 2
-
-    def test_it_calls_close_after_commit(self, process_work_queue, session):
-        process_work_queue()
-
-        assert session.method_calls[-2:] == [mock.call.commit(), mock.call.close()]
-
-    def test_it_rolls_back_on_handler_exception(self, process_work_queue, session):
-        messages.handle_message.side_effect = RuntimeError("explosion")
-
-        process_work_queue()
-
-        self._assert_rollback_and_close(session)
-
-    @pytest.mark.parametrize("exception", (KeyboardInterrupt, SystemExit))
-    def test_it_reraises_certain_exceptions(
-        self, process_work_queue, session, exception
+    def test_it_wraps_each_message_in_a_transaction(
+        self, process_work_queue, message, db
     ):
-        messages.handle_message.side_effect = exception
+        messages = [message] * 3
 
-        with pytest.raises(exception):
-            process_work_queue()
+        process_work_queue(queue=messages)
 
-        self._assert_rollback_and_close(session)
-
-    def test_it_rolls_back_on_unknown_message_type(self, process_work_queue, session):
-        process_work_queue(queue=["something that is not a message"])
-
-        self._assert_rollback_and_close(session)
-
-    def _assert_rollback_and_close(self, session):
-        session.commit.assert_not_called()
-        assert session.method_calls[-2:] == [mock.call.rollback(), mock.call.close()]
+        context_manager = db.read_only_transaction.return_value
+        assert context_manager.__enter__.call_count == len(messages)
+        assert context_manager.__exit__.call_count == len(messages)
 
     @pytest.fixture
     def process_work_queue(self, session, registry, message):
@@ -88,7 +68,7 @@ class TestProcessWorkQueue:
     @pytest.fixture(autouse=True)
     def db(self, patch, session):
         db = patch("h.streamer.streamer.db")
-        db.Session.return_value = session
+        db.get_session.return_value = session
         return db
 
     @pytest.fixture(autouse=True)
