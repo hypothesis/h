@@ -193,8 +193,10 @@ class TestSyncAnnotations:
 
     @pytest.fixture
     def caplog(self, caplog):
-        caplog.set_level(logging.CRITICAL, "elasticsearch")
-        caplog.set_level(logging.INFO)
+        # Filter out log messages from any other module.
+        caplog.set_level(logging.CRITICAL + 1)
+        # Filter in log messages from the module under test only.
+        caplog.set_level(logging.INFO, "h.services.search_index._queue")
         return caplog
 
     @pytest.fixture
