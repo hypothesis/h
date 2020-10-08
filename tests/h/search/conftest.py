@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-from h.services.annotation_moderation import AnnotationModerationService
 from h.services.group import GroupService
 from h.services.search_index import SearchIndexService
 
@@ -13,16 +12,6 @@ def group_service(pyramid_config):
     group_service.groupids_readable_by.return_value = ["__world__"]
     pyramid_config.register_service(group_service, name="group")
     return group_service
-
-
-@pytest.fixture
-def moderation_service(pyramid_config):
-    svc = mock.create_autospec(
-        AnnotationModerationService, spec_set=True, instance=True
-    )
-    svc.all_hidden.return_value = []
-    pyramid_config.register_service(svc, name="annotation_moderation")
-    return svc
 
 
 @pytest.fixture
