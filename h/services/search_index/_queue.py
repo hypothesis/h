@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from datetime import datetime
 
 from dateutil.parser import isoparse
@@ -63,17 +64,9 @@ class Queue:
         annotations_from_db = self._get_annotations_from_db(annotation_ids)
         annotations_from_es = self._get_annotations_from_es(annotation_ids)
 
-        # Jobs whose annotation is missing from or marked as deleted in the DB.
-        missing_from_db = []
-
-        # Jobs whose annotation is the same in Elasticsearch as in the DB.
-        up_to_date_in_es = []
-
-        # Annotation IDs that're in the DB but missing from Elasticsearch.
-        missing_from_es = set()
-
-        # IDs of annotations that are different in Elasticsearch than in the DB.
-        different_in_es = set()
+        job_complete = []
+        annotations_to_sync = set()
+        counts = defaultdict(lambda: 0)
 
         for job in jobs:
             annotation_id = job.kwargs["annotation_id"]
@@ -81,38 +74,28 @@ class Queue:
             annotation_from_es = annotations_from_es.get(annotation_id)
 
             if not annotation_from_db:
-                missing_from_db.append(job)
-            elif not annotation_from_es:
-                missing_from_es.add(job.kwargs["annotation_id"])
+                job_complete.append(job)
+                counts['missing_from_db'] += 1
+            if not annotation_from_es:
+                annotations_to_sync.add(annotation_id)
+                counts['missing_from_es'] += 1
             elif annotation_from_es["updated"] != annotation_from_db.updated:
-                different_in_es.add(job.kwargs["annotation_id"])
+                annotations_to_sync.add(annotation_id)
+                counts['different_in_es'] += 1
             else:
-                up_to_date_in_es.append(job)
+                job_complete.append(job)
+                counts['up_to_date_in_es'] += 1
 
-        if missing_from_db:
-            logger.info(
-                f"Deleting {len(missing_from_db)} sync annotation jobs because their annotations have been deleted from the DB"
-            )
-        if up_to_date_in_es:
-            logger.info(
-                f"Deleting {len(up_to_date_in_es)} successfully completed jobs from the queue"
-            )
-
-        for job in missing_from_db + up_to_date_in_es:
+        for job in job_complete:
+            counts['deleted_job'] += 1
             self._db.delete(job)
 
-        if missing_from_es:
-            logger.info(
-                f"Syncing {len(missing_from_es)} annotations that are missing from Elasticsearch"
-            )
+        if annotations_to_sync:
+            counts['indexed'] = len(annotations_to_sync)
+            self._batch_indexer.index(list(annotations_to_sync))
 
-        if different_in_es:
-            logger.info(
-                f"Syncing {len(different_in_es)} annotations that are different in Elasticsearch"
-            )
-
-        if missing_from_es or different_in_es:
-            self._batch_indexer.index(list(missing_from_es.union(different_in_es)))
+        logger.info(f"Job sync complete: {counts}")
+        return counts
 
     def _get_jobs_from_queue(self):
         return (
