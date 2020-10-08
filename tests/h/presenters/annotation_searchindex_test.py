@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 from h.presenters.annotation_searchindex import AnnotationSearchIndexPresenter
-from h.services.annotation_moderation import AnnotationModerationService
 
 
 @pytest.mark.usefixtures("nipsa_service")
@@ -109,11 +108,5 @@ class TestAnnotationSearchIndexPresenter:
         class_.return_value.asdict.return_value = {}
         return class_
 
-    @pytest.fixture(autouse=True)
-    def moderation_service(self, pyramid_config):
-        svc = mock.create_autospec(
-            AnnotationModerationService, spec_set=True, instance=True
-        )
-        svc.all_hidden.return_value = []
-        pyramid_config.register_service(svc, name="annotation_moderation")
-        return svc
+
+pytestmark = pytest.mark.usefixtures("moderation_service")

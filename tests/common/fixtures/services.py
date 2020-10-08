@@ -2,10 +2,11 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services.annotation_moderation import AnnotationModerationService
 from h.services.nipsa import NipsaService
 from h.services.search_index import SearchIndexService
 
-__all__ = ("mock_service", "search_index", "nipsa_service")
+__all__ = ("mock_service", "search_index", "nipsa_service", "moderation_service")
 
 
 @pytest.fixture
@@ -30,3 +31,8 @@ def nipsa_service(mock_service):
     nipsa_service.is_flagged.return_value = False
 
     return nipsa_service
+
+
+@pytest.fixture
+def moderation_service(mock_service):
+    return mock_service(AnnotationModerationService, name="annotation_moderation")

@@ -62,13 +62,6 @@ def resource():
 
 
 @pytest.fixture
-def moderation_service(pyramid_config):
-    svc = mock.Mock(spec_set=["hide", "unhide"])
-    pyramid_config.register_service(svc, name="annotation_moderation")
-    return svc
-
-
-@pytest.fixture
 def events(patch):
     return patch("h.views.api.moderation.events")
 
