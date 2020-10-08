@@ -55,7 +55,7 @@ class TestSyncAnnotations:
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
         self, annotations, annotation_ids, caplog, db_session, queue
     ):
-        for annotation in annotations[:LIMIT]:
+        for annotation in annotations:
             db_session.delete(annotation)
 
         queue.add_all(
@@ -76,7 +76,7 @@ class TestSyncAnnotations:
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
         self, annotations, annotation_ids, caplog, db_session, queue
     ):
-        for annotation in annotations[:LIMIT]:
+        for annotation in annotations:
             annotation.deleted = True
 
         queue.add_all(
@@ -97,9 +97,7 @@ class TestSyncAnnotations:
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
         self, annotation_ids, batch_indexer, caplog, queue
     ):
-        queue.add_all(
-            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
-        )
+        queue.add_all(annotation_ids, tag="test", scheduled_at=MINUS_FIVE_MINUTES)
 
         queue.sync()
 
@@ -120,7 +118,7 @@ class TestSyncAnnotations:
         index,
         queue,
     ):
-        index(annotations[:LIMIT])
+        index(annotations)
         queue.add_all(
             annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
         )
@@ -136,10 +134,8 @@ class TestSyncAnnotations:
     def test_if_the_annotation_has_a_different_updated_time_in_Elastic_it_indexes_it(
         self, annotations, annotation_ids, batch_indexer, caplog, index, now, queue
     ):
-        index(annotations[:LIMIT], updated=now - datetime_.timedelta(minutes=5))
-        queue.add_all(
-            annotation_ids[:LIMIT], tag="test", scheduled_at=MINUS_FIVE_MINUTES
-        )
+        index(annotations, updated=now - datetime_.timedelta(minutes=5))
+        queue.add_all(annotation_ids, tag="test", scheduled_at=MINUS_FIVE_MINUTES)
 
         queue.sync()
 
