@@ -2,6 +2,7 @@ import pytest
 from _datetime import datetime
 from pyramid import security
 
+from h.streamer.contexts import request_context
 from h.streamer.messages import handle_annotation_event
 from h.streamer.websocket import WebSocket
 from h.websocket import create_app
@@ -10,14 +11,23 @@ from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEAR
 
 @pytest.mark.skip("Only of use during development")
 class TestHandleAnnotationEventSpeed:  # pragma: no cover
+    def test_load_request(self, pyramid_request):
+        ...
+        # This is here just to flush out any first load costs
+
     @pytest.mark.parametrize("reps", (1, 16, 256, 4096))
     @pytest.mark.parametrize("action", ("create", "delete"))
-    def test_speed(self, db_session, registry, socket, message, action, reps):
+    def test_speed(self, db_session, pyramid_request, socket, message, action, reps):
         sockets = list(socket for _ in range(reps))
         message["action"] = action
 
         start = datetime.utcnow()
-        handle_annotation_event(message, sockets, registry, db_session)
+        handle_annotation_event(
+            message=message,
+            sockets=sockets,
+            request=pyramid_request,
+            session=db_session,
+        )
         diff = datetime.utcnow() - start
 
         assert socket.send_json.count == reps
@@ -29,7 +39,12 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
 
     @pytest.fixture
     def annotation(self, factories):
-        return factories.Annotation()
+        return factories.Annotation(shared=True)
+
+    @pytest.fixture
+    def pyramid_request(self, registry):
+        with request_context(registry) as request:
+            yield request
 
     @pytest.fixture
     def message(self, annotation):
