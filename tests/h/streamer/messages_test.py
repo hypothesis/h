@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import Mock, create_autospec, sentinel
 
 import pytest
@@ -325,15 +326,18 @@ class TestHandleUserEvent:
     def test_sends_session_change_when_joining_or_leaving_group(self, socket, message):
         socket.authenticated_userid = message["userid"]
 
-        messages.handle_user_event(message, [socket], None, None)
+        messages.handle_user_event(message, [socket, socket], None, None)
 
-        socket.send_json.assert_called_once_with(
-            {
-                "type": "session-change",
-                "action": "group-join",
-                "model": message["session_model"],
-            }
-        )
+        reply = {
+            "type": "session-change",
+            "action": "group-join",
+            "model": message["session_model"],
+        }
+
+        assert socket.send_json.call_args_list == [
+            mock.call(reply),
+            mock.call(reply),
+        ]
 
     def test_no_send_when_socket_is_not_event_users(self, socket, message):
         """Don't send session-change events if the event user is not the socket user."""
