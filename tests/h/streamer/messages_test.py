@@ -5,6 +5,7 @@ import pytest
 from gevent.queue import Queue
 from h_matchers import Any
 from pyramid import security
+from pyramid.request import Request
 
 from h.streamer import messages
 from h.streamer.websocket import WebSocket
@@ -75,7 +76,10 @@ class TestHandleMessage:
         )
 
         handler.assert_called_once_with(
-            message.payload, websocket.instances, registry, session
+            message.payload,
+            websocket.instances,
+            Any.object.of_type(Request).with_attrs({"registry": registry}),
+            session,
         )
 
     def test_it_raises_RuntimeError_for_bad_topics(self, registry):
@@ -99,7 +103,9 @@ class TestHandleMessage:
         return patch("h.streamer.websocket.WebSocket")
 
 
-@pytest.mark.usefixtures("nipsa_service")
+@pytest.mark.usefixtures(
+    "nipsa_service", "user_service", "links_service", "groupfinder_service"
+)
 class TestHandleAnnotationEvent:
     def test_it_fetches_the_annotation(
         self, fetch_annotation, handle_annotation_event, session, message
@@ -117,15 +123,6 @@ class TestHandleAnnotationEvent:
 
         assert result is None
 
-    def test_it_initializes_groupfinder_service(
-        self, groupfinder_service, handle_annotation_event, registry, session
-    ):
-        handle_annotation_event(registry=registry, session=session)
-
-        groupfinder_service.assert_called_once_with(
-            session, registry.settings["h.authority"]
-        )
-
     def test_it_serializes_the_annotation(
         self,
         handle_annotation_event,
@@ -140,8 +137,8 @@ class TestHandleAnnotationEvent:
 
         AnnotationNotificationContext.assert_called_once_with(
             fetch_annotation.return_value,
-            groupfinder_service.return_value,
-            links_service.return_value,
+            groupfinder_service,
+            links_service,
         )
 
         AnnotationJSONPresenter.assert_called_once_with(
@@ -203,7 +200,7 @@ class TestHandleAnnotationEvent:
         fetch_annotation,
     ):
         """Should return None if the annotation is from a NIPSA'd user."""
-        nipsa_service.return_value.is_flagged.return_value = True
+        nipsa_service.is_flagged.return_value = True
         fetch_annotation.return_value.userid = "nipsaed_user"
         socket.authenticated_userid = userid
 
@@ -240,26 +237,25 @@ class TestHandleAnnotationEvent:
         assert bool(socket.send_json.call_count) == can_see
 
     @pytest.fixture
-    def handle_annotation_event(self, message, socket, registry, session):
+    def handle_annotation_event(self, message, socket, pyramid_request, session):
         def handle_annotation_event(
-            message=message, sockets=None, registry=registry, session=session
+            message=message, sockets=None, request=pyramid_request, session=session
         ):
             if sockets is None:
                 sockets = [socket]
 
-            return messages.handle_annotation_event(message, sockets, registry, session)
+            return messages.handle_annotation_event(message, sockets, request, session)
 
         return handle_annotation_event
 
     @pytest.fixture
-    def registry(self, pyramid_request):
-        registry = pyramid_request.registry
-        registry.settings = {
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.registry.settings = {
             "h.app_url": "http://streamer",
             "h.authority": "example.org",
         }
 
-        return registry
+        return pyramid_request
 
     @pytest.fixture
     def session(self):
@@ -302,24 +298,6 @@ class TestHandleAnnotationEvent:
         SocketFilter = patch("h.streamer.messages.SocketFilter")
         SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)
         return SocketFilter
-
-    @pytest.fixture(autouse=True)
-    def user_service(self, patch):
-        return patch("h.streamer.messages.UserService")
-
-    @pytest.fixture(autouse=True)
-    def links_service(self, patch):
-        return patch("h.streamer.messages.LinksService")
-
-    @pytest.fixture(autouse=True)
-    def groupfinder_service(self, patch):
-        return patch("h.streamer.messages.GroupfinderService")
-
-    @pytest.fixture
-    def nipsa_service(self, patch):
-        service = patch("h.streamer.messages.NipsaService")
-        service.return_value.is_flagged.return_value = False
-        return service
 
 
 class TestHandleUserEvent:

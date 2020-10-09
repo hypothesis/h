@@ -8,11 +8,8 @@ from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
 from h.formatters import AnnotationUserInfoFormatter
+from h.interfaces import IGroupService
 from h.realtime import Consumer
-from h.services.groupfinder import GroupfinderService
-from h.services.links import LinksService
-from h.services.nipsa import NipsaService
-from h.services.user import UserService
 from h.streamer import websocket
 from h.streamer.contexts import AnnotationNotificationContext
 from h.streamer.filter import SocketFilter
@@ -78,11 +75,11 @@ def handle_message(message, registry, session, topic_handlers):
     # The `prepare` function sets the active registry which is an implicit
     # dependency of some of the authorization logic used to look up annotation
     # and group permissions.
-    with pyramid.scripting.prepare(registry=registry):
-        handler(message.payload, sockets, registry, session)
+    with pyramid.scripting.prepare(registry=registry) as env:
+        handler(message.payload, sockets, env["request"], session)
 
 
-def handle_user_event(message, sockets, registry, session):
+def handle_user_event(message, sockets, request, session):
     # for session state change events, the full session model
     # is included so that clients can update themselves without
     # further API requests
@@ -103,7 +100,7 @@ def handle_user_event(message, sockets, registry, session):
         socket.send_json(reply)
 
 
-def handle_annotation_event(message, sockets, registry, session):
+def handle_annotation_event(message, sockets, request, session):
     id_ = message["annotation_id"]
     annotation = storage.fetch_annotation(session, id_)
 
@@ -124,18 +121,15 @@ def handle_annotation_event(message, sockets, registry, session):
     # Create a generator which has the first socket back again
     matching_sockets = chain((first_socket,), matching_sockets)
 
-    authority = registry.settings.get("h.authority", "localhost")
-    base_url = registry.settings.get("h.app_url", "http://localhost:5000")
-
     resource = AnnotationNotificationContext(
         annotation,
-        group_service=GroupfinderService(session, authority),
-        links_service=LinksService(base_url, registry),
+        group_service=request.find_service(IGroupService),
+        links_service=request.find_service(name="links"),
     )
     read_principals = principals_allowed_by_permission(resource, "read")
-    reply = _generate_annotation_event(session, authority, message, resource)
+    reply = _generate_annotation_event(session, request, message, resource)
 
-    annotator_nipsad = NipsaService(session).is_flagged(annotation.userid)
+    annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
 
     for socket in matching_sockets:
         # Don't send notifications back to the person who sent them
@@ -153,7 +147,7 @@ def handle_annotation_event(message, sockets, registry, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(session, authority, message, resource):
+def _generate_annotation_event(session, request, message, resource):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -167,7 +161,7 @@ def _generate_annotation_event(session, authority, message, resource):
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
-        user_service = UserService(authority, session)
+        user_service = request.find_service(name="user")
         formatters = [AnnotationUserInfoFormatter(session, user_service)]
         payload = presenters.AnnotationJSONPresenter(
             resource, formatters=formatters
