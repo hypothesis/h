@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 from h_matchers import Any
 
-from h.interfaces import IGroupService
 from h.services.annotation_json_presentation import (
     AnnotationJSONPresentationService,
     annotation_json_presentation_service_factory,
@@ -235,16 +234,16 @@ class TestAnnotationJSONPresentationServiceFactory:
 
 
 @pytest.fixture
-def services(pyramid_config, user_service, links_service):
-    service_mocks = {"user": user_service, "links": links_service}
+def services(pyramid_config, user_service, links_service, groupfinder_service):
+    service_mocks = {
+        "user": user_service,
+        "links": links_service,
+        "group": groupfinder_service,
+    }
 
     for name in ["flag", "flag_count", "annotation_moderation"]:
         svc = mock.Mock()
         service_mocks[name] = svc
         pyramid_config.register_service(svc, name=name)
-
-    group_svc = mock.Mock()
-    service_mocks["group"] = group_svc
-    pyramid_config.register_service(group_svc, iface=IGroupService)
 
     return service_mocks

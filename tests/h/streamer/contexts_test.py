@@ -2,7 +2,6 @@ import pytest
 from h_matchers import Any
 from pyramid.security import DENY_ALL
 
-from h.services.groupfinder import GroupfinderService
 from h.streamer.contexts import AnnotationNotificationContext
 
 
@@ -29,12 +28,10 @@ class TestAnnotationNotificationContext:
         assert acl[-1] == DENY_ALL
 
     @pytest.fixture
-    def get_context_acl(self, db_session):
+    def get_context_acl(self, db_session, groupfinder_service):
         def get_context(annotation):
-            group_service = GroupfinderService(db_session, annotation.authority)
-
             context = AnnotationNotificationContext(
-                annotation, group_service=group_service, links_service=None
+                annotation, group_service=groupfinder_service, links_service=None
             )
 
             return context.__acl__()

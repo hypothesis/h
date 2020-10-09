@@ -77,7 +77,7 @@ class TestSearch:
     "AnnotationEvent",
     "create_schema",
     "links_service",
-    "group_service",
+    "groupfinder_service",
     "presentation_service",
     "storage",
 )
@@ -115,14 +115,14 @@ class TestCreate:
         assert str(exc.value) == "asplode"
 
     def test_it_creates_the_annotation_in_storage(
-        self, pyramid_request, storage, create_schema, group_service
+        self, pyramid_request, storage, create_schema, groupfinder_service
     ):
         schema = create_schema.return_value
 
         views.create(pyramid_request)
 
         storage.create_annotation.assert_called_once_with(
-            pyramid_request, schema.validate.return_value, group_service
+            pyramid_request, schema.validate.return_value, groupfinder_service
         )
 
     def test_it_raises_if_create_annotation_raises(self, pyramid_request, storage):
@@ -153,7 +153,7 @@ class TestCreate:
         storage,
         annotation_resource,
         pyramid_request,
-        group_service,
+        groupfinder_service,
         links_service,
     ):
 
@@ -162,7 +162,7 @@ class TestCreate:
         views.create(pyramid_request)
 
         annotation_resource.assert_called_once_with(
-            annotation, group_service, links_service
+            annotation, groupfinder_service, links_service
         )
 
     def test_it_presents_annotation(
@@ -244,7 +244,7 @@ class TestReadJSONLD:
 @pytest.mark.usefixtures(
     "AnnotationEvent",
     "links_service",
-    "group_service",
+    "groupfinder_service",
     "presentation_service",
     "update_schema",
     "storage",
@@ -285,7 +285,7 @@ class TestUpdate:
             views.update(mock.Mock(), pyramid_request)
 
     def test_it_updates_the_annotation_in_storage(
-        self, pyramid_request, storage, update_schema, group_service
+        self, pyramid_request, storage, update_schema, groupfinder_service
     ):
         context = mock.Mock()
         schema = update_schema.return_value
@@ -297,7 +297,7 @@ class TestUpdate:
             pyramid_request,
             context.annotation.id,
             mock.sentinel.validated_data,
-            group_service,
+            groupfinder_service,
         )
 
     def test_it_raises_if_storage_raises(self, pyramid_request, storage):
@@ -329,7 +329,7 @@ class TestUpdate:
         storage,
         annotation_resource,
         pyramid_request,
-        group_service,
+        groupfinder_service,
         links_service,
     ):
 
@@ -338,7 +338,7 @@ class TestUpdate:
         views.update(mock.Mock(), pyramid_request)
 
         annotation_resource.assert_called_once_with(
-            annotation, group_service, links_service
+            annotation, groupfinder_service, links_service
         )
 
     def test_it_presents_annotation(
@@ -402,13 +402,6 @@ def presentation_service(pyramid_config):
     svc = mock.Mock(spec_set=["present", "present_all"])
     pyramid_config.register_service(svc, name="annotation_json_presentation")
     return svc
-
-
-@pytest.fixture
-def group_service(pyramid_config):
-    group_service = mock.Mock(spec_set=["find"])
-    pyramid_config.register_service(group_service, iface="h.interfaces.IGroupService")
-    return group_service
 
 
 @pytest.fixture

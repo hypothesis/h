@@ -4,7 +4,6 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.services.flag import FlagService
-from h.services.groupfinder import GroupfinderService
 from h.traversal import AnnotationContext
 from h.views.api import flags as views
 
@@ -125,16 +124,6 @@ class TestCreate:
         flag_service = mock.create_autospec(FlagService, instance=True, spec_set=True)
         pyramid_config.register_service(flag_service, name="flag")
         return flag_service
-
-    @pytest.fixture
-    def groupfinder_service(self, pyramid_config):
-        groupfinder_service = mock.create_autospec(
-            GroupfinderService, instance=True, spec_set=True
-        )
-        pyramid_config.register_service(
-            groupfinder_service, iface="h.interfaces.IGroupService"
-        )
-        return groupfinder_service
 
     @pytest.fixture
     def flag_notification_email(self, patch):
