@@ -324,7 +324,6 @@ class TestProfileRoot:
         assert not pyramid_request.has_permission("update", context)
 
 
-@pytest.mark.usefixtures("groups", "groupfinder_service")
 class TestGroupRoot:
     def test_it_assigns_create_permission_with_user_role(
         self, set_permissions, pyramid_request
@@ -345,34 +344,32 @@ class TestGroupRoot:
         assert not pyramid_request.has_permission("create", context)
 
     def test_getitem_returns_fetched_group_if_not_None(
-        self, factories, group_factory, groupfinder_service
+        self, factories, group_factory, group_service
     ):
         group = factories.Group()
-        groupfinder_service.fetch.return_value = group
+        group_service.fetch.return_value = group
 
         assert group_factory[group.pubid] == group
 
     def test_getitem_raises_KeyError_if_fetch_returns_None(
-        self, group_factory, groupfinder_service
+        self, group_factory, group_service
     ):
-        groupfinder_service.fetch.return_value = None
+        group_service.fetch.return_value = None
         with pytest.raises(KeyError):
             group_factory["does_not_exist"]
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def groups(self, factories):
         # Add some "noise" groups to the DB.
         # These are groups that we _don't_ expect GroupRoot to return in
         # the tests.
         return [factories.Group(), factories.Group(), factories.Group()]
 
-    @pytest.fixture
-    def groupfinder_service(self, pyramid_config):
-        groupfinder_service = mock.create_autospec(
-            GroupService, spec_set=True, instance=True
-        )
-        pyramid_config.register_service(groupfinder_service, name="group")
-        return groupfinder_service
+    @pytest.fixture(autouse=True)
+    def group_service(self, pyramid_config):
+        group_service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+        pyramid_config.register_service(group_service, name="group")
+        return group_service
 
     @pytest.fixture
     def group_factory(self, pyramid_request):
