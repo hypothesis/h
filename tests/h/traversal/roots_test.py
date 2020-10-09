@@ -76,7 +76,7 @@ class TestRoot:
         assert pyramid_request.has_permission(pyramid.security.ALL_PERMISSIONS, context)
 
 
-@pytest.mark.usefixtures("group_service", "links_service")
+@pytest.mark.usefixtures("groupfinder_service", "links_service")
 class TestAnnotationRoot:
     def test_it_does_not_assign_create_permission_without_authenticated_user(
         self, set_permissions, pyramid_request
@@ -128,13 +128,13 @@ class TestAnnotationRoot:
             factory["123"]
 
     def test_get_item_has_right_group_service(
-        self, pyramid_request, storage, group_service
+        self, pyramid_request, storage, groupfinder_service
     ):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory["123"]
-        assert resource.group_service == group_service
+        assert resource.group_service == groupfinder_service
 
     def test_get_item_has_right_links_service(
         self, pyramid_request, storage, links_service
@@ -148,14 +148,6 @@ class TestAnnotationRoot:
     @pytest.fixture
     def storage(self, patch):
         return patch("h.traversal.roots.storage")
-
-    @pytest.fixture
-    def group_service(self, pyramid_config):
-        group_service = mock.Mock(spec_set=["find"])
-        pyramid_config.register_service(
-            group_service, iface="h.interfaces.IGroupService"
-        )
-        return group_service
 
 
 class TestAuthClientRoot:
@@ -332,7 +324,7 @@ class TestProfileRoot:
         assert not pyramid_request.has_permission("update", context)
 
 
-@pytest.mark.usefixtures("groups", "group_service")
+@pytest.mark.usefixtures("groups", "groupfinder_service")
 class TestGroupRoot:
     def test_it_assigns_create_permission_with_user_role(
         self, set_permissions, pyramid_request
@@ -353,17 +345,17 @@ class TestGroupRoot:
         assert not pyramid_request.has_permission("create", context)
 
     def test_getitem_returns_fetched_group_if_not_None(
-        self, factories, group_factory, group_service
+        self, factories, group_factory, groupfinder_service
     ):
         group = factories.Group()
-        group_service.fetch.return_value = group
+        groupfinder_service.fetch.return_value = group
 
         assert group_factory[group.pubid] == group
 
     def test_getitem_raises_KeyError_if_fetch_returns_None(
-        self, group_factory, group_service
+        self, group_factory, groupfinder_service
     ):
-        group_service.fetch.return_value = None
+        groupfinder_service.fetch.return_value = None
         with pytest.raises(KeyError):
             group_factory["does_not_exist"]
 
@@ -375,10 +367,12 @@ class TestGroupRoot:
         return [factories.Group(), factories.Group(), factories.Group()]
 
     @pytest.fixture
-    def group_service(self, pyramid_config):
-        group_service = mock.create_autospec(GroupService, spec_set=True, instance=True)
-        pyramid_config.register_service(group_service, name="group")
-        return group_service
+    def groupfinder_service(self, pyramid_config):
+        groupfinder_service = mock.create_autospec(
+            GroupService, spec_set=True, instance=True
+        )
+        pyramid_config.register_service(groupfinder_service, name="group")
+        return groupfinder_service
 
     @pytest.fixture
     def group_factory(self, pyramid_request):

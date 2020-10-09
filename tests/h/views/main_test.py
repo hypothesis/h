@@ -1,5 +1,3 @@
-from unittest import mock
-
 import pytest
 from h_matchers import All, Any
 from pyramid import httpexceptions
@@ -15,10 +13,10 @@ def _fake_sidebar_app(request, extra):
 
 @pytest.mark.usefixtures("routes")
 def test_og_document(
-    factories, pyramid_request, group_service, links_service, sidebar_app
+    factories, pyramid_request, groupfinder_service, links_service, sidebar_app
 ):
     annotation = factories.Annotation(userid="acct:foo@example.com")
-    context = AnnotationContext(annotation, group_service, links_service)
+    context = AnnotationContext(annotation, groupfinder_service, links_service)
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
@@ -38,9 +36,11 @@ def test_og_document(
 
 
 @pytest.mark.usefixtures("routes")
-def test_og_no_document(pyramid_request, group_service, links_service, sidebar_app):
+def test_og_no_document(
+    pyramid_request, groupfinder_service, links_service, sidebar_app
+):
     annotation = Annotation(id="123", userid="foo", target_uri="http://example.com")
-    context = AnnotationContext(annotation, group_service, links_service)
+    context = AnnotationContext(annotation, groupfinder_service, links_service)
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
@@ -150,10 +150,3 @@ def routes(pyramid_config):
     pyramid_config.add_route("api.annotation", "/api/ann/{id}")
     pyramid_config.add_route("api.index", "/api/index")
     pyramid_config.add_route("index", "/index")
-
-
-@pytest.fixture
-def group_service(pyramid_config):
-    group_service = mock.Mock(spec_set=["find"])
-    pyramid_config.register_service(group_service, iface="h.interfaces.IGroupService")
-    return group_service

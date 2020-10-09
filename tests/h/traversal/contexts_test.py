@@ -16,29 +16,29 @@ from h.traversal.contexts import (
 )
 
 
-@pytest.mark.usefixtures("group_service", "links_service")
+@pytest.mark.usefixtures("groupfinder_service", "links_service")
 class TestAnnotationContext:
-    def test_links(self, group_service, links_service):
+    def test_links(self, groupfinder_service, links_service):
         ann = mock.Mock()
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         result = res.links
 
         links_service.get_all.assert_called_once_with(ann)
         assert result == links_service.get_all.return_value
 
-    def test_link(self, group_service, links_service):
+    def test_link(self, groupfinder_service, links_service):
         ann = mock.Mock()
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         result = res.link("json")
 
         links_service.get.assert_called_once_with(ann, "json")
         assert result == links_service.get.return_value
 
-    def test_acl_private(self, factories, group_service, links_service):
+    def test_acl_private(self, factories, groupfinder_service, links_service):
         ann = factories.Annotation(shared=False, userid="saoirse")
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
         actual = res.__acl__()
         # Note NOT the ``moderate`` permission
         expect = [
@@ -51,7 +51,9 @@ class TestAnnotationContext:
         ]
         assert actual == expect
 
-    def test_acl_shared_admin_perms(self, factories, group_service, links_service):
+    def test_acl_shared_admin_perms(
+        self, factories, groupfinder_service, links_service
+    ):
         """
         Shared annotation contexts should still only give admin/update/delete
         permissions to the owner.
@@ -59,13 +61,13 @@ class TestAnnotationContext:
         policy = ACLAuthorizationPolicy()
 
         ann = factories.Annotation(shared=False, userid="saoirse")
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         for perm in ["admin", "update", "delete"]:
             assert policy.permits(res, ["saoirse"], perm)
             assert not policy.permits(res, ["someoneelse"], perm)
 
-    def test_acl_deleted(self, factories, group_service, links_service):
+    def test_acl_deleted(self, factories, groupfinder_service, links_service):
         """
         Nobody -- not even the owner -- should have any permissions on a
         deleted annotation.
@@ -73,7 +75,7 @@ class TestAnnotationContext:
         policy = ACLAuthorizationPolicy()
 
         ann = factories.Annotation(userid="saoirse", deleted=True)
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         for perm in ["read", "admin", "update", "delete", "moderate"]:
             assert not policy.permits(res, ["saiorse"], perm)
@@ -105,7 +107,7 @@ class TestAnnotationContext:
         groupid,
         userid,
         permitted,
-        group_service,
+        groupfinder_service,
         links_service,
     ):
         """
@@ -119,7 +121,7 @@ class TestAnnotationContext:
         pyramid_config.set_authorization_policy(policy)
 
         ann = factories.Annotation(shared=True, userid="mioara", groupid=groupid)
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
             assert pyramid_request.has_permission("read", res)
@@ -153,7 +155,7 @@ class TestAnnotationContext:
         groupid,
         userid,
         permitted,
-        group_service,
+        groupfinder_service,
         links_service,
     ):
         """
@@ -167,7 +169,7 @@ class TestAnnotationContext:
         pyramid_config.set_authorization_policy(policy)
 
         ann = factories.Annotation(shared=True, userid="mioara", groupid=groupid)
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
             assert pyramid_request.has_permission("flag", res)
@@ -201,7 +203,7 @@ class TestAnnotationContext:
         groupid,
         userid,
         permitted,
-        group_service,
+        groupfinder_service,
         links_service,
     ):
         """
@@ -216,7 +218,7 @@ class TestAnnotationContext:
         pyramid_config.set_authorization_policy(policy)
 
         ann = factories.Annotation(shared=True, userid="mioara", groupid=groupid)
-        res = AnnotationContext(ann, group_service, links_service)
+        res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
             assert pyramid_request.has_permission("moderate", res)
@@ -232,13 +234,10 @@ class TestAnnotationContext:
         }
 
     @pytest.fixture
-    def group_service(self, pyramid_config, groups):
-        group_service = mock.Mock(spec_set=["find"])
-        group_service.find.side_effect = lambda groupid: groups.get(groupid)
-        pyramid_config.register_service(
-            group_service, iface="h.interfaces.IGroupService"
-        )
-        return group_service
+    def groupfinder_service(self, groupfinder_service, groups):
+        groupfinder_service.find.side_effect = lambda groupid: groups.get(groupid)
+
+        return groupfinder_service
 
 
 @pytest.mark.usefixtures("links_svc")

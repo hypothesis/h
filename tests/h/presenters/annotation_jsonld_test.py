@@ -8,7 +8,7 @@ from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONLDPresenter:
-    def test_asdict(self, group_service, links_service):
+    def test_asdict(self, groupfinder_service, links_service):
         annotation = mock.Mock(
             id="foobar",
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -42,14 +42,14 @@ class TestAnnotationJSONLDPresenter:
             ],
         }
 
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
         result = AnnotationJSONLDPresenter(resource).asdict()
 
         assert result == expected
 
-    def test_id_returns_jsonld_id_link(self, group_service, links_service):
+    def test_id_returns_jsonld_id_link(self, groupfinder_service, links_service):
         annotation = mock.Mock(id="foobar")
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
         presenter = AnnotationJSONLDPresenter(resource)
 
         result = presenter.id
@@ -57,9 +57,9 @@ class TestAnnotationJSONLDPresenter:
         assert result == links_service.get.return_value
         links_service.get.assert_called_once_with(annotation, Any())
 
-    def test_bodies_returns_textual_body(self, group_service, links_service):
+    def test_bodies_returns_textual_body(self, groupfinder_service, links_service):
         annotation = mock.Mock(text="Flib flob flab", tags=None)
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
 
         bodies = AnnotationJSONLDPresenter(resource).bodies
 
@@ -71,9 +71,9 @@ class TestAnnotationJSONLDPresenter:
             }
         ]
 
-    def test_bodies_appends_tag_bodies(self, group_service, links_service):
+    def test_bodies_appends_tag_bodies(self, groupfinder_service, links_service):
         annotation = mock.Mock(text="Flib flob flab", tags=["giraffe", "lion"])
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
 
         bodies = AnnotationJSONLDPresenter(resource).bodies
 
@@ -84,19 +84,21 @@ class TestAnnotationJSONLDPresenter:
         } in bodies
         assert {"type": "TextualBody", "value": "lion", "purpose": "tagging"} in bodies
 
-    def test_ignores_selectors_lacking_types(self, group_service, links_service):
+    def test_ignores_selectors_lacking_types(self, groupfinder_service, links_service):
         annotation = mock.Mock(target_uri="http://example.com")
         annotation.target_selectors = [
             {"type": "TestSelector", "test": "foobar"},
             {"something": "else"},
         ]
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
 
         selectors = AnnotationJSONLDPresenter(resource).target[0]["selector"]
 
         assert selectors == [{"type": "TestSelector", "test": "foobar"}]
 
-    def test_rewrites_rangeselectors_same_element(self, group_service, links_service):
+    def test_rewrites_rangeselectors_same_element(
+        self, groupfinder_service, links_service
+    ):
         """
         A RangeSelector that starts and ends in the same element should be
         rewritten to an XPathSelector refinedBy a TextPositionSelector, for
@@ -112,7 +114,7 @@ class TestAnnotationJSONLDPresenter:
                 "endOffset": 43,
             }
         ]
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
 
         selectors = AnnotationJSONLDPresenter(resource).target[0]["selector"]
 
@@ -125,7 +127,7 @@ class TestAnnotationJSONLDPresenter:
         ]
 
     def test_rewrites_rangeselectors_different_element(
-        self, group_service, links_service
+        self, groupfinder_service, links_service
     ):
         """
         A RangeSelector that starts and ends in the different elements should
@@ -142,7 +144,7 @@ class TestAnnotationJSONLDPresenter:
                 "endOffset": 72,
             }
         ]
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
 
         selectors = AnnotationJSONLDPresenter(resource).target[0]["selector"]
 
@@ -166,7 +168,7 @@ class TestAnnotationJSONLDPresenter:
             }
         ]
 
-    def test_ignores_malformed_rangeselectors(self, group_service, links_service):
+    def test_ignores_malformed_rangeselectors(self, groupfinder_service, links_service):
         annotation = mock.Mock(target_uri="http://example.com")
         annotation.target_selectors = [
             {
@@ -176,7 +178,7 @@ class TestAnnotationJSONLDPresenter:
                 "endContainer": "/div[1]/main[1]/article[1]/div[2]/p[339]",
             }
         ]
-        resource = AnnotationContext(annotation, group_service, links_service)
+        resource = AnnotationContext(annotation, groupfinder_service, links_service)
 
         target = AnnotationJSONLDPresenter(resource).target[0]
 
