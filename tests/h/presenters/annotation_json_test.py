@@ -39,7 +39,7 @@ class IDDuplicatingFormatter:
 
 
 class TestAnnotationJSONPresenter:
-    def test_asdict(self, document_asdict, group_service, fake_links_service):
+    def test_asdict(self, document_asdict, group_service, links_service):
         ann = mock.Mock(
             id="the-id",
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -54,7 +54,7 @@ class TestAnnotationJSONPresenter:
             references=["referenced-id-1", "referenced-id-2"],
             extra={"extra-1": "foo", "extra-2": "bar"},
         )
-        resource = AnnotationContext(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, links_service)
 
         document_asdict.return_value = {"foo": "bar"}
 
@@ -80,7 +80,7 @@ class TestAnnotationJSONPresenter:
                 }
             ],
             "document": {"foo": "bar"},
-            "links": {"giraffe": "http://giraffe.com", "toad": "http://toad.net"},
+            "links": links_service.get_all.return_value,
             "references": ["referenced-id-1", "referenced-id-2"],
             "extra-1": "foo",
             "extra-2": "bar",
@@ -91,21 +91,21 @@ class TestAnnotationJSONPresenter:
         assert result == expected
 
     def test_asdict_extra_cannot_override_other_data(
-        self, document_asdict, group_service, fake_links_service
+        self, document_asdict, group_service, links_service
     ):
         ann = mock.Mock(id="the-real-id", extra={"id": "the-extra-id"})
-        resource = AnnotationContext(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, links_service)
         document_asdict.return_value = {}
 
         presented = AnnotationJSONPresenter(resource).asdict()
         assert presented["id"] == "the-real-id"
 
     def test_asdict_extra_uses_copy_of_extra(
-        self, document_asdict, group_service, fake_links_service
+        self, document_asdict, group_service, links_service
     ):
         extra = {"foo": "bar"}
         ann = mock.Mock(id="my-id", extra=extra)
-        resource = AnnotationContext(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, links_service)
         document_asdict.return_value = {}
 
         AnnotationJSONPresenter(resource).asdict()
@@ -113,9 +113,9 @@ class TestAnnotationJSONPresenter:
         # Presenting the annotation shouldn't change the "extra" dict.
         assert extra == {"foo": "bar"}
 
-    def test_asdict_merges_formatters(self, group_service, fake_links_service):
+    def test_asdict_merges_formatters(self, group_service, links_service):
         ann = mock.Mock(id="the-real-id", extra={})
-        resource = AnnotationContext(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, links_service)
 
         formatters = [
             FakeFormatter({"flagged": "nope"}),
@@ -127,7 +127,7 @@ class TestAnnotationJSONPresenter:
         assert presented["flagged"] == "nope"
         assert presented["nipsa"] == "maybe"
 
-    def test_immutable_formatters(self, group_service, fake_links_service):
+    def test_immutable_formatters(self, group_service, links_service):
         """Double-check we can't mutate the formatters list after the fact.
 
         This is an extra check just to make sure we can't accidentally change
@@ -136,7 +136,7 @@ class TestAnnotationJSONPresenter:
 
         """
         ann = mock.Mock(id="the-real-id", extra={})
-        resource = AnnotationContext(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, links_service)
 
         formatters = [FakeFormatter({"flagged": "nope"})]
         presenter = AnnotationJSONPresenter(resource, formatters)
@@ -145,11 +145,9 @@ class TestAnnotationJSONPresenter:
 
         assert "enterprise" not in presented
 
-    def test_formatter_uses_annotation_resource(
-        self, group_service, fake_links_service
-    ):
+    def test_formatter_uses_annotation_resource(self, group_service, links_service):
         annotation = mock.Mock(id="the-id", extra={})
-        resource = AnnotationContext(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, links_service)
 
         formatters = [IDDuplicatingFormatter()]
         presenter = AnnotationJSONPresenter(resource, formatters)
@@ -204,7 +202,7 @@ class TestAnnotationJSONPresenter:
         action,
         expected,
         group_service,
-        fake_links_service,
+        links_service,
     ):
         annotation.deleted = False
 
@@ -217,7 +215,7 @@ class TestAnnotationJSONPresenter:
         group.__acl__.return_value = [group_principals[group_readable]]
         group_service.find.return_value = group
 
-        resource = AnnotationContext(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, links_service)
         presenter = AnnotationJSONPresenter(resource)
         assert expected == presenter.permissions[action]
 

@@ -398,13 +398,6 @@ def annotation_resource(patch):
 
 
 @pytest.fixture
-def links_service(pyramid_config):
-    service = mock.Mock(spec_set=["get", "get_all"])
-    pyramid_config.register_service(service, name="links")
-    return service
-
-
-@pytest.fixture
 def presentation_service(pyramid_config):
     svc = mock.Mock(spec_set=["present", "present_all"])
     pyramid_config.register_service(svc, name="annotation_json_presentation")
