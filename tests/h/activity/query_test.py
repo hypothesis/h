@@ -195,13 +195,6 @@ class TestCheckURL:
         return factories.Group()
 
     @pytest.fixture
-    def user_service(self, factories, pyramid_config):
-        user_service = mock.Mock(spec_set=["fetch"])
-        user_service.fetch.return_value = factories.User.build()
-        pyramid_config.register_service(user_service, name="user")
-        return user_service
-
-    @pytest.fixture
     def unparse(self):
         return mock.Mock(spec_set=[], return_value="UNPARSED_QUERY")
 

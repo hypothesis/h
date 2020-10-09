@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-from h.services.user import UserService
 from h.services.user_unique import (
     DuplicateUserError,
     UserUniqueService,
@@ -181,10 +180,3 @@ def user_model(patch):
 @pytest.fixture
 def svc(db_session, user_service):
     return UserUniqueService(session=db_session, user_service=user_service)
-
-
-@pytest.fixture
-def user_service(pyramid_config):
-    service = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(service, name="user")
-    return service

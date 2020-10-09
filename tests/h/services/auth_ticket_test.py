@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from unittest import mock
 
 import pytest
 
@@ -11,7 +10,6 @@ from h.services.auth_ticket import (
     AuthTicketService,
     auth_ticket_service_factory,
 )
-from h.services.user import UserService
 
 
 class TestAuthTicketService:
@@ -210,15 +208,6 @@ class TestAuthTicketServiceFactory:
     def test_it_provides_user_service(self, pyramid_request, user_service):
         svc = auth_ticket_service_factory(None, pyramid_request)
         assert svc.usersvc == user_service
-
-
-@pytest.fixture
-def user_service(db_session, pyramid_config):
-    service = mock.Mock(
-        spec=UserService(default_authority="example.com", session=db_session)
-    )
-    pyramid_config.register_service(service, name="user")
-    return service
 
 
 @pytest.fixture

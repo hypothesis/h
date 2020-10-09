@@ -1120,12 +1120,6 @@ class TestUserSearchController:
             orcid="0000-0000-0000-0000",
         )
 
-    @pytest.fixture
-    def user_service(self, patch, pyramid_config):
-        user_service = patch("h.services.user.UserService")
-        pyramid_config.register_service(user_service, name="user")
-        return user_service
-
 
 @pytest.mark.usefixtures("routes", "search")
 class TestGroupAndUserSearchController:

@@ -53,12 +53,6 @@ class TestUpdatePreferences:
 
         assert result == session_profile.return_value
 
-    @pytest.fixture
-    def user_service(self, pyramid_config):
-        svc = mock.Mock()
-        pyramid_config.register_service(svc, name="user")
-        return svc
-
 
 @pytest.mark.usefixtures("group_list_service", "GroupContext", "GroupsJSONPresenter")
 class TestProfileGroups:

@@ -43,11 +43,3 @@ class TestGetUser:
         result = accounts.get_user(pyramid_request)
 
         assert result == user
-
-
-@pytest.fixture
-def user_service(pyramid_config):
-    service = mock.Mock(spec_set=["fetch"])
-    service.fetch.return_value = None
-    pyramid_config.register_service(service, name="user")
-    return service

@@ -10,7 +10,6 @@ from h.auth import role
 from h.exceptions import InvalidUserId
 from h.models import AuthClient
 from h.services.group import GroupService
-from h.services.user import UserService
 from h.traversal.contexts import AnnotationContext, UserContext
 from h.traversal.roots import (
     AnnotationRoot,
@@ -537,13 +536,6 @@ def client_authority(patch):
     client_authority = patch("h.traversal.roots.client_authority")
     client_authority.return_value = None
     return client_authority
-
-
-@pytest.fixture
-def user_service(pyramid_config):
-    user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(user_service, name="user")
-    return user_service
 
 
 @pytest.fixture

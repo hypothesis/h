@@ -5,7 +5,9 @@ import pytest
 from h.services.nipsa import NipsaService
 from h.services.search_index import SearchIndexService
 
-__all__ = ("mock_service", "search_index", "nipsa_service")
+__all__ = ("mock_service", "search_index", "nipsa_service", "user_service")
+
+from h.services.user import UserService
 
 
 @pytest.fixture
@@ -30,3 +32,8 @@ def nipsa_service(mock_service):
     nipsa_service.is_flagged.return_value = False
 
     return nipsa_service
+
+
+@pytest.fixture
+def user_service(mock_service):
+    return mock_service(UserService, name="user")

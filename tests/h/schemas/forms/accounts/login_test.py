@@ -5,7 +5,7 @@ import pytest
 from pyramid.exceptions import BadCSRFToken
 
 from h.schemas.forms.accounts import LoginSchema
-from h.services.user import UserNotActivated, UserService
+from h.services.user import UserNotActivated
 from h.services.user_password import UserPasswordService
 
 
@@ -107,16 +107,6 @@ class TestLoginSchema:
         pyramid_request.params = params
 
         assert LoginSchema.default_values(pyramid_request)["username"] == value
-
-
-@pytest.fixture
-def user_service(db_session, pyramid_config):
-    service = Mock(
-        spec_set=UserService(default_authority="example.com", session=db_session)
-    )
-    service.fetch_for_login.return_value = None
-    pyramid_config.register_service(service, name="user")
-    return service
 
 
 @pytest.fixture

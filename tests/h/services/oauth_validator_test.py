@@ -643,14 +643,14 @@ class TestValidateRefreshToken:
         assert result is True
 
     def test_sets_user_when_token_valid(
-        self, svc, client, oauth_request, token, user_svc
+        self, svc, client, oauth_request, token, user_service
     ):
         def fake_fetch(userid, authority=None):
             if userid == token.userid:
                 return mock.Mock(userid=userid)
             return None
 
-        user_svc.fetch.side_effect = fake_fetch
+        user_service.fetch.side_effect = fake_fetch
 
         assert oauth_request.user is None
         svc.validate_refresh_token(token.refresh_token, client, oauth_request)
@@ -707,20 +707,20 @@ class TestValidateScopes:
         assert svc.validate_scopes("something", scopes, None) is False
 
 
-@pytest.mark.usefixtures("user_svc")
+@pytest.mark.usefixtures("user_service")
 class TestOAuthValidatorServiceFactory:
     def test_it_returns_oauth_service(self, pyramid_request):
         svc = oauth_validator_service_factory(None, pyramid_request)
         assert isinstance(svc, OAuthValidatorService)
 
-    def test_provides_user_service(self, pyramid_request, user_svc):
+    def test_provides_user_service(self, pyramid_request, user_service):
         svc = oauth_validator_service_factory(None, pyramid_request)
-        assert svc.user_svc == user_svc
+        assert svc.user_svc == user_service
 
 
 @pytest.fixture
-def svc(db_session, user_svc):
-    return OAuthValidatorService(db_session, user_svc)
+def svc(db_session, user_service):
+    return OAuthValidatorService(db_session, user_service)
 
 
 @pytest.fixture
@@ -731,13 +731,6 @@ def oauth_request():
 @pytest.fixture
 def client(factories):
     return factories.AuthClient()
-
-
-@pytest.fixture
-def user_svc(pyramid_config):
-    svc = mock.Mock(spec_set=["fetch"])
-    pyramid_config.register_service(svc, name="user")
-    return svc
 
 
 @pytest.fixture
