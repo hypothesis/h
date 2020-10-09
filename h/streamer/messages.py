@@ -11,7 +11,7 @@ from h.formatters import AnnotationUserInfoFormatter
 from h.interfaces import IGroupService
 from h.realtime import Consumer
 from h.streamer import websocket
-from h.streamer.contexts import AnnotationNotificationContext
+from h.streamer.contexts import AnnotationNotificationContext, request_context
 from h.streamer.filter import SocketFilter
 
 log = logging.getLogger(__name__)
@@ -75,8 +75,8 @@ def handle_message(message, registry, session, topic_handlers):
     # The `prepare` function sets the active registry which is an implicit
     # dependency of some of the authorization logic used to look up annotation
     # and group permissions.
-    with pyramid.scripting.prepare(registry=registry) as env:
-        handler(message.payload, sockets, env["request"], session)
+    with request_context(registry) as request:
+        handler(message.payload, sockets, request, session)
 
 
 def handle_user_event(message, sockets, request, session):
