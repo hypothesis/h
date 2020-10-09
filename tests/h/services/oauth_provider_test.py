@@ -115,10 +115,3 @@ def validator_service(pyramid_config):
     svc = mock.Mock()
     pyramid_config.register_service(svc, name="oauth_validator")
     return svc
-
-
-@pytest.fixture
-def user_service(pyramid_config):
-    svc = mock.Mock()
-    pyramid_config.register_service(svc, name="user")
-    return svc

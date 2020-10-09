@@ -11,7 +11,6 @@ from h.models.group import (
 )
 from h.models.organization import Organization
 from h.schemas.forms.admin.group import AdminGroupSchema
-from h.services.user import UserService
 
 
 class TestAdminGroupSchema:
@@ -78,14 +77,14 @@ class TestAdminGroupSchema:
             bound_schema.deserialize(group_data)
 
     def test_it_raises_if_group_type_changed(
-        self, group_data, pyramid_csrf_request, org, user_svc
+        self, group_data, pyramid_csrf_request, org, user_service
     ):
         group = mock.Mock(type="open")
         group_data["group_type"] = "restricted"
         schema = AdminGroupSchema().bind(
             request=pyramid_csrf_request,
             group=group,
-            user_svc=user_svc,
+            user_svc=user_service,
             organizations={org.pubid: org},
         )
 
@@ -93,28 +92,28 @@ class TestAdminGroupSchema:
             schema.deserialize(group_data)
 
     def test_it_does_not_raise_if_group_type_is_same(
-        self, group_data, pyramid_csrf_request, org, user_svc
+        self, group_data, pyramid_csrf_request, org, user_service
     ):
         group = mock.Mock(type="open")
         group_data["group_type"] = "open"
         schema = AdminGroupSchema().bind(
             request=pyramid_csrf_request,
             group=group,
-            user_svc=user_svc,
+            user_svc=user_service,
             organizations={org.pubid: org},
         )
 
         schema.deserialize(group_data)
 
-    def test_it_raises_if_member_invalid(self, group_data, bound_schema, user_svc):
-        user_svc.fetch.return_value = None
+    def test_it_raises_if_member_invalid(self, group_data, bound_schema, user_service):
+        user_service.fetch.return_value = None
 
         group_data["members"] = ["valid_user", "invalid_user"]
         with pytest.raises(colander.Invalid, match="members.1"):
             bound_schema.deserialize(group_data)
 
     def test_it_passes_through_the_authority_when_checking_users(
-        self, group_data, bound_schema, user_svc, third_party_org
+        self, group_data, bound_schema, user_service, third_party_org
     ):
         group_data["organization"] = third_party_org.pubid
         group_data["members"] = ["valid_user"]
@@ -122,7 +121,7 @@ class TestAdminGroupSchema:
 
         bound_schema.deserialize(group_data)
 
-        user_svc.fetch.assert_has_calls(
+        user_service.fetch.assert_has_calls(
             (
                 # It's a bit of a shame to enshrine the order, as it really
                 # doesn't matter, but it's the easiest thing to do
@@ -135,16 +134,16 @@ class TestAdminGroupSchema:
         bound_schema.deserialize(group_data)
 
     def test_it_passes_creator_and_authority_to_user_fetch(
-        self, group_data, bound_schema, user_svc, org
+        self, group_data, bound_schema, user_service, org
     ):
         bound_schema.deserialize(group_data)
-        user_svc.fetch.assert_called_with(group_data["creator"], org.authority)
+        user_service.fetch.assert_called_with(group_data["creator"], org.authority)
 
     def test_it_allows_when_user_exists_at_authority(self, group_data, bound_schema):
         bound_schema.deserialize(group_data)
 
     def test_it_raises_when_the_creator_user_cannot_be_found(
-        self, group_data, bound_schema, user_svc
+        self, group_data, bound_schema
     ):
         """
         It raises if there's no user with the given username and authority.
@@ -192,19 +191,16 @@ def group_data(factories, org):
 
 
 @pytest.fixture
-def user_svc(pyramid_config, factories):
-    svc = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name="user")
-
+def user_service(user_service, factories):
     def fetch(username, authority):
         if "invalid" in username:
             return False
 
         return factories.User()
 
-    svc.fetch.side_effect = fetch
+    user_service.fetch.side_effect = fetch
 
-    return svc
+    return user_service
 
 
 @pytest.fixture
@@ -223,10 +219,10 @@ def third_party_org(db_session):
 
 
 @pytest.fixture
-def bound_schema(pyramid_csrf_request, org, third_party_org, user_svc):
+def bound_schema(pyramid_csrf_request, org, third_party_org, user_service):
     schema = AdminGroupSchema().bind(
         request=pyramid_csrf_request,
-        user_svc=user_svc,
+        user_svc=user_service,
         organizations={org.pubid: org, third_party_org.pubid: third_party_org},
     )
     return schema

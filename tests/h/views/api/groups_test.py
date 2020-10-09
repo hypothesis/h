@@ -15,7 +15,6 @@ from h.services.group_links import GroupLinksService
 from h.services.group_list import GroupListService
 from h.services.group_members import GroupMembersService
 from h.services.group_update import GroupUpdateService
-from h.services.user import UserService
 from h.views.api import groups as views
 
 pytestmark = pytest.mark.usefixtures("GroupsJSONPresenter")
@@ -566,11 +565,10 @@ class TestAddMember:
         return pyramid_request
 
     @pytest.fixture
-    def user_service(self, pyramid_config, user):
-        service = mock.create_autospec(UserService, spec_set=True, instance=True)
-        service.fetch.return_value = user
-        pyramid_config.register_service(service, name="user")
-        return service
+    def user_service(self, user_service, user):
+        user_service.fetch.return_value = user
+
+        return user_service
 
 
 @pytest.mark.usefixtures("authenticated_userid", "group_members_service")

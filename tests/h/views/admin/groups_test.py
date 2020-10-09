@@ -11,7 +11,6 @@ from h.services.group_create import GroupCreateService
 from h.services.group_members import GroupMembersService
 from h.services.group_update import GroupUpdateService
 from h.services.list_organizations import ListOrganizationsService
-from h.services.user import UserService
 from h.views.admin import groups
 from h.views.admin.groups import GroupCreateViews, GroupEditViews
 
@@ -40,7 +39,7 @@ class TestIndex:
 
 
 @pytest.mark.usefixtures(
-    "group_create_svc", "group_members_svc", "list_orgs_svc", "routes", "user_svc"
+    "group_create_svc", "group_members_svc", "list_orgs_svc", "routes", "user_service"
 )
 class TestGroupCreateView:
     def test_get_sets_form(self, pyramid_request):
@@ -95,7 +94,7 @@ class TestGroupCreateView:
         group_create_svc,
         handle_form_submission,
         default_org,
-        user_svc,
+        user_service,
         base_appstruct,
     ):
         def call_on_success(request, form, on_success, on_failure):
@@ -109,7 +108,7 @@ class TestGroupCreateView:
 
         group_create_svc.create_open_group.assert_called_with(
             name="My New Group",
-            userid=user_svc.fetch.return_value.userid,
+            userid=user_service.fetch.return_value.userid,
             description=None,
             scopes=["http://example.com"],
             organization=default_org,
@@ -122,7 +121,7 @@ class TestGroupCreateView:
         group_create_svc,
         handle_form_submission,
         default_org,
-        user_svc,
+        user_service,
         base_appstruct,
     ):
         def call_on_success(request, form, on_success, on_failure):
@@ -136,7 +135,7 @@ class TestGroupCreateView:
 
         group_create_svc.create_restricted_group.assert_called_with(
             name="My New Group",
-            userid=user_svc.fetch.return_value.userid,
+            userid=user_service.fetch.return_value.userid,
             description=None,
             scopes=["http://example.com"],
             organization=default_org,
@@ -150,11 +149,11 @@ class TestGroupCreateView:
         group_create_svc,
         group_members_svc,
         handle_form_submission,
-        user_svc,
+        user_service,
         base_appstruct,
     ):
         user = factories.User()
-        user_svc.fetch.return_value = user
+        user_service.fetch.return_value = user
 
         def call_on_success(request, form, on_success, on_failure):
             base_appstruct["members"] = ["someusername"]
@@ -185,7 +184,7 @@ class TestGroupCreateView:
 
 @pytest.mark.usefixtures(
     "routes",
-    "user_svc",
+    "user_service",
     "group_svc",
     "group_create_svc",
     "group_update_svc",
@@ -194,7 +193,7 @@ class TestGroupCreateView:
 )
 class TestGroupEditViews:
     def test_it_binds_schema(
-        self, pyramid_request, group, user_svc, default_org, AdminGroupSchema
+        self, pyramid_request, group, user_service, default_org, AdminGroupSchema
     ):
 
         GroupEditViews(group, pyramid_request)
@@ -203,7 +202,7 @@ class TestGroupEditViews:
         schema.bind.assert_called_with(
             request=pyramid_request,
             group=group,
-            user_svc=user_svc,
+            user_svc=user_service,
             organizations={default_org.pubid: default_org},
         )
 
@@ -243,7 +242,7 @@ class TestGroupEditViews:
         self,
         factories,
         pyramid_request,
-        user_svc,
+        user_service,
         list_orgs_svc,
         handle_form_submission,
         group_update_svc,
@@ -252,7 +251,7 @@ class TestGroupEditViews:
     ):
 
         fetched_user = factories.User()
-        user_svc.fetch.return_value = fetched_user
+        user_service.fetch.return_value = fetched_user
         updated_org = factories.Organization()
 
         list_orgs_svc.organizations.return_value.append(updated_org)
@@ -295,7 +294,7 @@ class TestGroupEditViews:
         factories,
         pyramid_request,
         group_create_svc,
-        user_svc,
+        user_service,
         group_members_svc,
         handle_form_submission,
         list_orgs_svc,
@@ -306,7 +305,7 @@ class TestGroupEditViews:
         list_orgs_svc.organizations.return_value = [group.organization]
 
         fetched_user = factories.User()
-        user_svc.fetch.return_value = fetched_user
+        user_service.fetch.return_value = fetched_user
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success(
@@ -335,7 +334,6 @@ class TestGroupEditViews:
     def test_delete_deletes_group(
         self, group, delete_group_svc, pyramid_request, routes
     ):
-
         view = GroupEditViews(group, pyramid_request)
 
         view.delete()
@@ -394,13 +392,6 @@ def routes(pyramid_config):
     pyramid_config.add_route("admin.groups", "/admin/groups")
     pyramid_config.add_route("admin.groups_create", "/admin/groups/new")
     pyramid_config.add_route("group_read", "/groups/{pubid}/{slug}")
-
-
-@pytest.fixture
-def user_svc(pyramid_config):
-    svc = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name="user")
-    return svc
 
 
 @pytest.fixture

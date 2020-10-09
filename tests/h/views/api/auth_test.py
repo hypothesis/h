@@ -12,13 +12,12 @@ from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
 from h.services.oauth_provider import OAuthProviderService
 from h.services.oauth_validator import DEFAULT_SCOPES
-from h.services.user import user_service_factory
 from h.util.datetime import utc_iso8601
 from h.views.api import auth as views
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 
 
-@pytest.mark.usefixtures("routes", "oauth_provider", "user_svc")
+@pytest.mark.usefixtures("routes", "oauth_provider", "user_service")
 class TestOAuthAuthorizeController:
     @pytest.mark.usefixtures("authenticated_user")
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
@@ -247,18 +246,12 @@ class TestOAuthAuthorizeController:
         )
 
     @pytest.fixture
-    def user_svc(self, pyramid_config, pyramid_request):
-        svc = mock.Mock(spec_set=user_service_factory(None, pyramid_request))
-        pyramid_config.register_service(svc, name="user")
-        return svc
-
-    @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.url = "http://example.com/auth?client_id=the-client-id&response_type=code&state=foobar"
         return pyramid_request
 
     @pytest.fixture
-    def authenticated_user(self, factories, pyramid_config, user_svc):
+    def authenticated_user(self, factories, pyramid_config, user_service):
         user = factories.User.build()
         pyramid_config.testing_securitypolicy(user.userid)
 
@@ -266,7 +259,7 @@ class TestOAuthAuthorizeController:
             if userid == user.userid:
                 return user
 
-        user_svc.fetch.side_effect = fake_fetch
+        user_service.fetch.side_effect = fake_fetch
 
         return user
 

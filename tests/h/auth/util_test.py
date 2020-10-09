@@ -7,7 +7,6 @@ import sqlalchemy as sa
 from h.auth import role, util
 from h.models import AuthClient
 from h.models.auth_client import GrantType
-from h.services.user import UserService
 
 FakeUser = namedtuple("FakeUser", ["authority", "admin", "staff", "groups"])
 FakeGroup = namedtuple("FakeGroup", ["pubid"])
@@ -326,14 +325,6 @@ class TestVerifyAuthClient:
     @pytest.fixture
     def hmac(self, patch):
         return patch("h.auth.util.hmac")
-
-
-@pytest.fixture
-def user_service(pyramid_config):
-    service = mock.create_autospec(UserService, spec_set=True, instance=True)
-    service.fetch.return_value = None
-    pyramid_config.register_service(service, name="user")
-    return service
 
 
 @pytest.fixture

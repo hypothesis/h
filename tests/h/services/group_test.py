@@ -6,7 +6,6 @@ import pytest
 from h.models import Group, GroupScope, User
 from h.models.group import ReadableBy
 from h.services.group import GroupService, groups_factory
-from h.services.user import UserService
 from tests.common.matchers import Matcher
 
 
@@ -196,13 +195,6 @@ def usr_svc(pyramid_request, db_session):
 @pytest.fixture
 def svc(db_session, usr_svc):
     return GroupService(db_session, usr_svc)
-
-
-@pytest.fixture
-def user_service(pyramid_config):
-    service = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(service, name="user")
-    return service
 
 
 class GroupWithName(Matcher):

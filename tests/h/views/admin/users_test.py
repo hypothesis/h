@@ -7,7 +7,6 @@ from pyramid import httpexceptions
 from h.models import Annotation
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.delete_user import DeleteUserService
-from h.services.user import UserService
 from h.views.admin.users import (
     UserNotFoundError,
     format_date,
@@ -231,16 +230,6 @@ def models(patch):
     module = patch("h.views.admin.users.models")
     module.Annotation = Annotation
     return module
-
-
-@pytest.fixture
-def user_service(pyramid_config, db_session):
-    service = mock.create_autospec(UserService, instance=True, spec_set=True)
-    service.return_value.default_authority = "example.com"
-    service.return_value.session = db_session
-
-    pyramid_config.register_service(service, name="user")
-    return service
 
 
 @pytest.fixture

@@ -1,10 +1,7 @@
-from unittest import mock
-
 import pytest
 
 from h.models import Annotation, Document, DocumentMeta, Subscriptions
 from h.notification.reply import Notification, get_notification
-from h.services.user import UserService
 
 FIXTURE_DATA = {
     "reply": {
@@ -183,14 +180,10 @@ class TestGetNotification:
         return sub
 
     @pytest.fixture
-    def user_service(self, factories, pyramid_config):
-        user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
-
+    def user_service(self, user_service, factories):
         users = {
             "acct:giraffe@safari.net": factories.User(),
             "acct:elephant@safari.net": factories.User(),
         }
         user_service.fetch.side_effect = users.get
-
-        pyramid_config.register_service(user_service, name="user")
         return user_service

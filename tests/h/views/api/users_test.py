@@ -147,7 +147,7 @@ class TestCreate:
 
 @pytest.mark.usefixtures(
     "auth_client",
-    "user_svc",
+    "user_service",
     "user",
     "user_update_svc",
     "UpdateUserAPISchema",
@@ -222,17 +222,14 @@ class TestUpdate:
         return {"email": "jeremy@weylandtech.com", "display_name": "Jeremy Weyland"}
 
     @pytest.fixture
-    def user_svc(self, pyramid_config, user):
-        svc = mock.Mock(spec_set=["fetch"])
-
+    def user_service(self, user_service, user):
         def fake_fetch(username, authority):
             if username == user.username and authority == user.authority:
                 return user
 
-        svc.fetch.side_effect = fake_fetch
+        user_service.fetch.side_effect = fake_fetch
 
-        pyramid_config.register_service(svc, name="user")
-        return svc
+        return user_service
 
 
 @pytest.fixture

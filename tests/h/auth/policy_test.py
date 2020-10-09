@@ -13,7 +13,6 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.exceptions import InvalidUserId
-from h.services.user import UserService
 
 API_PATHS = ("/api", "/api/foo", "/api/annotations/abc123")
 
@@ -657,13 +656,6 @@ class TestAuthClientAuthenticationPolicy:
             matched_user, verify_auth_client.return_value
         )
         assert principals == principals_for_auth_client_user.return_value
-
-    @pytest.fixture
-    def user_service(self, pyramid_config):
-        service = mock.create_autospec(UserService, spec_set=True, instance=True)
-        service.fetch.return_value = None
-        pyramid_config.register_service(service, name="user")
-        return service
 
     @pytest.fixture
     def principals_for_auth_client(self, patch):
