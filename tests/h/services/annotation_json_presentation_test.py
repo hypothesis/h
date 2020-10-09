@@ -235,10 +235,10 @@ class TestAnnotationJSONPresentationServiceFactory:
 
 
 @pytest.fixture
-def services(pyramid_config, user_service):
-    service_mocks = {"user": user_service}
+def services(pyramid_config, user_service, links_service):
+    service_mocks = {"user": user_service, "links": links_service}
 
-    for name in ["links", "flag", "flag_count", "annotation_moderation"]:
+    for name in ["flag", "flag_count", "annotation_moderation"]:
         svc = mock.Mock()
         service_mocks[name] = svc
         pyramid_config.register_service(svc, name=name)

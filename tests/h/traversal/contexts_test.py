@@ -240,12 +240,6 @@ class TestAnnotationContext:
         )
         return group_service
 
-    @pytest.fixture
-    def links_service(self, pyramid_config):
-        service = mock.Mock(spec_set=["get", "get_all"])
-        pyramid_config.register_service(service, name="links")
-        return service
-
 
 @pytest.mark.usefixtures("links_svc")
 class TestGroupContext:

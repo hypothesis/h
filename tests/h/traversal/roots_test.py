@@ -157,12 +157,6 @@ class TestAnnotationRoot:
         )
         return group_service
 
-    @pytest.fixture
-    def links_service(self, pyramid_config):
-        service = mock.Mock()
-        pyramid_config.register_service(service, name="links")
-        return service
-
 
 class TestAuthClientRoot:
     def test_getitem_returns_the_right_AuthClient(self, db_session, pyramid_request):

@@ -157,10 +157,3 @@ def group_service(pyramid_config):
     group_service = mock.Mock(spec_set=["find"])
     pyramid_config.register_service(group_service, iface="h.interfaces.IGroupService")
     return group_service
-
-
-@pytest.fixture
-def links_service(pyramid_config):
-    service = mock.Mock(spec_set=["get", "get_all"])
-    pyramid_config.register_service(service, name="links")
-    return service
