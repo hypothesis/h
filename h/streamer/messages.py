@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 from itertools import chain
 
-import pyramid.scripting
 from gevent.queue import Full
 from pyramid.security import principals_allowed_by_permission
 
