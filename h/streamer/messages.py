@@ -5,11 +5,11 @@ from itertools import chain
 from gevent.queue import Full
 from pyramid.security import principals_allowed_by_permission
 
-from h import presenters, realtime, storage
-from h.formatters import AnnotationUserInfoFormatter
+from h import realtime, storage
 from h.interfaces import IGroupService
 from h.realtime import Consumer
 from h.streamer import websocket
+from h.streamer.auth import authenticated_context
 from h.streamer.contexts import AnnotationNotificationContext, request_context
 from h.streamer.filter import SocketFilter
 
@@ -126,9 +126,8 @@ def handle_annotation_event(message, sockets, request, session):
         links_service=request.find_service(name="links"),
     )
     read_principals = principals_allowed_by_permission(resource, "read")
-    reply = _generate_annotation_event(session, request, message, resource)
-
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
+    reply = AnnotationReply(message['annotation_id'], message['action'], resource)
 
     for socket in matching_sockets:
         # Don't send notifications back to the person who sent them
@@ -143,31 +142,37 @@ def handle_annotation_event(message, sockets, request, session):
         if not set(read_principals).intersection(socket.effective_principals):
             continue
 
-        socket.send_json(reply)
+        socket.send_json(reply.get(request, socket))
 
 
-def _generate_annotation_event(session, request, message, resource):
-    """
-    Get message about annotation event `message` to be sent to `socket`.
+class AnnotationReply:
+    def __init__(self, annotation_id, action, resource):
+        self._annotation_id = annotation_id
+        self._action = action
+        self._resource = resource
 
-    Inspects the embedded annotation event and decides whether or not the
-    passed socket should receive notification of the event.
+        self._stock_reply = (
+            self._delete_annotation_reply() if self._action == "delete" else None
+        )
 
-    Returns None if the socket should not receive any message about this
-    annotation event, otherwise a dict containing information about the event.
-    """
+    def get(self, request, socket):
+        """Get message about annotation event to be sent to `socket`."""
+        if self._stock_reply:
+            return self._stock_reply
 
-    if message["action"] == "delete":
-        payload = {"id": message["annotation_id"]}
-    else:
-        user_service = request.find_service(name="user")
-        formatters = [AnnotationUserInfoFormatter(session, user_service)]
-        payload = presenters.AnnotationJSONPresenter(
-            resource, formatters=formatters
-        ).asdict()
+        return self._update_annotation_reply(request, socket)
 
-    return {
-        "type": "annotation-notification",
-        "options": {"action": message["action"]},
-        "payload": [payload],
-    }
+    def _delete_annotation_reply(self):
+        return self._reply({"id": self._annotation_id})
+
+    def _update_annotation_reply(self, request, socket):
+        with authenticated_context(request, socket):
+            presenter = request.find_service(name="annotation_json_presentation")
+            return self._reply(presenter.present(self._resource))
+
+    def _reply(self, payload):
+        return {
+            "type": "annotation-notification",
+            "options": {"action": self._action},
+            "payload": [payload],
+        }
