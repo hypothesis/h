@@ -9,7 +9,7 @@ from h.websocket import create_app
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
 
 
-@pytest.mark.skip("Only of use during development")
+#@pytest.mark.skip("Only of use during development")
 class TestHandleAnnotationEventSpeed:  # pragma: no cover
     def test_load_request(self, pyramid_request):
         ...
@@ -76,11 +76,15 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
         return SocketFilter
 
     @pytest.fixture
-    def socket(self, registry):
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def socket(self, registry, user):
         socket = WebSocket(
             sock=None,
             environ={
-                "h.ws.authenticated_userid": "foo",
+                "h.ws.authenticated_userid": user.userid,
                 "h.ws.effective_principals": [security.Everyone, "group:__world__"],
                 "h.ws.streamer_work_queue": None,
             },
