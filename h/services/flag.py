@@ -18,6 +18,9 @@ class FlagService:
         :returns: True/False depending on the existence of a flag.
         :rtype: bool
         """
+        if user is None:
+            return False
+
         query = self.session.query(models.Flag).filter_by(
             user=user, annotation=annotation
         )
