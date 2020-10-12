@@ -1,3 +1,4 @@
+import datetime
 from unittest.mock import call, create_autospec, patch, sentinel
 
 import pytest
@@ -5,6 +6,7 @@ from h_matchers import Any
 
 from h.events import AnnotationEvent
 from h.search.client import Client
+from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
 from h.services.settings import SettingsService
 
@@ -141,6 +143,40 @@ class TestAddAnnotation:
         return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
 
 
+class TestAddAnnotationsBetweenTimes:
+    def test_it(self, annotation_ids, search_index, queue):
+        search_index.add_annotations_between_times(
+            datetime.datetime(2020, 9, 9),
+            datetime.datetime(2020, 9, 11),
+            "test_tag",
+        )
+
+        queue.add_all.assert_called_once_with(
+            Any.list.containing(annotation_ids).only(), tag="test_tag"
+        )
+
+    @pytest.fixture
+    def annotations(self, factories):
+        return factories.Annotation.create_batch(
+            size=10, updated=datetime.datetime(year=2020, month=9, day=10)
+        )
+
+    @pytest.fixture(autouse=True)
+    def non_matching_annotations(self, factories):
+        """Annotations from outside the date range that we're reindexing."""
+        before_annotations = factories.Annotation.create_batch(
+            size=3, updated=datetime.datetime(year=2020, month=9, day=8)
+        )
+        after_annotations = factories.Annotation.create_batch(
+            size=3, updated=datetime.datetime(year=2020, month=9, day=12)
+        )
+        return before_annotations + after_annotations
+
+    @pytest.fixture
+    def annotation_ids(self, annotations):
+        return [annotation.id for annotation in annotations]
+
+
 class TestDeleteAnnotationById:
     @pytest.mark.parametrize("refresh", (True, False))
     def test_delete_annotation(self, search_index, es_client, refresh):
@@ -246,6 +282,13 @@ class TestHandleAnnotationEvent:
             yield delete_annotation_by_id
 
 
+class TestSync:
+    def test_it(self, search_index, queue):
+        search_index.sync(10)
+
+        queue.sync.assert_called_once_with(10)
+
+
 @pytest.fixture
 def with_reindex_in_progress(settings_service):
     settings_service.get.side_effect = {
@@ -263,12 +306,18 @@ def settings_service(pyramid_config):
 
 
 @pytest.fixture
-def search_index(es_client, pyramid_request, settings_service):
+def queue():
+    return create_autospec(Queue, spec_set=True, instance=True)
+
+
+@pytest.fixture
+def search_index(es_client, pyramid_request, settings_service, queue):
     return SearchIndexService(
         session=pyramid_request.db,
         es_client=es_client,
         request=pyramid_request,
         settings=settings_service,
+        queue=queue,
     )
 
 

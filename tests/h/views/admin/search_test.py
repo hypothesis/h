@@ -9,33 +9,30 @@ class TestSearchAdminViews:
     def test_get(self, views):
         assert views.get() == {}
 
-    def test_reindex_date(
-        self, views, reindex_annotations_in_date_range, pyramid_request
-    ):
+    def test_reindex_date(self, views, search_index, pyramid_request):
         pyramid_request.params = {
             "start": "2020-09-09",
-            "end": "2020-10-10",
+            "end": "2020-09-11",
         }
 
-        template_variables = views.reindex_date()
+        views.reindex_date()
 
-        reindex_annotations_in_date_range.delay.assert_called_once_with(
-            datetime.datetime(2020, 9, 9, 0, 0), datetime.datetime(2020, 10, 10, 0, 0)
+        search_index.add_annotations_between_times.assert_called_once_with(
+            datetime.datetime(year=2020, month=9, day=9),
+            datetime.datetime(year=2020, month=9, day=11),
+            "reindex_date()",
         )
         assert pyramid_request.session.peek_flash("success") == [
-            "Began reindexing from 2020-09-09 00:00:00 to 2020-10-10 00:00:00"
+            "Began reindexing from 2020-09-09 00:00:00 to 2020-09-11 00:00:00"
         ]
-        assert template_variables == {"indexing": True, "task_id": 23}
 
     @pytest.fixture
     def views(self, pyramid_request):
         return SearchAdminViews(pyramid_request)
 
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("admin.search", "/admin/search")
 
-@pytest.fixture(autouse=True)
-def reindex_annotations_in_date_range(patch):
-    reindex_annotations_in_date_range = patch(
-        "h.views.admin.search.reindex_annotations_in_date_range"
-    )
-    reindex_annotations_in_date_range.delay.return_value.id = 23
-    return reindex_annotations_in_date_range
+
+pytestmark = pytest.mark.usefixtures("search_index")

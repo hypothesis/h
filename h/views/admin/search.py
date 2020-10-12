@@ -1,7 +1,6 @@
 from dateutil.parser import isoparse
+from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
-
-from h.tasks.indexer import reindex_annotations_in_date_range
 
 
 @view_defaults(route_name="admin.search", permission="admin_search")
@@ -20,12 +19,15 @@ class SearchAdminViews:
         renderer="h:templates/admin/search.html.jinja2",
     )
     def reindex_date(self):
-        start_date = isoparse(self.request.params["start"].strip())
-        end_date = isoparse(self.request.params["end"].strip())
+        start_time = isoparse(self.request.params["start"].strip())
+        end_time = isoparse(self.request.params["end"].strip())
 
-        task = reindex_annotations_in_date_range.delay(start_date, end_date)
-        self.request.session.flash(
-            f"Began reindexing from {start_date} to {end_date}", "success"
+        self.request.find_service(name="search_index").add_annotations_between_times(
+            start_time, end_time, tag="reindex_date()"
         )
 
-        return {"indexing": True, "task_id": task.id}
+        self.request.session.flash(
+            f"Began reindexing from {start_time} to {end_time}", "success"
+        )
+
+        return HTTPFound(self.request.route_url("admin.search"))

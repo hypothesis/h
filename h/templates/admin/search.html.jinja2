@@ -3,15 +3,6 @@
 {% set page_id = 'search' %}
 {% set page_title = 'Search index' %}
 
-{% macro indexing_warnings() %}
-  <p>
-    This operation can be very expensive, so ensure it is not run twice at once.
-  </p>
-  <p>
-    The background worker will refuse to process any items after 250,000.
-  </p>
-{% endmacro %}
-
 {% macro panel(heading) %}
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -27,36 +18,25 @@
 {% block content %}
   <p>This is the search index admin page.</p>
 
-  {% if indexing %}
-    {% call panel(heading="⚠️Indexing is in progress... ⚠") %}
-      {{ indexing_warnings() }}
+  {% call panel(heading="Reindex all annotations between two dates") %}
+    <form method="POST" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
 
-      <p>Celery task id: <pre>{{ task_id }}</pre></p>
-    {% endcall %}
+      <div class="form-group">
+        <label for="start">Start date</label>
+        <input type="datetime-local" class="form-control" name="start" id="start">
+      </div>
 
-  {% else %}
-    {% call panel(heading="Reindex all annotations between two dates") %}
-      {{ indexing_warnings() }}
+      <div class="form-group">
+        <label for="end">End date</label>
+        <input type="datetime-local" class="form-control" name="end" id="end">
+      </div>
 
-      <form method="POST" class="form-inline">
-        <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
-
-        <div class="form-group">
-          <label for="start">Start date</label>
-          <input type="datetime-local" class="form-control" name="start" id="start">
-        </div>
-
-        <div class="form-group">
-          <label for="end">End date</label>
-          <input type="datetime-local" class="form-control" name="end" id="end">
-        </div>
-
-        <div class="form-group">
-          <input type="submit" class="btn btn-default" name="reindex_date" value="Reindex">
-        </div>
-      </form>
-    {% endcall %}
-  {% endif %}
+      <div class="form-group">
+        <input type="submit" class="btn btn-default" name="reindex_date" value="Reindex">
+      </div>
+    </form>
+  {% endcall %}
 
 
 {% endblock %}
