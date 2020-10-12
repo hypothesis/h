@@ -1,6 +1,7 @@
 from h_pyramid_sentry import report_exception
 
 from h import storage
+from h.models import Annotation
 from h.presenters import AnnotationSearchIndexPresenter
 from h.tasks.indexer import add_annotation, delete_annotation
 
@@ -11,7 +12,7 @@ class SearchIndexService:
     # The DB setting that stores whether a full re-index is taking place
     REINDEX_SETTING_KEY = "reindex.new_index"
 
-    def __init__(self, request, es_client, session, settings):
+    def __init__(self, request, es_client, session, settings, queue):
         """
         Create an instance of the service.
 
@@ -19,11 +20,13 @@ class SearchIndexService:
         :param es_client: Elasticsearch client
         :param session: DB session
         :param settings: Instance of settings (or other object with `get()`)
+        :param queue: The sync_annotations job queue
         """
         self._request = request
         self._es = es_client
         self._db = session
         self._settings = settings
+        self._queue = queue
 
     def add_annotation_by_id(self, annotation_id):
         """
@@ -62,6 +65,27 @@ class SearchIndexService:
         body = AnnotationSearchIndexPresenter(annotation, self._request).asdict()
 
         self._index_annotation_body(annotation.id, body, refresh=False)
+
+    def add_annotations_between_times(self, start_time, end_time, tag):
+        """
+        Add all annotations between two times to the search index.
+
+        All annotations whose updated time is between the given start_time and
+        end_time (inclusive) will be queued for background indexing into
+        Elasticsearch.
+
+        :type start_time: datetime.datetime
+        :type end_time: datetime.datetime
+        """
+        self._queue.add_all(
+            [
+                row[0]
+                for row in self._db.query(Annotation.id)
+                .filter(Annotation.updated >= start_time)
+                .filter(Annotation.updated <= end_time)
+            ],
+            tag=tag,
+        )
 
     def delete_annotation_by_id(self, annotation_id, refresh=False):
         """
@@ -106,6 +130,10 @@ class SearchIndexService:
 
         # Either the synchronous method was disabled, or failed...
         return async_task.delay(event.annotation_id)
+
+    def sync(self, limit):
+        """Process `limit` sync_annotation jobs from the job queue."""
+        self._queue.sync(limit)
 
     def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
         self._es.conn.index(
