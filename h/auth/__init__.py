@@ -13,31 +13,20 @@ from h.auth.policy import (
 from h.auth.util import default_authority, groupfinder
 from h.security import derive_key
 
-__all__ = ("DEFAULT_POLICY", "WEBSOCKET_POLICY")
-
 log = logging.getLogger(__name__)
 
-PROXY_POLICY = RemoteUserAuthenticationPolicy(
-    environ_key="HTTP_X_FORWARDED_USER", callback=groupfinder
-)
-TICKET_POLICY = pyramid_authsanity.AuthServicePolicy()
-
-TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
-AUTH_CLIENT_POLICY = AuthClientPolicy()
-
-API_POLICY = APIAuthenticationPolicy(
-    user_policy=TOKEN_POLICY, client_policy=AUTH_CLIENT_POLICY
+_API_POLICY = APIAuthenticationPolicy(
+    user_policy=TokenAuthenticationPolicy(callback=groupfinder),
+    client_policy=AuthClientPolicy(),
 )
 
 DEFAULT_POLICY = AuthenticationPolicy(
-    api_policy=API_POLICY, fallback_policy=TICKET_POLICY
+    api_policy=_API_POLICY, fallback_policy=pyramid_authsanity.AuthServicePolicy()
 )
-WEBSOCKET_POLICY = TOKEN_POLICY
 
 
 def includeme(config):
     global DEFAULT_POLICY
-    global WEBSOCKET_POLICY
 
     # Set up authsanity
     settings = config.registry.settings
@@ -59,9 +48,11 @@ def includeme(config):
         )
 
         DEFAULT_POLICY = AuthenticationPolicy(
-            api_policy=API_POLICY, fallback_policy=PROXY_POLICY
+            api_policy=_API_POLICY,
+            fallback_policy=RemoteUserAuthenticationPolicy(
+                environ_key="HTTP_X_FORWARDED_USER", callback=groupfinder
+            ),
         )
-        WEBSOCKET_POLICY = TOKEN_POLICY
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
