@@ -170,19 +170,16 @@ class TestSendReplyNotifications:
 
 
 class TestSyncAnnotation:
-    @pytest.mark.parametrize("synchronous", (True, False))
     def test_it_calls_sync_service(
-        self, pyramid_request, search_index, transaction_manager, synchronous
+        self, pyramid_request, search_index, transaction_manager
     ):
-        pyramid_request.feature.flags = {"synchronous_indexing": synchronous}
+
         event = AnnotationEvent(pyramid_request, {"id": "any"}, "action")
 
         subscribers.annotation_sync(event)
 
         transaction_manager.__enter__.assert_called_once()
-        search_index.handle_annotation_event.assert_called_once_with(
-            event, synchronous=synchronous
-        )
+        search_index.handle_annotation_event.assert_called_once_with(event)
         transaction_manager.__exit__.assert_called_once()
 
     @pytest.fixture

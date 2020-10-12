@@ -80,7 +80,7 @@ class SearchIndexService:
 
         self._index_annotation_body(annotation_id, {"deleted": True}, refresh=refresh)
 
-    def handle_annotation_event(self, event, synchronous=False):
+    def handle_annotation_event(self, event):
         """
         Process an annotation event, taking appropriate action to the event.
 
@@ -88,7 +88,6 @@ class SearchIndexService:
         fall back on a delayed celery task if not or if this fails.
 
         :param event: AnnotationEvent object
-        :synchronous: Try synchronous indexing before async
         """
         if event.action in ["create", "update"]:
             sync_handler, async_task = self.add_annotation_by_id, add_annotation
@@ -97,12 +96,11 @@ class SearchIndexService:
         else:
             return False
 
-        if synchronous:
-            try:
-                return sync_handler(event.annotation_id)
+        try:
+            return sync_handler(event.annotation_id)
 
-            except Exception as err:
-                report_exception(err)
+        except Exception as err:
+            report_exception(err)
 
         # Either the synchronous method was disabled, or failed...
         return async_task.delay(event.annotation_id)
