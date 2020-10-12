@@ -46,9 +46,7 @@ def annotation_sync(event):
     # transaction to ensure we don't leave an un-closed transaction
     with event.request.tm:
         search_index = event.request.find_service(name="search_index")
-        search_index.handle_annotation_event(
-            event, synchronous=event.request.feature("synchronous_indexing")
-        )
+        search_index.handle_annotation_event(event)
 
 
 @subscriber(AnnotationEvent)

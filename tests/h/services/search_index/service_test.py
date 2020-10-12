@@ -173,22 +173,20 @@ class TestDeleteAnnotationById:
 
 class TestHandleAnnotationEvent:
     def test_we_dispatch_correctly(
-        self, search_index, pyramid_request, action, synchronous, handler_for
+        self, search_index, pyramid_request, action, handler_for
     ):
         event = AnnotationEvent(pyramid_request, {"id": "any"}, action)
 
-        result = search_index.handle_annotation_event(event, synchronous=synchronous)
+        result = search_index.handle_annotation_event(event)
 
-        handler = handler_for(action, synchronous)
+        handler = handler_for(action, synchronous=True)
         handler.assert_called_once_with(event.annotation_id)
         assert result == handler.return_value
 
-    def test_we_do_nothing_for_unexpected_actions(
-        self, search_index, pyramid_request, synchronous
-    ):
+    def test_we_do_nothing_for_unexpected_actions(self, search_index, pyramid_request):
         event = AnnotationEvent(pyramid_request, {"id": "any"}, "strange_action")
 
-        result = search_index.handle_annotation_event(event, synchronous=synchronous)
+        result = search_index.handle_annotation_event(event)
 
         assert result is False
 
@@ -199,7 +197,7 @@ class TestHandleAnnotationEvent:
         sync_handler = handler_for(action, synchronous=True)
         sync_handler.side_effect = ValueError
 
-        result = search_index.handle_annotation_event(event, synchronous=True)
+        result = search_index.handle_annotation_event(event)
 
         sync_handler.assert_called_once_with(event.annotation_id)
         async_handler = handler_for(action, synchronous=False)
@@ -233,10 +231,6 @@ class TestHandleAnnotationEvent:
 
     @pytest.fixture(params=("create", "update", "delete"))
     def action(self, request):
-        return request.param
-
-    @pytest.fixture(params=(True, False))
-    def synchronous(self, request):
         return request.param
 
     @pytest.fixture(autouse=True)
