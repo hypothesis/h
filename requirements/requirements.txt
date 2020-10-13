@@ -67,7 +67,7 @@ pytz==2020.1              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.17.6        # via h-pyramid-sentry
 six==1.15.0               # via bcrypt, bleach, elasticsearch-dsl, jsonschema, packaging, python-dateutil
-sqlalchemy==1.3.19        # via -r requirements/requirements.in, alembic, zope.sqlalchemy
+sqlalchemy==1.3.20        # via -r requirements/requirements.in, alembic, zope.sqlalchemy
 supervisor==4.2.1         # via -r requirements/requirements.in
 text-unidecode==1.3       # via python-slugify
 transaction==2.4.0        # via -r requirements/requirements.in, pyramid-mailer, pyramid-tm, repoze.sendmail, zope.sqlalchemy
