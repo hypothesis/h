@@ -16,14 +16,14 @@ def websocket_metrics(_settings, _environ):
     prefix = "Custom/WebSocket"
 
     def generate_metrics():
-        active_connections = len(WebSocket.instances)
-        authenticated_connections = sum(
-            1 for ws in WebSocket.instances if ws.authenticated_userid
+        connections_active = len(WebSocket.instances)
+        connections_anonymous = sum(
+            1 for ws in WebSocket.instances if not ws.authenticated_userid
         )
 
-        yield f"{prefix}/ConnectionsActive", active_connections
-        yield f"{prefix}/ConnectionsAuthenticated", authenticated_connections
-        yield f"{prefix}/ConnectionsAnonymous", active_connections - authenticated_connections
+        yield f"{prefix}/ConnectionsActive", connections_active
+        yield f"{prefix}/ConnectionsAuthenticated", connections_active - connections_anonymous
+        yield f"{prefix}/ConnectionsAnonymous", connections_anonymous
 
         yield f"{prefix}/WorkQueueSize", WORK_QUEUE.qsize()
 
