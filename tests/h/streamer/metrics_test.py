@@ -8,19 +8,30 @@ from h.streamer.websocket import WebSocket
 
 
 class TestWebsocketMetrics:
-    def test_metrics(self, generate_metrics, sockets):
+    def test_it_records_socket_metrics(self, generate_metrics, sockets):
         sockets[0].authenticated_userid = "acct:jimsmith@hypothes.is"
         sockets[1].authenticated_userid = None
         sockets[2].authenticated_userid = None
 
-        metrics = list(generate_metrics())
+        metrics = generate_metrics()
 
-        expected_counts = [
-            ("Custom/WebSocket/ConnectionsActive", 3),
-            ("Custom/WebSocket/ConnectionsAuthenticated", 1),
-            ("Custom/WebSocket/ConnectionsAnonymous", 2),
-        ]
-        assert metrics == Any.list.containing(expected_counts).only()
+        assert list(metrics) == Any.list.containing(
+            [
+                ("Custom/WebSocket/ConnectionsActive", 3),
+                ("Custom/WebSocket/ConnectionsAuthenticated", 1),
+                ("Custom/WebSocket/ConnectionsAnonymous", 2),
+            ]
+        )
+
+    @pytest.mark.parametrize("size", (1, 5))
+    def test_it_records_work_queue_metric(self, generate_metrics, WORK_QUEUE, size):
+        WORK_QUEUE.qsize.return_value = size
+
+        metrics = generate_metrics()
+
+        assert list(metrics) == Any.list.containing(
+            [("Custom/WebSocket/WorkQueueSize", size)]
+        )
 
     @pytest.fixture
     def generate_metrics(self):
@@ -30,6 +41,14 @@ class TestWebsocketMetrics:
 
         return generate_metrics(environ={})
 
+    @pytest.fixture
+    def sockets(self):
+        sockets = [create_autospec(WebSocket, instance=True) for _ in range(3)]
+        for socket in sockets:
+            socket.authenticated_userid = None
+
+        return sockets
+
     @pytest.fixture(autouse=True)
     def WebSocket(self, patch, sockets):
         WebSocket = patch("h.streamer.metrics.WebSocket")
@@ -38,5 +57,5 @@ class TestWebsocketMetrics:
         return WebSocket
 
     @pytest.fixture
-    def sockets(self):
-        return [create_autospec(WebSocket, instance=True) for _ in range(3)]
+    def WORK_QUEUE(self, patch):
+        return patch("h.streamer.metrics.WORK_QUEUE")
