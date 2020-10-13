@@ -21,9 +21,9 @@ def websocket_metrics(_settings, _environ):
             1 for ws in WebSocket.instances if not ws.authenticated_userid
         )
 
-        yield f"{prefix}/ConnectionsActive", connections_active
-        yield f"{prefix}/ConnectionsAuthenticated", connections_active - connections_anonymous
-        yield f"{prefix}/ConnectionsAnonymous", connections_anonymous
+        yield f"{prefix}/Connections/Active", connections_active
+        yield f"{prefix}/Connections/Authenticated", connections_active - connections_anonymous
+        yield f"{prefix}/Connections/Anonymous", connections_anonymous
 
         yield f"{prefix}/WorkQueueSize", WORK_QUEUE.qsize()
 

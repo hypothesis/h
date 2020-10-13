@@ -17,9 +17,9 @@ class TestWebsocketMetrics:
 
         assert list(metrics) == Any.list.containing(
             [
-                ("Custom/WebSocket/ConnectionsActive", 3),
-                ("Custom/WebSocket/ConnectionsAuthenticated", 1),
-                ("Custom/WebSocket/ConnectionsAnonymous", 2),
+                ("Custom/WebSocket/Connections/Active", 3),
+                ("Custom/WebSocket/Connections/Authenticated", 1),
+                ("Custom/WebSocket/Connections/Anonymous", 2),
             ]
         )
 
