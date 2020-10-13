@@ -1,5 +1,6 @@
 from newrelic.agent import data_source_factory
 
+from h.streamer.streamer import WORK_QUEUE
 from h.streamer.websocket import WebSocket
 
 
@@ -23,5 +24,7 @@ def websocket_metrics(_settings, _environ):
         yield f"{prefix}/ConnectionsActive", active_connections
         yield f"{prefix}/ConnectionsAuthenticated", authenticated_connections
         yield f"{prefix}/ConnectionsAnonymous", active_connections - authenticated_connections
+
+        yield f"{prefix}/WorkQueueSize", WORK_QUEUE.qsize()
 
     return generate_metrics
