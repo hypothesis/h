@@ -5,6 +5,8 @@ import pytest
 
 from h.tasks import indexer
 
+pytestmark = pytest.mark.usefixtures("search_index")
+
 
 class TestSearchIndexServicesWrapperTasks:
     """Tests for tasks that just wrap SearchIndexServices functions."""
@@ -64,9 +66,6 @@ class TestSyncAnnotations:
         indexer.sync_annotations("test_queue")
 
         search_index.sync.assert_called_once_with("test_queue")
-
-
-pytestmark = pytest.mark.usefixtures("search_index")
 
 
 @pytest.fixture(autouse=True)

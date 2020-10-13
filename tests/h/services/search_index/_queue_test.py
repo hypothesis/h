@@ -16,6 +16,10 @@ from h.services.search_index._queue import (
     Queue,
 )
 
+LIMIT = 10
+ONE_WEEK = datetime_.timedelta(weeks=1)
+MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
+
 
 class TestAddSyncAnnotationJob:
     def test_it(self, db_session, queue, now):
@@ -226,15 +230,6 @@ class TestSyncAnnotations:
             es_client.conn.indices.refresh(index=es_client.index)
 
         return index
-
-
-LIMIT = 10
-
-
-ONE_WEEK = datetime_.timedelta(weeks=1)
-
-
-MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
 
 
 @pytest.fixture
