@@ -5,6 +5,8 @@ import pytest
 
 from h.presenters.annotation_searchindex import AnnotationSearchIndexPresenter
 
+pytestmark = pytest.mark.usefixtures("moderation_service")
+
 
 @pytest.mark.usefixtures("nipsa_service")
 class TestAnnotationSearchIndexPresenter:
@@ -107,6 +109,3 @@ class TestAnnotationSearchIndexPresenter:
         )
         class_.return_value.asdict.return_value = {}
         return class_
-
-
-pytestmark = pytest.mark.usefixtures("moderation_service")
