@@ -4,6 +4,8 @@ import pytest
 
 from h.views.admin.search import SearchAdminViews
 
+pytestmark = pytest.mark.usefixtures("search_index")
+
 
 class TestSearchAdminViews:
     def test_get(self, views):
@@ -33,6 +35,3 @@ class TestSearchAdminViews:
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
         pyramid_config.add_route("admin.search", "/admin/search")
-
-
-pytestmark = pytest.mark.usefixtures("search_index")

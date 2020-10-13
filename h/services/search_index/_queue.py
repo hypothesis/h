@@ -8,6 +8,12 @@ from h.models import Annotation, Job
 
 logger = get_task_logger(__name__)
 
+# Strings used in log messages.
+DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
+MISSING = "Annotations synced because they were not in Elasticsearch"
+OUT_OF_DATE = "Annotations synced because they were outdated in Elasticsearch"
+UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
+
 
 class Queue:
     """A job queue for synchronizing annotations from Postgres to Elastic."""
@@ -141,10 +147,3 @@ class Queue:
             hit["_source"]["updated"] = updated
 
         return {hit["_id"]: hit["_source"] for hit in hits}
-
-
-# Strings used in log messages.
-DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
-MISSING = "Annotations synced because they were not in Elasticsearch"
-OUT_OF_DATE = "Annotations synced because they were outdated in Elasticsearch"
-UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
