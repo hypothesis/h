@@ -14,6 +14,9 @@ LIMIT_MAX = query.LIMIT_MAX
 OFFSET_MAX = query.OFFSET_MAX
 
 
+pytestmark = pytest.mark.usefixtures("nipsa_service")
+
+
 class TestLimiter:
     def test_it_limits_number_of_annotations(self, Annotation, search):
         dt = datetime.datetime
@@ -1052,9 +1055,6 @@ class TestUsersAggregation:
         assert len(users_results) == bucket_limit
         assert count_pb == 3
         assert count_pc == 2
-
-
-pytestmark = pytest.mark.usefixtures("nipsa_service")
 
 
 @pytest.fixture
