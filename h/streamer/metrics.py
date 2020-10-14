@@ -1,13 +1,14 @@
-from newrelic.agent import data_source_generator, register_data_source
+import gevent
+import newrelic.agent
 
-from h.streamer.streamer import WORK_QUEUE
+from h.streamer import db
 from h.streamer.websocket import WebSocket
 
 PREFIX = "Custom/WebSocket"
+METRICS_INTERVAL = 60
 
 
-@data_source_generator(name="WebSocket Metrics")
-def websocket_metrics():
+def websocket_metrics(queue):
     """
     Report metrics about the websocket service to New Relic.
 
@@ -26,8 +27,20 @@ def websocket_metrics():
     yield f"{PREFIX}/Connections/Authenticated", connections_active - connections_anonymous
     yield f"{PREFIX}/Connections/Anonymous", connections_anonymous
 
-    yield f"{PREFIX}/WorkQueueSize", WORK_QUEUE.qsize()
+    yield f"{PREFIX}/WorkQueueSize", queue.qsize()
 
 
-def includeme(_config):  # pragma: no cover
-    register_data_source(websocket_metrics)
+def metrics_process(registry, queue):
+    session = db.get_session(registry.settings)
+
+    newrelic.agent.initialize()
+    application = newrelic.agent.application()
+
+    while True:
+        with db.read_only_transaction(session):
+
+            newrelic.agent.record_custom_metrics(
+                websocket_metrics(queue), application=application
+            )
+
+        gevent.sleep(METRICS_INTERVAL)

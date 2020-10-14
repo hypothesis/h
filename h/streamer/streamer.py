@@ -4,6 +4,7 @@ import sys
 import gevent
 
 from h.streamer import db, messages, websocket
+from h.streamer.metrics import metrics_process
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ def start(event):
     settings = registry.settings
 
     greenlets = [
+        gevent.spawn(metrics_process, registry, WORK_QUEUE),
         # Start greenlets to process messages from RabbitMQ
         gevent.spawn(messages.process_messages, settings, ANNOTATION_TOPIC, WORK_QUEUE),
         gevent.spawn(messages.process_messages, settings, USER_TOPIC, WORK_QUEUE),
