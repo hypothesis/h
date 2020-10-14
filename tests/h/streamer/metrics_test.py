@@ -33,6 +33,11 @@ class TestWebsocketMetrics:
             [("Custom/WebSocket/WorkQueueSize", size)]
         )
 
+    def test_it_records_alive_metric(self, generate_metrics):
+        metrics = generate_metrics()
+
+        assert list(metrics) == Any.list.containing([("Custom/WebSocket/Alive", 1)])
+
     @pytest.fixture
     def generate_metrics(self):
         # Work with the decorator from new relic to get the actual metrics
