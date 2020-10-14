@@ -19,6 +19,9 @@ def websocket_metrics():
         1 for ws in WebSocket.instances if not ws.authenticated_userid
     )
 
+    # Allow us to tell the difference between reporting 0 and not reporting
+    yield f"{PREFIX}/Alive", 1
+
     yield f"{PREFIX}/Connections/Active", connections_active
     yield f"{PREFIX}/Connections/Authenticated", connections_active - connections_anonymous
     yield f"{PREFIX}/Connections/Anonymous", connections_anonymous
