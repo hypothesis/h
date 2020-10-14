@@ -1,4 +1,4 @@
-from newrelic.agent import data_source_generator
+from newrelic.agent import data_source_generator, register_data_source
 
 from h.streamer.streamer import WORK_QUEUE
 from h.streamer.websocket import WebSocket
@@ -24,3 +24,7 @@ def websocket_metrics():
     yield f"{PREFIX}/Connections/Anonymous", connections_anonymous
 
     yield f"{PREFIX}/WorkQueueSize", WORK_QUEUE.qsize()
+
+
+def includeme(_config):  # pragma: no cover
+    register_data_source(websocket_metrics)
