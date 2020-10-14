@@ -67,7 +67,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
             # response, confusing this method into sending "Transfer-Encoding:
             # chunked" and, in turn, this confuses some strict WebSocket
             # clients.
-            if not hasattr(self.result, "__len__"):
+            if not hasattr(self.result, "__len__") and self.result is not None:
                 self.result = list(self.result)
 
             # ws4py 0.3.4 will try to pop the websocket from the environ
