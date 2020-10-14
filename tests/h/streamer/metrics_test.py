@@ -1,6 +1,7 @@
 from unittest.mock import create_autospec
 
 import pytest
+from gevent.queue import Queue
 from h_matchers import Any
 
 from h.streamer.metrics import websocket_metrics
@@ -24,8 +25,8 @@ class TestWebsocketMetrics:
         )
 
     @pytest.mark.parametrize("size", (1, 5))
-    def test_it_records_work_queue_metric(self, generate_metrics, WORK_QUEUE, size):
-        WORK_QUEUE.qsize.return_value = size
+    def test_it_records_work_queue_metric(self, generate_metrics, queue, size):
+        queue.qsize.return_value = size
 
         metrics = generate_metrics()
 
@@ -39,12 +40,12 @@ class TestWebsocketMetrics:
         assert list(metrics) == Any.list.containing([("Custom/WebSocket/Alive", 1)])
 
     @pytest.fixture
-    def generate_metrics(self):
-        # Work with the decorator from new relic to get the actual metrics
-        # function inside.
-        generate_metrics = websocket_metrics(settings={})["factory"]
+    def generate_metrics(self, queue):
+        return lambda: websocket_metrics(queue)
 
-        return generate_metrics(environ={})
+    @pytest.fixture
+    def queue(self):
+        return create_autospec(Queue, instance=True, spec_set=True)
 
     @pytest.fixture
     def sockets(self):
@@ -60,7 +61,3 @@ class TestWebsocketMetrics:
         WebSocket.instances = sockets
 
         return WebSocket
-
-    @pytest.fixture
-    def WORK_QUEUE(self, patch):
-        return patch("h.streamer.metrics.WORK_QUEUE")
