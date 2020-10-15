@@ -146,7 +146,8 @@ class Queue:
                 "_source": ["updated"],
                 "query": {"ids": {"values": list(annotation_ids)}},
                 "size": len(annotation_ids),
-            }
+            },
+            index=self._es.index,
         )
 
         logger.info(f"Elasticsearch response: {response}")
