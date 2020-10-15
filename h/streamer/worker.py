@@ -36,6 +36,7 @@ license distributed with the ws4py project. Such code remains copyright (c)
 """
 
 import logging
+import weakref
 
 import psycogreen.gevent
 from gevent.pool import Pool
@@ -128,13 +129,23 @@ class WSGIServer(PyWSGIServer):
     :class:`gunicorn.workers.ggevent.PyWSGIServer` base.
     """
 
+    # All instances of the server, allowing us to peek inside and see how many
+    # greenlets we have running. This should really only ever have one value in
+    # it
+    instances = weakref.WeakSet()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pool = GEventWebSocketPool()
 
+        # Add this so we can report on it
+        self.connection_pool = kwargs.get("spawn")
+        self.instances.add(self)
+
     def stop(self, *args, **kwargs):
         self.pool.clear()
         super().stop(*args, **kwargs)
+        self.instances.remove(self)
 
 
 class Worker(GeventPyWSGIWorker):
