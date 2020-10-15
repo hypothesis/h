@@ -75,9 +75,6 @@ class Queue:
         annotations_from_db = self._get_annotations_from_db(annotation_ids)
         annotations_from_es = self._get_annotations_from_es(annotation_ids)
 
-        logger.info(f"annotations_from_db: {annotations_from_db}")
-        logger.info(f"annotations_from_es: {annotations_from_es}")
-
         # Completed jobs that can be removed from the queue.
         job_complete = []
 
@@ -105,11 +102,6 @@ class Queue:
             else:
                 job_complete.append(job)
                 counts[UP_TO_DATE] += 1
-
-        logger.info(
-            f"job_complete: {[job.kwargs['annotation_id'] for job in job_complete]}"
-        )
-        logger.info(f"annotation_ids_to_sync: {annotation_ids_to_sync}")
 
         for job in job_complete:
             self._db.delete(job)
@@ -141,18 +133,14 @@ class Queue:
         }
 
     def _get_annotations_from_es(self, annotation_ids):
-        response = self._es.conn.search(
+        hits = self._es.conn.search(
             body={
                 "_source": ["updated"],
                 "query": {"ids": {"values": list(annotation_ids)}},
                 "size": len(annotation_ids),
             },
             index=self._es.index,
-        )
-
-        logger.info(f"Elasticsearch response: {response}")
-
-        hits = response["hits"]["hits"]
+        )["hits"]["hits"]
 
         for hit in hits:
             updated = hit["_source"].get("updated")
