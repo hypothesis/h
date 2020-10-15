@@ -37,6 +37,7 @@ license distributed with the ws4py project. Such code remains copyright (c)
 
 import logging
 
+import psycogreen.gevent
 from gevent.pool import Pool
 from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler, PyWSGIServer
 from ws4py import format_addresses
@@ -140,5 +141,8 @@ class Worker(GeventPyWSGIWorker):
     server_class = WSGIServer
     wsgi_handler = WebSocketWSGIHandler
 
-    # Used by our gunicorn config to selectively monkeypatch psycopg2
-    use_psycogreen = True
+    def patch(self):
+        psycogreen.gevent.patch_psycopg()
+        self.log.info("Made psycopg green")
+
+        super().patch()
