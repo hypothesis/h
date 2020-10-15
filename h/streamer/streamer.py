@@ -2,6 +2,7 @@ import logging
 import sys
 
 import gevent
+from pyramid.events import ApplicationCreated, subscriber
 
 from h.streamer import db, messages, websocket
 
@@ -31,6 +32,7 @@ class UnknownMessageType(Exception):
     """Raised if a message in the work queue if of an unknown type."""
 
 
+@subscriber(ApplicationCreated)
 def start(event):
     """
     Start some greenlets to process the incoming data from the message queue.
