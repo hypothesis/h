@@ -5,6 +5,7 @@ import gevent
 from pyramid.events import ApplicationCreated, subscriber
 
 from h.streamer import db, messages, websocket
+from h.streamer.stat_dump import dump_stats
 
 # from h.streamer.metrics import metrics_process
 
@@ -45,6 +46,7 @@ def start(event):
     settings = registry.settings
 
     greenlets = [
+        gevent.spawn(dump_stats),
         # Disable metrics for now
         # gevent.spawn(metrics_process, registry, WORK_QUEUE),
         # Start greenlets to process messages from RabbitMQ

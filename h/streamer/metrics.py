@@ -30,7 +30,7 @@ def websocket_metrics(queue):
     yield f"{PREFIX}/WorkQueueSize", queue.qsize()
 
 
-def metrics_process(registry, queue):
+def metrics_process(registry, queue):  # pragma: no cover
     session = db.get_session(registry.settings)
 
     newrelic.agent.initialize()
