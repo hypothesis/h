@@ -27,7 +27,7 @@ class TestIncludeMe:
         config.set_authentication_policy.assert_not_called()
         config.add_route.assert_not_called()
 
-        config.include.assert_called_once_with("h.streamer.kill_switch_views")
+        config.scan.assert_called_once_with("h.streamer.kill_switch_views")
 
     @pytest.fixture
     def with_kill_switch_on(self, patch):

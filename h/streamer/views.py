@@ -60,7 +60,3 @@ def error(context, request):
         "error": "server_error",
         "reason": "An unexpected error occurred and has been reported.",
     }
-
-
-def includeme(config):
-    config.scan(__name__)

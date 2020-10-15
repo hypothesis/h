@@ -7,7 +7,3 @@ from pyramid.view import notfound_view_config
 def not_found(_exc, _request):
     """Handle any request we get with the shortest possible response."""
     return Response(status="429 Offline", headerlist=[])
-
-
-def includeme(config):  # pragma: no cover
-    config.scan(__name__)
