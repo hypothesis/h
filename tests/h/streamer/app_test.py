@@ -4,7 +4,7 @@ import pytest
 from pyramid.config import Configurator
 
 from h.sentry_filters import SENTRY_FILTERS
-from h.websocket import create_app
+from h.streamer.app import create_app
 
 
 class TestIncludeMe:
@@ -31,7 +31,7 @@ class TestIncludeMe:
 
     @pytest.fixture
     def with_kill_switch_on(self, patch):
-        os = patch("h.websocket.os")
+        os = patch("h.streamer.app.os")
         os.environ.get.side_effect = {"KILL_SWITCH_WEBSOCKET": 1}.get
 
     @pytest.fixture
@@ -40,7 +40,7 @@ class TestIncludeMe:
 
     @pytest.fixture
     def configure(self, patch, config):
-        configure = patch("h.websocket.configure")
+        configure = patch("h.streamer.app.configure")
         configure.return_value = config
 
         return configure

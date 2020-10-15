@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from h.streamer import close_db_session_tween_factory
+from h.streamer.tweens import close_db_session_tween_factory
 
 
 class TestCloseTheDBSessionTweenFactory:
