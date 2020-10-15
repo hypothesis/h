@@ -2,10 +2,10 @@ import pytest
 from _datetime import datetime
 from pyramid import security
 
+from h.streamer.app import create_app
 from h.streamer.contexts import request_context
 from h.streamer.messages import handle_annotation_event
 from h.streamer.websocket import WebSocket
-from h.websocket import create_app
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
 
 
