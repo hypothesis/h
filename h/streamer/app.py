@@ -44,9 +44,7 @@ def create_app(_global_config, **settings):
     config.add_route("api.annotation", "/api/annotations/{id}", static=True)
 
     config.include("h.streamer.views")
-    config.add_subscriber(
-        "h.streamer.streamer.start", "pyramid.events.ApplicationCreated"
-    )
+    config.scan("h.streamer.streamer")
     config.add_tween(
         "h.streamer.tweens.close_db_session_tween_factory",
         over=["pyramid_exclog.exclog_tween_factory", pyramid.tweens.EXCVIEW],
