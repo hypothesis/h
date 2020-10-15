@@ -68,7 +68,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
             # even if it doesn't exist, causing a key error.
             self.environ.setdefault("ws4py.websocket", None)
 
-        super(WebSocketWSGIHandler, self).finalize_headers()
+        super().finalize_headers()
 
     def run_application(self):
         upgrade_header = self.environ.get("HTTP_UPGRADE", "").lower()
@@ -88,7 +88,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
                 ws_greenlet = self.server.pool.track(ws)
                 ws_greenlet.join()
         else:
-            super(WebSocketWSGIHandler, self).run_application()
+            super().run_application()
 
 
 class GEventWebSocketPool(Pool):
@@ -128,12 +128,12 @@ class WSGIServer(PyWSGIServer):
     """
 
     def __init__(self, *args, **kwargs):
-        super(WSGIServer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.pool = GEventWebSocketPool()
 
     def stop(self, *args, **kwargs):
         self.pool.clear()
-        super(WSGIServer, self).stop(*args, **kwargs)
+        super().stop(*args, **kwargs)
 
 
 class Worker(GeventPyWSGIWorker):
