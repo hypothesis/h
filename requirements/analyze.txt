@@ -31,7 +31,7 @@ h-matchers==1.2.9         # via -r requirements/requirements.txt
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt
 hkdf==0.0.3               # via -r requirements/requirements.txt
 hupper==1.10.2            # via -r requirements/requirements.txt, pyramid
-hypothesis==5.37.1        # via -r requirements/analyze.in
+hypothesis==5.37.3        # via -r requirements/analyze.in
 importlib-metadata==1.7.0  # via -r requirements/requirements.txt, jsonschema, kombu, pluggy, pytest
 iniconfig==1.0.1          # via pytest
 iso8601==0.1.13           # via -r requirements/requirements.txt, colander, deform
