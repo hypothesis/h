@@ -23,6 +23,13 @@ def add_annotation(id_):
     search_index.add_annotation_by_id(id_)
 
 
+@celery.task
+def add_annotations_between_times(start_time, end_time, tag):
+    celery.request.find_service(
+        name="search_index"
+    )._queue.add_annotations_between_times(start_time, end_time, tag)
+
+
 @celery.task(base=_BaseTaskWithRetry)
 def delete_annotation(id_):
     search_index = celery.request.find_service(name="search_index")

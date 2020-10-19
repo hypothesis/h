@@ -136,7 +136,7 @@ class TestAddAnnotation:
 
 
 class TestAddAnnotationsBetweenTimes:
-    def test_it(self, queue, search_index):
+    def test_it(self, indexer, search_index):
         start_time = datetime.datetime(2020, 9, 9)
         end_time = datetime.datetime(2020, 9, 11)
 
@@ -146,7 +146,7 @@ class TestAddAnnotationsBetweenTimes:
             "test_tag",
         )
 
-        queue.add_annotations_between_times.assert_called_once_with(
+        indexer.add_annotations_between_times.delay.assert_called_once_with(
             start_time, end_time, "test_tag"
         )
 

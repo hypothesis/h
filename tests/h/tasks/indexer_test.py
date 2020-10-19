@@ -26,6 +26,17 @@ class TestSearchIndexServicesWrapperTasks:
         )
 
 
+class TestAddAnnotationsBetweenTimes:
+    def test_it(self, search_index):
+        indexer.add_annotations_between_times(
+            sentinel.start_time, sentinel.end_time, sentinel.tag
+        )
+
+        search_index._queue.add_annotations_between_times.assert_called_once_with(
+            sentinel.start_time, sentinel.end_time, sentinel.tag
+        )
+
+
 class TestReindexUserAnnotations:
     def test_it_creates_batch_indexer(self, BatchIndexer, annotation_ids, celery):
         userid = list(annotation_ids.keys())[0]
