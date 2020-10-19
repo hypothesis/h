@@ -76,7 +76,7 @@ class SearchIndexService:
         :type start_time: datetime.datetime
         :type end_time: datetime.datetime
         """
-        self._queue.add_annotations_between_times(start_time, end_time, tag)
+        indexer.add_annotations_between_times.delay(start_time, end_time, tag)
 
     def delete_annotation_by_id(self, annotation_id, refresh=False):
         """

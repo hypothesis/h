@@ -7,6 +7,7 @@ from h.services.groupfinder import GroupfinderService
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService
 from h.services.search_index import SearchIndexService
+from h.services.search_index._queue import Queue
 
 __all__ = (
     "mock_service",
@@ -23,8 +24,10 @@ from h.services.user import UserService
 
 @pytest.fixture
 def mock_service(pyramid_config):
-    def mock_service(service_class, name):
-        service = create_autospec(service_class, instance=True, spec_set=True)
+    def mock_service(service_class, name, spec_set=True, **kwargs):
+        service = create_autospec(
+            service_class, instance=True, spec_set=spec_set, **kwargs
+        )
         pyramid_config.register_service(service, name=name)
 
         return service
@@ -34,7 +37,12 @@ def mock_service(pyramid_config):
 
 @pytest.fixture
 def search_index(mock_service):
-    return mock_service(SearchIndexService, "search_index")
+    return mock_service(
+        SearchIndexService,
+        "search_index",
+        spec_set=False,
+        _queue=create_autospec(Queue, spec_set=True, instance=True),
+    )
 
 
 @pytest.fixture
