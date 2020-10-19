@@ -144,37 +144,19 @@ class TestAddAnnotation:
 
 
 class TestAddAnnotationsBetweenTimes:
-    def test_it(self, annotation_ids, search_index, queue):
+    def test_it(self, queue, search_index):
+        start_time = datetime.datetime(2020, 9, 9)
+        end_time = datetime.datetime(2020, 9, 11)
+
         search_index.add_annotations_between_times(
-            datetime.datetime(2020, 9, 9),
-            datetime.datetime(2020, 9, 11),
+            start_time,
+            end_time,
             "test_tag",
         )
 
-        queue.add_all.assert_called_once_with(
-            Any.list.containing(annotation_ids).only(), tag="test_tag"
+        queue.add_annotations_between_times.assert_called_once_with(
+            start_time, end_time, "test_tag"
         )
-
-    @pytest.fixture
-    def annotations(self, factories):
-        return factories.Annotation.create_batch(
-            size=10, updated=datetime.datetime(year=2020, month=9, day=10)
-        )
-
-    @pytest.fixture(autouse=True)
-    def non_matching_annotations(self, factories):
-        """Annotations from outside the date range that we're reindexing."""
-        before_annotations = factories.Annotation.create_batch(
-            size=3, updated=datetime.datetime(year=2020, month=9, day=8)
-        )
-        after_annotations = factories.Annotation.create_batch(
-            size=3, updated=datetime.datetime(year=2020, month=9, day=12)
-        )
-        return before_annotations + after_annotations
-
-    @pytest.fixture
-    def annotation_ids(self, annotations):
-        return [annotation.id for annotation in annotations]
 
 
 class TestDeleteAnnotationById:

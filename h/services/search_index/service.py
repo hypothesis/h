@@ -1,7 +1,6 @@
 from h_pyramid_sentry import report_exception
 
 from h import storage
-from h.models import Annotation
 from h.presenters import AnnotationSearchIndexPresenter
 from h.tasks.indexer import add_annotation, delete_annotation
 
@@ -77,15 +76,7 @@ class SearchIndexService:
         :type start_time: datetime.datetime
         :type end_time: datetime.datetime
         """
-        self._queue.add_all(
-            [
-                row[0]
-                for row in self._db.query(Annotation.id)
-                .filter(Annotation.updated >= start_time)
-                .filter(Annotation.updated <= end_time)
-            ],
-            tag=tag,
-        )
+        self._queue.add_annotations_between_times(start_time, end_time, tag)
 
     def delete_annotation_by_id(self, annotation_id, refresh=False):
         """
