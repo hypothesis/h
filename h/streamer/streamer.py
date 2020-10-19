@@ -1,13 +1,13 @@
 import logging
+import os
 import sys
 
 import gevent
 from pyramid.events import ApplicationCreated, subscriber
 
 from h.streamer import db, messages, websocket
+from h.streamer.metrics import metrics_process
 from h.streamer.stat_dump import dump_stats
-
-# from h.streamer.metrics import metrics_process
 
 log = logging.getLogger(__name__)
 
@@ -47,14 +47,17 @@ def start(event):
 
     greenlets = [
         gevent.spawn(dump_stats),
-        # Disable metrics for now
-        # gevent.spawn(metrics_process, registry, WORK_QUEUE),
         # Start greenlets to process messages from RabbitMQ
         gevent.spawn(messages.process_messages, settings, ANNOTATION_TOPIC, WORK_QUEUE),
         gevent.spawn(messages.process_messages, settings, USER_TOPIC, WORK_QUEUE),
         # And one to process the queued work
         gevent.spawn(process_work_queue, registry, WORK_QUEUE),
     ]
+
+    if not os.environ.get("KILL_SWITCH_WEBSOCKET_METRICS"):
+        greenlets.append(
+            gevent.spawn(metrics_process, registry, WORK_QUEUE),
+        )
 
     # Start a "greenlet of last resort" to monitor the worker greenlets and
     # bail if any unexpected errors occur.
