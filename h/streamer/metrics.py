@@ -4,6 +4,7 @@ from pkg_resources import resource_filename
 
 from h.streamer import db
 from h.streamer.websocket import WebSocket
+from h.streamer.worker import WSGIServer
 
 PREFIX = "Custom/WebSocket"
 METRICS_INTERVAL = 60
@@ -28,6 +29,17 @@ def websocket_metrics(queue):
     yield f"{PREFIX}/Connections/Anonymous", connections_anonymous
 
     yield f"{PREFIX}/WorkQueueSize", queue.qsize()
+
+    # There really only should be one server per instance
+    for server in WSGIServer.instances:
+        pool = server.connection_pool
+        free = pool.free_count()
+
+        # We expect these values to track active connections exactly, so it's
+        # either pointless if they do / very interesting if they don't.
+        yield f"{PREFIX}/Worker/Pool/MaxSize", pool.size
+        yield f"{PREFIX}/Worker/Pool/Free", free
+        yield f"{PREFIX}/Worker/Pool/Used", pool.size - free
 
 
 def metrics_process(registry, queue):  # pragma: no cover

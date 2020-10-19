@@ -1,6 +1,7 @@
 from unittest.mock import create_autospec
 
 import pytest
+from gevent.pool import Pool
 from gevent.queue import Queue
 from h_matchers import Any
 
@@ -39,6 +40,22 @@ class TestWebsocketMetrics:
 
         assert list(metrics) == Any.list.containing([("Custom/WebSocket/Alive", 1)])
 
+    def test_it_records_worker_metrics(
+        self, generate_metrics, WSGIServer, server_instance
+    ):
+        server_instance.connection_pool.size = 4096
+        server_instance.connection_pool.free_count.return_value = 1024
+
+        metrics = generate_metrics()
+
+        assert list(metrics) == Any.list.containing(
+            [
+                ("Custom/WebSocket/Worker/Pool/MaxSize", 4096),
+                ("Custom/WebSocket/Worker/Pool/Free", 1024),
+                ("Custom/WebSocket/Worker/Pool/Used", 4096 - 1024),
+            ]
+        )
+
     @pytest.fixture
     def generate_metrics(self, queue):
         return lambda: websocket_metrics(queue)
@@ -61,3 +78,17 @@ class TestWebsocketMetrics:
         WebSocket.instances = sockets
 
         return WebSocket
+
+    @pytest.fixture
+    def WSGIServer(self, patch):
+        return patch("h.streamer.metrics.WSGIServer")
+
+    @pytest.fixture
+    def server_instance(self, WSGIServer):
+        server_instance = WSGIServer()
+        # Not sure why autospec doesn't pick any of this up, but it doesn't
+        server_instance.connection_pool = create_autospec(Pool, instance=True)
+
+        WSGIServer.instances = [server_instance]
+
+        return server_instance
