@@ -50,11 +50,31 @@ class URLSafeUUID(types.TypeDecorator):
     impl = postgresql.UUID
 
     def process_bind_param(self, value, dialect):
+        return self.url_safe_to_hex(value)
+
+    def process_result_value(self, value, dialect):
+        return self.hex_to_url_safe(value)
+
+    @staticmethod
+    def url_safe_to_hex(value):
+        """
+        Return the hex version of the given URL-safe UUID.
+
+        Converts UUID's from the application-level URL-safe format to the hex
+        format that's used internally in the DB.
+        """
         if value is None:
             return None
         return _get_hex_from_urlsafe(value)
 
-    def process_result_value(self, value, dialect):
+    @staticmethod
+    def hex_to_url_safe(value):
+        """
+        Return the URL-safe version of the given hex-format UUID.
+
+        Converts UUID's from the database-internal hex format to the URL-safe
+        format that's in the application.
+        """
         if value is None:
             return None
         hexstring = uuid.UUID(value).hex
