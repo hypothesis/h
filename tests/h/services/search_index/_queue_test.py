@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 from h_matchers import Any
 
+from h.db.types import URLSafeUUID
 from h.models import Job
 from h.search.index import BatchIndexer
 from h.services.search_index import SearchIndexService
@@ -22,8 +23,10 @@ MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
 
 
 class TestAddSyncAnnotationJob:
-    def test_it(self, db_session, queue, now):
-        queue.add("test_annotation_id", "test_tag", schedule_in=ONE_WEEK)
+    def test_it(self, db_session, factories, queue, now):
+        annotation = factories.Annotation.build()
+
+        queue.add(annotation.id, "test_tag", schedule_in=ONE_WEEK)
 
         assert db_session.query(Job).all() == [
             Any.instance_of(Job).with_attrs(
@@ -32,10 +35,52 @@ class TestAddSyncAnnotationJob:
                     scheduled_at=now + ONE_WEEK,
                     tag="test_tag",
                     priority=1,
-                    kwargs={"annotation_id": "test_annotation_id"},
+                    kwargs={
+                        "annotation_id": URLSafeUUID.url_safe_to_hex(annotation.id)
+                    },
                 )
             ),
         ]
+
+
+class TestAddAnnotationsBetweenTimes:
+    def test_it(self, annotation_ids, db_session, queue):
+        queue.add_annotations_between_times(
+            datetime_.datetime(2020, 9, 9),
+            datetime_.datetime(2020, 9, 11),
+            "test_tag",
+        )
+
+        annotation_ids_added_to_jobs_table = [
+            URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
+            for job in db_session.query(Job)
+        ]
+        assert (
+            annotation_ids_added_to_jobs_table
+            == Any.list.containing(annotation_ids).only()
+        )
+        assert db_session.query(Job.tag).distinct().all() == [("test_tag",)]
+
+    @pytest.fixture
+    def annotations(self, factories):
+        return factories.Annotation.create_batch(
+            size=10, updated=datetime_.datetime(year=2020, month=9, day=10)
+        )
+
+    @pytest.fixture(autouse=True)
+    def non_matching_annotations(self, factories):
+        """Annotations from outside the date range that we're reindexing."""
+        before_annotations = factories.Annotation.create_batch(
+            size=3, updated=datetime_.datetime(year=2020, month=9, day=8)
+        )
+        after_annotations = factories.Annotation.create_batch(
+            size=3, updated=datetime_.datetime(year=2020, month=9, day=12)
+        )
+        return before_annotations + after_annotations
+
+    @pytest.fixture
+    def annotation_ids(self, annotations):
+        return [annotation.id for annotation in annotations]
 
 
 class TestSyncAnnotations:

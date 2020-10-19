@@ -3,7 +3,10 @@ from datetime import datetime
 
 from celery.utils.log import get_task_logger
 from dateutil.parser import isoparse
+from sqlalchemy import func, select, text
+from zope.sqlalchemy import mark_changed
 
+from h.db.types import URLSafeUUID
 from h.models import Annotation, Job
 
 logger = get_task_logger(__name__)
@@ -44,10 +47,28 @@ class Queue:
                 name="sync_annotation",
                 scheduled_at=scheduled_at,
                 priority=priority,
-                kwargs={"annotation_id": annotation_id},
+                kwargs={"annotation_id": URLSafeUUID.url_safe_to_hex(annotation_id)},
             )
             for annotation_id in annotation_ids
         )
+
+    def add_annotations_between_times(self, start_time, end_time, tag):
+        self._db.execute(
+            Job.__table__.insert().from_select(
+                [Job.name, Job.priority, Job.tag, Job.kwargs],
+                select(
+                    [
+                        text("'sync_annotation'"),
+                        text("1000"),
+                        text(repr(tag)),
+                        func.jsonb_build_object("annotation_id", Annotation.id),
+                    ]
+                )
+                .where(Annotation.updated >= start_time)
+                .where(Annotation.updated <= end_time),
+            )
+        )
+        mark_changed(self._db)
 
     def sync(self, limit):
         """
@@ -71,7 +92,9 @@ class Queue:
         if not jobs:
             return
 
-        annotation_ids = {job.kwargs["annotation_id"] for job in jobs}
+        annotation_ids = {
+            URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"]) for job in jobs
+        }
         annotations_from_db = self._get_annotations_from_db(annotation_ids)
         annotations_from_es = self._get_annotations_from_es(annotation_ids)
 
@@ -86,7 +109,7 @@ class Queue:
         counts = Counter()
 
         for job in jobs:
-            annotation_id = job.kwargs["annotation_id"]
+            annotation_id = URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
             annotation_from_db = annotations_from_db.get(annotation_id)
             annotation_from_es = annotations_from_es.get(annotation_id)
 

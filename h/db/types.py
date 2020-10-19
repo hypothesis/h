@@ -73,7 +73,7 @@ class URLSafeUUID(types.TypeDecorator):
         Return the URL-safe version of the given hex-format UUID.
 
         Converts UUID's from the database-internal hex format to the URL-safe
-        format that's in the application.
+        format that's used in the application.
         """
         if value is None:
             return None
