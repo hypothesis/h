@@ -223,12 +223,7 @@ class TestHandleAnnotationEvent:
         assert result == async_handler.return_value
 
     @pytest.fixture(autouse=True)
-    def handler_for(self, patch, add_annotation_by_id, delete_annotation_by_id):
-        add_annotation_task = patch("h.services.search_index.service.add_annotation")
-        delete_annotation_task = patch(
-            "h.services.search_index.service.delete_annotation"
-        )
-
+    def handler_for(self, add_annotation_by_id, delete_annotation_by_id, indexer):
         handler_map = {
             True: {
                 "create": add_annotation_by_id,
@@ -236,9 +231,9 @@ class TestHandleAnnotationEvent:
                 "delete": delete_annotation_by_id,
             },
             False: {
-                "create": add_annotation_task.delay,
-                "update": add_annotation_task.delay,
-                "delete": delete_annotation_task.delay,
+                "create": indexer.add_annotation.delay,
+                "update": indexer.add_annotation.delay,
+                "delete": indexer.delete_annotation.delay,
             },
         }
 
@@ -306,3 +301,8 @@ def search_index(es_client, pyramid_request, settings_service, queue):
 @pytest.fixture(autouse=True)
 def es_client():
     return create_autospec(Client, instance=True)
+
+
+@pytest.fixture(autouse=True)
+def indexer(patch):
+    return patch("h.services.search_index.service.indexer")
