@@ -76,19 +76,18 @@ class TestAddAnnotationsBetweenTimes:
     @pytest.fixture
     def annotations(self, factories):
         return factories.Annotation.create_batch(
-            size=10, updated=datetime_.datetime(year=2020, month=9, day=10)
+            size=2, updated=datetime_.datetime(year=2020, month=9, day=10)
         )
 
     @pytest.fixture(autouse=True)
     def non_matching_annotations(self, factories):
         """Annotations from outside the date range that we're reindexing."""
-        before_annotations = factories.Annotation.create_batch(
-            size=3, updated=datetime_.datetime(year=2020, month=9, day=8)
+        factories.Annotation.create(
+            updated=datetime_.datetime(year=2020, month=9, day=8)
         )
-        after_annotations = factories.Annotation.create_batch(
-            size=3, updated=datetime_.datetime(year=2020, month=9, day=12)
+        factories.Annotation.create(
+            updated=datetime_.datetime(year=2020, month=9, day=12)
         )
-        return before_annotations + after_annotations
 
     @pytest.fixture
     def annotation_ids(self, annotations):
