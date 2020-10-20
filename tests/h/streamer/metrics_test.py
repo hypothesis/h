@@ -40,9 +40,7 @@ class TestWebsocketMetrics:
 
         assert list(metrics) == Any.list.containing([("Custom/WebSocket/Alive", 1)])
 
-    def test_it_records_worker_metrics(
-        self, generate_metrics, WSGIServer, server_instance
-    ):
+    def test_it_records_worker_metrics(self, generate_metrics, server_instance):
         server_instance.connection_pool.size = 4096
         server_instance.connection_pool.free_count.return_value = 1024
 
@@ -80,15 +78,14 @@ class TestWebsocketMetrics:
         return WebSocket
 
     @pytest.fixture
-    def WSGIServer(self, patch):
-        return patch("h.streamer.metrics.WSGIServer")
+    def server_instance(self, patch):
+        WSGIServer = patch("h.streamer.metrics.WSGIServer")
 
-    @pytest.fixture
-    def server_instance(self, WSGIServer):
         server_instance = WSGIServer()
         # Not sure why autospec doesn't pick any of this up, but it doesn't
         server_instance.connection_pool = create_autospec(Pool, instance=True)
 
+        # Real instances register themselves with the class
         WSGIServer.instances = [server_instance]
 
         return server_instance
