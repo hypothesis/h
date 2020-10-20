@@ -55,10 +55,6 @@ class TestAddAnnotationById:
 
         add_annotation.assert_has_calls([call(reply_annotation), call(root_annotation)])
 
-    @pytest.fixture(autouse=True)
-    def storage(self, patch):
-        return patch("h.services.search_index.service.storage")
-
     @pytest.fixture
     def root_annotation(self, factories):
         return factories.Annotation.build(references=[])
@@ -311,3 +307,8 @@ def indexer(patch):
 @pytest.fixture(autouse=True)
 def report_exception(patch):
     return patch("h.services.search_index.service.report_exception")
+
+
+@pytest.fixture(autouse=True)
+def storage(patch):
+    return patch("h.services.search_index.service.storage")
