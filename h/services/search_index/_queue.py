@@ -1,6 +1,6 @@
-import logging
 from collections import Counter
 from datetime import datetime
+from logging import getLogger
 
 from dateutil.parser import isoparse
 from sqlalchemy import func, select, text
@@ -9,18 +9,19 @@ from zope.sqlalchemy import mark_changed
 from h.db.types import URLSafeUUID
 from h.models import Annotation, Job
 
-logger = logging.getLogger(__name__)
-
-# Strings used in log messages.
-DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
-MISSING = "Annotations synced because they were not in Elasticsearch"
-OUT_OF_DATE = "Annotations synced because they were outdated in Elasticsearch"
-UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
-FORCED = "Annotations synced because their jobs had force=True"
+LOG = getLogger(__name__)
 
 
 class Queue:
     """A job queue for synchronizing annotations from Postgres to Elastic."""
+
+    class Result:
+        # Values for reporting which should stringify nicely
+        DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
+        MISSING = "Annotations synced because they were not in Elasticsearch"
+        OUT_OF_DATE = "Annotations synced because they were outdated in Elasticsearch"
+        UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
+        FORCED = "Annotations synced because their jobs had force=True"
 
     def __init__(self, db, es, batch_indexer):
         self._db = db
@@ -128,19 +129,19 @@ class Queue:
             if job.kwargs.get("force", False):
                 annotation_ids_to_sync.add(annotation_id)
                 job_complete.append(job)
-                counts[FORCED] += 1
+                counts[Queue.Result.FORCED] += 1
             elif not annotation_from_db:
                 job_complete.append(job)
-                counts[DELETED_FROM_DB] += 1
+                counts[Queue.Result.DELETED_FROM_DB] += 1
             elif not annotation_from_es:
                 annotation_ids_to_sync.add(annotation_id)
-                counts[MISSING] += 1
+                counts[Queue.Result.MISSING] += 1
             elif annotation_from_es["updated"] != annotation_from_db.updated:
                 annotation_ids_to_sync.add(annotation_id)
-                counts[OUT_OF_DATE] += 1
+                counts[Queue.Result.OUT_OF_DATE] += 1
             else:
                 job_complete.append(job)
-                counts[UP_TO_DATE] += 1
+                counts[Queue.Result.UP_TO_DATE] += 1
 
         for job in job_complete:
             self._db.delete(job)
@@ -148,7 +149,7 @@ class Queue:
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
-        logger.info(dict(counts))
+        LOG.info(dict(counts))
 
     def _get_jobs_from_queue(self, limit):
         return (
