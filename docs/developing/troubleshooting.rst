@@ -30,3 +30,11 @@ pyenv errors on macOS
 
 Read `pyenv's Common Build Problems page <https://github.com/pyenv/pyenv/wiki/common-build-problems>`_
 for the solutions to these.
+
+
+Memory Issues 
+-------------
+If there isn't enough memory available, some services like elasticsearch may fail silently. 
+You can execute ``docker ps`` to see which containers are running. 
+
+
