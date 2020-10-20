@@ -1,5 +1,4 @@
 import datetime as datetime_
-import logging
 import uuid
 from unittest import mock
 
@@ -10,14 +9,7 @@ from h.db.types import URLSafeUUID
 from h.models import Job
 from h.search.index import BatchIndexer
 from h.services.search_index import SearchIndexService
-from h.services.search_index._queue import (
-    DELETED_FROM_DB,
-    FORCED,
-    MISSING,
-    OUT_OF_DATE,
-    UP_TO_DATE,
-    Queue,
-)
+from h.services.search_index._queue import Queue
 
 LIMIT = 10
 ONE_WEEK = datetime_.timedelta(weeks=1)
@@ -104,29 +96,19 @@ class TestAddAnnotationsBetweenTimes:
 
 
 class TestSyncAnnotations:
-    def test_it_does_nothing_if_the_queue_is_empty(self, batch_indexer, caplog, queue):
+    def test_it_does_nothing_if_the_queue_is_empty(self, batch_indexer, queue):
         queue.sync(LIMIT)
 
         batch_indexer.index.assert_not_called()
-        # If it didn't do anything then it shouldn't have logged that it did anything.
-        assert DELETED_FROM_DB not in caplog.records
-        assert MISSING not in caplog.records
-        assert OUT_OF_DATE not in caplog.records
-        assert UP_TO_DATE not in caplog.records
 
     def test_it_ignores_jobs_that_arent_scheduled_yet(
-        self, annotation_ids, batch_indexer, caplog, queue
+        self, annotation_ids, batch_indexer, queue
     ):
         queue.add_all(annotation_ids, tag="test_tag", schedule_in=ONE_WEEK)
 
         queue.sync(LIMIT)
 
         batch_indexer.index.assert_not_called()
-        # If it didn't do anything then it shouldn't have logged that it did anything.
-        assert DELETED_FROM_DB not in caplog.records
-        assert MISSING not in caplog.records
-        assert OUT_OF_DATE not in caplog.records
-        assert UP_TO_DATE not in caplog.records
 
     def test_it_ignores_jobs_beyond_limit(
         self, all_annotation_ids, batch_indexer, queue
@@ -141,14 +123,7 @@ class TestSyncAnnotations:
             assert annotation_id not in batch_indexer.index.call_args[0][0]
 
     def test_if_the_job_has_force_True_it_indexes_the_annotation_and_deletes_the_job(
-        self,
-        annotations,
-        annotation_ids,
-        batch_indexer,
-        caplog,
-        db_session,
-        index,
-        queue,
+        self, annotations, annotation_ids, batch_indexer, db_session, index, queue, LOG
     ):
         index(annotations)
         queue.add_all(
@@ -157,14 +132,14 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        assert str({FORCED: 10}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.FORCED: 10})
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
         )
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
-        self, annotations, annotation_ids, caplog, db_session, queue
+        self, annotations, annotation_ids, db_session, queue, LOG
     ):
         for annotation in annotations:
             db_session.delete(annotation)
@@ -173,11 +148,11 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        assert str({DELETED_FROM_DB: 10}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.DELETED_FROM_DB: 10})
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
-        self, annotations, annotation_ids, caplog, db_session, queue
+        self, annotations, annotation_ids, db_session, queue, LOG
     ):
         for annotation in annotations:
             annotation.deleted = True
@@ -186,17 +161,17 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        assert str({DELETED_FROM_DB: 10}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.DELETED_FROM_DB: 10})
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
-        self, annotation_ids, batch_indexer, caplog, queue
+        self, annotation_ids, batch_indexer, queue, LOG
     ):
         queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
 
         queue.sync(LIMIT)
 
-        assert str({MISSING: 10}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.MISSING: 10})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
         )
@@ -206,22 +181,22 @@ class TestSyncAnnotations:
         annotations,
         annotation_ids,
         batch_indexer,
-        caplog,
         db_session,
         index,
         queue,
+        LOG,
     ):
         index(annotations)
         queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
 
         queue.sync(LIMIT)
 
-        assert str({UP_TO_DATE: 10}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.UP_TO_DATE: 10})
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
 
     def test_if_the_annotation_has_a_different_updated_time_in_Elastic_it_indexes_it(
-        self, annotations, annotation_ids, batch_indexer, caplog, index, now, queue
+        self, annotations, annotation_ids, batch_indexer, index, now, queue, LOG
     ):
         index(annotations)
         queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
@@ -232,13 +207,13 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        assert str({OUT_OF_DATE: 10}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.OUT_OF_DATE: 10})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
         )
 
     def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
-        self, annotation_ids, batch_indexer, caplog, queue
+        self, annotation_ids, batch_indexer, queue, LOG
     ):
         queue.add_all(
             [annotation_ids[0], annotation_ids[0], annotation_ids[0]],
@@ -249,13 +224,13 @@ class TestSyncAnnotations:
         queue.sync(LIMIT)
 
         # It only syncs the annotation to Elasticsearch once.
-        assert str({MISSING: 3}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.MISSING: 3})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing([annotation_ids[0]]).only()
         )
 
     def test_deleting_multiple_jobs_with_the_same_annotation_id(
-        self, annotations, batch_indexer, caplog, db_session, index, queue
+        self, annotations, batch_indexer, db_session, index, queue, LOG
     ):
         queue.add_all(
             [annotations[0].id, annotations[0].id, annotations[0].id],
@@ -266,7 +241,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        assert str({UP_TO_DATE: 3}) in caplog.text
+        LOG.info.assert_called_with({Queue.Result.UP_TO_DATE: 3})
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
 
@@ -285,14 +260,6 @@ class TestSyncAnnotations:
     @pytest.fixture
     def annotation_ids(self, all_annotation_ids):
         return all_annotation_ids[:LIMIT]
-
-    @pytest.fixture
-    def caplog(self, caplog):
-        # Filter out log messages from any other module.
-        caplog.set_level(logging.CRITICAL + 1)
-        # Filter in log messages from the module under test only.
-        caplog.set_level(logging.INFO, "h.services.search_index._queue")
-        return caplog
 
     @pytest.fixture
     def search_index(
@@ -330,6 +297,11 @@ def datetime(patch, now):
     datetime = patch("h.services.search_index._queue.datetime")
     datetime.utcnow.return_value = now
     return datetime
+
+
+@pytest.fixture(autouse=True)
+def LOG(patch):
+    return patch("h.services.search_index._queue.LOG")
 
 
 @pytest.fixture
