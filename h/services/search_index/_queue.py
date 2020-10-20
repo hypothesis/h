@@ -16,6 +16,7 @@ DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
 MISSING = "Annotations synced because they were not in Elasticsearch"
 OUT_OF_DATE = "Annotations synced because they were outdated in Elasticsearch"
 UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
+FORCED = "Annotations synced because their jobs had force=True"
 
 
 class Queue:
@@ -26,11 +27,11 @@ class Queue:
         self._es = es
         self._batch_indexer = batch_indexer
 
-    def add(self, annotation_id, tag, schedule_in=None):
+    def add(self, annotation_id, tag, schedule_in=None, force=False):
         """Queue an annotation to be synced to Elasticsearch."""
-        self.add_all([annotation_id], tag, schedule_in)
+        self.add_all([annotation_id], tag, schedule_in, force)
 
-    def add_all(self, annotation_ids, tag, schedule_in=None):
+    def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
         """Queue a list of annotations to be synced to Elasticsearch."""
 
         scheduled_at = (datetime.utcnow() + schedule_in) if schedule_in else None
@@ -47,12 +48,15 @@ class Queue:
                 name="sync_annotation",
                 scheduled_at=scheduled_at,
                 priority=priority,
-                kwargs={"annotation_id": URLSafeUUID.url_safe_to_hex(annotation_id)},
+                kwargs={
+                    "annotation_id": URLSafeUUID.url_safe_to_hex(annotation_id),
+                    "force": force,
+                },
             )
             for annotation_id in annotation_ids
         )
 
-    def add_annotations_between_times(self, start_time, end_time, tag):
+    def add_annotations_between_times(self, start_time, end_time, tag, force=False):
         self._db.execute(
             Job.__table__.insert().from_select(
                 [Job.name, Job.priority, Job.tag, Job.kwargs],
@@ -61,7 +65,9 @@ class Queue:
                         text("'sync_annotation'"),
                         text("1000"),
                         text(repr(tag)),
-                        func.jsonb_build_object("annotation_id", Annotation.id),
+                        func.jsonb_build_object(
+                            "annotation_id", Annotation.id, "force", force
+                        ),
                     ]
                 )
                 .where(Annotation.updated >= start_time)
@@ -93,10 +99,16 @@ class Queue:
             return
 
         annotation_ids = {
-            URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"]) for job in jobs
+            URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
+            for job in jobs
+            if not job.kwargs.get("force", False)
         }
-        annotations_from_db = self._get_annotations_from_db(annotation_ids)
-        annotations_from_es = self._get_annotations_from_es(annotation_ids)
+        if annotation_ids:
+            annotations_from_db = self._get_annotations_from_db(annotation_ids)
+            annotations_from_es = self._get_annotations_from_es(annotation_ids)
+        else:
+            annotations_from_db = {}
+            annotations_from_es = {}
 
         # Completed jobs that can be removed from the queue.
         job_complete = []
@@ -113,7 +125,11 @@ class Queue:
             annotation_from_db = annotations_from_db.get(annotation_id)
             annotation_from_es = annotations_from_es.get(annotation_id)
 
-            if not annotation_from_db:
+            if job.kwargs.get("force", False):
+                annotation_ids_to_sync.add(annotation_id)
+                job_complete.append(job)
+                counts[FORCED] += 1
+            elif not annotation_from_db:
                 job_complete.append(job)
                 counts[DELETED_FROM_DB] += 1
             elif not annotation_from_es:
