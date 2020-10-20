@@ -306,3 +306,8 @@ def es_client():
 @pytest.fixture(autouse=True)
 def indexer(patch):
     return patch("h.services.search_index.service.indexer")
+
+
+@pytest.fixture(autouse=True)
+def report_exception(patch):
+    return patch("h.services.search_index.service.report_exception")
