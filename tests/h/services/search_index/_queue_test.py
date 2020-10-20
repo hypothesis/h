@@ -11,7 +11,7 @@ from h.search.index import BatchIndexer
 from h.services.search_index import SearchIndexService
 from h.services.search_index._queue import Queue
 
-LIMIT = 10
+LIMIT = 2
 ONE_WEEK = datetime_.timedelta(weeks=1)
 MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
 
