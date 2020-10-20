@@ -132,7 +132,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.FORCED: 10})
+        LOG.info.assert_called_with({Queue.Result.FORCED: LIMIT})
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
@@ -148,7 +148,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.DELETED_FROM_DB: 10})
+        LOG.info.assert_called_with({Queue.Result.DELETED_FROM_DB: LIMIT})
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
@@ -161,7 +161,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.DELETED_FROM_DB: 10})
+        LOG.info.assert_called_with({Queue.Result.DELETED_FROM_DB: LIMIT})
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
@@ -171,7 +171,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.MISSING: 10})
+        LOG.info.assert_called_with({Queue.Result.MISSING: LIMIT})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
         )
@@ -191,7 +191,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.UP_TO_DATE: 10})
+        LOG.info.assert_called_with({Queue.Result.UP_TO_DATE: LIMIT})
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
 
@@ -207,7 +207,7 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.OUT_OF_DATE: 10})
+        LOG.info.assert_called_with({Queue.Result.OUT_OF_DATE: LIMIT})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
         )
@@ -216,7 +216,7 @@ class TestSyncAnnotations:
         self, annotation_ids, batch_indexer, queue, LOG
     ):
         queue.add_all(
-            [annotation_ids[0], annotation_ids[0], annotation_ids[0]],
+            [annotation_ids[0] for _ in range(LIMIT)],
             tag="test_tag",
             schedule_in=MINUS_FIVE_MINUTES,
         )
@@ -224,7 +224,7 @@ class TestSyncAnnotations:
         queue.sync(LIMIT)
 
         # It only syncs the annotation to Elasticsearch once.
-        LOG.info.assert_called_with({Queue.Result.MISSING: 3})
+        LOG.info.assert_called_with({Queue.Result.MISSING: LIMIT})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing([annotation_ids[0]]).only()
         )
@@ -233,7 +233,7 @@ class TestSyncAnnotations:
         self, annotations, batch_indexer, db_session, index, queue, LOG
     ):
         queue.add_all(
-            [annotations[0].id, annotations[0].id, annotations[0].id],
+            [annotations[0].id for _ in range(LIMIT)],
             tag="test_tag",
             schedule_in=MINUS_FIVE_MINUTES,
         )
@@ -241,14 +241,14 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.UP_TO_DATE: 3})
+        LOG.info.assert_called_with({Queue.Result.UP_TO_DATE: LIMIT})
         assert db_session.query(Job).all() == []
         batch_indexer.index.assert_not_called()
 
     @pytest.fixture
     def annotations(self, factories, now):
         return factories.Annotation.create_batch(
-            size=20,
+            size=LIMIT + 1,  # Make sure there's always over the limit
             created=now - datetime_.timedelta(minutes=1),
             updated=now - datetime_.timedelta(minutes=1),
         )
