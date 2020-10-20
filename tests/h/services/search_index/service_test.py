@@ -134,10 +134,6 @@ class TestAddAnnotation:
     def annotation(self, factories):
         return factories.Annotation.build()
 
-    @pytest.fixture(autouse=True)
-    def AnnotationSearchIndexPresenter(self, patch):
-        return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
-
 
 class TestAddAnnotationsBetweenTimes:
     def test_it(self, queue, search_index):
@@ -260,6 +256,11 @@ class TestSync:
         search_index.sync(10)
 
         queue.sync.assert_called_once_with(10)
+
+
+@pytest.fixture(autouse=True)
+def AnnotationSearchIndexPresenter(patch):
+    return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
 
 
 @pytest.fixture
