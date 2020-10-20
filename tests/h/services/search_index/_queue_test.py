@@ -1,5 +1,6 @@
 import datetime as datetime_
 import logging
+import uuid
 from unittest import mock
 
 import pytest
@@ -11,6 +12,7 @@ from h.search.index import BatchIndexer
 from h.services.search_index import SearchIndexService
 from h.services.search_index._queue import (
     DELETED_FROM_DB,
+    FORCED,
     MISSING,
     OUT_OF_DATE,
     UP_TO_DATE,
@@ -36,7 +38,8 @@ class TestAddSyncAnnotationJob:
                     tag="test_tag",
                     priority=1,
                     kwargs={
-                        "annotation_id": URLSafeUUID.url_safe_to_hex(annotation.id)
+                        "annotation_id": URLSafeUUID.url_safe_to_hex(annotation.id),
+                        "force": False,
                     },
                 )
             ),
@@ -44,22 +47,39 @@ class TestAddSyncAnnotationJob:
 
 
 class TestAddAnnotationsBetweenTimes:
-    def test_it(self, annotation_ids, db_session, queue):
+    @pytest.mark.parametrize("force", [True, False])
+    def test_it(self, annotation_ids, db_session, queue, force):
         queue.add_annotations_between_times(
             datetime_.datetime(2020, 9, 9),
             datetime_.datetime(2020, 9, 11),
             "test_tag",
+            force,
         )
 
-        annotation_ids_added_to_jobs_table = [
-            URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
-            for job in db_session.query(Job)
-        ]
         assert (
-            annotation_ids_added_to_jobs_table
-            == Any.list.containing(annotation_ids).only()
+            db_session.query(Job).all()
+            == Any.list.containing(
+                [
+                    Any.instance_of(Job).with_attrs(
+                        {
+                            "tag": "test_tag",
+                            "name": "sync_annotation",
+                            "scheduled_at": Any.instance_of(datetime_.datetime),
+                            "priority": 1000,
+                            "kwargs": {
+                                "annotation_id": str(
+                                    uuid.UUID(
+                                        URLSafeUUID.url_safe_to_hex(annotation_id)
+                                    )
+                                ),
+                                "force": force,
+                            },
+                        }
+                    )
+                    for annotation_id in annotation_ids
+                ]
+            ).only()
         )
-        assert db_session.query(Job.tag).distinct().all() == [("test_tag",)]
 
     @pytest.fixture
     def annotations(self, factories):
@@ -119,6 +139,29 @@ class TestSyncAnnotations:
 
         for annotation_id in all_annotation_ids[LIMIT:]:
             assert annotation_id not in batch_indexer.index.call_args[0][0]
+
+    def test_if_the_job_has_force_True_it_indexes_the_annotation_and_deletes_the_job(
+        self,
+        annotations,
+        annotation_ids,
+        batch_indexer,
+        caplog,
+        db_session,
+        index,
+        queue,
+    ):
+        index(annotations)
+        queue.add_all(
+            annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES, force=True
+        )
+
+        queue.sync(LIMIT)
+
+        assert str({FORCED: 10}) in caplog.text
+        assert db_session.query(Job).all() == []
+        batch_indexer.index.assert_called_once_with(
+            Any.list.containing(annotation_ids).only()
+        )
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
         self, annotations, annotation_ids, caplog, db_session, queue
