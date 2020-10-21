@@ -13,14 +13,16 @@ from h.services.search_index._queue import Queue
 
 LIMIT = 2
 ONE_WEEK = datetime_.timedelta(weeks=1)
-MINUS_FIVE_MINUTES = datetime_.timedelta(minutes=-5)
+ONE_WEEK_IN_SECONDS = int(ONE_WEEK.total_seconds())
+MINUS_5_MIN = datetime_.timedelta(minutes=-5)
+MINUS_5_MIN_IN_SECS = int(MINUS_5_MIN.total_seconds())
 
 
 class TestAddSyncAnnotationJob:
     def test_it(self, db_session, factories, queue, now):
         annotation = factories.Annotation.build()
 
-        queue.add(annotation.id, "test_tag", schedule_in=ONE_WEEK)
+        queue.add(annotation.id, "test_tag", schedule_in=ONE_WEEK_IN_SECONDS)
 
         assert db_session.query(Job).all() == [
             Any.instance_of(Job).with_attrs(
@@ -103,7 +105,7 @@ class TestSyncAnnotations:
     def test_it_ignores_jobs_that_arent_scheduled_yet(
         self, annotation_ids, batch_indexer, queue
     ):
-        queue.add_all(annotation_ids, tag="test_tag", schedule_in=ONE_WEEK)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=ONE_WEEK_IN_SECONDS)
 
         queue.sync(LIMIT)
 
@@ -113,7 +115,7 @@ class TestSyncAnnotations:
         self, all_annotation_ids, batch_indexer, queue
     ):
         queue.add_all(
-            all_annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES
+            all_annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS
         )
 
         queue.sync(LIMIT)
@@ -126,7 +128,10 @@ class TestSyncAnnotations:
     ):
         index(annotations)
         queue.add_all(
-            annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES, force=True
+            annotation_ids,
+            tag="test_tag",
+            schedule_in=MINUS_5_MIN_IN_SECS,
+            force=True,
         )
 
         queue.sync(LIMIT)
@@ -143,7 +148,7 @@ class TestSyncAnnotations:
         for annotation in annotations:
             db_session.delete(annotation)
 
-        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
 
         queue.sync(LIMIT)
 
@@ -156,7 +161,7 @@ class TestSyncAnnotations:
         for annotation in annotations:
             annotation.deleted = True
 
-        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
 
         queue.sync(LIMIT)
 
@@ -166,7 +171,7 @@ class TestSyncAnnotations:
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
         self, annotation_ids, batch_indexer, queue, LOG
     ):
-        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
 
         queue.sync(LIMIT)
 
@@ -186,7 +191,7 @@ class TestSyncAnnotations:
         LOG,
     ):
         index(annotations)
-        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
 
         queue.sync(LIMIT)
 
@@ -198,7 +203,7 @@ class TestSyncAnnotations:
         self, annotations, annotation_ids, batch_indexer, index, now, queue, LOG
     ):
         index(annotations)
-        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_FIVE_MINUTES)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
         # Simulate the annotations having been updated in the DB after they
         # were indexed.
         for annotation in annotations:
@@ -217,7 +222,7 @@ class TestSyncAnnotations:
         queue.add_all(
             [annotation_ids[0] for _ in range(LIMIT)],
             tag="test_tag",
-            schedule_in=MINUS_FIVE_MINUTES,
+            schedule_in=MINUS_5_MIN_IN_SECS,
         )
 
         queue.sync(LIMIT)
@@ -234,7 +239,7 @@ class TestSyncAnnotations:
         queue.add_all(
             [annotations[0].id for _ in range(LIMIT)],
             tag="test_tag",
-            schedule_in=MINUS_FIVE_MINUTES,
+            schedule_in=MINUS_5_MIN_IN_SECS,
         )
         index([annotations[0]])
 
