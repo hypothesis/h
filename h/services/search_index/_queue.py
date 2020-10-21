@@ -1,7 +1,7 @@
+import logging
 from collections import Counter
 from datetime import datetime
 
-from celery.utils.log import get_task_logger
 from dateutil.parser import isoparse
 from sqlalchemy import func, select, text
 from zope.sqlalchemy import mark_changed
@@ -9,7 +9,7 @@ from zope.sqlalchemy import mark_changed
 from h.db.types import URLSafeUUID
 from h.models import Annotation, Job
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 # Strings used in log messages.
 DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
