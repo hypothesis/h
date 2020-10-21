@@ -108,3 +108,34 @@ def start(argv, bootstrap):
     # instance, and it's then used in the worker bootstrap subscriber above.
     celery.webapp_bootstrap = bootstrap
     celery.start(argv)
+
+
+@signals.task_prerun.connect
+def add_task_name_and_id_to_log_messages(
+    task_id, task, *args, **kwargs
+):  # pragma: no cover
+    """
+     Add the Celery task name and ID to all messages logged by Celery tasks.
+
+     This makes it easier to observe Celery tasks by reading the logs. For
+     example you can find all messages logged by a given Celery task by
+     searching for the task's name in the logs.
+
+     This affects:
+
+    * Logging by Celery itself
+    * Logging in our @celery.task functions or anything they call (directly
+      or indirectly)
+    """
+    # Replace the root logger's formatter with one that includes task.name and
+    # task_id in the format. This assumes that the root logger has one handler,
+    # which happens to be the case.
+    root_loggers_handler = logging.getLogger().handlers[0]
+
+    root_loggers_handler.setFormatter(
+        logging.Formatter(
+            "[%(asctime)s: %(levelname)s/%(processName)s] "
+            + f"{task.name}[{task_id}] "
+            + "%(message)s"
+        )
+    )
