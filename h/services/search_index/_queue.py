@@ -1,5 +1,5 @@
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from logging import getLogger
 
 from dateutil.parser import isoparse
@@ -35,8 +35,6 @@ class Queue:
     def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
         """Queue a list of annotations to be synced to Elasticsearch."""
 
-        scheduled_at = (datetime.utcnow() + schedule_in) if schedule_in else None
-
         # Jobs with a lower number for their priority get processed before jobs
         # with a higher number. Make large batches of jobs added all at once
         # get processed *after* small batches added a few at a time, so that
@@ -47,7 +45,7 @@ class Queue:
             Job(
                 tag=tag,
                 name="sync_annotation",
-                scheduled_at=scheduled_at,
+                scheduled_at=self._datetime_at(schedule_in),
                 priority=priority,
                 kwargs={
                     "annotation_id": URLSafeUUID.url_safe_to_hex(annotation_id),
@@ -188,3 +186,11 @@ class Queue:
             hit["_source"]["updated"] = updated
 
         return {hit["_id"]: hit["_source"] for hit in hits}
+
+    @staticmethod
+    def _datetime_at(delta_seconds):
+        """Return the datetime at delta_seconds seconds from now."""
+        if not delta_seconds:
+            return None
+
+        return datetime.utcnow() + timedelta(seconds=delta_seconds)
