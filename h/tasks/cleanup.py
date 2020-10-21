@@ -6,7 +6,7 @@ from h.celery import celery, get_task_logger
 log = get_task_logger(__name__)
 
 
-@celery.task
+@celery.task(acks_late=False)
 def purge_deleted_annotations():
     """
     Remove annotations marked as deleted from the database.
@@ -22,21 +22,21 @@ def purge_deleted_annotations():
     ).delete()
 
 
-@celery.task
+@celery.task(acks_late=False)
 def purge_expired_auth_tickets():
     celery.request.db.query(models.AuthTicket).filter(
         models.AuthTicket.expires < datetime.utcnow()
     ).delete()
 
 
-@celery.task
+@celery.task(acks_late=False)
 def purge_expired_authz_codes():
     celery.request.db.query(models.AuthzCode).filter(
         models.AuthzCode.expires < datetime.utcnow()
     ).delete()
 
 
-@celery.task
+@celery.task(acks_late=False)
 def purge_expired_tokens():
     now = datetime.utcnow()
     celery.request.db.query(models.Token).filter(
@@ -44,7 +44,7 @@ def purge_expired_tokens():
     ).delete()
 
 
-@celery.task
+@celery.task(acks_late=False)
 def purge_removed_features():
     """Remove old feature flags from the database."""
     models.Feature.remove_old_flags(celery.request.db)

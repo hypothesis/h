@@ -49,6 +49,6 @@ def reindex_user_annotations(userid):
         log.warning("Failed to re-index annotations into ES6 %s", errored)
 
 
-@celery.task
+@celery.task(acks_late=False)
 def sync_annotations(limit):
     celery.request.find_service(name="search_index").sync(limit)
