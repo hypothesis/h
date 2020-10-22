@@ -8,9 +8,9 @@ class NipsaService:
     (NIPSA) flags on userids.
     """
 
-    def __init__(self, session, search_index):
+    def __init__(self, session, get_search_index):
         self.session = session
-        self._search_index = search_index
+        self._get_search_index = get_search_index
 
         # Cache of all userids which have been flagged.
         self._flagged_userids = None
@@ -77,11 +77,23 @@ class NipsaService:
         self._flagged_userids = None
 
     def _reindex_users_annotations(self, user, tag):
-        self._search_index.add_users_annotations(
+        self._get_search_index().add_users_annotations(
             user.userid, tag=tag, force=True, schedule_in=30
         )
 
 
 def nipsa_factory(context, request):
     """Return a NipsaService instance for the passed context and request."""
-    return NipsaService(request.db, request.find_service(name="search_index"))
+
+    # NipsaService uses a search_index getter function rather than the search
+    # index directly.
+    #
+    # This is because NipsaService is used in h.streamer where the search_index
+    # service can't be constructed because there's no Elasticsearch connection.
+    # Fortunately h.streamer doesn't call any of the NipsaService methods that
+    # use search_index so as long as NipsaService is lazy about getting
+    # search_index it won't crash the streamer.
+    def get_search_index():
+        return request.find_service(name="search_index")
+
+    return NipsaService(request.db, get_search_index)
