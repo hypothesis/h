@@ -3,7 +3,6 @@ import pytest
 from h.services.nipsa import NipsaService, nipsa_factory
 
 
-@pytest.mark.usefixtures("users")
 class TestNipsaService:
     def test_fetch_all_flagged_userids_returns_set_of_userids(self, svc):
         assert svc.fetch_all_flagged_userids() == {
@@ -89,21 +88,20 @@ class TestNipsaService:
     def svc(self, db_session, search_index):
         return NipsaService(db_session, search_index)
 
+    @pytest.fixture(autouse=True)
+    def users(self, db_session, factories):
+        users = {
+            "renata": factories.User(username="renata", nipsa=True),
+            "cecilia": factories.User(username="cecilia", nipsa=True),
+            "dominic": factories.User(username="dominic", nipsa=False),
+        }
+        db_session.flush()
+        return users
+
 
 def test_nipsa_factory(pyramid_request, search_index):
     svc = nipsa_factory(None, pyramid_request)
 
     assert isinstance(svc, NipsaService)
     assert svc.session == pyramid_request.db
-    assert svc._search_index == search_index
-
-
-@pytest.fixture
-def users(db_session, factories):
-    users = {
-        "renata": factories.User(username="renata", nipsa=True),
-        "cecilia": factories.User(username="cecilia", nipsa=True),
-        "dominic": factories.User(username="dominic", nipsa=False),
-    }
-    db_session.flush()
-    return users
+    assert svc._get_search_index() == search_index
