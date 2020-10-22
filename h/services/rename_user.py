@@ -1,5 +1,4 @@
 from h import models
-from h.search import index
 
 
 class UserRenameError(Exception):
@@ -24,9 +23,9 @@ class RenameUserService:
     UserRenameError if the new username is already taken by another account.
     """
 
-    def __init__(self, session, reindex):
+    def __init__(self, session, search_index):
         self.session = session
-        self.reindex = reindex
+        self._search_index = search_index
 
     def check(self, user, new_username):
         existing_user = models.User.get_by_username(
@@ -57,8 +56,12 @@ class RenameUserService:
         # can just update the userid.
         self._update_tokens(old_userid, new_userid)
 
-        ids = self._change_annotations(old_userid, new_userid)
-        self.reindex(ids)
+        self._change_annotations(old_userid, new_userid)
+        self._search_index.add_users_annotations(
+            old_userid,
+            tag="RenameUserService.rename()",
+            schedule_in=30,
+        )
 
     def _purge_auth_tickets(self, user):
         self.session.query(models.AuthTicket).filter(
@@ -73,12 +76,8 @@ class RenameUserService:
     def _change_annotations(self, old_userid, new_userid):
         annotations = self._fetch_annotations(old_userid)
 
-        ids = set()
         for annotation in annotations:
             annotation.userid = new_userid
-            ids.add(annotation.id)
-
-        return ids
 
     def _fetch_annotations(self, userid):
         return (
@@ -88,18 +87,9 @@ class RenameUserService:
         )
 
 
-def make_indexer(request):
-    def _reindex(ids):
-        if not ids:
-            return
-
-        request.tm.commit()
-        indexer = index.BatchIndexer(request.db, request.es, request)
-        indexer.index(ids)
-
-    return _reindex
-
-
 def rename_user_factory(context, request):
     """Return a RenameUserService instance for the passed context and request."""
-    return RenameUserService(session=request.db, reindex=make_indexer(request))
+    return RenameUserService(
+        session=request.db,
+        search_index=request.find_service(name="search_index"),
+    )

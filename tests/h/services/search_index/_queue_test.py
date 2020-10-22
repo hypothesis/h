@@ -256,7 +256,23 @@ class TestSyncAnnotations:
 
         queue.sync(LIMIT)
 
-        LOG.info.assert_called_with({Queue.Result.OUT_OF_DATE: LIMIT})
+        LOG.info.assert_called_with({Queue.Result.DIFFERENT: LIMIT})
+        batch_indexer.index.assert_called_once_with(
+            Any.list.containing(annotation_ids).only()
+        )
+
+    def test_if_the_annotation_has_a_different_userid_in_Elastic_it_indexes_it(
+        self, annotations, annotation_ids, batch_indexer, index, now, queue, LOG
+    ):
+        index(annotations)
+        queue.add_all(annotation_ids, tag="test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
+        # Simulate the user having been renamed in the DB.
+        for annotation in annotations:
+            annotation.userid = "new_userid"
+
+        queue.sync(LIMIT)
+
+        LOG.info.assert_called_with({Queue.Result.DIFFERENT: LIMIT})
         batch_indexer.index.assert_called_once_with(
             Any.list.containing(annotation_ids).only()
         )

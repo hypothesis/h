@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from h import models
-from h.services.rename_user import RenameUserService, UserRenameError, make_indexer
+from h.services.rename_user import RenameUserService, UserRenameError
 
 
 class TestRenameUserService:
@@ -85,18 +85,21 @@ class TestRenameUserService:
         assert {user.userid} == set(userids)
 
     def test_rename_reindexes_the_users_annotations(
-        self, service, user, annotations, indexer
+        self, service, user, annotations, search_index
     ):
+        original_userid = user.userid
+
         service.rename(user, "panda")
-        indexer.assert_called_once_with({ann.id for ann in annotations})
+
+        search_index.add_users_annotations.assert_called_once_with(
+            original_userid,
+            tag="RenameUserService.rename()",
+            schedule_in=30,
+        )
 
     @pytest.fixture
-    def indexer(self):
-        return mock.Mock(spec_set=[])
-
-    @pytest.fixture
-    def service(self, pyramid_request, indexer):
-        return RenameUserService(session=pyramid_request.db, reindex=indexer)
+    def service(self, pyramid_request, search_index):
+        return RenameUserService(session=pyramid_request.db, search_index=search_index)
 
     @pytest.fixture
     def check(self, patch):
@@ -117,30 +120,3 @@ class TestRenameUserService:
         db_session.flush()
 
         return anns
-
-
-class TestMakeIndexer:
-    def test_it_indexes_the_given_ids(self, req, index):
-        indexer = make_indexer(req)
-        indexer([1, 2, 3])
-
-        batch_indexer = index.BatchIndexer.return_value
-        batch_indexer.index.assert_called_once_with([1, 2, 3])
-        index.BatchIndexer.assert_any_call(req.db, req.es, req)
-
-    def test_it_skips_indexing_when_no_ids_given(self, req, index):
-        indexer = make_indexer(req)
-
-        indexer([])
-
-        assert not index.BatchIndexer.called
-
-    @pytest.fixture
-    def req(self, pyramid_request):
-        pyramid_request.tm = mock.MagicMock()
-        pyramid_request.es = mock.MagicMock()
-        return pyramid_request
-
-    @pytest.fixture
-    def index(self, patch):
-        return patch("h.services.rename_user.index")
