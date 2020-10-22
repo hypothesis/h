@@ -29,11 +29,34 @@ class Queue:
         self._batch_indexer = batch_indexer
 
     def add(self, annotation_id, tag, schedule_in=None, force=False):
-        """Queue an annotation to be synced to Elasticsearch."""
+        """
+        Queue an annotation to be synced to Elasticsearch.
+
+        :param annotation_id: The ID of the annotation to be queued, in the
+            application-level URL-safe format
+        :type annotation_id: unicode
+
+        :param tag: The tag to add to the job on the queue. For documentation
+            purposes only
+        :type tag: unicode
+
+        :param schedule_in: A number of seconds from now to wait before making
+            the job available for processing. The annotation won't be synced
+            until at least `schedule_in` seconds from now
+        :type schedule_in: int
+
+        :param force: Whether to force reindexing of the annotation even if
+            it's already indexed
+        :type force: bool
+        """
         self.add_all([annotation_id], tag, schedule_in, force)
 
     def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
-        """Queue a list of annotations to be synced to Elasticsearch."""
+        """
+        Queue a list of annotations to be synced to Elasticsearch.
+
+        See Queue.add() for documentation of the params.
+        """
 
         # Jobs with a lower number for their priority get processed before jobs
         # with a higher number. Make large batches of jobs added all at once
@@ -56,6 +79,20 @@ class Queue:
         )
 
     def add_annotations_between_times(self, start_time, end_time, tag, force=False):
+        """
+        Queue all annotations between two times to be synced to Elasticsearch.
+
+        All annotations whose updated time is >= start_time and <= end_time
+        will be queued for syncing to Elasticsearch.
+
+        See Queue.add() for documentation of the params.
+
+        :param start_time: The time to queue annotations from
+        :type start_time: datetime.datetime
+
+        :param end_time: The time to queue annotations until
+        :type end_time: datetime.datetime
+        """
         self._db.execute(
             Job.__table__.insert().from_select(
                 [Job.name, Job.priority, Job.tag, Job.kwargs],
