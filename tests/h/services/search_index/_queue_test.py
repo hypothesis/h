@@ -20,9 +20,11 @@ MINUS_5_MIN_IN_SECS = int(MINUS_5_MIN.total_seconds())
 
 class TestAddSyncAnnotationJob:
     def test_it(self, db_session, factories, queue, now):
-        annotation = factories.Annotation.build()
+        annotation = factories.Annotation.create()
 
         queue.add(annotation.id, "test_tag", schedule_in=ONE_WEEK_IN_SECONDS)
+
+        expected_id = str(uuid.UUID(URLSafeUUID.url_safe_to_hex(annotation.id)))
 
         assert db_session.query(Job).all() == [
             Any.instance_of(Job).with_attrs(
@@ -32,7 +34,7 @@ class TestAddSyncAnnotationJob:
                     tag="test_tag",
                     priority=1,
                     kwargs={
-                        "annotation_id": URLSafeUUID.url_safe_to_hex(annotation.id),
+                        "annotation_id": expected_id,
                         "force": False,
                     },
                 )
@@ -280,11 +282,12 @@ class TestSyncAnnotations:
     def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
         self, annotation_ids, batch_indexer, queue, LOG
     ):
-        queue.add_all(
-            [annotation_ids[0] for _ in range(LIMIT)],
-            tag="test_tag",
-            schedule_in=MINUS_5_MIN_IN_SECS,
-        )
+        for _ in range(LIMIT):
+            queue.add(
+                annotation_ids[0],
+                tag="test_tag",
+                schedule_in=MINUS_5_MIN_IN_SECS,
+            )
 
         queue.sync(LIMIT)
 
@@ -297,11 +300,13 @@ class TestSyncAnnotations:
     def test_deleting_multiple_jobs_with_the_same_annotation_id(
         self, annotations, batch_indexer, db_session, index, queue, LOG
     ):
-        queue.add_all(
-            [annotations[0].id for _ in range(LIMIT)],
-            tag="test_tag",
-            schedule_in=MINUS_5_MIN_IN_SECS,
-        )
+        for _ in range(LIMIT):
+            queue.add(
+                annotations[0].id,
+                tag="test_tag",
+                schedule_in=MINUS_5_MIN_IN_SECS,
+            )
+
         index([annotations[0]])
 
         queue.sync(LIMIT)

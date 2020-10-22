@@ -51,33 +51,6 @@ class Queue:
         """
         self.add_all([annotation_id], tag, schedule_in, force)
 
-    def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
-        """
-        Queue a list of annotations to be synced to Elasticsearch.
-
-        See Queue.add() for documentation of the params.
-        """
-
-        # Jobs with a lower number for their priority get processed before jobs
-        # with a higher number. Make large batches of jobs added all at once
-        # get processed *after* small batches added a few at a time, so that
-        # large batches don't hold up small ones for a long time.
-        priority = len(annotation_ids)
-
-        self._db.add_all(
-            Job(
-                tag=tag,
-                name="sync_annotation",
-                scheduled_at=self._datetime_at(schedule_in),
-                priority=priority,
-                kwargs={
-                    "annotation_id": URLSafeUUID.url_safe_to_hex(annotation_id),
-                    "force": force,
-                },
-            )
-            for annotation_id in annotation_ids
-        )
-
     def add_where(self, tag, priority, where, force=False, schedule_in=None):
         cols = [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at]
         values = [
@@ -96,6 +69,22 @@ class Queue:
 
         self._db.execute(query)
         mark_changed(self._db)
+
+    def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
+        """
+        Queue a list of annotations to be synced to Elasticsearch.
+
+        See Queue.add() for documentation of the params.
+        """
+
+        # Jobs with a lower number for their priority get processed before jobs
+        # with a higher number. Make large batches of jobs added all at once
+        # get processed *after* small batches added a few at a time, so that
+        # large batches don't hold up small ones for a long time.
+
+        return self.add_where(tag, priority=len(annotation_ids), where=[
+            Annotation.id.in_(annotation_ids)
+        ], schedule_in=schedule_in, force=force)
 
     def add_annotations_between_times(self, start_time, end_time, tag, force=False):
         """
