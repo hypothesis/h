@@ -70,7 +70,7 @@ class Queue:
         self._db.execute(query)
         mark_changed(self._db)
 
-    def add_between_times(self, start_time, end_time, tag, force=False):
+    def add_between_times(self, start_time, end_time, tag, force=True):
         """
         Queue all annotations between two times to be synced to Elasticsearch.
 
