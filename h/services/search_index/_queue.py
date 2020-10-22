@@ -28,6 +28,25 @@ class Queue:
         self._es = es
         self._batch_indexer = batch_indexer
 
+    def add_where(self, tag, priority, where, force=False, schedule_in=None):
+        cols = [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at]
+        values = [
+            text("'sync_annotation'"),
+            text(str(priority)),
+            text(repr(tag)),
+            func.jsonb_build_object("annotation_id", Annotation.id, "force", force),
+            text(f"'{self._datetime_at(schedule_in)}'"),
+        ]
+
+        select_query = select(values)
+        for clause in where:
+            select_query = select_query.where(clause)
+
+        query = Job.__table__.insert().from_select(cols, select_query)
+
+        self._db.execute(query)
+        mark_changed(self._db)
+
     def add(self, annotation_id, tag, schedule_in=None, force=False):
         """
         Queue an annotation to be synced to Elasticsearch.
@@ -49,26 +68,9 @@ class Queue:
             it's already indexed
         :type force: bool
         """
-        self.add_all([annotation_id], tag, schedule_in, force)
-
-    def add_where(self, tag, priority, where, force=False, schedule_in=None):
-        cols = [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at]
-        values = [
-            text("'sync_annotation'"),
-            text(str(priority)),
-            text(repr(tag)),
-            func.jsonb_build_object("annotation_id", Annotation.id, "force", force),
-            text(f"'{self._datetime_at(schedule_in)}'"),
-        ]
-
-        select_query = select(values)
-        for clause in where:
-            select_query = select_query.where(clause)
-
-        query = Job.__table__.insert().from_select(cols, select_query)
-
-        self._db.execute(query)
-        mark_changed(self._db)
+        return self.add_where(tag, priority=1, where=[
+            Annotation.id == annotation_id
+        ], schedule_in=schedule_in, force=force)
 
     def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
         """
