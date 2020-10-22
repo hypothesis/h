@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from logging import getLogger
 
 from dateutil.parser import isoparse
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select, text, and_
 from zope.sqlalchemy import mark_changed
 
 from h.db.types import URLSafeUUID
@@ -29,20 +29,22 @@ class Queue:
         self._batch_indexer = batch_indexer
 
     def add_where(self, tag, priority, where, force=False, schedule_in=None):
-        cols = [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at]
-        values = [
-            text("'sync_annotation'"),
-            text(str(priority)),
-            text(repr(tag)),
-            func.jsonb_build_object("annotation_id", Annotation.id, "force", force),
-            text(f"'{self._datetime_at(schedule_in)}'"),
-        ]
+        where_clause = and_(*where) if len(where) > 1 else where[0]
 
-        select_query = select(values)
-        for clause in where:
-            select_query = select_query.where(clause)
-
-        query = Job.__table__.insert().from_select(cols, select_query)
+        query = Job.__table__.insert().from_select(
+            [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at],
+            select(
+                [
+                    text("'sync_annotation'"),
+                    text(str(priority)),
+                    text(repr(tag)),
+                    func.jsonb_build_object(
+                        "annotation_id", Annotation.id, "force", force
+                    ),
+                    text(f"'{self._datetime_at(schedule_in)}'"),
+                ]
+            ).where(where_clause),
+        )
 
         self._db.execute(query)
         mark_changed(self._db)
