@@ -6,7 +6,6 @@ from h import models
 from h.accounts.events import ActivationEvent
 from h.i18n import TranslationString as _  # noqa
 from h.services.rename_user import UserRenameError
-from h.tasks.admin import rename_user
 
 
 class UserNotFoundError(Exception):
@@ -97,9 +96,7 @@ def users_rename(request):
 
     try:
         svc = request.find_service(name="rename_user")
-        svc.check(user, new_username)
-
-        rename_user.delay(user.id, new_username)
+        svc.rename(user, new_username)
 
         request.session.flash(
             'The user "%s" will be renamed to "%s" in the backgroud. Refresh this page to see if it\'s already done'
