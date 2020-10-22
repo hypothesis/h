@@ -57,7 +57,7 @@ class NipsaService:
         user.nipsa = True
         if self._flagged_userids is not None:
             self._flagged_userids.add(user.userid)
-        self._reindex_users_annotations(user, tag="NipsaService.flag()")
+        self._reindex_users_annotations(user, tag="NipsaService.flag")
 
     def unflag(self, user):
         """
@@ -70,7 +70,7 @@ class NipsaService:
         user.nipsa = False
         if self._flagged_userids is not None:
             self._flagged_userids.remove(user.userid)
-        self._reindex_users_annotations(user, tag="NipsaService.unflag()")
+        self._reindex_users_annotations(user, tag="NipsaService.unflag")
 
     def clear(self):
         """Unload the cache of flagged userids, if populated."""

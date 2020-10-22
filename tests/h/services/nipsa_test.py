@@ -32,7 +32,7 @@ class TestNipsaService:
 
         search_index.add_users_annotations.assert_called_once_with(
             "acct:dominic@example.com",
-            "NipsaService.flag()",
+            "NipsaService.flag",
             force=True,
             schedule_in=30,
         )
@@ -48,7 +48,7 @@ class TestNipsaService:
 
         search_index.add_users_annotations.assert_called_once_with(
             "acct:renata@example.com",
-            "NipsaService.unflag()",
+            "NipsaService.unflag",
             force=True,
             schedule_in=30,
         )
