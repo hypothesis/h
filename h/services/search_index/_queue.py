@@ -78,6 +78,25 @@ class Queue:
             for annotation_id in annotation_ids
         )
 
+    def add_where(self, tag, priority, where, force=False, schedule_in=None):
+        cols = [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at]
+        values = [
+            text("'sync_annotation'"),
+            text(str(priority)),
+            text(repr(tag)),
+            func.jsonb_build_object("annotation_id", Annotation.id, "force", force),
+            text(f"'{self._datetime_at(schedule_in)}'"),
+        ]
+
+        select_query = select(values)
+        for clause in where:
+            select_query = select_query.where(clause)
+
+        query = Job.__table__.insert().from_select(cols, select_query)
+
+        self._db.execute(query)
+        mark_changed(self._db)
+
     def add_annotations_between_times(self, start_time, end_time, tag, force=False):
         """
         Queue all annotations between two times to be synced to Elasticsearch.
@@ -94,7 +113,7 @@ class Queue:
         :type end_time: datetime.datetime
         """
 
-        self._add_annotations(
+        self.add_where(
             tag,
             priority=1000,
             where=[Annotation.updated >= start_time, Annotation.updated <= end_time],
@@ -111,7 +130,7 @@ class Queue:
         :type userid: unicode
         """
 
-        self._add_annotations(
+        self.add_where(
             tag,
             priority=100,
             where=[Annotation.userid == userid],
@@ -192,29 +211,6 @@ class Queue:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
         LOG.info(dict(counts))
-
-    def _add_annotations(self, tag, priority, where, force=False, schedule_in=None):
-        """Queue all annotations matching `where` to be synced to Elasticsearch."""
-        select_query = select(
-            [
-                text("'sync_annotation'"),
-                text(str(priority)),
-                text(repr(tag)),
-                func.jsonb_build_object("annotation_id", Annotation.id, "force", force),
-                text(f"'{self._datetime_at(schedule_in)}'"),
-            ]
-        )
-
-        for clause in where:
-            select_query = select_query.where(clause)
-
-        self._db.execute(
-            Job.__table__.insert().from_select(
-                [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at],
-                select_query,
-            )
-        )
-        mark_changed(self._db)
 
     def _get_jobs_from_queue(self, limit):
         return (
