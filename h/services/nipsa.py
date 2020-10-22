@@ -1,5 +1,4 @@
 from h.models import User
-from h.tasks.indexer import reindex_user_annotations
 
 
 class NipsaService:
@@ -9,8 +8,9 @@ class NipsaService:
     (NIPSA) flags on userids.
     """
 
-    def __init__(self, session):
+    def __init__(self, session, search_index):
         self.session = session
+        self._search_index = search_index
 
         # Cache of all userids which have been flagged.
         self._flagged_userids = None
@@ -57,7 +57,7 @@ class NipsaService:
         user.nipsa = True
         if self._flagged_userids is not None:
             self._flagged_userids.add(user.userid)
-        reindex_user_annotations.delay(user.userid)
+        self._reindex_users_annotations(user, tag="NipsaService.flag()")
 
     def unflag(self, user):
         """
@@ -70,13 +70,18 @@ class NipsaService:
         user.nipsa = False
         if self._flagged_userids is not None:
             self._flagged_userids.remove(user.userid)
-        reindex_user_annotations.delay(user.userid)
+        self._reindex_users_annotations(user, tag="NipsaService.unflag()")
 
     def clear(self):
         """Unload the cache of flagged userids, if populated."""
         self._flagged_userids = None
 
+    def _reindex_users_annotations(self, user, tag):
+        self._search_index.add_users_annotations(
+            user.userid, tag=tag, force=True, schedule_in=30
+        )
+
 
 def nipsa_factory(context, request):
     """Return a NipsaService instance for the passed context and request."""
-    return NipsaService(request.db)
+    return NipsaService(request.db, request.find_service(name="search_index"))

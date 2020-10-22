@@ -144,13 +144,6 @@ def batch_indexer(db_session, es_client, pyramid_request, moderation_service):
 
 
 @pytest.fixture
-def AnnotationSearchIndexPresenter(patch):
-    class_ = patch("h.search.index.presenters.AnnotationSearchIndexPresenter")
-    class_.return_value.asdict.return_value = {"test": "val"}
-    return class_
-
-
-@pytest.fixture
 def get_indexed_ann(es_client):
     def _get(annotation_id):
         """
