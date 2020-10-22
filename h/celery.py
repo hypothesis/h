@@ -38,7 +38,6 @@ celery.conf.update(
     task_routes={
         "h.tasks.indexer.add_annotation": "indexer",
         "h.tasks.indexer.delete_annotation": "indexer",
-        "h.tasks.indexer.reindex_user_annotations": "indexer",
     },
     task_serializer="json",
     task_queues=[

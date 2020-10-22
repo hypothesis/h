@@ -112,6 +112,33 @@ class Queue:
         )
         mark_changed(self._db)
 
+    def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
+        """
+        Queue all a user's annotations to be synced to Elasticsearch.
+
+        See Queue.add() for documentation of the params.
+
+        :param userid: The ID of the user in "acct:USERNAME@AUTHORITY" format
+        :type userid: unicode
+        """
+        self._db.execute(
+            Job.__table__.insert().from_select(
+                [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
+                select(
+                    [
+                        text("'sync_annotation'"),
+                        text(f"'{self._datetime_at(schedule_in)}'"),
+                        text("100"),
+                        text(repr(tag)),
+                        func.jsonb_build_object(
+                            "annotation_id", Annotation.id, "force", force
+                        ),
+                    ]
+                ).where(Annotation.userid == userid),
+            )
+        )
+        mark_changed(self._db)
+
     def sync(self, limit):
         """
         Synchronize a batch of annotations from Postgres to Elasticsearch.
@@ -227,7 +254,4 @@ class Queue:
     @staticmethod
     def _datetime_at(delta_seconds):
         """Return the datetime at delta_seconds seconds from now."""
-        if not delta_seconds:
-            return None
-
-        return datetime.utcnow() + timedelta(seconds=delta_seconds)
+        return datetime.utcnow() + timedelta(seconds=delta_seconds or 0)

@@ -75,10 +75,3 @@ class TestCelery:
         celery.report_failure(sender, "abc123", (), {}, einfo)
 
         assert not log.error.called
-
-
-def _patch(modulepath, request):
-    patcher = mock.patch(modulepath, autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module

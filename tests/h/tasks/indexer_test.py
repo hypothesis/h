@@ -37,39 +37,21 @@ class TestAddAnnotationsBetweenTimes:
         )
 
 
-class TestReindexUserAnnotations:
-    def test_it_creates_batch_indexer(self, BatchIndexer, annotation_ids, celery):
-        userid = list(annotation_ids.keys())[0]
-
-        indexer.reindex_user_annotations(userid)
-
-        BatchIndexer.assert_any_call(
-            celery.request.db, celery.request.es, celery.request
+class TestAddUsersAnnotations:
+    def test_it(self, search_index):
+        indexer.add_users_annotations(
+            sentinel.userid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
         )
 
-    def test_it_reindexes_users_annotations(self, BatchIndexer, annotation_ids):
-        userid = list(annotation_ids.keys())[0]
-
-        indexer.reindex_user_annotations(userid)
-
-        args, _ = BatchIndexer.return_value.index.call_args
-        actual = args[0]
-        expected = annotation_ids[userid]
-        assert sorted(expected) == sorted(actual)
-
-    @pytest.fixture
-    def annotation_ids(self, factories):
-        userid1 = "acct:jeannie@example.com"
-        userid2 = "acct:bob@example.com"
-
-        return {
-            userid1: [
-                a.id for a in factories.Annotation.create_batch(3, userid=userid1)
-            ],
-            userid2: [
-                a.id for a in factories.Annotation.create_batch(2, userid=userid2)
-            ],
-        }
+        search_index._queue.add_users_annotations.assert_called_once_with(
+            sentinel.userid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
 
 
 class TestSyncAnnotations:
@@ -77,11 +59,6 @@ class TestSyncAnnotations:
         indexer.sync_annotations("test_queue")
 
         search_index.sync.assert_called_once_with("test_queue")
-
-
-@pytest.fixture(autouse=True)
-def BatchIndexer(patch):
-    return patch("h.tasks.indexer.BatchIndexer")
 
 
 @pytest.fixture(autouse=True)

@@ -96,6 +96,51 @@ class TestAddAnnotationsBetweenTimes:
         return [annotation.id for annotation in annotations]
 
 
+class TestAddUsersAnnotations:
+    @pytest.mark.parametrize("force,schedule_in", [(True, 42), (False, None)])
+    def test_it(self, userid, users_annotations, db_session, queue, force, schedule_in):
+        queue.add_users_annotations(
+            userid, tag="test_tag", force=force, schedule_in=schedule_in
+        )
+
+        assert (
+            db_session.query(Job).all()
+            == Any.list.containing(
+                [
+                    Any.instance_of(Job).with_attrs(
+                        {
+                            "tag": "test_tag",
+                            "name": "sync_annotation",
+                            "scheduled_at": Any.instance_of(datetime_.datetime),
+                            "priority": 100,
+                            "kwargs": {
+                                "annotation_id": str(
+                                    uuid.UUID(
+                                        URLSafeUUID.url_safe_to_hex(annotation.id)
+                                    )
+                                ),
+                                "force": force,
+                            },
+                        }
+                    )
+                    for annotation in users_annotations
+                ]
+            ).only()
+        )
+
+    @pytest.fixture
+    def userid(self):
+        return "acct:joe@example.com"
+
+    @pytest.fixture
+    def users_annotations(self, factories, userid):
+        return factories.Annotation.create_batch(size=2, userid=userid)
+
+    @pytest.fixture(autouse=True)
+    def other_annotation(self, factories):
+        return factories.Annotation(userid="acct:bob@example.com")
+
+
 class TestSyncAnnotations:
     def test_it_does_nothing_if_the_queue_is_empty(self, batch_indexer, queue):
         queue.sync(LIMIT)

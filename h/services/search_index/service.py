@@ -78,6 +78,12 @@ class SearchIndexService:
         """
         indexer.add_annotations_between_times.delay(start_time, end_time, tag)
 
+    def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
+        """Add all of a users annotations to the search index."""
+        indexer.add_users_annotations.delay(
+            userid, tag, force=force, schedule_in=schedule_in
+        )
+
     def delete_annotation_by_id(self, annotation_id, refresh=False):
         """
         Mark an annotation as deleted in the search index.

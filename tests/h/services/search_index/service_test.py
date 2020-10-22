@@ -151,6 +151,23 @@ class TestAddAnnotationsBetweenTimes:
         )
 
 
+class TestAddUsersAnnotations:
+    def test_it(self, indexer, search_index):
+        search_index.add_users_annotations(
+            sentinel.userid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+        indexer.add_users_annotations.delay.assert_called_once_with(
+            sentinel.userid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+
 class TestDeleteAnnotationById:
     @pytest.mark.parametrize("refresh", (True, False))
     def test_delete_annotation(self, search_index, es_client, refresh):
