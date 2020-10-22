@@ -19,7 +19,7 @@ class Queue:
         # Values for reporting which should stringify nicely
         DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
         MISSING = "Annotations synced because they were not in Elasticsearch"
-        OUT_OF_DATE = "Annotations synced because they were outdated in Elasticsearch"
+        DIFFERENT = "Annotations synced because they were different in Elasticsearch"
         UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
         FORCED = "Annotations synced because their jobs had force=True"
 
@@ -93,24 +93,13 @@ class Queue:
         :param end_time: The time to queue annotations until
         :type end_time: datetime.datetime
         """
-        self._db.execute(
-            Job.__table__.insert().from_select(
-                [Job.name, Job.priority, Job.tag, Job.kwargs],
-                select(
-                    [
-                        text("'sync_annotation'"),
-                        text("1000"),
-                        text(repr(tag)),
-                        func.jsonb_build_object(
-                            "annotation_id", Annotation.id, "force", force
-                        ),
-                    ]
-                )
-                .where(Annotation.updated >= start_time)
-                .where(Annotation.updated <= end_time),
-            )
+
+        self._add_annotations(
+            tag,
+            priority=1000,
+            where=[Annotation.updated >= start_time, Annotation.updated <= end_time],
+            force=force,
         )
-        mark_changed(self._db)
 
     def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
         """
@@ -121,23 +110,14 @@ class Queue:
         :param userid: The ID of the user in "acct:USERNAME@AUTHORITY" format
         :type userid: unicode
         """
-        self._db.execute(
-            Job.__table__.insert().from_select(
-                [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
-                select(
-                    [
-                        text("'sync_annotation'"),
-                        text(f"'{self._datetime_at(schedule_in)}'"),
-                        text("100"),
-                        text(repr(tag)),
-                        func.jsonb_build_object(
-                            "annotation_id", Annotation.id, "force", force
-                        ),
-                    ]
-                ).where(Annotation.userid == userid),
-            )
+
+        self._add_annotations(
+            tag,
+            priority=100,
+            where=[Annotation.userid == userid],
+            force=force,
+            schedule_in=schedule_in,
         )
-        mark_changed(self._db)
 
     def sync(self, limit):
         """
@@ -198,9 +178,9 @@ class Queue:
             elif not annotation_from_es:
                 annotation_ids_to_sync.add(annotation_id)
                 counts[Queue.Result.MISSING] += 1
-            elif annotation_from_es["updated"] != annotation_from_db.updated:
+            elif not self.equal(annotation_from_es, annotation_from_db):
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.OUT_OF_DATE] += 1
+                counts[Queue.Result.DIFFERENT] += 1
             else:
                 job_complete.append(job)
                 counts[Queue.Result.UP_TO_DATE] += 1
@@ -212,6 +192,29 @@ class Queue:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
         LOG.info(dict(counts))
+
+    def _add_annotations(self, tag, priority, where, force=False, schedule_in=None):
+        """Queue all annotations matching `where` to be synced to Elasticsearch."""
+        select_query = select(
+            [
+                text("'sync_annotation'"),
+                text(str(priority)),
+                text(repr(tag)),
+                func.jsonb_build_object("annotation_id", Annotation.id, "force", force),
+                text(f"'{self._datetime_at(schedule_in)}'"),
+            ]
+        )
+
+        for clause in where:
+            select_query = select_query.where(clause)
+
+        self._db.execute(
+            Job.__table__.insert().from_select(
+                [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at],
+                select_query,
+            )
+        )
+        mark_changed(self._db)
 
     def _get_jobs_from_queue(self, limit):
         return (
@@ -229,7 +232,9 @@ class Queue:
     def _get_annotations_from_db(self, annotation_ids):
         return {
             annotation.id: annotation
-            for annotation in self._db.query(Annotation.id, Annotation.updated)
+            for annotation in self._db.query(
+                Annotation.id, Annotation.updated, Annotation.userid
+            )
             .filter_by(deleted=False)
             .filter(Annotation.id.in_(annotation_ids))
         }
@@ -237,7 +242,7 @@ class Queue:
     def _get_annotations_from_es(self, annotation_ids):
         hits = self._es.conn.search(
             body={
-                "_source": ["updated"],
+                "_source": ["updated", "user"],
                 "query": {"ids": {"values": list(annotation_ids)}},
                 "size": len(annotation_ids),
             },
@@ -250,6 +255,14 @@ class Queue:
             hit["_source"]["updated"] = updated
 
         return {hit["_id"]: hit["_source"] for hit in hits}
+
+    @staticmethod
+    def equal(annotation_from_es, annotation_from_db):
+        """Return True if the annotation from Elasticsearch is equal to the one from Postgres."""
+        return (
+            annotation_from_es["updated"] == annotation_from_db.updated
+            and annotation_from_es["user"] == annotation_from_db.userid
+        )
 
     @staticmethod
     def _datetime_at(delta_seconds):
