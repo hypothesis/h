@@ -86,7 +86,7 @@ class TestNipsaService:
 
     @pytest.fixture
     def svc(self, db_session, search_index):
-        return NipsaService(db_session, search_index)
+        return NipsaService(db_session, lambda: search_index)
 
     @pytest.fixture(autouse=True)
     def users(self, db_session, factories):
