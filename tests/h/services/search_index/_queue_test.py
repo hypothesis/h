@@ -66,22 +66,9 @@ class TestQueue:
     ):
         annotation = factories.Annotation.create()
 
-        queue.add_where(
-            tag="test_tag",
-            priority=1,
-            where=[Annotation.id == annotation.id],
-            force=force,
-        )
+        queue.add_where([Annotation.id == annotation.id], "test_tag", 1, force=force)
 
-        assert db_session.query(Job).one() == Any.instance_of(Job).with_attrs(
-            {
-                "kwargs": Any.dict.containing(
-                    {
-                        "force": expected_force,
-                    }
-                )
-            }
-        )
+        assert db_session.query(Job).one().kwargs["force"] == expected_force
 
     def test_add_by_id(self, queue, add_where):
         queue.add_by_id(
