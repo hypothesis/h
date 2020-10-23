@@ -46,6 +46,7 @@ class Queue:
             it's already indexed
         """
         where_clause = and_(*where) if len(where) > 1 else where[0]
+        schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)
 
         query = Job.__table__.insert().from_select(
             [Job.name, Job.tag, Job.priority, Job.kwargs, Job.scheduled_at],
@@ -57,7 +58,7 @@ class Queue:
                     func.jsonb_build_object(
                         "annotation_id", Annotation.id, "force", bool(force)
                     ),
-                    text(f"'{self._datetime_at(schedule_in)}'"),
+                    text(f"'{schedule_at}'"),
                 ]
             ).where(where_clause),
         )
@@ -224,8 +225,3 @@ class Queue:
             annotation_from_es["updated"] == annotation_from_db.updated
             and annotation_from_es["user"] == annotation_from_db.userid
         )
-
-    @staticmethod
-    def _datetime_at(delta_seconds):
-        """Return the datetime at delta_seconds seconds from now."""
-        return datetime.utcnow() + timedelta(seconds=delta_seconds or 0)
