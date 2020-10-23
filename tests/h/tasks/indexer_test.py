@@ -32,7 +32,7 @@ class TestAddAnnotationsBetweenTimes:
             sentinel.start_time, sentinel.end_time, sentinel.tag
         )
 
-        search_index._queue.add_annotations_between_times.assert_called_once_with(
+        search_index._queue.add_between_times.assert_called_once_with(
             sentinel.start_time, sentinel.end_time, sentinel.tag
         )
 
@@ -46,7 +46,7 @@ class TestAddUsersAnnotations:
             schedule_in=sentinel.schedule_in,
         )
 
-        search_index._queue.add_users_annotations.assert_called_once_with(
+        search_index._queue.add_by_user.assert_called_once_with(
             sentinel.userid,
             sentinel.tag,
             force=sentinel.force,

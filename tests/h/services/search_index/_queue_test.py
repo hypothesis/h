@@ -83,8 +83,8 @@ class TestQueue:
             }
         )
 
-    def test_add(self, queue, add_where):
-        queue.add(
+    def test_add_by_id(self, queue, add_where):
+        queue.add_by_id(
             sentinel.annotation_id,
             sentinel.tag,
             schedule_in=sentinel.schedule_in,
@@ -103,7 +103,7 @@ class TestQueue:
         assert where[0].compare(Annotation.id == sentinel.annotation_id)
 
     def test_add_annotations_between_times(self, queue, add_where):
-        queue.add_annotations_between_times(
+        queue.add_between_times(
             sentinel.start_time, sentinel.end_time, sentinel.tag, force=sentinel.force
         )
 
@@ -119,7 +119,7 @@ class TestQueue:
         assert where[1].compare(Annotation.updated <= sentinel.end_time)
 
     def test_add_users_annotations(self, queue, add_where):
-        queue.add_users_annotations(
+        queue.add_by_user(
             sentinel.userid,
             sentinel.tag,
             force=sentinel.force,
@@ -279,7 +279,6 @@ class TestSync:
         self, annotations, batch_indexer, add_all, db_session, index, queue, LOG
     ):
         add_all(ids=[annotations[0].id for _ in range(LIMIT)])
-
         index([annotations[0]])
 
         queue.sync(LIMIT)
@@ -341,7 +340,9 @@ class TestSync:
     def add_all(self, queue, annotation_ids):
         def add_all(ids=annotation_ids, schedule_in=MINUS_5_MIN_IN_SECS, force=False):
             for id_ in ids:
-                queue.add(id_, tag="test_tag", schedule_in=schedule_in, force=force)
+                queue.add_by_id(
+                    id_, tag="test_tag", schedule_in=schedule_in, force=force
+                )
 
         return add_all
 
