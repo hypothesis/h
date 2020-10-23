@@ -70,19 +70,7 @@ class Queue:
         self._db.execute(query)
         mark_changed(self._db)
 
-    def add(self, annotation_id, tag, schedule_in=None, force=False):
-        """
-        Queue an annotation to be synced to Elasticsearch.
-
-        See Queue.add_where() for documentation of the params.
-
-        :param annotation_id: The ID of the annotation to be queued, in the
-            application-level URL-safe format
-        """
-        where = [Annotation.id == annotation_id]
-        self.add_where(where, tag, self.Priority.SINGLE_ITEM, force, schedule_in)
-
-    def add_annotations_between_times(self, start_time, end_time, tag, force=False):
+    def add_between_times(self, start_time, end_time, tag, force=False):
         """
         Queue all annotations between two times to be synced to Elasticsearch.
 
@@ -95,7 +83,19 @@ class Queue:
         where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
         self.add_where(where, tag, Queue.Priority.BETWEEN_TIMES, force)
 
-    def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
+    def add_by_id(self, annotation_id, tag, force=False, schedule_in=None):
+        """
+        Queue an annotation to be synced to Elasticsearch.
+
+        See Queue.add_where() for documentation of the params.
+
+        :param annotation_id: The ID of the annotation to be queued, in the
+            application-level URL-safe format
+        """
+        where = [Annotation.id == annotation_id]
+        self.add_where(where, tag, Queue.Priority.SINGLE_ITEM, force, schedule_in)
+
+    def add_by_user(self, userid, tag, force=False, schedule_in=None):
         """
         Queue all a user's annotations to be synced to Elasticsearch.
 

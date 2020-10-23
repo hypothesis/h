@@ -23,14 +23,14 @@ def add_annotation(id_):
 
 @celery.task
 def add_annotations_between_times(start_time, end_time, tag):
-    celery.request.find_service(
-        name="search_index"
-    )._queue.add_annotations_between_times(start_time, end_time, tag)
+    celery.request.find_service(name="search_index")._queue.add_between_times(
+        start_time, end_time, tag
+    )
 
 
 @celery.task
 def add_users_annotations(userid, tag, force, schedule_in):
-    celery.request.find_service(name="search_index")._queue.add_users_annotations(
+    celery.request.find_service(name="search_index")._queue.add_by_user(
         userid, tag, force=force, schedule_in=schedule_in
     )
 
