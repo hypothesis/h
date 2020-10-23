@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from logging import getLogger
 
 from dateutil.parser import isoparse
-from sqlalchemy import func, select, text, and_
+from sqlalchemy import and_, func, select, text
 from zope.sqlalchemy import mark_changed
 
 from h.db.types import URLSafeUUID
@@ -14,6 +14,11 @@ LOG = getLogger(__name__)
 
 class Queue:
     """A job queue for synchronizing annotations from Postgres to Elastic."""
+
+    class Priority:
+        SINGLE_ITEM = 1
+        SINGLE_USER = 100
+        BETWEEN_TIMES = 1000
 
     class Result:
         # Values for reporting which should stringify nicely
@@ -29,17 +34,28 @@ class Queue:
         self._batch_indexer = batch_indexer
 
     def add_where(self, tag, priority, where, force=False, schedule_in=None):
+        """
+        :param where
+
+        :param tag: The tag to add to the job on the queue. For documentation
+            purposes only
+        :param schedule_in: A number of seconds from now to wait before making
+            the job available for processing. The annotation won't be synced
+            until at least `schedule_in` seconds from now
+        :param force: Whether to force reindexing of the annotation even if
+            it's already indexed
+        """
         where_clause = and_(*where) if len(where) > 1 else where[0]
 
         query = Job.__table__.insert().from_select(
-            [Job.name, Job.priority, Job.tag, Job.kwargs, Job.scheduled_at],
+            [Job.name, Job.tag, Job.priority, Job.kwargs, Job.scheduled_at],
             select(
                 [
                     text("'sync_annotation'"),
-                    text(str(priority)),
                     text(repr(tag)),
+                    text(str(priority)),
                     func.jsonb_build_object(
-                        "annotation_id", Annotation.id, "force", force
+                        "annotation_id", Annotation.id, "force", bool(force)
                     ),
                     text(f"'{self._datetime_at(schedule_in)}'"),
                 ]
@@ -53,65 +69,26 @@ class Queue:
         """
         Queue an annotation to be synced to Elasticsearch.
 
+        See Queue.add_where() for documentation of the params.
+
         :param annotation_id: The ID of the annotation to be queued, in the
             application-level URL-safe format
-        :type annotation_id: unicode
-
-        :param tag: The tag to add to the job on the queue. For documentation
-            purposes only
-        :type tag: unicode
-
-        :param schedule_in: A number of seconds from now to wait before making
-            the job available for processing. The annotation won't be synced
-            until at least `schedule_in` seconds from now
-        :type schedule_in: int
-
-        :param force: Whether to force reindexing of the annotation even if
-            it's already indexed
-        :type force: bool
         """
-        return self.add_where(tag, priority=1, where=[
-            Annotation.id == annotation_id
-        ], schedule_in=schedule_in, force=force)
-
-    def add_all(self, annotation_ids, tag, schedule_in=None, force=False):
-        """
-        Queue a list of annotations to be synced to Elasticsearch.
-
-        See Queue.add() for documentation of the params.
-        """
-
-        # Jobs with a lower number for their priority get processed before jobs
-        # with a higher number. Make large batches of jobs added all at once
-        # get processed *after* small batches added a few at a time, so that
-        # large batches don't hold up small ones for a long time.
-
-        return self.add_where(tag, priority=len(annotation_ids), where=[
-            Annotation.id.in_(annotation_ids)
-        ], schedule_in=schedule_in, force=force)
+        where = [Annotation.id == annotation_id]
+        self.add_where(tag, self.Priority.SINGLE_ITEM, where, force, schedule_in)
 
     def add_annotations_between_times(self, start_time, end_time, tag, force=False):
         """
         Queue all annotations between two times to be synced to Elasticsearch.
 
-        All annotations whose updated time is >= start_time and <= end_time
-        will be queued for syncing to Elasticsearch.
+        See Queue.add_where() for documentation of the params.
 
-        See Queue.add() for documentation of the params.
-
-        :param start_time: The time to queue annotations from
-        :type start_time: datetime.datetime
-
-        :param end_time: The time to queue annotations until
-        :type end_time: datetime.datetime
+        :param start_time: The time to queue annotations from (inclusive)
+        :param end_time: The time to queue annotations until (inclusive)
         """
 
-        self.add_where(
-            tag,
-            priority=1000,
-            where=[Annotation.updated >= start_time, Annotation.updated <= end_time],
-            force=force,
-        )
+        where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
+        self.add_where(tag, Queue.Priority.BETWEEN_TIMES, where, force)
 
     def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
         """
@@ -123,13 +100,8 @@ class Queue:
         :type userid: unicode
         """
 
-        self.add_where(
-            tag,
-            priority=100,
-            where=[Annotation.userid == userid],
-            force=force,
-            schedule_in=schedule_in,
-        )
+        where = [Annotation.userid == userid]
+        self.add_where(tag, Queue.Priority.SINGLE_USER, where, force, schedule_in)
 
     def sync(self, limit):
         """
