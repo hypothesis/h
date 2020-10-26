@@ -12,7 +12,6 @@ from h.util.query import column_windows
 
 log = logging.getLogger(__name__)
 
-ES_CHUNK_SIZE = 100
 PG_WINDOW_SIZE = 2000
 
 
@@ -34,9 +33,7 @@ class BatchIndexer:
         else:
             self._target_index = target_index
 
-    def index(
-        self, annotation_ids=None, windowsize=PG_WINDOW_SIZE, chunk_size=ES_CHUNK_SIZE
-    ):
+    def index(self, annotation_ids=None, windowsize=PG_WINDOW_SIZE):
         """
         Reindex annotations.
 
@@ -44,8 +41,6 @@ class BatchIndexer:
         :type annotation_ids: collection
         :param windowsize: the number of annotations to index in between progress log statements
         :type windowsize: integer
-        :param chunk_size: the number of docs in one chunk sent to ES
-        :type chunk_size: integer
 
         :returns: a set of errored ids
         :rtype: set
@@ -63,7 +58,7 @@ class BatchIndexer:
         indexing = es_helpers.streaming_bulk(
             self.es_client.conn,
             annotations,
-            chunk_size=chunk_size,
+            chunk_size=500,
             raise_on_error=False,
             expand_action_callback=self._prepare,
         )
