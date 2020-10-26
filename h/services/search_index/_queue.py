@@ -35,15 +35,19 @@ class Queue:
 
     def add_where(self, tag, priority, where, force=False, schedule_in=None):
         """
-        :param where
+        Queue annotations matching a filter to be synced to ElasticSearch.
 
         :param tag: The tag to add to the job on the queue. For documentation
             purposes only
+        :param priority: Integer priority value (higher number is lower
+            priority)
+        :param where: A list of SQLAlchemy BinaryExpression objects to limit
+            the annotations to be added
+        :param force: Whether to force reindexing of the annotation even if
+            it's already indexed
         :param schedule_in: A number of seconds from now to wait before making
             the job available for processing. The annotation won't be synced
             until at least `schedule_in` seconds from now
-        :param force: Whether to force reindexing of the annotation even if
-            it's already indexed
         """
         where_clause = and_(*where) if len(where) > 1 else where[0]
         schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)
