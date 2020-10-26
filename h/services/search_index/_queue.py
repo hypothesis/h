@@ -79,7 +79,6 @@ class Queue:
         :param start_time: The time to queue annotations from (inclusive)
         :param end_time: The time to queue annotations until (inclusive)
         """
-
         where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
         self.add_where(where, tag, Queue.Priority.BETWEEN_TIMES, force)
 
@@ -104,7 +103,6 @@ class Queue:
         :param userid: The ID of the user in "acct:USERNAME@AUTHORITY" format
         :type userid: unicode
         """
-
         where = [Annotation.userid == userid]
         self.add_where(where, tag, Queue.Priority.SINGLE_USER, force, schedule_in)
 
@@ -167,7 +165,7 @@ class Queue:
             elif not annotation_from_es:
                 annotation_ids_to_sync.add(annotation_id)
                 counts[Queue.Result.MISSING] += 1
-            elif not self.equal(annotation_from_es, annotation_from_db):
+            elif not self._equal(annotation_from_es, annotation_from_db):
                 annotation_ids_to_sync.add(annotation_id)
                 counts[Queue.Result.DIFFERENT] += 1
             else:
@@ -223,8 +221,8 @@ class Queue:
         return {hit["_id"]: hit["_source"] for hit in hits}
 
     @staticmethod
-    def equal(annotation_from_es, annotation_from_db):
-        """Return True if the annotation from Elasticsearch is equal to the one from Postgres."""
+    def _equal(annotation_from_es, annotation_from_db):
+        """Test if the annotations are equal."""
         return (
             annotation_from_es["updated"] == annotation_from_db.updated
             and annotation_from_es["user"] == annotation_from_db.userid
