@@ -53,16 +53,16 @@ class Queue:
         schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)
 
         query = Job.__table__.insert().from_select(
-            [Job.name, Job.tag, Job.priority, Job.kwargs, Job.scheduled_at],
+            [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
             select(
                 [
                     text("'sync_annotation'"),
-                    text(repr(tag)),
+                    text(f"'{schedule_at}'"),
                     text(str(priority)),
+                    text(repr(tag)),
                     func.jsonb_build_object(
                         "annotation_id", Annotation.id, "force", bool(force)
                     ),
-                    text(f"'{schedule_at}'"),
                 ]
             ).where(where_clause),
         )
