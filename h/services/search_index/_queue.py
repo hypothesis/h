@@ -33,16 +33,16 @@ class Queue:
         self._es = es
         self._batch_indexer = batch_indexer
 
-    def add_where(self, tag, priority, where, force=False, schedule_in=None):
+    def add_where(self, where, tag, priority, force=False, schedule_in=None):
         """
         Queue annotations matching a filter to be synced to ElasticSearch.
 
+        :param where: A list of SQLAlchemy BinaryExpression objects to limit
+            the annotations to be added
         :param tag: The tag to add to the job on the queue. For documentation
             purposes only
         :param priority: Integer priority value (higher number is lower
             priority)
-        :param where: A list of SQLAlchemy BinaryExpression objects to limit
-            the annotations to be added
         :param force: Whether to force reindexing of the annotation even if
             it's already indexed
         :param schedule_in: A number of seconds from now to wait before making
@@ -53,16 +53,16 @@ class Queue:
         schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)
 
         query = Job.__table__.insert().from_select(
-            [Job.name, Job.tag, Job.priority, Job.kwargs, Job.scheduled_at],
+            [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
             select(
                 [
                     text("'sync_annotation'"),
-                    text(repr(tag)),
+                    text(f"'{schedule_at}'"),
                     text(str(priority)),
+                    text(repr(tag)),
                     func.jsonb_build_object(
                         "annotation_id", Annotation.id, "force", bool(force)
                     ),
-                    text(f"'{schedule_at}'"),
                 ]
             ).where(where_clause),
         )
@@ -80,7 +80,7 @@ class Queue:
             application-level URL-safe format
         """
         where = [Annotation.id == annotation_id]
-        self.add_where(tag, self.Priority.SINGLE_ITEM, where, force, schedule_in)
+        self.add_where(where, tag, self.Priority.SINGLE_ITEM, force, schedule_in)
 
     def add_annotations_between_times(self, start_time, end_time, tag, force=False):
         """
@@ -93,7 +93,7 @@ class Queue:
         """
 
         where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
-        self.add_where(tag, Queue.Priority.BETWEEN_TIMES, where, force)
+        self.add_where(where, tag, Queue.Priority.BETWEEN_TIMES, force)
 
     def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
         """
@@ -106,7 +106,7 @@ class Queue:
         """
 
         where = [Annotation.userid == userid]
-        self.add_where(tag, Queue.Priority.SINGLE_USER, where, force, schedule_in)
+        self.add_where(where, tag, Queue.Priority.SINGLE_USER, force, schedule_in)
 
     def sync(self, limit):
         """

@@ -20,7 +20,7 @@ MINUS_5_MIN = datetime_.timedelta(minutes=-5)
 MINUS_5_MIN_IN_SECS = int(MINUS_5_MIN.total_seconds())
 
 
-class TestAddMethods:
+class TestQueue:
     def test_add_where(self, queue, factories, db_session, now):
         matching = [
             factories.Annotation.create(shared=True),
@@ -30,11 +30,9 @@ class TestAddMethods:
         factories.Annotation.create(shared=False)
 
         queue.add_where(
+            where=[Annotation.shared.is_(True)],
             tag="test_tag",
             priority=1234,
-            # Tell lint to ignore comparisons to True, which are required to
-            # form the SQLAlchemy BinaryExpression
-            where=[Annotation.shared == True],  # noqa: E712
             schedule_in=ONE_WEEK_IN_SECONDS,
         )
 
@@ -46,7 +44,7 @@ class TestAddMethods:
                     tag="test_tag",
                     priority=1234,
                     kwargs={
-                        "annotation_id": self.mapped_id(annotation),
+                        "annotation_id": self.database_id(annotation),
                         "force": False,
                     },
                 )
@@ -94,14 +92,14 @@ class TestAddMethods:
         )
 
         add_where.assert_called_once_with(
+            [Any.instance_of(BinaryExpression)],
             sentinel.tag,
             Queue.Priority.SINGLE_ITEM,
-            [Any.instance_of(BinaryExpression)],
             sentinel.force,
             sentinel.schedule_in,
         )
 
-        where = add_where.call_args[0][2]
+        where = add_where.call_args[0][0]
         assert where[0].compare(Annotation.id == sentinel.annotation_id)
 
     def test_add_annotations_between_times(self, queue, add_where):
@@ -110,13 +108,13 @@ class TestAddMethods:
         )
 
         add_where.assert_called_once_with(
+            [Any.instance_of(BinaryExpression)] * 2,
             sentinel.tag,
             Queue.Priority.BETWEEN_TIMES,
-            [Any.instance_of(BinaryExpression)] * 2,
             sentinel.force,
         )
 
-        where = add_where.call_args[0][2]
+        where = add_where.call_args[0][0]
         assert where[0].compare(Annotation.updated >= sentinel.start_time)
         assert where[1].compare(Annotation.updated <= sentinel.end_time)
 
@@ -129,17 +127,18 @@ class TestAddMethods:
         )
 
         add_where.assert_called_once_with(
+            [Any.instance_of(BinaryExpression)],
             sentinel.tag,
             Queue.Priority.SINGLE_USER,
-            [Any.instance_of(BinaryExpression)],
             sentinel.force,
             sentinel.schedule_in,
         )
 
-        where = add_where.call_args[0][2]
+        where = add_where.call_args[0][0]
         assert where[0].compare(Annotation.userid == sentinel.userid)
 
-    def mapped_id(self, annotation):
+    def database_id(self, annotation):
+        """Return `annotation.id` in the internal format used within the database."""
         return str(uuid.UUID(URLSafeUUID.url_safe_to_hex(annotation.id)))
 
     @pytest.fixture()
@@ -148,7 +147,7 @@ class TestAddMethods:
             yield add_where
 
 
-class TestSyncAnnotations:
+class TestSync:
     def test_it_does_nothing_if_the_queue_is_empty(self, batch_indexer, queue):
         queue.sync(LIMIT)
 
