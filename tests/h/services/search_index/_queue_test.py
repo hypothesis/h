@@ -32,9 +32,7 @@ class TestAddMethods:
         queue.add_where(
             tag="test_tag",
             priority=1234,
-            # Tell lint to ignore comparisons to True, which are required to
-            # form the SQLAlchemy BinaryExpression
-            where=[Annotation.shared == True],  # noqa: E712
+            where=[Annotation.shared.is_(True)],
             schedule_in=ONE_WEEK_IN_SECONDS,
         )
 
@@ -46,7 +44,7 @@ class TestAddMethods:
                     tag="test_tag",
                     priority=1234,
                     kwargs={
-                        "annotation_id": self.mapped_id(annotation),
+                        "annotation_id": self.database_id(annotation),
                         "force": False,
                     },
                 )
@@ -139,7 +137,8 @@ class TestAddMethods:
         where = add_where.call_args[0][2]
         assert where[0].compare(Annotation.userid == sentinel.userid)
 
-    def mapped_id(self, annotation):
+    def database_id(self, annotation):
+        """Return `annotation.id` in the internal format used within the database."""
         return str(uuid.UUID(URLSafeUUID.url_safe_to_hex(annotation.id)))
 
     @pytest.fixture()
