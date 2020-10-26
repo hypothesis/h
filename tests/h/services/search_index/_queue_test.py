@@ -20,7 +20,7 @@ MINUS_5_MIN = datetime_.timedelta(minutes=-5)
 MINUS_5_MIN_IN_SECS = int(MINUS_5_MIN.total_seconds())
 
 
-class TestAddMethods:
+class TestQueue:
     def test_add_where(self, queue, factories, db_session, now):
         matching = [
             factories.Annotation.create(shared=True),
@@ -147,7 +147,7 @@ class TestAddMethods:
             yield add_where
 
 
-class TestSyncAnnotations:
+class TestSync:
     def test_it_does_nothing_if_the_queue_is_empty(self, batch_indexer, queue):
         queue.sync(LIMIT)
 
