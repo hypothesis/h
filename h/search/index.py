@@ -12,7 +12,7 @@ from h.util.query import column_windows
 
 log = logging.getLogger(__name__)
 
-PG_WINDOW_SIZE = 5000
+PG_WINDOW_SIZE = 2500
 
 
 class BatchIndexer:
@@ -58,7 +58,7 @@ class BatchIndexer:
         indexing = es_helpers.streaming_bulk(
             self.es_client.conn,
             annotations,
-            chunk_size=5000,
+            chunk_size=2500,
             raise_on_error=False,
             expand_action_callback=self._prepare,
         )
