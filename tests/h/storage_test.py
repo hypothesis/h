@@ -8,6 +8,8 @@ from h.models.annotation import Annotation
 from h.models.document import Document, DocumentURI
 from h.schemas import ValidationError
 
+pytestmark = pytest.mark.usefixtures("search_index")
+
 
 class FakeGroup:
     @property
@@ -350,6 +352,17 @@ class TestCreateAnnotation:
 
         assert ann.document == document
 
+    def test_it_queues_the_annotation_for_syncing_to_Elasticsearch(
+        self, groupfinder_service, pyramid_request, search_index
+    ):
+        annotation = storage.create_annotation(
+            pyramid_request, self.annotation_data(), groupfinder_service
+        )
+
+        search_index._queue.add_by_id.assert_called_once_with(
+            annotation.id, tag="storage.create_annotation", schedule_in=30
+        )
+
     def test_it_returns_the_annotation(
         self, models, pyramid_request, groupfinder_service
     ):
@@ -601,6 +614,17 @@ class TestUpdateAnnotation:
             pyramid_request, "test_annotation_id", annotation_data, groupfinder_service
         )
         assert annotation.document == document
+
+    def test_it_queues_the_annotation_for_syncing_to_Elasticsearch(
+        self, annotation_data, groupfinder_service, pyramid_request, search_index
+    ):
+        storage.update_annotation(
+            pyramid_request, "test_annotation_id", annotation_data, groupfinder_service
+        )
+
+        search_index._queue.add_by_id.assert_called_once_with(
+            "test_annotation_id", tag="storage.update_annotation", schedule_in=30
+        )
 
     def test_it_returns_the_annotation(
         self, annotation_data, pyramid_request, groupfinder_service
