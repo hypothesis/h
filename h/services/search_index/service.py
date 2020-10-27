@@ -11,7 +11,7 @@ class SearchIndexService:
     # The DB setting that stores whether a full re-index is taking place
     REINDEX_SETTING_KEY = "reindex.new_index"
 
-    def __init__(self, request, es_client, session, settings, queue):
+    def __init__(self, request, es_client, session, settings):
         """
         Create an instance of the service.
 
@@ -19,13 +19,11 @@ class SearchIndexService:
         :param es_client: Elasticsearch client
         :param session: DB session
         :param settings: Instance of settings (or other object with `get()`)
-        :param queue: The sync_annotations job queue
         """
         self._request = request
         self._es = es_client
         self._db = session
         self._settings = settings
-        self._queue = queue
 
     def add_annotation_by_id(self, annotation_id):
         """
@@ -128,10 +126,6 @@ class SearchIndexService:
 
         # Either the synchronous method was disabled, or failed...
         return async_task.delay(event.annotation_id)
-
-    def sync(self, limit):
-        """Process `limit` sync_annotation jobs from the job queue."""
-        self._queue.sync(limit)
 
     def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
         self._es.conn.index(

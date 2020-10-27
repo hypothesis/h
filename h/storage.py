@@ -147,7 +147,7 @@ def create_annotation(request, data, group_service):
     request.db.add(annotation)
     request.db.flush()
 
-    request.find_service(name="search_index")._queue.add_by_id(
+    request.find_service(name="search_index.queue").add_by_id(
         annotation.id, tag="storage.create_annotation", schedule_in=30
     )
 
@@ -210,7 +210,7 @@ def update_annotation(request, id_, data, group_service):
         )
         annotation.document = document
 
-    request.find_service(name="search_index")._queue.add_by_id(
+    request.find_service(name="search_index.queue").add_by_id(
         id_, tag="storage.update_annotation", schedule_in=30
     )
 

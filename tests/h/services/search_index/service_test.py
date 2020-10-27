@@ -6,7 +6,6 @@ from h_matchers import Any
 
 from h.events import AnnotationEvent
 from h.search.client import Client
-from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
 from h.services.settings import SettingsService
 
@@ -268,13 +267,6 @@ class TestHandleAnnotationEvent:
             yield delete_annotation_by_id
 
 
-class TestSync:
-    def test_it(self, search_index, queue):
-        search_index.sync(10)
-
-        queue.sync.assert_called_once_with(10)
-
-
 @pytest.fixture(autouse=True)
 def AnnotationSearchIndexPresenter(patch):
     return patch("h.services.search_index.service.AnnotationSearchIndexPresenter")
@@ -297,18 +289,12 @@ def settings_service(pyramid_config):
 
 
 @pytest.fixture
-def queue():
-    return create_autospec(Queue, spec_set=True, instance=True)
-
-
-@pytest.fixture
-def search_index(es_client, pyramid_request, settings_service, queue):
+def search_index(es_client, pyramid_request, settings_service):
     return SearchIndexService(
         session=pyramid_request.db,
         es_client=es_client,
         request=pyramid_request,
         settings=settings_service,
-        queue=queue,
     )
 
 

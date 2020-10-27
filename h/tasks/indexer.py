@@ -23,14 +23,14 @@ def add_annotation(id_):
 
 @celery.task
 def add_annotations_between_times(start_time, end_time, tag):
-    search_index = celery.request.find_service(name="search_index")
-    search_index._queue.add_between_times(start_time, end_time, tag)
+    queue = celery.request.find_service(name="search_index.queue")
+    queue.add_between_times(start_time, end_time, tag)
 
 
 @celery.task
 def add_users_annotations(userid, tag, force, schedule_in):
-    search_index = celery.request.find_service(name="search_index")
-    search_index._queue.add_by_user(userid, tag, force=force, schedule_in=schedule_in)
+    queue = celery.request.find_service(name="search_index.queue")
+    queue.add_by_user(userid, tag, force=force, schedule_in=schedule_in)
 
 
 @celery.task(base=_BaseTaskWithRetry)
@@ -41,5 +41,5 @@ def delete_annotation(id_):
 
 @celery.task(acks_late=False)
 def sync_annotations(limit):
-    search_index = celery.request.find_service(name="search_index")
-    search_index.sync(limit)
+    queue = celery.request.find_service(name="search_index.queue")
+    queue.sync(limit)

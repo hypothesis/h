@@ -11,7 +11,7 @@ from h.db.types import URLSafeUUID
 from h.models import Annotation, Job
 from h.search.index import BatchIndexer
 from h.services.search_index import SearchIndexService
-from h.services.search_index._queue import Queue
+from h.services.search_index.queue import Queue
 
 LIMIT = 2
 ONE_WEEK = datetime_.timedelta(weeks=1)
@@ -295,11 +295,7 @@ class TestSync:
         self, es_client, pyramid_request, moderation_service, nipsa_service
     ):
         return SearchIndexService(
-            pyramid_request,
-            es_client,
-            session=pyramid_request.db,
-            settings={},
-            queue=queue,
+            pyramid_request, es_client, session=pyramid_request.db, settings={}
         )
 
     @pytest.fixture
@@ -341,14 +337,14 @@ def batch_indexer():
 
 @pytest.fixture(autouse=True)
 def datetime(patch, now):
-    datetime = patch("h.services.search_index._queue.datetime")
+    datetime = patch("h.services.search_index.queue.datetime")
     datetime.utcnow.return_value = now
     return datetime
 
 
 @pytest.fixture(autouse=True)
 def LOG(patch):
-    return patch("h.services.search_index._queue.LOG")
+    return patch("h.services.search_index.queue.LOG")
 
 
 @pytest.fixture

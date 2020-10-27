@@ -5,7 +5,7 @@ import pytest
 
 from h.tasks import indexer
 
-pytestmark = pytest.mark.usefixtures("search_index")
+pytestmark = pytest.mark.usefixtures("search_index", "search_index_queue")
 
 
 class TestSearchIndexServicesWrapperTasks:
@@ -27,18 +27,18 @@ class TestSearchIndexServicesWrapperTasks:
 
 
 class TestAddAnnotationsBetweenTimes:
-    def test_it(self, search_index):
+    def test_it(self, search_index_queue):
         indexer.add_annotations_between_times(
             sentinel.start_time, sentinel.end_time, sentinel.tag
         )
 
-        search_index._queue.add_between_times.assert_called_once_with(
+        search_index_queue.add_between_times.assert_called_once_with(
             sentinel.start_time, sentinel.end_time, sentinel.tag
         )
 
 
 class TestAddUsersAnnotations:
-    def test_it(self, search_index):
+    def test_it(self, search_index_queue):
         indexer.add_users_annotations(
             sentinel.userid,
             sentinel.tag,
@@ -46,7 +46,7 @@ class TestAddUsersAnnotations:
             schedule_in=sentinel.schedule_in,
         )
 
-        search_index._queue.add_by_user.assert_called_once_with(
+        search_index_queue.add_by_user.assert_called_once_with(
             sentinel.userid,
             sentinel.tag,
             force=sentinel.force,
@@ -55,10 +55,10 @@ class TestAddUsersAnnotations:
 
 
 class TestSyncAnnotations:
-    def test_it(self, search_index):
+    def test_it(self, search_index_queue):
         indexer.sync_annotations("test_queue")
 
-        search_index.sync.assert_called_once_with("test_queue")
+        search_index_queue.sync.assert_called_once_with("test_queue")
 
 
 @pytest.fixture(autouse=True)

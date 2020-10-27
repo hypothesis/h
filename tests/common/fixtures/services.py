@@ -2,16 +2,16 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services import search_index as search_index_
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.groupfinder import GroupfinderService
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService
-from h.services.search_index import SearchIndexService
-from h.services.search_index._queue import Queue
 
 __all__ = (
     "mock_service",
     "search_index",
+    "search_index_queue",
     "nipsa_service",
     "user_service",
     "links_service",
@@ -38,11 +38,13 @@ def mock_service(pyramid_config):
 @pytest.fixture
 def search_index(mock_service):
     return mock_service(
-        SearchIndexService,
-        "search_index",
-        spec_set=False,
-        _queue=create_autospec(Queue, spec_set=True, instance=True),
+        search_index_.SearchIndexService, "search_index", spec_set=False
     )
+
+
+@pytest.fixture
+def search_index_queue(mock_service):
+    return mock_service(search_index_.Queue, "search_index.queue", spec_set=False)
 
 
 @pytest.fixture

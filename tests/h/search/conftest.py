@@ -4,7 +4,6 @@ import pytest
 
 from h.services.group import GroupService
 from h.services.search_index import SearchIndexService
-from h.services.search_index._queue import Queue
 
 
 @pytest.fixture
@@ -51,7 +50,6 @@ def search_index(es_client, pyramid_request, moderation_service):
         es_client,
         session=pyramid_request.db,
         settings={},
-        queue=mock.create_autospec(Queue, spec_set=True, instance=True),
     )
 
 
