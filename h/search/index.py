@@ -12,7 +12,7 @@ from h.util.query import column_windows
 
 log = logging.getLogger(__name__)
 
-PG_WINDOW_SIZE = 2000
+PG_WINDOW_SIZE = 5000
 
 
 class BatchIndexer:
