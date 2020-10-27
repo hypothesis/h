@@ -180,20 +180,30 @@ class Queue:
 
         LOG.info(dict(counts))
 
-    def _get_jobs_from_queue(self, limit):
-        now = datetime.utcnow()
+    def count(self, tags=None):
+        query = self._job_query
 
+        if tags:
+            query = query.filter(Job.tag.in_(tags))
+
+        return query.count()
+
+    def _get_jobs_from_queue(self, limit):
         return (
-            self._db.query(Job)
-            .filter(
-                Job.name == "sync_annotation",
-                Job.scheduled_at < now,
-                Job.expires_at > now,
-            )
-            .order_by(Job.priority, Job.enqueued_at)
+            self._job_query.order_by(Job.priority, Job.enqueued_at)
             .limit(limit)
             .with_for_update(skip_locked=True)
             .all()
+        )
+
+    @property
+    def _job_query(self):
+        now = datetime.utcnow()
+
+        return self._db.query(Job).filter(
+            Job.name == "sync_annotation",
+            Job.scheduled_at < now,
+            Job.expires_at > now,
         )
 
     def _get_annotations_from_db(self, annotation_ids):

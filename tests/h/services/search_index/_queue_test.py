@@ -3,6 +3,7 @@ import uuid
 from unittest import mock
 from unittest.mock import patch, sentinel
 
+import factory
 import pytest
 from h_matchers import Any
 from sqlalchemy.sql.elements import BinaryExpression
@@ -346,6 +347,35 @@ class TestSync:
                 )
 
         return add_all
+
+
+class TestCount:
+    def test_it(self, db_session, factories, now, queue):
+        one_minute = datetime_.timedelta(minutes=1)
+
+        class JobFactory(factories.Job):
+            """A factory that, by default, creates jobs that should be counted."""
+
+            name = "sync_annotation"
+            tag = factory.Iterator(
+                ["storage.create_annotation", "storage.update_annotation"]
+            )
+            scheduled_at = now - one_minute
+
+        # 2 jobs that should be counted.
+        JobFactory.create_batch(size=2)
+        # A job that shouldn't be counted because it has the wrong tag.
+        JobFactory.create(tag="wrong_tag")
+        # A job that shouldn't be counted because it has the wrong name.
+        JobFactory.create(name="wrong_name")
+        # A job that shouldn't be counted because it's expired.
+        JobFactory.create(expires_at=now - one_minute)
+        # A job that shouldn't be counted because it isn't scheduled yet.
+        JobFactory.create(scheduled_at=now + one_minute)
+
+        count = queue.count(["storage.create_annotation", "storage.update_annotation"])
+
+        assert count == 2
 
 
 @pytest.fixture

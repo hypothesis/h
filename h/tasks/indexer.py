@@ -1,3 +1,4 @@
+import newrelic
 from celery import Task
 
 from h.celery import celery, get_task_logger
@@ -43,3 +44,16 @@ def delete_annotation(id_):
 def sync_annotations(limit):
     search_index = celery.request.find_service(name="search_index")
     search_index.sync(limit)
+
+
+@celery.task(acks_late=False)
+def report_sync_annotations_queue_length():
+    search_index = celery.request.find_service(name="search_index")
+
+    count = search_index._queue.count(
+        ["storage.create_annotation", "storage.update_annotation"]
+    )
+
+    newrelic.agent.record_custom_metric(
+        "Custom/SyncAnnotations/Queue/API/Length", count
+    )
