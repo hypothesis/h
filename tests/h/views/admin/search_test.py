@@ -22,7 +22,7 @@ class TestSearchAdminViews:
         search_index.add_annotations_between_times.assert_called_once_with(
             datetime.datetime(year=2020, month=9, day=9),
             datetime.datetime(year=2020, month=9, day=11),
-            "reindex_date()",
+            "reindex_date",
         )
         assert pyramid_request.session.peek_flash("success") == [
             "Began reindexing from 2020-09-09 00:00:00 to 2020-09-11 00:00:00"
