@@ -92,7 +92,7 @@ class TestExpandURI:
         ]
 
 
-@pytest.mark.usefixtures("models", "groupfinder_service")
+@pytest.mark.usefixtures("models")
 class TestCreateAnnotation:
     def test_it_fetches_parent_annotation_for_replies(
         self, fetch_annotation, pyramid_config, pyramid_request, groupfinder_service
