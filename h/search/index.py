@@ -58,7 +58,7 @@ class BatchIndexer:
         indexing = es_helpers.streaming_bulk(
             self.es_client.conn,
             annotations,
-            chunk_size=500,
+            chunk_size=5000,
             raise_on_error=False,
             expand_action_callback=self._prepare,
         )
