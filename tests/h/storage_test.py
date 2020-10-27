@@ -92,7 +92,7 @@ class TestExpandURI:
         ]
 
 
-@pytest.mark.usefixtures("models", "groupfinder_service", "update_document_metadata")
+@pytest.mark.usefixtures("models", "groupfinder_service")
 class TestCreateAnnotation:
     def test_it_fetches_parent_annotation_for_replies(
         self, fetch_annotation, pyramid_config, pyramid_request, groupfinder_service
@@ -391,7 +391,7 @@ class TestCreateAnnotation:
         }
 
 
-@pytest.mark.usefixtures("models", "update_document_metadata")
+@pytest.mark.usefixtures("models")
 class TestUpdateAnnotation:
     def test_it_gets_the_annotation_model(
         self, pyramid_request, annotation_data, groupfinder_service, models
@@ -656,7 +656,7 @@ def models(patch):
     return models
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def update_document_metadata(patch):
     return patch("h.storage.update_document_metadata")
 
