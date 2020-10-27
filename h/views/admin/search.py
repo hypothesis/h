@@ -23,7 +23,7 @@ class SearchAdminViews:
         end_time = isoparse(self.request.params["end"].strip())
 
         self.request.find_service(name="search_index").add_annotations_between_times(
-            start_time, end_time, tag="reindex_date()"
+            start_time, end_time, tag="reindex_date"
         )
 
         self.request.session.flash(
