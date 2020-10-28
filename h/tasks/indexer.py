@@ -47,13 +47,15 @@ def sync_annotations(limit):
 
 
 @celery.task(acks_late=False)
-def report_sync_annotations_queue_length():
-    search_index = celery.request.find_service(name="search_index")
+def report_job_queue_metrics():
+    queue = celery.request.find_service(name="search_index")._queue
 
-    count = search_index._queue.count(
-        ["storage.create_annotation", "storage.update_annotation"]
-    )
-
-    newrelic.agent.record_custom_metric(
-        "Custom/SyncAnnotations/Queue/API/Length", count
+    newrelic.agent.record_custom_metrics(
+        [
+            (
+                "Custom/SyncAnnotations/Queue/API/Length",
+                queue.count(["storage.create_annotation", "storage.update_annotation"]),
+            ),
+            ("Custom/SyncAnnotations/Queue/Expired/Length", queue.count(expired=True)),
+        ]
     )

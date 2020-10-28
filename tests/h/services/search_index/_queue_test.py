@@ -350,7 +350,18 @@ class TestSync:
 
 
 class TestCount:
-    def test_it(self, db_session, factories, now, queue):
+    @pytest.mark.parametrize(
+        "tags,expired,expected_result",
+        [
+            (None, False, 3),
+            (None, True, 1),
+            (["storage.create_annotation", "storage.update_annotation"], False, 2),
+            (["storage.create_annotation", "storage.update_annotation"], True, 1),
+        ],
+    )
+    def test_it(
+        self, db_session, factories, now, queue, tags, expired, expected_result
+    ):
         one_minute = datetime_.timedelta(minutes=1)
 
         class JobFactory(factories.Job):
@@ -362,20 +373,17 @@ class TestCount:
             )
             scheduled_at = now - one_minute
 
-        # 2 jobs that should be counted.
         JobFactory.create_batch(size=2)
-        # A job that shouldn't be counted because it has the wrong tag.
-        JobFactory.create(tag="wrong_tag")
-        # A job that shouldn't be counted because it has the wrong name.
-        JobFactory.create(name="wrong_name")
-        # A job that shouldn't be counted because it's expired.
+        JobFactory.create(tag="another_tag")
+        JobFactory.create(name="another_name")
+        # A job that's expired.
         JobFactory.create(expires_at=now - one_minute)
-        # A job that shouldn't be counted because it isn't scheduled yet.
+        # A job that isn't scheduled yet.
         JobFactory.create(scheduled_at=now + one_minute)
 
-        count = queue.count(["storage.create_annotation", "storage.update_annotation"])
+        count = queue.count(tags=tags, expired=expired)
 
-        assert count == 2
+        assert count == expected_result
 
 
 @pytest.fixture

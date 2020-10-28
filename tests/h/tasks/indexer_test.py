@@ -2,7 +2,6 @@ from unittest import mock
 from unittest.mock import sentinel
 
 import pytest
-from h_matchers import Any
 
 from h.tasks import indexer
 
@@ -62,16 +61,9 @@ class TestSyncAnnotations:
         search_index.sync.assert_called_once_with("test_queue")
 
 
-class TestReportSyncAnnotationsQueueLength:
-    def test_it(self, newrelic, search_index):
-        indexer.report_sync_annotations_queue_length()
-
-        search_index._queue.count.assert_called_once_with(
-            ["storage.create_annotation", "storage.update_annotation"]
-        )
-        newrelic.agent.record_custom_metric.assert_called_once_with(
-            Any.string(), search_index._queue.count.return_value
-        )
+class TestReportJobQueueMetrics:
+    def test_it(self):
+        indexer.report_job_queue_metrics()
 
 
 @pytest.fixture(autouse=True)
