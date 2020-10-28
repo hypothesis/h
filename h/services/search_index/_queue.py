@@ -181,11 +181,14 @@ class Queue:
         LOG.info(dict(counts))
 
     def _get_jobs_from_queue(self, limit):
+        now = datetime.utcnow()
+
         return (
             self._db.query(Job)
             .filter(
                 Job.name == "sync_annotation",
-                Job.scheduled_at < datetime.utcnow(),
+                Job.scheduled_at < now,
+                Job.expires_at > now,
             )
             .order_by(Job.priority, Job.enqueued_at)
             .limit(limit)

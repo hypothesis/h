@@ -158,6 +158,20 @@ class TestSync:
         for annotation_id in all_annotation_ids[LIMIT:]:
             assert annotation_id not in batch_indexer.index.call_args[0][0]
 
+    def test_it_ignores_jobs_that_are_expired(
+        self, batch_indexer, db_session, factories, now, queue, LOG
+    ):
+        annotation = factories.Annotation()
+        queue.add_by_id(annotation.id, "test_tag", schedule_in=MINUS_5_MIN_IN_SECS)
+        # Change the job's expires_at date so that it's expired.
+        job = db_session.query(Job).one()
+        job.expires_at = now - datetime_.timedelta(minutes=1)
+
+        queue.sync(LIMIT)
+
+        batch_indexer.index.assert_not_called()
+        assert db_session.query(Job).all() == [job]
+
     @pytest.mark.usefixtures("with_indexed_annotations")
     def test_if_the_job_has_force_True_it_indexes_the_annotation_and_deletes_the_job(
         self, annotation_ids, add_all, batch_indexer, db_session, queue, LOG
