@@ -43,7 +43,16 @@ def delete_annotation(id_):
 @celery.task(acks_late=False)
 def sync_annotations(limit):
     search_index = celery.request.find_service(name="search_index")
-    search_index.sync(limit)
+
+    counts = search_index.sync(limit)
+
+    log.info(dict(counts))
+    newrelic.agent.record_custom_metrics(
+        [
+            (f"Custom/SyncAnnotations/Queue/{key}", value)
+            for key, value in counts.items()
+        ]
+    )
 
 
 @celery.task(acks_late=False)

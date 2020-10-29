@@ -131,7 +131,7 @@ class SearchIndexService:
 
     def sync(self, limit):
         """Process `limit` sync_annotation jobs from the job queue."""
-        self._queue.sync(limit)
+        return self._queue.sync(limit)
 
     def _index_annotation_body(self, annotation_id, body, refresh, target_index=None):
         self._es.conn.index(

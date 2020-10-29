@@ -1,6 +1,5 @@
 from collections import Counter
 from datetime import datetime, timedelta
-from logging import getLogger
 
 from dateutil.parser import isoparse
 from sqlalchemy import and_, func, select, text
@@ -8,8 +7,6 @@ from zope.sqlalchemy import mark_changed
 
 from h.db.types import URLSafeUUID
 from h.models import Annotation, Job
-
-LOG = getLogger(__name__)
 
 
 class Queue:
@@ -21,12 +18,17 @@ class Queue:
         BETWEEN_TIMES = 1000
 
     class Result:
-        # Values for reporting which should stringify nicely
-        DELETED_FROM_DB = "Jobs deleted because annotations were deleted from the DB"
-        MISSING = "Annotations synced because they were not in Elasticsearch"
-        DIFFERENT = "Annotations synced because they were different in Elasticsearch"
-        UP_TO_DATE = "Jobs deleted because annotations were up to date in Elasticsearch"
-        FORCED = "Annotations synced because their jobs had force=True"
+        """String values for logging and metrics."""
+
+        # These are in the style of New Relic custom metric names.
+        SYNCED_MISSING = "Synced/Missing_from_Elastic"
+        SYNCED_DIFFERENT = "Synced/Different_in_Elastic"
+        SYNCED_FORCED = "Synced/Forced"
+        SYNCED_TOTAL = "Synced/Total"
+        COMPLETED_UP_TO_DATE = "Completed/Up_to_date_in_Elastic"
+        COMPLETED_DELETED = "Completed/Deleted_from_db"
+        COMPLETED_FORCED = "Completed/Forced"
+        COMPLETED_TOTAL = "Completed/Total"
 
     def __init__(self, db, es, batch_indexer):
         self._db = db
@@ -123,10 +125,12 @@ class Queue:
           job on the queue to be re-checked and removed the next time the
           method runs.
         """
+        counts = Counter()
+
         jobs = self._get_jobs_from_queue(limit)
 
         if not jobs:
-            return
+            return counts
 
         annotation_ids = {
             URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
@@ -148,8 +152,6 @@ class Queue:
         # than in the DB.
         annotation_ids_to_sync = set()
 
-        counts = Counter()
-
         for job in jobs:
             annotation_id = URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
             annotation_from_db = annotations_from_db.get(annotation_id)
@@ -158,19 +160,20 @@ class Queue:
             if job.kwargs.get("force", False):
                 annotation_ids_to_sync.add(annotation_id)
                 job_complete.append(job)
-                counts[Queue.Result.FORCED] += 1
+                counts[Queue.Result.SYNCED_FORCED] += 1
+                counts[Queue.Result.COMPLETED_FORCED] += 1
             elif not annotation_from_db:
                 job_complete.append(job)
-                counts[Queue.Result.DELETED_FROM_DB] += 1
+                counts[Queue.Result.COMPLETED_DELETED] += 1
             elif not annotation_from_es:
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.MISSING] += 1
+                counts[Queue.Result.SYNCED_MISSING] += 1
             elif not self._equal(annotation_from_es, annotation_from_db):
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.DIFFERENT] += 1
+                counts[Queue.Result.SYNCED_DIFFERENT] += 1
             else:
                 job_complete.append(job)
-                counts[Queue.Result.UP_TO_DATE] += 1
+                counts[Queue.Result.COMPLETED_UP_TO_DATE] += 1
 
         for job in job_complete:
             self._db.delete(job)
@@ -178,7 +181,23 @@ class Queue:
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
-        LOG.info(dict(counts))
+        synced_total = (
+            counts[Queue.Result.SYNCED_MISSING]
+            + counts[Queue.Result.SYNCED_DIFFERENT]
+            + counts[Queue.Result.SYNCED_FORCED]
+        )
+        if synced_total:
+            counts[Queue.Result.SYNCED_TOTAL] = synced_total
+
+        completed_total = (
+            counts[Queue.Result.COMPLETED_DELETED]
+            + counts[Queue.Result.COMPLETED_UP_TO_DATE]
+            + counts[Queue.Result.COMPLETED_FORCED]
+        )
+        if completed_total:
+            counts[Queue.Result.COMPLETED_TOTAL] = completed_total
+
+        return counts
 
     def count(self, tags=None):
         query = self._job_query
