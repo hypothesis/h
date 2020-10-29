@@ -199,8 +199,8 @@ class Queue:
 
         return counts
 
-    def count(self, tags=None, expired=False):
-        return self._job_query(tags=tags, expired=expired).count()
+    def count(self, tags=None):
+        return self._job_query(tags=tags).count()
 
     def _get_jobs_from_queue(self, limit):
         return (
@@ -211,22 +211,15 @@ class Queue:
             .all()
         )
 
-    def _job_query(self, tags=None, expired=False):
+    def _job_query(self, tags=None):
         now = datetime.utcnow()
 
         query = self._db.query(Job).filter(
-            Job.name == "sync_annotation", Job.scheduled_at < now
+            Job.name == "sync_annotation", Job.scheduled_at < now, Job.expires_at >= now
         )
 
         if tags:
             query = query.filter(Job.tag.in_(tags))
-
-        if expired:
-            # Only find expired jobs.
-            query = query.filter(Job.expires_at < now)
-        else:
-            # Only find jobs that aren't expired.
-            query = query.filter(Job.expires_at >= now)
 
         return query
 

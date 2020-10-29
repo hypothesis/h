@@ -1,4 +1,5 @@
 from collections import Counter
+from datetime import datetime, timedelta
 from unittest import mock
 from unittest.mock import sentinel
 
@@ -79,8 +80,22 @@ class TestSyncAnnotations:
 
 
 class TestReportJobQueueMetrics:
-    def test_it(self):
+    def test_it(self, factories, newrelic, search_index):
+        factories.Job.create()
+        factories.Job.create(expires_at=datetime.utcnow() - timedelta(minutes=1))
+
         indexer.report_job_queue_metrics()
+
+        newrelic.agent.record_custom_metrics.assert_called_once_with(
+            [
+                ("Custom/Job/Queue/Length", 2),
+                ("Custom/Job/Queue/Expired/Length", 1),
+                (
+                    "Custom/SyncAnnotations/Queue/API/Length",
+                    search_index._queue.count.return_value,
+                ),
+            ]
+        )
 
 
 @pytest.fixture(autouse=True)
