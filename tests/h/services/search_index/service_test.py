@@ -270,9 +270,10 @@ class TestHandleAnnotationEvent:
 
 class TestSync:
     def test_it(self, search_index, queue):
-        search_index.sync(10)
+        returned = search_index.sync(10)
 
         queue.sync.assert_called_once_with(10)
+        assert returned == queue.sync.return_value
 
 
 @pytest.fixture(autouse=True)
