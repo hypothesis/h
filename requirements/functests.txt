@@ -26,8 +26,8 @@ gevent==20.9.0            # via -r requirements/requirements.txt
 greenlet==0.4.17          # via -r requirements/requirements.txt, gevent
 gunicorn==20.0.4          # via -r requirements/requirements.txt
 h-api==1.0.0              # via -r requirements/requirements.txt
-h-matchers==1.2.9         # via -r requirements/requirements.txt
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt
+h_matchers==1.2.10        # via -r requirements/requirements.txt
 hkdf==0.0.3               # via -r requirements/requirements.txt
 hupper==1.10.2            # via -r requirements/requirements.txt, pyramid
 importlib-metadata==1.7.0  # via -r requirements/requirements.txt, jsonschema, kombu, pluggy, pytest
