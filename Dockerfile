@@ -1,15 +1,17 @@
-# Stage 1: Build node portion of the H app.
+# Stage 1: Build static frontend assets.
 FROM node:15-alpine as build
 
 ENV NODE_ENV production
 
-# Build node dependencies.
+# Install dependencies.
+WORKDIR /tmp/frontend-build
 COPY package-lock.json ./
 COPY package.json ./
 RUN npm ci --production
+RUN npm install --global gulp-cli@2.3.0
 
 # Build h js/css.
-COPY gulpfile.js ./ 
+COPY gulpfile.js ./
 COPY scripts/gulp ./scripts/gulp
 COPY h/static ./h/static
 RUN npm run build
@@ -48,7 +50,7 @@ RUN apk add --no-cache --virtual build-deps \
   && apk del build-deps
 
 # Copy frontend assets.
-COPY --from=build /build build
+COPY --from=build /tmp/frontend-build/build build
 
 # Copy the rest of the application files.
 COPY . .
