@@ -360,7 +360,7 @@ class TestCreateAnnotation:
         )
 
         search_index._queue.add_by_id.assert_called_once_with(
-            annotation.id, tag="storage.create_annotation", schedule_in=180
+            annotation.id, tag="storage.create_annotation", schedule_in=60
         )
 
     def test_it_returns_the_annotation(
@@ -623,7 +623,7 @@ class TestUpdateAnnotation:
         )
 
         search_index._queue.add_by_id.assert_called_once_with(
-            "test_annotation_id", tag="storage.update_annotation", schedule_in=180
+            "test_annotation_id", tag="storage.update_annotation", schedule_in=60
         )
 
     def test_it_returns_the_annotation(
