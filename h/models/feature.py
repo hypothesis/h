@@ -13,6 +13,7 @@ FEATURES = {
     ),
     "client_display_names": "Render display names instead of user names in the client",
     "client_search_input": "Show redesigned search/filter input in client",
+    "notebook_launch": "Allow access to notebook feature",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
