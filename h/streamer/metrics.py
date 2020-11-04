@@ -46,8 +46,7 @@ def metrics_process(registry, queue):  # pragma: no cover
     session = db.get_session(registry.settings)
 
     newrelic.agent.initialize(
-        config_file=resource_filename("h.streamer", "conf/newrelic.ini"),
-        log_file="debug",
+        config_file=resource_filename("h.streamer", "conf/newrelic.ini")
     )
     newrelic.agent.register_application(timeout=5)
     application = newrelic.agent.application()
