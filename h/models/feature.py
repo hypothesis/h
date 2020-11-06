@@ -33,9 +33,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    "client_search_input": "Show redesigned search/filter input in client",
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
