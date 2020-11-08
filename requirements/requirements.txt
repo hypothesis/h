@@ -11,7 +11,7 @@ bcrypt==3.2.0             # via -r requirements/requirements.in
 billiard==3.6.3.0         # via celery
 bleach==3.2.1             # via -r requirements/requirements.in
 celery==4.4.7             # via -r requirements/requirements.in
-certifi==2020.6.20        # via -r requirements/requirements.in, sentry-sdk
+certifi==2020.11.8        # via -r requirements/requirements.in, sentry-sdk
 cffi==1.14.3              # via -r requirements/requirements.in, bcrypt
 chameleon==3.8.1          # via deform
 click==7.1.2              # via -r requirements/requirements.in
@@ -23,8 +23,8 @@ gevent==20.9.0            # via -r requirements/requirements.in
 greenlet==0.4.17          # via gevent
 gunicorn==20.0.4          # via -r requirements/requirements.in
 h-api==1.0.0              # via -r requirements/requirements.in
+h-matchers==1.2.10        # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
-h_matchers==1.2.10        # via -r requirements/requirements.in
 hkdf==0.0.3               # via -r requirements/requirements.in
 hupper==1.10.2            # via pyramid
 importlib-metadata==1.7.0  # via jsonschema, kombu
