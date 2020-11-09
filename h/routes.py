@@ -189,6 +189,7 @@ def includeme(config):
 
     # Client
     config.add_route("sidebar_app", "/app.html")
+    config.add_route("notebook_app", "/notebook")
     config.add_route("embed", "/embed.js")
 
     # Feeds

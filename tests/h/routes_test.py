@@ -182,6 +182,7 @@ def test_includeme():
         call("oauth_authorize", "/oauth/authorize"),
         call("oauth_revoke", "/oauth/revoke"),
         call("sidebar_app", "/app.html"),
+        call("notebook_app", "/notebook"),
         call("embed", "/embed.js"),
         call("stream_atom", "/stream.atom"),
         call("stream_rss", "/stream.rss"),
