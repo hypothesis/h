@@ -32,7 +32,13 @@ def _client_url(request):
 @view_config(
     route_name="sidebar_app",
     renderer="h:templates/app.html.jinja2",
-    csp_insecure_optout=True,
+    csp_insecure_optout=True,  # This view adds its own custom Content Security Policy
+    http_cache=(60 * 5, {"public": True}),
+)
+@view_config(
+    route_name="notebook_app",
+    renderer="h:templates/app.html.jinja2",
+    csp_insecure_optout=True,  # This view adds its own custom Content Security Policy
     http_cache=(60 * 5, {"public": True}),
 )
 def sidebar_app(request, extra=None):
