@@ -72,7 +72,10 @@ def report_job_queue_metrics():
             ),
             (
                 "Custom/SyncAnnotations/Queue/API/Length",
-                queue.count(["storage.create_annotation", "storage.update_annotation"]),
+                queue.count(
+                    ["storage.create_annotation", "storage.update_annotation"],
+                    hide_scheduled=False,
+                ),
             ),
         ]
     )

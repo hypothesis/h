@@ -384,13 +384,17 @@ class TestSync:
 
 class TestCount:
     @pytest.mark.parametrize(
-        "tags,expected_result",
+        "tags,hide_scheduled,expected_result",
         [
-            (None, 3),
-            (["storage.create_annotation", "storage.update_annotation"], 2),
+            (None, True, 3),
+            (None, False, 4),
+            (["storage.create_annotation", "storage.update_annotation"], True, 2),
+            (["storage.create_annotation", "storage.update_annotation"], False, 3),
         ],
     )
-    def test_it(self, db_session, factories, now, queue, tags, expected_result):
+    def test_it(
+        self, db_session, factories, now, queue, tags, hide_scheduled, expected_result
+    ):
         one_minute = datetime_.timedelta(minutes=1)
 
         class JobFactory(factories.Job):
@@ -410,7 +414,7 @@ class TestCount:
         # A job that isn't scheduled yet.
         JobFactory.create(scheduled_at=now + one_minute)
 
-        count = queue.count(tags=tags)
+        count = queue.count(tags=tags, hide_scheduled=hide_scheduled)
 
         assert count == expected_result
 
