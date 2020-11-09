@@ -199,8 +199,8 @@ class Queue:
 
         return counts
 
-    def count(self, tags=None):
-        return self._job_query(tags=tags).count()
+    def count(self, tags=None, hide_scheduled=True):
+        return self._job_query(tags=tags, hide_scheduled=hide_scheduled).count()
 
     def _get_jobs_from_queue(self, limit):
         return (
@@ -211,12 +211,15 @@ class Queue:
             .all()
         )
 
-    def _job_query(self, tags=None):
+    def _job_query(self, tags=None, hide_scheduled=True):
         now = datetime.utcnow()
 
         query = self._db.query(Job).filter(
-            Job.name == "sync_annotation", Job.scheduled_at < now, Job.expires_at >= now
+            Job.name == "sync_annotation", Job.expires_at >= now
         )
+
+        if hide_scheduled:
+            query = query.filter(Job.scheduled_at < now)
 
         if tags:
             query = query.filter(Job.tag.in_(tags))
