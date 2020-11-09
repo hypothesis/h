@@ -72,7 +72,7 @@ pyramid-retry==2.1.1      # via -r requirements/requirements.txt
 pyramid-sanity==1.0.1     # via -r requirements/requirements.txt
 pyramid-services==2.2     # via -r requirements/requirements.txt, pyramid-authsanity
 pyramid-tm==2.4           # via -r requirements/requirements.txt
-pyramid==1.10.4           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-sanity, pyramid-services, pyramid-tm
+pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-sanity, pyramid-services, pyramid-tm
 pyrsistent==0.17.3        # via -r requirements/requirements.txt, jsonschema
 python-dateutil==2.8.1    # via -r requirements/requirements.txt, alembic, elasticsearch-dsl, faker
 python-editor==1.0.4      # via -r requirements/requirements.txt, alembic
