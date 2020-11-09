@@ -23,8 +23,8 @@ gevent==20.9.0            # via -r requirements/requirements.in
 greenlet==0.4.17          # via gevent
 gunicorn==20.0.4          # via -r requirements/requirements.in
 h-api==1.0.0              # via -r requirements/requirements.in
+h-matchers==1.2.10        # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
-h_matchers==1.2.10        # via -r requirements/requirements.in
 hkdf==0.0.3               # via -r requirements/requirements.in
 hupper==1.10.2            # via pyramid
 importlib-metadata==1.7.0  # via jsonschema, kombu
@@ -58,7 +58,7 @@ pyramid-retry==2.1.1      # via -r requirements/requirements.in
 pyramid-sanity==1.0.1     # via -r requirements/requirements.in
 pyramid-services==2.2     # via -r requirements/requirements.in, pyramid-authsanity
 pyramid-tm==2.4           # via -r requirements/requirements.in
-pyramid==1.10.4           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-sanity, pyramid-services, pyramid-tm
+pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-sanity, pyramid-services, pyramid-tm
 pyrsistent==0.17.3        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements/requirements.in, alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
