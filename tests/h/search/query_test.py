@@ -350,8 +350,9 @@ class TestAuthFilter:
 
 class TestGroupFilter:
     def test_matches_only_annotations_from_specified_group(
-        self, search, Annotation, group
+        self, search, Annotation, group, group_service, pyramid_request
     ):
+        group_service.groupids_readable_by.return_value = [group.pubid]
         Annotation(groupid="group2")
         Annotation(groupid="group3")
         group1_annotations = [
@@ -361,19 +362,11 @@ class TestGroupFilter:
 
         result = search.run(webob.multidict.MultiDict({"group": group.pubid}))
 
+        group_service.groupids_readable_by.assert_called_with(
+            pyramid_request.user, filter_=[group.pubid]
+        )
         assert sorted(result.annotation_ids) == sorted(group1_annotations)
 
-    @pytest.fixture
-    def search(self, search):
-        search.append_modifier(query.GroupFilter())
-        return search
-
-    @pytest.fixture
-    def group(self, factories):
-        return factories.OpenGroup(name="group1", pubid="group1id")
-
-
-class TestGroupAuthFilter:
     def test_does_not_return_annotations_if_group_not_readable_by_user(
         self, search, Annotation, group_service
     ):
@@ -401,9 +394,13 @@ class TestGroupAuthFilter:
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     @pytest.fixture
-    def search(self, search, pyramid_request):
-        search.append_modifier(query.GroupAuthFilter(pyramid_request))
+    def search(self, pyramid_request, search):
+        search.append_modifier(query.GroupFilter(pyramid_request))
         return search
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.OpenGroup(name="group1", pubid="group1id")
 
 
 class TestUserFilter:
