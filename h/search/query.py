@@ -196,27 +196,23 @@ class AuthFilter:
 class GroupFilter:
 
     """
-    Matches only those annotations belonging to the specified group.
+    Filter that limits which groups annotations are returned from.
+
+    This excludes annotations from groups that the user is not authorized to
+    read or which are explicitly excluded by the search query.
     """
-
-    def __call__(self, search, params):
-        # Remove parameter if passed, preventing fall-through to default query
-        group = params.pop("group", None)
-
-        if group is not None:
-            return search.filter("term", group=group)
-        return search
-
-
-class GroupAuthFilter:
-    """Filter out groups that the request isn't authorized to read."""
 
     def __init__(self, request):
         self.user = request.user
         self.group_service = request.find_service(name="group")
 
-    def __call__(self, search, _):
-        groups = self.group_service.groupids_readable_by(self.user)
+    def __call__(self, search, params):
+        filter_ = None
+        if "group" in params:
+            # Remove parameter if passed, preventing it being passed to default query
+            filter_ = [params.pop("group")]
+        groups = self.group_service.groupids_readable_by(self.user, filter_)
+
         return search.filter("terms", group=groups)
 
 

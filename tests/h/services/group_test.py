@@ -142,6 +142,19 @@ class TestGroupServiceGroupIds:
 
         assert group.pubid in svc.groupids_readable_by(user)
 
+    def test_readable_by_applies_filter(self, svc, db_session, factories):
+        user = factories.User()
+
+        factories.Group(
+            readable_by=ReadableBy.world
+        )  # Group that shouldn't be returned
+        group = factories.Group(readable_by=ReadableBy.world)
+
+        db_session.flush()
+
+        pubids = [group.pubid, "doesnotexist"]
+        assert svc.groupids_readable_by(user, filter_=pubids) == [group.pubid]
+
     def test_created_by_includes_created_groups(self, svc, factories):
         user = factories.User()
         group = factories.Group(creator=user)
