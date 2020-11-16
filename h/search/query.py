@@ -207,11 +207,11 @@ class GroupFilter:
         self.group_service = request.find_service(name="group")
 
     def __call__(self, search, params):
-        filter_ = None
+        group_ids = None
         if "group" in params:
             # Remove parameter if passed, preventing it being passed to default query
-            filter_ = [params.pop("group")]
-        groups = self.group_service.groupids_readable_by(self.user, filter_)
+            group_ids = [params.pop("group")]
+        groups = self.group_service.groupids_readable_by(self.user, group_ids)
 
         return search.filter("terms", group=groups)
 

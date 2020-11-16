@@ -363,7 +363,7 @@ class TestGroupFilter:
         result = search.run(webob.multidict.MultiDict({"group": group.pubid}))
 
         group_service.groupids_readable_by.assert_called_with(
-            pyramid_request.user, filter_=[group.pubid]
+            pyramid_request.user, group_ids=[group.pubid]
         )
         assert sorted(result.annotation_ids) == sorted(group1_annotations)
 

@@ -77,14 +77,14 @@ class GroupService:
             .order_by(Group.created.desc())
         )
 
-    def groupids_readable_by(self, user, filter_=None):
+    def groupids_readable_by(self, user, group_ids=None):
         """
         Return a list of pubids for which the user has read access.
 
         If the passed-in user is ``None``, this returns the list of
         world-readable groups.
 
-        If `filter_` is specified, only the subset of groups from that list is
+        If `group_ids` is specified, only the subset of groups from that list is
         returned. This is more efficient if the caller wants to know which
         groups from a specific list are readable by the user.
 
@@ -99,8 +99,8 @@ class GroupService:
             )
             readable = sa.or_(readable, readable_member)
 
-        if filter_:
-            readable = sa.and_(Group.pubid.in_(filter_), readable)
+        if group_ids:
+            readable = sa.and_(Group.pubid.in_(group_ids), readable)
 
         return [
             record.pubid for record in self.session.query(Group.pubid).filter(readable)

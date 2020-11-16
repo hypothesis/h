@@ -153,7 +153,7 @@ class TestGroupServiceGroupIds:
         db_session.flush()
 
         pubids = [group.pubid, "doesnotexist"]
-        assert svc.groupids_readable_by(user, filter_=pubids) == [group.pubid]
+        assert svc.groupids_readable_by(user, group_ids=pubids) == [group.pubid]
 
     def test_created_by_includes_created_groups(self, svc, factories):
         user = factories.User()
