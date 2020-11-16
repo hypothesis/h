@@ -706,17 +706,6 @@ class TestHiddenFilter:
 
         assert result.annotation_ids == [annotation.id]
 
-    @pytest.mark.usefixtures("as_user")
-    def test_shows_banned_users_annotations_in_groups_they_created(
-        self, pyramid_request, search, banned_user, group_service, make_annotation
-    ):
-        group_service.groupids_created_by.return_value = ["created_by_banneduser"]
-        annotation = make_annotation(banned_user, groupid="created_by_banneduser")
-
-        result = search.run({})
-
-        assert result.annotation_ids == [annotation.id]
-
     @pytest.fixture(params=[True, False], ids=["nipsa", "not nipsa"])
     def is_nipsaed(self, request):
         return request.param
