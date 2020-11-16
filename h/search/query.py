@@ -357,13 +357,9 @@ class HiddenFilter:
         ]
 
         if self.user is not None:
-            # Always show the logged-in user's annotations even if they have nipsa.
+            # Always show the logged-in user's annotations even if they have
+            # been hidden or the user has been NIPSA'd
             should_clauses.append(Q("term", user=self.user.userid.lower()))
-
-            # Also include nipsa'd annotations for groups that the user created.
-            created_groups = self.group_service.groupids_created_by(self.user)
-            if created_groups:
-                should_clauses.append(Q("terms", group=created_groups))
 
         return search.filter(Q("bool", should=should_clauses))
 
