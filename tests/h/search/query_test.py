@@ -353,9 +353,8 @@ class TestGroupFilter:
         self, search, Annotation, group, group_service, pyramid_request
     ):
         group_service.groupids_readable_by.return_value = [group.pubid]
-        Annotation(groupid="group2")
-        Annotation(groupid="group3")
-        group1_annotations = [
+        Annotation(groupid="other_group")
+        group_annotation_ids = [
             Annotation(groupid=group.pubid).id,
             Annotation(groupid=group.pubid).id,
         ]
@@ -365,28 +364,16 @@ class TestGroupFilter:
         group_service.groupids_readable_by.assert_called_with(
             pyramid_request.user, group_ids=[group.pubid]
         )
-        assert sorted(result.annotation_ids) == sorted(group1_annotations)
+        assert sorted(result.annotation_ids) == sorted(group_annotation_ids)
 
-    def test_does_not_return_annotations_if_group_not_readable_by_user(
+    def test_matches_only_annotations_in_groups_readable_by_user(
         self, search, Annotation, group_service
     ):
-        group_service.groupids_readable_by.return_value = []
-        Annotation(groupid="group2").id
-        Annotation(groupid="group1").id
-        Annotation(groupid="group1").id
-
-        result = search.run(webob.multidict.MultiDict({}))
-
-        assert not result.annotation_ids
-
-    def test_returns_annotations_if_group_readable_by_user(
-        self, search, Annotation, group_service
-    ):
-        group_service.groupids_readable_by.return_value = ["group1"]
-        Annotation(groupid="group2", shared=True).id
+        group_service.groupids_readable_by.return_value = ["readable_group"]
+        Annotation(groupid="unreadable_group", shared=True)
         expected_ids = [
-            Annotation(groupid="group1").id,
-            Annotation(groupid="group1").id,
+            Annotation(groupid="readable_group").id,
+            Annotation(groupid="readable_group").id,
         ]
 
         result = search.run(webob.multidict.MultiDict({}))
