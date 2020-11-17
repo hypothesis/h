@@ -178,9 +178,11 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.SYNCED_FORCED: 1,
-            Queue.Result.COMPLETED_FORCED: 1,
+            Queue.Result.SYNCED_FORCED.format(tag="test_tag"): 1,
+            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.SYNCED_TOTAL: 1,
+            Queue.Result.COMPLETED_FORCED.format(tag="test_tag"): 1,
+            Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
         assert job not in db_session.query(Job)
@@ -200,7 +202,8 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.COMPLETED_DELETED: 1,
+            Queue.Result.COMPLETED_DELETED.format(tag="test_tag"): 1,
+            Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
         assert job not in db_session.query(Job)
@@ -215,7 +218,8 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.COMPLETED_DELETED: 1,
+            Queue.Result.COMPLETED_DELETED.format(tag="test_tag"): 1,
+            Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
         assert job not in db_session.query(Job)
@@ -228,7 +232,8 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.SYNCED_MISSING: 1,
+            Queue.Result.SYNCED_MISSING.format(tag="test_tag"): 1,
+            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.SYNCED_TOTAL: 1,
         }
         batch_indexer.index.assert_called_once_with([self.url_safe_id(job)])
@@ -243,7 +248,8 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.COMPLETED_UP_TO_DATE: 1,
+            Queue.Result.COMPLETED_UP_TO_DATE.format(tag="test_tag"): 1,
+            Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
         assert job not in db_session.query(Job)
@@ -262,7 +268,8 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.SYNCED_DIFFERENT: 1,
+            Queue.Result.SYNCED_DIFFERENT.format(tag="test_tag"): 1,
+            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.SYNCED_TOTAL: 1,
         }
         batch_indexer.index.assert_called_once_with([annotation.id])
@@ -279,7 +286,8 @@ class TestSync:
         counts = queue.sync(1)
 
         assert counts == {
-            Queue.Result.SYNCED_DIFFERENT: 1,
+            Queue.Result.SYNCED_DIFFERENT.format(tag="test_tag"): 1,
+            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.SYNCED_TOTAL: 1,
         }
         batch_indexer.index.assert_called_once_with([annotation.id])
@@ -297,7 +305,8 @@ class TestSync:
         # But actually the two jobs were for the same annotation and it only
         # synced one.
         assert counts == {
-            Queue.Result.SYNCED_MISSING: 2,
+            Queue.Result.SYNCED_MISSING.format(tag="test_tag"): 2,
+            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 2,
             Queue.Result.SYNCED_TOTAL: 2,
         }
         # It only syncs the annotation to Elasticsearch once, even though it
@@ -314,12 +323,50 @@ class TestSync:
         counts = queue.sync(len(jobs))
 
         assert counts == {
-            Queue.Result.COMPLETED_UP_TO_DATE: 2,
+            Queue.Result.COMPLETED_UP_TO_DATE.format(tag="test_tag"): 2,
+            Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 2,
             Queue.Result.COMPLETED_TOTAL: 2,
         }
         for job in jobs:
             assert job not in db_session.query(Job)
         batch_indexer.index.assert_not_called()
+
+    def test_metrics(self, factories, index, now, queue):
+        def add_job(indexed=True, updated=False, deleted=False, **kwargs):
+            annotation = factories.Annotation()
+            factories.SyncAnnotationJob(annotation=annotation, **kwargs)
+
+            if indexed:
+                index(annotation)
+
+            if updated:
+                annotation.updated = now + ONE_WEEK
+
+            if deleted:
+                annotation.deleted = True
+
+        add_job()
+        add_job(indexed=False)
+        add_job(updated=True)
+        add_job(deleted=True)
+        add_job(tag="tag_2", force=True)
+
+        counts = queue.sync(5)
+
+        assert counts == {
+            "Synced/Total": 3,
+            "Completed/Total": 3,
+            "Synced/test_tag/Total": 2,
+            "Completed/test_tag/Total": 2,
+            "Synced/test_tag/Different_in_Elastic": 1,
+            "Synced/test_tag/Missing_from_Elastic": 1,
+            "Synced/tag_2/Forced": 1,
+            "Synced/tag_2/Total": 1,
+            "Completed/tag_2/Forced": 1,
+            "Completed/tag_2/Total": 1,
+            "Completed/test_tag/Up_to_date_in_Elastic": 1,
+            "Completed/test_tag/Deleted_from_db": 1,
+        }
 
     def url_safe_id(self, job):
         """Return the URL-safe version of the given job's annotation ID."""

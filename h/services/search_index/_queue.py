@@ -21,13 +21,15 @@ class Queue:
         """String values for logging and metrics."""
 
         # These are in the style of New Relic custom metric names.
-        SYNCED_MISSING = "Synced/Missing_from_Elastic"
-        SYNCED_DIFFERENT = "Synced/Different_in_Elastic"
-        SYNCED_FORCED = "Synced/Forced"
+        SYNCED_MISSING = "Synced/{tag}/Missing_from_Elastic"
+        SYNCED_DIFFERENT = "Synced/{tag}/Different_in_Elastic"
+        SYNCED_FORCED = "Synced/{tag}/Forced"
+        SYNCED_TAG_TOTAL = "Synced/{tag}/Total"
         SYNCED_TOTAL = "Synced/Total"
-        COMPLETED_UP_TO_DATE = "Completed/Up_to_date_in_Elastic"
-        COMPLETED_DELETED = "Completed/Deleted_from_db"
-        COMPLETED_FORCED = "Completed/Forced"
+        COMPLETED_UP_TO_DATE = "Completed/{tag}/Up_to_date_in_Elastic"
+        COMPLETED_DELETED = "Completed/{tag}/Deleted_from_db"
+        COMPLETED_FORCED = "Completed/{tag}/Forced"
+        COMPLETED_TAG_TOTAL = "Completed/{tag}/Total"
         COMPLETED_TOTAL = "Completed/Total"
 
     def __init__(self, db, es, batch_indexer):
@@ -160,42 +162,38 @@ class Queue:
             if job.kwargs.get("force", False):
                 annotation_ids_to_sync.add(annotation_id)
                 job_complete.append(job)
-                counts[Queue.Result.SYNCED_FORCED] += 1
-                counts[Queue.Result.COMPLETED_FORCED] += 1
+                counts[Queue.Result.SYNCED_FORCED.format(tag=job.tag)] += 1
+                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)] += 1
+                counts[Queue.Result.SYNCED_TOTAL] += 1
+                counts[Queue.Result.COMPLETED_FORCED.format(tag=job.tag)] += 1
+                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)] += 1
+                counts[Queue.Result.COMPLETED_TOTAL] += 1
             elif not annotation_from_db:
                 job_complete.append(job)
-                counts[Queue.Result.COMPLETED_DELETED] += 1
+                counts[Queue.Result.COMPLETED_DELETED.format(tag=job.tag)] += 1
+                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)] += 1
+                counts[Queue.Result.COMPLETED_TOTAL] += 1
             elif not annotation_from_es:
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.SYNCED_MISSING] += 1
+                counts[Queue.Result.SYNCED_MISSING.format(tag=job.tag)] += 1
+                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)] += 1
+                counts[Queue.Result.SYNCED_TOTAL] += 1
             elif not self._equal(annotation_from_es, annotation_from_db):
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.SYNCED_DIFFERENT] += 1
+                counts[Queue.Result.SYNCED_DIFFERENT.format(tag=job.tag)] += 1
+                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)] += 1
+                counts[Queue.Result.SYNCED_TOTAL] += 1
             else:
                 job_complete.append(job)
-                counts[Queue.Result.COMPLETED_UP_TO_DATE] += 1
+                counts[Queue.Result.COMPLETED_UP_TO_DATE.format(tag=job.tag)] += 1
+                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)] += 1
+                counts[Queue.Result.COMPLETED_TOTAL] += 1
 
         for job in job_complete:
             self._db.delete(job)
 
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
-
-        synced_total = (
-            counts[Queue.Result.SYNCED_MISSING]
-            + counts[Queue.Result.SYNCED_DIFFERENT]
-            + counts[Queue.Result.SYNCED_FORCED]
-        )
-        if synced_total:
-            counts[Queue.Result.SYNCED_TOTAL] = synced_total
-
-        completed_total = (
-            counts[Queue.Result.COMPLETED_DELETED]
-            + counts[Queue.Result.COMPLETED_UP_TO_DATE]
-            + counts[Queue.Result.COMPLETED_FORCED]
-        )
-        if completed_total:
-            counts[Queue.Result.COMPLETED_TOTAL] = completed_total
 
         return counts
 
