@@ -3,7 +3,6 @@ import uuid
 from unittest import mock
 from unittest.mock import patch, sentinel
 
-import factory
 import pytest
 from h_matchers import Any
 from sqlalchemy.sql.elements import BinaryExpression
@@ -403,43 +402,6 @@ class TestSync:
         # Create some noise jobs in the DB. None of these should ever be
         # touched by the sync() method in these tests.
         factories.Job()
-
-
-class TestCount:
-    @pytest.mark.parametrize(
-        "tags,hide_scheduled,expected_result",
-        [
-            (None, True, 3),
-            (None, False, 4),
-            (["storage.create_annotation", "storage.update_annotation"], True, 2),
-            (["storage.create_annotation", "storage.update_annotation"], False, 3),
-        ],
-    )
-    def test_it(
-        self, db_session, factories, now, queue, tags, hide_scheduled, expected_result
-    ):
-        one_minute = datetime_.timedelta(minutes=1)
-
-        class JobFactory(factories.Job):
-            """A factory that, by default, creates jobs that should be counted."""
-
-            name = "sync_annotation"
-            tag = factory.Iterator(
-                ["storage.create_annotation", "storage.update_annotation"]
-            )
-            scheduled_at = now - one_minute
-
-        JobFactory.create_batch(size=2)
-        JobFactory(tag="another_tag")
-        JobFactory(name="another_name")
-        # A job that's expired.
-        JobFactory(expires_at=now - one_minute)
-        # A job that isn't scheduled yet.
-        JobFactory(scheduled_at=now + one_minute)
-
-        count = queue.count(tags=tags, hide_scheduled=hide_scheduled)
-
-        assert count == expected_result
 
 
 @pytest.fixture

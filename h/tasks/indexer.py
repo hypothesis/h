@@ -1,10 +1,7 @@
-from datetime import datetime
-
 import newrelic
 from celery import Task
 
 from h.celery import celery, get_task_logger
-from h.models import Job
 
 log = get_task_logger(__name__)
 
@@ -56,26 +53,5 @@ def sync_annotations(limit):
 
 @celery.task(acks_late=False)
 def report_job_queue_metrics():
-    queue = celery.request.find_service(name="search_index")._queue
-
-    now = datetime.utcnow()
-
-    newrelic.agent.record_custom_metrics(
-        [
-            (
-                "Custom/Job/Queue/Length",
-                celery.request.db.query(Job).count(),
-            ),
-            (
-                "Custom/Job/Queue/Expired/Length",
-                celery.request.db.query(Job).filter(Job.expires_at < now).count(),
-            ),
-            (
-                "Custom/SyncAnnotations/Queue/API/Length",
-                queue.count(
-                    ["storage.create_annotation", "storage.update_annotation"],
-                    hide_scheduled=False,
-                ),
-            ),
-        ]
-    )
+    metrics = celery.request.find_service(name="job_queue_metrics").metrics()
+    newrelic.agent.record_custom_metrics(metrics)
