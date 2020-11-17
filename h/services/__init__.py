@@ -62,6 +62,9 @@ def includeme(config):
         ".group_scope.group_scope_factory", name="group_scope"
     )
     config.register_service_factory(
+        ".job_queue.metrics.factory", name="job_queue_metrics"
+    )
+    config.register_service_factory(
         ".list_organizations.list_organizations_factory", name="list_organizations"
     )
     config.register_service_factory(".nipsa.nipsa_factory", name="nipsa")

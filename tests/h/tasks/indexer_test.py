@@ -1,10 +1,10 @@
 from collections import Counter
-from datetime import datetime, timedelta
 from unittest import mock
 from unittest.mock import sentinel
 
 import pytest
 
+from h.services.job_queue.metrics import JobQueueMetrics
 from h.tasks import indexer
 
 pytestmark = pytest.mark.usefixtures("search_index")
@@ -80,22 +80,20 @@ class TestSyncAnnotations:
 
 
 class TestReportJobQueueMetrics:
-    def test_it(self, factories, newrelic, search_index):
-        factories.Job.create()
-        factories.Job.create(expires_at=datetime.utcnow() - timedelta(minutes=1))
-
+    def test_it(self, job_queue_metrics, newrelic):
         indexer.report_job_queue_metrics()
 
         newrelic.agent.record_custom_metrics.assert_called_once_with(
-            [
-                ("Custom/Job/Queue/Length", 2),
-                ("Custom/Job/Queue/Expired/Length", 1),
-                (
-                    "Custom/SyncAnnotations/Queue/API/Length",
-                    search_index._queue.count.return_value,
-                ),
-            ]
+            job_queue_metrics.metrics.return_value
         )
+
+    @pytest.fixture(autouse=True)
+    def job_queue_metrics(self, pyramid_config):
+        job_queue_metrics = mock.create_autospec(
+            JobQueueMetrics, spec_set=True, instance=True
+        )
+        pyramid_config.register_service(job_queue_metrics, name="job_queue_metrics")
+        return job_queue_metrics
 
 
 @pytest.fixture(autouse=True)
