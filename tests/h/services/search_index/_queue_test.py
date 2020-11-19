@@ -168,7 +168,7 @@ class TestSync:
 
         assert counts == {}
         batch_indexer.index.assert_not_called()
-        assert db_session.query(Job).all() == [job]
+        assert job in db_session.query(Job)
 
     def test_if_the_job_has_force_True_it_indexes_the_annotation_and_deletes_the_job(
         self, batch_indexer, db_session, factories, queue
@@ -183,7 +183,7 @@ class TestSync:
             Queue.Result.SYNCED_TOTAL: 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        assert db_session.query(Job).all() == []
+        assert job not in db_session.query(Job)
         batch_indexer.index.assert_called_once_with([self.url_safe_id(job)])
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
@@ -194,7 +194,7 @@ class TestSync:
         # from the DB again because we actually don't want the annotation to be
         # in the DB in this test.
         annotation = factories.Annotation()
-        factories.SyncAnnotationJob(annotation=annotation)
+        job = factories.SyncAnnotationJob(annotation=annotation)
         db_session.delete(annotation)
 
         counts = queue.sync(1)
@@ -203,13 +203,13 @@ class TestSync:
             Queue.Result.COMPLETED_DELETED: 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        assert db_session.query(Job).all() == []
+        assert job not in db_session.query(Job)
 
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
         self, db_session, factories, queue
     ):
         annotation = factories.Annotation()
-        factories.SyncAnnotationJob(annotation=annotation)
+        job = factories.SyncAnnotationJob(annotation=annotation)
         annotation.deleted = True
 
         counts = queue.sync(1)
@@ -218,7 +218,7 @@ class TestSync:
             Queue.Result.COMPLETED_DELETED: 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        assert db_session.query(Job).all() == []
+        assert job not in db_session.query(Job)
 
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
         self, batch_indexer, factories, queue
@@ -238,7 +238,7 @@ class TestSync:
     ):
         annotation = factories.Annotation()
         index(annotation)
-        factories.SyncAnnotationJob(annotation=annotation)
+        job = factories.SyncAnnotationJob(annotation=annotation)
 
         counts = queue.sync(1)
 
@@ -246,7 +246,7 @@ class TestSync:
             Queue.Result.COMPLETED_UP_TO_DATE: 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        assert db_session.query(Job).all() == []
+        assert job not in db_session.query(Job)
         batch_indexer.index.assert_not_called()
 
     def test_if_the_annotation_has_a_different_updated_time_in_Elastic_it_indexes_it(
@@ -317,7 +317,8 @@ class TestSync:
             Queue.Result.COMPLETED_UP_TO_DATE: 2,
             Queue.Result.COMPLETED_TOTAL: 2,
         }
-        assert db_session.query(Job).all() == []
+        for job in jobs:
+            assert job not in db_session.query(Job)
         batch_indexer.index.assert_not_called()
 
     def url_safe_id(self, job):
@@ -353,6 +354,12 @@ class TestSync:
         # sync() method in these tests.
         annotations = factories.Annotation.create_batch(size=2)
         index(annotations[0])
+
+    @pytest.fixture(autouse=True)
+    def noise_jobs(self, factories):
+        # Create some noise jobs in the DB. None of these should ever be
+        # touched by the sync() method in these tests.
+        factories.Job()
 
 
 class TestCount:
