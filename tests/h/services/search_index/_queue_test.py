@@ -142,29 +142,27 @@ class TestSync:
         batch_indexer.index.assert_not_called()
 
     def test_it_ignores_jobs_that_arent_scheduled_yet(
-        self, batch_indexer, now, queue, SyncAnnotationJobFactory
+        self, batch_indexer, factories, now, queue
     ):
-        SyncAnnotationJobFactory(scheduled_at=now + datetime_.timedelta(hours=1))
+        factories.SyncAnnotationJob(scheduled_at=now + datetime_.timedelta(hours=1))
 
         counts = queue.sync(1)
 
         assert counts == {}
         batch_indexer.index.assert_not_called()
 
-    def test_it_ignores_jobs_beyond_limit(
-        self, batch_indexer, queue, SyncAnnotationJobFactory
-    ):
+    def test_it_ignores_jobs_beyond_limit(self, batch_indexer, factories, queue):
         limit = 1
-        SyncAnnotationJobFactory.create_batch(size=limit + 1)
+        factories.SyncAnnotationJob.create_batch(size=limit + 1)
 
         queue.sync(limit)
 
         assert len(batch_indexer.index.call_args[0][0]) == limit
 
     def test_it_ignores_jobs_that_are_expired(
-        self, batch_indexer, db_session, now, queue, SyncAnnotationJobFactory
+        self, batch_indexer, db_session, factories, now, queue
     ):
-        job = SyncAnnotationJobFactory(expires_at=now - datetime_.timedelta(hours=1))
+        job = factories.SyncAnnotationJob(expires_at=now - datetime_.timedelta(hours=1))
 
         counts = queue.sync(1)
 
@@ -173,9 +171,9 @@ class TestSync:
         assert db_session.query(Job).all() == [job]
 
     def test_if_the_job_has_force_True_it_indexes_the_annotation_and_deletes_the_job(
-        self, batch_indexer, db_session, queue, SyncAnnotationJobFactory
+        self, batch_indexer, db_session, factories, queue
     ):
-        job = SyncAnnotationJobFactory(force=True)
+        job = factories.SyncAnnotationJob(force=True)
 
         counts = queue.sync(1)
 
@@ -189,14 +187,14 @@ class TestSync:
         batch_indexer.index.assert_called_once_with([self.url_safe_id(job)])
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
-        self, db_session, factories, queue, SyncAnnotationJobFactory
+        self, db_session, factories, queue
     ):
         # We have to actually create an annotation and save it to the DB in
         # order to get a valid annotation ID. Then we delete the annotation
         # from the DB again because we actually don't want the annotation to be
         # in the DB in this test.
         annotation = factories.Annotation()
-        SyncAnnotationJobFactory(annotation=annotation)
+        factories.SyncAnnotationJob(annotation=annotation)
         db_session.delete(annotation)
 
         counts = queue.sync(1)
@@ -208,10 +206,10 @@ class TestSync:
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
-        self, db_session, factories, queue, SyncAnnotationJobFactory
+        self, db_session, factories, queue
     ):
         annotation = factories.Annotation()
-        SyncAnnotationJobFactory(annotation=annotation)
+        factories.SyncAnnotationJob(annotation=annotation)
         annotation.deleted = True
 
         counts = queue.sync(1)
@@ -223,9 +221,9 @@ class TestSync:
         assert db_session.query(Job).all() == []
 
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
-        self, batch_indexer, queue, SyncAnnotationJobFactory
+        self, batch_indexer, factories, queue
     ):
-        job = SyncAnnotationJobFactory()
+        job = factories.SyncAnnotationJob()
 
         counts = queue.sync(1)
 
@@ -236,9 +234,11 @@ class TestSync:
         batch_indexer.index.assert_called_once_with([self.url_safe_id(job)])
 
     def test_if_the_annotation_is_already_in_Elastic_it_removes_the_job_from_the_queue(
-        self, batch_indexer, db_session, queue, SyncAnnotationJobFactory
+        self, batch_indexer, db_session, factories, index, queue
     ):
-        SyncAnnotationJobFactory(index=True)
+        annotation = factories.Annotation()
+        index(annotation)
+        factories.SyncAnnotationJob(annotation=annotation)
 
         counts = queue.sync(1)
 
@@ -250,10 +250,11 @@ class TestSync:
         batch_indexer.index.assert_not_called()
 
     def test_if_the_annotation_has_a_different_updated_time_in_Elastic_it_indexes_it(
-        self, batch_indexer, factories, now, queue, SyncAnnotationJobFactory
+        self, batch_indexer, factories, index, now, queue
     ):
         annotation = factories.Annotation()
-        SyncAnnotationJobFactory(annotation=annotation, index=True)
+        index(annotation)
+        factories.SyncAnnotationJob(annotation=annotation)
         # Simulate the annotation having been updated in the DB after it was
         # indexed.
         annotation.updated = now
@@ -267,10 +268,11 @@ class TestSync:
         batch_indexer.index.assert_called_once_with([annotation.id])
 
     def test_if_the_annotation_has_a_different_userid_in_Elastic_it_indexes_it(
-        self, batch_indexer, factories, queue, SyncAnnotationJobFactory
+        self, batch_indexer, factories, index, queue
     ):
         annotation = factories.Annotation()
-        SyncAnnotationJobFactory(annotation=annotation, index=True)
+        index(annotation)
+        factories.SyncAnnotationJob(annotation=annotation)
         # Simulate the user having been renamed in the DB.
         annotation.userid = "new_userid"
 
@@ -283,10 +285,10 @@ class TestSync:
         batch_indexer.index.assert_called_once_with([annotation.id])
 
     def test_if_there_are_multiple_jobs_with_the_same_annotation_id(
-        self, batch_indexer, factories, queue, SyncAnnotationJobFactory
+        self, batch_indexer, factories, queue
     ):
         annotation = factories.Annotation()
-        jobs = SyncAnnotationJobFactory.create_batch(size=2, annotation=annotation)
+        jobs = factories.SyncAnnotationJob.create_batch(size=2, annotation=annotation)
 
         counts = queue.sync(len(jobs))
 
@@ -303,12 +305,11 @@ class TestSync:
         batch_indexer.index.assert_called_once_with([annotation.id])
 
     def test_deleting_multiple_jobs_with_the_same_annotation_id(
-        self, batch_indexer, db_session, factories, queue, SyncAnnotationJobFactory
+        self, batch_indexer, db_session, factories, index, queue
     ):
         annotation = factories.Annotation()
-        jobs = SyncAnnotationJobFactory.create_batch(
-            size=2, annotation=annotation, index=True
-        )
+        index(annotation)
+        jobs = factories.SyncAnnotationJob.create_batch(size=2, annotation=annotation)
 
         counts = queue.sync(len(jobs))
 
@@ -344,80 +345,6 @@ class TestSync:
             es_client.conn.indices.refresh(index=es_client.index)
 
         return index
-
-    @pytest.fixture
-    def SyncAnnotationJobFactory(self, factories, index, now):
-        """
-        A factory for creating sync_annotation jobs.
-
-        By default this creates jobs with job.name="sync_annotation", with a
-        scheduled_at time in the past, and with a job.kwargs that contains an
-        annotation_id and force=False.
-
-        By default a new annotation will be created for the job to use.
-
-        By default the annotation will exist in the DB but will *not* be in
-        Elasticsearch.
-
-        Usage:
-
-            SyncAnnotationJobFactory()
-
-            # Create multiple jobs, each with its own annotation.
-            SyncAnnotationJobFactory.create_batch(size=3)
-
-            # Create a job that isn't scheduled yet.
-            one_hour_from_now = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-            SyncAnnotationJobFactory(scheduled_at=one_hour_from_now)
-
-            # Create an expired job.
-            one_hour_ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-            SyncAnnotationJobFactory(expires_at=one_hour_ago)
-
-            # Create multiple jobs with force=True in their kwargs.
-            SyncAnnotationJobFactory.create_batch(size=3, force=True)
-
-            # Create a job for a given annotation, instead of
-            # SyncAnnotationJobFactory creating a new annotation automatically.
-            annotation = factories.Annotation()
-            SyncAnnotationJobFactory(annotation=annotation)
-
-            # Create a job for an annotation that *is* already in Elasticsearch.
-            SyncAnnotationJobFactory(index=True)
-        """
-
-        class SyncAnnotationJobFactory(factories.Job):
-            class Meta:
-                exclude = "force"
-
-            annotation = factory.SubFactory(factories.Annotation)
-            force = False
-
-            scheduled_at = factory.LazyFunction(
-                lambda: now - datetime_.timedelta(hours=1)
-            )
-            name = "sync_annotation"
-
-            kwargs = factory.LazyAttribute(
-                lambda o: {
-                    "annotation_id": URLSafeUUID.url_safe_to_hex(o.annotation.id),
-                    "force": o.force,
-                }
-            )
-
-            @classmethod
-            def _create(cls, model_class, *args, **kwargs):
-                annotation = kwargs.pop("annotation")
-                index_ = kwargs.pop("index", False)
-
-                job = super()._create(model_class, *args, **kwargs)
-
-                if index_:
-                    index(annotation)
-
-                return job
-
-        return SyncAnnotationJobFactory
 
     @pytest.fixture(autouse=True)
     def noise_annotations(self, factories, index):
