@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import defaultdict
 from datetime import datetime, timedelta
 
 from dateutil.parser import isoparse
@@ -127,12 +127,12 @@ class Queue:
           job on the queue to be re-checked and removed the next time the
           method runs.
         """
-        counts = Counter()
-
         jobs = self._get_jobs_from_queue(limit)
 
         if not jobs:
-            return counts
+            return {}
+
+        counts = defaultdict(set)
 
         annotation_ids = {
             URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
@@ -162,32 +162,46 @@ class Queue:
             if job.kwargs.get("force", False):
                 annotation_ids_to_sync.add(annotation_id)
                 job_complete.append(job)
-                counts[Queue.Result.SYNCED_FORCED.format(tag=job.tag)] += 1
-                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)] += 1
-                counts[Queue.Result.SYNCED_TOTAL] += 1
-                counts[Queue.Result.COMPLETED_FORCED.format(tag=job.tag)] += 1
-                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)] += 1
-                counts[Queue.Result.COMPLETED_TOTAL] += 1
+                counts[Queue.Result.SYNCED_FORCED.format(tag=job.tag)].add(
+                    annotation_id
+                )
+                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(
+                    annotation_id
+                )
+                counts[Queue.Result.SYNCED_TOTAL].add(annotation_id)
+                counts[Queue.Result.COMPLETED_FORCED.format(tag=job.tag)].add(job.id)
+                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
+                counts[Queue.Result.COMPLETED_TOTAL].add(job.id)
             elif not annotation_from_db:
                 job_complete.append(job)
-                counts[Queue.Result.COMPLETED_DELETED.format(tag=job.tag)] += 1
-                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)] += 1
-                counts[Queue.Result.COMPLETED_TOTAL] += 1
+                counts[Queue.Result.COMPLETED_DELETED.format(tag=job.tag)].add(job.id)
+                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
+                counts[Queue.Result.COMPLETED_TOTAL].add(job.id)
             elif not annotation_from_es:
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.SYNCED_MISSING.format(tag=job.tag)] += 1
-                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)] += 1
-                counts[Queue.Result.SYNCED_TOTAL] += 1
+                counts[Queue.Result.SYNCED_MISSING.format(tag=job.tag)].add(
+                    annotation_id
+                )
+                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(
+                    annotation_id
+                )
+                counts[Queue.Result.SYNCED_TOTAL].add(annotation_id)
             elif not self._equal(annotation_from_es, annotation_from_db):
                 annotation_ids_to_sync.add(annotation_id)
-                counts[Queue.Result.SYNCED_DIFFERENT.format(tag=job.tag)] += 1
-                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)] += 1
-                counts[Queue.Result.SYNCED_TOTAL] += 1
+                counts[Queue.Result.SYNCED_DIFFERENT.format(tag=job.tag)].add(
+                    annotation_id
+                )
+                counts[Queue.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(
+                    annotation_id
+                )
+                counts[Queue.Result.SYNCED_TOTAL].add(annotation_id)
             else:
                 job_complete.append(job)
-                counts[Queue.Result.COMPLETED_UP_TO_DATE.format(tag=job.tag)] += 1
-                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)] += 1
-                counts[Queue.Result.COMPLETED_TOTAL] += 1
+                counts[Queue.Result.COMPLETED_UP_TO_DATE.format(tag=job.tag)].add(
+                    job.id
+                )
+                counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
+                counts[Queue.Result.COMPLETED_TOTAL].add(job.id)
 
         for job in job_complete:
             self._db.delete(job)
@@ -195,7 +209,7 @@ class Queue:
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
-        return counts
+        return {key: len(value) for key, value in counts.items()}
 
     def count(self, tags=None, hide_scheduled=True):
         return self._job_query(tags=tags, hide_scheduled=hide_scheduled).count()

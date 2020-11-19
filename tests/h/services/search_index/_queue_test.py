@@ -300,14 +300,10 @@ class TestSync:
 
         counts = queue.sync(len(jobs))
 
-        # Unfortunately the method gets the metrics wrong here: it reports that
-        # it synced two annotations because it processed two different jobs.
-        # But actually the two jobs were for the same annotation and it only
-        # synced one.
         assert counts == {
-            Queue.Result.SYNCED_MISSING.format(tag="test_tag"): 2,
-            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 2,
-            Queue.Result.SYNCED_TOTAL: 2,
+            Queue.Result.SYNCED_MISSING.format(tag="test_tag"): 1,
+            Queue.Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
+            Queue.Result.SYNCED_TOTAL: 1,
         }
         # It only syncs the annotation to Elasticsearch once, even though it
         # processed two separate jobs (for the same annotation).
