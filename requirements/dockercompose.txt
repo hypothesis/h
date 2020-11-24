@@ -8,7 +8,7 @@ attrs==20.2.0             # via jsonschema
 bcrypt==3.2.0             # via paramiko
 cached-property==1.5.1    # via docker-compose
 certifi==2020.11.8        # via requests
-cffi==1.14.3              # via bcrypt, cryptography, pynacl
+cffi==1.14.4              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 cryptography==3.2         # via paramiko
 distro==1.5.0             # via docker-compose
