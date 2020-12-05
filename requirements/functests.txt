@@ -12,7 +12,7 @@ beautifulsoup4==4.9.1     # via webtest
 billiard==3.6.3.0         # via -r requirements/requirements.txt, celery
 bleach==3.2.1             # via -r requirements/requirements.txt
 celery==4.4.7             # via -r requirements/requirements.txt
-certifi==2020.11.8        # via -r requirements/requirements.txt, sentry-sdk
+certifi==2020.12.5        # via -r requirements/requirements.txt, sentry-sdk
 cffi==1.14.4              # via -r requirements/requirements.txt, bcrypt
 chameleon==3.8.1          # via -r requirements/requirements.txt, deform
 click==7.1.2              # via -r requirements/requirements.txt
