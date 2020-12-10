@@ -79,7 +79,7 @@ webencodings==0.5.1       # via bleach
 webob==1.8.6              # via pyramid
 wired==0.2.2              # via pyramid-services
 ws4py==0.5.1              # via -r requirements/requirements.in
-wsaccel==0.6.2            # via -r requirements/requirements.in
+wsaccel==0.6.3            # via -r requirements/requirements.in
 zipp==3.1.0               # via importlib-metadata
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
 zope.event==4.4           # via gevent

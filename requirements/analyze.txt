@@ -99,7 +99,7 @@ webtest==2.0.35           # via -r requirements/analyze.in
 wired==0.2.2              # via -r requirements/requirements.txt, pyramid-services
 wrapt==1.12.1             # via astroid
 ws4py==0.5.1              # via -r requirements/requirements.txt
-wsaccel==0.6.2            # via -r requirements/requirements.txt
+wsaccel==0.6.3            # via -r requirements/requirements.txt
 zipp==3.1.0               # via -r requirements/requirements.txt, importlib-metadata
 zope.deprecation==4.1.2   # via -r requirements/requirements.txt, deform, pyramid, pyramid-jinja2
 zope.event==4.4           # via -r requirements/requirements.txt, gevent
