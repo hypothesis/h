@@ -16,7 +16,7 @@ cffi==1.14.4              # via -r requirements/requirements.in, bcrypt
 chameleon==3.8.1          # via deform
 click==7.1.2              # via -r requirements/requirements.in
 colander==1.8.2           # via deform
-deform==2.0.14            # via -r requirements/requirements.in
+deform==2.0.15            # via -r requirements/requirements.in
 elasticsearch-dsl==6.3.1  # via -r requirements/requirements.in
 elasticsearch==6.8.1      # via -r requirements/requirements.in, elasticsearch-dsl
 gevent==20.9.0            # via -r requirements/requirements.in
