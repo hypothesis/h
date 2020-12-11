@@ -18,7 +18,7 @@ chameleon==3.8.1          # via -r requirements/requirements.txt, deform
 click==7.1.2              # via -r requirements/requirements.txt
 colander==1.8.2           # via -r requirements/requirements.txt, deform
 decorator==4.4.2          # via ipython, traitlets
-deform==2.0.14            # via -r requirements/requirements.txt
+deform==2.0.15            # via -r requirements/requirements.txt
 elasticsearch-dsl==6.3.1  # via -r requirements/requirements.txt
 elasticsearch==6.8.1      # via -r requirements/requirements.txt, elasticsearch-dsl
 factory-boy==3.1.0        # via -r requirements/dev.in
