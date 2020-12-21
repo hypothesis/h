@@ -134,8 +134,8 @@ class TestSendReplyNotifications:
 
         mailer.send.delay.assert_not_called()
 
-    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer_task):
-        mailer_task.side_effect = OperationalError
+    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer):
+        mailer.send.side_effect = OperationalError
 
         # No explosions please
         subscribers.send_reply_notifications(event)
