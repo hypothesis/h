@@ -40,7 +40,7 @@ class ShareWidget {
     this._widget = this._container.querySelector(WIDGET_SELECTOR);
     this._widgetVisible = false;
 
-    // on initialize we need to reset container visbility
+    // on initialize we need to reset container visibility
     this.hide();
 
     this._handler = event => {
