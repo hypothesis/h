@@ -21,7 +21,7 @@ decorator==4.4.2          # via ipython, traitlets
 deform==2.0.15            # via -r requirements/requirements.txt
 elasticsearch-dsl==6.3.1  # via -r requirements/requirements.txt
 elasticsearch==6.8.1      # via -r requirements/requirements.txt, elasticsearch-dsl
-factory-boy==3.1.0        # via -r requirements/dev.in
+factory_boy==3.2.0        # via -r requirements/dev.in
 faker==4.1.5              # via factory-boy
 gevent==20.9.0            # via -r requirements/requirements.txt
 greenlet==0.4.17          # via -r requirements/requirements.txt, gevent
