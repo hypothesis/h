@@ -53,7 +53,7 @@ psycogreen==1.0.2         # via -r requirements/requirements.txt
 psycopg2==2.8.6           # via -r requirements/requirements.txt
 py==1.9.0                 # via pytest
 pycparser==2.20           # via -r requirements/requirements.txt, cffi
-pyjwt==1.7.1              # via -r requirements/requirements.txt
+pyjwt==2.0.1              # via -r requirements/requirements.txt
 pyparsing==2.4.7          # via -r requirements/requirements.txt, packaging
 pyramid-authsanity==1.1.0  # via -r requirements/requirements.txt
 pyramid-exclog==1.0       # via -r requirements/requirements.txt
