@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/analyze.in
 #
-alembic==1.4.3            # via -r requirements/requirements.txt
+alembic==1.5.0            # via -r requirements/requirements.txt
 amqp==2.6.1               # via -r requirements/requirements.txt, kombu
 astroid==2.4.2            # via pylint
 attrs==20.2.0             # via -r requirements/requirements.txt, hypothesis, jsonschema, pytest
