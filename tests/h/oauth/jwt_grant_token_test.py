@@ -19,7 +19,9 @@ class TestJWTGrantToken:
 
         JWTGrantToken("abcdef123456")
 
-        jwt_decode.assert_called_once_with("abcdef123456", verify=False)
+        jwt_decode.assert_called_once_with(
+            "abcdef123456", options={"verify_signature": False}
+        )
 
     def test_init_raises_for_invalid_token(self):
         with pytest.raises(InvalidRequestFatalError) as exc:

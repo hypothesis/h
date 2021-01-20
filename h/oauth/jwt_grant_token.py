@@ -26,7 +26,10 @@ class JWTGrantToken:
         self._token = token
 
         try:
-            self._claims = jwt.decode(token, verify=False)
+            self._claims = jwt.decode(
+                token,
+                options={"verify_signature": False},
+            )
         except jwt.DecodeError:
             raise InvalidRequestFatalError("Invalid JWT grant token format.")
 
