@@ -85,7 +85,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mistune==0.8.4
     # via -r requirements/requirements.in
-newrelic==6.0.0.154
+newrelic==6.0.1.155
     # via -r requirements/requirements.in
 oauthlib==3.1.0
     # via -r requirements/requirements.in
