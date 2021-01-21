@@ -40,7 +40,7 @@ elasticsearch==6.8.1
     # via
     #   -r requirements/requirements.in
     #   elasticsearch-dsl
-gevent==21.1.1
+gevent==21.1.2
     # via -r requirements/requirements.in
 greenlet==0.4.17
     # via gevent
