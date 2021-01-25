@@ -213,7 +213,7 @@ pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-pytest==6.2.1
+pytest==6.2.2
     # via -r requirements/analyze.in
 python-dateutil==2.8.1
     # via
