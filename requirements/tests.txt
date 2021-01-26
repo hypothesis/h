@@ -44,7 +44,7 @@ colander==1.8.2
     # via
     #   -r requirements/requirements.txt
     #   deform
-coverage==5.3.1
+coverage==5.4
     # via -r requirements/tests.in
 deform==2.0.15
     # via -r requirements/requirements.txt
