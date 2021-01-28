@@ -84,6 +84,12 @@ class SearchIndexService:
             userid, tag, force=force, schedule_in=schedule_in
         )
 
+    def add_group_annotations(self, groupid, tag, force=False, schedule_in=None):
+        """Add all annotations in a group to the search index."""
+        indexer.add_group_annotations.delay(
+            groupid, tag, force=force, schedule_in=schedule_in
+        )
+
     def delete_annotation_by_id(self, annotation_id, refresh=False):
         """
         Mark an annotation as deleted in the search index.

@@ -15,6 +15,7 @@ class Queue:
     class Priority:
         SINGLE_ITEM = 1
         SINGLE_USER = 100
+        SINGLE_GROUP = 100
         BETWEEN_TIMES = 1000
 
     class Result:
@@ -109,6 +110,18 @@ class Queue:
         """
         where = [Annotation.userid == userid]
         self.add_where(where, tag, Queue.Priority.SINGLE_USER, force, schedule_in)
+
+    def add_by_group(self, groupid, tag, force=False, schedule_in=None):
+        """
+        Queue all annotations in a group to be synced to Elasticsearch.
+
+        See Queue.add() for documentation of the params.
+
+        :param groupid: The pubid of the group
+        :type groupid: unicode
+        """
+        where = [Annotation.groupid == groupid]
+        self.add_where(where, tag, Queue.Priority.SINGLE_GROUP, force, schedule_in)
 
     def sync(self, limit):
         """

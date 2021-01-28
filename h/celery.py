@@ -38,6 +38,7 @@ celery.conf.update(
     task_routes={
         "h.tasks.indexer.add_annotation": "indexer",
         "h.tasks.indexer.add_annotations_between_times": "indexer",
+        "h.tasks.indexer.add_group_annotations": "indexer",
         "h.tasks.indexer.add_users_annotations": "indexer",
         "h.tasks.indexer.delete_annotation": "indexer",
     },

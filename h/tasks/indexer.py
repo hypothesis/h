@@ -30,6 +30,12 @@ def add_users_annotations(userid, tag, force, schedule_in):
     search_index._queue.add_by_user(userid, tag, force=force, schedule_in=schedule_in)
 
 
+@celery.task
+def add_group_annotations(groupid, tag, force, schedule_in):
+    search_index = celery.request.find_service(name="search_index")
+    search_index._queue.add_by_group(groupid, tag, force=force, schedule_in=schedule_in)
+
+
 @celery.task(base=_BaseTaskWithRetry)
 def delete_annotation(id_):
     search_index = celery.request.find_service(name="search_index")

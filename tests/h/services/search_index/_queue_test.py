@@ -123,6 +123,25 @@ class TestQueue:
         where = add_where.call_args[0][0]
         assert where[0].compare(Annotation.userid == sentinel.userid)
 
+    def test_add_group_annotations(self, queue, add_where):
+        queue.add_by_group(
+            sentinel.groupid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+        add_where.assert_called_once_with(
+            [Any.instance_of(BinaryExpression)],
+            sentinel.tag,
+            Queue.Priority.SINGLE_GROUP,
+            sentinel.force,
+            sentinel.schedule_in,
+        )
+
+        where = add_where.call_args[0][0]
+        assert where[0].compare(Annotation.groupid == sentinel.groupid)
+
     def database_id(self, annotation):
         """Return `annotation.id` in the internal format used within the database."""
         return str(uuid.UUID(URLSafeUUID.url_safe_to_hex(annotation.id)))

@@ -56,6 +56,23 @@ class TestAddUsersAnnotations:
         )
 
 
+class TestAddGroupAnnotations:
+    def test_it(self, search_index):
+        indexer.add_group_annotations(
+            sentinel.groupid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+        search_index._queue.add_by_group.assert_called_once_with(
+            sentinel.groupid,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+
 class TestSyncAnnotations:
     def test_it(self, newrelic, log, search_index):
         indexer.sync_annotations("test_queue")
