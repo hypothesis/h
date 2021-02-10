@@ -19,7 +19,7 @@ cffi==1.14.4
     #   pynacl
 chardet==3.0.4
     # via requests
-cryptography==3.2
+cryptography==3.3.2
     # via paramiko
 distro==1.5.0
     # via docker-compose
