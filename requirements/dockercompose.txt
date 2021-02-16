@@ -12,7 +12,7 @@ cached-property==1.5.1
     # via docker-compose
 certifi==2020.12.5
     # via requests
-cffi==1.14.4
+cffi==1.14.5
     # via
     #   bcrypt
     #   cryptography
@@ -24,7 +24,7 @@ cryptography==3.3.2
 distro==1.5.0
     # via docker-compose
 docker-compose==1.28.2
-    # via -r dockercompose.in
+    # via -r requirements/dockercompose.in
 docker[ssh]==4.4.1
     # via docker-compose
 dockerpty==0.4.1
