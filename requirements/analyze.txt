@@ -170,7 +170,7 @@ pycparser==2.20
     #   cffi
 pyjwt==2.0.1
     # via -r requirements/requirements.txt
-pylint==2.6.0
+pylint==2.6.1
     # via -r requirements/analyze.in
 pyparsing==2.4.7
     # via
