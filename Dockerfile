@@ -17,7 +17,7 @@ COPY h/static ./h/static
 RUN npm run build
 
 # Stage 2: Build the rest of the app using the build output from Stage 1.
-FROM python:3.6.9-alpine3.10
+FROM python:3.8.3-alpine3.10
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
