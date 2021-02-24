@@ -25,6 +25,14 @@ class Client:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
         self._mapping_type = "annotation"
 
+    def close(self):
+        """Close the connection to the Elasticsearch server."""
+
+        # In the latest version of the `elasticsearch` package we could just
+        # do `self._conn.close()` but this method is missing in v6 so we have
+        # to close the underlying transport directly.
+        self._conn.transport.close()
+
     @property
     def index(self):
         return self._index
