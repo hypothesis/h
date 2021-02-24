@@ -26,6 +26,9 @@ def es_client():
         refresh=True,
     )
 
+    # Close connection to ES server to avoid ResourceWarning about a leaked TCP socket.
+    client.close()
+
 
 @pytest.fixture(scope="session", autouse=True)
 def init_elasticsearch(request):
