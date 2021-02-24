@@ -1,6 +1,6 @@
-import collections
 import logging
 from codecs import open
+from collections.abc import Sequence
 
 from pkg_resources import resource_filename
 from pyramid import httpexceptions
@@ -35,8 +35,7 @@ def conditional_http_tween_factory(handler, registry):
         # status code of 200. The subtleties of doing it correctly in other
         # cases don't bear thinking about (at the moment).
         have_buffered_response = (
-            isinstance(response.app_iter, collections.Sequence)
-            and len(response.app_iter) == 1
+            isinstance(response.app_iter, Sequence) and len(response.app_iter) == 1
         )
         cacheable = request.method in {"GET", "HEAD"} and response.status_code == 200
         if have_buffered_response and cacheable:
