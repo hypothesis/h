@@ -55,7 +55,12 @@ def test_svg_icon_loads_icon():
 
     result = ext.svg_icon(read_icon, "settings")
 
-    assert result == Markup('<svg class="svg-icon" id="settings" />')
+    # nb. The order of attributes can differ depending on the Python version.
+    # In Python 3.9+ the `id` attribute is first.
+    assert result in [
+        Markup('<svg class="svg-icon" id="settings" />'),
+        Markup('<svg id="settings" class="svg-icon" />'),
+    ]
 
 
 def test_svg_icon_removes_title():
