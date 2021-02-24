@@ -51,7 +51,12 @@ def parse_origin(url):
 
     if url is None:
         return None
+
     parsed = urlsplit(url)
+
+    if not parsed.scheme or not parsed.netloc:
+        return None
+
     # netloc contains both host and port
     origin = SplitResult(parsed.scheme, parsed.netloc, "", "", "")
     return origin.geturl() or None
