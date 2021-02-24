@@ -42,8 +42,9 @@ class _CachedFile:
 
         current_mtime = os.path.getmtime(self.path)
         if not self._mtime or self._mtime < current_mtime:
-            self._cached = self.loader(open(self.path))
-            self._mtime = current_mtime
+            with open(self.path) as fp:
+                self._cached = self.loader(fp)
+                self._mtime = current_mtime
         return self._cached
 
 
