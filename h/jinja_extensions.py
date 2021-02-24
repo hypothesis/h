@@ -71,7 +71,8 @@ class SvgIcon(Extension):
         super(SvgIcon, self).__init__(environment)
 
         def read_icon(name):
-            return open("build/images/icons/{}.svg".format(name)).read()
+            with open("build/images/icons/{}.svg".format(name)) as fp:
+                return fp.read()
 
         environment.globals["svg_icon"] = partial(svg_icon, read_icon)
 
