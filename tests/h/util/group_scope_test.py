@@ -71,6 +71,10 @@ class TestParseOrigin:
             ("http://foo.com/baz", "http://foo.com"),
             ("http://foo.com:3553/bar", "http://foo.com:3553"),
             ("http://www.foo.bar.com", "http://www.foo.bar.com"),
+            # URLs with missing scheme or host.
+            ("file:///apath", None),
+            ("foo:123", None),
+            ("bar:", None),
             ("foo.com", None),
         ],
     )
