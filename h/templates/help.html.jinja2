@@ -1,6 +1,16 @@
 {% extends "layouts/base.html.jinja2" %}
 
 {% set style_bundle = 'help_page_css' %}
+    <section class="help-page-section">
+      <h2 id="getting-started" class="help-page-heading">Getting started</h2>
+      <p class="help-page-lede">
+        Now you have the extension up and running. It's time to start annotating
+        some documents.
+      </p>
+      <div class="numbered-list">
+        <div class="numbered-list-item">
+          Create an account using the sidebar on the right of the screen.
+        </div>
 
 {% block meta %}
   <link href='//fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
@@ -20,6 +30,10 @@
     <script async defer src="{{ embed_js_url }}"></script>
   {% endif %}
 {% endblock %}
+        <div class="numbered-list-item">
+          Pin the Hypothesis extension in Chrome (1 and 2), then activate the
+          sidebar by clicking the button in the location bar (3).
+        </div>
 
 {% block content %}
   <div class="help-page">
@@ -34,19 +48,22 @@
           <div class="numbered-list columns">
             <div class="columns__col-1-2"><div class="numbered-list-item">If you want to annotate and comment on documents then install our <a href="{{ request.route_url('chrome-extension') }}">browser extension</a>.</div></div>
             <div class="columns__col-1-2"><div class="numbered-list-item">If you wish to install Hypothesis on your own site then head over to GitHub.</div></div>
+        <div class="wrap-columns">
+          <div class="wrap-columns__col">
+            <img
+              alt="Select the puzzle-piece icon (extension menu) in the Chrome location bar, then 'pin' the Hypothesis extension so it is always available"
+              src="{{ asset_url('images/chrome-pin-extension-01.png') }}"
+            />
           </div>
         </section>
       {% endif %}
       {% if is_onboarding %}
-        <section class="help-page-section">
-          <h2 id="getting-started" class="help-page-heading">Getting started</h2>
-          <p class="help-page-lede">Now you have the extension up and running. It's time to
-            start annotating some documents.</p>
-          <div class="numbered-list columns">
-            <div class="columns__col-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="columns__col-1-2"><div class="numbered-list-item">Go forth and annotate! Enable the sidebar via the button in the location bar.</div></div>
+          <div class="wrap-columns__col">
+            <img
+              alt="Click the Hypothesis icon to activate the Hypothesis extension"
+              src="{{ asset_url('images/chrome-pin-extension-02.png') }}"
+            />
           </div>
-        </section>
       {% endif %}
       <section class="help-page-section">
         <h2 id="key-features" class="help-page-heading">Annotation Types</h2>
@@ -94,9 +111,13 @@
               <p>Private annotations are visible only to you when logged in.</p>
             </div>
           </section>
+        <div class="numbered-list-item">
+          Go forth and annotate!
         </div>
       </section>
       <section class="help-page-section">
+      </div>
+    </section>
         <section class="feature">
           <h3 class="feature-heading"><i class="feature-icon h-icon-visibility"></i>Show/Hide Highlights</h3>
           <p class="feature-content">Use the <i class="help-icon h-icon-visibility"></i> button to toggle highlight visibility on a page.</p>

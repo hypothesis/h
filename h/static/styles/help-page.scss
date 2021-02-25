@@ -38,16 +38,29 @@ a {
 
 .columns {
   display: flex;
+  justify-content: space-between;
   flex-direction: row;
 }
 
 .columns__col-1-2 {
   flex-shrink: 1;
-  width: 50%;
+  width: 45%;
+}
 
-  margin-left: 20px;
-  &:first-child {
-    margin-left: 0;
+.wrap-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-bottom: 2.5em;
+}
+
+.wrap-columns__col {
+  max-width: 21em;
+  & img {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid color.$grey-3;
+    max-width: 100%;
   }
 }
 
