@@ -36,6 +36,12 @@ a {
   color: color.$brand;
 }
 
+ol,
+li {
+  margin: 0;
+  padding: 0;
+}
+
 .columns {
   display: flex;
   justify-content: space-between;
@@ -51,7 +57,7 @@ a {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  margin-bottom: 2.5em;
+  margin: 2.5em 0;
 }
 
 .wrap-columns__col {
@@ -163,6 +169,7 @@ a {
 }
 
 .numbered-list {
+  width: 100%;
   counter-reset: numbered-list;
 }
 
@@ -171,8 +178,7 @@ a {
   counter-increment: numbered-list;
   padding-left: 3em;
   padding-top: 0.5em;
-  padding-right: 1.25em;
-  margin-bottom: 2.5em;
+  margin-bottom: 1.75em;
   list-style-type: none;
 
   &:before {
