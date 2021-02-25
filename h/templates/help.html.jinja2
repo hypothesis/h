@@ -1,6 +1,54 @@
-{% extends "layouts/base.html.jinja2" %}
-
-{% set style_bundle = 'help_page_css' %}
+{% extends "layouts/base.html.jinja2" %} {% set style_bundle = 'help_page_css'
+%} {% block meta %}
+<link
+  href="//fonts.googleapis.com/css?family=Lato:400,300"
+  rel="stylesheet"
+  type="text/css"
+/>
+{{ super() }}
+<script type="application/json" class="js-hypothesis-config">
+  {
+    "openSidebar": true,
+    "openLoginForm": true
+  }
+</script>
+{% if not is_onboarding %}
+<script type="application/json" class="js-hypothesis-config">
+  {
+    "sidebarAppUrl": "{{ request.route_url('sidebar_app') }}"
+  }
+</script>
+<script async defer src="{{ embed_js_url }}"></script>
+{% endif %} {% endblock %} {% block content %}
+<div class="help-page">
+  <div class="help-page-content masthead-small">
+    {% include "includes/logo-header.html.jinja2" %}
+  </div>
+  <article class="help-page-content">
+    {% if is_help %}
+    <section class="help-page-section">
+      <h2 id="installation" class="help-page-heading">Installation</h2>
+      <p class="help-page-lede">
+        There are a couple of installations of Hypothesis to choose from:
+      </p>
+      <div class="numbered-list columns">
+        <div class="columns__col-1-2">
+          <div class="numbered-list-item">
+            If you want to annotate and comment on documents then install our
+            <a href="{{ request.route_url('chrome-extension') }}"
+              >browser extension</a
+            >.
+          </div>
+        </div>
+        <div class="columns__col-1-2">
+          <div class="numbered-list-item">
+            If you wish to install Hypothesis on your own site then head over to
+            GitHub.
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endif %} {% if is_onboarding %}
     <section class="help-page-section">
       <h2 id="getting-started" class="help-page-heading">Getting started</h2>
       <p class="help-page-lede">
@@ -12,42 +60,11 @@
           Create an account using the sidebar on the right of the screen.
         </div>
 
-{% block meta %}
-  <link href='//fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
-  {{ super() }}
-  <script type="application/json" class="js-hypothesis-config">
-    {
-      "openSidebar": true,
-      "openLoginForm": true
-    }
-  </script>
-  {% if not is_onboarding %}
-    <script type="application/json" class="js-hypothesis-config">
-    {
-      "sidebarAppUrl": "{{ request.route_url('sidebar_app') }}"
-    }
-    </script>
-    <script async defer src="{{ embed_js_url }}"></script>
-  {% endif %}
-{% endblock %}
         <div class="numbered-list-item">
           Pin the Hypothesis extension in Chrome (1 and 2), then activate the
           sidebar by clicking the button in the location bar (3).
         </div>
 
-{% block content %}
-  <div class="help-page">
-    <div class="help-page-content masthead-small">
-      {% include "includes/logo-header.html.jinja2" %}
-    </div>
-    <article class="help-page-content">
-      {% if is_help %}
-        <section class="help-page-section">
-          <h2 id="installation" class="help-page-heading">Installation</h2>
-          <p class="help-page-lede">There are a couple of installations of Hypothesis to choose from:</p>
-          <div class="numbered-list columns">
-            <div class="columns__col-1-2"><div class="numbered-list-item">If you want to annotate and comment on documents then install our <a href="{{ request.route_url('chrome-extension') }}">browser extension</a>.</div></div>
-            <div class="columns__col-1-2"><div class="numbered-list-item">If you wish to install Hypothesis on your own site then head over to GitHub.</div></div>
         <div class="wrap-columns">
           <div class="wrap-columns__col">
             <img
@@ -55,98 +72,152 @@
               src="{{ asset_url('images/chrome-pin-extension-01.png') }}"
             />
           </div>
-        </section>
-      {% endif %}
-      {% if is_onboarding %}
           <div class="wrap-columns__col">
             <img
               alt="Click the Hypothesis icon to activate the Hypothesis extension"
               src="{{ asset_url('images/chrome-pin-extension-02.png') }}"
             />
           </div>
-      {% endif %}
-      <section class="help-page-section">
-        <h2 id="key-features" class="help-page-heading">Annotation Types</h2>
-        <p class="help-page-lede">There are a few types of annotations that can be created
-          with the application:</p>
-        <div class="feature-content">
-          <section class="feature">
-            <h3 class="feature-heading"><i class="feature-icon h-icon-annotate"></i> Notes</h3>
-            <div class="feature-content styled-text">
-              <p>Create a <em>note</em> by selecting some text and clicking the <i class="help-icon h-icon-annotate"></i> button</p>
-            </div>
-          </section>
-          <section class="feature">
-            <h3 class="feature-heading"><i class="feature-icon h-icon-highlight"></i> Highlights</h3>
-            <div class="feature-content">
-              <p><em>Highlights</em> can be created by clicking the <i class="help-icon h-icon-highlight"></i> button.
-              Try it on this sentence.</p>
-            </div>
-          </section>
-          <section class="feature">
-            <h3 class="feature-heading"><i class="feature-icon h-icon-reply"></i> Replies</h3>
-            <div class="feature-content">
-              <p>You can  <em>reply</em> to any annotation by using the <i class="help-icon h-icon-reply"></i> reply action
-                on every card.</p>
-            </div>
-          </section>
         </div>
-      </section>
-      <section class="help-page-section">
-        <h2 id="key-features" class="help-page-heading">Privacy</h2>
-        <p class="help-page-lede">Annotations are either public and visible to everyone
-          or private and visible only to you.</p>
-        <div class="columns feature-content">
-          <section class="feature columns__col-1-2">
-            <h3 class="feature-heading"><i class="feature-icon h-icon-public"></i> Public</h3>
-            <div class="feature-content styled-text">
-              <p>These annotations are visible to everyone both in the
-                document itself and our <a
-                href="{{request.route_url('stream')}}">public stream</a>.</p>
-            </div>
-          </section>
-          <section class="feature columns__col-1-2">
-            <h3 class="feature-heading"><i class="feature-icon h-icon-lock"></i> Private</h3>
-            <div class="feature-content">
-              <p>Private annotations are visible only to you when logged in.</p>
-            </div>
-          </section>
         <div class="numbered-list-item">
           Go forth and annotate!
         </div>
-      </section>
-      <section class="help-page-section">
       </div>
     </section>
+    {% endif %}
+    <section class="help-page-section">
+      <h2 id="key-features" class="help-page-heading">Annotation Types</h2>
+      <p class="help-page-lede">
+        There are a few types of annotations that can be created with the
+        application:
+      </p>
+      <div class="feature-content">
         <section class="feature">
-          <h3 class="feature-heading"><i class="feature-icon h-icon-visibility"></i>Show/Hide Highlights</h3>
-          <p class="feature-content">Use the <i class="help-icon h-icon-visibility"></i> button to toggle highlight visibility on a page.</p>
-        </section>
-        <section class="feature">
-          <h3 class="feature-heading"><i class="feature-icon h-icon-share"></i>Sharing a page</h3>
-          <div class="feature-content">
-            <p>Use the <i class="help-icon h-icon-share"></i> button to get a sharable link to the page with annotations.</p>
+          <h3 class="feature-heading">
+            <i class="feature-icon h-icon-annotate"></i> Notes
+          </h3>
+          <div class="feature-content styled-text">
+            <p>
+              Create a <em>note</em> by selecting some text and clicking the
+              <i class="help-icon h-icon-annotate"></i> button
+            </p>
           </div>
         </section>
+        <section class="feature">
+          <h3 class="feature-heading">
+            <i class="feature-icon h-icon-highlight"></i> Highlights
+          </h3>
+          <div class="feature-content">
+            <p>
+              <em>Highlights</em> can be created by clicking the
+              <i class="help-icon h-icon-highlight"></i> button. Try it on this
+              sentence.
+            </p>
+          </div>
+        </section>
+        <section class="feature">
+          <h3 class="feature-heading">
+            <i class="feature-icon h-icon-reply"></i> Replies
+          </h3>
+          <div class="feature-content">
+            <p>
+              You can <em>reply</em> to any annotation by using the
+              <i class="help-icon h-icon-reply"></i> reply action on every card.
+            </p>
+          </div>
+        </section>
+      </div>
+    </section>
+    <section class="help-page-section">
+      <h2 id="key-features" class="help-page-heading">Privacy</h2>
+      <p class="help-page-lede">
+        Annotations are either public and visible to everyone or private and
+        visible only to you.
+      </p>
+      <div class="columns feature-content">
+        <section class="feature columns__col-1-2">
+          <h3 class="feature-heading">
+            <i class="feature-icon h-icon-public"></i> Public
+          </h3>
+          <div class="feature-content styled-text">
+            <p>
+              These annotations are visible to everyone both in the document
+              itself and our
+              <a href="{{ request.route_url('stream') }}">public stream</a>.
+            </p>
+          </div>
+        </section>
+        <section class="feature columns__col-1-2">
+          <h3 class="feature-heading">
+            <i class="feature-icon h-icon-lock"></i> Private
+          </h3>
+          <div class="feature-content">
+            <p>Private annotations are visible only to you when logged in.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+    <section class="help-page-section">
+      <section class="feature">
+        <h3 class="feature-heading">
+          <i class="feature-icon h-icon-visibility"></i>Show/Hide Highlights
+        </h3>
+        <p class="feature-content">
+          Use the <i class="help-icon h-icon-visibility"></i> button to toggle
+          highlight visibility on a page.
+        </p>
       </section>
-      <section class="help-page-section">
-        <h2 class="help-page-heading">Resources</h2>
-        <div class="styled-text">
-          <ul>
-            <li>View the <a href="https://hypothes.is/roadmap/">product roadmap</a> to check out what we're working on.</li>
-            <li>Request features, report bugs and meet other users in our <a href="https://groups.google.com/forum/#!forum/hypothesis-forum">discussion forums</a>.</li>
-            <li>If you need help please don't hesitate to <a href="mailto:support@hypothes.is">get in touch</a>.</li>
-            <li>Visit <a href="https://hypothes.is/about/">our website</a> to learn more about the project.</li>
-            <li>Check out the code on <a href="https://github.com/hypothesis/h">GitHub</a>.</li>
-          </ul>
+      <section class="feature">
+        <h3 class="feature-heading">
+          <i class="feature-icon h-icon-share"></i>Sharing a page
+        </h3>
+        <div class="feature-content">
+          <p>
+            Use the <i class="help-icon h-icon-share"></i> button to get a
+            sharable link to the page with annotations.
+          </p>
         </div>
       </section>
-    </article>
-    <div class="help-page-sidebar">
-      <div id="help-1">
-        <p>Show and hide the sidebar using the <i class="h-icon-chevron-left"></i> button</p>
+    </section>
+    <section class="help-page-section">
+      <h2 class="help-page-heading">Resources</h2>
+      <div class="styled-text">
+        <ul>
+          <li>
+            View the
+            <a href="https://hypothes.is/roadmap/">product roadmap</a> to check
+            out what we're working on.
+          </li>
+          <li>
+            Request features, report bugs and meet other users in our
+            <a href="https://groups.google.com/forum/#!forum/hypothesis-forum"
+              >discussion forums</a
+            >.
+          </li>
+          <li>
+            If you need help please don't hesitate to
+            <a href="mailto:support@hypothes.is">get in touch</a>.
+          </li>
+          <li>
+            Visit <a href="https://hypothes.is/about/">our website</a> to learn
+            more about the project.
+          </li>
+          <li>
+            Check out the code on
+            <a href="https://github.com/hypothesis/h">GitHub</a>.
+          </li>
+        </ul>
       </div>
-      <div id="help-2"></div>
+    </section>
+  </article>
+  <div class="help-page-sidebar">
+    <div id="help-1">
+      <p>
+        Show and hide the sidebar using the
+        <i class="h-icon-chevron-left"></i> button
+      </p>
     </div>
+    <div id="help-2"></div>
   </div>
+</div>
 {% endblock %}
