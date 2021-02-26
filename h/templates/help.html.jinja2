@@ -31,22 +31,22 @@
       <p class="help-page-lede">
         There are a couple of installations of Hypothesis to choose from:
       </p>
-      <div class="numbered-list columns">
+      <ol class="numbered-list columns">
         <div class="columns__col-1-2">
-          <div class="numbered-list-item">
+          <li class="numbered-list-item">
             If you want to annotate and comment on documents then install our
             <a href="{{ request.route_url('chrome-extension') }}"
               >browser extension</a
             >.
-          </div>
+          </li>
         </div>
         <div class="columns__col-1-2">
-          <div class="numbered-list-item">
+          <li class="numbered-list-item">
             If you wish to install Hypothesis on your own site then head over to
             GitHub.
-          </div>
+          </li>
         </div>
-      </div>
+      </ol>
     </section>
     {% endif %} {% if is_onboarding %}
     <section class="help-page-section">
