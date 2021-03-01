@@ -255,7 +255,7 @@ sqlalchemy==1.3.23
     #   -r requirements/requirements.txt
     #   alembic
     #   zope.sqlalchemy
-supervisor==4.2.1
+supervisor==4.2.2
     # via -r requirements/requirements.txt
 text-unidecode==1.3
     # via
