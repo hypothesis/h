@@ -44,7 +44,7 @@ sphinx-autobuild==2020.9.1
     # via -r requirements/docs.in
 sphinx-rtd-theme==0.5.1
     # via -r requirements/docs.in
-sphinx==3.5.1
+sphinx==3.5.2
     # via
     #   -r requirements/docs.in
     #   sphinx-autobuild
