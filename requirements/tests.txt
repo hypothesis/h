@@ -166,8 +166,6 @@ pyparsing==2.4.7
     # via
     #   -r requirements/requirements.txt
     #   packaging
-pyramid-authsanity==1.1.0
-    # via -r requirements/requirements.txt
 pyramid-exclog==1.0
     # via -r requirements/requirements.txt
 pyramid-jinja2==2.8
@@ -186,7 +184,7 @@ pyramid-services==2.2
     #   pyramid-authsanity
 pyramid-tm==2.4
     # via -r requirements/requirements.txt
-pyramid==1.10.5
+pyramid==2.0
     # via
     #   -r requirements/requirements.txt
     #   h-pyramid-sentry
@@ -199,6 +197,8 @@ pyramid==1.10.5
     #   pyramid-sanity
     #   pyramid-services
     #   pyramid-tm
+pyramid_authsanity==2.0.0
+    # via -r requirements/requirements.txt
 pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
