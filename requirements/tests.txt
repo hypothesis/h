@@ -186,7 +186,7 @@ pyramid-services==2.2
     #   pyramid-authsanity
 pyramid-tm==2.4
     # via -r requirements/requirements.txt
-pyramid==1.10.5
+pyramid==1.10.8
     # via
     #   -r requirements/requirements.txt
     #   h-pyramid-sentry
