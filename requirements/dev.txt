@@ -85,7 +85,7 @@ importlib-metadata==1.7.0
     #   -r requirements/requirements.txt
     #   jsonschema
     #   kombu
-ipdb==0.13.5
+ipdb==0.13.6
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
@@ -262,6 +262,8 @@ text-unidecode==1.3
     #   -r requirements/requirements.txt
     #   faker
     #   python-slugify
+toml==0.10.2
+    # via ipdb
 traitlets==4.3.3
     # via ipython
 transaction==3.0.1
