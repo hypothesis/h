@@ -52,7 +52,7 @@ deform==2.0.15
     # via -r requirements/requirements.txt
 elasticsearch-dsl==6.3.1
     # via -r requirements/requirements.txt
-elasticsearch==6.8.1
+elasticsearch==6.8.2
     # via
     #   -r requirements/requirements.txt
     #   elasticsearch-dsl
