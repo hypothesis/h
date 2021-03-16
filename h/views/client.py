@@ -79,7 +79,7 @@ def sidebar_app(request, extra=None):
 
     ctx = {
         "app_config": json.dumps(app_config),
-        "embed_url": _client_url(request),
+        "client_url": _client_url(request),
     }
 
     if extra is not None:
