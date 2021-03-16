@@ -79,7 +79,7 @@ def sidebar_app(request, extra=None):
 
     ctx = {
         "app_config": json.dumps(app_config),
-        "embed_url": request.route_path("embed"),
+        "embed_url": _client_url(request),
     }
 
     if extra is not None:
@@ -92,11 +92,8 @@ def sidebar_app(request, extra=None):
     # As well as offering an extra layer of protection against various security
     # risks, this also helps to reduce noise in Sentry reports due to script
     # tags added by e.g. browser extensions.
-    #
-    # The `'self'` script-src is needed because app.html references the `/embed.js`
-    # route from h.
     client_origin = origin(_client_url(request))
-    script_src = f"'self' {client_origin} https://www.google-analytics.com"
+    script_src = f"{client_origin} https://www.google-analytics.com"
 
     # nb. Inline styles are currently allowed for the client because LaTeX
     # math rendering using KaTeX relies on them.
