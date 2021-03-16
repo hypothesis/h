@@ -24,10 +24,10 @@ class TestSidebarApp:
 
         assert actual_config == expected_config
 
-    def test_it_sets_embed_url(self, pyramid_request):
+    def test_it_sets_client_url(self, pyramid_request):
         ctx = client.sidebar_app(pyramid_request)
 
-        assert ctx["embed_url"] == "http://example.com/client_url"
+        assert ctx["client_url"] == "http://example.com/client_url"
 
     def test_it_sets_custom_content_security_policy_header(self, pyramid_request):
         client.sidebar_app(pyramid_request)
