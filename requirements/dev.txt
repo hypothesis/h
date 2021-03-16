@@ -85,7 +85,7 @@ importlib-metadata==1.7.0
     #   -r requirements/requirements.txt
     #   jsonschema
     #   kombu
-ipdb==0.13.6
+ipdb==0.13.7
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
