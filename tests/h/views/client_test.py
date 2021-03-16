@@ -27,7 +27,7 @@ class TestSidebarApp:
     def test_it_sets_embed_url(self, pyramid_request):
         ctx = client.sidebar_app(pyramid_request)
 
-        assert ctx["embed_url"] == "/embed.js"
+        assert ctx["embed_url"] == "http://example.com/client_url"
 
     def test_it_sets_custom_content_security_policy_header(self, pyramid_request):
         client.sidebar_app(pyramid_request)
@@ -35,15 +35,13 @@ class TestSidebarApp:
 
         assert (
             csp_header
-            == "script-src 'self' http://example.com https://www.google-analytics.com; style-src http://example.com 'unsafe-inline'"
+            == "script-src http://example.com https://www.google-analytics.com; style-src http://example.com 'unsafe-inline'"
         )
 
 
 @pytest.mark.usefixtures("routes", "pyramid_settings")
 class TestEmbedRedirect:
     def test_redirects_to_client_boot_script(self, pyramid_request):
-        pyramid_request.feature.flags["embed_cachebuster"] = False
-
         rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
@@ -75,6 +73,12 @@ def pyramid_settings(pyramid_settings):
     )
 
     return pyramid_settings
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.feature.flags["embed_cachebuster"] = False
+    return pyramid_request
 
 
 @pytest.fixture
