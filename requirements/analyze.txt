@@ -96,7 +96,7 @@ iso8601==0.1.13
     #   -r requirements/requirements.txt
     #   colander
     #   deform
-isort==5.7.0
+isort==5.8.0
     # via pylint
 itsdangerous==1.1.0
     # via -r requirements/requirements.txt
