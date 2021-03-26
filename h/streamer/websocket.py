@@ -8,7 +8,6 @@ import jsonschema
 from gevent.queue import Full
 from ws4py.websocket import WebSocket as _WebSocket
 
-from h import storage
 from h.streamer.filter import FILTER_SCHEMA, SocketFilter
 
 log = logging.getLogger(__name__)
@@ -165,10 +164,6 @@ def handle_filter_message(message, session=None):
         )
         return
 
-    if session is not None:
-        # Add backend expands for clauses
-        _expand_clauses(session, filter_)
-
     SocketFilter.set_filter(message.socket, filter_)
 
 
@@ -207,22 +202,3 @@ def handle_unknown_message(message, session=None):
 
 
 MESSAGE_HANDLERS[None] = handle_unknown_message  # noqa: E305
-
-
-def _expand_clauses(session, filter_):
-    for clause in filter_["clauses"]:
-        if "field" in clause and clause["field"] == "/uri":
-            _expand_uris(session, clause)
-
-
-def _expand_uris(session, clause):
-    uris = clause["value"]
-    expanded = set()
-
-    if not isinstance(uris, list):
-        uris = [uris]
-
-    for item in uris:
-        expanded.update(storage.expand_uri(session, item))
-
-    clause["value"] = list(expanded)
