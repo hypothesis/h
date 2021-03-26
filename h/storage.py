@@ -23,6 +23,7 @@ from h import models, schemas
 from h.db import types
 from h.models.document import update_document_metadata
 from h.util.group_scope import url_in_scope
+from h.util.uri import normalize as normalize_uri
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -217,7 +218,7 @@ def update_annotation(request, id_, data, group_service):
     return annotation
 
 
-def expand_uri(session, uri):
+def expand_uri(session, uri, normalized=False):
     """
     Return all URIs which refer to the same underlying document as `uri`.
 
@@ -225,29 +226,46 @@ def expand_uri(session, uri):
     passed URI, and if so returns the set of all URIs which we currently
     believe refer to the same document.
 
-    :param session: the database session
-    :type session: sqlalchemy.orm.session.Session
-
-    :param uri: a URI associated with the document
-    :type uri: str
+    :param session: Database session
+    :param uri: URI associated with the document
+    :param normalized: Return normalized URIs instead of the raw value
 
     :returns: a list of equivalent URIs
-    :rtype: list
     """
-    doc = models.Document.find_by_uris(session, [uri]).one_or_none()
 
-    if doc is None:
-        return [uri]
+    normalized_uri = normalize_uri(uri)
+
+    document_id = (
+        session.query(models.DocumentURI.document_id)
+        .filter(models.DocumentURI.uri_normalized == normalized_uri)
+        .limit(1)
+        .subquery()
+    )
+
+    type_uris = list(
+        session.query(
+            # Using the specific fields we want prevents object creation
+            # which significantly speeds this method up (knocks ~40% off)
+            models.DocumentURI.type,
+            models.DocumentURI.uri,
+            models.DocumentURI.uri_normalized,
+        ).filter(models.DocumentURI.document_id == document_id)
+    )
+
+    if not type_uris:
+        return [normalized_uri if normalized else uri]
 
     # We check if the match was a "canonical" link. If so, all annotations
     # created on that page are guaranteed to have that as their target.source
     # field, so we don't need to expand to other URIs and risk false positives.
-    docuris = doc.document_uris
-    for docuri in docuris:
-        if docuri.uri == uri and docuri.type == "rel-canonical":
-            return [uri]
+    for doc_type, plain_uri, _ in type_uris:
+        if doc_type == "rel-canonical" and plain_uri == uri:
+            return [normalized_uri if normalized else uri]
 
-    return [docuri.uri for docuri in docuris]
+    if normalized:
+        return [uri_normalized for _, _, uri_normalized in type_uris]
+
+    return [plain_uri for _, plain_uri, _ in type_uris]
 
 
 def _validate_group_scope(group, target_uri):
