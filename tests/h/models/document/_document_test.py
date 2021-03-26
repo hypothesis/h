@@ -11,104 +11,56 @@ from h.models.document._document import (
     update_document_metadata,
 )
 from h.models.document._exceptions import ConcurrentUpdateError
-from h.models.document._meta import DocumentMeta
-from h.models.document._uri import DocumentURI
 
 
 class TestDocumentFindByURIs:
-    def test_with_one_matching_Document(self, db_session):
-        # One Document with a non-matching DocumentURI pointing to it.
-        # find_by_uris() should not return this Document.
-        document1 = Document()
-        uri1 = "https://de.wikipedia.org/wiki/Hauptseite"
-        document1.document_uris.append(DocumentURI(claimant=uri1, uri=uri1))
+    def test_with_one_matching_Document(self, db_session, factories):
+        _noise = factories.Document(document_uris=[factories.DocumentURI()])
 
-        # A second Document with one matching and one non-matching DocumentURI
-        # pointing to it. find_by_uris() should return this Document.
-        document2 = Document()
-        uri2 = "https://en.wikipedia.org/wiki/Main_Page"
-        document2.document_uris.append(DocumentURI(claimant=uri2, uri=uri2))
-        uri3 = "https://en.wikipedia.org"
-        document2.document_uris.append(DocumentURI(claimant=uri3, uri=uri2))
+        matching_doc = factories.Document(
+            document_uris=[factories.DocumentURI(), factories.DocumentURI()]
+        )
 
-        db_session.add_all([document1, document2])
         db_session.flush()
 
         actual = Document.find_by_uris(
             db_session,
             [
-                "https://en.wikipedia.org/wiki/Main_Page",
-                "https://m.en.wikipedia.org/wiki/Main_Page",
+                "http://example.com/non-matching-noise",
+                matching_doc.document_uris[1].uri,
             ],
         )
 
         assert actual.count() == 1
-        assert actual.first() == document2
+        assert actual.first() == matching_doc
 
-    def test_no_matches(self, db_session):
-        document = Document()
-        document.document_uris.append(
-            DocumentURI(
-                claimant="https://en.wikipedia.org/wiki/Main_Page",
-                uri="https://en.wikipedia.org/wiki/Main_Page",
-            )
-        )
-        db_session.add(document)
+    def test_no_matches(self, db_session, factories):
+        _noise = factories.Document(document_uris=[factories.DocumentURI()])
         db_session.flush()
 
         actual = Document.find_by_uris(
-            db_session, ["https://de.wikipedia.org/wiki/Hauptseite"]
+            db_session, ["https://example.com/no_matching_document"]
         )
         assert actual.count() == 0
 
 
 class TestDocumentFindOrCreateByURIs:
-    def test_with_one_existing_Document(self, db_session):
-        """
-        When there's one matching Document it should return that Document.
-
-        When searching with two URIs that match two DocumentURIs that both
-        point to the same Document, it should return that Document.
-
-        """
-        document = Document()
-        docuri1 = DocumentURI(
-            claimant="https://en.wikipedia.org/wiki/Main_Page",
-            uri="https://en.wikipedia.org/wiki/Main_Page",
-            document=document,
-        )
-        docuri2 = DocumentURI(
-            claimant="https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page",
-            uri="https://en.wikipedia.org/wiki/Main_Page",
-            document=document,
-        )
-
-        db_session.add(docuri1)
-        db_session.add(docuri2)
+    def test_it_returns_a_document_when_theres_only_one(self, db_session, factories):
+        # When searching with two URIs that match two DocumentURIs that both
+        # point to the same Document, it should return that Document.
+        doc_uri1 = factories.DocumentURI()
+        doc_uri2 = factories.DocumentURI(document=doc_uri1.document)
         db_session.flush()
 
         actual = Document.find_or_create_by_uris(
-            db_session,
-            "https://en.wikipedia.org/wiki/Main_Page",
-            [
-                "https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page",
-                "https://m.en.wikipedia.org/wiki/Main_Page",
-            ],
+            db_session, doc_uri1.uri, [doc_uri1.claimant, doc_uri2.claimant]
         )
 
         assert actual.count() == 1
-        assert actual.first() == document
+        assert actual.first() == doc_uri1.document
 
-    def test_with_no_existing_documents(self, db_session):
-        """When there are no matching Documents it creates and returns one."""
-        document = Document()
-        docuri = DocumentURI(
-            claimant="https://en.wikipedia.org/wiki/Main_Page",
-            uri="https://en.wikipedia.org/wiki/Main_Page",
-            document=document,
-        )
-
-        db_session.add(docuri)
+    def test_with_no_existing_documents_we_create_one(self, db_session, factories):
+        _noise = factories.DocumentURI()
         db_session.flush()
 
         documents = Document.find_or_create_by_uris(
@@ -123,10 +75,10 @@ class TestDocumentFindOrCreateByURIs:
         assert isinstance(actual, Document)
         assert len(actual.document_uris) == 1
 
-        docuri = actual.document_uris[0]
-        assert docuri.claimant == "https://en.wikipedia.org/wiki/Pluto"
-        assert docuri.uri == "https://en.wikipedia.org/wiki/Pluto"
-        assert docuri.type == "self-claim"
+        doc_uri = actual.document_uris[0]
+        assert doc_uri.claimant == "https://en.wikipedia.org/wiki/Pluto"
+        assert doc_uri.uri == "https://en.wikipedia.org/wiki/Pluto"
+        assert doc_uri.type == "self-claim"
 
     def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
         def err():
@@ -218,9 +170,9 @@ class TestDocumentWebURI:
     def test_update_web_uri(self, document_uris, factories, expected_web_uri):
         document = factories.Document()
 
-        for docuri_tuple in document_uris:
+        for doc_uri_tuple in document_uris:
             factories.DocumentURI(
-                uri=docuri_tuple[0], type=docuri_tuple[1], document=document
+                uri=doc_uri_tuple[0], type=doc_uri_tuple[1], document=document
             )
 
         document.update_web_uri()
@@ -228,76 +180,52 @@ class TestDocumentWebURI:
         assert document.web_uri == expected_web_uri
 
 
-@pytest.mark.usefixtures("merge_data")
+@pytest.mark.usefixtures("duplicate_docs")
 class TestMergeDocuments:
-    def test_merge_documents_returns_master(self, db_session, merge_data):
-        master, _, _ = merge_data
+    def test_it_returns_the_first_doc(self, db_session, duplicate_docs):
+        merged = merge_documents(db_session, duplicate_docs)
 
-        merged_master = merge_documents(db_session, merge_data)
+        assert merged == duplicate_docs[0]
 
-        assert merged_master == master
-
-    def test_merge_documents_deletes_duplicate_documents(self, db_session, merge_data):
-        _, duplicate_1, duplicate_2 = merge_data
-
-        merge_documents(db_session, merge_data)
+    def test_it_deletes_all_but_the_first(self, db_session, duplicate_docs):
+        merge_documents(db_session, duplicate_docs)
         db_session.flush()
 
         count = (
             db_session.query(Document)
-            .filter(Document.id.in_([duplicate_1.id, duplicate_2.id]))
+            .filter(Document.id.in_([duplicate_docs[1].id, duplicate_docs[2].id]))
             .count()
         )
 
         assert count == 0
 
-    def test_merge_documents_rewires_document_uris(self, db_session, merge_data):
-        master, duplicate_1, duplicate_2 = merge_data
-
-        merge_documents(db_session, merge_data)
+    def test_it_moves_document_uris_to_the_first(self, db_session, duplicate_docs):
+        merge_documents(db_session, duplicate_docs)
         db_session.flush()
 
-        assert len(master.document_uris) == 3
-        assert len(duplicate_1.document_uris) == 0
-        assert len(duplicate_2.document_uris) == 0
+        assert [len(doc.document_uris) for doc in duplicate_docs] == [3, 0, 0]
 
-    def test_merge_documents_rewires_document_meta(self, db_session, merge_data):
-        master, duplicate_1, duplicate_2 = merge_data
-
-        merge_documents(db_session, merge_data)
+    def test_it_moves_document_meta_to_the_first(self, db_session, duplicate_docs):
+        merge_documents(db_session, duplicate_docs)
         db_session.flush()
 
-        assert len(master.meta) == 3
-        assert len(duplicate_1.meta) == 0
-        assert len(duplicate_2.meta) == 0
+        assert [len(doc.meta) for doc in duplicate_docs] == [3, 0, 0]
 
-    def test_merge_documents_rewires_annotations(self, db_session, merge_data):
-        master, duplicate_1, duplicate_2 = merge_data
-
-        merge_documents(db_session, merge_data)
+    def test_it_moves_annotations_to_the_first(self, db_session, duplicate_docs):
+        merge_documents(db_session, duplicate_docs)
         db_session.flush()
 
-        assert (
-            6
-            == db_session.query(models.Annotation)
-            .filter_by(document_id=master.id)
-            .count()
-        )
-        assert (
-            0
-            == db_session.query(models.Annotation)
-            .filter_by(document_id=duplicate_1.id)
-            .count()
-        )
-        assert (
-            0
-            == db_session.query(models.Annotation)
-            .filter_by(document_id=duplicate_2.id)
-            .count()
-        )
+        for document, expected_count in zip(duplicate_docs, (3, 0, 0)):
+            count = (
+                db_session.query(models.Annotation)
+                .filter_by(document_id=document.id)
+                .count()
+            )
 
-    def test_raises_retryable_error_when_flush_fails(
-        self, db_session, merge_data, monkeypatch
+            assert count == expected_count
+
+    def test_it_raises_retryable_error_when_flush_fails(
+        self, db_session, duplicate_docs, monkeypatch
     ):
         def err():
             raise sa.exc.IntegrityError(None, None, None)
@@ -305,146 +233,72 @@ class TestMergeDocuments:
         monkeypatch.setattr(db_session, "flush", err)
 
         with pytest.raises(ConcurrentUpdateError):
-            merge_documents(db_session, merge_data)
+            merge_documents(db_session, duplicate_docs)
 
-    def test_merge_documents_logs_when_its_called(self, caplog, db_session, merge_data):
+    def test_it_logs_when_its_called(self, caplog, db_session, duplicate_docs):
         caplog.set_level(logging.INFO)
 
-        merge_documents(db_session, merge_data)
+        merge_documents(db_session, duplicate_docs)
 
         assert caplog.record_tuples == [
             ("h.models.document._document", 20, "Merging 3 documents")
         ]
 
     @pytest.fixture
-    def merge_data(self, db_session, request):
-        master = Document(
-            document_uris=[
-                DocumentURI(
-                    claimant="https://en.wikipedia.org/wiki/Main_Page",
-                    uri="https://en.wikipedia.org/wiki/Main_Page",
-                    type="self-claim",
-                )
-            ],
-            meta=[
-                DocumentMeta(
-                    claimant="https://en.wikipedia.org/wiki/Main_Page",
-                    type="title",
-                    value="Wikipedia, the free encyclopedia",
-                )
-            ],
-        )
-        duplicate_1 = Document(
-            document_uris=[
-                DocumentURI(
-                    claimant="https://m.en.wikipedia.org/wiki/Main_Page",
-                    uri="https://en.wikipedia.org/wiki/Main_Page",
-                    type="rel-canonical",
-                )
-            ],
-            meta=[
-                DocumentMeta(
-                    claimant="https://m.en.wikipedia.org/wiki/Main_Page",
-                    type="title",
-                    value="Wikipedia, the free encyclopedia",
-                )
-            ],
-        )
-        duplicate_2 = Document(
-            document_uris=[
-                DocumentURI(
-                    claimant="https://en.wikipedia.org/wiki/Home",
-                    uri="https://en.wikipedia.org/wiki/Main_Page",
-                    type="rel-canonical",
-                )
-            ],
-            meta=[
-                DocumentMeta(
-                    claimant="https://en.wikipedia.org/wiki/Home",
-                    type="title",
-                    value="Wikipedia, the free encyclopedia",
-                )
-            ],
-        )
+    def duplicate_docs(self, db_session, factories):
+        uri = "http://example.com/master"
 
-        db_session.add_all([master, duplicate_1, duplicate_2])
+        documents = []
+        for _ in range(3):
+            meta = factories.DocumentMeta()
+
+            documents.append(
+                factories.Document(
+                    document_uris=[
+                        factories.DocumentURI(claimant=meta.claimant, uri=uri)
+                    ],
+                    meta=[meta],
+                )
+            )
+
         db_session.flush()
 
-        master_ann_1 = models.Annotation(userid="luke", document_id=master.id)
-        master_ann_2 = models.Annotation(userid="alice", document_id=master.id)
-        duplicate_1_ann_1 = models.Annotation(userid="lucy", document_id=duplicate_1.id)
-        duplicate_1_ann_2 = models.Annotation(userid="bob", document_id=duplicate_1.id)
-        duplicate_2_ann_1 = models.Annotation(userid="amy", document_id=duplicate_2.id)
-        duplicate_2_ann_2 = models.Annotation(userid="dan", document_id=duplicate_2.id)
-        db_session.add_all(
-            [
-                master_ann_1,
-                master_ann_2,
-                duplicate_1_ann_1,
-                duplicate_1_ann_2,
-                duplicate_2_ann_1,
-                duplicate_2_ann_2,
-            ]
-        )
-        return (master, duplicate_1, duplicate_2)
+        for doc in documents:
+            db_session.add(models.Annotation(userid="userid", document_id=doc.id))
+
+        return documents
 
 
 class TestUpdateDocumentMetadata:
     def test_it_uses_the_target_uri_to_get_the_document(
-        self, annotation, Document, session
+        self, annotation, Document, mock_db_session, doc_uri_dicts
     ):
-        document_uri_dicts = [
-            {
-                "uri": "http://example.com/example_1",
-                "claimant": "http://example.com/claimant",
-                "type": "type",
-                "content_type": None,
-            },
-            {
-                "uri": "http://example.com/example_2",
-                "claimant": "http://example.com/claimant",
-                "type": "type",
-                "content_type": None,
-            },
-            {
-                "uri": "http://example.com/example_3",
-                "claimant": "http://example.com/claimant",
-                "type": "type",
-                "content_type": None,
-            },
-        ]
-
         update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             [],
-            document_uri_dicts,
+            doc_uri_dicts,
             annotation.created,
             annotation.updated,
         )
 
         Document.find_or_create_by_uris.assert_called_once_with(
-            session,
+            mock_db_session,
             annotation.target_uri,
-            [
-                "http://example.com/example_1",
-                "http://example.com/example_2",
-                "http://example.com/example_3",
-            ],
+            [data["uri"] for data in doc_uri_dicts],
             created=annotation.created,
             updated=annotation.updated,
         )
 
     def test_if_there_are_multiple_documents_it_merges_them_into_one(
-        self, annotation, Document, merge_documents, session
+        self, annotation, Document, merge_documents, mock_db_session
     ):
-        """If it finds more than one document it calls merge_documents()."""
         Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=3)
         )
 
         update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             [],
             [],
@@ -453,30 +307,29 @@ class TestUpdateDocumentMetadata:
         )
 
         merge_documents.assert_called_once_with(
-            session,
+            mock_db_session,
             Document.find_or_create_by_uris.return_value,
             updated=annotation.updated,
         )
 
-    def test_it_calls_first(self, annotation, session, Document):
-        """If it finds only one document it calls first()."""
+    def test_it_calls_first_document_found(self, annotation, mock_db_session, Document):
         Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=1)
         )
 
-        update_document_metadata(session, annotation, [], [])
+        update_document_metadata(mock_db_session, annotation, [], [])
 
         Document.find_or_create_by_uris.return_value.first.assert_called_once_with()
 
     def test_it_updates_document_updated(
-        self, annotation, Document, merge_documents, session
+        self, annotation, Document, merge_documents, mock_db_session
     ):
         yesterday_ = "yesterday"
         document_ = merge_documents.return_value = mock.Mock(updated=yesterday_)
         Document.find_or_create_by_uris.return_value.first.return_value = document_
 
         update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             [],
             [],
@@ -487,60 +340,43 @@ class TestUpdateDocumentMetadata:
         assert document_.updated == annotation.updated
 
     def test_it_saves_all_the_document_uris(
-        self, session, annotation, Document, create_or_update_document_uri
+        self,
+        mock_db_session,
+        annotation,
+        Document,
+        create_or_update_document_uri,
+        doc_uri_dicts,
     ):
-        """It creates or updates a DocumentURI for each document URI dict."""
         Document.find_or_create_by_uris.return_value.count.return_value = 1
 
-        document_uri_dicts = [
-            {
-                "uri": "http://example.com/example_1",
-                "claimant": "http://example.com/claimant",
-                "type": "type",
-                "content_type": None,
-            },
-            {
-                "uri": "http://example.com/example_2",
-                "claimant": "http://example.com/claimant",
-                "type": "type",
-                "content_type": None,
-            },
-            {
-                "uri": "http://example.com/example_3",
-                "claimant": "http://example.com/claimant",
-                "type": "type",
-                "content_type": None,
-            },
-        ]
-
         update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             [],
-            document_uri_dicts,
+            doc_uri_dicts,
             annotation.created,
             annotation.updated,
         )
 
         assert create_or_update_document_uri.call_count == 3
-        for doc_uri_dict in document_uri_dicts:
+        for doc_uri_dict in doc_uri_dicts:
             create_or_update_document_uri.assert_any_call(
-                session=session,
+                session=mock_db_session,
                 document=Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
-                **doc_uri_dict
+                **doc_uri_dict,
             )
 
     def test_it_updates_document_web_uri(
-        self, annotation, Document, factories, session
+        self, annotation, Document, factories, mock_db_session
     ):
         document_ = mock.Mock(web_uri=None)
         Document.find_or_create_by_uris.return_value.count.return_value = 1
         Document.find_or_create_by_uris.return_value.first.return_value = document_
 
         update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             [],
             [],
@@ -550,32 +386,33 @@ class TestUpdateDocumentMetadata:
 
         document_.update_web_uri.assert_called_once_with()
 
-    def test_it_saves_all_the_document_metas(
-        self, annotation, create_or_update_document_meta, Document, session
-    ):
-        """It creates or updates a DocumentMeta for each document meta dict."""
-        Document.find_or_create_by_uris.return_value.count.return_value = 1
+    @pytest.fixture
+    def doc_uri_dicts(self):
+        return [
+            {
+                "uri": f"http://example.com/example_{i}",
+                "claimant": "http://example.com/claimant",
+                "type": "type",
+                "content_type": None,
+            }
+            for i in range(3)
+        ]
 
+    def test_it_saves_all_the_document_metas(
+        self, annotation, create_or_update_document_meta, Document, mock_db_session
+    ):
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
         document_meta_dicts = [
             {
+                "type": f"title_{i}",
+                "value": f"value_{i}",
                 "claimant": "http://example.com/claimant",
-                "type": "title",
-                "value": "foo",
-            },
-            {
-                "type": "article title",
-                "value": "bar",
-                "claimant": "http://example.com/claimant",
-            },
-            {
-                "type": "site title",
-                "value": "gar",
-                "claimant": "http://example.com/claimant",
-            },
+            }
+            for i in range(3)
         ]
 
         update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             document_meta_dicts,
             [],
@@ -586,20 +423,20 @@ class TestUpdateDocumentMetadata:
         assert create_or_update_document_meta.call_count == 3
         for document_meta_dict in document_meta_dicts:
             create_or_update_document_meta.assert_any_call(
-                session=session,
+                session=mock_db_session,
                 document=Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
-                **document_meta_dict
+                **document_meta_dict,
             )
 
     def test_it_returns_a_document(
-        self, annotation, create_or_update_document_meta, Document, session
+        self, annotation, create_or_update_document_meta, Document, mock_db_session
     ):
         Document.find_or_create_by_uris.return_value.count.return_value = 1
 
         result = update_document_metadata(
-            session,
+            mock_db_session,
             annotation.target_uri,
             [],
             [],
@@ -632,7 +469,3 @@ class TestUpdateDocumentMetadata:
     @pytest.fixture(autouse=True)
     def merge_documents(self, patch):
         return patch("h.models.document._document.merge_documents")
-
-    @pytest.fixture
-    def session(self, db_session):
-        return mock.Mock(spec=db_session)
