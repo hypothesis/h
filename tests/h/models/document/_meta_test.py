@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 import sqlalchemy as sa
+from h_matchers import Any
 
 from h.models import Document, DocumentMeta
 from h.models.document import ConcurrentUpdateError, create_or_update_document_meta
@@ -10,181 +11,76 @@ from tests.h.models.document.conftest import yesterday
 
 class TestCreateOrUpdateDocumentMeta:
     def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(
-        self, db_session
+        self, db_session, meta_attrs
     ):
-        claimant = "http://example.com/claimant"
-        type_ = "title"
-        value = "the title"
-        document = Document()
-        created = yesterday()
-        updated = datetime.now()
+        # Add one non-matching DocumentMeta to the database to be ignored.
+        db_session.add(DocumentMeta(**dict(meta_attrs, type="noise")))
 
-        # Add one non-matching DocumentMeta to the database.
-        # This should be ignored.
-        db_session.add(
-            DocumentMeta(
-                claimant=claimant,
-                # Different type means this should not match the query.
-                type="different",
-                value=value,
-                document=document,
-                created=created,
-                updated=updated,
-            )
-        )
-
-        create_or_update_document_meta(
-            session=db_session,
-            claimant=claimant,
-            type=type_,
-            value=value,
-            document=document,
-            created=created,
-            updated=updated,
-        )
+        create_or_update_document_meta(session=db_session, **meta_attrs)
 
         document_meta = db_session.query(DocumentMeta).all()[-1]
-        assert document_meta.claimant == claimant
-        assert document_meta.type == type_
-        assert document_meta.value == value
-        assert document_meta.document == document
-        assert document_meta.created == created
-        assert document_meta.updated == updated
+        assert document_meta == Any.object.with_attrs(meta_attrs)
 
-    def test_it_updates_an_existing_DocumentMeta_if_there_is_one(self, db_session):
-        claimant = "http://example.com/claimant"
-        type_ = "title"
-        value = "the title"
-        document = Document()
-        created = yesterday()
-        updated = datetime.now()
-        document_meta = DocumentMeta(
-            claimant=claimant,
-            type=type_,
-            value=value,
-            document=document,
-            created=created,
-            updated=updated,
-        )
-        db_session.add(document_meta)
-
-        new_updated = datetime.now()
-        create_or_update_document_meta(
-            session=db_session,
-            claimant=claimant,
-            type=type_,
+    def test_it_updates_an_existing_DocumentMeta_if_there_is_one(
+        self, db_session, meta_attrs
+    ):
+        original_attrs = meta_attrs
+        updated_attrs = dict(
+            original_attrs,
             value="new value",
             document=Document(),  # This should be ignored.
             created=datetime.now(),  # This should be ignored.
-            updated=new_updated,
+            updated=datetime.now(),
         )
+        document_meta = DocumentMeta(**original_attrs)
+        db_session.add(document_meta)
 
-        assert document_meta.value == "new value"
-        assert document_meta.updated == new_updated
-        assert document_meta.created == created, "It shouldn't update created"
-        assert document_meta.document == document, "It shouldn't update document"
+        create_or_update_document_meta(session=db_session, **updated_attrs)
+
+        assert document_meta.value == updated_attrs["value"]
+        assert document_meta.updated == updated_attrs["updated"]
+        assert document_meta.created == original_attrs["created"]
+        assert document_meta.document == original_attrs["document"]
         assert (
             len(db_session.query(DocumentMeta).all()) == 1
         ), "It shouldn't have added any new objects to the db"
 
-    def test_it_denormalizes_title_to_document_when_none(self, db_session):
-        claimant = "http://example.com/claimant"
-        type_ = "title"
-        value = ["the title"]
-        document = Document(title=None)
-        created = yesterday()
-        updated = datetime.now()
-        db_session.add(document)
-
-        create_or_update_document_meta(
-            session=db_session,
-            claimant=claimant,
-            type=type_,
-            value=value,
-            document=document,
-            created=created,
-            updated=updated,
-        )
-
-        document = db_session.query(Document).get(document.id)
-        assert document.title == value[0]
-
-    def test_it_denormalizes_title_to_document_when_empty(self, db_session):
-        claimant = "http://example.com/claimant"
-        type_ = "title"
-        value = ["the title"]
-        document = Document(title="")
-        created = yesterday()
-        updated = datetime.now()
-        db_session.add(document)
-
-        create_or_update_document_meta(
-            session=db_session,
-            claimant=claimant,
-            type=type_,
-            value=value,
-            document=document,
-            created=created,
-            updated=updated,
-        )
-
-        document = db_session.query(Document).get(document.id)
-        assert document.title == value[0]
-
-    def test_it_skips_denormalizing_title_to_document_when_already_set(
-        self, db_session
+    @pytest.mark.parametrize(
+        "doc_title,final_title",
+        ((None, "attr_title"), ("", "attr_title"), ("doc_title", "doc_title")),
+    )
+    def test_it_denormalizes_title_to_document_when_falsy(
+        self, db_session, meta_attrs, doc_title, final_title
     ):
-        claimant = "http://example.com/claimant"
-        type_ = "title"
-        value = ["the title"]
-        document = Document(title="foobar")
-        created = yesterday()
-        updated = datetime.now()
+        meta_attrs["value"] = ["attr_title"]
+        meta_attrs["document"] = document = Document(title=doc_title)
+
         db_session.add(document)
 
-        create_or_update_document_meta(
-            session=db_session,
-            claimant=claimant,
-            type=type_,
-            value=value,
-            document=document,
-            created=created,
-            updated=updated,
-        )
+        create_or_update_document_meta(session=db_session, **meta_attrs)
 
         document = db_session.query(Document).get(document.id)
-        assert document.title == "foobar"
+        assert document.title == final_title
 
-    def test_it_logs_a_warning(self, log, mock_db_session, factories):
-        """
-        It should warn on document mismatches.
-
-        It should warn if there's an existing DocumentMeta with a different
-        Document.
-        """
+    def test_it_logs_a_warning_with_existing_meta_on_a_different_doc(
+        self, log, mock_db_session, factories, meta_attrs
+    ):
         document_one = factories.Document()
         document_two = factories.Document()
         existing_document_meta = factories.DocumentMeta(document=document_one)
-
         mock_db_session.query.return_value.filter.return_value.one_or_none.return_value = (
             existing_document_meta
         )
 
         create_or_update_document_meta(
-            session=mock_db_session,
-            claimant="http://example.com/claimant",
-            type="title",
-            value="new value",
-            document=document_two,
-            created=yesterday(),
-            updated=datetime.now(),
+            session=mock_db_session, **dict(meta_attrs, document=document_two)
         )
 
         assert log.warning.call_count == 1
 
-    def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
-        document = Document()
-
+    def test_raises_retryable_error_when_flush_fails(
+        self, db_session, monkeypatch, meta_attrs
+    ):
         def err():
             raise sa.exc.IntegrityError(None, None, None)
 
@@ -192,15 +88,18 @@ class TestCreateOrUpdateDocumentMeta:
 
         with pytest.raises(ConcurrentUpdateError):
             with db_session.no_autoflush:  # prevent premature IntegrityError
-                create_or_update_document_meta(
-                    session=db_session,
-                    claimant="http://example.com",
-                    type="title",
-                    value="My Title",
-                    document=document,
-                    created=datetime.now(),
-                    updated=datetime.now(),
-                )
+                create_or_update_document_meta(session=db_session, **meta_attrs)
+
+    @pytest.fixture
+    def meta_attrs(self):
+        return {
+            "claimant": "http://example.com/claimant",
+            "type": "title",
+            "value": "the title",
+            "document": Document(),
+            "created": yesterday(),
+            "updated": datetime.now(),
+        }
 
     @pytest.fixture
     def log(self, patch):
