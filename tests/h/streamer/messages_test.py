@@ -168,6 +168,21 @@ class TestHandleAnnotationEvent:
             }
         )
 
+    def test_it_filters_the_sockets(
+        self,
+        handle_annotation_event,
+        SocketFilter,
+        fetch_annotation,
+        socket,
+        db_session,
+    ):
+
+        handle_annotation_event(sockets=[socket], session=db_session)
+
+        SocketFilter.matching.assert_called_once_with(
+            [socket], fetch_annotation.return_value, db_session
+        )
+
     def test_no_send_for_sender_socket(self, handle_annotation_event, socket, message):
         message["src_client_id"] = socket.client_id
 
@@ -178,7 +193,8 @@ class TestHandleAnnotationEvent:
     def test_no_send_if_filter_does_not_match(
         self, handle_annotation_event, socket, SocketFilter
     ):
-        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(())
+        SocketFilter.matching.side_effect = None
+        SocketFilter.matching.return_value = iter(())
         handle_annotation_event(sockets=[socket])
 
         socket.send_json.assert_not_called()
@@ -296,7 +312,9 @@ class TestHandleAnnotationEvent:
     @pytest.fixture(autouse=True)
     def SocketFilter(self, patch):
         SocketFilter = patch("h.streamer.messages.SocketFilter")
-        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)
+        SocketFilter.matching.side_effect = (
+            lambda sockets, annotation, db_session: iter(sockets)
+        )
         return SocketFilter
 
 

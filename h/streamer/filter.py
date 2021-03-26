@@ -1,3 +1,4 @@
+from h import storage
 from h.util.uri import normalize as normalize_uri
 
 FILTER_SCHEMA = {
@@ -28,7 +29,7 @@ class SocketFilter:
     KNOWN_FIELDS = {"/id", "/uri", "/references"}
 
     @classmethod
-    def matching(cls, sockets, annotation):
+    def matching(cls, sockets, annotation, session):
         """Find sockets with matching filters for the given annotation.
 
         For this to work, the sockets must have first had `set_filter()` called
@@ -36,11 +37,18 @@ class SocketFilter:
 
         :param sockets: Iterable of sockets to check
         :param annotation: Annotation to match
+        :param session: DB session
+
         :return: A generator of matching socket objects
         """
+
         values = {
             "/id": [annotation.id],
-            "/uri": [normalize_uri(annotation.target_uri)],
+            # Expand the URI to ensure we match any variants of it. This should
+            # match the normalization when searching (see `h.search.query`)
+            "/uri": set(
+                storage.expand_uri(session, annotation.target_uri, normalized=True)
+            ),
             "/references": set(annotation.references),
         }
 

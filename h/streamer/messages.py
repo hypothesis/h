@@ -108,7 +108,7 @@ def handle_annotation_event(message, sockets, request, session):
         return
 
     # Find connected clients which are interested in this annotation.
-    matching_sockets = SocketFilter.matching(sockets, annotation)
+    matching_sockets = SocketFilter.matching(sockets, annotation, session)
 
     try:
         # Check to see if the generator has any items

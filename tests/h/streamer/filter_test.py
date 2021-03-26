@@ -3,6 +3,7 @@ from random import random
 
 import pytest
 from h_matchers import Any
+from pytest import param
 
 from h.streamer.filter import SocketFilter
 
@@ -46,6 +47,42 @@ class TestFilterHandler:
 
         assert filter_matches(filter_, ann) is should_match
 
+    @pytest.mark.parametrize(
+        "equivalent_uris",
+        [
+            param(["httpx://othersite.com/foo.pdf"], id="normalized_value"),
+            param(["urn:x-pdf:1234"], id="other_tokens"),
+            param(["noise", "httpx://othersite.com/foo.pdf"], id="value_with_noise"),
+        ],
+    )
+    def test_it_matches_equivalent_uri(
+        self, annotation, filter_matches, equivalent_uris, storage, db_session
+    ):
+        storage.expand_uri.return_value = equivalent_uris
+        filter_ = {
+            "match_policy": "include_any",
+            "actions": {},
+            "clauses": [
+                {
+                    "field": "/uri",
+                    "operator": "one_of",
+                    "value": [
+                        # The value here is normalized by `set_filter()`
+                        "https://othersite.com/foo.pdf",
+                        # A PDF fingerprint or another value
+                        "urn:x-pdf:1234",
+                    ],
+                }
+            ],
+        }
+
+        result = filter_matches(filter_, annotation)
+
+        assert result  # It matches!
+        storage.expand_uri.assert_called_once_with(
+            db_session, annotation.target_uri, normalized=True
+        )
+
     def test_it_matches_id(self, factories, filter_matches, annotation):
         other_annotation = factories.Annotation()
 
@@ -58,17 +95,17 @@ class TestFilterHandler:
         assert filter_matches(filter_, annotation)
         assert not filter_matches(filter_, other_annotation)
 
-    def test_it_does_not_crash_without_filter_rows(self, annotation):
+    def test_it_does_not_crash_without_filter_rows(self, annotation, db_session):
         socket_no_rows = FakeSocket()
 
-        result = tuple(SocketFilter.matching([socket_no_rows], annotation))
+        result = tuple(SocketFilter.matching([socket_no_rows], annotation, db_session))
         assert not result
 
-    def test_it_does_not_crash_with_unexpected_fields(self, annotation):
+    def test_it_does_not_crash_with_unexpected_fields(self, annotation, db_session):
         socket = FakeSocket()
         socket.filter_rows = (("/not_a_thing", "value"),)
 
-        result = tuple(SocketFilter.matching([socket], annotation))
+        result = tuple(SocketFilter.matching([socket], annotation, db_session))
         assert not result
 
     @pytest.mark.parametrize(
@@ -123,7 +160,7 @@ class TestFilterHandler:
         assert not filter_matches(filter_, ann)
 
     @pytest.mark.skip(reason="For dev purposes only")
-    def test_speed(self, factories):  # pragma: no cover
+    def test_speed(self, factories, db_session):  # pragma: no cover
         # I think the max number connected at once is 4096
         sockets = [FakeSocket() for _ in range(4096)]
 
@@ -134,7 +171,7 @@ class TestFilterHandler:
 
         start = datetime.utcnow()
         # This returns a generator, we need to force it to produce answers
-        tuple(SocketFilter.matching(sockets, ann))
+        tuple(SocketFilter.matching(sockets, ann, db_session))
 
         diff = datetime.utcnow() - start
         ms = diff.seconds * 1000 + diff.microseconds / 1000
@@ -170,15 +207,19 @@ class TestFilterHandler:
         }
 
     @pytest.fixture
+    def storage(self, patch):
+        return patch("h.streamer.filter.storage")
+
+    @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation()
 
     @pytest.fixture
-    def filter_matches(self):
+    def filter_matches(self, db_session):
         def filter_matches(filter, annotation):
             socket = FakeSocket()
             SocketFilter.set_filter(socket, filter)
 
-            return bool(tuple(SocketFilter.matching([socket], annotation)))
+            return bool(tuple(SocketFilter.matching([socket], annotation, db_session)))
 
         return filter_matches
