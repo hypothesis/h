@@ -224,6 +224,11 @@ class TestDocumentWebURI:
 
 
 class TestDocumentURI:
+    def test_it_normalizes_the_uri(self):
+        document_uri = document.DocumentURI(uri="http://example.com/")
+
+        assert document_uri.uri_normalized == "httpx://example.com"
+
     def test_type_defaults_to_empty_string(self, db_session):
         document_uri = document.DocumentURI(
             claimant="http://www.example.com",
