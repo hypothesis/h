@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from unittest.mock import Mock
 
 import pytest
 import sqlalchemy as sa
@@ -7,7 +8,6 @@ from h_matchers import Any
 from h.models.document import ConcurrentUpdateError, create_or_update_document_uri
 from h.models.document._document import Document
 from h.models.document._uri import DocumentURI
-from tests.h.models.document.conftest import yesterday
 
 
 class TestDocumentURI:
@@ -149,9 +149,13 @@ class TestCreateOrUpdateDocumentURI:
             "type": "self-claim",
             "content_type": "",
             "document": Document(),
-            "created": yesterday(),
-            "updated": yesterday(),
+            "created": datetime.now() - timedelta(days=1),
+            "updated": datetime.now() - timedelta(days=1),
         }
+
+    @pytest.fixture()
+    def mock_db_session(self, db_session):
+        return Mock(spec=db_session)
 
     @pytest.fixture
     def log(self, patch):

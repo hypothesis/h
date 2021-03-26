@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from unittest.mock import Mock
 
 import pytest
 import sqlalchemy as sa
@@ -6,7 +7,6 @@ from h_matchers import Any
 
 from h.models import Document, DocumentMeta
 from h.models.document import ConcurrentUpdateError, create_or_update_document_meta
-from tests.h.models.document.conftest import yesterday
 
 
 class TestCreateOrUpdateDocumentMeta:
@@ -97,9 +97,13 @@ class TestCreateOrUpdateDocumentMeta:
             "type": "title",
             "value": "the title",
             "document": Document(),
-            "created": yesterday(),
+            "created": datetime.now() - timedelta(days=1),
             "updated": datetime.now(),
         }
+
+    @pytest.fixture()
+    def mock_db_session(self, db_session):
+        return Mock(spec=db_session)
 
     @pytest.fixture
     def log(self, patch):

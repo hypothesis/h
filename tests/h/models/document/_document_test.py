@@ -1,10 +1,9 @@
 import functools
 import logging
-from unittest.mock import Mock, sentinel
+from unittest.mock import sentinel
 
 import pytest
 import sqlalchemy as sa
-from h_matchers import Any
 
 from h import models
 from h.models.document._document import (
@@ -17,7 +16,7 @@ from h.models.document._exceptions import ConcurrentUpdateError
 
 class TestDocumentFindByURIs:
     def test_with_one_matching_Document(self, db_session, factories):
-        _noise = factories.Document(document_uris=[factories.DocumentURI()])
+        factories.Document(document_uris=[factories.DocumentURI()])  # Noise
 
         matching_doc = factories.Document(
             document_uris=[factories.DocumentURI(), factories.DocumentURI()]
@@ -37,7 +36,7 @@ class TestDocumentFindByURIs:
         assert actual.first() == matching_doc
 
     def test_no_matches(self, db_session, factories):
-        _noise = factories.Document(document_uris=[factories.DocumentURI()])
+        factories.Document(document_uris=[factories.DocumentURI()])  # Noise
         db_session.flush()
 
         actual = Document.find_by_uris(
@@ -64,7 +63,7 @@ class TestDocumentFindOrCreateByURIs:
         assert actual.first() == doc_uri1.document
 
     def test_with_no_existing_documents_we_create_one(self, db_session, factories):
-        _noise = factories.DocumentURI()
+        factories.DocumentURI()  # Noise
         db_session.flush()
 
         documents = Document.find_or_create_by_uris(
