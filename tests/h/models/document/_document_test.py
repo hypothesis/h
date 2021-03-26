@@ -105,82 +105,65 @@ class TestDocumentWebURI:
         assert factories.Document().web_uri is None
 
     @pytest.mark.parametrize(
-        "document_uris,expected_web_uri",
-        [
-            # Given a single http or https URL it just uses it.
-            ([("http://example.com", "self-claim")], "http://example.com"),
-            ([("https://example.com", "self-claim")], "https://example.com"),
-            ([("http://example.com", "rel-canonical")], "http://example.com"),
-            ([("https://example.com", "rel-canonical")], "https://example.com"),
-            ([("http://example.com", "rel-shortlink")], "http://example.com"),
-            ([("https://example.com", "rel-shortlink")], "https://example.com"),
-            # Given no http or https URLs it sets web_uri to None.
-            ([], None),
-            (
-                [
-                    ("ftp://example.com", "self-claim"),
-                    ("android-app://example.com", "rel-canonical"),
-                    ("urn:x-pdf:example", "rel-alternate"),
-                    ("doi:http://example.com", "rel-shortlink"),
-                ],
-                None,
-            ),
-            # It prefers self-claim URLs over all other URLs.
-            (
-                [
-                    ("https://example.com/shortlink", "rel-shortlink"),
-                    ("https://example.com/canonical", "rel-canonical"),
-                    ("https://example.com/self-claim", "self-claim"),
-                ],
-                "https://example.com/self-claim",
-            ),
-            # It prefers canonical URLs over all other non-self-claim URLs.
-            (
-                [
-                    ("https://example.com/shortlink", "rel-shortlink"),
-                    ("https://example.com/canonical", "rel-canonical"),
-                ],
-                "https://example.com/canonical",
-            ),
-            # If there's no self-claim or canonical URL it will return an https
-            # URL of a different type.
-            (
-                [
-                    ("ftp://example.com", "self-claim"),
-                    ("urn:x-pdf:example", "rel-alternate"),
-                    # This is the one that should be returned.
-                    ("https://example.com/alternate", "rel-alternate"),
-                    ("android-app://example.com", "rel-canonical"),
-                    ("doi:http://example.com", "rel-shortlink"),
-                ],
-                "https://example.com/alternate",
-            ),
-            # If there's no self-claim or canonical URL it will return an http
-            # URL of a different type.
-            (
-                [
-                    ("ftp://example.com", "self-claim"),
-                    ("urn:x-pdf:example", "rel-alternate"),
-                    # This is the one that should be returned.
-                    ("http://example.com/alternate", "rel-alternate"),
-                    ("android-app://example.com", "rel-canonical"),
-                    ("doi:http://example.com", "rel-shortlink"),
-                ],
-                "http://example.com/alternate",
-            ),
-        ],
+        "non_http_url",
+        (
+            "ftp://example.com",
+            "android-app://example.com",
+            "urn:x-pdf:example",
+            "doi:http://example.com",
+        ),
     )
-    def test_update_web_uri(self, document_uris, factories, expected_web_uri):
-        document = factories.Document()
+    def test_it_ignores_all_non_http_urls(self, factories, non_http_url, url_type):
+        self.assert_expected_web_uri_set(
+            factories, [(non_http_url, url_type)], expected=None
+        )
 
-        for doc_uri_tuple in document_uris:
-            factories.DocumentURI(
-                uri=doc_uri_tuple[0], type=doc_uri_tuple[1], document=document
-            )
+    def test_it_picks_the_first_http_value_when_the_types_are_the_same(
+        self, factories, url_type
+    ):
+        self.assert_expected_web_uri_set(
+            factories,
+            [
+                ("ftp://example.com/noise", url_type),
+                ("http://example.com/first", url_type),
+                ("https://example.com/second", url_type),
+            ],
+            expected="http://example.com/first",
+        )
+
+    @pytest.mark.parametrize(
+        "higher,lower",
+        (
+            ("self-claim", "rel-canonical"),
+            ("self-claim", "rel-shortlink"),
+            ("rel-canonical", "rel-shortlink"),
+        ),
+    )
+    def test_it_prefers_certain_types_over_others(self, factories, higher, lower):
+        self.assert_expected_web_uri_set(
+            factories,
+            [
+                ("https://example.com/lower", lower),
+                ("https://example.com/higher", higher),
+            ],
+            expected="https://example.com/higher",
+        )
+
+    def assert_expected_web_uri_set(self, factories, document_uris, expected):
+        document = factories.Document(
+            document_uris=[
+                factories.DocumentURI(uri=uri, type=uri_type)
+                for uri, uri_type in document_uris
+            ]
+        )
 
         document.update_web_uri()
 
-        assert document.web_uri == expected_web_uri
+        assert document.web_uri == expected
+
+    @pytest.fixture(params=("self-claim", "rel-canonical", "rel-shortlink"))
+    def url_type(self, request):
+        return request.param
 
 
 @pytest.mark.usefixtures("duplicate_docs")
