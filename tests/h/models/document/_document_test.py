@@ -1,8 +1,10 @@
+import functools
 import logging
-from unittest import mock
+from unittest.mock import Mock, sentinel
 
 import pytest
 import sqlalchemy as sa
+from h_matchers import Any
 
 from h import models
 from h.models.document._document import (
@@ -53,7 +55,9 @@ class TestDocumentFindOrCreateByURIs:
         db_session.flush()
 
         actual = Document.find_or_create_by_uris(
-            db_session, doc_uri1.uri, [doc_uri1.claimant, doc_uri2.claimant]
+            db_session,
+            claimant_uri=doc_uri1.uri,
+            uris=[doc_uri1.claimant, doc_uri2.claimant],
         )
 
         assert actual.count() == 1
@@ -65,8 +69,8 @@ class TestDocumentFindOrCreateByURIs:
 
         documents = Document.find_or_create_by_uris(
             db_session,
-            "https://en.wikipedia.org/wiki/Pluto",
-            ["https://m.en.wikipedia.org/wiki/Pluto"],
+            claimant_uri="https://en.wikipedia.org/wiki/Pluto",
+            uris=["https://m.en.wikipedia.org/wiki/Pluto"],
         )
 
         assert documents.count() == 1
@@ -271,120 +275,112 @@ class TestMergeDocuments:
 
 class TestUpdateDocumentMetadata:
     def test_it_uses_the_target_uri_to_get_the_document(
-        self, annotation, Document, mock_db_session, doc_uri_dicts
+        self, Document, caller, doc_uri_dicts
     ):
-        update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            [],
-            doc_uri_dicts,
-            annotation.created,
-            annotation.updated,
+        caller(
+            session=sentinel.session,
+            target_uri=sentinel.target_uri,
+            document_uri_dicts=doc_uri_dicts,
+            created=sentinel.created,
+            updated=sentinel.created,
         )
 
         Document.find_or_create_by_uris.assert_called_once_with(
-            mock_db_session,
-            annotation.target_uri,
+            sentinel.session,
+            sentinel.target_uri,
             [data["uri"] for data in doc_uri_dicts],
-            created=annotation.created,
-            updated=annotation.updated,
+            created=sentinel.created,
+            updated=sentinel.created,
         )
 
     def test_if_there_are_multiple_documents_it_merges_them_into_one(
-        self, annotation, Document, merge_documents, mock_db_session
+        self, Document, merge_documents, caller
     ):
-        Document.find_or_create_by_uris.return_value = mock.Mock(
-            count=mock.Mock(return_value=3)
-        )
+        Document.find_or_create_by_uris.return_value.count.return_value = 3
 
-        update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            [],
-            [],
-            annotation.created,
-            annotation.updated,
-        )
+        result = caller(session=sentinel.session, updated=sentinel.updated)
 
+        assert result == merge_documents.return_value
         merge_documents.assert_called_once_with(
-            mock_db_session,
+            sentinel.session,
             Document.find_or_create_by_uris.return_value,
-            updated=annotation.updated,
+            updated=sentinel.updated,
         )
 
-    def test_it_calls_first_document_found(self, annotation, mock_db_session, Document):
-        Document.find_or_create_by_uris.return_value = mock.Mock(
-            count=mock.Mock(return_value=1)
-        )
+    def test_it_for_single_documents_we_return_the_first(self, Document, caller):
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
 
-        update_document_metadata(mock_db_session, annotation, [], [])
+        result = caller()
 
-        Document.find_or_create_by_uris.return_value.first.assert_called_once_with()
+        first = Document.find_or_create_by_uris.return_value.first
+        first.assert_called_once_with()
+        assert result == first.return_value
 
-    def test_it_updates_document_updated(
-        self, annotation, Document, merge_documents, mock_db_session
-    ):
-        yesterday_ = "yesterday"
-        document_ = merge_documents.return_value = mock.Mock(updated=yesterday_)
-        Document.find_or_create_by_uris.return_value.first.return_value = document_
+    def test_it_updates_document_updated(self, Document, merge_documents, caller):
+        caller(updated=sentinel.updated)
 
-        update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            [],
-            [],
-            annotation.created,
-            annotation.updated,
-        )
-
-        assert document_.updated == annotation.updated
+        document = Document.find_or_create_by_uris.return_value.first.return_value
+        assert document.updated == sentinel.updated
 
     def test_it_saves_all_the_document_uris(
-        self,
-        mock_db_session,
-        annotation,
-        Document,
-        create_or_update_document_uri,
-        doc_uri_dicts,
+        self, Document, create_or_update_document_uri, doc_uri_dicts, caller
     ):
-        Document.find_or_create_by_uris.return_value.count.return_value = 1
-
-        update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            [],
-            doc_uri_dicts,
-            annotation.created,
-            annotation.updated,
+        self.assert_sub_items_stored(
+            Document,
+            caller,
+            field="document_uri_dicts",
+            data_items=doc_uri_dicts,
+            storage_fn=create_or_update_document_uri,
         )
 
-        assert create_or_update_document_uri.call_count == 3
-        for doc_uri_dict in doc_uri_dicts:
-            create_or_update_document_uri.assert_any_call(
-                session=mock_db_session,
+    def test_it_updates_document_web_uri(self, Document, caller):
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+
+        caller()
+
+        document = Document.find_or_create_by_uris.return_value.first.return_value
+        document.update_web_uri.assert_called_once_with()
+
+    def test_it_saves_all_the_document_metas(
+        self, create_or_update_document_meta, Document, caller
+    ):
+        document_meta_dicts = [
+            {
+                "type": f"title_{i}",
+                "value": f"value_{i}",
+                "claimant": "http://example.com/claimant",
+            }
+            for i in range(3)
+        ]
+
+        self.assert_sub_items_stored(
+            Document,
+            caller,
+            field="document_meta_dicts",
+            data_items=document_meta_dicts,
+            storage_fn=create_or_update_document_meta,
+        )
+
+    def assert_sub_items_stored(self, Document, caller, field, data_items, storage_fn):
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+
+        caller(
+            session=sentinel.session,
+            created=sentinel.created,
+            updated=sentinel.updated,
+            **{field: data_items},
+        )
+
+        assert storage_fn.call_count == len(data_items)
+
+        for item in data_items:
+            storage_fn.assert_any_call(
+                session=sentinel.session,
                 document=Document.find_or_create_by_uris.return_value.first.return_value,
-                created=annotation.created,
-                updated=annotation.updated,
-                **doc_uri_dict,
+                created=sentinel.created,
+                updated=sentinel.updated,
+                **item,
             )
-
-    def test_it_updates_document_web_uri(
-        self, annotation, Document, factories, mock_db_session
-    ):
-        document_ = mock.Mock(web_uri=None)
-        Document.find_or_create_by_uris.return_value.count.return_value = 1
-        Document.find_or_create_by_uris.return_value.first.return_value = document_
-
-        update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            [],
-            [],
-            annotation.created,
-            annotation.updated,
-        )
-
-        document_.update_web_uri.assert_called_once_with()
 
     @pytest.fixture
     def doc_uri_dicts(self):
@@ -398,59 +394,17 @@ class TestUpdateDocumentMetadata:
             for i in range(3)
         ]
 
-    def test_it_saves_all_the_document_metas(
-        self, annotation, create_or_update_document_meta, Document, mock_db_session
-    ):
-        Document.find_or_create_by_uris.return_value.count.return_value = 1
-        document_meta_dicts = [
-            {
-                "type": f"title_{i}",
-                "value": f"value_{i}",
-                "claimant": "http://example.com/claimant",
-            }
-            for i in range(3)
-        ]
-
-        update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            document_meta_dicts,
-            [],
-            annotation.created,
-            annotation.updated,
-        )
-
-        assert create_or_update_document_meta.call_count == 3
-        for document_meta_dict in document_meta_dicts:
-            create_or_update_document_meta.assert_any_call(
-                session=mock_db_session,
-                document=Document.find_or_create_by_uris.return_value.first.return_value,
-                created=annotation.created,
-                updated=annotation.updated,
-                **document_meta_dict,
-            )
-
-    def test_it_returns_a_document(
-        self, annotation, create_or_update_document_meta, Document, mock_db_session
-    ):
-        Document.find_or_create_by_uris.return_value.count.return_value = 1
-
-        result = update_document_metadata(
-            mock_db_session,
-            annotation.target_uri,
-            [],
-            [],
-            annotation.created,
-            annotation.updated,
-        )
-
-        assert result == Document.find_or_create_by_uris.return_value.first.return_value
-
     @pytest.fixture
-    def annotation(self):
-        # We can't use the factories here because our factories use the methods
-        # under test / being mocked here to create annotations
-        return mock.Mock(spec=models.Annotation())
+    def caller(self, db_session):
+        return functools.partial(
+            update_document_metadata,
+            session=sentinel.db_session,
+            target_uri=sentinel.target_uri,
+            created=sentinel.created,
+            updated=sentinel.updated,
+            document_meta_dicts=[],
+            document_uri_dicts=[],
+        )
 
     @pytest.fixture
     def Document(self, patch):
