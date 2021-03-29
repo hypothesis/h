@@ -44,7 +44,7 @@ gevent==21.1.2
     # via -r requirements/requirements.in
 greenlet==0.4.17
     # via gevent
-gunicorn==20.0.4
+gunicorn==20.1.0
     # via -r requirements/requirements.in
 h-api==1.0.0
     # via -r requirements/requirements.in
