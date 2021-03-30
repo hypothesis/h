@@ -10,7 +10,7 @@ amqp==2.6.1
     # via
     #   -r requirements/requirements.txt
     #   kombu
-astroid==2.5.1
+astroid==2.5.2
     # via pylint
 attrs==20.2.0
     # via
@@ -170,7 +170,7 @@ pycparser==2.20
     #   cffi
 pyjwt==2.0.1
     # via -r requirements/requirements.txt
-pylint==2.7.2
+pylint==2.7.4
     # via -r requirements/analyze.in
 pyparsing==2.4.7
     # via
