@@ -24,7 +24,7 @@ cryptography==3.3.2
 distro==1.5.0
     # via docker-compose
 docker-compose==1.28.6
-    # via -r dockercompose.in
+    # via -r requirements/dockercompose.in
 docker[ssh]==4.4.4
     # via docker-compose
 dockerpty==0.4.1
