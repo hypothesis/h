@@ -154,6 +154,12 @@ def normalize(uristr):
     # Try to extract the scheme
     uri = urlsplit(uristr)
 
+    # Case-normalize DOI because DOIs are case insensitive.
+    # https://www.doi.org/doi_handbook/2_Numbering.html#2.4
+    # This normalization allows comparing 'doi:/10.12345/AbC' == 'doi:/10.12345/aBc'
+    if uri.scheme == "doi" or (uri.scheme == "urn" and uri.path.startswith("doi:")):
+        return uristr.lower()
+
     # If this isn't a URL, we don't perform any normalization
     if uri.scheme.lower() not in URL_SCHEMES:
         return uristr

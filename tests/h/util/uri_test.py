@@ -35,8 +35,6 @@ class TestURINormalise:
     @pytest.mark.parametrize(
         "url_in,url_out",
         (
-            # Should leave URNs as they are
-            ("urn:doi:10.0001/12345", "urn:doi:10.0001/12345"),
             # Should leave http(s) URLs with no hostname as they are
             ("http:///path/to/page", "http:///path/to/page"),
             ("https:///path/to/page", "https:///path/to/page"),
@@ -62,6 +60,8 @@ class TestURINormalise:
             # Should case-normalize hostname
             ("http://EXAMPLE.COM", "httpx://example.com"),
             ("http://EXampLE.COM", "httpx://example.com"),
+            ("urn:doi:10.0001/JoM.1", "urn:doi:10.0001/jom.1"),
+            ("doi:10.0001/JoM.1", "doi:10.0001/jom.1"),
             # Should leave userinfo case alone
             ("http://Alice:p4SSword@example.com", "httpx://Alice:p4SSword@example.com"),
             ("http://BOB@example.com", "httpx://BOB@example.com"),
