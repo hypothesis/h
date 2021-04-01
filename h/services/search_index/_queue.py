@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from dateutil.parser import isoparse
-from sqlalchemy import and_, func, select, text
+from sqlalchemy import and_, func, literal_column, select
 from zope.sqlalchemy import mark_changed
 
 from h.db.types import URLSafeUUID
@@ -61,10 +61,10 @@ class Queue:
             [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
             select(
                 [
-                    text("'sync_annotation'"),
-                    text(f"'{schedule_at}'"),
-                    text(str(priority)),
-                    text(repr(tag)),
+                    literal_column("'sync_annotation'"),
+                    literal_column(f"'{schedule_at}'"),
+                    literal_column(str(priority)),
+                    literal_column(repr(tag)),
                     func.jsonb_build_object(
                         "annotation_id", Annotation.id, "force", bool(force)
                     ),
