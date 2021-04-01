@@ -19,7 +19,7 @@ class FlagCountService:
         """
         return (
             self._session.query(sa.func.count(Flag.id))
-            .filter_by(annotation_id=annotation.id)
+            .filter(Flag.annotation_id == annotation.id)
             .scalar()
         )
 
