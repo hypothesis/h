@@ -124,7 +124,10 @@ class AuthClientRoot(RootFactory):
             client = self.request.db.query(AuthClient).filter_by(id=client_id).one()
         except sqlalchemy.orm.exc.NoResultFound:
             raise KeyError()
-        except sqlalchemy.exc.DataError:  # Happens when client_id is not a valid UUID.
+        except (
+            sqlalchemy.exc.StatementError,
+            sqlalchemy.exc.DataError,
+        ):  # Happens when client_id is not a valid UUID.
             raise KeyError()
 
         # Add the default root factory to this resource's lineage so that the default
