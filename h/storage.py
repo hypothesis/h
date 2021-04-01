@@ -239,7 +239,7 @@ def expand_uri(session, uri, normalized=False):
         session.query(models.DocumentURI.document_id)
         .filter(models.DocumentURI.uri_normalized == normalized_uri)
         .limit(1)
-        .subquery()
+        .scalar_subquery()
     )
 
     type_uris = list(
