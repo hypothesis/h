@@ -252,7 +252,7 @@ six==1.15.0
     #   packaging
     #   python-dateutil
     #   traitlets
-sqlalchemy==1.4.3
+sqlalchemy==1.4.5
     # via
     #   -r requirements/requirements.txt
     #   alembic

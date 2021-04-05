@@ -240,7 +240,7 @@ six==1.15.0
     #   webtest
 soupsieve==2.0.1
     # via beautifulsoup4
-sqlalchemy==1.4.3
+sqlalchemy==1.4.5
     # via
     #   -r requirements/requirements.txt
     #   alembic
