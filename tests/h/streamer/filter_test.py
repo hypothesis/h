@@ -95,6 +95,24 @@ class TestFilterHandler:
         assert filter_matches(filter_, annotation)
         assert not filter_matches(filter_, other_annotation)
 
+    def test_it_matches_group_id(self, factories, filter_matches, annotation):
+        other_annotation = factories.Annotation(groupid="other")
+
+        filter_ = {
+            "match_policy": "include_any",
+            "actions": {},
+            "clauses": [
+                {
+                    "field": "/group",
+                    "operator": "equals",
+                    "value": [annotation.groupid],
+                }
+            ],
+        }
+
+        assert filter_matches(filter_, annotation)
+        assert not filter_matches(filter_, other_annotation)
+
     def test_it_does_not_crash_without_filter_rows(self, annotation, db_session):
         socket_no_rows = FakeSocket()
 
@@ -111,16 +129,28 @@ class TestFilterHandler:
     @pytest.mark.parametrize(
         "field,value,expected",
         (
+            # Single value
             ("/id", "v1", [("/id", "v1")]),
             ("/references", "v1", [("/references", "v1")]),
             ("/uri", "v1", [("/uri", "v1")]),
-            # Mapping
-            ("/uri", "http://example.com", [("/uri", "httpx://example.com")]),
+            ("/group", "v1", [("/group", "v1")]),
             # Multiple values
             ("/id", ["v1", "v2"], [("/id", "v1"), ("/id", "v2")]),
             ("/id", ["same", "same"], [("/id", "same")]),
+            (
+                "/references",
+                ["v1", "v2"],
+                [("/references", "v1"), ("/references", "v2")],
+            ),
+            ("/references", ["same", "same"], [("/references", "same")]),
+            ("/uri", ["v1", "v2"], [("/uri", "v1"), ("/uri", "v2")]),
+            ("/uri", ["same", "same"], [("/uri", "same")]),
+            ("/group", ["v1", "v2"], [("/group", "v1"), ("/group", "v2")]),
+            ("/group", ["same", "same"], [("/group", "same")]),
+            # Mapping
+            ("/uri", "http://example.com", [("/uri", "httpx://example.com")]),
             # Ignored
-            ("/group", "v1", []),
+            ("/filter", "v1", []),
             ("/random", "v1", []),
         ),
     )
@@ -201,6 +231,14 @@ class TestFilterHandler:
                     "value": [
                         "https://example.com",
                         "https://example.org" + str(random()),
+                    ],
+                },
+                {
+                    "field": "/group",
+                    "operator": "equals",
+                    "value": [
+                        "3jgSANNlEeebpLMf36MACw" + str(random()),
+                        "3jgSANNlEeebpLMf36MACw" + str(random()),
                     ],
                 },
             ],
