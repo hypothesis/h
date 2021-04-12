@@ -46,13 +46,13 @@ snowballstemmer==2.0.0
     # via sphinx
 sphinx-autobuild==2021.3.14
     # via -r requirements/docs.in
-sphinx==3.5.3
+sphinx-rtd-theme==0.5.2
+    # via -r requirements/docs.in
+sphinx==3.5.4
     # via
     #   -r requirements/docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
-sphinx_rtd_theme==0.5.2
-    # via -r requirements/docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
