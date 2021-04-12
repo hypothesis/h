@@ -26,7 +26,7 @@ FILTER_SCHEMA = {
 
 
 class SocketFilter:
-    KNOWN_FIELDS = {"/id", "/group", "/uri", "/references"}
+    KNOWN_FIELDS = {"/id", "/group", "/user", "/uri", "/references"}
 
     @classmethod
     def matching(cls, sockets, annotation, session):
@@ -45,6 +45,7 @@ class SocketFilter:
         values = {
             "/id": [annotation.id],
             "/group": [annotation.groupid],
+            "/user": [annotation.userid],
             # Expand the URI to ensure we match any variants of it. This should
             # match the normalization when searching (see `h.search.query`)
             "/uri": set(
