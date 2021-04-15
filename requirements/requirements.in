@@ -19,7 +19,6 @@ elasticsearch==6.8.2
 elasticsearch-dsl==6.3.1
 gevent >= 1.4.0
 gunicorn >= 19.9.0
-hkdf
 itsdangerous
 jsonschema
 kombu >= 4.2.1
@@ -29,6 +28,7 @@ oauthlib
 passlib
 psycogreen
 psycopg2
+pycryptodomex
 pyparsing >= 2.1.5
 pyramid
 pyramid_authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi
