@@ -54,8 +54,6 @@ h-matchers==1.2.10
     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.1
     # via -r requirements/requirements.in
-hkdf==0.0.3
-    # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
 importlib-metadata==1.7.0
@@ -112,6 +110,8 @@ psycopg2==2.8.6
     # via -r requirements/requirements.in
 pycparser==2.20
     # via cffi
+pycryptodomex==3.10.1
+    # via -r requirements/requirements.in
 pyjwt==2.0.1
     # via -r requirements/requirements.in
 pyparsing==2.4.7

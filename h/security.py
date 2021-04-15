@@ -1,8 +1,8 @@
 import base64
-import hashlib
 import os
 
-from hkdf import hkdf_expand, hkdf_extract
+from Cryptodome.Hash import SHA512
+from Cryptodome.Protocol.KDF import HKDF
 from passlib.context import CryptContext
 
 DEFAULT_ENTROPY = 32
@@ -37,8 +37,29 @@ def derive_key(key_material, salt, info):
     if not isinstance(key_material, bytes):
         key_material = key_material.encode()
 
-    pseudorandom_key = hkdf_extract(salt, key_material, hash=hashlib.sha512)
-    return hkdf_expand(pseudorandom_key, info, length=64, hash=hashlib.sha512)
+    return HKDF(
+        master=key_material,
+        key_len=64,
+        salt=salt,
+        hashmod=SHA512,
+        num_keys=1,
+        context=info,
+    )
+
+
+# If we have problems with PyCryptodome, an alternative implementation using
+# cryptography would be:
+
+# from cryptography.hazmat.primitives.kdf.hkdf import HKDF as HKDF2
+# from cryptography.hazmat.primitives import hashes
+#
+# def derive_key(key_material, salt, info):
+#     if not isinstance(key_material, bytes):
+#         key_material = key_material.encode()
+#
+#     return HKDF2(
+#         algorithm=hashes.SHA512(), length=64, salt=salt, info=info
+#     ).derive(key_material)
 
 
 # Implementation modeled on `secrets.token_urlsafe`, new in Python 3.6.

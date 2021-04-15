@@ -75,8 +75,6 @@ h-matchers==1.2.10
     # via -r requirements/requirements.txt
 h-pyramid-sentry==1.2.1
     # via -r requirements/requirements.txt
-hkdf==0.0.3
-    # via -r requirements/requirements.txt
 hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
@@ -173,6 +171,8 @@ pycparser==2.20
     # via
     #   -r requirements/requirements.txt
     #   cffi
+pycryptodomex==3.10.1
+    # via -r requirements/requirements.txt
 pygments==2.7.4
     # via ipython
 pyjwt==2.0.1
