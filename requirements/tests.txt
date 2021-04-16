@@ -242,7 +242,7 @@ six==1.15.0
     #   python-dateutil
 sortedcontainers==2.2.2
     # via hypothesis
-sqlalchemy==1.4.7
+sqlalchemy==1.4.8
     # via
     #   -r requirements/requirements.txt
     #   alembic

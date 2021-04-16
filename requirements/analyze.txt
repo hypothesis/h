@@ -75,8 +75,6 @@ h-matchers==1.2.10
     # via -r requirements/requirements.txt
 h-pyramid-sentry==1.2.1
     # via -r requirements/requirements.txt
-hkdf==0.0.3
-    # via -r requirements/requirements.txt
 hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
@@ -170,6 +168,8 @@ pycparser==2.20
     # via
     #   -r requirements/requirements.txt
     #   cffi
+pycryptodomex==3.10.1
+    # via -r requirements/requirements.txt
 pyjwt==2.0.1
     # via -r requirements/requirements.txt
 pylint==2.7.4
@@ -255,7 +255,7 @@ sortedcontainers==2.2.2
     # via hypothesis
 soupsieve==2.0.1
     # via beautifulsoup4
-sqlalchemy==1.4.7
+sqlalchemy==1.4.8
     # via
     #   -r requirements/requirements.txt
     #   alembic
