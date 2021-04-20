@@ -79,7 +79,7 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-hypothesis==6.9.2
+hypothesis==6.10.0
     # via -r requirements/analyze.in
 importlib-metadata==1.7.0
     # via
