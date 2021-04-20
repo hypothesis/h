@@ -5,83 +5,83 @@
 #    pip-compile requirements/tests.in
 #
 alembic==1.5.8
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 amqp==2.6.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   kombu
 attrs==20.2.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   hypothesis
     #   jsonschema
     #   pytest
 bcrypt==3.2.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 billiard==3.6.3.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   celery
 bleach==3.3.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 celery==4.4.7
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 certifi==2020.12.5
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   sentry-sdk
 cffi==1.14.5
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   bcrypt
 chameleon==3.8.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   deform
 click==7.1.2
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 colander==1.8.2
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   deform
 coverage==5.5
-    # via -r requirements/tests.in
+    # via -r tests.in
 deform==2.0.15
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 elasticsearch-dsl==6.3.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 elasticsearch==6.8.2
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   elasticsearch-dsl
 factory-boy==3.2.0
-    # via -r requirements/tests.in
+    # via -r tests.in
 faker==4.1.3
     # via factory-boy
 gevent==21.1.2
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 greenlet==1.0.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   gevent
     #   sqlalchemy
 gunicorn==20.1.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 h-api==1.0.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 h-matchers==1.2.10
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 h-pyramid-sentry==1.2.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 hupper==1.10.2
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid
 hypothesis==6.10.0
-    # via -r requirements/tests.in
+    # via -r tests.in
 importlib-metadata==1.7.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   jsonschema
     #   kombu
     #   pluggy
@@ -91,106 +91,106 @@ iniconfig==1.0.1
     # via pytest
 iso8601==0.1.13
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   colander
     #   deform
 itsdangerous==1.1.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 jinja2==2.11.3
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid-jinja2
 jsonschema==3.2.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   h-api
 kombu==4.6.11
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   celery
 mako==1.1.3
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   alembic
 markupsafe==1.1.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   jinja2
     #   mako
     #   pyramid-jinja2
 mistune==0.8.4
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 newrelic==6.2.0.156
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 oauthlib==3.1.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 packaging==20.4
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   bleach
     #   pytest
 passlib==1.7.4
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pastedeploy==2.1.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   plaster-pastedeploy
 peppercorn==0.6
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   deform
 plaster-pastedeploy==0.7
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid
 plaster==1.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   plaster-pastedeploy
     #   pyramid
 pluggy==0.13.1
     # via pytest
 psycogreen==1.0.2
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 psycopg2==2.8.6
-    # via -r requirements/requirements.txt
-py==1.9.0
+    # via -r requirements.txt
+py==1.10.0
     # via pytest
 pycparser==2.20
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   cffi
 pycryptodomex==3.10.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyjwt==2.0.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyparsing==2.4.7
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   packaging
 pyramid-authsanity==1.1.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-exclog==1.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-jinja2==2.8
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-layout==1.0
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-mailer==0.15.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-retry==2.1.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-sanity==1.0.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid-services==2.2
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid-authsanity
 pyramid-tm==2.4
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pyramid==1.10.8
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   h-pyramid-sentry
     #   pyramid-authsanity
     #   pyramid-exclog
@@ -203,37 +203,37 @@ pyramid==1.10.8
     #   pyramid-tm
 pyrsistent==0.17.3
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   jsonschema
 pytest==6.2.3
-    # via -r requirements/tests.in
+    # via -r tests.in
 python-dateutil==2.8.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   alembic
     #   elasticsearch-dsl
     #   faker
 python-editor==1.0.4
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   alembic
 python-slugify==4.0.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 pytz==2020.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   celery
 repoze.sendmail==4.3
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid-mailer
 sentry-sdk==0.17.6
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   h-pyramid-sentry
 six==1.15.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   bcrypt
     #   bleach
     #   elasticsearch-dsl
@@ -244,78 +244,78 @@ sortedcontainers==2.2.2
     # via hypothesis
 sqlalchemy==1.4.9
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   alembic
     #   zope.sqlalchemy
 supervisor==4.2.2
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 text-unidecode==1.3
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   faker
     #   python-slugify
 toml==0.10.1
     # via pytest
 transaction==3.0.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid-mailer
     #   pyramid-tm
     #   repoze.sendmail
     #   zope.sqlalchemy
 translationstring==1.4
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   colander
     #   deform
     #   pyramid
 urllib3==1.25.10
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   elasticsearch
     #   sentry-sdk
 venusian==3.0.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid
 vine==1.3.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   amqp
     #   celery
 webencodings==0.5.1
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   bleach
 webob==1.8.6
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid
 wired==0.2.2
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   pyramid-services
 ws4py==0.5.1
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 wsaccel==0.6.3
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 zipp==3.1.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   importlib-metadata
 zope.deprecation==4.1.2
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   deform
     #   pyramid
     #   pyramid-jinja2
 zope.event==4.4
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   gevent
 zope.interface==5.1.0
     # via
-    #   -r requirements/requirements.txt
+    #   -r requirements.txt
     #   gevent
     #   pyramid
     #   pyramid-authsanity
@@ -326,7 +326,7 @@ zope.interface==5.1.0
     #   wired
     #   zope.sqlalchemy
 zope.sqlalchemy==1.3
-    # via -r requirements/requirements.txt
+    # via -r requirements.txt
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
