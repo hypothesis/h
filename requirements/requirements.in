@@ -1,6 +1,6 @@
 # Hypothesis packages
-h_pyramid_sentry
-h_matchers
+h-pyramid-sentry
+h-matchers
 h-api
 pyramid-sanity
 
@@ -31,14 +31,14 @@ psycopg2
 pycryptodomex
 pyparsing >= 2.1.5
 pyramid
-pyramid_authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi
-pyramid_exclog
-pyramid_layout
+pyramid-authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi
+pyramid-exclog
+pyramid-layout
 pyramid-jinja2
 pyramid-services
-pyramid_mailer
-pyramid_retry
-pyramid_tm
+pyramid-mailer
+pyramid-retry
+pyramid-tm
 python-dateutil
 python-slugify < 4.1.0
 supervisor >= 4.0.0
