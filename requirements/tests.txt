@@ -71,7 +71,7 @@ h-api==1.0.0
     # via -r requirements/requirements.txt
 h-matchers==1.2.11
     # via -r requirements/requirements.txt
-h-pyramid-sentry==1.2.1
+h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.txt
 hupper==1.10.2
     # via
