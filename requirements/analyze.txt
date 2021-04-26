@@ -10,7 +10,7 @@ amqp==2.6.1
     # via
     #   -r requirements/requirements.txt
     #   kombu
-astroid==2.5.2
+astroid==2.5.6
     # via pylint
 attrs==20.2.0
     # via
@@ -172,7 +172,7 @@ pycryptodomex==3.10.1
     # via -r requirements/requirements.txt
 pyjwt==2.0.1
     # via -r requirements/requirements.txt
-pylint==2.7.4
+pylint==2.8.1
     # via -r requirements/analyze.in
 pyparsing==2.4.7
     # via
