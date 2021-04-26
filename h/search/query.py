@@ -17,7 +17,7 @@ DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())
 
 
 def popall(multidict, key):
-    """ Pops and returns all values of the key in multidict"""
+    """Pops and returns all values of the key in multidict"""
     values = multidict.getall(key)
     if values:
         del multidict[key]
