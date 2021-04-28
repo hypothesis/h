@@ -3,33 +3,65 @@ on: pull_request
 env:
   TOX_PARALLEL_NO_SPINNER: 1
   PYTEST_ADDOPTS: --exitfirst
+
 jobs:
-  backend:
+  metadata:
+    name: Metadata
     runs-on: ubuntu-latest
+    outputs:
+      python_headline_version: ${{ steps.list-python-versions.outputs.python_headline_version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: List Python versions
+        id: list-python-versions
+        run: |
+          pip install hdev
+          echo "::set-output name=python_headline_version::`hdev python_version --style plain --first`"
+
+  backend:
+    name: Backend
+    needs: metadata
+    runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:11.5-alpine
         ports:
         - 5432:5432
+
       elasticsearch:
         image: hypothesis/elasticsearch:latest
         ports:
         - 9200:9200
         env:
           discovery.type: single-node
+
     steps:
-    - name: Set up Python
+    - name: Setup python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.6.9
+        python-version: ${{ needs.metadata.outputs.python_headline_version }}
+
     - name: Update pip
       run: python -m pip install --upgrade pip
+
     - name: Install tox
       run: python -m pip install tox
+
     - name: Checkout git repo
       uses: actions/checkout@v2
+
     - name: Create test databases
       run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+
     - name: Cache the .tox dir
       uses: actions/cache@v2
       with:
@@ -42,8 +74,12 @@ jobs:
           ${{ runner.os }}-tox-backend-
     - name: Run tox
       run: tox --parallel auto -e checkformatting,tests,coverage
+
   functests:
+    name: Functional tests
+    needs: metadata
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:11.5-alpine
@@ -59,19 +95,25 @@ jobs:
         image: rabbitmq:3.6-management-alpine
         ports:
         - 5672:5672
+
     steps:
-    - name: Set up Python
+    - name: Setup python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.6.9
+        python-version: ${{ needs.metadata.outputs.python_headline_version }}
+
     - name: Update pip
       run: python -m pip install --upgrade pip
+
     - name: Install tox
       run: python -m pip install tox
+
     - name: Checkout git repo
       uses: actions/checkout@v2
+
     - name: Create test databases
       run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+
     - name: Cache the .tox dir
       uses: actions/cache@v2
       with:
@@ -81,30 +123,41 @@ jobs:
         key: ${{ runner.os }}-tox-functests-${{ hashFiles('tox.ini', 'requirements*', 'setup.py', 'setup.cfg') }}
         restore-keys: |
           ${{ runner.os }}-tox-functests-
+
     - name: Cache the node_modules dir
       uses: actions/cache@v2
       with:
         path: node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+
     - name: npm install
       run: npm install
+
     - name: gulp build
       run: gulp build
+
     - name: Run tox
       run: tox --parallel auto -e lint,functests
+
   frontend:
+    name: Frontend
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+
     - name: Cache the node_modules dir
       uses: actions/cache@v2
       with:
         path: node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+
     - name: Format
       run: make frontend-checkformatting
+
     - name: Lint
       run: make frontend-lint
+
     - name: Test
       run: gulp test

@@ -30,7 +30,7 @@ node {
                                          "-e SITE_PACKAGES=true"
                                          ) {
                 // Test dependencies
-                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
+                sh 'apk add --no-cache build-base libffi-dev postgresql-dev'
                 sh 'apk add --no-cache python3 python3-dev'
                 sh 'pip install -q tox>=3.8.0'
 
