@@ -6,7 +6,7 @@
 #
 appdirs==1.4.4
     # via black
-black==21.4b0
+black==21.4b1
     # via -r requirements/format.in
 click==7.1.2
     # via black
@@ -16,7 +16,7 @@ isort==5.8.0
     # via -r requirements/format.in
 mypy-extensions==0.4.3
     # via black
-pathspec==0.8.0
+pathspec==0.8.1
     # via black
 regex==2020.7.14
     # via black
