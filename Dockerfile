@@ -17,7 +17,7 @@ COPY h/static ./h/static
 RUN npm run build
 
 # Stage 2: Build the rest of the app using the build output from Stage 1.
-FROM python:3.6.9-alpine3.10
+FROM python:3.8.9-alpine3.13
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
@@ -32,7 +32,7 @@ RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hy
 WORKDIR /var/lib/hypothesis
 
 # Ensure nginx state and log directories writeable by unprivileged user.
-RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
+RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx
 
 # Copy nginx config
 COPY conf/nginx.conf /etc/nginx/nginx.conf
