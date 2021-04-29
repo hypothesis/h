@@ -6,7 +6,7 @@
 #
 appdirs==1.4.4
     # via black
-black==21.4b1
+black==21.4b2
     # via -r requirements/format.in
 click==7.1.2
     # via black
