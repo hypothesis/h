@@ -20,7 +20,7 @@ class Annotation(ModelFactory):
             "flush"  # Always flush the db to generate annotation.id.
         )
 
-    tags = factory.LazyFunction(lambda: FAKER.words(nb=random.randint(0, 5)))
+    tags = factory.LazyFunction(lambda: list(FAKER.words(nb=random.randint(0, 5))))
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(
