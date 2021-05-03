@@ -9,6 +9,16 @@ from h.models import Document, DocumentMeta
 from h.models.document import ConcurrentUpdateError, create_or_update_document_meta
 
 
+class TestDocumentMeta:
+    def test_repr(self):
+        meta = DocumentMeta(id=1234)
+
+        repr_string = repr(meta)
+
+        assert "DocumentMet" in repr_string
+        assert "1234" in repr_string
+
+
 class TestCreateOrUpdateDocumentMeta:
     def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(
         self, db_session, meta_attrs
@@ -21,14 +31,16 @@ class TestCreateOrUpdateDocumentMeta:
         document_meta = db_session.query(DocumentMeta).all()[-1]
         assert document_meta == Any.object.with_attrs(meta_attrs)
 
+    @pytest.mark.parametrize("correct_document", (True, False))
     def test_it_updates_an_existing_DocumentMeta_if_there_is_one(
-        self, db_session, meta_attrs
+        self, db_session, meta_attrs, correct_document
     ):
         original_attrs = meta_attrs
         updated_attrs = dict(
             original_attrs,
             value="new value",
-            document=Document(),  # This should be ignored.
+            # This should be ignored either way.
+            document=meta_attrs["document"] if correct_document else Document(),
             created=datetime.now(),  # This should be ignored.
             updated=datetime.now(),
         )

@@ -56,6 +56,14 @@ class TestDocumentURI:
         with pytest.raises(sa.exc.IntegrityError):
             db_session.commit()
 
+    def test_repr(self):
+        uri = DocumentURI(id=1234)
+
+        repr_string = repr(uri)
+
+        assert "DocumentURI" in repr_string
+        assert "1234" in repr_string
+
     @pytest.fixture
     def document_uri(self, db_session, factories):
         document_uri = factories.DocumentURI()
