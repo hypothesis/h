@@ -1,5 +1,6 @@
 import functools
 import logging
+from datetime import datetime as _datetime
 from unittest.mock import sentinel
 
 import pytest
@@ -12,6 +13,16 @@ from h.models.document._document import (
     update_document_metadata,
 )
 from h.models.document._exceptions import ConcurrentUpdateError
+
+
+class TestDocument:
+    def test_repr(self):
+        document = Document(id=1234)
+
+        repr_string = repr(document)
+
+        assert "Document" in repr_string
+        assert "1234" in repr_string
 
 
 class TestDocumentFindByURIs:
@@ -185,17 +196,24 @@ class TestMergeDocuments:
 
         assert count == 0
 
-    def test_it_moves_document_uris_to_the_first(self, db_session, duplicate_docs):
-        merge_documents(db_session, duplicate_docs)
+    @pytest.mark.parametrize("updated", (None, _datetime(2001, 1, 1)))
+    @pytest.mark.parametrize("sub_item", ("document_uris", "meta"))
+    def test_it_moves_sub_items_to_the_first(
+        self, db_session, duplicate_docs, datetime, updated, sub_item
+    ):
+        items = []
+        for doc in duplicate_docs[1:]:
+            items.extend(getattr(doc, sub_item))
+
+        master = merge_documents(db_session, duplicate_docs, updated=updated)
         db_session.flush()
 
-        assert [len(doc.document_uris) for doc in duplicate_docs] == [3, 0, 0]
+        assert [len(getattr(doc, sub_item)) for doc in duplicate_docs] == [3, 0, 0]
 
-    def test_it_moves_document_meta_to_the_first(self, db_session, duplicate_docs):
-        merge_documents(db_session, duplicate_docs)
-        db_session.flush()
-
-        assert [len(doc.meta) for doc in duplicate_docs] == [3, 0, 0]
+        expected_date = updated if updated else datetime.utcnow.return_value
+        for item in items:
+            assert item.document == master
+            assert item.updated == expected_date
 
     def test_it_moves_annotations_to_the_first(self, db_session, duplicate_docs):
         merge_documents(db_session, duplicate_docs)
@@ -256,23 +274,29 @@ class TestMergeDocuments:
 
 
 class TestUpdateDocumentMetadata:
+    @pytest.mark.parametrize(
+        "created,updated", ((sentinel.created, sentinel.updated), (None, None))
+    )
     def test_it_uses_the_target_uri_to_get_the_document(
-        self, Document, caller, doc_uri_dicts
+        self, Document, caller, doc_uri_dicts, created, updated, datetime
     ):
         caller(
             session=sentinel.session,
             target_uri=sentinel.target_uri,
             document_uri_dicts=doc_uri_dicts,
-            created=sentinel.created,
-            updated=sentinel.created,
+            created=created,
+            updated=updated,
         )
+
+        expected_created = created if created else datetime.utcnow.return_value
+        expected_updated = updated if updated else datetime.utcnow.return_value
 
         Document.find_or_create_by_uris.assert_called_once_with(
             sentinel.session,
             sentinel.target_uri,
             [data["uri"] for data in doc_uri_dicts],
-            created=sentinel.created,
-            updated=sentinel.created,
+            created=expected_created,
+            updated=expected_updated,
         )
 
     def test_if_there_are_multiple_documents_it_merges_them_into_one(
@@ -405,3 +429,11 @@ class TestUpdateDocumentMetadata:
     @pytest.fixture(autouse=True)
     def merge_documents(self, patch):
         return patch("h.models.document._document.merge_documents")
+
+
+@pytest.fixture
+def datetime(patch):
+    datetime = patch("h.models.document._document.datetime")
+    datetime.utcnow.return_value = _datetime.utcnow()
+
+    return datetime
