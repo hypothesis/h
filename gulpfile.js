@@ -9,7 +9,7 @@ var changed = require('gulp-changed');
 var commander = require('commander');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
-var log = require('gulplog');
+var log = require('fancy-log');
 var newer = require('gulp-newer');
 var postcss = require('gulp-postcss');
 var postcssURL = require('postcss-url');
@@ -268,18 +268,15 @@ function runKarma(baseConfig, opts, done) {
       mocha: {
         grep: taskArgs.grep,
       },
+      ...opts
     },
   };
 
   var karma = require('karma');
   new karma.Server(
-    Object.assign(
-      {},
-      {
-        configFile: path.resolve(__dirname, baseConfig),
-      },
-      cliOpts,
-      opts
+    karma.config.parseConfig(
+       path.resolve(__dirname, baseConfig),
+      cliOpts
     ),
     done
   ).start();

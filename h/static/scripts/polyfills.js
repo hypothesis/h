@@ -1,13 +1,13 @@
 'use strict';
 
 // ES2015 polyfills
-require('core-js/es6/promise');
-require('core-js/fn/array/find');
-require('core-js/fn/array/find-index');
-require('core-js/fn/array/from');
-require('core-js/fn/array/includes');
-require('core-js/fn/object/assign');
-require('core-js/fn/string/starts-with');
+require('core-js/features/promise');
+require('core-js/features/array/find');
+require('core-js/features/array/find-index');
+require('core-js/features/array/from');
+require('core-js/features/array/includes');
+require('core-js/features/object/assign');
+require('core-js/features/string/starts-with');
 
 // Sets Element.prototype.closest and Element.prototype.matches
 require('element-closest');
@@ -17,7 +17,7 @@ require('element-closest');
 require('unorm');
 
 // Element.prototype.dataset, required by IE 10
-require('element-dataset')();
+require('element-dataset').default();
 
 // Element.prototype.remove. Required by IE 10/11
 if (!Element.prototype.remove) {
