@@ -24,6 +24,7 @@ describe('util/modal-focus', () => {
   afterEach(() => {
     insideEls.forEach(el => el.remove());
     releaseFocus();
+    outsideEl.remove();
   });
 
   describe('#trap', () => {

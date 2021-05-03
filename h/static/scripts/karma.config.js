@@ -78,7 +78,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['ChromeHeadless'],
     browserNoActivityTimeout: 20000, // Travis is slow...
 
     // Continuous Integration mode
