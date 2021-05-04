@@ -1,7 +1,5 @@
 'use strict';
 
-require('core-js/fn/object/assign');
-
 /**
  * Return application configuration information from the host page.
  *

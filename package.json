@@ -17,9 +17,6 @@
     "browserify": "^16.2.3",
     "browserify-shim": "^3.8.12",
     "commander": "^2.9.0",
-    "core-js": "^1.2.5",
-    "element-closest": "^2.0.2",
-    "element-dataset": "^1.3.0",
     "escape-html": "^1.0.3",
     "exorcist": "^0.4.0",
     "gulp": "^4.0.0",
@@ -30,8 +27,6 @@
     "gulp-svgmin": "^2.2.0",
     "gulplog": "^1.0.0",
     "jquery": "^3.5.0",
-    "js-polyfills": "^0.1.16",
-    "keyboardevent-key-polyfill": "^1.0.2",
     "mkdirp": "^0.5.1",
     "normalize.css": "^8.0.0",
     "popper.js": "^1.14.4",
@@ -43,16 +38,16 @@
     "scroll-into-view": "^1.7.1",
     "through2": "^2.0.1",
     "uglifyify": "^4.0.5",
-    "unorm": "^1.4.1",
     "vinyl": "^1.1.1",
-    "watchify": "^3.11.1",
-    "whatwg-fetch": "^0.10.1"
+    "watchify": "^3.11.1"
   },
   "devDependencies": {
     "babel-plugin-mockable-imports": "^1.3.1",
     "chai": "^3.5.0",
     "check-dependencies": "^1.1.0",
+    "core-js": "^3.11.2",
     "diff": "^3.5.0",
+    "element-closest": "^3.0.2",
     "eslint": "^4.18.2",
     "eslint-config-hypothesis": "^1.0.0",
     "fetch-mock": "^5.1.5",
@@ -66,7 +61,9 @@
     "mocha": "^5.2.0",
     "prettier": "1.17.0",
     "sinon": "^1.17.3",
-    "syn": "^0.2.2"
+    "syn": "^0.2.2",
+    "unorm": "^1.6.0",
+    "whatwg-fetch": "^3.6.2"
   },
   "engines": {
     "node": ">=6"

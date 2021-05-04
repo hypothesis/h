@@ -8,8 +8,6 @@
  * version to be provided via the app's settings object.
  */
 
-require('core-js/fn/object/assign');
-
 const Raven = require('raven-js');
 
 function init(config) {
