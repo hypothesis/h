@@ -6,13 +6,9 @@
 #
 flake8==3.9.1
     # via -r requirements/lint.in
-importlib-metadata==1.7.0
-    # via flake8
 mccabe==0.6.1
     # via flake8
 pycodestyle==2.7.0
     # via flake8
-pyflakes==2.3.0
+pyflakes==2.3.1
     # via flake8
-zipp==3.1.0
-    # via importlib-metadata

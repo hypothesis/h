@@ -56,11 +56,6 @@ h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
-importlib-metadata==1.7.0
-    # via
-    #   jsonschema
-    #   kombu
-    #   sqlalchemy
 iso8601==0.1.13
     # via
     #   colander
@@ -219,8 +214,6 @@ ws4py==0.5.1
     # via -r requirements/requirements.in
 wsaccel==0.6.3
     # via -r requirements/requirements.in
-zipp==3.1.0
-    # via importlib-metadata
 zope.deprecation==4.1.2
     # via
     #   deform

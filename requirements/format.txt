@@ -10,19 +10,13 @@ black==21.4b2
     # via -r requirements/format.in
 click==7.1.2
     # via black
-dataclasses==0.7
-    # via black
 isort==5.8.0
     # via -r requirements/format.in
 mypy-extensions==0.4.3
     # via black
 pathspec==0.8.1
     # via black
-regex==2020.7.14
+regex==2021.4.4
     # via black
-toml==0.10.1
-    # via black
-typed-ast==1.4.3
-    # via black
-typing-extensions==3.7.4.3
+toml==0.10.2
     # via black
