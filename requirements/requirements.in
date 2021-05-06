@@ -40,7 +40,7 @@ pyramid-mailer
 pyramid-retry
 pyramid-tm
 python-dateutil
-python-slugify < 4.1.0
+python-slugify < 5.1.0
 supervisor >= 4.0.0
 transaction
 venusian
