@@ -209,7 +209,7 @@ python-editor==1.0.4
     # via
     #   -r requirements/requirements.txt
     #   alembic
-python-slugify==4.0.1
+python-slugify==5.0.2
     # via -r requirements/requirements.txt
 pytz==2020.1
     # via

@@ -155,7 +155,7 @@ python-dateutil==2.8.1
     #   elasticsearch-dsl
 python-editor==1.0.4
     # via alembic
-python-slugify==4.0.1
+python-slugify==5.0.2
     # via -r requirements/requirements.in
 pytz==2020.1
     # via celery
