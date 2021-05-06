@@ -7,7 +7,8 @@
     "build": "gulp build",
     "checkformatting": "prettier --check *.js {h,scripts}/**/*.js",
     "format": "prettier --list-different --write *.js {h,scripts}/**/*.js",
-    "lint": "eslint h/static/scripts"
+    "lint": "eslint h/static/scripts",
+    "test": "gulp test"
   },
   "dependencies": {
     "autoprefixer": "^6.0.3",
