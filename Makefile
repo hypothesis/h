@@ -26,8 +26,6 @@ help:
 	@echo "                       the Docker image locally in production mode. "
 	@echo "                       It assumes the services are being run using "
 	@echo "                       docker-compose in the 'h_default' network."
-	@echo "make clean             Delete development artefacts (cached files, "
-	@echo "                       dependencies, etc)"
 
 .PHONY: services
 services: args?=up -d
@@ -144,13 +142,6 @@ run-docker:
 		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \
 		hypothesis/hypothesis:$(DOCKER_TAG)
-
-.PHONY: clean
-clean:
-	@find . -type f -name "*.py[co]" -delete
-	@find . -type d -name "__pycache__" -delete
-	@rm -f node_modules/.uptodate
-	@rm -rf build
 
 DOCKER_TAG = dev
 
