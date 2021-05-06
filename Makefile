@@ -15,8 +15,6 @@ help:
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
 	@echo "make test              Run the unit tests"
-	@echo "make backend-tests     Run the backend unit tests"
-	@echo "make frontend-tests    Run the frontend unit tests"
 	@echo "make coverage          Print the unit test coverage report"
 	@echo "make functests         Run the functional tests"
 	@echo "make docs              Build docs website and serve it locally"
@@ -75,7 +73,7 @@ backend-lint: python
 
 .PHONY: frontend-lint
 frontend-lint: node_modules/.uptodate
-	@npm lint
+	@npm run-script lint
 
 .PHONY: analyze
 analyze: python
@@ -94,18 +92,12 @@ backend-checkformatting: python
 
 .PHONY: frontend-checkformatting
 frontend-checkformatting: node_modules/.uptodate
-	@npm checkformatting
+	@npm run-script checkformatting
 
 .PHONY: test
-test: backend-tests frontend-tests
-
-.PHONY: backend-tests
-backend-tests: python
+test: node_modules/.uptodate python
 	@tox -q
-
-.PHONY: frontend-tests
-frontend-tests: node_modules/.uptodate
-	@npm test
+	@$(GULP) test
 
 .PHONY: coverage
 coverage: python
@@ -162,8 +154,10 @@ clean:
 
 DOCKER_TAG = dev
 
+GULP := node_modules/.bin/gulp
+
 build/manifest.json: node_modules/.uptodate
-	@npm build
+	@$(GULP) build
 
 node_modules/.uptodate: package.json
 	@echo installing javascript dependencies
@@ -173,3 +167,7 @@ node_modules/.uptodate: package.json
 .PHONY: python
 python:
 	@./bin/install-python
+
+.PHONY: gulp
+gulp: node_modules/.uptodate
+	@$(GULP) $(args)
