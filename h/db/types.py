@@ -48,6 +48,7 @@ class URLSafeUUID(types.TypeDecorator):
     """
 
     impl = postgresql.UUID
+    cache_ok = True
 
     def process_bind_param(self, value, dialect):
         return self.url_safe_to_hex(value)
