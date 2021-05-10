@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-flake8==3.9.1
+flake8==3.9.2
     # via -r requirements/lint.in
 mccabe==0.6.1
     # via flake8
