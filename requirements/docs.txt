@@ -27,7 +27,9 @@ jinja2==2.11.3
 livereload==2.6.3
     # via sphinx-autobuild
 markupsafe==1.1.1
-    # via jinja2
+    # via
+    #   jinja2
+    #   sphinx
 packaging==20.9
     # via sphinx
 pygments==2.9.0
@@ -46,7 +48,7 @@ sphinx-autobuild==2021.3.14
     # via -r requirements/docs.in
 sphinx-rtd-theme==0.5.2
     # via -r requirements/docs.in
-sphinx==3.5.4
+sphinx==4.0.0
     # via
     #   -r requirements/docs.in
     #   sphinx-autobuild
