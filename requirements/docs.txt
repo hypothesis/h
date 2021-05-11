@@ -48,7 +48,7 @@ sphinx-autobuild==2021.3.14
     # via -r requirements/docs.in
 sphinx-rtd-theme==0.5.2
     # via -r requirements/docs.in
-sphinx==4.0.0
+sphinx==4.0.1
     # via
     #   -r requirements/docs.in
     #   sphinx-autobuild
