@@ -16,7 +16,7 @@ class ConfirmSubmitController extends Controller {
 
     element.addEventListener(
       'click',
-      event => {
+      (event) => {
         if (!window_.confirm(element.dataset.confirmMessage)) {
           event.preventDefault();
           event.stopPropagation();

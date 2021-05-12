@@ -40,7 +40,7 @@ class LozengeController extends Controller {
 
     element.classList.add('js-lozenge');
 
-    this.refs.deleteButton.addEventListener('click', event => {
+    this.refs.deleteButton.addEventListener('click', (event) => {
       event.preventDefault();
       options.deleteCallback();
     });

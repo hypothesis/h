@@ -20,7 +20,7 @@ class InputAutofocusController extends Controller {
   constructor(element) {
     super(element);
 
-    this._onKeyDown = event => {
+    this._onKeyDown = (event) => {
       if (document.activeElement === document.body) {
         if (isWordChar(event) || event.key === 'Backspace') {
           element.focus();

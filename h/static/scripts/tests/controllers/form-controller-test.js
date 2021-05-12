@@ -15,7 +15,7 @@ const FormController = require('../../controllers/form-controller');
  */
 function dataAttrs(data) {
   const dataAttrs = [];
-  Object.keys(data || {}).forEach(key => {
+  Object.keys(data || {}).forEach((key) => {
     dataAttrs.push(`data-${hyphenate(key)}="${data[key]}"`);
   });
   return dataAttrs.join(' ');
@@ -29,9 +29,7 @@ function fieldTemplate(field) {
 
   return `<div class="js-form-input" data-ref="${field.fieldRef}" ${dataAttr}>
     <label data-ref="label ${field.labelRef}">Label</label>
-    <input id="deformField" data-ref="formInput ${
-      field.ref
-    }" ${typeAttr} value="${field.value}">
+    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} value="${field.value}">
   </div>`;
 }
 
@@ -92,7 +90,7 @@ describe('FormController', () => {
     // spy on calls to it and update `ctrl` to the new controller instance
     // when the form is reloaded
     const reloadFn = ctrl.options.reload;
-    reloadSpy = sinon.spy(html => {
+    reloadSpy = sinon.spy((html) => {
       const newElement = reloadFn(html);
       ctrl = newElement.controllers[0];
       return newElement;
@@ -419,10 +417,10 @@ describe('FormController', () => {
       ];
       const inputs = [ctrl.refs.emailInput, ctrl.refs.passwordInput];
 
-      inputs.forEach(input => {
+      inputs.forEach((input) => {
         input.focus();
 
-        const editing = containers.filter(el =>
+        const editing = containers.filter((el) =>
           el.classList.contains('is-editing')
         );
         assert.equal(editing.length, 2);

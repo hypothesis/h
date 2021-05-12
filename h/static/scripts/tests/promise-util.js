@@ -9,10 +9,10 @@
  */
 function toResult(promise) {
   return promise
-    .then(result => {
+    .then((result) => {
       return { result: result };
     })
-    .catch(err => {
+    .catch((err) => {
       return { error: err };
     });
 }

@@ -136,7 +136,7 @@ class AutosuggestDropdownController extends Controller {
 
       if (
         newState.activeId &&
-        newState.list.find(item => item.__suggestionId === newState.activeId)
+        newState.list.find((item) => item.__suggestionId === newState.activeId)
       ) {
         this._listContainer
           .querySelector(`[data-suggestion-id="${newState.activeId}"]`)
@@ -169,15 +169,13 @@ class AutosuggestDropdownController extends Controller {
     }
 
     this.setState({
-      rootList: list.map(item => {
+      rootList: list.map((item) => {
         return Object.assign({}, item, {
           // create an id that lets us direction map
           // selection to arbitrary item in list.
           // This allows lists to pass more than just the required
           // `name` property to know more about what the list item is
-          __suggestionId: Math.random()
-            .toString(36)
-            .substr(2, 5),
+          __suggestionId: Math.random().toString(36).substr(2, 5),
         });
       }),
     });
@@ -219,7 +217,7 @@ class AutosuggestDropdownController extends Controller {
     const currentActive = this._getActiveListItemElement();
     const suggestionId =
       currentActive && currentActive.getAttribute('data-suggestion-id');
-    const selection = this.state.list.filter(item => {
+    const selection = this.state.list.filter((item) => {
       return item.__suggestionId === suggestionId;
     })[0];
 
@@ -351,7 +349,7 @@ class AutosuggestDropdownController extends Controller {
 
     this._listContainer.innerHTML = '';
 
-    this.state.list.forEach(listItem => {
+    this.state.list.forEach((listItem) => {
       const li = document.createElement('li');
       li.setAttribute('role', 'option');
       li.classList.add(this.options.classNames.item);
@@ -368,7 +366,7 @@ class AutosuggestDropdownController extends Controller {
         'mouseleave',
         this._toggleItemHoverState.bind(this, /*hovering*/ false)
       );
-      li.addEventListener('mousedown', event => {
+      li.addEventListener('mousedown', (event) => {
         // for situations like mobile, hovering might not be
         // the first event to set the active state for an element
         // so we will mimic that on mouse down and let selection happen
@@ -391,7 +389,7 @@ class AutosuggestDropdownController extends Controller {
     // we need to use mousedown instead of click
     // so we can beat the blur event which can
     // change visibility/target of the active event
-    document.addEventListener('mousedown', event => {
+    document.addEventListener('mousedown', (event) => {
       const target = event.target;
 
       // when clicking the input itself or if we are
@@ -417,7 +415,7 @@ class AutosuggestDropdownController extends Controller {
     // input takes the cursor to the beginning of the input value.
     this._input.addEventListener(
       'keydown',
-      event => {
+      (event) => {
         const key = event.keyCode;
 
         // only consume the ENTER event if
@@ -447,7 +445,7 @@ class AutosuggestDropdownController extends Controller {
 
     this._input.addEventListener(
       'keyup',
-      event => {
+      (event) => {
         if ([ENTER, UP, DOWN].indexOf(event.keyCode) === -1) {
           this._filterAndToggleVisibility();
         }

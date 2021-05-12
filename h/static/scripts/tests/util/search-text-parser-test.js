@@ -6,7 +6,7 @@ const unroll = require('../util').unroll;
 describe('SearchTextParser', () => {
   unroll(
     'should create a lozenge #input',
-    fixture => {
+    (fixture) => {
       assert.isTrue(searchTextParser.shouldLozengify(fixture.input));
     },
     [
@@ -32,7 +32,7 @@ describe('SearchTextParser', () => {
 
   unroll(
     'should not create a lozenge for',
-    fixture => {
+    (fixture) => {
       assert.isFalse(searchTextParser.shouldLozengify(fixture.input));
     },
     [

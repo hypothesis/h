@@ -10,7 +10,7 @@ const AutosuggestDropdownController = require('../../controllers/autosuggest-dro
 const mouseMove = (() => {
   let _lastMovePos;
 
-  return posObj => {
+  return (posObj) => {
     if (_lastMovePos) {
       const prevEl = document.elementFromPoint(
         _lastMovePos.pageX,
@@ -76,22 +76,20 @@ describe('AutosuggestDropdownController', () => {
         activeItem: 'an-active-item',
       },
 
-      renderListItem: listItem => {
+      renderListItem: (listItem) => {
         let itemContents = `<span class="a-title"> ${listItem.title} </span>`;
 
         if (listItem.explanation) {
-          itemContents += `<span class="an-explanation"> ${
-            listItem.explanation
-          } </span>`;
+          itemContents += `<span class="an-explanation"> ${listItem.explanation} </span>`;
         }
 
         return itemContents;
       },
 
-      listFilter: function(list, currentInput) {
+      listFilter: function (list, currentInput) {
         currentInput = (currentInput || '').trim();
 
-        return list.filter(item => {
+        return list.filter((item) => {
           if (!currentInput) {
             return item;
           }
@@ -99,7 +97,7 @@ describe('AutosuggestDropdownController', () => {
         });
       },
 
-      onSelect: function() {},
+      onSelect: function () {},
     };
 
     const isSuggestionContainerVisible = () => {
@@ -180,7 +178,7 @@ describe('AutosuggestDropdownController', () => {
       );
     });
 
-    it('opens and closes based on focus status', done => {
+    it('opens and closes based on focus status', (done) => {
       new AutosuggestDropdownController(input, defaultConfig);
 
       assert.isFalse(isSuggestionContainerVisible(), 'basline is hidden');
@@ -195,7 +193,7 @@ describe('AutosuggestDropdownController', () => {
       });
     });
 
-    it('changes suggestion container and item visibility on matching input', done => {
+    it('changes suggestion container and item visibility on matching input', (done) => {
       const reduceSpy = sinon.spy(defaultConfig, 'listFilter');
 
       assert.equal(reduceSpy.callCount, 0);
@@ -243,7 +241,7 @@ describe('AutosuggestDropdownController', () => {
         });
     });
 
-    it('allows click selection', done => {
+    it('allows click selection', (done) => {
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -318,7 +316,7 @@ describe('AutosuggestDropdownController', () => {
       navigationExpectations
     );
 
-    it('persists active navigation through list filter', done => {
+    it('persists active navigation through list filter', (done) => {
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -349,7 +347,7 @@ describe('AutosuggestDropdownController', () => {
         });
     });
 
-    it('allows keyboard selection', done => {
+    it('allows keyboard selection', (done) => {
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -377,7 +375,7 @@ describe('AutosuggestDropdownController', () => {
       });
     });
 
-    it('can hover items', done => {
+    it('can hover items', (done) => {
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -408,7 +406,7 @@ describe('AutosuggestDropdownController', () => {
       });
     });
 
-    it('correctly sets active elements when swapping between keyboard and mouse setting', done => {
+    it('correctly sets active elements when swapping between keyboard and mouse setting', (done) => {
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);

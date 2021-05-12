@@ -64,9 +64,9 @@ describe('ShareWidgetController', () => {
     );
   };
 
-  const checkURLs = expectedURL => {
+  const checkURLs = (expectedURL) => {
     Array.from(container.querySelectorAll('[share-target-href]')).forEach(
-      anchor => {
+      (anchor) => {
         const tmpl = anchor.getAttribute('share-target-href');
         const expectedLink = tmpl.replace('{href}', expectedURL);
         const actualLink = anchor.href;
@@ -105,7 +105,7 @@ describe('ShareWidgetController', () => {
     ctrl.beforeRemove();
   });
 
-  it('shows/hides widget on clicking', done => {
+  it('shows/hides widget on clicking', (done) => {
     assert.isFalse(widgetIsVisble(), 'not visible by default');
 
     const btns = getTriggers();
@@ -141,7 +141,7 @@ describe('ShareWidgetController', () => {
       });
   });
 
-  it('displays correctly for current share link', done => {
+  it('displays correctly for current share link', (done) => {
     const btns = getTriggers();
 
     syn

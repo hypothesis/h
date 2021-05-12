@@ -15,10 +15,10 @@ const SearchBarController = require('../../controllers/search-bar-controller');
  * @param {SearchBarController} ctrl
  * @return {string[]}
  */
-const getLozengeValues = ctrl => {
+const getLozengeValues = (ctrl) => {
   return Array.from(
     ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')
-  ).map(el => {
+  ).map((el) => {
     const facetName = el.querySelector('.lozenge__facet-name').textContent;
     const facetValue = el.querySelector('.lozenge__facet-value').textContent;
     return facetName + facetValue;
@@ -54,15 +54,15 @@ describe('SearchBarController', () => {
       </div>
     `;
 
-    const getItemTitles = function() {
+    const getItemTitles = function () {
       return Array.from(
         dropdown.querySelectorAll('.search-bar__dropdown-menu-title')
-      ).map(node => {
+      ).map((node) => {
         return node.textContent.trim();
       });
     };
 
-    const setup = function() {
+    const setup = function () {
       testEl = document.createElement('div');
       testEl.innerHTML = TEMPLATE;
       document.body.appendChild(testEl);
@@ -73,7 +73,7 @@ describe('SearchBarController', () => {
       dropdown = input.nextSibling;
     };
 
-    const teardown = function() {
+    const teardown = function () {
       document.body.removeChild(testEl);
       const tagsJSON = document.querySelector('.js-tag-suggestions');
       if (tagsJSON) {
@@ -86,7 +86,7 @@ describe('SearchBarController', () => {
       }
     };
 
-    const addTagSuggestions = function() {
+    const addTagSuggestions = function () {
       const suggestions = [
         {
           tag: 'aaaa',
@@ -132,7 +132,7 @@ describe('SearchBarController', () => {
       document.body.appendChild(tagsScript);
     };
 
-    const addGroupSuggestions = function() {
+    const addGroupSuggestions = function () {
       const suggestions = [
         {
           name: 'aaac',
@@ -185,7 +185,7 @@ describe('SearchBarController', () => {
     beforeEach(setup);
     afterEach(teardown);
 
-    it('uses autosuggestion for initial facets', done => {
+    it('uses autosuggestion for initial facets', (done) => {
       assert.isFalse(dropdown.classList.contains('is-open'));
 
       syn.click(input, () => {
@@ -197,7 +197,7 @@ describe('SearchBarController', () => {
       });
     });
 
-    it('it filters and updates input with autosuggested facet selection', done => {
+    it('it filters and updates input with autosuggested facet selection', (done) => {
       syn
         .click(input, () => {
           assert.notOk(input.value, 'baseline no value in input');
@@ -208,7 +208,7 @@ describe('SearchBarController', () => {
         });
     });
 
-    it('allows submitting the form dropdown is open but has no selected value', done => {
+    it('allows submitting the form dropdown is open but has no selected value', (done) => {
       const form = testEl.querySelector('form');
       const submit = sinon.stub(form, 'submit');
 
@@ -268,7 +268,7 @@ describe('SearchBarController', () => {
         [{ text: 'group:' }, { text: 'Group:' }, { text: 'GROUP:' }]
       );
 
-      it('orders groups by earliest value match first', done => {
+      it('orders groups by earliest value match first', (done) => {
         syn
           .click(input)
           .type('group:', () => {
@@ -288,7 +288,7 @@ describe('SearchBarController', () => {
           });
       });
 
-      it('supports multi word matching', done => {
+      it('supports multi word matching', (done) => {
         syn
           .click(input)
           .type('group:"mul', () => {
@@ -308,7 +308,7 @@ describe('SearchBarController', () => {
           });
       });
 
-      it('handles filtering matches with unicode', done => {
+      it('handles filtering matches with unicode', (done) => {
         syn.click(input).type('group:éf', () => {
           assert.deepEqual(
             getItemTitles(),
@@ -319,7 +319,7 @@ describe('SearchBarController', () => {
         });
       });
 
-      it('sets input and display friendly name value', done => {
+      it('sets input and display friendly name value', (done) => {
         syn
           .click(input)
           .type('group:"mul[down][enter]', () => {
@@ -349,7 +349,7 @@ describe('SearchBarController', () => {
           });
       });
 
-      it('matches escaped values', done => {
+      it('matches escaped values', (done) => {
         syn.click(input).type('group:<[down][enter]', () => {
           assert.equal(
             testEl.querySelector('input[type=hidden]').value.trim(),
@@ -404,7 +404,7 @@ describe('SearchBarController', () => {
         [{ text: 'tag:' }, { text: 'Tag:' }, { text: 'TAG:' }]
       );
 
-      it('orders tags by priority and indexOf score', done => {
+      it('orders tags by priority and indexOf score', (done) => {
         syn
           .click(input)
           .type('tag:', () => {
@@ -424,7 +424,7 @@ describe('SearchBarController', () => {
           });
       });
 
-      it('matches on multi word searches', done => {
+      it('matches on multi word searches', (done) => {
         syn
           .click(input)
           .type('tag:"mul', () => {
@@ -451,7 +451,7 @@ describe('SearchBarController', () => {
           });
       });
 
-      it('handles filtering matches with unicode', done => {
+      it('handles filtering matches with unicode', (done) => {
         syn.click(input).type('tag:éf', () => {
           assert.deepEqual(
             getItemTitles(),
@@ -601,7 +601,7 @@ describe('SearchBarController', () => {
       assert.equal(input.value, "'bar");
     });
 
-    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', done => {
+    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', (done) => {
       const { ctrl, input } = component('foo');
 
       syn
@@ -613,7 +613,7 @@ describe('SearchBarController', () => {
         });
     });
 
-    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', done => {
+    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', (done) => {
       const { ctrl, input } = component("'bar gar'");
 
       syn
@@ -625,7 +625,7 @@ describe('SearchBarController', () => {
         });
     });
 
-    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', done => {
+    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', (done) => {
       const { ctrl, input } = component("'bar");
 
       // Move cursor to end of field.
@@ -680,7 +680,7 @@ describe('SearchBarController', () => {
         assert.equal(hiddenInput.value, 'group:pid124');
       });
 
-      it('places lozenges as first elements in container', done => {
+      it('places lozenges as first elements in container', (done) => {
         const template = `
             <div>
               <form data-ref="searchBarForm">
@@ -723,7 +723,7 @@ describe('SearchBarController', () => {
         });
       });
 
-      it('places lozenges after any initial lozenges', done => {
+      it('places lozenges after any initial lozenges', (done) => {
         const template = `
             <div>
               <form data-ref="searchBarForm">

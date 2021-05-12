@@ -14,11 +14,11 @@ var VinylFile = require('vinyl');
  * manifest mapping input paths (eg. "scripts/foo.js")
  * to URLs with cache-busting query parameters (eg. "scripts/foo.js?af95bd").
  */
-module.exports = function(opts) {
+module.exports = function (opts) {
   var manifest = {};
 
   return through.obj(
-    function(file, enc, callback) {
+    function (file, enc, callback) {
       var hash = crypto.createHash('sha1');
       hash.update(file.contents);
 
@@ -28,7 +28,7 @@ module.exports = function(opts) {
 
       callback();
     },
-    function(callback) {
+    function (callback) {
       var manifestFile = new VinylFile({
         path: opts.name,
         contents: Buffer.from(JSON.stringify(manifest, null, 2), 'utf-8'),

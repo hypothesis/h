@@ -82,7 +82,7 @@ class EnvironmentFlags {
     const flags = envFlagsFromUrl(
       url || this._element.ownerDocument.location.href
     );
-    flags.forEach(flag => {
+    flags.forEach((flag) => {
       if (flag.indexOf('no-') === 0) {
         this.set(flag.slice(3), false);
       } else {

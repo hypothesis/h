@@ -13,7 +13,7 @@ class AdminUsersController extends Controller {
       );
     }
 
-    this.on('submit', event => {
+    this.on('submit', (event) => {
       if (!confirmFormSubmit()) {
         event.preventDefault();
       }

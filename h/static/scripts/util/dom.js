@@ -17,7 +17,7 @@ const hyphenate = stringUtil.hyphenate;
  *                 is true or removed otherwise.
  */
 function setElementState(el, state) {
-  Object.keys(state).forEach(key => {
+  Object.keys(state).forEach((key) => {
     const stateClass = 'is-' + hyphenate(key);
     if (state[key]) {
       el.classList.add(stateClass);
@@ -43,7 +43,7 @@ function findRefs(el) {
     // and avoid https://bugs.webkit.org/show_bug.cgi?id=161454
     const refEl = descendantsWithRef[i];
     const refs = (refEl.getAttribute('data-ref') || '').split(' ');
-    refs.forEach(ref => {
+    refs.forEach((ref) => {
       map[ref] = refEl;
     });
   }

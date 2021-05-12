@@ -15,7 +15,7 @@ class FormCancelController extends Controller {
 
     const window_ = options.window || window;
 
-    element.addEventListener('click', event => {
+    element.addEventListener('click', (event) => {
       event.preventDefault();
       window_.close();
     });

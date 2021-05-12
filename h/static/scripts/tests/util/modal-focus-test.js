@@ -12,7 +12,7 @@ describe('util/modal-focus', () => {
 
   beforeEach(() => {
     insideEls = [1, 2, 3].map(() => document.createElement('input'));
-    insideEls.forEach(el => document.body.appendChild(el));
+    insideEls.forEach((el) => document.body.appendChild(el));
 
     outsideEl = document.createElement('input');
     document.body.appendChild(outsideEl);
@@ -22,7 +22,7 @@ describe('util/modal-focus', () => {
   });
 
   afterEach(() => {
-    insideEls.forEach(el => el.remove());
+    insideEls.forEach((el) => el.remove());
     releaseFocus();
   });
 

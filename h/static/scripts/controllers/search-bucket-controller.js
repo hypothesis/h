@@ -26,7 +26,7 @@ class SearchBucketController extends Controller {
 
     this.scrollTo = this.options.scrollTo || scrollIntoView;
 
-    this.refs.header.addEventListener('click', event => {
+    this.refs.header.addEventListener('click', (event) => {
       if (this.refs.domainLink.contains(event.target)) {
         return;
       }
@@ -37,7 +37,7 @@ class SearchBucketController extends Controller {
       this.setState({ expanded: !this.state.expanded });
     });
 
-    this.refs.title.addEventListener('click', event => {
+    this.refs.title.addEventListener('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
 

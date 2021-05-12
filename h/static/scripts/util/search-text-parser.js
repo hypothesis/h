@@ -107,7 +107,7 @@ function getLozengeValues(queryString) {
   let inputTerms = '';
   let quoted;
   const queryTerms = [];
-  queryString.split(' ').forEach(term => {
+  queryString.split(' ').forEach((term) => {
     if (quoted) {
       inputTerms = inputTerms + ' ' + term;
       if (shouldLozengify(inputTerms)) {

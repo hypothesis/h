@@ -16,7 +16,7 @@ const ARROW_PADDING_BOTTOM = 5;
 
 let shareWidgetAttached = false;
 
-const getOffset = el => {
+const getOffset = (el) => {
   el = el.getBoundingClientRect();
   return {
     // adjust for top left of the document
@@ -43,7 +43,7 @@ class ShareWidget {
     // on initialize we need to reset container visibility
     this.hide();
 
-    this._handler = event => {
+    this._handler = (event) => {
       const target = event.target;
 
       // do nothing if we are clicking inside of the widget
@@ -104,7 +104,7 @@ class ShareWidget {
 
     // social links
     Array.from(this._widget.querySelectorAll(TARGET_HREF_SELECTOR)).forEach(
-      target => {
+      (target) => {
         target.href = target
           .getAttribute(TARGET_HREF_ATTR)
           .replace('{href}', encodeURI(config.url));

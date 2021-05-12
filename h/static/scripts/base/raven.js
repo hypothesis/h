@@ -65,7 +65,7 @@ function report(error, when, context) {
  * automatically, in which case this code can simply be removed.
  */
 function installUnhandledPromiseErrorHandler() {
-  window.addEventListener('unhandledrejection', event => {
+  window.addEventListener('unhandledrejection', (event) => {
     if (event.reason) {
       report(event.reason, 'Unhandled Promise rejection');
     }

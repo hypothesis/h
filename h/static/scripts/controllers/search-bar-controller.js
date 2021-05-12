@@ -18,7 +18,7 @@ const MAX_SUGGESTIONS = 5;
  * Normalize a string for use in comparisons of user input with a suggestion.
  * This causes differences in unicode composition and combining characters/accents to be ignored.
  */
-const normalizeStr = function(str) {
+const normalizeStr = function (str) {
   return stringUtil.fold(stringUtil.normalize(str));
 };
 
@@ -64,7 +64,7 @@ class SearchBarController extends Controller {
           title: 'group:',
           explanation: 'show annotations associated with a group',
         },
-      ].map(item => {
+      ].map((item) => {
         return Object.assign(item, { type: FACET_TYPE });
       });
 
@@ -81,7 +81,7 @@ class SearchBarController extends Controller {
         }
       }
 
-      const tagsList = (tagSuggestions || []).map(item => {
+      const tagsList = (tagSuggestions || []).map((item) => {
         return Object.assign(item, {
           type: TAG_TYPE,
           title: item.tag, // make safe
@@ -108,7 +108,7 @@ class SearchBarController extends Controller {
         }
       }
 
-      const groupsList = (groupSuggestions || []).map(item => {
+      const groupsList = (groupSuggestions || []).map((item) => {
         return Object.assign(item, {
           type: GROUP_TYPE,
           title: item.name, // make safe
@@ -141,11 +141,11 @@ class SearchBarController extends Controller {
      *      input: {String}    // like group:pid1234
      *    }
      */
-    const getInputAndDisplayValsForGroup = groupLoz => {
+    const getInputAndDisplayValsForGroup = (groupLoz) => {
       let groupVal = groupLoz.substr(groupLoz.indexOf(':') + 1).trim();
       let inputVal = groupVal.trim();
       let displayVal = groupVal;
-      const wrapQuotesIfNeeded = function(str) {
+      const wrapQuotesIfNeeded = function (str) {
         return str.indexOf(' ') > -1 ? `"${str}"` : str;
       };
 
@@ -168,7 +168,7 @@ class SearchBarController extends Controller {
       // them equal to us. Since that is very unlikely to occur for one user's group
       // set, the convenience of being defensive about bad input/urls is more valuable
       // than the risk of overlap.
-      const matchByPubid = this._suggestionsMap.find(item => {
+      const matchByPubid = this._suggestionsMap.find((item) => {
         return (
           item.type === GROUP_TYPE && item.pubid.toLowerCase() === matchVal
         );
@@ -178,7 +178,7 @@ class SearchBarController extends Controller {
         inputVal = matchByPubid.pubid;
         displayVal = wrapQuotesIfNeeded(matchByPubid.name);
       } else {
-        const matchByName = this._suggestionsMap.find(item => {
+        const matchByName = this._suggestionsMap.find((item) => {
           return (
             item.type === GROUP_TYPE && item.matchOn.toLowerCase() === matchVal
           );
@@ -222,7 +222,7 @@ class SearchBarController extends Controller {
       const lozElements = Array.from(
         this.element.querySelectorAll('.js-lozenge')
       );
-      return lozElements.map(el => el.controllers[0]);
+      return lozElements.map((el) => el.controllers[0]);
     };
 
     /**
@@ -237,7 +237,7 @@ class SearchBarController extends Controller {
      */
     const updateHiddenInput = () => {
       let newValue = '';
-      lozenges().forEach(loz => {
+      lozenges().forEach((loz) => {
         let inputValue = loz.inputValue();
         if (inputValue.indexOf('group:') === 0) {
           inputValue = getInputAndDisplayValsForGroup(inputValue).input;
@@ -254,7 +254,7 @@ class SearchBarController extends Controller {
      *
      * @param {string} content The search term
      */
-    const addLozenge = content => {
+    const addLozenge = (content) => {
       const lozengeEl = cloneTemplate(this.options.lozengeTemplate);
       const currentLozenges = this.element.querySelectorAll('.lozenge');
       if (currentLozenges.length > 0) {
@@ -271,7 +271,7 @@ class SearchBarController extends Controller {
 
       const deleteCallback = () => {
         lozengeEl.remove();
-        lozenges().forEach(ctrl => ctrl.setState({ disabled: true }));
+        lozenges().forEach((ctrl) => ctrl.setState({ disabled: true }));
         updateHiddenInput();
         this.refs.searchBarForm.submit();
       };
@@ -295,10 +295,8 @@ class SearchBarController extends Controller {
      * so they are hooked up with the proper event handling
      */
     const lozengifyInput = () => {
-      const {
-        lozengeValues,
-        incompleteInputValue,
-      } = SearchTextParser.getLozengeValues(this._input.value);
+      const { lozengeValues, incompleteInputValue } =
+        SearchTextParser.getLozengeValues(this._input.value);
 
       lozengeValues.forEach(addLozenge);
       this._input.value = incompleteInputValue;
@@ -306,7 +304,7 @@ class SearchBarController extends Controller {
       updateHiddenInput();
     };
 
-    const onInputKeyDown = event => {
+    const onInputKeyDown = (event) => {
       const SPACE_KEY_CODE = 32;
 
       if (event.keyCode === SPACE_KEY_CODE) {
@@ -335,7 +333,7 @@ class SearchBarController extends Controller {
         activeItem: 'js-search-bar-dropdown-menu-item--active',
       },
 
-      renderListItem: listItem => {
+      renderListItem: (listItem) => {
         let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(
           listItem.title
         )} </span>`;
@@ -346,9 +344,7 @@ class SearchBarController extends Controller {
         }
 
         if (listItem.explanation) {
-          itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${
-            listItem.explanation
-          } </span>`;
+          itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
         }
 
         return itemContents;
@@ -383,7 +379,7 @@ class SearchBarController extends Controller {
         }
 
         return list
-          .filter(item => {
+          .filter((item) => {
             return (
               item.type === typeFilter &&
               item.matchOn.toLowerCase().indexOf(inputFilter.toLowerCase()) >= 0
@@ -423,7 +419,7 @@ class SearchBarController extends Controller {
           .slice(0, MAX_SUGGESTIONS);
       },
 
-      onSelect: itemSelected => {
+      onSelect: (itemSelected) => {
         if (
           itemSelected.type === TAG_TYPE ||
           itemSelected.type === GROUP_TYPE

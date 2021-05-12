@@ -26,7 +26,7 @@ describe('submitForm', () => {
 
   unroll(
     'submits the form data',
-    testCase => {
+    (testCase) => {
       const form = document.createElement('form');
       form.method = 'POST';
       form.innerHTML = '<input name="field" value="value">';
@@ -70,7 +70,7 @@ describe('submitForm', () => {
     const responseBody = '<form><!-- updated form !--></form>';
     mockResponse(responseBody);
 
-    return submitForm(form, fetchMock.fetchMock).then(response => {
+    return submitForm(form, fetchMock.fetchMock).then((response) => {
       assert.equal(response.form, responseBody);
     });
   });
@@ -81,7 +81,7 @@ describe('submitForm', () => {
 
     const done = submitForm(form, fetchMock.fetchMock);
 
-    return done.catch(err => {
+    return done.catch((err) => {
       assert.match(err, sinon.match({ status: 400, form: 'response' }));
     });
   });
@@ -92,7 +92,7 @@ describe('submitForm', () => {
 
     const done = submitForm(form, fetchMock.fetchMock);
 
-    return done.catch(err => {
+    return done.catch((err) => {
       assert.match(
         err,
         sinon.match({ status: 500, reason: 'Internal Server Error' })
