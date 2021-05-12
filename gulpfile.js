@@ -9,7 +9,7 @@ var changed = require('gulp-changed');
 var commander = require('commander');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
-var log = require('gulplog');
+var log = require('fancy-log');
 var newer = require('gulp-newer');
 var postcss = require('gulp-postcss');
 var postcssURL = require('postcss-url');
@@ -53,9 +53,9 @@ var vendorModules = ['jquery', 'bootstrap', 'raven-js'];
 var vendorNoParseModules = ['jquery'];
 
 // Builds the bundles containing vendor JS code
-gulp.task('build-vendor-js', function () {
+gulp.task('build-vendor-js', function() {
   var finished = [];
-  Object.keys(vendorBundles).forEach(function (name) {
+  Object.keys(vendorBundles).forEach(function(name) {
     finished.push(
       createBundle({
         name: name,
@@ -99,15 +99,15 @@ var bundles = [
   },
 ];
 
-var bundleConfigs = bundles.map(function (config) {
+var bundleConfigs = bundles.map(function(config) {
   return Object.assign({}, bundleBaseConfig, config);
 });
 
 gulp.task(
   'build-js',
-  gulp.series(['build-vendor-js'], function () {
+  gulp.series(['build-vendor-js'], function() {
     return Promise.all(
-      bundleConfigs.map(function (config) {
+      bundleConfigs.map(function(config) {
         return createBundle(config);
       })
     );
@@ -116,8 +116,8 @@ gulp.task(
 
 gulp.task(
   'watch-js',
-  gulp.series(['build-vendor-js'], function () {
-    return bundleConfigs.map((config) => createBundle(config, { watch: true }));
+  gulp.series(['build-vendor-js'], function() {
+    return bundleConfigs.map(config => createBundle(config, { watch: true }));
   })
 );
 
@@ -127,7 +127,7 @@ function rewriteCSSURL(asset) {
   return asset.url.replace(/^fonts\//, '../fonts/');
 }
 
-gulp.task('build-vendor-css', function () {
+gulp.task('build-vendor-css', function() {
   var vendorCSSFiles = [
     // Icon font
     './h/static/styles/vendor/icomoon.css',
@@ -162,12 +162,12 @@ function buildStyleBundle(entryFile) {
 
 gulp.task(
   'build-css',
-  gulp.series(['build-vendor-css'], function () {
+  gulp.series(['build-vendor-css'], function() {
     return Promise.all(styleBundleEntryFiles.map(buildStyleBundle));
   })
 );
 
-gulp.task('watch-css', function () {
+gulp.task('watch-css', function() {
   gulp.watch(
     'h/static/styles/**/*.scss',
     { ignoreInitial: false },
@@ -177,20 +177,20 @@ gulp.task('watch-css', function () {
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
 
-gulp.task('build-fonts', function () {
+gulp.task('build-fonts', function() {
   return gulp
     .src(fontFiles)
     .pipe(changed(FONTS_DIR))
     .pipe(gulp.dest(FONTS_DIR));
 });
 
-gulp.task('watch-fonts', function () {
+gulp.task('watch-fonts', function() {
   gulp.watch(fontFiles, gulp.series('build-fonts'));
 });
 
 var imageFiles = 'h/static/images/**/*';
-gulp.task('build-images', function () {
-  var shouldMinifySVG = function (file) {
+gulp.task('build-images', function() {
+  var shouldMinifySVG = function(file) {
     return IS_PRODUCTION_BUILD && file.path.match(/\.svg$/);
   };
 
@@ -214,7 +214,7 @@ gulp.task('build-images', function () {
     .pipe(gulp.dest(IMAGES_DIR));
 });
 
-gulp.task('watch-images', function () {
+gulp.task('watch-images', function() {
   gulp.watch(imageFiles, gulp.series('build-images'));
 });
 
@@ -229,7 +229,7 @@ function generateManifest() {
     .src(MANIFEST_SOURCE_FILES)
     .pipe(manifest({ name: 'manifest.json' }))
     .pipe(
-      through.obj(function (file, enc, callback) {
+      through.obj(function(file, enc, callback) {
         log.info('Updated asset manifest');
         this.push(file);
         callback();
@@ -238,7 +238,7 @@ function generateManifest() {
     .pipe(gulp.dest('build/'));
 }
 
-gulp.task('watch-manifest', function () {
+gulp.task('watch-manifest', function() {
   gulp.watch(MANIFEST_SOURCE_FILES, generateManifest);
 });
 
@@ -284,10 +284,10 @@ function runKarma(baseConfig, opts, done) {
   ).start();
 }
 
-gulp.task('test', function (callback) {
+gulp.task('test', function(callback) {
   runKarma('./h/static/scripts/karma.config.js', { singleRun: true }, callback);
 });
 
-gulp.task('test-watch', function (callback) {
+gulp.task('test-watch', function(callback) {
   runKarma('./h/static/scripts/karma.config.js', {}, callback);
 });

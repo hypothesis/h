@@ -8,22 +8,20 @@ var path = require('path');
 
 var browserify = require('browserify');
 var exorcist = require('exorcist');
-var gulpUtil = require('gulp-util');
+var log = require('fancy-log');
 var mkdirp = require('mkdirp');
 var uglifyify = require('uglifyify');
 var watchify = require('watchify');
 
-var log = gulpUtil.log;
-
 function streamFinished(stream) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     stream.on('finish', resolve);
     stream.on('error', reject);
   });
 }
 
 function waitForever() {
-  return new Promise(function () {});
+  return new Promise(function() {});
 }
 
 /**
@@ -86,7 +84,7 @@ module.exports = function createBundle(config, buildOpts) {
       //
       // This can break on web pages which provide their own definition of
       // `global`. See https://github.com/hypothesis/h/issues/2723
-      global: function () {
+      global: function() {
         return 'typeof self !== "undefined" ? self : window';
       },
     },
@@ -100,7 +98,7 @@ module.exports = function createBundle(config, buildOpts) {
   // Specify modules that Browserify should not parse.
   // The 'noParse' array must contain full file paths,
   // not module names.
-  bundleOpts.noParse = (config.noParse || []).map(function (id) {
+  bundleOpts.noParse = (config.noParse || []).map(function(id) {
     // If package.json specifies a custom entry point for the module for
     // use in the browser, resolve that.
     var packageConfig = require('../../package.json');
@@ -119,7 +117,7 @@ module.exports = function createBundle(config, buildOpts) {
 
   var bundle = browserify([], bundleOpts);
 
-  (config.require || []).forEach(function (req) {
+  (config.require || []).forEach(function(req) {
     // When another bundle uses 'bundle.external(<module path>)',
     // the module path is rewritten relative to the
     // base directory and a '/' prefix is added, so
@@ -157,7 +155,7 @@ module.exports = function createBundle(config, buildOpts) {
   function build() {
     var output = fs.createWriteStream(bundlePath);
     var b = bundle.bundle();
-    b.on('error', function (err) {
+    b.on('error', function(err) {
       log('Build error', err.toString());
     });
     var stream = b.pipe(exorcist(sourcemapPath)).pipe(output);
@@ -166,23 +164,23 @@ module.exports = function createBundle(config, buildOpts) {
 
   if (buildOpts.watch) {
     bundle.plugin(watchify);
-    bundle.on('update', function (ids) {
+    bundle.on('update', function(ids) {
       var start = Date.now();
 
       log('Source files changed', ids);
       build()
-        .then(function () {
+        .then(function() {
           log('Updated %s (%d ms)', bundleFileName, Date.now() - start);
         })
-        .catch(function (err) {
+        .catch(function(err) {
           console.error('Building updated bundle failed:', err);
         });
     });
     build()
-      .then(function () {
+      .then(function() {
         log('Built ' + bundleFileName);
       })
-      .catch(function (err) {
+      .catch(function(err) {
         console.error('Error building bundle:', err);
       });
 
