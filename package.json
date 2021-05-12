@@ -11,7 +11,9 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@babel/core": "^7.14.0",
     "@babel/preset-env": "^7.14.1",
+    "@popperjs/core": "^2.9.2",
     "autoprefixer": "^10.2.5",
     "babel-preset-es2015": "^6.14.0",
     "babelify": "^10.0.0",
@@ -50,6 +52,9 @@
     "diff": "^5.0.0",
     "eslint": "^7.26.0",
     "eslint-config-hypothesis": "^2.5.0",
+    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "fetch-mock": "^9.11.0",
     "karma": "^6.3.2",
     "karma-browserify": "^8.0.0",
