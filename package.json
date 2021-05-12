@@ -74,6 +74,7 @@
     "url": "https://github.com/hypothesis/h/issues"
   },
   "homepage": "https://github.com/hypothesis/h",
+  "browserslist": "chrome 57, edge 17, firefox 53, safari 10.1",
   "browserify": {
     "transform": [
       "babelify",
