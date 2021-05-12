@@ -11,6 +11,7 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.14.1",
     "autoprefixer": "^10.2.5",
     "babel-preset-es2015": "^6.14.0",
     "babelify": "^10.0.0",
@@ -80,6 +81,9 @@
       "babelify",
       "browserify-shim"
     ]
+  },
+  "browser": {
+    "fetch-mock": "./node_modules/fetch-mock/cjs/client.js"
   },
   "browserify-shim": {
     "jquery": "$"
