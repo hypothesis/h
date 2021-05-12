@@ -23,7 +23,7 @@ describe('ShareWidgetController', () => {
           class="share-widget-target__icon">
           {{ svg_icon('google-plus', 'share-widget-action') }}
         </a>
-        <a share-target-href="mailto:?subject=Let's%20Annotate&amp;body={href}"
+        <a share-target-href="mailto:?subject=Let%27s%20Annotate&amp;body={href}"
           class="share-widget-target__icon">
         </a>
       </div>
@@ -64,11 +64,13 @@ describe('ShareWidgetController', () => {
     );
   };
 
-  const urlsReflectUpdate = interpolatedValue => {
-    return Array.from(container.querySelectorAll('[share-target-href]')).every(
+  const checkURLs = expectedURL => {
+    Array.from(container.querySelectorAll('[share-target-href]')).forEach(
       anchor => {
         const tmpl = anchor.getAttribute('share-target-href');
-        return tmpl.replace('{href}', interpolatedValue) === anchor.href;
+        const expectedLink = tmpl.replace('{href}', expectedURL);
+        const actualLink = anchor.href;
+        assert.equal(actualLink, expectedLink);
       }
     );
   };
@@ -139,28 +141,27 @@ describe('ShareWidgetController', () => {
       });
   });
 
-  // FIXME - Make this test pass in Chrome
-  it.skip('displays correctly for current share link', done => {
+  it('displays correctly for current share link', done => {
     const btns = getTriggers();
 
     syn
       .click(btns[0], () => {
-        assert.isTrue(urlsReflectUpdate('http://url1.goes?here=true'));
+        checkURLs('http://url1.goes?here=true');
         assert.isFalse(privateMessageVisible());
         assert.isFalse(groupMessageVisible());
       })
       .click(btns[1], () => {
-        assert.isTrue(urlsReflectUpdate('http://url2.goes?here'));
+        checkURLs('http://url2.goes?here');
         assert.isTrue(privateMessageVisible());
         assert.isFalse(groupMessageVisible());
       })
       .click(btns[2], () => {
-        assert.isTrue(urlsReflectUpdate('https://url3.goes?here=true'));
+        checkURLs('https://url3.goes?here=true');
         assert.isFalse(privateMessageVisible());
         assert.isTrue(groupMessageVisible());
       })
       .click(btns[3].querySelector('b'), () => {
-        assert.isTrue(urlsReflectUpdate('http://url4.goes?here=alsotrue'));
+        checkURLs('http://url4.goes?here=alsotrue');
         assert.isTrue(privateMessageVisible());
         assert.isFalse(groupMessageVisible());
         done();

@@ -57,13 +57,9 @@ describe('util/dom', () => {
   });
 
   describe('cloneTemplate', () => {
-    // FIXME - Make this test pass in Chrome
-    it.skip('clones the first child of the template when <template> is supported', () => {
-      const frag = document.createDocumentFragment();
-      frag.appendChild(createDOM('<div id="child"></div>'));
-      frag.appendChild(createDOM('<div id="child-b"></div>'));
+    it('clones the first child of the template when <template> is supported', () => {
       const template = document.createElement('template');
-      template.content = frag;
+      template.innerHTML = '<div id="child"></div>';
       const clone = domUtil.cloneTemplate(template);
       assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
     });

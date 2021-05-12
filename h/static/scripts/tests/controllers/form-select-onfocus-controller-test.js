@@ -34,13 +34,13 @@ describe('FormSelectOnFocusController', () => {
     assert.strictEqual(input.selectionEnd, input.value.length);
   });
 
-  // FIXME - Make this test pass in Chrome
-  it.skip('it selects the element without focus event when it is the active element', () => {
+  it('it selects the element without focus event when it is the active element', () => {
     // Focus element before instantiating the controller
     const input = root.querySelector('input');
     input.focus();
 
-    new FormSelectOnFocusController(document.body);
+    new FormSelectOnFocusController(input);
+
     assert.strictEqual(input.selectionStart, 0);
     assert.strictEqual(input.selectionEnd, input.value.length);
   });
