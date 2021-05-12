@@ -625,9 +625,11 @@ describe('SearchBarController', () => {
         });
     });
 
-    // FIXME - Make this test pass in Chrome
-    it.skip('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', done => {
+    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', done => {
       const { ctrl, input } = component("'bar");
+
+      // Move cursor to end of field.
+      input.selectionStart = input.value.length;
 
       syn
         .click(input)

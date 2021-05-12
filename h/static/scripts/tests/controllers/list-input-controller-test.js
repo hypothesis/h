@@ -33,14 +33,13 @@ describe('ListInputController', () => {
     assert.equal(itemCount(ctrl), 2);
   });
 
-  // FIXME - Make this test pass in Chrome
-  it.skip('removes the item when clicking "Remove item" button', () => {
+  it('removes the item when clicking "Remove item" button', () => {
     const ctrl = setupComponent(document, template, ListInputController);
     ctrl.refs.addItemButton.click();
 
     const removeBtn = ctrl.element.querySelector('li > button');
     removeBtn.click();
 
-    assert.equal(itemCount(ctrl), 1);
+    assert.equal(itemCount(ctrl), 0);
   });
 });
