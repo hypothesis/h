@@ -28,7 +28,7 @@ cffi==1.14.5
     #   bcrypt
 chameleon==3.8.1
     # via deform
-click==7.1.2
+click==8.0.0
     # via -r requirements/requirements.in
 colander==1.8.2
     # via deform
