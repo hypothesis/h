@@ -16,7 +16,7 @@ describe('CopyButtonController', () => {
   beforeEach(() => {
     copySuccess = false;
     copiedText = '';
-    sinon.stub(document, 'execCommand', (command) => {
+    sinon.stub(document, 'execCommand').callsFake((command) => {
       if (command === 'copy') {
         copiedText = document.getSelection().toString();
         return copySuccess;
