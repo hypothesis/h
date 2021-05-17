@@ -3,25 +3,27 @@
  */
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
+/* eslint-env node */
 
-var browserify = require('browserify');
-var exorcist = require('exorcist');
-var log = require('fancy-log');
-var mkdirp = require('mkdirp');
-var uglifyify = require('uglifyify');
-var watchify = require('watchify');
+const fs = require('fs');
+const path = require('path');
+
+const browserify = require('browserify');
+const exorcist = require('exorcist');
+const log = require('fancy-log');
+const mkdirp = require('mkdirp');
+const uglifyify = require('uglifyify');
+const watchify = require('watchify');
 
 function streamFinished(stream) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     stream.on('finish', resolve);
     stream.on('error', reject);
   });
 }
 
 function waitForever() {
-  return new Promise(function () {});
+  return new Promise(() => {});
 }
 
 /**
@@ -58,7 +60,7 @@ module.exports = function createBundle(config, buildOpts) {
 
   buildOpts = buildOpts || { watch: false };
 
-  var bundleOpts = {
+  const bundleOpts = {
     debug: true,
 
     // Browserify will try to detect and automatically provide
@@ -98,10 +100,10 @@ module.exports = function createBundle(config, buildOpts) {
   // Specify modules that Browserify should not parse.
   // The 'noParse' array must contain full file paths,
   // not module names.
-  bundleOpts.noParse = (config.noParse || []).map(function (id) {
+  bundleOpts.noParse = (config.noParse || []).map(id => {
     // If package.json specifies a custom entry point for the module for
     // use in the browser, resolve that.
-    var packageConfig = require('../../package.json');
+    const packageConfig = require('../../package.json');
     if (packageConfig.browser && packageConfig.browser[id]) {
       return require.resolve('../../' + packageConfig.browser[id]);
     } else {
@@ -109,15 +111,15 @@ module.exports = function createBundle(config, buildOpts) {
     }
   });
 
-  var name = config.name;
+  const name = config.name;
 
-  var bundleFileName = name + '.bundle.js';
-  var bundlePath = config.path + '/' + bundleFileName;
-  var sourcemapPath = bundlePath + '.map';
+  const bundleFileName = name + '.bundle.js';
+  const bundlePath = config.path + '/' + bundleFileName;
+  const sourcemapPath = bundlePath + '.map';
 
-  var bundle = browserify([], bundleOpts);
+  const bundle = browserify([], bundleOpts);
 
-  (config.require || []).forEach(function (req) {
+  (config.require || []).forEach(req => {
     // When another bundle uses 'bundle.external(<module path>)',
     // the module path is rewritten relative to the
     // base directory and a '/' prefix is added, so
@@ -132,8 +134,8 @@ module.exports = function createBundle(config, buildOpts) {
       // If the require path is absolute, the same rules as
       // above apply but the path needs to be relative to
       // the root of the repository
-      var repoRootPath = path.join(__dirname, '../../');
-      var relativePath = path.relative(
+      const repoRootPath = path.join(__dirname, '../../');
+      const relativePath = path.relative(
         path.resolve(repoRootPath),
         path.resolve(req)
       );
@@ -153,34 +155,34 @@ module.exports = function createBundle(config, buildOpts) {
   }
 
   function build() {
-    var output = fs.createWriteStream(bundlePath);
-    var b = bundle.bundle();
-    b.on('error', function (err) {
+    const output = fs.createWriteStream(bundlePath);
+    const b = bundle.bundle();
+    b.on('error', err => {
       log('Build error', err.toString());
     });
-    var stream = b.pipe(exorcist(sourcemapPath)).pipe(output);
+    const stream = b.pipe(exorcist(sourcemapPath)).pipe(output);
     return streamFinished(stream);
   }
 
   if (buildOpts.watch) {
     bundle.plugin(watchify);
-    bundle.on('update', function (ids) {
-      var start = Date.now();
+    bundle.on('update', ids => {
+      const start = Date.now();
 
       log('Source files changed', ids);
       build()
-        .then(function () {
+        .then(() => {
           log('Updated %s (%d ms)', bundleFileName, Date.now() - start);
         })
-        .catch(function (err) {
+        .catch(err => {
           console.error('Building updated bundle failed:', err);
         });
     });
     build()
-      .then(function () {
+      .then(() => {
         log('Built ' + bundleFileName);
       })
-      .catch(function (err) {
+      .catch(err => {
         console.error('Error building bundle:', err);
       });
 
