@@ -1,13 +1,7 @@
 {
   "extends": "hypothesis",
   "rules": {
-    "indent": "off",
-    "no-var": "error",
     "prefer-arrow-callback": "error",
-    "prefer-const": ["error", { "destructuring": "all" }],
-    "space-before-blocks": "error"
-  },
-  "parserOptions": {
-    "ecmaVersion": 2017
+    "prefer-const": ["error", { "destructuring": "all" }]
   }
 }
