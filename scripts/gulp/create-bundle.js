@@ -8,12 +8,10 @@ var path = require('path');
 
 var browserify = require('browserify');
 var exorcist = require('exorcist');
-var gulpUtil = require('gulp-util');
+var log = require('fancy-log');
 var mkdirp = require('mkdirp');
 var uglifyify = require('uglifyify');
 var watchify = require('watchify');
-
-var log = gulpUtil.log;
 
 function streamFinished(stream) {
   return new Promise(function(resolve, reject) {
