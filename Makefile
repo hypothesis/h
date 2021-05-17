@@ -80,8 +80,15 @@ analyze: python
 	@tox -qe analyze
 
 .PHONY: format
-format: python
+format: backend-format frontend-format
+
+.PHONY: backend-format
+backend-format: python
 	@tox -qe format
+
+.PHONY: frontend-format
+frontend-format: node_modules/.uptodate
+	@yarn format
 
 PHONY: checkformatting
 checkformatting: backend-checkformatting frontend-checkformatting
