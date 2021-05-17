@@ -46,6 +46,7 @@ class TestResetPasswordSchema:
         pyramid_csrf_request.registry.password_reset_serializer = self.FakeSerializer()
         schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
         user = user_model.get_by_username.return_value
+        # TODO - This needs to be a timezone UN-aware timestamp
         user.password_updated = 2
 
         with pytest.raises(colander.Invalid) as exc:
@@ -58,6 +59,7 @@ class TestResetPasswordSchema:
         pyramid_csrf_request.registry.password_reset_serializer = self.FakeSerializer()
         schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
         user = user_model.get_by_username.return_value
+        # TODO - This needs to be a timezone UN-aware timestamp
         user.password_updated = 0
 
         appstruct = schema.deserialize({"user": "abc123", "password": "secret"})
@@ -70,6 +72,7 @@ class TestResetPasswordSchema:
 
             assert return_timestamp
 
+            # TODO - This needs to be a timezone aware timestamp
             return payload, 1
 
     class FakeExpiredSerializer(FakeSerializer):
