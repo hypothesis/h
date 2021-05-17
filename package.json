@@ -11,10 +11,11 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@popperjs/core": "^2.9.2",
     "autoprefixer": "^6.0.3",
     "babel-preset-es2015": "^6.14.0",
     "babelify": "^7.3.0",
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^5.0.1",
     "browserify": "^16.2.3",
     "browserify-shim": "^3.8.12",
     "commander": "^2.9.0",
@@ -30,7 +31,6 @@
     "jquery": "^3.5.0",
     "mkdirp": "^0.5.1",
     "normalize.css": "^8.0.0",
-    "popper.js": "^1.14.4",
     "postcss": "^6.0.21",
     "postcss-url": "^7.3.1",
     "query-string": "^3.0.1",
