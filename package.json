@@ -59,7 +59,7 @@
     "karma-sinon": "^1.0.5",
     "mocha": "^5.2.0",
     "prettier": "1.17.0",
-    "sinon": "^1.17.3",
+    "sinon": "^10.0.0",
     "syn": "^0.2.2"
   },
   "engines": {
