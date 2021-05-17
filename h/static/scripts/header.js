@@ -18,7 +18,7 @@ if (gaTrackingId) {
   /* eslint-disable */
   window.ga =
     window.ga ||
-    function() {
+    function () {
       (ga.q = ga.q || []).push(arguments);
     };
   ga.l = +new Date();

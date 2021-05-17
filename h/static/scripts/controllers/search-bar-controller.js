@@ -18,7 +18,7 @@ const MAX_SUGGESTIONS = 5;
  * Normalize a string for use in comparisons of user input with a suggestion.
  * This causes differences in unicode composition and combining characters/accents to be ignored.
  */
-const normalizeStr = function(str) {
+const normalizeStr = function (str) {
   return stringUtil.fold(stringUtil.normalize(str));
 };
 
@@ -145,7 +145,7 @@ class SearchBarController extends Controller {
       let groupVal = groupLoz.substr(groupLoz.indexOf(':') + 1).trim();
       let inputVal = groupVal.trim();
       let displayVal = groupVal;
-      const wrapQuotesIfNeeded = function(str) {
+      const wrapQuotesIfNeeded = function (str) {
         return str.indexOf(' ') > -1 ? `"${str}"` : str;
       };
 
@@ -295,10 +295,8 @@ class SearchBarController extends Controller {
      * so they are hooked up with the proper event handling
      */
     const lozengifyInput = () => {
-      const {
-        lozengeValues,
-        incompleteInputValue,
-      } = SearchTextParser.getLozengeValues(this._input.value);
+      const { lozengeValues, incompleteInputValue } =
+        SearchTextParser.getLozengeValues(this._input.value);
 
       lozengeValues.forEach(addLozenge);
       this._input.value = incompleteInputValue;
@@ -346,9 +344,7 @@ class SearchBarController extends Controller {
         }
 
         if (listItem.explanation) {
-          itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${
-            listItem.explanation
-          } </span>`;
+          itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
         }
 
         return itemContents;

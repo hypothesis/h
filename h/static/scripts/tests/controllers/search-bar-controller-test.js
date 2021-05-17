@@ -54,7 +54,7 @@ describe('SearchBarController', () => {
       </div>
     `;
 
-    const getItemTitles = function() {
+    const getItemTitles = function () {
       return Array.from(
         dropdown.querySelectorAll('.search-bar__dropdown-menu-title')
       ).map(node => {
@@ -62,7 +62,7 @@ describe('SearchBarController', () => {
       });
     };
 
-    const setup = function() {
+    const setup = function () {
       testEl = document.createElement('div');
       testEl.innerHTML = TEMPLATE;
       document.body.appendChild(testEl);
@@ -73,7 +73,7 @@ describe('SearchBarController', () => {
       dropdown = input.nextSibling;
     };
 
-    const teardown = function() {
+    const teardown = function () {
       document.body.removeChild(testEl);
       const tagsJSON = document.querySelector('.js-tag-suggestions');
       if (tagsJSON) {
@@ -86,7 +86,7 @@ describe('SearchBarController', () => {
       }
     };
 
-    const addTagSuggestions = function() {
+    const addTagSuggestions = function () {
       const suggestions = [
         {
           tag: 'aaaa',
@@ -132,7 +132,7 @@ describe('SearchBarController', () => {
       document.body.appendChild(tagsScript);
     };
 
-    const addGroupSuggestions = function() {
+    const addGroupSuggestions = function () {
       const suggestions = [
         {
           name: 'aaac',

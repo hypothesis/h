@@ -37,7 +37,7 @@ describe('EnvironmentFlags', () => {
     });
 
     it('should add "env-touch" flag if touch events are available', () => {
-      el.ontouchstart = function() {};
+      el.ontouchstart = function () {};
       flags.init();
       assert.isTrue(el.classList.contains('env-touch'));
     });
