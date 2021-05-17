@@ -175,9 +175,7 @@ class AutosuggestDropdownController extends Controller {
           // selection to arbitrary item in list.
           // This allows lists to pass more than just the required
           // `name` property to know more about what the list item is
-          __suggestionId: Math.random()
-            .toString(36)
-            .substr(2, 5),
+          __suggestionId: Math.random().toString(36).substr(2, 5),
         });
       }),
     });

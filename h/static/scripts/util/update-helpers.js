@@ -9,7 +9,7 @@ module.exports = {
    * @returns {bool}       the result of comparing if the two
    *   arrays seem like they have changed. True if they have changed
    */
-  listIsDifferent: function(listA, listB) {
+  listIsDifferent: function (listA, listB) {
     if (!(Array.isArray(listA) && Array.isArray(listB))) {
       return true;
     }

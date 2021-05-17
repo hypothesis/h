@@ -80,15 +80,13 @@ describe('AutosuggestDropdownController', () => {
         let itemContents = `<span class="a-title"> ${listItem.title} </span>`;
 
         if (listItem.explanation) {
-          itemContents += `<span class="an-explanation"> ${
-            listItem.explanation
-          } </span>`;
+          itemContents += `<span class="an-explanation"> ${listItem.explanation} </span>`;
         }
 
         return itemContents;
       },
 
-      listFilter: function(list, currentInput) {
+      listFilter: function (list, currentInput) {
         currentInput = (currentInput || '').trim();
 
         return list.filter(item => {
@@ -99,7 +97,7 @@ describe('AutosuggestDropdownController', () => {
         });
       },
 
-      onSelect: function() {},
+      onSelect: function () {},
     };
 
     const isSuggestionContainerVisible = () => {

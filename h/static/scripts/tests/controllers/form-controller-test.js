@@ -29,9 +29,7 @@ function fieldTemplate(field) {
 
   return `<div class="js-form-input" data-ref="${field.fieldRef}" ${dataAttr}>
     <label data-ref="label ${field.labelRef}">Label</label>
-    <input id="deformField" data-ref="formInput ${
-      field.ref
-    }" ${typeAttr} value="${field.value}">
+    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} value="${field.value}">
   </div>`;
 }
 
