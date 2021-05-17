@@ -1,30 +1,29 @@
 'use strict';
 
 /* eslint-env node */
-/* eslint-disable no-var, prefer-arrow-callback */
 
-var path = require('path');
+const path = require('path');
 
-var changed = require('gulp-changed');
-var commander = require('commander');
-var gulp = require('gulp');
-var gulpIf = require('gulp-if');
-var log = require('fancy-log');
-var newer = require('gulp-newer');
-var postcss = require('gulp-postcss');
-var postcssURL = require('postcss-url');
-var svgmin = require('gulp-svgmin');
-var through = require('through2');
+const changed = require('gulp-changed');
+const commander = require('commander');
+const gulp = require('gulp');
+const gulpIf = require('gulp-if');
+const log = require('fancy-log');
+const newer = require('gulp-newer');
+const postcss = require('gulp-postcss');
+const postcssURL = require('postcss-url');
+const svgmin = require('gulp-svgmin');
+const through = require('through2');
 
-var createBundle = require('./scripts/gulp/create-bundle');
-var createStyleBundle = require('./scripts/gulp/create-style-bundle');
-var manifest = require('./scripts/gulp/manifest');
+const createBundle = require('./scripts/gulp/create-bundle');
+const createStyleBundle = require('./scripts/gulp/create-style-bundle');
+const manifest = require('./scripts/gulp/manifest');
 
-var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
-var SCRIPT_DIR = 'build/scripts';
-var STYLE_DIR = 'build/styles';
-var FONTS_DIR = 'build/fonts';
-var IMAGES_DIR = 'build/images';
+const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
+const SCRIPT_DIR = 'build/scripts';
+const STYLE_DIR = 'build/styles';
+const FONTS_DIR = 'build/fonts';
+const IMAGES_DIR = 'build/images';
 
 function parseCommandLine() {
   commander

@@ -1,10 +1,12 @@
 'use strict';
 
-var path = require('path');
-var crypto = require('crypto');
+/* eslint-env node */
 
-var through = require('through2');
-var VinylFile = require('vinyl');
+const path = require('path');
+const crypto = require('crypto');
+
+const through = require('through2');
+const VinylFile = require('vinyl');
 
 /**
  * Gulp plugin that generates a cache-busting manifest file.
@@ -15,21 +17,21 @@ var VinylFile = require('vinyl');
  * to URLs with cache-busting query parameters (eg. "scripts/foo.js?af95bd").
  */
 module.exports = function (opts) {
-  var manifest = {};
+  const manifest = {};
 
   return through.obj(
-    function (file, enc, callback) {
-      var hash = crypto.createHash('sha1');
+    (file, enc, callback) => {
+      const hash = crypto.createHash('sha1');
       hash.update(file.contents);
 
-      var hashSuffix = hash.digest('hex').slice(0, 6);
-      var relPath = path.relative('build/', file.path);
+      const hashSuffix = hash.digest('hex').slice(0, 6);
+      const relPath = path.relative('build/', file.path);
       manifest[relPath] = relPath + '?' + hashSuffix;
 
       callback();
     },
     function (callback) {
-      var manifestFile = new VinylFile({
+      const manifestFile = new VinylFile({
         path: opts.name,
         contents: Buffer.from(JSON.stringify(manifest, null, 2), 'utf-8'),
       });
