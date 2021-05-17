@@ -1,89 +1,114 @@
+from datetime import datetime, timedelta
+from unittest.mock import create_autospec
+
 import colander
 import pytest
-from itsdangerous import BadData, SignatureExpired
+import pytz
+from itsdangerous import BadData, SignatureExpired, URLSafeTimedSerializer
 
 from h.schemas.forms.accounts import ResetPasswordSchema
 
-pytestmark = pytest.mark.usefixtures("pyramid_config")
 
-
-@pytest.mark.usefixtures("user_model")
+@pytest.mark.usefixtures("pyramid_config")
 class TestResetPasswordSchema:
-    def test_it_is_invalid_with_password_too_short(self, pyramid_csrf_request):
-        schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
+    def test_it_is_valid_with_a_long_password(self, schema):
+        # Yeah... our minimum password length is 2 chars. See
+        # `h.schema.forms.accounts.util`
+        schema.deserialize({"password": "aa", "user": "*any*"})
 
+    @pytest.mark.parametrize("password", ("", "a"))
+    def test_it_is_invalid_with_password_too_short(self, schema, password):
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"password": "a"})
+            schema.deserialize({"password": password, "user": "*any*"})
+
         assert "password" in exc.value.asdict()
 
-    def test_it_is_invalid_with_invalid_user_token(self, pyramid_csrf_request):
-        pyramid_csrf_request.registry.password_reset_serializer = (
-            self.FakeInvalidSerializer()
-        )
-        schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
+    def test_it_is_invalid_with_invalid_user_token(self, schema, serializer):
+        serializer.loads.side_effect = BadData("Invalid token")
 
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"user": "abc123", "password": "secret"})
+            schema.deserialize({"user": "INVALID_TOKEN", "password": "*any*"})
 
         assert "user" in exc.value.asdict()
         assert "Wrong reset code." in exc.value.asdict()["user"]
 
-    def test_it_is_invalid_with_expired_token(self, pyramid_csrf_request):
-        pyramid_csrf_request.registry.password_reset_serializer = (
-            self.FakeExpiredSerializer()
-        )
-        schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
+    def test_it_is_invalid_with_expired_token(self, schema, serializer):
+        serializer.loads.side_effect = SignatureExpired("Token has expired")
 
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"user": "abc123", "password": "secret"})
+            schema.deserialize({"user": "encoded_token", "password": "*any*"})
+
+        serializer.loads.assert_called_once_with(
+            "encoded_token", max_age=72 * 3600, return_timestamp=True
+        )
 
         assert "user" in exc.value.asdict()
         assert "Reset code has expired." in exc.value.asdict()["user"]
 
-    def test_it_is_invalid_if_user_has_already_reset_their_password(
-        self, pyramid_csrf_request, user_model
+    @pytest.mark.parametrize(
+        "password_updated",
+        (
+            # This situation triggers if the users password has not been used since
+            # the token was issued. Note our DB dates are not timezone aware.
+            datetime.now() - timedelta(days=1),
+            # ... or if it's never been reset
+            None,
+        ),
+    )
+    def test_it_returns_user_when_valid(
+        self, schema, user, models, password_updated, pyramid_csrf_request, serializer
     ):
-        pyramid_csrf_request.registry.password_reset_serializer = self.FakeSerializer()
-        schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
-        user = user_model.get_by_username.return_value
-        # TODO - This needs to be a timezone UN-aware timestamp
-        user.password_updated = 2
+        user.password_updated = password_updated
+
+        appstruct = schema.deserialize({"user": "encoded_token", "password": "secret"})
+
+        models.User.get_by_username.assert_called_once_with(
+            pyramid_csrf_request.db,
+            serializer.loads.return_value[0],
+            pyramid_csrf_request.default_authority,
+        )
+        assert appstruct["user"] == user
+
+    def test_it_is_invalid_if_user_has_already_reset_their_password(
+        self, schema, serializer, user
+    ):
+        # This situation triggers if the users password has been used since
+        # the token was issued. Note our DB dates are not timezone aware.
+        user.password_updated = datetime.now() + timedelta(days=1)
 
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"user": "abc123", "password": "secret"})
+            schema.deserialize({"user": "EXPIRED_TOKEN", "password": "*any*"})
 
         assert "user" in exc.value.asdict()
         assert "This reset code has already been used." in exc.value.asdict()["user"]
 
-    def test_it_returns_user_when_valid(self, pyramid_csrf_request, user_model):
-        pyramid_csrf_request.registry.password_reset_serializer = self.FakeSerializer()
-        schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
-        user = user_model.get_by_username.return_value
-        # TODO - This needs to be a timezone UN-aware timestamp
-        user.password_updated = 0
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
-        appstruct = schema.deserialize({"user": "abc123", "password": "secret"})
+    @pytest.fixture(autouse=True)
+    def serializer(self, pyramid_csrf_request, pyramid_config):
+        # We must be after `pyramid_config` in the queue, as it replaces the
+        # registry object with another one which undoes our changes here
 
-        assert appstruct["user"] == user
+        serializer = create_autospec(
+            URLSafeTimedSerializer, instance=True, spec_set=True
+        )
 
-    class FakeSerializer:
-        def loads(self, token, max_age=0, return_timestamp=False):
-            payload = {"username": "foo@bar.com"}
+        # Note that dates from `URLSafeTimedSerializer` are timezone aware
+        now = datetime.now(tz=pytz.UTC)
+        serializer.loads.return_value = "username@example.com", now
 
-            assert return_timestamp
+        pyramid_csrf_request.registry.password_reset_serializer = serializer
 
-            # TODO - This needs to be a timezone aware timestamp
-            return payload, 1
+        return serializer
 
-    class FakeExpiredSerializer(FakeSerializer):
-        def loads(self, token, max_age=0, return_timestamp=False):
-            raise SignatureExpired("Token has expired")
+    @pytest.fixture(autouse=True)
+    def models(self, patch):
+        return patch("h.schemas.forms.accounts.reset_password.models")
 
-    class FakeInvalidSerializer(FakeSerializer):
-        def loads(self, token, max_age=0, return_timestamp=False):
-            raise BadData("Invalid token")
-
-
-@pytest.fixture
-def user_model(patch):
-    return patch("h.accounts.schemas.models.User")
+    @pytest.fixture(autouse=True)
+    def user(self, models):
+        user = models.User.get_by_username.return_value
+        user.password_updated = None
+        return user
