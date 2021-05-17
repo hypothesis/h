@@ -10,18 +10,32 @@ from h.schemas.forms.accounts import ResetPasswordSchema
 
 
 @pytest.mark.usefixtures("pyramid_config")
-class TestResetPasswordSchema:
+class TestResetPasswordSchemaDeserialize:
     def test_it_is_valid_with_a_long_password(self, schema):
         # Yeah... our minimum password length is 2 chars. See
         # `h.schema.forms.accounts.util`
-        schema.deserialize({"password": "aa", "user": "*any*"})
+        schema.deserialize({"user": "*any*", "password": "aa"})
 
     @pytest.mark.parametrize("password", ("", "a"))
     def test_it_is_invalid_with_password_too_short(self, schema, password):
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"password": password, "user": "*any*"})
+            schema.deserialize({"user": "*any*", "password": password})
 
         assert "password" in exc.value.asdict()
+
+    def test_it_is_invalid_with_a_null_user(self, schema):
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({"user": colander.null, "password": "*any*"})
+
+        assert "user" in exc.value.asdict()
+
+    def test_it_is_invalid_with_a_missing_user(self, schema, models):
+        models.User.get_by_username.return_value = None
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({"user": "encoded_token", "password": "*any*"})
+
+        assert "user" in exc.value.asdict()
 
     def test_it_is_invalid_with_invalid_user_token(self, schema, serializer):
         serializer.loads.side_effect = BadData("Invalid token")
