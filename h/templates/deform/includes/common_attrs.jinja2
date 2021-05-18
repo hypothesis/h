@@ -29,6 +29,9 @@ autofocus
 {%- if field.widget.disable_autocomplete -%}
 autocomplete="off"
 {% endif -%}
+{%- if field.widget.autocomplete -%}
+autocomplete="{{ field.widget.autocomplete }}"
+{% endif -%}
 {%- if field.widget.max_length -%}
 data-maxlength="{{ field.widget.max_length }}"
 {% endif -%}
