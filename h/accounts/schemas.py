@@ -63,7 +63,9 @@ def email_node(**kwargs):
         validator=colander.All(
             validators.Length(max=EMAIL_MAX_LENGTH), validators.Email(), unique_email
         ),
-        widget=deform.widget.TextInputWidget(template="emailinput"),
+        widget=deform.widget.TextInputWidget(
+            template="emailinput", autocomplete="username"
+        ),
         **kwargs
     )
 
@@ -91,13 +93,17 @@ def privacy_acceptance_validator(node, value):
 
 def password_node(**kwargs):
     """Return a Colander schema node for an existing user password."""
-    kwargs.setdefault("widget", deform.widget.PasswordWidget())
+    kwargs.setdefault(
+        "widget", deform.widget.PasswordWidget(autocomplete="current-password")
+    )
     return colander.SchemaNode(colander.String(), **kwargs)
 
 
 def new_password_node(**kwargs):
     """Return a Colander schema node for a new user password."""
-    kwargs.setdefault("widget", deform.widget.PasswordWidget())
+    kwargs.setdefault(
+        "widget", deform.widget.PasswordWidget(autocomplete="new-password")
+    )
     return colander.SchemaNode(
         colander.String(),
         validator=validators.Length(min=PASSWORD_MIN_LENGTH),
@@ -193,13 +199,15 @@ class EmailChangeSchema(CSRFSchema):
 
 class PasswordChangeSchema(CSRFSchema):
     password = password_node(title=_("Current password"), inactive_label=_("Password"))
-    new_password = password_node(title=_("New password"), hide_until_form_active=True)
+    new_password = new_password_node(
+        title=_("New password"), hide_until_form_active=True
+    )
     # No validators: all validation is done on the new_password field and we
     # merely assert that the confirmation field is the same.
     new_password_confirm = colander.SchemaNode(
         colander.String(),
         title=_("Confirm new password"),
-        widget=deform.widget.PasswordWidget(),
+        widget=deform.widget.PasswordWidget(autocomplete="new-password"),
         hide_until_form_active=True,
     )
 
