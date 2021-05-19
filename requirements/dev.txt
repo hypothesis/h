@@ -90,7 +90,7 @@ iso8601==0.1.13
     #   -r requirements/requirements.txt
     #   colander
     #   deform
-itsdangerous==2.0.0
+itsdangerous==2.0.1
     # via -r requirements/requirements.txt
 jedi==0.18.0
     # via ipython
