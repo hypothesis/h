@@ -90,7 +90,7 @@ iso8601==0.1.13
     #   deform
 isort==5.8.0
     # via pylint
-itsdangerous==2.0.0
+itsdangerous==2.0.1
     # via -r requirements/requirements.txt
 jinja2==2.11.3
     # via
