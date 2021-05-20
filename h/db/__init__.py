@@ -12,10 +12,10 @@ property `request.db` which is provided by this module.
 """
 import logging
 
+import importlib_resources
 import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
-from pkg_resources import resource_stream
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import exc, sessionmaker
 
@@ -136,8 +136,10 @@ def _maybe_create_default_organization(engine, authority):
         default_org = models.Organization(
             name="Hypothesis", authority=authority, pubid="__default__"
         )
-        with resource_stream("h", "static/images/icons/logo.svg") as h_logo:
-            default_org.logo = h_logo.read().decode("utf-8")
+
+        default_org.logo = (
+            importlib_resources.files("h") / "static/images/icons/logo.svg"
+        ).read_text()
         session.add(default_org)
 
     session.commit()

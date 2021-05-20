@@ -1,6 +1,6 @@
 import gevent
+import importlib_resources
 import newrelic.agent
-from pkg_resources import resource_filename
 
 from h.streamer import db
 from h.streamer.websocket import WebSocket
@@ -42,12 +42,14 @@ def websocket_metrics(queue):
         yield f"{PREFIX}/Worker/Pool/Used", pool.size - free
 
 
+NEW_RELIC_CONFIG_REF = importlib_resources.files("h.streamer") / "conf/newrelic.ini"
+
+
 def metrics_process(registry, queue):  # pragma: no cover
     session = db.get_session(registry.settings)
 
-    newrelic.agent.initialize(
-        config_file=resource_filename("h.streamer", "conf/newrelic.ini")
-    )
+    with importlib_resources.as_file(NEW_RELIC_CONFIG_REF) as config_file:
+        newrelic.agent.initialize(config_file=config_file)
     newrelic.agent.register_application(timeout=5)
     application = newrelic.agent.application()
 

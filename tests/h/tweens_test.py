@@ -10,18 +10,18 @@ from h.util.redirects import Redirect
 
 class TestRedirectTween:
     def test_it_loads_redirects(self, patch):
-        open_ = patch("h.tweens.open")
         parse_redirects = patch("h.tweens.parse_redirects")
 
         tweens.redirect_tween_factory(handler=None, registry=None)
 
-        open_.assert_called_once_with(
-            Any.string.matching("^.*h/redirects$"), encoding="utf-8"
-        )
-        # Parse redirects is called with the value returned by the context manager
         parse_redirects.assert_called_once_with(
-            open_.return_value.__enter__.return_value
+            # Check parse_redirects is called with a file like object
+            Any.object.with_attrs({"readlines": Any.callable()})
         )
+
+    def test_it_loads_successfully(self):
+        # Don't mock parse_redirects out to check the file actually parses
+        tweens.redirect_tween_factory(handler=None, registry=None)
 
     def test_it_does_not_redirect_for_non_redirected_routes(self, pyramid_request):
         redirects = [
