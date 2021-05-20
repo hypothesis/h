@@ -39,7 +39,7 @@ chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
     #   deform
-click==8.0.0
+click==8.0.1
     # via -r requirements/requirements.txt
 colander==1.8.2
     # via

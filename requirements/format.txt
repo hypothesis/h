@@ -8,7 +8,7 @@ appdirs==1.4.4
     # via black
 black==21.5b1
     # via -r requirements/format.in
-click==8.0.0
+click==8.0.1
     # via black
 isort==5.8.0
     # via -r requirements/format.in
