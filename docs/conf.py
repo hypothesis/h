@@ -105,7 +105,7 @@ pygments_style = 'tango'
 # see http://sphinx-doc.org/latest/extdev/index.html
 def setup(app):
     # Add annotation to docs pages
-    app.add_javascript('https://hypothes.is/embed.js')
+    app.add_js_file('https://hypothes.is/embed.js')
 
 # -- Options for HTML output ---------------------------------------------------
 
