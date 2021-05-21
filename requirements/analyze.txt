@@ -79,7 +79,7 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-hypothesis==6.13.0
+hypothesis==6.13.1
     # via -r requirements/analyze.in
 iniconfig==1.1.1
     # via pytest
