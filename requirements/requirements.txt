@@ -48,7 +48,7 @@ greenlet==1.0.0
     #   sqlalchemy
 gunicorn==20.1.0
     # via -r requirements/requirements.in
-h-api==1.0.0
+h-api==1.0.1
     # via -r requirements/requirements.in
 h-matchers==1.2.11
     # via -r requirements/requirements.in
@@ -56,6 +56,8 @@ h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
+importlib-resources==5.1.4
+    # via h-api
 iso8601==0.1.13
     # via
     #   colander
@@ -214,6 +216,8 @@ ws4py==0.5.1
     # via -r requirements/requirements.in
 wsaccel==0.6.3
     # via -r requirements/requirements.in
+zipp==3.4.1
+    # via importlib-resources
 zope.deprecation==4.1.2
     # via
     #   deform

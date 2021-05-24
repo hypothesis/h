@@ -67,7 +67,7 @@ greenlet==1.0.0
     #   sqlalchemy
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-api==1.0.0
+h-api==1.0.1
     # via -r requirements/requirements.txt
 h-matchers==1.2.11
     # via -r requirements/requirements.txt
@@ -77,6 +77,10 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
+importlib-resources==5.1.4
+    # via
+    #   -r requirements/requirements.txt
+    #   h-api
 ipdb==0.13.7
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
@@ -308,6 +312,10 @@ ws4py==0.5.1
     # via -r requirements/requirements.txt
 wsaccel==0.6.3
     # via -r requirements/requirements.txt
+zipp==3.4.1
+    # via
+    #   -r requirements/requirements.txt
+    #   importlib-resources
 zope.deprecation==4.1.2
     # via
     #   -r requirements/requirements.txt
