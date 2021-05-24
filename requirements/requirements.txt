@@ -57,7 +57,9 @@ h-pyramid-sentry==1.2.3
 hupper==1.10.2
     # via pyramid
 importlib-resources==5.1.4
-    # via h-api
+    # via
+    #   -r requirements/requirements.in
+    #   h-api
 iso8601==0.1.13
     # via
     #   colander
