@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.6.3
+alembic==1.6.4
     # via -r requirements/requirements.in
 amqp==2.6.1
     # via kombu
