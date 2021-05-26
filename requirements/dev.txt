@@ -126,7 +126,7 @@ matplotlib-inline==0.1.2
     # via ipython
 mistune==0.8.4
     # via -r requirements/requirements.txt
-newrelic==6.2.0.156
+newrelic==6.4.0.157
     # via -r requirements/requirements.txt
 oauthlib==3.1.0
     # via -r requirements/requirements.txt
