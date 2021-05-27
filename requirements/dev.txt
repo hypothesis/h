@@ -45,7 +45,9 @@ colander==1.8.2
     #   -r requirements/requirements.txt
     #   deform
 decorator==5.0.7
-    # via ipython
+    # via
+    #   ipdb
+    #   ipython
 deform==2.0.15
     # via -r requirements/requirements.txt
 elasticsearch-dsl==6.3.1
@@ -81,7 +83,7 @@ importlib-resources==5.1.4
     # via
     #   -r requirements/requirements.txt
     #   h-api
-ipdb==0.13.7
+ipdb==0.13.8
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
