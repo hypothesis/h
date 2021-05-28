@@ -41,7 +41,7 @@
     "through2": "^4.0.2",
     "uglifyify": "^5.0.2",
     "vinyl": "^2.2.1",
-    "watchify": "^3.11.1"
+    "watchify": "^4.0.0"
   },
   "devDependencies": {
     "babel-plugin-mockable-imports": "^1.7.1",
