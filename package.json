@@ -14,7 +14,7 @@
     "@babel/core": "^7.14.2",
     "@babel/preset-env": "^7.14.2",
     "@popperjs/core": "^2.9.2",
-    "autoprefixer": "^10.2.5",
+    "autoprefixer": "^10.2.6",
     "babelify": "^10.0.0",
     "bootstrap": "^5.0.1",
     "browserify": "^17.0.0",
