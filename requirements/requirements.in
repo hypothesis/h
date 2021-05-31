@@ -10,7 +10,7 @@ SQLAlchemy >= 1.1.4
 alembic
 bcrypt
 bleach
-celery >= 4.3
+celery
 certifi  # Required to connect to Elasticsearch over SSL.
 cffi
 click
@@ -22,7 +22,7 @@ gunicorn >= 19.9.0
 importlib_resources
 itsdangerous
 jsonschema
-kombu >= 4.2.1
+kombu
 mistune
 newrelic
 oauthlib
