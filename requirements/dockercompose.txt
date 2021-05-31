@@ -8,7 +8,7 @@ attrs==20.3.0
     # via jsonschema
 bcrypt==3.2.0
     # via paramiko
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
 cffi==1.14.5
     # via
