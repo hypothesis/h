@@ -15,5 +15,4 @@ def celery(ctx):
     This command delegates to the celery-worker command, giving access to the
     full Celery CLI.
     """
-    argv = [ctx.command_path] + list(ctx.args)
-    start(argv=argv, bootstrap=ctx.obj["bootstrap"])
+    start(argv=list(ctx.args), bootstrap=ctx.obj["bootstrap"])
