@@ -9,7 +9,6 @@ const commander = require('commander');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const log = require('fancy-log');
-const newer = require('gulp-newer');
 const postcss = require('gulp-postcss');
 const postcssURL = require('postcss-url');
 const svgmin = require('gulp-svgmin');
@@ -139,7 +138,6 @@ gulp.task('build-vendor-css', function () {
 
   return gulp
     .src(vendorCSSFiles)
-    .pipe(newer(STYLE_DIR))
     .pipe(postcss([cssURLRewriter]))
     .pipe(gulp.dest(STYLE_DIR));
 });
