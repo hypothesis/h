@@ -40,20 +40,20 @@ function parseCommandLine() {
   };
 }
 
-var taskArgs = parseCommandLine();
+const taskArgs = parseCommandLine();
 
-var vendorBundles = {
+const vendorBundles = {
   jquery: ['jquery'],
   bootstrap: ['bootstrap'],
   raven: ['raven-js'],
 };
-var vendorModules = ['jquery', 'bootstrap', 'raven-js'];
-var vendorNoParseModules = ['jquery'];
+const vendorModules = ['jquery', 'bootstrap', 'raven-js'];
+const vendorNoParseModules = ['jquery'];
 
 // Builds the bundles containing vendor JS code
-gulp.task('build-vendor-js', function () {
-  var finished = [];
-  Object.keys(vendorBundles).forEach(function (name) {
+gulp.task('build-vendor-js', () => {
+  const finished = [];
+  Object.keys(vendorBundles).forEach(name => {
     finished.push(
       createBundle({
         name: name,
@@ -67,14 +67,14 @@ gulp.task('build-vendor-js', function () {
   return Promise.all(finished);
 });
 
-var bundleBaseConfig = {
+const bundleBaseConfig = {
   path: SCRIPT_DIR,
   external: vendorModules,
   minify: IS_PRODUCTION_BUILD,
   noParse: vendorNoParseModules,
 };
 
-var bundles = [
+const bundles = [
   {
     // Public-facing website
     name: 'site',
@@ -97,15 +97,15 @@ var bundles = [
   },
 ];
 
-var bundleConfigs = bundles.map(function (config) {
+const bundleConfigs = bundles.map(config => {
   return Object.assign({}, bundleBaseConfig, config);
 });
 
 gulp.task(
   'build-js',
-  gulp.series(['build-vendor-js'], function () {
+  gulp.series(['build-vendor-js'], () => {
     return Promise.all(
-      bundleConfigs.map(function (config) {
+      bundleConfigs.map(config => {
         return createBundle(config);
       })
     );
@@ -114,7 +114,7 @@ gulp.task(
 
 gulp.task(
   'watch-js',
-  gulp.series(['build-vendor-js'], function () {
+  gulp.series(['build-vendor-js'], () => {
     return bundleConfigs.map(config => createBundle(config, { watch: true }));
   })
 );
@@ -125,14 +125,14 @@ function rewriteCSSURL(asset) {
   return asset.url.replace(/^fonts\//, '../fonts/');
 }
 
-gulp.task('build-vendor-css', function () {
-  var vendorCSSFiles = [
+gulp.task('build-vendor-css', () => {
+  const vendorCSSFiles = [
     // Icon font
     './h/static/styles/vendor/icomoon.css',
     './node_modules/bootstrap/dist/css/bootstrap.css',
   ];
 
-  var cssURLRewriter = postcssURL({
+  const cssURLRewriter = postcssURL({
     url: rewriteCSSURL,
   });
 
@@ -142,7 +142,7 @@ gulp.task('build-vendor-css', function () {
     .pipe(gulp.dest(STYLE_DIR));
 });
 
-var styleBundleEntryFiles = [
+const styleBundleEntryFiles = [
   './h/static/styles/admin.scss',
   './h/static/styles/help-page.scss',
   './h/static/styles/site.scss',
@@ -159,12 +159,12 @@ function buildStyleBundle(entryFile) {
 
 gulp.task(
   'build-css',
-  gulp.series(['build-vendor-css'], function () {
+  gulp.series(['build-vendor-css'], () => {
     return Promise.all(styleBundleEntryFiles.map(buildStyleBundle));
   })
 );
 
-gulp.task('watch-css', function () {
+gulp.task('watch-css', () => {
   gulp.watch(
     'h/static/styles/**/*.scss',
     { ignoreInitial: false },
@@ -172,27 +172,27 @@ gulp.task('watch-css', function () {
   );
 });
 
-var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
+const fontFiles = 'h/static/styles/vendor/fonts/*.woff';
 
-gulp.task('build-fonts', function () {
+gulp.task('build-fonts', () => {
   return gulp
     .src(fontFiles)
     .pipe(changed(FONTS_DIR))
     .pipe(gulp.dest(FONTS_DIR));
 });
 
-gulp.task('watch-fonts', function () {
+gulp.task('watch-fonts', () => {
   gulp.watch(fontFiles, gulp.series('build-fonts'));
 });
 
-var imageFiles = 'h/static/images/**/*';
-gulp.task('build-images', function () {
-  var shouldMinifySVG = function (file) {
+const imageFiles = 'h/static/images/**/*';
+gulp.task('build-images', () => {
+  const shouldMinifySVG = function (file) {
     return IS_PRODUCTION_BUILD && file.path.match(/\.svg$/);
   };
 
   // See https://github.com/ben-eb/gulp-svgmin#plugins
-  var svgminConfig = {
+  const svgminConfig = {
     plugins: [
       {
         // svgo removes `viewBox` by default, which breaks scaled rendering of
@@ -211,11 +211,11 @@ gulp.task('build-images', function () {
     .pipe(gulp.dest(IMAGES_DIR));
 });
 
-gulp.task('watch-images', function () {
+gulp.task('watch-images', () => {
   gulp.watch(imageFiles, gulp.series('build-images'));
 });
 
-var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
+const MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
 
 /**
  * Generate a JSON manifest mapping file paths to
@@ -235,7 +235,7 @@ function generateManifest() {
     .pipe(gulp.dest('build/'));
 }
 
-gulp.task('watch-manifest', function () {
+gulp.task('watch-manifest', () => {
   gulp.watch(MANIFEST_SOURCE_FILES, generateManifest);
 });
 
@@ -259,7 +259,7 @@ gulp.task(
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration
-  var cliOpts = {
+  const cliOpts = {
     client: {
       mocha: {
         grep: taskArgs.grep,
@@ -268,17 +268,17 @@ function runKarma(baseConfig, opts, done) {
     ...opts,
   };
 
-  var karma = require('karma');
+  const karma = require('karma');
   new karma.Server(
     karma.config.parseConfig(path.resolve(__dirname, baseConfig), cliOpts),
     done
   ).start();
 }
 
-gulp.task('test', function (callback) {
+gulp.task('test', callback => {
   runKarma('./h/static/scripts/karma.config.js', { singleRun: true }, callback);
 });
 
-gulp.task('test-watch', function (callback) {
+gulp.task('test-watch', callback => {
   runKarma('./h/static/scripts/karma.config.js', {}, callback);
 });
