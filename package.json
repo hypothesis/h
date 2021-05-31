@@ -26,7 +26,6 @@
     "gulp": "^4.0.0",
     "gulp-changed": "^4.0.2",
     "gulp-if": "^3.0.0",
-    "gulp-newer": "^1.2.0",
     "gulp-postcss": "^9.0.0",
     "gulp-svgmin": "^3.0.0",
     "jquery": "^3.6.0",
