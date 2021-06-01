@@ -168,7 +168,7 @@ pycryptodomex==3.10.1
     # via -r requirements/requirements.txt
 pyjwt==2.1.0
     # via -r requirements/requirements.txt
-pylint==2.8.2
+pylint==2.8.3
     # via -r requirements/analyze.in
 pyparsing==2.4.7
     # via
