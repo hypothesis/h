@@ -143,7 +143,7 @@ mistune==0.8.4
     # via -r requirements/requirements.txt
 newrelic==6.4.0.157
     # via -r requirements/requirements.txt
-oauthlib==3.1.0
+oauthlib==3.1.1
     # via -r requirements/requirements.txt
 packaging==20.4
     # via

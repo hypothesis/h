@@ -98,7 +98,7 @@ mistune==0.8.4
     # via -r requirements/requirements.in
 newrelic==6.4.0.157
     # via -r requirements/requirements.in
-oauthlib==3.1.0
+oauthlib==3.1.1
     # via -r requirements/requirements.in
 packaging==20.4
     # via bleach
