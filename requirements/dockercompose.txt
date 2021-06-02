@@ -58,7 +58,7 @@ six==1.15.0
     #   websocket-client
 texttable==1.6.3
     # via docker-compose
-urllib3==1.26.4
+urllib3==1.26.5
     # via requests
 websocket-client==0.58.0
     # via
