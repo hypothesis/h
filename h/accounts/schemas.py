@@ -222,7 +222,6 @@ class PasswordChangeSchema(CSRFSchema):
 
 class NotificationsSchema(CSRFSchema):
     types = (("reply", _("Email me when someone replies to one of my annotations.")),)
-
     notifications = colander.SchemaNode(
         colander.Set(),
         widget=deform.widget.CheckboxChoiceWidget(omit_label=True, values=types),

@@ -14,8 +14,10 @@
              {%- if field.error -%}
              aria-invalid="true"
              {% endif -%}
+             {# For reason about `autocomplete="off"` see https://github.com/hypothesis/h/pull/6696 #}
+             autocomplete="off"
              {% if value in cstruct %}
-             checked="True"
+             checked
              {% endif %}>
       {{ title }}
     </label>
