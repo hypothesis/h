@@ -104,7 +104,7 @@ ipdb==0.13.8
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.24.0
+ipython==7.24.1
     # via
     #   -r requirements/dev.in
     #   ipdb
