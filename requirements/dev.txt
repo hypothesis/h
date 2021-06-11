@@ -272,7 +272,7 @@ six==1.15.0
     #   jsonschema
     #   packaging
     #   python-dateutil
-sqlalchemy==1.4.17
+sqlalchemy==1.4.18
     # via
     #   -r requirements/requirements.txt
     #   alembic
