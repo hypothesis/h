@@ -273,7 +273,7 @@ sortedcontainers==2.3.0
     # via hypothesis
 soupsieve==2.2.1
     # via beautifulsoup4
-sqlalchemy==1.4.17
+sqlalchemy==1.4.18
     # via
     #   -r requirements/requirements.txt
     #   alembic
