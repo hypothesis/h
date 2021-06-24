@@ -38,6 +38,13 @@ chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
     #   deform
+click==7.1.2
+    # via
+    #   -r requirements/requirements.txt
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
 click-didyoumean==0.0.3
     # via
     #   -r requirements/requirements.txt
@@ -50,13 +57,6 @@ click-repl==0.2.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-click==7.1.2
-    # via
-    #   -r requirements/requirements.txt
-    #   celery
-    #   click-didyoumean
-    #   click-plugins
-    #   click-repl
 colander==1.8.2
     # via
     #   -r requirements/requirements.txt
@@ -67,12 +67,12 @@ decorator==5.0.7
     #   ipython
 deform==2.0.15
     # via -r requirements/requirements.txt
-elasticsearch-dsl==6.3.1
-    # via -r requirements/requirements.txt
 elasticsearch==6.8.2
     # via
     #   -r requirements/requirements.txt
     #   elasticsearch-dsl
+elasticsearch-dsl==6.3.1
+    # via -r requirements/requirements.txt
 factory-boy==3.2.0
     # via -r requirements/dev.in
 faker==8.1.2
@@ -102,12 +102,12 @@ importlib-resources==5.1.4
     #   h-api
 ipdb==0.13.9
     # via -r requirements/dev.in
-ipython-genutils==0.2.0
-    # via traitlets
 ipython==7.24.1
     # via
     #   -r requirements/dev.in
     #   ipdb
+ipython-genutils==0.2.0
+    # via traitlets
 iso8601==0.1.13
     # via
     #   -r requirements/requirements.txt
@@ -143,7 +143,7 @@ matplotlib-inline==0.1.2
     # via ipython
 mistune==0.8.4
     # via -r requirements/requirements.txt
-newrelic==6.4.2.159
+newrelic==6.4.3.160
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
     # via -r requirements/requirements.txt
@@ -167,14 +167,14 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-plaster-pastedeploy==0.7
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
 plaster==1.0
     # via
     #   -r requirements/requirements.txt
     #   plaster-pastedeploy
+    #   pyramid
+plaster-pastedeploy==0.7
+    # via
+    #   -r requirements/requirements.txt
     #   pyramid
 prompt-toolkit==3.0.18
     # via
@@ -201,6 +201,19 @@ pyparsing==2.4.7
     # via
     #   -r requirements/requirements.txt
     #   packaging
+pyramid==1.10.8
+    # via
+    #   -r requirements/requirements.txt
+    #   h-pyramid-sentry
+    #   pyramid-authsanity
+    #   pyramid-exclog
+    #   pyramid-jinja2
+    #   pyramid-layout
+    #   pyramid-mailer
+    #   pyramid-retry
+    #   pyramid-sanity
+    #   pyramid-services
+    #   pyramid-tm
 pyramid-authsanity==1.1.0
     # via -r requirements/requirements.txt
 pyramid-exclog==1.0
@@ -221,19 +234,6 @@ pyramid-services==2.2
     #   pyramid-authsanity
 pyramid-tm==2.4
     # via -r requirements/requirements.txt
-pyramid==1.10.8
-    # via
-    #   -r requirements/requirements.txt
-    #   h-pyramid-sentry
-    #   pyramid-authsanity
-    #   pyramid-exclog
-    #   pyramid-jinja2
-    #   pyramid-layout
-    #   pyramid-mailer
-    #   pyramid-retry
-    #   pyramid-sanity
-    #   pyramid-services
-    #   pyramid-tm
 pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt

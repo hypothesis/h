@@ -28,12 +28,6 @@ cffi==1.14.5
     #   bcrypt
 chameleon==3.8.1
     # via deform
-click-didyoumean==0.0.3
-    # via celery
-click-plugins==1.1.1
-    # via celery
-click-repl==0.2.0
-    # via celery
 click==7.1.2
     # via
     #   -r requirements/requirements.in
@@ -41,16 +35,22 @@ click==7.1.2
     #   click-didyoumean
     #   click-plugins
     #   click-repl
+click-didyoumean==0.0.3
+    # via celery
+click-plugins==1.1.1
+    # via celery
+click-repl==0.2.0
+    # via celery
 colander==1.8.2
     # via deform
 deform==2.0.15
-    # via -r requirements/requirements.in
-elasticsearch-dsl==6.3.1
     # via -r requirements/requirements.in
 elasticsearch==6.8.2
     # via
     #   -r requirements/requirements.in
     #   elasticsearch-dsl
+elasticsearch-dsl==6.3.1
+    # via -r requirements/requirements.in
 gevent==21.1.2
     # via -r requirements/requirements.in
 greenlet==1.0.0
@@ -96,7 +96,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mistune==0.8.4
     # via -r requirements/requirements.in
-newrelic==6.4.2.159
+newrelic==6.4.3.160
     # via -r requirements/requirements.in
 oauthlib==3.1.1
     # via -r requirements/requirements.in
@@ -108,12 +108,12 @@ pastedeploy==2.1.0
     # via plaster-pastedeploy
 peppercorn==0.6
     # via deform
-plaster-pastedeploy==0.7
-    # via pyramid
 plaster==1.0
     # via
     #   plaster-pastedeploy
     #   pyramid
+plaster-pastedeploy==0.7
+    # via pyramid
 prompt-toolkit==3.0.18
     # via click-repl
 psycogreen==1.0.2
@@ -130,6 +130,19 @@ pyparsing==2.4.7
     # via
     #   -r requirements/requirements.in
     #   packaging
+pyramid==1.10.8
+    # via
+    #   -r requirements/requirements.in
+    #   h-pyramid-sentry
+    #   pyramid-authsanity
+    #   pyramid-exclog
+    #   pyramid-jinja2
+    #   pyramid-layout
+    #   pyramid-mailer
+    #   pyramid-retry
+    #   pyramid-sanity
+    #   pyramid-services
+    #   pyramid-tm
 pyramid-authsanity==1.1.0
     # via -r requirements/requirements.in
 pyramid-exclog==1.0
@@ -150,19 +163,6 @@ pyramid-services==2.2
     #   pyramid-authsanity
 pyramid-tm==2.4
     # via -r requirements/requirements.in
-pyramid==1.10.8
-    # via
-    #   -r requirements/requirements.in
-    #   h-pyramid-sentry
-    #   pyramid-authsanity
-    #   pyramid-exclog
-    #   pyramid-jinja2
-    #   pyramid-layout
-    #   pyramid-mailer
-    #   pyramid-retry
-    #   pyramid-sanity
-    #   pyramid-services
-    #   pyramid-tm
 pyrsistent==0.17.3
     # via jsonschema
 python-dateutil==2.8.1

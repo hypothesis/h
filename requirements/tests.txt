@@ -38,6 +38,13 @@ chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
     #   deform
+click==7.1.2
+    # via
+    #   -r requirements/requirements.txt
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
 click-didyoumean==0.0.3
     # via
     #   -r requirements/requirements.txt
@@ -50,13 +57,6 @@ click-repl==0.2.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-click==7.1.2
-    # via
-    #   -r requirements/requirements.txt
-    #   celery
-    #   click-didyoumean
-    #   click-plugins
-    #   click-repl
 colander==1.8.2
     # via
     #   -r requirements/requirements.txt
@@ -65,12 +65,12 @@ coverage==5.5
     # via -r requirements/tests.in
 deform==2.0.15
     # via -r requirements/requirements.txt
-elasticsearch-dsl==6.3.1
-    # via -r requirements/requirements.txt
 elasticsearch==6.8.2
     # via
     #   -r requirements/requirements.txt
     #   elasticsearch-dsl
+elasticsearch-dsl==6.3.1
+    # via -r requirements/requirements.txt
 factory-boy==3.2.0
     # via -r requirements/tests.in
 faker==8.1.2
@@ -133,7 +133,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mistune==0.8.4
     # via -r requirements/requirements.txt
-newrelic==6.4.2.159
+newrelic==6.4.3.160
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
     # via -r requirements/requirements.txt
@@ -152,14 +152,14 @@ peppercorn==0.6
     # via
     #   -r requirements/requirements.txt
     #   deform
-plaster-pastedeploy==0.7
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
 plaster==1.0
     # via
     #   -r requirements/requirements.txt
     #   plaster-pastedeploy
+    #   pyramid
+plaster-pastedeploy==0.7
+    # via
+    #   -r requirements/requirements.txt
     #   pyramid
 pluggy==0.13.1
     # via pytest
@@ -185,6 +185,19 @@ pyparsing==2.4.7
     # via
     #   -r requirements/requirements.txt
     #   packaging
+pyramid==1.10.8
+    # via
+    #   -r requirements/requirements.txt
+    #   h-pyramid-sentry
+    #   pyramid-authsanity
+    #   pyramid-exclog
+    #   pyramid-jinja2
+    #   pyramid-layout
+    #   pyramid-mailer
+    #   pyramid-retry
+    #   pyramid-sanity
+    #   pyramid-services
+    #   pyramid-tm
 pyramid-authsanity==1.1.0
     # via -r requirements/requirements.txt
 pyramid-exclog==1.0
@@ -205,19 +218,6 @@ pyramid-services==2.2
     #   pyramid-authsanity
 pyramid-tm==2.4
     # via -r requirements/requirements.txt
-pyramid==1.10.8
-    # via
-    #   -r requirements/requirements.txt
-    #   h-pyramid-sentry
-    #   pyramid-authsanity
-    #   pyramid-exclog
-    #   pyramid-jinja2
-    #   pyramid-layout
-    #   pyramid-mailer
-    #   pyramid-retry
-    #   pyramid-sanity
-    #   pyramid-services
-    #   pyramid-tm
 pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
