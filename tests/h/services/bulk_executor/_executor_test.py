@@ -1,5 +1,3 @@
-from unittest.mock import sentinel
-
 import pytest
 from h_api.bulk_api.model.config_body import Configuration
 from h_api.enums import CommandType, DataType
@@ -8,6 +6,7 @@ from pytest import param
 
 from h.services.bulk_executor._executor import BulkExecutor
 from tests.h.services.bulk_executor.conftest import (
+    AUTHORITY,
     group_upsert_command,
     upsert_user_command,
 )
@@ -30,7 +29,7 @@ class TestDBExecutor:
     def test_it_calls_correct_db_handler(
         self, db_session, command_type, data_type, handler, commands
     ):
-        executor = BulkExecutor(db_session)
+        executor = BulkExecutor(db_session, authority=AUTHORITY)
         handler.assert_called_once_with(db_session)
 
         executor.effective_user_id = 1
@@ -55,18 +54,18 @@ class TestDBExecutor:
     def test_it_raises_UnsupportedOperationError_for_invalid_actions(
         self, db_session, command_type, data_type, commands
     ):
-        executor = BulkExecutor(db_session)
+        executor = BulkExecutor(db_session, authority=AUTHORITY)
 
         with pytest.raises(UnsupportedOperationError):
             executor.execute_batch(command_type, data_type, commands, {})
 
-    def test_it_raises_InvalidDeclarationError_with_non_lms_authority(self):
+    def test_it_raises_InvalidDeclarationError_with_non_lms_authority(self, executor):
         config = Configuration.create(
             effective_user="acct:user@bad_authority.com", total_instructions=2
         )
 
         with pytest.raises(InvalidDeclarationError):
-            BulkExecutor(sentinel.db).configure(config)
+            executor.configure(config)
 
     @pytest.mark.parametrize(
         "command",
@@ -90,16 +89,12 @@ class TestDBExecutor:
         ),
     )
     def test_it_raises_InvalidDeclarationError_with_called_with_non_lms_authority(
-        self, command
+        self, command, executor
     ):
         with pytest.raises(InvalidDeclarationError):
-            BulkExecutor(sentinel.db).execute_batch(
-                command.type, command.body.type, {}, [command]
-            )
+            executor.execute_batch(command.type, command.body.type, {}, [command])
 
-    def test_configure_looks_up_the_effective_user(self, db_session, user):
-        executor = BulkExecutor(db_session)
-
+    def test_configure_looks_up_the_effective_user(self, executor, user):
         assert executor.effective_user_id is None
 
         executor.configure(
@@ -108,13 +103,19 @@ class TestDBExecutor:
 
         assert executor.effective_user_id == user.id
 
-    def test_configure_raises_if_the_effective_user_does_not_exist(self, db_session):
+    def test_configure_raises_if_the_effective_user_does_not_exist(
+        self, executor, user
+    ):
         with pytest.raises(InvalidDeclarationError):
-            BulkExecutor(db_session).configure(
+            executor.configure(
                 Configuration.create(
-                    effective_user="acct:fake@lms.hypothes.is", total_instructions=2
+                    effective_user=f"acct:missing@{AUTHORITY}", total_instructions=2
                 )
             )
+
+    @pytest.fixture
+    def executor(self, db_session):
+        return BulkExecutor(db_session, authority=AUTHORITY)
 
     @pytest.fixture
     def handler(self, patch, request):
@@ -122,4 +123,4 @@ class TestDBExecutor:
 
     @pytest.fixture
     def commands(self):
-        return [group_upsert_command()]
+        return [group_upsert_command(authority=AUTHORITY)]

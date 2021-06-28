@@ -4,7 +4,7 @@ from h_api.bulk_api import CommandBuilder
 
 from h.models import User
 
-AUTHORITY = "lms.hypothes.is"
+AUTHORITY = "lms.ca.hypothes.is"
 
 
 def upsert_user_command(n=0, authority=AUTHORITY, query_authority=AUTHORITY, **extras):
@@ -51,7 +51,7 @@ def group_membership_create(user_id, group_id):
 
 @pytest.fixture
 def user(db_session):
-    user = User(_username="username", authority="lms.hypothes.is")
+    user = User(_username="username", authority=AUTHORITY)
     db_session.add(user)
     db_session.flush()
 

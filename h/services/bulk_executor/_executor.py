@@ -16,7 +16,7 @@ from h.services.bulk_executor._actions import (
 class BulkExecutor(Executor):
     """Executor of command objects which will modify the database in bulk."""
 
-    def __init__(self, db, authority="lms.hypothes.is"):
+    def __init__(self, db, authority):
         """
         :param db: DB session object
         :param authority: Restrict all request to this authority

@@ -16,6 +16,7 @@ GROUP_NAME_MAX_LENGTH = 25
 GROUP_DESCRIPTION_MAX_LENGTH = 250
 AUTHORITY_PROVIDED_ID_PATTERN = r"^[a-zA-Z0-9._\-+!~*()']+$"
 AUTHORITY_PROVIDED_ID_MAX_LENGTH = 1024
+LMS_AUTHORITY_PATTERN = re.compile(r"^lms\.(?:.*?)?hypothes\.is$")
 
 
 class JoinableBy(enum.Enum):
@@ -257,8 +258,8 @@ class Group(Base, mixins.Timestamps):
         #   LMS app's machine user: https://github.com/hypothesis/lms/issues/1401
         # * Or changed the LMS app to use h's new bulk API instead of using the
         #   group upsert API: https://github.com/hypothesis/lms/issues/1506
-        if self.authority == "lms.hypothes.is":
-            terms.append((security.Allow, "acct:lms@lms.hypothes.is", "upsert"))
+        if LMS_AUTHORITY_PATTERN.match(self.authority):
+            terms.append((security.Allow, f"acct:lms@{self.authority}", "upsert"))
 
         # This authority principal may be used to grant auth clients
         # permissions for groups within their authority

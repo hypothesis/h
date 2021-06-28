@@ -10,14 +10,20 @@ from h.views.api.bulk import bulk
 
 
 class TestBulk:
-    def test_it_calls_bulk_api_correctly(self, pyramid_request, BulkAPI, bulk_executor):
+    def test_it_calls_bulk_api_correctly(
+        self, pyramid_request, BulkAPI, bulk_executor, client_authority
+    ):
         bulk(pyramid_request)
 
         BulkAPI.from_byte_stream.assert_called_once_with(
             pyramid_request.body_file, executor=bulk_executor.return_value
         )
 
-        bulk_executor.assert_called_once_with(pyramid_request.db)
+        bulk_executor.assert_called_once_with(
+            pyramid_request.db, authority=client_authority.return_value
+        )
+
+        client_authority.assert_called_once_with(pyramid_request)
 
     def test_it_formats_responses_correctly(self, pyramid_request, return_values):
         result = bulk(pyramid_request)
@@ -59,16 +65,20 @@ class TestBulk:
     def return_values(self):
         return [{f"row_{i}": "value"} for i in range(3)]
 
+    @pytest.fixture
+    def no_return_content(self, BulkAPI):
+        BulkAPI.from_byte_stream.return_value = None
+
+    @pytest.fixture(autouse=True)
+    def client_authority(self, patch):
+        return patch("h.views.api.bulk.client_authority")
+
     @pytest.fixture(autouse=True)
     def BulkAPI(self, patch, return_values):
         BulkAPI = patch("h.views.api.bulk.BulkAPI")
         BulkAPI.from_byte_stream.return_value = (value for value in return_values)
 
         return BulkAPI
-
-    @pytest.fixture
-    def no_return_content(self, BulkAPI):
-        BulkAPI.from_byte_stream.return_value = None
 
     @pytest.fixture(autouse=True)
     def bulk_executor(self, patch):
