@@ -10,6 +10,11 @@ class TestBulkAPIRoot:
             (None, None, False),
             ("acct:user@hypothes.is", "client_authority:hypothes.is", False),
             ("acct:user@lms.hypothes.is", "client_authority:lms.hypothes.is", True),
+            (
+                "acct:user@lms.ca.hypothes.is",
+                "client_authority:lms.ca.hypothes.is",
+                True,
+            ),
         ),
     )
     def test_it_sets_bulk_action_permission_as_expected(

@@ -323,11 +323,11 @@ class TestBulkGroupMembershipCreate:
         return [group_membership_create(user.id, group.id) for group in groups]
 
     @pytest.fixture
-    def groups(self, db_session):
+    def groups(self, db_session, user):
         groups = [
             Group(
                 name=f"group_{i}",
-                authority="lms.hypothes.is",
+                authority=user.authority,
                 authority_provided_id=f"ap_id_{i}",
             )
             for i in range(3)

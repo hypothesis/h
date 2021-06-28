@@ -4,6 +4,7 @@ from itertools import chain
 from h_api.bulk_api import BulkAPI
 from pyramid.response import Response
 
+from h.auth.util import client_authority
 from h.services.bulk_executor import BulkExecutor
 from h.views.api.config import api_config
 
@@ -32,7 +33,8 @@ def bulk(request):
     """
 
     results = BulkAPI.from_byte_stream(
-        request.body_file, executor=BulkExecutor(request.db)
+        request.body_file,
+        executor=BulkExecutor(db=request.db, authority=client_authority(request)),
     )
 
     if results is None:

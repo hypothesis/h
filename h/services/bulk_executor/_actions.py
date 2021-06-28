@@ -171,14 +171,13 @@ class GroupMembershipCreateAction(DBAction):
 
         stmt = insert(GroupMembership).values(values)
 
-        if on_duplicate == "continue":
-            # This update doesn't change the row, but it does count as it being
-            # 'updated' which means we can get the values in the "RETURNING"
-            # clause and do the select in one go
-            stmt = stmt.on_conflict_do_update(
-                index_elements=["user_id", "group_id"],
-                set_={"user_id": stmt.excluded.user_id},
-            )
+        # This update doesn't change the row, but it does count as it being
+        # 'updated' which means we can get the values in the "RETURNING"
+        # clause and do the select in one go
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["user_id", "group_id"],
+            set_={"user_id": stmt.excluded.user_id},
+        )
 
         stmt = stmt.returning(GroupMembership.id)
 
