@@ -19,6 +19,18 @@ class TestOrganizationService:
         assert isinstance(organization, Organization)
         assert organization.logo is None
 
+    def test_get_by_public_id(self, service, factories):
+        organization = factories.Organization()
+
+        result = service.get_by_public_id(organization.pubid)
+
+        assert result == organization
+
+    def test_get_by_public_with_no_match(self, service):
+        result = service.get_by_public_id("no_matching_org")
+
+        assert result is None
+
     def test_get_default(self, service, default_organization):
         assert service.get_default() == default_organization
 
