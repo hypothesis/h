@@ -31,6 +31,15 @@ class OrganizationService:
         self.session.add(organization)
         return organization
 
+    def get_by_public_id(self, pubid):
+        """
+        Get an organization by public id.
+
+        :param pubid: The public id to search for
+        :return: An organization model or None if no match is found
+        """
+        return self.session.query(Organization).filter_by(pubid=pubid).one_or_none()
+
     def get_default(self, authority=None):
         """Get the default org with an option to create it if missing.
 

@@ -1,6 +1,3 @@
-import sqlalchemy.orm
-
-from h.models import Organization
 from h.traversal.root import Root, RootFactory
 
 
@@ -10,19 +7,19 @@ class OrganizationRoot(RootFactory):
 
     FIXME: This class should return OrganizationContext objects, not Organization
     objects.
-
     """
 
     def __getitem__(self, pubid):
-        try:
-            org = self.request.db.query(Organization).filter_by(pubid=pubid).one()
-
-            # Inherit global ACL. See comments in :py:class`h.traversal.AuthClientRoot`.
-            org.__parent__ = Root(self.request)
-
-            return org
-        except sqlalchemy.orm.exc.NoResultFound:
+        organization = self.request.find_service(name="organization").get_by_public_id(
+            pubid
+        )
+        if organization is None:
             raise KeyError()
+
+        # Inherit global ACL. See comments in :py:class`h.traversal.AuthClientRoot`.
+        organization.__parent__ = Root(self.request)
+
+        return organization
 
 
 class OrganizationContext:

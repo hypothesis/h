@@ -1,31 +1,33 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 
 from h.traversal.organization import OrganizationContext, OrganizationRoot
 
 
-@pytest.mark.usefixtures("organizations")
+@pytest.mark.usefixtures("organization_service")
 class TestOrganizationRoot:
     def test_it_returns_the_requested_organization(
-        self, organizations, organization_factory
+        self, pyramid_request, organization_service
     ):
-        organization = organizations[1]
+        result = OrganizationRoot(pyramid_request)[sentinel.pubid]
 
-        assert organization_factory[organization.pubid] == organization
+        assert result == organization_service.get_by_public_id.return_value
+        organization_service.get_by_public_id.assert_called_once_with(sentinel.pubid)
 
-    def test_it_404s_if_the_organization_doesnt_exist(self, organization_factory):
+    def test_it_404s_if_the_organization_doesnt_exist(
+        self, pyramid_request, organization_service
+    ):
+        organization_service.get_by_public_id.return_value = None
+
         with pytest.raises(KeyError):
-            organization_factory["does_not_exist"]
+            OrganizationRoot(pyramid_request)[sentinel.non_existent_pubid]
 
     @pytest.fixture
-    def organization_factory(self, pyramid_request):
-        return OrganizationRoot(pyramid_request)
-
-    @pytest.fixture
-    def organizations(self, factories):
+    def with_noise_organization(self, factories):
         # Add a handful of organizations to the DB to make the test realistic.
-        return [factories.Organization() for _ in range(3)]
+        factories.Organization.generate_batch(size=2)
 
 
 class TestOrganizationContext:
