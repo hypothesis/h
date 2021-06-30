@@ -4,6 +4,7 @@ import pytest
 from h_matchers import Any
 
 from h.models import Organization
+from h.traversal import OrganizationContext
 from h.views.admin.organizations import (
     OrganizationCreateController,
     OrganizationEditController,
@@ -24,7 +25,7 @@ class TestIndex:
         "query,expected_orgs",
         [
             # With no query, all orgs are returned, including the default
-            # "Hypothesis" org.
+            # "Hypothesis" organization.
             (None, ["BioPub", "ChemPub", "Hypothesis"]),
             # With a query, only matching orgs are returned.
             ("bio", ["BioPub"]),
@@ -36,9 +37,9 @@ class TestIndex:
         if query:
             pyramid_request.GET["q"] = query
 
-        ctx = index(None, pyramid_request)
+        response = index(None, pyramid_request)
 
-        filtered_orgs = sorted([org.name for org in ctx["results"]])
+        filtered_orgs = sorted([org.name for org in response["results"]])
         assert filtered_orgs == expected_orgs
 
     @pytest.fixture
@@ -52,29 +53,33 @@ class TestIndex:
 @pytest.mark.usefixtures("routes")
 class TestOrganizationCreateController:
     def test_get_sets_default_values(self, pyramid_request):
-        ctrl = OrganizationCreateController(pyramid_request)
+        controller = OrganizationCreateController(pyramid_request)
 
-        ctx = ctrl.get()
+        response = controller.get()
 
-        assert ctx["form"] == {"authority": pyramid_request.default_authority}
+        assert response["form"] == {"authority": pyramid_request.default_authority}
 
     def test_post_creates_org(self, pyramid_request, handle_form_submission):
         def call_on_success(request, form, on_success, on_failure):
             return on_success(
                 {
-                    "name": "New org",
-                    "authority": "example.org",
+                    "name": "New organization",
+                    "authority": "example.organization",
                     "logo": "<svg>a logo</svg>",
                 }
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = OrganizationCreateController(pyramid_request)
+        controller = OrganizationCreateController(pyramid_request)
 
-        ctrl.post()
+        controller.post()
 
-        org = pyramid_request.db.query(Organization).filter_by(name="New org").one()
-        assert org.authority == "example.org"
+        org = (
+            pyramid_request.db.query(Organization)
+            .filter_by(name="New organization")
+            .one()
+        )
+        assert org.authority == "example.organization"
         assert org.logo == "<svg>a logo</svg>"
 
     def test_post_redirects_to_list_view(
@@ -83,16 +88,16 @@ class TestOrganizationCreateController:
         def call_on_success(request, form, on_success, on_failure):
             return on_success(
                 {
-                    "name": "New org",
-                    "authority": "example.org",
+                    "name": "New organization",
+                    "authority": "example.organization",
                     "logo": "<svg>a logo</svg>",
                 }
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = OrganizationCreateController(pyramid_request)
+        controller = OrganizationCreateController(pyramid_request)
 
-        response = ctrl.post()
+        response = controller.post()
 
         list_url = pyramid_request.route_url("admin.organizations")
         assert response == matchers.Redirect302To(list_url)
@@ -100,87 +105,92 @@ class TestOrganizationCreateController:
 
 @pytest.mark.usefixtures("routes")
 class TestOrganizationEditController:
-    def test_read_presents_org(self, pyramid_request, org):
-        ctrl = OrganizationEditController(org, pyramid_request)
-        ctx = ctrl.read()
-        assert ctx["form"] == self._expected_form(org)
+    def test_read(self, get_controller, pyramid_request, organization):
+        response = get_controller().read()
 
-    def test_logo_is_empty_if_not_set(self, pyramid_request, org):
-        org.logo = None
-        ctrl = OrganizationEditController(org, pyramid_request)
-
-        ctx = ctrl.read()
-
-        assert ctx["form"]["logo"] == ""
-
-    def test_read_shows_delete_button(self, pyramid_request, org):
-        ctrl = OrganizationEditController(org, pyramid_request)
-        ctx = ctrl.read()
-        assert ctx["delete_url"] == pyramid_request.route_url(
-            "admin.organizations_delete", pubid=org.pubid
+        expected_delete_url = pyramid_request.route_url(
+            "admin.organizations_delete", pubid=organization.pubid
         )
+        assert response == {
+            "form": self._expected_form(organization),
+            "delete_url": expected_delete_url,
+        }
+
+    def test_logo_is_empty_if_not_set(self, get_controller, organization):
+        organization.logo = None
+
+        response = get_controller().read()
+
+        assert response["form"]["logo"] == ""
 
     def test_read_does_not_show_delete_button_for_default_org(
-        self, pyramid_request, org
+        self, get_controller, organization
     ):
-        org.pubid = Organization.DEFAULT_PUBID
-        ctrl = OrganizationEditController(org, pyramid_request)
+        organization.pubid = Organization.DEFAULT_PUBID
 
-        ctx = ctrl.read()
+        response = get_controller().read()
 
-        assert ctx["delete_url"] is None
+        assert response["delete_url"] is None
 
-    def test_update_saves_org(self, pyramid_request, org, handle_form_submission):
+    def test_update_saves_org(
+        self, get_controller, organization, handle_form_submission
+    ):
         def call_on_success(request, form, on_success, on_failure):
             return on_success(
                 {
                     "name": "Updated name",
-                    "authority": org.authority,
+                    "authority": organization.authority,
                     "logo": "<svg>new logo</svg>",
                 }
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = OrganizationEditController(org, pyramid_request)
 
-        ctx = ctrl.update()
+        response = get_controller().update()
 
-        assert org.name == "Updated name"
-        assert org.logo == "<svg>new logo</svg>"
-        assert ctx["form"] == self._expected_form(org)
+        assert organization.name == "Updated name"
+        assert organization.logo == "<svg>new logo</svg>"
+        assert response["form"] == self._expected_form(organization)
 
-    def test_delete_removes_org(self, pyramid_request, db_session, org):
-        ctrl = OrganizationEditController(org, pyramid_request)
-        ctrl.delete()
-        assert org in db_session.deleted
+    def test_delete(self, get_controller, organization, pyramid_request, matchers):
+        response = get_controller().delete()
 
-    def test_delete_redirects_to_org_list(self, matchers, org, pyramid_request):
-        ctrl = OrganizationEditController(org, pyramid_request)
-
-        response = ctrl.delete()
-
+        assert organization in pyramid_request.db.deleted
         list_url = pyramid_request.route_path("admin.organizations")
         assert response == matchers.Redirect302To(list_url)
 
-    def test_delete_fails_if_org_has_groups(self, factories, org, pyramid_request):
-        factories.Group(name="Test", organization=org)
-        ctrl = OrganizationEditController(org, pyramid_request)
+    def test_delete_fails_if_org_has_groups(
+        self, get_controller, organization, pyramid_request, factories
+    ):
+        factories.Group(name="Test", organization=organization)
 
-        ctx = ctrl.delete()
+        response = get_controller().delete()
 
-        assert org not in pyramid_request.db.deleted
+        assert organization not in pyramid_request.db.deleted
         assert pyramid_request.response.status_int == 400
         pyramid_request.session.flash.assert_called_with(
             Any.string.matching(".*Cannot delete.*1 groups"), "error"
         )
-        assert ctx["form"] == self._expected_form(org)
+        assert response["form"] == self._expected_form(organization)
 
-    def _expected_form(self, org):
-        return {"authority": org.authority, "logo": org.logo, "name": org.name}
+    def _expected_form(self, organization):
+        return {
+            "authority": organization.authority,
+            "logo": organization.logo,
+            "name": organization.name,
+        }
 
     @pytest.fixture
-    def org(self, factories):
-        return factories.Organization(name="FooPub", logo="<svg></svg>")
+    def get_controller(self, organization, pyramid_request):
+        def get_controller():
+            organization_context = OrganizationContext(organization, pyramid_request)
+            return OrganizationEditController(organization_context, pyramid_request)
+
+        return get_controller
+
+    @pytest.fixture
+    def organization(self, factories):
+        return factories.Organization(logo="<svg></svg>")
 
 
 @pytest.fixture

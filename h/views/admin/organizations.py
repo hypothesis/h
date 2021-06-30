@@ -57,9 +57,9 @@ class OrganizationCreateController:
             authority = appstruct["authority"]
             logo = appstruct["logo"]
             name = appstruct["name"]
-            org = Organization(authority=authority, name=name, logo=logo)
+            organization = Organization(authority=authority, name=name, logo=logo)
 
-            self.request.db.add(org)
+            self.request.db.add(organization)
             self.request.session.flash(
                 Markup(_("Created new organization {}".format(name))), "success"
             )
@@ -83,8 +83,8 @@ class OrganizationCreateController:
     renderer="h:templates/admin/organizations_edit.html.jinja2",
 )
 class OrganizationEditController:
-    def __init__(self, org, request):
-        self.org = org
+    def __init__(self, context, request):
+        self.organization = context.organization
         self.request = request
         self.schema = OrganizationSchema().bind(request=request)
         self.form = request.create_form(self.schema, buttons=(_("Save"),))
@@ -96,11 +96,11 @@ class OrganizationEditController:
 
     @view_config(request_method="POST", route_name="admin.organizations_delete")
     def delete(self):
-        org = self.org
-
         # Prevent deletion while the organization has associated groups.
         group_count = (
-            self.request.db.query(models.Group).filter_by(organization=org).count()
+            self.request.db.query(models.Group)
+            .filter_by(organization=self.organization)
+            .count()
         )
         if group_count > 0:
             self.request.response.status_int = 400
@@ -115,15 +115,18 @@ class OrganizationEditController:
             return self._template_context()
 
         # Delete the organization.
-        self.request.db.delete(org)
+        self.request.db.delete(self.organization)
         self.request.session.flash(
-            _("Successfully deleted organization %s" % (org.name), "success")
+            _(
+                "Successfully deleted organization %s" % (self.organization.name),
+                "success",
+            )
         )
         return HTTPFound(location=self.request.route_path("admin.organizations"))
 
     @view_config(request_method="POST")
     def update(self):
-        org = self.org
+        org = self.organization
 
         def on_success(appstruct):
             org.name = appstruct["name"]
@@ -141,15 +144,15 @@ class OrganizationEditController:
         )
 
     def _update_appstruct(self):
-        org = self.org
+        org = self.organization
         self.form.set_appstruct(
             {"authority": org.authority, "logo": org.logo or "", "name": org.name}
         )
 
     def _template_context(self):
         delete_url = None
-        if not self.org.is_default:
+        if not self.organization.is_default:
             delete_url = self.request.route_url(
-                "admin.organizations_delete", pubid=self.org.pubid
+                "admin.organizations_delete", pubid=self.organization.pubid
             )
         return {"form": self.form.render(), "delete_url": delete_url}
