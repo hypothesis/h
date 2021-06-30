@@ -69,11 +69,7 @@ from h.traversal.group import (
     GroupUpsertContext,
     GroupUpsertRoot,
 )
-from h.traversal.organization import (
-    OrganizationContext,
-    OrganizationLogoRoot,
-    OrganizationRoot,
-)
+from h.traversal.organization import OrganizationContext, OrganizationRoot
 from h.traversal.profile import ProfileRoot
 from h.traversal.root import Root
 from h.traversal.user import UserContext, UserRoot, UserUserIDRoot
@@ -89,7 +85,6 @@ __all__ = (
     "GroupUpsertContext",
     "GroupUpsertRoot",
     "OrganizationRoot",
-    "OrganizationLogoRoot",
     "ProfileRoot",
     "OrganizationContext",
     "UserContext",
