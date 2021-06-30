@@ -7,12 +7,13 @@ from h.traversal.organization import OrganizationContext, OrganizationRoot
 
 @pytest.mark.usefixtures("organization_service")
 class TestOrganizationRoot:
-    def test_it_returns_the_requested_organization(
+    def test_it_returns_the_organization_context(
         self, pyramid_request, organization_service
     ):
         result = OrganizationRoot(pyramid_request)[sentinel.pubid]
 
-        assert result == organization_service.get_by_public_id.return_value
+        assert isinstance(result, OrganizationContext)
+        assert result.organization == organization_service.get_by_public_id.return_value
         organization_service.get_by_public_id.assert_called_once_with(sentinel.pubid)
 
     def test_it_404s_if_the_organization_doesnt_exist(
