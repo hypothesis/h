@@ -6,7 +6,6 @@ from h import form  # noqa F401
 from h import i18n, models, paginator
 from h.models.annotation import Annotation
 from h.models.group_scope import GroupScope
-from h.models.organization import Organization
 from h.schemas.forms.admin.group import AdminGroupSchema
 
 _ = i18n.TranslationString
@@ -45,7 +44,9 @@ class GroupCreateViews:
         self.group_members_svc = self.request.find_service(name="group_members")
 
         self.organizations = {o.pubid: o for o in self.list_org_svc.organizations()}
-        self.default_org_id = Organization.default(self.request.db).pubid
+        self.default_org_id = (
+            self.request.find_service(name="organization").get_default().pubid
+        )
 
         self.schema = AdminGroupSchema().bind(
             request=request, organizations=self.organizations, user_svc=self.user_svc

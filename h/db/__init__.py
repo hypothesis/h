@@ -12,12 +12,11 @@ property `request.db` which is provided by this module.
 """
 import logging
 
-import importlib_resources
 import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import exc, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from h.util.session_tracker import Tracker
 
@@ -123,26 +122,10 @@ def _session(request):
 
 
 def _maybe_create_default_organization(engine, authority):
-    from h import models
+    from h.services.organization import OrganizationService
 
     session = Session(bind=engine)
-
-    try:
-        default_org = models.Organization.default(session)
-    except exc.NoResultFound:
-        default_org = None
-
-    if default_org is None:
-        default_org = models.Organization(
-            name="Hypothesis",
-            authority=authority,
-            pubid=models.Organization.DEFAULT_PUBID,
-        )
-
-        default_org.logo = (
-            importlib_resources.files("h") / "static/images/icons/logo.svg"
-        ).read_text()
-        session.add(default_org)
+    default_org = OrganizationService(session).get_default(authority)
 
     session.commit()
     session.close()
