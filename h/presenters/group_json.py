@@ -46,7 +46,8 @@ class GroupJSONPresenter:
     def _model(self):
         organization = None
         if self.organization_context:
-            organization = self.organization_context.id
+            organization = self.organization_context.organization.pubid
+
         model = {
             "id": self.context.id,
             "groupid": self.group.groupid,

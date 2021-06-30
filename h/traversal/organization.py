@@ -57,10 +57,6 @@ class OrganizationContext:
         self.request = request
 
     @property
-    def id(self):
-        return self.organization.pubid  # Web-facing unique ID for this resource
-
-    @property
     def links(self):
         # TODO
         return {}

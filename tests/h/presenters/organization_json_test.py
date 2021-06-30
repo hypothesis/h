@@ -26,7 +26,7 @@ class TestOrganizationJSONPresenter:
 
         assert presenter.asdict() == {
             "name": "My Org",
-            "id": organization_context.id,
+            "id": organization.pubid,
             "default": False,
             "logo": pyramid_request.route_url(
                 "organization_logo", pubid=organization.pubid

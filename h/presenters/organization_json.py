@@ -6,13 +6,9 @@ class OrganizationJSONPresenter:
         self.organization = organization_context.organization
 
     def asdict(self):
-        return self._model()
-
-    def _model(self):
-        model = {
-            "id": self.context.id,
+        return {
+            "id": self.organization.pubid,
             "default": self.organization.is_default,
             "logo": self.context.logo,
             "name": self.organization.name,
         }
-        return model
