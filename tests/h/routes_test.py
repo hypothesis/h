@@ -189,7 +189,7 @@ def test_includeme():
         call(
             "organization_logo",
             "/organizations/{pubid}/logo",
-            factory="h.traversal.OrganizationLogoRoot",
+            factory="h.traversal.OrganizationRoot",
             traverse="/{pubid}",
         ),
         call("group_create", "/groups/new"),

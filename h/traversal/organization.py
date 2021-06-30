@@ -25,29 +25,6 @@ class OrganizationRoot(RootFactory):
             raise KeyError()
 
 
-class OrganizationLogoRoot(RootFactory):
-    """
-    Root factory for routes whose context is an :py:class:`h.traversal.OrganizationLogoContext`.
-
-    FIXME: This class should return OrganizationLogoContext objects, not
-    organization logos.
-
-    """
-
-    def __init__(self, request):
-        super().__init__(request)
-        self.organization_factory = OrganizationRoot(self.request)
-
-    def __getitem__(self, pubid):
-        # This will raise KeyError if the organization doesn't exist.
-        organization = self.organization_factory[pubid]
-
-        if not organization.logo:
-            raise KeyError()
-
-        return organization.logo
-
-
 class OrganizationContext:
     """Context for organization-based views."""
 

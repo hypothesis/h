@@ -200,7 +200,7 @@ def includeme(config):
     config.add_route(
         "organization_logo",
         "/organizations/{pubid}/logo",
-        factory="h.traversal.OrganizationLogoRoot",
+        factory="h.traversal.OrganizationRoot",
         traverse="/{pubid}",
     )
 
