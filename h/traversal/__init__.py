@@ -2,8 +2,12 @@ from h.traversal.contexts import (
     AnnotationContext,
     GroupContext,
     GroupUpsertContext,
-    OrganizationContext,
     UserContext,
+)
+from h.traversal.organization import (
+    OrganizationContext,
+    OrganizationLogoRoot,
+    OrganizationRoot,
 )
 from h.traversal.roots import (
     AnnotationRoot,
@@ -11,8 +15,6 @@ from h.traversal.roots import (
     BulkAPIRoot,
     GroupRoot,
     GroupUpsertRoot,
-    OrganizationLogoRoot,
-    OrganizationRoot,
     ProfileRoot,
     Root,
     UserRoot,

@@ -17,8 +17,6 @@ from h.traversal.roots import (
     BulkAPIRoot,
     GroupRoot,
     GroupUpsertRoot,
-    OrganizationLogoRoot,
-    OrganizationRoot,
     ProfileRoot,
     Root,
     UserRoot,
@@ -261,49 +259,6 @@ class TestBulkAPIRoot:
         )
 
 
-@pytest.mark.usefixtures("organizations")
-class TestOrganizationRoot:
-    def test_it_returns_the_requested_organization(
-        self, organizations, organization_factory
-    ):
-        organization = organizations[1]
-
-        assert organization_factory[organization.pubid] == organization
-
-    def test_it_404s_if_the_organization_doesnt_exist(self, organization_factory):
-        with pytest.raises(KeyError):
-            organization_factory["does_not_exist"]
-
-    @pytest.fixture
-    def organization_factory(self, pyramid_request):
-        return OrganizationRoot(pyramid_request)
-
-
-@pytest.mark.usefixtures("organizations")
-class TestOrganizationLogoRoot:
-    def test_it_returns_the_requested_organizations_logo(
-        self, organizations, organization_logo_factory
-    ):
-        organization = organizations[1]
-        organization.logo = "<svg>blah</svg>"
-
-        assert organization_logo_factory[organization.pubid] == "<svg>blah</svg>"
-
-    def test_it_404s_if_the_organization_doesnt_exist(self, organization_logo_factory):
-        with pytest.raises(KeyError):
-            organization_logo_factory["does_not_exist"]
-
-    def test_it_404s_if_the_organization_has_no_logo(
-        self, organizations, organization_logo_factory
-    ):
-        with pytest.raises(KeyError):
-            assert organization_logo_factory[organizations[0].pubid]
-
-    @pytest.fixture
-    def organization_logo_factory(self, pyramid_request):
-        return OrganizationLogoRoot(pyramid_request)
-
-
 class TestProfileRoot:
     def test_it_assigns_update_permission_with_user_role(
         self, set_permissions, pyramid_request
@@ -521,12 +476,6 @@ def client_authority(patch):
     client_authority = patch("h.traversal.roots.client_authority")
     client_authority.return_value = None
     return client_authority
-
-
-@pytest.fixture
-def organizations(factories):
-    # Add a handful of organizations to the DB to make the test realistic.
-    return [factories.Organization() for _ in range(3)]
 
 
 @pytest.fixture
