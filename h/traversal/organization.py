@@ -57,11 +57,6 @@ class OrganizationContext:
         self.request = request
 
     @property
-    def links(self):
-        # TODO
-        return {}
-
-    @property
     def logo(self):
         if self.organization.logo:
             return self.request.route_url(

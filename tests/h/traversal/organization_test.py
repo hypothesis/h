@@ -62,13 +62,6 @@ class TestOrganizationContext:
 
         assert organization_context.organization == organization
 
-    def test_it_returns_links_property(self, factories, pyramid_request):
-        organization = factories.Organization()
-
-        organization_context = OrganizationContext(organization, pyramid_request)
-
-        assert organization_context.links == {}
-
     def test_it_returns_logo_property_as_route_url(self, factories, pyramid_request):
         fake_logo = "<svg>H</svg>"
         pyramid_request.route_url = mock.Mock()
