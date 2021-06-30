@@ -179,7 +179,7 @@ class GroupSearchController(SearchController):
         if self.group.organization:
             result["group"]["organization"] = {
                 "name": self.group.organization.name,
-                "logo": self._organization_context.logo,
+                "logo": self._organization_context.logo_url,
             }
         else:
             result["group"]["organization"] = None
