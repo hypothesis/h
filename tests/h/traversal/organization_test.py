@@ -62,14 +62,6 @@ class TestOrganizationContext:
 
         assert organization_context.organization == organization
 
-    def test_it_returns_pubid_as_id(self, factories, pyramid_request):
-        organization = factories.Organization()
-
-        organization_context = OrganizationContext(organization, pyramid_request)
-
-        assert organization_context.id != organization.id
-        assert organization_context.id == organization.pubid
-
     def test_it_returns_links_property(self, factories, pyramid_request):
         organization = factories.Organization()
 
