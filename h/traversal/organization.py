@@ -31,7 +31,7 @@ class OrganizationContext:
         self.request = request
 
     @property
-    def logo(self):
+    def logo_url(self):
         if self.organization.logo:
             return self.request.route_url(
                 "organization_logo", pubid=self.organization.pubid

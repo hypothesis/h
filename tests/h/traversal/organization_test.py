@@ -1,5 +1,4 @@
-from unittest import mock
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 
@@ -32,39 +31,36 @@ class TestOrganizationRoot:
 
 class TestOrganizationContext:
     def test_it_returns_organization_model_as_property(
-        self, factories, pyramid_request
+        self, organization, pyramid_request
     ):
-        organization = factories.Organization()
+        result = OrganizationContext(organization, pyramid_request).organization
 
-        organization_context = OrganizationContext(organization, pyramid_request)
+        assert result == organization
 
-        assert organization_context.organization == organization
+    def test_logo_url(self, organization, pyramid_request):
+        organization.logo = "<svg>H</svg>"
 
-    def test_it_returns_logo_property_as_route_url(self, factories, pyramid_request):
-        fake_logo = "<svg>H</svg>"
-        pyramid_request.route_url = mock.Mock()
-
-        organization = factories.Organization(logo=fake_logo)
-
-        organization_context = OrganizationContext(organization, pyramid_request)
-        logo = organization_context.logo
+        result = OrganizationContext(organization, pyramid_request).logo_url
 
         pyramid_request.route_url.assert_called_with(
             "organization_logo", pubid=organization.pubid
         )
-        assert logo is not None
+        assert result == pyramid_request.route_url.return_value
 
-    def test_it_returns_none_for_logo_if_no_logo(self, factories, pyramid_request):
-        pyramid_request.route_url = mock.Mock()
+    def test_logo_url_with_no_logo(self, organization, pyramid_request):
+        organization.logo = None
 
-        organization = factories.Organization(logo=None)
+        result = OrganizationContext(organization, pyramid_request).logo_url
 
-        organization_context = OrganizationContext(organization, pyramid_request)
-        logo = organization_context.logo
+        pyramid_request.route_url.assert_not_called()
+        assert result is None
 
-        pyramid_request.route_url.assert_not_called
-        assert logo is None
+    @pytest.fixture
+    def organization(self, factories):
+        return factories.Organization()
 
-    @pytest.fixture(autouse=True)
-    def organization_routes(self, pyramid_config):
-        pyramid_config.add_route("organization_logo", "/organization/{pubid}/logo")
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.route_url = create_autospec(pyramid_request.route_url)
+
+        return pyramid_request

@@ -9,6 +9,6 @@ class OrganizationJSONPresenter:
         return {
             "id": self.organization.pubid,
             "default": self.organization.is_default,
-            "logo": self.context.logo,
+            "logo": self.context.logo_url,
             "name": self.organization.name,
         }
