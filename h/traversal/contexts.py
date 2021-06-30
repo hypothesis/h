@@ -21,6 +21,7 @@ the view callable as the ``context`` argument.
 from pyramid.security import DENY_ALL, Allow, principals_allowed_by_permission
 
 from h.auth import role
+from h.traversal.organization import OrganizationContext
 
 
 class AnnotationContext:
@@ -89,32 +90,6 @@ class AnnotationContext:
             return []
         principals = principals_allowed_by_permission(group, principal)
         return principals
-
-
-class OrganizationContext:
-    """Context for organization-based views."""
-
-    def __init__(self, organization, request):
-        # TODO Links service
-        self.organization = organization
-        self.request = request
-
-    @property
-    def id(self):
-        return self.organization.pubid  # Web-facing unique ID for this resource
-
-    @property
-    def links(self):
-        # TODO
-        return {}
-
-    @property
-    def logo(self):
-        if self.organization.logo:
-            return self.request.route_url(
-                "organization_logo", pubid=self.organization.pubid
-            )
-        return None
 
 
 class GroupContext:
