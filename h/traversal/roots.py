@@ -149,53 +149,6 @@ class BulkAPIRoot(RootFactory):
     __acl__ = [(Allow, "client_authority:lms.hypothes.is", "bulk_action")]
 
 
-class GroupRoot(RootFactory):
-    """
-    Root factory for routes whose context is an :py:class:`h.traversal.GroupContext`.
-
-    FIXME: This class should return GroupContext objects, not Group objects.
-
-    """
-
-    __acl__ = [(Allow, role.User, "create")]  # Any authn'd user may create a group
-
-    def __init__(self, request):
-        super().__init__(request)
-        self.group_service = request.find_service(name="group")
-
-    def __getitem__(self, pubid_or_groupid):
-        group = self.group_service.fetch(pubid_or_groupid)
-        if group is None:
-            raise KeyError()
-        return group
-
-
-class GroupUpsertRoot(RootFactory):
-    """
-    Root factory for group "UPSERT" API
-
-    This Root can support a route in which the traversal's ``__getitem__``
-    will attempt a lookup but will not raise if that fails.
-
-    This is to allow a single route that can accept and update an existing group
-    OR create a new one.
-    """
-
-    __acl__ = GroupRoot.__acl__
-
-    def __init__(self, request):
-        super().__init__(request)
-        self._group_root = GroupRoot(request)
-
-    def __getitem__(self, pubid_or_groupid):
-        try:
-            group = self._group_root[pubid_or_groupid]
-        except KeyError:
-            group = None
-
-        return contexts.GroupUpsertContext(group=group, request=self.request)
-
-
 class ProfileRoot(RootFactory):
     """
     Simple Root for API profile endpoints

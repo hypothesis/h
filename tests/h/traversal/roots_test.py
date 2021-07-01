@@ -9,14 +9,11 @@ import h.auth
 from h.auth import role
 from h.exceptions import InvalidUserId
 from h.models import AuthClient
-from h.services.group import GroupService
 from h.traversal.contexts import AnnotationContext, UserContext
 from h.traversal.roots import (
     AnnotationRoot,
     AuthClientRoot,
     BulkAPIRoot,
-    GroupRoot,
-    GroupUpsertRoot,
     ProfileRoot,
     Root,
     UserRoot,
@@ -279,94 +276,6 @@ class TestProfileRoot:
         assert not pyramid_request.has_permission("update", context)
 
 
-class TestGroupRoot:
-    def test_it_assigns_create_permission_with_user_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=[role.User])
-
-        context = GroupRoot(pyramid_request)
-
-        assert pyramid_request.has_permission("create", context)
-
-    def test_it_does_not_assign_create_permission_without_user_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=["whatever"])
-
-        context = GroupRoot(pyramid_request)
-
-        assert not pyramid_request.has_permission("create", context)
-
-    def test_getitem_returns_fetched_group_if_not_None(
-        self, factories, group_factory, group_service
-    ):
-        group = factories.Group()
-        group_service.fetch.return_value = group
-
-        assert group_factory[group.pubid] == group
-
-    def test_getitem_raises_KeyError_if_fetch_returns_None(
-        self, group_factory, group_service
-    ):
-        group_service.fetch.return_value = None
-        with pytest.raises(KeyError):
-            group_factory["does_not_exist"]
-
-    @pytest.fixture(autouse=True)
-    def groups(self, factories):
-        # Add some "noise" groups to the DB.
-        # These are groups that we _don't_ expect GroupRoot to return in
-        # the tests.
-        return [factories.Group(), factories.Group(), factories.Group()]
-
-    @pytest.fixture(autouse=True)
-    def group_service(self, pyramid_config):
-        group_service = mock.create_autospec(GroupService, spec_set=True, instance=True)
-        pyramid_config.register_service(group_service, name="group")
-        return group_service
-
-    @pytest.fixture
-    def group_factory(self, pyramid_request):
-        return GroupRoot(pyramid_request)
-
-
-@pytest.mark.usefixtures("GroupRoot", "GroupUpsertContext")
-class TestGroupUpsertRoot:
-    def test_getitem_returns_empty_upsert_context_if_missing_group(
-        self, pyramid_request, GroupRoot, GroupUpsertContext
-    ):
-        root = GroupUpsertRoot(pyramid_request)
-        GroupRoot.return_value.__getitem__.side_effect = KeyError("bang")
-
-        context = root["whatever"]
-
-        GroupRoot.return_value.__getitem__.assert_called_once_with("whatever")
-        assert context == GroupUpsertContext.return_value
-        GroupUpsertContext.assert_called_once_with(group=None, request=pyramid_request)
-
-    def test_getitem_returns_populated_upsert_context_if_group_found(
-        self, pyramid_request, GroupRoot, GroupUpsertContext, factories
-    ):
-        group = factories.Group()
-        root = GroupUpsertRoot(pyramid_request)
-        GroupRoot.return_value.__getitem__.return_value = group
-
-        context = root["agroup"]
-
-        GroupRoot.return_value.__getitem__.assert_called_once_with("agroup")
-        assert context == GroupUpsertContext.return_value
-        GroupUpsertContext.assert_called_once_with(group=group, request=pyramid_request)
-
-    @pytest.fixture
-    def GroupRoot(self, patch):
-        return patch("h.traversal.roots.GroupRoot")
-
-    @pytest.fixture
-    def GroupUpsertContext(self, patch):
-        return patch("h.traversal.roots.contexts.GroupUpsertContext")
-
-
 @pytest.mark.usefixtures("user_service", "client_authority")
 class TestUserRoot:
     def test_it_does_not_assign_create_permission_without_auth_client_role(
@@ -476,18 +385,3 @@ def client_authority(patch):
     client_authority = patch("h.traversal.roots.client_authority")
     client_authority.return_value = None
     return client_authority
-
-
-@pytest.fixture
-def set_permissions(pyramid_config):
-    default = object()
-
-    def request_with_permissions(user_id=None, principals=default):
-        if principals is default:
-            principals = [pyramid.security.Everyone]
-
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(user_id, groupids=principals)
-        pyramid_config.set_authorization_policy(policy)
-
-    return request_with_permissions
