@@ -63,13 +63,11 @@ shouldn't return model objects directly).
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
 from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow, Authenticated
+from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow
 
-from h import storage
 from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
-from h.interfaces import IGroupService
 from h.models import AuthClient
 from h.traversal import contexts
 
@@ -93,21 +91,6 @@ class Root(RootFactory):
         (Allow, role.Admin, ALL_PERMISSIONS),
         DENY_ALL,
     ]
-
-
-class AnnotationRoot(RootFactory):
-    """Root factory for routes whose context is an :py:class:`h.traversal.AnnotationContext`."""
-
-    __acl__ = [(Allow, Authenticated, "create")]
-
-    def __getitem__(self, id):
-        annotation = storage.fetch_annotation(self.request.db, id)
-        if annotation is None:
-            raise KeyError()
-
-        group_service = self.request.find_service(IGroupService)
-        links_service = self.request.find_service(name="links")
-        return contexts.AnnotationContext(annotation, group_service, links_service)
 
 
 class AuthClientRoot(RootFactory):
