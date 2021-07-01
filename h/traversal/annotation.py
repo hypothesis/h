@@ -7,7 +7,7 @@ from pyramid.security import (
 
 from h import storage
 from h.interfaces import IGroupService
-from h.traversal.roots import RootFactory
+from h.traversal.root import RootFactory
 
 
 class AnnotationRoot(RootFactory):
