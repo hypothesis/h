@@ -1,5 +1,3 @@
-from unittest import mock
-
 import pyramid.authorization
 import pyramid.security
 import pytest
@@ -9,9 +7,8 @@ import h.auth
 from h.auth import role
 from h.exceptions import InvalidUserId
 from h.models import AuthClient
-from h.traversal.contexts import AnnotationContext, UserContext
+from h.traversal.contexts import UserContext
 from h.traversal.roots import (
-    AnnotationRoot,
     AuthClientRoot,
     BulkAPIRoot,
     ProfileRoot,
@@ -69,80 +66,6 @@ class TestRoot:
         context = Root(pyramid_request)
 
         assert pyramid_request.has_permission(pyramid.security.ALL_PERMISSIONS, context)
-
-
-@pytest.mark.usefixtures("groupfinder_service", "links_service")
-class TestAnnotationRoot:
-    def test_it_does_not_assign_create_permission_without_authenticated_user(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions()
-
-        context = AnnotationRoot(pyramid_request)
-
-        assert not pyramid_request.has_permission("create", context)
-
-    def test_it_assigns_create_permission_to_authenticated_request(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions(
-            "acct:adminuser@foo", principals=[pyramid.security.Authenticated]
-        )
-
-        context = AnnotationRoot(pyramid_request)
-
-        assert pyramid_request.has_permission("create", context)
-
-    def test_get_item_fetches_annotation(self, pyramid_request, storage):
-        factory = AnnotationRoot(pyramid_request)
-
-        factory["123"]
-        storage.fetch_annotation.assert_called_once_with(pyramid_request.db, "123")
-
-    def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert isinstance(resource, AnnotationContext)
-
-    def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert resource.annotation == storage.fetch_annotation.return_value
-
-    def test_get_item_raises_when_annotation_is_not_found(
-        self, storage, pyramid_request
-    ):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = None
-
-        with pytest.raises(KeyError):
-            factory["123"]
-
-    def test_get_item_has_right_group_service(
-        self, pyramid_request, storage, groupfinder_service
-    ):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert resource.group_service == groupfinder_service
-
-    def test_get_item_has_right_links_service(
-        self, pyramid_request, storage, links_service
-    ):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert resource.links_service == links_service
-
-    @pytest.fixture
-    def storage(self, patch):
-        return patch("h.traversal.roots.storage")
 
 
 class TestAuthClientRoot:

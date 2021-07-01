@@ -1,4 +1,5 @@
-from h.traversal.contexts import AnnotationContext, UserContext
+from h.traversal.annotation import AnnotationContext, AnnotationRoot
+from h.traversal.contexts import UserContext
 from h.traversal.group import (
     GroupContext,
     GroupRoot,
@@ -11,7 +12,6 @@ from h.traversal.organization import (
     OrganizationRoot,
 )
 from h.traversal.roots import (
-    AnnotationRoot,
     AuthClientRoot,
     BulkAPIRoot,
     ProfileRoot,
@@ -22,6 +22,7 @@ from h.traversal.roots import (
 
 __all__ = (
     "Root",
+    "AnnotationContext",
     "AnnotationRoot",
     "AuthClientRoot",
     "BulkAPIRoot",
@@ -34,7 +35,6 @@ __all__ = (
     "ProfileRoot",
     "UserRoot",
     "UserUserIDRoot",
-    "AnnotationContext",
     "OrganizationContext",
     "UserContext",
 )
