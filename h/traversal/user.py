@@ -4,7 +4,7 @@ from pyramid.security import Allow
 from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
-from h.traversal.roots import RootFactory
+from h.traversal.root import RootFactory
 
 
 class UserContext:

@@ -1,7 +1,7 @@
 import sqlalchemy.orm
 
 from h.models import Organization
-from h.traversal.roots import Root, RootFactory
+from h.traversal.root import Root, RootFactory
 
 
 class OrganizationRoot(RootFactory):

@@ -3,59 +3,8 @@ import pyramid.security
 import pytest
 
 import h.auth
-from h.auth import role
 from h.models import AuthClient
-from h.traversal.roots import AuthClientRoot, BulkAPIRoot, ProfileRoot, Root
-
-
-class TestRoot:
-    @pytest.mark.parametrize(
-        "permission",
-        [
-            "admin_index",
-            "admin_groups",
-            "admin_mailer",
-            "admin_organizations",
-            "admin_users",
-            pyramid.security.ALL_PERMISSIONS,
-        ],
-    )
-    def test_it_denies_all_permissions_for_unauthed_request(
-        self, set_permissions, pyramid_request, permission
-    ):
-        set_permissions(None, principals=None)
-
-        context = Root(pyramid_request)
-
-        assert not pyramid_request.has_permission(permission, context)
-
-    @pytest.mark.parametrize(
-        "permission",
-        [
-            "admin_index",
-            "admin_groups",
-            "admin_mailer",
-            "admin_organizations",
-            "admin_users",
-        ],
-    )
-    def test_it_assigns_admin_permissions_to_requests_with_staff_role(
-        self, set_permissions, pyramid_request, permission
-    ):
-        set_permissions("acct:adminuser@foo", principals=[role.Staff])
-
-        context = Root(pyramid_request)
-
-        assert pyramid_request.has_permission(permission, context)
-
-    def test_it_assigns_all_permissions_to_requests_with_admin_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=[role.Admin])
-
-        context = Root(pyramid_request)
-
-        assert pyramid_request.has_permission(pyramid.security.ALL_PERMISSIONS, context)
+from h.traversal.auth_client import AuthClientRoot
 
 
 class TestAuthClientRoot:
@@ -145,45 +94,3 @@ class TestAuthClientRoot:
             ),
             permission=permission,
         )
-
-
-class TestBulkAPIRoot:
-    @pytest.mark.parametrize(
-        "user,principal,permission_expected",
-        (
-            (None, None, False),
-            ("acct:user@hypothes.is", "client_authority:hypothes.is", False),
-            ("acct:user@lms.hypothes.is", "client_authority:lms.hypothes.is", True),
-        ),
-    )
-    def test_it_sets_bulk_action_permission_as_expected(
-        self, set_permissions, pyramid_request, user, principal, permission_expected
-    ):
-        set_permissions(user, principals=[principal])
-
-        context = BulkAPIRoot(pyramid_request)
-
-        assert (
-            pyramid_request.has_permission("bulk_action", context)
-            == permission_expected
-        )
-
-
-class TestProfileRoot:
-    def test_it_assigns_update_permission_with_user_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=[role.User])
-
-        context = ProfileRoot(pyramid_request)
-
-        assert pyramid_request.has_permission("update", context)
-
-    def test_it_does_not_assign_update_permission_without_user_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=["whatever"])
-
-        context = ProfileRoot(pyramid_request)
-
-        assert not pyramid_request.has_permission("update", context)

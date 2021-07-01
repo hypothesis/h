@@ -2,7 +2,7 @@ from pyramid.security import Allow
 
 from h.auth import role
 from h.traversal.organization import OrganizationContext
-from h.traversal.roots import RootFactory
+from h.traversal.root import RootFactory
 
 
 class GroupRoot(RootFactory):
