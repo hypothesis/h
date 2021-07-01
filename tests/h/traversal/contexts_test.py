@@ -4,14 +4,7 @@ import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.auth import role
-from h.services.group_links import GroupLinksService
-from h.traversal.contexts import (
-    AnnotationContext,
-    GroupContext,
-    GroupUpsertContext,
-    UserContext,
-)
+from h.traversal.contexts import AnnotationContext, UserContext
 
 
 @pytest.mark.usefixtures("groupfinder_service", "links_service")
@@ -238,118 +231,6 @@ class TestAnnotationContext:
         return groupfinder_service
 
 
-@pytest.mark.usefixtures("links_svc")
-class TestGroupContext:
-    def test_it_returns_group_model_as_property(self, factories, pyramid_request):
-        group = factories.Group()
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.group == group
-
-    def test_it_proxies_links_to_svc(self, factories, links_svc, pyramid_request):
-        group = factories.Group()
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.links == links_svc.get_all.return_value
-
-    def test_it_returns_pubid_as_id(self, factories, pyramid_request):
-        group = factories.Group()
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.id == group.pubid  # NOT the group.id
-
-    def test_organization_is_None_if_the_group_has_no_organization(
-        self, factories, pyramid_request
-    ):
-        group = factories.Group()
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.organization is None
-
-    def test_it_expands_organization_if_the_group_has_one(
-        self, factories, pyramid_request
-    ):
-        organization = factories.Organization()
-        group = factories.Group(organization=organization)
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.organization.organization == organization
-
-    def test_it_returns_None_for_missing_organization_relation(
-        self, factories, pyramid_request
-    ):
-        group = factories.Group()
-        group.organization = None
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.organization is None
-
-
-@pytest.mark.usefixtures("links_svc")
-class TestGroupUpsertContext:
-    def test_acl_applies_root_upsert_to_user_role_when_no_group(
-        self, pyramid_config, pyramid_request
-    ):
-        policy = ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[security.Authenticated, role.User]
-        )
-        pyramid_config.set_authorization_policy(policy)
-
-        context = GroupUpsertContext(group=None, request=pyramid_request)
-
-        assert pyramid_request.has_permission("upsert", context)
-
-    def test_acl_denies_root_upsert_if_no_user_role_and_no_group(
-        self, pyramid_config, pyramid_request
-    ):
-        policy = ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[security.Authenticated]
-        )
-        pyramid_config.set_authorization_policy(policy)
-
-        context = GroupUpsertContext(group=None, request=pyramid_request)
-
-        assert not pyramid_request.has_permission("upsert", context)
-
-    def test_acl_applies_group_model_acl_if_group_is_not_None(
-        self, pyramid_config, pyramid_request, factories
-    ):
-        group = factories.Group()
-        policy = ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[security.Authenticated]
-        )
-        pyramid_config.set_authorization_policy(policy)
-
-        context = GroupUpsertContext(group=group, request=pyramid_request)
-
-        assert context.__acl__() == group.__acl__()
-
-    def test_acl_does_not_apply_root_upsert_permission_if_group_is_not_None(
-        self, pyramid_config, pyramid_request, factories
-    ):
-        group = factories.Group()
-        policy = ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[security.Authenticated, role.User]
-        )
-        pyramid_config.set_authorization_policy(policy)
-
-        context = GroupUpsertContext(group=group, request=pyramid_request)
-
-        # an `upsert` permission could be present in the ACL via the model IF the current
-        # user were the creator, but they're not
-        assert not pyramid_request.has_permission("upsert", context)
-
-
 class TestUserContext:
     def test_acl_assigns_read_to_AuthClient_with_user_authority(self, factories):
         user = factories.User(username="fiona", authority="myauthority.com")
@@ -394,10 +275,3 @@ class FakeGroup:
                 # to private annotations)
                 acl.append((security.Allow, p, "moderate"))
         self.__acl__ = acl
-
-
-@pytest.fixture
-def links_svc(pyramid_config):
-    svc = mock.create_autospec(GroupLinksService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name="group_links")
-    return svc

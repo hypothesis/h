@@ -7,6 +7,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 from h.services.delete_group import DeleteGroupService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
+from h.services.group_links import GroupLinksService
 from h.services.group_members import GroupMembersService
 from h.services.group_update import GroupUpdateService
 from h.services.groupfinder import GroupfinderService
@@ -25,6 +26,7 @@ __all__ = (
     "list_organizations_service",
     "groupfinder_service",
     "group_create_service",
+    "group_links_service",
     "group_members_service",
     "group_service",
     "group_update_service",
@@ -87,6 +89,11 @@ def groupfinder_service(pyramid_config):
 @pytest.fixture
 def group_create_service(mock_service):
     return mock_service(GroupCreateService, name="group_create")
+
+
+@pytest.fixture
+def group_links_service(mock_service):
+    return mock_service(GroupLinksService, name="group_links")
 
 
 @pytest.fixture

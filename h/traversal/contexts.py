@@ -20,9 +20,6 @@ the view callable as the ``context`` argument.
 """
 from pyramid.security import DENY_ALL, Allow, principals_allowed_by_permission
 
-from h.auth import role
-from h.traversal.organization import OrganizationContext
-
 
 class AnnotationContext:
     """Context for annotation-based views."""
@@ -90,64 +87,6 @@ class AnnotationContext:
             return []
         principals = principals_allowed_by_permission(group, principal)
         return principals
-
-
-class GroupContext:
-    """Context for group-based views."""
-
-    def __init__(self, group, request):
-        self.request = request
-        self.group = group
-        self.links_service = self.request.find_service(name="group_links")
-
-    @property
-    def id(self):
-        return self.group.pubid  # Web-facing unique ID for this resource
-
-    @property
-    def links(self):
-        return self.links_service.get_all(self.group)
-
-    @property
-    def organization(self):
-        if self.group.organization is not None:
-            return OrganizationContext(self.group.organization, self.request)
-        return None
-
-
-class GroupUpsertContext:
-    """Context for group UPSERT"""
-
-    def __init__(self, group, request):
-        self._request = request
-        self.group = group
-
-    def __acl__(self):
-        """
-        Get the ACL from the group model or set "upsert" for all users in absence of model
-
-        If there is a group model, get the ACL from there. Otherwise, return an
-        ACL that sets the "upsert" permission for authenticated requests that have
-        a real user associated with them via :attr:`h.auth.role.User`.
-
-        The "upsert" permission is an unusual hybrid. It has a different meaning
-        depending on the upsert situation.
-
-        If there is no group associated with the context, the "upsert" permission
-        should be given to all real users such that they may use the UPSERT endpoint
-        to create a new group. However, if there is a group associated with the
-        context, the "upsert" permission is managed by the model. The model only
-        applies "upsert" for the group's creator. This will allow the endpoint to
-        support updating a specific group (model), but only if the request's
-        user should be able to update the group.
-        """
-
-        # TODO: This and ``GroupContext`` can likely be merged once ``GroupContext``
-        # is used more resource-appropriately and returned by :class:`h.traversal.roots.GroupRoot`
-        # during traversal
-        if self.group is not None:
-            return self.group.__acl__()
-        return [(Allow, role.User, "upsert")]
 
 
 class UserContext:
