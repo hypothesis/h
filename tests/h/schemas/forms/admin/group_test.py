@@ -204,8 +204,8 @@ def user_service(user_service, factories):
 
 
 @pytest.fixture
-def org(db_session):
-    return Organization.default(db_session)
+def org(factories):
+    return factories.Organization()
 
 
 @pytest.fixture
