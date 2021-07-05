@@ -39,6 +39,10 @@ class Organization(Base, mixins.Timestamps):
     def __repr__(self):
         return "<Organization: %s>" % self.pubid
 
+    @property
+    def is_default(self):
+        return self.pubid == self.DEFAULT_PUBID
+
     @classmethod
     def default(cls, session):
         return session.query(cls).filter_by(pubid=Organization.DEFAULT_PUBID).one()

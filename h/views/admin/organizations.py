@@ -148,7 +148,7 @@ class OrganizationEditController:
 
     def _template_context(self):
         delete_url = None
-        if self.org.pubid != Organization.DEFAULT_PUBID:
+        if not self.org.is_default:
             delete_url = self.request.route_url(
                 "admin.organizations_delete", pubid=self.org.pubid
             )
