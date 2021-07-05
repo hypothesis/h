@@ -5,7 +5,6 @@ from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.auth import role
-from h.models import Organization
 from h.services.group_links import GroupLinksService
 from h.traversal.contexts import (
     AnnotationContext,
