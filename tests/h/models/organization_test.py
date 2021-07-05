@@ -46,6 +46,16 @@ def test_repr(db_session, factories):
     assert repr(organization) == "<Organization: test_pubid>"
 
 
+@pytest.mark.parametrize(
+    "pubid,is_default",
+    ((models.Organization.DEFAULT_PUBID, True), ("anything_else", False)),
+)
+def test_is_default(pubid, is_default):
+    organization = models.Organization(pubid=pubid)
+
+    assert organization.is_default == is_default
+
+
 def test_default_returns_the_default_organization(db_session):
     assert (
         models.Organization.default(db_session).pubid

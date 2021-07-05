@@ -21,7 +21,6 @@ the view callable as the ``context`` argument.
 from pyramid.security import DENY_ALL, Allow, principals_allowed_by_permission
 
 from h.auth import role
-from h.models.organization import Organization
 
 
 class AnnotationContext:
@@ -103,10 +102,6 @@ class OrganizationContext:
     @property
     def id(self):
         return self.organization.pubid  # Web-facing unique ID for this resource
-
-    @property
-    def default(self):
-        return self.id == Organization.DEFAULT_PUBID
 
     @property
     def links(self):

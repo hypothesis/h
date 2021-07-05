@@ -343,24 +343,6 @@ class TestOrganizationContext:
         pyramid_request.route_url.assert_not_called
         assert logo is None
 
-    def test_default_property_if_not_default_organization(
-        self, factories, pyramid_request
-    ):
-        organization = factories.Organization()
-
-        organization_context = OrganizationContext(organization, pyramid_request)
-
-        assert organization_context.default is False
-
-    def test_default_property_if_default_organization(
-        self, factories, pyramid_request, default_organization
-    ):
-        organization_context = OrganizationContext(
-            default_organization, pyramid_request
-        )
-
-        assert organization_context.default is True
-
 
 @pytest.mark.usefixtures("links_svc")
 class TestGroupUpsertContext:
