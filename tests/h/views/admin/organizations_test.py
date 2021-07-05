@@ -123,7 +123,7 @@ class TestOrganizationEditController:
     def test_read_does_not_show_delete_button_for_default_org(
         self, pyramid_request, org
     ):
-        org.pubid = "__default__"
+        org.pubid = Organization.DEFAULT_PUBID
         ctrl = OrganizationEditController(org, pyramid_request)
 
         ctx = ctrl.read()
