@@ -1,10 +1,8 @@
 import colander
 import pytest
 
-from h.schemas.forms.admin.organization import (
-    ORGANIZATION_LOGO_MAX_CHARS,
-    OrganizationSchema,
-)
+from h.models import Organization
+from h.schemas.forms.admin.organization import OrganizationSchema
 
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
@@ -15,12 +13,12 @@ class TestOrganizationSchema:
 
     def test_it_raises_if_logo_is_too_long(self, org_data, bound_schema):
         org_data["logo"] = '<svg xmlns="http://svg.com">{}</svg>'.format(
-            "a" * ORGANIZATION_LOGO_MAX_CHARS + "b"
+            "a" * Organization.LOGO_MAX_CHARS + "b"
         )
 
         with pytest.raises(
             colander.Invalid,
-            match="larger than {:,d} characters".format(ORGANIZATION_LOGO_MAX_CHARS),
+            match="larger than {:,d} characters".format(Organization.LOGO_MAX_CHARS),
         ):
             bound_schema.deserialize(org_data)
 

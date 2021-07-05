@@ -4,17 +4,11 @@ import colander
 from deform.widget import TextAreaWidget, TextInputWidget
 
 import h.i18n
-from h.models.organization import (
-    ORGANIZATION_NAME_MAX_CHARS,
-    ORGANIZATION_NAME_MIN_CHARS,
-)
+from h.models.organization import Organization
 from h.schemas import validators
 from h.schemas.base import CSRFSchema
 
 _ = h.i18n.TranslationString
-
-
-ORGANIZATION_LOGO_MAX_CHARS = 100000
 
 
 def _strip_xmlns(tag):
@@ -24,12 +18,12 @@ def _strip_xmlns(tag):
 
 
 def validate_logo(node, value):
-    if len(value) > ORGANIZATION_LOGO_MAX_CHARS:
+    if len(value) > Organization.LOGO_MAX_CHARS:
         raise colander.Invalid(
             node,
             _(
                 "Logo is larger than {:,d} characters".format(
-                    ORGANIZATION_LOGO_MAX_CHARS
+                    Organization.LOGO_MAX_CHARS
                 )
             ),
         )
@@ -50,9 +44,9 @@ class OrganizationSchema(CSRFSchema):
         colander.String(),
         title=_("Name"),
         validator=validators.Length(
-            ORGANIZATION_NAME_MIN_CHARS, ORGANIZATION_NAME_MAX_CHARS
+            Organization.NAME_MIN_CHARS, Organization.NAME_MAX_CHARS
         ),
-        widget=TextInputWidget(max_length=ORGANIZATION_NAME_MAX_CHARS),
+        widget=TextInputWidget(max_length=Organization.NAME_MAX_CHARS),
     )
 
     logo = colander.SchemaNode(

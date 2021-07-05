@@ -3,12 +3,13 @@ import sqlalchemy as sa
 from h import pubid
 from h.db import Base, mixins
 
-ORGANIZATION_DEFAULT_PUBID = "__default__"
-ORGANIZATION_NAME_MIN_CHARS = 1
-ORGANIZATION_NAME_MAX_CHARS = 25
-
 
 class Organization(Base, mixins.Timestamps):
+    DEFAULT_PUBID = "__default__"
+    NAME_MIN_CHARS = 1
+    NAME_MAX_CHARS = 25
+    LOGO_MAX_CHARS = 100000
+
     __tablename__ = "organization"
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
@@ -26,11 +27,11 @@ class Organization(Base, mixins.Timestamps):
     @sa.orm.validates("name")
     def validate_name(self, key, name):
         if not (
-            ORGANIZATION_NAME_MIN_CHARS <= len(name) <= ORGANIZATION_NAME_MAX_CHARS
+            Organization.NAME_MIN_CHARS <= len(name) <= Organization.NAME_MAX_CHARS
         ):
             raise ValueError(
                 "name must be between {min} and {max} characters long".format(
-                    min=ORGANIZATION_NAME_MIN_CHARS, max=ORGANIZATION_NAME_MAX_CHARS
+                    min=Organization.NAME_MIN_CHARS, max=Organization.NAME_MAX_CHARS
                 )
             )
         return name
@@ -40,4 +41,4 @@ class Organization(Base, mixins.Timestamps):
 
     @classmethod
     def default(cls, session):
-        return session.query(cls).filter_by(pubid=ORGANIZATION_DEFAULT_PUBID).one()
+        return session.query(cls).filter_by(pubid=Organization.DEFAULT_PUBID).one()

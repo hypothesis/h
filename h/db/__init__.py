@@ -134,7 +134,9 @@ def _maybe_create_default_organization(engine, authority):
 
     if default_org is None:
         default_org = models.Organization(
-            name="Hypothesis", authority=authority, pubid="__default__"
+            name="Hypothesis",
+            authority=authority,
+            pubid=models.Organization.DEFAULT_PUBID,
         )
 
         default_org.logo = (

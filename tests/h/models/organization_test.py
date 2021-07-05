@@ -47,4 +47,7 @@ def test_repr(db_session, factories):
 
 
 def test_default_returns_the_default_organization(db_session):
-    assert models.Organization.default(db_session).pubid == "__default__"
+    assert (
+        models.Organization.default(db_session).pubid
+        == models.Organization.DEFAULT_PUBID
+    )

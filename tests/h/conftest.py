@@ -18,7 +18,6 @@ from webob.multidict import MultiDict
 
 from h import db
 from h.models import Organization
-from h.models.organization import ORGANIZATION_DEFAULT_PUBID
 from h.settings import database_url
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
@@ -119,7 +118,7 @@ def default_organization(db_session):
     # This looks a bit odd, but as part of our DB initialization we always add
     # a default org. So tests can't add their own without causing a conflict.
     return (
-        db_session.query(Organization).filter_by(pubid=ORGANIZATION_DEFAULT_PUBID).one()
+        db_session.query(Organization).filter_by(pubid=Organization.DEFAULT_PUBID).one()
     )
 
 
