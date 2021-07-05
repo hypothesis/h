@@ -352,10 +352,12 @@ class TestOrganizationContext:
 
         assert organization_context.default is False
 
-    def test_default_property_if_default_organization(self, factories, pyramid_request):
-        organization = Organization.default(pyramid_request.db)
-
-        organization_context = OrganizationContext(organization, pyramid_request)
+    def test_default_property_if_default_organization(
+        self, factories, pyramid_request, default_organization
+    ):
+        organization_context = OrganizationContext(
+            default_organization, pyramid_request
+        )
 
         assert organization_context.default is True
 
