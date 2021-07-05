@@ -54,7 +54,7 @@ def test_enforce_scope_can_be_set_False(db_session, factories):
     assert group.enforce_scope is False
 
 
-def test_slug(db_session, factories, default_organization):
+def test_slug(db_session, factories, organization):
     name = "My Hypothesis Group"
     user = factories.User()
 
@@ -62,7 +62,7 @@ def test_slug(db_session, factories, default_organization):
         name=name,
         authority="foobar.com",
         creator=user,
-        organization=default_organization,
+        organization=organization,
     )
     db_session.add(group)
     db_session.flush()
@@ -170,7 +170,7 @@ def test_you_cannot_set_type(factories):
         group.type = "open"
 
 
-def test_repr(db_session, factories, default_organization):
+def test_repr(db_session, factories, organization):
     name = "My Hypothesis Group"
     user = factories.User()
 
@@ -178,7 +178,7 @@ def test_repr(db_session, factories, default_organization):
         name=name,
         authority="foobar.com",
         creator=user,
-        organization=default_organization,
+        organization=organization,
     )
     db_session.add(group)
     db_session.flush()
@@ -201,7 +201,7 @@ def test_group_organization(db_session):
     assert group.organization_id == org.id
 
 
-def test_created_by(db_session, factories, default_organization):
+def test_created_by(db_session, factories, organization):
     name_1 = "My first group"
     name_2 = "My second group"
     user = factories.User()
@@ -210,13 +210,13 @@ def test_created_by(db_session, factories, default_organization):
         name=name_1,
         authority="foobar.com",
         creator=user,
-        organization=default_organization,
+        organization=organization,
     )
     group_2 = models.Group(
         name=name_2,
         authority="foobar.com",
         creator=user,
-        organization=default_organization,
+        organization=organization,
     )
 
     db_session.add_all([group_1, group_2])
@@ -447,3 +447,8 @@ class TestGroupACL:
         )
         group.pubid = "test-group"
         return group
+
+
+@pytest.fixture()
+def organization(factories):
+    return factories.Organization()

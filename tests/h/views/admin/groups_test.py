@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 from h_matchers import Any
 
-from h.models import Organization
 from h.views.admin import groups
 from h.views.admin.groups import GroupCreateViews, GroupEditViews
 
@@ -41,6 +40,7 @@ class TestIndex:
     "list_organizations_service",
     "routes",
     "user_service",
+    "organization_service",
 )
 class TestGroupCreateView:
     def test_get_sets_form(self, pyramid_request):
@@ -58,13 +58,17 @@ class TestGroupCreateView:
         list_organizations_service.organizations.assert_called_with()
 
     def test_init_binds_schema_with_organizations(
-        self, pyramid_request, default_org, AdminGroupSchema, list_organizations_service
+        self,
+        pyramid_request,
+        organization,
+        AdminGroupSchema,
+        list_organizations_service,
     ):
         GroupCreateViews(pyramid_request)
 
         schema = AdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
-        assert call_kwargs["organizations"] == {default_org.pubid: default_org}
+        assert call_kwargs["organizations"] == {organization.pubid: organization}
 
     def test_post_handles_form_submission(
         self, pyramid_request, handle_form_submission
@@ -96,7 +100,7 @@ class TestGroupCreateView:
         pyramid_request,
         group_create_service,
         handle_form_submission,
-        default_org,
+        organization,
         user_service,
         base_appstruct,
     ):
@@ -114,7 +118,7 @@ class TestGroupCreateView:
             userid=user_service.fetch.return_value.userid,
             description=None,
             scopes=["http://example.com"],
-            organization=default_org,
+            organization=organization,
             enforce_scope=True,
         )
 
@@ -123,7 +127,7 @@ class TestGroupCreateView:
         pyramid_request,
         group_create_service,
         handle_form_submission,
-        default_org,
+        organization,
         user_service,
         base_appstruct,
     ):
@@ -141,7 +145,7 @@ class TestGroupCreateView:
             userid=user_service.fetch.return_value.userid,
             description=None,
             scopes=["http://example.com"],
-            organization=default_org,
+            organization=organization,
             enforce_scope=True,
         )
 
@@ -172,14 +176,14 @@ class TestGroupCreateView:
         )
 
     @pytest.fixture
-    def base_appstruct(self, pyramid_request, default_org):
+    def base_appstruct(self, pyramid_request, organization):
         return {
             "name": "My New Group",
             "group_type": "restricted",
             "creator": pyramid_request.user.username,
             "description": None,
             "members": [],
-            "organization": default_org.pubid,
+            "organization": organization.pubid,
             "scopes": ["http://example.com"],
             "enforce_scope": True,
         }
@@ -196,7 +200,12 @@ class TestGroupCreateView:
 )
 class TestGroupEditViews:
     def test_it_binds_schema(
-        self, pyramid_request, group, user_service, default_org, AdminGroupSchema
+        self,
+        pyramid_request,
+        group,
+        user_service,
+        organization,
+        AdminGroupSchema,
     ):
         GroupEditViews(group, pyramid_request)
 
@@ -205,7 +214,7 @@ class TestGroupEditViews:
             request=pyramid_request,
             group=group,
             user_svc=user_service,
-            organizations={default_org.pubid: default_org},
+            organizations={organization.pubid: organization},
         )
 
     def test_read_renders_form(self, pyramid_request, factories, group):
@@ -234,7 +243,7 @@ class TestGroupEditViews:
         self,
         pyramid_request,
         group,
-        default_org,
+        organization,
         AdminGroupSchema,
         list_organizations_service,
     ):
@@ -243,7 +252,7 @@ class TestGroupEditViews:
         list_organizations_service.organizations.assert_called_with(group.authority)
         schema = AdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
-        assert call_kwargs["organizations"] == {default_org.pubid: default_org}
+        assert call_kwargs["organizations"] == {organization.pubid: organization}
 
     def test_update_proxies_to_update_service_on_success(
         self,
@@ -391,8 +400,15 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def default_org(db_session):
-    return Organization.default(db_session)
+def list_organizations_service(list_organizations_service, organization):
+    list_organizations_service.organizations.return_value = [organization]
+
+    return list_organizations_service
+
+
+@pytest.fixture
+def organization(factories):
+    return factories.Organization()
 
 
 @pytest.fixture
