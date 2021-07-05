@@ -1,35 +1,53 @@
 import pytest
 
-from h.models import Organization
 from h.services.list_organizations import (
     ListOrganizationsService,
     list_organizations_factory,
 )
-from h.services.organization import organization_factory
 
 
 class TestListOrganizations:
-    def test_returns_organizations_from_all_authorities_if_no_authority_specified(
-        self, svc, organizations, default_orgs, alternate_organizations
-    ):
-        expected_orgs = default_orgs + organizations + alternate_organizations
+    ALT_AUTHORITY = "bar.com"
 
+    def test_returns_all_organizations_if_no_authority_specified(
+        self, svc, organizations, alt_organizations
+    ):
         results = svc.organizations()
 
-        assert results == expected_orgs
+        names = [org.name for org in results]
+
+        # The "Hypothesis" here is from the default org added by DB init
+        assert names == ["Hypothesis", "alt_org_1", "alt_org_2", "org_1", "org_2"]
 
     def test_returns_organizations_for_the_authority_specified(
-        self,
-        svc,
-        authority,
-        organizations,
-        alternate_organizations,
-        alternate_authority,
+        self, svc, alt_organizations
     ):
+        results = svc.organizations(authority=self.ALT_AUTHORITY)
 
-        results = svc.organizations(authority=alternate_authority)
+        names = [org.name for org in results]
+        assert names == ["alt_org_1", "alt_org_2"]
 
-        assert results == alternate_organizations
+    @pytest.fixture(autouse=True)
+    def organizations(self, factories, pyramid_request):
+        # Add these out of order so it will come back out of order if unsorted
+        authority = pyramid_request.default_authority
+
+        return [
+            factories.Organization(name="org_2", authority=authority),
+            factories.Organization(name="org_1", authority=authority),
+        ]
+
+    @pytest.fixture(autouse=True)
+    def alt_organizations(self, factories):
+        # Add these out of order so it will come back out of order if unsorted
+        return [
+            factories.Organization(name="alt_org_2", authority=self.ALT_AUTHORITY),
+            factories.Organization(name="alt_org_1", authority=self.ALT_AUTHORITY),
+        ]
+
+    @pytest.fixture
+    def svc(self, db_session):
+        return ListOrganizationsService(session=db_session)
 
 
 class TestListOrganizationsFactory:
@@ -42,44 +60,3 @@ class TestListOrganizationsFactory:
         svc = list_organizations_factory(None, pyramid_request)
 
         assert svc._session == pyramid_request.db
-
-
-@pytest.fixture
-def authority(pyramid_request):
-    return pyramid_request.default_authority
-
-
-@pytest.fixture
-def alternate_authority():
-    return "bar.com"
-
-
-@pytest.fixture
-def org_svc(pyramid_request):
-    return organization_factory(None, pyramid_request)
-
-
-@pytest.fixture
-def organizations(factories, authority, org_svc):
-    # Add these out of order so it will come back out of order if unsorted..
-    org2 = org_svc.create(name="Org2", authority=authority)
-    org1 = org_svc.create(name="Org1", authority=authority)
-    return [org1, org2]
-
-
-@pytest.fixture
-def alternate_organizations(factories, alternate_authority, org_svc):
-    # Add these out of order so it will come back out of order if unsorted..
-    org4 = org_svc.create(name="Org4", authority=alternate_authority)
-    org3 = org_svc.create(name="Org3", authority=alternate_authority)
-    return [org3, org4]
-
-
-@pytest.fixture
-def default_orgs(db_session):
-    return [Organization.default(db_session)]
-
-
-@pytest.fixture
-def svc(db_session):
-    return ListOrganizationsService(session=db_session)
