@@ -68,9 +68,7 @@ class TestCreatePrivateGroup:
 
         assert getattr(group, flag) == expected_value
 
-    def test_it_creates_group_with_no_organization_by_default(
-        self, default_organization, creator, svc
-    ):
+    def test_it_creates_group_with_no_organization_by_default(self, creator, svc):
         group = svc.create_private_group("Anteater fans", creator.userid)
 
         assert group.organization is None
@@ -171,7 +169,7 @@ class TestCreateOpenGroup:
         assert getattr(group, flag) == expected_value
 
     def test_it_creates_group_with_no_organization_by_default(
-        self, default_organization, creator, svc, origins
+        self, creator, svc, origins
     ):
         group = svc.create_open_group("Anteater fans", creator.userid, scopes=origins)
 
@@ -312,7 +310,7 @@ class TestCreateRestrictedGroup:
         assert getattr(group, flag) == expected_value
 
     def test_it_creates_group_with_no_organization_by_default(
-        self, default_organization, creator, svc, origins
+        self, creator, svc, origins
     ):
         group = svc.create_restricted_group(
             "Anteater fans", creator.userid, scopes=origins

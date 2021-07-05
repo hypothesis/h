@@ -7,7 +7,6 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
-from h.models import Organization
 from h.services.annotation_stats import AnnotationStatsService
 from h.views import activity
 
@@ -256,7 +255,6 @@ class TestGroupSearchController:
         factories,
         test_group,
         test_user,
-        default_org,
         OrganizationContext,
         pyramid_request,
     ):
@@ -281,7 +279,6 @@ class TestGroupSearchController:
         factories,
         test_group,
         test_user,
-        default_org,
         OrganizationContext,
         pyramid_request,
     ):
@@ -1367,11 +1364,6 @@ def search(patch):
         "zero_message": "No annotations matched your search.",
     }
     return search
-
-
-@pytest.fixture
-def default_org(db_session):
-    return Organization.default(db_session)
 
 
 @pytest.fixture
