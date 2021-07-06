@@ -31,13 +31,12 @@ function parseCommandLine() {
     .option('--grep [pattern]', 'Run only tests matching a given pattern')
     .parse(process.argv);
 
-  if (commander.grep) {
-    log.info(`Running tests matching pattern /${commander.grep}/`);
+  const { grep } = commander.opts();
+  if (grep) {
+    log.info(`Running tests matching pattern /${grep}/`);
   }
 
-  return {
-    grep: commander.grep,
-  };
+  return { grep };
 }
 
 const taskArgs = parseCommandLine();
