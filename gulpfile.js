@@ -198,7 +198,8 @@ gulp.task('build-images', () => {
         // the SVG.
         //
         // See https://github.com/svg/svgo/issues/1128
-        removeViewBox: false,
+        name: 'removeViewBox',
+        active: false,
       },
     ],
   };
