@@ -35,7 +35,7 @@
     "postcss-url": "^10.1.3",
     "query-string": "^7.0.0",
     "raven-js": "^3.7.0",
-    "sass": "^1.34.0",
+    "sass": "^1.35.1",
     "scroll-into-view": "^1.16.0",
     "through2": "^4.0.2",
     "uglifyify": "^5.0.2",
