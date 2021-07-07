@@ -5,16 +5,25 @@ class OrganizationJSONPresenter:
         self.request = request
         self.organization = organization
 
-    def asdict(self):
-        logo = (
-            self.request.route_url("organization_logo", pubid=self.organization.pubid)
-            if self.organization.logo
-            else None
-        )
+    def asdict(self, summary=False):
+        """
+        Create a dict of the organization.
 
-        return {
-            "id": self.organization.pubid,
-            "default": self.organization.is_default,
-            "logo": logo,
+        :param summary: Return the name and logo only (used in activity stream)
+        """
+        model = {
             "name": self.organization.name,
+            "logo": (
+                self.request.route_url(
+                    "organization_logo", pubid=self.organization.pubid
+                )
+                if self.organization.logo
+                else None
+            ),
         }
+
+        if not summary:
+            model["id"] = self.organization.pubid
+            model["default"] = self.organization.is_default
+
+        return model
