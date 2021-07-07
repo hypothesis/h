@@ -1,5 +1,4 @@
 from h.presenters.organization_json import OrganizationJSONPresenter
-from h.traversal import OrganizationContext
 
 
 class GroupJSONPresenter:
@@ -10,11 +9,6 @@ class GroupJSONPresenter:
         self.links_service = request.find_service(name="group_links")
         self.group = group
 
-        if group.organization is None:
-            self.organization_context = None
-        else:
-            self.organization_context = OrganizationContext(group.organization, request)
-
     def asdict(self, expand=None):
         model = {
             "id": self.group.pubid,
@@ -22,9 +16,7 @@ class GroupJSONPresenter:
             "groupid": self.group.groupid,
             "name": self.group.name,
             "organization": (
-                self.organization_context.organization.pubid
-                if self.organization_context
-                else None
+                self.group.organization.pubid if self.group.organization else None
             ),
             "public": self.group.is_public,
             # DEPRECATED: TODO: remove from client
