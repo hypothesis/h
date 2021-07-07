@@ -256,7 +256,6 @@ class TestGroupSearchController:
         factories,
         test_group,
         test_user,
-        OrganizationContext,
         pyramid_request,
     ):
         group_info = controller.search()["group"]
@@ -280,7 +279,6 @@ class TestGroupSearchController:
         factories,
         test_group,
         test_user,
-        OrganizationContext,
         pyramid_request,
     ):
         group_info = controller.search()["group"]
@@ -884,14 +882,7 @@ class TestGroupSearchController:
         return {None: None, "creator": group.creator, "user": factories.User()}
 
     @pytest.fixture
-    def OrganizationContext(self, patch):
-        OrganizationContext = patch("h.views.activity.OrganizationContext")
-        organization_context = OrganizationContext.return_value
-        organization_context.logo = "http://example.com/organizations/pubid/logo"
-        return OrganizationContext
-
-    @pytest.fixture
-    def controller(self, request, group, pyramid_request, OrganizationContext, query):
+    def controller(self, request, group, pyramid_request, query):
         test_group = group
         if "test_group" in request.fixturenames:
             test_group = request.getfixturevalue("test_group")

@@ -12,8 +12,8 @@ from h.i18n import TranslationString as _  # noqa: N813
 from h.links import pretty_link
 from h.models.group import ReadableBy
 from h.paginator import paginate
+from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
-from h.traversal import OrganizationContext
 from h.util.datetime import utc_us_style_date
 from h.util.user import split_user
 from h.views.groups import check_slug
@@ -92,12 +92,6 @@ class GroupSearchController(SearchController):
     def __init__(self, context, request):
         super().__init__(request)
         self.group = context.group
-        if self.group.organization:
-            self._organization_context = OrganizationContext(
-                self.group.organization, request
-            )
-        else:
-            self._organization_context = None
 
     @view_config(request_method="GET")
     def search(self):  # pylint: disable=too-complex
@@ -177,10 +171,9 @@ class GroupSearchController(SearchController):
             "share_msg": _("Sharing the link lets people view this group:"),
         }
         if self.group.organization:
-            result["group"]["organization"] = {
-                "name": self.group.organization.name,
-                "logo": self._organization_context.logo_url,
-            }
+            result["group"]["organization"] = OrganizationJSONPresenter(
+                self.group.organization, self.request
+            ).asdict(summary=True)
         else:
             result["group"]["organization"] = None
 
