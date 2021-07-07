@@ -1,7 +1,6 @@
 from pyramid.security import Allow
 
 from h.auth import role
-from h.traversal.organization import OrganizationContext
 from h.traversal.root import RootFactory
 
 
@@ -24,25 +23,6 @@ class GroupRoot(RootFactory):
         if group is None:
             raise KeyError()
         return group
-
-
-class GroupContext:
-    """Context for group-based views."""
-
-    def __init__(self, group, request):
-        self.request = request
-        self.group = group
-        self.links_service = self.request.find_service(name="group_links")
-
-    @property
-    def links(self):
-        return self.links_service.get_all(self.group)
-
-    @property
-    def organization(self):
-        if self.group.organization is not None:
-            return OrganizationContext(self.group.organization, self.request)
-        return None
 
 
 class GroupUpsertRoot(RootFactory):

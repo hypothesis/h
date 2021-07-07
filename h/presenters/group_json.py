@@ -1,12 +1,31 @@
 from h.presenters.organization_json import OrganizationJSONPresenter
-from h.traversal import GroupContext
+from h.traversal import OrganizationContext
+
+
+class _GroupContext:
+    """Context for group-based views."""
+
+    def __init__(self, group, request):
+        self.request = request
+        self.group = group
+        self.links_service = self.request.find_service(name="group_links")
+
+    @property
+    def links(self):
+        return self.links_service.get_all(self.group)
+
+    @property
+    def organization(self):
+        if self.group.organization is not None:
+            return OrganizationContext(self.group.organization, self.request)
+        return None
 
 
 class GroupJSONPresenter:
     """Present a group in the JSON format returned by API requests."""
 
     def __init__(self, group, request):
-        self.context = GroupContext(group, request)
+        self.context = _GroupContext(group, request)
 
         self.group = group
         self.organization_context = self.context.organization
