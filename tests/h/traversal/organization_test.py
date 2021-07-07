@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec, sentinel
+from unittest.mock import sentinel
 
 import pytest
 
@@ -31,37 +31,12 @@ class TestOrganizationRoot:
 
 
 class TestOrganizationContext:
-    def test_it_returns_organization_model_as_property(
-        self, organization, pyramid_request
-    ):
-        result = OrganizationContext(organization, pyramid_request).organization
+    def test_it_returns_parent(self, Root):
+        context = OrganizationContext(sentinel.request, sentinel.organization)
 
-        assert result == organization
-
-    def test_logo_url(self, organization, pyramid_request):
-        organization.logo = "<svg>H</svg>"
-
-        result = OrganizationContext(organization, pyramid_request).logo_url
-
-        pyramid_request.route_url.assert_called_with(
-            "organization_logo", pubid=organization.pubid
-        )
-        assert result == pyramid_request.route_url.return_value
-
-    def test_logo_url_with_no_logo(self, organization, pyramid_request):
-        organization.logo = None
-
-        result = OrganizationContext(organization, pyramid_request).logo_url
-
-        pyramid_request.route_url.assert_not_called()
-        assert result is None
+        assert context.__parent__ == Root.return_value
+        Root.assert_called_once_with(sentinel.request)
 
     @pytest.fixture
-    def organization(self, factories):
-        return factories.Organization()
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.route_url = create_autospec(pyramid_request.route_url)
-
-        return pyramid_request
+    def Root(self, patch):
+        return patch("h.traversal.organization.Root")
