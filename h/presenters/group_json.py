@@ -10,54 +10,44 @@ class GroupJSONPresenter:
         self.group = group_context.group
 
     def asdict(self, expand=None):
-        if expand is None:
-            expand = []
-
-        model = self._model()
-        self._expand(model, expand)
-        model["links"] = self.context.links or {}
-        return model
-
-    def _expand(self, model, expand):
-        if "organization" in expand:
-            if self.organization_context:
-                model["organization"] = OrganizationJSONPresenter(
-                    self.organization_context
-                ).asdict()
-        if "scopes" in expand:
-            model["scopes"] = {}
-            # The API representation of scope enforcement differs from the DB
-            # representation. All groups have an `enforce_scope` property, and
-            # it defaults to True. However, URL enforcement for incoming
-            # annotations only happens if there are 1 or more scopes to restrict
-            # to. Therefore, the API representation of this property is False
-            # if there are no scopes.
-            model["scopes"]["enforced"] = (
-                self.group.enforce_scope if self.group.scopes else False
-            )
-            # At this presentation layer, format scopes to look like
-            # patterns—currently a simple wildcarded prefix—to give us more
-            # flexibility in making scope more granular later
-            model["scopes"]["uri_patterns"] = [
-                scope.scope + "*" for scope in self.group.scopes
-            ]
-        return model
-
-    def _model(self):
-        organization = None
-        if self.organization_context:
-            organization = self.organization_context.organization.pubid
-
         model = {
             "id": self.context.id,
+            "links": self.context.links or {},
             "groupid": self.group.groupid,
             "name": self.group.name,
-            "organization": organization,
-            "public": self.group.is_public,  # DEPRECATED: TODO: remove from client
+            "organization": (
+                self.organization_context.organization.pubid
+                if self.organization_context
+                else None
+            ),
+            "public": self.group.is_public,
+            # DEPRECATED: TODO: remove from client
             "scoped": True if self.group.scopes else False,
             "type": self.group.type,
         }
+
+        if expand:
+            self._expand(model, expand)
+
         return model
+
+    def _expand(self, model, expand):
+        if "organization" in expand and self.organization_context:
+            model["organization"] = OrganizationJSONPresenter(
+                self.organization_context
+            ).asdict()
+
+        if "scopes" in expand:
+            model["scopes"] = {
+                # Groups in the DB have an `enforce_scope` property (default
+                # True), but URL enforcement for annotations only happens if
+                # there are scopes to restrict to. So the API value requires
+                # both to be true.
+                "enforced": bool(self.group.enforce_scope and self.group.scopes),
+                # Format scopes to be the scope with a wild-card suffix so we
+                # can make the scopes more granular later.
+                "uri_patterns": [scope.scope + "*" for scope in self.group.scopes],
+            }
 
 
 class GroupsJSONPresenter:
