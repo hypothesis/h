@@ -1,51 +1,30 @@
 import pytest
 
 from h.presenters.organization_json import OrganizationJSONPresenter
-from h.traversal import OrganizationContext
 
 
 class TestOrganizationJSONPresenter:
-    def test_organization_asdict_no_logo(self, factories, pyramid_request):
-        organization = factories.Organization(name="My Org", logo=None)
-        organization_context = OrganizationContext(organization, pyramid_request)
+    def test_it(self, factories, pyramid_request):
+        organization = factories.Organization(logo="<svg>Fancy logo</svg>")
 
-        presenter = OrganizationJSONPresenter(organization_context)
-
-        assert presenter.asdict() == {
-            "name": "My Org",
-            "id": organization.pubid,
-            "default": False,
-            "logo": None,
-        }
-
-    def test_organization_asdict_with_logo(self, factories, routes, pyramid_request):
-        organization = factories.Organization(name="My Org", logo="<svg>H</svg>")
-        organization_context = OrganizationContext(organization, pyramid_request)
-
-        presenter = OrganizationJSONPresenter(organization_context)
+        presenter = OrganizationJSONPresenter(organization, pyramid_request)
 
         assert presenter.asdict() == {
-            "name": "My Org",
+            "name": organization.name,
             "id": organization.pubid,
-            "default": False,
+            "default": organization.is_default,
             "logo": pyramid_request.route_url(
                 "organization_logo", pubid=organization.pubid
             ),
         }
 
-    def test_default_organization(
-        self, db_session, routes, pyramid_request, default_organization
-    ):
-        organization_context = OrganizationContext(
-            default_organization, pyramid_request
-        )
+    def test_it_with_no_logo(self, factories, pyramid_request):
+        organization = factories.Organization(logo=None)
 
-        presenter = OrganizationJSONPresenter(organization_context)
-        presented = presenter.asdict()
+        presenter = OrganizationJSONPresenter(organization, pyramid_request)
 
-        assert presented["default"] is True
+        assert presenter.asdict()["logo"] is None
 
-
-@pytest.fixture
-def routes(pyramid_config):
-    pyramid_config.add_route("organization_logo", "/organizations/{pubid}/logo")
+    @pytest.fixture(autouse=True)
+    def with_logo_route(self, pyramid_config):
+        pyramid_config.add_route("organization_logo", "/organizations/{pubid}/logo")
