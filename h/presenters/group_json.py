@@ -6,6 +6,7 @@ class GroupJSONPresenter:
     """Present a group in the JSON format returned by API requests."""
 
     def __init__(self, group, request):
+        self.request = request
         self.links_service = request.find_service(name="group_links")
         self.group = group
 
@@ -37,9 +38,9 @@ class GroupJSONPresenter:
         return model
 
     def _expand(self, model, expand):
-        if "organization" in expand and self.organization_context:
+        if "organization" in expand and self.group.organization:
             model["organization"] = OrganizationJSONPresenter(
-                self.organization_context
+                self.group.organization, self.request
             ).asdict()
 
         if "scopes" in expand:
