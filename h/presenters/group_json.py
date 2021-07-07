@@ -8,11 +8,6 @@ class _GroupContext:
     def __init__(self, group, request):
         self.request = request
         self.group = group
-        self.links_service = self.request.find_service(name="group_links")
-
-    @property
-    def links(self):
-        return self.links_service.get_all(self.group)
 
     @property
     def organization(self):
@@ -27,13 +22,14 @@ class GroupJSONPresenter:
     def __init__(self, group, request):
         self.context = _GroupContext(group, request)
 
+        self.links_service = request.find_service(name="group_links")
         self.group = group
         self.organization_context = self.context.organization
 
     def asdict(self, expand=None):
         model = {
             "id": self.group.pubid,
-            "links": self.context.links or {},
+            "links": self.links_service.get_all(self.group) or {},
             "groupid": self.group.groupid,
             "name": self.group.name,
             "organization": (
