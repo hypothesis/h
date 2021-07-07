@@ -35,10 +35,6 @@ class GroupContext:
         self.links_service = self.request.find_service(name="group_links")
 
     @property
-    def id(self):
-        return self.group.pubid  # Web-facing unique ID for this resource
-
-    @property
     def links(self):
         return self.links_service.get_all(self.group)
 

@@ -11,7 +11,7 @@ class GroupJSONPresenter:
 
     def asdict(self, expand=None):
         model = {
-            "id": self.context.id,
+            "id": self.group.pubid,
             "links": self.context.links or {},
             "groupid": self.group.groupid,
             "name": self.group.name,

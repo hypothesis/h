@@ -32,13 +32,6 @@ class TestGroupContext:
 
         assert group_context.links == group_links_service.get_all.return_value
 
-    def test_it_returns_pubid_as_id(self, factories, pyramid_request):
-        group = factories.Group()
-
-        group_context = GroupContext(group, pyramid_request)
-
-        assert group_context.id == group.pubid  # NOT the group.id
-
     def test_organization_is_None_if_the_group_has_no_organization(
         self, factories, pyramid_request
     ):
