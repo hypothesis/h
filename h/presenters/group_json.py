@@ -1,13 +1,15 @@
 from h.presenters.organization_json import OrganizationJSONPresenter
+from h.traversal import GroupContext
 
 
 class GroupJSONPresenter:
     """Present a group in the JSON format returned by API requests."""
 
-    def __init__(self, group_context):
-        self.context = group_context
+    def __init__(self, group, request):
+        self.context = GroupContext(group, request)
+
+        self.group = group
         self.organization_context = self.context.organization
-        self.group = group_context.group
 
     def asdict(self, expand=None):
         model = {
@@ -53,11 +55,12 @@ class GroupJSONPresenter:
 class GroupsJSONPresenter:
     """Present a list of groups as JSON"""
 
-    def __init__(self, group_contexts):
-        self.contexts = group_contexts
+    def __init__(self, groups, request):
+        self.groups = groups
+        self.request = request
 
     def asdicts(self, expand=None):
         return [
-            GroupJSONPresenter(group_context).asdict(expand=expand)
-            for group_context in self.contexts
+            GroupJSONPresenter(group, self.request).asdict(expand=expand)
+            for group in self.groups
         ]

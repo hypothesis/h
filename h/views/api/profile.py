@@ -2,7 +2,6 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session
 from h.presenters import GroupsJSONPresenter
-from h.traversal import GroupContext
 from h.views.api.config import api_config
 
 
@@ -37,8 +36,7 @@ def profile_groups(request):
     list_svc = request.find_service(name="group_list")
 
     groups = list_svc.user_groups(user=request.user)
-    group_contexts = [GroupContext(group, request) for group in groups]
-    groups_formatted = GroupsJSONPresenter(group_contexts).asdicts(expand=expand)
+    groups_formatted = GroupsJSONPresenter(groups, request).asdicts(expand=expand)
     return groups_formatted
 
 

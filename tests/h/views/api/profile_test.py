@@ -54,51 +54,26 @@ class TestUpdatePreferences:
         assert result == session_profile.return_value
 
 
-@pytest.mark.usefixtures("group_list_service", "GroupContext", "GroupsJSONPresenter")
+@pytest.mark.usefixtures("group_list_service", "GroupsJSONPresenter")
 class TestProfileGroups:
-    def test_it_proxies_to_group_list_service(
-        self, pyramid_request, group_list_service
-    ):
-        views.profile_groups(pyramid_request)
+    @pytest.mark.parametrize(
+        "expand",
+        ([], ["organization"], ["organization", "scopes"]),
+    )
+    def test_it(self, pyramid_request, expand, group_list_service, GroupsJSONPresenter):
+        for param in expand:
+            pyramid_request.GET.add("expand", param)
+
+        result = views.profile_groups(pyramid_request)
 
         group_list_service.user_groups.assert_called_once_with(
             user=pyramid_request.user
         )
-
-    def test_it_converts_group_models_to_contexts(
-        self, pyramid_request, group_list_service, GroupContext
-    ):
-        group_list_service.user_groups.return_value = [1, 2, 3]
-        views.profile_groups(pyramid_request)
-
-        GroupContext.assert_has_calls(
-            [
-                mock.call(1, pyramid_request),
-                mock.call(2, pyramid_request),
-                mock.call(3, pyramid_request),
-            ]
+        GroupsJSONPresenter.assert_called_once_with(
+            group_list_service.user_groups.return_value, pyramid_request
         )
-
-    def test_it_returns_presented_groups(
-        self, pyramid_request, group_list_service, GroupsJSONPresenter
-    ):
-        group_list_service.user_groups.return_value = [1, 2, 3]
-
-        result = views.profile_groups(pyramid_request)
-
-        assert result == GroupsJSONPresenter([1, 2, 3]).asdicts.return_value
-
-    def test_it_proxies_expand_to_presenter(
-        self, pyramid_request, group_list_service, GroupsJSONPresenter
-    ):
-        pyramid_request.params["expand"] = "organization"
-        group_list_service.user_groups.return_value = [1, 2, 3]
-
-        views.profile_groups(pyramid_request)
-
-        GroupsJSONPresenter([1, 2, 3]).asdicts.assert_called_once_with(
-            expand=["organization"]
-        )
+        GroupsJSONPresenter.return_value.asdicts.assert_called_once_with(expand=expand)
+        assert result == GroupsJSONPresenter.return_value.asdicts.return_value
 
 
 @pytest.fixture
@@ -118,11 +93,6 @@ def group_list_service(pyramid_config):
     svc = mock.create_autospec(GroupListService, spec_set=True, instance=True)
     pyramid_config.register_service(svc, name="group_list")
     return svc
-
-
-@pytest.fixture
-def GroupContext(patch):
-    return patch("h.views.api.profile.GroupContext")
 
 
 @pytest.fixture

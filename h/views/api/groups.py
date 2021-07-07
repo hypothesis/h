@@ -10,7 +10,6 @@ from h.auth.util import client_authority
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
-from h.traversal import GroupContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -33,8 +32,8 @@ def groups(request):
         authority=request.params.get("authority"),
         document_uri=request.params.get("document_uri"),
     )
-    all_groups = [GroupContext(group, request) for group in all_groups]
-    all_groups = GroupsJSONPresenter(all_groups).asdicts(expand=expand)
+
+    all_groups = GroupsJSONPresenter(all_groups, request).asdicts(expand=expand)
     return all_groups
 
 
@@ -71,9 +70,7 @@ def create(request):
         description=appstruct.get("description", None),
         groupid=groupid,
     )
-    return GroupJSONPresenter(GroupContext(group, request)).asdict(
-        expand=["organization", "scopes"]
-    )
+    return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
 
 
 @api_config(
@@ -89,7 +86,7 @@ def read(group, request):
 
     expand = request.GET.getall("expand") or []
 
-    return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=expand)
+    return GroupJSONPresenter(group, request).asdict(expand=expand)
 
 
 @api_config(
@@ -121,9 +118,7 @@ def update(group, request):
 
     group = group_update_service.update(group, **appstruct)
 
-    return GroupJSONPresenter(GroupContext(group, request)).asdict(
-        expand=["organization", "scopes"]
-    )
+    return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
 
 
 @api_config(
@@ -184,9 +179,7 @@ def upsert(context, request):
     group = group_update_service.update(group, **update_properties)
 
     # Note that this view takes a ``GroupUpsertContext`` but uses a ``GroupContext`` here
-    return GroupJSONPresenter(GroupContext(group, request)).asdict(
-        expand=["organization", "scopes"]
-    )
+    return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
 
 
 @api_config(

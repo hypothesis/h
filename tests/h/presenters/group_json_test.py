@@ -1,9 +1,8 @@
-from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
 
-from h import traversal
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
 
 
@@ -16,15 +15,15 @@ class TestGroupJSONPresenter:
             authority_provided_id="abc123",
             organization=factories.Organization(),
         )
-        group_context = traversal.GroupContext(group, pyramid_request)
-        results = GroupJSONPresenter(group_context).asdict()
+
+        results = GroupJSONPresenter(group, pyramid_request).asdict()
 
         assert results == Any.dict.containing(
             {
                 "name": "My Group",
                 "id": "mygroup",
                 "groupid": "group:abc123@example.com",
-                "organization": group_context.organization.organization.pubid,
+                "organization": group.organization.pubid,
                 "links": group_links_service.get_all.return_value,
                 "scoped": False,
             }
@@ -118,8 +117,7 @@ class TestGroupJSONPresenter:
     @pytest.fixture
     def present(self, pyramid_request):
         def present(group, expand=None):
-            group_context = traversal.GroupContext(group, pyramid_request)
-            presenter = GroupJSONPresenter(group_context)
+            presenter = GroupJSONPresenter(group, pyramid_request)
             return presenter.asdict(expand=expand)
 
         return present
@@ -142,46 +140,18 @@ class TestGroupJSONPresenter:
 
 @pytest.mark.usefixtures("group_links_service")
 class TestGroupsJSONPresenter:
-    def test_proxies_to_GroupJSONPresenter(
-        self, factories, GroupJSONPresenter, GroupContexts
-    ):
-        groups = [factories.Group(), factories.OpenGroup()]
-        group_contexts = GroupContexts(groups)
-        presenter = GroupsJSONPresenter(group_contexts)
-        expected_call_args = [
-            mock.call(group_context) for group_context in group_contexts
-        ]
+    def test_it(self, factories, pyramid_request, GroupJSONPresenter):
+        group = factories.Group()
+        presenter = GroupsJSONPresenter(groups=[group], request=pyramid_request)
 
-        presenter.asdicts()
+        result = presenter.asdicts(expand=sentinel.expand)
 
-        assert GroupJSONPresenter.call_args_list == expected_call_args
+        GroupJSONPresenter.assert_called_once_with(group, pyramid_request)
+        GroupJSONPresenter.return_value.asdict.assert_called_once_with(
+            expand=sentinel.expand
+        )
+        assert result == [GroupJSONPresenter.return_value.asdict.return_value]
 
-    def test_asdicts_returns_list_of_dicts(self, factories, GroupContexts):
-        groups = [factories.Group(name="filbert"), factories.OpenGroup(name="delbert")]
-        group_contexts = GroupContexts(groups)
-        presenter = GroupsJSONPresenter(group_contexts)
-
-        result = presenter.asdicts()
-
-        assert [group["name"] for group in result] == ["filbert", "delbert"]
-
-    def test_asdicts_injects_links(self, factories, GroupContexts):
-        groups = [factories.Group(), factories.OpenGroup()]
-        group_contexts = GroupContexts(groups)
-        presenter = GroupsJSONPresenter(group_contexts)
-
-        result = presenter.asdicts()
-
-        for group_model in result:
-            assert "links" in group_model
-
-    @pytest.fixture
-    def GroupContexts(self, pyramid_request):
-        def resource_factory(groups):
-            return [traversal.GroupContext(group, pyramid_request) for group in groups]
-
-        return resource_factory
-
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def GroupJSONPresenter(self, patch):
         return patch("h.presenters.group_json.GroupJSONPresenter")

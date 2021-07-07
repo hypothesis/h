@@ -40,67 +40,28 @@ class TestGetGroups:
             document_uri="http://example.com/thisthing.html",
         )
 
-    def test_converts_groups_to_resources(
-        self, GroupContext, anonymous_request, open_groups, group_list_service
-    ):
-        group_list_service.request_groups.return_value = open_groups
-
-        views.groups(anonymous_request)
-
-        GroupContext.assert_has_calls(
-            [
-                mock.call(open_groups[0], anonymous_request),
-                mock.call(open_groups[1], anonymous_request),
-            ]
-        )
-
-    def test_uses_presenter_for_formatting(
+    @pytest.mark.parametrize(
+        "expand",
+        ([], ["organization"], ["organization", "scopes"]),
+    )
+    def test_returns_dicts_from_presenter(
         self,
-        group_links_service,
+        anonymous_request,
         open_groups,
         group_list_service,
         GroupsJSONPresenter,
-        anonymous_request,
+        expand,
     ):
-        group_list_service.request_groups.return_value = open_groups
+        for param in expand:
+            anonymous_request.GET.add("expand", param)
 
-        views.groups(anonymous_request)
-
-        GroupsJSONPresenter.assert_called_once()
-
-    def test_returns_dicts_from_presenter(
-        self, anonymous_request, open_groups, group_list_service, GroupsJSONPresenter
-    ):
         group_list_service.request_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
-        assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
-
-    def test_proxies_expand_to_presenter(
-        self, anonymous_request, open_groups, group_list_service, GroupsJSONPresenter
-    ):
-        anonymous_request.params["expand"] = "organization"
-        group_list_service.request_groups.return_value = open_groups
-
-        views.groups(anonymous_request)
-
-        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(
-            expand=["organization"]
-        )
-
-    def test_passes_multiple_expand_to_presenter(
-        self, anonymous_request, open_groups, group_list_service, GroupsJSONPresenter
-    ):
-        anonymous_request.GET.add("expand", "organization")
-        anonymous_request.GET.add("expand", "foobars")
-        group_list_service.request_groups.return_value = open_groups
-
-        views.groups(anonymous_request)
-
-        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(
-            expand=["organization", "foobars"]
-        )
+        GroupsJSONPresenter.assert_called_once_with(open_groups, anonymous_request)
+        GroupsJSONPresenter.return_value.asdicts.assert_called_once_with(expand=expand)
+        assert result == GroupsJSONPresenter.return_value.asdicts.return_value
 
     @pytest.fixture
     def open_groups(self, factories):
@@ -111,7 +72,6 @@ class TestGetGroups:
     "CreateGroupAPISchema",
     "group_service",
     "group_create_service",
-    "GroupContext",
     "GroupJSONPresenter",
 )
 class TestCreateGroup:
@@ -192,24 +152,18 @@ class TestCreateGroup:
             views.create(pyramid_request)
 
     def test_it_creates_group_context_from_created_group(
-        self, pyramid_request, GroupContext, group_create_service
+        self, pyramid_request, group_create_service, GroupJSONPresenter
     ):
         my_group = mock.Mock()
         group_create_service.create_private_group.return_value = my_group
 
-        views.create(pyramid_request)
+        result = views.create(pyramid_request)
 
-        GroupContext.assert_called_with(my_group, pyramid_request)
-
-    def test_it_returns_new_group_formatted_with_presenter(
-        self, pyramid_request, GroupContext, GroupJSONPresenter
-    ):
-        views.create(pyramid_request)
-
-        GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
+        GroupJSONPresenter.assert_called_once_with(my_group, pyramid_request)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
             expand=["organization", "scopes"]
         )
+        assert result == GroupJSONPresenter.return_value.asdict.return_value
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
@@ -220,43 +174,23 @@ class TestCreateGroup:
         return pyramid_request
 
 
-@pytest.mark.usefixtures("GroupJSONPresenter", "GroupContext")
+@pytest.mark.usefixtures("GroupJSONPresenter")
 class TestReadGroup:
-    def test_it_creates_group_context_from_group_model(
-        self, GroupContext, factories, pyramid_request
-    ):
-        group = factories.Group()
-
-        views.read(group, pyramid_request)
-
-        GroupContext.assert_called_once_with(group, pyramid_request)
-
-    def test_it_forwards_expand_param_to_presenter(
-        self, GroupJSONPresenter, factories, pyramid_request
-    ):
+    def test_it(self, factories, pyramid_request, GroupJSONPresenter):
         pyramid_request.params["expand"] = "organization"
         group = factories.Group()
 
-        views.read(group, pyramid_request)
+        result = views.read(group, pyramid_request)
 
+        GroupJSONPresenter.assert_called_once_with(group, pyramid_request)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(["organization"])
-
-    def test_it_returns_presented_group(
-        self, GroupJSONPresenter, factories, pyramid_request
-    ):
-        pyramid_request.params["expand"] = "organization"
-        group = factories.Group()
-
-        presented = views.read(group, pyramid_request)
-
-        assert presented == GroupJSONPresenter.return_value.asdict.return_value
+        assert result == GroupJSONPresenter.return_value.asdict.return_value
 
 
 @pytest.mark.usefixtures(
     "UpdateGroupAPISchema",
     "group_service",
     "group_update_service",
-    "GroupContext",
     "GroupJSONPresenter",
 )
 class TestUpdateGroup:
@@ -279,7 +213,6 @@ class TestUpdateGroup:
     def test_it_raises_HTTPConflict_on_duplicate(
         self, pyramid_request, UpdateGroupAPISchema, group_service, factories
     ):
-
         pre_existing_group = factories.Group(
             authority_provided_id="something", authority="example.com"
         )
@@ -302,24 +235,18 @@ class TestUpdateGroup:
         views.update(group, pyramid_request)
 
     def test_it_creates_group_context_from_updated_group(
-        self, pyramid_request, GroupContext, group_update_service
+        self, pyramid_request, factories, group_update_service, GroupJSONPresenter
     ):
-        my_group = mock.Mock()
+        my_group = factories.Group()
         group_update_service.update.return_value = my_group
 
-        views.update(my_group, pyramid_request)
+        result = views.update(my_group, pyramid_request)
 
-        GroupContext.assert_called_with(my_group, pyramid_request)
-
-    def test_it_returns_updated_group_formatted_with_presenter(
-        self, pyramid_request, GroupContext, GroupJSONPresenter, group
-    ):
-        views.update(group, pyramid_request)
-
-        GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
+        GroupJSONPresenter.assert_called_with(my_group, pyramid_request)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
             expand=["organization", "scopes"]
         )
+        assert result == GroupJSONPresenter.return_value.asdict.return_value
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
@@ -339,7 +266,6 @@ class TestUpdateGroup:
     "CreateGroupAPISchema",
     "group_service",
     "group_update_service",
-    "GroupContext",
     "GroupJSONPresenter",
 )
 class TestUpsertGroup:
@@ -421,36 +347,24 @@ class TestUpsertGroup:
             group, **{"name": "Dingdong", "description": "", "groupid": None}
         )
 
-    def test_it_creates_group_context_from_updated_group(
+    def test_it_returns_updated_group_formatted_with_presenter(
         self,
         pyramid_request,
-        GroupContext,
         group_update_service,
         group,
         GroupUpsertContext,
+        GroupJSONPresenter,
     ):
         context = GroupUpsertContext(group, pyramid_request)
         group_update_service.update.return_value = group
 
-        views.upsert(context, pyramid_request)
+        result = views.upsert(context, pyramid_request)
 
-        GroupContext.assert_called_with(group, pyramid_request)
-
-    def test_it_returns_updated_group_formatted_with_presenter(
-        self,
-        pyramid_request,
-        GroupContext,
-        GroupJSONPresenter,
-        group,
-        GroupUpsertContext,
-    ):
-        context = GroupUpsertContext(group, pyramid_request)
-        views.upsert(context, pyramid_request)
-
-        GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
+        GroupJSONPresenter.assert_called_with(group, pyramid_request)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
             expand=["organization", "scopes"]
         )
+        assert result == GroupJSONPresenter.return_value.asdict.return_value
 
     @pytest.fixture
     def create(self, patch):
@@ -631,11 +545,6 @@ def GroupsJSONPresenter(patch):
 @pytest.fixture
 def UserJSONPresenter(patch):
     return patch("h.views.api.groups.UserJSONPresenter")
-
-
-@pytest.fixture
-def GroupContext(patch):
-    return patch("h.views.api.groups.GroupContext")
 
 
 @pytest.fixture
