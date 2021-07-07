@@ -96,7 +96,7 @@ hupper==1.10.2
     #   pyramid
 hypothesis==6.14.1
     # via -r requirements/tests.in
-importlib_resources==5.2.0
+importlib-resources==5.2.0
     # via
     #   -r requirements/requirements.txt
     #   h-api
@@ -133,7 +133,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mistune==0.8.4
     # via -r requirements/requirements.txt
-newrelic==6.4.3.160
+newrelic==6.4.4.161
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
     # via -r requirements/requirements.txt
