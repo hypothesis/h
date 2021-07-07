@@ -3,11 +3,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from h.presenters.group_json import (
-    GroupJSONPresenter,
-    GroupsJSONPresenter,
-    _GroupContext,
-)
+from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
 
 
 @pytest.mark.usefixtures("group_links_service")
@@ -159,42 +155,3 @@ class TestGroupsJSONPresenter:
     @pytest.fixture(autouse=True)
     def GroupJSONPresenter(self, patch):
         return patch("h.presenters.group_json.GroupJSONPresenter")
-
-
-
-class TestGroupContext:
-    def test_it_returns_group_model_as_property(self, factories, pyramid_request):
-        group = factories.Group()
-
-        group_context = _GroupContext(group, pyramid_request)
-
-        assert group_context.group == group
-
-    def test_organization_is_None_if_the_group_has_no_organization(
-        self, factories, pyramid_request
-    ):
-        group = factories.Group()
-
-        group_context = _GroupContext(group, pyramid_request)
-
-        assert group_context.organization is None
-
-    def test_it_expands_organization_if_the_group_has_one(
-        self, factories, pyramid_request
-    ):
-        organization = factories.Organization()
-        group = factories.Group(organization=organization)
-
-        group_context = _GroupContext(group, pyramid_request)
-
-        assert group_context.organization.organization == organization
-
-    def test_it_returns_None_for_missing_organization_relation(
-        self, factories, pyramid_request
-    ):
-        group = factories.Group()
-        group.organization = None
-
-        group_context = _GroupContext(group, pyramid_request)
-
-        assert group_context.organization is None
