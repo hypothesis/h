@@ -69,18 +69,18 @@ class SocketFilter:
                     continue
 
     @classmethod
-    def set_filter(cls, socket, filter):
+    def set_filter(cls, socket, filter_):
         """Add filtering information to a socket for use with `matching()`.
 
         :param socket: Socket to add filtering information too
-        :param filter: Filter JSON to process
+        :param filter_: Filter JSON to process
         """
-        socket.filter_rows = tuple(cls._rows_for(filter))
+        socket.filter_rows = tuple(cls._rows_for(filter_))
 
     @classmethod
-    def _rows_for(cls, filter):
+    def _rows_for(cls, filter_):
         """Convert a filter to field value pairs."""
-        for clause in filter["clauses"]:
+        for clause in filter_["clauses"]:
             field = clause["field"]
             if field not in cls.KNOWN_FIELDS:
                 continue

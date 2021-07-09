@@ -85,8 +85,8 @@ def cohorts_add(request):
     permission="admin_features",
 )
 def cohorts_edit(context, request):
-    id = request.matchdict["id"]
-    cohort = request.db.query(models.FeatureCohort).get(id)
+    id_ = request.matchdict["id"]
+    cohort = request.db.query(models.FeatureCohort).get(id_)
     return {
         "cohort": cohort,
         "members": cohort.members,

@@ -10,7 +10,7 @@ class TestGenerate:
     ):
         generate(
             pyramid_request,
-            id=1234,
+            user_id=1234,
             email="foo@example.com",
             activation_code="abcd4567",
         )
@@ -29,7 +29,7 @@ class TestGenerate:
 
         recipients, subject, text, html = generate(
             pyramid_request,
-            id=1234,
+            user_id=1234,
             email="foo@example.com",
             activation_code="abcd4567",
         )
@@ -46,7 +46,7 @@ class TestGenerate:
 
         generate(
             pyramid_request,
-            id=1234,
+            user_id=1234,
             email="foo@example.com",
             activation_code="abcd4567",
         )

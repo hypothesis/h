@@ -69,7 +69,7 @@ class DocumentURI(Base, mixins.Timestamps):
         return "<DocumentURI %s>" % self.id
 
 
-def create_or_update_document_uri(
+def create_or_update_document_uri(  # pylint: disable=redefined-builtin
     session, claimant, uri, type, content_type, document, created, updated
 ):
     """

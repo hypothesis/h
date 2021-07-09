@@ -1,5 +1,5 @@
+import codecs
 import logging
-from codecs import open
 
 import colander
 import deform
@@ -29,7 +29,7 @@ def get_blacklist():
         # can't load the file, then don't crash out, just log a warning about
         # the problem.
         try:
-            with open("h/accounts/blacklist", encoding="utf-8") as fp:
+            with codecs.open("h/accounts/blacklist", encoding="utf-8") as fp:
                 blacklist = fp.readlines()
         except (IOError, ValueError):
             log.exception("unable to load blacklist")

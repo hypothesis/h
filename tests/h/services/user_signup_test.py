@@ -99,7 +99,7 @@ class TestUserSignupService:
         user = svc.signup(username="foo", email="foo@bar.com")
 
         signup_email.assert_called_once_with(
-            id=user.id, email="foo@bar.com", activation_code=user.activation.code
+            user_id=user.id, email="foo@bar.com", activation_code=user.activation.code
         )
 
     def test_signup_sends_email(self, mailer, svc):
@@ -213,10 +213,10 @@ class TestUserSignupServiceFactory:
         signup_email = patch("h.emails.signup.generate")
         svc = user_signup_service_factory(None, pyramid_request)
 
-        svc.signup_email(id=123, email="foo@bar.com", activation_code="abc456")
+        svc.signup_email(user_id=123, email="foo@bar.com", activation_code="abc456")
 
         signup_email.assert_called_once_with(
-            pyramid_request, id=123, email="foo@bar.com", activation_code="abc456"
+            pyramid_request, user_id=123, email="foo@bar.com", activation_code="abc456"
         )
 
     def test_provides_user_password_service(self, pyramid_request):
