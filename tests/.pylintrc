@@ -1,0 +1,42 @@
+[MASTER]
+jobs=0  # Speed up PyLint by using one process per CPU core.
+load-plugins=pylint.extensions.bad_builtin,
+             pylint.extensions.broad_try_clause,
+             pylint.extensions.check_elif,
+             pylint.extensions.comparetozero,
+             pylint.extensions.docparams,
+             pylint.extensions.emptystring,
+             pylint.extensions.mccabe,
+             pylint.extensions.overlapping_exceptions,
+             pylint.extensions.redefined_variable_type,
+
+[MESSAGES CONTROL]
+disable=bad-continuation,
+        invalid-name,
+        missing-function-docstring,
+        missing-module-docstring,
+        missing-class-docstring,
+        missing-type-doc,
+        missing-return-type-doc,
+        no-self-use,
+        redefined-outer-name,
+        too-few-public-methods,
+        wrong-import-order,
+
+[REPORTS]
+output-format=colorized
+score=no
+
+[SIMILARITIES]
+
+# Ignore comments when computing similarities.
+ignore-comments=no
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=no
+
+# Ignore imports when computing similarities.
+ignore-imports=yes
+
+# Set a slightly higher base for repeated code
+min-similarity-lines=14
