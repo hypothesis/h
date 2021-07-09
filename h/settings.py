@@ -9,8 +9,6 @@ log = logging.getLogger(__name__)
 class SettingError(Exception):
     """Exception thrown when a setting cannot be resolved."""
 
-    pass
-
 
 class SettingsManager:
     """
