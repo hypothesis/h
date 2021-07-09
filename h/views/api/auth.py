@@ -120,9 +120,7 @@ class OAuthAuthorizeController:
 
     def _authorize(self):
         try:
-            scopes, credentials = self.oauth.validate_authorization_request(
-                self.request.url
-            )
+            _, credentials = self.oauth.validate_authorization_request(self.request.url)
         except OAuth2Error as err:
             raise OAuthAuthorizeError(
                 err.description or "Error: {}".format(self.context.error)
@@ -166,7 +164,7 @@ class OAuthAuthorizeController:
         user = self.user_svc.fetch(self.request.authenticated_userid)
         credentials = {"user": user}
 
-        headers, _, status = self.oauth.create_authorization_response(
+        headers, _, _ = self.oauth.create_authorization_response(
             self.request.url, scopes=scopes, credentials=credentials
         )
 
@@ -203,7 +201,7 @@ class OAuthAccessTokenController:
     @api_config(versions=["v1", "v2"], route_name="token", request_method="POST")
     @handles_oauth_errors
     def post(self):
-        headers, body, status = self.oauth.create_token_response(
+        _, body, status = self.oauth.create_token_response(
             self.request.url,
             self.request.method,
             self.request.POST,
@@ -224,7 +222,7 @@ class OAuthRevocationController:
     @api_config(versions=["v1", "v2"], route_name="oauth_revoke", request_method="POST")
     @handles_oauth_errors
     def post(self):
-        headers, body, status = self.oauth.create_revocation_response(
+        _, body, status = self.oauth.create_revocation_response(
             self.request.url,
             self.request.method,
             self.request.POST,
