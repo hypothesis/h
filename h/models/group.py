@@ -6,7 +6,7 @@ import slugify
 import sqlalchemy as sa
 from pyramid import security
 
-from h import pubid
+from h import pubid  # pylint: disable=unused-import
 from h.auth import role
 from h.db import Base, mixins
 from h.util.group import split_groupid
