@@ -87,9 +87,8 @@ class UserSignupService:
                     in e.args[0]
                 ):
                     log.warning(
-                        "concurrent account signup conflict error occured during user signup {}".format(
-                            e.args[0]
-                        )
+                        "concurrent account signup conflict error occurred during user signup %s",
+                        e.args[0],
                     )
                     raise ConflictError(
                         "The email address {} has already been registered.".format(

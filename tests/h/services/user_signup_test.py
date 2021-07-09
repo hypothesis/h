@@ -135,9 +135,8 @@ class TestUserSignupService:
             svc.signup(username="foo", email="foo@bar.com")
 
         assert (
-            "concurrent account signup conflict error occured during user "
-            "signup (psycopg2.errors.UniqueViolation) duplicate key value violates unique "
-            "constraint" in log.warning.call_args[0][0]
+            "concurrent account signup conflict error occurred during user signup"
+            in log.warning.call_args[0][0]
         )
 
     @pytest.mark.parametrize(
