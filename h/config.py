@@ -45,7 +45,7 @@ def configure(environ=None, settings=None):
     settings_manager.set(
         "es.client.timeout", "ELASTICSEARCH_CLIENT_TIMEOUT", type_=float
     )
-    settings_manager.set("es.url", "ELASTICSEARCH_URL", required=True),
+    settings_manager.set("es.url", "ELASTICSEARCH_URL", required=True)
     settings_manager.set("es.index", "ELASTICSEARCH_INDEX")
     settings_manager.set(
         "es.check_icu_plugin",
