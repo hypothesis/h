@@ -41,7 +41,7 @@ def add(ctx, name, authority, type_):
 
     request.tm.commit()
 
-    message = "OAuth client for {authority} created\n" "Client ID: {id}"
+    message = "OAuth client for {authority} created\nClient ID: {id}"
     if type_ == "confidential":
         message += "\nClient Secret: {secret}"
 
