@@ -15,8 +15,8 @@ class AnnotationRoot(RootFactory):
 
     __acl__ = [(Allow, Authenticated, "create")]
 
-    def __getitem__(self, id):
-        annotation = storage.fetch_annotation(self.request.db, id)
+    def __getitem__(self, id_):
+        annotation = storage.fetch_annotation(self.request.db, id_)
         if annotation is None:
             raise KeyError()
 

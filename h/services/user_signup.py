@@ -118,7 +118,7 @@ class UserSignupService:
 
         # Send the activation email
         mail_params = self.signup_email(
-            id=user.id, email=user.email, activation_code=user.activation.code
+            user_id=user.id, email=user.email, activation_code=user.activation.code
         )
         self.mailer.send.delay(*mail_params)
 
