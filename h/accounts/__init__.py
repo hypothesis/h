@@ -7,8 +7,6 @@ class Error(Exception):
 
     """Base class for this package's custom exception classes."""
 
-    pass
-
 
 class JSONError(Error):
 
@@ -18,8 +16,6 @@ class JSONError(Error):
     be parsed as JSON, or top-level keys missing from the JSON.
 
     """
-
-    pass
 
 
 def get_user(request):
