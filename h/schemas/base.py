@@ -34,8 +34,8 @@ class CSRFSchema(colander.Schema):
         missing=None,
     )
 
-    def validator(self, form, _value):
-        request = form.bindings["request"]
+    def validator(self, node, _value):
+        request = node.bindings["request"]
         check_csrf_token(request)
 
 

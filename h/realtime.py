@@ -29,7 +29,9 @@ class Consumer(ConsumerMixin):
         self.handler = handler
         self.exchange = get_exchange()
 
-    def get_consumers(self, consumer_factory, channel):
+    def get_consumers(
+        self, consumer_factory, channel
+    ):  # pylint: disable=arguments-renamed
         name = self.generate_queue_name()
         queue = kombu.Queue(
             name,

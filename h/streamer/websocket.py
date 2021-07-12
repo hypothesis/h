@@ -64,9 +64,9 @@ class WebSocket(_WebSocket):
         cls.instances.add(instance)
         return instance
 
-    def received_message(self, msg):
+    def received_message(self, message):
         try:
-            payload = json.loads(msg.data)
+            payload = json.loads(message.data)
         except ValueError:
             self.close(reason="invalid message format")
             return
