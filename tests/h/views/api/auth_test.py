@@ -9,7 +9,6 @@ from oauthlib.oauth2 import InvalidRequestFatalError
 from pyramid import httpexceptions
 
 from h.models.auth_client import ResponseType
-from h.security.permissions import Permission
 from h.services.auth_token import auth_token_service_factory
 from h.services.oauth_provider import OAuthProviderService
 from h.services.oauth_validator import DEFAULT_SCOPES
@@ -217,7 +216,7 @@ class TestOAuthAuthorizeController:
     def oauth_provider(self, pyramid_config, auth_client, oauth_request):
         svc = mock.create_autospec(OAuthProviderService, instance=True)
 
-        scopes = [Permission.Annotation.READ, Permission.Annotation.WRITE]
+        scopes = ["annotation:read", "annotation:write"]
         credentials = {
             "client_id": auth_client.id,
             "state": "foobar",
