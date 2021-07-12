@@ -45,9 +45,9 @@ class GroupUpdateService:
                         id=kwargs["authority_provided_id"]
                     )
                 )
-            else:
-                # Re-raise as this is an unexpected problem
-                raise
+
+            # Re-raise as this is an unexpected problem
+            raise
 
         return group
 

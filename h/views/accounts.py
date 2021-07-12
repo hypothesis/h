@@ -629,6 +629,6 @@ def claim_account_legacy(_request):
 def dismiss_sidebar_tutorial(request):
     if request.authenticated_userid is None:
         raise accounts.JSONError()
-    else:
-        request.user.sidebar_tutorial_dismissed = True
-        return ajax_payload(request, {"status": "okay"})
+
+    request.user.sidebar_tutorial_dismissed = True
+    return ajax_payload(request, {"status": "okay"})

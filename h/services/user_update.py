@@ -54,9 +54,9 @@ class UserUpdateService:
                         username=kwargs["username"]
                     )
                 )
-            else:
-                # Re-raise as this is an unexpected problem
-                raise
+
+            # Re-raise as this is an unexpected problem
+            raise
 
         return user
 
