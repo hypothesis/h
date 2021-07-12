@@ -42,7 +42,7 @@ def send(self, recipients, subject, body, html=None):
             "Recipient was refused when trying to send an email. Does the user have an invalid email address?",
             exc_info=exc,
         )
-    except (smtplib.socket.error, smtplib.SMTPException) as exc:
+    except smtplib.socket.error as exc:
         # Exponential backoff in case the SMTP service is having problems.
         countdown = self.default_retry_delay * 2 ** self.request.retries
         self.retry(exc=exc, countdown=countdown)
