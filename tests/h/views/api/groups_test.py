@@ -8,7 +8,7 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
 )
 
-from h.traversal import GroupUpsertContext
+from h.traversal.group import GroupUpsertContext
 from h.views.api import groups as views
 
 
@@ -251,21 +251,21 @@ class TestUpdateGroup:
 )
 class TestUpsertGroup:
     def test_it_proxies_to_create_if_group_empty(
-        self, context, pyramid_request, create
+        self, context, pyramid_request, groups_create
     ):
         context.group = None
 
         res = views.upsert(context, pyramid_request)
 
-        create.assert_called_once_with(pyramid_request)
-        assert res == create.return_value
+        groups_create.assert_called_once_with(pyramid_request)
+        assert res == groups_create.return_value
 
     def test_it_does_not_proxy_to_create_if_group_extant(
-        self, context, pyramid_request, create
+        self, context, pyramid_request, groups_create
     ):
         views.upsert(context, pyramid_request)
 
-        assert create.call_count == 0
+        assert groups_create.call_count == 0
 
     def test_it_validates_against_group_update_schema_if_group_extant(
         self, context, pyramid_request, CreateGroupAPISchema
@@ -320,19 +320,13 @@ class TestUpsertGroup:
         )
         assert result == GroupJSONPresenter.return_value.asdict.return_value
 
-    @pytest.fixture(autouse=True)
-    def create(self, patch):
+    @pytest.fixture
+    def groups_create(self, patch):
         return patch("h.views.api.groups.create")
 
     @pytest.fixture
-    def group_user(self, factories):
-        return
-
-    @pytest.fixture
-    def context(self, factories, group_user, pyramid_request):
-        return GroupUpsertContext(
-            group=factories.Group(creator=factories.User()), request=pyramid_request
-        )
+    def context(self, factories):
+        return GroupUpsertContext(group=factories.Group(creator=factories.User()))
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
