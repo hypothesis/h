@@ -21,7 +21,6 @@ class AuthClientRoot(RootFactory):
             raise KeyError()
         except (
             sqlalchemy.exc.StatementError,
-            sqlalchemy.exc.DataError,
         ):  # Happens when client_id is not a valid UUID.
             raise KeyError()
 
