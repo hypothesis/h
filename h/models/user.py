@@ -104,7 +104,7 @@ class UserIDComparator(Comparator):
                 other = sa.tuple_(_normalise_username(val["username"]), val["domain"])
         return self.__clause_element__() == other
 
-    def in_(self, userids):
+    def in_(self, userids):  # pylint: disable=arguments-renamed
         others = []
         for userid in userids:
             try:
