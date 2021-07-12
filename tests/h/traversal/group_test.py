@@ -1,4 +1,5 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 from pyramid import security
@@ -20,7 +21,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=None, request=pyramid_request)
+        context = GroupUpsertContext(group=None)
 
         assert pyramid_request.has_permission("upsert", context)
 
@@ -33,7 +34,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=None, request=pyramid_request)
+        context = GroupUpsertContext(group=None)
 
         assert not pyramid_request.has_permission("upsert", context)
 
@@ -47,7 +48,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=group, request=pyramid_request)
+        context = GroupUpsertContext(group=group)
 
         assert context.__acl__() == group.__acl__()
 
@@ -61,7 +62,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=group, request=pyramid_request)
+        context = GroupUpsertContext(group=group)
 
         # an `upsert` permission could be present in the ACL via the model IF the current
         # user were the creator, but they're not
@@ -120,37 +121,19 @@ class TestGroupRoot:
         return GroupRoot(pyramid_request)
 
 
-@pytest.mark.usefixtures("GroupRoot", "GroupUpsertContext")
 class TestGroupUpsertRoot:
     def test_getitem_returns_empty_upsert_context_if_missing_group(
-        self, pyramid_request, GroupRoot, GroupUpsertContext
+        self, pyramid_request, group_service, GroupUpsertContext
     ):
         root = GroupUpsertRoot(pyramid_request)
-        GroupRoot.return_value.__getitem__.side_effect = KeyError("bang")
+        group_service.fetch.return_value = sentinel.group
 
-        context = root["whatever"]
+        context = root["group_id"]
 
-        GroupRoot.return_value.__getitem__.assert_called_once_with("whatever")
+        group_service.fetch.assert_called_once_with("group_id")
         assert context == GroupUpsertContext.return_value
-        GroupUpsertContext.assert_called_once_with(group=None, request=pyramid_request)
+        GroupUpsertContext.assert_called_once_with(group=sentinel.group)
 
-    def test_getitem_returns_populated_upsert_context_if_group_found(
-        self, pyramid_request, GroupRoot, GroupUpsertContext, factories
-    ):
-        group = factories.Group()
-        root = GroupUpsertRoot(pyramid_request)
-        GroupRoot.return_value.__getitem__.return_value = group
-
-        context = root["agroup"]
-
-        GroupRoot.return_value.__getitem__.assert_called_once_with("agroup")
-        assert context == GroupUpsertContext.return_value
-        GroupUpsertContext.assert_called_once_with(group=group, request=pyramid_request)
-
-    @pytest.fixture
-    def GroupRoot(self, patch):
-        return patch("h.traversal.group.GroupRoot")
-
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def GroupUpsertContext(self, patch):
         return patch("h.traversal.group.GroupUpsertContext")
