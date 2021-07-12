@@ -137,12 +137,12 @@ def includeme(config):
         request_method="POST",
         factory="h.traversal.BulkAPIRoot",
     )
-    config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRequiredRoot")
+    config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
     config.add_route(
         "api.group_upsert",
         "/api/groups/{id}",
         request_method="PUT",
-        factory="h.traversal.GroupUpsertRoot",
+        factory="h.traversal.GroupRoot",
         traverse="/{id}",
     )
     config.add_route(

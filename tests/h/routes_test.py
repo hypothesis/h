@@ -132,12 +132,12 @@ def test_includeme():
             request_method="POST",
             factory="h.traversal.BulkAPIRoot",
         ),
-        call("api.groups", "/api/groups", factory="h.traversal.GroupRequiredRoot"),
+        call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group_upsert",
             "/api/groups/{id}",
             request_method="PUT",
-            factory="h.traversal.GroupUpsertRoot",
+            factory="h.traversal.GroupRoot",
             traverse="/{id}",
         ),
         call(

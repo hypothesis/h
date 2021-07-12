@@ -8,7 +8,7 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
 )
 
-from h.traversal.group import GroupUpsertContext
+from h.traversal.group import GroupContext
 from h.views.api import groups as views
 
 
@@ -326,7 +326,7 @@ class TestUpsertGroup:
 
     @pytest.fixture
     def context(self, factories):
-        return GroupUpsertContext(group=factories.Group(creator=factories.User()))
+        return GroupContext(group=factories.Group(creator=factories.User()))
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

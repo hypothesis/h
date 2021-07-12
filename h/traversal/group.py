@@ -30,17 +30,17 @@ class GroupRequiredRoot(RootFactory):
         return group
 
 
-class GroupUpsertRoot(GroupRequiredRoot):
-    """Root factory for group "UPSERT" API."""
+class GroupRoot(GroupRequiredRoot):
+    """Root factory for group routes."""
 
     def __getitem__(self, pubid_or_groupid):
         # Group could be `None` here!
-        return GroupUpsertContext(group=self.group_service.fetch(pubid_or_groupid))
+        return GroupContext(group=self.group_service.fetch(pubid_or_groupid))
 
 
 @dataclass
-class GroupUpsertContext:
-    """Context for group UPSERT."""
+class GroupContext:
+    """Context for a single (optional) group."""
 
     group: Optional[Group] = None
 
