@@ -61,9 +61,6 @@ class FlagService:
 
         :param annotation: The annotation to be flagged.
         :type annotation: h.models.Annotation
-
-        :returns: None
-        :rtype: NoneType
         """
         if self.flagged(user, annotation):
             return
