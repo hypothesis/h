@@ -139,7 +139,6 @@ class TestAnnotationContext:
         expect = [
             (security.Allow, "saoirse", Permission.Annotation.READ),
             (security.Allow, "saoirse", Permission.Annotation.FLAG),
-            (security.Allow, "saoirse", Permission.Annotation.ADMIN),
             (security.Allow, "saoirse", Permission.Annotation.UPDATE),
             (security.Allow, "saoirse", Permission.Annotation.DELETE),
             security.DENY_ALL,
@@ -159,7 +158,6 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         for perm in [
-            Permission.Annotation.ADMIN,
             Permission.Annotation.UPDATE,
             Permission.Annotation.DELETE,
         ]:
@@ -178,7 +176,6 @@ class TestAnnotationContext:
 
         for perm in [
             Permission.Annotation.READ,
-            Permission.Annotation.ADMIN,
             Permission.Annotation.UPDATE,
             Permission.Annotation.DELETE,
             Permission.Annotation.MODERATE,

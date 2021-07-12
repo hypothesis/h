@@ -1,8 +1,6 @@
 class Permission:
     class Annotation:
-        ADMIN = "annotation:admin"  # Is this used anywhere?
         READ = "annotation:read"
-        WRITE = "annotation:write"  # Is this granted anywhere?
         UPDATE = "annotation:update"
         CREATE = "annotation:create"
         DELETE = "annotation:delete"

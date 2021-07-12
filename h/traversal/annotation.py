@@ -79,7 +79,6 @@ class AnnotationContext:
 
         # The user who created the annotation always has the following permissions
         for action in [
-            Permission.Annotation.ADMIN,
             Permission.Annotation.UPDATE,
             Permission.Annotation.DELETE,
         ]:
