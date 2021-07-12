@@ -8,6 +8,7 @@ from h.services.delete_group import DeleteGroupService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
 from h.services.group_links import GroupLinksService
+from h.services.group_list import GroupListService
 from h.services.group_members import GroupMembersService
 from h.services.group_update import GroupUpdateService
 from h.services.groupfinder import GroupfinderService
@@ -27,6 +28,7 @@ __all__ = (
     "groupfinder_service",
     "group_create_service",
     "group_links_service",
+    "group_list_service",
     "group_members_service",
     "group_service",
     "group_update_service",
@@ -94,6 +96,11 @@ def group_create_service(mock_service):
 @pytest.fixture
 def group_links_service(mock_service):
     return mock_service(GroupLinksService, name="group_links")
+
+
+@pytest.fixture
+def group_list_service(mock_service):
+    return mock_service(GroupListService, name="group_list")
 
 
 @pytest.fixture
