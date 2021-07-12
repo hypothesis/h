@@ -25,10 +25,10 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
     def _add_formatter(self, formatter):
         try:
             verifyObject(IAnnotationFormatter, formatter)
-        except DoesNotImplement:
+        except DoesNotImplement as err:
             raise ValueError(
                 "formatter is not implementing IAnnotationFormatter interface"
-            )
+            ) from err
 
         self._formatters.append(formatter)
 

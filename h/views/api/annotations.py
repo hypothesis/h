@@ -164,8 +164,8 @@ def _json_payload(request):
     """
     try:
         return request.json_body
-    except ValueError:
-        raise PayloadError()
+    except ValueError as err:
+        raise PayloadError() from err
 
 
 def _publish_annotation_event(request, annotation, action):

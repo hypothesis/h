@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 def status(request):
     try:
         request.db.execute("SELECT 1")
-    except Exception as exc:
-        log.exception(exc)
-        raise HTTPInternalServerError("Database connection failed")
+    except Exception as err:
+        log.exception(err)
+        raise HTTPInternalServerError("Database connection failed") from err
     return {"status": "okay"}

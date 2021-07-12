@@ -236,8 +236,8 @@ def add_member(context, request):
 
     try:
         user = user_svc.fetch(request.matchdict["userid"])
-    except ValueError:
-        raise HTTPNotFound()
+    except ValueError as err:
+        raise HTTPNotFound() from err
 
     if user is None:
         raise HTTPNotFound()
@@ -258,5 +258,5 @@ def _json_payload(request):
     """
     try:
         return request.json_body
-    except ValueError:
-        raise PayloadError()
+    except ValueError as err:
+        raise PayloadError() from err

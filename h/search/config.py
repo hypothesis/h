@@ -232,8 +232,8 @@ def _update_index_mappings(conn, name, doc_type, mapping):
     """Attempt to update the index mappings."""
     try:
         conn.indices.put_mapping(index=name, doc_type=doc_type, body=mapping)
-    except elasticsearch.exceptions.RequestError as e:
-        if not e.error.startswith("MergeMappingException"):
+    except elasticsearch.exceptions.RequestError as err:
+        if not err.error.startswith("MergeMappingException"):
             raise
 
         message = (
@@ -242,7 +242,7 @@ def _update_index_mappings(conn, name, doc_type, mapping):
             "search reindex` command helpful."
         )
         log.critical(message)
-        raise RuntimeError(message)
+        raise RuntimeError(message) from err
 
 
 def _random_id():

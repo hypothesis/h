@@ -115,8 +115,8 @@ class Document(Base, mixins.Timestamps):
 
         try:
             session.flush()
-        except sa.exc.IntegrityError:
-            raise ConcurrentUpdateError("concurrent document creation")
+        except sa.exc.IntegrityError as err:
+            raise ConcurrentUpdateError("concurrent document creation") from err
 
         return documents
 
@@ -158,8 +158,8 @@ def merge_documents(session, documents, updated=None):
         session.query(Document).filter(Document.id.in_(duplicate_ids)).delete(
             synchronize_session="fetch"
         )
-    except sa.exc.IntegrityError:
-        raise ConcurrentUpdateError("concurrent document merges")
+    except sa.exc.IntegrityError as err:
+        raise ConcurrentUpdateError("concurrent document merges") from err
 
     return master
 

@@ -70,7 +70,7 @@ def create(request):
     try:
         user_unique_service.ensure_unique(appstruct, authority=client_authority_)
     except DuplicateUserError as err:
-        raise HTTPConflict(str(err))
+        raise HTTPConflict(str(err)) from err
 
     user_signup_service = request.find_service(name="user_signup")
     user = user_signup_service.signup(require_activation=False, **appstruct)
@@ -106,5 +106,5 @@ def update(user, request):
 def _json_payload(request):
     try:
         return request.json_body
-    except ValueError:
-        raise PayloadError()
+    except ValueError as err:
+        raise PayloadError() from err

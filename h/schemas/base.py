@@ -88,9 +88,9 @@ def enum_type(enum_cls):
 
             try:
                 return enum_cls[cstruct]
-            except KeyError:
+            except KeyError as err:
                 msg = '"{}" is not a known value'.format(cstruct)
-                raise colander.Invalid(node, msg)
+                raise colander.Invalid(node, msg) from err
 
         def serialize(self, _node, appstruct):
             if not appstruct:

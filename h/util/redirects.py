@@ -73,8 +73,10 @@ def parse(specs):
 
         try:
             src, typ, dst = line.split(None, 3)
-        except ValueError:
-            raise ParseError("invalid redirect specification: {!r}".format(line))
+        except ValueError as err:
+            raise ParseError(
+                "invalid redirect specification: {!r}".format(line)
+            ) from err
         if typ == "internal-exact":
             r = Redirect(prefix=False, internal=True, src=src, dst=dst)
         elif typ == "internal-prefix":

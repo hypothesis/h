@@ -72,8 +72,8 @@ class JWTAuthorizationGrant(GrantTypeBase):
 
         try:
             self.validate_token_request(request)
-        except errors.OAuth2Error as e:
-            return headers, e.json, e.status_code
+        except errors.OAuth2Error as err:
+            return headers, err.json, err.status_code
 
         token = token_handler.create_token(request, refresh_token=True)
         self.request_validator.save_token(token, request)
@@ -97,8 +97,8 @@ class JWTAuthorizationGrant(GrantTypeBase):
 
         try:
             assertion = request.assertion
-        except AttributeError:
-            raise errors.InvalidRequestFatalError("Missing assertion.")
+        except AttributeError as err:
+            raise errors.InvalidRequestFatalError("Missing assertion.") from err
 
         token = JWTGrantToken(assertion)
 

@@ -47,12 +47,12 @@ class LoginSchema(CSRFSchema):
 
         try:
             user = user_service.fetch_for_login(username_or_email=username)
-        except UserNotActivated:
+        except UserNotActivated as exp:
             err = colander.Invalid(node)
             err["username"] = _(
                 "Please check your email and open the link " "to activate your account."
             )
-            raise err
+            raise err from exp
 
         if user is None:
             err = colander.Invalid(node)

@@ -30,8 +30,8 @@ class JWTGrantToken:
                 token,
                 options={"verify_signature": False},
             )
-        except jwt.DecodeError:
-            raise InvalidRequestFatalError("Invalid JWT grant token format.")
+        except jwt.DecodeError as err:
+            raise InvalidRequestFatalError("Invalid JWT grant token format.") from err
 
     @property
     def issuer(self):
@@ -71,25 +71,27 @@ class VerifiedJWTGrantToken(JWTGrantToken):
                 key=key,
                 leeway=self.LEEWAY,
             )
-        except TypeError:
-            raise InvalidClientError("Client is invalid.")
-        except jwt.DecodeError:
-            raise InvalidGrantError("Invalid grant token signature.")
-        except jwt.exceptions.InvalidAlgorithmError:
-            raise InvalidGrantError("Invalid grant token signature algorithm.")
-        except jwt.MissingRequiredClaimError as exc:
-            if exc.claim == "aud":
-                raise errors.MissingJWTGrantTokenClaimError("aud", "audience")
+        except TypeError as err:
+            raise InvalidClientError("Client is invalid.") from err
+        except jwt.DecodeError as err:
+            raise InvalidGrantError("Invalid grant token signature.") from err
+        except jwt.exceptions.InvalidAlgorithmError as err:
+            raise InvalidGrantError("Invalid grant token signature algorithm.") from err
+        except jwt.MissingRequiredClaimError as err:
+            if err.claim == "aud":
+                raise errors.MissingJWTGrantTokenClaimError("aud", "audience") from err
 
-            raise errors.MissingJWTGrantTokenClaimError(exc.claim)
-        except jwt.InvalidAudienceError:
-            raise errors.InvalidJWTGrantTokenClaimError("aud", "audience")
-        except jwt.ImmatureSignatureError:
-            raise InvalidGrantError("Grant token is not yet valid.")
-        except jwt.ExpiredSignatureError:
-            raise InvalidGrantError("Grant token is expired.")
-        except jwt.InvalidIssuedAtError:
-            raise InvalidGrantError("Grant token issue time (iat) is in the future.")
+            raise errors.MissingJWTGrantTokenClaimError(err.claim) from err
+        except jwt.InvalidAudienceError as err:
+            raise errors.InvalidJWTGrantTokenClaimError("aud", "audience") from err
+        except jwt.ImmatureSignatureError as err:
+            raise InvalidGrantError("Grant token is not yet valid.") from err
+        except jwt.ExpiredSignatureError as err:
+            raise InvalidGrantError("Grant token is expired.") from err
+        except jwt.InvalidIssuedAtError as err:
+            raise InvalidGrantError(
+                "Grant token issue time (iat) is in the future."
+            ) from err
 
     @property
     def expiry(self):
@@ -105,8 +107,8 @@ class VerifiedJWTGrantToken(JWTGrantToken):
             raise errors.MissingJWTGrantTokenClaimError(key, description)
         try:
             return datetime.datetime.utcfromtimestamp(claim)
-        except (TypeError, ValueError):
-            raise errors.InvalidJWTGrantTokenClaimError(key, description)
+        except (TypeError, ValueError) as err:
+            raise errors.InvalidJWTGrantTokenClaimError(key, description) from err
 
     @property
     def subject(self):
