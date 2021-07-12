@@ -8,12 +8,8 @@ from h.models import Group
 from h.traversal.root import RootFactory
 
 
-class GroupRequiredRoot(RootFactory):
-    """
-    Root factory for routes dealing with groups which must exist.
-
-    FIXME: This class should return GroupContext objects, not Group objects.
-    """
+class GroupRoot(RootFactory):
+    """Root factory for group routes."""
 
     # Any logged in user may create a group
     __acl__ = [(Allow, role.User, "create")]
@@ -23,19 +19,23 @@ class GroupRequiredRoot(RootFactory):
         self.group_service = request.find_service(name="group")
 
     def __getitem__(self, pubid_or_groupid):
-        group = self.group_service.fetch(pubid_or_groupid)
-        if group is None:
-            raise KeyError()
-
-        return group
-
-
-class GroupRoot(GroupRequiredRoot):
-    """Root factory for group routes."""
-
-    def __getitem__(self, pubid_or_groupid):
         # Group could be `None` here!
         return GroupContext(group=self.group_service.fetch(pubid_or_groupid))
+
+
+class GroupRequiredRoot(GroupRoot):
+    """
+    Root factory for routes dealing with groups which must exist.
+
+    FIXME: This class should return GroupContext objects, not Group objects.
+    """
+
+    def __getitem__(self, pubid_or_groupid):
+        group_context = super().__getitem__(pubid_or_groupid)
+        if group_context.group is None:
+            raise KeyError()
+
+        return group_context.group
 
 
 @dataclass

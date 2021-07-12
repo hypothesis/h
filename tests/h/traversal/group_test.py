@@ -1,7 +1,6 @@
 from unittest.mock import sentinel
 
 import pytest
-from pyramid.security import Allow
 
 from h.auth import role
 from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
@@ -16,15 +15,22 @@ class TestGroupContext:
         assert context.group == group
         assert context.__acl__() == group.__acl__()
 
-    def test_it_without_a_group(self, factories):
+    @pytest.mark.parametrize(
+        "principal,has_upsert", ((role.User, True), ("other", False))
+    )
+    def test_it_without_a_group(
+        self, set_permissions, pyramid_request, principal, has_upsert
+    ):
+        set_permissions("acct:adminuser@foo", principals=[principal])
+
         context = GroupContext(group=None)
 
         assert context.group is None
-        assert context.__acl__() == [(Allow, role.User, "upsert")]
+        assert bool(pyramid_request.has_permission("upsert", context)) == has_upsert
 
 
-@pytest.mark.usefixtures("group_service")
-class TestGroupRequiredRoot:
+@pytest.mark.usefixtures("group_service", "GroupContext_")
+class TestGroupRoot:
     @pytest.mark.parametrize(
         "principal,has_create", ((role.User, True), ("other", False))
     )
@@ -33,48 +39,42 @@ class TestGroupRequiredRoot:
     ):
         set_permissions("acct:adminuser@foo", principals=[principal])
 
-        context = GroupRequiredRoot(pyramid_request)
+        context = GroupRoot(pyramid_request)
 
         assert bool(pyramid_request.has_permission("create", context)) == has_create
 
-    def test_getitem_returns_fetched_group_if_not_None(
-        self, factories, group_factory, group_service
-    ):
-        group = factories.Group()
-        group_service.fetch.return_value = group
-
-        assert group_factory[group.pubid] == group
-
-    def test_getitem_raises_KeyError_if_fetch_returns_None(
-        self, group_factory, group_service
-    ):
-        group_service.fetch.return_value = None
-        with pytest.raises(KeyError):
-            group_factory["does_not_exist"]
-
-    @pytest.fixture(autouse=True)
-    def group_noise(self, factories):
-        # Add some "noise" groups to the DB that we _don't_ expect get back
-        factories.Group.create_batch(size=3)
-
-    @pytest.fixture
-    def group_factory(self, pyramid_request):
-        return GroupRequiredRoot(pyramid_request)
-
-
-class TestGroupRoot:
-    def test_getitem_returns_empty_upsert_context_if_missing_group(
-        self, pyramid_request, group_service, GroupContext
+    def test_it_returns_the_context_from_looking_up_the_group(
+        self, pyramid_request, group_service, GroupContext_
     ):
         root = GroupRoot(pyramid_request)
-        group_service.fetch.return_value = sentinel.group
 
-        context = root["group_id"]
+        context = root[sentinel.group_id]
 
-        group_service.fetch.assert_called_once_with("group_id")
-        assert context == GroupContext.return_value
-        GroupContext.assert_called_once_with(group=sentinel.group)
+        group_service.fetch.assert_called_once_with(sentinel.group_id)
+        GroupContext_.assert_called_once_with(group_service.fetch.return_value)
 
-    @pytest.fixture(autouse=True)
-    def GroupContext(self, patch):
-        return patch("h.traversal.group.GroupContext")
+        assert context == GroupContext_.return_value
+
+
+@pytest.mark.usefixtures("group_service")
+class TestGroupRequiredRoot:
+    def test_getitem_returns_fetched_group_if_not_None(
+        self, factories, pyramid_request, GroupContext_
+    ):
+        GroupContext_.return_value.group = factories.Group()
+
+        context = GroupRequiredRoot(pyramid_request)[sentinel.group_id]
+
+        assert context == GroupContext_.return_value.group
+
+    def test_getitem_raises_KeyError_if_there_is_no_group(
+        self, pyramid_request, GroupContext_
+    ):
+        GroupContext_.return_value.group = None
+        with pytest.raises(KeyError):
+            GroupRequiredRoot(pyramid_request)["does_not_exist"]
+
+
+@pytest.fixture
+def GroupContext_(patch):
+    return patch("h.traversal.group.GroupContext")
