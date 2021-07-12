@@ -40,9 +40,8 @@ def features_save(request):
             if val == "on":
                 if cohort not in feat.cohorts:
                     feat.cohorts.append(cohort)
-            else:
-                if cohort in feat.cohorts:
-                    feat.cohorts.remove(cohort)
+            elif cohort in feat.cohorts:
+                feat.cohorts.remove(cohort)
 
     request.session.flash(_("Changes saved."), "success")
     return httpexceptions.HTTPSeeOther(location=request.route_url("admin.features"))
