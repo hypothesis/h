@@ -36,7 +36,7 @@ class UsernameComparator(Comparator):
     correctly find a user with a username of "Juan.Wood", for example.
     """
 
-    def operate(self, op, other, **kwargs):
+    def operate(self, op, other, **kwargs):  # pylint: disable=arguments-differ
         return op(
             _normalise_username(self.__clause_element__()),
             _normalise_username(other),
