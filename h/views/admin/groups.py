@@ -130,7 +130,7 @@ class GroupCreateViews:
 )
 class GroupEditViews:
     def __init__(self, context, request):
-        self.group = context
+        self.group = context.group
         self.request = request
 
         self.list_org_svc = request.find_service(name="list_organizations")
@@ -157,12 +157,10 @@ class GroupEditViews:
 
     @view_config(request_method="POST", route_name="admin.groups_delete")
     def delete(self):
-        group = self.group
-        svc = self.request.find_service(name="delete_group")
+        self.request.find_service(name="delete_group").delete(self.group)
 
-        svc.delete(group)
         self.request.session.flash(
-            _("Successfully deleted group %s" % (group.name), "success"),
+            _("Successfully deleted group %s" % (self.group.name), "success"),
             queue="success",
         )
 

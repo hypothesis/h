@@ -89,12 +89,12 @@ class SearchController:
 class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
 
-    def __init__(self, group, request):
+    def __init__(self, context, request):
         super(GroupSearchController, self).__init__(request)
-        self.group = group
-        if group.organization:
+        self.group = context.group
+        if self.group.organization:
             self._organization_context = OrganizationContext(
-                group.organization, request
+                self.group.organization, request
             )
         else:
             self._organization_context = None

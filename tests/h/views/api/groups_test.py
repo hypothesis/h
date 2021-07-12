@@ -168,13 +168,12 @@ class TestCreateGroup:
 
 
 class TestReadGroup:
-    def test_it(self, factories, pyramid_request, GroupJSONPresenter):
+    def test_it(self, context, pyramid_request, GroupJSONPresenter):
         pyramid_request.params["expand"] = "organization"
-        group = factories.Group()
 
-        result = views.read(group, pyramid_request)
+        result = views.read(context, pyramid_request)
 
-        GroupJSONPresenter.assert_called_once_with(group, pyramid_request)
+        GroupJSONPresenter.assert_called_once_with(context.group, pyramid_request)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(["organization"])
         assert result == GroupJSONPresenter.return_value.asdict.return_value
 
@@ -182,48 +181,50 @@ class TestReadGroup:
 @pytest.mark.usefixtures("group_service", "group_update_service")
 class TestUpdateGroup:
     def test_it_inits_group_update_schema(
-        self, pyramid_request, group, UpdateGroupAPISchema
+        self, pyramid_request, context, UpdateGroupAPISchema
     ):
-        views.update(group, pyramid_request)
+        views.update(context, pyramid_request)
 
         UpdateGroupAPISchema.return_value.validate.assert_called_once_with({})
 
     def test_it_passes_request_params_to_group_update_service(
-        self, group, pyramid_request, UpdateGroupAPISchema, group_update_service
+        self, context, pyramid_request, UpdateGroupAPISchema, group_update_service
     ):
         patch_payload = {"name": "My Group", "description": "How about that?"}
         UpdateGroupAPISchema.return_value.validate.return_value = patch_payload
 
-        views.update(group, pyramid_request)
+        views.update(context, pyramid_request)
 
-        group_update_service.update.assert_called_once_with(group, **patch_payload)
+        group_update_service.update.assert_called_once_with(
+            context.group, **patch_payload
+        )
 
     def test_it_raises_HTTPConflict_on_duplicate(
-        self, pyramid_request, UpdateGroupAPISchema, group, group_service, factories
+        self, pyramid_request, UpdateGroupAPISchema, context, group_service, factories
     ):
         # Return a different pre-existing group when we search by id
         group_service.fetch.return_value = factories.Group(
-            authority_provided_id="different_id", authority=group.authority
+            authority_provided_id="different_id", authority=context.group.authority
         )
 
         with pytest.raises(HTTPConflict, match="group with groupid.*already exists"):
-            views.update(group, pyramid_request)
+            views.update(context, pyramid_request)
 
     def test_it_does_not_raise_HTTPConflict_if_duplicate_is_same_group(
-        self, pyramid_request, UpdateGroupAPISchema, group, group_service
+        self, pyramid_request, UpdateGroupAPISchema, context, group_service
     ):
-        group_service.fetch.return_value = group
+        group_service.fetch.return_value = context.group
 
-        views.update(group, pyramid_request)
+        views.update(context, pyramid_request)
 
     def test_it_creates_group_context_from_updated_group(
-        self, pyramid_request, group, group_update_service, GroupJSONPresenter
+        self, pyramid_request, context, group_update_service, GroupJSONPresenter
     ):
-        group_update_service.update.return_value = group
+        group_update_service.update.return_value = context.group
 
-        result = views.update(group, pyramid_request)
+        result = views.update(context, pyramid_request)
 
-        GroupJSONPresenter.assert_called_with(group, pyramid_request)
+        GroupJSONPresenter.assert_called_with(context.group, pyramid_request)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
             expand=["organization", "scopes"]
         )
@@ -236,10 +237,6 @@ class TestUpdateGroup:
         pyramid_request.json_body = {}
         pyramid_request.user = factories.User()
         return pyramid_request
-
-    @pytest.fixture
-    def group(self, factories):
-        return factories.Group(authority="example.com")
 
     @pytest.fixture(autouse=True)
     def UpdateGroupAPISchema(self, patch):
@@ -325,10 +322,6 @@ class TestUpsertGroup:
         return patch("h.views.api.groups.create")
 
     @pytest.fixture
-    def context(self, factories):
-        return GroupContext(group=factories.Group(creator=factories.User()))
-
-    @pytest.fixture
     def pyramid_request(self, pyramid_request):
         # Add a nominal json_body so that _json_payload() parsing of
         # it doesn't raise
@@ -338,18 +331,17 @@ class TestUpsertGroup:
 
 class TestReadMembers:
     def test_it_returns_formatted_users_from_group(
-        self, factories, pyramid_request, UserJSONPresenter
+        self, context, factories, pyramid_request, UserJSONPresenter
     ):
-        group = factories.Group.build()
-        group.members = [
+        context.group.members = [
             factories.User.build(),
             factories.User.build(),
             factories.User.build(),
         ]
 
-        views.read_members(group, pyramid_request)
+        views.read_members(context, pyramid_request)
 
-        assert UserJSONPresenter.call_count == len(group.members)
+        assert UserJSONPresenter.call_count == len(context.group.members)
 
     @pytest.fixture
     def UserJSONPresenter(self, patch):
@@ -359,66 +351,64 @@ class TestReadMembers:
 @pytest.mark.usefixtures("group_members_service", "user_service")
 class TestAddMember:
     def test_it_adds_user_from_request_params_to_group(
-        self, group, user, pyramid_request, group_members_service
+        self, context, user, pyramid_request, group_members_service
     ):
-        views.add_member(group, pyramid_request)
+        views.add_member(context, pyramid_request)
 
-        group_members_service.member_join.assert_called_once_with(group, user.userid)
+        group_members_service.member_join.assert_called_once_with(
+            context.group, user.userid
+        )
 
     def test_it_returns_HTTPNoContent_when_add_member_is_successful(
-        self, group, pyramid_request
+        self, context, pyramid_request
     ):
-        resp = views.add_member(group, pyramid_request)
+        resp = views.add_member(context, pyramid_request)
 
         assert isinstance(resp, HTTPNoContent)
 
     def test_it_raises_HTTPNotFound_with_mismatched_user_and_group_authorities(
-        self, factories, pyramid_request
+        self, context, pyramid_request
     ):
-        group = factories.Group(authority="different_authority.com")
+        context.group.authority = "different_authority.com"
 
         with pytest.raises(HTTPNotFound):
-            views.add_member(group, pyramid_request)
+            views.add_member(context, pyramid_request)
 
     def test_it_raises_HTTPNotFound_with_non_existent_user(
-        self, group, pyramid_request, user_service
+        self, context, pyramid_request, user_service
     ):
         user_service.fetch.return_value = None
 
         pyramid_request.matchdict["userid"] = "some_user"
 
         with pytest.raises(HTTPNotFound):
-            views.add_member(group, pyramid_request)
+            views.add_member(context, pyramid_request)
 
     def test_it_raises_HTTPNotFound_if_userid_malformed(
-        self, group, pyramid_request, user_service
+        self, context, pyramid_request, user_service
     ):
         user_service.fetch.side_effect = ValueError("nope")
 
         pyramid_request.matchdict["userid"] = "invalidformat@wherever"
 
         with pytest.raises(HTTPNotFound):  # view handles ValueError and raises NotFound
-            views.add_member(group, pyramid_request)
+            views.add_member(context, pyramid_request)
 
     def test_it_fetches_user_from_the_request_params(
-        self, group, user, pyramid_request, user_service
+        self, context, user, pyramid_request, user_service
     ):
-        views.add_member(group, pyramid_request)
+        views.add_member(context, pyramid_request)
 
         user_service.fetch.assert_called_once_with(user.userid)
-
-    @pytest.fixture
-    def group(self, factories):
-        return factories.Group(authority="example.com")
 
     @pytest.fixture
     def user(self, factories):
         return factories.User(authority="example.com")
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, group, user):
+    def pyramid_request(self, pyramid_request, context, user):
         pyramid_request.matchdict["userid"] = user.userid
-        pyramid_request.matchdict["pubid"] = group.pubid
+        pyramid_request.matchdict["pubid"] = context.group.pubid
         return pyramid_request
 
     @pytest.fixture
@@ -431,20 +421,17 @@ class TestAddMember:
 @pytest.mark.usefixtures("authenticated_userid", "group_members_service")
 class TestRemoveMember:
     def test_it_removes_current_user(
-        self, shorthand_request, authenticated_userid, group_members_service
+        self, context, shorthand_request, authenticated_userid, group_members_service
     ):
-        group = mock.sentinel.group
 
-        views.remove_member(group, shorthand_request)
+        views.remove_member(context, shorthand_request)
 
         group_members_service.member_leave.assert_called_once_with(
-            group, authenticated_userid
+            context.group, authenticated_userid
         )
 
-    def test_it_returns_no_content(self, shorthand_request):
-        group = mock.sentinel.group
-
-        response = views.remove_member(group, shorthand_request)
+    def test_it_returns_no_content(self, context, shorthand_request):
+        response = views.remove_member(context, shorthand_request)
 
         assert isinstance(response, HTTPNoContent)
 
@@ -491,3 +478,8 @@ def GroupsJSONPresenter(patch):
 @pytest.fixture(autouse=True)
 def GroupJSONPresenter(patch):
     return patch("h.views.api.groups.GroupJSONPresenter")
+
+
+@pytest.fixture
+def context(factories):
+    return GroupContext(group=factories.Group(creator=factories.User()))

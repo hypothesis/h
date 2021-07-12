@@ -81,12 +81,12 @@ def create(request):
     link_name="group.read",
     description="Fetch a group",
 )
-def read(group, request):
+def read(context, request):
     """Fetch a group."""
 
     expand = request.GET.getall("expand") or []
 
-    return GroupJSONPresenter(group, request).asdict(expand=expand)
+    return GroupJSONPresenter(context.group, request).asdict(expand=expand)
 
 
 @api_config(
@@ -97,7 +97,7 @@ def read(group, request):
     link_name="group.update",
     description="Update a group",
 )
-def update(group, request):
+def update(context, request):
     """Update a group from a PATCH payload."""
     appstruct = UpdateGroupAPISchema(
         default_authority=request.default_authority,
@@ -111,12 +111,12 @@ def update(group, request):
     groupid = appstruct.get("groupid", None)
     if groupid is not None:
         duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
-        if duplicate_group and (duplicate_group != group):
+        if duplicate_group and (duplicate_group != context.group):
             raise HTTPConflict(
                 _("group with groupid '{}' already exists").format(groupid)
             )
 
-    group = group_update_service.update(group, **appstruct)
+    group = group_update_service.update(context.group, **appstruct)
 
     return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
 
@@ -190,9 +190,9 @@ def upsert(context, request):
     description="Fetch all members of a group",
     permission="member_read",
 )
-def read_members(group, request):
+def read_members(context, request):
     """Fetch the members of a group."""
-    return [UserJSONPresenter(user).asdict() for user in group.members]
+    return [UserJSONPresenter(user).asdict() for user in context.group.members]
 
 
 @api_config(
@@ -203,7 +203,7 @@ def read_members(group, request):
     description="Remove the current user from a group",
     effective_principals=security.Authenticated,
 )
-def remove_member(group, request):
+def remove_member(context, request):
     """Remove a member from the given group."""
     # Currently, we only support removing the requesting user
     if request.matchdict.get("userid") == "me":
@@ -212,7 +212,7 @@ def remove_member(group, request):
         raise HTTPBadRequest('Only the "me" user value is currently supported')
 
     group_members_service = request.find_service(name="group_members")
-    group_members_service.member_leave(group, userid)
+    group_members_service.member_leave(context.group, userid)
 
     return HTTPNoContent()
 
@@ -225,7 +225,7 @@ def remove_member(group, request):
     permission="member_add",
     description="Add the user in the request params to a group.",
 )
-def add_member(group, request):
+def add_member(context, request):
     """Add a member to a given group.
 
     :raise HTTPNotFound: if the user is not found or if the use and group
@@ -242,10 +242,10 @@ def add_member(group, request):
     if user is None:
         raise HTTPNotFound()
 
-    if user.authority != group.authority:
+    if user.authority != context.group.authority:
         raise HTTPNotFound()
 
-    group_members_svc.member_join(group, user.userid)
+    group_members_svc.member_join(context.group, user.userid)
 
     return HTTPNoContent()
 

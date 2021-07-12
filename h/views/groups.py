@@ -69,8 +69,8 @@ class GroupCreateController:
     permission="admin",
 )
 class GroupEditController:
-    def __init__(self, group, request):
-        self.group = group
+    def __init__(self, context, request):
+        self.group = context.group
         self.request = request
         self.schema = group_schema().bind(request=self.request)
         self.form = request.create_form(
@@ -108,8 +108,8 @@ class GroupEditController:
 
 
 @view_config(route_name="group_read_noslug", request_method="GET")
-def read_noslug(group, request):
-    check_slug(group, request)
+def read_noslug(context, request):
+    check_slug(context.group, request)
 
 
 def check_slug(group, request):

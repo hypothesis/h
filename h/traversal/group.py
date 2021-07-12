@@ -35,7 +35,7 @@ class GroupRequiredRoot(GroupRoot):
         if group_context.group is None:
             raise KeyError()
 
-        return group_context.group
+        return group_context
 
 
 @dataclass

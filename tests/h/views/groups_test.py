@@ -4,9 +4,7 @@ import pytest
 from h_matchers import Any
 from pyramid.httpexceptions import HTTPMovedPermanently
 
-from h.models import Group, User
-from h.models.group import JoinableBy
-from h.services.group_create import GroupCreateService
+from h.traversal.group import GroupContext
 from h.views import groups as views
 
 
@@ -52,8 +50,16 @@ class TestGroupCreateController:
         ]
 
     def test_post_redirects_if_form_valid(
-        self, controller, handle_form_submission, matchers
+        self,
+        controller,
+        handle_form_submission,
+        matchers,
+        group_create_service,
+        factories,
     ):
+        group = factories.Group()
+        group_create_service.create_private_group.return_value = group
+
         # If the form submission is valid then handle_form_submission() should
         # return the redirect that on_success() returns.
         def return_on_success(request, form, on_success, on_failure):
@@ -61,7 +67,9 @@ class TestGroupCreateController:
 
         handle_form_submission.side_effect = return_on_success
 
-        assert controller.post() == matchers.Redirect303To("/g/abc123/fake-group")
+        response = controller.post()
+
+        assert response == matchers.Redirect303To(f"/g/{group.pubid}/{group.slug}")
 
     def test_post_does_not_create_group_if_form_invalid(
         self, controller, group_create_service, handle_form_submission
@@ -100,66 +108,44 @@ class TestGroupCreateController:
 
 @pytest.mark.usefixtures("routes")
 class TestGroupEditController:
-    def test_get_reads_group_properties(self, pyramid_request):
+    def test_get_reads_group_properties(self, pyramid_request, group):
         pyramid_request.create_form.return_value = FakeForm()
 
-        creator = User(username="luke", authority="example.org")
-        group = Group(
-            name="Birdwatcher Community",
-            authority="foobar.com",
-            description="We watch birds all day long",
-            creator=creator,
-        )
-        group.pubid = "the-test-pubid"
-
-        result = views.GroupEditController(group, pyramid_request).get()
+        result = views.GroupEditController(GroupContext(group), pyramid_request).get()
 
         assert result == {
             "form": {
-                "name": "Birdwatcher Community",
-                "description": "We watch birds all day long",
+                "name": group.name,
+                "description": group.description,
             },
-            "group_path": "/g/the-test-pubid/birdwatcher-community",
+            "group_path": f"/g/{group.pubid}/{group.slug}",
         }
 
-    def test_post_sets_group_properties(self, form_validating_to, pyramid_request):
-        creator = User(username="luke", authority="example.org")
-        group = Group(
-            name="Birdwatcher Community",
-            authority="foobar.com",
-            description="We watch birds all day long",
-            creator=creator,
-        )
-        group.pubid = "the-test-pubid"
-
-        controller = views.GroupEditController(group, pyramid_request)
+    def test_post_sets_group_properties(
+        self, form_validating_to, pyramid_request, group
+    ):
+        controller = views.GroupEditController(GroupContext(group), pyramid_request)
         controller.form = form_validating_to(
-            {
-                "name": "Alligatorwatcher Comm.",
-                "description": "We are all about the alligators now",
-            }
+            {"name": "New name", "description": "New description"}
         )
         controller.post()
 
-        assert group.name == "Alligatorwatcher Comm."
-        assert group.description == "We are all about the alligators now"
+        assert group.name == "New name"
+        assert group.description == "New description"
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group(description="DESCRIPTION")
 
 
 @pytest.mark.usefixtures("routes")
-def test_read_noslug_redirects(pyramid_request):
-    group = FakeGroup("abc123", "some-slug")
+def test_read_noslug_redirects(pyramid_request, factories):
+    group = factories.Group()
 
     with pytest.raises(HTTPMovedPermanently) as exc:
-        views.read_noslug(group, pyramid_request)
+        views.read_noslug(GroupContext(group), pyramid_request)
 
-    assert exc.value.location == "/g/abc123/some-slug"
-
-
-class FakeGroup:
-    def __init__(self, pubid, slug, joinable_by=JoinableBy.authority):
-        self.pubid = pubid
-        self.slug = slug
-        self.joinable_by = joinable_by
+    assert exc.value.location == f"/g/{group.pubid}/{group.slug}"
 
 
 class FakeForm:
@@ -175,14 +161,6 @@ def form_validating_to(appstruct):
     form.validate.return_value = appstruct
     form.render.return_value = "valid form"
     return form
-
-
-@pytest.fixture
-def group_create_service(pyramid_config):
-    service = mock.create_autospec(GroupCreateService, spec_set=True, instance=True)
-    service.create_private_group.return_value = FakeGroup("abc123", "fake-group")
-    pyramid_config.register_service(service, name="group_create")
-    return service
 
 
 @pytest.fixture

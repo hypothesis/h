@@ -8,6 +8,7 @@ from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
 from h.services.annotation_stats import AnnotationStatsService
+from h.traversal.group import GroupContext
 from h.views import activity
 
 GROUP_TYPE_OPTIONS = ("group", "open_group", "restricted_group")
@@ -894,7 +895,9 @@ class TestGroupSearchController:
         test_group = group
         if "test_group" in request.fixturenames:
             test_group = request.getfixturevalue("test_group")
-        controller = activity.GroupSearchController(test_group, pyramid_request)
+
+        context = GroupContext(test_group)
+        controller = activity.GroupSearchController(context, pyramid_request)
         return controller
 
     @pytest.fixture
@@ -1241,7 +1244,7 @@ class TestGroupAndUserSearchController:
         # correct URL.
         pyramid_request.matchdict["slug"] = group.slug
 
-        return activity.GroupSearchController(group, pyramid_request)
+        return activity.GroupSearchController(GroupContext(group), pyramid_request)
 
     @pytest.fixture
     def delete_lozenge_request(self, pyramid_request):

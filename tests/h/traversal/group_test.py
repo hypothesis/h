@@ -58,14 +58,14 @@ class TestGroupRoot:
 
 @pytest.mark.usefixtures("group_service")
 class TestGroupRequiredRoot:
-    def test_getitem_returns_fetched_group_if_not_None(
+    def test_getitem_returns_fetched_groupcontext_if_not_None(
         self, factories, pyramid_request, GroupContext_
     ):
         GroupContext_.return_value.group = factories.Group()
 
         context = GroupRequiredRoot(pyramid_request)[sentinel.group_id]
 
-        assert context == GroupContext_.return_value.group
+        assert context == GroupContext_.return_value
 
     def test_getitem_raises_KeyError_if_there_is_no_group(
         self, pyramid_request, GroupContext_
