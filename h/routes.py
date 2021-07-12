@@ -40,13 +40,13 @@ def includeme(config):
     config.add_route(
         "admin.groups_delete",
         "/admin/groups/delete/{id}",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{id}",
     )
     config.add_route(
         "admin.groups_edit",
         "/admin/groups/{id}",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{id}",
     )
     config.add_route("admin.mailer", "/admin/mailer")
@@ -137,7 +137,7 @@ def includeme(config):
         request_method="POST",
         factory="h.traversal.BulkAPIRoot",
     )
-    config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
+    config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRequiredRoot")
     config.add_route(
         "api.group_upsert",
         "/api/groups/{id}",
@@ -149,7 +149,7 @@ def includeme(config):
         "api.group",
         "/api/groups/{id}",
         request_method=("GET", "PATCH"),
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{id}",
     )
     config.add_route("api.profile", "/api/profile", factory="h.traversal.ProfileRoot")
@@ -158,13 +158,13 @@ def includeme(config):
     config.add_route(
         "api.group_members",
         "/api/groups/{pubid}/members",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
     config.add_route(
         "api.group_member",
         "/api/groups/{pubid}/members/{userid}",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
     config.add_route("api.search", "/api/search")
@@ -209,20 +209,20 @@ def includeme(config):
     config.add_route(
         "group_edit",
         "/groups/{pubid}/edit",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route(
         "group_read",
         "/groups/{pubid}/{slug:[^/]*}",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
     config.add_route(
         "group_read_noslug",
         "/groups/{pubid}",
-        factory="h.traversal.GroupRoot",
+        factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
 

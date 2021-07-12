@@ -7,7 +7,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.auth import role
 from h.services.group import GroupService
-from h.traversal.group import GroupRoot, GroupUpsertContext, GroupUpsertRoot
+from h.traversal.group import GroupRequiredRoot, GroupUpsertContext, GroupUpsertRoot
 
 
 @pytest.mark.usefixtures("group_links_service")
@@ -69,13 +69,13 @@ class TestGroupUpsertContext:
         assert not pyramid_request.has_permission("upsert", context)
 
 
-class TestGroupRoot:
+class TestGroupRequiredRoot:
     def test_it_assigns_create_permission_with_user_role(
         self, set_permissions, pyramid_request
     ):
         set_permissions("acct:adminuser@foo", principals=[role.User])
 
-        context = GroupRoot(pyramid_request)
+        context = GroupRequiredRoot(pyramid_request)
 
         assert pyramid_request.has_permission("create", context)
 
@@ -84,7 +84,7 @@ class TestGroupRoot:
     ):
         set_permissions("acct:adminuser@foo", principals=["whatever"])
 
-        context = GroupRoot(pyramid_request)
+        context = GroupRequiredRoot(pyramid_request)
 
         assert not pyramid_request.has_permission("create", context)
 
@@ -118,7 +118,7 @@ class TestGroupRoot:
 
     @pytest.fixture
     def group_factory(self, pyramid_request):
-        return GroupRoot(pyramid_request)
+        return GroupRequiredRoot(pyramid_request)
 
 
 class TestGroupUpsertRoot:
