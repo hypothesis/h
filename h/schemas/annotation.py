@@ -284,8 +284,8 @@ def _target_selectors(targets):
     # Any fields of the target other than 'selector' are discarded.
     if targets and "selector" in targets[0]:
         return targets[0]["selector"]
-    else:
-        return []
+
+    return []
 
 
 class SearchParamsSchema(colander.Schema):

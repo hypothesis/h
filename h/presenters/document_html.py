@@ -25,8 +25,7 @@ class DocumentHTMLPresenter:
         """
         if self.uri.lower().startswith("file:///"):
             return jinja2.escape(self.uri.split("/")[-1])
-        else:
-            return ""
+        return ""
 
     @property
     def href(self):
@@ -46,8 +45,7 @@ class DocumentHTMLPresenter:
         """
         if self.document.web_uri:
             return jinja2.escape(self.document.web_uri)
-        else:
-            return ""
+        return ""
 
     @property
     def hostname_or_filename(self):
@@ -68,13 +66,13 @@ class DocumentHTMLPresenter:
         """
         if self.filename:
             return jinja2.escape(unquote(self.filename))
-        else:
-            hostname = urlparse(self.uri).hostname
 
-            # urlparse()'s .hostname is sometimes None.
-            hostname = hostname or ""
+        hostname = urlparse(self.uri).hostname
 
-            return jinja2.escape(hostname)
+        # urlparse()'s .hostname is sometimes None.
+        hostname = hostname or ""
+
+        return jinja2.escape(hostname)
 
     @property
     def link(self):
@@ -144,8 +142,7 @@ class DocumentHTMLPresenter:
             parts = urlparse(title)
             return unquote(parts.netloc + parts.path)
 
-        else:
-            return title
+        return title
 
     @property
     def title(self):
@@ -170,8 +167,8 @@ class DocumentHTMLPresenter:
 
         if self.filename:
             return jinja2.escape(unquote(self.filename))
-        else:
-            return jinja2.escape(unquote(self.uri))
+
+        return jinja2.escape(unquote(self.uri))
 
     @property
     def uri(self):
@@ -209,8 +206,8 @@ def _format_document_link(href, title, link_text, host_or_filename):
         """Truncate the given string to at most length chars."""
         if len(content) <= length:
             return content
-        else:
-            return content[:length] + jinja2.Markup("&hellip;")
+
+        return content[:length] + jinja2.Markup("&hellip;")
 
     host_or_filename = truncate(host_or_filename)
     link_text = truncate(link_text)

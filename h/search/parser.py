@@ -137,12 +137,12 @@ def _escape_term(term):
         if '\\"' in term:
             return '"' + term + '"'
         # Originally single quoted and contained escaped single quotes
-        elif "\\'" in term:
+        if "\\'" in term:
             return "'" + term + "'"
         # Contains unescaped single quotes, so easiest to double quote
-        elif "'" in term:
+        if "'" in term:
             return '"' + term + '"'
+
         # None of the above: prefer single quotes
-        else:
-            return "'" + term + "'"
+        return "'" + term + "'"
     return term

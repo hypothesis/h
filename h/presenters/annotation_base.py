@@ -29,15 +29,13 @@ class AnnotationBasePresenter:
     def text(self):
         if self.annotation.text:
             return self.annotation.text
-        else:
-            return ""
+        return ""
 
     @property
     def tags(self):
         if self.annotation.tags:
             return self.annotation.tags
-        else:
-            return []
+        return []
 
     @property
     def target(self):

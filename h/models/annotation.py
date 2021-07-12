@@ -191,8 +191,7 @@ class Annotation(Base):
         """
         if self.references:
             return self.references[0]
-        else:
-            return self.id
+        return self.id
 
     @property
     def authority(self):
