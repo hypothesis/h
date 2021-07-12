@@ -9,8 +9,8 @@ def unsubscribe(request):
     token = request.matchdict["token"]
     try:
         payload = request.registry.notification_serializer.loads(token)
-    except ValueError:
-        raise HTTPNotFound()
+    except ValueError as err:
+        raise HTTPNotFound() from err
 
     subscriptions = request.db.query(Subscriptions).filter_by(
         type=payload["type"], uri=payload["uri"]

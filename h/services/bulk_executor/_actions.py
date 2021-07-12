@@ -131,7 +131,7 @@ class GroupUpsertAction(DBAction):
             if err.orig.pgcode == "21000":
                 raise ConflictingDataError(
                     "Attempted to create two groups with the same authority and id"
-                )
+                ) from err
 
             raise
 
@@ -192,7 +192,7 @@ class GroupMembershipCreateAction(DBAction):
                 raise ConflictingDataError(
                     "Cannot insert group membership as either the user or "
                     f"group specified does not exist: {err.params}"
-                )
+                ) from err
 
             raise
 
@@ -275,7 +275,7 @@ class UserUpsertAction(DBAction):
             if err.orig.pgcode == "21000":
                 raise ConflictingDataError(
                     "Attempted to assign existing identity to a different user"
-                )
+                ) from err
 
             raise
 

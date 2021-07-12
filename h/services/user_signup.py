@@ -76,25 +76,25 @@ class UserSignupService:
         if require_activation:
             try:
                 self._require_activation(user)
-            except IntegrityError as e:
+            except IntegrityError as err:
                 # When identical signup requests get issued at nearly the same time, they
                 # race each other to the database and result in unique contraint integrity
                 # errors on the user's email or username within the authority.
                 if (
                     'duplicate key value violates unique constraint "uq__user__email"'
-                    in e.args[0]
+                    in err.args[0]
                     or 'duplicate key value violates unique constraint "ix__user__userid"'
-                    in e.args[0]
+                    in err.args[0]
                 ):
                     log.warning(
                         "concurrent account signup conflict error occurred during user signup %s",
-                        e.args[0],
+                        err.args[0],
                     )
                     raise ConflictError(
                         "The email address {} has already been registered.".format(
                             user.email
                         )
-                    )
+                    ) from err
                 # If the exception is not related to the email or username, re-raise it.
                 raise
 

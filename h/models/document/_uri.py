@@ -136,5 +136,5 @@ def create_or_update_document_uri(  # pylint: disable=redefined-builtin
 
     try:
         session.flush()
-    except sa.exc.IntegrityError:
-        raise ConcurrentUpdateError("concurrent document uri updates")
+    except sa.exc.IntegrityError as err:
+        raise ConcurrentUpdateError("concurrent document uri updates") from err

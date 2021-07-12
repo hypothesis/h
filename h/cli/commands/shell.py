@@ -75,5 +75,7 @@ def shell(config, type_):
 
     try:
         runner(**locals_)
-    except ImportError:
-        raise click.ClickException("The {!r} shell is not available.".format(type_))
+    except ImportError as err:
+        raise click.ClickException(
+            "The {!r} shell is not available.".format(type_)
+        ) from err

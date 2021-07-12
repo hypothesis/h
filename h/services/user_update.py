@@ -35,7 +35,7 @@ class UserUpdateService:
             try:
                 setattr(user, key, value)
             except ValueError as err:
-                raise ValidationError(err)
+                raise ValidationError(err) from err
 
         try:
             self.session.flush()
@@ -53,7 +53,7 @@ class UserUpdateService:
                     "username '{username}' is already in use".format(
                         username=kwargs["username"]
                     )
-                )
+                ) from err
 
             # Re-raise as this is an unexpected problem
             raise

@@ -117,5 +117,5 @@ def create_or_update_document_meta(  # pylint:disable=redefined-builtin
 
     try:
         session.flush()
-    except sa.exc.IntegrityError:
-        raise ConcurrentUpdateError("concurrent document meta updates")
+    except sa.exc.IntegrityError as err:
+        raise ConcurrentUpdateError("concurrent document meta updates") from err

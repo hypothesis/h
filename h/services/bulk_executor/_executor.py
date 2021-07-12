@@ -44,10 +44,10 @@ class BulkExecutor(Executor):
                 self.db.query(User).filter(User.userid == config.effective_user).one()
             )
 
-        except NoResultFound:
+        except NoResultFound as err:
             raise InvalidDeclarationError(
                 f"No user found for effective user: '{config.effective_user}'"
-            )
+            ) from err
 
         self.effective_user_id = user.id
 

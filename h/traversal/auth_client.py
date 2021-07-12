@@ -17,12 +17,12 @@ class AuthClientRoot(RootFactory):
     def __getitem__(self, client_id):
         try:
             client = self.request.db.query(AuthClient).filter_by(id=client_id).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise KeyError()
+        except sqlalchemy.orm.exc.NoResultFound as err:
+            raise KeyError() from err
         except (
             sqlalchemy.exc.StatementError,
-        ):  # Happens when client_id is not a valid UUID.
-            raise KeyError()
+        ) as err:  # Happens when client_id is not a valid UUID.
+            raise KeyError() from err
 
         # Add the default root factory to this resource's lineage so that the default
         # ACL is applied. This is needed so that permissions required by auth client

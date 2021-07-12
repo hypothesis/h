@@ -240,8 +240,8 @@ class ResetController:
         # Otherwise, we 404.
         try:
             user = ResetCode().deserialize(self.schema, code)
-        except colander.Invalid:
-            raise httpexceptions.HTTPNotFound()
+        except colander.Invalid as err:
+            raise httpexceptions.HTTPNotFound() from err
         else:
             # N.B. the form field for the reset code is called 'user'. See the
             # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
@@ -316,8 +316,8 @@ class ActivateController:
 
         try:
             id_ = int(id_)
-        except ValueError:
-            raise httpexceptions.HTTPNotFound()
+        except ValueError as err:
+            raise httpexceptions.HTTPNotFound() from err
 
         activation = models.Activation.get_by_code(self.request.db, code)
         if activation is None:
@@ -363,8 +363,8 @@ class ActivateController:
 
         try:
             id_ = int(id_)
-        except ValueError:
-            raise httpexceptions.HTTPNotFound()
+        except ValueError as err:
+            raise httpexceptions.HTTPNotFound() from err
 
         if id_ == self.request.user.id:
             # The user is already logged in to the account (so the account

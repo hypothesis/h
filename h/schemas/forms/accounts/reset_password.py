@@ -33,12 +33,12 @@ class ResetCode(colander.SchemaType):
             username, timestamp = serializer.loads(
                 cstruct, max_age=72 * 3600, return_timestamp=True
             )
-        except SignatureExpired:
+        except SignatureExpired as err:
             raise colander.Invalid(
                 node, _("Reset code has expired. Please reset your password again")
-            )
-        except BadData:
-            raise colander.Invalid(node, _("Wrong reset code."))
+            ) from err
+        except BadData as err:
+            raise colander.Invalid(node, _("Wrong reset code.")) from err
 
         user = models.User.get_by_username(
             request.db, username, request.default_authority

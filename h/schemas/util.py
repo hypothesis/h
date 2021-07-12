@@ -65,7 +65,7 @@ def validate_query_params(schema, params):
 
     try:
         parsed = schema.deserialize(param_dict)
-    except colander.Invalid as exc:
-        raise ValidationError(_colander_exception_msg(exc))
+    except colander.Invalid as err:
+        raise ValidationError(_colander_exception_msg(err)) from err
 
     return _dict_to_multidict(parsed)

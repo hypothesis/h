@@ -29,7 +29,7 @@ class GroupUpdateService:
             try:
                 setattr(group, key, value)
             except ValueError as err:
-                raise ValidationError(err)
+                raise ValidationError(err) from err
 
         try:
             self.session.flush()
@@ -44,7 +44,7 @@ class GroupUpdateService:
                     "authority_provided_id '{id}' is already in use".format(
                         id=kwargs["authority_provided_id"]
                     )
-                )
+                ) from err
 
             # Re-raise as this is an unexpected problem
             raise

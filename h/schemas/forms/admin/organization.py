@@ -29,8 +29,8 @@ def validate_logo(node, value):
         )
     try:
         root = ElementTree.fromstring(value)
-    except ElementTree.ParseError:
-        raise colander.Invalid(node, _("Logo is not parsable XML"))
+    except ElementTree.ParseError as err:
+        raise colander.Invalid(node, _("Logo is not parsable XML")) from err
 
     if _strip_xmlns(root.tag) != "svg":
         raise colander.Invalid(node, _("Logo does not start with <svg> tag"))

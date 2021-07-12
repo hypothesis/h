@@ -90,10 +90,10 @@ class SettingsManager:
         if val:
             try:
                 self.settings[name] = type_(val)
-            except ValueError:
+            except ValueError as err:
                 raise SettingError(
                     "error casting {} as {}".format(cast_message, type_.__name__)
-                )
+                ) from err
 
 
 def database_url(url):

@@ -56,7 +56,7 @@ def update_preferences(request):
     # used in other endpoints
     try:
         svc.update_preferences(request.user, **preferences)
-    except TypeError as e:
-        raise HTTPBadRequest(str(e))
+    except TypeError as err:
+        raise HTTPBadRequest(str(err)) from err
 
     return h_session.profile(request)

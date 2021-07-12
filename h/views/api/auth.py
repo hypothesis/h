@@ -124,7 +124,7 @@ class OAuthAuthorizeController:
         except OAuth2Error as err:
             raise OAuthAuthorizeError(
                 err.description or "Error: {}".format(self.context.error)
-            )
+            ) from err
 
         if self.request.authenticated_userid is None:
             raise HTTPFound(
@@ -170,13 +170,13 @@ class OAuthAuthorizeController:
 
         try:
             return HTTPFound(location=headers["Location"])
-        except KeyError:
+        except KeyError as err:
             client_id = self.request.params.get("client_id")
             raise RuntimeError(
                 'created authorisation code for client "{}" but got no redirect location'.format(
                     client_id
                 )
-            )
+            ) from err
 
     @classmethod
     def _render_web_message_response(cls, redirect_uri):
