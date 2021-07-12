@@ -80,8 +80,8 @@ class VerifiedJWTGrantToken(JWTGrantToken):
         except jwt.MissingRequiredClaimError as exc:
             if exc.claim == "aud":
                 raise errors.MissingJWTGrantTokenClaimError("aud", "audience")
-            else:
-                raise errors.MissingJWTGrantTokenClaimError(exc.claim)
+
+            raise errors.MissingJWTGrantTokenClaimError(exc.claim)
         except jwt.InvalidAudienceError:
             raise errors.InvalidJWTGrantTokenClaimError("aud", "audience")
         except jwt.ImmatureSignatureError:
