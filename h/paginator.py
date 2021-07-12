@@ -41,7 +41,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
 
     # If there are 1-3 pages to the left of current, add the pages.
     i = current_page - buffer
-    while i >= max_left and i < current_page:
+    while max_left <= i < current_page:
         if i > first:
             page_numbers.append(i)
         i += 1
@@ -53,7 +53,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
     max_right = current_page + buffer
 
     i = current_page + 1
-    while i <= max_right and i > current_page and i < page_max:
+    while max_right >= i > current_page and i < page_max:
         page_numbers.append(i)
         i += 1
 
