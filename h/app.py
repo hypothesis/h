@@ -14,12 +14,6 @@ from h.views.client import DEFAULT_CLIENT_URL
 log = logging.getLogger(__name__)
 
 
-def configure_jinja2_assets(config):
-    jinja2_env = config.get_jinja2_environment()
-    jinja2_env.globals["asset_url"] = config.registry["assets_env"].url
-    jinja2_env.globals["asset_urls"] = config.registry["assets_env"].urls
-
-
 def in_debug_mode(request):
     return asbool(request.registry.settings.get("pyramid.debug_all"))
 
@@ -36,8 +30,6 @@ def create_app(_global_config, **settings):
 
 
 def includeme(config):
-    settings = config.registry.settings
-
     config.set_root_factory("h.traversal:Root")
     config.scan("h.subscribers")
 
@@ -62,19 +54,13 @@ def includeme(config):
     config.add_jinja2_extension("h.jinja_extensions.SvgIcon")
     # Register a deferred action to setup the assets environment
     # when the configuration is committed.
-    config.action(None, configure_jinja2_assets, args=(config,))
+    config.action(None, _configure_jinja2_assets, args=(config,))
 
     # Pyramid layouts: provides support for reusable components ('panels')
     # that are used across multiple pages
     config.include("pyramid_layout")
 
-    config.registry.settings.setdefault(
-        "mail.default_sender", '"Annotation Daemon" <no-reply@localhost>'
-    )
-    if asbool(config.registry.settings.get("h.debug")):
-        config.include("pyramid_mailer.debug")
-    else:
-        config.include("pyramid_mailer")
+    _configure_mailer(config)
 
     # Pyramid service layer: provides infrastructure for registering and
     # retrieving services bound to the request.
@@ -93,19 +79,7 @@ def includeme(config):
     config.include("pyramid_exclog")
     config.add_settings({"exclog.extra_info": True})
 
-    # Define the global default Content Security Policy
-    client_url = settings.get("h.client_url", DEFAULT_CLIENT_URL)
-    client_host = urlparse(client_url).netloc
-    settings["csp"] = {
-        "font-src": ["'self'", "fonts.gstatic.com", client_host],
-        "script-src": ["'self'", client_host, "www.google-analytics.com"],
-        # Allow inline styles until https://github.com/hypothesis/client/issues/293
-        # is resolved as otherwise our own tool would break on the site,
-        # including on /docs/help.
-        "style-src": ["'self'", "fonts.googleapis.com", client_host, "'unsafe-inline'"],
-    }
-    if "csp.report_uri" in settings:
-        settings["csp"]["report-uri"] = [settings["csp.report_uri"]]
+    _configure_csp(config)
 
     # Core site modules
     config.include("h.assets")
@@ -130,7 +104,19 @@ def includeme(config):
     config.include("h.links")
     config.include("h.notification")
 
-    # Configure sentry
+    _configure_sentry(config)
+
+    # pyramid-sanity should be activated as late as possible
+    config.include("pyramid_sanity")
+
+
+def _configure_jinja2_assets(config):
+    jinja2_env = config.get_jinja2_environment()
+    jinja2_env.globals["asset_url"] = config.registry["assets_env"].url
+    jinja2_env.globals["asset_urls"] = config.registry["assets_env"].urls
+
+
+def _configure_sentry(config):
     config.add_settings(
         {
             "h_pyramid_sentry.filters": SENTRY_FILTERS,
@@ -139,8 +125,31 @@ def includeme(config):
             "h_pyramid_sentry.sqlalchemy_support": True,
         }
     )
-
     config.include("h_pyramid_sentry")
 
-    # pyramid-sanity should be activated as late as possible
-    config.include("pyramid_sanity")
+
+def _configure_mailer(config):
+    config.registry.settings.setdefault(
+        "mail.default_sender", '"Annotation Daemon" <no-reply@localhost>'
+    )
+    if asbool(config.registry.settings.get("h.debug")):
+        config.include("pyramid_mailer.debug")
+    else:
+        config.include("pyramid_mailer")
+
+
+def _configure_csp(config):
+    settings = config.registry.settings
+    # Define the global default Content Security Policy
+    client_url = settings.get("h.client_url", DEFAULT_CLIENT_URL)
+    client_host = urlparse(client_url).netloc
+    settings["csp"] = {
+        "font-src": ["'self'", "fonts.gstatic.com", client_host],
+        "script-src": ["'self'", client_host, "www.google-analytics.com"],
+        # Allow inline styles until https://github.com/hypothesis/client/issues/293
+        # is resolved as otherwise our own tool would break on the site,
+        # including on /docs/help.
+        "style-src": ["'self'", "fonts.googleapis.com", client_host, "'unsafe-inline'"],
+    }
+    if "csp.report_uri" in settings:
+        settings["csp"]["report-uri"] = [settings["csp.report_uri"]]
