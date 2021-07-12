@@ -27,7 +27,7 @@ class GroupJSONPresenter:
             ),
             "public": self.group.is_public,
             # DEPRECATED: TODO: remove from client
-            "scoped": True if self.group.scopes else False,
+            "scoped": bool(self.group.scopes),
             "type": self.group.type,
         }
 
