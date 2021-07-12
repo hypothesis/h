@@ -43,12 +43,12 @@ class UserSignupService:
         :param require_activation: The name to use.
         :type require_activation: bool.
 
-        :param identities: A list of dictionaries representing identities to
-          add to the new user. Each dictionary will be passed as keyword args
-          to :py:class:`h.models.UserIdentity`.
-
         Remaining keyword arguments are used to construct a new
         :py:class:`h.models.User` object.
+
+            * *identities*  A list of dictionaries representing identities to
+              add to the new user. Each dictionary will be passed as keyword args
+              to `h.models.UserIdentity`.
 
         :returns: the newly-created user object.
         :rtype: h.models.User
