@@ -78,7 +78,7 @@ def handle_message(message, registry, session, topic_handlers):
         handler(message.payload, sockets, request, session)
 
 
-def handle_user_event(message, sockets, request, session):
+def handle_user_event(message, sockets, _request, _session):
     # for session state change events, the full session model
     # is included so that clients can update themselves without
     # further API requests

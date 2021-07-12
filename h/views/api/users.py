@@ -17,7 +17,7 @@ from h.views.api.exceptions import PayloadError
     description="Fetch a user",
     permission="read",
 )
-def read(context, request):
+def read(context, _request):
     """
     Fetch a user.
 

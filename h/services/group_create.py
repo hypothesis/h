@@ -151,7 +151,7 @@ class GroupCreateService:
             )
 
 
-def group_create_factory(context, request):
+def group_create_factory(_context, request):
     """Return a GroupCreateService instance for the passed context and request."""
     user_service = request.find_service(name="user")
     return GroupCreateService(

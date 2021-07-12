@@ -23,5 +23,5 @@ class GroupfinderService:
         return self.session.query(models.Group).filter_by(pubid=id_).one_or_none()
 
 
-def groupfinder_service_factory(context, request):
+def groupfinder_service_factory(_context, request):
     return GroupfinderService(request.db, request.default_authority)

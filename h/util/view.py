@@ -8,7 +8,7 @@ def _exc_info():
     return sys.exc_info()
 
 
-def handle_exception(request, exception):
+def handle_exception(request, exception):  # pylint: disable=unused-argument
     """
     Handle an uncaught exception for the passed request.
 

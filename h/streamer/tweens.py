@@ -1,7 +1,7 @@
 __all__ = ["close_db_session_tween_factory"]
 
 
-def close_db_session_tween_factory(handler, registry):
+def close_db_session_tween_factory(handler, _registry):
     """Return the close_db_session_tween."""
 
     def close_db_session_tween(request):

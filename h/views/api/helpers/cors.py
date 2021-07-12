@@ -125,7 +125,7 @@ def add_preflight_view(config, route_name, cors_policy):
     if route_name in config.registry.cors_preflighted_views:
         return
 
-    def preflight_view(context, request):
+    def preflight_view(_context, _request):
         return Response()
 
     config.add_view(

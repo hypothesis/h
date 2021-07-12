@@ -171,6 +171,6 @@ class UserService:
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
 
 
-def user_service_factory(context, request):
+def user_service_factory(_context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.default_authority, session=request.db)

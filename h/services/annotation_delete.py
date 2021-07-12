@@ -31,5 +31,5 @@ class AnnotationDeleteService:
             self.delete(ann)
 
 
-def annotation_delete_service_factory(context, request):
+def annotation_delete_service_factory(_context, request):
     return AnnotationDeleteService(request)

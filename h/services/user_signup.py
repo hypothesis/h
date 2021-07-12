@@ -122,7 +122,7 @@ class UserSignupService:
         self.mailer.send.delay(*mail_params)
 
 
-def user_signup_service_factory(context, request):
+def user_signup_service_factory(_context, request):
     """Return a UserSignupService instance for the passed context and request."""
     return UserSignupService(
         default_authority=request.default_authority,

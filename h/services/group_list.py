@@ -210,7 +210,7 @@ class GroupListService:
         return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
 
 
-def group_list_factory(context, request):
+def group_list_factory(_context, request):
     """Return a GroupListService instance for the passed context and request."""
     group_scope_service = request.find_service(name="group_scope")
     return GroupListService(

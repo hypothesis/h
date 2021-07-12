@@ -98,7 +98,7 @@ def _session(request):
     # So as a precaution add our own callback here to make sure db sessions are
     # always closed.
     @request.add_finished_callback
-    def close_the_sqlalchemy_session(request):
+    def close_the_sqlalchemy_session(_request):
         if len(session.transaction._connections) > 1:
             # There appear to still be open DB connections belonging to this
             # request. This shouldn't happen.

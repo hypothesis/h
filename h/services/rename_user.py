@@ -87,7 +87,7 @@ class RenameUserService:
         )
 
 
-def rename_user_factory(context, request):
+def rename_user_factory(_context, request):
     """Return a RenameUserService instance for the passed context and request."""
     return RenameUserService(
         session=request.db,

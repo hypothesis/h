@@ -27,7 +27,7 @@ class GroupLinksService:
         return links
 
 
-def group_links_factory(context, request):
+def group_links_factory(_context, request):
     """Return a GroupLinksService instance for the passed context and request."""
     return GroupLinksService(
         default_authority=request.default_authority, route_url=request.route_url

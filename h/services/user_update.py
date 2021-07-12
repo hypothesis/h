@@ -61,6 +61,6 @@ class UserUpdateService:
         return user
 
 
-def user_update_factory(context, request):
+def user_update_factory(_context, request):
     """Return a UserUpdateService instance for the passed context and request."""
     return UserUpdateService(session=request.db)

@@ -68,5 +68,5 @@ class AnnotationModerationService:
         annotation.moderation = None
 
 
-def annotation_moderation_service_factory(context, request):
+def annotation_moderation_service_factory(_context, request):
     return AnnotationModerationService(request.db)

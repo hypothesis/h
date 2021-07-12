@@ -190,7 +190,7 @@ def upsert(context, request):
     description="Fetch all members of a group",
     permission="member_read",
 )
-def read_members(context, request):
+def read_members(context, _request):
     """Fetch the members of a group."""
     return [UserJSONPresenter(user).asdict() for user in context.group.members]
 

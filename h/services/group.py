@@ -122,7 +122,7 @@ class GroupService:
         ]
 
 
-def groups_factory(context, request):
+def groups_factory(_context, request):
     """Return a GroupService instance for the passed context and request."""
     user_service = request.find_service(name="user")
     return GroupService(session=request.db, user_fetcher=user_service.fetch)

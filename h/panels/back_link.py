@@ -8,7 +8,7 @@ from h.i18n import TranslationString as _  # noqa
 
 
 @panel_config(name="back_link", renderer="h:templates/panels/back_link.html.jinja2")
-def back_link(context, request):
+def back_link(_context, request):
     """
     A link which takes the user back to the previous page on the site.
     """

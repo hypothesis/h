@@ -98,7 +98,7 @@ class FeatureService:
         return False
 
 
-def feature_service_factory(context, request):
+def feature_service_factory(_context, request):
     return FeatureService(session=request.db, overrides=_feature_overrides(request))
 
 

@@ -82,7 +82,7 @@ class NipsaService:
         )
 
 
-def nipsa_factory(context, request):
+def nipsa_factory(_context, request):
     """Return a NipsaService instance for the passed context and request."""
 
     # NipsaService uses a search_index getter function rather than the search

@@ -55,7 +55,7 @@ def features_save(request):
     permission="admin_features",
 )
 @paginator.paginate_query
-def cohorts_index(context, request):
+def cohorts_index(_context, request):
     query = request.db.query(models.FeatureCohort)
     return query.order_by(models.FeatureCohort.name)
 
@@ -84,7 +84,7 @@ def cohorts_add(request):
     renderer="h:templates/admin/cohorts_edit.html.jinja2",
     permission="admin_features",
 )
-def cohorts_edit(context, request):
+def cohorts_edit(_context, request):
     id_ = request.matchdict["id"]
     cohort = request.db.query(models.FeatureCohort).get(id_)
     return {

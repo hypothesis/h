@@ -214,7 +214,7 @@ class GroupSearchController(SearchController):
 
         return result
 
-    def _get_total_annotations_in_group(self, result, request):
+    def _get_total_annotations_in_group(self, result, _request):
         """
         Get number of annotations in group.
 
@@ -394,7 +394,7 @@ class UserSearchController(SearchController):
 
         return result
 
-    def _get_total_user_annotations(self, result, request):
+    def _get_total_user_annotations(self, result, _request):
         """
         Get number of annotations that the user has made.
 

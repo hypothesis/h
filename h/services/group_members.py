@@ -78,7 +78,7 @@ class GroupMembersService:
         self.publish("group-leave", group.pubid, userid)
 
 
-def group_members_factory(context, request):
+def group_members_factory(_context, request):
     """Return a GroupMembersService instance for the passed context and request."""
     user_service = request.find_service(name="user")
     return GroupMembersService(

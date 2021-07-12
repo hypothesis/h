@@ -43,5 +43,5 @@ class DocumentService:
         )
 
 
-def document_service_factory(context, request):
+def document_service_factory(_context, request):
     return DocumentService(request.db)

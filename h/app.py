@@ -24,7 +24,7 @@ def in_debug_mode(request):
     return asbool(request.registry.settings.get("pyramid.debug_all"))
 
 
-def create_app(global_config, **settings):
+def create_app(_global_config, **settings):
     """
     Create the h WSGI application.
 

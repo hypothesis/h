@@ -110,7 +110,7 @@ class AuthTicketService:
         self._userid = None
 
 
-def auth_ticket_service_factory(context, request):
+def auth_ticket_service_factory(_context, request):
     """Return a AuthTicketService instance for the passed context and request."""
     user_service = request.find_service(name="user")
     return AuthTicketService(request.db, user_service)

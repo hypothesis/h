@@ -39,6 +39,6 @@ class SettingsService:
         return self.session.query(Setting).get(key)
 
 
-def settings_factory(context, request):
+def settings_factory(_context, request):
     """Return a SettingsService instance for the passed context and request."""
     return SettingsService(session=request.db)

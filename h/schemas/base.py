@@ -10,7 +10,7 @@ from pyramid.csrf import check_csrf_token, get_csrf_token
 
 
 @colander.deferred
-def deferred_csrf_token(node, kw):
+def deferred_csrf_token(_node, kw):
     request = kw.get("request")
     return get_csrf_token(request)
 
@@ -34,7 +34,7 @@ class CSRFSchema(colander.Schema):
         missing=None,
     )
 
-    def validator(self, form, value):
+    def validator(self, form, _value):
         request = form.bindings["request"]
         check_csrf_token(request)
 
@@ -92,7 +92,7 @@ def enum_type(enum_cls):
                 msg = '"{}" is not a known value'.format(cstruct)
                 raise colander.Invalid(node, msg)
 
-        def serialize(self, node, appstruct):
+        def serialize(self, _node, appstruct):
             if not appstruct:
                 return ""
             return appstruct.name

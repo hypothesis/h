@@ -58,6 +58,6 @@ class AnnotationStatsService:
         return search_result.total
 
 
-def annotation_stats_factory(context, request):
+def annotation_stats_factory(_context, request):
     """Return an AnnotationStatsService instance for the passed context and request."""
     return AnnotationStatsService(request)
