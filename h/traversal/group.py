@@ -8,7 +8,7 @@ from h.models import Group
 from h.traversal.root import RootFactory
 
 
-class GroupRoot(RootFactory):
+class GroupRequiredRoot(RootFactory):
     """
     Root factory for routes dealing with groups which must exist.
 
@@ -30,7 +30,7 @@ class GroupRoot(RootFactory):
         return group
 
 
-class GroupUpsertRoot(GroupRoot):
+class GroupUpsertRoot(GroupRequiredRoot):
     """Root factory for group "UPSERT" API."""
 
     def __getitem__(self, pubid_or_groupid):
