@@ -7,11 +7,11 @@ from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.auth import role
 from h.services.group import GroupService
-from h.traversal.group import GroupRequiredRoot, GroupUpsertContext, GroupUpsertRoot
+from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
 
 
 @pytest.mark.usefixtures("group_links_service")
-class TestGroupUpsertContext:
+class TestGroupContext:
     def test_acl_applies_root_upsert_to_user_role_when_no_group(
         self, pyramid_config, pyramid_request
     ):
@@ -21,7 +21,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=None)
+        context = GroupContext(group=None)
 
         assert pyramid_request.has_permission("upsert", context)
 
@@ -34,7 +34,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=None)
+        context = GroupContext(group=None)
 
         assert not pyramid_request.has_permission("upsert", context)
 
@@ -48,7 +48,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=group)
+        context = GroupContext(group=group)
 
         assert context.__acl__() == group.__acl__()
 
@@ -62,7 +62,7 @@ class TestGroupUpsertContext:
         )
         pyramid_config.set_authorization_policy(policy)
 
-        context = GroupUpsertContext(group=group)
+        context = GroupContext(group=group)
 
         # an `upsert` permission could be present in the ACL via the model IF the current
         # user were the creator, but they're not
@@ -121,19 +121,19 @@ class TestGroupRequiredRoot:
         return GroupRequiredRoot(pyramid_request)
 
 
-class TestGroupUpsertRoot:
+class TestGroupRoot:
     def test_getitem_returns_empty_upsert_context_if_missing_group(
-        self, pyramid_request, group_service, GroupUpsertContext
+        self, pyramid_request, group_service, GroupContext
     ):
-        root = GroupUpsertRoot(pyramid_request)
+        root = GroupRoot(pyramid_request)
         group_service.fetch.return_value = sentinel.group
 
         context = root["group_id"]
 
         group_service.fetch.assert_called_once_with("group_id")
-        assert context == GroupUpsertContext.return_value
-        GroupUpsertContext.assert_called_once_with(group=sentinel.group)
+        assert context == GroupContext.return_value
+        GroupContext.assert_called_once_with(group=sentinel.group)
 
     @pytest.fixture(autouse=True)
-    def GroupUpsertContext(self, patch):
-        return patch("h.traversal.group.GroupUpsertContext")
+    def GroupContext(self, patch):
+        return patch("h.traversal.group.GroupContext")
