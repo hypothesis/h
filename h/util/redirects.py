@@ -58,7 +58,7 @@ def lookup(redirects, request):
         if r.prefix and path.startswith(r.src):
             suffix = path.replace(r.src, "", 1)
             return _dst_root(request, r) + suffix
-        elif not r.prefix and path == r.src:
+        if not r.prefix and path == r.src:
             return _dst_root(request, r)
     return None
 
@@ -92,5 +92,5 @@ def parse(specs):
 def _dst_root(request, redirect):
     if redirect.internal:
         return request.route_url(redirect.dst)
-    else:
-        return redirect.dst
+
+    return redirect.dst

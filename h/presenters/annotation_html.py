@@ -88,48 +88,42 @@ class AnnotationHTMLPresenter:
         """Return a link to this annotation's document."""
         if self.document:
             return self.document.link
-        else:
-            return ""
+        return ""
 
     @property
     def filename(self):
         """Return the filename of this annotation's document."""
         if self.document:
             return self.document.filename
-        else:
-            return ""
+        return ""
 
     @property
     def hostname_or_filename(self):
         """Return the hostname of this annotation's document."""
         if self.document:
             return self.document.hostname_or_filename
-        else:
-            return ""
+        return ""
 
     @property
     def href(self):
         """Return an href for this annotation's document, or ''."""
         if self.document:
             return self.document.href
-        else:
-            return ""
+        return ""
 
     @property
     def link_text(self):
         """Return some link text for this annotation's document."""
         if self.document:
             return self.document.link_text
-        else:
-            return ""
+        return ""
 
     @property
     def title(self):
         """Return a title for this annotation."""
         if self.document:
             return self.document.title
-        else:
-            return ""
+        return ""
 
     # Explicitly forward some annotation properties for convenient access.
     @property

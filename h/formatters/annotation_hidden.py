@@ -48,8 +48,8 @@ class AnnotationHiddenFormatter:
 
         if self._is_hidden(annotation):
             return {"hidden": True, "text": "", "tags": []}
-        else:
-            return {"hidden": False}
+
+        return {"hidden": False}
 
     def _current_user_is_moderator(self, group):
         return self._moderator_check(group)

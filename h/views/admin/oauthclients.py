@@ -13,8 +13,8 @@ _ = i18n.TranslationString
 def _response_type_for_grant_type(grant_type):
     if grant_type == GrantType.authorization_code:
         return ResponseType.code
-    else:
-        return None
+
+    return None
 
 
 @view_config(

@@ -72,5 +72,5 @@ def _orcid_checksum_digit(orcid):
 
     if result == 10:
         return "X"
-    else:
-        return str(result)
+
+    return str(result)
