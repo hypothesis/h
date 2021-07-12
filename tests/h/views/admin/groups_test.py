@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from h_matchers import Any
 
+from h.traversal.group import GroupContext
 from h.views.admin import groups
 from h.views.admin.groups import GroupCreateViews, GroupEditViews
 
@@ -46,9 +47,9 @@ class TestGroupCreateView:
     def test_get_sets_form(self, pyramid_request):
         view = GroupCreateViews(pyramid_request)
 
-        ctx = view.get()
+        response = view.get()
 
-        assert "form" in ctx
+        assert "form" in response
 
     def test_init_fetches_all_organizations(
         self, pyramid_request, list_organizations_service
@@ -207,7 +208,7 @@ class TestGroupEditViews:
         organization,
         AdminGroupSchema,
     ):
-        GroupEditViews(group, pyramid_request)
+        GroupEditViews(GroupContext(group), pyramid_request)
 
         schema = AdminGroupSchema.return_value
         schema.bind.assert_called_with(
@@ -221,23 +222,23 @@ class TestGroupEditViews:
         factories.Annotation(groupid=group.pubid)
         factories.Annotation(groupid=group.pubid)
 
-        view = GroupEditViews(group, pyramid_request)
+        view = GroupEditViews(GroupContext(group), pyramid_request)
 
-        ctx = view.read()
+        response = view.read()
 
-        assert ctx["form"] == self._expected_form(group)
-        assert ctx["pubid"] == group.pubid
-        assert ctx["group_name"] == group.name
-        assert ctx["member_count"] == len(group.members)
-        assert ctx["annotation_count"] == 2
+        assert response["form"] == self._expected_form(group)
+        assert response["pubid"] == group.pubid
+        assert response["group_name"] == group.name
+        assert response["member_count"] == len(group.members)
+        assert response["annotation_count"] == 2
 
     def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group):
         group.creator = None
-        view = GroupEditViews(group, pyramid_request)
+        view = GroupEditViews(GroupContext(group), pyramid_request)
 
-        ctx = view.read()
+        response = view.read()
 
-        assert ctx["form"] == self._expected_form(group)
+        assert response["form"] == self._expected_form(group)
 
     def test_read_lists_organizations_in_groups_authority(
         self,
@@ -247,7 +248,7 @@ class TestGroupEditViews:
         AdminGroupSchema,
         list_organizations_service,
     ):
-        GroupEditViews(group, pyramid_request)
+        GroupEditViews(GroupContext(group), pyramid_request)
 
         list_organizations_service.organizations.assert_called_with(group.authority)
         schema = AdminGroupSchema.return_value
@@ -287,9 +288,9 @@ class TestGroupEditViews:
             )
 
         handle_form_submission.side_effect = call_on_success
-        view = GroupEditViews(group, pyramid_request)
+        view = GroupEditViews(GroupContext(group), pyramid_request)
 
-        ctx = view.update()
+        response = view.update()
 
         group_update_service.update.assert_called_once_with(
             group,
@@ -298,12 +299,12 @@ class TestGroupEditViews:
             description="New description",
             name="Updated group",
             scopes=[
-                GroupScope(scope=o)
-                for o in ["http://somewhereelse.com", "http://www.gladiolus.org"]
+                GroupScope(scope=scope)
+                for scope in ["http://somewhereelse.com", "http://www.gladiolus.org"]
             ],
             enforce_scope=False,
         )
-        assert ctx["form"] == self._expected_form(group)
+        assert response["form"] == self._expected_form(group)
 
     def test_update_updates_group_members_on_success(
         self,
@@ -339,7 +340,7 @@ class TestGroupEditViews:
             )
 
         handle_form_submission.side_effect = call_on_success
-        view = GroupEditViews(group, pyramid_request)
+        view = GroupEditViews(GroupContext(group), pyramid_request)
 
         view.update()
 
@@ -350,7 +351,7 @@ class TestGroupEditViews:
     def test_delete_deletes_group(
         self, group, delete_group_service, pyramid_request, routes
     ):
-        view = GroupEditViews(group, pyramid_request)
+        view = GroupEditViews(GroupContext(group), pyramid_request)
 
         view.delete()
 
