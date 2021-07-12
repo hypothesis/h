@@ -237,5 +237,5 @@ class NotificationsSchema(CSRFSchema):
     )
 
 
-def includeme(config):
+def includeme(_config):
     pass

@@ -26,5 +26,5 @@ class GroupScopeService:
         ]
 
 
-def group_scope_factory(context, request):
+def group_scope_factory(_context, request):
     return GroupScopeService(session=request.db)

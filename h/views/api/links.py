@@ -12,7 +12,7 @@ from h.views.api.helpers.angular import AngularRouteTemplater
     # regardless of authorization.
     http_cache=(60 * 5, {"public": True}),
 )
-def links(context, request):
+def links(_context, request):
     templater = AngularRouteTemplater(request.route_url, params=["user"])
 
     tag_search_url = request.route_url("activity.search", _query={"q": 'tag:"__tag__"'})

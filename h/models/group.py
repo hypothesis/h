@@ -156,7 +156,7 @@ class Group(Base, mixins.Timestamps):
         super(Group, self).__init__(**kwargs)
 
     @sa.orm.validates("name")
-    def validate_name(self, key, name):
+    def validate_name(self, _key, name):
         if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:
             raise ValueError(
                 "name must be between {min} and {max} characters "
@@ -165,7 +165,7 @@ class Group(Base, mixins.Timestamps):
         return name
 
     @sa.orm.validates("authority_provided_id")
-    def validate_authority_provided_id(self, key, authority_provided_id):
+    def validate_authority_provided_id(self, _key, authority_provided_id):
         if not authority_provided_id:
             return None
 

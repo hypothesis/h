@@ -9,7 +9,7 @@ _ = i18n.TranslationString
 
 
 @colander.deferred
-def _deferred_username_widget(node, kw):
+def _deferred_username_widget(_node, kw):
     """Return a username widget that autofocuses if username isn't pre-filled."""
     return deform.widget.TextInputWidget(
         autofocus=_should_autofocus_username(kw), autocomplete="username"
@@ -17,7 +17,7 @@ def _deferred_username_widget(node, kw):
 
 
 @colander.deferred
-def _deferred_password_widget(node, kw):
+def _deferred_password_widget(_node, kw):
     """Return a password widget that autofocuses if username *is* pre-filled."""
     return deform.widget.PasswordWidget(
         autofocus=not _should_autofocus_username(kw), autocomplete="current-password"

@@ -10,7 +10,7 @@ from h.views.api.helpers.angular import AngularRouteTemplater
     # regardless of authorization.
     http_cache=(60 * 5, {"public": True}),
 )
-def index(context, request):
+def index(_context, request):
     """Return the API descriptor document.
 
     Clients may use this to discover endpoints for the API.
@@ -37,7 +37,7 @@ def index(context, request):
     # regardless of authorization.
     http_cache=(60 * 5, {"public": True}),
 )
-def index_v2(context, request):
+def index_v2(_context, request):
     """Return the API descriptor document.
 
     Clients may use this to discover endpoints for the API.

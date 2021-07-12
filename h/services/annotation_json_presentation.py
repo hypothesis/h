@@ -60,7 +60,7 @@ class AnnotationJSONPresentationService:
         return presenters.AnnotationJSONPresenter(annotation_resource, self.formatters)
 
 
-def annotation_json_presentation_service_factory(context, request):
+def annotation_json_presentation_service_factory(_context, request):
     group_svc = request.find_service(IGroupService)
     links_svc = request.find_service(name="links")
     flag_svc = request.find_service(name="flag")

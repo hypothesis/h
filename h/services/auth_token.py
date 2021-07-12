@@ -59,5 +59,5 @@ class AuthTokenService:
         return None
 
 
-def auth_token_service_factory(context, request):
+def auth_token_service_factory(_context, request):
     return AuthTokenService(request.db)

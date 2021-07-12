@@ -18,7 +18,7 @@ _ = i18n.TranslationString
     permission="admin_groups",
 )
 @paginator.paginate_query
-def groups_index(context, request):
+def groups_index(_context, request):
     """Retrieve a paginated list of all groups, filtered by optional group name parameter"""
 
     group_svc = request.find_service(name="group")

@@ -69,6 +69,6 @@ class OrganizationService:
         return default_org
 
 
-def organization_factory(context, request):
+def organization_factory(_context, request):
     """Return a OrganizationService instance for the request."""
     return OrganizationService(session=request.db)

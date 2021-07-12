@@ -17,7 +17,7 @@ _ = i18n.TranslationString
     permission="admin_organizations",
 )
 @paginator.paginate_query
-def index(context, request):
+def index(_context, request):
     q = request.params.get("q")
 
     filter_terms = []

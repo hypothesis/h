@@ -8,7 +8,7 @@ from pyramid.view import view_config
 
 
 @view_config(renderer="h:templates/help.html.jinja2", route_name="custom_onboarding")
-def custom_onboarding_page(context, request):
+def custom_onboarding_page(_context, request):
     return {
         "embed_js_url": request.route_path("embed"),
         "is_help": False,
@@ -17,12 +17,12 @@ def custom_onboarding_page(context, request):
 
 
 @view_config(renderer="h:templates/help.html.jinja2", route_name="onboarding")
-def onboarding_page(context, request):
+def onboarding_page(_context, request):
     return exc.HTTPFound(request.route_url("custom_onboarding", slug=_random_word()))
 
 
 @view_config(renderer="h:templates/help.html.jinja2", route_name="help")
-def help_page(context, request):
+def help_page(_context, request):
     return {
         "embed_js_url": request.route_path("embed"),
         "is_help": True,

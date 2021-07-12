@@ -276,7 +276,7 @@ class User(Base):
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
     @sa.orm.validates("email")
-    def validate_email(self, key, email):
+    def validate_email(self, _key, email):
         if email is None:
             return email
 
@@ -288,7 +288,7 @@ class User(Base):
         return email
 
     @sa.orm.validates("_username")
-    def validate_username(self, key, username):
+    def validate_username(self, _key, username):
         if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
             raise ValueError(
                 "username must be between {min} and {max} "

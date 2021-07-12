@@ -233,11 +233,11 @@ class AuthClientPolicy:
         """
         return self._basic_auth_policy.effective_principals(request)
 
-    def remember(self, request, userid, **kw):
+    def remember(self, request, userid, **kw):  # pylint: disable=unused-argument
         """Not implemented for basic auth client policy."""
         return []
 
-    def forget(self, request):
+    def forget(self, _request):
         """Not implemented for basic auth client policy."""
         return []
 
@@ -317,11 +317,11 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         self.callback = callback
         self.debug = debug
 
-    def remember(self, request, userid, **kw):
+    def remember(self, request, userid, **kw):  # pylint: disable=unused-argument
         """Not implemented for token auth policy."""
         return []
 
-    def forget(self, request):
+    def forget(self, _request):
         """Not implemented for token auth policy."""
         return []
 

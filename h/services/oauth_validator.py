@@ -162,7 +162,9 @@ class OAuthValidatorService(RequestValidator):
         if authz_code:
             self.session.delete(authz_code)
 
-    def invalidate_refresh_token(self, refresh_token, request, *args, **kwargs):
+    def invalidate_refresh_token(
+        self, refresh_token, request, *args, **kwargs  # pylint: disable=unused-argument
+    ):
         """
         Shorten expiration of a refresh token.
 
@@ -386,7 +388,7 @@ class OAuthValidatorService(RequestValidator):
         )
 
 
-def oauth_validator_service_factory(context, request):
+def oauth_validator_service_factory(_context, request):
     """Return a OAuthValidator instance for the passed context and request."""
     user_svc = request.find_service(name="user")
     return OAuthValidatorService(request.db, user_svc)

@@ -72,5 +72,5 @@ class FlagService:
         self.session.add(flag)
 
 
-def flag_service_factory(context, request):
+def flag_service_factory(_context, request):
     return FlagService(request.db)

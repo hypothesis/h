@@ -55,6 +55,6 @@ class UserPasswordService:
         user.password_updated = datetime.datetime.utcnow()
 
 
-def user_password_service_factory(context, request):
+def user_password_service_factory(_context, _request):
     """Return a UserPasswordService instance for the passed context and request."""
     return UserPasswordService()

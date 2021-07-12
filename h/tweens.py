@@ -1,3 +1,4 @@
+# pylint: disable=unused-argument
 import logging
 from collections.abc import Sequence
 

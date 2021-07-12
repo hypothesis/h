@@ -50,5 +50,5 @@ class FlagCountService:
         return flag_counts
 
 
-def flag_count_service_factory(context, request):
+def flag_count_service_factory(_context, request):
     return FlagCountService(request.db)

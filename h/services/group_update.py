@@ -52,6 +52,6 @@ class GroupUpdateService:
         return group
 
 
-def group_update_factory(context, request):
+def group_update_factory(_context, request):
     """Return a GroupUpdateService instance for the passed context and request."""
     return GroupUpdateService(session=request.db)

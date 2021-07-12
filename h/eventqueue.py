@@ -60,7 +60,7 @@ class EventQueue:
                         raise
                     report_exception()
 
-    def response_callback(self, request, response):
+    def response_callback(self, request, _response):
         if request.exception is not None:
             return
 

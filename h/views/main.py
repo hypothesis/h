@@ -54,7 +54,7 @@ def annotation_page(context, request):
 
 
 @view_config(route_name="robots", http_cache=(86400, {"public": True}))
-def robots(context, request):
+def robots(_context, request):
     return response.FileResponse(
         "h/static/robots.txt", request=request, content_type="text/plain"
     )
@@ -65,7 +65,7 @@ def robots(context, request):
     renderer="h:templates/app.html.jinja2",
     csp_insecure_optout=True,
 )
-def stream(context, request):
+def stream(_context, request):
     q = request.params.get("q", "").split(":", 1)
     if len(q) >= 2 and q[0] == "tag":
         tag = q[1]

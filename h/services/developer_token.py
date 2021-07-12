@@ -75,5 +75,5 @@ class DeveloperTokenService:
         return PREFIX + security.token_urlsafe()
 
 
-def developer_token_service_factory(context, request):
+def developer_token_service_factory(_context, request):
     return DeveloperTokenService(request.db)

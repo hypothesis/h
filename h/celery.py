@@ -65,32 +65,34 @@ celery.conf.update(
 
 
 @signals.worker_init.connect
-def bootstrap_worker(sender, **kwargs):
+def bootstrap_worker(sender, **kwargs):  # pylint: disable=unused-argument
     request = sender.app.webapp_bootstrap()
     sender.app.request = request
 
 
 @signals.task_prerun.connect
-def reset_nipsa_cache(sender, **kwargs):
+def reset_nipsa_cache(sender, **kwargs):  # pylint: disable=unused-argument
     """Reset nipsa service cache before running each task."""
     svc = sender.app.request.find_service(name="nipsa")
     svc.clear()
 
 
 @signals.task_success.connect
-def transaction_commit(sender, **kwargs):
+def transaction_commit(sender, **kwargs):  # pylint: disable=unused-argument
     """Commit the request transaction after each successful task execution."""
     sender.app.request.tm.commit()
 
 
 @signals.task_failure.connect
-def transaction_abort(sender, **kwargs):
+def transaction_abort(sender, **kwargs):  # pylint: disable=unused-argument
     """Abort the request transaction after each failed task execution."""
     sender.app.request.tm.abort()
 
 
 @signals.task_failure.connect
-def report_failure(sender, task_id, args, kwargs, einfo, **kw):
+def report_failure(
+    sender, task_id, args, kwargs, einfo, **kw
+):  # pylint: disable=unused-argument
     """Report a task failure to the console in development."""
     if not sender.app.request.debug:
         return
@@ -114,7 +116,7 @@ def start(argv, bootstrap):
 
 @signals.task_prerun.connect
 def add_task_name_and_id_to_log_messages(
-    task_id, task, *args, **kwargs
+    task_id, task, *args, **kwargs  # pylint: disable=unused-argument
 ):  # pragma: no cover
     """
      Add the Celery task name and ID to all messages logged by Celery tasks.

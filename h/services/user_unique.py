@@ -75,6 +75,6 @@ class UserUniqueService:
             raise DuplicateUserError(", ".join(errors))
 
 
-def user_unique_factory(context, request):
+def user_unique_factory(_context, request):
     user_service = request.find_service(name="user")
     return UserUniqueService(session=request.db, user_service=user_service)

@@ -126,14 +126,14 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         else:
             raise InvalidRefreshTokenError()
 
-    def generate_access_token(self, oauth_request):
+    def generate_access_token(self, _oauth_request):
         return ACCESS_TOKEN_PREFIX + token_urlsafe()
 
-    def generate_refresh_token(self, oauth_request):
+    def generate_refresh_token(self, _oauth_request):
         return REFRESH_TOKEN_PREFIX + token_urlsafe()
 
 
-def oauth_provider_service_factory(context, request):
+def oauth_provider_service_factory(_context, request):
     validator_svc = request.find_service(name="oauth_validator")
     user_svc = request.find_service(name="user")
     return OAuthProviderService(validator_svc, user_svc, request.domain)

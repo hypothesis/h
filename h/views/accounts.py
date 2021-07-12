@@ -48,7 +48,7 @@ def _login_redirect_url(request):
     accept="text/html",
     renderer="h:templates/accounts/session_invalid.html.jinja2",
 )
-def bad_csrf_token_html(context, request):
+def bad_csrf_token_html(_context, request):
     request.response.status_code = 403
 
     next_path = "/"
@@ -61,7 +61,7 @@ def bad_csrf_token_html(context, request):
 
 
 @json_view(context=BadCSRFToken)
-def bad_csrf_token_json(context, request):
+def bad_csrf_token_json(_context, request):
     request.response.status_code = 403
     reason = _("Session is invalid. Please try again.")
     return {"status": "failure", "reason": reason, "model": session.model(request)}
@@ -618,7 +618,7 @@ class DeveloperController:
     request_method="GET",
     renderer="h:templates/accounts/claim_account_legacy.html.jinja2",
 )
-def claim_account_legacy(request):
+def claim_account_legacy(_request):
     """Render a page explaining that claim links are no longer valid."""
     return {}
 

@@ -64,11 +64,11 @@ class Tracker:
 
         return changes
 
-    def _after_rollback(self, *args):
+    def _after_rollback(self, *args):  # pylint: disable=unused-argument
         self._flushed_changes = {}
 
-    def _after_commit(self, *args):
+    def _after_commit(self, *args):  # pylint: disable=unused-argument
         self._flushed_changes = {}
 
-    def _after_flush(self, *args):
+    def _after_flush(self, *args):  # pylint: disable=unused-argument
         self._flushed_changes.update(self._unflushed_changes())

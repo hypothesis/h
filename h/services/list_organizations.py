@@ -33,7 +33,7 @@ class ListOrganizationsService:
         )
 
 
-def list_organizations_factory(context, request):
+def list_organizations_factory(_context, request):
     """
     Return a ListOrganizationsService instance for the passed
     context.

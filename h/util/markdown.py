@@ -30,7 +30,7 @@ MARKDOWN_TAGS = [
 ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
 
 
-def _filter_link_attributes(tag, name, value):
+def _filter_link_attributes(_tag, name, value):
     if name in ["href", "title"]:
         return True
 
@@ -102,7 +102,7 @@ def sanitize(text):
     return cleaner.clean(text)
 
 
-def _linkify_target_blank(attrs, new=False):
+def _linkify_target_blank(attrs, new=False):  # pylint: disable=unused-argument
     # FIXME: when bleach>2.0.0 is released we can use
     # bleach.callbacks.target_blank instead of this function. We have our own
     # copy to work around a bug in 2.0.0:
@@ -121,7 +121,7 @@ def _linkify_target_blank(attrs, new=False):
     return attrs
 
 
-def _linkify_rel(attrs, new=False):
+def _linkify_rel(attrs, new=False):  # pylint: disable=unused-argument
     href_key = (None, "href")
 
     if href_key not in attrs:

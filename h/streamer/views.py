@@ -21,7 +21,7 @@ def websocket_view(request):
 
 
 @notfound_view_config(renderer="json")
-def notfound(exc, request):
+def notfound(_exc, request):
     request.response.status_code = 404
     return {
         "ok": False,
@@ -31,7 +31,7 @@ def notfound(exc, request):
 
 
 @forbidden_view_config(renderer="json")
-def forbidden(exc, request):
+def forbidden(_exc, request):
     request.response.status_code = 403
     return {
         "ok": False,
@@ -42,7 +42,7 @@ def forbidden(exc, request):
 
 
 @view_config(context=HandshakeError, renderer="json")
-def error_badhandshake(exc, request):
+def error_badhandshake(_exc, request):
     request.response.status_code = 400
     return {
         "ok": False,
@@ -52,7 +52,7 @@ def error_badhandshake(exc, request):
 
 
 @view_config(context=Exception, renderer="json")
-def error(context, request):
+def error(_context, request):
     request.response.status_code = 500
 
     return {

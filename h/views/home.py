@@ -5,7 +5,7 @@ from pyramid.view import view_config
 
 
 @view_config(route_name="via_redirect", request_method="GET")
-def via_redirect(context, request):
+def via_redirect(_context, request):
     url = request.params.get("url")
 
     if url is None:
@@ -16,7 +16,7 @@ def via_redirect(context, request):
 
 
 @view_config(route_name="index", request_method="GET")
-def index_redirect(context, request):
+def index_redirect(_context, request):
     try:
         redirect = request.registry.settings["h.homepage_redirect_url"]
     except KeyError:
