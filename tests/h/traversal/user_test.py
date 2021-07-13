@@ -31,24 +31,31 @@ class TestUserRoot:
 
         assert bool(pyramid_request.has_permission("create", context)) == has_create
 
-    def test_get_user(self, root, user_service):
-        user = root.get_user(sentinel.userid, sentinel.authority)
+    def test_get_user_context(self, root, user_service, UserContext):
+        user = root.get_user_context(sentinel.userid, sentinel.authority)
 
         user_service.fetch.assert_called_once_with(sentinel.userid, sentinel.authority)
 
-        assert user == user_service.fetch.return_value
+        UserContext.assert_called_with(user_service.fetch.return_value)
+        assert user == UserContext.return_value
 
-    def test_get_user_raises_if_the_user_does_not_exist(self, root, user_service):
+    def test_get_user_context_raises_if_the_user_does_not_exist(
+        self, root, user_service
+    ):
         user_service.fetch.return_value = None
 
         with pytest.raises(KeyError):
-            root.get_user(sentinel.userid, sentinel.authority)
+            root.get_user_context(sentinel.userid, sentinel.authority)
 
-    def test_get_user_raises_if_the_userid_is_invalid(self, root, user_service):
+    def test_get_user_context_raises_if_the_userid_is_invalid(self, root, user_service):
         user_service.fetch.side_effect = InvalidUserId("user_id")
 
         with pytest.raises(HTTPBadRequest):
-            root.get_user(sentinel.bad_username, authority=None)
+            root.get_user_context(sentinel.bad_username, authority=None)
+
+    @pytest.fixture(autouse=True)
+    def UserContext(self, patch):
+        return patch("h.traversal.user.UserContext")
 
     @pytest.fixture
     def root(self, pyramid_request):
@@ -63,16 +70,15 @@ class TestUserByNameRoot:
     ):
         client_authority.return_value = returned_authority
 
-        user = root[sentinel.username]
+        context = root[sentinel.username]
 
         client_authority.assert_called_once_with(pyramid_request)
-        root.get_user.assert_called_once_with(
+        root.get_user_context.assert_called_once_with(
             sentinel.username,
             authority=client_authority.return_value
             or pyramid_request.default_authority,
         )
-
-        assert user == root.get_user.return_value
+        assert context == root.get_user_context.return_value
 
     @pytest.fixture(autouse=True)
     def client_authority(self, patch):
@@ -82,25 +88,21 @@ class TestUserByNameRoot:
     def root(self, pyramid_request):
         root = UserByNameRoot(pyramid_request)
 
-        with patch.object(root, "get_user"):
+        with patch.object(root, "get_user_context"):
             yield root
 
 
 @pytest.mark.usefixtures("user_service")
 class TestUserByIDRoot:
-    def test_it_fetches_the_requested_user(self, root, user_service, UserContext):
+    def test_it_fetches_the_requested_user(self, root, user_service):
         context = root[sentinel.userid]
 
-        root.get_user.assert_called_once_with(sentinel.userid, authority=None)
-        UserContext.assert_called_with(root.get_user.return_value)
-        assert context == UserContext.return_value
+        root.get_user_context.assert_called_once_with(sentinel.userid, authority=None)
+
+        assert context == root.get_user_context.return_value
 
     @pytest.fixture
     def root(self, pyramid_request):
         root = UserByIDRoot(pyramid_request)
-        with patch.object(root, "get_user"):
+        with patch.object(root, "get_user_context"):
             yield root
-
-    @pytest.fixture(autouse=True)
-    def UserContext(self, patch):
-        return patch("h.traversal.user.UserContext")

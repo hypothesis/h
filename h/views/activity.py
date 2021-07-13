@@ -342,9 +342,9 @@ class GroupSearchController(SearchController):
 class UserSearchController(SearchController):
     """View callables unique to the "activity.user_search" route."""
 
-    def __init__(self, user, request):
+    def __init__(self, context, request):
         super().__init__(request)
-        self.user = user
+        self.user = context.user
 
     @view_config(request_method="GET")
     def search(self):
