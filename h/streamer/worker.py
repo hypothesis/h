@@ -114,7 +114,7 @@ class GEventWebSocketPool(Pool):
                 websocket = greenlet._run.__self__
                 if websocket:
                     websocket.close(1001, "Server is shutting down")
-            except:  # noqa: E722
+            except:  # noqa: E722 #pylint: disable=bare-except
                 pass
             finally:
                 self.discard(greenlet)
