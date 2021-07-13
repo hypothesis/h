@@ -26,10 +26,6 @@ class TestRead:
         result = read(context, pyramid_request)
         assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
-    @pytest.fixture
-    def context(self, user):
-        return mock.create_autospec(UserContext, instance=True, user=user)
-
 
 @pytest.mark.usefixtures("client_authority", "user_signup_service", "user_unique_svc")
 class TestCreate:
@@ -148,66 +144,60 @@ class TestCreate:
 @pytest.mark.usefixtures(
     "auth_client",
     "user_service",
-    "user",
     "user_update_svc",
     "UpdateUserAPISchema",
     "TrustedUserJSONPresenter",
 )
 class TestUpdate:
     def test_it_validates_request_payload(
-        self, pyramid_request, user, user_update_svc, UpdateUserAPISchema
+        self, pyramid_request, context, UpdateUserAPISchema
     ):
         data = {"display_name": "Rudolph Blimp", "email": "fingers@perplexology.com"}
         pyramid_request.json_body = data
 
-        update(user, pyramid_request)
+        update(context, pyramid_request)
 
         UpdateUserAPISchema.return_value.validate.assert_called_once_with(data)
 
     def test_it_proxies_to_user_update_svc(
-        self, pyramid_request, user, user_update_svc, UpdateUserAPISchema
+        self, pyramid_request, context, user_update_svc, UpdateUserAPISchema
     ):
         appstruct = {
             "display_name": "Rudolph Blimp",
             "email": "fingers@perplexology.com",
         }
         UpdateUserAPISchema.return_value.validate.return_value = appstruct
-        user_update_svc.update.return_value = user
+        user_update_svc.update.return_value = context.user
 
-        update(user, pyramid_request)
+        update(context, pyramid_request)
 
-        user_update_svc.update.assert_called_once_with(user, **appstruct)
+        user_update_svc.update.assert_called_once_with(context.user, **appstruct)
 
     def test_it_presents_updated_user_returned_from_service(
-        self, pyramid_request, user, TrustedUserJSONPresenter, user_update_svc
+        self, pyramid_request, context, TrustedUserJSONPresenter, user_update_svc
     ):
-        user_update_svc.update.return_value = user
-        update(user, pyramid_request)
+        user_update_svc.update.return_value = context.user
 
-        TrustedUserJSONPresenter.assert_called_once_with(user)
+        result = update(context, pyramid_request)
 
-    def test_it_returns_presented_user(
-        self, pyramid_request, valid_payload, TrustedUserJSONPresenter
-    ):
-        result = update(user, pyramid_request)
-
+        TrustedUserJSONPresenter.assert_called_once_with(context.user)
         assert result == TrustedUserJSONPresenter.return_value.asdict()
 
     def test_raises_when_schema_validation_fails(
-        self, user, pyramid_request, valid_payload, UpdateUserAPISchema
+        self, context, pyramid_request, valid_payload, UpdateUserAPISchema
     ):
         UpdateUserAPISchema.return_value.validate.side_effect = ValidationError(
             "validation failed"
         )
 
         with pytest.raises(ValidationError):
-            update(user, pyramid_request)
+            update(context, pyramid_request)
 
-    def test_raises_for_invalid_json_body(self, user, pyramid_request, patch):
+    def test_raises_for_invalid_json_body(self, context, pyramid_request, patch):
         type(pyramid_request).json_body = mock.PropertyMock(side_effect=ValueError())
 
         with pytest.raises(PayloadError):
-            update(user, pyramid_request)
+            update(context, pyramid_request)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
@@ -287,3 +277,8 @@ def TrustedUserJSONPresenter(patch):
 @pytest.fixture
 def user(factories, auth_client):
     return factories.User(authority=auth_client.authority)
+
+
+@pytest.fixture
+def context(user):
+    return mock.create_autospec(UserContext, instance=True, user=user)

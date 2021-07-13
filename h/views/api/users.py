@@ -86,7 +86,7 @@ def create(request):
     description="Update a user",
     permission="update",
 )
-def update(user, request):
+def update(context, request):
     """
     Update a user.
 
@@ -97,7 +97,7 @@ def update(user, request):
     appstruct = schema.validate(_json_payload(request))
 
     user_update_service = request.find_service(name="user_update")
-    user = user_update_service.update(user, **appstruct)
+    user = user_update_service.update(context.user, **appstruct)
 
     presenter = TrustedUserJSONPresenter(user)
     return presenter.asdict()

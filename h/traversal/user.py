@@ -30,7 +30,7 @@ class UserRoot(RootFactory):
 
         self.user_service = self.request.find_service(name="user")
 
-    def get_user(self, userid_or_username, authority):
+    def get_user_context(self, userid_or_username, authority):
         """Get a user while handling errors appropriately for a traversal."""
 
         try:
@@ -42,15 +42,14 @@ class UserRoot(RootFactory):
         if not user:
             raise KeyError()
 
-        return user
+        return UserContext(user)
 
 
 class UserByNameRoot(UserRoot):
     """Root factory for routes which look up users by username."""
 
     def __getitem__(self, username):
-        # TODO: This should be a UserContext
-        return self.get_user(
+        return self.get_user_context(
             username,
             authority=client_authority(self.request) or self.request.default_authority,
         )
@@ -60,4 +59,4 @@ class UserByIDRoot(UserRoot):
     """Root factory for routes which look up users by id."""
 
     def __getitem__(self, userid):
-        return UserContext(self.get_user(userid, authority=None))
+        return self.get_user_context(userid, authority=None)

@@ -8,6 +8,7 @@ from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
 from h.services.annotation_stats import AnnotationStatsService
+from h.traversal import UserContext
 from h.traversal.group import GroupContext
 from h.views import activity
 
@@ -931,9 +932,6 @@ class TestGroupSearchController:
 
 @pytest.mark.usefixtures("annotation_stats_service", "user_service", "routes", "search")
 class TestUserSearchController:
-
-    """Tests unique to UserSearchController."""
-
     def test_search_calls_search_with_request(
         self, controller, pyramid_request, search
     ):
@@ -1095,7 +1093,7 @@ class TestUserSearchController:
 
     @pytest.fixture
     def controller(self, user, pyramid_request, query):
-        return activity.UserSearchController(user, pyramid_request)
+        return activity.UserSearchController(UserContext(user), pyramid_request)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
@@ -1252,7 +1250,7 @@ class TestGroupAndUserSearchController:
 
     @pytest.fixture
     def user_search_controller(self, user, pyramid_request):
-        return activity.UserSearchController(user, pyramid_request)
+        return activity.UserSearchController(UserContext(user), pyramid_request)
 
 
 @pytest.fixture
