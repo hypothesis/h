@@ -163,7 +163,7 @@ def test_includeme():
             traverse="/{pubid}",
         ),
         call("api.search", "/api/search"),
-        call("api.users", "/api/users", factory="h.traversal.UserByNameRoot"),
+        call("api.users", "/api/users", factory="h.traversal.UserRoot"),
         call(
             "api.user_read",
             "/api/users/{userid}",
