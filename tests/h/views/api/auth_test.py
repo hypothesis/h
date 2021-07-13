@@ -9,14 +9,14 @@ from oauthlib.oauth2 import InvalidRequestFatalError
 from pyramid import httpexceptions
 
 from h.models.auth_client import ResponseType
-from h.services.oauth_provider import OAuthProviderService
+from h.services.auth_token import auth_token_service_factory
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
 from h.views.api import auth as views
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 
 
-@pytest.mark.usefixtures("routes", "oauth_provider", "user_service")
+@pytest.mark.usefixtures("routes", "oauth_provider_service", "user_service")
 class TestOAuthAuthorizeController:
     @pytest.mark.usefixtures("authenticated_user")
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
@@ -133,12 +133,16 @@ class TestOAuthAuthorizeController:
 
     @pytest.mark.usefixtures("authenticated_user")
     def test_get_web_message_allows_empty_state_in_context_for_trusted_clients(
-        self, controller, auth_client, oauth_provider
+        self, controller, auth_client, oauth_provider_service
     ):
         auth_client.trusted = True
 
         headers = {"Location": "{}?code=abcdef123456".format(auth_client.redirect_uri)}
-        oauth_provider.create_authorization_response.return_value = (headers, None, 302)
+        oauth_provider_service.create_authorization_response.return_value = (
+            headers,
+            None,
+            302,
+        )
 
         response = controller.get_web_message()
         assert response["state"] is None
@@ -192,12 +196,16 @@ class TestOAuthAuthorizeController:
         }
 
     def test_post_web_message_allows_empty_state_in_context(
-        self, controller, auth_client, oauth_provider
+        self, controller, auth_client, oauth_provider_service
     ):
         auth_client.trusted = True
 
         headers = {"Location": "{}?code=abcdef123456".format(auth_client.redirect_uri)}
-        oauth_provider.create_authorization_response.return_value = (headers, None, 302)
+        oauth_provider_service.create_authorization_response.return_value = (
+            headers,
+            None,
+            302,
+        )
 
         response = controller.post_web_message()
         assert response["state"] is None
@@ -212,16 +220,19 @@ class TestOAuthAuthorizeController:
         return OAuthRequest("/")
 
     @pytest.fixture
-    def oauth_provider(self, pyramid_config, auth_client, oauth_request):
-        svc = mock.create_autospec(OAuthProviderService, instance=True)
-
+    def oauth_provider_service(
+        self, oauth_provider_service, auth_client, oauth_request
+    ):
         scopes = ["annotation:read", "annotation:write"]
         credentials = {
             "client_id": auth_client.id,
             "state": "foobar",
             "request": oauth_request,
         }
-        svc.validate_authorization_request.return_value = (scopes, credentials)
+        oauth_provider_service.validate_authorization_request.return_value = (
+            scopes,
+            credentials,
+        )
 
         headers = {
             "Location": "{}?code=abcdef123456&state=foobar".format(
@@ -230,11 +241,13 @@ class TestOAuthAuthorizeController:
         }
         body = None
         status = 302
-        svc.create_authorization_response.return_value = (headers, body, status)
+        oauth_provider_service.create_authorization_response.return_value = (
+            headers,
+            body,
+            status,
+        )
 
-        pyramid_config.register_service(svc, name="oauth_provider")
-
-        return svc
+        return oauth_provider_service
 
     @pytest.fixture
     def auth_client(self, factories):
@@ -267,28 +280,30 @@ class TestOAuthAuthorizeController:
         pyramid_config.add_route("login", "/login")
 
 
-@pytest.mark.usefixtures("oauth_provider")
+@pytest.mark.usefixtures("oauth_provider_service")
 class TestOAuthAccessTokenController:
     def test_it_creates_token_response(
-        self, pyramid_request, controller, oauth_provider
+        self, pyramid_request, controller, oauth_provider_service
     ):
         controller.post()
-        oauth_provider.create_token_response.assert_called_once_with(
+        oauth_provider_service.create_token_response.assert_called_once_with(
             pyramid_request.url,
             pyramid_request.method,
             pyramid_request.POST,
             pyramid_request.headers,
         )
 
-    def test_it_returns_correct_response_on_success(self, controller, oauth_provider):
+    def test_it_returns_correct_response_on_success(
+        self, controller, oauth_provider_service
+    ):
         body = json.dumps({"access_token": "the-access-token"})
-        oauth_provider.create_token_response.return_value = ({}, body, 200)
+        oauth_provider_service.create_token_response.return_value = ({}, body, 200)
 
         assert controller.post() == {"access_token": "the-access-token"}
 
-    def test_it_raises_when_error(self, controller, oauth_provider):
+    def test_it_raises_when_error(self, controller, oauth_provider_service):
         body = json.dumps({"error": "invalid_request"})
-        oauth_provider.create_token_response.return_value = ({}, body, 400)
+        oauth_provider_service.create_token_response.return_value = ({}, body, 400)
 
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             controller.post()
@@ -314,20 +329,19 @@ class TestOAuthAccessTokenController:
         return views.OAuthAccessTokenController(pyramid_request)
 
     @pytest.fixture
-    def oauth_provider(self, pyramid_config):
-        svc = mock.Mock(spec_set=["create_token_response"])
-        svc.create_token_response.return_value = ({}, "{}", 200)
-        pyramid_config.register_service(svc, name="oauth_provider")
-        return svc
+    def oauth_provider_service(self, oauth_provider_service):
+        oauth_provider_service.create_token_response.return_value = ({}, "{}", 200)
+
+        return oauth_provider_service
 
 
-@pytest.mark.usefixtures("oauth_provider")
+@pytest.mark.usefixtures("oauth_provider_service")
 class TestOAuthRevocationController:
     def test_it_creates_revocation_response(
-        self, pyramid_request, controller, oauth_provider
+        self, pyramid_request, controller, oauth_provider_service
     ):
         controller.post()
-        oauth_provider.create_revocation_response.assert_called_once_with(
+        oauth_provider_service.create_revocation_response.assert_called_once_with(
             pyramid_request.url,
             pyramid_request.method,
             pyramid_request.POST,
@@ -338,9 +352,9 @@ class TestOAuthRevocationController:
         response = controller.post()
         assert response == {}
 
-    def test_it_raises_when_error(self, controller, oauth_provider):
+    def test_it_raises_when_error(self, controller, oauth_provider_service):
         body = json.dumps({"error": "invalid_request"})
-        oauth_provider.create_revocation_response.return_value = ({}, body, 400)
+        oauth_provider_service.create_revocation_response.return_value = ({}, body, 400)
 
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             controller.post()
@@ -365,11 +379,10 @@ class TestOAuthRevocationController:
         return views.OAuthRevocationController(pyramid_request)
 
     @pytest.fixture
-    def oauth_provider(self, pyramid_config):
-        svc = mock.Mock(spec_set=["create_revocation_response"])
-        svc.create_revocation_response.return_value = ({}, "{}", 200)
-        pyramid_config.register_service(svc, name="oauth_provider")
-        return svc
+    def oauth_provider_service(self, oauth_provider_service):
+        oauth_provider_service.create_revocation_response.return_value = ({}, "{}", 200)
+
+        return oauth_provider_service
 
 
 class TestDebugToken:
@@ -391,18 +404,18 @@ class TestDebugToken:
         assert exc.value.type == "missing_token"
         assert "Bearer token is missing" in str(exc.value)
 
-    def test_it_validates_token(self, pyramid_request, auth_token_service):
+    def test_it_validates_token(self, pyramid_request, token_service):
         pyramid_request.auth_token = "the-access-token"
 
         views.debug_token(pyramid_request)
 
-        auth_token_service.validate.assert_called_once_with("the-access-token")
+        token_service.validate.assert_called_once_with("the-access-token")
 
     def test_it_raises_error_when_token_is_invalid(
-        self, pyramid_request, auth_token_service
+        self, pyramid_request, token_service
     ):
         pyramid_request.auth_token = "the-token"
-        auth_token_service.validate.return_value = None
+        token_service.validate.return_value = None
 
         with pytest.raises(OAuthTokenError) as exc:
             views.debug_token(pyramid_request)
@@ -411,10 +424,10 @@ class TestDebugToken:
         assert "Bearer token does not exist or is expired" in str(exc.value)
 
     def test_returns_debug_data_for_oauth_token(
-        self, pyramid_request, auth_token_service, oauth_token
+        self, pyramid_request, token_service, oauth_token
     ):
         pyramid_request.auth_token = oauth_token.value
-        auth_token_service.fetch.return_value = oauth_token
+        token_service.fetch.return_value = oauth_token
 
         result = views.debug_token(pyramid_request)
 
@@ -430,10 +443,10 @@ class TestDebugToken:
         }
 
     def test_returns_debug_data_for_developer_token(
-        self, pyramid_request, auth_token_service, developer_token
+        self, pyramid_request, token_service, developer_token
     ):
         pyramid_request.auth_token = developer_token.value
-        auth_token_service.fetch.return_value = developer_token
+        token_service.fetch.return_value = developer_token
 
         result = views.debug_token(pyramid_request)
 
@@ -443,6 +456,12 @@ class TestDebugToken:
             "expires_at": None,
             "expired": False,
         }
+
+    @pytest.fixture
+    def token_service(self, pyramid_config, pyramid_request):
+        svc = mock.Mock(spec_set=auth_token_service_factory(None, pyramid_request))
+        pyramid_config.register_service(svc, name="auth_token")
+        return svc
 
     @pytest.fixture
     def oauth_token(self, factories):
