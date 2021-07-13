@@ -24,10 +24,10 @@ class TestOrganizationRoot:
         with pytest.raises(KeyError):
             OrganizationRoot(pyramid_request)[sentinel.non_existent_pubid]
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def with_noise_organization(self, factories):
         # Add a handful of organizations to the DB to make the test realistic.
-        factories.Organization.generate_batch(size=2)
+        factories.Organization.create_batch(size=2)
 
 
 class TestOrganizationContext:

@@ -111,12 +111,6 @@ class TestAnnotationBasePresenter:
 class Berlin(datetime.tzinfo):
     """Berlin timezone, without DST support"""
 
-    def utcoffset(self, dt):
-        return datetime.timedelta(hours=1)
-
-    def tzname(self, dt):
-        return "Berlin"
-
     def dst(self, dt):
         return datetime.timedelta()
 
