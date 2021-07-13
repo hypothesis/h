@@ -1,17 +1,20 @@
+from dataclasses import dataclass
+
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.security import Allow
 
 from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
+from h.models import User
 from h.traversal.root import RootFactory
 
 
+@dataclass
 class UserContext:
     """Context for user-centered views."""
 
-    def __init__(self, user):
-        self.user = user
+    user: User
 
     def __acl__(self):
         """
