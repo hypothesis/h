@@ -391,14 +391,6 @@ class TestGroupACL:
     def test_creator_has_upsert_permissions(self, group, authz_policy):
         assert authz_policy.permits(group, "acct:luke@example.com", "upsert")
 
-    @pytest.mark.parametrize("authority", ("lms.hypothes.is", "lms.ca.hypothes.is"))
-    def test_lms_machine_user_has_upsert_permissions(
-        self, group, authz_policy, authority
-    ):
-        group.authority = authority
-
-        assert authz_policy.permits(group, f"acct:lms@{authority}", "upsert")
-
     def test_admin_allowed_only_for_authority_when_no_creator(
         self, group, authz_policy
     ):
