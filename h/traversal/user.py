@@ -30,33 +30,34 @@ class UserRoot(RootFactory):
 
         self.user_service = self.request.find_service(name="user")
 
+    def get_user(self, userid_or_username, authority):
+        """Get a user while handling errors appropriately for a traversal."""
+
+        try:
+            user = self.user_service.fetch(userid_or_username, authority)
+
+        except InvalidUserId as err:
+            raise HTTPBadRequest(err.args[0]) from err
+
+        if not user:
+            raise KeyError()
+
+        return user
+
 
 class UserByNameRoot(UserRoot):
     """Root factory for routes which look up users by username."""
 
     def __getitem__(self, username):
-        authority = client_authority(self.request) or self.request.default_authority
-        user = self.user_service.fetch(username, authority)
-
-        if not user:
-            raise KeyError()
-
         # TODO: This should be a UserContext
-        return user
+        return self.get_user(
+            username,
+            authority=client_authority(self.request) or self.request.default_authority,
+        )
 
 
 class UserByIDRoot(UserRoot):
     """Root factory for routes which look up users by id."""
 
     def __getitem__(self, userid):
-        try:
-            user = self.user_service.fetch(userid)
-        except InvalidUserId as e:
-            # In this context we failed because the user provided a userid
-            # we cannot parse, not because it could not be found
-            raise HTTPBadRequest(e.args[0]) from e
-
-        if not user:
-            raise KeyError()
-
-        return UserContext(user)
+        return UserContext(self.get_user(userid, authority=None))

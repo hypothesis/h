@@ -1,4 +1,4 @@
-from unittest.mock import sentinel
+from unittest.mock import patch, sentinel
 
 import pytest
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -36,38 +36,48 @@ class TestUserRoot:
 
         assert bool(pyramid_request.has_permission("create", context)) == has_create
 
+    def test_get_user(self, root, user_service):
+        user = root.get_user(sentinel.userid, sentinel.authority)
+
+        user_service.fetch.assert_called_once_with(sentinel.userid, sentinel.authority)
+
+        assert user == user_service.fetch.return_value
+
+    def test_get_user_raises_if_the_user_does_not_exist(self, root, user_service):
+        user_service.fetch.return_value = None
+
+        with pytest.raises(KeyError):
+            root.get_user(sentinel.userid, sentinel.authority)
+
+    def test_get_user_raises_if_the_userid_is_invalid(self, root, user_service):
+        user_service.fetch.side_effect = InvalidUserId("user_id")
+
+        with pytest.raises(HTTPBadRequest):
+            root.get_user(sentinel.bad_username, authority=None)
+
+    @pytest.fixture
+    def root(self, pyramid_request):
+        return UserRoot(pyramid_request)
+
 
 @pytest.mark.usefixtures("user_service")
 class TestUserByNameRoot:
+    @pytest.mark.parametrize("returned_authority", (None, sentinel.client_authority))
     def test_it_fetches_the_requested_user(
-        self, pyramid_request, root, user_service, client_authority
+        self, pyramid_request, root, user_service, client_authority, returned_authority
     ):
-        client_authority.return_value = sentinel.client_authority
+        client_authority.return_value = returned_authority
 
         user = root[sentinel.username]
 
         client_authority.assert_called_once_with(pyramid_request)
-        user_service.fetch.assert_called_once_with(
-            sentinel.username, sentinel.client_authority
-        )
-        assert user == user_service.fetch.return_value
-
-    def test_it_uses_the_default_authority_when_theres_no_client_one(
-        self, root, user_service, pyramid_request, client_authority
-    ):
-        client_authority.return_value = None
-
-        root[sentinel.username]
-
-        user_service.fetch.assert_called_once_with(
-            sentinel.username, pyramid_request.default_authority
+        root.get_user.assert_called_once_with(
+            sentinel.username,
+            authority=client_authority.return_value
+            or pyramid_request.default_authority,
         )
 
-    def test_it_raises_KeyError_if_the_user_does_not_exist(self, root, user_service):
-        user_service.fetch.return_value = None
-
-        with pytest.raises(KeyError):
-            root["does_not_exist"]
+        assert user == root.get_user.return_value
 
     @pytest.fixture(autouse=True)
     def client_authority(self, patch):
@@ -75,7 +85,10 @@ class TestUserByNameRoot:
 
     @pytest.fixture
     def root(self, pyramid_request):
-        return UserByNameRoot(pyramid_request)
+        root = UserByNameRoot(pyramid_request)
+
+        with patch.object(root, "get_user"):
+            yield root
 
 
 @pytest.mark.usefixtures("user_service")
@@ -83,27 +96,15 @@ class TestUserByIDRoot:
     def test_it_fetches_the_requested_user(self, root, user_service, UserContext):
         context = root[sentinel.userid]
 
-        user_service.fetch.assert_called_once_with(sentinel.userid)
-        UserContext.assert_called_with(user_service.fetch.return_value)
+        root.get_user.assert_called_once_with(sentinel.userid, authority=None)
+        UserContext.assert_called_with(root.get_user.return_value)
         assert context == UserContext.return_value
-
-    def test_it_fails_with_bad_request_if_the_userid_is_invalid(
-        self, root, user_service
-    ):
-        user_service.fetch.side_effect = InvalidUserId("dummy id")
-
-        with pytest.raises(HTTPBadRequest):
-            root["total_nonsense"]
-
-    def test_it_raises_KeyError_if_the_user_does_not_exist(self, root, user_service):
-        user_service.fetch.return_value = None
-
-        with pytest.raises(KeyError):
-            root["does_not_exist"]
 
     @pytest.fixture
     def root(self, pyramid_request):
-        return UserByIDRoot(pyramid_request)
+        root = UserByIDRoot(pyramid_request)
+        with patch.object(root, "get_user"):
+            yield root
 
     @pytest.fixture(autouse=True)
     def UserContext(self, patch):
