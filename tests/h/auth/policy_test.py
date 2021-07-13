@@ -702,7 +702,7 @@ class TestAuthClientAuthenticationPolicy:
         return patch("h.auth.policy.BasicAuthAuthenticationPolicy")
 
 
-@pytest.mark.usefixtures("token_service")
+@pytest.mark.usefixtures("auth_token_service")
 class TestTokenAuthenticationPolicy:
     def test_remember_does_nothing(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
@@ -728,10 +728,10 @@ class TestTokenAuthenticationPolicy:
         assert result == "acct:foo@example.com"
 
     def test_unauthenticated_userid_returns_none_if_token_invalid(
-        self, pyramid_request, token_service
+        self, pyramid_request, auth_token_service
     ):
         policy = TokenAuthenticationPolicy()
-        token_service.validate.return_value = None
+        auth_token_service.validate.return_value = None
         pyramid_request.auth_token = "abcd123"
 
         result = policy.unauthenticated_userid(pyramid_request)
@@ -811,15 +811,15 @@ class TestTokenAuthenticationPolicy:
         return DummyToken()
 
     @pytest.fixture
-    def token_service(self, pyramid_config, fake_token):
+    def auth_token_service(self, auth_token_service, fake_token):
         def validate(token_str):
             if token_str == "valid123":
                 return fake_token
             return None
 
-        svc = mock.Mock(validate=mock.Mock(side_effect=validate))
-        pyramid_config.register_service(svc, name="auth_token")
-        return svc
+        auth_token_service.validate.side_effect = validate
+
+        return auth_token_service
 
 
 class DummyToken:

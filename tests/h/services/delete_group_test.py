@@ -1,8 +1,5 @@
-from unittest import mock
-
 import pytest
 
-from h.services.annotation_delete import AnnotationDeleteService
 from h.services.delete_group import (
     DeleteGroupService,
     DeletePublicGroupError,
@@ -56,12 +53,3 @@ class TestDeleteGroupServiceFactory:
 def svc(db_session, pyramid_request):
     pyramid_request.db = db_session
     return delete_group_service_factory({}, pyramid_request)
-
-
-@pytest.fixture
-def annotation_delete_service(pyramid_config):
-    service = mock.create_autospec(
-        AnnotationDeleteService, spec_set=True, instance=True
-    )
-    pyramid_config.register_service(service, name="annotation_delete")
-    return service

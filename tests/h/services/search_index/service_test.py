@@ -8,7 +8,6 @@ from h.events import AnnotationEvent
 from h.search.client import Client
 from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
-from h.services.settings import SettingsService
 
 
 class TestAddAnnotationById:
@@ -306,11 +305,9 @@ def with_reindex_in_progress(settings_service):
 
 
 @pytest.fixture
-def settings_service(pyramid_config):
-    settings_service = create_autospec(SettingsService)
+def settings_service(settings_service):
     settings_service.get.return_value = False
 
-    pyramid_config.register_service(settings_service, name="settings")
     return settings_service
 
 

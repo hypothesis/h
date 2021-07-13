@@ -8,7 +8,6 @@ from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.services.developer_token import developer_token_service_factory
-from h.services.user_password import UserPasswordService
 from h.views import accounts as views
 
 
@@ -927,13 +926,6 @@ def ActivationEvent(patch):
 @pytest.fixture
 def mailer(patch):
     return patch("h.views.accounts.mailer")
-
-
-@pytest.fixture
-def user_password_service(pyramid_config):
-    service = mock.Mock(spec_set=UserPasswordService())
-    pyramid_config.register_service(service, name="user_password")
-    return service
 
 
 @pytest.fixture(autouse=True)

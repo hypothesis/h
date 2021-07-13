@@ -5,7 +5,6 @@ import pytest
 from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas
-from h.services.user_password import UserPasswordService
 
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
@@ -314,11 +313,3 @@ def dummy_node(pyramid_request):
 @pytest.fixture
 def user_model(patch):
     return patch("h.accounts.schemas.models.User")
-
-
-@pytest.fixture
-def user_password_service(pyramid_config):
-    service = Mock(spec_set=UserPasswordService())
-    service.check_password.return_value = True
-    pyramid_config.register_service(service, name="user_password")
-    return service

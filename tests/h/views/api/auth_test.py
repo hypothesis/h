@@ -9,7 +9,6 @@ from oauthlib.oauth2 import InvalidRequestFatalError
 from pyramid import httpexceptions
 
 from h.models.auth_client import ResponseType
-from h.services.auth_token import auth_token_service_factory
 from h.services.oauth_provider import OAuthProviderService
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
@@ -392,18 +391,18 @@ class TestDebugToken:
         assert exc.value.type == "missing_token"
         assert "Bearer token is missing" in str(exc.value)
 
-    def test_it_validates_token(self, pyramid_request, token_service):
+    def test_it_validates_token(self, pyramid_request, auth_token_service):
         pyramid_request.auth_token = "the-access-token"
 
         views.debug_token(pyramid_request)
 
-        token_service.validate.assert_called_once_with("the-access-token")
+        auth_token_service.validate.assert_called_once_with("the-access-token")
 
     def test_it_raises_error_when_token_is_invalid(
-        self, pyramid_request, token_service
+        self, pyramid_request, auth_token_service
     ):
         pyramid_request.auth_token = "the-token"
-        token_service.validate.return_value = None
+        auth_token_service.validate.return_value = None
 
         with pytest.raises(OAuthTokenError) as exc:
             views.debug_token(pyramid_request)
@@ -412,10 +411,10 @@ class TestDebugToken:
         assert "Bearer token does not exist or is expired" in str(exc.value)
 
     def test_returns_debug_data_for_oauth_token(
-        self, pyramid_request, token_service, oauth_token
+        self, pyramid_request, auth_token_service, oauth_token
     ):
         pyramid_request.auth_token = oauth_token.value
-        token_service.fetch.return_value = oauth_token
+        auth_token_service.fetch.return_value = oauth_token
 
         result = views.debug_token(pyramid_request)
 
@@ -431,10 +430,10 @@ class TestDebugToken:
         }
 
     def test_returns_debug_data_for_developer_token(
-        self, pyramid_request, token_service, developer_token
+        self, pyramid_request, auth_token_service, developer_token
     ):
         pyramid_request.auth_token = developer_token.value
-        token_service.fetch.return_value = developer_token
+        auth_token_service.fetch.return_value = developer_token
 
         result = views.debug_token(pyramid_request)
 
@@ -444,12 +443,6 @@ class TestDebugToken:
             "expires_at": None,
             "expired": False,
         }
-
-    @pytest.fixture
-    def token_service(self, pyramid_config, pyramid_request):
-        svc = mock.Mock(spec_set=auth_token_service_factory(None, pyramid_request))
-        pyramid_config.register_service(svc, name="auth_token")
-        return svc
 
     @pytest.fixture
     def oauth_token(self, factories):

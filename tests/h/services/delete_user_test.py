@@ -4,7 +4,6 @@ import pytest
 import sqlalchemy
 
 from h.models import Annotation, Document
-from h.services.annotation_delete import AnnotationDeleteService
 from h.services.delete_user import delete_user_service_factory
 
 
@@ -103,12 +102,3 @@ def group_with_two_users(db_session, factories):
     db_session.flush()
 
     return (group, creator, member, creator_ann, member_ann)
-
-
-@pytest.fixture
-def annotation_delete_service(pyramid_config):
-    service = mock.create_autospec(
-        AnnotationDeleteService, spec_set=True, instance=True
-    )
-    pyramid_config.register_service(service, name="annotation_delete")
-    return service

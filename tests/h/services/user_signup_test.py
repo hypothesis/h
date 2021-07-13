@@ -6,7 +6,6 @@ from sqlalchemy.exc import IntegrityError
 
 from h.models import Activation, Subscriptions, User
 from h.services.exceptions import ConflictError
-from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService, user_signup_service_factory
 
 
@@ -90,6 +89,11 @@ class TestUserSignupService:
     def test_signup_sets_password_using_password_service(
         self, svc, user_password_service
     ):
+        def password_setter(user, password):
+            user.password = "fakehash"
+
+        user_password_service.update_password.side_effect = password_setter
+
         user = svc.signup(username="foo", email="foo@bar.com", password="wibble")
 
         user_password_service.update_password.assert_called_once_with(user, "wibble")
@@ -224,16 +228,3 @@ class TestUserSignupServiceFactory:
         password_svc = pyramid_request.find_service(name="user_password")
 
         assert svc.password_service == password_svc
-
-
-@pytest.fixture
-def user_password_service(pyramid_config):
-    service = mock.Mock(spec_set=UserPasswordService())
-
-    def password_setter(user, password):
-        user.password = "fakehash"
-
-    service.update_password.side_effect = password_setter
-
-    pyramid_config.register_service(service, name="user_password")
-    return service

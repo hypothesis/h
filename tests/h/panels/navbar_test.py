@@ -3,10 +3,9 @@ from unittest import mock
 import pytest
 
 from h.panels.navbar import navbar
-from h.services.group_list import GroupListService
 
 
-@pytest.mark.usefixtures("routes", "group_list_svc")
+@pytest.mark.usefixtures("routes", "group_list_service")
 class TestNavbar:
     def test_it_sets_null_username_when_logged_out(self, req):
         result = navbar({}, req)
@@ -106,8 +105,7 @@ class TestNavbar:
         return pyramid_request
 
     @pytest.fixture
-    def group_list_svc(self, pyramid_config, user):
-        svc = mock.create_autospec(GroupListService, spec_set=True, instance=True)
-        svc.associated_groups.return_value = user.groups
-        pyramid_config.register_service(svc, name="group_list")
-        return svc
+    def group_list_service(self, group_list_service, user):
+        group_list_service.associated_groups.return_value = user.groups
+
+        return group_list_service

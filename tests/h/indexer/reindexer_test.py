@@ -165,12 +165,6 @@ class TestReindex:
         return mock_es
 
     @pytest.fixture
-    def settings_service(self, pyramid_config):
-        service = mock.Mock()
-        pyramid_config.register_service(service, name="settings")
-        return service
-
-    @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.tm = mock.Mock()
         return pyramid_request

@@ -5,13 +5,14 @@ from passlib.context import CryptContext
 
 from h import models
 from h.cli.commands import user as user_cli
-from h.services.annotation_delete import AnnotationDeleteService
 from h.services.delete_user import DeleteUserService
 from h.services.user_password import UserPasswordService
 
 
 class TestAddCommand:
-    def test_it_adds_user_with_default_authority(self, cli, cliconfig, signup_service):
+    def test_it_adds_user_with_default_authority(
+        self, cli, cliconfig, user_signup_service
+    ):
         result = cli.invoke(
             user_cli.add,
             [
@@ -27,14 +28,16 @@ class TestAddCommand:
 
         assert result.exit_code == 0
 
-        signup_service.signup.assert_called_with(
+        user_signup_service.signup.assert_called_with(
             username="admin",
             email="admin@localhost",
             password="admin",
             require_activation=False,
         )
 
-    def test_it_adds_user_with_specific_authority(self, cli, cliconfig, signup_service):
+    def test_it_adds_user_with_specific_authority(
+        self, cli, cliconfig, user_signup_service
+    ):
         result = cli.invoke(
             user_cli.add,
             [
@@ -52,7 +55,7 @@ class TestAddCommand:
 
         assert result.exit_code == 0
 
-        signup_service.signup.assert_called_with(
+        user_signup_service.signup.assert_called_with(
             username="admin",
             email="admin@localhost",
             password="admin",
@@ -279,12 +282,6 @@ class TestDeleteUserCommand:
 
 
 @pytest.fixture
-def signup_service():
-    signup_service = mock.Mock(spec_set=["signup"])
-    return signup_service
-
-
-@pytest.fixture
 def hasher():
     # Use a much faster hasher for testing purposes. DO NOT use as few as
     # 5 rounds of bcrypt in production code under ANY CIRCUMSTANCES.
@@ -296,34 +293,25 @@ def hasher():
     )
 
 
-@pytest.fixture
-def password_service(hasher):
+@pytest.fixture(autouse=True)
+def password_service(hasher, pyramid_config):
+    # TODO - This should really be mocked!
     password_service = UserPasswordService()
     password_service.hasher = hasher
+
+    pyramid_config.register_service(password_service, name="user_password")
+
     return password_service
 
 
-@pytest.fixture
-def delete_user_service(pyramid_request, annotation_delete_service):
-    return DeleteUserService(pyramid_request, annotation_delete_service)
+@pytest.fixture(autouse=True)
+def delete_user_service(pyramid_config, pyramid_request, annotation_delete_service):
+    # TODO - This should really be mocked!
+    delete_user_service = DeleteUserService(pyramid_request, annotation_delete_service)
 
-
-@pytest.fixture
-def annotation_delete_service(pyramid_config):
-    service = mock.create_autospec(
-        AnnotationDeleteService, spec_set=True, instance=True
-    )
-    return service
-
-
-@pytest.fixture
-def pyramid_config(
-    pyramid_config, signup_service, password_service, delete_user_service
-):
-    pyramid_config.register_service(signup_service, name="user_signup")
-    pyramid_config.register_service(password_service, name="user_password")
     pyramid_config.register_service(delete_user_service, name="delete_user")
-    return pyramid_config
+
+    return delete_user_service
 
 
 @pytest.fixture

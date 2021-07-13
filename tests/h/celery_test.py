@@ -21,14 +21,12 @@ class TestCelery:
 
         assert sender.app.request == request
 
-    def test_nipsa_cache(self, pyramid_config, pyramid_request):
+    def test_nipsa_cache(self, pyramid_config, pyramid_request, nipsa_service):
         sender = mock.Mock(app=mock.Mock(request=pyramid_request))
-        nipsa_svc = mock.Mock()
-        pyramid_config.register_service(nipsa_svc, name="nipsa")
 
         celery.reset_nipsa_cache(sender)
 
-        nipsa_svc.clear.assert_called_once_with()
+        nipsa_service.clear.assert_called_once_with()
 
     def test_transaction_commit_commits_request_transaction(self):
         sender = mock.Mock(spec=["app"])

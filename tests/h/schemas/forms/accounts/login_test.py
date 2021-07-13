@@ -107,11 +107,3 @@ class TestLoginSchema:
         pyramid_request.params = params
 
         assert LoginSchema.default_values(pyramid_request)["username"] == value
-
-
-@pytest.fixture
-def user_password_service(pyramid_config):
-    service = Mock(spec_set=UserPasswordService())
-    service.check_password.return_value = True
-    pyramid_config.register_service(service, name="user_password")
-    return service

@@ -48,9 +48,16 @@ class TestCreate:
         )
 
     def test_it_presents_user(
-        self, pyramid_request, valid_payload, user, TrustedUserJSONPresenter
+        self,
+        pyramid_request,
+        valid_payload,
+        user,
+        TrustedUserJSONPresenter,
+        user_signup_service,
     ):
+        user_signup_service.signup.return_value = user
         pyramid_request.json_body = valid_payload
+
         create(pyramid_request)
 
         TrustedUserJSONPresenter.assert_called_once_with(user)
@@ -237,22 +244,6 @@ def auth_client(factories):
     return factories.ConfidentialAuthClient(
         authority="weylandindustries.com", grant_type=GrantType.client_credentials
     )
-
-
-@pytest.fixture
-def user_signup_service(db_session, pyramid_config, user):
-    service = mock.Mock(
-        spec_set=UserSignupService(
-            default_authority="example.com",
-            mailer=None,
-            session=None,
-            password_service=None,
-            signup_email=None,
-        )
-    )
-    service.signup.return_value = user
-    pyramid_config.register_service(service, name="user_signup")
-    return service
 
 
 @pytest.fixture

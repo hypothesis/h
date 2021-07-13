@@ -2,16 +2,15 @@ from unittest import mock
 
 import pytest
 
-from h.services.group import GroupService
 from h.services.search_index import SearchIndexService
 from h.services.search_index._queue import Queue
 
 
 @pytest.fixture
-def group_service(pyramid_config):
-    group_service = mock.create_autospec(GroupService, instance=True, spec_set=True)
+def group_service(group_service):
+
     group_service.groupids_readable_by.return_value = ["__world__"]
-    pyramid_config.register_service(group_service, name="group")
+
     return group_service
 
 

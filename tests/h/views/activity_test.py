@@ -909,18 +909,6 @@ class TestGroupSearchController:
         return pyramid_request
 
     @pytest.fixture
-    def group_service(self, patch, pyramid_config):
-        group_service = patch("h.services.group.GroupService")
-        pyramid_config.register_service(group_service, name="group")
-        return group_service
-
-    @pytest.fixture
-    def group_members_service(self, patch, pyramid_config):
-        group_members_service = patch("h.services.group_members.GroupMembersService")
-        pyramid_config.register_service(group_members_service, name="group_members")
-        return group_members_service
-
-    @pytest.fixture
     def pyramid_request(self, request, group, pyramid_request):
         test_group = group
         if "test_group" in request.fixturenames:
