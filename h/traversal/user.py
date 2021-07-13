@@ -22,20 +22,21 @@ class UserContext:
     def __acl__(self):
         """
         Set the "read" permission for AuthClients that have a matching authority
-        to the user. This supercedes the ACL in :class:`h.models.User`.
-
-        .. todo:: This ACL should be expanded (as needed) as more views make use of
-        a context versus a model directly.
+        to the user. This supercedes the ACL in `h.models.User`.
         """
-        acl = []
 
-        user_authority_principal = f"client_authority:{self.user.authority}"
-        acl.append((Allow, user_authority_principal, "read"))
-
-        return acl
+        return [(Allow, f"client_authority:{self.user.authority}", "read")]
 
 
-class UserByNameRoot(RootFactory):
+class UserRoot(RootFactory):
+    __acl__ = [(Allow, role.AuthClient, "create")]
+
+    def __init__(self, request):
+        super().__init__(request)
+        self.user_service = self.request.find_service(name="user")
+
+
+class UserByNameRoot(UserRoot):
     """
     Root factory for routes which traverse Users by ``username``
 
@@ -43,15 +44,9 @@ class UserByNameRoot(RootFactory):
 
     """
 
-    __acl__ = [(Allow, role.AuthClient, "create")]
-
-    def __init__(self, request):
-        super().__init__(request)
-        self.user_svc = self.request.find_service(name="user")
-
     def __getitem__(self, username):
         authority = client_authority(self.request) or self.request.default_authority
-        user = self.user_svc.fetch(username, authority)
+        user = self.user_service.fetch(username, authority)
 
         if not user:
             raise KeyError()
@@ -59,22 +54,16 @@ class UserByNameRoot(RootFactory):
         return user
 
 
-class UserByIDRoot(RootFactory):
+class UserByIDRoot(UserRoot):
     """
     Root factory for routes whose context is a :class:`h.traversal.UserContext`.
 
     .. todo:: This should be the main Root for User objects
     """
 
-    __acl__ = [(Allow, role.AuthClient, "create")]
-
-    def __init__(self, request):
-        super().__init__(request)
-        self.user_svc = self.request.find_service(name="user")
-
     def __getitem__(self, userid):
         try:
-            user = self.user_svc.fetch(userid)
+            user = self.user_service.fetch(userid)
         except InvalidUserId as e:
             # In this context we failed because the user provided a userid
             # we cannot parse, not because it could not be found
