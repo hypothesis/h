@@ -335,16 +335,16 @@ class User(Base):
         )
 
     def __acl__(self):
-        terms = []
+        client_authority = "client_authority:{}".format(self.authority)
 
-        # auth_clients that have the same authority as the user
-        # may update the user
-        user_update_principal = "client_authority:{}".format(self.authority)
-        terms.append((security.Allow, user_update_principal, "update"))
-
-        terms.append(security.DENY_ALL)
-
-        return terms
+        return [
+            # auth_clients that have the same authority as the user may update
+            # the user
+            (security.Allow, client_authority, "update"),
+            (security.Allow, client_authority, "read"),
+            # This is for inheriting security policies... do we inherit?
+            security.DENY_ALL,
+        ]
 
     def __repr__(self):
         return "<User: %s>" % self.username
