@@ -310,36 +310,22 @@ class TestUserGetByUsername:
 
 
 class TestUserACL:
-    def test_auth_client_with_matching_authority_may_update_user(
-        self, user, authz_policy
-    ):
-        user.authority = "weewhack.com"
+    @pytest.mark.parametrize(
+        "principal,permits",
+        (
+            # The right client authority has permissions
+            ("client_authority:user_authority", True),
+            ("client_authority:DIFFERENT", False),
+            # User's don't by just being in the authority
+            ("authority:user_authority", False),
+        ),
+    )
+    @pytest.mark.parametrize("permission", ("update", "read"))
+    def test_it(self, principal, permission, permits):
+        policy = ACLAuthorizationPolicy()
 
-        assert authz_policy.permits(
-            user, ["flip", "client_authority:weewhack.com"], "update"
+        user = models.User(authority="user_authority")
+
+        assert (
+            bool(policy.permits(user, [principal, "some_noise"], permission)) == permits
         )
-
-    def test_auth_client_without_matching_authority_may_not_update_user(
-        self, user, authz_policy
-    ):
-        user.authority = "weewhack.com"
-
-        assert not authz_policy.permits(
-            user, ["flip", "client_authority:2weewhack.com"], "update"
-        )
-
-    def test_user_with_authority_may_not_update_user(self, user, authz_policy):
-        user.authority = "fabuloso.biz"
-
-        assert not authz_policy.permits(
-            user, ["flip", "authority:fabuloso.biz"], "update"
-        )
-
-    @pytest.fixture
-    def authz_policy(self):
-        return ACLAuthorizationPolicy()
-
-    @pytest.fixture
-    def user(self):
-        user = models.User(username="filip", authority="example.com")
-        return user

@@ -17,12 +17,9 @@ class UserContext:
     user: User
 
     def __acl__(self):
-        """
-        Set the "read" permission for AuthClients that have a matching authority
-        to the user. This supercedes the ACL in `h.models.User`.
-        """
+        """Return user access control lists."""
 
-        return [(Allow, f"client_authority:{self.user.authority}", "read")]
+        return self.user.__acl__()
 
 
 class UserRoot(RootFactory):

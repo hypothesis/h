@@ -1,7 +1,6 @@
 from unittest.mock import patch, sentinel
 
 import pytest
-from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.httpexceptions import HTTPBadRequest
 
 from h.auth import role
@@ -10,16 +9,12 @@ from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
 
 
 class TestUserContext:
-    def test_acl_matching_authority_allows_read(self, factories):
+    def test_acl_matching_user(self, factories):
         user = factories.User()
 
-        context = UserContext(user)
+        acl = UserContext(user).__acl__()
 
-        policy = ACLAuthorizationPolicy()
-        assert policy.permits(context, [f"client_authority:{user.authority}"], "read")
-        assert not policy.permits(
-            context, ["client_authority:DIFFERENT_AUTHORITY"], "read"
-        )
+        assert acl == user.__acl__()
 
 
 @pytest.mark.usefixtures("user_service")
