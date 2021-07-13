@@ -5,7 +5,6 @@ from webob.multidict import MultiDict, NestedMultiDict
 
 from h.schemas import ValidationError
 from h.search.core import SearchResult
-from h.services.annotation_delete import AnnotationDeleteService
 from h.views.api import annotations as views
 
 
@@ -413,12 +412,3 @@ def pyramid_request(pyramid_request):
 @pytest.fixture
 def storage(patch):
     return patch("h.views.api.annotations.storage")
-
-
-@pytest.fixture
-def annotation_delete_service(pyramid_config):
-    service = mock.create_autospec(
-        AnnotationDeleteService, spec_set=True, instance=True
-    )
-    pyramid_config.register_service(service, name="annotation_delete")
-    return service

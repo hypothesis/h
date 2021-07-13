@@ -7,7 +7,6 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
-from h.services.annotation_stats import AnnotationStatsService
 from h.traversal.group import GroupContext
 from h.views import activity
 
@@ -619,6 +618,8 @@ class TestGroupSearchController:
         annotation_stats_service,
         pyramid_request,
     ):
+        annotation_stats_service.group_annotation_count.return_value = 5
+
         result = controller.search()["stats"]
         annotation_stats_service.group_annotation_count.assert_called_with(
             test_group.pubid
@@ -976,6 +977,8 @@ class TestUserSearchController:
     def test_search_passes_the_user_annotation_counts_to_the_template(
         self, controller, pyramid_config, annotation_stats_service, user
     ):
+        annotation_stats_service.user_annotation_count.return_value = 6
+
         result = controller.search()["stats"]
         annotation_stats_service.user_annotation_count.assert_called_with(user.userid)
         assert result["annotation_count"] == 6
@@ -1331,20 +1334,6 @@ def routes(pyramid_config):
     pyramid_config.add_route("group_read", "/groups/{pubid}/{slug}")
     pyramid_config.add_route("group_edit", "/groups/{pubid}/edit")
     pyramid_config.add_route("account_profile", "/account/profile")
-
-
-@pytest.fixture
-def annotation_stats_service(pyramid_config):
-    ann_stat_svc = mock.create_autospec(
-        AnnotationStatsService, instance=True, spec_set=True
-    )
-
-    ann_stat_svc.user_annotation_count.return_value = 6
-    ann_stat_svc.group_annotation_count.return_value = 5
-
-    pyramid_config.register_service(ann_stat_svc, name="annotation_stats")
-
-    return ann_stat_svc
 
 
 @pytest.fixture

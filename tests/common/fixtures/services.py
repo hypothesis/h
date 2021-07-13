@@ -4,8 +4,10 @@ import pytest
 
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_moderation import AnnotationModerationService
+from h.services.annotation_stats import AnnotationStatsService
 from h.services.auth_token import AuthTokenService
 from h.services.delete_group import DeleteGroupService
+from h.services.delete_user import DeleteUserService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
 from h.services.group_links import GroupLinksService
@@ -24,8 +26,10 @@ from h.services.search_index._queue import Queue
 __all__ = (
     "mock_service",
     "annotation_delete_service",
+    "annotation_stats_service",
     "auth_token_service",
     "delete_group_service",
+    "delete_user_service",
     "links_service",
     "list_organizations_service",
     "groupfinder_service",
@@ -71,6 +75,11 @@ def annotation_delete_service(mock_service):
 
 
 @pytest.fixture
+def annotation_stats_service(mock_service):
+    return mock_service(AnnotationStatsService, name="annotation_stats")
+
+
+@pytest.fixture
 def auth_token_service(mock_service):
     return mock_service(AuthTokenService, name="auth_token")
 
@@ -78,6 +87,11 @@ def auth_token_service(mock_service):
 @pytest.fixture
 def delete_group_service(mock_service):
     return mock_service(DeleteGroupService, name="delete_group")
+
+
+@pytest.fixture
+def delete_user_service(mock_service):
+    return mock_service(DeleteUserService, name="delete_user")
 
 
 @pytest.fixture
