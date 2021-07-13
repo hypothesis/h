@@ -24,7 +24,7 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route(
         "activity.user_search",
         "/users/{username}",
-        factory="h.traversal:UserRoot",
+        factory="h.traversal.UserByNameRoot",
         traverse="/{username}",
     )
 
@@ -168,18 +168,18 @@ def includeme(config):  # pylint: disable=too-many-statements
         traverse="/{pubid}",
     )
     config.add_route("api.search", "/api/search")
-    config.add_route("api.users", "/api/users", factory="h.traversal.UserRoot")
+    config.add_route("api.users", "/api/users", factory="h.traversal.UserByNameRoot")
     config.add_route(
         "api.user_read",
         "/api/users/{userid}",
         request_method="GET",
-        factory="h.traversal.UserUserIDRoot",
+        factory="h.traversal.UserByIDRoot",
         traverse="/{userid}",
     )
     config.add_route(
         "api.user",
         "/api/users/{username}",
-        factory="h.traversal.UserRoot",
+        factory="h.traversal.UserByNameRoot",
         traverse="/{username}",
     )
     config.add_route("badge", "/api/badge")

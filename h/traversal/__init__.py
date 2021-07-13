@@ -16,7 +16,7 @@ Usage:
 .. code-block:: python
 
    config.add_route("activity.user_search", "/users/{username}",
-                    factory="h.traversal:UserRoot",
+                    factory="h.traversal:UserByNameRoot",
                     traverse="/{username}")
 
 When configuring a route in :py:mod:`h.routes` you can use the ``factory``
@@ -67,7 +67,7 @@ from h.traversal.group import GroupRequiredRoot, GroupRoot
 from h.traversal.organization import OrganizationContext, OrganizationRoot
 from h.traversal.profile import ProfileRoot
 from h.traversal.root import Root
-from h.traversal.user import UserContext, UserRoot, UserUserIDRoot
+from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
 
 __all__ = (
     "Root",
@@ -81,6 +81,7 @@ __all__ = (
     "OrganizationRoot",
     "ProfileRoot",
     "UserContext",
+    "UserByNameRoot",
+    "UserByIDRoot",
     "UserRoot",
-    "UserUserIDRoot",
 )

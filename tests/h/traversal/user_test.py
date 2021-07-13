@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h.auth import role
 from h.exceptions import InvalidUserId
-from h.traversal.user import UserContext, UserRoot, UserUserIDRoot
+from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext
 
 
 class TestUserContext:
@@ -23,7 +23,7 @@ class TestUserContext:
 
 
 @pytest.mark.usefixtures("user_service", "client_authority")
-class TestUserRoot:
+class TestUserByNameRoot:
     @pytest.mark.parametrize(
         "principals,has_create", (([], False), ([role.AuthClient], True))
     )
@@ -32,7 +32,7 @@ class TestUserRoot:
     ):
         set_permissions(user_id="*any*", principals=principals)
 
-        context = UserRoot(pyramid_request)
+        context = UserByNameRoot(pyramid_request)
 
         assert bool(pyramid_request.has_permission("create", context)) == has_create
 
@@ -70,11 +70,11 @@ class TestUserRoot:
 
     @pytest.fixture
     def user_factory(self, pyramid_request):
-        return UserRoot(pyramid_request)
+        return UserByNameRoot(pyramid_request)
 
 
 @pytest.mark.usefixtures("user_service")
-class TestUserUserIDRoot:
+class TestUserByIDRoot:
     def test_it_fetches_the_requested_user(
         self, user_userid_root, user_service, UserContext
     ):
@@ -102,7 +102,7 @@ class TestUserUserIDRoot:
 
     @pytest.fixture
     def user_userid_root(self, pyramid_request):
-        return UserUserIDRoot(pyramid_request)
+        return UserByIDRoot(pyramid_request)
 
     @pytest.fixture(autouse=True)
     def UserContext(self, patch):
