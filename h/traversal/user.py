@@ -8,13 +8,7 @@ from h.traversal.root import RootFactory
 
 
 class UserContext:
-    """
-    Context for user-centered views
-
-    .. todo:: Most views still traverse using ``username`` and work directly
-       with User models (:class:`h.models.User`). This context should be
-       expanded as we continue to move over to a more resource-based approach.
-    """
+    """Context for user-centered views."""
 
     def __init__(self, user):
         self.user = user
@@ -33,16 +27,12 @@ class UserRoot(RootFactory):
 
     def __init__(self, request):
         super().__init__(request)
+
         self.user_service = self.request.find_service(name="user")
 
 
 class UserByNameRoot(UserRoot):
-    """
-    Root factory for routes which traverse Users by ``username``
-
-    FIXME: This class should return UserContext objects, not User objects.
-
-    """
+    """Root factory for routes which look up users by username."""
 
     def __getitem__(self, username):
         authority = client_authority(self.request) or self.request.default_authority
@@ -51,15 +41,12 @@ class UserByNameRoot(UserRoot):
         if not user:
             raise KeyError()
 
+        # TODO: This should be a UserContext
         return user
 
 
 class UserByIDRoot(UserRoot):
-    """
-    Root factory for routes whose context is a :class:`h.traversal.UserContext`.
-
-    .. todo:: This should be the main Root for User objects
-    """
+    """Root factory for routes which look up users by id."""
 
     def __getitem__(self, userid):
         try:
