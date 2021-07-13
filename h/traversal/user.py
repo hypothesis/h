@@ -35,7 +35,7 @@ class UserContext:
         return acl
 
 
-class UserRoot(RootFactory):
+class UserByNameRoot(RootFactory):
     """
     Root factory for routes which traverse Users by ``username``
 
@@ -59,7 +59,7 @@ class UserRoot(RootFactory):
         return user
 
 
-class UserUserIDRoot(RootFactory):
+class UserByIDRoot(RootFactory):
     """
     Root factory for routes whose context is a :class:`h.traversal.UserContext`.
 
