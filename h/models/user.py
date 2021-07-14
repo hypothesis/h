@@ -69,7 +69,7 @@ class UserIDComparator(Comparator):  # pylint: disable=abstract-method
             (lower(replace('luis.silva', '.', '')), 'example.com')
     """
 
-    def __init__(self, username, authority):
+    def __init__(self, username, authority):  # pylint: disable=super-init-not-called
         self.username = username
         self.authority = authority
 

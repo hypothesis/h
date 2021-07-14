@@ -514,7 +514,7 @@ class TestAuthClientPolicy:
         )
 
     def test_unauthenticated_userid_returns_None_if_no_credentials(
-        self, pyramid_request, auth_client
+        self, pyramid_request
     ):
         pyramid_request.headers["Authorization"] = None
         pyramid_request.headers["X-Forwarded-User"] = None

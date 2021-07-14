@@ -129,7 +129,7 @@ class APIAuthenticationPolicy:
 
 class IdentityBasedPolicy:
     @classmethod
-    def identity(cls, request) -> Optional[Identity]:
+    def identity(cls, request) -> Optional[Identity]:  # pylint:disable=unused-argument
         """
         Get an Identity object for valid credentials.
 
