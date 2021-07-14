@@ -3,6 +3,7 @@ import pyramid.security
 import pytest
 
 from h.auth import role
+from h.security.permissions import Permission
 from h.traversal.root import Root
 
 
@@ -30,11 +31,11 @@ class TestRoot:
     @pytest.mark.parametrize(
         "permission",
         [
-            "admin_index",
-            "admin_groups",
-            "admin_mailer",
-            "admin_organizations",
-            "admin_users",
+            Permission.AdminPage.INDEX,
+            Permission.AdminPage.GROUPS,
+            Permission.AdminPage.MAILER,
+            Permission.AdminPage.ORGANIZATIONS,
+            Permission.AdminPage.USERS,
         ],
     )
     def test_it_assigns_admin_permissions_to_requests_with_staff_role(

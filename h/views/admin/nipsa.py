@@ -3,6 +3,7 @@ from pyramid.view import view_config
 
 from h import models
 from h.i18n import TranslationString as _  # noqa: N813
+from h.security.permissions import Permission
 
 
 class UserNotFoundError(Exception):
@@ -13,7 +14,7 @@ class UserNotFoundError(Exception):
     route_name="admin.nipsa",
     request_method="GET",
     renderer="h:templates/admin/nipsa.html.jinja2",
-    permission="admin_nipsa",
+    permission=Permission.AdminPage.NIPSA,
 )
 def nipsa_index(request):
     nipsa_service = request.find_service(name="nipsa")
@@ -27,7 +28,7 @@ def nipsa_index(request):
     route_name="admin.nipsa",
     request_method="POST",
     request_param="add",
-    permission="admin_nipsa",
+    permission=Permission.AdminPage.NIPSA,
     require_csrf=True,
 )
 def nipsa_add(request):
@@ -54,7 +55,7 @@ def nipsa_add(request):
     route_name="admin.nipsa",
     request_method="POST",
     request_param="remove",
-    permission="admin_nipsa",
+    permission=Permission.AdminPage.NIPSA,
     require_csrf=True,
 )
 def nipsa_remove(request):

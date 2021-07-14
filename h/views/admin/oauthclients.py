@@ -6,6 +6,7 @@ from h.models import AuthClient
 from h.models.auth_client import GrantType, ResponseType
 from h.schemas.auth_client import CreateAuthClientSchema, EditAuthClientSchema
 from h.security import token_urlsafe
+from h.security.permissions import Permission
 
 _ = i18n.TranslationString
 
@@ -20,7 +21,7 @@ def _response_type_for_grant_type(grant_type):
 @view_config(
     route_name="admin.oauthclients",
     renderer="h:templates/admin/oauthclients.html.jinja2",
-    permission="admin_oauthclients",
+    permission=Permission.AdminPage.OAUTH_CLIENTS,
 )
 def index(request):
     clients = request.db.query(AuthClient).order_by(AuthClient.name.asc()).all()
@@ -29,7 +30,7 @@ def index(request):
 
 @view_defaults(
     route_name="admin.oauthclients_create",
-    permission="admin_oauthclients",
+    permission=Permission.AdminPage.OAUTH_CLIENTS,
     renderer="h:templates/admin/oauthclients_create.html.jinja2",
 )
 class AuthClientCreateController:
@@ -91,7 +92,7 @@ class AuthClientCreateController:
 
 @view_defaults(
     route_name="admin.oauthclients_edit",
-    permission="admin.oauthclients",
+    permission=Permission.AdminPage.OAUTH_CLIENTS,
     renderer="h:templates/admin/oauthclients_edit.html.jinja2",
 )
 class AuthClientEditController:

@@ -3,13 +3,14 @@ from pyramid.view import view_config
 
 from h import models
 from h.i18n import TranslationString as _  # noqa: N813
+from h.security.permissions import Permission
 
 
 @view_config(
     route_name="admin.admins",
     request_method="GET",
     renderer="h:templates/admin/admins.html.jinja2",
-    permission="admin_admins",
+    permission=Permission.AdminPage.ADMINS,
 )
 def admins_index(request):
     """A list of all the admin users as an HTML page."""
@@ -25,7 +26,7 @@ def admins_index(request):
     request_method="POST",
     request_param="add",
     renderer="h:templates/admin/admins.html.jinja2",
-    permission="admin_admins",
+    permission=Permission.AdminPage.ADMINS,
     require_csrf=True,
 )
 def admins_add(request):
@@ -48,7 +49,7 @@ def admins_add(request):
     request_method="POST",
     request_param="remove",
     renderer="h:templates/admin/admins.html.jinja2",
-    permission="admin_admins",
+    permission=Permission.AdminPage.ADMINS,
     require_csrf=True,
 )
 def admins_remove(request):
