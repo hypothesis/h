@@ -1,6 +1,7 @@
 from pyramid.security import Allow
 
 from h.auth.util import client_authority
+from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
@@ -13,6 +14,8 @@ class BulkAPIRoot(RootFactory):
         if authority := client_authority(self.request):
             # Currently only LMS uses this end-point
             if authority.startswith("lms.") and authority.endswith(".hypothes.is"):
-                return [(Allow, f"client_authority:{authority}", "bulk_action")]
+                return [
+                    (Allow, f"client_authority:{authority}", Permission.API.BULK_ACTION)
+                ]
 
         return []
