@@ -415,7 +415,7 @@ class TestGroupCreateFactory:
     def test_provides_request_db_as_session(self, pyramid_request):
         svc = group_create_factory(None, pyramid_request)
 
-        assert svc.session == pyramid_request.db
+        assert svc.db == pyramid_request.db
 
     def test_wraps_user_service_as_user_fetcher(self, pyramid_request, user_service):
         svc = group_create_factory(None, pyramid_request)

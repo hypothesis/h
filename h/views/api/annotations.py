@@ -48,8 +48,7 @@ def search(request):
 
     separate_replies = params.pop("_separate_replies", False)
 
-    search = search_lib.Search(request, separate_replies=separate_replies)
-    result = search.run(params)
+    result = search_lib.Search(request, separate_replies=separate_replies).run(params)
 
     svc = request.find_service(name="annotation_json_presentation")
 

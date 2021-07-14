@@ -89,14 +89,13 @@ class MathRenderer(mistune.Renderer):
 
 def render(text):
     if text is not None:
-        render = _get_markdown()
-        return sanitize(render(text))
+        return sanitize(_get_markdown()(text))
+
     return None
 
 
 def sanitize(text):
-    cleaner = _get_cleaner()
-    return cleaner.clean(text)
+    return _get_cleaner().clean(text)
 
 
 def _linkify_target_blank(attrs, new=False):  # pylint: disable=unused-argument

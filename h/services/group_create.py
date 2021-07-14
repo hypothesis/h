@@ -10,15 +10,15 @@ from h.models.group import (
 
 
 class GroupCreateService:
-    def __init__(self, session, user_fetcher, publish):
+    def __init__(self, db, user_fetcher, publish):
         """
         Create a new GroupCreateService.
 
-        :param session: the SQLAlchemy session object
+        :param db: the SQLAlchemy session object
         :param user_fetcher: a callable for fetching users by userid
         :param publish: a callable for publishing events
         """
-        self.session = session
+        self.db = db
         self.user_fetcher = user_fetcher
         self.publish = publish
 
@@ -130,13 +130,13 @@ class GroupCreateService:
             scopes=group_scopes,
             **kwargs
         )
-        self.session.add(group)
+        self.db.add(group)
 
         if add_creator_as_member:
             group.members.append(group.creator)
 
             # Flush the DB to generate group.pubid before publish()ing it.
-            self.session.flush()
+            self.db.flush()
 
             self.publish("group-join", group.pubid, group.creator.userid)
 
@@ -155,7 +155,7 @@ def group_create_factory(_context, request):
     """Return a GroupCreateService instance for the passed context and request."""
     user_service = request.find_service(name="user")
     return GroupCreateService(
-        session=request.db,
+        db=request.db,
         user_fetcher=user_service.fetch,
         publish=partial(_publish, request),
     )

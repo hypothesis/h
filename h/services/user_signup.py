@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from h.emails import signup
 from h.models import Activation, Subscriptions, User, UserIdentity
 from h.services.exceptions import ConflictError
-from h.tasks import mailer
+from h.tasks import mailer as tasks_mailer
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class UserSignupService:
         Create a new user signup service.
 
         :param default_authority: the default authority for new users
-        :param mailer: a mailer (such as :py:mod:`h.tasks.mailer`)
+        :param mailer: a mailer (such as `h.tasks.mailer`)
         :param session: the SQLAlchemy session object
         :param signup_email: a function for generating a signup email
         :param password_service: the user password service
@@ -126,7 +126,7 @@ def user_signup_service_factory(_context, request):
     """Return a UserSignupService instance for the passed context and request."""
     return UserSignupService(
         default_authority=request.default_authority,
-        mailer=mailer,
+        mailer=tasks_mailer,
         session=request.db,
         signup_email=partial(signup.generate, request),
         password_service=request.find_service(name="user_password"),

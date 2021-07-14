@@ -30,19 +30,19 @@ def add(ctx, name, authority, type_):
     """
     request = ctx.obj["bootstrap"]()
 
-    authclient = models.AuthClient(name=name, authority=authority)
+    client = models.AuthClient(name=name, authority=authority)
     if type_ == "confidential":
-        authclient.secret = token_urlsafe()
-    request.db.add(authclient)
+        client.secret = token_urlsafe()
+    request.db.add(client)
     request.db.flush()
 
-    id_ = authclient.id
-    secret = authclient.secret
+    id_ = client.id
+    secret = client.secret
 
     request.tm.commit()
 
-    message = "OAuth client for {authority} created\nClient ID: {id}"
+    message = f"OAuth client for {authority} created\nClient ID: {id_}"
     if type_ == "confidential":
-        message += "\nClient Secret: {secret}"
+        message += f"\nClient Secret: {secret}"
 
-    click.echo(message.format(authority=authority, id=id_, secret=secret))
+    click.echo(message)

@@ -21,10 +21,10 @@ from h import models
 class DevDataFactory:
     """Factory class for inserting standard dev data into the DB."""
 
-    def __init__(self, request, devdata):
+    def __init__(self, request, devdata_):
         self.db = request.db
         self.tm = request.tm
-        self.devdata = devdata
+        self.devdata = devdata_
 
         self.user_password_service = request.find_service(name="user_password")
         self.group_service = request.find_service(name="group")
