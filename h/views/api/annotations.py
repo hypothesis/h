@@ -27,6 +27,7 @@ from h.schemas.annotation import (
     UpdateAnnotationSchema,
 )
 from h.schemas.util import validate_query_params
+from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
@@ -64,7 +65,7 @@ def search(request):
     versions=["v1", "v2"],
     route_name="api.annotations",
     request_method="POST",
-    permission="create",
+    permission=Permission.Annotation.CREATE,
     link_name="annotation.create",
     description="Create an annotation",
 )
@@ -86,7 +87,7 @@ def create(request):
     versions=["v1", "v2"],
     route_name="api.annotation",
     request_method="GET",
-    permission="read",
+    permission=Permission.Annotation.READ,
     link_name="annotation.read",
     description="Fetch an annotation",
 )
@@ -100,7 +101,7 @@ def read(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation.jsonld",
     request_method="GET",
-    permission="read",
+    permission=Permission.Annotation.READ,
 )
 def read_jsonld(context, request):
     request.response.content_type = "application/ld+json"
@@ -116,7 +117,7 @@ def read_jsonld(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation",
     request_method=("PATCH", "PUT"),
-    permission="update",
+    permission=Permission.Annotation.UPDATE,
     link_name="annotation.update",
     description="Update an annotation",
 )
@@ -143,7 +144,7 @@ def update(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation",
     request_method="DELETE",
-    permission="delete",
+    permission=Permission.Annotation.DELETE,
     link_name="annotation.delete",
     description="Delete an annotation",
 )

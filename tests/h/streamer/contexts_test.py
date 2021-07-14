@@ -2,6 +2,7 @@ import pytest
 from h_matchers import Any
 from pyramid.security import DENY_ALL
 
+from h.security.permissions import Permission
 from h.streamer.contexts import AnnotationNotificationContext
 
 
@@ -9,18 +10,18 @@ class TestAnnotationNotificationContext:
     def test_public_annotation_permissions(self, get_context_acl, factories):
         acl = get_context_acl(factories.Annotation(shared=True))
 
-        assert acl[0] == ("Allow", "system.Everyone", "read")
+        assert acl[0] == ("Allow", "system.Everyone", Permission.Annotation.READ)
 
     def test_private_annotation_permissions(self, get_context_acl, factories):
         annotation = factories.Annotation(shared=False)
         acl = get_context_acl(annotation)
 
-        assert acl[0] == ("Allow", annotation.userid, "read")
+        assert acl[0] == ("Allow", annotation.userid, Permission.Annotation.READ)
 
     def test_deleted_still_returns_read_permissions(self, get_context_acl, factories):
         acl = get_context_acl(factories.Annotation(deleted=True))
 
-        assert acl[0] == ("Allow", Any.string(), "read")
+        assert acl[0] == ("Allow", Any.string(), Permission.Annotation.READ)
 
     def test_it_always_adds_deny_last(self, get_context_acl, factories):
         acl = get_context_acl(factories.Annotation())

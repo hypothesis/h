@@ -7,13 +7,14 @@ from pyramid.security import (
 
 from h import storage
 from h.interfaces import IGroupService
+from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
 class AnnotationRoot(RootFactory):
     """Root factory for routes whose context is an `AnnotationContext`."""
 
-    __acl__ = [(Allow, Authenticated, "create")]
+    __acl__ = [(Allow, Authenticated, Permission.Annotation.CREATE)]
 
     def __getitem__(self, id_):
         annotation = storage.fetch_annotation(self.request.db, id_)
@@ -47,9 +48,9 @@ class AnnotationContext:
     def _read_principals(self):
         if self.annotation.shared:
             for principal in self._group_principals(self.group, "read"):
-                yield Allow, principal, "read"
+                yield Allow, principal, Permission.Annotation.READ
         else:
-            yield Allow, self.annotation.userid, "read"
+            yield Allow, self.annotation.userid, Permission.Annotation.READ
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
@@ -65,19 +66,23 @@ class AnnotationContext:
         # Otherwise they are derived from the annotation's creator
         if self.annotation.shared:
             for principal in self._group_principals(self.group, "flag"):
-                acl.append((Allow, principal, "flag"))
+                acl.append((Allow, principal, Permission.Annotation.FLAG))
 
             for principal in self._group_principals(self.group, "moderate"):
-                acl.append((Allow, principal, "moderate"))
+                acl.append((Allow, principal, Permission.Annotation.MODERATE))
 
         else:
             # Flagging one's own private annotations is nonsensical,
             # but from an authz perspective, allowed. It is up to services/views
             # to handle these situations appropriately
-            acl.append((Allow, self.annotation.userid, "flag"))
+            acl.append((Allow, self.annotation.userid, Permission.Annotation.FLAG))
 
         # The user who created the annotation always has the following permissions
-        for action in ["admin", "update", "delete"]:
+        for action in [
+            Permission.Annotation.ADMIN,
+            Permission.Annotation.UPDATE,
+            Permission.Annotation.DELETE,
+        ]:
             acl.append((Allow, self.annotation.userid, action))
 
         # If we haven't explicitly authorized it, it's not allowed.
