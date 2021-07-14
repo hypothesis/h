@@ -43,7 +43,9 @@ def bulk(request):
     # raise errors outside of the view when called
 
     try:
-        results = chain([next(results)], results)
+        results = chain(  # pylint: disable=redefined-variable-type
+            [next(results)], results
+        )
     except StopIteration:
         results = []
 

@@ -129,18 +129,19 @@ class Sorter:
         # Dates like "2017" can also be cast as floats so if a number is less
         # than 9999 it is assumed to be a year and not ms since the epoch.
         try:
-            date = float(str_value)
-            if date < 9999:
+            epoch = float(str_value)
+            if epoch < 9999:
                 raise ValueError("This is not in the form ms since the epoch.")
-            return date
+            return epoch
         except ValueError:
             try:
                 date = parse(str_value, default=DEFAULT_DATE)
                 # If timezone isn't specified assume it's utc.
                 if not date.tzinfo:
                     date = date.replace(tzinfo=tz.tzutc())
-                epoch = dt.utcfromtimestamp(0).replace(tzinfo=tz.tzutc())
-                return (date - epoch).total_seconds() * 1000.0
+
+                return dt.timestamp(date) * 1000
+
             except ValueError:
                 pass
 
