@@ -6,6 +6,7 @@ from sqlalchemy import func
 from h import form, i18n, models, paginator
 from h.models.organization import Organization
 from h.schemas.forms.admin.organization import OrganizationSchema
+from h.security.permissions import Permission
 
 _ = i18n.TranslationString
 
@@ -14,7 +15,7 @@ _ = i18n.TranslationString
     route_name="admin.organizations",
     request_method="GET",
     renderer="h:templates/admin/organizations.html.jinja2",
-    permission="admin_organizations",
+    permission=Permission.AdminPage.ORGANIZATIONS,
 )
 @paginator.paginate_query
 def index(_context, request):
@@ -36,7 +37,7 @@ def index(_context, request):
 @view_defaults(
     route_name="admin.organizations_create",
     renderer="h:templates/admin/organizations_create.html.jinja2",
-    permission="admin_organizations",
+    permission=Permission.AdminPage.ORGANIZATIONS,
 )
 class OrganizationCreateController:
     def __init__(self, request):
@@ -79,7 +80,7 @@ class OrganizationCreateController:
 
 @view_defaults(
     route_name="admin.organizations_edit",
-    permission="admin_organizations",
+    permission=Permission.AdminPage.ORGANIZATIONS,
     renderer="h:templates/admin/organizations_edit.html.jinja2",
 )
 class OrganizationEditController:

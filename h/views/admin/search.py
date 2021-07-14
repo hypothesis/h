@@ -3,6 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
 from h import models
+from h.security.permissions import Permission
 
 
 class NotFoundError(Exception):
@@ -15,7 +16,7 @@ def not_found(exc, request):
     return HTTPFound(location=request.route_url("admin.search"))
 
 
-@view_defaults(route_name="admin.search", permission="admin_search")
+@view_defaults(route_name="admin.search", permission=Permission.AdminPage.SEARCH)
 class SearchAdminViews:
     def __init__(self, request):
         self.request = request

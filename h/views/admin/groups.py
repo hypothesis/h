@@ -7,6 +7,7 @@ from h import i18n, models, paginator
 from h.models.annotation import Annotation
 from h.models.group_scope import GroupScope
 from h.schemas.forms.admin.group import AdminGroupSchema
+from h.security.permissions import Permission
 
 _ = i18n.TranslationString
 
@@ -15,7 +16,7 @@ _ = i18n.TranslationString
     route_name="admin.groups",
     request_method="GET",
     renderer="h:templates/admin/groups.html.jinja2",
-    permission="admin_groups",
+    permission=Permission.AdminPage.GROUPS,
 )
 @paginator.paginate_query
 def groups_index(_context, request):
@@ -30,7 +31,7 @@ def groups_index(_context, request):
 @view_defaults(
     route_name="admin.groups_create",
     renderer="h:templates/admin/groups_create.html.jinja2",
-    permission="admin_groups",
+    permission=Permission.AdminPage.GROUPS,
 )
 class GroupCreateViews:
     """Views for admin create-group forms"""

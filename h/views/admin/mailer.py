@@ -2,6 +2,7 @@ from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config
 
 from h.emails import test
+from h.security.permissions import Permission
 from h.tasks import mailer
 
 
@@ -9,7 +10,7 @@ from h.tasks import mailer
     route_name="admin.mailer",
     request_method="GET",
     renderer="h:templates/admin/mailer.html.jinja2",
-    permission="admin_mailer",
+    permission=Permission.AdminPage.MAILER,
 )
 def mailer_index(request):
     """Show the mailer test tools."""
@@ -19,7 +20,7 @@ def mailer_index(request):
 @view_config(
     route_name="admin.mailer_test",
     request_method="POST",
-    permission="admin_mailer",
+    permission=Permission.AdminPage.MAILER,
     require_csrf=True,
 )
 def mailer_test(request):

@@ -1,6 +1,7 @@
 from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow
 
 from h.auth import role
+from h.security.permissions import Permission
 
 
 class RootFactory:
@@ -14,11 +15,11 @@ class Root(RootFactory):
     """This app's default root factory."""
 
     __acl__ = [
-        (Allow, role.Staff, "admin_index"),
-        (Allow, role.Staff, "admin_groups"),
-        (Allow, role.Staff, "admin_mailer"),
-        (Allow, role.Staff, "admin_organizations"),
-        (Allow, role.Staff, "admin_users"),
+        (Allow, role.Staff, Permission.AdminPage.INDEX),
+        (Allow, role.Staff, Permission.AdminPage.GROUPS),
+        (Allow, role.Staff, Permission.AdminPage.MAILER),
+        (Allow, role.Staff, Permission.AdminPage.ORGANIZATIONS),
+        (Allow, role.Staff, Permission.AdminPage.USERS),
         (Allow, role.Admin, ALL_PERMISSIONS),
         DENY_ALL,
     ]
