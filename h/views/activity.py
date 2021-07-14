@@ -90,7 +90,7 @@ class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
 
     def __init__(self, context, request):
-        super(GroupSearchController, self).__init__(request)
+        super().__init__(request)
         self.group = context.group
         if self.group.organization:
             self._organization_context = OrganizationContext(
@@ -107,7 +107,7 @@ class GroupSearchController(SearchController):
 
         check_slug(self.group, self.request)
 
-        result = super(GroupSearchController, self).search()
+        result = super().search()
 
         result["opts"] = {"search_groupname": self.group.name}
 
@@ -350,12 +350,12 @@ class UserSearchController(SearchController):
     """View callables unique to the "activity.user_search" route."""
 
     def __init__(self, user, request):
-        super(UserSearchController, self).__init__(request)
+        super().__init__(request)
         self.user = user
 
     @view_config(request_method="GET")
     def search(self):
-        result = super(UserSearchController, self).search()
+        result = super().search()
 
         result["opts"] = {"search_username": self.user.username}
         result["more_info"] = "more_info" in self.request.params

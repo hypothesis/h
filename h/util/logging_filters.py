@@ -24,7 +24,7 @@ class ExceptionFilter(logging.Filter):
         ignore_exceptions: a tuple of tuples ((exception name, loglevel))
                            example: (("ReadTimeout", "WARNING"),)
         """
-        super(ExceptionFilter, self).__init__()
+        super().__init__()
 
         # build decoder dict where both string and int map to int logging level
         logging_levels = {val: val for val in LEVELS.values()}

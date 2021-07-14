@@ -46,7 +46,7 @@ class WebSocket(_WebSocket):
     query = None
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
-        super(WebSocket, self).__init__(
+        super().__init__(
             sock,
             protocols=protocols,
             extensions=extensions,

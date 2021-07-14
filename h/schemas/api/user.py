@@ -46,7 +46,7 @@ class CreateUserAPISchema(JSONSchema):
     }
 
     def validate(self, data):
-        appstruct = super(CreateUserAPISchema, self).validate(data)
+        appstruct = super().validate(data)
         return appstruct
 
 
@@ -66,7 +66,7 @@ class UpdateUserAPISchema(JSONSchema):
     }
 
     def validate(self, data):
-        appstruct = super(UpdateUserAPISchema, self).validate(data)
+        appstruct = super().validate(data)
         appstruct = self._whitelisted_properties_only(appstruct)
         return appstruct
 

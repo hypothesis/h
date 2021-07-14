@@ -57,7 +57,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
     LEEWAY = datetime.timedelta(seconds=10)
 
     def __init__(self, token, key, audience):
-        super(VerifiedJWTGrantToken, self).__init__(token)
+        super().__init__(token)
         self._verify(key, audience)
 
     def _verify(self, key, audience):

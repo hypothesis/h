@@ -17,7 +17,7 @@ class CommandLine(_CommandLine):
     def __init__(self, file_, prog=None):
         self.file_ = file_
 
-        super(CommandLine, self).__init__(prog=prog)
+        super().__init__(prog=prog)
 
         # This is super sneaky. Grab the config option and suppress its help.
         conf = None

@@ -5,9 +5,6 @@ from h.i18n import TranslationString as _  # noqa: N813
 class DuplicateUserError(Exception):
     """Indicates that data violates user uniqueness constraints"""
 
-    def __init__(self, message):
-        super(DuplicateUserError, self).__init__(message)
-
 
 class UserUniqueService:
 

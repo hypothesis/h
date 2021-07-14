@@ -37,7 +37,7 @@ class GroupAPISchema(JSONSchema):
         :arg default_authority: The service's default authority (default None)
 
         """
-        super(GroupAPISchema, self).__init__()
+        super().__init__()
         self.group_authority = group_authority
         self.default_authority = default_authority
 
@@ -50,7 +50,7 @@ class GroupAPISchema(JSONSchema):
         :rtype: dict
 
         """
-        appstruct = super(GroupAPISchema, self).validate(data)
+        appstruct = super().validate(data)
         appstruct = self._whitelisted_fields_only(appstruct)
         self._validate_groupid(appstruct)
 

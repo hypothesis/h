@@ -14,7 +14,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
     """Present an annotation in the JSON format returned by API requests."""
 
     def __init__(self, annotation_resource, formatters=None):
-        super(AnnotationJSONPresenter, self).__init__(annotation_resource)
+        super().__init__(annotation_resource)
 
         self._formatters = []
 
