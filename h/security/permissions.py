@@ -12,3 +12,6 @@ class Permission:
         SEARCH = "admin:search"
         STAFF = "admin:staff"
         USERS = "admin:users"
+
+    class API:
+        BULK_ACTION = "api:bulk_action"
