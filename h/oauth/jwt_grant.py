@@ -43,7 +43,7 @@ from h.oauth.jwt_grant_token import JWTGrantToken
 
 class JWTAuthorizationGrant(GrantTypeBase):  # pylint: disable=abstract-method
     def __init__(self, request_validator, user_svc, domain):
-        self.request_validator = request_validator
+        super().__init__(request_validator)
         self.user_svc = user_svc
         self.domain = domain
 
