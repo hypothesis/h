@@ -21,19 +21,23 @@ class FakeGroup:
     def __init__(self, principals):
         acl = []
         for p in principals:
-            acl.append((security.Allow, p, "read"))
+            acl.append((security.Allow, p, Permission.Group.READ))
             if p == security.Everyone:
-                acl.append((security.Allow, security.Authenticated, "flag"))
-                acl.append((security.Allow, security.Authenticated, "moderate"))
+                acl.append(
+                    (security.Allow, security.Authenticated, Permission.Group.FLAG)
+                )
+                acl.append(
+                    (security.Allow, security.Authenticated, Permission.Group.MODERATE)
+                )
             else:
-                acl.append((security.Allow, p, "flag"))
+                acl.append((security.Allow, p, Permission.Group.FLAG))
                 # Normally, the ``moderate`` permission would only be applied
                 # to the admin (creator) of a group, but this ``FakeGroup``
                 # is indeed fake. Tests in this module are merely around whether
                 # this permission is translated appropriately from a group
                 # to an annotation context (i.e. it should not be applied
                 # to private annotations)
-                acl.append((security.Allow, p, "moderate"))
+                acl.append((security.Allow, p, Permission.Group.MODERATE))
         self.__acl__ = acl
 
 

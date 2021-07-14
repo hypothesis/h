@@ -47,7 +47,7 @@ class AnnotationContext:
 
     def _read_principals(self):
         if self.annotation.shared:
-            for principal in self._group_principals(self.group, "read"):
+            for principal in self._group_principals(self.group, Permission.Group.READ):
                 yield Allow, principal, Permission.Annotation.READ
         else:
             yield Allow, self.annotation.userid, Permission.Annotation.READ
@@ -65,10 +65,12 @@ class AnnotationContext:
         # permissions for this annotation's containing group.
         # Otherwise they are derived from the annotation's creator
         if self.annotation.shared:
-            for principal in self._group_principals(self.group, "flag"):
+            for principal in self._group_principals(self.group, Permission.Group.FLAG):
                 acl.append((Allow, principal, Permission.Annotation.FLAG))
 
-            for principal in self._group_principals(self.group, "moderate"):
+            for principal in self._group_principals(
+                self.group, Permission.Group.MODERATE
+            ):
                 acl.append((Allow, principal, Permission.Annotation.MODERATE))
 
         else:

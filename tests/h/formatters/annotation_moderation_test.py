@@ -3,6 +3,7 @@ from collections import namedtuple
 import pytest
 
 from h.formatters.annotation_moderation import AnnotationModerationFormatter
+from h.security.permissions import Permission
 from h.services.flag_count import FlagCountService
 
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
@@ -74,13 +75,13 @@ class TestAnnotationModerationFormatter:
     @pytest.fixture
     def permission_granted(self, group):
         has_permission = FakePermissionCheck()
-        has_permission.add_permission("moderate", group, True)
+        has_permission.add_permission(Permission.Group.MODERATE, group, True)
         return has_permission
 
     @pytest.fixture
     def permission_denied(self, group):
         has_permission = FakePermissionCheck()
-        has_permission.add_permission("moderate", group, False)
+        has_permission.add_permission(Permission.Group.MODERATE, group, False)
         return has_permission
 
     @pytest.fixture

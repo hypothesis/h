@@ -14,6 +14,7 @@ from h.models.group import ReadableBy
 from h.paginator import paginate
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
+from h.security.permissions import Permission
 from h.util.datetime import utc_us_style_date
 from h.util.user import split_user
 from h.views.groups import check_slug
@@ -189,7 +190,7 @@ class GroupSearchController(SearchController):
             self.group.creator.userid if self.group.creator else None,
         ]
 
-        if self.request.has_permission("admin", self.group):
+        if self.request.has_permission(Permission.Group.ADMIN, self.group):
             result["group_edit_url"] = self.request.route_url(
                 "group_edit", pubid=self.group.pubid
             )
@@ -228,7 +229,7 @@ class GroupSearchController(SearchController):
         This adds the authenticated user to the given group and redirect the
         browser to the search page.
         """
-        if not self.request.has_permission("join", self.group):
+        if not self.request.has_permission(Permission.Group.JOIN, self.group):
             raise httpexceptions.HTTPNotFound()
 
         group_members_service = self.request.find_service(name="group_members")
@@ -322,8 +323,10 @@ class GroupSearchController(SearchController):
         return _toggle_tag_facet(self.request)
 
     def _check_access_permissions(self):
-        if not self.request.has_permission("read", self.group):
-            show_join_page = self.request.has_permission("join", self.group)
+        if not self.request.has_permission(Permission.Group.READ, self.group):
+            show_join_page = self.request.has_permission(
+                Permission.Group.JOIN, self.group
+            )
             if not self.request.user:
                 # Show a page which will prompt the user to login to join.
                 show_join_page = True

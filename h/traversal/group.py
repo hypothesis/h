@@ -5,6 +5,7 @@ from pyramid.security import Allow
 
 from h.auth import role
 from h.models import Group
+from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
@@ -12,7 +13,7 @@ class GroupRoot(RootFactory):
     """Root factory for group routes."""
 
     # Any logged in user may create a group
-    __acl__ = [(Allow, role.User, "create")]
+    __acl__ = [(Allow, role.User, Permission.Group.CREATE)]
 
     def __init__(self, request):
         super().__init__(request)
@@ -48,7 +49,7 @@ class GroupContext:
         if self.group is None:
             # If there's no group then give "upsert" permission to users to
             # allow them to use the UPSERT endpoint to create a new group.
-            return [(Allow, role.User, "upsert")]
+            return [(Allow, role.User, Permission.Group.UPSERT)]
 
         # If there is a group associated with the context, the "upsert" and
         # all other permissions are managed by the model
