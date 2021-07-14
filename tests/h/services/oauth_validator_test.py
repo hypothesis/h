@@ -9,6 +9,7 @@ from oauthlib.oauth2 import InvalidClientIdError
 from h import models
 from h.models.auth_client import GrantType as AuthClientGrantType
 from h.models.auth_client import ResponseType as AuthClientResponseType
+from h.security.permissions import Permission
 from h.services.oauth_validator import (
     Client,
     OAuthValidatorService,
@@ -222,8 +223,8 @@ class TestGetDefaultRedirectUri:
 class TestGetDefaultScopes:
     def test_returns_default_scopes(self, svc):
         assert svc.get_default_scopes("something", None) == [
-            "annotation:read",
-            "annotation:write",
+            Permission.Annotation.READ,
+            Permission.Annotation.WRITE,
         ]
 
 

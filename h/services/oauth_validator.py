@@ -6,12 +6,13 @@ from sqlalchemy.exc import StatementError
 
 from h import models
 from h.models.auth_client import GrantType as AuthClientGrantType
+from h.security.permissions import Permission
 from h.services.oauth_provider import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
 from h.util.db import lru_cache_in_transaction
 from h.util.uri import render_url_template
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
-DEFAULT_SCOPES = ["annotation:read", "annotation:write"]
+DEFAULT_SCOPES = [Permission.Annotation.READ, Permission.Annotation.WRITE]
 
 
 class Client:

@@ -1,12 +1,14 @@
 import copy
 
 from pyramid import security
+from pyramid.security import principals_allowed_by_permission
 from zope.interface.exceptions import DoesNotImplement
 from zope.interface.verify import verifyObject
 
 from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
+from h.security.permissions import Permission
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
@@ -74,8 +76,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         if self.annotation.shared:
             read = "group:{}".format(self.annotation.groupid)
 
-            principals = security.principals_allowed_by_permission(
-                self.annotation_resource, "read"
+            principals = principals_allowed_by_permission(
+                self.annotation_resource, Permission.Annotation.READ
             )
             if security.Everyone in principals:
                 read = "group:__world__"

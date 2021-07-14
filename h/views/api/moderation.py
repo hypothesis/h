@@ -1,6 +1,7 @@
 from pyramid.httpexceptions import HTTPNoContent
 
 from h import events
+from h.security.permissions import Permission
 from h.views.api.config import api_config
 
 
@@ -10,7 +11,7 @@ from h.views.api.config import api_config
     request_method="PUT",
     link_name="annotation.hide",
     description="Hide an annotation as a group moderator",
-    permission="moderate",
+    permission=Permission.Annotation.MODERATE,
 )
 def create(context, request):
 
@@ -29,7 +30,7 @@ def create(context, request):
     request_method="DELETE",
     link_name="annotation.unhide",
     description="Unhide an annotation as a group moderator",
-    permission="moderate",
+    permission=Permission.Annotation.MODERATE,
 )
 def delete(context, request):
 
