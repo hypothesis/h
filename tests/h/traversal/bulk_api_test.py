@@ -1,5 +1,6 @@
 import pytest
 
+from h.security.permissions import Permission
 from h.traversal.bulk_api import BulkAPIRoot
 
 
@@ -25,6 +26,6 @@ class TestBulkAPIRoot:
         context = BulkAPIRoot(pyramid_request)
 
         assert (
-            pyramid_request.has_permission("bulk_action", context)
+            pyramid_request.has_permission(Permission.API.BULK_ACTION, context)
             == permission_expected
         )

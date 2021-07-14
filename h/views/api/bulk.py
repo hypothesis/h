@@ -5,6 +5,7 @@ from h_api.bulk_api import BulkAPI
 from pyramid.response import Response
 
 from h.auth.util import client_authority
+from h.security.permissions import Permission
 from h.services.bulk_executor import BulkExecutor
 from h.views.api.config import api_config
 
@@ -16,7 +17,7 @@ from h.views.api.config import api_config
     link_name="bulk",
     description="Perform multiple operations in one call",
     subtype="x-ndjson",
-    permission="bulk_action",
+    permission=Permission.API.BULK_ACTION,
 )
 def bulk(request):
     """
