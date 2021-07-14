@@ -6,6 +6,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h.auth import role
 from h.exceptions import InvalidUserId
+from h.security.permissions import Permission
 from h.traversal.user import UserContext, UserRoot, UserUserIDRoot
 
 
@@ -14,7 +15,9 @@ class TestUserContext:
         user = factories.User(username="fiona", authority="myauthority.com")
         res = UserContext(user)
         actual = res.__acl__()
-        expect = [(security.Allow, "client_authority:myauthority.com", "read")]
+        expect = [
+            (security.Allow, "client_authority:myauthority.com", Permission.User.READ)
+        ]
         assert actual == expect
 
     def test_acl_matching_authority_allows_read(self, factories):
@@ -23,8 +26,12 @@ class TestUserContext:
         user = factories.User(username="fiona", authority="myauthority.com")
         res = UserContext(user)
 
-        assert policy.permits(res, ["client_authority:myauthority.com"], "read")
-        assert not policy.permits(res, ["client_authority:example.com"], "read")
+        assert policy.permits(
+            res, ["client_authority:myauthority.com"], Permission.User.READ
+        )
+        assert not policy.permits(
+            res, ["client_authority:example.com"], Permission.User.READ
+        )
 
 
 @pytest.mark.usefixtures("user_service", "client_authority")
@@ -38,7 +45,7 @@ class TestUserRoot:
 
         context = UserRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission("create", context)
+        assert not pyramid_request.has_permission(Permission.User.CREATE, context)
 
     def test_it_assigns_create_permission_to_auth_client_role(
         self, set_permissions, pyramid_request
@@ -47,7 +54,7 @@ class TestUserRoot:
 
         context = UserRoot(pyramid_request)
 
-        assert pyramid_request.has_permission("create", context)
+        assert pyramid_request.has_permission(Permission.User.CREATE, context)
 
     def test_it_fetches_the_requested_user(
         self, pyramid_request, user_factory, user_service

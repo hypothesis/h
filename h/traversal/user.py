@@ -4,6 +4,7 @@ from pyramid.security import Allow
 from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
+from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
@@ -30,7 +31,7 @@ class UserContext:
         acl = []
 
         user_authority_principal = f"client_authority:{self.user.authority}"
-        acl.append((Allow, user_authority_principal, "read"))
+        acl.append((Allow, user_authority_principal, Permission.User.READ))
 
         return acl
 
@@ -43,7 +44,7 @@ class UserRoot(RootFactory):
 
     """
 
-    __acl__ = [(Allow, role.AuthClient, "create")]
+    __acl__ = [(Allow, role.AuthClient, Permission.User.CREATE)]
 
     def __init__(self, request):
         super().__init__(request)
@@ -66,7 +67,7 @@ class UserUserIDRoot(RootFactory):
     .. todo:: This should be the main Root for User objects
     """
 
-    __acl__ = [(Allow, role.AuthClient, "create")]
+    __acl__ = [(Allow, role.AuthClient, Permission.User.CREATE)]
 
     def __init__(self, request):
         super().__init__(request)

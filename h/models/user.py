@@ -8,6 +8,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 from h.db import Base
 from h.exceptions import InvalidUserId
+from h.security.permissions import Permission
 from h.util.user import split_user
 
 USERNAME_MIN_LENGTH = 3
@@ -340,7 +341,8 @@ class User(Base):
         # auth_clients that have the same authority as the user
         # may update the user
         user_update_principal = "client_authority:{}".format(self.authority)
-        terms.append((security.Allow, user_update_principal, "update"))
+
+        terms.append((security.Allow, user_update_principal, Permission.User.UPDATE))
 
         terms.append(security.DENY_ALL)
 
