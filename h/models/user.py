@@ -8,6 +8,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 from h.db import Base
 from h.exceptions import InvalidUserId
+from h.security.permissions import Permission
 from h.util.user import split_user
 
 USERNAME_MIN_LENGTH = 3
@@ -340,8 +341,8 @@ class User(Base):
         return [
             # auth_clients that have the same authority as the user may update
             # the user
-            (security.Allow, client_authority, "update"),
-            (security.Allow, client_authority, "read"),
+            (security.Allow, client_authority, Permission.User.UPDATE),
+            (security.Allow, client_authority, Permission.User.READ),
             # This is for inheriting security policies... do we inherit?
             security.DENY_ALL,
         ]

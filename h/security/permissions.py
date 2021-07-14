@@ -1,4 +1,9 @@
 class Permission:
+    class User:
+        READ = "user:read"
+        CREATE = "user:create"
+        UPDATE = "user:update"
+
     class Profile:
         UPDATE = "profile:update"
 
