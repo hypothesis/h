@@ -5,11 +5,15 @@ from pyramid import httpexceptions
 from h.i18n import TranslationString as _  # noqa: N813
 
 
-class OAuthAuthorizeError(httpexceptions.HTTPBadRequest):
+class OAuthAuthorizeError(  # pylint: disable=too-many-ancestors
+    httpexceptions.HTTPBadRequest
+):
     """An OAuth authorization request failure."""
 
 
-class OAuthTokenError(httpexceptions.HTTPUnauthorized):
+class OAuthTokenError(
+    httpexceptions.HTTPUnauthorized
+):  # pylint: disable=too-many-ancestors
     """
     An OAuth token request failure.
 
@@ -22,7 +26,7 @@ class OAuthTokenError(httpexceptions.HTTPUnauthorized):
         super().__init__(detail)
 
 
-class PayloadError(httpexceptions.HTTPBadRequest):
+class PayloadError(httpexceptions.HTTPBadRequest):  # pylint: disable=too-many-ancestors
     """An API request has a missing or invalid payload."""
 
     def __init__(self):
