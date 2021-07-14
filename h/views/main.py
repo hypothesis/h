@@ -10,6 +10,7 @@ from pyramid import httpexceptions, response
 from pyramid.view import view_config
 
 from h.exceptions import InvalidUserId
+from h.security.permissions import Permission
 from h.util.user import split_user
 from h.views.client import sidebar_app
 
@@ -18,7 +19,7 @@ log = logging.getLogger(__name__)
 
 @view_config(
     route_name="annotation",
-    permission="read",
+    permission=Permission.Annotation.READ,
     renderer="h:templates/app.html.jinja2",
     csp_insecure_optout=True,
 )

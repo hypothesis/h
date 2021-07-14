@@ -5,6 +5,7 @@ import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
+from h.security.permissions import Permission
 from h.traversal import AnnotationContext, AnnotationRoot
 
 
@@ -45,7 +46,7 @@ class TestAnnotationRoot:
 
         context = AnnotationRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission("create", context)
+        assert not pyramid_request.has_permission(Permission.Annotation.CREATE, context)
 
     def test_it_assigns_create_permission_to_authenticated_request(
         self, set_permissions, pyramid_request
@@ -56,7 +57,7 @@ class TestAnnotationRoot:
 
         context = AnnotationRoot(pyramid_request)
 
-        assert pyramid_request.has_permission("create", context)
+        assert pyramid_request.has_permission(Permission.Annotation.CREATE, context)
 
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
@@ -136,11 +137,11 @@ class TestAnnotationContext:
         actual = res.__acl__()
         # Note NOT the ``moderate`` permission
         expect = [
-            (security.Allow, "saoirse", "read"),
-            (security.Allow, "saoirse", "flag"),
-            (security.Allow, "saoirse", "admin"),
-            (security.Allow, "saoirse", "update"),
-            (security.Allow, "saoirse", "delete"),
+            (security.Allow, "saoirse", Permission.Annotation.READ),
+            (security.Allow, "saoirse", Permission.Annotation.FLAG),
+            (security.Allow, "saoirse", Permission.Annotation.ADMIN),
+            (security.Allow, "saoirse", Permission.Annotation.UPDATE),
+            (security.Allow, "saoirse", Permission.Annotation.DELETE),
             security.DENY_ALL,
         ]
         assert actual == expect
@@ -157,7 +158,11 @@ class TestAnnotationContext:
         ann = factories.Annotation(shared=False, userid="saoirse")
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
-        for perm in ["admin", "update", "delete"]:
+        for perm in [
+            Permission.Annotation.ADMIN,
+            Permission.Annotation.UPDATE,
+            Permission.Annotation.DELETE,
+        ]:
             assert policy.permits(res, ["saoirse"], perm)
             assert not policy.permits(res, ["someoneelse"], perm)
 
@@ -171,7 +176,13 @@ class TestAnnotationContext:
         ann = factories.Annotation(userid="saoirse", deleted=True)
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
-        for perm in ["read", "admin", "update", "delete", "moderate"]:
+        for perm in [
+            Permission.Annotation.READ,
+            Permission.Annotation.ADMIN,
+            Permission.Annotation.UPDATE,
+            Permission.Annotation.DELETE,
+            Permission.Annotation.MODERATE,
+        ]:
             assert not policy.permits(res, ["saiorse"], perm)
 
     @pytest.mark.parametrize(
@@ -218,9 +229,9 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission("read", res)
+            assert pyramid_request.has_permission(Permission.Annotation.READ, res)
         else:
-            assert not pyramid_request.has_permission("read", res)
+            assert not pyramid_request.has_permission(Permission.Annotation.READ, res)
 
     @pytest.mark.parametrize(
         "groupid,userid,permitted",
@@ -266,9 +277,9 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission("flag", res)
+            assert pyramid_request.has_permission(Permission.Annotation.FLAG, res)
         else:
-            assert not pyramid_request.has_permission("flag", res)
+            assert not pyramid_request.has_permission(Permission.Annotation.FLAG, res)
 
     @pytest.mark.parametrize(
         "groupid,userid,permitted",
@@ -315,9 +326,11 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission("moderate", res)
+            assert pyramid_request.has_permission(Permission.Annotation.MODERATE, res)
         else:
-            assert not pyramid_request.has_permission("moderate", res)
+            assert not pyramid_request.has_permission(
+                Permission.Annotation.MODERATE, res
+            )
 
     @pytest.fixture
     def groups(self):
