@@ -100,7 +100,7 @@ class GroupSearchController(SearchController):
             self._organization_context = None
 
     @view_config(request_method="GET")
-    def search(self):
+    def search(self):  # pylint: disable=too-complex
         result = self._check_access_permissions()
         if result is not None:
             return result

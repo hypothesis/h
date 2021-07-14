@@ -4,7 +4,7 @@ import math
 PAGE_SIZE = 20
 
 
-def paginate(request, total, page_size=PAGE_SIZE):
+def paginate(request, total, page_size=PAGE_SIZE):  # pylint:disable=too-complex
     first = 1
     page_max = int(math.ceil(total / page_size))
     page_max = max(1, page_max)  # There's always at least one page.

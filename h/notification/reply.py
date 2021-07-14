@@ -30,7 +30,7 @@ class Notification(
 
 def get_notification(
     request, annotation, action
-):  # pylint: disable=too-many-return-statements
+):  # pylint: disable=too-many-return-statements,too-complex
     """
     Check if the passed annotation and action pair should send a notification.
 

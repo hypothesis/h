@@ -60,7 +60,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
         super(VerifiedJWTGrantToken, self).__init__(token)
         self._verify(key, audience)
 
-    def _verify(self, key, audience):
+    def _verify(self, key, audience):  # pylint:disable=too-complex
         if self.expiry - self.not_before > self.MAX_LIFETIME:
             raise InvalidGrantError("Grant token lifetime is too long.")
         try:
