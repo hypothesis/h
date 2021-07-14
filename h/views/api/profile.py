@@ -2,6 +2,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session
 from h.presenters import GroupsJSONPresenter
+from h.security.permissions import Permission
 from h.views.api.config import api_config
 
 
@@ -44,7 +45,7 @@ def profile_groups(request):
     versions=["v1", "v2"],
     route_name="api.profile",
     request_method="PATCH",
-    permission="update",
+    permission=Permission.Profile.UPDATE,
     link_name="profile.update",
     description="Update a user's preferences",
 )

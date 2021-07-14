@@ -1,4 +1,5 @@
 from h.auth import role
+from h.security.permissions import Permission
 from h.traversal.profile import ProfileRoot
 
 
@@ -10,7 +11,7 @@ class TestProfileRoot:
 
         context = ProfileRoot(pyramid_request)
 
-        assert pyramid_request.has_permission("update", context)
+        assert pyramid_request.has_permission(Permission.Profile.UPDATE, context)
 
     def test_it_does_not_assign_update_permission_without_user_role(
         self, set_permissions, pyramid_request
@@ -19,4 +20,4 @@ class TestProfileRoot:
 
         context = ProfileRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission("update", context)
+        assert not pyramid_request.has_permission(Permission.Profile.UPDATE, context)

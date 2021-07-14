@@ -1,4 +1,7 @@
 class Permission:
+    class Profile:
+        UPDATE = "profile:update"
+
     class AdminPage:
         ADMINS = "admin:admins"
         BADGE = "admin:badge"
