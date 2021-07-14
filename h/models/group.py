@@ -9,6 +9,7 @@ from pyramid import security
 from h import pubid
 from h.auth import role
 from h.db import Base, mixins
+from h.security.permissions import Permission
 from h.util.group import split_groupid
 
 GROUP_NAME_MIN_LENGTH = 3
@@ -225,29 +226,31 @@ class Group(Base, mixins.Timestamps):
 
         join_principal = _join_principal(self)
         if join_principal is not None:
-            terms.append((security.Allow, join_principal, "join"))
+            terms.append((security.Allow, join_principal, Permission.Group.JOIN))
 
         read_principal = _read_principal(self)
         if read_principal is not None:
-            terms.append((security.Allow, read_principal, "read"))
+            terms.append((security.Allow, read_principal, Permission.Group.READ))
             # Any user who can read the group should also be able to see
             # who is a member of the group
-            terms.append((security.Allow, read_principal, "member_read"))
+            terms.append((security.Allow, read_principal, Permission.Group.MEMBER_READ))
 
         flag_principal = _flag_principal(self)
         if flag_principal is not None:
-            terms.append((security.Allow, flag_principal, "flag"))
+            terms.append((security.Allow, flag_principal, Permission.Group.FLAG))
 
         write_principal = _write_principal(self)
         if write_principal is not None:
-            terms.append((security.Allow, write_principal, "write"))
+            terms.append((security.Allow, write_principal, Permission.Group.WRITE))
 
         if self.creator:
             # The creator of the group should be able to update it
-            terms.append((security.Allow, self.creator.userid, "admin"))
-            terms.append((security.Allow, self.creator.userid, "moderate"))
+            terms.append((security.Allow, self.creator.userid, Permission.Group.ADMIN))
+            terms.append(
+                (security.Allow, self.creator.userid, Permission.Group.MODERATE)
+            )
             # The creator may update this group in an upsert context
-            terms.append((security.Allow, self.creator.userid, "upsert"))
+            terms.append((security.Allow, self.creator.userid, Permission.Group.UPSERT))
 
         # This authority principal may be used to grant auth clients
         # permissions for groups within their authority
@@ -255,20 +258,22 @@ class Group(Base, mixins.Timestamps):
 
         # auth_clients that have the same authority as the target group
         # may read the members within it
-        terms.append((security.Allow, authority_principal, "member_read"))
+        terms.append(
+            (security.Allow, authority_principal, Permission.Group.MEMBER_READ)
+        )
         # auth_clients that have the same authority as the target group
         # may add members to it
-        terms.append((security.Allow, authority_principal, "member_add"))
+        terms.append((security.Allow, authority_principal, Permission.Group.MEMBER_ADD))
         # auth_clients that have the same authority as this group
         # should be allowed to update it
-        terms.append((security.Allow, authority_principal, "admin"))
+        terms.append((security.Allow, authority_principal, Permission.Group.ADMIN))
         # auth_clients with matching authority should be able to read
         # the group
-        terms.append((security.Allow, authority_principal, "read"))
+        terms.append((security.Allow, authority_principal, Permission.Group.READ))
 
         # Those with the admin or staff role should be able to admin/edit any group
-        terms.append((security.Allow, role.Staff, "admin"))
-        terms.append((security.Allow, role.Admin, "admin"))
+        terms.append((security.Allow, role.Staff, Permission.Group.ADMIN))
+        terms.append((security.Allow, role.Admin, Permission.Group.ADMIN))
 
         terms.append(security.DENY_ALL)
 

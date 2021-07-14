@@ -1,4 +1,16 @@
 class Permission:
+    class Group:
+        ADMIN = "group:admin"  # Is this really "EDIT" or a combination?
+        JOIN = "group:join"
+        READ = "group:read"
+        WRITE = "group:write"
+        UPSERT = "group:upsert"
+        CREATE = "group:create"
+        FLAG = "group:flag"
+        MODERATE = "group:moderate"
+        MEMBER_READ = "group:member:read"
+        MEMBER_ADD = "group:member:add"
+
     class Annotation:
         ADMIN = "annotation:admin"  # Is this used anywhere?
         READ = "annotation:read"

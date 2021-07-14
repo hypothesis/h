@@ -2,6 +2,7 @@ from sqlalchemy.orm import subqueryload
 
 from h import formatters, models, presenters, storage, traversal
 from h.interfaces import IGroupService
+from h.security.permissions import Permission
 
 
 class AnnotationJSONPresentationService:
@@ -22,7 +23,7 @@ class AnnotationJSONPresentationService:
         self.links_svc = links_svc
 
         def moderator_check(group):
-            return has_permission("moderate", group)
+            return has_permission(Permission.Group.MODERATE, group)
 
         self.formatters = [
             formatters.AnnotationFlagFormatter(flag_svc, user),

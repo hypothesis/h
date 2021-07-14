@@ -10,6 +10,7 @@ from h.auth.util import client_authority
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
+from h.security.permissions import Permission
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -41,7 +42,7 @@ def groups(request):
     versions=["v1", "v2"],
     route_name="api.groups",
     request_method="POST",
-    permission="create",
+    permission=Permission.Group.CREATE,
     link_name="group.create",
     description="Create a new group",
 )
@@ -77,7 +78,7 @@ def create(request):
     versions=["v1", "v2"],
     route_name="api.group",
     request_method="GET",
-    permission="read",
+    permission=Permission.Group.READ,
     link_name="group.read",
     description="Fetch a group",
 )
@@ -93,7 +94,7 @@ def read(context, request):
     versions=["v1", "v2"],
     route_name="api.group",
     request_method="PATCH",
-    permission="admin",
+    permission=Permission.Group.ADMIN,
     link_name="group.update",
     description="Update a group",
 )
@@ -125,7 +126,7 @@ def update(context, request):
     versions=["v1", "v2"],
     route_name="api.group_upsert",
     request_method="PUT",
-    permission="upsert",
+    permission=Permission.Group.UPSERT,
     link_name="group.create_or_update",
     description="Create or update a group",
 )
@@ -188,7 +189,7 @@ def upsert(context, request):
     request_method="GET",
     link_name="group.members.read",
     description="Fetch all members of a group",
-    permission="member_read",
+    permission=Permission.Group.MEMBER_READ,
 )
 def read_members(context, _request):
     """Fetch the members of a group."""
@@ -222,7 +223,7 @@ def remove_member(context, request):
     route_name="api.group_member",
     request_method="POST",
     link_name="group.member.add",
-    permission="member_add",
+    permission=Permission.Group.MEMBER_ADD,
     description="Add the user in the request params to a group.",
 )
 def add_member(context, request):

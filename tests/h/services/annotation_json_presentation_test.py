@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from h_matchers import Any
 
+from h.security.permissions import Permission
 from h.services.annotation_json_presentation import (
     AnnotationJSONPresentationService,
     annotation_json_presentation_service_factory,
@@ -30,7 +31,7 @@ class TestAnnotationJSONPresentationService:
         group = mock.Mock()
         moderator_check = formatters.AnnotationHiddenFormatter.call_args[0][1]
         moderator_check(group)
-        has_permission.assert_called_once_with("moderate", group)
+        has_permission.assert_called_once_with(Permission.Group.MODERATE, group)
 
     def test_it_configures_hidden_formatter(self, services, formatters, svc):
         assert formatters.AnnotationHiddenFormatter.return_value in svc.formatters

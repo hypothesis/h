@@ -22,6 +22,7 @@ from pyramid import i18n
 from h import models, schemas
 from h.db import types
 from h.models.document import update_document_metadata
+from h.security.permissions import Permission
 from h.util.group_scope import url_in_scope
 from h.util.uri import normalize as normalize_uri
 
@@ -124,7 +125,9 @@ def create_annotation(request, data, group_service):
     # a groupfinder we will allow writing this annotation without any
     # further checks.
     group = group_service.find(data["groupid"])
-    if group is None or not request.has_permission("write", context=group):
+    if group is None or not request.has_permission(
+        Permission.Group.WRITE, context=group
+    ):
         raise schemas.ValidationError(
             "group: " + _("You may not create annotations " "in the specified group!")
         )

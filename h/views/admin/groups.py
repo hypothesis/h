@@ -126,7 +126,7 @@ class GroupCreateViews:
 
 @view_defaults(
     route_name="admin.groups_edit",
-    permission="admin",
+    permission=Permission.Group.ADMIN,
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
 class GroupEditViews:
