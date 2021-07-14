@@ -7,6 +7,7 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
+from h.security.permissions import Permission
 from h.services.annotation_stats import AnnotationStatsService
 from h.traversal import UserContext
 from h.traversal.group import GroupContext
@@ -121,10 +122,7 @@ class TestGroupSearchController:
         """When the request has no read permission but join, it should render the join template."""
 
         def fake_has_permission(permission, context=None):
-            if permission == "read":
-                return False
-            if permission == "join":
-                return True
+            return False
 
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
         pyramid_request.override_renderer = mock.PropertyMock()
@@ -142,8 +140,7 @@ class TestGroupSearchController:
         """
 
         def fake_has_permission(permission, context=None):
-            if permission in ("read", "join"):
-                return False
+            return False
 
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
 
@@ -161,8 +158,7 @@ class TestGroupSearchController:
         self, controller, factories, pyramid_request, test_group, test_user
     ):
         def fake_has_permission(permission, context=None):
-            if permission in ("read", "join"):
-                return False
+            return False
 
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
 
@@ -301,7 +297,7 @@ class TestGroupSearchController:
         self, controller, factories, test_group, test_user, pyramid_request
     ):
         def fake_has_permission(permission, context=None):
-            return permission != "admin"
+            return permission != Permission.Group.ADMIN
 
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
 
@@ -343,7 +339,6 @@ class TestGroupSearchController:
     def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
         self, controller, factories, test_group, test_user, pyramid_request
     ):
-
         assert controller.search()["more_info"] is False
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
@@ -688,7 +683,6 @@ class TestGroupSearchController:
         pyramid_request,
         search,
     ):
-
         info = controller.search()
 
         assert info["group_users_args"][0] == test_heading
@@ -706,7 +700,6 @@ class TestGroupSearchController:
     def test_search_sets_display_members_for_group(
         self, controller, test_group, test_user, pyramid_request, search
     ):
-
         info = controller.search()["group_users_args"]
         userids = [i["userid"] for i in info[1]]
         for member in test_group.members:
@@ -718,7 +711,6 @@ class TestGroupSearchController:
     def test_search_sets_display_members_for_open_group(
         self, controller, test_group, pyramid_request, search
     ):
-
         info = controller.search()["group_users_args"]
         userids = [i["userid"] for i in info[1]]
 
@@ -733,11 +725,9 @@ class TestGroupSearchController:
     def test_leave_removes_empty_query_from_url(
         self, controller, test_group, pyramid_request, group_leave_request, q
     ):
-        """
-        It should remove an empty q from the URL it redirects to.
+        """It should remove an empty q from the URL it redirects to.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
-
         """
         group_leave_request.POST["q"] = q
         group_leave_request.POST["group_leave"] = test_group.pubid
@@ -849,11 +839,9 @@ class TestGroupSearchController:
     def test_toggle_user_facet_removes_empty_query(
         self, controller, test_group, pyramid_request, toggle_user_facet_request, q
     ):
-        """
-        It should remove an empty query from the URL.
+        """It should remove an empty query from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
-
         """
         toggle_user_facet_request.params["q"] = q
 
@@ -932,6 +920,8 @@ class TestGroupSearchController:
 
 @pytest.mark.usefixtures("annotation_stats_service", "user_service", "routes", "search")
 class TestUserSearchController:
+    """Tests unique to UserSearchController."""
+
     def test_search_calls_search_with_request(
         self, controller, pyramid_request, search
     ):
@@ -1074,11 +1064,9 @@ class TestUserSearchController:
 
     @pytest.mark.parametrize("q", ["", "   "])
     def test_back_removes_empty_query(self, controller, user, pyramid_request, q):
-        """
-        It should remove an empty q param from the URL.
+        """It should remove an empty q param from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
-
         """
         pyramid_request.matched_route = mock.Mock()
         pyramid_request.matched_route.name = "activity.user_search"
@@ -1112,7 +1100,6 @@ class TestUserSearchController:
 
 @pytest.mark.usefixtures("routes", "search")
 class TestGroupAndUserSearchController:
-
     """Tests common to both GroupSearchController and UserSearchController."""
 
     @pytest.mark.usefixtures("delete_lozenge_request")
@@ -1139,11 +1126,9 @@ class TestGroupAndUserSearchController:
     def test_delete_lozenge_removes_empty_queries(
         self, controller, delete_lozenge_request, q
     ):
-        """
-        It should remove an empty q from the URL.
+        """It should remove an empty q from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
-
         """
         delete_lozenge_request.params["q"] = q
 
@@ -1203,12 +1188,9 @@ class TestGroupAndUserSearchController:
     def test_toggle_tag_facet_removes_empty_query(
         self, controller, toggle_tag_facet_request, q
     ):
-        """
-        It should remove an empty q from the URL.
-
+        """It should remove an empty q from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
-
         """
         toggle_tag_facet_request.params["q"] = q
 

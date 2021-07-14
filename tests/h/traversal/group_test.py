@@ -3,6 +3,7 @@ from unittest.mock import sentinel
 import pytest
 
 from h.auth import role
+from h.security.permissions import Permission
 from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
 
 
@@ -26,7 +27,10 @@ class TestGroupContext:
         context = GroupContext(group=None)
 
         assert context.group is None
-        assert bool(pyramid_request.has_permission("upsert", context)) == has_upsert
+        assert (
+            bool(pyramid_request.has_permission(Permission.Group.UPSERT, context))
+            == has_upsert
+        )
 
 
 @pytest.mark.usefixtures("group_service", "GroupContext_")
@@ -41,7 +45,10 @@ class TestGroupRoot:
 
         context = GroupRoot(pyramid_request)
 
-        assert bool(pyramid_request.has_permission("create", context)) == has_create
+        assert (
+            bool(pyramid_request.has_permission(Permission.Group.CREATE, context))
+            == has_create
+        )
 
     def test_it_returns_the_context_from_looking_up_the_group(
         self, pyramid_request, group_service, GroupContext_

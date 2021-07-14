@@ -8,6 +8,7 @@ from zope.interface import implementer
 
 from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
+from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
@@ -209,8 +210,12 @@ class TestAnnotationJSONPresenter:
         annotation.deleted = False
 
         group_principals = {
-            "members": (security.Allow, "group:{}".format(annotation.groupid), "read"),
-            "world": (security.Allow, security.Everyone, "read"),
+            "members": (
+                security.Allow,
+                "group:{}".format(annotation.groupid),
+                Permission.Group.READ,
+            ),
+            "world": (security.Allow, security.Everyone, Permission.Group.READ),
             None: security.DENY_ALL,
         }
         group = mock.Mock(spec_set=["__acl__"])

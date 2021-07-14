@@ -4,6 +4,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import form, i18n
 from h.schemas.forms.group import group_schema
+from h.security.permissions import Permission
 
 _ = i18n.TranslationString
 
@@ -66,7 +67,7 @@ class GroupCreateController:
 @view_defaults(
     route_name="group_edit",
     renderer="h:templates/groups/edit.html.jinja2",
-    permission="admin",
+    permission=Permission.Group.ADMIN,
 )
 class GroupEditController:
     def __init__(self, context, request):
