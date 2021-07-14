@@ -5,6 +5,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h.auth import role
 from h.exceptions import InvalidUserId
+from h.security.permissions import Permission
 from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
 
 
@@ -29,7 +30,10 @@ class TestUserRoot:
 
         context = UserRoot(pyramid_request)
 
-        assert bool(pyramid_request.has_permission("create", context)) == has_create
+        assert (
+            bool(pyramid_request.has_permission(Permission.User.CREATE, context))
+            == has_create
+        )
 
     def test_get_user_context(self, root, user_service, UserContext):
         user = root.get_user_context(sentinel.userid, sentinel.authority)

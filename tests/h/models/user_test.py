@@ -5,6 +5,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from sqlalchemy import exc
 
 from h import models
+from h.security.permissions import Permission
 
 
 class TestUserModelDataConstraints:
@@ -320,7 +321,9 @@ class TestUserACL:
             ("authority:user_authority", False),
         ),
     )
-    @pytest.mark.parametrize("permission", ("update", "read"))
+    @pytest.mark.parametrize(
+        "permission", (Permission.User.UPDATE, Permission.User.READ)
+    )
     def test_it(self, principal, permission, permits):
         policy = ACLAuthorizationPolicy()
 

@@ -4,6 +4,7 @@ from h.auth.util import client_authority
 from h.presenters import TrustedUserJSONPresenter
 from h.schemas import ValidationError
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
+from h.security.permissions import Permission
 from h.services.user_unique import DuplicateUserError
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
@@ -15,7 +16,7 @@ from h.views.api.exceptions import PayloadError
     request_method="GET",
     link_name="user.read",
     description="Fetch a user",
-    permission="read",
+    permission=Permission.User.READ,
 )
 def read(context, _request):
     """
@@ -33,7 +34,7 @@ def read(context, _request):
     request_method="POST",
     link_name="user.create",
     description="Create a new user",
-    permission="create",
+    permission=Permission.User.CREATE,
 )
 def create(request):
     """
@@ -84,7 +85,7 @@ def create(request):
     request_method="PATCH",
     link_name="user.update",
     description="Update a user",
-    permission="update",
+    permission=Permission.User.UPDATE,
 )
 def update(context, request):
     """

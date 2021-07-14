@@ -7,6 +7,7 @@ from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
+from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
@@ -23,7 +24,7 @@ class UserContext:
 
 
 class UserRoot(RootFactory):
-    __acl__ = [(Allow, role.AuthClient, "create")]
+    __acl__ = [(Allow, role.AuthClient, Permission.User.CREATE)]
 
     def __init__(self, request):
         super().__init__(request)
