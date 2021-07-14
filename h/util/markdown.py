@@ -80,9 +80,6 @@ class MathBlockLexer(mistune.BlockLexer):
 
 
 class MathRenderer(mistune.Renderer):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def block_math(self, text):
         return "<p>$$%s$$</p>\n" % text
 
