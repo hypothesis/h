@@ -133,8 +133,9 @@ def _load_bundles(fp):
 
 
 # Site assets
-assets_view = static_view("h:../build", cache_max_age=None, use_subpath=True)
-assets_view = _add_cors_header(assets_view)
+assets_view = _add_cors_header(
+    static_view("h:../build", cache_max_age=None, use_subpath=True)
+)
 
 
 def includeme(config):
