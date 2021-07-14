@@ -30,16 +30,16 @@ def profile(request, authority=None):
     else:
         authority = authority or request.default_authority
 
-    profile = {}
-    profile["userid"] = request.authenticated_userid
-    profile["authority"] = authority
-    profile["groups"] = _current_groups(request, authority)
-    profile["features"] = request.feature.all()
-    profile["preferences"] = _user_preferences(user)
-
-    profile.update(user_info(user))
-
-    return profile
+    return dict(
+        {
+            "userid": request.authenticated_userid,
+            "authority": authority,
+            "groups": _current_groups(request, authority),
+            "features": request.feature.all(),
+            "preferences": _user_preferences(user),
+        },
+        **user_info(user)
+    )
 
 
 def user_info(user):
@@ -76,15 +76,15 @@ def _current_groups(request, authority):
 
 
 def _group_model(route_url, group):
-    model = {"name": group.name, "id": group.pubid, "public": group.is_public}
+    model_ = {"name": group.name, "id": group.pubid, "public": group.is_public}
 
     # We currently want to show URLs for secret groups, but not for open
     # groups, and not for the `__world__` group (where it doesn't make sense).
     # This is currently all non-public groups, which saves us needing to do a
     # check in here on the group's authority.
     if not group.is_public:
-        model["url"] = route_url("group_read", pubid=group.pubid, slug=group.slug)
-    return model
+        model_["url"] = route_url("group_read", pubid=group.pubid, slug=group.slug)
+    return model_
 
 
 def _user_preferences(user):

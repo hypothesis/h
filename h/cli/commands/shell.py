@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 """Command to run an interactive shell with application context."""
 
 import click

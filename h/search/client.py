@@ -14,7 +14,9 @@ class Client:
     :param elasticsearch: Elasticsearch library defaulted to elasticsearch
     """
 
-    def __init__(self, host, index, elasticsearch=elasticsearch, **kwargs):
+    def __init__(
+        self, host, index, elasticsearch=elasticsearch, **kwargs
+    ):  # pylint: disable=redefined-outer-name
         self._version = elasticsearch.__version__
         self._index = index
         self._conn = elasticsearch.Elasticsearch([host], **kwargs)

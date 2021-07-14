@@ -169,7 +169,7 @@ class TestFactory:
     def test_provides_request_db_as_session(self, pyramid_request):
         group_members_service = group_members_factory(None, pyramid_request)
 
-        assert group_members_service.session == pyramid_request.db
+        assert group_members_service.db == pyramid_request.db
 
     def test_wraps_user_service_as_user_fetcher(self, pyramid_request, user_service):
         group_members_service = group_members_factory(None, pyramid_request)

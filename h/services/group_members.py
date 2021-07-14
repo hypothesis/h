@@ -7,15 +7,15 @@ class GroupMembersService:
 
     """A service for manipulating group membership."""
 
-    def __init__(self, session, user_fetcher, publish):
+    def __init__(self, db, user_fetcher, publish):
         """
         Create a new GroupMembersService
 
-        :param session: the SQLAlchemy session object
+        :param db: the SQLAlchemy db object
         :param user_fetcher: a callable for fetching users by userid
         :param publish: a callable for publishing events
         """
-        self.session = session
+        self.db = db
         self.user_fetcher = user_fetcher
         self.publish = publish
 
@@ -82,7 +82,7 @@ def group_members_factory(_context, request):
     """Return a GroupMembersService instance for the passed context and request."""
     user_service = request.find_service(name="user")
     return GroupMembersService(
-        session=request.db,
+        db=request.db,
         user_fetcher=user_service.fetch,
         publish=partial(_publish, request),
     )
