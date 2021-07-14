@@ -130,7 +130,7 @@ def group_organization_select_widget(_node, kw):
 
 class AdminGroupSchema(CSRFSchema):
     def __init__(self, *args):
-        super(AdminGroupSchema, self).__init__(validator=username_validator, *args)
+        super().__init__(validator=username_validator, *args)
 
     group_type = colander.SchemaNode(
         colander.String(),

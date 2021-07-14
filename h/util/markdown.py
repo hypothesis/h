@@ -61,7 +61,7 @@ class MathMarkdown(mistune.Markdown):
 
 class MathInlineLexer(mistune.InlineLexer):
     def __init__(self, *args, **kwargs):
-        super(MathInlineLexer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.rules.inline_math = re.compile(r"\\\((.*?)\\\)", re.DOTALL)
         self.default_rules.insert(0, "inline_math")
 
@@ -71,7 +71,7 @@ class MathInlineLexer(mistune.InlineLexer):
 
 class MathBlockLexer(mistune.BlockLexer):
     def __init__(self, *args, **kwargs):
-        super(MathBlockLexer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.rules.block_math = re.compile(r"^\$\$(.*?)\$\$", re.DOTALL)
         self.default_rules.insert(0, "block_math")
 
@@ -81,7 +81,7 @@ class MathBlockLexer(mistune.BlockLexer):
 
 class MathRenderer(mistune.Renderer):
     def __init__(self, **kwargs):
-        super(MathRenderer, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def block_math(self, text):
         return "<p>$$%s$$</p>\n" % text

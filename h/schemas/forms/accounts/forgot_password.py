@@ -17,7 +17,7 @@ class ForgotPasswordSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
-        super(ForgotPasswordSchema, self).validator(node, value)
+        super().validator(node, value)
 
         request = node.bindings["request"]
         email = value.get("email")

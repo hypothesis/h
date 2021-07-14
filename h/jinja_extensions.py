@@ -17,7 +17,7 @@ class Filters(Extension):
     """
 
     def __init__(self, environment):
-        super(Filters, self).__init__(environment)
+        super().__init__(environment)
 
         environment.filters["to_json"] = to_json
         environment.filters["human_timestamp"] = human_timestamp
@@ -68,7 +68,7 @@ class SvgIcon(Extension):
     """
 
     def __init__(self, environment):
-        super(SvgIcon, self).__init__(environment)
+        super().__init__(environment)
 
         def read_icon(name):
             with open("build/images/icons/{}.svg".format(name)) as fp:

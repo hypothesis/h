@@ -152,9 +152,6 @@ class Group(Base, mixins.Timestamps):
     )
     organization = sa.orm.relationship("Organization")
 
-    def __init__(self, **kwargs):
-        super(Group, self).__init__(**kwargs)
-
     @sa.orm.validates("name")
     def validate_name(self, _key, name):
         if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:

@@ -9,7 +9,7 @@ class MissingJWTGrantTokenClaimError(InvalidGrantError):
             )
         else:
             description = "Missing claim '{}' from grant token.".format(claim)
-        super(MissingJWTGrantTokenClaimError, self).__init__(description=description)
+        super().__init__(description=description)
 
 
 class InvalidJWTGrantTokenClaimError(InvalidGrantError):
@@ -20,7 +20,7 @@ class InvalidJWTGrantTokenClaimError(InvalidGrantError):
             )
         else:
             description = "Invalid claim '{}' in grant token.".format(claim)
-        super(InvalidJWTGrantTokenClaimError, self).__init__(description=description)
+        super().__init__(description=description)
 
 
 class InvalidRefreshTokenError(InvalidRequestFatalError):

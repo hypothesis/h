@@ -184,7 +184,7 @@ class EmailChangeSchema(CSRFSchema):
     password = password_node(title=_("Confirm password"), hide_until_form_active=True)
 
     def validator(self, node, value):
-        super(EmailChangeSchema, self).validator(node, value)
+        super().validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")
@@ -212,7 +212,7 @@ class PasswordChangeSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
-        super(PasswordChangeSchema, self).validator(node, value)
+        super().validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")
