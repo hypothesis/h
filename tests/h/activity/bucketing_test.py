@@ -80,7 +80,7 @@ class TestDocumentBucket:
         bucket = bucketing.DocumentBucket(document)
 
         for _ in range(7):
-            annotation = factories.Annotation()
+            annotation = _fabricate_annotation()
             bucket.append(annotation)
 
         assert bucket.annotations_count == 7
@@ -90,15 +90,15 @@ class TestDocumentBucket:
 
         annotations = []
         for _ in range(7):
-            annotation = factories.Annotation()
+            annotation = _fabricate_annotation()
             annotations.append(annotation)
             bucket.append(annotation)
 
         assert bucket.annotations == annotations
 
     def test_append_adds_unique_annotation_tag_to_bucket(self, document):
-        ann_1 = factories.Annotation(tags=["foo", "bar"])
-        ann_2 = factories.Annotation(tags=["foo", "baz"])
+        ann_1 = _fabricate_annotation(tags=["foo", "bar"])
+        ann_2 = _fabricate_annotation(tags=["foo", "baz"])
 
         bucket = bucketing.DocumentBucket(document)
         bucket.append(ann_1)
@@ -106,9 +106,9 @@ class TestDocumentBucket:
         assert bucket.tags == {"foo", "bar", "baz"}
 
     def test_append_adds_unique_annotation_user_to_bucket(self, document):
-        ann_1 = factories.Annotation(userid="luke")
-        ann_2 = factories.Annotation(userid="alice")
-        ann_3 = factories.Annotation(userid="luke")
+        ann_1 = _fabricate_annotation(userid="luke")
+        ann_2 = _fabricate_annotation(userid="alice")
+        ann_3 = _fabricate_annotation(userid="luke")
 
         bucket = bucketing.DocumentBucket(document)
         bucket.append(ann_1)
@@ -121,7 +121,7 @@ class TestDocumentBucket:
         bucket_2 = bucketing.DocumentBucket(document)
 
         for _ in range(5):
-            annotation = factories.Annotation()
+            annotation = _fabricate_annotation()
             bucket_1.append(annotation)
             bucket_2.append(annotation)
 
@@ -184,7 +184,7 @@ class TestDocumentBucket:
     def test_incontext_link_returns_link_to_first_annotation(self, document, patch):
         incontext_link = patch("h.links.incontext_link")
         bucket = bucketing.DocumentBucket(document)
-        ann = factories.Annotation()
+        ann = _fabricate_annotation()
         bucket.append(ann)
         request = Mock()
 
@@ -215,7 +215,7 @@ class TestBucket:
         [(FIVE_MINS_AGO, "Last 7 days"), (THIRD_MARCH_1968, "Mar 1968")],
     )
     def test_one_annotation(self, annotation_datetime, timeframe_label):
-        annotation = factories.Annotation(
+        annotation = _fabricate_annotation(
             document=factories.Document(), updated=annotation_datetime
         )
 
@@ -240,7 +240,7 @@ class TestBucket:
         self, annotation_datetime, timeframe_label
     ):
         results = [
-            factories.Annotation(
+            _fabricate_annotation(
                 target_uri="https://example.com", updated=annotation_datetime
             )
             for _ in range(3)
@@ -262,13 +262,13 @@ class TestBucket:
     def test_annotations_of_multiple_documents_in_one_timeframe(
         self, annotation_datetime, timeframe_label
     ):
-        annotation_1 = factories.Annotation(
+        annotation_1 = _fabricate_annotation(
             target_uri="http://example1.com", updated=annotation_datetime
         )
-        annotation_2 = factories.Annotation(
+        annotation_2 = _fabricate_annotation(
             target_uri="http://example2.com", updated=annotation_datetime
         )
-        annotation_3 = factories.Annotation(
+        annotation_3 = _fabricate_annotation(
             target_uri="http://example3.com", updated=annotation_datetime
         )
 
@@ -293,9 +293,9 @@ class TestBucket:
 
     def test_annotations_of_the_same_document_in_different_timeframes(self):
         results = [
-            factories.Annotation(),
-            factories.Annotation(updated=FIFTH_NOVEMBER_1969),
-            factories.Annotation(updated=THIRD_MARCH_1968),
+            _fabricate_annotation(),
+            _fabricate_annotation(updated=FIFTH_NOVEMBER_1969),
+            _fabricate_annotation(updated=THIRD_MARCH_1968),
         ]
         document = factories.Document()
         for annotation in results:
@@ -315,16 +315,16 @@ class TestBucket:
 
     def test_recent_and_older_annotations_together(self):
         results = [
-            factories.Annotation(target_uri="http://example1.com"),
-            factories.Annotation(target_uri="http://example2.com"),
-            factories.Annotation(target_uri="http://example3.com"),
-            factories.Annotation(
+            _fabricate_annotation(target_uri="http://example1.com"),
+            _fabricate_annotation(target_uri="http://example2.com"),
+            _fabricate_annotation(target_uri="http://example3.com"),
+            _fabricate_annotation(
                 target_uri="http://example4.com", updated=THIRD_MARCH_1968
             ),
-            factories.Annotation(
+            _fabricate_annotation(
                 target_uri="http://example5.com", updated=THIRD_MARCH_1968
             ),
-            factories.Annotation(
+            _fabricate_annotation(
                 target_uri="http://example6.com", updated=THIRD_MARCH_1968
             ),
         ]
@@ -367,14 +367,14 @@ class TestBucket:
         """
         one_month_ago = UTCNOW - datetime.timedelta(days=30)
         annotations = [
-            factories.Annotation(
+            _fabricate_annotation(
                 target_uri="http://example.com", updated=one_month_ago
             ),
-            factories.Annotation(
+            _fabricate_annotation(
                 target_uri="http://example.com",
                 updated=one_month_ago - datetime.timedelta(days=1),
             ),
-            factories.Annotation(
+            _fabricate_annotation(
                 target_uri="http://example.com",
                 updated=one_month_ago - datetime.timedelta(days=2),
             ),
@@ -394,3 +394,13 @@ class TestBucket:
         utcnow = patch("h.activity.bucketing.utcnow")
         utcnow.return_value = UTCNOW
         return utcnow
+
+
+def _fabricate_annotation(**kwargs):
+    """Wraps factories.Annotation to take the value of `updated` bypassing SQLA's `onupdate`."""
+    updated = kwargs.pop("updated", None)
+    annotation = factories.Annotation(**kwargs)
+    if updated:
+        annotation.updated = updated
+
+    return annotation

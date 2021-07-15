@@ -6,11 +6,12 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
+from h.db.mixins import Timestamps
 from h.util import markdown, uri
 from h.util.user import split_user
 
 
-class Annotation(Base):
+class Annotation(Base, Timestamps):
 
     """Model class representing a single annotation."""
 
@@ -35,22 +36,6 @@ class Annotation(Base):
     #: transparently to a URL-safe Base64-encoded string.
     id = sa.Column(
         types.URLSafeUUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
-    )
-
-    #: The timestamp when the annotation was created.
-    created = sa.Column(
-        sa.DateTime,
-        default=datetime.datetime.utcnow,
-        server_default=sa.func.now(),
-        nullable=False,
-    )
-
-    #: The timestamp when the user edited the annotation last.
-    updated = sa.Column(
-        sa.DateTime,
-        server_default=sa.func.now(),
-        default=datetime.datetime.utcnow,
-        nullable=False,
     )
 
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
