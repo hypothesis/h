@@ -16,7 +16,7 @@ class TestUserContext:
         res = UserContext(user)
         actual = res.__acl__()
         expect = [
-            (security.Allow, "client_authority:myauthority.com", Permission.User.READ)
+            (security.Allow, "client_authority:myauthority.com", Permission.USER_READ)
         ]
         assert actual == expect
 
@@ -27,10 +27,10 @@ class TestUserContext:
         res = UserContext(user)
 
         assert policy.permits(
-            res, ["client_authority:myauthority.com"], Permission.User.READ
+            res, ["client_authority:myauthority.com"], Permission.USER_READ
         )
         assert not policy.permits(
-            res, ["client_authority:example.com"], Permission.User.READ
+            res, ["client_authority:example.com"], Permission.USER_READ
         )
 
 
@@ -45,7 +45,7 @@ class TestUserRoot:
 
         context = UserRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission(Permission.User.CREATE, context)
+        assert not pyramid_request.has_permission(Permission.USER_CREATE, context)
 
     def test_it_assigns_create_permission_to_auth_client_role(
         self, set_permissions, pyramid_request
@@ -54,7 +54,7 @@ class TestUserRoot:
 
         context = UserRoot(pyramid_request)
 
-        assert pyramid_request.has_permission(Permission.User.CREATE, context)
+        assert pyramid_request.has_permission(Permission.USER_CREATE, context)
 
     def test_it_fetches_the_requested_user(
         self, pyramid_request, user_factory, user_service

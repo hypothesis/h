@@ -31,11 +31,11 @@ class TestRoot:
     @pytest.mark.parametrize(
         "permission",
         [
-            Permission.AdminPage.INDEX,
-            Permission.AdminPage.GROUPS,
-            Permission.AdminPage.MAILER,
-            Permission.AdminPage.ORGANIZATIONS,
-            Permission.AdminPage.USERS,
+            Permission.ADMINPAGE_INDEX,
+            Permission.ADMINPAGE_GROUPS,
+            Permission.ADMINPAGE_MAILER,
+            Permission.ADMINPAGE_ORGANIZATIONS,
+            Permission.ADMINPAGE_USERS,
         ],
     )
     def test_it_assigns_admin_permissions_to_requests_with_staff_role(

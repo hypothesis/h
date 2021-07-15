@@ -14,7 +14,7 @@ class UserNotFoundError(Exception):
     route_name="admin.nipsa",
     request_method="GET",
     renderer="h:templates/admin/nipsa.html.jinja2",
-    permission=Permission.AdminPage.NIPSA,
+    permission=Permission.ADMINPAGE_NIPSA,
 )
 def nipsa_index(request):
     nipsa_service = request.find_service(name="nipsa")
@@ -28,7 +28,7 @@ def nipsa_index(request):
     route_name="admin.nipsa",
     request_method="POST",
     request_param="add",
-    permission=Permission.AdminPage.NIPSA,
+    permission=Permission.ADMINPAGE_NIPSA,
     require_csrf=True,
 )
 def nipsa_add(request):
@@ -55,7 +55,7 @@ def nipsa_add(request):
     route_name="admin.nipsa",
     request_method="POST",
     request_param="remove",
-    permission=Permission.AdminPage.NIPSA,
+    permission=Permission.ADMINPAGE_NIPSA,
     require_csrf=True,
 )
 def nipsa_remove(request):

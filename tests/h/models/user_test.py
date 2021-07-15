@@ -317,7 +317,7 @@ class TestUserACL:
         user.authority = "weewhack.com"
 
         assert authz_policy.permits(
-            user, ["flip", "client_authority:weewhack.com"], Permission.User.UPDATE
+            user, ["flip", "client_authority:weewhack.com"], Permission.USER_UPDATE
         )
 
     def test_auth_client_without_matching_authority_may_not_update_user(
@@ -326,14 +326,14 @@ class TestUserACL:
         user.authority = "weewhack.com"
 
         assert not authz_policy.permits(
-            user, ["flip", "client_authority:2weewhack.com"], Permission.User.UPDATE
+            user, ["flip", "client_authority:2weewhack.com"], Permission.USER_UPDATE
         )
 
     def test_user_with_authority_may_not_update_user(self, user, authz_policy):
         user.authority = "fabuloso.biz"
 
         assert not authz_policy.permits(
-            user, ["flip", "authority:fabuloso.biz"], Permission.User.UPDATE
+            user, ["flip", "authority:fabuloso.biz"], Permission.USER_UPDATE
         )
 
     @pytest.fixture

@@ -126,7 +126,7 @@ def create_annotation(request, data, group_service):
     # further checks.
     group = group_service.find(data["groupid"])
     if group is None or not request.has_permission(
-        Permission.Group.WRITE, context=group
+        Permission.GROUP_WRITE, context=group
     ):
         raise schemas.ValidationError(
             "group: " + _("You may not create annotations " "in the specified group!")

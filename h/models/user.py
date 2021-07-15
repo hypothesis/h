@@ -342,7 +342,7 @@ class User(Base):
         # may update the user
         user_update_principal = "client_authority:{}".format(self.authority)
 
-        terms.append((security.Allow, user_update_principal, Permission.User.UPDATE))
+        terms.append((security.Allow, user_update_principal, Permission.USER_UPDATE))
 
         terms.append(security.DENY_ALL)
 

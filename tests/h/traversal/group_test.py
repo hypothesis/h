@@ -28,7 +28,7 @@ class TestGroupContext:
 
         assert context.group is None
         assert (
-            bool(pyramid_request.has_permission(Permission.Group.UPSERT, context))
+            bool(pyramid_request.has_permission(Permission.GROUP_UPSERT, context))
             == has_upsert
         )
 
@@ -46,7 +46,7 @@ class TestGroupRoot:
         context = GroupRoot(pyramid_request)
 
         assert (
-            bool(pyramid_request.has_permission(Permission.Group.CREATE, context))
+            bool(pyramid_request.has_permission(Permission.GROUP_CREATE, context))
             == has_create
         )
 

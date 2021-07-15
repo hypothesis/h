@@ -14,7 +14,7 @@ from h.traversal.root import RootFactory
 class AnnotationRoot(RootFactory):
     """Root factory for routes whose context is an `AnnotationContext`."""
 
-    __acl__ = [(Allow, Authenticated, Permission.Annotation.CREATE)]
+    __acl__ = [(Allow, Authenticated, Permission.ANNOTATION_CREATE)]
 
     def __getitem__(self, id_):
         annotation = storage.fetch_annotation(self.request.db, id_)
@@ -47,10 +47,10 @@ class AnnotationContext:
 
     def _read_principals(self):
         if self.annotation.shared:
-            for principal in self._group_principals(self.group, Permission.Group.READ):
-                yield Allow, principal, Permission.Annotation.READ
+            for principal in self._group_principals(self.group, Permission.GROUP_READ):
+                yield Allow, principal, Permission.ANNOTATION_READ
         else:
-            yield Allow, self.annotation.userid, Permission.Annotation.READ
+            yield Allow, self.annotation.userid, Permission.ANNOTATION_READ
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
@@ -65,25 +65,25 @@ class AnnotationContext:
         # permissions for this annotation's containing group.
         # Otherwise they are derived from the annotation's creator
         if self.annotation.shared:
-            for principal in self._group_principals(self.group, Permission.Group.FLAG):
-                acl.append((Allow, principal, Permission.Annotation.FLAG))
+            for principal in self._group_principals(self.group, Permission.GROUP_FLAG):
+                acl.append((Allow, principal, Permission.ANNOTATION_FLAG))
 
             for principal in self._group_principals(
-                self.group, Permission.Group.MODERATE
+                self.group, Permission.GROUP_MODERATE
             ):
-                acl.append((Allow, principal, Permission.Annotation.MODERATE))
+                acl.append((Allow, principal, Permission.ANNOTATION_MODERATE))
 
         else:
             # Flagging one's own private annotations is nonsensical,
             # but from an authz perspective, allowed. It is up to services/views
             # to handle these situations appropriately
-            acl.append((Allow, self.annotation.userid, Permission.Annotation.FLAG))
+            acl.append((Allow, self.annotation.userid, Permission.ANNOTATION_FLAG))
 
         # The user who created the annotation always has the following permissions
         for action in [
-            Permission.Annotation.ADMIN,
-            Permission.Annotation.UPDATE,
-            Permission.Annotation.DELETE,
+            Permission.ANNOTATION_ADMIN,
+            Permission.ANNOTATION_UPDATE,
+            Permission.ANNOTATION_DELETE,
         ]:
             acl.append((Allow, self.annotation.userid, action))
 

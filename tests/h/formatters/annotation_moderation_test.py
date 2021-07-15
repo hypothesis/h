@@ -75,13 +75,13 @@ class TestAnnotationModerationFormatter:
     @pytest.fixture
     def permission_granted(self, group):
         has_permission = FakePermissionCheck()
-        has_permission.add_permission(Permission.Group.MODERATE, group, True)
+        has_permission.add_permission(Permission.GROUP_MODERATE, group, True)
         return has_permission
 
     @pytest.fixture
     def permission_denied(self, group):
         has_permission = FakePermissionCheck()
-        has_permission.add_permission(Permission.Group.MODERATE, group, False)
+        has_permission.add_permission(Permission.GROUP_MODERATE, group, False)
         return has_permission
 
     @pytest.fixture

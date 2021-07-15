@@ -10,4 +10,4 @@ class ProfileRoot(RootFactory):
     Simple Root for API profile endpoints
     """
 
-    __acl__ = [(Allow, role.User, Permission.Profile.UPDATE)]
+    __acl__ = [(Allow, role.User, Permission.PROFILE_UPDATE)]

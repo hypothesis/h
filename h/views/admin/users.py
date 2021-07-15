@@ -27,7 +27,7 @@ def format_date(date):
     route_name="admin.users",
     request_method="GET",
     renderer="h:templates/admin/users.html.jinja2",
-    permission=Permission.AdminPage.USERS,
+    permission=Permission.ADMINPAGE_USERS,
 )
 def users_index(request):
     user = None
@@ -60,7 +60,7 @@ def users_index(request):
     route_name="admin.users_activate",
     request_method="POST",
     request_param="userid",
-    permission=Permission.AdminPage.USERS,
+    permission=Permission.ADMINPAGE_USERS,
     require_csrf=True,
 )
 def users_activate(request):
@@ -86,7 +86,7 @@ def users_activate(request):
 @view_config(
     route_name="admin.users_rename",
     request_method="POST",
-    permission=Permission.AdminPage.USERS,
+    permission=Permission.ADMINPAGE_USERS,
     require_csrf=True,
 )
 def users_rename(request):
@@ -125,7 +125,7 @@ def users_rename(request):
 @view_config(
     route_name="admin.users_delete",
     request_method="POST",
-    permission=Permission.AdminPage.USERS,
+    permission=Permission.ADMINPAGE_USERS,
     require_csrf=True,
 )
 def users_delete(request):

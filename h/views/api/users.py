@@ -16,7 +16,7 @@ from h.views.api.exceptions import PayloadError
     request_method="GET",
     link_name="user.read",
     description="Fetch a user",
-    permission=Permission.User.READ,
+    permission=Permission.USER_READ,
 )
 def read(context, _request):
     """
@@ -34,7 +34,7 @@ def read(context, _request):
     request_method="POST",
     link_name="user.create",
     description="Create a new user",
-    permission=Permission.User.CREATE,
+    permission=Permission.USER_CREATE,
 )
 def create(request):
     """
@@ -85,7 +85,7 @@ def create(request):
     request_method="PATCH",
     link_name="user.update",
     description="Update a user",
-    permission=Permission.User.UPDATE,
+    permission=Permission.USER_UPDATE,
 )
 def update(user, request):
     """

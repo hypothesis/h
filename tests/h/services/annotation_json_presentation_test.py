@@ -31,7 +31,7 @@ class TestAnnotationJSONPresentationService:
         group = mock.Mock()
         moderator_check = formatters.AnnotationHiddenFormatter.call_args[0][1]
         moderator_check(group)
-        has_permission.assert_called_once_with(Permission.Group.MODERATE, group)
+        has_permission.assert_called_once_with(Permission.GROUP_MODERATE, group)
 
     def test_it_configures_hidden_formatter(self, services, formatters, svc):
         assert formatters.AnnotationHiddenFormatter.return_value in svc.formatters

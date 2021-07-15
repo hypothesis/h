@@ -223,8 +223,8 @@ class TestGetDefaultRedirectUri:
 class TestGetDefaultScopes:
     def test_returns_default_scopes(self, svc):
         assert svc.get_default_scopes("something", None) == [
-            Permission.Annotation.READ,
-            Permission.Annotation.WRITE,
+            Permission.ANNOTATION_READ.value,
+            Permission.ANNOTATION_WRITE.value,
         ]
 
 

@@ -17,7 +17,7 @@ from h.views.api.config import api_config
     link_name="bulk",
     description="Perform multiple operations in one call",
     subtype="x-ndjson",
-    permission=Permission.API.BULK_ACTION,
+    permission=Permission.API_BULK_ACTION,
 )
 def bulk(request):
     """

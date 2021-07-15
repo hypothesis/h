@@ -37,7 +37,7 @@ class AnnotationModerationFormatter:
 
     def format(self, annotation_resource):
         if not self._has_permission(
-            Permission.Group.MODERATE, annotation_resource.group
+            Permission.GROUP_MODERATE, annotation_resource.group
         ):
             return {}
 

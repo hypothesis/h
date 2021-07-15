@@ -1,47 +1,44 @@
-class Permission:
-    class Group:
-        ADMIN = "group:admin"  # Is this really "EDIT" or a combination?
-        JOIN = "group:join"
-        READ = "group:read"
-        WRITE = "group:write"
-        UPSERT = "group:upsert"
-        CREATE = "group:create"
-        FLAG = "group:flag"
-        MODERATE = "group:moderate"
-        MEMBER_READ = "group:member:read"
-        MEMBER_ADD = "group:member:add"
+from enum import Enum
 
-    class Annotation:
-        ADMIN = "annotation:admin"  # Is this used anywhere?
-        READ = "annotation:read"
-        WRITE = "annotation:write"  # Is this granted anywhere?
-        UPDATE = "annotation:update"
-        CREATE = "annotation:create"
-        DELETE = "annotation:delete"
-        FLAG = "annotation:flag"
-        MODERATE = "annotation:moderate"
 
-    class User:
-        READ = "user:read"
-        CREATE = "user:create"
-        UPDATE = "user:update"
+class Permission(Enum):
+    GROUP_ADMIN = "group:admin"  # Is this really "EDIT" or a combination?
+    GROUP_JOIN = "group:join"
+    GROUP_READ = "group:read"
+    GROUP_WRITE = "group:write"
+    GROUP_UPSERT = "group:upsert"
+    GROUP_CREATE = "group:create"
+    GROUP_FLAG = "group:flag"
+    GROUP_MODERATE = "group:moderate"
+    GROUP_MEMBER_READ = "group:member:read"
+    GROUP_MEMBER_ADD = "group:member:add"
 
-    class Profile:
-        UPDATE = "profile:update"
+    ANNOTATION_ADMIN = "annotation:admin"  # Is this used anywhere?
+    ANNOTATION_READ = "annotation:read"
+    ANNOTATION_WRITE = "annotation:write"  # Is this granted anywhere?
+    ANNOTATION_UPDATE = "annotation:update"
+    ANNOTATION_CREATE = "annotation:create"
+    ANNOTATION_DELETE = "annotation:delete"
+    ANNOTATION_FLAG = "annotation:flag"
+    ANNOTATION_MODERATE = "annotation:moderate"
 
-    class AdminPage:
-        ADMINS = "admin:admins"
-        BADGE = "admin:badge"
-        FEATURES = "admin:features"
-        GROUPS = "admin:groups"
-        INDEX = "admin:index"
-        MAILER = "admin:mailer"
-        OAUTH_CLIENTS = "admin:oauth_clients"
-        ORGANIZATIONS = "admin:organizations"
-        NIPSA = "admin:nipsa"
-        SEARCH = "admin:search"
-        STAFF = "admin:staff"
-        USERS = "admin:users"
+    USER_READ = "user:read"
+    USER_CREATE = "user:create"
+    USER_UPDATE = "user:update"
 
-    class API:
-        BULK_ACTION = "api:bulk_action"
+    PROFILE_UPDATE = "profile:update"
+
+    ADMINPAGE_ADMINS = "admin:admins"
+    ADMINPAGE_BADGE = "admin:badge"
+    ADMINPAGE_FEATURES = "admin:features"
+    ADMINPAGE_GROUPS = "admin:groups"
+    ADMINPAGE_INDEX = "admin:index"
+    ADMINPAGE_MAILER = "admin:mailer"
+    ADMINPAGE_OAUTH_CLIENTS = "admin:oauth_clients"
+    ADMINPAGE_ORGANIZATIONS = "admin:organizations"
+    ADMINPAGE_NIPSA = "admin:nipsa"
+    ADMINPAGE_SEARCH = "admin:search"
+    ADMINPAGE_STAFF = "admin:staff"
+    ADMINPAGE_USERS = "admin:users"
+
+    API_BULK_ACTION = "api:bulk_action"

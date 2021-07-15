@@ -10,7 +10,7 @@ from h.security.permissions import Permission
     route_name="admin.index",
     request_method="GET",
     renderer="h:templates/admin/index.html.jinja2",
-    permission=Permission.AdminPage.INDEX,
+    permission=Permission.ADMINPAGE_INDEX,
 )
 def index(_):
     return {

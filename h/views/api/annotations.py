@@ -65,7 +65,7 @@ def search(request):
     versions=["v1", "v2"],
     route_name="api.annotations",
     request_method="POST",
-    permission=Permission.Annotation.CREATE,
+    permission=Permission.ANNOTATION_CREATE,
     link_name="annotation.create",
     description="Create an annotation",
 )
@@ -87,7 +87,7 @@ def create(request):
     versions=["v1", "v2"],
     route_name="api.annotation",
     request_method="GET",
-    permission=Permission.Annotation.READ,
+    permission=Permission.ANNOTATION_READ,
     link_name="annotation.read",
     description="Fetch an annotation",
 )
@@ -101,7 +101,7 @@ def read(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation.jsonld",
     request_method="GET",
-    permission=Permission.Annotation.READ,
+    permission=Permission.ANNOTATION_READ,
 )
 def read_jsonld(context, request):
     request.response.content_type = "application/ld+json"
@@ -117,7 +117,7 @@ def read_jsonld(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation",
     request_method=("PATCH", "PUT"),
-    permission=Permission.Annotation.UPDATE,
+    permission=Permission.ANNOTATION_UPDATE,
     link_name="annotation.update",
     description="Update an annotation",
 )
@@ -144,7 +144,7 @@ def update(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation",
     request_method="DELETE",
-    permission=Permission.Annotation.DELETE,
+    permission=Permission.ANNOTATION_DELETE,
     link_name="annotation.delete",
     description="Delete an annotation",
 )

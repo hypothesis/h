@@ -42,7 +42,7 @@ def groups(request):
     versions=["v1", "v2"],
     route_name="api.groups",
     request_method="POST",
-    permission=Permission.Group.CREATE,
+    permission=Permission.GROUP_CREATE,
     link_name="group.create",
     description="Create a new group",
 )
@@ -78,7 +78,7 @@ def create(request):
     versions=["v1", "v2"],
     route_name="api.group",
     request_method="GET",
-    permission=Permission.Group.READ,
+    permission=Permission.GROUP_READ,
     link_name="group.read",
     description="Fetch a group",
 )
@@ -94,7 +94,7 @@ def read(context, request):
     versions=["v1", "v2"],
     route_name="api.group",
     request_method="PATCH",
-    permission=Permission.Group.ADMIN,
+    permission=Permission.GROUP_ADMIN,
     link_name="group.update",
     description="Update a group",
 )
@@ -126,7 +126,7 @@ def update(context, request):
     versions=["v1", "v2"],
     route_name="api.group_upsert",
     request_method="PUT",
-    permission=Permission.Group.UPSERT,
+    permission=Permission.GROUP_UPSERT,
     link_name="group.create_or_update",
     description="Create or update a group",
 )
@@ -189,7 +189,7 @@ def upsert(context, request):
     request_method="GET",
     link_name="group.members.read",
     description="Fetch all members of a group",
-    permission=Permission.Group.MEMBER_READ,
+    permission=Permission.GROUP_MEMBER_READ,
 )
 def read_members(context, _request):
     """Fetch the members of a group."""
@@ -223,7 +223,7 @@ def remove_member(context, request):
     route_name="api.group_member",
     request_method="POST",
     link_name="group.member.add",
-    permission=Permission.Group.MEMBER_ADD,
+    permission=Permission.GROUP_MEMBER_ADD,
     description="Add the user in the request params to a group.",
 )
 def add_member(context, request):

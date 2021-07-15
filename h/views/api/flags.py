@@ -14,7 +14,7 @@ from h.views.api.config import api_config
     request_method="PUT",
     link_name="annotation.flag",
     description="Flag an annotation for review",
-    permission=Permission.Annotation.FLAG,
+    permission=Permission.ANNOTATION_FLAG,
 )
 def create(context, request):
     svc = request.find_service(name="flag")

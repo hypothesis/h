@@ -16,7 +16,7 @@ _ = i18n.TranslationString
     route_name="admin.groups",
     request_method="GET",
     renderer="h:templates/admin/groups.html.jinja2",
-    permission=Permission.AdminPage.GROUPS,
+    permission=Permission.ADMINPAGE_GROUPS,
 )
 @paginator.paginate_query
 def groups_index(_context, request):
@@ -31,7 +31,7 @@ def groups_index(_context, request):
 @view_defaults(
     route_name="admin.groups_create",
     renderer="h:templates/admin/groups_create.html.jinja2",
-    permission=Permission.AdminPage.GROUPS,
+    permission=Permission.ADMINPAGE_GROUPS,
 )
 class GroupCreateViews:
     """Views for admin create-group forms"""
@@ -126,7 +126,7 @@ class GroupCreateViews:
 
 @view_defaults(
     route_name="admin.groups_edit",
-    permission=Permission.Group.ADMIN,
+    permission=Permission.GROUP_ADMIN,
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
 class GroupEditViews:

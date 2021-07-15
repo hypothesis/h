@@ -12,7 +12,7 @@ from h.util.db import lru_cache_in_transaction
 from h.util.uri import render_url_template
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
-DEFAULT_SCOPES = [Permission.Annotation.READ, Permission.Annotation.WRITE]
+DEFAULT_SCOPES = [Permission.ANNOTATION_READ.value, Permission.ANNOTATION_WRITE.value]
 
 
 class Client:

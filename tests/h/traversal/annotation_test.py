@@ -21,23 +21,23 @@ class FakeGroup:
     def __init__(self, principals):
         acl = []
         for p in principals:
-            acl.append((security.Allow, p, Permission.Group.READ))
+            acl.append((security.Allow, p, Permission.GROUP_READ))
             if p == security.Everyone:
                 acl.append(
-                    (security.Allow, security.Authenticated, Permission.Group.FLAG)
+                    (security.Allow, security.Authenticated, Permission.GROUP_FLAG)
                 )
                 acl.append(
-                    (security.Allow, security.Authenticated, Permission.Group.MODERATE)
+                    (security.Allow, security.Authenticated, Permission.GROUP_MODERATE)
                 )
             else:
-                acl.append((security.Allow, p, Permission.Group.FLAG))
+                acl.append((security.Allow, p, Permission.GROUP_FLAG))
                 # Normally, the ``moderate`` permission would only be applied
                 # to the admin (creator) of a group, but this ``FakeGroup``
                 # is indeed fake. Tests in this module are merely around whether
                 # this permission is translated appropriately from a group
                 # to an annotation context (i.e. it should not be applied
                 # to private annotations)
-                acl.append((security.Allow, p, Permission.Group.MODERATE))
+                acl.append((security.Allow, p, Permission.GROUP_MODERATE))
         self.__acl__ = acl
 
 
@@ -50,7 +50,7 @@ class TestAnnotationRoot:
 
         context = AnnotationRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission(Permission.Annotation.CREATE, context)
+        assert not pyramid_request.has_permission(Permission.ANNOTATION_CREATE, context)
 
     def test_it_assigns_create_permission_to_authenticated_request(
         self, set_permissions, pyramid_request
@@ -61,7 +61,7 @@ class TestAnnotationRoot:
 
         context = AnnotationRoot(pyramid_request)
 
-        assert pyramid_request.has_permission(Permission.Annotation.CREATE, context)
+        assert pyramid_request.has_permission(Permission.ANNOTATION_CREATE, context)
 
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
@@ -141,11 +141,11 @@ class TestAnnotationContext:
         actual = res.__acl__()
         # Note NOT the ``moderate`` permission
         expect = [
-            (security.Allow, "saoirse", Permission.Annotation.READ),
-            (security.Allow, "saoirse", Permission.Annotation.FLAG),
-            (security.Allow, "saoirse", Permission.Annotation.ADMIN),
-            (security.Allow, "saoirse", Permission.Annotation.UPDATE),
-            (security.Allow, "saoirse", Permission.Annotation.DELETE),
+            (security.Allow, "saoirse", Permission.ANNOTATION_READ),
+            (security.Allow, "saoirse", Permission.ANNOTATION_FLAG),
+            (security.Allow, "saoirse", Permission.ANNOTATION_ADMIN),
+            (security.Allow, "saoirse", Permission.ANNOTATION_UPDATE),
+            (security.Allow, "saoirse", Permission.ANNOTATION_DELETE),
             security.DENY_ALL,
         ]
         assert actual == expect
@@ -163,9 +163,9 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         for perm in [
-            Permission.Annotation.ADMIN,
-            Permission.Annotation.UPDATE,
-            Permission.Annotation.DELETE,
+            Permission.ANNOTATION_ADMIN,
+            Permission.ANNOTATION_UPDATE,
+            Permission.ANNOTATION_DELETE,
         ]:
             assert policy.permits(res, ["saoirse"], perm)
             assert not policy.permits(res, ["someoneelse"], perm)
@@ -181,11 +181,11 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         for perm in [
-            Permission.Annotation.READ,
-            Permission.Annotation.ADMIN,
-            Permission.Annotation.UPDATE,
-            Permission.Annotation.DELETE,
-            Permission.Annotation.MODERATE,
+            Permission.ANNOTATION_READ,
+            Permission.ANNOTATION_ADMIN,
+            Permission.ANNOTATION_UPDATE,
+            Permission.ANNOTATION_DELETE,
+            Permission.ANNOTATION_MODERATE,
         ]:
             assert not policy.permits(res, ["saiorse"], perm)
 
@@ -233,9 +233,9 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission(Permission.Annotation.READ, res)
+            assert pyramid_request.has_permission(Permission.ANNOTATION_READ, res)
         else:
-            assert not pyramid_request.has_permission(Permission.Annotation.READ, res)
+            assert not pyramid_request.has_permission(Permission.ANNOTATION_READ, res)
 
     @pytest.mark.parametrize(
         "groupid,userid,permitted",
@@ -281,9 +281,9 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission(Permission.Annotation.FLAG, res)
+            assert pyramid_request.has_permission(Permission.ANNOTATION_FLAG, res)
         else:
-            assert not pyramid_request.has_permission(Permission.Annotation.FLAG, res)
+            assert not pyramid_request.has_permission(Permission.ANNOTATION_FLAG, res)
 
     @pytest.mark.parametrize(
         "groupid,userid,permitted",
@@ -330,10 +330,10 @@ class TestAnnotationContext:
         res = AnnotationContext(ann, groupfinder_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission(Permission.Annotation.MODERATE, res)
+            assert pyramid_request.has_permission(Permission.ANNOTATION_MODERATE, res)
         else:
             assert not pyramid_request.has_permission(
-                Permission.Annotation.MODERATE, res
+                Permission.ANNOTATION_MODERATE, res
             )
 
     @pytest.fixture

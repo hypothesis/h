@@ -10,7 +10,7 @@ from h.tasks import mailer
     route_name="admin.mailer",
     request_method="GET",
     renderer="h:templates/admin/mailer.html.jinja2",
-    permission=Permission.AdminPage.MAILER,
+    permission=Permission.ADMINPAGE_MAILER,
 )
 def mailer_index(request):
     """Show the mailer test tools."""
@@ -20,7 +20,7 @@ def mailer_index(request):
 @view_config(
     route_name="admin.mailer_test",
     request_method="POST",
-    permission=Permission.AdminPage.MAILER,
+    permission=Permission.ADMINPAGE_MAILER,
     require_csrf=True,
 )
 def mailer_test(request):

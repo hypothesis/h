@@ -15,7 +15,7 @@ class BulkAPIRoot(RootFactory):
             # Currently only LMS uses this end-point
             if authority.startswith("lms.") and authority.endswith(".hypothes.is"):
                 return [
-                    (Allow, f"client_authority:{authority}", Permission.API.BULK_ACTION)
+                    (Allow, f"client_authority:{authority}", Permission.API_BULK_ACTION)
                 ]
 
         return []

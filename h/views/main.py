@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 @view_config(
     route_name="annotation",
-    permission=Permission.Annotation.READ,
+    permission=Permission.ANNOTATION_READ,
     renderer="h:templates/app.html.jinja2",
     csp_insecure_optout=True,
 )

@@ -213,9 +213,9 @@ class TestAnnotationJSONPresenter:
             "members": (
                 security.Allow,
                 "group:{}".format(annotation.groupid),
-                Permission.Group.READ,
+                Permission.GROUP_READ,
             ),
-            "world": (security.Allow, security.Everyone, Permission.Group.READ),
+            "world": (security.Allow, security.Everyone, Permission.GROUP_READ),
             None: security.DENY_ALL,
         }
         group = mock.Mock(spec_set=["__acl__"])

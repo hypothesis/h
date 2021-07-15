@@ -31,7 +31,7 @@ class UserContext:
         acl = []
 
         user_authority_principal = f"client_authority:{self.user.authority}"
-        acl.append((Allow, user_authority_principal, Permission.User.READ))
+        acl.append((Allow, user_authority_principal, Permission.USER_READ))
 
         return acl
 
@@ -44,7 +44,7 @@ class UserRoot(RootFactory):
 
     """
 
-    __acl__ = [(Allow, role.AuthClient, Permission.User.CREATE)]
+    __acl__ = [(Allow, role.AuthClient, Permission.USER_CREATE)]
 
     def __init__(self, request):
         super().__init__(request)
@@ -67,7 +67,7 @@ class UserUserIDRoot(RootFactory):
     .. todo:: This should be the main Root for User objects
     """
 
-    __acl__ = [(Allow, role.AuthClient, Permission.User.CREATE)]
+    __acl__ = [(Allow, role.AuthClient, Permission.USER_CREATE)]
 
     def __init__(self, request):
         super().__init__(request)

@@ -45,7 +45,7 @@ def profile_groups(request):
     versions=["v1", "v2"],
     route_name="api.profile",
     request_method="PATCH",
-    permission=Permission.Profile.UPDATE,
+    permission=Permission.PROFILE_UPDATE,
     link_name="profile.update",
     description="Update a user's preferences",
 )

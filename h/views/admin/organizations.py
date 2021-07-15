@@ -15,7 +15,7 @@ _ = i18n.TranslationString
     route_name="admin.organizations",
     request_method="GET",
     renderer="h:templates/admin/organizations.html.jinja2",
-    permission=Permission.AdminPage.ORGANIZATIONS,
+    permission=Permission.ADMINPAGE_ORGANIZATIONS,
 )
 @paginator.paginate_query
 def index(_context, request):
@@ -37,7 +37,7 @@ def index(_context, request):
 @view_defaults(
     route_name="admin.organizations_create",
     renderer="h:templates/admin/organizations_create.html.jinja2",
-    permission=Permission.AdminPage.ORGANIZATIONS,
+    permission=Permission.ADMINPAGE_ORGANIZATIONS,
 )
 class OrganizationCreateController:
     def __init__(self, request):
@@ -80,7 +80,7 @@ class OrganizationCreateController:
 
 @view_defaults(
     route_name="admin.organizations_edit",
-    permission=Permission.AdminPage.ORGANIZATIONS,
+    permission=Permission.ADMINPAGE_ORGANIZATIONS,
     renderer="h:templates/admin/organizations_edit.html.jinja2",
 )
 class OrganizationEditController:

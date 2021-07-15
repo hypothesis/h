@@ -120,7 +120,8 @@ class OAuthAuthorizeController:
 
     def _authorize(self):
         try:
-            _, credentials = self.oauth.validate_authorization_request(self.request.url)
+            url = self.request.url
+            _, credentials = self.oauth.validate_authorization_request(url)
         except OAuth2Error as err:
             raise OAuthAuthorizeError(
                 err.description or "Error: {}".format(self.context.error)

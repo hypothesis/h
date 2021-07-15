@@ -16,7 +16,7 @@ def not_found(exc, request):
     return HTTPFound(location=request.route_url("admin.search"))
 
 
-@view_defaults(route_name="admin.search", permission=Permission.AdminPage.SEARCH)
+@view_defaults(route_name="admin.search", permission=Permission.ADMINPAGE_SEARCH)
 class SearchAdminViews:
     def __init__(self, request):
         self.request = request

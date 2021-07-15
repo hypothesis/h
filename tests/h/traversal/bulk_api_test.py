@@ -26,6 +26,6 @@ class TestBulkAPIRoot:
         context = BulkAPIRoot(pyramid_request)
 
         assert (
-            pyramid_request.has_permission(Permission.API.BULK_ACTION, context)
+            pyramid_request.has_permission(Permission.API_BULK_ACTION, context)
             == permission_expected
         )

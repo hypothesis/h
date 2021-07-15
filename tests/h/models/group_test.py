@@ -247,7 +247,7 @@ class TestGroupACL:
         assert authz_policy.permits(
             group,
             ["flip", "client_authority:weewhack.com"],
-            Permission.Group.MEMBER_READ,
+            Permission.GROUP_MEMBER_READ,
         )
 
     def test_auth_client_without_matching_authority_may_not_read_members(
@@ -258,7 +258,7 @@ class TestGroupACL:
         assert not authz_policy.permits(
             group,
             ["flip", "client_authority:2weewhack.com"],
-            Permission.Group.MEMBER_READ,
+            Permission.GROUP_MEMBER_READ,
         )
 
     def test_auth_client_with_matching_authority_may_add_members(
@@ -269,7 +269,7 @@ class TestGroupACL:
         assert authz_policy.permits(
             group,
             ["flip", "client_authority:weewhack.com"],
-            Permission.Group.MEMBER_ADD,
+            Permission.GROUP_MEMBER_ADD,
         )
 
     def test_auth_client_without_matching_authority_may_not_add_members(
@@ -280,46 +280,46 @@ class TestGroupACL:
         assert not authz_policy.permits(
             group,
             ["flip", "client_authority:2weewhack.com"],
-            Permission.Group.MEMBER_ADD,
+            Permission.GROUP_MEMBER_ADD,
         )
 
     def test_user_with_authority_may_not_add_members(self, group, authz_policy):
         group.authority = "fabuloso.biz"
 
         assert not authz_policy.permits(
-            group, ["flip", "authority:fabuloso.biz"], Permission.Group.MEMBER_ADD
+            group, ["flip", "authority:fabuloso.biz"], Permission.GROUP_MEMBER_ADD
         )
 
     def test_authority_joinable(self, group, authz_policy):
         group.joinable_by = JoinableBy.authority
 
         assert authz_policy.permits(
-            group, ["userid", "authority:example.com"], Permission.Group.JOIN
+            group, ["userid", "authority:example.com"], Permission.GROUP_JOIN
         )
 
     def test_not_joinable(self, group, authz_policy):
         group.joinable_by = None
         assert not authz_policy.permits(
-            group, ["userid", "authority:example.com"], Permission.Group.JOIN
+            group, ["userid", "authority:example.com"], Permission.GROUP_JOIN
         )
 
     def test_world_readable(self, group, authz_policy):
         group.readable_by = ReadableBy.world
-        assert authz_policy.permits(group, [security.Everyone], Permission.Group.READ)
+        assert authz_policy.permits(group, [security.Everyone], Permission.GROUP_READ)
 
     def test_world_readable_allows_member_read_for_everyone(self, group, authz_policy):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(
-            group, [security.Everyone], Permission.Group.MEMBER_READ
+            group, [security.Everyone], Permission.GROUP_MEMBER_READ
         )
 
     def test_world_readable_grants_flag_permissions(self, group, authz_policy):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(
-            group, [security.Authenticated], Permission.Group.FLAG
+            group, [security.Authenticated], Permission.GROUP_FLAG
         )
         assert not authz_policy.permits(
-            group, [security.Everyone], Permission.Group.FLAG
+            group, [security.Everyone], Permission.GROUP_FLAG
         )
 
     def test_world_readable_does_not_grant_moderate_permissions(
@@ -327,38 +327,38 @@ class TestGroupACL:
     ):
         group.readable_by = ReadableBy.world
         assert not authz_policy.permits(
-            group, [security.Authenticated], Permission.Group.MODERATE
+            group, [security.Authenticated], Permission.GROUP_MODERATE
         )
         assert not authz_policy.permits(
-            group, [security.Everyone], Permission.Group.MODERATE
+            group, [security.Everyone], Permission.GROUP_MODERATE
         )
 
     def test_members_readable(self, group, authz_policy):
         group.readable_by = ReadableBy.members
-        assert authz_policy.permits(group, ["group:test-group"], Permission.Group.READ)
+        assert authz_policy.permits(group, ["group:test-group"], Permission.GROUP_READ)
 
     def test_members_should_be_readable_by_group_members(self, group, authz_policy):
         group.readable_by = ReadableBy.members
         assert authz_policy.permits(
-            group, ["group:test-group"], Permission.Group.MEMBER_READ
+            group, ["group:test-group"], Permission.GROUP_MEMBER_READ
         )
 
     def test_members_flaggable(self, group, authz_policy):
         group.readable_by = ReadableBy.members
-        assert authz_policy.permits(group, ["group:test-group"], Permission.Group.FLAG)
+        assert authz_policy.permits(group, ["group:test-group"], Permission.GROUP_FLAG)
 
     def test_non_creator_members_do_not_have_moderate_permission(
         self, group, authz_policy
     ):
         group.readable_by = ReadableBy.members
         assert not authz_policy.permits(
-            group, ["group:test-group"], Permission.Group.MODERATE
+            group, ["group:test-group"], Permission.GROUP_MODERATE
         )
 
     def test_not_readable(self, group, authz_policy):
         group.readable_by = None
         assert not authz_policy.permits(
-            group, [security.Everyone, "group:test-group"], Permission.Group.READ
+            group, [security.Everyone, "group:test-group"], Permission.GROUP_READ
         )
 
     def test_member_read_permission_not_granted_if_group_not_readable(
@@ -366,39 +366,39 @@ class TestGroupACL:
     ):
         group.readable_by = None
         assert not authz_policy.permits(
-            group, [security.Everyone, "group:test-group"], Permission.Group.MEMBER_READ
+            group, [security.Everyone, "group:test-group"], Permission.GROUP_MEMBER_READ
         )
 
     def test_not_flaggable(self, group, authz_policy):
         group.readable_by = None
         assert not authz_policy.permits(
-            group, [security.Authenticated, "group:test-group"], Permission.Group.FLAG
+            group, [security.Authenticated, "group:test-group"], Permission.GROUP_FLAG
         )
 
     def test_authority_writeable(self, group, authz_policy):
         group.writeable_by = WriteableBy.authority
         assert authz_policy.permits(
-            group, ["authority:example.com"], Permission.Group.WRITE
+            group, ["authority:example.com"], Permission.GROUP_WRITE
         )
 
     def test_members_writeable(self, group, authz_policy):
         group.writeable_by = WriteableBy.members
-        assert authz_policy.permits(group, ["group:test-group"], Permission.Group.WRITE)
+        assert authz_policy.permits(group, ["group:test-group"], Permission.GROUP_WRITE)
 
     def test_not_writeable(self, group, authz_policy):
         group.writeable_by = (None,)
         assert not authz_policy.permits(
-            group, ["authority:example.com", "group:test-group"], Permission.Group.WRITE
+            group, ["authority:example.com", "group:test-group"], Permission.GROUP_WRITE
         )
 
     def test_creator_has_moderate_permission(self, group, authz_policy):
         assert authz_policy.permits(
-            group, "acct:luke@example.com", Permission.Group.MODERATE
+            group, "acct:luke@example.com", Permission.GROUP_MODERATE
         )
 
     def test_creator_has_admin_permission(self, group, authz_policy):
         assert authz_policy.permits(
-            group, "acct:luke@example.com", Permission.Group.ADMIN
+            group, "acct:luke@example.com", Permission.GROUP_ADMIN
         )
 
     def test_auth_client_with_matching_authority_has_admin_permission(
@@ -407,7 +407,7 @@ class TestGroupACL:
         group.authority = "weewhack.com"
 
         assert authz_policy.permits(
-            group, ["flip", "client_authority:weewhack.com"], Permission.Group.ADMIN
+            group, ["flip", "client_authority:weewhack.com"], Permission.GROUP_ADMIN
         )
 
     def test_auth_client_without_matching_authority_does_not_have_admin_permission(
@@ -416,12 +416,12 @@ class TestGroupACL:
         group.authority = "weewhack.com"
 
         assert not authz_policy.permits(
-            group, ["flip", "client_authority:2weewhack.com"], Permission.Group.ADMIN
+            group, ["flip", "client_authority:2weewhack.com"], Permission.GROUP_ADMIN
         )
 
     def test_creator_has_upsert_permissions(self, group, authz_policy):
         assert authz_policy.permits(
-            group, "acct:luke@example.com", Permission.Group.UPSERT
+            group, "acct:luke@example.com", Permission.GROUP_UPSERT
         )
 
     def test_admin_allowed_only_for_authority_when_no_creator(
@@ -430,19 +430,19 @@ class TestGroupACL:
         group.creator = None
 
         principals = authz_policy.principals_allowed_by_permission(
-            group, Permission.Group.ADMIN
+            group, Permission.GROUP_ADMIN
         )
 
         assert "client_authority:example.com" in principals
         assert authz_policy.permits(
-            group, ["flip", "client_authority:example.com"], Permission.Group.ADMIN
+            group, ["flip", "client_authority:example.com"], Permission.GROUP_ADMIN
         )
 
     def test_no_moderate_permission_when_no_creator(self, group, authz_policy):
         group.creator = None
 
         principals = authz_policy.principals_allowed_by_permission(
-            group, Permission.Group.MODERATE
+            group, Permission.GROUP_MODERATE
         )
         assert len(principals) == 0
 
@@ -450,28 +450,28 @@ class TestGroupACL:
         group.creator = None
 
         principals = authz_policy.principals_allowed_by_permission(
-            group, Permission.Group.UPSERT
+            group, Permission.GROUP_UPSERT
         )
         assert len(principals) == 0
 
     def test_staff_user_has_admin_permission_on_any_group(self, group, authz_policy):
         principals = authz_policy.principals_allowed_by_permission(
-            group, Permission.Group.ADMIN
+            group, Permission.GROUP_ADMIN
         )
 
         assert role.Staff in principals
         assert authz_policy.permits(
-            group, ["whatever", "group:__staff__"], Permission.Group.ADMIN
+            group, ["whatever", "group:__staff__"], Permission.GROUP_ADMIN
         )
 
     def test_admin_user_has_admin_permission_on_any_group(self, group, authz_policy):
         principals = authz_policy.principals_allowed_by_permission(
-            group, Permission.Group.ADMIN
+            group, Permission.GROUP_ADMIN
         )
 
         assert role.Admin in principals
         assert authz_policy.permits(
-            group, ["whatever", "group:__admin__"], Permission.Group.ADMIN
+            group, ["whatever", "group:__admin__"], Permission.GROUP_ADMIN
         )
 
     def test_fallback_is_deny_all(self, group, authz_policy):

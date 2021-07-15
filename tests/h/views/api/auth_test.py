@@ -217,7 +217,7 @@ class TestOAuthAuthorizeController:
     def oauth_provider(self, pyramid_config, auth_client, oauth_request):
         svc = mock.create_autospec(OAuthProviderService, instance=True)
 
-        scopes = [Permission.Annotation.READ, Permission.Annotation.WRITE]
+        scopes = [Permission.ANNOTATION_READ.value, Permission.ANNOTATION_WRITE.value]
         credentials = {
             "client_id": auth_client.id,
             "state": "foobar",

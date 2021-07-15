@@ -10,7 +10,7 @@ from h.security.permissions import Permission
     route_name="admin.admins",
     request_method="GET",
     renderer="h:templates/admin/admins.html.jinja2",
-    permission=Permission.AdminPage.ADMINS,
+    permission=Permission.ADMINPAGE_ADMINS,
 )
 def admins_index(request):
     """A list of all the admin users as an HTML page."""
@@ -26,7 +26,7 @@ def admins_index(request):
     request_method="POST",
     request_param="add",
     renderer="h:templates/admin/admins.html.jinja2",
-    permission=Permission.AdminPage.ADMINS,
+    permission=Permission.ADMINPAGE_ADMINS,
     require_csrf=True,
 )
 def admins_add(request):
@@ -49,7 +49,7 @@ def admins_add(request):
     request_method="POST",
     request_param="remove",
     renderer="h:templates/admin/admins.html.jinja2",
-    permission=Permission.AdminPage.ADMINS,
+    permission=Permission.ADMINPAGE_ADMINS,
     require_csrf=True,
 )
 def admins_remove(request):
