@@ -101,7 +101,7 @@ class GroupAPISchema(JSONSchema):
 
         new_appstruct = {}
 
-        for allowed_field in GROUP_SCHEMA_PROPERTIES.keys():
+        for allowed_field in GROUP_SCHEMA_PROPERTIES:
             if allowed_field in appstruct:
                 new_appstruct[allowed_field] = appstruct[allowed_field]
 
