@@ -289,8 +289,7 @@ class UriCombinedWildcardFilter:
         for query_uri in query_uris:
             expanded = storage.expand_uri(self.request.db, query_uri)
 
-            us = [normalize_method(u) for u in expanded]
-            uris.update(us)
+            uris.update([normalize_method(uri) for uri in expanded])
         return list(uris)
 
     @staticmethod
@@ -370,10 +369,10 @@ class AnyMatcher:
     def __call__(self, search, params):
         if "any" not in params:
             return search
-        qs = " ".join(popall(params, "any"))
+        query = " ".join(popall(params, "any"))
         return search.query(
             SimpleQueryString(
-                query=qs,
+                query=query,
                 fields=["quote", "tags", "text", "uri.parts"],
                 default_operator="and",
             )

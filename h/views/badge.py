@@ -113,8 +113,7 @@ def badge(request):
 
     else:
         query = MultiDict({"uri": uri, "limit": 0})
-        s = search.Search(request)
-        result = s.run(query)
+        result = search.Search(request).run(query)
         count = result.total
 
     return {"total": count}

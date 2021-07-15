@@ -47,5 +47,5 @@ def update_settings(ctx):
 
     try:
         config.update_index_settings(request.es)
-    except RuntimeError as e:
-        raise click.ClickException(str(e))
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc))

@@ -21,8 +21,8 @@ def fetch_git_ref():
 
 
 def fetch_git_date(ref):
-    ts = subprocess.check_output(["git", "show", "-s", "--format=%ct", ref])
-    return datetime.datetime.fromtimestamp(int(ts))
+    output = subprocess.check_output(["git", "show", "-s", "--format=%ct", ref])
+    return datetime.datetime.fromtimestamp(int(output))
 
 
 def fetch_git_dirty():

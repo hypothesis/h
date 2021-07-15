@@ -48,7 +48,7 @@ whitespace = {
 Match = namedtuple("Match", ["key", "value"])
 
 
-def parse(q):
+def parse(query):
     """
     Parse a free text, Lucene-like, query string into a MultiDict.
 
@@ -65,7 +65,7 @@ def parse(q):
     Supported keys for fields are ``user``, ``group``, ``tag``, ``uri``.
     Any other search terms will get the key ``any``.
     """
-    parse_results = _make_parser().parseString(q)
+    parse_results = _make_parser().parseString(query)
 
     # The parser returns all matched strings, even the field names, we use a
     # parse action to turn matches into a key/value pair (Match), but we need
@@ -73,7 +73,7 @@ def parse(q):
     return MultiDict([m for m in parse_results if isinstance(m, Match)])
 
 
-def unparse(q):
+def unparse(query):
     """
     Turn a dict-like object into a Lucene-like query string.
 
@@ -83,7 +83,7 @@ def unparse(q):
     """
     terms = []
 
-    for key, val in q.items():
+    for key, val in query.items():
         if key == "any":
             terms.append(_escape_term(val))
         else:
@@ -120,8 +120,8 @@ def _make_parser():
 
 
 def _decorate_match(key):
-    def parse_action_impl(t):
-        return Match(key, t[0])
+    def parse_action_impl(term):
+        return Match(key, term[0])
 
     return parse_action_impl
 

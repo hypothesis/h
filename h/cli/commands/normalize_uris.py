@@ -129,11 +129,13 @@ def _normalize_annotations_window(session, window):
     )
 
     ids = set()
-    for a in query:
-        normalized = uri.normalize(a.target_uri)
-        if normalized != a.target_uri_normalized:
-            a._target_uri_normalized = normalized  # pylint: disable=protected-access
-            ids.add(a.id)
+    for annotation in query:
+        normalized = uri.normalize(annotation.target_uri)
+        if normalized != annotation.target_uri_normalized:
+            annotation._target_uri_normalized = (  # pylint: disable=protected-access
+                normalized
+            )
+            ids.add(annotation.id)
 
     return ids
 

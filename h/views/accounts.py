@@ -551,8 +551,8 @@ class NotificationsController:
         )
 
     def _update_notifications(self, appstruct):
-        for n in self._user_notifications():
-            n.active = n.type in appstruct["notifications"]
+        for notification in self._user_notifications():
+            notification.active = notification.type in appstruct["notifications"]
 
     def _template_data(self):
         user_has_email_address = self.request.user and self.request.user.email

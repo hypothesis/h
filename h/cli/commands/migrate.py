@@ -20,9 +20,9 @@ class CommandLine(_CommandLine):
 
         # This is super sneaky. Grab the config option and suppress its help.
         conf = None
-        for a in self.parser._actions:
-            if "--config" in a.option_strings:
-                conf = a
+        for action in self.parser._actions:
+            if "--config" in action.option_strings:
+                conf = action
                 break
         if conf:
             conf.help = argparse.SUPPRESS

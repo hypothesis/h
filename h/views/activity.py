@@ -36,10 +36,10 @@ class SearchController:
     @view_config(request_method="GET")
     def search(self):
         # Make a copy of the query params to be consumed by search.
-        q = self.parsed_query_params.copy()
+        query_params = self.parsed_query_params.copy()
 
         # Check whether a redirect is required.
-        query.check_url(self.request, q)
+        query.check_url(self.request, query_params)
 
         page_size = self.request.params.get("page_size", PAGE_SIZE)
         try:
@@ -48,7 +48,7 @@ class SearchController:
             page_size = PAGE_SIZE
 
         # Fetch results.
-        results = query.execute(self.request, q, page_size=page_size)
+        results = query.execute(self.request, query_params, page_size=page_size)
 
         groups_suggestions = []
 
@@ -57,8 +57,8 @@ class SearchController:
                 groups_suggestions.append({"name": group.name, "pubid": group.pubid})
 
         def tag_link(tag):
-            q = parser.unparse({"tag": tag})
-            return self.request.route_url("activity.search", _query=[("q", q)])
+            tag = parser.unparse({"tag": tag})
+            return self.request.route_url("activity.search", _query=[("q", tag)])
 
         def username_from_id(userid):
             parts = split_user(userid)
@@ -565,9 +565,9 @@ def _update_q(params, parsed_query):
     empty trailing ?q=
 
     """
-    q = parser.unparse(parsed_query)
-    if q.strip():
-        params["q"] = q
+    query_ = parser.unparse(parsed_query)
+    if query_.strip():
+        params["q"] = query_
     else:
         params.pop("q", None)
 

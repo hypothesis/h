@@ -142,14 +142,14 @@ def merge_documents(session, documents, updated=None):
 
     for doc in duplicates:
         for _ in range(len(doc.document_uris)):
-            u = doc.document_uris.pop()
-            u.document = master
-            u.updated = updated
+            uri = doc.document_uris.pop()
+            uri.document = master
+            uri.updated = updated
 
         for _ in range(len(doc.meta)):
-            m = doc.meta.pop()
-            m.document = master
-            m.updated = updated
+            meta = doc.meta.pop()
+            meta.document = master
+            meta.updated = updated
 
     try:  # pylint:disable=too-many-try-statements
         session.flush()

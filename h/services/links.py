@@ -51,16 +51,18 @@ class LinksService:
 
     def get(self, annotation, name):
         """Get the link named `name` for the passed `annotation`."""
-        g, _ = self.registry[LINK_GENERATORS_KEY][name]
-        return g(self._request, annotation)
+        link_generator, _ = self.registry[LINK_GENERATORS_KEY][name]
+        return link_generator(self._request, annotation)
 
     def get_all(self, annotation):
         """Get all (non-hidden) links for the passed `annotation`."""
         links = {}
-        for name, (g, hidden) in self.registry[LINK_GENERATORS_KEY].items():
+        for name, (link_generator, hidden) in self.registry[
+            LINK_GENERATORS_KEY
+        ].items():
             if hidden:
                 continue
-            link = g(self._request, annotation)
+            link = link_generator(self._request, annotation)
             if link is not None:
                 links[name] = link
         return links

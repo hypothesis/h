@@ -109,7 +109,7 @@ def _feature_overrides(request):
     """
     overrides = []
     for param in request.GET:
-        m = PARAM_PATTERN.match(param)
-        if m:
-            overrides.append(m.group("featurename"))
+        match = PARAM_PATTERN.match(param)
+        if match:
+            overrides.append(match.group("featurename"))
     return overrides

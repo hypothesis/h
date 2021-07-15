@@ -44,9 +44,8 @@ def move_uri(ctx, old, new):
         doc_claimant=len(docuris_claimant),
         doc_uri=len(docuris_uri),
     )
-    c = click.prompt(prompt, default="n", show_default=False)
-
-    if c != "y":
+    answer = click.prompt(prompt, default="n", show_default=False)
+    if answer != "y":
         print("Aborted")
         return
 

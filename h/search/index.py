@@ -103,8 +103,7 @@ def _all_annotations(session, windowsize=2000):
     query = _eager_loaded_annotations(session).filter(_annotation_filter())
 
     for window in windows:
-        for a in query.filter(window):
-            yield a
+        yield from query.filter(window)
 
 
 def _filtered_annotations(session, ids):
@@ -115,8 +114,7 @@ def _filtered_annotations(session, ids):
         .filter(models.Annotation.id.in_(ids))
     )
 
-    for a in annotations:
-        yield a
+    yield from annotations
 
 
 def _annotation_filter():

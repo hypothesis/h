@@ -59,10 +59,10 @@ class SignupController:
                 privacy_accepted=datetime.datetime.utcnow(),
                 comms_opt_in=appstruct["comms_opt_in"],
             )
-        except ConflictError as e:
+        except ConflictError as exc:
             template_context["heading"] = _("Account already registered")
             template_context["message"] = _(
-                "{failure_reason}".format(failure_reason=e.args[0])
+                "{failure_reason}".format(failure_reason=exc.args[0])
             )
 
         return template_context

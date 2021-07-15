@@ -17,15 +17,18 @@ AUTHORITY_PROVIDED_ID_MAX_LENGTH = 1024
 
 
 class JoinableBy(enum.Enum):
+    # pylint:disable=invalid-name
     authority = "authority"
 
 
 class ReadableBy(enum.Enum):
+    # pylint:disable=invalid-name
     members = "members"
     world = "world"
 
 
 class WriteableBy(enum.Enum):
+    # pylint:disable=invalid-name
     authority = "authority"
     members = "members"
 

@@ -16,8 +16,8 @@ def unsubscribe(request):
         type=payload["type"], uri=payload["uri"]
     )
 
-    for s in subscriptions:
-        if s.active:
-            s.active = False
+    for subscription in subscriptions:
+        if subscription.active:
+            subscription.active = False
 
     return {}

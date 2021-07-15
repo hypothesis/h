@@ -18,11 +18,11 @@ class TestRender:
 
     def test_it_sanitizes_the_output(self, markdown_render, sanitize):
         markdown.render("foobar")
-        sanitize.assert_called_once_with(markdown_render.return_value)
+        sanitize.assert_called_once_with(markdown_render.return_value.return_value)
 
     @pytest.fixture
     def markdown_render(self, patch):
-        return patch("h.util.markdown.markdown")
+        return patch("h.util.markdown._get_markdown")
 
     @pytest.fixture
     def sanitize(self, patch):
