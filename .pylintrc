@@ -16,6 +16,16 @@ disable=bad-continuation,
         missing-type-doc,
         missing-return-type-doc,
         wrong-import-order,
+        # We use isort to sort and group our imports, so we don't need PyLint to
+        # check them for us.
+        ungrouped-imports,
+
+        # We use Black to format our code automatically, so we don't need PyLint to
+        # check formatting for us.
+        bad-continuation,
+        line-too-long,
+
+        too-few-public-methods
 
 [REPORTS]
 output-format=colorized
