@@ -135,7 +135,7 @@ def _linkify_rel(attrs, new=False):  # pylint: disable=unused-argument
 
 
 def _get_cleaner():
-    global cleaner
+    global cleaner  # pylint: disable=global-statement
     if cleaner is None:
         linkify_filter = partial(
             LinkifyFilter, callbacks=[_linkify_target_blank, _linkify_rel]
@@ -147,7 +147,7 @@ def _get_cleaner():
 
 
 def _get_markdown():
-    global markdown
+    global markdown  # pylint: disable=global-statement
     if markdown is None:
         markdown = MathMarkdown(
             renderer=MathRenderer(),

@@ -4,6 +4,7 @@ transforms it into a MultiDict structure that h.search understands.
 """
 
 from collections import namedtuple
+from functools import lru_cache
 
 import pyparsing as pp
 from webob.multidict import MultiDict
@@ -42,7 +43,6 @@ whitespace = {
     "\u3000",  # ideographic space
 }
 
-parser = None
 Match = namedtuple("Match", ["key", "value"])
 
 
@@ -62,7 +62,7 @@ def parse(q):
     Supported keys for fields are ``user``, ``group``, ``tag``, ``uri``.
     Any other search terms will get the key ``any``.
     """
-    parser = _get_parser()
+    parser = _make_parser()
     parse_results = parser.parseString(q)
 
     # The parser returns all matched strings, even the field names, we use a
@@ -90,13 +90,7 @@ def unparse(q):
     return " ".join(terms)
 
 
-def _get_parser():
-    global parser
-    if parser is None:
-        parser = _make_parser()
-    return parser
-
-
+@lru_cache(maxsize=None)
 def _make_parser():
     word = pp.CharsNotIn("".join(whitespace))
     word.skipWhitespace = True

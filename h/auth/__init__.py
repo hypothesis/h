@@ -36,6 +36,7 @@ WEBSOCKET_POLICY = TOKEN_POLICY
 
 
 def includeme(config):
+    # pylint: disable=global-statement
     global DEFAULT_POLICY
     global WEBSOCKET_POLICY
 
