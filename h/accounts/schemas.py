@@ -1,5 +1,6 @@
 import codecs
 import logging
+from functools import lru_cache
 
 import colander
 import deform
@@ -19,23 +20,20 @@ _ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
 PASSWORD_MIN_LENGTH = 2  # FIXME: this is ridiculous
-USERNAME_BLACKLIST = None
 
 
+@lru_cache(maxsize=None)
 def get_blacklist():
-    global USERNAME_BLACKLIST
-    if USERNAME_BLACKLIST is None:
-        # Try to load the blacklist file from disk. If, for whatever reason, we
-        # can't load the file, then don't crash out, just log a warning about
-        # the problem.
-        try:
-            with codecs.open("h/accounts/blacklist", encoding="utf-8") as fp:
-                blacklist = fp.readlines()
-        except (IOError, ValueError):
-            log.exception("unable to load blacklist")
-            blacklist = []
-        USERNAME_BLACKLIST = set(line.strip().lower() for line in blacklist)
-    return USERNAME_BLACKLIST
+    # Try to load the blacklist file from disk. If, for whatever reason, we
+    # can't load the file, then don't crash out, just log a warning about
+    # the problem.
+    try:
+        with codecs.open("h/accounts/blacklist", encoding="utf-8") as fp:
+            blacklist = fp.readlines()
+    except (IOError, ValueError):
+        log.exception("unable to load blacklist")
+        blacklist = []
+    return set(line.strip().lower() for line in blacklist)
 
 
 def unique_email(node, value):
