@@ -33,6 +33,7 @@ def bpython(**locals_):
 
 
 def ipython(**locals_):
+    # pylint: disable-all
     from IPython import start_ipython
     from traitlets.config import get_config
 

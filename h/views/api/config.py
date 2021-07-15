@@ -123,7 +123,7 @@ def api_config(versions, link_name=None, description=None, **settings):
 
         # Support use as a class method decorator.
         # Taken from Pyramid's `view_config` decorator implementation.
-        if info.scope == "class":
+        if info.scope == "class":  # pylint: disable=no-member
             if settings.get("attr") is None:
                 settings["attr"] = wrapped.__name__
 
