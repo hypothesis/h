@@ -42,7 +42,7 @@ class DeleteUserService:
         # We check for non-empty `group_ids` before querying the DB to avoid an
         # expensive SQL query if `in_` is given an empty list (see
         # https://stackoverflow.com/questions/23523147/)
-        if len(group_ids) == 0:
+        if not len(group_ids):
             return []
 
         query = (

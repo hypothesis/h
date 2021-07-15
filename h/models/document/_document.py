@@ -103,7 +103,7 @@ class Document(Base, mixins.Timestamps):
         finduris = [claimant_uri] + uris
         documents = cls.find_by_uris(session, finduris)
 
-        if documents.count() == 0:
+        if not documents.count():
             doc = Document(created=created, updated=updated)
             DocumentURI(
                 document=doc,

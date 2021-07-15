@@ -110,7 +110,7 @@ def execute(request, query, page_size):
         timeframes=[],
     )
 
-    if result.total == 0:
+    if not result.total:
         return result
 
     # Load all referenced annotations from the database, bucket them, and add

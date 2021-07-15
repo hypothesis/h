@@ -46,7 +46,7 @@ class DocumentBucket:
         specific annotation, so here we just link to the first annotation in the
         document.
         """
-        if len(self.annotations) == 0:
+        if not len(self.annotations):
             return None
         return links.incontext_link(request, self.annotations[0])
 

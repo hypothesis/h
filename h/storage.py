@@ -271,7 +271,7 @@ def expand_uri(session, uri, normalized=False):
 def _validate_group_scope(group, target_uri):
     # If no scopes are present, or if the group is configured to allow
     # annotations outside of its scope, there's nothing to do here
-    if not group.scopes or group.enforce_scope is False:
+    if not group.scopes or not group.enforce_scope:
         return
     # The target URI must match at least one
     # of a group's defined scopes, if the group has any

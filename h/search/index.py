@@ -142,7 +142,7 @@ def _log_status(stream, log_every=1000):
     for item in stream:
         yield item
         i += 1
-        if i % log_every == 0:
+        if not i % log_every:
             now = time.time()
             delta = now - then
             then = now
