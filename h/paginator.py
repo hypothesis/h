@@ -53,7 +53,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
     max_right = current_page + buffer
 
     i = current_page + 1
-    while max_right >= i > current_page and i < page_max:
+    while current_page < i <= max_right and i < page_max:
         page_numbers.append(i)
         i += 1
 
