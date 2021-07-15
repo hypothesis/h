@@ -19,12 +19,12 @@ _ = i18n.TranslationString
 )
 @paginator.paginate_query
 def index(_context, request):
-    q = request.params.get("q")
+    q_param = request.params.get("q")
 
     filter_terms = []
-    if q:
+    if q_param:
         filter_terms.append(
-            func.lower(Organization.name).like("%{}%".format(q.lower()))
+            func.lower(Organization.name).like("%{}%".format(q_param.lower()))
         )
 
     return (

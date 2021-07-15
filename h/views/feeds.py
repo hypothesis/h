@@ -11,8 +11,7 @@ _ = i18n.TranslationStringFactory(__package__)
 
 def _annotations(request):
     """Return the annotations from the search API."""
-    s = search.Search(request)
-    result = s.run(MultiDict(request.params))
+    result = search.Search(request).run(MultiDict(request.params))
     return fetch_ordered_annotations(request.db, result.annotation_ids)
 
 

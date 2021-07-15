@@ -10,8 +10,8 @@ from pyramid.csrf import check_csrf_token, get_csrf_token
 
 
 @colander.deferred
-def deferred_csrf_token(_node, kw):
-    request = kw.get("request")
+def deferred_csrf_token(_node, kwargs):
+    request = kwargs.get("request")
     return get_csrf_token(request)
 
 

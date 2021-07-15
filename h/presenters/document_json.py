@@ -6,9 +6,9 @@ class DocumentJSONPresenter:
         if not self.document:
             return {}
 
-        d = {}
+        document_dict = {}
         title = self.document.title
         if title:
-            d["title"] = [title]
+            document_dict["title"] = [title]
 
-        return d
+        return document_dict

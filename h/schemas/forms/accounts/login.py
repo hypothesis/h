@@ -9,18 +9,19 @@ _ = i18n.TranslationString
 
 
 @colander.deferred
-def _deferred_username_widget(_node, kw):
+def _deferred_username_widget(_node, kwargs):
     """Return a username widget that autofocuses if username isn't pre-filled."""
     return deform.widget.TextInputWidget(
-        autofocus=_should_autofocus_username(kw), autocomplete="username"
+        autofocus=_should_autofocus_username(kwargs), autocomplete="username"
     )
 
 
 @colander.deferred
-def _deferred_password_widget(_node, kw):
+def _deferred_password_widget(_node, kwargs):
     """Return a password widget that autofocuses if username *is* pre-filled."""
     return deform.widget.PasswordWidget(
-        autofocus=not _should_autofocus_username(kw), autocomplete="current-password"
+        autofocus=not _should_autofocus_username(kwargs),
+        autocomplete="current-password",
     )
 
 
@@ -47,12 +48,12 @@ class LoginSchema(CSRFSchema):
 
         try:
             user = user_service.fetch_for_login(username_or_email=username)
-        except UserNotActivated as exp:
+        except UserNotActivated as exc:
             err = colander.Invalid(node)
             err["username"] = _(
                 "Please check your email and open the link " "to activate your account."
             )
-            raise err from exp
+            raise err from exc
 
         if user is None:
             err = colander.Invalid(node)
@@ -81,9 +82,9 @@ class LoginSchema(CSRFSchema):
         }
 
 
-def _should_autofocus_username(kw):
+def _should_autofocus_username(kwargs):
     """Return True if the username widget should be autofocused."""
-    if LoginSchema.default_values(kw["request"]).get("username"):
+    if LoginSchema.default_values(kwargs["request"]).get("username"):
         # The username widget is going to be pre-filled, so don't autofocus it.
         # (This allows the password widget, which the user still has to type
         # into, to be autofocused instead.)

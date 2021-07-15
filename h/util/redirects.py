@@ -54,12 +54,12 @@ def lookup(redirects, request):
     # redirect rule that the path is matched against.
     path = request.path
 
-    for r in redirects:
-        if r.prefix and path.startswith(r.src):
-            suffix = path.replace(r.src, "", 1)
-            return _dst_root(request, r) + suffix
-        if not r.prefix and path == r.src:
-            return _dst_root(request, r)
+    for redirect in redirects:
+        if redirect.prefix and path.startswith(redirect.src):
+            suffix = path.replace(redirect.src, "", 1)
+            return _dst_root(request, redirect) + suffix
+        if not redirect.prefix and path == redirect.src:
+            return _dst_root(request, redirect)
     return None
 
 
@@ -78,16 +78,16 @@ def parse(specs):
                 "invalid redirect specification: {!r}".format(line)
             ) from err
         if typ == "internal-exact":
-            r = Redirect(prefix=False, internal=True, src=src, dst=dst)
+            redirect = Redirect(prefix=False, internal=True, src=src, dst=dst)
         elif typ == "internal-prefix":
-            r = Redirect(prefix=True, internal=True, src=src, dst=dst)
+            redirect = Redirect(prefix=True, internal=True, src=src, dst=dst)
         elif typ == "exact":
-            r = Redirect(prefix=False, internal=False, src=src, dst=dst)
+            redirect = Redirect(prefix=False, internal=False, src=src, dst=dst)
         elif typ == "prefix":
-            r = Redirect(prefix=True, internal=False, src=src, dst=dst)
+            redirect = Redirect(prefix=True, internal=False, src=src, dst=dst)
         else:
             raise ParseError("unknown redirect type: {!r}".format(typ))
-        result.append(r)
+        result.append(redirect)
     return result
 
 

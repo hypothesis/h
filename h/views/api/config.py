@@ -107,10 +107,10 @@ def api_config(versions, link_name=None, description=None, **settings):
     `add_api_view` to register the view instead of `context.add_view`.
     """
 
-    def callback(context, _name, ob):
+    def callback(context, _name, view):
         add_api_view(
             context.config,
-            view=ob,
+            view=view,
             versions=versions,
             link_name=link_name,
             description=description,

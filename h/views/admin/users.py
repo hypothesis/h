@@ -99,8 +99,8 @@ def users_rename(request):
     try:
         svc.rename(user, new_username)
 
-    except (UserRenameError, ValueError) as e:
-        request.session.flash(str(e), "error")
+    except (UserRenameError, ValueError) as exc:
+        request.session.flash(str(exc), "error")
         return httpexceptions.HTTPFound(
             location=request.route_path(
                 "admin.users",

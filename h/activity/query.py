@@ -36,7 +36,7 @@ def extract(request, parse=parser.parse):
     If no query is present in the passed request, returns ``None``.
     """
 
-    q = parse(request.params.get("q", ""))
+    query = parse(request.params.get("q", ""))
 
     # If the query sent to a {group, user} search page includes a {group,
     # user}, we override it, because otherwise we'll display the union of the
@@ -45,11 +45,11 @@ def extract(request, parse=parser.parse):
     # (Note that a query for the *intersection* of >1 users or groups is by
     # definition empty)
     if request.matched_route.name == "group_read":
-        q["group"] = request.matchdict["pubid"]
+        query["group"] = request.matchdict["pubid"]
     elif request.matched_route.name == "activity.user_search":
-        q["user"] = request.matchdict["username"]
+        query["user"] = request.matchdict["username"]
 
-    return q
+    return query
 
 
 def check_url(request, query, unparse=parser.unparse):

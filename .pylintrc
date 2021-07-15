@@ -36,10 +36,23 @@ disable=bad-continuation,
         unused-argument,
         too-many-arguments,
         super-init-not-called,
-        invalid-name,
         fixme,
 
+good-names=
+    # PyLint's default good names.
+    i,j,k,ex,Run,_,ok,
 
+    # The standard name used for the pyramid_tm transaction manager.
+    tm,
+
+    # websocket
+    ws,
+    # request.db
+    db,
+    # request.es
+    es,
+    # Primary key on models
+    id,
 
 [REPORTS]
 output-format=colorized

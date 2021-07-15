@@ -67,9 +67,9 @@ def robots(_context, request):
     csp_insecure_optout=True,
 )
 def stream(_context, request):
-    q = request.params.get("q", "").split(":", 1)
-    if len(q) >= 2 and q[0] == "tag":
-        tag = q[1]
+    query = request.params.get("q", "").split(":", 1)
+    if len(query) >= 2 and query[0] == "tag":
+        tag = query[1]
         if " " in tag:
             tag = '"' + tag + '"'
         query = {"q": "tag:{}".format(tag)}

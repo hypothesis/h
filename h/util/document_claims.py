@@ -265,7 +265,7 @@ def document_uri_self_claim(claimant):
     }
 
 
-def doi_uri_from_string(s):
+def doi_uri_from_string(string):
     """
     Return the DOI URI from the given user-supplied string, or None.
 
@@ -277,16 +277,16 @@ def doi_uri_from_string(s):
     If the given string, minus any `doi:` prefix does not match the syntax
     for DOI names ("10.NNNN/.*") then `None` is returned.
     """
-    s = s.strip()
+    string = string.strip()
 
-    if s.startswith("doi:"):
-        s = s[len("doi:") :]
+    if string.startswith("doi:"):
+        string = string[len("doi:") :]
 
-    s = s.strip()
+    string = string.strip()
 
-    if DOI_PATTERN.match(s) is None:
+    if DOI_PATTERN.match(string) is None:
         return None
 
-    s = "doi:{}".format(s)
+    string = "doi:{}".format(string)
 
-    return s
+    return string

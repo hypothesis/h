@@ -100,8 +100,8 @@ def url_with_origin_validator(node, val):
 
 
 @colander.deferred
-def group_type_validator(_node, kw):
-    group = kw.get("group")
+def group_type_validator(_node, kwargs):
+    group = kwargs.get("group")
     if not group:
         return colander.OneOf([key for key, title in VALID_GROUP_TYPES])
 
@@ -115,8 +115,8 @@ def group_type_validator(_node, kw):
 
 
 @colander.deferred
-def group_organization_select_widget(_node, kw):
-    orgs = kw["organizations"]
+def group_organization_select_widget(_node, kwargs):
+    orgs = kwargs["organizations"]
     org_labels = []
     org_pubids = []
     for org in orgs.values():

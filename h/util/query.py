@@ -33,20 +33,20 @@ def column_windows(session, column, windowsize=2000, where=None):
 
         return column >= start_id
 
-    q = session.query(
+    query = session.query(
         column, sa.func.row_number().over(order_by=column).label("rownum")
     )
 
     if where is not None:
-        q = q.filter(where)
+        query = query.filter(where)
 
-    q = q.from_self(column)
+    query = query.from_self(column)
 
     # Select every "windowsize'th" row from the inner query.
     if windowsize > 1:
-        q = q.filter(sa.text("rownum %% %d=1" % windowsize))
+        query = query.filter(sa.text("rownum %% %d=1" % windowsize))
 
-    intervals = [id for id, in q]
+    intervals = [id for id, in query]
 
     while intervals:
         start = intervals.pop(0)

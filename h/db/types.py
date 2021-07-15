@@ -206,15 +206,15 @@ def _transform_quote_selector(selectors, transform_func):
     return selectors
 
 
-def _escape_null_byte(s):
-    if s is None:
-        return s
+def _escape_null_byte(string):
+    if string is None:
+        return string
 
-    return s.replace("\u0000", "\\u0000")
+    return string.replace("\u0000", "\\u0000")
 
 
-def _unescape_null_byte(s):
-    if s is None:
-        return s
+def _unescape_null_byte(string):
+    if string is None:
+        return string
 
-    return s.replace("\\u0000", "\u0000")
+    return string.replace("\\u0000", "\u0000")

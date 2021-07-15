@@ -287,9 +287,9 @@ def _normalize_queryvalue(value):
     return quote_plus(unquote_plus(value), safe=UNRESERVED_QUERY_VALUE)
 
 
-def _blacklisted_query_param(s):
+def _blacklisted_query_param(string):
     """Return True if the given string matches any BLACKLISTED_QUERY_PARAMS."""
-    return any(patt.match(s) for patt in BLACKLISTED_QUERY_PARAMS)
+    return any(patt.match(string) for patt in BLACKLISTED_QUERY_PARAMS)
 
 
 def render_url_template(template, example_url):

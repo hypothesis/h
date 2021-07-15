@@ -6,11 +6,11 @@ class DocumentSearchIndexPresenter:
         if not self.document:
             return {}
 
-        d = {}
+        document_dict = {}
         if self.document.title:
-            d["title"] = [self.document.title]
+            document_dict["title"] = [self.document.title]
 
         if self.document.web_uri:
-            d["web_uri"] = self.document.web_uri
+            document_dict["web_uri"] = self.document.web_uri
 
-        return d
+        return document_dict
