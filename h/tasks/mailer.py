@@ -1,3 +1,4 @@
+# pylint: disable=no-member # Instance of 'Celery' has no 'request' member
 """
 A module for sending email.
 

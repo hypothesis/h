@@ -1,3 +1,4 @@
+# pylint: disable=no-member # Instance of 'Celery' has no 'request' member
 from datetime import datetime, timedelta
 
 from h import models

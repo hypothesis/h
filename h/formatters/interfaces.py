@@ -1,7 +1,7 @@
 from zope.interface import Interface
 
 
-class IAnnotationFormatter(Interface):
+class IAnnotationFormatter(Interface):  # pylint:disable=inherit-non-class
     """
     Interface for annotation formatters.
 
@@ -22,7 +22,7 @@ class IAnnotationFormatter(Interface):
     is being preloaded with said method.
     """
 
-    def preload(ids):  # noqa: N805
+    def preload(ids):  # noqa: N805 pylint:disable=no-self-argument
         """
         Batch load data based on annotation ids.
 
@@ -30,7 +30,7 @@ class IAnnotationFormatter(Interface):
         :type ids: list of unicode
         """
 
-    def format(annotation_context):  # noqa: N805
+    def format(annotation_context):  # noqa: N805 pylint:disable=no-self-argument
         """
         Presents additional annotation data that will be served to API clients.
 

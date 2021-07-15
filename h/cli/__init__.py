@@ -69,7 +69,7 @@ def main():
     resolver = path.DottedNameResolver()
     for cmd in SUBCOMMANDS:
         cli.add_command(resolver.resolve(cmd))
-    cli(prog_name="hypothesis", obj={})
+    cli(prog_name="hypothesis", obj={})  # pylint: disable-all
 
 
 if __name__ == "__main__":

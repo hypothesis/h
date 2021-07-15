@@ -1,7 +1,7 @@
 from zope.interface import Attribute, Interface
 
 
-class IAuthenticationToken(Interface):
+class IAuthenticationToken(Interface):  # pylint:disable=inherit-non-class
     """Represents an authentication token."""
 
     userid = Attribute("""The userid to which this token was issued.""")

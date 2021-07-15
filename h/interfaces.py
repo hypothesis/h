@@ -1,7 +1,7 @@
 from zope.interface import Interface
 
 
-class IGroupService(Interface):
+class IGroupService(Interface):  # pylint:disable=inherit-non-class
     def find(self, id_):
         """
         Finds and returns a group based on the given id.
