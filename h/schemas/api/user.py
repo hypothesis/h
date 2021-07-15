@@ -75,7 +75,7 @@ class UpdateUserAPISchema(JSONSchema):
 
         new_appstruct = {}
 
-        for allowed_field in UpdateUserAPISchema.schema["properties"].keys():
+        for allowed_field in UpdateUserAPISchema.schema["properties"]:
             if allowed_field in appstruct:
                 new_appstruct[allowed_field] = appstruct[allowed_field]
 
