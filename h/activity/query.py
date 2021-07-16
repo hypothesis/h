@@ -185,8 +185,7 @@ def _execute_search(request, query, page_size):
         page = 1
 
     # Don't allow negative page numbers.
-    if page < 1:
-        page = 1
+    page = max(page, 1)
 
     query["limit"] = page_size
     query["offset"] = (page - 1) * page_size
