@@ -3,7 +3,7 @@ from pyramid.renderers import render
 from h import links
 
 
-def generate(request, notification):  # pylint: disable=too-many-locals
+def generate(request, notification):
     """
     Generate an email for a reply notification.
 
@@ -14,46 +14,30 @@ def generate(request, notification):  # pylint: disable=too-many-locals
 
     :returns: a 4-element tuple containing: recipients, subject, text, html
     """
-    document_title = notification.document.title
-    if not document_title:
-        document_title = notification.parent.target_uri
-
-    parent_user = notification.parent_user
-    parent_user_url = request.route_url("stream.user_query", user=parent_user.username)
-    parent_user_display_name = parent_user.display_name or parent_user.username
-
-    reply_url = links.incontext_link(request, notification.reply)
-    if not reply_url:
-        reply_url = request.route_url("annotation", id=notification.reply.id)
-
-    reply_user = notification.reply_user
-    reply_user_url = request.route_url("stream.user_query", user=reply_user.username)
-    reply_user_display_name = reply_user.display_name or reply_user.username
-
-    unsubscribe_token = _unsubscribe_token(request, parent_user)
-    unsubscribe_url = request.route_url("unsubscribe", token=unsubscribe_token)
-
-    if notification.reply_user.authority != request.default_authority:
-        reply_user_url = None
-
-    if notification.parent_user.authority != request.default_authority:
-        parent_user_url = None
 
     context = {
-        "document_title": document_title,
+        "document_title": notification.document.title or notification.parent.target_uri,
         "document_url": notification.parent.target_uri,
+        # Parent related
         "parent": notification.parent,
-        "parent_user_display_name": parent_user_display_name,
-        "parent_user_url": parent_user_url,
+        "parent_user_display_name": notification.parent_user.display_name
+        or notification.parent_user.username,
+        "parent_user_url": _get_user_url(notification.parent_user, request),
+        "unsubscribe_url": request.route_url(
+            "unsubscribe",
+            token=_unsubscribe_token(request, notification.parent_user),
+        ),
+        # Reply related
         "reply": notification.reply,
-        "reply_url": reply_url,
-        "reply_user_display_name": reply_user_display_name,
-        "reply_user_url": reply_user_url,
-        "unsubscribe_url": unsubscribe_url,
+        "reply_url": links.incontext_link(request, notification.reply)
+        or request.route_url("annotation", id=notification.reply.id),
+        "reply_user_display_name": notification.reply_user.display_name
+        or notification.reply_user.username,
+        "reply_user_url": _get_user_url(notification.reply_user, request),
     }
 
     subject = "{user} has replied to your annotation".format(
-        user=reply_user_display_name
+        user=context["reply_user_display_name"]
     )
     text = render(
         "h:templates/emails/reply_notification.txt.jinja2", context, request=request
@@ -63,6 +47,13 @@ def generate(request, notification):  # pylint: disable=too-many-locals
     )
 
     return [notification.parent_user.email], subject, text, html
+
+
+def _get_user_url(user, request):
+    if user.authority == request.default_authority:
+        return request.route_url("stream.user_query", user=user.username)
+
+    return None
 
 
 def _unsubscribe_token(request, user):
