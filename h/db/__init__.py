@@ -1,3 +1,4 @@
+# pylint: disable=import-outside-toplevel
 """
 Configure and expose the application database session.
 
