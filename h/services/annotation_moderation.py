@@ -22,7 +22,7 @@ class AnnotationModerationService:
         Check which of the given annotation ids is hidden.
 
         :param annotation_ids: The ids of the annotations to check.
-        :type annotation: list of unicode
+        :type annotation_ids: list of unicode
 
         :returns: The subset of the annotation ids that are hidden.
         :rtype: set of unicode
