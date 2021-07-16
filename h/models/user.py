@@ -69,12 +69,8 @@ class UserIDComparator(Comparator):  # pylint: disable=abstract-method
             (lower(replace('luis.silva', '.', '')), 'example.com')
     """
 
-    def __init__(self, username, authority):  # pylint: disable=super-init-not-called
-        self.username = username
-        self.authority = authority
-
-    def __clause_element__(self):
-        return sa.tuple_(_normalise_username(self.username), self.authority)
+    def __init__(self, username, authority):
+        super().__init__(sa.tuple_(_normalise_username(username), authority))
 
     def __eq__(self, other):
         """
@@ -101,7 +97,7 @@ class UserIDComparator(Comparator):  # pylint: disable=abstract-method
                 return False
             else:
                 other = sa.tuple_(_normalise_username(val["username"]), val["domain"])
-        return self.__clause_element__() == other
+        return self.expression == other
 
     def in_(self, userids):  # pylint: disable=arguments-renamed
         others = []
@@ -117,7 +113,7 @@ class UserIDComparator(Comparator):  # pylint: disable=abstract-method
         if not others:
             return False
 
-        return self.__clause_element__().in_(others)
+        return self.expression.in_(others)
 
 
 class User(Base):
