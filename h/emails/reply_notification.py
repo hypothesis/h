@@ -3,7 +3,7 @@ from pyramid.renderers import render
 from h import links
 
 
-def generate(request, notification):
+def generate(request, notification):  # pylint: disable=too-many-locals
     """
     Generate an email for a reply notification.
 

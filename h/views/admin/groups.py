@@ -32,7 +32,7 @@ def groups_index(_context, request):
     renderer="h:templates/admin/groups_create.html.jinja2",
     permission="admin_groups",
 )
-class GroupCreateViews:
+class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
     """Views for admin create-group forms"""
 
     def __init__(self, request):
@@ -128,7 +128,7 @@ class GroupCreateViews:
     permission="admin",
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
-class GroupEditViews:
+class GroupEditViews:  # pylint: disable=too-many-instance-attributes
     def __init__(self, context, request):
         self.group = context.group
         self.request = request
