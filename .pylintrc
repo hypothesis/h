@@ -15,6 +15,7 @@ disable=bad-continuation,
         missing-docstring,
         missing-type-doc,
         missing-return-type-doc,
+        missing-yield-type-doc,
         wrong-import-order,
         # We use isort to sort and group our imports, so we don't need PyLint to
         # check them for us.
