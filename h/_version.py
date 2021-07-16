@@ -28,11 +28,10 @@ def fetch_git_date(ref):
 def fetch_git_dirty():
     # Ensure git index is up-to-date first. This usually isn't necessary, but
     # can be needed inside a docker container where the index is out of date.
-    # pylint: disable=compare-to-zero
     subprocess.call(["git", "update-index", "-q", "--refresh"])
-    dirty_tree = subprocess.call(["git", "diff-files", "--quiet"]) != 0
-    dirty_index = (
-        subprocess.call(["git", "diff-index", "--quiet", "--cached", "HEAD"]) != 0
+    dirty_tree = bool(subprocess.call(["git", "diff-files", "--quiet"]))
+    dirty_index = bool(
+        subprocess.call(["git", "diff-index", "--quiet", "--cached", "HEAD"])
     )
     return dirty_tree or dirty_index
 
