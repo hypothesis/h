@@ -35,7 +35,7 @@ def validate_media_types(wrapped):
         # If Accept has been set
         if request.accept:
             # At least one of the media types in Accept must be known to the app
-            if not any([t in valid_media_types() for t in request.accept]):
+            if not any((t in valid_media_types() for t in request.accept)):
                 # If no Accept media types are known, convert to a 406 error
                 context = HTTPNotAcceptable("Not acceptable")
         response = wrapped(context, request)
