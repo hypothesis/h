@@ -22,7 +22,7 @@ class Client:
         self.client_id = authclient.id
 
 
-class OAuthValidatorService(RequestValidator):
+class OAuthValidatorService(RequestValidator):  # pylint:disable=too-many-public-methods
     """
     Validates OAuth requests
 
@@ -162,7 +162,7 @@ class OAuthValidatorService(RequestValidator):
         if authz_code:
             self.session.delete(authz_code)
 
-    def invalidate_refresh_token(self, refresh_token, request, *args, **_kwargs):
+    def invalidate_refresh_token(self, refresh_token, _request, *_args, **_kwargs):
         """
         Shorten expiration of a refresh token.
 

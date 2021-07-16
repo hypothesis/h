@@ -59,7 +59,7 @@ class WebSocket(_WebSocket):
 
         self._work_queue = environ["h.ws.streamer_work_queue"]
 
-    def __new__(cls, *args, **_kwargs):
+    def __new__(cls, *_args, **_kwargs):
         instance = super(WebSocket, cls).__new__(cls)
         cls.instances.add(instance)
         return instance
