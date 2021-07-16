@@ -14,7 +14,7 @@ def get_session(settings):
 @contextmanager
 def read_only_transaction(session):
     """Wrap a call in a read only transaction context manager."""
-    try:
+    try:  # pylint: disable=too-many-try-statements
         session.execute(
             "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE READ ONLY DEFERRABLE"
         )

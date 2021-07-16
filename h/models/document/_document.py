@@ -152,7 +152,7 @@ def merge_documents(session, documents, updated=None):
             m.document = master
             m.updated = updated
 
-    try:
+    try:  # pylint:disable=too-many-try-statements
         session.flush()
         session.query(Annotation).filter(
             Annotation.document_id.in_(duplicate_ids)

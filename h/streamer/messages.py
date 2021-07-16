@@ -31,8 +31,8 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
     """
 
     def _handler(payload):
+        message = Message(topic=routing_key, payload=payload)
         try:
-            message = Message(topic=routing_key, payload=payload)
             work_queue.put(message, timeout=0.1)
         except Full:
             log.warning(

@@ -94,10 +94,19 @@ def users_rename(request):
     old_username = user.username
     new_username = request.params.get("new_username").strip()
 
+    svc = request.find_service(name="rename_user")
     try:
-        svc = request.find_service(name="rename_user")
         svc.rename(user, new_username)
 
+    except (UserRenameError, ValueError) as e:
+        request.session.flash(str(e), "error")
+        return httpexceptions.HTTPFound(
+            location=request.route_path(
+                "admin.users",
+                _query=(("username", old_username), ("authority", user.authority)),
+            )
+        )
+    else:
         request.session.flash(
             'The user "%s" will be renamed to "%s" in the backgroud. Refresh this page to see if it\'s already done'
             % (old_username, new_username),
@@ -108,15 +117,6 @@ def users_rename(request):
             location=request.route_path(
                 "admin.users",
                 _query=(("username", new_username), ("authority", user.authority)),
-            )
-        )
-
-    except (UserRenameError, ValueError) as e:
-        request.session.flash(str(e), "error")
-        return httpexceptions.HTTPFound(
-            location=request.route_path(
-                "admin.users",
-                _query=(("username", old_username), ("authority", user.authority)),
             )
         )
 

@@ -95,9 +95,10 @@ class UserService:
 
         cache_keys = {}
         for userid in userids:
+            val = split_user(userid)
+            key = (val["username"], val["domain"])
+
             try:
-                val = split_user(userid)
-                key = (val["username"], val["domain"])
                 cache_keys[key] = userid
             except ValueError:
                 continue
@@ -109,7 +110,7 @@ class UserService:
         if missing_ids:
             users = self.session.query(User).filter(
                 User.userid.in_(missing_ids)  # pylint:disable=no-member
-            )
+            )  # pylint:disable=no-member
             for user in users:
                 cache_key = (user.username, user.authority)
                 self._cache[cache_key] = user
