@@ -110,7 +110,7 @@ class GEventWebSocketPool(Pool):
     def clear(self):
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
-            try:
+            try:  # pylint:disable=too-many-try-statements
                 websocket = greenlet._run.__self__
                 if websocket:
                     websocket.close(1001, "Server is shutting down")

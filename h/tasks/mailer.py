@@ -34,9 +34,9 @@ def send(self, recipients, subject, body, html=None):
         subject=subject, recipients=recipients, body=body, html=html
     )
     mailer = pyramid_mailer.get_mailer(celery.request)
+    if celery.request.debug:
+        log.info("emailing in debug mode: check the `mail/' directory")
     try:
-        if celery.request.debug:
-            log.info("emailing in debug mode: check the `mail/' directory")
         mailer.send_immediately(email)
     except smtplib.SMTPRecipientsRefused as exc:
         log.warning(

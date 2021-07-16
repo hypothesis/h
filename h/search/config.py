@@ -221,7 +221,7 @@ def _update_index_analysis(conn, name, analysis):
     settings = conn.indices.get_settings(index=name)
     existing = settings[name]["settings"]["index"].get("analysis", {})
     if existing != analysis:
-        try:
+        try:  # pylint: disable=too-many-try-statements
             conn.indices.close(index=name)
             conn.indices.put_settings(index=name, body={"analysis": analysis})
         finally:

@@ -55,11 +55,12 @@ class Limiter:
         offset = params.pop("offset", 0)
         try:
             val = int(offset)
+        except ValueError:
+            return 0
+        else:
             # val must be 0 <= val <= OFFSET_MAX.
             val = min(val, OFFSET_MAX)
             val = max(val, 0)
-        except ValueError:
-            return 0
         return val
 
     @staticmethod
@@ -67,13 +68,15 @@ class Limiter:
         limit = params.pop("limit", LIMIT_DEFAULT)
         try:
             val = int(limit)
+        except ValueError:
+            return LIMIT_DEFAULT
+        else:
             # val must be 0 <= val <= LIMIT_MAX but if
             # val < 0 then set it to the default.
             val = min(val, LIMIT_MAX)
             if val < 0:
                 return LIMIT_DEFAULT
-        except ValueError:
-            return LIMIT_DEFAULT
+
         return val
 
 
@@ -131,13 +134,13 @@ class Sorter:
         """
         # Dates like "2017" can also be cast as floats so if a number is less
         # than 9999 it is assumed to be a year and not ms since the epoch.
-        try:
+        try:  # pylint: disable=too-many-try-statements
             epoch = float(str_value)
             if epoch < 9999:
                 raise ValueError("This is not in the form ms since the epoch.")
             return epoch
         except ValueError:
-            try:
+            try:  # pylint: disable=too-many-try-statements
                 date = parse(str_value, default=DEFAULT_DATE)
                 # If timezone isn't specified assume it's utc.
                 if not date.tzinfo:
