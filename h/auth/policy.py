@@ -233,7 +233,7 @@ class AuthClientPolicy:
         """
         return self._basic_auth_policy.effective_principals(request)
 
-    def remember(self, request, userid, **_kwargs):
+    def remember(self, _request, _userid, **_kwargs):
         """Not implemented for basic auth client policy."""
         return []
 
@@ -317,7 +317,7 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         self.callback = callback
         self.debug = debug
 
-    def remember(self, request, userid, **_kwargs):
+    def remember(self, _request, _userid, **_kwargs):
         """Not implemented for token auth policy."""
         return []
 
