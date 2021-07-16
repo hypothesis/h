@@ -114,7 +114,7 @@ def start(argv, bootstrap):
 
 @signals.task_prerun.connect
 def add_task_name_and_id_to_log_messages(
-    task_id, task, *args, **_kwargs
+    task_id, task, *_args, **_kwargs
 ):  # pragma: no cover
     """
      Add the Celery task name and ID to all messages logged by Celery tasks.
