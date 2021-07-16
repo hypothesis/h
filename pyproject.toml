@@ -1,0 +1,3 @@
+[tool.hdev]
+project_name = "h"
+project_type = "application"
