@@ -36,11 +36,19 @@ def reset_app(app):
     app.reset()
 
 
-@pytest.fixture(autouse=True)
-def clean_db(db_engine):
+@pytest.fixture
+def with_clean_db(db_engine):
     from h import db
 
-    _clean_database(db_engine)
+    tables = reversed(db.Base.metadata.sorted_tables)
+    with contextlib.closing(db_engine.connect()) as conn:
+        tx = conn.begin()
+        tnames = ", ".join('"' + t.name + '"' for t in tables)
+        conn.execute("TRUNCATE {};".format(tnames))
+        tx.commit()
+
+    # We need to re-init the DB as it creates the default test group and
+    # possibly more in future?
     db.init(db_engine, authority=TEST_SETTINGS["h.authority"])
 
 
@@ -49,7 +57,10 @@ def db_engine():
     from h import db
 
     db_engine = db.make_engine(TEST_SETTINGS)
+    db.init(db_engine, authority=TEST_SETTINGS["h.authority"])
+
     yield db_engine
+
     db_engine.dispose()
 
 
@@ -92,14 +103,3 @@ def pyramid_app():
 @pytest.fixture(autouse=True)
 def always_delete_all_elasticsearch_documents(es_client):  # noqa: F811
     pass
-
-
-def _clean_database(engine):
-    from h import db
-
-    tables = reversed(db.Base.metadata.sorted_tables)
-    with contextlib.closing(engine.connect()) as conn:
-        tx = conn.begin()
-        tnames = ", ".join('"' + t.name + '"' for t in tables)
-        conn.execute("TRUNCATE {};".format(tnames))
-        tx.commit()
