@@ -57,7 +57,7 @@ def db_engine():
     from h import db
 
     db_engine = db.make_engine(TEST_SETTINGS)
-    db.init(db_engine, authority=TEST_SETTINGS["h.authority"])
+    db.init(db_engine, authority=TEST_SETTINGS["h.authority"], should_create=True)
 
     yield db_engine
 
