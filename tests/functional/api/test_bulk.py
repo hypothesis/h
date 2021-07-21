@@ -8,6 +8,7 @@ from h_matchers import Any
 from h.models import Group, GroupMembership, User
 
 
+@pytest.mark.usefixtures("with_clean_db")
 class TestBulk:
     AUTHORITY = "lms.hypothes.is"
 

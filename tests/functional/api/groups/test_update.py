@@ -170,7 +170,7 @@ class TestUpdateGroup:
         headers["X-Forwarded-User"] = third_party_user.userid
         group_payload = {
             "name": "My Group",
-            "groupid": "group:333vcdfkj~@thirdparty.com",
+            "groupid": "group:98762557@thirdparty.com",
         }
 
         path = "/api/groups/{id}".format(id=group.pubid)
@@ -178,9 +178,7 @@ class TestUpdateGroup:
 
         assert res.status_code == 200
         assert "groupid" in res.json_body
-        assert res.json_body["groupid"] == "group:{groupid}@thirdparty.com".format(
-            groupid="333vcdfkj~"
-        )
+        assert res.json_body["groupid"] == "group:98762557@thirdparty.com"
 
     def test_it_returns_HTTP_Conflict_if_groupid_is_duplicate(
         self, app, auth_client_header, third_party_user, factories, db_session
@@ -188,18 +186,18 @@ class TestUpdateGroup:
         group1 = factories.Group(
             creator=third_party_user,
             authority=third_party_user.authority,
-            groupid="group:one@thirdparty.com",
+            groupid="group:update_one@thirdparty.com",
         )
         group2 = factories.Group(
             creator=third_party_user,
             authority=third_party_user.authority,
-            groupid="group:two@thirdparty.com",
+            groupid="group:update_two@thirdparty.com",
         )
         db_session.commit()
 
         headers = auth_client_header
         headers["X-Forwarded-User"] = third_party_user.userid
-        group_payload = {"groupid": "group:one@thirdparty.com"}
+        group_payload = {"groupid": "group:update_one@thirdparty.com"}
 
         # Attempting to set group2's `groupid` to one already taken by group1
         path = "/api/groups/{id}".format(id=group2.pubid)

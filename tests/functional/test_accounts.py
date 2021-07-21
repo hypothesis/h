@@ -8,7 +8,7 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         email_form = res.forms["email"]
-        email_form["email"] = "new_email@example.com"
+        email_form["email"] = "new_email1@example.com"
         email_form["password"] = "pass"
 
         res = email_form.submit().follow()
@@ -19,7 +19,7 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         email_form = res.forms["email"]
-        email_form["email"] = "new_email@example.com"
+        email_form["email"] = "new_email2@example.com"
         email_form["password"] = "pass"
 
         res = email_form.submit(xhr=True, status=200)
@@ -30,7 +30,7 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         email_form = res.forms["email"]
-        email_form["email"] = "new_email@example.com"
+        email_form["email"] = "new_email3@example.com"
         email_form["password"] = "pass"
 
         res = email_form.submit(xhr=True)

@@ -79,15 +79,30 @@ class TestCreateUser:
             == "authority 'mismatch.com' does not match client authority"
         )
 
-    def test_it_returns_409_if_user_conflict(
-        self, app, user_payload, auth_client_header, user
-    ):
+    def test_it_returns_409_if_user_conflict(self, app, auth_client_header, user):
+        existing_user_payload = self.payload_for_user(user)
+
         # user fixture creates user with conflicting username/authority combo
         res = app.post_json(
-            "/api/users", user_payload, headers=auth_client_header, expect_errors=True
+            "/api/users",
+            existing_user_payload,
+            headers=auth_client_header,
+            expect_errors=True,
         )
 
         assert res.status_code == 409
+
+    @pytest.fixture
+    def user_payload(self, factories):
+        # Create a user we won't save just to get access to all the nice fakers
+        return self.payload_for_user(factories.User.build())
+
+    def payload_for_user(self, user):
+        return {
+            "username": user.username,
+            "email": user.email,
+            "authority": user.authority,
+        }
 
 
 class TestUpdateUser:
@@ -144,17 +159,11 @@ class TestUpdateUser:
 
 
 @pytest.fixture
-def user_payload():
-    return {
-        "username": "filip",
-        "email": "filip@example.com",
-        "authority": "example.com",
-    }
+def patch_user_payload(factories):
+    # Create a user we won't save just to get access to all the nice fakers
+    temp_user = factories.User.build()
 
-
-@pytest.fixture
-def patch_user_payload():
-    return {"email": "filip@example2.com", "display_name": "Filip Pilip"}
+    return {"email": temp_user.email, "display_name": temp_user.display_name}
 
 
 @pytest.fixture
@@ -177,6 +186,7 @@ def auth_client_header(auth_client):
 
 @pytest.fixture
 def user(db_session, factories):
-    user = factories.User(username="filip", authority="example.com")
+    user = factories.User.create()
     db_session.commit()
+
     return user
