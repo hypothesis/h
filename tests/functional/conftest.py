@@ -24,23 +24,33 @@ TEST_SETTINGS = {
 }
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def app(pyramid_app, db_engine):
+    return TestApp(pyramid_app)
+
+
+@pytest.fixture(autouse=True)
+def reset_app(app):
+    yield
+
+    app.reset()
+
+
+@pytest.fixture(autouse=True)
+def clean_db(db_engine):
     from h import db
 
     _clean_database(db_engine)
     db.init(db_engine, authority=TEST_SETTINGS["h.authority"])
-
-    return TestApp(pyramid_app)
 
 
 @pytest.fixture(scope="session")
 def db_engine():
     from h import db
 
-    engine = db.make_engine(TEST_SETTINGS)
-    yield engine
-    engine.dispose()
+    db_engine = db.make_engine(TEST_SETTINGS)
+    yield db_engine
+    db_engine.dispose()
 
 
 @pytest.fixture
