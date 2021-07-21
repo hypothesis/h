@@ -6,67 +6,73 @@ from h.models.auth_client import GrantType
 
 
 class TestCreateGroup:
-    def test_it_returns_http_200_with_valid_payload(self, app, token_auth_header):
-        group = {"name": "My Group"}
-        res = app.post_json("/api/groups", group, headers=token_auth_header)
+    def test_it_returns_http_200_with_valid_payload(
+        self, app, token_auth_header, group_payload
+    ):
+        res = app.post_json("/api/groups", group_payload, headers=token_auth_header)
 
         assert res.status_code == 200
 
-    def test_it_ignores_non_whitelisted_fields_in_payload(self, app, token_auth_header):
-        group = {"name": "My Group", "organization": "foobar", "joinable_by": "whoever"}
-        res = app.post_json("/api/groups", group, headers=token_auth_header)
+    def test_it_ignores_non_whitelisted_fields_in_payload(
+        self, app, token_auth_header, group_payload
+    ):
+        group_payload["organization"] = "foobar"
+        group_payload["joinable_by"] = "whoever"
+
+        res = app.post_json("/api/groups", group_payload, headers=token_auth_header)
 
         assert res.status_code == 200
 
     def test_it_returns_http_400_with_invalid_payload(self, app, token_auth_header):
-        group = {}
+        bad_group_payload = {}
 
         res = app.post_json(
-            "/api/groups", group, headers=token_auth_header, expect_errors=True
+            "/api/groups",
+            bad_group_payload,
+            headers=token_auth_header,
+            expect_errors=True,
         )
 
         assert res.status_code == 400
 
     def test_it_returns_http_400_if_groupid_set_on_default_authority(
-        self, app, token_auth_header
+        self, app, token_auth_header, group_payload
     ):
-        group = {"name": "My Group", "groupid": "3434kjkjk"}
+        group_payload["groupid"] = "group:12345@example.com"
+
         res = app.post_json(
-            "/api/groups", group, headers=token_auth_header, expect_errors=True
+            "/api/groups", group_payload, headers=token_auth_header, expect_errors=True
         )
 
         assert res.status_code == 400
 
     def test_it_returns_http_404_if_no_authenticated_user(
-        self, app, auth_client_header
+        self, app, auth_client_header, group_payload
     ):
         # FIXME: This should return a 403
-        group = {"name": "My Group"}
         res = app.post_json(
-            "/api/groups", group, headers=auth_client_header, expect_errors=True
+            "/api/groups", group_payload, headers=auth_client_header, expect_errors=True
         )
 
         assert res.status_code == 404
 
     @pytest.mark.xfail
     def test_it_returns_http_403_if_no_authenticated_user(
-        self, app, auth_client_header
+        self, app, auth_client_header, group_payload
     ):
-        group = {"name": "My Group"}
         res = app.post_json(
-            "/api/groups", group, headers=auth_client_header, expect_errors=True
+            "/api/groups", group_payload, headers=auth_client_header, expect_errors=True
         )
 
         assert res.status_code == 403
 
     def test_it_allows_auth_client_with_forwarded_user(
-        self, app, auth_client_header, third_party_user
+        self, app, auth_client_header, third_party_user, group_payload
     ):
         headers = auth_client_header
         headers["X-Forwarded-User"] = third_party_user.userid
-        group = {"name": "My Group"}
 
-        res = app.post_json("/api/groups", group, headers=headers)
+        res = app.post_json("/api/groups", group_payload, headers=headers)
 
         assert res.status_code == 200
 
@@ -75,26 +81,26 @@ class TestCreateGroup:
     ):
         headers = auth_client_header
         headers["X-Forwarded-User"] = third_party_user.userid
-        group = {"name": "My Group", "groupid": "group:333vcdfkj~@thirdparty.com"}
+        group = {"name": "My Group", "groupid": "group:23457456~@thirdparty.com"}
 
         res = app.post_json("/api/groups", group, headers=headers)
         data = res.json
 
         assert res.status_code == 200
         assert "groupid" in data
-        assert data["groupid"] == "group:{groupid}@thirdparty.com".format(
-            groupid="333vcdfkj~"
-        )
+        assert data["groupid"] == "group:23457456~@thirdparty.com"
 
     def test_it_returns_HTTP_Conflict_if_groupid_is_duplicate(
-        self, app, auth_client_header, third_party_user
+        self, app, auth_client_header, third_party_user, group_payload
     ):
+        group_payload["groupid"] = "group:23456@thirdparty.com"
         headers = auth_client_header
         headers["X-Forwarded-User"] = third_party_user.userid
-        group = {"name": "My Group", "groupid": "group:333vcdfkj~@thirdparty.com"}
 
-        res = app.post_json("/api/groups", group, headers=headers)
-        res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
+        app.post_json("/api/groups", group_payload, headers=headers)
+        res = app.post_json(
+            "/api/groups", group_payload, headers=headers, expect_errors=True
+        )
 
         assert res.status_code == 409
 
@@ -109,6 +115,13 @@ class TestCreateGroup:
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
 
         assert res.status_code == 404
+
+    @pytest.fixture
+    def group_payload(self, factories):
+        # Create a group we won't save for access to all the nice fakers
+        group = factories.Group.build()
+
+        return {"name": group.name}
 
 
 @pytest.fixture

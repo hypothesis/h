@@ -137,7 +137,7 @@ class TestUpsertGroupUpdate:
         headers["X-Forwarded-User"] = third_party_user.userid
         group_payload = {
             "name": "My Group",
-            "groupid": "group:333vcdfkj~@thirdparty.com",
+            "groupid": "group:34567845@thirdparty.com",
         }
 
         path = "/api/groups/{id}".format(id=group.pubid)
@@ -145,9 +145,7 @@ class TestUpsertGroupUpdate:
 
         assert res.status_code == 200
         assert "groupid" in res.json_body
-        assert res.json_body["groupid"] == "group:{groupid}@thirdparty.com".format(
-            groupid="333vcdfkj~"
-        )
+        assert res.json_body["groupid"] == "group:34567845@thirdparty.com"
 
     def test_it_supersedes_groupid_with_value_in_payload(
         self, app, auth_client_header, third_party_user, factories, db_session
@@ -183,18 +181,21 @@ class TestUpsertGroupUpdate:
         group1 = factories.Group(
             creator=third_party_user,
             authority=third_party_user.authority,
-            groupid="group:one@thirdparty.com",
+            groupid="group:upsert_one@thirdparty.com",
         )
         group2 = factories.Group(
             creator=third_party_user,
             authority=third_party_user.authority,
-            groupid="group:two@thirdparty.com",
+            groupid="group:upsert_two@thirdparty.com",
         )
         db_session.commit()
 
         headers = auth_client_header
         headers["X-Forwarded-User"] = third_party_user.userid
-        group_payload = {"name": "Whatnot", "groupid": "group:one@thirdparty.com"}
+        group_payload = {
+            "name": "Whatnot",
+            "groupid": "group:upsert_one@thirdparty.com",
+        }
 
         # Attempting to set group2's `groupid` to one already taken by group1
         path = "/api/groups/{id}".format(id=group2.pubid)
