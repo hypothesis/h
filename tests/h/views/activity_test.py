@@ -1035,7 +1035,7 @@ class TestUserSearchController:
         result = controller.search()
 
         assert result["zero_message"] == (
-            "{name} has not made any annotations yet.".format(name=user.username)
+            "{name} has not made any annotations yet.".format(name=user.display_name)
         )
 
     def test_search_shows_the_getting_started_box_when_on_your_own_page(

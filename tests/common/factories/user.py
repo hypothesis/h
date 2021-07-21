@@ -48,4 +48,5 @@ class User(ModelFactory):
     authority = "example.com"
     username = factory.LazyAttribute(unique_username)
     email = factory.LazyAttribute(unique_email)
+    display_name = factory.Faker("name")
     registered_date = factory.Faker("date_time_this_decade")
