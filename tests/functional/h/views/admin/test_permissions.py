@@ -21,7 +21,7 @@ class TestAdminPermissions:
     @pytest.mark.parametrize("url", (page[0] for page in PAGES))
     def test_not_accessible_by_regular_user(self, app, url, user):
         self.login(app, user)
-        
+
         res = app.get(url, expect_errors=True)
 
         assert res.status_code == 404
