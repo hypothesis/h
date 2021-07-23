@@ -3,7 +3,7 @@ import pytest
 
 class TestAdminPermissions:
     PAGES = (
-        # URL, accessible by role.Staff?
+        # (URL, accessible by role.Staff?)
         ("/admin/", True),
         ("/admin/admins", False),
         ("/admin/badge", False),
@@ -22,17 +22,13 @@ class TestAdminPermissions:
     def test_not_accessible_by_regular_user(self, app, url, user):
         self.login(app, user)
 
-        res = app.get(url, expect_errors=True)
-
-        assert res.status_code == 404
+        app.get(url, status=404)
 
     @pytest.mark.parametrize("url", (page[0] for page in PAGES))
     def test_accessible_by_admin(self, app, url, admin_user):
         self.login(app, admin_user)
 
-        res = app.get(url)
-
-        assert res.status_code == 200
+        app.get(url)
 
     @pytest.mark.parametrize("url,accessible", PAGES)
     def test_accessible_by_staff(self, app, url, accessible, staff_user):
