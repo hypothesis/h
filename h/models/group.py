@@ -5,6 +5,7 @@ from collections import namedtuple
 import slugify
 import sqlalchemy as sa
 from pyramid import security
+from pyramid.security import Allow
 
 from h import pubid  # pylint: disable=unused-import
 from h.auth import role
@@ -221,56 +222,67 @@ class Group(Base, mixins.Timestamps):
     def __acl__(self):
         terms = []
 
-        join_principal = _join_principal(self)
-        if join_principal is not None:
-            terms.append((security.Allow, join_principal, Permission.Group.JOIN))
+        # This principal is given to clients which log in using an OAuth client
+        # and secret to a particular authority
+        client_authority_principal = f"client_authority:{self.authority}"
+        # Given to logged in users to the authority they belong in
+        in_authority_principal = f"authority:{self.authority}"
+        # Logged in users are given group principals for all of their groups
+        in_group_principal = f"group:{self.pubid}"
 
-        read_principal = _read_principal(self)
-        if read_principal is not None:
-            terms.append((security.Allow, read_principal, Permission.Group.READ))
-            # Any user who can read the group should also be able to see
-            # who is a member of the group
-            terms.append((security.Allow, read_principal, Permission.Group.MEMBER_READ))
+        # General permissions ---------------------------------------------- #
 
-        flag_principal = _flag_principal(self)
-        if flag_principal is not None:
-            terms.append((security.Allow, flag_principal, Permission.Group.FLAG))
+        if self.joinable_by == JoinableBy.authority:
+            terms.append((Allow, in_authority_principal, Permission.Group.JOIN))
 
-        write_principal = _write_principal(self)
-        if write_principal is not None:
-            terms.append((security.Allow, write_principal, Permission.Group.WRITE))
+        # Any logged in user should be able to flag things they can see
+        if self.readable_by == ReadableBy.members:
+            terms.append((Allow, in_group_principal, Permission.Group.FLAG))
+        elif self.readable_by == ReadableBy.world:
+            terms.append((Allow, security.Authenticated, Permission.Group.FLAG))
+
+        if self.writeable_by == WriteableBy.authority:
+            terms.append((Allow, in_authority_principal, Permission.Group.WRITE))
+        elif self.writeable_by == WriteableBy.members:
+            terms.append((Allow, in_group_principal, Permission.Group.WRITE))
+
+        if self.creator:
+            terms.append((Allow, self.creator.userid, Permission.Group.MODERATE))
+            # The creator may update this group in an upsert context
+            terms.append((Allow, self.creator.userid, Permission.Group.UPSERT))
+
+        # auth_clients that have the same authority as the target group
+        # may add members to it
+        terms.append((Allow, client_authority_principal, Permission.Group.MEMBER_ADD))
+
+        # Read permissions ------------------------------------------------ #
+
+        if self.readable_by == ReadableBy.members:
+            terms.append((Allow, in_group_principal, Permission.Group.READ))
+            terms.append((Allow, in_group_principal, Permission.Group.MEMBER_READ))
+        elif self.readable_by == ReadableBy.world:
+            terms.append((Allow, security.Everyone, Permission.Group.READ))
+            terms.append((Allow, security.Everyone, Permission.Group.MEMBER_READ))
+
+        # auth_clients with matching authority should be able to read the group
+        # and it's members
+        terms.append((Allow, client_authority_principal, Permission.Group.READ))
+        terms.append((Allow, client_authority_principal, Permission.Group.MEMBER_READ))
+
+        # Group edit permissions ------------------------------------------- #
+
+        # auth_clients that have the same authority as this group
+        # should be allowed to update it
+        terms.append((Allow, client_authority_principal, Permission.Group.ADMIN))
+
+        # Those with the admin or staff role should be able to admin/edit any
+        # group
+        terms.append((Allow, role.Staff, Permission.Group.ADMIN))
+        terms.append((Allow, role.Admin, Permission.Group.ADMIN))
 
         if self.creator:
             # The creator of the group should be able to update it
-            terms.append((security.Allow, self.creator.userid, Permission.Group.ADMIN))
-            terms.append(
-                (security.Allow, self.creator.userid, Permission.Group.MODERATE)
-            )
-            # The creator may update this group in an upsert context
-            terms.append((security.Allow, self.creator.userid, Permission.Group.UPSERT))
-
-        # This authority principal may be used to grant auth clients
-        # permissions for groups within their authority
-        authority_principal = "client_authority:{}".format(self.authority)
-
-        # auth_clients that have the same authority as the target group
-        # may read the members within it
-        terms.append(
-            (security.Allow, authority_principal, Permission.Group.MEMBER_READ)
-        )
-        # auth_clients that have the same authority as the target group
-        # may add members to it
-        terms.append((security.Allow, authority_principal, Permission.Group.MEMBER_ADD))
-        # auth_clients that have the same authority as this group
-        # should be allowed to update it
-        terms.append((security.Allow, authority_principal, Permission.Group.ADMIN))
-        # auth_clients with matching authority should be able to read
-        # the group
-        terms.append((security.Allow, authority_principal, Permission.Group.READ))
-
-        # Those with the admin or staff role should be able to admin/edit any group
-        terms.append((security.Allow, role.Staff, Permission.Group.ADMIN))
-        terms.append((security.Allow, role.Admin, Permission.Group.ADMIN))
+            terms.append((Allow, self.creator.userid, Permission.Group.ADMIN))
 
         terms.append(security.DENY_ALL)
 
@@ -285,50 +297,17 @@ class Group(Base, mixins.Timestamps):
         return session.query(cls).filter(Group.creator == user)
 
 
-def _join_principal(group):
-    return {JoinableBy.authority: "authority:{}".format(group.authority)}.get(
-        group.joinable_by
-    )
-
-
-def _read_principal(group):
-    return {
-        ReadableBy.members: "group:{}".format(group.pubid),
-        ReadableBy.world: security.Everyone,
-    }.get(group.readable_by)
-
-
-def _flag_principal(group):
-    # If a user can read (see) annotations within this group,
-    # they can also flag them—but they need to be logged in
-    # (``pyramid.security.Authenticated``)
-    return {
-        ReadableBy.members: "group:{}".format(group.pubid),
-        ReadableBy.world: security.Authenticated,
-    }.get(group.readable_by)
-
-
-def _write_principal(group):
-    return {
-        WriteableBy.authority: "authority:{}".format(group.authority),
-        WriteableBy.members: "group:{}".format(group.pubid),
-    }.get(group.writeable_by)
-
-
 TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")
-
 
 OPEN_GROUP_TYPE_FLAGS = TypeFlags(
     joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.authority
 )
-
 
 PRIVATE_GROUP_TYPE_FLAGS = TypeFlags(
     joinable_by=JoinableBy.authority,
     readable_by=ReadableBy.members,
     writeable_by=WriteableBy.members,
 )
-
 
 RESTRICTED_GROUP_TYPE_FLAGS = TypeFlags(
     joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.members
