@@ -24,7 +24,7 @@ def read_only_transaction(session):
     except (KeyboardInterrupt, SystemExit):
         session.rollback()
         raise
-    except Exception as exc:
+    except Exception as exc:  # pylint:disable=broad-except
         LOG.warning("Caught exception during streamer transaction:", exc_info=exc)
         session.rollback()
     else:

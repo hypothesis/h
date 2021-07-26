@@ -55,7 +55,7 @@ class EventQueue:
             for subscriber in subscribers:
                 try:
                     subscriber(event)
-                except Exception:
+                except Exception:  # pylint: disable=broad-except
                     if event.request.debug:
                         raise
                     report_exception()

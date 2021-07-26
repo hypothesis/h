@@ -129,7 +129,7 @@ class SearchIndexService:
         try:
             return sync_handler(event.annotation_id)
 
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             report_exception(err)
 
         # Either the synchronous method was disabled, or failed...
