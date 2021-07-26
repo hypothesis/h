@@ -50,53 +50,53 @@ def get_notification(
     """
     # Only send notifications when new annotations are created
     if action != "create":
-        return
+        return None
 
     # If the annotation doesn't have a parent, or we can't find its parent,
     # then we can't send a notification email.
     parent_id = annotation.parent_id
     if parent_id is None:
-        return
+        return None
 
     # Now we know we're dealing with a reply
     reply = annotation
 
     parent = storage.fetch_annotation(request.db, parent_id)
     if parent is None:
-        return
+        return None
 
     user_service = request.find_service(name="user")
 
     # If the parent user doesn't exist (anymore), we can't send an email.
     parent_user = user_service.fetch(parent.userid)
     if parent_user is None:
-        return
+        return None
 
     # If the parent user doesn't have an email address we can't email them.
     if not parent_user.email:
-        return
+        return None
 
     # If the reply user doesn't exist (anymore), we can't send an email, but
     # this would be super weird, so log a warning.
     reply_user = user_service.fetch(reply.userid)
     if reply_user is None:
         log.warning("user who just replied no longer exists: %s", reply.userid)
-        return
+        return None
 
     # Do not notify users about their own replies
     if parent_user == reply_user:
-        return
+        return None
 
     # Don't send reply notifications to the author of the parent annotation if
     # the reply was private.
     if not reply.shared:
-        return
+        return None
 
     # FIXME: we should be retrieving the document from the root annotation, not
     # the reply, and dealing with the possibility that we have no document
     # metadata.
     if reply.document is None:
-        return
+        return None
 
     # Bail if there is no active 'reply' subscription for the user being
     # replied to.
@@ -106,7 +106,7 @@ def get_notification(
         .first()
     )
     if sub is None:
-        return
+        return None
 
     return Notification(reply, reply_user, parent, parent_user, reply.document)
 

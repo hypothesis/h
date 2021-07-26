@@ -338,6 +338,8 @@ class GroupSearchController(SearchController):
 
             raise httpexceptions.HTTPNotFound()
 
+        return None
+
 
 @view_defaults(
     route_name="activity.user_search",

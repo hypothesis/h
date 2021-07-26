@@ -212,8 +212,10 @@ class AuthClientPolicy:
         # authentication of BasicAuth and forwarded user—this will invoke check
         callback_ok = self._basic_auth_policy.callback(auth_userid, request)
 
-        if callback_ok is not None:
-            return forwarded_userid  # This should always be a userid, not an auth_client id
+        if callback_ok is None:
+            return None
+
+        return forwarded_userid  # This should always be a userid, not an auth_client id
 
     def effective_principals(self, request):
         """

@@ -147,8 +147,10 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         """Returns the ``redirect_uri`` stored on the client with the given id."""
 
         client = self.find_client(client_id)
-        if client is not None:
-            return render_url_template(client.redirect_uri, example_url=request.uri)
+        if not client:
+            return None
+
+        return render_url_template(client.redirect_uri, example_url=request.uri)
 
     def get_default_scopes(self, client_id, request, *args, **kwargs):
         """Return the default scopes for the provided client."""

@@ -22,10 +22,10 @@ class AnnotationModerationFormatter:
 
     def preload(self, annotation_ids):
         if self._user is None:
-            return
+            return None
 
         if not annotation_ids:
-            return
+            return None
 
         flag_counts = self._flag_count_svc.flag_counts(annotation_ids)
         self._cache.update(flag_counts)

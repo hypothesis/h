@@ -12,13 +12,15 @@ class AnnotationBasePresenter:
 
     @property
     def created(self):
-        if self.annotation.created:
-            return utc_iso8601(self.annotation.created)
+        if not self.annotation.created:
+            return None
+        return utc_iso8601(self.annotation.created)
 
     @property
     def updated(self):
-        if self.annotation.updated:
-            return utc_iso8601(self.annotation.updated)
+        if not self.annotation.updated:
+            return None
+        return utc_iso8601(self.annotation.updated)
 
     @property
     def links(self):

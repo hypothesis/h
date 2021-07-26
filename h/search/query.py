@@ -151,6 +151,8 @@ class Sorter:
             except ValueError:
                 pass
 
+        return None
+
 
 class TopLevelAnnotationsFilter:
 
