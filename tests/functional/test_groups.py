@@ -85,11 +85,3 @@ class TestGroupEditController:
         db_session.commit()
 
         return group
-
-
-@pytest.fixture
-def user_owned_group(factories, db_session, user):
-    group = factories.Group(creator=user)
-    db_session.commit()
-
-    return group
