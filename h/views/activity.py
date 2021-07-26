@@ -107,7 +107,7 @@ class GroupSearchController(SearchController):
 
         # If the group has read access only for members  and the user is not in that list
         # return without extra info.
-        if self.group.readable_by == ReadableBy.MEMBERS and (
+        if self.group.readable_by == ReadableBy.members and (
             self.request.user not in self.group.members
         ):
             return result

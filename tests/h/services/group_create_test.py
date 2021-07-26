@@ -58,9 +58,9 @@ class TestCreatePrivateGroup:
     @pytest.mark.parametrize(
         "flag,expected_value",
         [
-            ("joinable_by", JoinableBy.AUTHORITY),
-            ("readable_by", ReadableBy.MEMBERS),
-            ("writeable_by", WriteableBy.MEMBERS),
+            ("joinable_by", JoinableBy.authority),
+            ("readable_by", ReadableBy.members),
+            ("writeable_by", WriteableBy.members),
         ],
     )
     def test_it_sets_access_flags(self, svc, creator, flag, expected_value):
@@ -159,8 +159,8 @@ class TestCreateOpenGroup:
         "flag,expected_value",
         [
             ("joinable_by", None),
-            ("readable_by", ReadableBy.WORLD),
-            ("writeable_by", WriteableBy.AUTHORITY),
+            ("readable_by", ReadableBy.world),
+            ("writeable_by", WriteableBy.authority),
         ],
     )
     def test_it_sets_access_flags(self, svc, creator, origins, flag, expected_value):
@@ -298,8 +298,8 @@ class TestCreateRestrictedGroup:
         "flag,expected_value",
         [
             ("joinable_by", None),
-            ("readable_by", ReadableBy.WORLD),
-            ("writeable_by", WriteableBy.MEMBERS),
+            ("readable_by", ReadableBy.world),
+            ("writeable_by", WriteableBy.members),
         ],
     )
     def test_it_sets_access_flags(self, svc, creator, origins, flag, expected_value):
