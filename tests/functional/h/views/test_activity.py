@@ -42,24 +42,3 @@ class TestGroupSearchController:
         # OAuth clients, staff and admins can edit a group
         # The creator of thr group can also edit the group
         assert f"http://localhost/groups/{open_group.pubid}/edit" in str(response.html)
-
-    @pytest.fixture
-    def group(self, factories, db_session, user):
-        group = factories.Group()
-        db_session.commit()
-
-        return group
-
-    @pytest.fixture
-    def other_authority_group(self, factories, db_session, user):
-        group = factories.Group(authority="different_authority")
-        db_session.commit()
-
-        return group
-
-    @pytest.fixture
-    def open_group(self, factories, db_session, user):
-        group = factories.OpenGroup()
-        db_session.commit()
-
-        return group
