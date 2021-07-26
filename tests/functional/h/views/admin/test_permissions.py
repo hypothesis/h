@@ -18,49 +18,55 @@ class TestAdminPermissions:
         ("/admin/search", False),
     )
 
+    @pytest.mark.usefixtures("with_logged_in_user")
     @pytest.mark.parametrize("url", (page[0] for page in PAGES))
-    def test_not_accessible_by_regular_user(self, app, url, user):
-        self.login(app, user)
-
+    def test_not_accessible_by_regular_user(self, app, url):
         app.get(url, status=404)
 
+    @pytest.mark.usefixtures("with_logged_in_admin")
     @pytest.mark.parametrize("url", (page[0] for page in PAGES))
-    def test_accessible_by_admin(self, app, url, admin_user):
-        self.login(app, admin_user)
-
+    def test_accessible_by_admin(self, app, url):
         app.get(url)
 
+    @pytest.mark.usefixtures("with_logged_in_staff_member")
     @pytest.mark.parametrize("url,accessible", PAGES)
-    def test_accessible_by_staff(self, app, url, accessible, staff_user):
-        self.login(app, staff_user)
-
+    def test_accessible_by_staff(self, app, url, accessible):
         res = app.get(url, expect_errors=not accessible)
 
         assert res.status_code == 200 if accessible else 404
 
     @pytest.fixture
-    def user(self, db_session, factories):
-        # Password is 'pass'
-        return factories.User(
-            password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"
-        )
+    def user(self, factories):
+        return factories.User()
 
     @pytest.fixture
-    def staff_user(self, user, db_session):
+    def with_logged_in_user(self, login_user):
+        login_user()
+
+    @pytest.fixture
+    def with_logged_in_staff_member(self, login_user, user):
         user.staff = True
-        db_session.commit()
 
-        return user
+        login_user()
 
     @pytest.fixture
-    def admin_user(self, user, db_session):
+    def with_logged_in_admin(self, login_user, user):
         user.admin = True
-        db_session.commit()
 
-        return user
+        login_user()
 
-    def login(self, app, user):
-        login_page = app.get("/login")
-        login_page.form["username"] = user.username
-        login_page.form["password"] = "pass"
-        login_page.form.submit()
+    @pytest.fixture
+    def login_user(self, db_session, app, user):
+        def login_user():
+            # This is the hash for `pass` used below
+            user.password = (
+                "$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"
+            )
+            db_session.commit()
+
+            login_page = app.get("/login")
+            login_page.form["username"] = user.username
+            login_page.form["password"] = "pass"
+            login_page.form.submit()
+
+        return login_user
