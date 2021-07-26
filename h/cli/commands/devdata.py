@@ -159,8 +159,8 @@ def devdata(ctx):
             os.path.join(pathlib.Path(h.__file__).parent.parent, ".devdata.env"),
         )
 
-        with open(os.path.join(git_dir, "h", "devdata.json"), "r") as file:
+        with open(os.path.join(git_dir, "h", "devdata.json"), "r") as handle:
             DevDataFactory(
                 ctx.obj["bootstrap"](),
-                json.loads(file.read()),
+                json.loads(handle.read()),
             ).create_all()
