@@ -32,7 +32,7 @@ class InvalidUUID(Exception, DontWrapMixin):
     pass
 
 
-class URLSafeUUID(types.TypeDecorator):
+class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
 
     """
     Expose UUIDs as URL-safe base64-encoded strings.
@@ -82,7 +82,7 @@ class URLSafeUUID(types.TypeDecorator):
         return _get_urlsafe_from_hex(hexstring)
 
 
-class AnnotationSelectorJSONB(types.TypeDecorator):
+class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-method
 
     """
     Special type for the Annotation selector column.
