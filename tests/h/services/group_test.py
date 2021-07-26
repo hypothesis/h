@@ -121,9 +121,9 @@ class TestGroupServiceGroupIds:
         self, with_user, svc, db_session, factories
     ):
         # group readable by members
-        factories.Group(readable_by=ReadableBy.members)
+        factories.Group(readable_by=ReadableBy.MEMBERS)
         # group readable by everyone
-        group = factories.Group(readable_by=ReadableBy.world)
+        group = factories.Group(readable_by=ReadableBy.WORLD)
 
         user = None
         if with_user:
@@ -135,7 +135,7 @@ class TestGroupServiceGroupIds:
     def test_readable_by_includes_memberships(self, svc, db_session, factories):
         user = factories.User()
 
-        group = factories.Group(readable_by=ReadableBy.members)
+        group = factories.Group(readable_by=ReadableBy.MEMBERS)
         group.members.append(user)
 
         db_session.flush()
@@ -146,9 +146,9 @@ class TestGroupServiceGroupIds:
         user = factories.User()
 
         factories.Group(
-            readable_by=ReadableBy.world
+            readable_by=ReadableBy.WORLD
         )  # Group that shouldn't be returned
-        group = factories.Group(readable_by=ReadableBy.world)
+        group = factories.Group(readable_by=ReadableBy.WORLD)
 
         db_session.flush()
 
@@ -165,7 +165,7 @@ class TestGroupServiceGroupIds:
         user = factories.User()
         private_group = factories.Group()
         private_group.members.append(user)
-        factories.Group(readable_by=ReadableBy.world)
+        factories.Group(readable_by=ReadableBy.WORLD)
         db_session.flush()
 
         assert svc.groupids_created_by(user) == []
