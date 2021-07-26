@@ -16,9 +16,9 @@ class Group(ModelFactory):
     name = factory.Sequence(lambda n: "Group {n}".format(n=str(n)))
     authority = "example.com"
     creator = factory.SubFactory(User)
-    joinable_by = JoinableBy.authority
-    readable_by = ReadableBy.members
-    writeable_by = WriteableBy.members
+    joinable_by = JoinableBy.AUTHORITY
+    readable_by = ReadableBy.MEMBERS
+    writeable_by = WriteableBy.MEMBERS
     members = factory.LazyAttribute(lambda obj: [obj.creator])
     enforce_scope = True
 
@@ -35,8 +35,8 @@ class OpenGroup(Group):
     name = factory.Sequence(lambda n: "Open Group {n}".format(n=str(n)))
 
     joinable_by = None
-    readable_by = ReadableBy.world
-    writeable_by = WriteableBy.authority
+    readable_by = ReadableBy.WORLD
+    writeable_by = WriteableBy.AUTHORITY
     members = []
 
 
@@ -44,4 +44,4 @@ class RestrictedGroup(Group):
     name = factory.Sequence(lambda n: "Restricted Group {n}".format(n=str(n)))
 
     joinable_by = None
-    readable_by = ReadableBy.world
+    readable_by = ReadableBy.WORLD

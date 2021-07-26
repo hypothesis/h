@@ -19,17 +19,17 @@ AUTHORITY_PROVIDED_ID_MAX_LENGTH = 1024
 
 
 class JoinableBy(enum.Enum):
-    authority = "authority"
+    AUTHORITY = "authority"
 
 
 class ReadableBy(enum.Enum):
-    members = "members"
-    world = "world"
+    MEMBERS = "members"
+    WORLD = "world"
 
 
 class WriteableBy(enum.Enum):
-    authority = "authority"
-    members = "members"
+    AUTHORITY = "authority"
+    MEMBERS = "members"
 
 
 class GroupMembership(Base):
@@ -215,7 +215,7 @@ class Group(Base, mixins.Timestamps):
 
     @property
     def is_public(self):
-        return self.readable_by == ReadableBy.world
+        return self.readable_by == ReadableBy.WORLD
 
     def __acl__(self):
         terms = []
@@ -281,15 +281,15 @@ class Group(Base, mixins.Timestamps):
 
 
 def _join_principal(group):
-    return {JoinableBy.authority: "authority:{}".format(group.authority)}.get(
+    return {JoinableBy.AUTHORITY: "authority:{}".format(group.authority)}.get(
         group.joinable_by
     )
 
 
 def _read_principal(group):
     return {
-        ReadableBy.members: "group:{}".format(group.pubid),
-        ReadableBy.world: security.Everyone,
+        ReadableBy.MEMBERS: "group:{}".format(group.pubid),
+        ReadableBy.WORLD: security.Everyone,
     }.get(group.readable_by)
 
 
@@ -298,15 +298,15 @@ def _flag_principal(group):
     # they can also flag them—but they need to be logged in
     # (``pyramid.security.Authenticated``)
     return {
-        ReadableBy.members: "group:{}".format(group.pubid),
-        ReadableBy.world: security.Authenticated,
+        ReadableBy.MEMBERS: "group:{}".format(group.pubid),
+        ReadableBy.WORLD: security.Authenticated,
     }.get(group.readable_by)
 
 
 def _write_principal(group):
     return {
-        WriteableBy.authority: "authority:{}".format(group.authority),
-        WriteableBy.members: "group:{}".format(group.pubid),
+        WriteableBy.AUTHORITY: "authority:{}".format(group.authority),
+        WriteableBy.MEMBERS: "group:{}".format(group.pubid),
     }.get(group.writeable_by)
 
 
@@ -314,17 +314,17 @@ TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")
 
 
 OPEN_GROUP_TYPE_FLAGS = TypeFlags(
-    joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.authority
+    joinable_by=None, readable_by=ReadableBy.WORLD, writeable_by=WriteableBy.AUTHORITY
 )
 
 
 PRIVATE_GROUP_TYPE_FLAGS = TypeFlags(
-    joinable_by=JoinableBy.authority,
-    readable_by=ReadableBy.members,
-    writeable_by=WriteableBy.members,
+    joinable_by=JoinableBy.AUTHORITY,
+    readable_by=ReadableBy.MEMBERS,
+    writeable_by=WriteableBy.MEMBERS,
 )
 
 
 RESTRICTED_GROUP_TYPE_FLAGS = TypeFlags(
-    joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.members
+    joinable_by=None, readable_by=ReadableBy.WORLD, writeable_by=WriteableBy.MEMBERS
 )

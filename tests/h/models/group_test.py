@@ -155,8 +155,8 @@ def test_type_raises_for_unknown_type_of_group(factories):
     group = factories.Group()
     # Set the group's access flags to an invalid / unused combination.
     group.joinable_by = None
-    group.readable_by = ReadableBy.members
-    group.writeable_by = WriteableBy.authority
+    group.readable_by = ReadableBy.MEMBERS
+    group.writeable_by = WriteableBy.AUTHORITY
 
     expected_err = "^This group doesn't seem to match any known type"
     with pytest.raises(ValueError, match=expected_err):
@@ -226,13 +226,13 @@ def test_created_by(db_session, factories, organization):
 
 
 def test_public_group():
-    group = models.Group(readable_by=ReadableBy.world)
+    group = models.Group(readable_by=ReadableBy.WORLD)
 
     assert group.is_public
 
 
 def test_non_public_group():
-    group = models.Group(readable_by=ReadableBy.members)
+    group = models.Group(readable_by=ReadableBy.MEMBERS)
 
     assert not group.is_public
 
@@ -282,7 +282,7 @@ class TestGroupACL:
         )
 
     def test_authority_joinable(self, group, authz_policy):
-        group.joinable_by = JoinableBy.authority
+        group.joinable_by = JoinableBy.AUTHORITY
 
         assert authz_policy.permits(group, ["userid", "authority:example.com"], "join")
 
@@ -293,41 +293,41 @@ class TestGroupACL:
         )
 
     def test_world_readable(self, group, authz_policy):
-        group.readable_by = ReadableBy.world
+        group.readable_by = ReadableBy.WORLD
         assert authz_policy.permits(group, [security.Everyone], "read")
 
     def test_world_readable_allows_member_read_for_everyone(self, group, authz_policy):
-        group.readable_by = ReadableBy.world
+        group.readable_by = ReadableBy.WORLD
         assert authz_policy.permits(group, [security.Everyone], "member_read")
 
     def test_world_readable_grants_flag_permissions(self, group, authz_policy):
-        group.readable_by = ReadableBy.world
+        group.readable_by = ReadableBy.WORLD
         assert authz_policy.permits(group, [security.Authenticated], "flag")
         assert not authz_policy.permits(group, [security.Everyone], "flag")
 
     def test_world_readable_does_not_grant_moderate_permissions(
         self, group, authz_policy
     ):
-        group.readable_by = ReadableBy.world
+        group.readable_by = ReadableBy.WORLD
         assert not authz_policy.permits(group, [security.Authenticated], "moderate")
         assert not authz_policy.permits(group, [security.Everyone], "moderate")
 
     def test_members_readable(self, group, authz_policy):
-        group.readable_by = ReadableBy.members
+        group.readable_by = ReadableBy.MEMBERS
         assert authz_policy.permits(group, ["group:test-group"], "read")
 
     def test_members_should_be_readable_by_group_members(self, group, authz_policy):
-        group.readable_by = ReadableBy.members
+        group.readable_by = ReadableBy.MEMBERS
         assert authz_policy.permits(group, ["group:test-group"], "member_read")
 
     def test_members_flaggable(self, group, authz_policy):
-        group.readable_by = ReadableBy.members
+        group.readable_by = ReadableBy.MEMBERS
         assert authz_policy.permits(group, ["group:test-group"], "flag")
 
     def test_non_creator_members_do_not_have_moderate_permission(
         self, group, authz_policy
     ):
-        group.readable_by = ReadableBy.members
+        group.readable_by = ReadableBy.MEMBERS
         assert not authz_policy.permits(group, ["group:test-group"], "moderate")
 
     def test_not_readable(self, group, authz_policy):
@@ -351,11 +351,11 @@ class TestGroupACL:
         )
 
     def test_authority_writeable(self, group, authz_policy):
-        group.writeable_by = WriteableBy.authority
+        group.writeable_by = WriteableBy.AUTHORITY
         assert authz_policy.permits(group, ["authority:example.com"], "write")
 
     def test_members_writeable(self, group, authz_policy):
-        group.writeable_by = WriteableBy.members
+        group.writeable_by = WriteableBy.MEMBERS
         assert authz_policy.permits(group, ["group:test-group"], "write")
 
     def test_not_writeable(self, group, authz_policy):

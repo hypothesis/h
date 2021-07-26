@@ -90,11 +90,11 @@ class GroupService:
 
         :type user: `h.models.user.User`
         """
-        readable = Group.readable_by == ReadableBy.world
+        readable = Group.readable_by == ReadableBy.WORLD
 
         if user is not None:
             readable_member = sa.and_(
-                Group.readable_by == ReadableBy.members,
+                Group.readable_by == ReadableBy.MEMBERS,
                 Group.members.any(User.id == user.id),
             )
             readable = sa.or_(readable, readable_member)

@@ -81,7 +81,7 @@ class GroupListService:
             self._session.query(models.Group)
             .filter_by(
                 authority=self._authority(user),
-                readable_by=group.ReadableBy.world,
+                readable_by=group.ReadableBy.WORLD,
                 creator=user,
             )
             .all()
@@ -172,7 +172,7 @@ class GroupListService:
             .filter(models.Group.id.in_(matching_scope_groupids))
             .filter(models.Group.authority == authority)
             .filter(
-                models.Group.readable_by == group.ReadableBy.world
+                models.Group.readable_by == group.ReadableBy.WORLD
             )  # Only "public" groups
             .all()
         )
@@ -199,7 +199,7 @@ class GroupListService:
             self._session.query(models.Group)
             .filter_by(
                 authority=authority,
-                readable_by=group.ReadableBy.world,
+                readable_by=group.ReadableBy.WORLD,
                 pubid="__world__",
             )
             .one_or_none()

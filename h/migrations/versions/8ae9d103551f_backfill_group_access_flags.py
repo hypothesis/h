@@ -46,9 +46,9 @@ group_table = sa.table(
 def upgrade():
     op.execute(
         group_table.update().values(
-            joinable_by=JoinableBy.authority,
-            readable_by=ReadableBy.members,
-            writeable_by=WriteableBy.members,
+            joinable_by=JoinableBy.AUTHORITY,
+            readable_by=ReadableBy.MEMBERS,
+            writeable_by=WriteableBy.MEMBERS,
         )
     )
 
