@@ -50,7 +50,8 @@ class Limiter:
         ending_offset = starting_offset + self._extract_limit(params)
         return search[starting_offset:ending_offset]
 
-    def _extract_offset(self, params):
+    @staticmethod
+    def _extract_offset(params):
         offset = params.pop("offset", 0)
         try:
             val = int(offset)
@@ -61,7 +62,8 @@ class Limiter:
             return 0
         return val
 
-    def _extract_limit(self, params):
+    @staticmethod
+    def _extract_limit(params):
         limit = params.pop("limit", LIMIT_DEFAULT)
         try:
             val = int(limit)
@@ -118,7 +120,8 @@ class Sorter:
             }
         )
 
-    def _parse_date(self, str_value):
+    @staticmethod
+    def _parse_date(str_value):
         """
         Converts a string to a float representing miliseconds since the epoch.
 
@@ -291,7 +294,8 @@ class UriCombinedWildcardFilter:
             uris.update(us)
         return list(uris)
 
-    def _wildcard_uri_normalized(self, wildcard_uri):
+    @staticmethod
+    def _wildcard_uri_normalized(wildcard_uri):
         """
         Same as uri.normalized but it replaces _'s with ?'s after normalization.
 

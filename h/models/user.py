@@ -126,7 +126,7 @@ class User(Base):
     __tablename__ = "user"
 
     @declared_attr
-    def __table_args__(cls):  # noqa: N805 pylint:disable=no-self-argument
+    def __table_args__(cls):  # noqa: N805 pylint:disable=no-self-argument, no-self-use
         return (
             # (email, authority) must be unique
             sa.UniqueConstraint("email", "authority"),
@@ -277,7 +277,7 @@ class User(Base):
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
     @sa.orm.validates("email")
-    def validate_email(self, _key, email):
+    def validate_email(self, _key, email):  # pylint:disable=no-self-use
         if email is None:
             return email
 
@@ -289,7 +289,7 @@ class User(Base):
         return email
 
     @sa.orm.validates("_username")
-    def validate_username(self, _key, username):
+    def validate_username(self, _key, username):  # pylint: disable=no-self-use
         if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
             raise ValueError(
                 "username must be between {min} and {max} "

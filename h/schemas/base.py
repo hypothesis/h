@@ -36,7 +36,7 @@ class CSRFSchema(colander.Schema):
         missing=None,
     )
 
-    def validator(self, node, _value):
+    def validator(self, node, _value):  # pylint: disable=no-self-use
         request = node.bindings["request"]
         check_csrf_token(request)
 
@@ -84,7 +84,7 @@ def enum_type(enum_cls):
     """
 
     class EnumType(colander.SchemaType):
-        def deserialize(self, node, cstruct):
+        def deserialize(self, node, cstruct):  # pylint: disable= no-self-use
             if cstruct == colander.null:
                 return None
 
@@ -94,7 +94,7 @@ def enum_type(enum_cls):
                 msg = '"{}" is not a known value'.format(cstruct)
                 raise colander.Invalid(node, msg) from err
 
-        def serialize(self, _node, appstruct):
+        def serialize(self, _node, appstruct):  # pylint: disable= no-self-use
             if not appstruct:
                 return ""
             return appstruct.name

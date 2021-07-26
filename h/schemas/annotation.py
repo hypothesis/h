@@ -441,7 +441,8 @@ class SearchParamsSchema(colander.Schema):
             # offset must be set to 0 if search_after is specified.
             cstruct["offset"] = 0
 
-    def _date_is_parsable(self, value):
+    @staticmethod
+    def _date_is_parsable(value):
         """Return True if date is parsable and False otherwise."""
 
         # Dates like "2017" can also be cast as floats so if a number is less

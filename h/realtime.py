@@ -53,7 +53,8 @@ class Consumer(ConsumerMixin):
         message.ack()
         self.handler(body)
 
-    def _random_id(self):
+    @staticmethod
+    def _random_id():
         """Generate a short random string"""
         data = struct.pack("Q", random.getrandbits(64))
         return base64.urlsafe_b64encode(data).strip(b"=")

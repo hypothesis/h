@@ -233,11 +233,11 @@ class AuthClientPolicy:
         """
         return self._basic_auth_policy.effective_principals(request)
 
-    def remember(self, _request, _userid, **_kwargs):
+    def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for basic auth client policy."""
         return []
 
-    def forget(self, _request):
+    def forget(self, _request):  # pylint: disable=no-self-use
         """Not implemented for basic auth client policy."""
         return []
 
@@ -317,15 +317,15 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         self.callback = callback
         self.debug = debug
 
-    def remember(self, _request, _userid, **_kwargs):
+    def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for token auth policy."""
         return []
 
-    def forget(self, _request):
+    def forget(self, _request):  # pylint: disable=no-self-use
         """Not implemented for token auth policy."""
         return []
 
-    def unauthenticated_userid(self, request):
+    def unauthenticated_userid(self, request):  # pylint: disable=no-self-use
         """
         Return the userid implied by the token in the passed request, if any.
 
