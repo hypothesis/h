@@ -126,7 +126,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
 
 @view_defaults(
     route_name="admin.groups_edit",
-    permission=Permission.Group.ADMIN,
+    permission=Permission.AdminPage.GROUPS,
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
 class GroupEditViews:  # pylint: disable=too-many-instance-attributes
