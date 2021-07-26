@@ -41,7 +41,7 @@ from oauthlib.oauth2.rfc6749.grant_types.base import GrantTypeBase
 from h.oauth.jwt_grant_token import JWTGrantToken
 
 
-class JWTAuthorizationGrant(GrantTypeBase):
+class JWTAuthorizationGrant(GrantTypeBase):  # pylint: disable=abstract-method
     def __init__(self, request_validator, user_svc, domain):
         self.request_validator = request_validator
         self.user_svc = user_svc

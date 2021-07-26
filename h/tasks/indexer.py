@@ -1,4 +1,6 @@
 # pylint: disable=no-member # Instance of 'Celery' has no 'request' member
+from abc import ABC
+
 import newrelic
 from celery import Task
 
@@ -8,7 +10,7 @@ log = get_task_logger(__name__)
 
 
 # See: https://docs.celeryproject.org/en/stable/userguide/tasks.html#automatic-retry-for-known-exceptions
-class _BaseTaskWithRetry(Task):
+class _BaseTaskWithRetry(ABC, Task):
     autoretry_for = (Exception,)
     retry_kwargs = {"countdown": 5, "max_retries": 1}
 

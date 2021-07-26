@@ -24,7 +24,7 @@ def _normalise_username(username):
     return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
-class UsernameComparator(Comparator):
+class UsernameComparator(Comparator):  # pylint: disable=abstract-method
     """
     Custom comparator for :py:attr:`~h.models.user.User.username`.
 
@@ -45,7 +45,7 @@ class UsernameComparator(Comparator):
         )
 
 
-class UserIDComparator(Comparator):
+class UserIDComparator(Comparator):  # pylint: disable=abstract-method
     """
     Custom comparator for :py:attr:`~h.models.user.User.userid`.
 

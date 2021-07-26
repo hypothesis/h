@@ -10,7 +10,7 @@ from jinja2.ext import Extension
 SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
 
-class Filters(Extension):
+class Filters(Extension):  # pylint:disable=abstract-method
 
     """
     Set up filters for Jinja2.
@@ -61,7 +61,7 @@ def to_json(value):
     return Markup(result)
 
 
-class SvgIcon(Extension):
+class SvgIcon(Extension):  # pylint: disable=abstract-method
 
     """
     Setup helpers for rendering icons.
