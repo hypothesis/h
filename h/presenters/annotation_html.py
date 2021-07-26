@@ -20,6 +20,8 @@ class AnnotationHTMLPresenter:
             if "exact" in selector:
                 return selector["exact"]
 
+        return None
+
     @property
     def uri(self):
         return jinja2.escape(self.annotation.target_uri)

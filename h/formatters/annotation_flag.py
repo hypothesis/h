@@ -16,7 +16,7 @@ class AnnotationFlagFormatter:
 
     def preload(self, annotation_ids):
         if self.user is None:
-            return
+            return None
 
         flagged_ids = self.flag_service.all_flagged(
             user=self.user, annotation_ids=annotation_ids

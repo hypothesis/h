@@ -176,8 +176,10 @@ class Annotation(Base):
         Return None if this annotation is not a reply.
 
         """
-        if self.references:
-            return self.references[-1]
+        if not self.references:
+            return None
+
+        return self.references[-1]
 
     @property
     def thread_root_id(self):
