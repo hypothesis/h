@@ -145,8 +145,8 @@ def _maybe_create_world_group(engine, authority, default_org):
             name="Public",
             authority=authority,
             joinable_by=None,
-            readable_by=ReadableBy.WORLD,
-            writeable_by=WriteableBy.AUTHORITY,
+            readable_by=ReadableBy.world,
+            writeable_by=WriteableBy.authority,
             organization=default_org,
         )
         world_group.pubid = "__world__"
