@@ -126,10 +126,12 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         else:
             raise InvalidRefreshTokenError()
 
-    def generate_access_token(self, _oauth_request):
+    @staticmethod
+    def generate_access_token(oauth_request):
         return ACCESS_TOKEN_PREFIX + token_urlsafe()
 
-    def generate_refresh_token(self, _oauth_request):
+    @staticmethod
+    def generate_refresh_token(_oauth_request):
         return REFRESH_TOKEN_PREFIX + token_urlsafe()
 
 

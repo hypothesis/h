@@ -71,7 +71,8 @@ class DeveloperTokenService:
             .one_or_none()
         )
 
-    def _generate_token(self):
+    @staticmethod
+    def _generate_token():
         return PREFIX + security.token_urlsafe()
 
 

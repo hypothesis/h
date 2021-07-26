@@ -205,7 +205,8 @@ class GroupListService:
             .one_or_none()
         )
 
-    def _sort(self, groups):
+    @staticmethod
+    def _sort(groups):
         """sort a list of groups of a single type"""
         return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
 

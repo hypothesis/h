@@ -163,7 +163,8 @@ class UserService:
 
         return user
 
-    def update_preferences(self, user, **kwargs):
+    @staticmethod
+    def update_preferences(user, **kwargs):
         invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
         if invalid_keys:
             keys = ", ".join(sorted(invalid_keys))

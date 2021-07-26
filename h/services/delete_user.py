@@ -63,7 +63,8 @@ class DeleteUserService:
         for group in groups:
             self.request.db.delete(group)
 
-    def _unassign_groups_creator(self, groups):
+    @staticmethod
+    def _unassign_groups_creator(groups):
         for group in groups:
             group.creator = None
 

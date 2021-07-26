@@ -22,7 +22,7 @@ class SearchAdminViews:
         self.request = request
 
     @view_config(request_method="GET", renderer="h:templates/admin/search.html.jinja2")
-    def get(self):
+    def get(self):  # pylint: disable=no-self-use
         return {}
 
     @view_config(

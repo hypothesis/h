@@ -153,7 +153,7 @@ class Group(Base, mixins.Timestamps):
     organization = sa.orm.relationship("Organization")
 
     @sa.orm.validates("name")
-    def validate_name(self, _key, name):
+    def validate_name(self, _key, name):  # pylint:disable=no-self-use
         if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:
             raise ValueError(
                 "name must be between {min} and {max} characters "
@@ -162,7 +162,9 @@ class Group(Base, mixins.Timestamps):
         return name
 
     @sa.orm.validates("authority_provided_id")
-    def validate_authority_provided_id(self, _key, authority_provided_id):
+    def validate_authority_provided_id(  # pylint:disable=no-self-use
+        self, _key, authority_provided_id
+    ):
         if not authority_provided_id:
             return None
 

@@ -80,10 +80,10 @@ class MathBlockLexer(mistune.BlockLexer):
 
 
 class MathRenderer(mistune.Renderer):
-    def block_math(self, text):
+    def block_math(self, text):  # pylint: disable=no-self-use
         return "<p>$$%s$$</p>\n" % text
 
-    def inline_math(self, text):
+    def inline_math(self, text):  # pylint: disable=no-self-use
         return "\\(%s\\)" % text
 
 

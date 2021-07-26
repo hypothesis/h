@@ -96,7 +96,8 @@ class GroupAPISchema(JSONSchema):
                 )
             )
 
-    def _whitelisted_fields_only(self, appstruct):
+    @staticmethod
+    def _whitelisted_fields_only(appstruct):
         """Return a new appstruct containing only schema-defined fields"""
 
         new_appstruct = {}

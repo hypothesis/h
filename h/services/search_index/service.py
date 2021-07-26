@@ -65,7 +65,8 @@ class SearchIndexService:
 
         self._index_annotation_body(annotation.id, body, refresh=False)
 
-    def add_annotations_between_times(self, start_time, end_time, tag):
+    @staticmethod
+    def add_annotations_between_times(start_time, end_time, tag):
         """
         Add all annotations between two times to the search index.
 
@@ -78,13 +79,15 @@ class SearchIndexService:
         """
         indexer.add_annotations_between_times.delay(start_time, end_time, tag)
 
-    def add_users_annotations(self, userid, tag, force=False, schedule_in=None):
+    @staticmethod
+    def add_users_annotations(userid, tag, force=False, schedule_in=None):
         """Add all of a users annotations to the search index."""
         indexer.add_users_annotations.delay(
             userid, tag, force=force, schedule_in=schedule_in
         )
 
-    def add_group_annotations(self, groupid, tag, force=False, schedule_in=None):
+    @staticmethod
+    def add_group_annotations(groupid, tag, force=False, schedule_in=None):
         """Add all annotations in a group to the search index."""
         indexer.add_group_annotations.delay(
             groupid, tag, force=force, schedule_in=schedule_in

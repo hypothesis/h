@@ -5,7 +5,8 @@ class AnnotationModerationService:
     def __init__(self, session):
         self.session = session
 
-    def hidden(self, annotation):
+    @staticmethod
+    def hidden(annotation):
         """
         Check if an annotation id is hidden.
 
@@ -55,7 +56,8 @@ class AnnotationModerationService:
 
         annotation.moderation = models.AnnotationModeration()
 
-    def unhide(self, annotation):
+    @staticmethod
+    def unhide(annotation):
         """
         Show a hidden annotation again to other users.
 
