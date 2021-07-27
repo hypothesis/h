@@ -4,10 +4,7 @@ import pytest
 from h_matchers import Any
 
 from h.security.permissions import Permission
-from h.services.annotation_json_presentation import (
-    AnnotationJSONPresentationService,
-    annotation_json_presentation_service_factory,
-)
+from h.services.annotation_json_presentation import AnnotationJSONPresentationService
 
 
 @pytest.mark.usefixtures("presenters", "formatters")
@@ -142,96 +139,25 @@ class TestAnnotationJSONPresentationService:
 
     @pytest.fixture
     def presenters(self, patch):
-        return patch("h.services.annotation_json_presentation.presenters")
+        return patch("h.services.annotation_json_presentation.service.presenters")
 
     @pytest.fixture
     def storage(self, patch):
-        return patch("h.services.annotation_json_presentation.storage")
+        return patch("h.services.annotation_json_presentation.service.storage")
 
     @pytest.fixture
     def traversal(self, patch):
-        return patch("h.services.annotation_json_presentation.traversal")
+        return patch("h.services.annotation_json_presentation.service.traversal")
 
     @pytest.fixture
     def present(self, patch):
         return patch(
-            "h.services.annotation_json_presentation.AnnotationJSONPresentationService.present"
+            "h.services.annotation_json_presentation.service.AnnotationJSONPresentationService.present"
         )
 
     @pytest.fixture
     def formatters(self, patch):
-        return patch("h.services.annotation_json_presentation.formatters")
-
-
-@pytest.mark.usefixtures("services")
-class TestAnnotationJSONPresentationServiceFactory:
-    def test_returns_service(self, pyramid_request):
-        svc = annotation_json_presentation_service_factory(None, pyramid_request)
-
-        assert isinstance(svc, AnnotationJSONPresentationService)
-
-    def test_provides_session(self, pyramid_request, service_class):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["session"] == pyramid_request.db
-
-    def test_provides_user(self, pyramid_request, service_class):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["user"] == pyramid_request.user
-
-    def test_provides_group_service(self, pyramid_request, service_class, services):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["group_svc"] == services["group"]
-
-    def test_provides_links_service(self, pyramid_request, service_class, services):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["links_svc"] == services["links"]
-
-    def test_provides_flag_service(self, pyramid_request, service_class, services):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["flag_svc"] == services["flag"]
-
-    def test_provides_moderation_service(
-        self, pyramid_request, service_class, services
-    ):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["moderation_svc"] == services["annotation_moderation"]
-
-    def test_provides_flag_count_service(
-        self, pyramid_request, service_class, services
-    ):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["flag_count_svc"] == services["flag_count"]
-
-    def test_provides_has_permission(self, pyramid_request, service_class):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["has_permission"] == pyramid_request.has_permission
-
-    @pytest.fixture
-    def service_class(self, patch):
-        return patch(
-            "h.services.annotation_json_presentation.AnnotationJSONPresentationService"
-        )
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.user = mock.Mock()
-        return pyramid_request
+        return patch("h.services.annotation_json_presentation.service.formatters")
 
 
 @pytest.fixture
