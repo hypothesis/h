@@ -10,7 +10,13 @@ from h.services.annotation_json_presentation import AnnotationJSONPresentationSe
 
 class TestAnnotationJSONPresentationService:
     def test_it_configures_formatters(
-        self, svc, formatters, flag_service, moderation_service, has_permission
+        self,
+        svc,
+        formatters,
+        db_session,
+        flag_service,
+        moderation_service,
+        has_permission,
     ):
         formatters.AnnotationFlagFormatter.assert_called_once_with(
             sentinel.flag_svc, sentinel.user
@@ -22,7 +28,7 @@ class TestAnnotationJSONPresentationService:
             sentinel.flag_count_svc, sentinel.user, has_permission
         )
         formatters.AnnotationUserInfoFormatter.assert_called_once_with(
-            sentinel.db_session, sentinel.user_svc
+            db_session, sentinel.user_svc
         )
 
         assert svc.formatters == [
@@ -40,9 +46,7 @@ class TestAnnotationJSONPresentationService:
         moderator_check(group)
         has_permission.assert_called_once_with(Permission.Group.MODERATE, group)
 
-    def test_present_calls_presenter(
-        self, svc, AnnotationJSONPresenter, annotation_resource
-    ):
+    def test_present(self, svc, AnnotationJSONPresenter, annotation_resource):
         result = svc.present(annotation_resource)
 
         AnnotationJSONPresenter.assert_called_once_with(
@@ -92,9 +96,9 @@ class TestAnnotationJSONPresentationService:
         assert result == [present.return_value]
 
     @pytest.fixture
-    def svc(self, has_permission):
+    def svc(self, db_session, has_permission):
         return AnnotationJSONPresentationService(
-            session=sentinel.db_session,
+            session=db_session,
             user=sentinel.user,
             group_svc=sentinel.group_svc,
             links_svc=sentinel.links_svc,
