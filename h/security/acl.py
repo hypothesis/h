@@ -17,8 +17,6 @@ class ACL:
         # Logged in users are given group principals for all of their groups
         in_group_principal = f"group:{group.pubid}"
 
-        # General permissions ---------------------------------------------- #
-
         if group.joinable_by == JoinableBy.authority:
             yield Allow, in_authority_principal, Permission.Group.JOIN
 
@@ -27,36 +25,21 @@ class ACL:
         elif group.writeable_by == WriteableBy.members:
             yield Allow, in_group_principal, Permission.Group.WRITE
 
-        if group.creator:
-            yield Allow, group.creator.userid, Permission.Group.MODERATE
-            # The creator may update this group in an upsert context
-            yield Allow, group.creator.userid, Permission.Group.UPSERT
-
-        # auth_clients that have the same authority as the target group
-        # may add members to it
-        yield Allow, client_authority_principal, Permission.Group.MEMBER_ADD
-
-        # Read permissions ------------------------------------------------ #
-
         if group.readable_by == ReadableBy.members:
             yield Allow, in_group_principal, Permission.Group.READ
             yield Allow, in_group_principal, Permission.Group.MEMBER_READ
             yield Allow, in_group_principal, Permission.Group.FLAG
+
         elif group.readable_by == ReadableBy.world:
             yield Allow, security.Everyone, Permission.Group.READ
             yield Allow, security.Everyone, Permission.Group.MEMBER_READ
             # Any logged in user should be able to flag things they can see
             yield Allow, security.Authenticated, Permission.Group.FLAG
 
-        # auth_clients with matching authority should be able to read the group
-        # and it's members
+        # auth_clients with matching authority
         yield Allow, client_authority_principal, Permission.Group.READ
         yield Allow, client_authority_principal, Permission.Group.MEMBER_READ
-
-        # Group edit permissions ------------------------------------------- #
-
-        # auth_clients that have the same authority as this group
-        # should be allowed to update it
+        yield Allow, client_authority_principal, Permission.Group.MEMBER_ADD
         yield Allow, client_authority_principal, Permission.Group.ADMIN
 
         # Those with the admin or staff role should be able to admin/edit any
@@ -65,7 +48,8 @@ class ACL:
         yield Allow, role.Admin, Permission.Group.ADMIN
 
         if group.creator:
-            # The creator of the group should be able to update it
             yield Allow, group.creator.userid, Permission.Group.ADMIN
+            yield Allow, group.creator.userid, Permission.Group.MODERATE
+            yield Allow, group.creator.userid, Permission.Group.UPSERT
 
         yield security.DENY_ALL
