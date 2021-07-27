@@ -8,13 +8,14 @@ from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
 
 
 class TestGroupContext:
-    def test_it_with_a_group(self, factories):
+    def test_it_with_a_group(self, factories, ACL):
         group = factories.Group()
 
         context = GroupContext(group=group)
 
         assert context.group == group
-        assert context.__acl__() == group.__acl__()
+        assert context.__acl__() == ACL.for_group.return_value
+        ACL.for_group.assert_called_once_with(group)
 
     @pytest.mark.parametrize(
         "principal,has_upsert", ((role.User, True), ("other", False))
@@ -31,6 +32,10 @@ class TestGroupContext:
             bool(pyramid_request.has_permission(Permission.Group.UPSERT, context))
             == has_upsert
         )
+
+    @pytest.fixture
+    def ACL(self, patch):
+        return patch("h.traversal.group.ACL")
 
 
 @pytest.mark.usefixtures("group_service", "GroupContext_")

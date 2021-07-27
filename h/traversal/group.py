@@ -5,6 +5,7 @@ from pyramid.security import Allow
 
 from h.auth import role
 from h.models import Group
+from h.security.acl import ACL
 from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
@@ -53,4 +54,5 @@ class GroupContext:
 
         # If there is a group associated with the context, the "upsert" and
         # all other permissions are managed by the model
-        return self.group.__acl__()
+
+        return ACL.for_group(self.group)
