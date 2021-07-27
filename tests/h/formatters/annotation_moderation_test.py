@@ -1,4 +1,5 @@
 from collections import namedtuple
+from unittest.mock import create_autospec
 
 import pytest
 
@@ -7,17 +8,6 @@ from h.security.permissions import Permission
 from h.services.flag_count import FlagCountService
 
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
-
-
-class FakePermissionCheck:
-    def __init__(self):
-        self._permissions = {}
-
-    def add_permission(self, permission, context, granted):
-        self._permissions[(permission, context)] = granted
-
-    def __call__(self, permission, context):
-        return self._permissions[(permission, context)]
 
 
 class TestAnnotationModerationFormatter:
@@ -36,14 +26,16 @@ class TestAnnotationModerationFormatter:
         assert formatter.preload([]) is None
 
     def test_format_returns_empty_for_non_moderator(
-        self, flag_count_svc, user, group, flagged, permission_denied
+        self, formatter, has_permission, flagged, group
     ):
-        formatter = AnnotationModerationFormatter(
-            flag_count_svc, user, permission_denied
-        )
+        has_permission.return_value = False
+
         annotation_context = FakeAnnotationContext(flagged, group)
 
         assert formatter.format(annotation_context) == {}
+        has_permission.assert_called_once_with(
+            Permission.Annotation.MODERATE, annotation_context
+        )
 
     def test_format_returns_flag_count_for_moderator(self, formatter, group, flagged):
         annotation_context = FakeAnnotationContext(flagged, group)
@@ -73,16 +65,11 @@ class TestAnnotationModerationFormatter:
         return factories.Group()
 
     @pytest.fixture
-    def permission_granted(self, group):
-        has_permission = FakePermissionCheck()
-        has_permission.add_permission(Permission.Group.MODERATE, group, True)
-        return has_permission
+    def has_permission(self):
+        def has_permission(permission, context):
+            """Return if we can do something in a context."""
 
-    @pytest.fixture
-    def permission_denied(self, group):
-        has_permission = FakePermissionCheck()
-        has_permission.add_permission(Permission.Group.MODERATE, group, False)
-        return has_permission
+        return create_autospec(has_permission)
 
     @pytest.fixture
     def flagged(self, factories):
@@ -95,9 +82,9 @@ class TestAnnotationModerationFormatter:
         return factories.Annotation()
 
     @pytest.fixture
-    def formatter(self, flag_count_svc, user, permission_granted):
+    def formatter(self, flag_count_svc, user, has_permission):
         """A formatter with the most common configuration."""
-        return AnnotationModerationFormatter(flag_count_svc, user, permission_granted)
+        return AnnotationModerationFormatter(flag_count_svc, user, has_permission)
 
     @pytest.fixture
     def flag_count_svc(self, db_session):
