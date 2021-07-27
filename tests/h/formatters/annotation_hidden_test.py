@@ -36,14 +36,14 @@ class TestAnonymousUserHiding:
     """An anonymous user will see redacted annotations when they're hidden."""
 
     def test_format_for_unhidden_annotation(self, formatter, annotation, group):
-        resource = FakeAnnotationContext(annotation, group)
-        assert formatter.format(resource) == {"hidden": False}
+        context = FakeAnnotationContext(annotation, group)
+        assert formatter.format(context) == {"hidden": False}
 
     def test_format_for_hidden_annotation(self, formatter, hidden_annotation, group):
-        resource = FakeAnnotationContext(hidden_annotation, group)
+        context = FakeAnnotationContext(hidden_annotation, group)
 
         censored = {"hidden": True, "text": "", "tags": []}
-        assert formatter.format(resource) == censored
+        assert formatter.format(context) == censored
 
     @pytest.fixture
     def current_user(self):
@@ -54,18 +54,18 @@ class TestNonAuthorHiding:
     """Regular users see redacted annotations, unless they are a moderator."""
 
     def test_format_for_unhidden_annotation(self, formatter, annotation, group):
-        resource = FakeAnnotationContext(annotation, group)
-        assert formatter.format(resource) == {"hidden": False}
+        context = FakeAnnotationContext(annotation, group)
+        assert formatter.format(context) == {"hidden": False}
 
     def test_format_for_non_moderator(self, formatter, hidden_annotation, group):
-        resource = FakeAnnotationContext(hidden_annotation, group)
+        context = FakeAnnotationContext(hidden_annotation, group)
 
         censored = {"hidden": True, "text": "", "tags": []}
-        assert formatter.format(resource) == censored
+        assert formatter.format(context) == censored
 
     def test_format_for_moderator(self, formatter, hidden_annotation, moderated_group):
-        resource = FakeAnnotationContext(hidden_annotation, moderated_group)
-        assert formatter.format(resource) == {"hidden": True}
+        context = FakeAnnotationContext(hidden_annotation, moderated_group)
+        assert formatter.format(context) == {"hidden": True}
 
 
 class TestAuthorHiding:
@@ -75,16 +75,16 @@ class TestAuthorHiding:
     """
 
     def test_format_for_public_annotation(self, formatter, annotation, group):
-        resource = FakeAnnotationContext(annotation, group)
-        assert formatter.format(resource) == {"hidden": False}
+        context = FakeAnnotationContext(annotation, group)
+        assert formatter.format(context) == {"hidden": False}
 
     def test_format_for_non_moderator(self, formatter, hidden_annotation, group):
-        resource = FakeAnnotationContext(hidden_annotation, group)
-        assert formatter.format(resource) == {"hidden": False}
+        context = FakeAnnotationContext(hidden_annotation, group)
+        assert formatter.format(context) == {"hidden": False}
 
     def test_format_for_moderator(self, formatter, hidden_annotation, moderated_group):
-        resource = FakeAnnotationContext(hidden_annotation, moderated_group)
-        assert formatter.format(resource) == {"hidden": True}
+        context = FakeAnnotationContext(hidden_annotation, moderated_group)
+        assert formatter.format(context) == {"hidden": True}
 
     @pytest.fixture
     def annotation(self, factories, current_user):

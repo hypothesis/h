@@ -148,10 +148,10 @@ class TestCreate:
             AnnotationEvent.return_value
         )
 
-    def test_it_initialises_annotation_resource(
+    def test_it_initialises_annotation_context(
         self,
         storage,
-        annotation_resource,
+        annotation_context,
         pyramid_request,
         groupfinder_service,
         links_service,
@@ -161,17 +161,17 @@ class TestCreate:
 
         views.create(pyramid_request)
 
-        annotation_resource.assert_called_once_with(
+        annotation_context.assert_called_once_with(
             annotation, groupfinder_service, links_service
         )
 
     def test_it_presents_annotation(
-        self, annotation_resource, presentation_service, pyramid_request
+        self, annotation_context, presentation_service, pyramid_request
     ):
         views.create(pyramid_request)
 
         presentation_service.present.assert_called_once_with(
-            annotation_resource.return_value
+            annotation_context.return_value
         )
 
     def test_it_returns_presented_annotation(
@@ -324,10 +324,10 @@ class TestUpdate:
             AnnotationEvent.return_value
         )
 
-    def test_it_initialises_annotation_resource(
+    def test_it_initialises_annotation_context(
         self,
         storage,
-        annotation_resource,
+        annotation_context,
         pyramid_request,
         groupfinder_service,
         links_service,
@@ -337,17 +337,17 @@ class TestUpdate:
 
         views.update(mock.Mock(), pyramid_request)
 
-        annotation_resource.assert_called_once_with(
+        annotation_context.assert_called_once_with(
             annotation, groupfinder_service, links_service
         )
 
     def test_it_presents_annotation(
-        self, annotation_resource, presentation_service, pyramid_request
+        self, annotation_context, presentation_service, pyramid_request
     ):
         views.update(mock.Mock(), pyramid_request)
 
         presentation_service.present.assert_called_once_with(
-            annotation_resource.return_value
+            annotation_context.return_value
         )
 
     def test_it_returns_a_presented_dict(self, presentation_service, pyramid_request):
@@ -393,7 +393,7 @@ def AnnotationEvent(patch):
 
 
 @pytest.fixture
-def annotation_resource(patch):
+def annotation_context(patch):
     return patch("h.views.api.annotations.AnnotationContext")
 
 

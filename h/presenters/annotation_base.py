@@ -6,9 +6,9 @@ from h.util.datetime import utc_iso8601
 
 
 class AnnotationBasePresenter:
-    def __init__(self, annotation_resource):
-        self.annotation_resource = annotation_resource
-        self.annotation = annotation_resource.annotation
+    def __init__(self, annotation_context):
+        self.annotation_context = annotation_context
+        self.annotation = annotation_context.annotation
 
     @property
     def created(self):
@@ -23,7 +23,7 @@ class AnnotationBasePresenter:
     @property
     def links(self):
         """A dictionary of named hypermedia links for this annotation."""
-        return self.annotation_resource.links
+        return self.annotation_context.links
 
     @property
     def text(self):

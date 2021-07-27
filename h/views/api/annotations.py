@@ -78,8 +78,8 @@ def create(request):
     _publish_annotation_event(request, annotation, "create")
 
     svc = request.find_service(name="annotation_json_presentation")
-    annotation_resource = _annotation_resource(request, annotation)
-    return svc.present(annotation_resource)
+    annotation_context = _annotation_context(request, annotation)
+    return svc.present(annotation_context)
 
 
 @api_config(
@@ -135,8 +135,8 @@ def update(context, request):
     _publish_annotation_event(request, annotation, "update")
 
     svc = request.find_service(name="annotation_json_presentation")
-    annotation_resource = _annotation_resource(request, annotation)
-    return svc.present(annotation_resource)
+    annotation_context = _annotation_context(request, annotation)
+    return svc.present(annotation_context)
 
 
 @api_config(
@@ -174,7 +174,7 @@ def _publish_annotation_event(request, annotation, action):
     request.notify_after_commit(event)
 
 
-def _annotation_resource(request, annotation):
+def _annotation_context(request, annotation):
     group_service = request.find_service(IGroupService)
     links_service = request.find_service(name="links")
     return AnnotationContext(annotation, group_service, links_service)

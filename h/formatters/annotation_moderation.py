@@ -31,13 +31,13 @@ class AnnotationModerationFormatter:
         self._cache.update(flag_counts)
         return flag_counts
 
-    def format(self, annotation_resource):
+    def format(self, annotation_context):
         if not self._has_permission(
-            Permission.Group.MODERATE, annotation_resource.group
+            Permission.Group.MODERATE, annotation_context.group
         ):
             return {}
 
-        flag_count = self._load(annotation_resource.annotation)
+        flag_count = self._load(annotation_context.annotation)
         return {"moderation": {"flagCount": flag_count}}
 
     def _load(self, annotation):

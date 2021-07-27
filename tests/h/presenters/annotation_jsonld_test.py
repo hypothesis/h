@@ -42,15 +42,15 @@ class TestAnnotationJSONLDPresenter:
             ],
         }
 
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
-        result = AnnotationJSONLDPresenter(resource).asdict()
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
+        result = AnnotationJSONLDPresenter(context).asdict()
 
         assert result == expected
 
     def test_id_returns_jsonld_id_link(self, groupfinder_service, links_service):
         annotation = mock.Mock(id="foobar")
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
-        presenter = AnnotationJSONLDPresenter(resource)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
+        presenter = AnnotationJSONLDPresenter(context)
 
         result = presenter.id
 
@@ -59,9 +59,9 @@ class TestAnnotationJSONLDPresenter:
 
     def test_bodies_returns_textual_body(self, groupfinder_service, links_service):
         annotation = mock.Mock(text="Flib flob flab", tags=None)
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
 
-        bodies = AnnotationJSONLDPresenter(resource).bodies
+        bodies = AnnotationJSONLDPresenter(context).bodies
 
         assert bodies == [
             {
@@ -73,9 +73,9 @@ class TestAnnotationJSONLDPresenter:
 
     def test_bodies_appends_tag_bodies(self, groupfinder_service, links_service):
         annotation = mock.Mock(text="Flib flob flab", tags=["giraffe", "lion"])
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
 
-        bodies = AnnotationJSONLDPresenter(resource).bodies
+        bodies = AnnotationJSONLDPresenter(context).bodies
 
         assert {
             "type": "TextualBody",
@@ -90,9 +90,9 @@ class TestAnnotationJSONLDPresenter:
             {"type": "TestSelector", "test": "foobar"},
             {"something": "else"},
         ]
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
 
-        selectors = AnnotationJSONLDPresenter(resource).target[0]["selector"]
+        selectors = AnnotationJSONLDPresenter(context).target[0]["selector"]
 
         assert selectors == [{"type": "TestSelector", "test": "foobar"}]
 
@@ -114,9 +114,9 @@ class TestAnnotationJSONLDPresenter:
                 "endOffset": 43,
             }
         ]
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
 
-        selectors = AnnotationJSONLDPresenter(resource).target[0]["selector"]
+        selectors = AnnotationJSONLDPresenter(context).target[0]["selector"]
 
         assert selectors == [
             {
@@ -144,9 +144,9 @@ class TestAnnotationJSONLDPresenter:
                 "endOffset": 72,
             }
         ]
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
 
-        selectors = AnnotationJSONLDPresenter(resource).target[0]["selector"]
+        selectors = AnnotationJSONLDPresenter(context).target[0]["selector"]
 
         assert selectors == [
             {
@@ -178,8 +178,8 @@ class TestAnnotationJSONLDPresenter:
                 "endContainer": "/div[1]/main[1]/article[1]/div[2]/p[339]",
             }
         ]
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
 
-        target = AnnotationJSONLDPresenter(resource).target[0]
+        target = AnnotationJSONLDPresenter(context).target[0]
 
         assert "selector" not in target
