@@ -46,11 +46,11 @@ class TestAnnotationJSONPresentationService:
         moderator_check(group)
         has_permission.assert_called_once_with(Permission.Group.MODERATE, group)
 
-    def test_present(self, svc, AnnotationJSONPresenter, annotation_resource):
-        result = svc.present(annotation_resource)
+    def test_present(self, svc, AnnotationJSONPresenter, AnnotationContext):
+        result = svc.present(AnnotationContext.return_value)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource, svc.formatters
+            AnnotationContext.return_value, svc.formatters
         )
 
         assert result == AnnotationJSONPresenter.return_value.asdict.return_value
@@ -93,10 +93,6 @@ class TestAnnotationJSONPresentationService:
     @pytest.fixture
     def has_permission(self):
         return mock.Mock()
-
-    @pytest.fixture
-    def annotation_resource(self):
-        return mock.Mock(spec_set=["annotation"], annotation=mock.Mock())
 
     @pytest.fixture
     def AnnotationContext(self, patch):
