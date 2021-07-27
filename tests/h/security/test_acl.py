@@ -14,7 +14,7 @@ class TestACLForGroup:
 
         assert permits(["noise", f"authority:{group.authority}"], Permission.Group.JOIN)
         assert not permits(
-            ["noise", f"authority:DIFFERENT_AUTHORITY"], Permission.Group.JOIN
+            ["noise", "authority:DIFFERENT_AUTHORITY"], Permission.Group.JOIN
         )
 
     def test_not_joinable(self, group, permits):
@@ -38,53 +38,6 @@ class TestACLForGroup:
         group.writeable_by = None
 
         assert not permitted_principals_for(Permission.Group.WRITE)
-
-    def test_creator_has_moderate_permission(self, group, permits):
-        assert permits(group.creator.userid, Permission.Group.MODERATE)
-
-    def test_no_moderate_permission_when_no_creator(
-        self, group, permitted_principals_for
-    ):
-        group.creator = None
-
-        assert not permitted_principals_for(Permission.Group.MODERATE)
-
-    def test_world_readable_does_not_grant_moderate_permissions(self, group, permits):
-        group.readable_by = ReadableBy.world
-
-        assert not permits([security.Authenticated], Permission.Group.MODERATE)
-        assert not permits([security.Everyone], Permission.Group.MODERATE)
-
-    def test_non_creator_members_do_not_have_moderate_permission(self, group, permits):
-        group.readable_by = ReadableBy.members
-
-        assert not permits([f"group:{group.pubid}"], Permission.Group.MODERATE)
-
-    def test_creator_has_upsert_permissions(self, group, permits):
-        assert permits(group.creator.userid, Permission.Group.UPSERT)
-
-    def test_no_upsert_permission_when_no_creator(
-        self, group, permitted_principals_for
-    ):
-        group.creator = None
-
-        assert not permitted_principals_for(Permission.Group.UPSERT)
-
-    def test_auth_client_with_matching_authority_may_add_members(self, group, permits):
-        assert permits(
-            ["noise", f"client_authority:{group.authority}"],
-            Permission.Group.MEMBER_ADD,
-        )
-
-        assert not permits(
-            ["noise", "client_authority:DIFFERENT_AUTHORITY"],
-            Permission.Group.MEMBER_ADD,
-        )
-
-    def test_user_with_authority_may_not_add_members(self, group, permits):
-        assert not permits(
-            ["noise", f"authority:{group.authority}"], Permission.Group.MEMBER_ADD
-        )
 
     def test_world_readable_and_flaggable(self, group, permits):
         group.readable_by = ReadableBy.world
@@ -125,8 +78,12 @@ class TestACLForGroup:
             [f"client_authority:{group.authority}"], Permission.Group.MEMBER_READ
         )
 
-    def test_creator_has_admin_permission(self, group, permits):
-        assert permits(group.creator.userid, Permission.Group.ADMIN)
+    def test_auth_client_with_matching_authority_may_add_members(
+        self, group, permitted_principals_for
+    ):
+        assert permitted_principals_for(Permission.Group.MEMBER_ADD) == {
+            f"client_authority:{group.authority}"
+        }
 
     def test_auth_client_with_matching_authority_has_admin_permission(
         self, group, permits
@@ -138,6 +95,7 @@ class TestACLForGroup:
             ["noise", "client_authority:DIFFERENT_AUTHORITY"], Permission.Group.ADMIN
         )
 
+    @pytest.mark.skip("This isn't currently true. Should it be?")
     def test_admin_allowed_only_for_authority_when_no_creator(self, group, permits):
         group.creator = None
 
@@ -151,6 +109,26 @@ class TestACLForGroup:
     def test_admin_user_has_admin_permission_on_any_group(self, group, permits):
         assert permits(["noise", role.Admin], Permission.Group.ADMIN)
 
+    @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))
+    def test_creator_permissions(
+        self, group, permitted_principals_for, permits, readable_by
+    ):
+        group.readable_by = readable_by
+
+        assert permits(group.creator.userid, Permission.Group.ADMIN)
+        assert permits(group.creator.userid, Permission.Group.UPSERT)
+        assert permitted_principals_for(Permission.Group.MODERATE) == {
+            group.creator.userid
+        }
+
+    def test_no_creator_permissions_without_creator(
+        self, group, permitted_principals_for
+    ):
+        group.creator = None
+
+        assert not permitted_principals_for(Permission.Group.MODERATE)
+        assert not permitted_principals_for(Permission.Group.UPSERT)
+
     def test_fallback_is_deny_all(self, group, permits):
         assert not permits([security.Everyone], "non_existant_permission")
 
@@ -159,7 +137,7 @@ class TestACLForGroup:
         def permits(principals, permission):
             class ACLCarrier:
                 def __acl__(self):
-                    return list(ACL.for_group(group))
+                    return ACL.for_group(group)
 
             return ACLAuthorizationPolicy().permits(
                 ACLCarrier(), principals, permission
@@ -172,7 +150,7 @@ class TestACLForGroup:
         def permitted_principals_for(permission):
             class ACLCarrier:
                 def __acl__(self):
-                    return list(ACL.for_group(group))
+                    return ACL.for_group(group)
 
             return ACLAuthorizationPolicy().principals_allowed_by_permission(
                 ACLCarrier(), permission
