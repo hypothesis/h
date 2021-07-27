@@ -1,10 +1,7 @@
-from zope.interface import implementer
-
-from h.formatters.interfaces import IAnnotationFormatter
+from h.formatters.formatter import AnnotationFormatter
 
 
-@implementer(IAnnotationFormatter)
-class AnnotationFlagFormatter:
+class AnnotationFlagFormatter(AnnotationFormatter):
     """
     Formatter for exposing a user's annotation flags.
 
