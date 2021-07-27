@@ -1,7 +1,10 @@
 from sqlalchemy.orm import subqueryload
 
-from h import formatters, models, presenters, storage, traversal
+from h import formatters, storage
+from h.models import Annotation
+from h.presenters import AnnotationJSONPresenter
 from h.security.permissions import Permission
+from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresentationService:
@@ -39,7 +42,7 @@ class AnnotationJSONPresentationService:
 
     def present_all(self, annotation_ids):
         def eager_load_documents(query):
-            return query.options(subqueryload(models.Annotation.document))
+            return query.options(subqueryload(Annotation.document))
 
         annotations = storage.fetch_ordered_annotations(
             self.session, annotation_ids, query_processor=eager_load_documents
@@ -50,11 +53,9 @@ class AnnotationJSONPresentationService:
             formatter.preload(annotation_ids)
 
         return [
-            self.present(
-                traversal.AnnotationContext(ann, self.group_svc, self.links_svc)
-            )
+            self.present(AnnotationContext(ann, self.group_svc, self.links_svc))
             for ann in annotations
         ]
 
     def _get_presenter(self, annotation_resource):
-        return presenters.AnnotationJSONPresenter(annotation_resource, self.formatters)
+        return AnnotationJSONPresenter(annotation_resource, self.formatters)
