@@ -14,13 +14,18 @@ class AnnotationFlagFormatter:
         # instances because we only store the annotation id and a boolean flag.
         self._cache = {}
 
-    def preload(self, ids):
+    def preload(self, annotation_ids):
         if self.user is None:
             return
 
-        flagged_ids = self.flag_service.all_flagged(user=self.user, annotation_ids=ids)
+        flagged_ids = self.flag_service.all_flagged(
+            user=self.user, annotation_ids=annotation_ids
+        )
 
-        flags = {id_: (id_ in flagged_ids) for id_ in ids}
+        flags = {
+            annotation_id: (annotation_id in flagged_ids)
+            for annotation_id in annotation_ids
+        }
         self._cache.update(flags)
         return flags
 
