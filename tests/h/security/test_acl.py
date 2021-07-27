@@ -12,17 +12,13 @@ class TestACLForGroup:
     def test_authority_joinable(self, group, permits):
         group.joinable_by = JoinableBy.authority
 
-        assert permits(["noise", f"authority:{group.authority}"], Permission.Group.JOIN)
-        assert not permits(
-            ["noise", "authority:DIFFERENT_AUTHORITY"], Permission.Group.JOIN
-        )
+        assert permits([f"authority:{group.authority}"], Permission.Group.JOIN)
+        assert not permits(["authority:DIFFERENT_AUTHORITY"], Permission.Group.JOIN)
 
     def test_not_joinable(self, group, permits):
         group.joinable_by = None
 
-        assert not permits(
-            ["noise", f"authority:{group.authority}"], Permission.Group.JOIN
-        )
+        assert not permits([f"authority:{group.authority}"], Permission.Group.JOIN)
 
     def test_authority_writeable(self, group, permits):
         group.writeable_by = WriteableBy.authority
@@ -88,26 +84,16 @@ class TestACLForGroup:
     def test_auth_client_with_matching_authority_has_admin_permission(
         self, group, permits
     ):
-        assert permits(
-            ["noise", f"client_authority:{group.authority}"], Permission.Group.ADMIN
-        )
+        assert permits([f"client_authority:{group.authority}"], Permission.Group.ADMIN)
         assert not permits(
-            ["noise", "client_authority:DIFFERENT_AUTHORITY"], Permission.Group.ADMIN
-        )
-
-    @pytest.mark.skip("This isn't currently true. Should it be?")
-    def test_admin_allowed_only_for_authority_when_no_creator(self, group, permits):
-        group.creator = None
-
-        assert permits(
-            ["noise", f"client_authority:{group.authority}"], Permission.Group.ADMIN
+            ["client_authority:DIFFERENT_AUTHORITY"], Permission.Group.ADMIN
         )
 
     def test_staff_user_has_admin_permission_on_any_group(self, group, permits):
-        assert permits(["noise", role.Staff], Permission.Group.ADMIN)
+        assert permits([role.Staff], Permission.Group.ADMIN)
 
     def test_admin_user_has_admin_permission_on_any_group(self, group, permits):
-        assert permits(["noise", role.Admin], Permission.Group.ADMIN)
+        assert permits([role.Admin], Permission.Group.ADMIN)
 
     @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))
     def test_creator_permissions(
