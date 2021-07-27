@@ -1,3 +1,6 @@
+from h.security.permissions import Permission
+
+
 class AnnotationHiddenFormatter:
     """
     Formatter for dealing with annotations that a moderator has hidden.
@@ -14,9 +17,9 @@ class AnnotationHiddenFormatter:
     the `hidden` flag set to `True`, and the annotation's content is redacted.
     """
 
-    def __init__(self, moderation_svc, moderator_check, user):
+    def __init__(self, moderation_svc, has_permission, user):
         self._moderation_svc = moderation_svc
-        self._moderator_check = moderator_check
+        self._has_permission = has_permission
         self._user = user
 
         # Local cache of hidden flags. We don't need to care about detached
@@ -35,9 +38,8 @@ class AnnotationHiddenFormatter:
 
     def format(self, annotation_context):
         annotation = annotation_context.annotation
-        group = annotation_context.group
 
-        if self._current_user_is_moderator(group):
+        if self._current_user_is_moderator(annotation_context):
             return {"hidden": self._is_hidden(annotation)}
 
         if self._current_user_is_author(annotation):
@@ -48,8 +50,10 @@ class AnnotationHiddenFormatter:
 
         return {"hidden": False}
 
-    def _current_user_is_moderator(self, group):
-        return self._moderator_check(group)
+    def _current_user_is_moderator(self, annotation_context):
+        return self._has_permission(
+            Permission.Annotation.MODERATE, context=annotation_context
+        )
 
     def _current_user_is_author(self, annotation):
         return self._user and self._user.userid == annotation.userid

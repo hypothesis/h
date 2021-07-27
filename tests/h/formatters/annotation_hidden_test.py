@@ -1,8 +1,10 @@
 from collections import namedtuple
+from unittest.mock import create_autospec
 
 import pytest
 
 from h.formatters.annotation_hidden import AnnotationHiddenFormatter
+from h.security.permissions import Permission
 from h.services.annotation_moderation import AnnotationModerationService
 
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
@@ -82,9 +84,15 @@ class TestAuthorHiding:
         context = FakeAnnotationContext(hidden_annotation, group)
         assert formatter.format(context) == {"hidden": False}
 
-    def test_format_for_moderator(self, formatter, hidden_annotation, moderated_group):
+    def test_format_for_moderator(
+        self, formatter, hidden_annotation, moderated_group, has_permission
+    ):
         context = FakeAnnotationContext(hidden_annotation, moderated_group)
+
         assert formatter.format(context) == {"hidden": True}
+        has_permission.assert_called_once_with(
+            Permission.Annotation.MODERATE, context=context
+        )
 
     @pytest.fixture
     def annotation(self, factories, current_user):
@@ -102,8 +110,8 @@ def current_user(factories):
 
 
 @pytest.fixture
-def formatter(moderation_svc, moderator_check, current_user):
-    return AnnotationHiddenFormatter(moderation_svc, moderator_check, current_user)
+def formatter(moderation_svc, has_permission, current_user):
+    return AnnotationHiddenFormatter(moderation_svc, has_permission, current_user)
 
 
 @pytest.fixture
@@ -112,8 +120,13 @@ def moderation_svc(db_session):
 
 
 @pytest.fixture
-def moderator_check(moderated_group):
-    return lambda group: (group == moderated_group)
+def has_permission(moderated_group):
+    def has_permission(permission, context):
+        return context.group == moderated_group
+
+    mocked_has_permission = create_autospec(has_permission)
+    mocked_has_permission.side_effect = has_permission
+    return mocked_has_permission
 
 
 @pytest.fixture
