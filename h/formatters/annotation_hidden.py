@@ -23,10 +23,13 @@ class AnnotationHiddenFormatter:
         # instances because we only store the annotation id and a boolean flag.
         self._cache = {}
 
-    def preload(self, ids):
-        hidden_ids = self._moderation_svc.all_hidden(ids)
+    def preload(self, annotation_ids):
+        hidden_ids = self._moderation_svc.all_hidden(annotation_ids)
 
-        hidden = {id_: (id_ in hidden_ids) for id_ in ids}
+        hidden = {
+            annotation_id: (annotation_id in hidden_ids)
+            for annotation_id in annotation_ids
+        }
         self._cache.update(hidden)
         return hidden
 

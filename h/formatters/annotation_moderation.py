@@ -20,14 +20,14 @@ class AnnotationModerationFormatter:
         # instances because we only store the annotation id and a count.
         self._cache = {}
 
-    def preload(self, ids):
+    def preload(self, annotation_ids):
         if self._user is None:
             return
 
-        if not ids:
+        if not annotation_ids:
             return
 
-        flag_counts = self._flag_count_svc.flag_counts(ids)
+        flag_counts = self._flag_count_svc.flag_counts(annotation_ids)
         self._cache.update(flag_counts)
         return flag_counts
 
