@@ -55,45 +55,26 @@ class TestAnnotationJSONPresentationService:
 
         assert result == AnnotationJSONPresenter.return_value.asdict.return_value
 
-    def test_present_all_loads_annotations_from_db(self, svc, storage):
-        svc.present_all(["id-1", "id-2"])
+    def test_present_all(
+        self, svc, factories, AnnotationJSONPresenter, AnnotationContext
+    ):
+        annotation = factories.Annotation()
+        annotation_ids = [annotation.id]
 
-        storage.fetch_ordered_annotations.assert_called_once_with(
-            svc.session, ["id-1", "id-2"], query_processor=Any()
+        result = svc.present_all(annotation_ids)
+
+        for formatter in svc.formatters:
+            formatter.preload.assert_called_once_with(annotation_ids)
+
+        AnnotationContext.assert_called_once_with(
+            annotation, svc.group_svc, svc.links_svc
         )
-
-    def test_present_all_initialises_annotation_resources(
-        self, svc, storage, AnnotationContext
-    ):
-        ann = mock.Mock()
-        storage.fetch_ordered_annotations.return_value = [ann]
-
-        svc.present_all(["ann-1"])
-
-        AnnotationContext.assert_called_once_with(ann, svc.group_svc, svc.links_svc)
-
-    def test_present_all_presents_annotation_resources(
-        self, svc, storage, AnnotationContext, present
-    ):
-        storage.fetch_ordered_annotations.return_value = [mock.Mock()]
-        resource = AnnotationContext.return_value
-
-        svc.present_all(["ann-1"])
-        present.assert_called_once_with(svc, resource)
-
-    def test_present_all_preloads_formatters(self, svc, storage):
-        formatter = mock.Mock(spec_set=["preload"])
-        svc.formatters = [formatter]
-
-        svc.present_all(["ann-1", "ann-2"])
-
-        formatter.preload.assert_called_once_with(["ann-1", "ann-2"])
-
-    def test_returns_presented_annotations(self, svc, storage, present):
-        storage.fetch_ordered_annotations.return_value = [mock.Mock()]
-
-        result = svc.present_all(["ann-1"])
-        assert result == [present.return_value]
+        AnnotationJSONPresenter.assert_called_once_with(
+            AnnotationContext.return_value, svc.formatters
+        )
+        assert result == [
+            AnnotationJSONPresenter.return_value.asdict.return_value,
+        ]
 
     @pytest.fixture
     def svc(self, db_session, has_permission):
@@ -118,19 +99,9 @@ class TestAnnotationJSONPresentationService:
         return mock.Mock(spec_set=["annotation"], annotation=mock.Mock())
 
     @pytest.fixture
-    def storage(self, patch):
-        return patch("h.services.annotation_json_presentation.service.storage")
-
-    @pytest.fixture
     def AnnotationContext(self, patch):
         return patch(
             "h.services.annotation_json_presentation.service.AnnotationContext"
-        )
-
-    @pytest.fixture
-    def present(self, patch):
-        return patch(
-            "h.services.annotation_json_presentation.service.AnnotationJSONPresentationService.present"
         )
 
     @pytest.fixture(autouse=True)
