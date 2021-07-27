@@ -1,42 +1,15 @@
 import datetime
 from unittest import mock
+from unittest.mock import create_autospec
 
 import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
-from zope.interface import implementer
 
-from h.formatters.interfaces import IAnnotationFormatter
+from h.formatters import AnnotationFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
 from h.security.permissions import Permission
 from h.traversal import AnnotationContext
-
-
-@implementer(IAnnotationFormatter)
-class FakeFormatter:
-    def __init__(self, data=None):
-        self.data = data or {}
-
-    def preload(self, ids):
-        pass
-
-    def format(self, annotation):
-        return self.data
-
-
-@implementer(IAnnotationFormatter)
-class IDDuplicatingFormatter:
-    """This formatter take the annotation's ID and adds it in another key.
-
-    The main purpose of it is to confirm that the presenter is passing in the
-    AnnotationContext object.
-    """
-
-    def preload(self, ids):
-        pass
-
-    def format(self, annotation_resource):
-        return {"duplicated-id": annotation_resource.annotation.id}
 
 
 class TestAnnotationJSONPresenter:
@@ -114,21 +87,27 @@ class TestAnnotationJSONPresenter:
         # Presenting the annotation shouldn't change the "extra" dict.
         assert extra == {"foo": "bar"}
 
-    def test_asdict_merges_formatters(self, groupfinder_service, links_service):
+    def test_asdict_merges_formatters(
+        self, groupfinder_service, links_service, get_formatter
+    ):
         ann = mock.Mock(id="the-real-id", extra={})
         resource = AnnotationContext(ann, groupfinder_service, links_service)
+        presenter = AnnotationJSONPresenter(
+            resource,
+            formatters=[
+                get_formatter({"flagged": "nope"}),
+                get_formatter({"nipsa": "maybe"}),
+            ],
+        )
 
-        formatters = [
-            FakeFormatter({"flagged": "nope"}),
-            FakeFormatter({"nipsa": "maybe"}),
-        ]
-        presenter = AnnotationJSONPresenter(resource, formatters)
         presented = presenter.asdict()
 
         assert presented["flagged"] == "nope"
         assert presented["nipsa"] == "maybe"
 
-    def test_immutable_formatters(self, groupfinder_service, links_service):
+    def test_immutable_formatters(
+        self, groupfinder_service, links_service, get_formatter
+    ):
         """Double-check we can't mutate the formatters list after the fact.
 
         This is an extra check just to make sure we can't accidentally change
@@ -138,26 +117,25 @@ class TestAnnotationJSONPresenter:
         """
         ann = mock.Mock(id="the-real-id", extra={})
         resource = AnnotationContext(ann, groupfinder_service, links_service)
+        formatters = []
 
-        formatters = [FakeFormatter({"flagged": "nope"})]
         presenter = AnnotationJSONPresenter(resource, formatters)
-        formatters.append(FakeFormatter({"enterprise": "synergy"}))
+        formatters.append(get_formatter({"enterprise": "synergy"}))
         presented = presenter.asdict()
 
         assert "enterprise" not in presented
 
     def test_formatter_uses_annotation_resource(
-        self, groupfinder_service, links_service
+        self, groupfinder_service, links_service, get_formatter
     ):
         annotation = mock.Mock(id="the-id", extra={})
         resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        formatter = get_formatter()
 
-        formatters = [IDDuplicatingFormatter()]
-        presenter = AnnotationJSONPresenter(resource, formatters)
+        presenter = AnnotationJSONPresenter(resource, formatters=[formatter])
+        presenter.asdict()
 
-        output = presenter.asdict()
-
-        assert output["duplicated-id"] == "the-id"
+        formatter.format.assert_called_once_with(resource)
 
     @pytest.mark.usefixtures("policy")
     @pytest.mark.parametrize(
@@ -226,15 +204,16 @@ class TestAnnotationJSONPresenter:
         presenter = AnnotationJSONPresenter(resource)
         assert expected == presenter.permissions[action]
 
-    def test_exception_for_wrong_formatter_type(self):
-        with pytest.raises(ValueError) as exc:
-            AnnotationJSONPresenter(mock.Mock(), formatters=[mock.Mock()])
-
-        assert "not implementing IAnnotationFormatter interface" in str(exc.value)
-
     @pytest.fixture
-    def document_asdict(self, patch):
-        return patch("h.presenters.annotation_json.DocumentJSONPresenter.asdict")
+    def get_formatter(self):
+        def get_formatter(payload=None):
+            formatter = create_autospec(
+                AnnotationFormatter, spec_set=True, instance=True
+            )
+            formatter.format.return_value = payload or {}
+            return formatter
+
+        return get_formatter
 
     @pytest.fixture
     def policy(self, pyramid_config):
@@ -242,3 +221,7 @@ class TestAnnotationJSONPresenter:
         policy = ACLAuthorizationPolicy()
         pyramid_config.testing_securitypolicy(None)
         pyramid_config.set_authorization_policy(policy)
+
+    @pytest.fixture
+    def document_asdict(self, patch):
+        return patch("h.presenters.annotation_json.DocumentJSONPresenter.asdict")

@@ -1,10 +1,7 @@
-from zope.interface import implementer
-
-from h.formatters.interfaces import IAnnotationFormatter
+from h.formatters.formatter import AnnotationFormatter
 
 
-@implementer(IAnnotationFormatter)
-class AnnotationHiddenFormatter:
+class AnnotationHiddenFormatter(AnnotationFormatter):
     """
     Formatter for dealing with annotations that a moderator has hidden.
 

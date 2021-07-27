@@ -1,11 +1,8 @@
-from zope.interface import implementer
-
-from h.formatters.interfaces import IAnnotationFormatter
+from h.formatters.formatter import AnnotationFormatter
 from h.security.permissions import Permission
 
 
-@implementer(IAnnotationFormatter)
-class AnnotationModerationFormatter:
+class AnnotationModerationFormatter(AnnotationFormatter):
     """
     Formatter for exposing an annotation's moderation information.
 

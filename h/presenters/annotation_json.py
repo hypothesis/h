@@ -2,10 +2,7 @@ import copy
 
 from pyramid import security
 from pyramid.security import principals_allowed_by_permission
-from zope.interface.exceptions import DoesNotImplement
-from zope.interface.verify import verifyObject
 
-from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security.permissions import Permission
@@ -21,18 +18,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         self._formatters = []
 
         if formatters is not None:
-            for formatter in formatters:
-                self._add_formatter(formatter)
-
-    def _add_formatter(self, formatter):
-        try:
-            verifyObject(IAnnotationFormatter, formatter)
-        except DoesNotImplement as err:
-            raise ValueError(
-                "formatter is not implementing IAnnotationFormatter interface"
-            ) from err
-
-        self._formatters.append(formatter)
+            self._formatters.extend(formatters)
 
     def asdict(self):
         docpresenter = DocumentJSONPresenter(self.annotation.document)
