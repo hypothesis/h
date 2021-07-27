@@ -4,13 +4,9 @@ from collections import namedtuple
 
 import slugify
 import sqlalchemy as sa
-from pyramid import security
-from pyramid.security import Allow
 
 from h import pubid  # pylint: disable=unused-import
-from h.auth import role
 from h.db import Base, mixins
-from h.security.permissions import Permission
 from h.util.group import split_groupid
 
 GROUP_NAME_MIN_LENGTH = 3
@@ -220,75 +216,6 @@ class Group(Base, mixins.Timestamps):
     @property
     def is_public(self):
         return self.readable_by == ReadableBy.world
-
-    def __acl__(self):
-        terms = []
-
-        # This principal is given to clients which log in using an OAuth client
-        # and secret to a particular authority
-        client_authority_principal = f"client_authority:{self.authority}"
-        # Given to logged in users to the authority they belong in
-        in_authority_principal = f"authority:{self.authority}"
-        # Logged in users are given group principals for all of their groups
-        in_group_principal = f"group:{self.pubid}"
-
-        # General permissions ---------------------------------------------- #
-
-        if self.joinable_by == JoinableBy.authority:
-            terms.append((Allow, in_authority_principal, Permission.Group.JOIN))
-
-        # Any logged in user should be able to flag things they can see
-        if self.readable_by == ReadableBy.members:
-            terms.append((Allow, in_group_principal, Permission.Group.FLAG))
-        elif self.readable_by == ReadableBy.world:
-            terms.append((Allow, security.Authenticated, Permission.Group.FLAG))
-
-        if self.writeable_by == WriteableBy.authority:
-            terms.append((Allow, in_authority_principal, Permission.Group.WRITE))
-        elif self.writeable_by == WriteableBy.members:
-            terms.append((Allow, in_group_principal, Permission.Group.WRITE))
-
-        if self.creator:
-            terms.append((Allow, self.creator.userid, Permission.Group.MODERATE))
-            # The creator may update this group in an upsert context
-            terms.append((Allow, self.creator.userid, Permission.Group.UPSERT))
-
-        # auth_clients that have the same authority as the target group
-        # may add members to it
-        terms.append((Allow, client_authority_principal, Permission.Group.MEMBER_ADD))
-
-        # Read permissions ------------------------------------------------ #
-
-        if self.readable_by == ReadableBy.members:
-            terms.append((Allow, in_group_principal, Permission.Group.READ))
-            terms.append((Allow, in_group_principal, Permission.Group.MEMBER_READ))
-        elif self.readable_by == ReadableBy.world:
-            terms.append((Allow, security.Everyone, Permission.Group.READ))
-            terms.append((Allow, security.Everyone, Permission.Group.MEMBER_READ))
-
-        # auth_clients with matching authority should be able to read the group
-        # and it's members
-        terms.append((Allow, client_authority_principal, Permission.Group.READ))
-        terms.append((Allow, client_authority_principal, Permission.Group.MEMBER_READ))
-
-        # Group edit permissions ------------------------------------------- #
-
-        # auth_clients that have the same authority as this group
-        # should be allowed to update it
-        terms.append((Allow, client_authority_principal, Permission.Group.ADMIN))
-
-        # Those with the admin or staff role should be able to admin/edit any
-        # group
-        terms.append((Allow, role.Staff, Permission.Group.ADMIN))
-        terms.append((Allow, role.Admin, Permission.Group.ADMIN))
-
-        if self.creator:
-            # The creator of the group should be able to update it
-            terms.append((Allow, self.creator.userid, Permission.Group.ADMIN))
-
-        terms.append(security.DENY_ALL)
-
-        return terms
 
     def __repr__(self):
         return "<Group: %s>" % self.slug
