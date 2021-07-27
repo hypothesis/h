@@ -1,74 +1,45 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 
 from h.services.annotation_json_presentation import (
-    AnnotationJSONPresentationService,
     annotation_json_presentation_service_factory,
 )
 
 
-@pytest.mark.usefixtures("services")
 class TestAnnotationJSONPresentationServiceFactory:
-    def test_returns_service(self, pyramid_request):
-        svc = annotation_json_presentation_service_factory(None, pyramid_request)
-
-        assert isinstance(svc, AnnotationJSONPresentationService)
-
-    def test_provides_session(self, pyramid_request, service_class):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["session"] == pyramid_request.db
-
-    def test_provides_user(self, pyramid_request, service_class):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["user"] == pyramid_request.user
-
-    def test_provides_group_service(self, pyramid_request, service_class, services):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["group_svc"] == services["group"]
-
-    def test_provides_links_service(self, pyramid_request, service_class, services):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["links_svc"] == services["links"]
-
-    def test_provides_flag_service(self, pyramid_request, service_class, services):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["flag_svc"] == services["flag"]
-
-    def test_provides_moderation_service(
-        self, pyramid_request, service_class, services
+    def test_it(
+        self,
+        pyramid_request,
+        AnnotationJSONPresentationService,
+        flag_service,
+        flag_count_service,
+        groupfinder_service,
+        links_service,
+        moderation_service,
+        user_service,
     ):
-        annotation_json_presentation_service_factory(None, pyramid_request)
+        service = annotation_json_presentation_service_factory(
+            sentinel.context, pyramid_request
+        )
 
-        _, kwargs = service_class.call_args
-        assert kwargs["moderation_svc"] == services["annotation_moderation"]
+        assert service == AnnotationJSONPresentationService.return_value
 
-    def test_provides_flag_count_service(
-        self, pyramid_request, service_class, services
-    ):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["flag_count_svc"] == services["flag_count"]
-
-    def test_provides_has_permission(self, pyramid_request, service_class):
-        annotation_json_presentation_service_factory(None, pyramid_request)
-
-        _, kwargs = service_class.call_args
-        assert kwargs["has_permission"] == pyramid_request.has_permission
+        AnnotationJSONPresentationService.assert_called_once_with(
+            session=pyramid_request.db,
+            user=pyramid_request.user,
+            has_permission=pyramid_request.has_permission,
+            group_svc=groupfinder_service,
+            links_svc=links_service,
+            flag_svc=flag_service,
+            flag_count_svc=flag_count_service,
+            moderation_svc=moderation_service,
+            user_svc=user_service,
+        )
 
     @pytest.fixture
-    def service_class(self, patch):
+    def AnnotationJSONPresentationService(self, patch):
         return patch(
             "h.services.annotation_json_presentation.factory.AnnotationJSONPresentationService"
         )
@@ -77,19 +48,3 @@ class TestAnnotationJSONPresentationServiceFactory:
     def pyramid_request(self, pyramid_request):
         pyramid_request.user = mock.Mock()
         return pyramid_request
-
-
-@pytest.fixture
-def services(pyramid_config, user_service, links_service, groupfinder_service):
-    service_mocks = {
-        "user": user_service,
-        "links": links_service,
-        "group": groupfinder_service,
-    }
-
-    for name in ["flag", "flag_count", "annotation_moderation"]:
-        svc = mock.Mock()
-        service_mocks[name] = svc
-        pyramid_config.register_service(svc, name=name)
-
-    return service_mocks
