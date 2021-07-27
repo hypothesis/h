@@ -69,7 +69,7 @@ class TestAnnotationRoot:
         factory["123"]
         storage.fetch_annotation.assert_called_once_with(pyramid_request.db, "123")
 
-    def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
+    def test_get_item_returns_annotation_context(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 

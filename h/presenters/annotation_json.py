@@ -12,8 +12,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
 
     """Present an annotation in the JSON format returned by API requests."""
 
-    def __init__(self, annotation_resource, formatters=None):
-        super().__init__(annotation_resource)
+    def __init__(self, annotation_context, formatters=None):
+        super().__init__(annotation_context)
 
         self._formatters = []
 
@@ -45,7 +45,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         annotation.update(base)
 
         for formatter in self._formatters:
-            annotation.update(formatter.format(self.annotation_resource))
+            annotation.update(formatter.format(self.annotation_context))
 
         return annotation
 
@@ -63,7 +63,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             read = "group:{}".format(self.annotation.groupid)
 
             principals = principals_allowed_by_permission(
-                self.annotation_resource, Permission.Annotation.READ
+                self.annotation_context, Permission.Annotation.READ
             )
             if security.Everyone in principals:
                 read = "group:__world__"

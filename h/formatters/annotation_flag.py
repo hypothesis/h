@@ -24,8 +24,8 @@ class AnnotationFlagFormatter:
         self._cache.update(flags)
         return flags
 
-    def format(self, annotation_resource):
-        flagged = self._load(annotation_resource.annotation)
+    def format(self, annotation_context):
+        flagged = self._load(annotation_context.annotation)
         return {"flagged": flagged}
 
     def _load(self, annotation):

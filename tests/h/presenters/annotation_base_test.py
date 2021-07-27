@@ -7,79 +7,79 @@ from h.presenters.annotation_base import AnnotationBasePresenter, utc_iso8601
 class TestAnnotationBasePresenter:
     def test_constructor_args(self):
         annotation = mock.Mock()
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
-        presenter = AnnotationBasePresenter(resource)
+        presenter = AnnotationBasePresenter(context)
 
-        assert presenter.annotation_resource == resource
+        assert presenter.annotation_context == context
         assert presenter.annotation == annotation
 
     def test_created_returns_none_if_missing(self):
         annotation = mock.Mock(created=None)
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
-        created = AnnotationBasePresenter(resource).created
+        created = AnnotationBasePresenter(context).created
 
         assert created is None
 
     def test_created_uses_iso_format(self):
         when = datetime.datetime(2012, 3, 14, 23, 34, 47, 12)
         annotation = mock.Mock(created=when)
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
-        created = AnnotationBasePresenter(resource).created
+        created = AnnotationBasePresenter(context).created
 
         assert created == "2012-03-14T23:34:47.000012+00:00"
 
     def test_updated_returns_none_if_missing(self):
         annotation = mock.Mock(updated=None)
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
-        updated = AnnotationBasePresenter(resource).updated
+        updated = AnnotationBasePresenter(context).updated
 
         assert updated is None
 
     def test_updated_uses_iso_format(self):
         when = datetime.datetime(1983, 8, 31, 7, 18, 20, 98763)
         annotation = mock.Mock(updated=when)
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
-        updated = AnnotationBasePresenter(resource).updated
+        updated = AnnotationBasePresenter(context).updated
 
         assert updated == "1983-08-31T07:18:20.098763+00:00"
 
     def test_links(self):
         annotation = mock.Mock()
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
-        links = AnnotationBasePresenter(resource).links
-        assert links == resource.links
+        links = AnnotationBasePresenter(context).links
+        assert links == context.links
 
     def test_text(self):
         annotation = mock.Mock(text="It is magical!")
-        resource = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(resource)
+        context = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(context)
 
         assert "It is magical!" == presenter.text
 
     def test_text_missing(self):
         annotation = mock.Mock(text=None)
-        resource = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(resource)
+        context = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(context)
 
         assert "" == presenter.text
 
     def test_tags(self):
         annotation = mock.Mock(tags=["interesting", "magic"])
-        resource = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(resource)
+        context = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(context)
 
         assert ["interesting", "magic"] == presenter.tags
 
     def test_tags_missing(self):
         annotation = mock.Mock(tags=None)
-        resource = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(resource)
+        context = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(context)
 
         assert [] == presenter.tags
 
@@ -88,7 +88,7 @@ class TestAnnotationBasePresenter:
             target_uri="http://example.com",
             target_selectors={"PositionSelector": {"start": 0, "end": 12}},
         )
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
         expected = [
             {
@@ -96,15 +96,15 @@ class TestAnnotationBasePresenter:
                 "selector": {"PositionSelector": {"start": 0, "end": 12}},
             }
         ]
-        actual = AnnotationBasePresenter(resource).target
+        actual = AnnotationBasePresenter(context).target
         assert expected == actual
 
     def test_target_missing_selectors(self):
         annotation = mock.Mock(target_uri="http://example.com", target_selectors=None)
-        resource = mock.Mock(annotation=annotation)
+        context = mock.Mock(annotation=annotation)
 
         expected = [{"source": "http://example.com"}]
-        actual = AnnotationBasePresenter(resource).target
+        actual = AnnotationBasePresenter(context).target
         assert expected == actual
 
 

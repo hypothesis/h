@@ -36,8 +36,8 @@ class AnnotationJSONPresentationService:
             formatters.AnnotationUserInfoFormatter(self.session, user_svc),
         ]
 
-    def present(self, annotation_resource):
-        return AnnotationJSONPresenter(annotation_resource, self.formatters).asdict()
+    def present(self, annotation_context):
+        return AnnotationJSONPresenter(annotation_context, self.formatters).asdict()
 
     def present_all(self, annotation_ids):
         def eager_load_documents(query):

@@ -28,7 +28,7 @@ class TestAnnotationJSONPresenter:
             references=["referenced-id-1", "referenced-id-2"],
             extra={"extra-1": "foo", "extra-2": "bar"},
         )
-        resource = AnnotationContext(ann, groupfinder_service, links_service)
+        context = AnnotationContext(ann, groupfinder_service, links_service)
 
         document_asdict.return_value = {"foo": "bar"}
 
@@ -60,7 +60,7 @@ class TestAnnotationJSONPresenter:
             "extra-2": "bar",
         }
 
-        result = AnnotationJSONPresenter(resource).asdict()
+        result = AnnotationJSONPresenter(context).asdict()
 
         assert result == expected
 
@@ -68,10 +68,10 @@ class TestAnnotationJSONPresenter:
         self, document_asdict, groupfinder_service, links_service
     ):
         ann = mock.Mock(id="the-real-id", extra={"id": "the-extra-id"})
-        resource = AnnotationContext(ann, groupfinder_service, links_service)
+        context = AnnotationContext(ann, groupfinder_service, links_service)
         document_asdict.return_value = {}
 
-        presented = AnnotationJSONPresenter(resource).asdict()
+        presented = AnnotationJSONPresenter(context).asdict()
         assert presented["id"] == "the-real-id"
 
     def test_asdict_extra_uses_copy_of_extra(
@@ -79,10 +79,10 @@ class TestAnnotationJSONPresenter:
     ):
         extra = {"foo": "bar"}
         ann = mock.Mock(id="my-id", extra=extra)
-        resource = AnnotationContext(ann, groupfinder_service, links_service)
+        context = AnnotationContext(ann, groupfinder_service, links_service)
         document_asdict.return_value = {}
 
-        AnnotationJSONPresenter(resource).asdict()
+        AnnotationJSONPresenter(context).asdict()
 
         # Presenting the annotation shouldn't change the "extra" dict.
         assert extra == {"foo": "bar"}
@@ -91,9 +91,9 @@ class TestAnnotationJSONPresenter:
         self, groupfinder_service, links_service, get_formatter
     ):
         ann = mock.Mock(id="the-real-id", extra={})
-        resource = AnnotationContext(ann, groupfinder_service, links_service)
+        context = AnnotationContext(ann, groupfinder_service, links_service)
         presenter = AnnotationJSONPresenter(
-            resource,
+            context,
             formatters=[
                 get_formatter({"flagged": "nope"}),
                 get_formatter({"nipsa": "maybe"}),
@@ -116,26 +116,26 @@ class TestAnnotationJSONPresenter:
 
         """
         ann = mock.Mock(id="the-real-id", extra={})
-        resource = AnnotationContext(ann, groupfinder_service, links_service)
+        context = AnnotationContext(ann, groupfinder_service, links_service)
         formatters = []
 
-        presenter = AnnotationJSONPresenter(resource, formatters)
+        presenter = AnnotationJSONPresenter(context, formatters)
         formatters.append(get_formatter({"enterprise": "synergy"}))
         presented = presenter.asdict()
 
         assert "enterprise" not in presented
 
-    def test_formatter_uses_annotation_resource(
+    def test_formatter_uses_annotation_context(
         self, groupfinder_service, links_service, get_formatter
     ):
         annotation = mock.Mock(id="the-id", extra={})
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
         formatter = get_formatter()
 
-        presenter = AnnotationJSONPresenter(resource, formatters=[formatter])
+        presenter = AnnotationJSONPresenter(context, formatters=[formatter])
         presenter.asdict()
 
-        formatter.format.assert_called_once_with(resource)
+        formatter.format.assert_called_once_with(context)
 
     @pytest.mark.usefixtures("policy")
     @pytest.mark.parametrize(
@@ -200,8 +200,8 @@ class TestAnnotationJSONPresenter:
         group.__acl__.return_value = [group_principals[group_readable]]
         groupfinder_service.find.return_value = group
 
-        resource = AnnotationContext(annotation, groupfinder_service, links_service)
-        presenter = AnnotationJSONPresenter(resource)
+        context = AnnotationContext(annotation, groupfinder_service, links_service)
+        presenter = AnnotationJSONPresenter(context)
         assert expected == presenter.permissions[action]
 
     @pytest.fixture

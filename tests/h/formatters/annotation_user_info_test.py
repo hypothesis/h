@@ -25,9 +25,9 @@ class TestAnnotationUserInfoFormatter:
 
     def test_format_fetches_user_by_id(self, formatter, factories, user_svc):
         annotation = factories.Annotation.build()
-        resource = FakeAnnotationContext(annotation)
+        context = FakeAnnotationContext(annotation)
 
-        formatter.format(resource)
+        formatter.format(context)
 
         user_svc.fetch.assert_called_once_with(annotation.userid)
 

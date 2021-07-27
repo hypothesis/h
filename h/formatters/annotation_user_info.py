@@ -19,6 +19,6 @@ class AnnotationUserInfoFormatter:
         }
         self.user_svc.fetch_all(userids)
 
-    def format(self, annotation_resource):
-        user = self.user_svc.fetch(annotation_resource.annotation.userid)
+    def format(self, annotation_context):
+        user = self.user_svc.fetch(annotation_context.annotation.userid)
         return user_info(user)

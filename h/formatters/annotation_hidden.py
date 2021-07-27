@@ -30,9 +30,9 @@ class AnnotationHiddenFormatter:
         self._cache.update(hidden)
         return hidden
 
-    def format(self, annotation_resource):
-        annotation = annotation_resource.annotation
-        group = annotation_resource.group
+    def format(self, annotation_context):
+        annotation = annotation_context.annotation
+        group = annotation_context.group
 
         if self._current_user_is_moderator(group):
             return {"hidden": self._is_hidden(annotation)}
