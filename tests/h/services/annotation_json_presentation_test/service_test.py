@@ -1,4 +1,5 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -9,18 +10,28 @@ from h.services.annotation_json_presentation import AnnotationJSONPresentationSe
 
 @pytest.mark.usefixtures("presenters", "formatters")
 class TestAnnotationJSONPresentationService:
-    def test_initializes_flag_formatter(self, services, formatters, svc):
+    def test_it_configures_formatters(
+        self, svc, formatters, flag_service, moderation_service, has_permission
+    ):
         formatters.AnnotationFlagFormatter.assert_called_once_with(
-            services["flag"], mock.sentinel.user
+            sentinel.flag_svc, sentinel.user
         )
-
-    def test_it_configures_flag_formatter(self, services, formatters, svc):
-        assert formatters.AnnotationFlagFormatter.return_value in svc.formatters
-
-    def test_initializes_hidden_formatter(self, services, formatters, svc):
         formatters.AnnotationHiddenFormatter.assert_called_once_with(
-            services["annotation_moderation"], Any.function(), mock.sentinel.user
+            sentinel.moderation_svc, Any.function(), sentinel.user
         )
+        formatters.AnnotationModerationFormatter.assert_called_once_with(
+            sentinel.flag_count_svc, sentinel.user, has_permission
+        )
+        formatters.AnnotationUserInfoFormatter.assert_called_once_with(
+            sentinel.db_session, sentinel.user_svc
+        )
+
+        assert svc.formatters == [
+            formatters.AnnotationFlagFormatter.return_value,
+            formatters.AnnotationHiddenFormatter.return_value,
+            formatters.AnnotationModerationFormatter.return_value,
+            formatters.AnnotationUserInfoFormatter.return_value,
+        ]
 
     def test_hidden_status_included_if_user_can_moderate_group(
         self, formatters, has_permission, svc
@@ -30,48 +41,17 @@ class TestAnnotationJSONPresentationService:
         moderator_check(group)
         has_permission.assert_called_once_with(Permission.Group.MODERATE, group)
 
-    def test_it_configures_hidden_formatter(self, services, formatters, svc):
-        assert formatters.AnnotationHiddenFormatter.return_value in svc.formatters
-
-    def test_initializes_moderation_formatter(
-        self, services, formatters, has_permission, svc
-    ):
-        formatters.AnnotationModerationFormatter.assert_called_once_with(
-            services["flag_count"], mock.sentinel.user, has_permission
-        )
-
-    def test_it_configures_moderation_formatter(self, services, formatters, svc):
-        assert formatters.AnnotationModerationFormatter.return_value in svc.formatters
-
-    def test_initializes_user_info_formatter(self, services, formatters, svc):
-        formatters.AnnotationUserInfoFormatter.assert_called_once_with(
-            mock.sentinel.db_session, services["user"]
-        )
-
-    def test_it_configures_user_info_formatter(self, services, formatters, svc):
-        assert formatters.AnnotationUserInfoFormatter.return_value in svc.formatters
-
-    def test_present_inits_presenter(self, svc, presenters, annotation_resource):
-        svc.present(annotation_resource)
+    def test_present_calls_presenter(self, svc, presenters, annotation_resource):
+        result = svc.present(annotation_resource)
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource, Any()
+            annotation_resource, svc.formatters
         )
 
-    def test_present_adds_formatters(self, svc, annotation_resource, presenters):
-        formatters = [mock.Mock(), mock.Mock()]
-        svc.formatters = formatters
-
-        svc.present(annotation_resource)
-
-        presenters.AnnotationJSONPresenter.assert_called_once_with(Any(), formatters)
-
-    def test_present_returns_presenter_dict(self, svc, presenters):
-        presenter = presenters.AnnotationJSONPresenter.return_value
-
-        result = svc.present(mock.Mock())
-
-        assert result == presenter.asdict.return_value
+        assert (
+            result
+            == presenters.AnnotationJSONPresenter.return_value.asdict.return_value
+        )
 
     def test_present_all_loads_annotations_from_db(self, svc, storage):
         svc.present_all(["id-1", "id-2"])
@@ -116,16 +96,16 @@ class TestAnnotationJSONPresentationService:
         assert result == [present.return_value]
 
     @pytest.fixture
-    def svc(self, services, has_permission):
+    def svc(self, has_permission):
         return AnnotationJSONPresentationService(
-            session=mock.sentinel.db_session,
-            user=mock.sentinel.user,
-            group_svc=services["group"],
-            links_svc=services["links"],
-            flag_svc=services["flag"],
-            flag_count_svc=services["flag_count"],
-            moderation_svc=services["annotation_moderation"],
-            user_svc=services["user"],
+            session=sentinel.db_session,
+            user=sentinel.user,
+            group_svc=sentinel.group_svc,
+            links_svc=sentinel.links_svc,
+            flag_svc=sentinel.flag_svc,
+            flag_count_svc=sentinel.flag_count_svc,
+            moderation_svc=sentinel.moderation_svc,
+            user_svc=sentinel.user_svc,
             has_permission=has_permission,
         )
 
@@ -158,19 +138,3 @@ class TestAnnotationJSONPresentationService:
     @pytest.fixture
     def formatters(self, patch):
         return patch("h.services.annotation_json_presentation.service.formatters")
-
-
-@pytest.fixture
-def services(pyramid_config, user_service, links_service, groupfinder_service):
-    service_mocks = {
-        "user": user_service,
-        "links": links_service,
-        "group": groupfinder_service,
-    }
-
-    for name in ["flag", "flag_count", "annotation_moderation"]:
-        svc = mock.Mock()
-        service_mocks[name] = svc
-        pyramid_config.register_service(svc, name=name)
-
-    return service_mocks
