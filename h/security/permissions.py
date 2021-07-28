@@ -1,5 +1,8 @@
+from enum import Enum
+
+
 class Permission:
-    class Group:
+    class Group(Enum):
         ADMIN = "group:admin"  # Is this really "EDIT" or a combination?
         JOIN = "group:join"
         READ = "group:read"
@@ -11,7 +14,7 @@ class Permission:
         MEMBER_READ = "group:member:read"
         MEMBER_ADD = "group:member:add"
 
-    class Annotation:
+    class Annotation(Enum):
         READ = "annotation:read"
         UPDATE = "annotation:update"
         CREATE = "annotation:create"
@@ -19,15 +22,15 @@ class Permission:
         FLAG = "annotation:flag"
         MODERATE = "annotation:moderate"
 
-    class User:
+    class User(Enum):
         READ = "user:read"
         CREATE = "user:create"
         UPDATE = "user:update"
 
-    class Profile:
+    class Profile(Enum):
         UPDATE = "profile:update"
 
-    class AdminPage:
+    class AdminPage(Enum):
         ADMINS = "admin:admins"
         BADGE = "admin:badge"
         FEATURES = "admin:features"
@@ -41,5 +44,5 @@ class Permission:
         STAFF = "admin:staff"
         USERS = "admin:users"
 
-    class API:
+    class API(Enum):
         BULK_ACTION = "api:bulk_action"
