@@ -1,9 +1,8 @@
 from h import models
-from h.formatters.formatter import AnnotationFormatter
 from h.session import user_info
 
 
-class AnnotationUserInfoFormatter(AnnotationFormatter):
+class AnnotationUserInfoFormatter:
     def __init__(self, session, user_svc):
         self.session = session
         self.user_svc = user_svc

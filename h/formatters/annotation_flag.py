@@ -1,7 +1,4 @@
-from h.formatters.formatter import AnnotationFormatter
-
-
-class AnnotationFlagFormatter(AnnotationFormatter):
+class AnnotationFlagFormatter:
     """
     Formatter for exposing a user's annotation flags.
 
