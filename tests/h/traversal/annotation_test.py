@@ -48,23 +48,25 @@ class TestAnnotationRoot:
 
 
 class TestAnnotationContext:
-    def test_links(self, groupfinder_service, links_service):
-        ann = mock.Mock()
-        res = AnnotationContext(ann, groupfinder_service, links_service)
+    def test_links(self, annotation, context, links_service):
+        result = context.links
 
-        result = res.links
-
-        links_service.get_all.assert_called_once_with(ann)
+        links_service.get_all.assert_called_once_with(annotation)
         assert result == links_service.get_all.return_value
 
-    def test_link(self, groupfinder_service, links_service):
-        ann = mock.Mock()
-        res = AnnotationContext(ann, groupfinder_service, links_service)
+    def test_link(self, annotation, context, links_service):
+        result = context.link("json")
 
-        result = res.link("json")
-
-        links_service.get.assert_called_once_with(ann, "json")
+        links_service.get.assert_called_once_with(annotation, "json")
         assert result == links_service.get.return_value
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def context(self, annotation, groupfinder_service, links_service):
+        return AnnotationContext(annotation, groupfinder_service, links_service)
 
 
 class FakeGroup:
