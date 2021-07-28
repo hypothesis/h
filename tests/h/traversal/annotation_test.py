@@ -1,6 +1,7 @@
 from unittest.mock import sentinel
 
 import pytest
+from h_matchers import Any
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
@@ -9,24 +10,19 @@ from h.traversal import AnnotationContext, AnnotationRoot
 
 
 class TestAnnotationRoot:
-    def test_create_permission_requires_authenticated_user(
-        self, pyramid_request, permits
-    ):
-        root = AnnotationRoot(pyramid_request)
-
+    def test_create_permission_requires_authenticated_user(self, root, permits):
         assert permits(root, [security.Authenticated], Permission.Annotation.CREATE)
         assert not permits(root, [], Permission.Annotation.CREATE)
 
     def test_annotation_lookup(
         self,
+        root,
         pyramid_request,
         AnnotationContext,
         storage,
         groupfinder_service,
         links_service,
     ):
-        root = AnnotationRoot(pyramid_request)
-
         context = root[sentinel.annotation_id]
 
         assert context == AnnotationContext.return_value
@@ -36,6 +32,16 @@ class TestAnnotationRoot:
         AnnotationContext.assert_called_once_with(
             storage.fetch_annotation.return_value, groupfinder_service, links_service
         )
+
+    def test_failing_annotation_lookup(self, root, storage):
+        storage.fetch_annotation.return_value = None
+
+        with pytest.raises(KeyError):
+            assert root[sentinel.annotation_id]
+
+    @pytest.fixture
+    def root(self, pyramid_request):
+        return AnnotationRoot(pyramid_request)
 
     @pytest.fixture
     def storage(self, patch):
@@ -83,6 +89,8 @@ class TestAnnotationContext:
     def test_acl_shared_permissions_mirror_the_group(
         self, annotation, context, permits, groupfinder_service
     ):
+        annotation.shared = True
+
         class GroupACLs:
             __acl__ = [
                 (security.Allow, "principal_1", Permission.Group.FLAG),
@@ -92,12 +100,22 @@ class TestAnnotationContext:
             ]
 
         groupfinder_service.find.return_value = GroupACLs()
-        annotation.shared = True
 
         permits(context, ["principal_1"], Permission.Annotation.FLAG)
         permits(context, ["principal_2"], Permission.Annotation.FLAG)
         permits(context, ["principal_1"], Permission.Annotation.MODERATE)
         permits(context, ["principal_2"], Permission.Annotation.MODERATE)
+
+    def test_acl_shared_permissions_with_no_group(
+        self, annotation, context, permits, groupfinder_service
+    ):
+        annotation.shared = True
+        groupfinder_service.find.return_value = None
+
+        acl = context.__acl__()
+
+        assert (security.Allow, Any(), Permission.Annotation.FLAG) not in acl
+        assert (security.Allow, Any(), Permission.Annotation.MODERATE) not in acl
 
     @pytest.fixture
     def annotation(self, factories):
