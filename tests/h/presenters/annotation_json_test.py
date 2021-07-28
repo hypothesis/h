@@ -77,22 +77,6 @@ class TestAnnotationJSONPresenter:
         for formatter in formatters:
             formatter.format.assert_called_once_with(context)
 
-    def test_immutable_formatters(self, annotation, context, get_formatter):
-        """Double-check we can't mutate the formatters list after the fact.
-
-        This is an extra check just to make sure we can't accidentally change
-        the constructor so that it simply aliases the list that's passed in,
-        leaving us open to all kinds of mutability horrors.
-
-        """
-        formatters = []
-
-        presenter = AnnotationJSONPresenter(context, formatters)
-        formatters.append(get_formatter({"enterprise": "synergy"}))
-        presented = presenter.asdict()
-
-        assert "enterprise" not in presented
-
     @pytest.mark.parametrize(
         "shared,readable_by,permission",
         (
