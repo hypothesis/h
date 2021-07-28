@@ -92,6 +92,7 @@ class GroupSearchController(SearchController):
 
     def __init__(self, context, request):
         super().__init__(request)
+        self.context = context
         self.group = context.group
 
     @view_config(request_method="GET")
@@ -190,7 +191,7 @@ class GroupSearchController(SearchController):
             self.group.creator.userid if self.group.creator else None,
         ]
 
-        if self.request.has_permission(Permission.Group.ADMIN, self.group):
+        if self.request.has_permission(Permission.Group.ADMIN, context=self.context):
             result["group_edit_url"] = self.request.route_url(
                 "group_edit", pubid=self.group.pubid
             )
@@ -229,7 +230,7 @@ class GroupSearchController(SearchController):
         This adds the authenticated user to the given group and redirect the
         browser to the search page.
         """
-        if not self.request.has_permission(Permission.Group.JOIN, self.group):
+        if not self.request.has_permission(Permission.Group.JOIN, context=self.context):
             raise httpexceptions.HTTPNotFound()
 
         group_members_service = self.request.find_service(name="group_members")
@@ -323,7 +324,7 @@ class GroupSearchController(SearchController):
         return _toggle_tag_facet(self.request)
 
     def _check_access_permissions(self):
-        if not self.request.has_permission(Permission.Group.READ, self.group):
+        if not self.request.has_permission(Permission.Group.READ, context=self.context):
             show_join_page = self.request.has_permission(
                 Permission.Group.JOIN, self.group
             )
