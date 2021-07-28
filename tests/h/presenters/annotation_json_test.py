@@ -1,113 +1,83 @@
 import datetime
-from unittest import mock
 from unittest.mock import create_autospec
 
 import pytest
+from h_matchers import Any
 from pyramid import security
-from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.formatters import AnnotationFlagFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
-from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONPresenter:
-    def test_asdict(self, document_asdict, groupfinder_service, links_service):
-        ann = mock.Mock(
-            id="the-id",
-            created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
-            updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
-            userid="acct:luke",
-            target_uri="http://example.com",
-            text="It is magical!",
-            tags=["magic"],
-            groupid="__world__",
-            shared=True,
-            target_selectors=[{"TestSelector": "foobar"}],
-            references=["referenced-id-1", "referenced-id-2"],
-            extra={"extra-1": "foo", "extra-2": "bar"},
+    def test_asdict(self, annotation, context, DocumentJSONPresenter):
+        annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
+        annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
+        annotation.references = ["referenced-id-1", "referenced-id-2"]
+        annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
+        presenter = AnnotationJSONPresenter(context)
+
+        result = presenter.asdict()
+
+        assert result == Any.dict.containing(
+            {
+                "id": annotation.id,
+                "created": "2016-02-24T18:03:25.000768+00:00",
+                "updated": "2016-02-29T10:24:05.000564+00:00",
+                "user": annotation.userid,
+                "uri": annotation.target_uri,
+                "group": annotation.groupid,
+                "text": annotation.text,
+                "tags": annotation.tags,
+                "permissions": {
+                    "read": [annotation.userid],
+                    "admin": [annotation.userid],
+                    "update": [annotation.userid],
+                    "delete": [annotation.userid],
+                },
+                "target": [
+                    {
+                        "source": annotation.target_uri,
+                        "selector": annotation.target_selectors,
+                    }
+                ],
+                "document": DocumentJSONPresenter.return_value.asdict.return_value,
+                "links": context.links,
+                "references": annotation.references,
+                "extra-1": "foo",
+                "extra-2": "bar",
+            }
         )
-        context = AnnotationContext(ann, groupfinder_service, links_service)
 
-        document_asdict.return_value = {"foo": "bar"}
+        DocumentJSONPresenter.assert_called_once_with(annotation.document)
+        DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
 
-        expected = {
-            "id": "the-id",
-            "created": "2016-02-24T18:03:25.000768+00:00",
-            "updated": "2016-02-29T10:24:05.000564+00:00",
-            "user": "acct:luke",
-            "uri": "http://example.com",
-            "text": "It is magical!",
-            "tags": ["magic"],
-            "group": "__world__",
-            "permissions": {
-                "read": ["group:__world__"],
-                "admin": ["acct:luke"],
-                "update": ["acct:luke"],
-                "delete": ["acct:luke"],
-            },
-            "target": [
-                {
-                    "source": "http://example.com",
-                    "selector": [{"TestSelector": "foobar"}],
-                }
-            ],
-            "document": {"foo": "bar"},
-            "links": links_service.get_all.return_value,
-            "references": ["referenced-id-1", "referenced-id-2"],
-            "extra-1": "foo",
-            "extra-2": "bar",
-        }
-
-        result = AnnotationJSONPresenter(context).asdict()
-
-        assert result == expected
-
-    def test_asdict_extra_cannot_override_other_data(
-        self, document_asdict, groupfinder_service, links_service
-    ):
-        ann = mock.Mock(id="the-real-id", extra={"id": "the-extra-id"})
-        context = AnnotationContext(ann, groupfinder_service, links_service)
-        document_asdict.return_value = {}
+    def test_asdict_extra_inherits_correctly(self, annotation, context):
+        annotation.extra = {"id": "DIFFERENT"}
 
         presented = AnnotationJSONPresenter(context).asdict()
-        assert presented["id"] == "the-real-id"
 
-    def test_asdict_extra_uses_copy_of_extra(
-        self, document_asdict, groupfinder_service, links_service
-    ):
-        extra = {"foo": "bar"}
-        ann = mock.Mock(id="my-id", extra=extra)
-        context = AnnotationContext(ann, groupfinder_service, links_service)
-        document_asdict.return_value = {}
+        # We can't override things (we are applied first)
+        assert presented["id"] == annotation.id
+        # And we aren't mutated
+        assert annotation.extra == {"id": "DIFFERENT"}
 
-        AnnotationJSONPresenter(context).asdict()
+    def test_asdict_merges_formatters(self, annotation, context, get_formatter):
+        formatters = [
+            get_formatter({"flagged": "nope"}),
+            get_formatter({"nipsa": "maybe"}),
+        ]
 
-        # Presenting the annotation shouldn't change the "extra" dict.
-        assert extra == {"foo": "bar"}
-
-    def test_asdict_merges_formatters(
-        self, groupfinder_service, links_service, get_formatter
-    ):
-        ann = mock.Mock(id="the-real-id", extra={})
-        context = AnnotationContext(ann, groupfinder_service, links_service)
-        presenter = AnnotationJSONPresenter(
-            context,
-            formatters=[
-                get_formatter({"flagged": "nope"}),
-                get_formatter({"nipsa": "maybe"}),
-            ],
-        )
-
-        presented = presenter.asdict()
+        presented = AnnotationJSONPresenter(context, formatters=formatters).asdict()
 
         assert presented["flagged"] == "nope"
         assert presented["nipsa"] == "maybe"
 
-    def test_immutable_formatters(
-        self, groupfinder_service, links_service, get_formatter
-    ):
+        for formatter in formatters:
+            formatter.format.assert_called_once_with(context)
+
+    def test_immutable_formatters(self, annotation, context, get_formatter):
         """Double-check we can't mutate the formatters list after the fact.
 
         This is an extra check just to make sure we can't accidentally change
@@ -115,8 +85,6 @@ class TestAnnotationJSONPresenter:
         leaving us open to all kinds of mutability horrors.
 
         """
-        ann = mock.Mock(id="the-real-id", extra={})
-        context = AnnotationContext(ann, groupfinder_service, links_service)
         formatters = []
 
         presenter = AnnotationJSONPresenter(context, formatters)
@@ -125,84 +93,43 @@ class TestAnnotationJSONPresenter:
 
         assert "enterprise" not in presented
 
-    def test_formatter_uses_annotation_context(
-        self, groupfinder_service, links_service, get_formatter
-    ):
-        annotation = mock.Mock(id="the-id", extra={})
-        context = AnnotationContext(annotation, groupfinder_service, links_service)
-        formatter = get_formatter()
-
-        presenter = AnnotationJSONPresenter(context, formatters=[formatter])
-        presenter.asdict()
-
-        formatter.format.assert_called_once_with(context)
-
-    @pytest.mark.usefixtures("policy")
     @pytest.mark.parametrize(
-        "annotation,group_readable,action,expected",
-        [
-            (
-                mock.Mock(userid="acct:luke", shared=False),
-                "world",
-                "read",
-                ["acct:luke"],
-            ),
-            (
-                mock.Mock(userid="acct:luke", groupid="abcde", shared=False),
-                "members",
-                "read",
-                ["acct:luke"],
-            ),
-            (
-                mock.Mock(groupid="__world__", shared=True),
-                "world",
-                "read",
-                ["group:__world__"],
-            ),
-            (
-                mock.Mock(groupid="lulapalooza", shared=True),
-                "members",
-                "read",
-                ["group:lulapalooza"],
-            ),
-            (
-                mock.Mock(groupid="open", shared=True),
-                "world",
-                "read",
-                ["group:__world__"],
-            ),
-            (mock.Mock(userid="acct:luke"), None, "admin", ["acct:luke"]),
-            (mock.Mock(userid="acct:luke"), None, "update", ["acct:luke"]),
-            (mock.Mock(userid="acct:luke"), None, "delete", ["acct:luke"]),
-        ],
+        "shared,readable_by,permission",
+        (
+            (False, [], "USER_ID"),
+            (True, [], "group:GROUP_ID"),
+            (True, [security.Everyone], "group:__world__"),
+        ),
     )
-    def test_permissions(
+    def test_read_permission(
         self,
         annotation,
-        group_readable,
-        action,
-        expected,
-        groupfinder_service,
-        links_service,
+        context,
+        principals_allowed_by_permission,
+        shared,
+        readable_by,
+        permission,
     ):
-        annotation.deleted = False
+        annotation.id = "ANNOTATION_ID"
+        annotation.groupid = "GROUP_ID"
+        annotation.userid = "USER_ID"
+        annotation.shared = shared
 
-        group_principals = {
-            "members": (
-                security.Allow,
-                "group:{}".format(annotation.groupid),
-                Permission.Group.READ,
-            ),
-            "world": (security.Allow, security.Everyone, Permission.Group.READ),
-            None: security.DENY_ALL,
-        }
-        group = mock.Mock(spec_set=["__acl__"])
-        group.__acl__.return_value = [group_principals[group_readable]]
-        groupfinder_service.find.return_value = group
+        principals_allowed_by_permission.return_value = readable_by
 
-        context = AnnotationContext(annotation, groupfinder_service, links_service)
-        presenter = AnnotationJSONPresenter(context)
-        assert expected == presenter.permissions[action]
+        presented = AnnotationJSONPresenter(context).asdict()
+
+        assert presented["permissions"]["read"] == [permission]
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def context(self, annotation):
+        return create_autospec(
+            AnnotationContext, instance=True, spec_set=True, annotation=annotation
+        )
 
     @pytest.fixture
     def get_formatter(self):
@@ -218,12 +145,9 @@ class TestAnnotationJSONPresenter:
         return get_formatter
 
     @pytest.fixture
-    def policy(self, pyramid_config):
-        """Set up a fake authentication policy with a real ACL authorization policy."""
-        policy = ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(None)
-        pyramid_config.set_authorization_policy(policy)
+    def DocumentJSONPresenter(self, patch):
+        return patch("h.presenters.annotation_json.DocumentJSONPresenter")
 
     @pytest.fixture
-    def document_asdict(self, patch):
-        return patch("h.presenters.annotation_json.DocumentJSONPresenter.asdict")
+    def principals_allowed_by_permission(self, patch):
+        return patch("h.presenters.annotation_json.principals_allowed_by_permission")
