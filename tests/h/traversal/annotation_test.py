@@ -88,25 +88,35 @@ class TestAnnotationContext:
         permits(context, [annotation.userid], Permission.Annotation.READ)
         permits(context, [annotation.userid], Permission.Annotation.FLAG)
 
+    @pytest.mark.parametrize(
+        "permission", (Permission.Group.FLAG, Permission.Group.MODERATE)
+    )
     def test_acl_shared_permissions_mirror_the_group(
-        self, annotation, context, permits, groupfinder_service
+        self,
+        annotation,
+        context,
+        permits,
+        groupfinder_service,
+        GroupContext,
+        permission,
     ):
         annotation.shared = True
-
-        class GroupACLs:
-            __acl__ = [
-                (security.Allow, "principal_1", Permission.Group.FLAG),
-                (security.Allow, "principal_2", Permission.Group.FLAG),
-                (security.Allow, "principal_1", Permission.Group.MODERATE),
-                (security.Allow, "principal_2", Permission.Group.MODERATE),
-            ]
-
-        groupfinder_service.find.return_value = GroupACLs()
+        GroupContext.return_value.__acl__ = [
+            (security.Allow, "principal_1", Permission.Group.FLAG),
+            (security.Allow, "principal_2", Permission.Group.FLAG),
+            (security.Allow, "principal_1", Permission.Group.MODERATE),
+            (security.Allow, "principal_2", Permission.Group.MODERATE),
+        ]
 
         permits(context, ["principal_1"], Permission.Annotation.FLAG)
         permits(context, ["principal_2"], Permission.Annotation.FLAG)
         permits(context, ["principal_1"], Permission.Annotation.MODERATE)
         permits(context, ["principal_2"], Permission.Annotation.MODERATE)
+
+        # This is called a bunch of times right now, we don't need to get too
+        # specific. We can tell it's doing it's job of passing on the ACLs by
+        # the assertions above
+        GroupContext.assert_called_with(groupfinder_service.find.return_value)
 
     def test_acl_shared_permissions_with_no_group(
         self, annotation, context, permits, groupfinder_service
@@ -126,6 +136,10 @@ class TestAnnotationContext:
     @pytest.fixture
     def context(self, annotation, groupfinder_service, links_service):
         return AnnotationContext(annotation, groupfinder_service, links_service)
+
+    @pytest.fixture(autouse=True)
+    def GroupContext(self, patch):
+        return patch("h.traversal.annotation.GroupContext")
 
 
 @pytest.fixture

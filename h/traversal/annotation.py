@@ -8,6 +8,7 @@ from pyramid.security import (
 from h import storage
 from h.interfaces import IGroupService
 from h.security.permissions import Permission
+from h.traversal.group import GroupContext
 from h.traversal.root import RootFactory
 
 
@@ -95,4 +96,4 @@ class AnnotationContext:
         if group is None:
             return []
 
-        return principals_allowed_by_permission(group, permission)
+        return principals_allowed_by_permission(GroupContext(group), permission)
