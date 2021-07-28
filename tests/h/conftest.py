@@ -51,12 +51,6 @@ class DummyFeature:
     def all(self):
         return self.flags
 
-    def load(self):
-        self.loaded = True
-
-    def clear(self):
-        self.flags = {}
-
 
 class DummySession:
 
@@ -72,9 +66,6 @@ class DummySession:
     def add(self, obj):
         self.added.append(obj)
 
-    def delete(self, obj):
-        self.deleted.append(obj)
-
     def flush(self):
         self.flushed = True
 
@@ -83,9 +74,6 @@ class DummySession:
 class FakeInvalid:
     def __init__(self, errors):
         self.errors = errors
-
-    def asdict(self):
-        return self.errors
 
 
 def autopatcher(request, target, **kwargs):
@@ -187,9 +175,7 @@ def form_validating_to():
 @pytest.fixture
 def invalid_form():
     def invalid_form(errors=None):
-        if errors is None:
-            errors = {}
-        invalid = FakeInvalid(errors)
+        invalid = FakeInvalid(errors or {})
         form = mock.MagicMock()
         form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
         form.render.return_value = "invalid form"
