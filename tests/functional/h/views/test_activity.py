@@ -3,7 +3,9 @@ import pytest
 
 class TestGroupSearchController:
     @pytest.mark.usefixtures("with_logged_in_user")
-    @pytest.mark.xfail  # See https://github.com/hypothesis/product-backlog/issues/109
+    @pytest.mark.xfail(
+        reason="See https://github.com/hypothesis/product-backlog/issues/109"
+    )
     def test_group_page_includes_referrer_tag(self, app, user_owned_group):
         """
         The group read page should include a referrer tag.
