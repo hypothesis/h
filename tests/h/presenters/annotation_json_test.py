@@ -78,10 +78,10 @@ class TestAnnotationJSONPresenter:
             formatter.format.assert_called_once_with(context)
 
     @pytest.mark.parametrize(
-        "shared,readable_by,permission",
+        "shared,readable_by,permission_template",
         (
-            (False, [], "USER_ID"),
-            (True, [], "group:GROUP_ID"),
+            (False, [], "{annotation.userid}"),
+            (True, [], "group:{annotation.groupid}"),
             (True, [security.Everyone], "group:__world__"),
         ),
     )
@@ -92,22 +92,19 @@ class TestAnnotationJSONPresenter:
         principals_allowed_by_permission,
         shared,
         readable_by,
-        permission,
+        permission_template,
     ):
-        annotation.id = "ANNOTATION_ID"
-        annotation.groupid = "GROUP_ID"
-        annotation.userid = "USER_ID"
         annotation.shared = shared
-
         principals_allowed_by_permission.return_value = readable_by
 
         presented = AnnotationJSONPresenter(context).asdict()
 
+        permission = permission_template.format(annotation=annotation)
         assert presented["permissions"]["read"] == [permission]
 
     @pytest.fixture
     def annotation(self, factories):
-        return factories.Annotation()
+        return factories.Annotation(groupid="NOT WORLD")
 
     @pytest.fixture
     def context(self, annotation):
