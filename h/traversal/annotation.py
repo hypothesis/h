@@ -16,8 +16,8 @@ class AnnotationRoot(RootFactory):
 
     __acl__ = [(Allow, Authenticated, Permission.Annotation.CREATE)]
 
-    def __getitem__(self, id_):
-        annotation = storage.fetch_annotation(self.request.db, id_)
+    def __getitem__(self, annotation_id):
+        annotation = storage.fetch_annotation(self.request.db, annotation_id)
         if annotation is None:
             raise KeyError()
 
@@ -44,13 +44,6 @@ class AnnotationContext:
 
     def link(self, name):
         return self.links_service.get(self.annotation, name)
-
-    def _read_principals(self):
-        if self.annotation.shared:
-            for principal in self._group_principals(self.group, Permission.Group.READ):
-                yield Allow, principal, Permission.Annotation.READ
-        else:
-            yield Allow, self.annotation.userid, Permission.Annotation.READ
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
@@ -91,9 +84,16 @@ class AnnotationContext:
 
         return acl
 
+    def _read_principals(self):
+        if self.annotation.shared:
+            for principal in self._group_principals(self.group, Permission.Group.READ):
+                yield Allow, principal, Permission.Annotation.READ
+        else:
+            yield Allow, self.annotation.userid, Permission.Annotation.READ
+
     @staticmethod
-    def _group_principals(group, principal):
+    def _group_principals(group, permission):
         if group is None:
             return []
-        principals = principals_allowed_by_permission(group, principal)
+        principals = principals_allowed_by_permission(group, permission)
         return principals
