@@ -1,12 +1,70 @@
 from unittest import mock
+from unittest.mock import sentinel
 
-import pyramid.security
 import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.security.permissions import Permission
 from h.traversal import AnnotationContext, AnnotationRoot
+
+
+class TestAnnotationRoot:
+    def test_create_permission_requires_authenticated_user(
+        self, pyramid_request, permits
+    ):
+        root = AnnotationRoot(pyramid_request)
+
+        assert permits(root, [security.Authenticated], Permission.Annotation.CREATE)
+        assert not permits(root, [], Permission.Annotation.CREATE)
+
+    def test_annotation_lookup(
+        self,
+        pyramid_request,
+        AnnotationContext,
+        storage,
+        groupfinder_service,
+        links_service,
+    ):
+        root = AnnotationRoot(pyramid_request)
+
+        context = root[sentinel.annotation_id]
+
+        assert context == AnnotationContext.return_value
+        storage.fetch_annotation.assert_called_once_with(
+            pyramid_request.db, sentinel.annotation_id
+        )
+        AnnotationContext.assert_called_once_with(
+            storage.fetch_annotation.return_value, groupfinder_service, links_service
+        )
+
+    @pytest.fixture
+    def storage(self, patch):
+        return patch("h.traversal.annotation.storage")
+
+    @pytest.fixture
+    def AnnotationContext(self, patch):
+        return patch("h.traversal.annotation.AnnotationContext")
+
+
+class TestAnnotationContext:
+    def test_links(self, groupfinder_service, links_service):
+        ann = mock.Mock()
+        res = AnnotationContext(ann, groupfinder_service, links_service)
+
+        result = res.links
+
+        links_service.get_all.assert_called_once_with(ann)
+        assert result == links_service.get_all.return_value
+
+    def test_link(self, groupfinder_service, links_service):
+        ann = mock.Mock()
+        res = AnnotationContext(ann, groupfinder_service, links_service)
+
+        result = res.link("json")
+
+        links_service.get.assert_called_once_with(ann, "json")
+        assert result == links_service.get.return_value
 
 
 class FakeGroup:
@@ -42,99 +100,7 @@ class FakeGroup:
 
 
 @pytest.mark.usefixtures("groupfinder_service", "links_service")
-class TestAnnotationRoot:
-    def test_it_does_not_assign_create_permission_without_authenticated_user(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions()
-
-        context = AnnotationRoot(pyramid_request)
-
-        assert not pyramid_request.has_permission(Permission.Annotation.CREATE, context)
-
-    def test_it_assigns_create_permission_to_authenticated_request(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions(
-            "acct:adminuser@foo", principals=[pyramid.security.Authenticated]
-        )
-
-        context = AnnotationRoot(pyramid_request)
-
-        assert pyramid_request.has_permission(Permission.Annotation.CREATE, context)
-
-    def test_get_item_fetches_annotation(self, pyramid_request, storage):
-        factory = AnnotationRoot(pyramid_request)
-
-        factory["123"]
-        storage.fetch_annotation.assert_called_once_with(pyramid_request.db, "123")
-
-    def test_get_item_returns_annotation_context(self, pyramid_request, storage):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert isinstance(resource, AnnotationContext)
-
-    def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert resource.annotation == storage.fetch_annotation.return_value
-
-    def test_get_item_raises_when_annotation_is_not_found(
-        self, storage, pyramid_request
-    ):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = None
-
-        with pytest.raises(KeyError):
-            factory["123"]
-
-    def test_get_item_has_right_group_service(
-        self, pyramid_request, storage, groupfinder_service
-    ):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert resource.group_service == groupfinder_service
-
-    def test_get_item_has_right_links_service(
-        self, pyramid_request, storage, links_service
-    ):
-        factory = AnnotationRoot(pyramid_request)
-        storage.fetch_annotation.return_value = mock.Mock()
-
-        resource = factory["123"]
-        assert resource.links_service == links_service
-
-    @pytest.fixture
-    def storage(self, patch):
-        return patch("h.traversal.annotation.storage")
-
-
-@pytest.mark.usefixtures("groupfinder_service", "links_service")
-class TestAnnotationContext:
-    def test_links(self, groupfinder_service, links_service):
-        ann = mock.Mock()
-        res = AnnotationContext(ann, groupfinder_service, links_service)
-
-        result = res.links
-
-        links_service.get_all.assert_called_once_with(ann)
-        assert result == links_service.get_all.return_value
-
-    def test_link(self, groupfinder_service, links_service):
-        ann = mock.Mock()
-        res = AnnotationContext(ann, groupfinder_service, links_service)
-
-        result = res.link("json")
-
-        links_service.get.assert_called_once_with(ann, "json")
-        assert result == links_service.get.return_value
-
+class TestAnnotationContextACL:
     def test_acl_private(self, factories, groupfinder_service, links_service):
         ann = factories.Annotation(shared=False, userid="saoirse")
         res = AnnotationContext(ann, groupfinder_service, links_service)
@@ -346,3 +312,11 @@ class TestAnnotationContext:
         groupfinder_service.find.side_effect = lambda groupid: groups.get(groupid)
 
         return groupfinder_service
+
+
+@pytest.fixture
+def permits():
+    def permits(context, principals, permission):
+        return ACLAuthorizationPolicy().permits(context, principals, permission)
+
+    return permits
