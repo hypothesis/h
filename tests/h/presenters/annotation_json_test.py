@@ -6,7 +6,7 @@ import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.formatters import AnnotationFormatter
+from h.formatters import AnnotationFlagFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
 from h.security.permissions import Permission
 from h.traversal import AnnotationContext
@@ -207,8 +207,10 @@ class TestAnnotationJSONPresenter:
     @pytest.fixture
     def get_formatter(self):
         def get_formatter(payload=None):
+            # All formatters should have the same interface. We'll pick one at
+            # random to act as an exemplar
             formatter = create_autospec(
-                AnnotationFormatter, spec_set=True, instance=True
+                AnnotationFlagFormatter, spec_set=True, instance=True
             )
             formatter.format.return_value = payload or {}
             return formatter

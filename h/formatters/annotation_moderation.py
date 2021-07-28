@@ -1,8 +1,7 @@
-from h.formatters.formatter import AnnotationFormatter
 from h.security.permissions import Permission
 
 
-class AnnotationModerationFormatter(AnnotationFormatter):
+class AnnotationModerationFormatter:
     """
     Formatter for exposing an annotation's moderation information.
 

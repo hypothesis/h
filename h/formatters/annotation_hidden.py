@@ -1,7 +1,4 @@
-from h.formatters.formatter import AnnotationFormatter
-
-
-class AnnotationHiddenFormatter(AnnotationFormatter):
+class AnnotationHiddenFormatter:
     """
     Formatter for dealing with annotations that a moderator has hidden.
 
