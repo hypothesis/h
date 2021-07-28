@@ -120,13 +120,11 @@ def moderation_svc(db_session):
 
 
 @pytest.fixture
-def has_permission(moderated_group):
+def has_permission(pyramid_request, moderated_group):
     def has_permission(permission, context):
         return context.group == moderated_group
 
-    mocked_has_permission = create_autospec(has_permission)
-    mocked_has_permission.side_effect = has_permission
-    return mocked_has_permission
+    return create_autospec(pyramid_request.has_permission, side_effect=has_permission)
 
 
 @pytest.fixture
