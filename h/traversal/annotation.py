@@ -29,6 +29,8 @@ class AnnotationRoot(RootFactory):
 class AnnotationContext:
     """Context for annotation-based views."""
 
+    annotation = None
+
     def __init__(self, annotation, group_service, links_service):
         self.group_service = group_service
         self.links_service = links_service
