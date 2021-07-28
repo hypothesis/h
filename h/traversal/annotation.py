@@ -72,12 +72,9 @@ class AnnotationContext:
             # to handle these situations appropriately
             acl.append((Allow, self.annotation.userid, Permission.Annotation.FLAG))
 
-        # The user who created the annotation always has the following permissions
-        for action in [
-            Permission.Annotation.UPDATE,
-            Permission.Annotation.DELETE,
-        ]:
-            acl.append((Allow, self.annotation.userid, action))
+        # The user who created the annotation always has the these permissions
+        acl.append((Allow, self.annotation.userid, Permission.Annotation.UPDATE))
+        acl.append((Allow, self.annotation.userid, Permission.Annotation.DELETE))
 
         # If we haven't explicitly authorized it, it's not allowed.
         acl.append(DENY_ALL)
@@ -95,5 +92,5 @@ class AnnotationContext:
     def _group_principals(group, permission):
         if group is None:
             return []
-        principals = principals_allowed_by_permission(group, permission)
-        return principals
+
+        return principals_allowed_by_permission(group, permission)
