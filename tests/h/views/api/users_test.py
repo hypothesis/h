@@ -216,6 +216,7 @@ class TestUpdate:
         def fake_fetch(username, authority):
             if username == user.username and authority == user.authority:
                 return user
+            return None
 
         user_service.fetch.side_effect = fake_fetch
 

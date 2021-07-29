@@ -258,6 +258,7 @@ class TestOAuthAuthorizeController:
         def fake_fetch(userid):
             if userid == user.userid:
                 return user
+            return None
 
         user_service.fetch.side_effect = fake_fetch
 
