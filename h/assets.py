@@ -2,16 +2,17 @@
 
 import os.path
 
+import importlib_resources
 from h_assets import Environment, assets_view
 
 
 def includeme(config):
-    h_root = os.path.dirname(__file__)
+    h_files = importlib_resources.files("h")
 
     assets_env = Environment(
         assets_base_url="/assets",
-        bundle_config_path=f"{h_root}/assets.ini",
-        manifest_path=f"{h_root}/../build/manifest.json",
+        bundle_config_path=h_files / "assets.ini",
+        manifest_path=h_files / "../build/manifest.json",
     )
 
     # Store asset environment in registry for use in registering `asset_urls`
