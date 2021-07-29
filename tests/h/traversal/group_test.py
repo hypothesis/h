@@ -73,7 +73,7 @@ class TestGroupRequiredRoot:
     ):
         GroupContext_.return_value.group = None
         with pytest.raises(KeyError):
-            GroupRequiredRoot(pyramid_request)["does_not_exist"]
+            _ = GroupRequiredRoot(pyramid_request)["does_not_exist"]
 
 
 @pytest.fixture

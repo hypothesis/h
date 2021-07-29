@@ -321,7 +321,7 @@ class TestAuthFilter:
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
         # Make a private annotation from a different user.
-        Annotation(userid="acct:foo@auth2").id
+        _ = Annotation(userid="acct:foo@auth2").id
         users_private_ids = [Annotation(userid=userid).id, Annotation(userid=userid).id]
 
         result = search.run(webob.multidict.MultiDict({}))
@@ -483,7 +483,7 @@ class TestUriCombinedWildcardFilter:
             "http://reading.com/x-pdf",
         ]
         Annotation(target_uri="urn:x-pdf:1235")
-        Annotation(target_uri="file:///Users/jane/article.pdf").id
+        _ = Annotation(target_uri="file:///Users/jane/article.pdf").id
         expected_ids = [
             Annotation(target_uri="urn:x-pdf:1234").id,
             Annotation(target_uri="doi:10.1.1/1234").id,
@@ -817,8 +817,8 @@ class TestAnyMatcher:
         quote, text, uri.parts, and tags
         that contain any of the passed keywords.
         """
-        Annotation(text="bar is best").id
-        Annotation(tags=["foo"]).id
+        _ = Annotation(text="bar is best").id
+        _ = Annotation(tags=["foo"]).id
 
         matched_ids = [
             Annotation(target_uri="foo/bar/baz.com").id,

@@ -45,7 +45,7 @@ class TestAnnotationDeleteService:
         anns = [annotation(), annotation()]
         svc.delete_annotations(anns)
 
-        svc.delete.mock_calls == [mock.call(anns[0]), mock.call(anns[1])]
+        assert svc.delete.mock_calls == [mock.call(anns[0]), mock.call(anns[1])]
 
 
 @pytest.fixture
