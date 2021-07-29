@@ -138,7 +138,7 @@ class TestAuthDomain:
 
     def test_it_returns_str(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)
-        assert type(util.default_authority(pyramid_request)) == str
+        assert isinstance(util.default_authority(pyramid_request), str)
 
 
 class TestPrincipalsForAuthClient:

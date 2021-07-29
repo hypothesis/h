@@ -28,9 +28,9 @@ class TestUserIdentity:
         )
 
         # Auto incrementing unique IDs should have been generated for us.
-        assert type(user_identities[0].id) is int
-        assert type(user_identities[1].id) is int
-        assert type(user_identities[2].id) is int
+        assert isinstance(user_identities[0].id, int)
+        assert isinstance(user_identities[1].id, int)
+        assert isinstance(user_identities[2].id, int)
 
         # The provider strings that we gave should have been saved.
         assert user_identities[0].provider == "provider_1"
