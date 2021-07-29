@@ -22,7 +22,7 @@ class TestOrganizationRoot:
         organization_service.get_by_public_id.return_value = None
 
         with pytest.raises(KeyError):
-            OrganizationRoot(pyramid_request)[sentinel.non_existent_pubid]
+            _ = OrganizationRoot(pyramid_request)[sentinel.non_existent_pubid]
 
     @pytest.fixture(autouse=True)
     def with_noise_organization(self, factories):
