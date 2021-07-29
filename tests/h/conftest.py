@@ -21,7 +21,7 @@ from h.models import Organization
 from h.settings import database_url
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
-from tests.common.fixtures.services import *  # noqa: F403,F401
+from tests.common.fixtures.services import *  # noqa: F403,F401 pylint:disable=wildcard-import
 
 TEST_AUTHORITY = "example.com"
 TEST_DATABASE_URL = database_url(
