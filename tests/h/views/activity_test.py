@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 import datetime
 from unittest import mock
 

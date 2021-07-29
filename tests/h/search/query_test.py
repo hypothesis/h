@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 import datetime
 
 import elasticsearch_dsl
