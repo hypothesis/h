@@ -213,7 +213,9 @@ class TestAddPreflightView:
         add_preflight_view(pyramid_config, "api.read_thing", cors_policy)
 
         (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs["decorator"] == cors_policy
+        assert (  # pylint: disable=comparison-with-callable
+            kwargs["decorator"] == cors_policy
+        )
 
     def test_it_adds_one_preflight_view_per_route(self, pyramid_config):
         cors_policy = policy()
