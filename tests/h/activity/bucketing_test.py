@@ -134,7 +134,7 @@ class TestDocumentBucket:
         bucket_1.annotations = [1, 2, 3]
         bucket_2.annotations = [2, 3, 4]
 
-        assert not bucket_1 == bucket_2
+        assert bucket_1 != bucket_2
 
     def test_eq_tags_mismatch(self, document):
         bucket_1 = bucketing.DocumentBucket(document)
@@ -143,7 +143,7 @@ class TestDocumentBucket:
         bucket_1.tags.update(["foo", "bar"])
         bucket_2.tags.update(["foo", "baz"])
 
-        assert not bucket_1 == bucket_2
+        assert bucket_1 != bucket_2
 
     def test_eq_users_mismatch(self, document):
         bucket_1 = bucketing.DocumentBucket(document)
@@ -152,7 +152,7 @@ class TestDocumentBucket:
         bucket_1.users.update(["alice", "luke"])
         bucket_2.users.update(["luke", "paula"])
 
-        assert not bucket_1 == bucket_2
+        assert bucket_1 != bucket_2
 
     def test_eq_uri_mismatch(self, document):
         bucket_1 = bucketing.DocumentBucket(document)
@@ -161,7 +161,7 @@ class TestDocumentBucket:
         bucket_1.uri = "http://example.com"
         bucket_2.uri = "http://example.org"
 
-        assert not bucket_1 == bucket_2
+        assert bucket_1 != bucket_2
 
     def test_eq_domain_mismatch(self, document):
         bucket_1 = bucketing.DocumentBucket(document)
@@ -170,7 +170,7 @@ class TestDocumentBucket:
         bucket_1.domain = "example.com"
         bucket_2.domain = "example.org"
 
-        assert not bucket_1 == bucket_2
+        assert bucket_1 != bucket_2
 
     def test_eq_title_mismatch(self, document):
         bucket_1 = bucketing.DocumentBucket(document)
@@ -179,7 +179,7 @@ class TestDocumentBucket:
         bucket_1.title = "First Title"
         bucket_2.title = "Second Title"
 
-        assert not bucket_1 == bucket_2
+        assert bucket_1 != bucket_2
 
     def test_incontext_link_returns_link_to_first_annotation(self, document, patch):
         incontext_link = patch("h.links.incontext_link")

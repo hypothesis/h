@@ -612,7 +612,7 @@ class TestAccountController:
         user.email = None
 
         result = views.AccountController(pyramid_request).get()
-        assert result["email"] == ""
+        assert not result["email"]
 
     def test_post_email_form_with_valid_data_changes_email(
         self, form_validating_to, pyramid_request

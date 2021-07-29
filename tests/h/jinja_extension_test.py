@@ -64,7 +64,7 @@ def test_svg_icon_loads_icon():
 
 
 def test_svg_icon_removes_title():
-    def read_icon(name):
+    def read_icon(_name):
         return '<svg xmlns="http://www.w3.org/2000/svg"><title>foo</title></svg>'
 
     assert ext.svg_icon(read_icon, "icon") == Markup(
@@ -73,7 +73,7 @@ def test_svg_icon_removes_title():
 
 
 def test_svg_icon_strips_default_xml_namespace():
-    def read_icon(name):
+    def read_icon(_name):
         return '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
 
     assert ext.svg_icon(read_icon, "icon") == Markup(
@@ -82,7 +82,7 @@ def test_svg_icon_strips_default_xml_namespace():
 
 
 def test_svg_icon_sets_css_class():
-    def read_icon(name):
+    def read_icon(_name):
         return "<svg></svg>"
 
     result = ext.svg_icon(read_icon, "icon", css_class="fancy-icon")

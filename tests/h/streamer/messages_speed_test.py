@@ -11,13 +11,15 @@ from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEAR
 
 @pytest.mark.skip("Only of use during development")
 class TestHandleAnnotationEventSpeed:  # pragma: no cover
-    def test_load_request(self, pyramid_request):
+    def test_load_request(self):
         ...
         # This is here just to flush out any first load costs
 
     @pytest.mark.parametrize("reps", (1, 16, 256, 4096))
     @pytest.mark.parametrize("action", ("create", "delete"))
-    def test_speed(self, db_session, pyramid_request, socket, message, action, reps):
+    def test_speed(  # pylint: disable=too-many-arguments
+        self, db_session, pyramid_request, socket, message, action, reps
+    ):
         sockets = list(socket for _ in range(reps))
         message["action"] = action
 
@@ -75,8 +77,9 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
         SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)
         return SocketFilter
 
+    @pytest.mark.usefixtures("registry")
     @pytest.fixture
-    def socket(self, registry):
+    def socket(self):
         socket = WebSocket(
             sock=None,
             environ={

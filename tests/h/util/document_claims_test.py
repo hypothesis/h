@@ -794,5 +794,4 @@ def one(list_):
 def strip_prefix(prefix, s):
     if s.startswith(prefix):
         return s[len(prefix) :]
-    else:
-        return s
+    return s

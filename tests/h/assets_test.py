@@ -29,7 +29,7 @@ MANIFEST_JSON = """
 def _fake_open(path):
     if path == "bundles.ini":
         return StringIO(BUNDLE_INI)
-    elif path == "manifest.json":
+    if path == "manifest.json":
         return StringIO(MANIFEST_JSON)
 
 
@@ -70,7 +70,7 @@ def test_environment_reloads_manifest_on_change(mtime, open, auto_reload):
     def _fake_open(path):
         if path == "bundles.ini":
             return StringIO(bundle_content)
-        elif path == "manifest.json":
+        if path == "manifest.json":
             return StringIO(manifest_content)
 
     open.side_effect = _fake_open

@@ -78,8 +78,6 @@ class TestBadgeAddRemove:
 
 @pytest.fixture
 def blocked_uris(db_session):
-    from h import models
-
     uris = []
     for uri in ["blocked1", "blocked2", "blocked3"]:
         uris.append(models.Blocklist(uri=uri))

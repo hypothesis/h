@@ -121,7 +121,7 @@ class TestOrganizationEditController:
 
         response = get_controller().read()
 
-        assert response["form"]["logo"] == ""
+        assert not response["form"]["logo"]
 
     def test_read_does_not_show_delete_button_for_default_org(
         self, get_controller, organization

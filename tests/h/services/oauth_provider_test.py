@@ -23,7 +23,7 @@ class TestOAuthProviderService:
         def fake_find_refresh_token(refresh_token):
             if refresh_token == token_1.refresh_token:
                 return token_1
-            elif refresh_token == token_2.refresh_token:
+            if refresh_token == token_2.refresh_token:
                 return token_2
 
         validator_service.find_refresh_token.side_effect = fake_find_refresh_token

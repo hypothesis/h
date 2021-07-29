@@ -67,7 +67,7 @@ class TestAnnotationBasePresenter:
         context = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(context)
 
-        assert "" == presenter.text
+        assert not presenter.text
 
     def test_tags(self):
         annotation = mock.Mock(tags=["interesting", "magic"])
