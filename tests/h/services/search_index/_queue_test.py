@@ -35,7 +35,26 @@ class TestQueue:
             schedule_in=ONE_WEEK_IN_SECONDS,
         )
 
-        assert db_session.query(Job).all() == [
+        jobs = db_session.query(Job).all()
+
+        # This is a temporary duplication of the test below. This formulation
+        # is a bit ugly and less declarative but will hopefully give us fine
+        # grained detail about why the match failed while we work on adding
+        # `assert_on_comparison` support to Any.object.with_attrs.
+        # This is to address this test being flaky for reasons we don't
+        # understand
+        for i in range(2):
+            assert isinstance(jobs[i], Job)
+            assert jobs[i].enqueued_at == Any.instance_of(datetime_.datetime)
+            assert jobs[i].scheduled_at == now + ONE_WEEK
+            assert jobs[i].tag == "test_tag"
+            assert jobs[i].priority == 1234
+            assert jobs[i].kwargs == {
+                "annotation_id": self.database_id(matching[i]),
+                "force": False,
+            }
+
+        assert jobs == [
             Any.instance_of(Job).with_attrs(
                 dict(
                     enqueued_at=Any.instance_of(datetime_.datetime),
