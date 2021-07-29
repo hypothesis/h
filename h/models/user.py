@@ -333,8 +333,5 @@ class User(Base):
             .first()
         )
 
-    def __acl__(self):
-        return ACL.for_user(self)
-
     def __repr__(self):
         return "<User: %s>" % self.username

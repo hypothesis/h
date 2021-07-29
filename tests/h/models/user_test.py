@@ -1,11 +1,9 @@
 from datetime import datetime, timedelta
 
 import pytest
-from pyramid.authorization import ACLAuthorizationPolicy
 from sqlalchemy import exc
 
 from h import models
-from h.security.permissions import Permission
 
 
 class TestUserModelDataConstraints:
@@ -308,27 +306,3 @@ class TestUserGetByUsername:
         }
         db_session.flush()
         return users
-
-
-class TestUserACL:
-    @pytest.mark.parametrize(
-        "principal,permits",
-        (
-            # The right client authority has permissions
-            ("client_authority:user_authority", True),
-            ("client_authority:DIFFERENT", False),
-            # User's don't by just being in the authority
-            ("authority:user_authority", False),
-        ),
-    )
-    @pytest.mark.parametrize(
-        "permission", (Permission.User.UPDATE, Permission.User.READ)
-    )
-    def test_it(self, principal, permission, permits):
-        policy = ACLAuthorizationPolicy()
-
-        user = models.User(authority="user_authority")
-
-        assert (
-            bool(policy.permits(user, [principal, "some_noise"], permission)) == permits
-        )
