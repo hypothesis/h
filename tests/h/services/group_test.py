@@ -214,6 +214,7 @@ class GroupWithName(Matcher):
     """Matches any Group with the given name."""
 
     def __init__(self, name):
+        super(Matcher).__init__()
         self.name = name
 
     def __eq__(self, group):
@@ -227,6 +228,7 @@ class GroupScopeWithOrigin(Matcher):
     """Matches any GroupScope with the given origin."""
 
     def __init__(self, origin):
+        super(Matcher).__init__()
         self.origin = origin
 
     def __eq__(self, group_scope):
