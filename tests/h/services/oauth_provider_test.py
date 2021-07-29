@@ -26,6 +26,8 @@ class TestOAuthProviderService:
             if refresh_token == token_2.refresh_token:
                 return token_2
 
+            return None
+
         validator_service.find_refresh_token.side_effect = fake_find_refresh_token
 
         assert oauth_request.client_id is None
@@ -40,6 +42,7 @@ class TestOAuthProviderService:
         def fake_find_refresh_token(refresh_token):
             if refresh_token == token.refresh_token:
                 return token
+            return None
 
         validator_service.find_refresh_token.side_effect = fake_find_refresh_token
 

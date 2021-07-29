@@ -32,6 +32,8 @@ def _fake_open(path):
     if path == "manifest.json":
         return StringIO(MANIFEST_JSON)
 
+    return None
+
 
 @patch(open_target, _fake_open)
 @patch("os.path.getmtime")
@@ -73,6 +75,8 @@ def test_environment_reloads_manifest_on_change(mtime, open, auto_reload):
         if path == "manifest.json":
             return StringIO(manifest_content)
 
+        return None
+
     open.side_effect = _fake_open
     mtime.return_value = 100
     env = Environment(
@@ -93,3 +97,5 @@ def test_environment_reloads_manifest_on_change(mtime, open, auto_reload):
         assert env.urls("app_js") == ["/assets/app.bundle.js?newhash"]
     else:
         assert env.urls("app_js") == ["/assets/app.bundle.js?oldhash"]
+
+    return None

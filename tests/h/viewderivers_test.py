@@ -89,6 +89,8 @@ class TestCSPProtectedView:
                 if view["introspectable"]["route_name"] == "testview":
                     return view["introspectable"]["derived_callable"]
 
+            return None
+
         return _impl
 
 
