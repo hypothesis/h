@@ -70,8 +70,8 @@ class TestGetProfileGroups:
 
         res = app.get("/api/profile/groups", headers=headers)
 
-        for property in ["id", "name", "scoped", "type"]:
-            assert property in res.json[0]
+        for key in ["id", "name", "scoped", "type"]:
+            assert key in res.json[0]
 
 
 class TestPatchProfile:
