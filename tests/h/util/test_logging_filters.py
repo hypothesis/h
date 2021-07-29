@@ -34,8 +34,8 @@ class TestExceptionFilter:
 
     def test_does_log_if_exception_mismatch(self, logger):
         try:
-            raise Exception("Not a read timeout")
-        except Exception:
+            raise ValueError("Not a read timeout")
+        except ValueError:
             logger.warning("warning", exc_info=True)
         assert logger.handlers[
             0
