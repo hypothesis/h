@@ -8,6 +8,17 @@ from h.security.permissions import Permission
 
 class ACL:
     @classmethod
+    def for_user(cls, user):
+        client_authority = "client_authority:{}".format(user.authority)
+
+        # auth_clients with the same authority as the user may update the user
+        yield Allow, client_authority, Permission.User.UPDATE
+        yield Allow, client_authority, Permission.User.READ
+
+        # This is for inheriting security policies... do we inherit?
+        yield security.DENY_ALL
+
+    @classmethod
     def for_group(cls, group):
         # This principal is given to clients which log in using an OAuth client
         # and secret to a particular authority

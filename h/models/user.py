@@ -2,13 +2,11 @@ import datetime
 import re
 
 import sqlalchemy as sa
-from pyramid import security
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 from h.db import Base
 from h.exceptions import InvalidUserId
-from h.security.permissions import Permission
 from h.util.user import split_user
 
 USERNAME_MIN_LENGTH = 3
@@ -336,16 +334,7 @@ class User(Base):
         )
 
     def __acl__(self):
-        client_authority = "client_authority:{}".format(self.authority)
-
-        return [
-            # auth_clients that have the same authority as the user may update
-            # the user
-            (security.Allow, client_authority, Permission.User.UPDATE),
-            (security.Allow, client_authority, Permission.User.READ),
-            # This is for inheriting security policies... do we inherit?
-            security.DENY_ALL,
-        ]
+        return ACL.for_user(self)
 
     def __repr__(self):
         return "<User: %s>" % self.username
