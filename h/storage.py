@@ -23,6 +23,7 @@ from h import models, schemas
 from h.db import types
 from h.models.document import update_document_metadata
 from h.security.permissions import Permission
+from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 from h.util.uri import normalize as normalize_uri
 
@@ -89,18 +90,12 @@ def create_annotation(request, data, group_service):
     Create an annotation from already-validated data.
 
     :param request: the request object
-    :type request: pyramid.request.Request
-
     :param data: an annotation data dict that has already been validated by
         :py:class:`h.schemas.annotation.CreateAnnotationSchema`
-    :type data: dict
-
     :param group_service: a service object that implements
-        :py:class:`h.interfaces.IGroupService`
-    :type group_service: :py:class:`h.interfaces.IGroupService`
+        `h.interfaces.IGroupService`
 
     :returns: the created and flushed annotation
-    :rtype: :py:class:`h.models.Annotation`
     """
     created = updated = datetime.utcnow()
 
@@ -126,10 +121,10 @@ def create_annotation(request, data, group_service):
     # further checks.
     group = group_service.find(data["groupid"])
     if group is None or not request.has_permission(
-        Permission.Group.WRITE, context=group
+        Permission.Group.WRITE, context=GroupContext(group)
     ):
         raise schemas.ValidationError(
-            "group: " + _("You may not create annotations " "in the specified group!")
+            "group: " + _("You may not create annotations in the specified group!")
         )
 
     _validate_group_scope(group, data["target_uri"])
