@@ -7,8 +7,8 @@ from webtest import TestApp
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
-from tests.functional.fixtures.authentication import *  # noqa: F403,F401 pylint:disable=wildcard-import
-from tests.functional.fixtures.groups import *  # noqa: F403,F401 pylint:disable=wildcard-import
+from tests.functional.fixtures.authentication import *  # noqa: F403,F401 pylint:disable=wildcard-import,unused-wildcard-import
+from tests.functional.fixtures.groups import *  # noqa: F403,F401 pylint:disable=wildcard-import,unused-wildcard-import
 
 TEST_SETTINGS = {
     "es.url": ELASTICSEARCH_URL,
