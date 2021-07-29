@@ -77,7 +77,10 @@ class WebSocketWSGIHandler(PyWSGIHandler):
         if upgrade_header:
             # Build and start the HTTP response
             self.environ["ws4py.socket"] = (
-                self.socket or self.environ["wsgi.input"].rfile._sock
+                self.socket
+                or self.environ[  # pylint: disable=protected-access
+                    "wsgi.input"
+                ].rfile._sock
             )
             self.result = self.application(self.environ, self.start_response) or []
             self.process_result()
@@ -111,7 +114,7 @@ class GEventWebSocketPool(Pool):
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
             try:  # pylint:disable=too-many-try-statements
-                websocket = greenlet._run.__self__
+                websocket = greenlet._run.__self__  # pylint: disable=protected-access
                 if websocket:
                     websocket.close(1001, "Server is shutting down")
             except:  # noqa: E722 #pylint: disable=bare-except

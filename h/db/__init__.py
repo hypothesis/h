@@ -100,7 +100,10 @@ def _session(request):
     # always closed.
     @request.add_finished_callback
     def close_the_sqlalchemy_session(_request):
-        if len(session.transaction._connections) > 1:
+        if (
+            len(session.transaction._connections)  # pylint: disable=protected-access
+            > 1
+        ):
             # There appear to still be open DB connections belonging to this
             # request. This shouldn't happen.
             changes = tracker.uncommitted_changes() if tracker else []
