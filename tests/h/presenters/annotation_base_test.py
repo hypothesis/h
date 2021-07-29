@@ -60,7 +60,7 @@ class TestAnnotationBasePresenter:
         context = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(context)
 
-        assert "It is magical!" == presenter.text
+        assert presenter.text == "It is magical!"
 
     def test_text_missing(self):
         annotation = mock.Mock(text=None)

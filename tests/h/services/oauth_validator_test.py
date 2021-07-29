@@ -207,7 +207,7 @@ class TestGetDefaultRedirectUri:
             client.id, OAuthRequest("ftps://example.org")
         )
 
-        assert "ftps://example.org/auth/callback" == actual
+        assert actual == "ftps://example.org/auth/callback"
 
     def test_returns_none_when_client_missing(self, svc):
         id_ = str(uuid.uuid1())

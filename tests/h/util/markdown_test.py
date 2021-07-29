@@ -6,15 +6,15 @@ from h.util import markdown
 class TestRender:
     def test_it_renders_markdown(self):
         actual = markdown.render("_emphasis_ **bold**")
-        assert "<p><em>emphasis</em> <strong>bold</strong></p>\n" == actual
+        assert actual == "<p><em>emphasis</em> <strong>bold</strong></p>\n"
 
     def test_it_ignores_math_block(self):
         actual = markdown.render("$$1 + 1 = 2$$")
-        assert "<p>$$1 + 1 = 2$$</p>\n" == actual
+        assert actual == "<p>$$1 + 1 = 2$$</p>\n"
 
     def test_it_ignores_inline_match(self):
         actual = markdown.render(r"Foobar \(1 + 1 = 2\)")
-        assert "<p>Foobar \\(1 + 1 = 2\\)</p>\n" == actual
+        assert actual == "<p>Foobar \\(1 + 1 = 2\\)</p>\n"
 
     def test_it_sanitizes_the_output(self, markdown_render, sanitize):
         markdown.render("foobar")
