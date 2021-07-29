@@ -5,7 +5,7 @@ class TestPutHide:
     def test_it_returns_http_204_for_group_creator(
         self, app, group_annotation, user_with_token
     ):
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.put(
@@ -18,7 +18,7 @@ class TestPutHide:
     def test_it_returns_http_404_if_annotation_is_in_world_group(
         self, app, world_annotation, user_with_token
     ):
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.put(
@@ -42,7 +42,7 @@ class TestPutHide:
         self, app, private_group_annotation, user_with_token
     ):
 
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.put(
@@ -58,7 +58,7 @@ class TestDeleteHide:
     def test_it_returns_http_204_for_group_creator(
         self, app, group_annotation, user_with_token
     ):
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.delete(
@@ -71,7 +71,7 @@ class TestDeleteHide:
     def test_it_returns_http_404_if_annotation_is_in_world_group(
         self, app, world_annotation, user_with_token
     ):
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.delete(
@@ -95,7 +95,7 @@ class TestDeleteHide:
         self, app, private_group_annotation, user_with_token
     ):
 
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.delete(

@@ -43,7 +43,7 @@ class TestDeleteUserService:
         self, db_session, group_with_two_users, pyramid_request, svc
     ):
         pyramid_request.db = db_session
-        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+        (group, creator, _, _, member_ann) = group_with_two_users
         db_session.delete(member_ann)
 
         svc.delete(creator)
@@ -54,7 +54,7 @@ class TestDeleteUserService:
         self, db_session, group_with_two_users, pyramid_request, svc
     ):
         pyramid_request.db = db_session
-        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+        (group, creator, _, _, _) = group_with_two_users
 
         svc.delete(creator)
 
@@ -64,7 +64,7 @@ class TestDeleteUserService:
         self, db_session, group_with_two_users, pyramid_request, svc
     ):
         pyramid_request.db = db_session
-        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+        (group, _, member, _, _) = group_with_two_users
 
         svc.delete(member)
 

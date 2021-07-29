@@ -164,7 +164,7 @@ def user_with_token(db_session, factories):
 def append_token_auth(user_with_token):
     def append_header(headers=None):
         headers = headers or {}
-        user, token = user_with_token
+        _, token = user_with_token
         headers["Authorization"] = "Bearer {}".format(token.value)
         return headers
 

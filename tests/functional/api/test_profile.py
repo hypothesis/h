@@ -52,7 +52,7 @@ class TestGetProfileGroups:
         assert res.json == []
 
     def test_it_returns_users_groups_when_authed(self, app, user_with_token, groups):
-        user, token = user_with_token
+        _, token = user_with_token
         user_groupids = [group.pubid for group in groups].sort()
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
@@ -64,7 +64,7 @@ class TestGetProfileGroups:
         assert user_groupids == returned_groupids
 
     def test_it_returns_group_properties(self, app, user_with_token):
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
@@ -78,7 +78,7 @@ class TestPatchProfile:
     def test_it_allows_authenticated_user(self, app, user_with_token):
         """PATCH profile will always act on the auth'd user's profile."""
 
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": "Bearer {}".format(token.value)}
         profile = {"preferences": {"show_sidebar_tutorial": True}}
@@ -93,7 +93,7 @@ class TestPatchProfile:
     def test_it_updates_user_profile(self, app, user_with_token):
         """PATCH profile will always act on the auth'd user's profile."""
 
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": "Bearer {}".format(token.value)}
         profile = {"preferences": {"show_sidebar_tutorial": False}}
