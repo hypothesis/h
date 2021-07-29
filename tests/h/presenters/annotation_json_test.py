@@ -125,10 +125,10 @@ class TestAnnotationJSONPresenter:
 
         return get_formatter
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def DocumentJSONPresenter(self, patch):
         return patch("h.presenters.annotation_json.DocumentJSONPresenter")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def principals_allowed_by_permission(self, patch):
         return patch("h.presenters.annotation_json.principals_allowed_by_permission")
