@@ -24,7 +24,7 @@ class TestGetAnnotation:
     def test_it_returns_http_404_for_private_annotation_when_unauthorized(
         self, app, private_annotation, user_with_token
     ):
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
         res = app.get(
@@ -64,7 +64,7 @@ class TestGetAnnotationJSONLD:
     def test_it_returns_http_404_for_private_annotation_when_unauthorized(
         self, app, private_annotation, user_with_token
     ):
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
         res = app.get(
@@ -130,7 +130,7 @@ class TestPostAnnotation:
 
     # TODO: This endpoint should return a 201
     def test_it_returns_http_200_when_annotation_created(self, app, user_with_token):
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
         annotation = {
@@ -149,7 +149,7 @@ class TestPatchAnnotation:
         self, app, user_annotation, user_with_token
     ):
         """An annotation's creator (user) is blessed with the 'update' permission"""
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
         annotation_patch = {"text": "This is an updated annotation"}
@@ -179,7 +179,7 @@ class TestPatchAnnotation:
         self, app, annotation, user_with_token
     ):
         """The user in this request is not the annotation's creator"""
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
@@ -200,7 +200,7 @@ class TestDeleteAnnotation:
         self, app, user_annotation, user_with_token
     ):
         """An annotation's creator (user) is blessed with the 'update' permission"""
-        user, token = user_with_token
+        _, token = user_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
@@ -223,7 +223,7 @@ class TestDeleteAnnotation:
         self, app, annotation, user_with_token
     ):
         """The user in this request is not the annotation's creator"""
-        user, token = user_with_token
+        _, token = user_with_token
         headers = {"Authorization": str("Bearer {}".format(token.value))}
 
         res = app.delete(

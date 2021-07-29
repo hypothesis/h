@@ -5,7 +5,7 @@ class TestModeration:
     def test_moderator_flag_listing(
         self, app, group, flagged_annotation, moderator_with_token
     ):
-        moderator, token = moderator_with_token
+        _, token = moderator_with_token
 
         headers = {"Authorization": str("Bearer {}".format(token.value))}
         annotation_url = "/api/annotations/{}".format(flagged_annotation.id)

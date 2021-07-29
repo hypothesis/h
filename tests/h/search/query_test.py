@@ -944,7 +944,7 @@ class TestRepliesMatcher:
 
 class TestTagsAggregation:
     def test_it_returns_annotation_counts_by_tag(self, Annotation, search):
-        for i in range(2):
+        for _ in range(2):
             Annotation(tags=["tag_a"])
         Annotation(tags=["tag_b"])
 
@@ -965,9 +965,9 @@ class TestTagsAggregation:
         bucket_limit = 2
 
         Annotation(tags=["tag_a"])
-        for i in range(3):
+        for _ in range(3):
             Annotation(tags=["tag_b"])
-        for i in range(2):
+        for _ in range(2):
             Annotation(tags=["tag_c"])
 
         search.append_aggregation(query.TagsAggregation(bucket_limit))
@@ -984,7 +984,7 @@ class TestTagsAggregation:
 
 class TestUsersAggregation:
     def test_it_returns_annotation_counts_by_user(self, Annotation, search):
-        for i in range(2):
+        for _ in range(2):
             Annotation(userid="acct:pa@example.com")
         Annotation(userid="acct:pb@example.com")
 
@@ -1009,9 +1009,9 @@ class TestUsersAggregation:
         bucket_limit = 2
 
         Annotation(userid="acct:pa@example.com")
-        for i in range(3):
+        for _ in range(3):
             Annotation(userid="acct:pb@example.com")
-        for i in range(2):
+        for _ in range(2):
             Annotation(userid="acct:pc@example.com")
 
         search.append_aggregation(query.UsersAggregation(limit=bucket_limit))
