@@ -19,8 +19,10 @@ from webob.multidict import MultiDict
 from h import db
 from h.models import Organization
 from h.settings import database_url
-from tests.common.fixtures import es_client  # noqa: F401
-from tests.common.fixtures import init_elasticsearch  # noqa: F401
+from tests.common.fixtures import es_client  # noqa: F401 pylint:disable=unused-import
+from tests.common.fixtures import (  # noqa: F401 pylint:disable=unused-import
+    init_elasticsearch,
+)
 from tests.common.fixtures.services import *  # noqa: F403,F401 pylint:disable=wildcard-import,unused-wildcard-import
 
 TEST_AUTHORITY = "example.com"
