@@ -7,6 +7,7 @@ from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
+from h.security.acl import ACL
 from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
@@ -20,7 +21,7 @@ class UserContext:
     def __acl__(self):
         """Return user access control lists."""
 
-        return self.user.__acl__()
+        return ACL.for_user(self.user)
 
 
 class UserRoot(RootFactory):

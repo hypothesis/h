@@ -10,12 +10,17 @@ from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
 
 
 class TestUserContext:
-    def test_acl_matching_user(self, factories):
+    def test_acl_matching_user(self, factories, ACL):
         user = factories.User()
 
         acl = UserContext(user).__acl__()
 
-        assert acl == user.__acl__()
+        ACL.for_user.assert_called_once_with(user)
+        assert acl == ACL.for_user.return_value
+
+    @pytest.fixture
+    def ACL(self, patch):
+        return patch("h.traversal.user.ACL")
 
 
 @pytest.mark.usefixtures("user_service")

@@ -8,6 +8,38 @@ from h.security.acl import ACL
 from h.security.permissions import Permission
 
 
+class TestACLForUser:
+    @pytest.mark.parametrize(
+        "principal_template,permits",
+        (
+            # The right client authority has permissions
+            ("client_authority:{user.authority}", True),
+            ("client_authority:DIFFERENT", False),
+            # User's don't by just being in the authority
+            ("authority:{user.authority}", False),
+        ),
+    )
+    @pytest.mark.parametrize(
+        "permission", (Permission.User.UPDATE, Permission.User.READ)
+    )
+    def test_it(self, user, principal_template, permission, permits):
+        policy = ACLAuthorizationPolicy()
+
+        class ACLCarrier:
+            def __acl__(self):
+                return ACL.for_user(user)
+
+        principal = principal_template.format(user=user)
+        assert (
+            bool(policy.permits(ACLCarrier(), [principal, "some_noise"], permission))
+            == permits
+        )
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User.create()
+
+
 class TestACLForGroup:
     def test_authority_joinable(self, group, permits):
         group.joinable_by = JoinableBy.authority
