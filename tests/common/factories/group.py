@@ -23,7 +23,7 @@ class Group(ModelFactory):
     enforce_scope = True
 
     @factory.post_generation
-    def scopes(self, create, scopes=0, **kwargs):
+    def scopes(self, create, scopes=0, **kwargs):  # pylint: disable=method-hidden
         if isinstance(scopes, int):
             scopes = [GroupScope(group=self) for _ in range(0, scopes)]
 
