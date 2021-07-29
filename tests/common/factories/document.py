@@ -29,10 +29,9 @@ class DocumentMeta(ModelFactory):
     def value(self):
         if self.type == "twitter.url.main_url":
             return [FAKER.url()]
-        elif self.type == "favicon":
+        if self.type == "favicon":
             return [FAKER.image_url()]
-        else:
-            return [FAKER.bs()]
+        return [FAKER.bs()]
 
 
 class DocumentURI(ModelFactory):

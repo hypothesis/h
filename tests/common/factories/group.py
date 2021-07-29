@@ -27,7 +27,7 @@ class Group(ModelFactory):
         if isinstance(scopes, int):
             scopes = [GroupScope(group=self) for _ in range(0, scopes)]
 
-        self.scopes = scopes or []
+        self.scopes = scopes or []  # pylint: disable=method-hidden
 
 
 class OpenGroup(Group):

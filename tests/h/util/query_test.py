@@ -28,7 +28,7 @@ class TestColumnWindows:
             (13, ["abcdefghijklm", "nopqrstuvwxyz"]),
             (10, ["abcdefghij", "klmnopqrst", "uvwxyz"]),
             (5, ["abcde", "fghij", "klmno", "pqrst", "uvwxy", "z"]),
-            (1, [char for char in ASCII_LOWERCASE]),
+            (1, list(ASCII_LOWERCASE)),
         ],
     )
     def test_basic_windowing(self, db_session, windowsize, expected):
@@ -47,7 +47,7 @@ class TestColumnWindows:
             (13, ["abcdefghijklm"]),
             (10, ["abcdefghij", "klm"]),
             (3, ["abc", "def", "ghi", "jkl", "m"]),
-            (1, [char for char in ASCII_LOWERCASE[:13]]),
+            (1, list(ASCII_LOWERCASE[:13])),
         ],
     )
     def test_filtered_windowing(self, db_session, windowsize, expected):

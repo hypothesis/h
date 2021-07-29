@@ -97,7 +97,7 @@ class FakeNipsaService:
 
 @pytest.fixture
 def nipsa_service(pyramid_config, users):
-    service = FakeNipsaService([u for u in users.values()])
+    service = FakeNipsaService(list(users.values()))
     pyramid_config.register_service(service, name="nipsa")
     return service
 

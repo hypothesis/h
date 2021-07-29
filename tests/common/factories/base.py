@@ -6,7 +6,7 @@ SESSION = None
 
 
 def set_session(value):
-    global SESSION
+    global SESSION  # pylint:disable=global-statement
 
     SESSION = value
 
@@ -26,6 +26,8 @@ class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
             raise RuntimeError("no session: did you use the factories fixture?")
         obj = model_class(*args, **kwargs)
         SESSION.add(obj)
-        if cls._meta.sqlalchemy_session_persistence == "flush":
+        if (  # pylint:disable=no-member
+            cls._meta.sqlalchemy_session_persistence == "flush"
+        ):
             SESSION.flush()
         return obj

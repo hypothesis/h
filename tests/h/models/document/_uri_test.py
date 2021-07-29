@@ -20,7 +20,7 @@ class TestDocumentURI:
         document_uri = factories.DocumentURI(type=None)
         db_session.flush()
 
-        assert document_uri.type == ""
+        assert not document_uri.type
 
     def test_you_cannot_set_type_to_null(self, db_session, document_uri):
         document_uri.type = None
@@ -32,7 +32,7 @@ class TestDocumentURI:
         document_uri = factories.DocumentURI(content_type=None)
         db_session.flush()
 
-        assert document_uri.content_type == ""
+        assert not document_uri.content_type
 
     def test_you_cannot_set_content_type_to_null(self, db_session, document_uri):
         document_uri.content_type = None

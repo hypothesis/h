@@ -399,7 +399,7 @@ class TestCreateAnnotationSchema:
     def test_it_inserts_empty_string_if_data_contains_no_text(self, pyramid_request):
         schema = CreateAnnotationSchema(pyramid_request)
 
-        assert schema.validate(self.valid_data())["text"] == ""
+        assert not schema.validate(self.valid_data())["text"]
 
     def test_it_inserts_empty_list_if_data_contains_no_tags(self, pyramid_request):
         schema = CreateAnnotationSchema(pyramid_request)

@@ -93,7 +93,7 @@ class TestEnumType:
 
     def test_serialize_returns_an_empty_string_if_value_is_none(self, color_type):
         node = Mock()
-        assert color_type.serialize(node, None) == ""
+        assert not color_type.serialize(node, None)
 
     def test_deserialize_returns_none_if_value_is_null(self, color_type):
         node = Mock()

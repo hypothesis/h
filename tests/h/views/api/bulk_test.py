@@ -48,7 +48,7 @@ class TestBulk:
             # Looks like this doesn't do anything, but it turns this into a
             # generator. Unless the first item is retrieved the above is not
             # executed.
-            yield {}  # pragma: no cover
+            yield {}  # pragma: no cover pylint:disable=unreachable
 
         BulkAPI.from_byte_stream.side_effect = bad_generator
 

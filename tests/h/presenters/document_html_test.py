@@ -12,7 +12,7 @@ class TestDocumentHTMLPresenter:
             document_uris=[mock.Mock(uri="http://example.com/example.html")]
         )
 
-        assert presenter.filename == ""
+        assert not presenter.filename
 
     def test_filename_with_file_uri(self):
         presenter = self.presenter(
@@ -40,19 +40,19 @@ class TestDocumentHTMLPresenter:
             document_uris=[mock.Mock(uri="file:///home/seanh/My%20Documents/")]
         )
 
-        assert presenter.filename == ""
+        assert not presenter.filename
 
     def test_filename_with_no_uri(self):
         # self.uri should always be unicode, the worst it should ever be is an
         # empty string.
         presenter = self.presenter(document_uris=[mock.Mock(uri="")])
 
-        assert presenter.filename == ""
+        assert not presenter.filename
 
     def test_filename_with_nonsense_uri(self):
         presenter = self.presenter(document_uris=[mock.Mock(uri="foobar")])
 
-        assert presenter.filename == ""
+        assert not presenter.filename
 
     def test_href_returns_web_uri_if_document_has_one(self):
         web_uri = "http://www.example.com/example.html"
@@ -60,7 +60,7 @@ class TestDocumentHTMLPresenter:
         assert self.presenter(web_uri=web_uri).href == web_uri
 
     def test_href_returns_empty_string_for_document_with_no_web_uri(self):
-        assert self.presenter(web_uri=None).href == ""
+        assert not self.presenter(web_uri=None).href
 
     def test_href_returns_Markup(self):
         web_uri = "http://www.example.com/example.html"
@@ -239,7 +239,7 @@ class TestDocumentHTMLPresenter:
         uri.return_value = ""
         filename.return_value = ""
 
-        assert self.presenter(title=None).title == ""
+        assert not self.presenter(title=None).title
 
     def test_web_uri_returns_document_web_uri(self):
         """
