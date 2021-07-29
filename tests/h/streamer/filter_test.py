@@ -254,9 +254,9 @@ class TestFilterHandler:
 
     @pytest.fixture
     def filter_matches(self, db_session):
-        def filter_matches(filter, annotation):
+        def filter_matches(filter_, annotation):
             socket = FakeSocket()
-            SocketFilter.set_filter(socket, filter)
+            SocketFilter.set_filter(socket, filter_)
 
             return bool(tuple(SocketFilter.matching([socket], annotation, db_session)))
 

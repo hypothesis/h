@@ -272,7 +272,7 @@ class TestHandleClientIDMessage:
 
 class TestHandleFilterMessage:
     def test_sets_socket_filter(self, socket, SocketFilter):
-        filter = {
+        filter_ = {
             "actions": {},
             "match_policy": "include_any",
             "clauses": [
@@ -280,11 +280,11 @@ class TestHandleFilterMessage:
             ],
         }
 
-        message = websocket.Message(socket=socket, payload={"filter": filter})
+        message = websocket.Message(socket=socket, payload={"filter": filter_})
 
         websocket.handle_filter_message(message)
 
-        SocketFilter.set_filter.assert_called_once_with(socket, filter)
+        SocketFilter.set_filter.assert_called_once_with(socket, filter_)
 
     def test_missing_filter_error(self, socket):
         message = websocket.Message(socket=socket, payload={"type": "filter"})
