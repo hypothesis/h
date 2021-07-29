@@ -14,7 +14,7 @@ class TestAnnotationRoot:
         assert permits(root, [security.Authenticated], Permission.Annotation.CREATE)
         assert not permits(root, [], Permission.Annotation.CREATE)
 
-    def test_annotation_lookup(
+    def test_getting_by_subscript_returns_AnnotationContext(
         self,
         root,
         pyramid_request,
@@ -25,15 +25,17 @@ class TestAnnotationRoot:
     ):
         context = root[sentinel.annotation_id]
 
-        assert context == AnnotationContext.return_value
         storage.fetch_annotation.assert_called_once_with(
             pyramid_request.db, sentinel.annotation_id
         )
         AnnotationContext.assert_called_once_with(
             storage.fetch_annotation.return_value, groupfinder_service, links_service
         )
+        assert context == AnnotationContext.return_value
 
-    def test_failing_annotation_lookup(self, root, storage):
+    def test_getting_by_subscript_raises_KeyError_if_annotation_missing(
+        self, root, storage
+    ):
         storage.fetch_annotation.return_value = None
 
         with pytest.raises(KeyError):
