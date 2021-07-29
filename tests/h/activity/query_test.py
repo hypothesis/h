@@ -175,20 +175,16 @@ class TestCheckURL:
 
         unparse.assert_called_once_with({"tag": "foo"})
 
-    def test_does_nothing_with_non_matching_queries(self, pyramid_request, unparse):
+    def test_doesnt_raise_with_non_matching_queries(self, pyramid_request, unparse):
         query = MultiDict({"tag": "foo"})
 
-        result = check_url(pyramid_request, query, unparse=unparse)
+        check_url(pyramid_request, query, unparse=unparse)
 
-        assert result is None
-
-    def test_does_nothing_if_not_on_search_page(self, pyramid_request, unparse):
+    def test_doesnt_raise_if_not_on_search_page(self, pyramid_request, unparse):
         pyramid_request.matched_route.name = "group_read"
         query = MultiDict({"group": "abcd1234"})
 
-        result = check_url(pyramid_request, query, unparse=unparse)
-
-        assert result is None
+        check_url(pyramid_request, query, unparse=unparse)
 
     @pytest.fixture
     def group(self, factories):
