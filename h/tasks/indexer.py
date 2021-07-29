@@ -24,19 +24,25 @@ def add_annotation(id_):
 @celery.task
 def add_annotations_between_times(start_time, end_time, tag):
     search_index = celery.request.find_service(name="search_index")
-    search_index._queue.add_between_times(start_time, end_time, tag)
+    search_index._queue.add_between_times(  # pylint: disable=protected-access
+        start_time, end_time, tag
+    )
 
 
 @celery.task
 def add_users_annotations(userid, tag, force, schedule_in):
     search_index = celery.request.find_service(name="search_index")
-    search_index._queue.add_by_user(userid, tag, force=force, schedule_in=schedule_in)
+    search_index._queue.add_by_user(  # pylint: disable=protected-access
+        userid, tag, force=force, schedule_in=schedule_in
+    )
 
 
 @celery.task
 def add_group_annotations(groupid, tag, force, schedule_in):
     search_index = celery.request.find_service(name="search_index")
-    search_index._queue.add_by_group(groupid, tag, force=force, schedule_in=schedule_in)
+    search_index._queue.add_by_group(  # pylint: disable=protected-access
+        groupid, tag, force=force, schedule_in=schedule_in
+    )
 
 
 @celery.task(base=_BaseTaskWithRetry)

@@ -84,8 +84,14 @@ def _normalize_document_uris_window(session, window):
         if existing.count() > 0:
             session.delete(docuri)
         else:
-            docuri._claimant_normalized = uri.normalize(docuri.claimant)
-            docuri._uri_normalized = uri.normalize(docuri.uri)
+            docuri._claimant_normalized = (  # pylint: disable=protected-access
+                uri.normalize(
+                    docuri.claimant,
+                )
+            )
+            docuri._uri_normalized = uri.normalize(  # pylint: disable=protected-access
+                docuri.uri,
+            )
 
         session.flush()
 
@@ -107,7 +113,12 @@ def _normalize_document_meta_window(session, window):
         if existing.count() > 0:
             session.delete(docmeta)
         else:
-            docmeta._claimant_normalized = uri.normalize(docmeta.claimant)
+
+            docmeta._claimant_normalized = (  # pylint: disable=protected-access
+                uri.normalize(
+                    docmeta.claimant,
+                )
+            )
 
         session.flush()
 
@@ -123,7 +134,7 @@ def _normalize_annotations_window(session, window):
     for a in query:
         normalized = uri.normalize(a.target_uri)
         if normalized != a.target_uri_normalized:
-            a._target_uri_normalized = normalized
+            a._target_uri_normalized = normalized  # pylint: disable=protected-access
             ids.add(a.id)
 
     return ids
