@@ -326,7 +326,7 @@ class GroupSearchController(SearchController):
     def _check_access_permissions(self):
         if not self.request.has_permission(Permission.Group.READ, context=self.context):
             show_join_page = self.request.has_permission(
-                Permission.Group.JOIN, self.group
+                Permission.Group.JOIN, self.context
             )
             if not self.request.user:
                 # Show a page which will prompt the user to login to join.
