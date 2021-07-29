@@ -231,6 +231,7 @@ class GroupScopeWithOrigin(Matcher):
     """Matches any GroupScope with the given origin."""
 
     def __init__(self, origin):
+        super(Matcher, self).__init__()
         self.origin = origin
 
     def __eq__(self, group_scope):
