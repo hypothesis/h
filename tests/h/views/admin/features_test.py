@@ -38,9 +38,9 @@ def test_features_index_sorts_features(Feature, pyramid_request):
 
 @features_save_fixtures
 def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_request):
-    foo = DummyFeature(name="foo")
-    bar = DummyFeature(name="bar")
-    Feature.all.return_value = [foo, bar]
+    feature_foo = DummyFeature(name="foo")
+    feature_bar = DummyFeature(name="bar")
+    Feature.all.return_value = [feature_foo, feature_bar]
     pyramid_request.POST = {
         "foo[everyone]": "on",
         "foo[staff]": "on",
@@ -49,31 +49,31 @@ def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_reque
 
     features_save(pyramid_request)
 
-    assert foo.everyone is foo.staff is bar.admins is True
+    assert feature_foo.everyone is feature_foo.staff is feature_bar.admins is True
 
 
 @features_save_fixtures
 def test_features_save_sets_attributes_when_checkboxes_off(Feature, pyramid_request):
-    foo = DummyFeature(name="foo")
-    foo.everyone = True
-    foo.staff = True
-    Feature.all.return_value = [foo]
+    feature = DummyFeature(name="foo")
+    feature.everyone = True
+    feature.staff = True
+    Feature.all.return_value = [feature]
     pyramid_request.POST = {}
 
     features_save(pyramid_request)
 
-    assert foo.everyone is foo.staff is False
+    assert feature.everyone is feature.staff is False
 
 
 @features_save_fixtures
 def test_features_save_ignores_unknown_fields(Feature, pyramid_request):
-    foo = DummyFeature(name="foo")
-    Feature.all.return_value = [foo]
+    feature = DummyFeature(name="foo")
+    Feature.all.return_value = [feature]
     pyramid_request.POST = {"foo[wibble]": "on", "foo[admins]": "ignoreme"}
 
     features_save(pyramid_request)
 
-    assert foo.admins is False
+    assert feature.admins is False
 
 
 def test_cohorts_index_without_cohorts(pyramid_request):
