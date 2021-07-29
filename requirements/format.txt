@@ -10,7 +10,7 @@ black==21.7b0
     # via -r requirements/format.in
 click==8.0.1
     # via black
-isort==5.9.2
+isort==5.9.3
     # via -r requirements/format.in
 mypy-extensions==0.4.3
     # via black
