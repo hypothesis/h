@@ -2,8 +2,29 @@ from datetime import datetime, timedelta
 
 import pytest
 from sqlalchemy import exc
+from sqlalchemy.sql.elements import BinaryExpression
 
 from h import models
+from h.models.user import UserIDComparator
+
+
+class TestUserIDComparator:
+    @pytest.mark.parametrize("other", (None, "acct:username@authority"))
+    def test__eq__returns_a_BinaryExpression(self, comparator, other):
+        # We don't actually get a True here, just something which might
+        # evaluate to true in the DB
+        assert isinstance(comparator.__eq__(other), BinaryExpression)
+
+    @pytest.mark.parametrize(
+        "non_matching",
+        ("not_a_valid_user_id", "acct:DIFFERENT@authority", "acct:username@DIFFERENT"),
+    )
+    def test__eq___returns_False(self, comparator, non_matching):
+        assert not comparator.__eq__(non_matching)
+
+    @pytest.fixture
+    def comparator(self):
+        return UserIDComparator("username", "authority")
 
 
 class TestUserModelDataConstraints:
@@ -218,6 +239,9 @@ class TestUserModel:
         # nullable
         assert getattr(models.User(), "privacy_accepted") is None
 
+    def test_repr(self, user):
+        assert repr(user) == "<User: kiki>"
+
     @pytest.fixture
     def user(self, db_session):
         user = models.User(
@@ -275,6 +299,22 @@ class TestUserGetByEmail:
         }
         db_session.flush()
         return users
+
+
+class TestUserGetByActivation:
+    def test_it(self, db_session, factories):
+        activated_user = factories.User(activation=factories.Activation())
+
+        user = models.User.get_by_activation(db_session, activated_user.activation)
+
+        assert user == activated_user
+
+    def test_it_with_no_matches(self, db_session, factories):
+        activation = factories.Activation()
+
+        user = models.User.get_by_activation(db_session, activation)
+
+        assert user is None
 
 
 class TestUserGetByUsername:
