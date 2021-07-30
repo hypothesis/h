@@ -213,8 +213,9 @@ def svc(db_session, usr_svc):
 class GroupWithName(Matcher):
     """Matches any Group with the given name."""
 
-    def __init__(self, name):
-        super(Matcher).__init__()
+    def __init__(
+        self, name
+    ):  # pylint:disable=super-init-not-called #:Overwriting __eq__ instead
         self.name = name
 
     def __eq__(self, group):
@@ -227,8 +228,9 @@ class GroupWithName(Matcher):
 class GroupScopeWithOrigin(Matcher):
     """Matches any GroupScope with the given origin."""
 
-    def __init__(self, origin):
-        super(Matcher).__init__()
+    def __init__(
+        self, origin
+    ):  # pylint:disable=super-init-not-called #: Overwriting __eq__ instead
         self.origin = origin
 
     def __eq__(self, group_scope):
