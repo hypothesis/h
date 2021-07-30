@@ -94,6 +94,12 @@ class ACL:
 
     @classmethod
     def _for_annotation(cls, annotation, group, allow_read_on_delete):
+        # All authenticated users can create annotations
+        yield Allow, security.Authenticated, Permission.Annotation.CREATE
+
+        if not annotation:
+            return
+
         # If the annotation has been deleted, nobody has any privileges on it
         # any more.
         if annotation.deleted and not allow_read_on_delete:

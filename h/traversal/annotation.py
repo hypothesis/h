@@ -1,16 +1,11 @@
-from pyramid.security import Allow, Authenticated
-
 from h import storage
 from h.interfaces import IGroupService
 from h.security.acl import ACL
-from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
 class AnnotationRoot(RootFactory):
     """Root factory for routes whose context is an `AnnotationContext`."""
-
-    __acl__ = [(Allow, Authenticated, Permission.Annotation.CREATE)]
 
     def __getitem__(self, annotation_id):
         annotation = storage.fetch_annotation(self.request.db, annotation_id)
@@ -20,6 +15,10 @@ class AnnotationRoot(RootFactory):
         group_service = self.request.find_service(IGroupService)
         links_service = self.request.find_service(name="links")
         return AnnotationContext(annotation, group_service, links_service)
+
+    @classmethod
+    def __acl__(cls):
+        return ACL.for_annotation(annotation=None, group=None)
 
 
 class AnnotationContext:

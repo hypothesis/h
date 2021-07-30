@@ -1,17 +1,16 @@
 from unittest.mock import sentinel
 
 import pytest
-from pyramid import security
-from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.security.permissions import Permission
 from h.traversal import AnnotationContext, AnnotationRoot
 
 
 class TestAnnotationRoot:
-    def test_create_permission_requires_authenticated_user(self, root, permits):
-        assert permits(root, [security.Authenticated], Permission.Annotation.CREATE)
-        assert not permits(root, [], Permission.Annotation.CREATE)
+    def test_create_permission_requires_authenticated_user(self, root, ACL):
+        acl = root.__acl__()
+
+        ACL.for_annotation.assert_called_once_with(None, None)
+        assert acl == ACL.for_annotation.return_value
 
     def test_getting_by_subscript_returns_AnnotationContext(
         self,
@@ -86,14 +85,7 @@ class TestAnnotationContext:
     def annotation(self, factories):
         return factories.Annotation()
 
-    @pytest.fixture(autouse=True)
-    def ACL(self, patch):
-        return patch("h.traversal.annotation.ACL")
 
-
-@pytest.fixture
-def permits():
-    def permits(context, principals, permission):
-        return ACLAuthorizationPolicy().permits(context, principals, permission)
-
-    return permits
+@pytest.fixture(autouse=True)
+def ACL(patch):
+    return patch("h.traversal.annotation.ACL")
