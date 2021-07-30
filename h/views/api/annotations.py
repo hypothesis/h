@@ -19,7 +19,6 @@ from pyramid import i18n
 from h import search as search_lib
 from h import storage
 from h.events import AnnotationEvent
-from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
 from h.schemas.annotation import (
     CreateAnnotationSchema,
@@ -72,8 +71,8 @@ def create(request):
     """Create an annotation from the POST payload."""
     schema = CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
-    group_service = request.find_service(IGroupService)
-    annotation = storage.create_annotation(request, appstruct, group_service)
+
+    annotation = storage.create_annotation(request, appstruct)
 
     _publish_annotation_event(request, annotation, "create")
 
@@ -126,11 +125,8 @@ def update(context, request):
         request, context.annotation.target_uri, context.annotation.groupid
     )
     appstruct = schema.validate(_json_payload(request))
-    group_service = request.find_service(IGroupService)
 
-    annotation = storage.update_annotation(
-        request, context.annotation.id, appstruct, group_service
-    )
+    annotation = storage.update_annotation(request, context.annotation.id, appstruct)
 
     _publish_annotation_event(request, annotation, "update")
 

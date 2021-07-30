@@ -85,63 +85,59 @@ def fetch_ordered_annotations(session, ids, query_processor=None):
     return anns
 
 
-def create_annotation(request, data, group_service):
+def create_annotation(request, data):
     """
     Create an annotation from already-validated data.
 
     :param request: the request object
     :param data: an annotation data dict that has already been validated by
         :py:class:`h.schemas.annotation.CreateAnnotationSchema`
-    :param group_service: a service object that implements
-        `h.interfaces.IGroupService`
 
     :returns: the created and flushed annotation
     """
-    created = updated = datetime.utcnow()
-
-    document_uri_dicts = data["document"]["document_uri_dicts"]
-    document_meta_dicts = data["document"]["document_meta_dicts"]
-    del data["document"]
+    document_data = data.pop("document", {})
 
     # Replies must have the same group as their parent.
     if data["references"]:
-        top_level_annotation_id = data["references"][0]
-        top_level_annotation = fetch_annotation(request.db, top_level_annotation_id)
-        if top_level_annotation:
-            data["groupid"] = top_level_annotation.groupid
+        root_annotation_id = data["references"][0]
+
+        if root_annotation := fetch_annotation(request.db, root_annotation_id):
+            data["groupid"] = root_annotation.groupid
         else:
             raise schemas.ValidationError(
                 "references.0: "
-                + _("Annotation {id} does not exist").format(id=top_level_annotation_id)
+                + _("Annotation {id} does not exist").format(id=root_annotation_id)
             )
 
+    # Create the annotation and enable relationship loading so we can access
+    # the group, even though we've not added this to the session yet
+    annotation = models.Annotation(**data)
+    request.db.enable_relationship_loading(annotation)
+
+    group = annotation.group
+    if not group:
+        raise schemas.ValidationError(
+            "group: " + _(f"Invalid group id {annotation.groupid}")
+        )
+
     # The user must have permission to create an annotation in the group
-    # they've asked to create one in. If the application didn't configure
-    # a groupfinder we will allow writing this annotation without any
-    # further checks.
-    group = group_service.find(data["groupid"])
-    if group is None or not request.has_permission(
-        Permission.Group.WRITE, context=GroupContext(group)
-    ):
+    # they've asked to create one in.
+    if not request.has_permission(Permission.Group.WRITE, context=GroupContext(group)):
         raise schemas.ValidationError(
             "group: " + _("You may not create annotations in the specified group!")
         )
 
     _validate_group_scope(group, data["target_uri"])
 
-    annotation = models.Annotation(**data)
-    annotation.created = created
-    annotation.updated = updated
-
-    document = update_document_metadata(
+    annotation.created = annotation.updated = datetime.utcnow()
+    annotation.document = update_document_metadata(
         request.db,
         annotation.target_uri,
-        document_meta_dicts,
-        document_uri_dicts,
-        created=created,
-        updated=updated,
+        document_data["document_meta_dicts"],
+        document_data["document_uri_dicts"],
+        created=annotation.created,
+        updated=annotation.updated,
     )
-    annotation.document = document
 
     request.db.add(annotation)
     request.db.flush()
@@ -153,65 +149,48 @@ def create_annotation(request, data, group_service):
     return annotation
 
 
-def update_annotation(request, id_, data, group_service):
+def update_annotation(request, id_, data):
     """
     Update an existing annotation and its associated document metadata.
 
-    Update the annotation identified by ``id_`` with the given
-    data. Create, delete and update document metadata as appropriate.
-
     :param request: the request object
-
     :param id_: the ID of the annotation to be updated, this is assumed to be a
-        validated ID of an annotation that does already exist in the database
-    :type id_: string
-
+        validated ID of an annotation that does already exists in the database
     :param data: the validated data with which to update the annotation
-    :type data: dict
-
-    :type group_service: :py:class:`h.interfaces.IGroupService`
-
     :returns: the updated annotation
     :rtype: h.models.Annotation
-
     """
-    updated = datetime.utcnow()
-
-    # Remove any 'document' field first so that we don't try to save it on the
-    # annotation object.
-    document = data.pop("document", None)
-
     annotation = request.db.query(models.Annotation).get(id_)
-    annotation.updated = updated
-
-    group = group_service.find(annotation.groupid)
-    if group is None:
-        raise schemas.ValidationError(
-            "group: " + _("Invalid group specified for annotation")
-        )
-    if data.get("target_uri", None):
-        _validate_group_scope(group, data["target_uri"])
-
     annotation.extra.update(data.pop("extra", {}))
+    annotation.updated = datetime.utcnow()
 
+    # Pop the document so we don't set it directly
+    document = data.pop("document", None)
     for key, value in data.items():
         setattr(annotation, key, value)
 
+    if target_uri := data.get("target_uri", None):
+        _validate_group_scope(annotation.group, target_uri)
+
+    if annotation.group is None:
+        raise schemas.ValidationError(
+            "group: " + _("Invalid group specified for annotation")
+        )
+
     if document:
-        document_uri_dicts = document["document_uri_dicts"]
-        document_meta_dicts = document["document_meta_dicts"]
-        document = update_document_metadata(
+        annotation.document = update_document_metadata(
             request.db,
             annotation.target_uri,
-            document_meta_dicts,
-            document_uri_dicts,
-            updated=updated,
+            document["document_meta_dicts"],
+            document["document_uri_dicts"],
+            updated=annotation.updated,
         )
-        annotation.document = document
 
-    request.find_service(  # pylint: disable=protected-access
+    request.find_service(
         name="search_index"
-    )._queue.add_by_id(id_, tag="storage.update_annotation", schedule_in=60)
+    )._queue.add_by_id(  # pylint: disable=protected-access
+        annotation.id, tag="storage.update_annotation", schedule_in=60
+    )
 
     return annotation
 
