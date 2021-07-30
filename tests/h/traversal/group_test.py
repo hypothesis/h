@@ -33,27 +33,16 @@ class TestGroupContext:
             == has_upsert
         )
 
-    @pytest.fixture
-    def ACL(self, patch):
-        return patch("h.traversal.group.ACL")
-
 
 @pytest.mark.usefixtures("group_service", "GroupContext_")
 class TestGroupRoot:
-    @pytest.mark.parametrize(
-        "principal,has_create", ((role.User, True), ("other", False))
-    )
-    def test_it_assigns_create_permission_with_user_role(
-        self, set_permissions, pyramid_request, principal, has_create
-    ):
-        set_permissions("acct:adminuser@foo", principals=[principal])
-
+    def test_it_passes_on_acls(self, set_permissions, pyramid_request, ACL):
         context = GroupRoot(pyramid_request)
 
-        assert (
-            bool(pyramid_request.has_permission(Permission.Group.CREATE, context))
-            == has_create
-        )
+        acls = context.__acl__()
+
+        ACL.for_group.assert_called_once_with()
+        assert acls == ACL.for_group.return_value
 
     def test_it_returns_the_context_from_looking_up_the_group(
         self, pyramid_request, group_service, GroupContext_
@@ -85,6 +74,11 @@ class TestGroupRequiredRoot:
         GroupContext_.return_value.group = None
         with pytest.raises(KeyError):
             GroupRequiredRoot(pyramid_request)["does_not_exist"]
+
+
+@pytest.fixture
+def ACL(patch):
+    return patch("h.traversal.group.ACL")
 
 
 @pytest.fixture

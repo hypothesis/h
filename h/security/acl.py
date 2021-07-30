@@ -19,7 +19,23 @@ class ACL:
         yield security.DENY_ALL
 
     @classmethod
-    def for_group(cls, group):
+    def for_group(cls, group=None):
+        # Any logged in user may create a group
+        yield Allow, role.User, Permission.Group.CREATE
+
+        if group:
+            # Most permissions are contextual based on group
+            yield from cls._for_group(group)
+        else:
+            # If and only if there's no group then give UPSERT permission to
+            # users to allow them  to create a new group. Upserting an
+            # existing group is a different
+            yield Allow, role.User, Permission.Group.UPSERT
+
+        yield security.DENY_ALL
+
+    @classmethod
+    def _for_group(cls, group):
         # This principal is given to clients which log in using an OAuth client
         # and secret to a particular authority
         client_authority_principal = f"client_authority:{group.authority}"
@@ -62,5 +78,3 @@ class ACL:
             yield Allow, group.creator.userid, Permission.Group.ADMIN
             yield Allow, group.creator.userid, Permission.Group.MODERATE
             yield Allow, group.creator.userid, Permission.Group.UPSERT
-
-        yield security.DENY_ALL
