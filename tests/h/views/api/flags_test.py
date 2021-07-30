@@ -3,105 +3,57 @@ from unittest import mock
 import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
-from h.services.flag import FlagService
 from h.traversal import AnnotationContext
 from h.views.api import flags as views
 
 
-@pytest.mark.usefixtures(
-    "flag_service",
-    "groupfinder_service",
-    "mailer",
-    "flag_notification_email",
-    "incontext_link",
-)
+@pytest.mark.usefixtures("flag_service")
 class TestCreate:
-    def test_it_flags_annotation(
-        self, annotation_context, pyramid_request, flag_service
-    ):
-        views.create(annotation_context, pyramid_request)
+    def test_it(self, annotation_context, pyramid_request, flag_service):
+        response = views.create(annotation_context, pyramid_request)
 
+        assert isinstance(response, HTTPNoContent)
         flag_service.create.assert_called_once_with(
             pyramid_request.user, annotation_context.annotation
         )
 
-    def test_it_returns_no_content(self, annotation_context, pyramid_request):
-        response = views.create(annotation_context, pyramid_request)
-
-        assert isinstance(response, HTTPNoContent)
-
-    def test_passes_info_to_flag_notification_email(
+    @pytest.mark.parametrize("incontext_returns", (True, False))
+    def test_it_sends_notification_email(
         self,
         annotation_context,
         pyramid_request,
-        groupfinder_service,
-        flag_notification_email,
-        incontext_link,
-    ):
-        pyramid_request.json_body = {"annotation": annotation_context.annotation.id}
-
-        views.create(annotation_context, pyramid_request)
-
-        flag_notification_email.assert_called_once_with(
-            request=pyramid_request,
-            email=groupfinder_service.find.return_value.creator.email,
-            incontext_link=incontext_link.return_value,
-        )
-
-    def test_passes_annotation_target_uri_to_flag_notification_email(
-        self,
-        annotation_context,
-        pyramid_request,
-        groupfinder_service,
-        flag_notification_email,
-        incontext_link,
-    ):
-        pyramid_request.json_body = {"annotation": annotation_context.annotation.id}
-        incontext_link.return_value = None
-
-        views.create(annotation_context, pyramid_request)
-
-        flag_notification_email.assert_called_once_with(
-            request=pyramid_request,
-            email=groupfinder_service.find.return_value.creator.email,
-            incontext_link=annotation_context.annotation.target_uri,
-        )
-
-    def test_sends_notification_email(
-        self, annotation_context, pyramid_request, flag_notification_email, mailer
-    ):
-        pyramid_request.json_body = {"annotation": annotation_context.annotation.id}
-
-        views.create(annotation_context, pyramid_request)
-
-        mailer.send.delay.assert_called_once_with(*flag_notification_email.return_value)
-
-    def test_doesnt_send_email_if_group_has_no_creator(
-        self,
-        annotation_context,
-        factories,
-        groupfinder_service,
-        pyramid_request,
+        flag_notification,
         mailer,
+        incontext_link,
+        incontext_returns,
     ):
-        groupfinder_service.find.return_value = factories.Group()
-        groupfinder_service.find.return_value.creator = None
+        if not incontext_returns:
+            incontext_link.return_value = None
 
         views.create(annotation_context, pyramid_request)
 
-        assert not mailer.send.delay.called
-
-    def test_doesnt_send_email_if_group_creator_has_no_email_address(
-        self,
-        annotation_context,
-        factories,
-        groupfinder_service,
-        pyramid_request,
-        mailer,
-    ):
-        groupfinder_service.find.return_value = factories.Group(
-            creator=factories.User(email=None)
+        flag_notification.generate.assert_called_once_with(
+            request=pyramid_request,
+            email=annotation_context.annotation.group.creator.email,
+            incontext_link=(
+                incontext_link.return_value
+                if incontext_returns
+                else annotation_context.annotation.target_uri
+            ),
         )
+
+        mailer.send.delay.assert_called_once_with(
+            *flag_notification.generate.return_value
+        )
+
+    @pytest.mark.parametrize("blank_field", ("creator", "creator_email"))
+    def test_doesnt_send_email_if_group_has_no_creator_or_email(
+        self, annotation_context, pyramid_request, mailer, blank_field
+    ):
+        if blank_field == "creator":
+            annotation_context.annotation.group.creator = None
+        else:
+            annotation_context.annotation.group.creator.email = None
 
         views.create(annotation_context, pyramid_request)
 
@@ -110,37 +62,25 @@ class TestCreate:
     @pytest.fixture
     def annotation_context(self, factories):
         return mock.create_autospec(
-            AnnotationContext, instance=True, annotation=factories.Annotation()
+            AnnotationContext,
+            instance=True,
+            annotation=factories.Annotation(group=factories.Group()),
         )
 
     @pytest.fixture
-    def pyramid_request(self, factories, pyramid_request):
+    def pyramid_request(self, factories, pyramid_request, annotation_context):
         pyramid_request.user = factories.User()
-        pyramid_request.json_body = {}
+        pyramid_request.json_body = {"annotation": annotation_context.annotation.id}
         return pyramid_request
 
-    @pytest.fixture
-    def flag_service(self, pyramid_config):
-        flag_service = mock.create_autospec(FlagService, instance=True, spec_set=True)
-        pyramid_config.register_service(flag_service, name="flag")
-        return flag_service
+    @pytest.fixture(autouse=True)
+    def flag_notification(self, patch):
+        return patch("h.views.api.flags.flag_notification")
 
-    @pytest.fixture
-    def flag_notification_email(self, patch):
-        return patch(
-            "h.emails.flag_notification.generate",
-            return_value=(
-                ["fake@example.com"],
-                "Some subject",
-                "Some text",
-                "Some html",
-            ),
-        )
-
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def mailer(self, patch):
         return patch("h.views.api.flags.mailer")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def incontext_link(self, patch):
         return patch("h.views.api.flags.links.incontext_link")

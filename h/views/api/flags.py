@@ -2,7 +2,6 @@ from pyramid.httpexceptions import HTTPNoContent
 
 from h import links
 from h.emails import flag_notification
-from h.interfaces import IGroupService
 from h.security.permissions import Permission
 from h.tasks import mailer
 from h.views.api.config import api_config
@@ -17,8 +16,7 @@ from h.views.api.config import api_config
     permission=Permission.Annotation.FLAG,
 )
 def create(context, request):
-    svc = request.find_service(name="flag")
-    svc.create(request.user, context.annotation)
+    request.find_service(name="flag").create(request.user, context.annotation)
 
     _email_group_admin(request, context.annotation)
 
@@ -26,13 +24,11 @@ def create(context, request):
 
 
 def _email_group_admin(request, annotation):
-    group_service = request.find_service(IGroupService)
-    group = group_service.find(annotation.groupid)
-
     incontext_link = links.incontext_link(request, annotation)
     if incontext_link is None:
         incontext_link = annotation.target_uri
 
+    group = annotation.group
     if group.creator and group.creator.email:
         send_params = flag_notification.generate(
             request, group.creator.email, incontext_link
