@@ -196,12 +196,22 @@ class TestACLForGroup:
 
 
 class TestACLForAnnotation:
-    def test_it_denies_everything_when_deleted(self, annotation, group):
+    def test_it_grants_create_to_authenticated_users(self, permits):
+        acl = ACL.for_annotation(None, None)  # Doesn't require an annotation
+
+        assert permits(
+            ObjectWithACL(acl), [security.Authenticated], Permission.Annotation.CREATE
+        )
+        assert not permits(ObjectWithACL(acl), [], Permission.Annotation.CREATE)
+
+    def test_it_denies_normal_permissions_when_deleted(
+        self, annotation, group, anno_permits
+    ):
         annotation.deleted = True
 
-        acl = ACL.for_annotation(annotation, group)
-
-        assert list(acl) == [security.DENY_ALL]
+        # Users should normally have permissions to read their own annotations
+        # so we'll use that as an example
+        assert not anno_permits([annotation.userid], Permission.Annotation.READ)
 
     def test_it_allows_read_if_asked_on_deleted(self, annotation, group, permits):
         annotation.deleted = True
