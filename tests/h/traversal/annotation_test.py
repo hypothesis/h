@@ -1,7 +1,6 @@
 from unittest.mock import sentinel
 
 import pytest
-from h_matchers import Any
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
@@ -78,70 +77,6 @@ class TestAnnotationContext:
 
         links_service.get.assert_called_once_with(annotation, "json")
         assert result == links_service.get.return_value
-
-    def test_acl_everything_is_denied_when_deleted(self, annotation, context):
-        annotation.deleted = True
-
-        acl = context.__acl__()
-
-        assert list(acl) == [security.DENY_ALL]
-
-    def test_acl_the_user_can_always_update_and_delete_their_own(
-        self, annotation, context, permits
-    ):
-        permits(context, [annotation.userid], Permission.Annotation.UPDATE)
-        permits(context, [annotation.userid], Permission.Annotation.DELETE)
-
-    def test_acl_non_shared_permissions_go_to_the_user(
-        self, annotation, context, permits
-    ):
-        annotation.shared = False
-
-        permits(context, [annotation.userid], Permission.Annotation.READ)
-        permits(context, [annotation.userid], Permission.Annotation.FLAG)
-
-    @pytest.mark.parametrize(
-        "permission", (Permission.Group.FLAG, Permission.Group.MODERATE)
-    )
-    def test_acl_shared_permissions_mirror_the_group(
-        self, annotation, context, permits, groupfinder_service, permission, ACL
-    ):
-        annotation.shared = True
-        ACL.for_group.return_value = [
-            (security.Allow, "principal_1", Permission.Group.READ),
-            (security.Allow, "principal_2", Permission.Group.READ),
-            (security.Allow, "principal_1", Permission.Group.FLAG),
-            (security.Allow, "principal_2", Permission.Group.FLAG),
-            (security.Allow, "principal_1", Permission.Group.MODERATE),
-            (security.Allow, "principal_2", Permission.Group.MODERATE),
-        ]
-
-        permits(context, ["principal_1"], Permission.Annotation.READ)
-        permits(context, ["principal_2"], Permission.Annotation.READ)
-        permits(context, ["principal_1"], Permission.Annotation.FLAG)
-        permits(context, ["principal_2"], Permission.Annotation.FLAG)
-        permits(context, ["principal_1"], Permission.Annotation.MODERATE)
-        permits(context, ["principal_2"], Permission.Annotation.MODERATE)
-
-        # This is called a bunch of times right now, we don't need to get too
-        # specific. We can tell it's doing it's job of passing on the ACLs by
-        # the assertions above
-        ACL.for_group.assert_called_with(groupfinder_service.find.return_value)
-
-    def test_acl_shared_permissions_with_no_group(
-        self, annotation, context, permits, groupfinder_service
-    ):
-        annotation.shared = True
-        groupfinder_service.find.return_value = None
-
-        acl = context.__acl__()
-
-        assert (security.Allow, Any(), Permission.Annotation.FLAG) not in acl
-        assert (security.Allow, Any(), Permission.Annotation.MODERATE) not in acl
-
-    @pytest.fixture
-    def annotation(self, factories):
-        return factories.Annotation()
 
     @pytest.fixture
     def context(self, annotation, groupfinder_service, links_service):

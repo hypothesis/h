@@ -1,6 +1,8 @@
 import functools
+from unittest.mock import patch
 
 import pytest
+from h_matchers import Any
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
@@ -191,6 +193,77 @@ class TestACLForGroup:
     @pytest.fixture
     def group(self, factories):
         return factories.Group.create(creator=factories.User.create())
+
+
+class TestACLForAnnotation:
+    def test_it_denies_everything_when_deleted(self, annotation, group):
+        annotation.deleted = True
+
+        acl = ACL.for_annotation(annotation, group)
+
+        assert list(acl) == [security.DENY_ALL]
+
+    def test_it_allows_the_user_to_always_update_and_delete_their_own(
+        self, annotation, anno_permits
+    ):
+        anno_permits([annotation.userid], Permission.Annotation.UPDATE)
+        anno_permits([annotation.userid], Permission.Annotation.DELETE)
+
+    def test_it_gives_non_shared_permissions_go_to_the_user(
+        self, annotation, anno_permits
+    ):
+        annotation.shared = False
+
+        anno_permits([annotation.userid], Permission.Annotation.READ)
+        anno_permits([annotation.userid], Permission.Annotation.FLAG)
+
+    @pytest.mark.parametrize(
+        "permission",
+        (Permission.Group.FLAG, Permission.Group.MODERATE, Permission.Group.READ),
+    )
+    def test_it_mirrors_permissions_from_the_group_for_shared_annotations(
+        self, annotation, group, anno_permits, permission, for_group
+    ):
+        annotation.shared = True
+        for_group.return_value = [
+            (security.Allow, "principal_1", permission),
+            (security.Allow, "principal_2", permission),
+        ]
+
+        anno_permits(["principal_1"], permission)
+        anno_permits(["principal_2"], permission)
+
+        # This is called a bunch of times right now, we don't need to get too
+        # specific. We can tell it's doing it's job of passing on the ACLs by
+        # the assertions above
+        for_group.assert_called_with(group)
+
+    def test_it_with_a_shared_annotation_with_no_group(self, annotation, anno_permits):
+        annotation.shared = True
+
+        acl = ACL.for_annotation(annotation, group=None)
+
+        assert (security.Allow, Any(), Permission.Annotation.FLAG) not in acl
+        assert (security.Allow, Any(), Permission.Annotation.MODERATE) not in acl
+
+    @pytest.fixture
+    def for_group(self):
+        with patch.object(ACL, "for_group") as for_group:
+            yield for_group
+
+    @pytest.fixture
+    def anno_permits(self, permits, annotation, group):
+        return functools.partial(
+            permits, ObjectWithACL(ACL.for_annotation(annotation, group))
+        )
+
+    @pytest.fixture
+    def annotation(self, factories, group):
+        return factories.Annotation(groupid=group.groupid)
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
 
 
 class ObjectWithACL:
