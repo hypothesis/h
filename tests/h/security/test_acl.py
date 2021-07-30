@@ -203,6 +203,13 @@ class TestACLForAnnotation:
 
         assert list(acl) == [security.DENY_ALL]
 
+    def test_it_allows_read_if_asked_on_deleted(self, annotation, group, permits):
+        annotation.deleted = True
+
+        acl = ACL.for_annotation(annotation, group, allow_read_on_delete=True)
+
+        permits(ObjectWithACL(acl), [annotation.userid], Permission.Annotation.READ)
+
     def test_it_allows_the_user_to_always_update_and_delete_their_own(
         self, annotation, anno_permits
     ):
