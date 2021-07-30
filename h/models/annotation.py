@@ -6,6 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
+from h.models.group import Group
 from h.util import markdown, uri
 from h.util.user import split_user
 
@@ -64,6 +65,13 @@ class Annotation(Base):
         server_default="__world__",
         nullable=False,
         index=True,
+    )
+
+    group = sa.orm.relationship(
+        Group,
+        primaryjoin=(Group.pubid == groupid),
+        foreign_keys=[groupid],
+        lazy="select",
     )
 
     #: The textual body of the annotation.

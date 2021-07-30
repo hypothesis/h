@@ -162,6 +162,27 @@ def test_deleting_tags_inline_is_persisted(db_session, factories):
     assert "foo" not in annotation.tags
 
 
+class TestAnnotationGroup:
+    def test_it(self, group, factories):
+        annotation = factories.Annotation(group=group)
+
+        assert annotation.group == group
+
+    def test_it_works_with_pubid(self, group, factories):
+        annotation = factories.Annotation(groupid=group.pubid)
+
+        assert annotation.group == group
+
+    def test_it_returns_world_by_default(self, factories):
+        annotation = factories.Annotation()
+
+        assert annotation.group.pubid == "__world__"
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group(pubid="12345678")
+
+
 class TestThread:
     def test_empty_thread(self, root):
         assert root.thread == []
