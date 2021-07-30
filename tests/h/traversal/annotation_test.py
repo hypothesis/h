@@ -55,6 +55,18 @@ class TestAnnotationRoot:
 
 
 class TestAnnotationContext:
+    def test__acl__(self, context, ACL):
+        context.allow_read_on_delete = sentinel.allow_read_on_delete
+
+        acl = context.__acl__()
+
+        ACL.for_annotation.assert_called_once_with(
+            context.annotation,
+            context.group,
+            allow_read_on_delete=sentinel.allow_read_on_delete,
+        )
+        assert acl == ACL.for_annotation.return_value
+
     def test_links(self, annotation, context, links_service):
         result = context.links
 
@@ -134,6 +146,10 @@ class TestAnnotationContext:
     @pytest.fixture
     def context(self, annotation, groupfinder_service, links_service):
         return AnnotationContext(annotation, groupfinder_service, links_service)
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation()
 
     @pytest.fixture(autouse=True)
     def ACL(self, patch):

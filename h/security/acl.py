@@ -1,5 +1,5 @@
 from pyramid import security
-from pyramid.security import Allow
+from pyramid.security import DENY_ALL, Allow
 
 from h.auth import role
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
@@ -16,7 +16,7 @@ class ACL:
         yield Allow, client_authority, Permission.User.READ
 
         # This is for inheriting security policies... do we inherit?
-        yield security.DENY_ALL
+        yield DENY_ALL
 
     @classmethod
     def for_group(cls, group=None):
@@ -32,7 +32,7 @@ class ACL:
             # existing group is a different
             yield Allow, role.User, Permission.Group.UPSERT
 
-        yield security.DENY_ALL
+        yield DENY_ALL
 
     @classmethod
     def _for_group(cls, group):
@@ -78,3 +78,71 @@ class ACL:
             yield Allow, group.creator.userid, Permission.Group.ADMIN
             yield Allow, group.creator.userid, Permission.Group.MODERATE
             yield Allow, group.creator.userid, Permission.Group.UPSERT
+
+    @classmethod
+    def for_annotation(cls, annotation, group, allow_read_on_delete=False):
+        """Return a Pyramid ACL for this annotation.
+
+        :param annotation: Annotation in question
+        :param group: Group associated with the annotation (if any)
+        :param allow_read_on_delete: Grant READ permissions on deleted
+            annotations.
+        """
+        yield from cls._for_annotation(annotation, group, allow_read_on_delete)
+
+        yield DENY_ALL
+
+    @classmethod
+    def _for_annotation(cls, annotation, group, allow_read_on_delete):
+        # If the annotation has been deleted, nobody has any privileges on it
+        # any more.
+        if annotation.deleted and not allow_read_on_delete:
+            return
+
+        if annotation.shared:
+            # You can read an annotation if you can read the group it's in
+            yield from cls._map_acls(
+                ACL.for_group(group),
+                {Permission.Group.READ: Permission.Annotation.READ},
+            )
+        else:
+            yield Allow, annotation.userid, Permission.Annotation.READ
+
+        if annotation.deleted:
+            return
+
+        if annotation.shared:
+            # You can flag or moderate an annotation if you can flag or
+            # morderate the group it's in
+            yield from cls._map_acls(
+                ACL.for_group(group),
+                {
+                    Permission.Group.FLAG: Permission.Annotation.FLAG,
+                    Permission.Group.MODERATE: Permission.Annotation.MODERATE,
+                },
+            )
+
+        else:
+            # Flagging one's own private annotations is nonsensical,
+            # but from an authz perspective, allowed. It is up to services/views
+            # to handle these situations appropriately
+            yield Allow, annotation.userid, Permission.Annotation.FLAG
+
+        # The user who created the annotation always has the these permissions
+        yield Allow, annotation.userid, Permission.Annotation.UPDATE
+        yield Allow, annotation.userid, Permission.Annotation.DELETE
+
+    @classmethod
+    def _map_acls(cls, acls, permission_map):
+        """Map an ACL swapping permissions provided in the map."""
+
+        for action, principal, permission in acls:
+            try:
+                mapped_permission = permission_map.get(permission)
+            except TypeError:
+                # Things like Pyramid's "ALL_PERMISSIONS" can't be hashed or
+                # mapped
+                continue
+
+            if mapped_permission:
+                yield action, principal, mapped_permission
