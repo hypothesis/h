@@ -230,8 +230,9 @@ def creator(factories):
 class GroupScopeWithOrigin(Matcher):
     """Matches any GroupScope with the given origin."""
 
-    def __init__(self, origin):
-        super(Matcher, self).__init__()
+    def __init__(
+        self, origin
+    ):  # pylint:disable=super-init-not-called #:(Overwriting __eq__ instead)
         self.origin = origin
 
     def __eq__(self, group_scope):
