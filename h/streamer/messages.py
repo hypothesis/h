@@ -10,8 +10,9 @@ from h.formatters import AnnotationUserInfoFormatter
 from h.interfaces import IGroupService
 from h.realtime import Consumer
 from h.streamer import websocket
-from h.streamer.contexts import AnnotationNotificationContext, request_context
+from h.streamer.contexts import request_context
 from h.streamer.filter import SocketFilter
+from h.traversal import AnnotationContext
 
 log = logging.getLogger(__name__)
 
@@ -122,10 +123,15 @@ def handle_annotation_event(message, sockets, request, session):
         (first_socket,), matching_sockets
     )
 
-    resource = AnnotationNotificationContext(
+    resource = AnnotationContext(
         annotation,
         group_service=request.find_service(IGroupService),
         links_service=request.find_service(name="links"),
+        # This is a bit clunky but we have one permission for reading
+        # annotations and reading notifications about deleted annotations.
+        # We could really do with two, as you don't get READ when things are
+        # deleted by default
+        allow_read_on_delete=True,
     )
     read_principals = principals_allowed_by_permission(resource, "read")
     reply = _generate_annotation_event(session, request, message, resource)
