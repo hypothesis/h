@@ -67,7 +67,7 @@ h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
-importlib_resources==5.2.1
+importlib-resources==5.2.1
     # via
     #   -r requirements/requirements.in
     #   h-api
@@ -96,7 +96,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mistune==0.8.4
     # via -r requirements/requirements.in
-newrelic==6.4.4.161
+newrelic==6.6.0.162
     # via -r requirements/requirements.in
 oauthlib==3.1.1
     # via -r requirements/requirements.in
