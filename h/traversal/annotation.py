@@ -7,6 +7,7 @@ from pyramid.security import (
 
 from h import storage
 from h.interfaces import IGroupService
+from h.security.acl import ACL
 from h.security.permissions import Permission
 from h.traversal.group import GroupContext
 from h.traversal.root import RootFactory
@@ -49,51 +50,64 @@ class AnnotationContext:
         return self.links_service.get(self.annotation, name)
 
     def __acl__(self):
+        return list(self.acl_for_annotation(self.annotation, self.group))
+
+    @classmethod
+    def acl_for_annotation(cls, annotation, group, allow_read_on_delete=False):
         """Return a Pyramid ACL for this annotation."""
         # If the annotation has been deleted, nobody has any privileges on it
         # any more.
-        if self.annotation.deleted:
-            return [DENY_ALL]
+        if annotation.deleted and not allow_read_on_delete:
+            yield DENY_ALL
+            return
 
-        acl = list(self._read_principals())
+        if annotation.shared:
+            yield from cls._map_acls(
+                ACL.for_group(group),
+                {Permission.Group.READ: Permission.Annotation.READ},
+            )
+
+        else:
+            yield Allow, annotation.userid, Permission.Annotation.READ
+
+        if annotation.deleted:
+            yield DENY_ALL
+            return
 
         # For shared annotations, some permissions are derived from the
         # permissions for this annotation's containing group.
         # Otherwise they are derived from the annotation's creator
-        if self.annotation.shared:
-            for principal in self._group_principals(self.group, Permission.Group.FLAG):
-                acl.append((Allow, principal, Permission.Annotation.FLAG))
-
-            for principal in self._group_principals(
-                self.group, Permission.Group.MODERATE
-            ):
-                acl.append((Allow, principal, Permission.Annotation.MODERATE))
+        if annotation.shared:
+            yield from cls._map_acls(
+                ACL.for_group(group),
+                {
+                    Permission.Group.FLAG: Permission.Annotation.FLAG,
+                    Permission.Group.MODERATE: Permission.Annotation.MODERATE,
+                },
+            )
 
         else:
             # Flagging one's own private annotations is nonsensical,
             # but from an authz perspective, allowed. It is up to services/views
             # to handle these situations appropriately
-            acl.append((Allow, self.annotation.userid, Permission.Annotation.FLAG))
+            yield Allow, annotation.userid, Permission.Annotation.FLAG
 
         # The user who created the annotation always has the these permissions
-        acl.append((Allow, self.annotation.userid, Permission.Annotation.UPDATE))
-        acl.append((Allow, self.annotation.userid, Permission.Annotation.DELETE))
+        yield Allow, annotation.userid, Permission.Annotation.UPDATE
+        yield Allow, annotation.userid, Permission.Annotation.DELETE
 
         # If we haven't explicitly authorized it, it's not allowed.
-        acl.append(DENY_ALL)
+        yield DENY_ALL
 
-        return acl
+    @classmethod
+    def _map_acls(cls, acls, permission_map):
+        for action, principal, permission in acls:
+            try:
+                mapped_permission = permission_map.get(permission)
+            except TypeError:
+                # Things like Pyramids "ALL_PERMISSIONS" can't be hashed or
+                # mapped
+                continue
 
-    def _read_principals(self):
-        if self.annotation.shared:
-            for principal in self._group_principals(self.group, Permission.Group.READ):
-                yield Allow, principal, Permission.Annotation.READ
-        else:
-            yield Allow, self.annotation.userid, Permission.Annotation.READ
-
-    @staticmethod
-    def _group_principals(group, permission):
-        if group is None:
-            return []
-
-        return principals_allowed_by_permission(GroupContext(group), permission)
+            if mapped_permission:
+                yield action, principal, mapped_permission
