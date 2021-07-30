@@ -24,13 +24,13 @@ class TestACLForUser:
     @pytest.mark.parametrize(
         "permission", (Permission.User.UPDATE, Permission.User.READ)
     )
-    def test_it(self, permits, user, principal_template, permission, is_permitted):
+    def test_it(self, user_permits, user, principal_template, permission, is_permitted):
         principal = principal_template.format(user=user)
-        assert bool(permits([principal, "some_noise"], permission)) == is_permitted
+        assert bool(user_permits([principal, "some_noise"], permission)) == is_permitted
 
     @pytest.fixture
-    def permits(self, permits, user):
-        return functools.partial(permits, ACL.for_user(user))
+    def user_permits(self, permits, user):
+        return functools.partial(permits, ObjectWithACL(ACL.for_user(user)))
 
     @pytest.fixture
     def user(self, factories):
@@ -38,68 +38,90 @@ class TestACLForUser:
 
 
 class TestACLForGroup:
-    def test_authority_joinable(self, group, permits):
+    def test_logged_in_users_get_create_permission(
+        self, group_permits, no_group_permits
+    ):
+        assert group_permits([role.User], Permission.Group.CREATE)
+        assert not group_permits([], Permission.Group.CREATE)
+        assert no_group_permits([role.User], Permission.Group.CREATE)
+        assert not no_group_permits([], Permission.Group.CREATE)
+
+    def test_logged_in_users_get_upsert_permission_when_theres_no_group(
+        self, no_group_permits
+    ):
+        assert no_group_permits([role.User], Permission.Group.UPSERT)
+        assert not no_group_permits([], Permission.Group.UPSERT)
+
+    def test_authority_joinable(self, group, group_permits):
         group.joinable_by = JoinableBy.authority
 
-        assert permits([f"authority:{group.authority}"], Permission.Group.JOIN)
-        assert not permits(["authority:DIFFERENT_AUTHORITY"], Permission.Group.JOIN)
+        assert group_permits([f"authority:{group.authority}"], Permission.Group.JOIN)
+        assert not group_permits(
+            ["authority:DIFFERENT_AUTHORITY"], Permission.Group.JOIN
+        )
 
-    def test_not_joinable(self, group, permits):
+    def test_not_joinable(self, group, group_permits):
         group.joinable_by = None
 
-        assert not permits([f"authority:{group.authority}"], Permission.Group.JOIN)
+        assert not group_permits(
+            [f"authority:{group.authority}"], Permission.Group.JOIN
+        )
 
-    def test_authority_writeable(self, group, permits):
+    def test_authority_writeable(self, group, group_permits):
         group.writeable_by = WriteableBy.authority
 
-        assert permits([f"authority:{group.authority}"], Permission.Group.WRITE)
+        assert group_permits([f"authority:{group.authority}"], Permission.Group.WRITE)
 
-    def test_members_writeable(self, group, permits):
+    def test_members_writeable(self, group, group_permits):
         group.writeable_by = WriteableBy.members
 
-        assert permits([f"group:{group.pubid}"], Permission.Group.WRITE)
+        assert group_permits([f"group:{group.pubid}"], Permission.Group.WRITE)
 
     def test_not_writeable(self, group, permitted_principals_for):
         group.writeable_by = None
 
         assert not permitted_principals_for(Permission.Group.WRITE)
 
-    def test_world_readable_and_flaggable(self, group, permits):
+    def test_world_readable_and_flaggable(self, group, group_permits):
         group.readable_by = ReadableBy.world
 
-        assert permits([security.Everyone], Permission.Group.READ)
-        assert permits([security.Everyone], Permission.Group.MEMBER_READ)
-        assert permits([security.Authenticated], Permission.Group.FLAG)
-        assert not permits([security.Everyone], Permission.Group.FLAG)
+        assert group_permits([security.Everyone], Permission.Group.READ)
+        assert group_permits([security.Everyone], Permission.Group.MEMBER_READ)
+        assert group_permits([security.Authenticated], Permission.Group.FLAG)
+        assert not group_permits([security.Everyone], Permission.Group.FLAG)
 
-    def test_members_readable_and_flaggable(self, group, permits):
+    def test_members_readable_and_flaggable(self, group, group_permits):
         group.readable_by = ReadableBy.members
 
-        assert permits([f"group:{group.pubid}"], Permission.Group.READ)
-        assert permits([f"group:{group.pubid}"], Permission.Group.MEMBER_READ)
-        assert permits([f"group:{group.pubid}"], Permission.Group.FLAG)
+        assert group_permits([f"group:{group.pubid}"], Permission.Group.READ)
+        assert group_permits([f"group:{group.pubid}"], Permission.Group.MEMBER_READ)
+        assert group_permits([f"group:{group.pubid}"], Permission.Group.FLAG)
 
-    def test_not_readable(self, group, permits):
+    def test_not_readable(self, group, group_permits):
         group.readable_by = None
 
-        assert not permits(
+        assert not group_permits(
             [security.Everyone, f"group:{group.pubid}"], Permission.Group.READ
         )
-        assert not permits(
+        assert not group_permits(
             [security.Everyone, f"group:{group.pubid}"], Permission.Group.MEMBER_READ
         )
-        assert not permits(
+        assert not group_permits(
             [security.Authenticated, f"group:{group.pubid}"], Permission.Group.FLAG
         )
 
     @pytest.mark.parametrize(
         "readable_by", (ReadableBy.world, ReadableBy.members, None)
     )
-    def test_the_client_authority_can_always_read(self, group, permits, readable_by):
+    def test_the_client_authority_can_always_read(
+        self, group, group_permits, readable_by
+    ):
         group.readable_by = readable_by
 
-        assert permits([f"client_authority:{group.authority}"], Permission.Group.READ)
-        assert permits(
+        assert group_permits(
+            [f"client_authority:{group.authority}"], Permission.Group.READ
+        )
+        assert group_permits(
             [f"client_authority:{group.authority}"], Permission.Group.MEMBER_READ
         )
 
@@ -111,27 +133,29 @@ class TestACLForGroup:
         }
 
     def test_auth_client_with_matching_authority_has_admin_permission(
-        self, group, permits
+        self, group, group_permits
     ):
-        assert permits([f"client_authority:{group.authority}"], Permission.Group.ADMIN)
-        assert not permits(
+        assert group_permits(
+            [f"client_authority:{group.authority}"], Permission.Group.ADMIN
+        )
+        assert not group_permits(
             ["client_authority:DIFFERENT_AUTHORITY"], Permission.Group.ADMIN
         )
 
-    def test_staff_user_has_admin_permission_on_any_group(self, group, permits):
-        assert permits([role.Staff], Permission.Group.ADMIN)
+    def test_staff_user_has_admin_permission_on_any_group(self, group, group_permits):
+        assert group_permits([role.Staff], Permission.Group.ADMIN)
 
-    def test_admin_user_has_admin_permission_on_any_group(self, group, permits):
-        assert permits([role.Admin], Permission.Group.ADMIN)
+    def test_admin_user_has_admin_permission_on_any_group(self, group, group_permits):
+        assert group_permits([role.Admin], Permission.Group.ADMIN)
 
     @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))
     def test_creator_permissions(
-        self, group, permitted_principals_for, permits, readable_by
+        self, group, permitted_principals_for, group_permits, readable_by
     ):
         group.readable_by = readable_by
 
-        assert permits(group.creator.userid, Permission.Group.ADMIN)
-        assert permits(group.creator.userid, Permission.Group.UPSERT)
+        assert group_permits(group.creator.userid, Permission.Group.ADMIN)
+        assert group_permits(group.creator.userid, Permission.Group.UPSERT)
         assert permitted_principals_for(Permission.Group.MODERATE) == {
             group.creator.userid
         }
@@ -144,12 +168,16 @@ class TestACLForGroup:
         assert not permitted_principals_for(Permission.Group.MODERATE)
         assert not permitted_principals_for(Permission.Group.UPSERT)
 
-    def test_fallback_is_deny_all(self, group, permits):
-        assert not permits([security.Everyone], "non_existant_permission")
+    def test_fallback_is_deny_all(self, group, group_permits):
+        assert not group_permits([security.Everyone], "non_existant_permission")
 
     @pytest.fixture
-    def permits(self, permits, group):
-        return functools.partial(permits, ACL.for_group(group))
+    def no_group_permits(self, permits):
+        return functools.partial(permits, ObjectWithACL(ACL.for_group(None)))
+
+    @pytest.fixture
+    def group_permits(self, permits, group):
+        return functools.partial(permits, ObjectWithACL(ACL.for_group(group)))
 
     @pytest.fixture
     def permitted_principals_for(self, group):
@@ -175,9 +203,4 @@ class ObjectWithACL:
 
 @pytest.fixture
 def permits():
-    def permits(acl_iterable, principals, permission):
-        return ACLAuthorizationPolicy().permits(
-            ObjectWithACL(acl_iterable), principals, permission
-        )
-
-    return permits
+    return ACLAuthorizationPolicy().permits
