@@ -33,10 +33,13 @@ class AnnotationContext:
 
     annotation = None
 
-    def __init__(self, annotation, group_service, links_service):
+    def __init__(
+        self, annotation, group_service, links_service, allow_read_on_delete=False
+    ):
         self.group_service = group_service
         self.links_service = links_service
         self.annotation = annotation
+        self.allow_read_on_delete = allow_read_on_delete
 
     @property
     def group(self):
@@ -50,7 +53,9 @@ class AnnotationContext:
         return self.links_service.get(self.annotation, name)
 
     def __acl__(self):
-        return list(self.acl_for_annotation(self.annotation, self.group))
+        return self.acl_for_annotation(
+            self.annotation, self.group, self.allow_read_on_delete
+        )
 
     @classmethod
     def acl_for_annotation(cls, annotation, group, allow_read_on_delete=False):
