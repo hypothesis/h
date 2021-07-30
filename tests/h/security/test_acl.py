@@ -1,3 +1,5 @@
+import functools
+
 import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -10,7 +12,7 @@ from h.security.permissions import Permission
 
 class TestACLForUser:
     @pytest.mark.parametrize(
-        "principal_template,permits",
+        "principal_template,is_permitted",
         (
             # The right client authority has permissions
             ("client_authority:{user.authority}", True),
@@ -22,18 +24,13 @@ class TestACLForUser:
     @pytest.mark.parametrize(
         "permission", (Permission.User.UPDATE, Permission.User.READ)
     )
-    def test_it(self, user, principal_template, permission, permits):
-        policy = ACLAuthorizationPolicy()
-
-        class ACLCarrier:
-            def __acl__(self):
-                return ACL.for_user(user)
-
+    def test_it(self, permits, user, principal_template, permission, is_permitted):
         principal = principal_template.format(user=user)
-        assert (
-            bool(policy.permits(ACLCarrier(), [principal, "some_noise"], permission))
-            == permits
-        )
+        assert bool(permits([principal, "some_noise"], permission)) == is_permitted
+
+    @pytest.fixture
+    def permits(self, permits, user):
+        return functools.partial(permits, ACL.for_user(user))
 
     @pytest.fixture
     def user(self, factories):
@@ -151,27 +148,14 @@ class TestACLForGroup:
         assert not permits([security.Everyone], "non_existant_permission")
 
     @pytest.fixture
-    def permits(self, group):
-        def permits(principals, permission):
-            class ACLCarrier:
-                def __acl__(self):
-                    return ACL.for_group(group)
-
-            return ACLAuthorizationPolicy().permits(
-                ACLCarrier(), principals, permission
-            )
-
-        return permits
+    def permits(self, permits, group):
+        return functools.partial(permits, ACL.for_group(group))
 
     @pytest.fixture
     def permitted_principals_for(self, group):
         def permitted_principals_for(permission):
-            class ACLCarrier:
-                def __acl__(self):
-                    return ACL.for_group(group)
-
             return ACLAuthorizationPolicy().principals_allowed_by_permission(
-                ACLCarrier(), permission
+                ObjectWithACL(ACL.for_group(group)), permission
             )
 
         return permitted_principals_for
@@ -179,3 +163,21 @@ class TestACLForGroup:
     @pytest.fixture
     def group(self, factories):
         return factories.Group.create(creator=factories.User.create())
+
+
+class ObjectWithACL:
+    # We can't use a raw list of ACLs with Pyramid's permissions system so we
+    # need a small object which has the interface that Pyramid expects in order
+    # for it to understand them
+    def __init__(self, acl):
+        self.__acl__ = acl
+
+
+@pytest.fixture
+def permits():
+    def permits(acl_iterable, principals, permission):
+        return ACLAuthorizationPolicy().permits(
+            ObjectWithACL(acl_iterable), principals, permission
+        )
+
+    return permits
