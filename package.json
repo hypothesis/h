@@ -47,7 +47,7 @@
     "chai": "^4.3.4",
     "check-dependencies": "^1.1.0",
     "diff": "^5.0.0",
-    "eslint": "^7.29.0",
+    "eslint": "^7.32.0",
     "eslint-config-hypothesis": "2.5",
     "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-react": "^7.24.0",
