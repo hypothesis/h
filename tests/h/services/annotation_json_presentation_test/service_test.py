@@ -49,9 +49,7 @@ class TestAnnotationJSONPresentationService:
         for formatter in svc.formatters:
             formatter.preload.assert_called_once_with(annotation_ids)
 
-        AnnotationContext.assert_called_once_with(
-            annotation, svc.group_svc, svc.links_svc
-        )
+        AnnotationContext.assert_called_once_with(annotation, svc.links_svc)
         AnnotationJSONPresenter.assert_called_once_with(
             AnnotationContext.return_value, svc.formatters
         )
@@ -64,7 +62,6 @@ class TestAnnotationJSONPresentationService:
         return AnnotationJSONPresentationService(
             session=db_session,
             user=sentinel.user,
-            group_svc=sentinel.group_svc,
             links_svc=sentinel.links_svc,
             flag_svc=sentinel.flag_svc,
             flag_count_svc=sentinel.flag_count_svc,

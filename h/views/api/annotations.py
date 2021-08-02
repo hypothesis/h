@@ -175,6 +175,5 @@ def _publish_annotation_event(request, annotation, action):
 
 
 def _annotation_context(request, annotation):
-    group_service = request.find_service(IGroupService)
     links_service = request.find_service(name="links")
-    return AnnotationContext(annotation, group_service, links_service)
+    return AnnotationContext(annotation, links_service)

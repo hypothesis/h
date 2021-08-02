@@ -9,7 +9,7 @@ class TestAnnotationRoot:
     def test_create_permission_requires_authenticated_user(self, root, ACL):
         acl = root.__acl__()
 
-        ACL.for_annotation.assert_called_once_with(None, None)
+        ACL.for_annotation.assert_called_once_with(annotation=None)
         assert acl == ACL.for_annotation.return_value
 
     def test_getting_by_subscript_returns_AnnotationContext(
@@ -18,7 +18,6 @@ class TestAnnotationRoot:
         pyramid_request,
         AnnotationContext,
         storage,
-        groupfinder_service,
         links_service,
     ):
         context = root[sentinel.annotation_id]
@@ -27,7 +26,7 @@ class TestAnnotationRoot:
             pyramid_request.db, sentinel.annotation_id
         )
         AnnotationContext.assert_called_once_with(
-            storage.fetch_annotation.return_value, groupfinder_service, links_service
+            storage.fetch_annotation.return_value, links_service
         )
         assert context == AnnotationContext.return_value
 
@@ -60,7 +59,6 @@ class TestAnnotationContext:
 
         ACL.for_annotation.assert_called_once_with(
             context.annotation,
-            context.group,
             allow_read_on_delete=sentinel.allow_read_on_delete,
         )
         assert acl == ACL.for_annotation.return_value
@@ -78,8 +76,8 @@ class TestAnnotationContext:
         assert result == links_service.get.return_value
 
     @pytest.fixture
-    def context(self, annotation, groupfinder_service, links_service):
-        return AnnotationContext(annotation, groupfinder_service, links_service)
+    def context(self, annotation, links_service):
+        return AnnotationContext(annotation, links_service)
 
     @pytest.fixture
     def annotation(self, factories):

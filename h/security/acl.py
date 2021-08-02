@@ -80,20 +80,19 @@ class ACL:
             yield Allow, group.creator.userid, Permission.Group.UPSERT
 
     @classmethod
-    def for_annotation(cls, annotation, group, allow_read_on_delete=False):
+    def for_annotation(cls, annotation, allow_read_on_delete=False):
         """Return a Pyramid ACL for this annotation.
 
         :param annotation: Annotation in question
-        :param group: Group associated with the annotation (if any)
         :param allow_read_on_delete: Grant READ permissions on deleted
             annotations.
         """
-        yield from cls._for_annotation(annotation, group, allow_read_on_delete)
+        yield from cls._for_annotation(annotation, allow_read_on_delete)
 
         yield DENY_ALL
 
     @classmethod
-    def _for_annotation(cls, annotation, group, allow_read_on_delete):
+    def _for_annotation(cls, annotation, allow_read_on_delete):
         # All authenticated users can create annotations
         yield Allow, security.Authenticated, Permission.Annotation.CREATE
 
@@ -108,7 +107,7 @@ class ACL:
         if annotation.shared:
             # You can read an annotation if you can read the group it's in
             yield from cls._map_acls(
-                ACL.for_group(group),
+                ACL.for_group(annotation.group),
                 {Permission.Group.READ: Permission.Annotation.READ},
             )
         else:
@@ -121,7 +120,7 @@ class ACL:
             # You can flag or moderate an annotation if you can flag or
             # morderate the group it's in
             yield from cls._map_acls(
-                ACL.for_group(group),
+                ACL.for_group(annotation.group),
                 {
                     Permission.Group.FLAG: Permission.Annotation.FLAG,
                     Permission.Group.MODERATE: Permission.Annotation.MODERATE,

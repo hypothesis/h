@@ -149,21 +149,13 @@ class TestCreate:
         )
 
     def test_it_initialises_annotation_context(
-        self,
-        storage,
-        annotation_context,
-        pyramid_request,
-        groupfinder_service,
-        links_service,
+        self, storage, annotation_context, pyramid_request, links_service
     ):
-
         annotation = storage.create_annotation.return_value
 
         views.create(pyramid_request)
 
-        annotation_context.assert_called_once_with(
-            annotation, groupfinder_service, links_service
-        )
+        annotation_context.assert_called_once_with(annotation, links_service)
 
     def test_it_presents_annotation(
         self, annotation_context, presentation_service, pyramid_request
@@ -202,7 +194,6 @@ class TestRead:
         result = views.read(context, pyramid_request)
 
         presentation_service.present.assert_called_once_with(context)
-
         assert result == presentation_service.present.return_value
 
 
@@ -325,21 +316,13 @@ class TestUpdate:
         )
 
     def test_it_initialises_annotation_context(
-        self,
-        storage,
-        annotation_context,
-        pyramid_request,
-        groupfinder_service,
-        links_service,
+        self, storage, annotation_context, pyramid_request, links_service
     ):
-
         annotation = storage.update_annotation.return_value
 
         views.update(mock.Mock(), pyramid_request)
 
-        annotation_context.assert_called_once_with(
-            annotation, groupfinder_service, links_service
-        )
+        annotation_context.assert_called_once_with(annotation, links_service)
 
     def test_it_presents_annotation(
         self, annotation_context, presentation_service, pyramid_request

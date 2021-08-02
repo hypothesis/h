@@ -204,19 +204,17 @@ class TestACLForAnnotation:
         )
         assert not permits(ObjectWithACL(acl), [], Permission.Annotation.CREATE)
 
-    def test_it_denies_normal_permissions_when_deleted(
-        self, annotation, group, anno_permits
-    ):
+    def test_it_denies_normal_permissions_when_deleted(self, annotation, anno_permits):
         annotation.deleted = True
 
         # Users should normally have permissions to read their own annotations
         # so we'll use that as an example
         assert not anno_permits([annotation.userid], Permission.Annotation.READ)
 
-    def test_it_allows_read_if_asked_on_deleted(self, annotation, group, permits):
+    def test_it_allows_read_if_asked_on_deleted(self, annotation, permits):
         annotation.deleted = True
 
-        acl = ACL.for_annotation(annotation, group, allow_read_on_delete=True)
+        acl = ACL.for_annotation(annotation, allow_read_on_delete=True)
 
         permits(ObjectWithACL(acl), [annotation.userid], Permission.Annotation.READ)
 
@@ -257,8 +255,9 @@ class TestACLForAnnotation:
 
     def test_it_with_a_shared_annotation_with_no_group(self, annotation, anno_permits):
         annotation.shared = True
+        annotation.group = None
 
-        acl = ACL.for_annotation(annotation, group=None)
+        acl = ACL.for_annotation(annotation)
 
         assert (security.Allow, Any(), Permission.Annotation.FLAG) not in acl
         assert (security.Allow, Any(), Permission.Annotation.MODERATE) not in acl
@@ -269,14 +268,12 @@ class TestACLForAnnotation:
             yield for_group
 
     @pytest.fixture
-    def anno_permits(self, permits, annotation, group):
-        return functools.partial(
-            permits, ObjectWithACL(ACL.for_annotation(annotation, group))
-        )
+    def anno_permits(self, permits, annotation):
+        return functools.partial(permits, ObjectWithACL(ACL.for_annotation(annotation)))
 
     @pytest.fixture
     def annotation(self, factories, group):
-        return factories.Annotation(groupid=group.groupid)
+        return factories.Annotation(groupid=group.pubid)
 
     @pytest.fixture
     def group(self, factories):

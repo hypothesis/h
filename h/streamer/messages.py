@@ -7,7 +7,6 @@ from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
 from h.formatters import AnnotationUserInfoFormatter
-from h.interfaces import IGroupService
 from h.realtime import Consumer
 from h.streamer import websocket
 from h.streamer.contexts import request_context
@@ -125,7 +124,6 @@ def handle_annotation_event(message, sockets, request, session):
 
     resource = AnnotationContext(
         annotation,
-        group_service=request.find_service(IGroupService),
         links_service=request.find_service(name="links"),
         # This is a bit clunky but we have one permission for reading
         # annotations and reading notifications about deleted annotations.

@@ -103,9 +103,7 @@ class TestHandleMessage:
         return patch("h.streamer.websocket.WebSocket")
 
 
-@pytest.mark.usefixtures(
-    "nipsa_service", "user_service", "links_service", "groupfinder_service"
-)
+@pytest.mark.usefixtures("nipsa_service", "user_service", "links_service")
 class TestHandleAnnotationEvent:
     def test_it_fetches_the_annotation(
         self, fetch_annotation, handle_annotation_event, session, message
@@ -128,7 +126,6 @@ class TestHandleAnnotationEvent:
         handle_annotation_event,
         fetch_annotation,
         links_service,
-        groupfinder_service,
         AnnotationContext,
         AnnotationUserInfoFormatter,
         AnnotationJSONPresenter,
@@ -137,7 +134,6 @@ class TestHandleAnnotationEvent:
 
         AnnotationContext.assert_called_once_with(
             fetch_annotation.return_value,
-            groupfinder_service,
             links_service,
             allow_read_on_delete=True,
         )
