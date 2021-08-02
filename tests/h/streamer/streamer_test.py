@@ -12,8 +12,11 @@ class TestProcessWorkQueue:
     ):
         process_work_queue(queue=[message])
 
-        messages.handle_message.assert_called_once_with(
-            message, registry, session, topic_handlers=TOPIC_HANDLERS
+        messages.handle_message.assert_called_once_with(  # pylint:disable=no-member
+            message,
+            registry,
+            session,
+            topic_handlers=TOPIC_HANDLERS,
         )
 
     def test_it_sends_websocket_messages_to_websocket_handle_message(
@@ -21,7 +24,9 @@ class TestProcessWorkQueue:
     ):
         process_work_queue(queue=[ws_message])
 
-        websocket.handle_message.assert_called_once_with(ws_message, session)
+        websocket.handle_message.assert_called_once_with(  # pylint:disable=no-member
+            ws_message, session
+        )
 
     def test_it_raises_UnknownMessageType_for_strange_messages(
         self, process_work_queue

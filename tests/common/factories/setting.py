@@ -11,4 +11,6 @@ class Setting(ModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     key = factory.Sequence(lambda n: "setting_%d" % n)
-    value = factory.LazyAttribute(lambda _: FAKER.catch_phrase())
+    value = factory.LazyAttribute(
+        lambda _: FAKER.catch_phrase()  # pylint: disable=no-member
+    )
