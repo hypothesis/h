@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from h.search.core import SearchResult
 from h.views.feeds import stream_atom, stream_rss
 
 
@@ -94,7 +95,6 @@ def search(patch):
 
 @pytest.fixture
 def search_run(search):
-    from h.search.core import SearchResult
 
     result = SearchResult(
         total=123, annotation_ids=["foo", "bar"], reply_ids=[], aggregations={}

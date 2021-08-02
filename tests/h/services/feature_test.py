@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from pyramid.request import apply_request_extensions
 
 from h import models
 from h.services.feature import (
@@ -32,7 +33,6 @@ class TestFeatureRequestProperty:
 
     @pytest.fixture
     def pyramid_config(self, pyramid_config, pyramid_request):
-        from pyramid.request import apply_request_extensions
 
         pyramid_config.add_request_method(
             FeatureRequestProperty, name="feature", reify=True

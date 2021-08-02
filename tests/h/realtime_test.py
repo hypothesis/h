@@ -1,5 +1,6 @@
 from unittest import mock
 
+import kombu
 import pytest
 from h_matchers import Any
 from kombu.exceptions import LimitExceeded, OperationalError
@@ -135,7 +136,6 @@ class TestPublisher:
 
 class TestGetExchange:
     def test_returns_the_exchange(self):
-        import kombu
 
         exchange = realtime.get_exchange()
         assert isinstance(exchange, kombu.Exchange)

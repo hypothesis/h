@@ -1,6 +1,8 @@
 import datetime
 from unittest import mock
 
+from pytz import timezone
+
 from h.presenters.annotation_base import AnnotationBasePresenter, utc_iso8601
 
 

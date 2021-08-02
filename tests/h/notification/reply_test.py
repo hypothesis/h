@@ -1,4 +1,5 @@
 import pytest
+from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.models import Annotation, Document, DocumentMeta, Subscriptions
 from h.notification.reply import Notification, get_notification
@@ -134,7 +135,6 @@ class TestGetNotification:
 
     @pytest.fixture
     def authz_policy(self, pyramid_config):
-        from pyramid.authorization import ACLAuthorizationPolicy
 
         pyramid_config.set_authorization_policy(ACLAuthorizationPolicy())
 

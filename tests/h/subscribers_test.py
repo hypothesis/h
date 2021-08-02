@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from kombu.exceptions import OperationalError
+from transaction import TransactionManager
 
 from h import subscribers
 from h.events import AnnotationEvent
@@ -165,7 +166,6 @@ class TestSyncAnnotation:
 
     @pytest.fixture
     def transaction_manager(self, pyramid_request):
-        from transaction import TransactionManager
 
         pyramid_request.tm = mock.create_autospec(
             TransactionManager, instance=True, spec_set=True
