@@ -152,7 +152,7 @@ def test_type_raises_for_unknown_type_of_group(factories):
 
     expected_err = "^This group doesn't seem to match any known type"
     with pytest.raises(ValueError, match=expected_err):
-        group.type
+        _ = group.type
 
 
 def test_you_cannot_set_type(factories):

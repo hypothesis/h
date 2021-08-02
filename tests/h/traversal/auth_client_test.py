@@ -27,7 +27,7 @@ class TestAuthClientRoot:
         auth_client_root = AuthClientRoot(pyramid_request)
 
         with pytest.raises(KeyError):
-            auth_client_root["1d5937d6-73be-11e8-9125-871084ad92cf"]
+            _ = auth_client_root["1d5937d6-73be-11e8-9125-871084ad92cf"]
 
     def test_getitem_returns_KeyError_if_no_matching_AuthClient_in_DB(
         self, db_session, pyramid_request
@@ -45,13 +45,13 @@ class TestAuthClientRoot:
         auth_client_root = AuthClientRoot(pyramid_request)
 
         with pytest.raises(KeyError):
-            auth_client_root["1d5937d6-73be-11e8-9125-871084ad92cf"]
+            _ = auth_client_root["1d5937d6-73be-11e8-9125-871084ad92cf"]
 
     def test_getitem_returns_KeyError_if_client_id_is_invalid(self, pyramid_request):
         auth_client_root = AuthClientRoot(pyramid_request)
 
         with pytest.raises(KeyError):
-            auth_client_root["this_is_not_a_valid_UUID"]
+            _ = auth_client_root["this_is_not_a_valid_UUID"]
 
     @pytest.mark.parametrize("permission", ("foo", "bar", "admin_oauthclients"))
     def test_getitem_grants_admins_all_permissions_on_the_AuthClient(

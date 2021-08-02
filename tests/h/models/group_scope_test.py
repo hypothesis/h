@@ -39,7 +39,7 @@ class TestGroupScope:
     def test_it_raises_if_path_accessed(self, factories):
         scope = factories.GroupScope()
         with pytest.raises(AttributeError):
-            scope.path
+            _ = scope.path
 
     def test_you_can_get_a_groupscopes_group_by_the_group_property(self, factories):
         group = factories.OpenGroup()
