@@ -85,7 +85,7 @@ gunicorn==20.1.0
     # via -r requirements/requirements.txt
 h-api==1.0.1
     # via -r requirements/requirements.txt
-h-assets==1.0.3
+h-assets==1.0.2
     # via -r requirements/requirements.txt
 h-matchers==1.2.11
     # via -r requirements/requirements.txt
@@ -95,7 +95,7 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-importlib-resources==5.2.1
+importlib_resources==5.2.1
     # via
     #   -r requirements/requirements.txt
     #   h-api
