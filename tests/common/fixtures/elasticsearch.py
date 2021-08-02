@@ -44,7 +44,8 @@ def init_elasticsearch(request):
         """Delete the test index if it exists."""
         if es_client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
             # The delete operation must be done on a concrete index, not an alias
-            # in ES6. See https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
+            # in ES6. See:
+            # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
             concrete_indexes = es_client.conn.indices.get(index=ELASTICSEARCH_INDEX)
             for index in concrete_indexes:
                 es_client.conn.indices.delete(index=index)

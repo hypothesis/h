@@ -30,7 +30,10 @@ class Test400Errors:
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
         reason = res.json["reason"]
         # FIXME: The `reason` is double-escaped
-        expected = "groupid: '3434kjkjk' does not match \"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\""
+        expected = (
+            "groupid: '3434kjkjk'"
+            ' does not match "^group:([a-zA-Z0-9._\\\\-+!~*()\']{1,1024})@(.*)$"'
+        )
 
         assert res.status_code == 400
         assert reason == expected
@@ -38,6 +41,11 @@ class Test400Errors:
 
 class Test404Errors:
     # TODO: Some of these 404s should really be 403s
+    reason_message = (
+        "Either the resource you requested doesn't exist,"
+        " or you are not currently authorized to see it."
+    )
+
     def test_it_404s_if_authz_fail_with_valid_accept(self, app, append_auth_client):
         headers = append_auth_client()
         headers["Accept"] = "application/json"
@@ -46,10 +54,7 @@ class Test404Errors:
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
 
         assert res.status_code == 404
-        assert (
-            res.json["reason"]
-            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
-        )
+        assert res.json["reason"] == self.reason_message
 
     def test_it_404s_if_authz_fail_with_missing_accept(self, app, append_auth_client):
         headers = append_auth_client()
@@ -58,10 +63,7 @@ class Test404Errors:
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
 
         assert res.status_code == 404
-        assert (
-            res.json["reason"]
-            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
-        )
+        assert res.json["reason"] == self.reason_message
 
     def test_it_404s_if_not_found_with_valid_accept_and_no_authz(self, app):
         headers = {}
@@ -70,19 +72,16 @@ class Test404Errors:
         res = app.get("/api/not_a_thing", headers=headers, expect_errors=True)
 
         assert res.status_code == 404
-        assert (
-            res.json["reason"]
-            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
+        assert res.json["reason"] == (
+            "Either the resource you requested doesn't exist, "
+            "or you are not currently authorized to see it."
         )
 
     def test_it_404s_if_not_found_with_missing_accept_and_no_authz(self, app):
         res = app.get("/api/not_a_thing", expect_errors=True)
 
         assert res.status_code == 404
-        assert (
-            res.json["reason"]
-            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
-        )
+        assert res.json["reason"] == self.reason_message
 
 
 class Test409Errors:

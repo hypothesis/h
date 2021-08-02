@@ -34,9 +34,9 @@ class TestUnauthorizedToNotFound:
         wrapped(HTTPNotFound(), pyramid_request)
 
         context, _ = testview.call_args[0]
-        assert (
-            context.message
-            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
+        assert context.message == (
+            "Either the resource you requested doesn't exist,"
+            " or you are not currently authorized to see it."
         )
 
 
@@ -47,9 +47,9 @@ class TestNormalizeNotFound:
         wrapped(HTTPNotFound(), pyramid_request)
 
         context, _ = testview.call_args[0]
-        assert (
-            context.message
-            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
+        assert context.message == (
+            "Either the resource you requested doesn't exist,"
+            " or you are not currently authorized to see it."
         )
 
     def test_context_is_not_found(self, pyramid_request, testview):
