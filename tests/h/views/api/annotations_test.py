@@ -214,7 +214,7 @@ class TestReadJSONLD:
         }
 
     def test_it_returns_presented_annotation(
-        self, AnnotationJSONLDPresenter, pyramid_request
+        self, AnnotationJSONLDPresenter, pyramid_request, links_service
     ):
         context = mock.Mock()
         presenter = mock.Mock()
@@ -223,7 +223,9 @@ class TestReadJSONLD:
 
         result = views.read_jsonld(context, pyramid_request)
 
-        AnnotationJSONLDPresenter.assert_called_once_with(context)
+        AnnotationJSONLDPresenter.assert_called_once_with(
+            context, links_service=links_service
+        )
         assert result == presenter.asdict()
 
     @pytest.fixture

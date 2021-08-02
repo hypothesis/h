@@ -107,7 +107,10 @@ def read_jsonld(context, request):
         "charset": "UTF-8",
         "profile": str(AnnotationJSONLDPresenter.CONTEXT_URL),
     }
-    presenter = AnnotationJSONLDPresenter(context)
+
+    presenter = AnnotationJSONLDPresenter(
+        context, links_service=request.find_service(name="links")
+    )
     return presenter.asdict()
 
 
