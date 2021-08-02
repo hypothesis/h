@@ -10,8 +10,6 @@ amqp==5.0.6
     # via
     #   -r requirements/requirements.txt
     #   kombu
-appnope==0.1.2
-    # via ipython
 attrs==20.2.0
     # via
     #   -r requirements/requirements.txt
@@ -90,7 +88,7 @@ gunicorn==20.1.0
     # via -r requirements/requirements.txt
 h-api==1.0.1
     # via -r requirements/requirements.txt
-h-assets==1.0.2
+h-assets==1.0.3
     # via -r requirements/requirements.txt
 h-matchers==1.2.11
     # via -r requirements/requirements.txt
@@ -100,7 +98,7 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-importlib_resources==5.2.1
+importlib-resources==5.2.1
     # via
     #   -r requirements/requirements.txt
     #   h-api
