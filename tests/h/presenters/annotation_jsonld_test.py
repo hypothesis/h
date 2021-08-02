@@ -1,6 +1,6 @@
 import datetime
-from unittest import mock
 
+import pytest
 from h_matchers import Any
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
@@ -8,101 +8,66 @@ from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONLDPresenter:
-    def test_asdict(self, links_service):
-        annotation = mock.Mock(
-            id="foobar",
-            created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
-            updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
-            userid="acct:luke",
-            target_uri="http://example.com",
-            text="It is magical!",
-            tags=["magic"],
-            target_selectors=[{"type": "TestSelector", "test": "foobar"}],
-        )
+    def test_it(self, presenter, annotation, links_service):
+        annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
+        annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
+
         expected = {
             "@context": "http://www.w3.org/ns/anno.jsonld",
             "type": "Annotation",
             "id": links_service.get.return_value,
             "created": "2016-02-24T18:03:25.000768+00:00",
             "modified": "2016-02-29T10:24:05.000564+00:00",
-            "creator": "acct:luke",
-            "body": [
-                {
-                    "type": "TextualBody",
-                    "format": "text/markdown",
-                    "value": "It is magical!",
-                },
-                {"type": "TextualBody", "purpose": "tagging", "value": "magic"},
-            ],
+            "creator": annotation.userid,
+            "body": Any.list(),
             "target": [
                 {
-                    "source": "http://example.com",
-                    "selector": [{"type": "TestSelector", "test": "foobar"}],
+                    "source": annotation.target_uri,
+                    "selector": Any.list(),
                 }
             ],
         }
 
-        context = AnnotationContext(annotation, links_service)
-        result = AnnotationJSONLDPresenter(context).asdict()
+        result = presenter.asdict()
 
         assert result == expected
 
-    def test_id_returns_jsonld_id_link(self, links_service):
-        annotation = mock.Mock(id="foobar")
-        context = AnnotationContext(annotation, links_service)
-        presenter = AnnotationJSONLDPresenter(context)
+    def test_it_returns_bodies(self, presenter, annotation):
+        result = presenter.asdict()
 
-        result = presenter.id
-
-        assert result == links_service.get.return_value
-        links_service.get.assert_called_once_with(annotation, Any())
-
-    def test_bodies_returns_textual_body(self, links_service):
-        annotation = mock.Mock(text="Flib flob flab", tags=None)
-        context = AnnotationContext(annotation, links_service)
-
-        bodies = AnnotationJSONLDPresenter(context).bodies
-
-        assert bodies == [
+        expected_bodies = [
             {
                 "type": "TextualBody",
-                "value": "Flib flob flab",
                 "format": "text/markdown",
+                "value": annotation.text,
             }
         ]
+        expected_bodies.extend(
+            [
+                {"type": "TextualBody", "value": tag, "purpose": "tagging"}
+                for tag in annotation.tags
+            ]
+        )
+        assert result["body"] == expected_bodies
 
-    def test_bodies_appends_tag_bodies(self, links_service):
-        annotation = mock.Mock(text="Flib flob flab", tags=["giraffe", "lion"])
-        context = AnnotationContext(annotation, links_service)
-
-        bodies = AnnotationJSONLDPresenter(context).bodies
-
-        assert {
-            "type": "TextualBody",
-            "value": "giraffe",
-            "purpose": "tagging",
-        } in bodies
-        assert {"type": "TextualBody", "value": "lion", "purpose": "tagging"} in bodies
-
-    def test_ignores_selectors_lacking_types(self, links_service):
-        annotation = mock.Mock(target_uri="http://example.com")
+    def test_it_ignores_selectors_lacking_types(self, presenter, annotation):
         annotation.target_selectors = [
             {"type": "TestSelector", "test": "foobar"},
             {"something": "else"},
         ]
-        context = AnnotationContext(annotation, links_service)
 
-        selectors = AnnotationJSONLDPresenter(context).target[0]["selector"]
+        result = presenter.asdict()
 
-        assert selectors == [{"type": "TestSelector", "test": "foobar"}]
+        assert result["target"][0]["selector"] == [
+            {"type": "TestSelector", "test": "foobar"}
+        ]
 
-    def test_rewrites_rangeselectors_same_element(self, links_service):
+    def test_rewrites_rangeselectors_same_element(self, presenter, annotation):
         """
         A RangeSelector that starts and ends in the same element should be
         rewritten to an XPathSelector refinedBy a TextPositionSelector, for
         the sake of simplicity.
         """
-        annotation = mock.Mock(target_uri="http://example.com")
         annotation.target_selectors = [
             {
                 "type": "RangeSelector",
@@ -112,11 +77,10 @@ class TestAnnotationJSONLDPresenter:
                 "endOffset": 43,
             }
         ]
-        context = AnnotationContext(annotation, links_service)
 
-        selectors = AnnotationJSONLDPresenter(context).target[0]["selector"]
+        result = presenter.asdict()
 
-        assert selectors == [
+        assert result["target"][0]["selector"] == [
             {
                 "type": "XPathSelector",
                 "value": "/div[1]/main[1]/article[1]/div[2]/p[339]",
@@ -124,13 +88,12 @@ class TestAnnotationJSONLDPresenter:
             }
         ]
 
-    def test_rewrites_rangeselectors_different_element(self, links_service):
+    def test_rewrites_rangeselectors_different_element(self, presenter, annotation):
         """
         A RangeSelector that starts and ends in the different elements should
         be rewritten to a RangeSelector bounded by two XPathSelectors, each of
         which is refinedBy a "point"-like TextPositionSelector.
         """
-        annotation = mock.Mock(target_uri="http://example.com")
         annotation.target_selectors = [
             {
                 "type": "RangeSelector",
@@ -140,11 +103,10 @@ class TestAnnotationJSONLDPresenter:
                 "endOffset": 72,
             }
         ]
-        context = AnnotationContext(annotation, links_service)
 
-        selectors = AnnotationJSONLDPresenter(context).target[0]["selector"]
+        result = presenter.asdict()
 
-        assert selectors == [
+        assert result["target"][0]["selector"] == [
             {
                 "type": "RangeSelector",
                 "startSelector": {
@@ -164,8 +126,7 @@ class TestAnnotationJSONLDPresenter:
             }
         ]
 
-    def test_ignores_malformed_rangeselectors(self, links_service):
-        annotation = mock.Mock(target_uri="http://example.com")
+    def test_ignores_malformed_rangeselectors(self, presenter, annotation):
         annotation.target_selectors = [
             {
                 "type": "RangeSelector",
@@ -174,8 +135,19 @@ class TestAnnotationJSONLDPresenter:
                 "endContainer": "/div[1]/main[1]/article[1]/div[2]/p[339]",
             }
         ]
-        context = AnnotationContext(annotation, links_service)
 
-        target = AnnotationJSONLDPresenter(context).target[0]
+        result = presenter.asdict()
 
-        assert "selector" not in target
+        assert "selector" not in result["target"][0]
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def context(self, annotation, links_service):
+        return AnnotationContext(annotation, links_service)
+
+    @pytest.fixture
+    def presenter(self, context, links_service):
+        return AnnotationJSONLDPresenter(context, links_service)

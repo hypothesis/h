@@ -10,35 +10,36 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
       https://www.w3.org/TR/annotation-model/
     """
 
+    def __init__(self, annotation_context, links_service):
+        super().__init__(annotation_context)
+
+        self._links_service = links_service
+
     CONTEXT_URL = "http://www.w3.org/ns/anno.jsonld"
 
     def asdict(self):
         return {
             "@context": self.CONTEXT_URL,
             "type": "Annotation",
-            "id": self.id,
+            "id": self._links_service.get(self.annotation, "jsonld_id"),
             "created": self.created,
             "modified": self.updated,
             "creator": self.annotation.userid,
-            "body": self.bodies,
-            "target": self.target,
+            "body": self._bodies,
+            "target": self._target,
         }
 
     @property
-    def id(self):
-        return self.annotation_context.get_annotation_link("jsonld_id")
-
-    @property
-    def bodies(self):
+    def _bodies(self):
         bodies = [
             {"type": "TextualBody", "value": self.text, "format": "text/markdown"}
         ]
-        for t in self.tags:
-            bodies.append({"type": "TextualBody", "value": t, "purpose": "tagging"})
+        for tag in self.tags:
+            bodies.append({"type": "TextualBody", "value": tag, "purpose": "tagging"})
         return bodies
 
     @property
-    def target(self):
+    def _target(self):
         target = {"source": self.annotation.target_uri}
         selectors = []
 

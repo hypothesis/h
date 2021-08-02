@@ -63,12 +63,6 @@ class TestAnnotationContext:
         )
         assert acl == ACL.for_annotation.return_value
 
-    def test_get_annotation_link(self, annotation, context, links_service):
-        result = context.get_annotation_link("json")
-
-        links_service.get.assert_called_once_with(annotation, "json")
-        assert result == links_service.get.return_value
-
     @pytest.fixture
     def context(self, annotation, links_service):
         return AnnotationContext(annotation, links_service)

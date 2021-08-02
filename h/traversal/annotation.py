@@ -29,8 +29,5 @@ class AnnotationContext:
         self.annotation = annotation
         self.allow_read_on_delete = allow_read_on_delete
 
-    def get_annotation_link(self, name):
-        return self.links_service.get(self.annotation, name)
-
     def __acl__(self):
         return ACL.for_annotation(self.annotation, self.allow_read_on_delete)
