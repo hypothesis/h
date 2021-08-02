@@ -30,10 +30,6 @@ class AnnotationContext:
         self.allow_read_on_delete = allow_read_on_delete
 
     @property
-    def group(self):
-        return self.annotation.group
-
-    @property
     def links(self):
         return self.links_service.get_all(self.annotation)
 
