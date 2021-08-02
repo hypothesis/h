@@ -51,7 +51,7 @@ class TestAnnotationJSONPresentationService:
         for formatter in svc.formatters:
             formatter.preload.assert_called_once_with(annotation_ids)
 
-        AnnotationContext.assert_called_once_with(annotation, svc.links_svc)
+        AnnotationContext.assert_called_once_with(annotation)
         AnnotationJSONPresenter.assert_called_once_with(
             AnnotationContext.return_value,
             links_service=svc.links_svc,

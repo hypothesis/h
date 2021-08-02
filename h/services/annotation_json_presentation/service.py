@@ -48,6 +48,5 @@ class AnnotationJSONPresentationService:
             formatter.preload(annotation_ids)
 
         return [
-            self.present(AnnotationContext(annotation, self.links_svc))
-            for annotation in annotations
+            self.present(AnnotationContext(annotation)) for annotation in annotations
         ]

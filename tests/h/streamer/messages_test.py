@@ -135,7 +135,6 @@ class TestHandleAnnotationEvent:
 
         AnnotationContext.assert_called_once_with(
             fetch_annotation.return_value,
-            links_service,
             allow_read_on_delete=True,
         )
 
