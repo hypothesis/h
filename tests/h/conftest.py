@@ -19,6 +19,7 @@ from webob.multidict import MultiDict
 from h import db
 from h.models import Organization
 from h.settings import database_url
+from tests.common import factories as common_factories
 from tests.common.fixtures import es_client  # noqa: F401 pylint:disable=unused-import
 from tests.common.fixtures import (  # noqa: F401 pylint:disable=unused-import
     init_elasticsearch,
@@ -146,11 +147,9 @@ def db_session(db_engine):
 
 @pytest.fixture
 def factories(db_session):
-    from ..common import factories
-
-    factories.set_session(db_session)
-    yield factories
-    factories.set_session(None)
+    common_factories.set_session(db_session)
+    yield common_factories
+    common_factories.set_session(None)
 
 
 @pytest.fixture
@@ -188,7 +187,7 @@ def invalid_form():
 
 @pytest.fixture
 def matchers():
-    # pylint: disable=redefined-outer-name
+    # pylint: disable=redefined-outer-name, import-outside-toplevel
     from ..common import matchers
 
     return matchers

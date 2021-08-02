@@ -4,6 +4,9 @@ import os
 import pytest
 from webtest import TestApp
 
+from h import db
+from h.app import create_app
+from tests.common import factories as factories_common
 from tests.common.fixtures import es_client  # noqa: F401 pylint:disable=unused-import
 from tests.common.fixtures import (  # noqa: F401 pylint:disable=unused-import
     init_elasticsearch,
@@ -40,8 +43,6 @@ def reset_app(app):
 
 @pytest.fixture
 def with_clean_db(db_engine):
-    from h import db
-
     tables = reversed(db.Base.metadata.sorted_tables)
     with contextlib.closing(db_engine.connect()) as conn:
         tx = conn.begin()
@@ -56,8 +57,6 @@ def with_clean_db(db_engine):
 
 @pytest.fixture(scope="session")
 def db_engine():
-    from h import db
-
     db_engine = db.make_engine(TEST_SETTINGS)
     db.init(db_engine, authority=TEST_SETTINGS["h.authority"], should_create=True)
 
@@ -69,8 +68,6 @@ def db_engine():
 @pytest.fixture
 def db_session(db_engine):
     """Get a standalone database session for preparing database state."""
-    from h import db
-
     session = db.Session(bind=db_engine)
     yield session
     session.close()
@@ -78,16 +75,13 @@ def db_session(db_engine):
 
 @pytest.fixture
 def factories(db_session):
-    from ..common import factories
-
-    factories.set_session(db_session)
-    yield factories
-    factories.set_session(None)
+    factories_common.set_session(db_session)
+    yield factories_common
+    factories_common.set_session(None)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def init_db(db_engine):
-    from h import db
 
     authority = TEST_SETTINGS["h.authority"]
     db.init(db_engine, should_drop=True, should_create=True, authority=authority)
@@ -95,8 +89,6 @@ def init_db(db_engine):
 
 @pytest.fixture(scope="session")
 def pyramid_app():
-    from h.app import create_app
-
     return create_app(None, **TEST_SETTINGS)
 
 

@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from pyramid.exceptions import HTTPNotFound
 
 from h.models import Subscriptions
 from h.views.notification import unsubscribe
@@ -58,7 +59,6 @@ class TestUnsubscribe:
         assert not sub1.active
 
     def test_raises_not_found_if_token_invalue(self, pyramid_request, token_serializer):
-        from pyramid.exceptions import HTTPNotFound
 
         pyramid_request.matchdict = {"token": "wibble"}
         token_serializer.loads.side_effect = ValueError("token invalid")
