@@ -1121,7 +1121,7 @@ class TestGroupAndUserSearchController:
 
         location = controller.delete_lozenge().location
 
-        location == "http://example.com/search?q=foo+bar"
+        assert location == "http://example.com/search?q=foo+bar"
 
     @pytest.mark.parametrize("q", ["", "   "])
     def test_delete_lozenge_removes_empty_queries(
@@ -1135,7 +1135,7 @@ class TestGroupAndUserSearchController:
 
         location = controller.delete_lozenge().location
 
-        location == "http://example.com/search"
+        assert location == "http://example.com/search"
 
     @pytest.mark.usefixtures("toggle_tag_facet_request")
     def test_toggle_tag_facet_returns_a_redirect(self, controller):

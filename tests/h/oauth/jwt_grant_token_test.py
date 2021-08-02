@@ -40,7 +40,7 @@ class TestJWTGrantToken:
         grant_token = JWTGrantToken(jwttok)
 
         with pytest.raises(MissingJWTGrantTokenClaimError) as exc:
-            grant_token.issuer
+            _ = grant_token.issuer
 
         assert exc.value.description == "Missing claim 'iss' (issuer) from grant token."
 
@@ -206,7 +206,7 @@ class TestVerifiedJWTGrantToken:
 
         grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
         with pytest.raises(InvalidGrantError) as exc:
-            grant_token.subject
+            _ = grant_token.subject
 
         assert (
             exc.value.description == "Missing claim 'sub' (subject) from grant token."
@@ -218,7 +218,7 @@ class TestVerifiedJWTGrantToken:
 
         grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
         with pytest.raises(InvalidGrantError) as exc:
-            grant_token.subject
+            _ = grant_token.subject
 
         assert (
             exc.value.description == "Missing claim 'sub' (subject) from grant token."
