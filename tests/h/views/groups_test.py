@@ -150,7 +150,7 @@ def test_read_noslug_redirects(pyramid_request, factories):
 
 class FakeForm:
     def set_appstruct(self, appstruct):
-        self.appstruct = appstruct
+        self.appstruct = appstruct  # pylint:disable=attribute-defined-outside-init
 
     def render(self):
         return self.appstruct

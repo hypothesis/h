@@ -9,6 +9,8 @@ from h.views.admin.groups import GroupCreateViews, GroupEditViews
 
 
 class FakeForm:
+    appstruct = None
+
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 

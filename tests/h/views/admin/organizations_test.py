@@ -13,6 +13,8 @@ from h.views.admin.organizations import (
 
 
 class FakeForm:
+    appstruct = None
+
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
