@@ -11,7 +11,6 @@ class AnnotationJSONPresentationService:
         self,
         session,
         user,
-        group_svc,
         links_svc,
         flag_svc,
         flag_count_svc,
@@ -20,7 +19,6 @@ class AnnotationJSONPresentationService:
         has_permission,
     ):
         self.session = session
-        self.group_svc = group_svc
         self.links_svc = links_svc
 
         self.formatters = [
@@ -48,6 +46,6 @@ class AnnotationJSONPresentationService:
             formatter.preload(annotation_ids)
 
         return [
-            self.present(AnnotationContext(annotation, self.group_svc, self.links_svc))
+            self.present(AnnotationContext(annotation, self.links_svc))
             for annotation in annotations
         ]

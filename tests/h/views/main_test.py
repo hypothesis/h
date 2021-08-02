@@ -12,11 +12,9 @@ def _fake_sidebar_app(request, extra):
 
 
 @pytest.mark.usefixtures("routes")
-def test_og_document(
-    factories, pyramid_request, groupfinder_service, links_service, sidebar_app
-):
+def test_og_document(factories, pyramid_request, links_service, sidebar_app):
     annotation = factories.Annotation(userid="acct:foo@example.com")
-    context = AnnotationContext(annotation, groupfinder_service, links_service)
+    context = AnnotationContext(annotation, links_service)
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
@@ -36,11 +34,9 @@ def test_og_document(
 
 
 @pytest.mark.usefixtures("routes")
-def test_og_no_document(
-    pyramid_request, groupfinder_service, links_service, sidebar_app
-):
+def test_og_no_document(pyramid_request, links_service, sidebar_app):
     annotation = Annotation(id="123", userid="foo", target_uri="http://example.com")
-    context = AnnotationContext(annotation, groupfinder_service, links_service)
+    context = AnnotationContext(annotation, links_service)
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)

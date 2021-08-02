@@ -1,4 +1,3 @@
-from h.interfaces import IGroupService
 from h.services.annotation_json_presentation.service import (
     AnnotationJSONPresentationService,
 )
@@ -10,7 +9,6 @@ def annotation_json_presentation_service_factory(_context, request):
         user=request.user,
         has_permission=request.has_permission,
         # Services
-        group_svc=request.find_service(IGroupService),
         links_svc=request.find_service(name="links"),
         flag_svc=request.find_service(name="flag"),
         flag_count_svc=request.find_service(name="flag_count"),

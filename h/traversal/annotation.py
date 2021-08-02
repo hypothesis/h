@@ -1,5 +1,4 @@
 from h import storage
-from h.interfaces import IGroupService
 from h.security.acl import ACL
 from h.traversal.root import RootFactory
 
@@ -12,13 +11,12 @@ class AnnotationRoot(RootFactory):
         if annotation is None:
             raise KeyError()
 
-        group_service = self.request.find_service(IGroupService)
         links_service = self.request.find_service(name="links")
-        return AnnotationContext(annotation, group_service, links_service)
+        return AnnotationContext(annotation, links_service)
 
     @classmethod
     def __acl__(cls):
-        return ACL.for_annotation(annotation=None, group=None)
+        return ACL.for_annotation(annotation=None)
 
 
 class AnnotationContext:
@@ -26,17 +24,14 @@ class AnnotationContext:
 
     annotation = None
 
-    def __init__(
-        self, annotation, group_service, links_service, allow_read_on_delete=False
-    ):
-        self.group_service = group_service
+    def __init__(self, annotation, links_service, allow_read_on_delete=False):
         self.links_service = links_service
         self.annotation = annotation
         self.allow_read_on_delete = allow_read_on_delete
 
     @property
     def group(self):
-        return self.group_service.find(self.annotation.groupid)
+        return self.annotation.group
 
     @property
     def links(self):
@@ -46,6 +41,4 @@ class AnnotationContext:
         return self.links_service.get(self.annotation, name)
 
     def __acl__(self):
-        return ACL.for_annotation(
-            self.annotation, self.group, self.allow_read_on_delete
-        )
+        return ACL.for_annotation(self.annotation, self.allow_read_on_delete)
