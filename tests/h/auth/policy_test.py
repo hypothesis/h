@@ -29,6 +29,7 @@ AUTH_CLIENT_API_BLACKLIST = [
 class TestAuthenticationPolicy:
     @pytest.fixture(autouse=True)
     def policy(self):
+        # pylint:disable=attribute-defined-outside-init
         self.api_policy = mock.Mock(spec_set=list(IAuthenticationPolicy))
         self.fallback_policy = mock.Mock(spec_set=list(IAuthenticationPolicy))
         self.policy = AuthenticationPolicy(

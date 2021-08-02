@@ -15,6 +15,8 @@ class FakeForm:
     Fake implementation of `deform.form.Form`.
     """
 
+    appstruct = None
+
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
