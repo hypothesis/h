@@ -23,11 +23,6 @@ class AnnotationBasePresenter:
         return utc_iso8601(self.annotation.updated)
 
     @property
-    def links(self):
-        """A dictionary of named hypermedia links for this annotation."""
-        return self.annotation_context.links
-
-    @property
     def text(self):
         if self.annotation.text:
             return self.annotation.text

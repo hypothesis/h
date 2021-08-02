@@ -40,7 +40,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                 },
                 "target": self.target,
                 "document": DocumentJSONPresenter(self.annotation.document).asdict(),
-                "links": self.links,
+                "links": self.annotation_context.annotation_links,
             }
         )
 
