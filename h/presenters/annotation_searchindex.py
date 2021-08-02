@@ -58,9 +58,3 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         nipsa_service = self.request.find_service(name="nipsa")
         if nipsa_service.is_flagged(user_id):
             result["nipsa"] = True
-
-    @property
-    def links(self):
-        # The search index presenter has no need to generate links, and so the
-        # `links_service` parameter has been removed from the constructor.
-        raise NotImplementedError("search index presenter doesn't have links")

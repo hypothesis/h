@@ -30,10 +30,11 @@ class AnnotationContext:
         self.allow_read_on_delete = allow_read_on_delete
 
     @property
-    def links(self):
+    def annotation_links(self):
+        """A dictionary of named hypermedia links for this annotation."""
         return self.links_service.get_all(self.annotation)
 
-    def link(self, name):
+    def get_annotation_link(self, name):
         return self.links_service.get(self.annotation, name)
 
     def __acl__(self):

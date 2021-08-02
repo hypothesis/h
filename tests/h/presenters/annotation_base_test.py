@@ -48,13 +48,6 @@ class TestAnnotationBasePresenter:
 
         assert updated == "1983-08-31T07:18:20.098763+00:00"
 
-    def test_links(self):
-        annotation = mock.Mock()
-        context = mock.Mock(annotation=annotation)
-
-        links = AnnotationBasePresenter(context).links
-        assert links == context.links
-
     def test_text(self):
         annotation = mock.Mock(text="It is magical!")
         context = mock.Mock(annotation=annotation)

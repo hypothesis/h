@@ -43,7 +43,7 @@ class TestAnnotationJSONPresenter:
                     }
                 ],
                 "document": DocumentJSONPresenter.return_value.asdict.return_value,
-                "links": context.links,
+                "links": context.annotation_links,
                 "references": annotation.references,
                 "extra-1": "foo",
                 "extra-2": "bar",

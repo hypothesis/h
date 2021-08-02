@@ -26,7 +26,7 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
 
     @property
     def id(self):
-        return self.annotation_context.link("jsonld_id")
+        return self.annotation_context.get_annotation_link("jsonld_id")
 
     @property
     def bodies(self):
