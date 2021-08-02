@@ -125,7 +125,6 @@ def handle_annotation_event(message, sockets, request, session):
 
     annotation_context = AnnotationContext(
         annotation,
-        links_service=request.find_service(name="links"),
         # This is a bit clunky but we have one permission for reading
         # annotations and reading notifications about deleted annotations.
         # We could really do with two, as you don't get READ when things are

@@ -117,9 +117,7 @@ class TestAnnotationJSONPresenter:
 
     @pytest.fixture
     def context(self, annotation):
-        return create_autospec(
-            AnnotationContext, instance=True, spec_set=True, annotation=annotation
-        )
+        return AnnotationContext(annotation)
 
     @pytest.fixture
     def get_formatter(self):

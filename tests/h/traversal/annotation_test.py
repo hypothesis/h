@@ -25,9 +25,7 @@ class TestAnnotationRoot:
         storage.fetch_annotation.assert_called_once_with(
             pyramid_request.db, sentinel.annotation_id
         )
-        AnnotationContext.assert_called_once_with(
-            storage.fetch_annotation.return_value, links_service
-        )
+        AnnotationContext.assert_called_once_with(storage.fetch_annotation.return_value)
         assert context == AnnotationContext.return_value
 
     def test_getting_by_subscript_raises_KeyError_if_annotation_missing(

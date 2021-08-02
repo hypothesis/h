@@ -1,4 +1,7 @@
+from dataclasses import dataclass
+
 from h import storage
+from h.models import Annotation
 from h.security.acl import ACL
 from h.traversal.root import RootFactory
 
@@ -11,23 +14,19 @@ class AnnotationRoot(RootFactory):
         if annotation is None:
             raise KeyError()
 
-        links_service = self.request.find_service(name="links")
-        return AnnotationContext(annotation, links_service)
+        return AnnotationContext(annotation)
 
     @classmethod
     def __acl__(cls):
         return ACL.for_annotation(annotation=None)
 
 
+@dataclass
 class AnnotationContext:
     """Context for annotation-based views."""
 
-    annotation = None
-
-    def __init__(self, annotation, links_service, allow_read_on_delete=False):
-        self.links_service = links_service
-        self.annotation = annotation
-        self.allow_read_on_delete = allow_read_on_delete
+    annotation: Annotation
+    allow_read_on_delete: bool = False
 
     def __acl__(self):
         return ACL.for_annotation(self.annotation, self.allow_read_on_delete)

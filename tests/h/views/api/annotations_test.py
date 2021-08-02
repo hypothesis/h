@@ -154,7 +154,7 @@ class TestCreate:
 
         views.create(pyramid_request)
 
-        annotation_context.assert_called_once_with(annotation, links_service)
+        annotation_context.assert_called_once_with(annotation)
 
     def test_it_presents_annotation(
         self, annotation_context, presentation_service, pyramid_request
@@ -321,7 +321,7 @@ class TestUpdate:
 
         views.update(mock.Mock(), pyramid_request)
 
-        annotation_context.assert_called_once_with(annotation, links_service)
+        annotation_context.assert_called_once_with(annotation)
 
     def test_it_presents_annotation(
         self, annotation_context, presentation_service, pyramid_request
