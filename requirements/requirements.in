@@ -2,7 +2,6 @@
 h-pyramid-sentry
 h-matchers
 h-api
-h-assets
 pyramid-sanity
 
 # 3rd-party packages
