@@ -31,7 +31,9 @@ class AnnotationJSONPresentationService:
         ]
 
     def present(self, annotation_context):
-        return AnnotationJSONPresenter(annotation_context, self.formatters).asdict()
+        return AnnotationJSONPresenter(
+            annotation_context, links_service=self.links_svc, formatters=self.formatters
+        ).asdict()
 
     def present_all(self, annotation_ids):
         def eager_load_documents(query):

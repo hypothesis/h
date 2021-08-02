@@ -33,7 +33,9 @@ class TestAnnotationJSONPresentationService:
         result = svc.present(AnnotationContext.return_value)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            AnnotationContext.return_value, svc.formatters
+            AnnotationContext.return_value,
+            links_service=svc.links_svc,
+            formatters=svc.formatters,
         )
 
         assert result == AnnotationJSONPresenter.return_value.asdict.return_value
@@ -51,7 +53,9 @@ class TestAnnotationJSONPresentationService:
 
         AnnotationContext.assert_called_once_with(annotation, svc.links_svc)
         AnnotationJSONPresenter.assert_called_once_with(
-            AnnotationContext.return_value, svc.formatters
+            AnnotationContext.return_value,
+            links_service=svc.links_svc,
+            formatters=svc.formatters,
         )
         assert result == [
             AnnotationJSONPresenter.return_value.asdict.return_value,

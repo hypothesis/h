@@ -172,7 +172,9 @@ def _generate_annotation_event(session, request, message, annotation_context):
         user_service = request.find_service(name="user")
         formatters = [AnnotationUserInfoFormatter(session, user_service)]
         payload = presenters.AnnotationJSONPresenter(
-            annotation_context, formatters=formatters
+            annotation_context,
+            links_service=request.find_service(name="links"),
+            formatters=formatters,
         ).asdict()
 
     return {

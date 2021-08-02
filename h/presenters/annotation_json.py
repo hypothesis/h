@@ -11,9 +11,10 @@ from h.security.permissions import Permission
 class AnnotationJSONPresenter(AnnotationBasePresenter):
     """Present an annotation in the JSON format returned by API requests."""
 
-    def __init__(self, annotation_context, formatters=None):
+    def __init__(self, annotation_context, links_service, formatters=None):
         super().__init__(annotation_context)
 
+        self._links_service = links_service
         self._formatters = tuple(formatters or [])
 
     def asdict(self):
@@ -40,7 +41,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                 },
                 "target": self.target,
                 "document": DocumentJSONPresenter(self.annotation.document).asdict(),
-                "links": self.annotation_context.annotation_links,
+                "links": self._links_service.get_all(self.annotation),
             }
         )
 

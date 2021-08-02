@@ -141,6 +141,7 @@ class TestHandleAnnotationEvent:
 
         AnnotationJSONPresenter.assert_called_once_with(
             AnnotationContext.return_value,
+            links_service=links_service,
             formatters=[AnnotationUserInfoFormatter.return_value],
         )
         assert AnnotationJSONPresenter.return_value.asdict.called

@@ -11,14 +11,15 @@ from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONPresenter:
-    def test_asdict(self, annotation, context, DocumentJSONPresenter):
+    def test_asdict(self, presenter, annotation, links_service, DocumentJSONPresenter):
         annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
         annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
         annotation.references = ["referenced-id-1", "referenced-id-2"]
         annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
-        presenter = AnnotationJSONPresenter(context)
 
         result = presenter.asdict()
+
+        links_service.get_all.assert_called_once_with(annotation)
 
         assert result == Any.dict.containing(
             {
@@ -43,7 +44,7 @@ class TestAnnotationJSONPresenter:
                     }
                 ],
                 "document": DocumentJSONPresenter.return_value.asdict.return_value,
-                "links": context.annotation_links,
+                "links": links_service.get_all.return_value,
                 "references": annotation.references,
                 "extra-1": "foo",
                 "extra-2": "bar",
@@ -53,23 +54,27 @@ class TestAnnotationJSONPresenter:
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
         DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
 
-    def test_asdict_extra_inherits_correctly(self, annotation, context):
+    def test_asdict_extra_inherits_correctly(self, presenter, annotation):
         annotation.extra = {"id": "DIFFERENT"}
 
-        presented = AnnotationJSONPresenter(context).asdict()
+        presented = presenter.asdict()
 
         # We can't override things (we are applied first)
         assert presented["id"] == annotation.id
         # And we aren't mutated
         assert annotation.extra == {"id": "DIFFERENT"}
 
-    def test_asdict_merges_formatters(self, annotation, context, get_formatter):
+    def test_asdict_merges_formatters(
+        self, annotation, context, links_service, get_formatter
+    ):
         formatters = [
             get_formatter({"flagged": "nope"}),
             get_formatter({"nipsa": "maybe"}),
         ]
 
-        presented = AnnotationJSONPresenter(context, formatters=formatters).asdict()
+        presented = AnnotationJSONPresenter(
+            context, links_service=links_service, formatters=formatters
+        ).asdict()
 
         assert presented["flagged"] == "nope"
         assert presented["nipsa"] == "maybe"
@@ -87,8 +92,8 @@ class TestAnnotationJSONPresenter:
     )
     def test_read_permission(
         self,
+        presenter,
         annotation,
-        context,
         principals_allowed_by_permission,
         shared,
         readable_by,
@@ -97,10 +102,14 @@ class TestAnnotationJSONPresenter:
         annotation.shared = shared
         principals_allowed_by_permission.return_value = readable_by
 
-        presented = AnnotationJSONPresenter(context).asdict()
+        presented = presenter.asdict()
 
         permission = permission_template.format(annotation=annotation)
         assert presented["permissions"]["read"] == [permission]
+
+    @pytest.fixture
+    def presenter(self, context, links_service):
+        return AnnotationJSONPresenter(context, links_service=links_service)
 
     @pytest.fixture
     def annotation(self, factories):
