@@ -171,7 +171,7 @@ class TestUserModelUserId:
         result = (
             db_session.query(models.User)
             .filter(
-                models.User.userid.in_(
+                models.User.userid.in_(  # pylint:disable=no-member
                     [
                         "acct:fredbloggs@example.net",
                         "acct:alicewrites@foobar.com",
@@ -198,7 +198,10 @@ class TestUserModelUserId:
 
         result = (
             db_session.query(models.User)
-            .filter(models.User.userid.in_(["acct:fredbloggs@example.net", "invalid"]))
+            .filter(
+                # pylint:disable=no-member
+                models.User.userid.in_(["acct:fredbloggs@example.net", "invalid"])
+            )
             .all()
         )
 
@@ -211,7 +214,11 @@ class TestUserModelUserId:
 
         result = (
             db_session.query(models.User)
-            .filter(models.User.userid.in_(["fredbloggsexample.net"]))
+            .filter(
+                models.User.userid.in_(  # pylint:disable=no-member
+                    ["fredbloggsexample.net"]
+                )
+            )
             .all()
         )
 

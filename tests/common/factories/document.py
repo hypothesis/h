@@ -27,6 +27,7 @@ class DocumentMeta(ModelFactory):
 
     @factory.lazy_attribute
     def value(self):
+        # pylint: disable=no-member
         if self.type == "twitter.url.main_url":
             return [FAKER.url()]
         if self.type == "favicon":

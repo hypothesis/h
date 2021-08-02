@@ -20,12 +20,15 @@ class Annotation(ModelFactory):
             "flush"  # Always flush the db to generate annotation.id.
         )
 
-    tags = factory.LazyFunction(lambda: list(FAKER.words(nb=random.randint(0, 5))))
+    tags = factory.LazyFunction(
+        lambda: list(FAKER.words(nb=random.randint(0, 5)))  # pylint:disable=no-member
+    )
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(
         lambda: "acct:{username}@{authority}".format(
-            username=FAKER.user_name(), authority="localhost"
+            username=FAKER.user_name(),  # pylint:disable=no-member
+            authority="localhost",
         )
     )
     document = factory.SubFactory(Document)
