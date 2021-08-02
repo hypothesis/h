@@ -1,5 +1,7 @@
 """View for serving static assets under `/assets`"""
 
+import os.path
+
 import importlib_resources
 from h_assets import Environment, assets_view
 from pyramid.settings import asbool
