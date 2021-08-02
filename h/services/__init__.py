@@ -53,9 +53,6 @@ def includeme(config):
     config.register_service_factory(
         ".group_members.group_members_factory", name="group_members"
     )
-    config.register_service_factory(
-        ".groupfinder.groupfinder_service_factory", iface="h.interfaces.IGroupService"
-    )
     config.register_service_factory(".links.links_factory", name="links")
     config.register_service_factory(".group_list.group_list_factory", name="group_list")
     config.register_service_factory(

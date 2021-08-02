@@ -13,7 +13,6 @@ from h.services.group_links import GroupLinksService
 from h.services.group_list import GroupListService
 from h.services.group_members import GroupMembersService
 from h.services.group_update import GroupUpdateService
-from h.services.groupfinder import GroupfinderService
 from h.services.links import LinksService
 from h.services.list_organizations import ListOrganizationsService
 from h.services.nipsa import NipsaService
@@ -29,7 +28,6 @@ __all__ = (
     "list_organizations_service",
     "flag_count_service",
     "flag_service",
-    "groupfinder_service",
     "group_create_service",
     "group_links_service",
     "group_list_service",
@@ -96,14 +94,6 @@ def flag_count_service(pyramid_config):
 def flag_service(pyramid_config):
     service = create_autospec(FlagService, instance=True, spec_set=True)
     pyramid_config.register_service(service, name="flag")
-
-    return service
-
-
-@pytest.fixture
-def groupfinder_service(pyramid_config):
-    service = create_autospec(GroupfinderService, instance=True, spec_set=True)
-    pyramid_config.register_service(service, iface="h.interfaces.IGroupService")
 
     return service
 
