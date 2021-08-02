@@ -43,6 +43,7 @@ class Annotation(ModelFactory):
             },
             {"end": 362, "start": 286, "type": "TextPositionSelector"},
             {
+                # pylint: disable=line-too-long
                 "exact": "If you wish to install Hypothesis on your own site then head over to GitHub.",
                 "prefix": " browser extension.\n            ",
                 "suffix": "\n          \n        \n      \n    ",

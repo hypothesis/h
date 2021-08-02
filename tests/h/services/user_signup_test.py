@@ -155,7 +155,9 @@ class TestUserSignupService:
     def test_signup_raises_conflict_error_when_account_already_exists(
         self, svc, db_session, username, email
     ):
-        """This happens when two or more identical concurrent signup requests race each other to the db."""
+        """This happens when two or more identical concurrent signup
+        requests race each other to the db.
+        """
         with pytest.raises(
             ConflictError,
             match="The email address {} has already been registered.".format(email),

@@ -41,6 +41,7 @@ class TestSanitize:
             ('<a href="mailto:foo@example.net">example</a>', None),
             ('<a title="foobar">example</a>', None),
             (
+                # pylint:disable=line-too-long
                 '<a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a>',
                 None,
             ),

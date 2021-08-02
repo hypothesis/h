@@ -521,7 +521,8 @@ class TestUriCombinedWildcardFilter:
     @pytest.mark.parametrize(
         "params,expected_ann_indexes,separate_keys",
         [
-            # Test with separate_keys = True (aka uri/url are exact match & wildcard_uri is wildcard match.)
+            # Test with separate_keys = True
+            # (aka uri/url are exact match & wildcard_uri is wildcard match.)
             (
                 webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz_45")]),
                 [2, 3],

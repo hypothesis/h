@@ -247,6 +247,7 @@ class TestOAuthAuthorizeController:
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
+        # pylint:disable=line-too-long
         pyramid_request.url = "http://example.com/auth?client_id=the-client-id&response_type=code&state=foobar"
         return pyramid_request
 
