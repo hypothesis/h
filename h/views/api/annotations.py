@@ -27,7 +27,6 @@ from h.schemas.annotation import (
 )
 from h.schemas.util import validate_query_params
 from h.security.permissions import Permission
-from h.traversal import AnnotationContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -77,7 +76,7 @@ def create(request):
     _publish_annotation_event(request, annotation, "create")
 
     svc = request.find_service(name="annotation_json_presentation")
-    return svc.present(AnnotationContext(annotation))
+    return svc.present(annotation)
 
 
 @api_config(
@@ -90,8 +89,9 @@ def create(request):
 )
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    svc = request.find_service(name="annotation_json_presentation")
-    return svc.present(context)
+    return request.find_service(name="annotation_json_presentation").present(
+        context.annotation
+    )
 
 
 @api_config(
@@ -107,10 +107,9 @@ def read_jsonld(context, request):
         "profile": str(AnnotationJSONLDPresenter.CONTEXT_URL),
     }
 
-    presenter = AnnotationJSONLDPresenter(
-        context, links_service=request.find_service(name="links")
-    )
-    return presenter.asdict()
+    return AnnotationJSONLDPresenter(
+        context.annotation, links_service=request.find_service(name="links")
+    ).asdict()
 
 
 @api_config(
@@ -132,8 +131,7 @@ def update(context, request):
 
     _publish_annotation_event(request, annotation, "update")
 
-    svc = request.find_service(name="annotation_json_presentation")
-    return svc.present(AnnotationContext(annotation))
+    return request.find_service(name="annotation_json_presentation").present(annotation)
 
 
 @api_config(

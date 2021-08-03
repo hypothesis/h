@@ -7,7 +7,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
     """Present an annotation in the JSON format used in the search index."""
 
     def __init__(self, annotation, request):
-        self.annotation = annotation
+        super().__init__(annotation)
         self.request = request
 
     def asdict(self):

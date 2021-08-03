@@ -1,4 +1,5 @@
 from h.security.permissions import Permission
+from h.traversal import AnnotationContext
 
 
 class AnnotationModerationFormatter:
@@ -31,13 +32,13 @@ class AnnotationModerationFormatter:
         self._cache.update(flag_counts)
         return flag_counts
 
-    def format(self, annotation_context):
+    def format(self, annotation):
         if not self._has_permission(
-            Permission.Annotation.MODERATE, context=annotation_context
+            Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
         ):
             return {}
 
-        flag_count = self._load(annotation_context.annotation)
+        flag_count = self._load(annotation)
         return {"moderation": {"flagCount": flag_count}}
 
     def _load(self, annotation):

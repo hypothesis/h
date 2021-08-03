@@ -1,4 +1,5 @@
 from h.security.permissions import Permission
+from h.traversal import AnnotationContext
 
 
 class AnnotationHiddenFormatter:
@@ -36,10 +37,8 @@ class AnnotationHiddenFormatter:
         self._cache.update(hidden)
         return hidden
 
-    def format(self, annotation_context):
-        annotation = annotation_context.annotation
-
-        if self._current_user_is_moderator(annotation_context):
+    def format(self, annotation):
+        if self._current_user_is_moderator(annotation):
             return {"hidden": self._is_hidden(annotation)}
 
         if self._current_user_is_author(annotation):
@@ -50,9 +49,9 @@ class AnnotationHiddenFormatter:
 
         return {"hidden": False}
 
-    def _current_user_is_moderator(self, annotation_context):
+    def _current_user_is_moderator(self, annotation):
         return self._has_permission(
-            Permission.Annotation.MODERATE, context=annotation_context
+            Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
         )
 
     def _current_user_is_author(self, annotation):

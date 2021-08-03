@@ -6,9 +6,8 @@ from h.util.datetime import utc_iso8601
 
 
 class AnnotationBasePresenter:
-    def __init__(self, annotation_context):
-        self.annotation_context = annotation_context
-        self.annotation = annotation_context.annotation
+    def __init__(self, annotation):
+        self.annotation = annotation
 
     @property
     def created(self):

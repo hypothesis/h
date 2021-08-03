@@ -10,8 +10,8 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
       https://www.w3.org/TR/annotation-model/
     """
 
-    def __init__(self, annotation_context, links_service):
-        super().__init__(annotation_context)
+    def __init__(self, annotation, links_service):
+        super().__init__(annotation)
 
         self._links_service = links_service
 
