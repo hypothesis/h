@@ -133,10 +133,7 @@ class TestHandleAnnotationEvent:
     ):
         handle_annotation_event()
 
-        AnnotationContext.assert_called_once_with(
-            fetch_annotation.return_value,
-            allow_read_on_delete=True,
-        )
+        AnnotationContext.assert_called_once_with(fetch_annotation.return_value)
 
         AnnotationJSONPresenter.assert_called_once_with(
             AnnotationContext.return_value,
@@ -246,7 +243,7 @@ class TestHandleAnnotationEvent:
         handle_annotation_event(sockets=[socket])
 
         principals_allowed_by_permission.assert_called_with(
-            AnnotationContext.return_value, Permission.Annotation.READ
+            AnnotationContext.return_value, Permission.Annotation.READ_REALTIME_UPDATES
         )
         assert bool(socket.send_json.call_count) == can_see
 

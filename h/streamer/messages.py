@@ -123,16 +123,9 @@ def handle_annotation_event(message, sockets, request, session):
         (first_socket,), matching_sockets
     )
 
-    annotation_context = AnnotationContext(
-        annotation,
-        # This is a bit clunky but we have one permission for reading
-        # annotations and reading notifications about deleted annotations.
-        # We could really do with two, as you don't get READ when things are
-        # deleted by default
-        allow_read_on_delete=True,
-    )
+    annotation_context = AnnotationContext(annotation)
     read_principals = principals_allowed_by_permission(
-        annotation_context, Permission.Annotation.READ
+        annotation_context, Permission.Annotation.READ_REALTIME_UPDATES
     )
     reply = _generate_annotation_event(session, request, message, annotation_context)
 

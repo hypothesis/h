@@ -16,6 +16,7 @@ class Permission:
 
     class Annotation(Enum):
         READ = "annotation:read"
+        READ_REALTIME_UPDATES = "annotation:read_realtime_updates"
         UPDATE = "annotation:update"
         CREATE = "annotation:create"
         DELETE = "annotation:delete"
