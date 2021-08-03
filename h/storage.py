@@ -172,6 +172,10 @@ def update_annotation(request, id_, data):
     if target_uri := data.get("target_uri", None):
         _validate_group_scope(annotation.group, target_uri)
 
+    # Expire the group relationship so we get the most up to date value instead
+    # of the one one which was present when we loaded the model
+    # https://docs.sqlalchemy.org/en/13/faq/sessions.html#i-set-the-foo-id-attribute-on-my-instance-to-7-but-the-foo-attribute-is-still-none-shouldn-t-it-have-loaded-foo-with-id-7
+    request.db.expire(annotation, ["group"])
     if annotation.group is None:
         raise schemas.ValidationError(
             "group: " + _("Invalid group specified for annotation")
