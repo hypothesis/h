@@ -3,7 +3,6 @@ from sqlalchemy.orm import subqueryload
 from h import formatters, storage
 from h.models import Annotation
 from h.presenters import AnnotationJSONPresenter
-from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresentationService:
@@ -30,9 +29,9 @@ class AnnotationJSONPresentationService:
             formatters.AnnotationUserInfoFormatter(self.session, user_svc),
         ]
 
-    def present(self, annotation_context):
+    def present(self, annotation):
         return AnnotationJSONPresenter(
-            annotation_context, links_service=self.links_svc, formatters=self.formatters
+            annotation, links_service=self.links_svc, formatters=self.formatters
         ).asdict()
 
     def present_all(self, annotation_ids):
@@ -47,6 +46,4 @@ class AnnotationJSONPresentationService:
         for formatter in self.formatters:
             formatter.preload(annotation_ids)
 
-        return [
-            self.present(AnnotationContext(annotation)) for annotation in annotations
-        ]
+        return [self.present(annotation) for annotation in annotations]

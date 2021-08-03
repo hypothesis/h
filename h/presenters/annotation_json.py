@@ -6,13 +6,14 @@ from pyramid.security import principals_allowed_by_permission
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security.permissions import Permission
+from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
     """Present an annotation in the JSON format returned by API requests."""
 
-    def __init__(self, annotation_context, links_service, formatters=None):
-        super().__init__(annotation_context)
+    def __init__(self, annotation, links_service, formatters=None):
+        super().__init__(annotation)
 
         self._links_service = links_service
         self._formatters = tuple(formatters or [])
@@ -49,7 +50,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             annotation["references"] = self.annotation.references
 
         for formatter in self._formatters:
-            annotation.update(formatter.format(self.annotation_context))
+            annotation.update(formatter.format(self.annotation))
 
         return annotation
 
@@ -59,7 +60,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             return self.annotation.userid
 
         if security.Everyone in principals_allowed_by_permission(
-            self.annotation_context, Permission.Annotation.READ
+            AnnotationContext(self.annotation), Permission.Annotation.READ
         ):
             # Anyone in the world can read this
             return "group:__world__"

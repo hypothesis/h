@@ -123,11 +123,10 @@ def handle_annotation_event(message, sockets, request, session):
         (first_socket,), matching_sockets
     )
 
-    annotation_context = AnnotationContext(annotation)
     read_principals = principals_allowed_by_permission(
-        annotation_context, Permission.Annotation.READ_REALTIME_UPDATES
+        AnnotationContext(annotation), Permission.Annotation.READ_REALTIME_UPDATES
     )
-    reply = _generate_annotation_event(session, request, message, annotation_context)
+    reply = _generate_annotation_event(session, request, message, annotation)
 
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
 
@@ -147,7 +146,7 @@ def handle_annotation_event(message, sockets, request, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(session, request, message, annotation_context):
+def _generate_annotation_event(session, request, message, annotation):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -164,7 +163,7 @@ def _generate_annotation_event(session, request, message, annotation_context):
         user_service = request.find_service(name="user")
         formatters = [AnnotationUserInfoFormatter(session, user_service)]
         payload = presenters.AnnotationJSONPresenter(
-            annotation_context,
+            annotation,
             links_service=request.find_service(name="links"),
             formatters=formatters,
         ).asdict()
