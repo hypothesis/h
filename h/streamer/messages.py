@@ -8,6 +8,7 @@ from pyramid.security import principals_allowed_by_permission
 from h import presenters, realtime, storage
 from h.formatters import AnnotationUserInfoFormatter
 from h.realtime import Consumer
+from h.security.permissions import Permission
 from h.streamer import websocket
 from h.streamer.contexts import request_context
 from h.streamer.filter import SocketFilter
@@ -122,7 +123,7 @@ def handle_annotation_event(message, sockets, request, session):
         (first_socket,), matching_sockets
     )
 
-    resource = AnnotationContext(
+    annotation_context = AnnotationContext(
         annotation,
         links_service=request.find_service(name="links"),
         # This is a bit clunky but we have one permission for reading
@@ -131,8 +132,10 @@ def handle_annotation_event(message, sockets, request, session):
         # deleted by default
         allow_read_on_delete=True,
     )
-    read_principals = principals_allowed_by_permission(resource, "read")
-    reply = _generate_annotation_event(session, request, message, resource)
+    read_principals = principals_allowed_by_permission(
+        annotation_context, Permission.Annotation.READ
+    )
+    reply = _generate_annotation_event(session, request, message, annotation_context)
 
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
 
@@ -152,7 +155,7 @@ def handle_annotation_event(message, sockets, request, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(session, request, message, resource):
+def _generate_annotation_event(session, request, message, annotation_context):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -169,7 +172,7 @@ def _generate_annotation_event(session, request, message, resource):
         user_service = request.find_service(name="user")
         formatters = [AnnotationUserInfoFormatter(session, user_service)]
         payload = presenters.AnnotationJSONPresenter(
-            resource, formatters=formatters
+            annotation_context, formatters=formatters
         ).asdict()
 
     return {

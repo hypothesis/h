@@ -7,6 +7,7 @@ from h_matchers import Any
 from pyramid import security
 from pyramid.request import Request
 
+from h.security.permissions import Permission
 from h.streamer import messages
 from h.streamer.websocket import WebSocket
 
@@ -245,7 +246,7 @@ class TestHandleAnnotationEvent:
         handle_annotation_event(sockets=[socket])
 
         principals_allowed_by_permission.assert_called_with(
-            AnnotationContext.return_value, "read"
+            AnnotationContext.return_value, Permission.Annotation.READ
         )
         assert bool(socket.send_json.call_count) == can_see
 
