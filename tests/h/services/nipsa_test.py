@@ -39,7 +39,7 @@ class TestNipsaService:
         svc.unflag(users["flagged_user"])
 
         assert not svc.is_flagged("acct:flagged_user@example.com")
-        assert users["flagged_user"].nipsa is False
+        assert not users["flagged_user"].nipsa
 
     def test_unflag_triggers_reindex_job(self, svc, users, search_index):
         svc.unflag(users["flagged_user"])

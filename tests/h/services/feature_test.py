@@ -58,7 +58,7 @@ class TestFeatureService:
     def test_enabled_false_if_everyone_false(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert svc.enabled("foo") is False
+        assert not svc.enabled("foo")
 
     def test_enabled_true_if_everyone_true(self, db_session):
         svc = FeatureService(session=db_session)
@@ -68,13 +68,13 @@ class TestFeatureService:
     def test_enabled_false_when_admins_true_no_user(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert svc.enabled("on-for-admins") is False
+        assert not svc.enabled("on-for-admins")
 
     def test_enabled_false_when_admins_true_nonadmin_user(self, db_session, factories):
         svc = FeatureService(session=db_session)
         user = factories.User(admin=False)
 
-        assert svc.enabled("on-for-admins", user=user) is False
+        assert not svc.enabled("on-for-admins", user=user)
 
     def test_enabled_true_when_admins_true_admin_user(self, db_session, factories):
         svc = FeatureService(session=db_session)
@@ -85,13 +85,13 @@ class TestFeatureService:
     def test_enabled_false_when_staff_true_no_user(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert svc.enabled("on-for-staff") is False
+        assert not svc.enabled("on-for-staff")
 
     def test_enabled_false_when_staff_true_nonstaff_user(self, db_session, factories):
         svc = FeatureService(session=db_session)
         user = factories.User(staff=False)
 
-        assert svc.enabled("on-for-staff", user=user) is False
+        assert not svc.enabled("on-for-staff", user=user)
 
     def test_enabled_true_when_staff_true_staff_user(self, db_session, factories):
         svc = FeatureService(db_session)
@@ -102,13 +102,13 @@ class TestFeatureService:
     def test_enabled_false_when_cohort_no_user(self, db_session):
         svc = FeatureService(db_session)
 
-        assert svc.enabled("on-for-cohort") is False
+        assert not svc.enabled("on-for-cohort")
 
     def test_enabled_false_when_cohort_user_not_in_cohort(self, db_session, factories):
         svc = FeatureService(db_session)
         user = factories.User()
 
-        assert svc.enabled("on-for-cohort", user=user) is False
+        assert not svc.enabled("on-for-cohort", user=user)
 
     def test_enabled_true_when_cohort_user_in_cohort(
         self, cohort, db_session, factories

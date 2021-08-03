@@ -122,7 +122,7 @@ class TestListGroupsRequestGroups:
     ):
         svc.request_groups(authority=default_authority)
 
-        assert group_scope_service.fetch_by_scope.call_count == 0
+        assert not group_scope_service.fetch_by_scope.call_count
 
     def test_it_returns_private_groups_if_user(
         self, svc, user, default_authority, sample_groups

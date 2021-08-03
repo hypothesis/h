@@ -25,7 +25,7 @@ class TestAddCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         signup_service.signup.assert_called_with(
             username="admin",
@@ -50,7 +50,7 @@ class TestAddCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         signup_service.signup.assert_called_with(
             username="admin",
@@ -67,7 +67,7 @@ class TestAdminCommand:
             user_cli.admin, ["--on", non_admin_user.username], obj=cliconfig
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(non_admin_user.id)
         assert user.admin
@@ -75,7 +75,7 @@ class TestAdminCommand:
     def test_it_adds_admin_by_default(self, cli, cliconfig, non_admin_user, db_session):
         result = cli.invoke(user_cli.admin, [non_admin_user.username], obj=cliconfig)
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(non_admin_user.id)
         assert user.admin
@@ -92,7 +92,7 @@ class TestAdminCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(non_admin_user.id)
         assert user.admin
@@ -102,7 +102,7 @@ class TestAdminCommand:
             user_cli.admin, ["--off", admin_user.username], obj=cliconfig
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(admin_user.id)
         assert not user.admin
@@ -118,7 +118,7 @@ class TestAdminCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(admin_user.id)
         assert not user.admin
@@ -170,7 +170,7 @@ class TestPasswordCommand:
             user_cli.password, [user.username, "--password", "newpass"], obj=cliconfig
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(user.id)
         assert password_service.check_password(user, "newpass")
@@ -187,7 +187,7 @@ class TestPasswordCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         user = db_session.query(models.User).get(user.id)
         assert password_service.check_password(user, "newpass")
@@ -232,8 +232,8 @@ class TestDeleteUserCommand:
     def test_it_deletes_user(self, cli, cliconfig, user, db_session):
         result = cli.invoke(user_cli.delete, [user.username], obj=cliconfig)
 
-        assert result.exit_code == 0
-        user = db_session.query(models.User).filter_by(id=user.id).count() == 0
+        assert not result.exit_code
+        assert not db_session.query(models.User).filter_by(id=user.id).count()
 
     def test_it_deletes_user_with_specific_authority(
         self, cli, cliconfig, user, db_session
@@ -247,8 +247,8 @@ class TestDeleteUserCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
-        assert db_session.query(models.User).filter_by(id=user.id).count() == 0
+        assert not result.exit_code
+        assert not db_session.query(models.User).filter_by(id=user.id).count()
 
     def test_it_errors_when_user_could_not_be_found(
         self, cli, cliconfig, user, db_session

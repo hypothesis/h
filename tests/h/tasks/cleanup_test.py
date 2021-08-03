@@ -42,7 +42,7 @@ class TestPurgeDeletedAnnotations:
         purge_deleted_annotations()
 
         if purged:
-            assert db_session.query(Annotation).count() == 0
+            assert not db_session.query(Annotation).count()
         else:
             assert db_session.query(Annotation).count() == 1
 
@@ -58,7 +58,7 @@ class TestPurgeExpiredAuthTickets:
 
         assert db_session.query(AuthTicket).count() == 2
         purge_expired_auth_tickets()
-        assert db_session.query(AuthTicket).count() == 0
+        assert not db_session.query(AuthTicket).count()
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
         tickets = [
@@ -83,7 +83,7 @@ class TestPurgeExpiredAuthzCodes:
 
         assert db_session.query(AuthzCode).count() == 2
         purge_expired_authz_codes()
-        assert db_session.query(AuthzCode).count() == 0
+        assert not db_session.query(AuthzCode).count()
 
     def test_it_leaves_valid_authz_codes(self, db_session, factories):
         authz_codes = [
@@ -111,7 +111,7 @@ class TestPurgeExpiredTokens:
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
-        assert db_session.query(Token).count() == 0
+        assert not db_session.query(Token).count()
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
         factories.DeveloperToken(

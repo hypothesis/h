@@ -280,7 +280,7 @@ class TestExecute:
         execute(pyramid_request, query, self.PAGE_SIZE)
 
         query = search.run.call_args[0][0]
-        assert query["offset"] == 0
+        assert not query["offset"]
 
     def test_it_gets_the_first_page_of_results_if_page_arg_is_1(
         self, pyramid_request, search
@@ -291,7 +291,7 @@ class TestExecute:
         execute(pyramid_request, query, self.PAGE_SIZE)
 
         query = search.run.call_args[0][0]
-        assert query["offset"] == 0
+        assert not query["offset"]
 
     @pytest.mark.parametrize(
         "page,offset",
@@ -322,7 +322,7 @@ class TestExecute:
         execute(pyramid_request, query, self.PAGE_SIZE)
 
         query = search.run.call_args[0][0]
-        assert query["offset"] == 0
+        assert not query["offset"]
 
     @pytest.mark.parametrize("page", ("-23.7", "foo"))
     def test_it_gets_the_first_page_of_results_if_page_arg_is_not_an_int(
@@ -334,7 +334,7 @@ class TestExecute:
         execute(pyramid_request, query, self.PAGE_SIZE)
 
         query = search.run.call_args[0][0]
-        assert query["offset"] == 0
+        assert not query["offset"]
 
     def test_it_passes_the_given_query_params_to_the_search(
         self, pyramid_request, search
@@ -355,7 +355,7 @@ class TestExecute:
 
         # This is what execute()'s result should look like if there are no
         # annotations that match the given search query.
-        assert result.total == 0
+        assert not result.total
         assert result.aggregations == mock.sentinel.aggregations
         assert result.timeframes == []
 

@@ -427,7 +427,7 @@ class TestDocumentURIsFromHighwireDOI:
         document_uris = document_claims.document_uris_from_highwire_doi(
             highwire_dict, claimant="http://example.com/example.html"
         )
-        assert len(document_uris) == 0
+        assert not document_uris
 
 
 class TestDocumentURIsFromDC:
@@ -460,7 +460,7 @@ class TestDocumentURIsFromDC:
         document_uris = document_claims.document_uris_from_dc(
             dc_dict, claimant="http://example.com/example.html"
         )
-        assert len(document_uris) == 0
+        assert not document_uris
 
 
 class TestDocumentURISelfClaim:

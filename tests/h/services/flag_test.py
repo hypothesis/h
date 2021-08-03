@@ -16,7 +16,7 @@ class TestFlagServiceFlagged:
         user = factories.User()
         annotation = factories.Annotation(userid=user.userid)
 
-        assert svc.flagged(user, annotation) is False
+        assert not svc.flagged(user, annotation)
 
     def test_it_lists_flagged_ids(self, svc, flags):
         user = flags[-1].user

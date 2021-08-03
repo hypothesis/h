@@ -22,7 +22,7 @@ class TestEventQueue:
     def test_call_appends_event_to_queue(self):
         queue = eventqueue.EventQueue(mock.Mock())
 
-        assert len(queue.queue) == 0
+        assert not queue.queue
         event = mock.Mock()
         queue(event)
         assert list(queue.queue) == [event]

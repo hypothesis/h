@@ -16,7 +16,7 @@ class TestAnnotationModerationServiceHidden:
     def test_it_returns_false_for_non_moderated_annotation(self, svc, factories):
         annotation = factories.Annotation()
 
-        assert svc.hidden(annotation) is False
+        assert not svc.hidden(annotation)
 
 
 @pytest.mark.usefixtures("mods")
@@ -74,7 +74,7 @@ class TestAnnotationModerationServiceUnhide:
 
         svc.unhide(annotation)
 
-        assert svc.hidden(annotation) is False
+        assert not svc.hidden(annotation)
 
     def test_it_leaves_othes_annotations_hidden(self, svc, factories, db_session):
         mod1, mod2 = factories.AnnotationModeration(), factories.AnnotationModeration()
@@ -90,7 +90,7 @@ class TestAnnotationModerationServiceUnhide:
 
         svc.unhide(annotation)
 
-        assert svc.hidden(annotation) is False
+        assert not svc.hidden(annotation)
 
 
 class TestAnnotationNipsaServiceFactory:

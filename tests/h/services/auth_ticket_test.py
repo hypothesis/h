@@ -51,19 +51,19 @@ class TestAuthTicketService:
         assert str(exc.value) == "auth ticket is not loaded yet"
 
     def test_verify_ticket_fails_when_id_is_None(self, svc):
-        assert svc.verify_ticket(self.principal, None) is False
+        assert not svc.verify_ticket(self.principal, None)
 
     def test_verify_ticket_fails_when_id_is_empty(self, svc):
-        assert svc.verify_ticket(self.principal, "") is False
+        assert not svc.verify_ticket(self.principal, "")
 
     @pytest.mark.usefixtures("ticket")
     def test_verify_ticket_fails_when_ticket_cannot_be_found(self, svc, db_session):
-        assert svc.verify_ticket("foobar", "bogus") is False
+        assert not svc.verify_ticket("foobar", "bogus")
 
     def test_verify_ticket_fails_when_ticket_user_does_not_match_principal(
         self, svc, db_session, ticket
     ):
-        assert svc.verify_ticket("foobar", ticket.id) is False
+        assert not svc.verify_ticket("foobar", ticket.id)
 
     def test_verify_ticket_fails_when_ticket_is_expired(
         self, svc, db_session, factories
@@ -72,7 +72,7 @@ class TestAuthTicketService:
         ticket = factories.AuthTicket(expires=expires)
         db_session.flush()
 
-        assert svc.verify_ticket(ticket.user_userid, ticket.id) is False
+        assert not svc.verify_ticket(ticket.user_userid, ticket.id)
 
     def test_verify_ticket_succeeds_when_ticket_is_valid(self, svc, db_session, ticket):
         assert svc.verify_ticket(ticket.user_userid, ticket.id) is True

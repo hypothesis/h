@@ -17,12 +17,12 @@ class TestToken:
         expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         token = Token(expires=expires)
 
-        assert token.expired is False
+        assert not token.expired
 
     def test_expired_is_false_if_expires_is_none(self):
         token = Token(expires=None)
 
-        assert token.expired is False
+        assert not token.expired
 
     def test_expired_is_true_if_expires_is_in_the_past(self):
         expires = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
@@ -34,12 +34,12 @@ class TestToken:
         refresh_token_expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         token = Token(refresh_token_expires=refresh_token_expires)
 
-        assert token.refresh_token_expired is False
+        assert not token.refresh_token_expired
 
     def test_refresh_token_expired_is_false_if_none(self):
         token = Token(refresh_token_expires=None)
 
-        assert token.refresh_token_expired is False
+        assert not token.refresh_token_expired
 
     def test_refresh_token_expired_is_true_if_in_past(self):
         refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(hours=1)

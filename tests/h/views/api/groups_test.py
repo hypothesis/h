@@ -262,7 +262,7 @@ class TestUpsertGroup:
     ):
         views.upsert(context, pyramid_request)
 
-        assert groups_create.call_count == 0
+        assert not groups_create.call_count
 
     def test_it_validates_against_group_update_schema_if_group_extant(
         self, context, pyramid_request, CreateGroupAPISchema

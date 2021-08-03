@@ -55,7 +55,7 @@ class TestAddCommand:
             obj=cliconfig,
         )
 
-        assert result.exit_code == 0
+        assert not result.exit_code
 
         authclient = (
             db_session.query(models.AuthClient)

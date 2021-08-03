@@ -87,7 +87,7 @@ class TestAddApiView:
             route_name="thing.read",
             enable_preflight=False,
         )
-        assert cors.add_preflight_view.call_count == 0
+        assert not cors.add_preflight_view.call_count
 
     def test_it_allows_decorator_override(self, pyramid_config, view):
         decorator = mock.Mock()

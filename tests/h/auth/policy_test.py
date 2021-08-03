@@ -134,7 +134,7 @@ class TestAPIAuthenticationPolicy:
         userid = api_policy.authenticated_userid(pyramid_request)
 
         user_policy.authenticated_userid.assert_called_once_with(pyramid_request)
-        assert client_policy.authenticated_userid.call_count == 0
+        assert not client_policy.authenticated_userid.call_count
         assert userid == user_policy.authenticated_userid.return_value
 
     @pytest.mark.parametrize("route_name,route_method", AUTH_CLIENT_API_WHITELIST)
@@ -174,7 +174,7 @@ class TestAPIAuthenticationPolicy:
         userid = api_policy.authenticated_userid(pyramid_request)
 
         user_policy.authenticated_userid.assert_called_once_with(pyramid_request)
-        assert client_policy.authenticated_userid.call_count == 0
+        assert not client_policy.authenticated_userid.call_count
         assert userid == user_policy.authenticated_userid.return_value
 
     @pytest.mark.parametrize("route_name,route_method", AUTH_CLIENT_API_WHITELIST)
@@ -192,7 +192,7 @@ class TestAPIAuthenticationPolicy:
         userid = api_policy.unauthenticated_userid(pyramid_request)
 
         user_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
-        assert client_policy.unauthenticated_userid.call_count == 0
+        assert not client_policy.unauthenticated_userid.call_count
         assert userid == user_policy.unauthenticated_userid.return_value
 
     def test_unauthenticated_userid_proxies_to_client_policy_if_user_fails(
@@ -223,7 +223,7 @@ class TestAPIAuthenticationPolicy:
         userid = api_policy.unauthenticated_userid(pyramid_request)
 
         user_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
-        assert client_policy.unauthenticated_userid.call_count == 0
+        assert not client_policy.unauthenticated_userid.call_count
         assert userid == user_policy.unauthenticated_userid.return_value
 
     def test_effective_principals_proxies_to_user_policy_first(
@@ -234,7 +234,7 @@ class TestAPIAuthenticationPolicy:
         principals = api_policy.effective_principals(pyramid_request)
 
         user_policy.effective_principals.assert_called_once_with(pyramid_request)
-        assert client_policy.effective_principals.call_count == 0
+        assert not client_policy.effective_principals.call_count
         assert principals == user_policy.effective_principals.return_value
 
     @pytest.mark.parametrize("route_name,route_method", AUTH_CLIENT_API_WHITELIST)
@@ -274,7 +274,7 @@ class TestAPIAuthenticationPolicy:
         principals = api_policy.effective_principals(pyramid_request)
 
         user_policy.effective_principals.assert_called_once_with(pyramid_request)
-        assert client_policy.effective_principals.call_count == 0
+        assert not client_policy.effective_principals.call_count
         assert principals == user_policy.effective_principals.return_value
 
     @pytest.mark.parametrize("route_name,route_method", AUTH_CLIENT_API_WHITELIST)
@@ -324,7 +324,7 @@ class TestAPIAuthenticationPolicy:
         user_policy.remember.assert_called_once_with(
             pyramid_request, "acct:foo@bar.com"
         )
-        assert client_policy.remember.call_count == 0
+        assert not client_policy.remember.call_count
         assert remembered == user_policy.remember.return_value
 
     @pytest.mark.parametrize("route_name,route_method", AUTH_CLIENT_API_WHITELIST)
@@ -366,7 +366,7 @@ class TestAPIAuthenticationPolicy:
         forgot = api_policy.forget(pyramid_request)
 
         user_policy.forget.assert_called_once_with(pyramid_request)
-        assert client_policy.forget.call_count == 0
+        assert not client_policy.forget.call_count
         assert forgot == user_policy.forget.return_value
 
     @pytest.fixture
@@ -440,9 +440,8 @@ class TestAuthClientAuthenticationPolicy:
 
         auth_policy.unauthenticated_userid(pyramid_request)
 
-        assert (
+        assert not (
             BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.call_count
-            == 0
         )
 
     def test_authenticated_userid_returns_None_if_no_forwarded_userid(
@@ -473,11 +472,10 @@ class TestAuthClientAuthenticationPolicy:
         auth_policy = AuthClientPolicy()
         auth_policy.authenticated_userid(pyramid_request)
 
-        assert (
+        assert not (
             BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.call_count
-            == 0
         )
-        assert BasicAuthAuthenticationPolicy.return_value.callback.call_count == 0
+        assert not BasicAuthAuthenticationPolicy.return_value.callback.call_count
 
     def test_authenticated_userid_returns_userid_if_callback_ok(
         self, auth_policy, pyramid_request
@@ -582,7 +580,7 @@ class TestAuthClientAuthenticationPolicy:
 
         AuthClientPolicy.check("someusername", "somepassword", pyramid_request)
 
-        assert principals_for_auth_client.call_count == 0
+        assert not principals_for_auth_client.call_count
 
     def test_check_fetches_user_if_forwarded_user(
         self, pyramid_request, verify_auth_client, user_service

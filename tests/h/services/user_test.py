@@ -82,7 +82,7 @@ class TestUserService:
 
         svc.update_preferences(user, show_sidebar_tutorial=True)
 
-        assert user.sidebar_tutorial_dismissed is False
+        assert not user.sidebar_tutorial_dismissed
 
     def test_update_preferences_tutorial_disable(self, svc, factories):
         user = factories.User.build(sidebar_tutorial_dismissed=False)

@@ -53,7 +53,7 @@ class TestDocumentFindByURIs:
         actual = Document.find_by_uris(
             db_session, ["https://example.com/no_matching_document"]
         )
-        assert actual.count() == 0
+        assert not actual.count()
 
 
 class TestDocumentFindOrCreateByURIs:
@@ -188,13 +188,11 @@ class TestMergeDocuments:
         merge_documents(db_session, duplicate_docs)
         db_session.flush()
 
-        count = (
+        assert not (
             db_session.query(Document)
             .filter(Document.id.in_([duplicate_docs[1].id, duplicate_docs[2].id]))
             .count()
         )
-
-        assert count == 0
 
     @pytest.mark.parametrize("updated", (None, _datetime(2001, 1, 1)))
     @pytest.mark.parametrize("sub_item", ("document_uris", "meta"))
