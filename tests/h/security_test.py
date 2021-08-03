@@ -91,11 +91,12 @@ class TestDeriveKey:
         derived = derive_key("akey", b"somesalt", b"some-info")
         assert len(derived) == 64
 
-    # pylint: disable=line-too-long
-    # Test vectors adapted from the HKDF RFC by https://www.kullo.net/blog/hkdf-sha-512-test-vectors/
+    # Test vectors adapted from the HKDF RFC by:
+    # https://www.kullo.net/blog/hkdf-sha-512-test-vectors/
     @pytest.mark.parametrize(
         "info,key,salt,expected",
         [
+            # pylint: disable=line-too-long
             (
                 "f0f1f2f3f4f5f6f7f8f9",
                 "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
