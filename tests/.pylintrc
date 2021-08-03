@@ -13,15 +13,25 @@ load-plugins=pylint.extensions.bad_builtin,
 [MESSAGES CONTROL]
 disable=bad-continuation,
         invalid-name,
+        missing-docstring,
+        missing-yield-doc,
         missing-function-docstring,
         missing-module-docstring,
         missing-class-docstring,
         missing-type-doc,
         missing-return-type-doc,
+        missing-yield-type-doc,
         no-self-use,
         redefined-outer-name,
         too-few-public-methods,
+        too-many-public-methods,
         wrong-import-order,
+
+        wrong-import-order,
+        # We use isort to sort and group our imports, so we don't need PyLint to
+        # check them for us.
+        ungrouped-imports,
+
 
 [REPORTS]
 output-format=colorized
