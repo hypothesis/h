@@ -23,11 +23,7 @@ class GroupRoot(RootFactory):
 
 
 class GroupRequiredRoot(GroupRoot):
-    """
-    Root factory for routes dealing with groups which must exist.
-
-    FIXME: This class should return GroupContext objects, not Group objects.
-    """
+    """Root factory for routes dealing with groups which must exist."""
 
     def __getitem__(self, pubid_or_groupid):
         group_context = super().__getitem__(pubid_or_groupid)
