@@ -26,7 +26,7 @@ def create_app(_global_config, **settings):
 
     config.include("h.auth")
     # Override the default authentication policy.
-    config.set_authentication_policy("h.auth.WEBSOCKET_POLICY")
+    config.set_authentication_policy("h.auth.TOKEN_POLICY")
 
     config.include("h.authz")
     config.include("h.db")
