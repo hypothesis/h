@@ -10,8 +10,6 @@ amqp==5.0.6
     # via
     #   -r requirements/requirements.txt
     #   kombu
-appnope==0.1.2
-    # via ipython
 attrs==20.2.0
     # via
     #   -r requirements/requirements.txt
