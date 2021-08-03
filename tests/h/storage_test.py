@@ -314,6 +314,19 @@ class TestUpdateAnnotation:
         )
         assert result.document == update_document_metadata.return_value
 
+    def test_it_uses_the_updated_group_not_the_old_one(
+        self, pyramid_request, annotation, group
+    ):
+        assert annotation.groupid != group.pubid
+        assert annotation.group != group
+
+        result = storage.update_annotation(
+            pyramid_request, annotation.id, {"groupid": group.pubid}
+        )
+
+        assert result.groupid == group.pubid
+        assert result.group == group
+
     def test_it_does_not_call_update_document_meta_if_no_document_in_data(
         self, pyramid_request, annotation, update_document_metadata
     ):
