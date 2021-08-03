@@ -88,7 +88,7 @@ gunicorn==20.1.0
     # via -r requirements/requirements.txt
 h-api==1.0.1
     # via -r requirements/requirements.txt
-h-assets==1.0.3
+h-assets==1.0.4
     # via -r requirements/requirements.txt
 h-matchers==1.2.11
     # via -r requirements/requirements.txt
