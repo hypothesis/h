@@ -30,6 +30,11 @@ class TestACLForUser:
         principal = principal_template.format(user=user)
         assert bool(user_permits([principal, "some_noise"], permission)) == is_permitted
 
+    def test_a_user_is_not_required_for_create(self, permits):
+        acl_object = ObjectWithACL(ACL.for_user(user=None))
+
+        permits(acl_object, [role.AuthClient], Permission.User.CREATE)
+
     @pytest.fixture
     def user_permits(self, permits, user):
         return functools.partial(permits, ObjectWithACL(ACL.for_user(user)))

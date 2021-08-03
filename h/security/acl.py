@@ -8,7 +8,12 @@ from h.security.permissions import Permission
 
 class ACL:
     @classmethod
-    def for_user(cls, user):
+    def for_user(cls, user=None):
+        yield Allow, role.AuthClient, Permission.User.CREATE
+
+        if not user:
+            return
+
         client_authority = "client_authority:{}".format(user.authority)
 
         # auth_clients with the same authority as the user may update the user
