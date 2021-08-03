@@ -80,41 +80,43 @@ class ACL:
             yield Allow, group.creator.userid, Permission.Group.UPSERT
 
     @classmethod
-    def for_annotation(cls, annotation, allow_read_on_delete=False):
+    def for_annotation(cls, annotation):
         """Return a Pyramid ACL for this annotation.
 
         :param annotation: Annotation in question
-        :param allow_read_on_delete: Grant READ permissions on deleted
-            annotations.
         """
-        yield from cls._for_annotation(annotation, allow_read_on_delete)
+        yield from cls._for_annotation(annotation)
 
         yield DENY_ALL
 
     @classmethod
-    def _for_annotation(cls, annotation, allow_read_on_delete):
+    def _for_annotation(cls, annotation):
         # All authenticated users can create annotations
         yield Allow, security.Authenticated, Permission.Annotation.CREATE
 
         if not annotation:
             return
 
-        # If the annotation has been deleted, nobody has any privileges on it
-        # any more.
-        if annotation.deleted and not allow_read_on_delete:
+        if annotation.shared:
+            # You can read an annotation if you can read the group it's in
+            yield from cls._map_acls(
+                ACL.for_group(annotation.group),
+                {Permission.Group.READ: [Permission.Annotation.READ_REALTIME_UPDATES]},
+            )
+        else:
+            yield Allow, annotation.userid, Permission.Annotation.READ_REALTIME_UPDATES
+
+        if annotation.deleted:
             return
 
         if annotation.shared:
             # You can read an annotation if you can read the group it's in
             yield from cls._map_acls(
                 ACL.for_group(annotation.group),
-                {Permission.Group.READ: Permission.Annotation.READ},
+                {Permission.Group.READ: [Permission.Annotation.READ]},
             )
         else:
             yield Allow, annotation.userid, Permission.Annotation.READ
-
-        if annotation.deleted:
-            return
 
         if annotation.shared:
             # You can flag or moderate an annotation if you can flag or
@@ -122,8 +124,8 @@ class ACL:
             yield from cls._map_acls(
                 ACL.for_group(annotation.group),
                 {
-                    Permission.Group.FLAG: Permission.Annotation.FLAG,
-                    Permission.Group.MODERATE: Permission.Annotation.MODERATE,
+                    Permission.Group.FLAG: [Permission.Annotation.FLAG],
+                    Permission.Group.MODERATE: [Permission.Annotation.MODERATE],
                 },
             )
 
@@ -143,11 +145,10 @@ class ACL:
 
         for action, principal, permission in acls:
             try:
-                mapped_permission = permission_map.get(permission)
+                for mapped_permission in permission_map.get(permission, []):
+                    yield action, principal, mapped_permission
+
             except TypeError:
                 # Things like Pyramid's "ALL_PERMISSIONS" can't be hashed or
                 # mapped
                 continue
-
-            if mapped_permission:
-                yield action, principal, mapped_permission

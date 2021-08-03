@@ -52,15 +52,10 @@ class TestAnnotationRoot:
 class TestAnnotationContext:
     def test__acl__(self, factories, ACL):
         annotation = factories.Annotation()
-        context = AnnotationContext(
-            annotation, allow_read_on_delete=sentinel.allow_read_on_delete
-        )
 
-        acl = context.__acl__()
+        acl = AnnotationContext(annotation).__acl__()
 
-        ACL.for_annotation.assert_called_once_with(
-            annotation, sentinel.allow_read_on_delete
-        )
+        ACL.for_annotation.assert_called_once_with(annotation)
         assert acl == ACL.for_annotation.return_value
 
 

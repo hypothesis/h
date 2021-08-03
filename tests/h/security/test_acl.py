@@ -197,26 +197,22 @@ class TestACLForGroup:
 
 class TestACLForAnnotation:
     def test_it_grants_create_to_authenticated_users(self, permits):
-        acl = ACL.for_annotation(None, None)  # Doesn't require an annotation
+        acl = ACL.for_annotation(None)  # Doesn't require an annotation
 
         assert permits(
             ObjectWithACL(acl), [security.Authenticated], Permission.Annotation.CREATE
         )
         assert not permits(ObjectWithACL(acl), [], Permission.Annotation.CREATE)
 
-    def test_it_denies_normal_permissions_when_deleted(self, annotation, anno_permits):
+    def test_it_allows_read_realtime_on_delete(self, annotation, anno_permits):
         annotation.deleted = True
 
         # Users should normally have permissions to read their own annotations
         # so we'll use that as an example
+        assert anno_permits(
+            [annotation.userid], Permission.Annotation.READ_REALTIME_UPDATES
+        )
         assert not anno_permits([annotation.userid], Permission.Annotation.READ)
-
-    def test_it_allows_read_if_asked_on_deleted(self, annotation, permits):
-        annotation.deleted = True
-
-        acl = ACL.for_annotation(annotation, allow_read_on_delete=True)
-
-        permits(ObjectWithACL(acl), [annotation.userid], Permission.Annotation.READ)
 
     def test_it_allows_the_user_to_always_update_and_delete_their_own(
         self, annotation, anno_permits
@@ -233,20 +229,31 @@ class TestACLForAnnotation:
         anno_permits([annotation.userid], Permission.Annotation.FLAG)
 
     @pytest.mark.parametrize(
-        "permission",
-        (Permission.Group.FLAG, Permission.Group.MODERATE, Permission.Group.READ),
+        "group_permission,annotation_permission",
+        (
+            (Permission.Group.FLAG, Permission.Annotation.FLAG),
+            (Permission.Group.MODERATE, Permission.Annotation.MODERATE),
+            (Permission.Group.READ, Permission.Annotation.READ),
+            (Permission.Group.READ, Permission.Annotation.READ_REALTIME_UPDATES),
+        ),
     )
     def test_it_mirrors_permissions_from_the_group_for_shared_annotations(
-        self, annotation, group, anno_permits, permission, for_group
+        self,
+        annotation,
+        group,
+        anno_permits,
+        group_permission,
+        annotation_permission,
+        for_group,
     ):
         annotation.shared = True
         for_group.return_value = [
-            (security.Allow, "principal_1", permission),
-            (security.Allow, "principal_2", permission),
+            (security.Allow, "principal_1", group_permission),
+            (security.Allow, "principal_2", group_permission),
         ]
 
-        anno_permits(["principal_1"], permission)
-        anno_permits(["principal_2"], permission)
+        anno_permits(["principal_1"], annotation_permission)
+        anno_permits(["principal_2"], annotation_permission)
 
         # This is called a bunch of times right now, we don't need to get too
         # specific. We can tell it's doing it's job of passing on the ACLs by

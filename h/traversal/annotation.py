@@ -26,7 +26,6 @@ class AnnotationContext:
     """Context for annotation-based views."""
 
     annotation: Annotation
-    allow_read_on_delete: bool = False
 
     def __acl__(self):
-        return ACL.for_annotation(self.annotation, self.allow_read_on_delete)
+        return ACL.for_annotation(self.annotation)
