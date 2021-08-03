@@ -34,6 +34,17 @@ class ACL:
         yield DENY_ALL
 
     @classmethod
+    def for_bulk_api(cls, client_authority=None):
+        if not client_authority:
+            return
+
+        # Currently only LMS uses this end-point
+        if client_authority.startswith("lms.") and client_authority.endswith(
+            ".hypothes.is"
+        ):
+            yield Allow, f"client_authority:{client_authority}", Permission.API.BULK_ACTION
+
+    @classmethod
     def for_profile(cls):
         # A user can always update their own profile
         yield Allow, role.User, Permission.Profile.UPDATE

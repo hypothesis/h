@@ -1,31 +1,24 @@
+from unittest.mock import sentinel
+
 import pytest
 
-from h.security.permissions import Permission
 from h.traversal.bulk_api import BulkAPIRoot
 
 
 class TestBulkAPIRoot:
-    @pytest.mark.parametrize(
-        "user,principal,permission_expected",
-        (
-            (None, None, False),
-            ("acct:user@hypothes.is", "client_authority:hypothes.is", False),
-            ("acct:user@lms.hypothes.is", "client_authority:lms.hypothes.is", True),
-            (
-                "acct:user@lms.ca.hypothes.is",
-                "client_authority:lms.ca.hypothes.is",
-                True,
-            ),
-        ),
-    )
-    def test_it_sets_bulk_action_permission_as_expected(
-        self, set_permissions, pyramid_request, user, principal, permission_expected
-    ):
-        set_permissions(user, principals=[principal])
+    def test_acl_matching_user(self, client_authority, ACL):
+        acl = BulkAPIRoot(sentinel.request).__acl__()
 
-        context = BulkAPIRoot(pyramid_request)
-
-        assert (
-            pyramid_request.has_permission(Permission.API.BULK_ACTION, context)
-            == permission_expected
+        client_authority.assert_called_once_with(sentinel.request)
+        ACL.for_bulk_api.assert_called_once_with(
+            client_authority=client_authority.return_value
         )
+        assert acl == ACL.for_bulk_api.return_value
+
+    @pytest.fixture
+    def client_authority(self, patch):
+        return patch("h.traversal.bulk_api.client_authority")
+
+    @pytest.fixture
+    def ACL(self, patch):
+        return patch("h.traversal.bulk_api.ACL")
