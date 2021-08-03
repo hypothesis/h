@@ -1,23 +1,17 @@
-from h.auth import role
-from h.security.permissions import Permission
+from unittest.mock import sentinel
+
+import pytest
+
 from h.traversal.profile import ProfileRoot
 
 
 class TestProfileRoot:
-    def test_it_assigns_update_permission_with_user_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=[role.User])
+    def test_acl_matching_user(self, ACL):
+        acl = ProfileRoot(sentinel.request).__acl__()
 
-        context = ProfileRoot(pyramid_request)
+        ACL.for_profile.assert_called_once_with()
+        assert acl == ACL.for_profile.return_value
 
-        assert pyramid_request.has_permission(Permission.Profile.UPDATE, context)
-
-    def test_it_does_not_assign_update_permission_without_user_role(
-        self, set_permissions, pyramid_request
-    ):
-        set_permissions("acct:adminuser@foo", principals=["whatever"])
-
-        context = ProfileRoot(pyramid_request)
-
-        assert not pyramid_request.has_permission(Permission.Profile.UPDATE, context)
+    @pytest.fixture
+    def ACL(self, patch):
+        return patch("h.traversal.profile.ACL")
