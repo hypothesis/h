@@ -74,7 +74,9 @@ def test_text_setter_renders_markdown(markdown):
 
     markdown.render.assert_called_once_with("foobar")
 
-    assert annotation.text_rendered == markdown.render.return_value
+    assert (  # pylint: disable=comparison-with-callable
+        annotation.text_rendered == markdown.render.return_value
+    )
 
 
 @pytest.mark.parametrize(
