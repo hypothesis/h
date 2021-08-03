@@ -8,6 +8,16 @@ from h.security.permissions import Permission
 
 class ACL:
     @classmethod
+    def for_admin_pages(cls):
+        yield Allow, role.Staff, Permission.AdminPage.INDEX
+        yield Allow, role.Staff, Permission.AdminPage.GROUPS
+        yield Allow, role.Staff, Permission.AdminPage.MAILER
+        yield Allow, role.Staff, Permission.AdminPage.ORGANIZATIONS
+        yield Allow, role.Staff, Permission.AdminPage.USERS
+        yield Allow, role.Admin, security.ALL_PERMISSIONS
+        yield DENY_ALL
+
+    @classmethod
     def for_user(cls, user=None):
         yield Allow, role.AuthClient, Permission.User.CREATE
 

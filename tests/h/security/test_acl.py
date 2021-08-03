@@ -12,6 +12,48 @@ from h.security.acl import ACL
 from h.security.permissions import Permission
 
 
+class TestACLForAdminPages:
+    @pytest.mark.parametrize(
+        "permission",
+        (
+            Permission.AdminPage.INDEX,
+            Permission.AdminPage.GROUPS,
+            Permission.AdminPage.MAILER,
+            Permission.AdminPage.ORGANIZATIONS,
+            Permission.AdminPage.USERS,
+        ),
+    )
+    def test_staff_permissions(self, admin_page_permits, permission):
+        assert not admin_page_permits([], permission)
+        assert admin_page_permits([role.Staff], permission)
+        assert admin_page_permits([role.Admin], permission)
+
+    @pytest.mark.parametrize(
+        "permission",
+        (
+            Permission.AdminPage.ADMINS,
+            Permission.AdminPage.BADGE,
+            Permission.AdminPage.FEATURES,
+            Permission.AdminPage.OAUTH_CLIENTS,
+            Permission.AdminPage.NIPSA,
+            Permission.AdminPage.SEARCH,
+            Permission.AdminPage.STAFF,
+        ),
+    )
+    def test_admin_only_permissions(self, admin_page_permits, permission):
+        assert not admin_page_permits([], permission)
+        assert not admin_page_permits([role.Staff], permission)
+        assert admin_page_permits([role.Admin], permission)
+
+    @pytest.fixture
+    def admin_page_permits(self, permits):
+        # Wrap this in a list as we ask for more than one permission per
+        # context. This is an artefact of `ObjectWithACL` not how it really
+        # works
+        acl = list(ACL.for_admin_pages())
+        return functools.partial(permits, ObjectWithACL(acl))
+
+
 class TestACLForUser:
     @pytest.mark.parametrize(
         "principal_template,is_permitted",
