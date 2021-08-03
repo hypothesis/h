@@ -12,7 +12,7 @@ from .user import User
 
 def generate_code(_=None):
     """Simulate the way oauthlib generates authz codes."""
-    chars = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "012a456789"
+    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
     rand = random.SystemRandom()
     return "".join(rand.choice(chars) for x in range(30))

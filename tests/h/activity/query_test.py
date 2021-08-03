@@ -178,13 +178,13 @@ class TestCheckURL:
     def test_doesnt_raise_with_non_matching_queries(self, pyramid_request, unparse):
         query = MultiDict({"tag": "foo"})
 
-        check_url(pyramid_request, query, unparse=unparse)
+        assert not check_url(pyramid_request, query, unparse=unparse)
 
     def test_doesnt_raise_if_not_on_search_page(self, pyramid_request, unparse):
         pyramid_request.matched_route.name = "group_read"
         query = MultiDict({"group": "abcd1234"})
 
-        check_url(pyramid_request, query, unparse=unparse)
+        assert not check_url(pyramid_request, query, unparse=unparse)
 
     @pytest.fixture
     def group(self, factories):
