@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 
 from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.security import Allow
 
-from h.auth import role
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
 from h.security.acl import ACL
-from h.security.permissions import Permission
 from h.traversal.root import RootFactory
 
 
@@ -19,14 +16,10 @@ class UserContext:
     user: User
 
     def __acl__(self):
-        """Return user access control lists."""
-
         return ACL.for_user(self.user)
 
 
 class UserRoot(RootFactory):
-    __acl__ = [(Allow, role.AuthClient, Permission.User.CREATE)]
-
     def __init__(self, request):
         super().__init__(request)
 
@@ -45,6 +38,9 @@ class UserRoot(RootFactory):
             raise KeyError()
 
         return UserContext(user)
+
+    def __acl__(self):
+        return ACL.for_user(user=None)
 
 
 class UserByNameRoot(UserRoot):
