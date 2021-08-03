@@ -86,6 +86,14 @@ class TestACLForUser:
         return factories.User.create()
 
 
+class TestACLForProfile:
+    def test_it(self, permits):
+        acl = ACL.for_profile()
+
+        assert permits(ObjectWithACL(acl), [role.User], Permission.Profile.UPDATE)
+        assert not permits(ObjectWithACL(acl), [], Permission.Profile.UPDATE)
+
+
 class TestACLForGroup:
     def test_logged_in_users_get_create_permission(
         self, group_permits, no_group_permits

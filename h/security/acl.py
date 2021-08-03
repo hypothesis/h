@@ -34,6 +34,11 @@ class ACL:
         yield DENY_ALL
 
     @classmethod
+    def for_profile(cls):
+        # A user can always update their own profile
+        yield Allow, role.User, Permission.Profile.UPDATE
+
+    @classmethod
     def for_group(cls, group=None):
         # Any logged in user may create a group
         yield Allow, role.User, Permission.Group.CREATE
