@@ -1,6 +1,5 @@
-pytest
-factory-boy
-hypothesis
-webtest
 pylint
--r requirements.txt
+pydocstyle
+pycodestyle
+-r tests.txt
+-r functests.txt
