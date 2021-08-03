@@ -86,6 +86,26 @@ class TestACLForUser:
         return factories.User.create()
 
 
+class TestForBulkAPI:
+    @pytest.mark.parametrize(
+        "client_authority,principal,is_permitted",
+        (
+            ("lms.hypothes.is", "client_authority:lms.hypothes.is", True),
+            ("lms.ca.hypothes.is", "client_authority:lms.ca.hypothes.is", True),
+            ("lms.hypothes.is", "client_authority:MISMATCH.hypothes.is", False),
+            ("lms.other", "client_authority:lms.other", False),
+            ("hypothes.is", "client_authority:hypothes.is", False),
+        ),
+    )
+    def test_it(self, permits, client_authority, principal, is_permitted):
+        acl = ACL.for_bulk_api(client_authority=client_authority)
+
+        assert (
+            permits(ObjectWithACL(acl), [principal], Permission.API.BULK_ACTION)
+            == is_permitted
+        )
+
+
 class TestACLForProfile:
     def test_it(self, permits):
         acl = ACL.for_profile()
