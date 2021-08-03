@@ -13,33 +13,15 @@ from h.auth.policy import (
 from h.auth.util import default_authority, groupfinder
 from h.security import derive_key
 
-__all__ = ("DEFAULT_POLICY", "WEBSOCKET_POLICY")
+__all__ = ("TOKEN_POLICY",)
 
 log = logging.getLogger(__name__)
 
-PROXY_POLICY = RemoteUserAuthenticationPolicy(
-    environ_key="HTTP_X_FORWARDED_USER", callback=groupfinder
-)
-TICKET_POLICY = pyramid_authsanity.AuthServicePolicy()
-
+# We export this for the websocket to use as it's main policy
 TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
-AUTH_CLIENT_POLICY = AuthClientPolicy()
-
-API_POLICY = APIAuthenticationPolicy(
-    user_policy=TOKEN_POLICY, client_policy=AUTH_CLIENT_POLICY
-)
-
-DEFAULT_POLICY = AuthenticationPolicy(
-    api_policy=API_POLICY, fallback_policy=TICKET_POLICY
-)
-WEBSOCKET_POLICY = TOKEN_POLICY
 
 
 def includeme(config):
-    # pylint: disable=global-statement
-    global DEFAULT_POLICY
-    global WEBSOCKET_POLICY
-
     # Set up authsanity
     settings = config.registry.settings
     settings["authsanity.source"] = "cookie"
@@ -50,7 +32,21 @@ def includeme(config):
     )
     config.include("pyramid_authsanity")
 
-    if config.registry.settings.get("h.proxy_auth"):
+    # Set the default authentication policy. This can be overridden by modules
+    # that include this one.
+    config.set_authentication_policy(
+        _get_policy(config.registry.settings.get("h.proxy_auth"))
+    )
+
+    # Allow retrieval of the authority from the request object.
+    config.add_request_method(default_authority, name="default_authority", reify=True)
+
+    # Allow retrieval of the auth token (if present) from the request object.
+    config.add_request_method(".tokens.auth_token", reify=True)
+
+
+def _get_policy(proxy_auth):
+    if proxy_auth:
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "
             "the X-Forwarded-User request header can ONLY be set by "
@@ -59,17 +55,16 @@ def includeme(config):
             "being available to ANYONE!"
         )
 
-        DEFAULT_POLICY = AuthenticationPolicy(
-            api_policy=API_POLICY, fallback_policy=PROXY_POLICY
+        fallback_policy = RemoteUserAuthenticationPolicy(
+            environ_key="HTTP_X_FORWARDED_USER", callback=groupfinder
         )
-        WEBSOCKET_POLICY = TOKEN_POLICY
 
-    # Set the default authentication policy. This can be overridden by modules
-    # that include this one.
-    config.set_authentication_policy(DEFAULT_POLICY)
+    else:
+        fallback_policy = pyramid_authsanity.AuthServicePolicy()
 
-    # Allow retrieval of the authority from the request object.
-    config.add_request_method(default_authority, name="default_authority", reify=True)
-
-    # Allow retrieval of the auth token (if present) from the request object.
-    config.add_request_method(".tokens.auth_token", reify=True)
+    return AuthenticationPolicy(
+        api_policy=APIAuthenticationPolicy(
+            user_policy=TOKEN_POLICY, client_policy=AuthClientPolicy()
+        ),
+        fallback_policy=fallback_policy,
+    )
