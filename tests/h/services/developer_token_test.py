@@ -19,7 +19,7 @@ class TestDeveloperTokenService:
     def test_create_creates_new_developer_token_for_userid(
         self, svc, db_session, userid
     ):
-        assert db_session.query(models.Token).count() == 0
+        assert not db_session.query(models.Token).count()
         svc.create(userid)
         assert db_session.query(models.Token).count() == 1
 

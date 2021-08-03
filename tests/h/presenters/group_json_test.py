@@ -93,7 +93,7 @@ class TestGroupJSONPresenter:
         result = present(open_group, expand=["scopes"])
 
         assert "scopes" in result
-        assert result["scopes"]["enforced"] is False
+        assert not result["scopes"]["enforced"]
         assert set(result["scopes"]["uri_patterns"]) == {
             "http://foo.com/bar*",
             "https://foo.com/baz*",
@@ -109,7 +109,7 @@ class TestGroupJSONPresenter:
         assert result["scopes"]["uri_patterns"] == []
         # Even if the model is configured to enforce scope, de facto
         # it can't if there are no scopes
-        assert result["scopes"]["enforced"] is False
+        assert not result["scopes"]["enforced"]
 
     def test_it_ignores_unrecognized_expands(self, present, open_group):
         present(open_group, expand=["foobars", "dingdong"])

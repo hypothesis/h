@@ -232,7 +232,7 @@ class TestHandleAnnotationEvent:
 
         result = search_index.handle_annotation_event(event)
 
-        assert result is False
+        assert not result
 
     def test_we_fallback_to_async_if_sync_fails(
         self, search_index, pyramid_request, action, handler_for

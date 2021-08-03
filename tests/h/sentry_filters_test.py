@@ -13,10 +13,10 @@ class TestFilterWS4PYErrorLogging:
         assert is_ws4py_error_logging(event) is True
 
     def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert is_ws4py_error_logging(unexpected_logger_event) is False
+        assert not is_ws4py_error_logging(unexpected_logger_event)
 
     def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert is_ws4py_error_logging(unexpected_exception_event) is False
+        assert not is_ws4py_error_logging(unexpected_exception_event)
 
 
 class TestFilterWS4PYHandshakeError:
@@ -29,13 +29,13 @@ class TestFilterWS4PYHandshakeError:
 
     def test_doesnt_filter_out_other_handshake_errors(self):
         event = exception_event(ws4py.exc.HandshakeError("Some other message"))
-        assert is_ws4py_handshake_error(event) is False
+        assert not is_ws4py_handshake_error(event)
 
     def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert is_ws4py_handshake_error(unexpected_logger_event) is False
+        assert not is_ws4py_handshake_error(unexpected_logger_event)
 
     def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert is_ws4py_handshake_error(unexpected_exception_event) is False
+        assert not is_ws4py_handshake_error(unexpected_exception_event)
 
 
 @pytest.fixture

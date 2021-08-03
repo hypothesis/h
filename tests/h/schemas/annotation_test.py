@@ -413,7 +413,7 @@ class TestCreateAnnotationSchema:
             self.valid_data(permissions={"read": ["acct:harriet@example.com"]})
         )
 
-        assert appstruct["shared"] is False
+        assert not appstruct["shared"]
         assert "permissions" not in appstruct
 
     def test_it_replaces_shared_permissions_with_shared_True(self, pyramid_request):
@@ -435,7 +435,7 @@ class TestCreateAnnotationSchema:
 
         appstruct = schema.validate(self.valid_data())
 
-        assert appstruct["shared"] is False
+        assert not appstruct["shared"]
 
     def test_it_renames_group_to_groupid(self, pyramid_request):
         schema = CreateAnnotationSchema(pyramid_request)
@@ -518,7 +518,7 @@ class TestUpdateAnnotationSchema:
             {"permissions": {"read": ["acct:harriet@example.com"]}}
         )
 
-        assert appstruct["shared"] is False
+        assert not appstruct["shared"]
         assert "permissions" not in appstruct
         assert "permissions" not in appstruct.get("extras", {})
 
@@ -650,7 +650,7 @@ class TestSearchParamsSchema:
 
         params = validate_query_params(schema, NestedMultiDict())
 
-        assert params["offset"] == 0
+        assert not params["offset"]
 
     def test_it_defaults_sort(self, schema):
 
@@ -723,7 +723,7 @@ class TestSearchParamsSchema:
 
         params = validate_query_params(schema, input_params)
 
-        assert params["offset"] == 0
+        assert not params["offset"]
         assert params["search_after"] == "2009-02-16"
 
     @pytest.mark.parametrize(

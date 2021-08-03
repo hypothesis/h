@@ -164,7 +164,7 @@ class TestUserIdentity:
 
         db_session.delete(user)
 
-        assert db_session.query(models.UserIdentity).count() == 0
+        assert not db_session.query(models.UserIdentity).count()
 
     def test_repr(self):
         user_identity = models.UserIdentity(

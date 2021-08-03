@@ -16,7 +16,7 @@ class TestReindexCommand:
     def test_calls_reindex(self, cli, cliconfig, pyramid_request, reindex):
         result = cli.invoke(search.reindex, [], obj=cliconfig)
 
-        assert result.exit_code == 0
+        assert not result.exit_code
         reindex.assert_called_once_with(
             pyramid_request.db, pyramid_request.es, pyramid_request
         )
@@ -33,7 +33,7 @@ class TestUpdateSettingsCommand:
     ):
         result = cli.invoke(search.update_settings, [], obj=cliconfig)
 
-        assert result.exit_code == 0
+        assert not result.exit_code
         update_index_settings.assert_called_once_with(pyramid_request.es)
 
     def test_handles_runtimeerror(self, cli, cliconfig, update_index_settings):

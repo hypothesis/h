@@ -5,7 +5,7 @@ from h.services import flag_count
 
 class TestFlagCountService:
     def test_flag_count_returns_zero_for_unflagged_annotation(self, svc, unflagged):
-        assert svc.flag_count(unflagged) == 0
+        assert not svc.flag_count(unflagged)
 
     def test_flag_count_returns_flag_count_for_flagged_annotation(self, svc, flagged):
         assert svc.flag_count(flagged) == 2
@@ -23,7 +23,7 @@ class TestFlagCountService:
     def test_flag_counts_returns_zero_for_unflagged_annotation(self, svc, unflagged):
         flag_counts = svc.flag_counts([unflagged.id])
 
-        assert flag_counts[unflagged.id] == 0
+        assert not flag_counts[unflagged.id]
 
     def test_flag_counts_returns_flag_count_for_flagged_annotation(self, svc, flagged):
         flag_counts = svc.flag_counts([flagged.id])

@@ -108,7 +108,7 @@ class TestShellCommand:
 
         result = cli.invoke(shell.shell, ["--type", "bpython"], obj=config)
 
-        assert result.exit_code != 0
+        assert result.exit_code
 
     @pytest.fixture
     def code(self, monkeypatch):

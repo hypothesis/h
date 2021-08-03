@@ -252,7 +252,7 @@ class TestForgotPasswordController:
 
         controller.post()
 
-        assert activation_model.call_count == 0
+        assert not activation_model.call_count
 
     def test_post_generates_mail(
         self,
@@ -334,7 +334,7 @@ class TestResetController:
         result = controller.get()
 
         assert result["form"] == "valid form"
-        assert result["has_code"] is False
+        assert not result["has_code"]
 
     def test_get_with_prefilled_code_returns_rendered_form(
         self, pyramid_request, ResetCode, form_validating_to
@@ -771,7 +771,7 @@ class TestNotificationsController:
 
         controller.post()
 
-        assert subs[0].active is False
+        assert not subs[0].active
         assert subs[1].active is True
 
     def test_post_with_valid_data_redirects(

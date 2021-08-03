@@ -19,7 +19,7 @@ class TestInitCommand:
         db.init.assert_called_once_with(
             db_engine, should_create=True, authority="foobar.org"
         )
-        assert result.exit_code == 0
+        assert not result.exit_code
 
     def test_skips_database_init_if_alembic_managed(
         self, request, cli, cliconfig, db, db_engine
@@ -34,7 +34,7 @@ class TestInitCommand:
         result = cli.invoke(init_cli.init, obj=cliconfig)
 
         assert not db.init.called
-        assert result.exit_code == 0
+        assert not result.exit_code
 
     def test_stamps_alembic_version(
         self,
@@ -54,7 +54,7 @@ class TestInitCommand:
 
         Config.assert_called_once_with("conf/alembic.ini")
         alembic_stamp.assert_called_once_with(Config.return_value, "head")
-        assert result.exit_code == 0
+        assert not result.exit_code
 
     def test_initialises_search(self, cli, cliconfig, search, pyramid_settings):
         pyramid_settings["es.check_icu_plugin"] = False
@@ -63,7 +63,7 @@ class TestInitCommand:
 
         search.get_client.assert_called_once_with(pyramid_settings)
         search.init.assert_any_call(es_client, pyramid_settings["es.check_icu_plugin"])
-        assert result.exit_code == 0
+        assert not result.exit_code
 
 
 @pytest.fixture

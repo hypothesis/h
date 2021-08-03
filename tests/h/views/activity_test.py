@@ -340,7 +340,7 @@ class TestGroupSearchController:
     def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
         self, controller, factories, test_group, test_user, pyramid_request
     ):
-        assert controller.search()["more_info"] is False
+        assert not controller.search()["more_info"]
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     def test_search_returns_name_in_opts(self, controller, test_group, pyramid_request):
@@ -945,7 +945,7 @@ class TestUserSearchController:
     def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
         self, controller
     ):
-        assert controller.search()["more_info"] is False
+        assert not controller.search()["more_info"]
 
     def test_search_passes_the_username_to_the_template_if_the_user_has_no_display_name(
         self, controller, user

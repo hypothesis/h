@@ -24,7 +24,7 @@ def test_reply_is_reply():
 def test_non_reply_is_not_reply():
     ann = Annotation()
 
-    assert ann.is_reply is False
+    assert not ann.is_reply
 
 
 def test_parent_id_of_annotation():

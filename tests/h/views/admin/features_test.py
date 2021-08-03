@@ -62,7 +62,8 @@ def test_features_save_sets_attributes_when_checkboxes_off(Feature, pyramid_requ
 
     features_save(pyramid_request)
 
-    assert feature.everyone is feature.staff is False
+    assert not feature.everyone
+    assert not feature.staff
 
 
 @features_save_fixtures
@@ -73,7 +74,7 @@ def test_features_save_ignores_unknown_fields(Feature, pyramid_request):
 
     features_save(pyramid_request)
 
-    assert feature.admins is False
+    assert not feature.admins
 
 
 def test_cohorts_index_without_cohorts(pyramid_request):
@@ -103,7 +104,7 @@ def test_cohorts_add_creates_cohort_with_no_members(pyramid_request):
 
     cohort = result[0]
     assert cohort.name == "cohort"
-    assert len(cohort.members) == 0
+    assert not cohort.members
 
 
 def test_cohorts_edit_add_user(factories, pyramid_request):
@@ -152,7 +153,7 @@ def test_cohorts_edit_remove_user(factories, pyramid_request):
     pyramid_request.params["remove"] = user.userid
     cohorts_edit_remove(pyramid_request)
 
-    assert len(cohort.members) == 0
+    assert not cohort.members
 
 
 def test_cohorts_edit_with_no_users(pyramid_request):
@@ -164,7 +165,7 @@ def test_cohorts_edit_with_no_users(pyramid_request):
     result = cohorts_edit({}, pyramid_request)
 
     assert result["cohort"].id == cohort.id
-    assert len(result["cohort"].members) == 0
+    assert not result["cohort"].members
 
 
 def test_cohorts_edit_with_users(factories, pyramid_request):
@@ -223,7 +224,7 @@ def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
         pyramid_request.db.query(models.FeatureCohort).filter_by(name="cohort").first()
     )
 
-    assert len(feat.cohorts) == 0
+    assert not feat.cohorts
     assert cohort not in feat.cohorts
 
 

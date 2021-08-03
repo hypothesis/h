@@ -63,7 +63,7 @@ class TestRenameUserService:
             .filter(models.AuthTicket.id.in_(ids))
             .count()
         )
-        assert count == 0
+        assert not count
 
     def test_rename_updates_tokens(self, service, user, db_session, factories):
         token = models.Token(userid=user.userid, value="foo")
