@@ -12,6 +12,5 @@ def annotation_json_presentation_service_factory(_context, request):
         links_svc=request.find_service(name="links"),
         flag_svc=request.find_service(name="flag"),
         flag_count_svc=request.find_service(name="flag_count"),
-        moderation_svc=request.find_service(name="annotation_moderation"),
         user_svc=request.find_service(name="user"),
     )

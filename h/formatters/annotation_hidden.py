@@ -18,36 +18,25 @@ class AnnotationHiddenFormatter:
     the `hidden` flag set to `True`, and the annotation's content is redacted.
     """
 
-    def __init__(self, moderation_svc, has_permission, user):
-        self._moderation_svc = moderation_svc
+    def __init__(self, has_permission, user):
         self._has_permission = has_permission
         self._user = user
 
-        # Local cache of hidden flags. We don't need to care about detached
-        # instances because we only store the annotation id and a boolean flag.
-        self._cache = {}
-
     def preload(self, annotation_ids):
-        hidden_ids = self._moderation_svc.all_hidden(annotation_ids)
+        """Preload annotation ids."""
 
-        hidden = {
-            annotation_id: (annotation_id in hidden_ids)
-            for annotation_id in annotation_ids
-        }
-        self._cache.update(hidden)
-        return hidden
+        # We don't do anything here but must meet the expected interface
 
     def format(self, annotation):
-        if self._current_user_is_moderator(annotation):
-            return {"hidden": self._is_hidden(annotation)}
-
-        if self._current_user_is_author(annotation):
+        if not annotation.is_hidden or self._current_user_is_author(annotation):
             return {"hidden": False}
 
-        if self._is_hidden(annotation):
-            return {"hidden": True, "text": "", "tags": []}
+        result = {"hidden": True}
 
-        return {"hidden": False}
+        if not self._current_user_is_moderator(annotation):
+            result.update({"text": "", "tags": []})
+
+        return result
 
     def _current_user_is_moderator(self, annotation):
         return self._has_permission(
@@ -56,9 +45,3 @@ class AnnotationHiddenFormatter:
 
     def _current_user_is_author(self, annotation):
         return self._user and self._user.userid == annotation.userid
-
-    def _is_hidden(self, annotation):
-        if annotation.id not in self._cache:
-            self._cache[annotation.id] = annotation.is_hidden
-
-        return self._cache[annotation.id]
