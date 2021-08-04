@@ -1,104 +1,85 @@
 import datetime
-from unittest import mock
+
+import pytest
 
 from h.presenters.annotation_base import AnnotationBasePresenter, utc_iso8601
 
 
 class TestAnnotationBasePresenter:
-    def test_constructor_args(self):
-        annotation = mock.Mock()
-        context = mock.Mock(annotation=annotation)
+    def test_constructor_args(self, annotation):
+        presenter = AnnotationBasePresenter(annotation)
 
-        presenter = AnnotationBasePresenter(context)
-
-        assert presenter.annotation_context == context
         assert presenter.annotation == annotation
 
-    def test_created_returns_none_if_missing(self):
-        annotation = mock.Mock(created=None)
-        context = mock.Mock(annotation=annotation)
+    @pytest.mark.parametrize(
+        "created,expected",
+        (
+            (None, None),
+            (
+                datetime.datetime(2012, 3, 14, 23, 34, 47, 12),
+                "2012-03-14T23:34:47.000012+00:00",
+            ),
+        ),
+    )
+    def test_created(self, annotation, created, expected):
+        annotation.created = created
 
-        created = AnnotationBasePresenter(context).created
+        created = AnnotationBasePresenter(annotation).created
 
-        assert created is None
+        assert created == expected
 
-    def test_created_uses_iso_format(self):
-        when = datetime.datetime(2012, 3, 14, 23, 34, 47, 12)
-        annotation = mock.Mock(created=when)
-        context = mock.Mock(annotation=annotation)
+    @pytest.mark.parametrize(
+        "updated,expected",
+        (
+            (None, None),
+            (
+                datetime.datetime(1983, 8, 31, 7, 18, 20, 98763),
+                "1983-08-31T07:18:20.098763+00:00",
+            ),
+        ),
+    )
+    def test_updated_returns_none_if_missing(self, annotation, updated, expected):
+        annotation.updated = updated
 
-        created = AnnotationBasePresenter(context).created
+        updated = AnnotationBasePresenter(annotation).updated
 
-        assert created == "2012-03-14T23:34:47.000012+00:00"
+        assert updated == expected
 
-    def test_updated_returns_none_if_missing(self):
-        annotation = mock.Mock(updated=None)
-        context = mock.Mock(annotation=annotation)
+    @pytest.mark.parametrize("text,expected", ((None, ""), ("text", "text")))
+    def test_text(self, annotation, text, expected):
+        annotation.text = text
 
-        updated = AnnotationBasePresenter(context).updated
+        presenter = AnnotationBasePresenter(annotation)
 
-        assert updated is None
+        assert presenter.text == expected
 
-    def test_updated_uses_iso_format(self):
-        when = datetime.datetime(1983, 8, 31, 7, 18, 20, 98763)
-        annotation = mock.Mock(updated=when)
-        context = mock.Mock(annotation=annotation)
+    @pytest.mark.parametrize(
+        "tags,expected",
+        ((None, []), (["interesting", "magic"], ["interesting", "magic"])),
+    )
+    def test_tags(self, annotation, tags, expected):
+        annotation.tags = tags
+        presenter = AnnotationBasePresenter(annotation)
 
-        updated = AnnotationBasePresenter(context).updated
+        assert presenter.tags == expected
 
-        assert updated == "1983-08-31T07:18:20.098763+00:00"
+    def test_target(self, annotation):
+        target = AnnotationBasePresenter(annotation).target
 
-    def test_text(self):
-        annotation = mock.Mock(text="It is magical!")
-        context = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(context)
-
-        assert presenter.text == "It is magical!"
-
-    def test_text_missing(self):
-        annotation = mock.Mock(text=None)
-        context = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(context)
-
-        assert not presenter.text
-
-    def test_tags(self):
-        annotation = mock.Mock(tags=["interesting", "magic"])
-        context = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(context)
-
-        assert ["interesting", "magic"] == presenter.tags
-
-    def test_tags_missing(self):
-        annotation = mock.Mock(tags=None)
-        context = mock.Mock(annotation=annotation)
-        presenter = AnnotationBasePresenter(context)
-
-        assert [] == presenter.tags
-
-    def test_target(self):
-        annotation = mock.Mock(
-            target_uri="http://example.com",
-            target_selectors={"PositionSelector": {"start": 0, "end": 12}},
-        )
-        context = mock.Mock(annotation=annotation)
-
-        expected = [
-            {
-                "source": "http://example.com",
-                "selector": {"PositionSelector": {"start": 0, "end": 12}},
-            }
+        assert target == [
+            {"source": annotation.target_uri, "selector": annotation.target_selectors}
         ]
-        actual = AnnotationBasePresenter(context).target
-        assert expected == actual
 
-    def test_target_missing_selectors(self):
-        annotation = mock.Mock(target_uri="http://example.com", target_selectors=None)
-        context = mock.Mock(annotation=annotation)
+    def test_target_missing_selectors(self, annotation):
+        annotation.target_selectors = None
 
-        expected = [{"source": "http://example.com"}]
-        actual = AnnotationBasePresenter(context).target
-        assert expected == actual
+        target = AnnotationBasePresenter(annotation).target
+
+        assert target == [{"source": annotation.target_uri}]
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation.build()
 
 
 class Berlin(datetime.tzinfo):

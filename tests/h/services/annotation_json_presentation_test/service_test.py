@@ -29,21 +29,16 @@ class TestAnnotationJSONPresentationService:
             formatters.AnnotationUserInfoFormatter.return_value,
         ]
 
-    def test_present(self, svc, AnnotationJSONPresenter, AnnotationContext):
-        result = svc.present(AnnotationContext.return_value)
+    def test_present(self, svc, annotation, AnnotationJSONPresenter):
+        result = svc.present(annotation)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            AnnotationContext.return_value,
-            links_service=svc.links_svc,
-            formatters=svc.formatters,
+            annotation, links_service=svc.links_svc, formatters=svc.formatters
         )
 
         assert result == AnnotationJSONPresenter.return_value.asdict.return_value
 
-    def test_present_all(
-        self, svc, factories, AnnotationJSONPresenter, AnnotationContext
-    ):
-        annotation = factories.Annotation()
+    def test_present_all(self, svc, factories, annotation, AnnotationJSONPresenter):
         annotation_ids = [annotation.id]
 
         result = svc.present_all(annotation_ids)
@@ -51,11 +46,8 @@ class TestAnnotationJSONPresentationService:
         for formatter in svc.formatters:
             formatter.preload.assert_called_once_with(annotation_ids)
 
-        AnnotationContext.assert_called_once_with(annotation)
         AnnotationJSONPresenter.assert_called_once_with(
-            AnnotationContext.return_value,
-            links_service=svc.links_svc,
-            formatters=svc.formatters,
+            annotation, links_service=svc.links_svc, formatters=svc.formatters
         )
         assert result == [
             AnnotationJSONPresenter.return_value.asdict.return_value,
@@ -75,10 +67,8 @@ class TestAnnotationJSONPresentationService:
         )
 
     @pytest.fixture
-    def AnnotationContext(self, patch):
-        return patch(
-            "h.services.annotation_json_presentation.service.AnnotationContext"
-        )
+    def annotation(self, factories):
+        return factories.Annotation()
 
     @pytest.fixture(autouse=True)
     def formatters(self, patch):

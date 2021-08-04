@@ -7,7 +7,6 @@ from pyramid import security
 
 from h.formatters import AnnotationFlagFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
-from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONPresenter:
@@ -64,23 +63,21 @@ class TestAnnotationJSONPresenter:
         # And we aren't mutated
         assert annotation.extra == {"id": "DIFFERENT"}
 
-    def test_asdict_merges_formatters(
-        self, annotation, context, links_service, get_formatter
-    ):
+    def test_asdict_merges_formatters(self, annotation, links_service, get_formatter):
         formatters = [
             get_formatter({"flagged": "nope"}),
             get_formatter({"nipsa": "maybe"}),
         ]
 
         presented = AnnotationJSONPresenter(
-            context, links_service=links_service, formatters=formatters
+            annotation, links_service=links_service, formatters=formatters
         ).asdict()
 
         assert presented["flagged"] == "nope"
         assert presented["nipsa"] == "maybe"
 
         for formatter in formatters:
-            formatter.format.assert_called_once_with(context)
+            formatter.format.assert_called_once_with(annotation)
 
     @pytest.mark.parametrize(
         "shared,readable_by,permission_template",
@@ -108,16 +105,12 @@ class TestAnnotationJSONPresenter:
         assert presented["permissions"]["read"] == [permission]
 
     @pytest.fixture
-    def presenter(self, context, links_service):
-        return AnnotationJSONPresenter(context, links_service=links_service)
+    def presenter(self, annotation, links_service):
+        return AnnotationJSONPresenter(annotation, links_service=links_service)
 
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation(groupid="NOT WORLD")
-
-    @pytest.fixture
-    def context(self, annotation):
-        return AnnotationContext(annotation)
 
     @pytest.fixture
     def get_formatter(self):
