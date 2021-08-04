@@ -221,5 +221,11 @@ class Annotation(Base):
             return None
         return split_user(self.userid)["domain"]
 
+    @property
+    def is_hidden(self):
+        """Check if this annotation id is hidden."""
+
+        return self.moderation is not None
+
     def __repr__(self):
         return "<Annotation %s>" % self.id
