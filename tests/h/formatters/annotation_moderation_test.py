@@ -1,81 +1,84 @@
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 
 from h.formatters.annotation_moderation import AnnotationModerationFormatter
 from h.security.permissions import Permission
-from h.services.flag_count import FlagCountService
 
 
 class TestAnnotationModerationFormatter:
-    def test_preload_sets_flag_counts(self, formatter, flagged, unflagged):
-        preload = formatter.preload([flagged.id, unflagged.id])
+    def test_preload_sets_flag_counts(self, formatter, flag_service):
+        flag_service.flag_counts.return_value = {"flagged": 2, "unflagged": 0}
 
-        assert preload == {flagged.id: 2, unflagged.id: 0}
+        preload = formatter.preload(sentinel.ids)
 
-    def test_preload_skipped_without_user(self, flag_count_svc):
+        flag_service.flag_counts.assert_called_once_with(sentinel.ids)
+
+        assert preload == flag_service.flag_counts.return_value
+        assert formatter._cache == flag_service.flag_counts.return_value
+
+    def test_preload_skipped_without_user(self, flag_service):
         formatter = AnnotationModerationFormatter(
-            flag_count_svc, user=None, has_permission=None
+            flag_service, user=None, has_permission=sentinel.has_permission
         )
-        assert formatter.preload(["annotation-id"]) is None
 
-    def test_preload_skipped_without_ids(self, formatter):
-        assert formatter.preload([]) is None
+        formatter.preload(sentinel.ids)
+
+        flag_service.flag_counts.assert_not_called()
+
+    def test_preload_skipped_without_ids(self, formatter, flag_service):
+        formatter.preload([])
+
+        flag_service.flag_counts.assert_not_called()
 
     def test_format_returns_empty_for_non_moderator(
-        self, formatter, has_permission, flagged, AnnotationContext
+        self, formatter, has_permission, annotation, AnnotationContext
     ):
         has_permission.return_value = False
 
-        assert formatter.format(flagged) == {}
+        assert formatter.format(annotation) == {}
 
-        AnnotationContext.assert_called_once_with(flagged)
+        AnnotationContext.assert_called_once_with(annotation)
         has_permission.assert_called_once_with(
             Permission.Annotation.MODERATE, AnnotationContext.return_value
         )
 
-    def test_format_returns_flag_count_for_moderator(self, formatter, flagged):
-        output = formatter.format(flagged)
+    def test_format_returns_flag_count_for_moderator(
+        self, formatter, annotation, flag_service, has_permission
+    ):
+        has_permission.return_value = True
 
-        assert output == {"moderation": {"flagCount": 2}}
+        output = formatter.format(annotation)
 
-    def test_format_returns_zero_flag_count(self, formatter, unflagged):
-        output = formatter.format(unflagged)
+        flag_service.flag_count.assert_called_once_with(annotation)
+        assert output == {
+            "moderation": {"flagCount": flag_service.flag_count.return_value}
+        }
 
-        assert output == {"moderation": {"flagCount": 0}}
+    def test_format_uses_the_cache_from_preloading(
+        self, formatter, annotation, flag_service
+    ):
+        flag_service.flag_counts.return_value = {annotation.id: 1}
+        formatter.preload([annotation.id])
 
-    def test_format_for_preloaded_annotation(self, formatter, flagged):
-        formatter.preload([flagged.id])
-        output = formatter.format(flagged)
-        assert output == {"moderation": {"flagCount": 2}}
+        output = formatter.format(annotation)
 
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
+        assert output == {"moderation": {"flagCount": 1}}
+        flag_service.flag_count.assert_not_called()
 
     @pytest.fixture
     def has_permission(self, pyramid_request):
         return create_autospec(pyramid_request.has_permission)
 
     @pytest.fixture
-    def flagged(self, factories):
-        annotation = factories.Annotation()
-        factories.Flag.create_batch(2, annotation=annotation)
-        return annotation
-
-    @pytest.fixture
-    def unflagged(self, factories):
+    def annotation(self, factories):
         return factories.Annotation()
 
     @pytest.fixture
-    def formatter(self, flag_count_svc, user, has_permission):
-        """Return a formatter with the most common configuration."""
-        return AnnotationModerationFormatter(flag_count_svc, user, has_permission)
-
-    @pytest.fixture
-    def flag_count_svc(self, db_session):
-        # TODO! - This should really be mocked - We are likely re-testing code
-        return FlagCountService(db_session)
+    def formatter(self, flag_service, factories, has_permission):
+        return AnnotationModerationFormatter(
+            flag_service, factories.User(), has_permission
+        )
 
     @pytest.fixture
     def AnnotationContext(self, patch):
