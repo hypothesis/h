@@ -135,6 +135,10 @@ sure: checkformatting lint test coverage functests
 docker:
 	@git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
+.PHONY: docker-ws
+docker-ws:
+	docker build -t hypothesis/hypothesis-ws:$(DOCKER_TAG) h/streamer 
+
 .PHONY: run-docker
 run-docker:
 	# To use the local client with the Docker container, you must run the service,
@@ -157,6 +161,23 @@ run-docker:
 		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \
 		hypothesis/hypothesis:$(DOCKER_TAG)
+
+.PHONY: run-docker-ws
+run-docker-ws:
+	@docker run \
+		--net h_default \
+		-e "APP_URL=http://localhost:5000" \
+		-e "AUTHORITY=localhost" \
+		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
+		-e "CLIENT_OAUTH_ID" \
+		-e "CLIENT_URL=http://localhost:3001/hypothesis" \
+		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
+		-e "ELASTICSEARCH_URL=http://elasticsearch:9200" \
+		-e "NEW_RELIC_APP_NAME=h (dev)" \
+		-e "NEW_RELIC_LICENSE_KEY" \
+		-e "SECRET_KEY=notasecret" \
+		-p 5000:5000 \
+		hypothesis/hypothesis-ws:$(DOCKER_TAG)
 
 DOCKER_TAG = dev
 
