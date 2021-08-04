@@ -16,7 +16,6 @@ class TestAnnotationJSONPresentationServiceFactory:
         flag_service,
         flag_count_service,
         links_service,
-        moderation_service,
         user_service,
     ):
         service = annotation_json_presentation_service_factory(
@@ -32,7 +31,6 @@ class TestAnnotationJSONPresentationServiceFactory:
             links_svc=links_service,
             flag_svc=flag_service,
             flag_count_svc=flag_count_service,
-            moderation_svc=moderation_service,
             user_svc=user_service,
         )
 

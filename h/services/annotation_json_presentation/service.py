@@ -13,7 +13,6 @@ class AnnotationJSONPresentationService:
         links_svc,
         flag_svc,
         flag_count_svc,
-        moderation_svc,
         user_svc,
         has_permission,
     ):
@@ -22,7 +21,7 @@ class AnnotationJSONPresentationService:
 
         self.formatters = [
             formatters.AnnotationFlagFormatter(flag_svc, user),
-            formatters.AnnotationHiddenFormatter(moderation_svc, has_permission, user),
+            formatters.AnnotationHiddenFormatter(has_permission, user),
             formatters.AnnotationModerationFormatter(
                 flag_count_svc, user, has_permission
             ),
@@ -35,11 +34,16 @@ class AnnotationJSONPresentationService:
         ).asdict()
 
     def present_all(self, annotation_ids):
-        def eager_load_documents(query):
-            return query.options(subqueryload(Annotation.document))
+        def eager_load_related_items(query):
+            return query.options(
+                # Ensure that accessing `annotation.document` or `.moderation`
+                # doesn't trigger any more queries by pre-loading these
+                subqueryload(Annotation.document),
+                subqueryload(Annotation.moderation),
+            )
 
         annotations = storage.fetch_ordered_annotations(
-            self.session, annotation_ids, query_processor=eager_load_documents
+            self.session, annotation_ids, query_processor=eager_load_related_items
         )
 
         # preload formatters, so they can optimize database access

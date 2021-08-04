@@ -13,7 +13,7 @@ class TestAnnotationJSONPresentationService:
             sentinel.flag_svc, sentinel.user
         )
         formatters.AnnotationHiddenFormatter.assert_called_once_with(
-            sentinel.moderation_svc, sentinel.has_permission, sentinel.user
+            sentinel.has_permission, sentinel.user
         )
         formatters.AnnotationModerationFormatter.assert_called_once_with(
             sentinel.flag_count_svc, sentinel.user, sentinel.has_permission
@@ -61,7 +61,6 @@ class TestAnnotationJSONPresentationService:
             links_svc=sentinel.links_svc,
             flag_svc=sentinel.flag_svc,
             flag_count_svc=sentinel.flag_count_svc,
-            moderation_svc=sentinel.moderation_svc,
             user_svc=sentinel.user_svc,
             has_permission=sentinel.has_permission,
         )
