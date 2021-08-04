@@ -1,73 +1,25 @@
-from h import models
+from h.models import AnnotationModeration
 
 
 class AnnotationModerationService:
     def __init__(self, session):
-        self.session = session
-
-    @staticmethod
-    def hidden(annotation):
-        """
-        Check if an annotation id is hidden.
-
-        :param annotation: The annotation to check.
-        :type annotation: h.models.Annotation
-
-        :returns: true/false boolean
-        :rtype: bool
-        """
-        return annotation.moderation is not None
+        self._session = session
 
     def all_hidden(self, annotation_ids):
         """
         Check which of the given annotation ids is hidden.
 
         :param annotation_ids: The ids of the annotations to check.
-        :type annotation_ids: list of unicode
-
         :returns: The subset of the annotation ids that are hidden.
-        :rtype: set of unicode
         """
         if not annotation_ids:
             return set()
 
-        query = self.session.query(models.AnnotationModeration.annotation_id).filter(
-            models.AnnotationModeration.annotation_id.in_(annotation_ids)
+        query = self._session.query(AnnotationModeration.annotation_id).filter(
+            AnnotationModeration.annotation_id.in_(annotation_ids)
         )
 
         return {m.annotation_id for m in query}
-
-    def hide(self, annotation):
-        """
-        Hide an annotation from other users.
-
-        This hides the given annotation from anybody except its author and the
-        group moderators.
-
-        In case the given annotation already has a moderation flag, this method
-        is a no-op.
-
-        :param annotation: The annotation to hide from others.
-        :type annotation: h.models.Annotation
-        """
-
-        if self.hidden(annotation):
-            return
-
-        annotation.moderation = models.AnnotationModeration()
-
-    @staticmethod
-    def unhide(annotation):
-        """
-        Show a hidden annotation again to other users.
-
-        In case the given annotation is not moderated, this method is a no-op.
-
-        :param annotation: The annotation to unhide.
-        :type annotation: h.models.Annotation
-        """
-
-        annotation.moderation = None
 
 
 def annotation_moderation_service_factory(_context, request):
