@@ -145,9 +145,5 @@ class TestAnnotationJSONLDPresenter:
         return factories.Annotation()
 
     @pytest.fixture
-    def context(self, annotation, links_service):
-        return AnnotationContext(annotation, links_service)
-
-    @pytest.fixture
-    def presenter(self, context, links_service):
-        return AnnotationJSONLDPresenter(context, links_service)
+    def presenter(self, annotation, links_service):
+        return AnnotationJSONLDPresenter(AnnotationContext(annotation), links_service)

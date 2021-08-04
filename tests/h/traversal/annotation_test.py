@@ -50,24 +50,18 @@ class TestAnnotationRoot:
 
 
 class TestAnnotationContext:
-    def test__acl__(self, context, ACL):
-        context.allow_read_on_delete = sentinel.allow_read_on_delete
+    def test__acl__(self, factories, ACL):
+        annotation = factories.Annotation()
+        context = AnnotationContext(
+            annotation, allow_read_on_delete=sentinel.allow_read_on_delete
+        )
 
         acl = context.__acl__()
 
         ACL.for_annotation.assert_called_once_with(
-            context.annotation,
-            allow_read_on_delete=sentinel.allow_read_on_delete,
+            annotation, sentinel.allow_read_on_delete
         )
         assert acl == ACL.for_annotation.return_value
-
-    @pytest.fixture
-    def context(self, annotation, links_service):
-        return AnnotationContext(annotation, links_service)
-
-    @pytest.fixture
-    def annotation(self, factories):
-        return factories.Annotation()
 
 
 @pytest.fixture(autouse=True)
