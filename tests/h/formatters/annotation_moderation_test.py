@@ -1,4 +1,3 @@
-from collections import namedtuple
 from unittest.mock import create_autospec
 
 import pytest
@@ -6,8 +5,6 @@ import pytest
 from h.formatters.annotation_moderation import AnnotationModerationFormatter
 from h.security.permissions import Permission
 from h.services.flag_count import FlagCountService
-
-FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
 
 
 class TestAnnotationModerationFormatter:
@@ -26,34 +23,30 @@ class TestAnnotationModerationFormatter:
         assert formatter.preload([]) is None
 
     def test_format_returns_empty_for_non_moderator(
-        self, formatter, has_permission, flagged, group
+        self, formatter, has_permission, flagged, AnnotationContext
     ):
         has_permission.return_value = False
 
-        annotation_context = FakeAnnotationContext(flagged, group)
+        assert formatter.format(flagged) == {}
 
-        assert formatter.format(annotation_context) == {}
+        AnnotationContext.assert_called_once_with(flagged)
         has_permission.assert_called_once_with(
-            Permission.Annotation.MODERATE, annotation_context
+            Permission.Annotation.MODERATE, AnnotationContext.return_value
         )
 
-    def test_format_returns_flag_count_for_moderator(self, formatter, group, flagged):
-        annotation_context = FakeAnnotationContext(flagged, group)
+    def test_format_returns_flag_count_for_moderator(self, formatter, flagged):
+        output = formatter.format(flagged)
 
-        output = formatter.format(annotation_context)
         assert output == {"moderation": {"flagCount": 2}}
 
-    def test_format_returns_zero_flag_count(self, formatter, group, unflagged):
-        annotation_context = FakeAnnotationContext(unflagged, group)
+    def test_format_returns_zero_flag_count(self, formatter, unflagged):
+        output = formatter.format(unflagged)
 
-        output = formatter.format(annotation_context)
         assert output == {"moderation": {"flagCount": 0}}
 
-    def test_format_for_preloaded_annotation(self, formatter, group, flagged):
-        annotation_context = FakeAnnotationContext(flagged, group)
-
+    def test_format_for_preloaded_annotation(self, formatter, flagged):
         formatter.preload([flagged.id])
-        output = formatter.format(annotation_context)
+        output = formatter.format(flagged)
         assert output == {"moderation": {"flagCount": 2}}
 
     @pytest.fixture
@@ -61,15 +54,8 @@ class TestAnnotationModerationFormatter:
         return factories.User()
 
     @pytest.fixture
-    def group(self, factories):
-        return factories.Group()
-
-    @pytest.fixture
-    def has_permission(self):
-        def has_permission(permission, context):
-            """Return if we can do something in a context."""
-
-        return create_autospec(has_permission)
+    def has_permission(self, pyramid_request):
+        return create_autospec(pyramid_request.has_permission)
 
     @pytest.fixture
     def flagged(self, factories):
@@ -83,9 +69,13 @@ class TestAnnotationModerationFormatter:
 
     @pytest.fixture
     def formatter(self, flag_count_svc, user, has_permission):
-        """A formatter with the most common configuration."""
         return AnnotationModerationFormatter(flag_count_svc, user, has_permission)
 
     @pytest.fixture
     def flag_count_svc(self, db_session):
+        # TODO! - This should really be mocked - We are likely re-testing code
         return FlagCountService(db_session)
+
+    @pytest.fixture
+    def AnnotationContext(self, patch):
+        return patch("h.formatters.annotation_moderation.AnnotationContext")

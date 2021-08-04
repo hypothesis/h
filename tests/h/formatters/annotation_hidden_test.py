@@ -1,4 +1,3 @@
-from collections import namedtuple
 from unittest.mock import create_autospec
 
 import pytest
@@ -6,8 +5,6 @@ import pytest
 from h.formatters.annotation_hidden import AnnotationHiddenFormatter
 from h.security.permissions import Permission
 from h.services.annotation_moderation import AnnotationModerationService
-
-FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
 
 
 class TestAnnotationHiddenFormatter:
@@ -37,15 +34,13 @@ class TestAnnotationHiddenFormatter:
 class TestAnonymousUserHiding:
     """An anonymous user will see redacted annotations when they're hidden."""
 
-    def test_format_for_unhidden_annotation(self, formatter, annotation, group):
-        context = FakeAnnotationContext(annotation, group)
-        assert formatter.format(context) == {"hidden": False}
+    def test_format_for_unhidden_annotation(self, formatter, annotation):
+        assert formatter.format(annotation) == {"hidden": False}
 
-    def test_format_for_hidden_annotation(self, formatter, hidden_annotation, group):
-        context = FakeAnnotationContext(hidden_annotation, group)
+    def test_format_for_hidden_annotation(self, formatter, hidden_annotation):
 
         censored = {"hidden": True, "text": "", "tags": []}
-        assert formatter.format(context) == censored
+        assert formatter.format(hidden_annotation) == censored
 
     @pytest.fixture
     def current_user(self):
@@ -55,19 +50,15 @@ class TestAnonymousUserHiding:
 class TestNonAuthorHiding:
     """Regular users see redacted annotations, unless they are a moderator."""
 
-    def test_format_for_unhidden_annotation(self, formatter, annotation, group):
-        context = FakeAnnotationContext(annotation, group)
-        assert formatter.format(context) == {"hidden": False}
+    def test_format_for_unhidden_annotation(self, formatter, annotation):
+        assert formatter.format(annotation) == {"hidden": False}
 
-    def test_format_for_non_moderator(self, formatter, hidden_annotation, group):
-        context = FakeAnnotationContext(hidden_annotation, group)
-
-        censored = {"hidden": True, "text": "", "tags": []}
-        assert formatter.format(context) == censored
-
-    def test_format_for_moderator(self, formatter, hidden_annotation, moderated_group):
-        context = FakeAnnotationContext(hidden_annotation, moderated_group)
-        assert formatter.format(context) == {"hidden": True}
+    def test_format_for_non_moderator(self, formatter, hidden_annotation):
+        assert formatter.format(hidden_annotation) == {
+            "hidden": True,
+            "text": "",
+            "tags": [],
+        }
 
 
 class TestAuthorHiding:
@@ -76,22 +67,21 @@ class TestAuthorHiding:
     The one exception is when they are also a moderator for the group.
     """
 
-    def test_format_for_public_annotation(self, formatter, annotation, group):
-        context = FakeAnnotationContext(annotation, group)
-        assert formatter.format(context) == {"hidden": False}
+    def test_format_for_public_annotation(self, formatter, annotation):
+        assert formatter.format(annotation) == {"hidden": False}
 
-    def test_format_for_non_moderator(self, formatter, hidden_annotation, group):
-        context = FakeAnnotationContext(hidden_annotation, group)
-        assert formatter.format(context) == {"hidden": False}
+    def test_format_for_non_moderator(self, formatter, hidden_annotation):
+        assert formatter.format(hidden_annotation) == {"hidden": False}
 
     def test_format_for_moderator(
-        self, formatter, hidden_annotation, moderated_group, has_permission
+        self, formatter, hidden_annotation, has_permission, AnnotationContext
     ):
-        context = FakeAnnotationContext(hidden_annotation, moderated_group)
+        has_permission.return_value = True
 
-        assert formatter.format(context) == {"hidden": True}
+        assert formatter.format(hidden_annotation) == {"hidden": True}
+        AnnotationContext.assert_called_once_with(hidden_annotation)
         has_permission.assert_called_once_with(
-            Permission.Annotation.MODERATE, context=context
+            Permission.Annotation.MODERATE, context=AnnotationContext.return_value
         )
 
     @pytest.fixture
@@ -99,9 +89,8 @@ class TestAuthorHiding:
         return factories.Annotation(userid=current_user.userid)
 
     @pytest.fixture
-    def hidden_annotation(self, factories, annotation):
-        factories.AnnotationModeration(annotation=annotation)
-        return annotation
+    def AnnotationContext(self, patch):
+        return patch("h.formatters.annotation_hidden.AnnotationContext")
 
 
 @pytest.fixture
@@ -116,25 +105,13 @@ def formatter(moderation_svc, has_permission, current_user):
 
 @pytest.fixture
 def moderation_svc(db_session):
+    # TODO! - This should be mocked - We are probably testing other code here
     return AnnotationModerationService(db_session)
 
 
 @pytest.fixture
-def has_permission(pyramid_request, moderated_group):
-    def has_permission(permission, context):
-        return context.group == moderated_group
-
-    return create_autospec(pyramid_request.has_permission, side_effect=has_permission)
-
-
-@pytest.fixture
-def moderated_group(factories):
-    return factories.Group()
-
-
-@pytest.fixture
-def group(factories):
-    return factories.Group()
+def has_permission(pyramid_request):
+    return create_autospec(pyramid_request.has_permission, return_value=False)
 
 
 @pytest.fixture
@@ -143,6 +120,6 @@ def annotation(factories):
 
 
 @pytest.fixture
-def hidden_annotation(factories):
-    mod = factories.AnnotationModeration()
-    return mod.annotation
+def hidden_annotation(factories, annotation):
+    factories.AnnotationModeration(annotation=annotation)
+    return annotation
