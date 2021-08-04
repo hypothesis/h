@@ -54,12 +54,7 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route("admin.nipsa", "/admin/nipsa")
     config.add_route("admin.oauthclients", "/admin/oauthclients")
     config.add_route("admin.oauthclients_create", "/admin/oauthclients/new")
-    config.add_route(
-        "admin.oauthclients_edit",
-        "/admin/oauthclients/{id}",
-        factory="h.traversal.AuthClientRoot",
-        traverse="/{id}",
-    )
+    config.add_route("admin.oauthclients_edit", "/admin/oauthclients/{id}")
     config.add_route("admin.organizations", "/admin/organizations")
     config.add_route("admin.organizations_create", "/admin/organizations/new")
     config.add_route(

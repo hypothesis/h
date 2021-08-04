@@ -61,12 +61,7 @@ def test_includeme():
         call("admin.nipsa", "/admin/nipsa"),
         call("admin.oauthclients", "/admin/oauthclients"),
         call("admin.oauthclients_create", "/admin/oauthclients/new"),
-        call(
-            "admin.oauthclients_edit",
-            "/admin/oauthclients/{id}",
-            factory="h.traversal.AuthClientRoot",
-            traverse="/{id}",
-        ),
+        call("admin.oauthclients_edit", "/admin/oauthclients/{id}"),
         call("admin.organizations", "/admin/organizations"),
         call("admin.organizations_create", "/admin/organizations/new"),
         call(

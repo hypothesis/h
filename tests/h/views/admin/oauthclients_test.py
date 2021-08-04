@@ -1,6 +1,7 @@
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, create_autospec, sentinel
 
 import pytest
+from pyramid.httpexceptions import HTTPNotFound
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType
 from h.views.admin.oauthclients import (
@@ -138,92 +139,116 @@ class TestAuthClientCreateController:
 
 @pytest.mark.usefixtures("routes")
 class TestAuthClientEditController:
-    def test_read_renders_form(self, authclient, pyramid_request):
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+    def test_it_gets_the_client_from_the_id(self, pyramid_request, auth_client):
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
 
-        ctx = ctrl.read()
+        assert controller.client == auth_client
 
-        assert ctx["form"] == self._expected_form(authclient)
+    def test_it_returns_HTTPNotFound_if_the_client_is_missing(
+        self, pyramid_request, db_session, auth_client
+    ):
+        db_session.delete(auth_client)
 
-    def test_update_updates_authclient(self, authclient, form_post, pyramid_request):
-        form_post["client_id"] = authclient.id
-        form_post["client_secret"] = authclient.secret
+        with pytest.raises(HTTPNotFound):
+            AuthClientEditController(sentinel.context, pyramid_request)
+
+    def test_it_returns_HTTPNotFound_if_the_client_id_is_invalid(self, pyramid_request):
+        pyramid_request.matchdict["id"] = "scrambled_id"
+
+        with pytest.raises(HTTPNotFound):
+            AuthClientEditController(sentinel.context, pyramid_request)
+
+    def test_read(self, pyramid_request, auth_client):
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
+
+        response = controller.read()
+
+        assert response["form"] == self._expected_form(auth_client)
+
+    def test_update_updates_auth_client(self, auth_client, form_post, pyramid_request):
+        form_post["client_id"] = auth_client.id
+        form_post["client_secret"] = auth_client.secret
         pyramid_request.POST = form_post
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
 
-        ctx = ctrl.update()
+        response = controller.update()
 
-        assert authclient.name == "new-name"
-        assert ctx["form"] == self._expected_form(authclient)
+        assert auth_client.name == "new-name"
+        assert response["form"] == self._expected_form(auth_client)
 
     @pytest.mark.parametrize(
-        "grant_type, expected_response_type",
+        "grant_type,expected_type",
         [("authorization_code", ResponseType.code), ("jwt_bearer", None)],
     )
     def test_update_sets_response_type(
-        self, authclient, form_post, pyramid_request, grant_type, expected_response_type
+        self, auth_client, form_post, pyramid_request, grant_type, expected_type
     ):
         pyramid_request.POST = form_post
         pyramid_request.POST["grant_type"] = grant_type
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
 
-        ctrl.update()
+        controller.update()
 
-        assert authclient.response_type == expected_response_type
+        assert auth_client.response_type == expected_type
 
     def test_update_does_not_update_read_only_fields(
-        self, authclient, form_post, pyramid_request
+        self, auth_client, form_post, pyramid_request
     ):
         # Attempt to modify read-only ID and secret fields.
-        old_id = authclient.id
-        old_secret = authclient.secret
+        old_id = auth_client.id
+        old_secret = auth_client.secret
         form_post["client_id"] = "new-id"
         form_post["client_secret"] = "new-secret"
         pyramid_request.POST = form_post
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
 
-        ctx = ctrl.update()
+        response = controller.update()
 
-        assert authclient.id == old_id
-        assert authclient.secret == old_secret
-        assert ctx["form"] == self._expected_form(authclient)
+        assert auth_client.id == old_id
+        assert auth_client.secret == old_secret
+        assert response["form"] == self._expected_form(auth_client)
 
-    def test_delete_removes_authclient(self, authclient, pyramid_request):
+    def test_delete_removes_auth_client(self, auth_client, pyramid_request):
         pyramid_request.db.delete = create_autospec(
             pyramid_request.db.delete, return_value=None
         )
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
 
-        ctrl.delete()
+        controller.delete()
 
-        pyramid_request.db.delete.assert_called_with(authclient)
+        pyramid_request.db.delete.assert_called_with(auth_client)
 
-    def test_delete_redirects_to_index(self, authclient, matchers, pyramid_request):
+    def test_delete_redirects_to_index(self, auth_client, matchers, pyramid_request):
         pyramid_request.db.delete = create_autospec(
             pyramid_request.db.delete, return_value=None
         )
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        controller = AuthClientEditController(sentinel.context, pyramid_request)
 
-        response = ctrl.delete()
+        response = controller.delete()
 
         expected_location = pyramid_request.route_url("admin.oauthclients")
         assert response == matchers.Redirect302To(expected_location)
 
-    def _expected_form(self, authclient):
+    def _expected_form(self, auth_client):
         return {
-            "authority": authclient.authority,
-            "name": authclient.name,
-            "client_id": authclient.id,
-            "client_secret": authclient.secret,
-            "redirect_url": authclient.redirect_uri or "",
-            "trusted": authclient.trusted,
-            "grant_type": authclient.grant_type,
-            "response_type": authclient.response_type,
+            "authority": auth_client.authority,
+            "name": auth_client.name,
+            "client_id": auth_client.id,
+            "client_secret": auth_client.secret,
+            "redirect_url": auth_client.redirect_uri or "",
+            "trusted": auth_client.trusted,
+            "grant_type": auth_client.grant_type,
+            "response_type": auth_client.response_type,
         }
 
     @pytest.fixture
-    def authclient(self, pyramid_request):
-        client = AuthClient(
+    def pyramid_request(self, pyramid_request, auth_client):
+        pyramid_request.matchdict["id"] = auth_client.id
+        return pyramid_request
+
+    @pytest.fixture
+    def auth_client(self, factories):
+        return factories.AuthClient(
             name="testclient",
             authority="annotator.org",
             secret="not_a_secret",
@@ -231,10 +256,6 @@ class TestAuthClientEditController:
             grant_type=GrantType.authorization_code,
             response_type=ResponseType.code,
         )
-
-        pyramid_request.db.add(client)
-
-        return client
 
 
 @pytest.fixture

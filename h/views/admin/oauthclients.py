@@ -1,5 +1,6 @@
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.view import view_config, view_defaults
+from sqlalchemy.exc import NoResultFound, StatementError
 
 from h import form, i18n
 from h.models import AuthClient
@@ -96,9 +97,9 @@ class AuthClientCreateController:
     renderer="h:templates/admin/oauthclients_edit.html.jinja2",
 )
 class AuthClientEditController:
-    def __init__(self, client, request):
+    def __init__(self, _context, request):
         self.request = request
-        self.client = client
+        self.client = self._get_client(request)
         self.schema = EditAuthClientSchema().bind(request=request)
         self.form = request.create_form(self.schema, buttons=(_("Save"),))
 
@@ -132,6 +133,11 @@ class AuthClientEditController:
             on_failure=self._template_context,
         )
 
+    @view_config(request_method="POST", request_param="delete")
+    def delete(self):
+        self.request.db.delete(self.client)
+        return HTTPFound(location=self.request.route_url("admin.oauthclients"))
+
     def _update_appstruct(self):
         client = self.client
         self.form.set_appstruct(
@@ -150,7 +156,12 @@ class AuthClientEditController:
     def _template_context(self):
         return {"form": self.form.render()}
 
-    @view_config(request_method="POST", request_param="delete")
-    def delete(self):
-        self.request.db.delete(self.client)
-        return HTTPFound(location=self.request.route_url("admin.oauthclients"))
+    @classmethod
+    def _get_client(cls, request):
+        client_id = request.matchdict.get("id")
+
+        try:
+            return request.db.query(AuthClient).filter_by(id=client_id).one()
+        except (NoResultFound, StatementError) as err:
+            # Statement errors happen if the id is invalid
+            raise HTTPNotFound() from err
