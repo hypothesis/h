@@ -4,7 +4,6 @@ import pytest
 from h_matchers import Any
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
-from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONLDPresenter:
@@ -142,8 +141,8 @@ class TestAnnotationJSONLDPresenter:
 
     @pytest.fixture
     def annotation(self, factories):
-        return factories.Annotation()
+        return factories.Annotation.build()
 
     @pytest.fixture
     def presenter(self, annotation, links_service):
-        return AnnotationJSONLDPresenter(AnnotationContext(annotation), links_service)
+        return AnnotationJSONLDPresenter(annotation, links_service)
