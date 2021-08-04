@@ -127,16 +127,13 @@ class TestHandleAnnotationEvent:
         handle_annotation_event,
         fetch_annotation,
         links_service,
-        AnnotationContext,
         AnnotationUserInfoFormatter,
         AnnotationJSONPresenter,
     ):
         handle_annotation_event()
 
-        AnnotationContext.assert_called_once_with(fetch_annotation.return_value)
-
         AnnotationJSONPresenter.assert_called_once_with(
-            AnnotationContext.return_value,
+            fetch_annotation.return_value,
             links_service=links_service,
             formatters=[AnnotationUserInfoFormatter.return_value],
         )
