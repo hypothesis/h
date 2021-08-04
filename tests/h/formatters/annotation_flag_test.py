@@ -1,11 +1,7 @@
-from collections import namedtuple
-
 import pytest
 
 from h.formatters.annotation_flag import AnnotationFlagFormatter
 from h.services.flag import FlagService
-
-FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation"])
 
 
 class TestAnnotationFlagFormatter:
@@ -23,21 +19,20 @@ class TestAnnotationFlagFormatter:
 
     def test_format_for_existing_flag(self, formatter, factories, current_user):
         flag = factories.Flag(user=current_user)
-        annotation_context = FakeAnnotationContext(flag.annotation)
-        assert formatter.format(annotation_context) == {"flagged": True}
+
+        assert formatter.format(flag.annotation) == {"flagged": True}
 
     def test_format_for_missing_flag(self, formatter, factories):
         annotation = factories.Annotation()
-        annotation_context = FakeAnnotationContext(annotation)
 
-        assert formatter.format(annotation_context) == {"flagged": False}
+        assert formatter.format(annotation) == {"flagged": False}
 
     def test_format_for_unauthenticated_user(self, flag_service, factories):
         annotation = factories.Annotation()
-        annotation_context = FakeAnnotationContext(annotation)
+
         formatter = AnnotationFlagFormatter(flag_service, user=None)
 
-        assert formatter.format(annotation_context) == {"flagged": False}
+        assert formatter.format(annotation) == {"flagged": False}
 
     @pytest.fixture
     def current_user(self, factories):
