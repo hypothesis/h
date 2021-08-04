@@ -85,63 +85,54 @@ class ACL:
 
         :param annotation: Annotation in question
         """
-        yield from cls._for_annotation(annotation)
+        yield Allow, security.Authenticated, Permission.Annotation.CREATE
+
+        if annotation:
+            if annotation.shared:
+                yield from cls._for_shared_annotation(annotation)
+            else:
+                yield from cls._for_private_annotation(annotation)
+
+            if not annotation.deleted:
+                # The user who created the annotation always has the these permissions
+                yield Allow, annotation.userid, Permission.Annotation.UPDATE
+                yield Allow, annotation.userid, Permission.Annotation.DELETE
 
         yield DENY_ALL
 
     @classmethod
-    def _for_annotation(cls, annotation):
-        # All authenticated users can create annotations
-        yield Allow, security.Authenticated, Permission.Annotation.CREATE
+    def _for_private_annotation(cls, annotation):
+        yield Allow, annotation.userid, Permission.Annotation.READ_REALTIME_UPDATES
 
-        if not annotation:
-            return
-
-        if annotation.shared:
-            # You can read an annotation if you can read the group it's in
-            yield from cls._map_acls(
-                ACL.for_group(annotation.group),
-                {Permission.Group.READ: [Permission.Annotation.READ_REALTIME_UPDATES]},
-            )
-        else:
-            yield Allow, annotation.userid, Permission.Annotation.READ_REALTIME_UPDATES
-
-        if annotation.deleted:
-            return
-
-        if annotation.shared:
-            # You can read an annotation if you can read the group it's in
-            yield from cls._map_acls(
-                ACL.for_group(annotation.group),
-                {Permission.Group.READ: [Permission.Annotation.READ]},
-            )
-        else:
+        if not annotation.deleted:
             yield Allow, annotation.userid, Permission.Annotation.READ
 
-        if annotation.shared:
-            # You can flag or moderate an annotation if you can flag or
-            # morderate the group it's in
-            yield from cls._map_acls(
-                ACL.for_group(annotation.group),
-                {
-                    Permission.Group.FLAG: [Permission.Annotation.FLAG],
-                    Permission.Group.MODERATE: [Permission.Annotation.MODERATE],
-                },
-            )
-
-        else:
             # Flagging one's own private annotations is nonsensical,
             # but from an authz perspective, allowed. It is up to services/views
             # to handle these situations appropriately
             yield Allow, annotation.userid, Permission.Annotation.FLAG
 
-        # The user who created the annotation always has the these permissions
-        yield Allow, annotation.userid, Permission.Annotation.UPDATE
-        yield Allow, annotation.userid, Permission.Annotation.DELETE
-
     @classmethod
-    def _map_acls(cls, acls, permission_map):
-        """Map an ACL swapping permissions provided in the map."""
+    def _for_shared_annotation(cls, annotation):
+        # If an annotation is shared then we derive our permissions based on
+        # what the user is allowed to do in the group
+        permission_map = {
+            Permission.Group.READ: [
+                Permission.Annotation.READ,
+                Permission.Annotation.READ_REALTIME_UPDATES,
+            ],
+            Permission.Group.FLAG: [Permission.Annotation.FLAG],
+            Permission.Group.MODERATE: [Permission.Annotation.MODERATE],
+        }
+
+        if annotation.deleted:
+            # For deleted annotations the only thing you can do is be notified
+            # that it's been deleted
+            permission_map = {
+                Permission.Group.READ: [Permission.Annotation.READ_REALTIME_UPDATES]
+            }
+
+        acls = ACL.for_group(annotation.group)
 
         for action, principal, permission in acls:
             try:
