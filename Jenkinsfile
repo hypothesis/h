@@ -2,12 +2,14 @@
 
 @Library('pipeline-library') _
 
-def img
+def image
+def ws_only_image
 
 node {
     stage('build') {
         checkout(scm)
-        img = buildApp(name: 'hypothesis/hypothesis')
+        image = buildApp(name: 'hypothesis/hypothesis')
+        ws_only_image = buildApp(name: 'hypothesis/hypothesis-ws', path: 'h/streamer')
     }
 
     stage('test') {
@@ -23,7 +25,7 @@ node {
         brokerUrl = "amqp://guest:guest@${hostIp}:${containerPort(rabbit, 5672)}//"
 
         try {
-            testApp(image: img, runArgs: "-u root " +
+            testApp(image: image, runArgs: "-u root " +
                                          "-e BROKER_URL=${brokerUrl} " +
                                          "-e ELASTICSEARCH_URL=${elasticsearchHost} " +
                                          "-e TEST_DATABASE_URL=${databaseUrl} " +
@@ -47,7 +49,8 @@ node {
 
     onlyOnMaster {
         stage('release') {
-            releaseApp(image: img)
+            releaseApp(image: image)
+            releaseApp(image: ws_only_image)
         }
     }
 }
@@ -55,7 +58,7 @@ node {
 onlyOnMaster {
     milestone()
     stage('qa deploy') {
-        deployApp(image: img, app: 'h', env: 'qa', region: "us-west-1")
+        deployApp(image: image, app: 'h', env: 'qa', region: "us-west-1")
     }
 
     milestone()
@@ -67,12 +70,12 @@ onlyOnMaster {
     stage("prod Deploy") {
         parallel(
             us: {
-                deployApp(image: img, app: "h", env: "prod", region: "us-west-1")
+                deployApp(image: image, app: "h", env: "prod", region: "us-west-1")
             },
             ca: {
 		// Workaround to ensure all parallel builds happen. See https://hypothes-is.slack.com/archives/CR3E3S7K8/p1625041642057400
                 sleep 2
-                deployApp(image: img, app: "h-ca", env: "prod", region: "ca-central-1")
+                deployApp(image: image, app: "h-ca", env: "prod", region: "ca-central-1")
             }
         )
     }
