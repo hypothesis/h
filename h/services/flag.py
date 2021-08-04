@@ -1,41 +1,32 @@
 import sqlalchemy as sa
 
-from h.models import Flag
+from h.models import Annotation, Flag, User
 
 
 class FlagService:
     def __init__(self, session):
         self._session = session
 
-    def flagged(self, user, annotation):
+    def flagged(self, user: User, annotation: Annotation):
         """
         Check if a given user has flagged a given annotation.
 
         :param user: The user to check for a flag.
-        :type user: h.models.User
-
         :param annotation: The annotation to check for a flag.
-        :type annotation: h.models.Annotation
-
         :returns: True/False depending on the existence of a flag.
-        :rtype: bool
         """
         query = self._session.query(Flag).filter_by(user=user, annotation=annotation)
         return query.count() > 0
 
-    def all_flagged(self, user, annotation_ids):
+    def all_flagged(self, user: User, annotation_ids):
         """
         Check which of the given annotation IDs the given user has flagged.
 
         :param user: The user to check for a flag.
-        :type user: h.models.User
-
         :param annotation_ids: The IDs of the annotations to check.
-        :type annotation_ids: sequence of unicode
-
         :returns The subset of the IDs that the given user has flagged.
-        :rtype set of unicode
         """
+
         # SQLAlchemy doesn't behave in the way we might expect when handed an
         # `in_` condition with an empty sequence
         if not annotation_ids:
@@ -47,7 +38,7 @@ class FlagService:
 
         return {f.annotation_id for f in query}
 
-    def create(self, user, annotation):
+    def create(self, user: User, annotation: Annotation):
         """
         Create a flag for the given user and annotation.
 
@@ -57,26 +48,19 @@ class FlagService:
         is a no-op.
 
         :param user: The user flagging the annotation.
-        :type user: h.models.User
-
         :param annotation: The annotation to be flagged.
-        :type annotation: h.models.Annotation
         """
         if self.flagged(user, annotation):
             return
 
-        flag = Flag(user=user, annotation=annotation)
-        self._session.add(flag)
+        self._session.add(Flag(user=user, annotation=annotation))
 
-    def flag_count(self, annotation):
+    def flag_count(self, annotation: Annotation):
         """
         Return the number of times a given annotation has been flagged.
 
         :param annotation: The annotation to check for flags.
-        :type annotation: h.models.Annotation
-
         :returns: The number of times the annotation has been flagged.
-        :rtype: int
         """
         return (
             self._session.query(sa.func.count(Flag.id))
@@ -89,10 +73,7 @@ class FlagService:
         Return flag counts for a batch of annotations.
 
         :param annotation_ids: The IDs of the annotations to check.
-        :type annotation_ids: sequence of unicode
-
         :returns: A map of annotation IDs to flag counts.
-        :rtype: dict[unicode, int]
         """
         if not annotation_ids:
             return {}
