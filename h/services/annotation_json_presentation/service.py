@@ -17,9 +17,14 @@ class AnnotationJSONPresentationService:
         ]
 
     def present(self, annotation):
-        return AnnotationJSONPresenter(
-            annotation, links_service=self.links_svc, formatters=self.formatters
+        model = AnnotationJSONPresenter(
+            annotation, links_service=self.links_svc
         ).asdict()
+
+        for formatter in self.formatters:
+            model.update(formatter.format(annotation))
+
+        return model
 
     def present_all(self, annotation_ids):
         def eager_load_related_items(query):
