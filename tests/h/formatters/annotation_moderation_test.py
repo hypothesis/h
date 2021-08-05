@@ -69,6 +69,7 @@ class TestAnnotationModerationFormatter:
 
     @pytest.fixture
     def formatter(self, flag_count_svc, user, has_permission):
+        """Return a formatter with the most common configuration."""
         return AnnotationModerationFormatter(flag_count_svc, user, has_permission)
 
     @pytest.fixture
