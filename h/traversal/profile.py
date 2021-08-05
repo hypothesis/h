@@ -3,7 +3,7 @@ from h.traversal.root import RootFactory
 
 
 class ProfileRoot(RootFactory):
-    """Simple Root for API profile endpoints."""
+    """Sets a simple Root for API profile endpoints."""
 
     @classmethod
     def __acl__(cls):
