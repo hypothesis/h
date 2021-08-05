@@ -4,7 +4,7 @@ from h.util.datetime import utc_iso8601, utc_us_style_date
 
 
 class Berlin(datetime.tzinfo):
-    """Berlin timezone, without DST support"""
+    """Berlin timezone, without DST support."""
 
     def utcoffset(self, dt):
         return datetime.timedelta(hours=1)

@@ -1,4 +1,3 @@
-# pylint: disable=protected-access
 """Unit tests for h/atom.py."""
 from datetime import datetime
 from unittest import mock

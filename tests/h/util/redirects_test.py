@@ -65,10 +65,7 @@ class TestLookup:
         assert result == "http://example.com/donkey/bar"
 
     def test_ordering_indicates_priority(self, pyramid_request):
-        """
-        Earlier matching redirect specifications should be chosen over later
-        ones.
-        """
+        # Earlier matching redirect specifications should be chosen over later ones.
         pyramid_request.path = "/foo/bar"
         redirects = [
             Redirect(src="/foo", dst="http://giraffe.com", internal=False, prefix=True),

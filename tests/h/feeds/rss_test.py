@@ -6,7 +6,8 @@ from h.feeds import rss
 
 
 def _annotation_url():
-    """Return a mock annotation_url() function.
+    """
+    Return a mock annotation_url() function.
 
     It just returns a hard-coded URL, enough to make the code that calls this
     function not crash.

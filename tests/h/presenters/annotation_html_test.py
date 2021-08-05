@@ -9,7 +9,8 @@ from h.presenters.annotation_html import AnnotationHTMLPresenter
 
 class TestAnnotationHTMLPresenter:
     def _annotation(self, annotation=None, **kwargs):
-        """Return an AnnotationHTMLPresenter for the given annotation.
+        """
+        Return an AnnotationHTMLPresenter for the given annotation.
 
         If no annotation is given a mock will be used, and any keyword
         arguments will be forwarded to the mock.Mock() constructor.

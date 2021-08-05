@@ -78,7 +78,8 @@ class TestDocumentHTMLPresenter:
 
     @link_text_fixtures
     def test_link_text_with_http_title(self, title):
-        """If .title is an http URI .link_test should use it.
+        """
+        If .title is an http URI .link_test should use it.
 
         This happens when an annotation's document has no title, so .title
         falls back on the URI instead.
@@ -90,7 +91,8 @@ class TestDocumentHTMLPresenter:
 
     @link_text_fixtures
     def test_link_text_with_https_title(self, title):
-        """If .title is an https URI .link_test should use it.
+        """
+        If .title is an https URI .link_test should use it.
 
         This happens when an annotation's document has no title, so .title
         falls back on the URI instead.
@@ -183,8 +185,8 @@ class TestDocumentHTMLPresenter:
 
     @title_fixtures
     def test_title_with_file_uri(self, filename):
-        """If the document has no title and the annotation has a file:// uri
-        then it should return the filename part only."""
+        # If the document has no title and the annotation has a file:// uri
+        # then it should return the filename part only."""
         filename.return_value = "MyFile.pdf"
 
         assert self.presenter(title=None).title == "MyFile.pdf"

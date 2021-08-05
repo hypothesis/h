@@ -405,7 +405,7 @@ class TestSync:
 
     @pytest.fixture
     def index(self, es_client, search_index):
-        """A method that indexes the given annotation into Elasticsearch."""
+        """Declare a method that indexes the given annotation into Elasticsearch."""
 
         def index(annotation):
             search_index.add_annotation(annotation)

@@ -41,7 +41,8 @@ class TestSearch:
         )
 
     def test_it_returns_replies_in_annotations_ids(self, pyramid_request, Annotation):
-        """Without separate_replies it returns replies in annotation_ids.
+        """
+        Without separate_replies it returns replies in annotation_ids.
 
         Test that if no separate_replies argument is given then it returns the
         ids of replies mixed in with the top-level annotations in
@@ -61,7 +62,8 @@ class TestSearch:
     def test_replies_that_dont_match_the_search_arent_included(
         self, factories, pyramid_request, Annotation
     ):
-        """Replies that don't match the search query aren't included.
+        """
+        Replies that don't match the search query aren't included.
 
         Not even if the top-level annotations that they're replies to _are_
         included.
@@ -108,7 +110,8 @@ class TestSearch:
         assert annotation.id in result.annotation_ids
 
     def test_replies_can_come_before_annotations(self, pyramid_request, Annotation):
-        """A reply may appear before its annotation in the search results.
+        """
+        A reply may appear before its annotation in the search results.
 
         Things are returned in updated order so normally a reply would appear
         before the annotation that it is a reply to in the search results.
@@ -126,7 +129,8 @@ class TestSearch:
         assert result.annotation_ids == [reply.id, annotation.id]
 
     def test_replies_can_come_after_annotations(self, pyramid_request, Annotation):
-        """A reply may appear after its annotation in the search results.
+        """
+        A reply may appear after its annotation in the search results.
 
         Things are returned in updated order so if the original author has
         updated the top-level annotation since the reply was created, then the
@@ -143,7 +147,8 @@ class TestSearch:
         assert result.annotation_ids == [annotation.id, reply.id]
 
     def test_it_returns_an_empty_replies_list(self, pyramid_request, Annotation):
-        """Test that without separate_replies it returns an empty reply_ids.
+        """
+        Test that without separate_replies it returns an empty reply_ids.
 
         If no separate_replies argument is given then it still returns a
         reply_ids list but the list is always empty.
@@ -226,7 +231,8 @@ class TestSearchWithSeparateReplies:
     def test_separate_replies_that_dont_match_the_search_are_still_included(
         self, factories, pyramid_request, Annotation
     ):
-        """All replies to the matching annotations are included.
+        """
+        All replies to the matching annotations are included.
 
         Even if the replies don't match the search query. As long as the
         top-level annotation matches the search query, its replies will be
@@ -273,7 +279,8 @@ class TestSearchWithSeparateReplies:
         assert result.reply_ids == [reply.id]
 
     def test_only_200_replies_are_included(self, pyramid_request, Annotation):
-        """No more than 200 replies can be included in reply_ids.
+        """
+        No more than 200 replies can be included in reply_ids.
 
         200 is the total maximum number of replies (to all annotations in
         annotation_ids) that can be included in reply_ids.

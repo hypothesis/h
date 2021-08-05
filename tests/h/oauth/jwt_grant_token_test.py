@@ -226,7 +226,7 @@ class TestVerifiedJWTGrantToken:
 
     @pytest.fixture
     def claims(self):
-        """Returns claims for a valid JWT token."""
+        """Return claims for a valid JWT token."""
 
         return {
             "aud": "test-audience",

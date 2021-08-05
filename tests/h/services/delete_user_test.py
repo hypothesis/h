@@ -84,9 +84,7 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def group_with_two_users(db_session, factories):
-    """
-    Create a group with two members and an annotation created by each.
-    """
+    """Create a group with two members and an annotation created by each."""
     creator = factories.User()
     member = factories.User()
 

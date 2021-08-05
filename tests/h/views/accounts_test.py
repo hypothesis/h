@@ -1,5 +1,3 @@
-# pylint: disable=no-self-use
-
 from unittest import mock
 
 import colander
@@ -441,19 +439,15 @@ class TestActivateController:
     def test_get_when_not_logged_in_redirects_if_activation_not_found(
         self, activation_model, pyramid_request
     ):
-        """
+        # If the activation code doesn't match any activation then we redirect to
+        # the front page and flash a message suggesting that they may already be
+        # activated and can log in.
 
-        If the activation code doesn't match any activation then we redirect to
-        the front page and flash a message suggesting that they may already be
-        activated and can log in.
+        # This happens if a user clicks on an activation link from an email after
+        # they've already been activated, for example.
 
-        This happens if a user clicks on an activation link from an email after
-        they've already been activated, for example.
-
-        (This also happens if users visit a bogus activation URL, but we're
-        happy to do this same redirect in that edge case.)
-
-        """
+        # (This also happens if users visit a bogus activation URL, but we're
+        # happy to do this same redirect in that edge case.)
         pyramid_request.matchdict = {"id": "123", "code": "abc456"}
         activation_model.get_by_code.return_value = None
 
@@ -491,12 +485,8 @@ class TestActivateController:
     def test_get_when_not_logged_in_404s_if_user_id_does_not_match_hash(
         self, pyramid_request, user_model
     ):
-        """
-
-        We don't want to let a user with a valid hash activate a different
-        user's account!
-
-        """
+        # We don't want to let a user with a valid hash activate a different
+        # user's account!
         pyramid_request.matchdict = {"id": "123", "code": "abc456"}
         user_model.get_by_activation.return_value.id = 2  # Not the same id.
 

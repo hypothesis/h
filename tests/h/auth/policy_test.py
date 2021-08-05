@@ -766,10 +766,8 @@ class TestTokenAuthenticationPolicy:
     def test_unauthenticated_userid_skips_query_param_for_non_ws_requests(
         self, pyramid_request
     ):
-        """
-        When we have a valid token in the `access_token` query param, but it's
-        not a request to /ws, then we should ignore this access token.
-        """
+        # When we have a valid token in the `access_token` query param, but it's
+        # not a request to /ws, then we should ignore this access token.
 
         policy = TokenAuthenticationPolicy()
         pyramid_request.GET["access_token"] = "valid123"

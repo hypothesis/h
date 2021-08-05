@@ -28,7 +28,7 @@ class TestUserIDComparator:
 
 
 class TestUserModelDataConstraints:
-    """Unit tests for :py:module:`h.models.User` data integrity constraints"""
+    """Unit tests for :py:module:`h.models.User` data integrity constraints."""
 
     def test_cannot_create_dot_variant_of_user(self, db_session):
         fred = models.User(

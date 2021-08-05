@@ -21,10 +21,8 @@ class TestDeriveKey:
         salt=REASONABLE_SALT,
     )
     def test_different_info_different_output(self, info_a, info_b, key, salt):
-        """
-        For fixed key material and salt, derive_key should give different output
-        for differing info parameters.
-        """
+        # For fixed key material and salt, derive_key should give different output
+        # for differing info parameters.
         assume(info_a != info_b)
 
         info_a_bytes = info_a.encode("utf-8")
