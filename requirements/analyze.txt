@@ -132,7 +132,7 @@ h-assets==1.0.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-matchers==1.2.11
+h-matchers==1.2.12
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
