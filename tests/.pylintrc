@@ -24,7 +24,6 @@ disable=
 
     # We don't always want to have to put a `:return:` in a docstring.
     missing-return-doc,
-
     # We don't always want to have to put an `:rtype:` in a docstring.
     missing-return-type-doc,
 
