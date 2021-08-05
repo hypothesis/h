@@ -71,7 +71,6 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
     settings_manager.set("csp.report_uri", "CSP_REPORT_URI")
     settings_manager.set("csp.report_only", "CSP_REPORT_ONLY")
     settings_manager.set("ga_tracking_id", "GOOGLE_ANALYTICS_TRACKING_ID")
-    settings_manager.set("ga_client_tracking_id", "GOOGLE_ANALYTICS_CLIENT_TRACKING_ID")
     settings_manager.set("h.app_url", "APP_URL")
     settings_manager.set(
         "h.authority",
