@@ -1,10 +1,10 @@
 import pytest
 
-from h.formatters.annotation_flag import AnnotationFlagFormatter
+from h.services.annotation_json_presentation._formatters.flag import FlagFormatter
 from h.services.flag import FlagService
 
 
-class TestAnnotationFlagFormatter:
+class TestFlagFormatter:
     def test_preload_sets_found_flags_to_true(self, flags, formatter, current_user):
         annotation_ids = [f.annotation_id for f in flags[current_user]]
 
@@ -30,7 +30,7 @@ class TestAnnotationFlagFormatter:
     def test_format_for_unauthenticated_user(self, flag_service, factories):
         annotation = factories.Annotation()
 
-        formatter = AnnotationFlagFormatter(flag_service, user=None)
+        formatter = FlagFormatter(flag_service, user=None)
 
         assert formatter.format(annotation) == {"flagged": False}
 
@@ -44,7 +44,7 @@ class TestAnnotationFlagFormatter:
 
     @pytest.fixture
     def formatter(self, flag_service, current_user):
-        return AnnotationFlagFormatter(flag_service, current_user)
+        return FlagFormatter(flag_service, current_user)
 
     @pytest.fixture
     def flag_service(self, db_session):

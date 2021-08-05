@@ -1,4 +1,4 @@
-class AnnotationFlagFormatter:
+class FlagFormatter:
     """
     Formatter for exposing a user's annotation flags.
 

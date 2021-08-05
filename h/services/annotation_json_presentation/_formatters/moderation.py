@@ -2,7 +2,7 @@ from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
-class AnnotationModerationFormatter:
+class ModerationFormatter:
     """
     Formatter for exposing an annotation's moderation information.
 
