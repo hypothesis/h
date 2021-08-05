@@ -27,7 +27,23 @@ disable=bad-continuation,
         bad-continuation,
         line-too-long,
 
-        too-few-public-methods
+        too-few-public-methods,
+
+        # Ignored during pep8 -> pylint transition
+        unused-argument,
+        too-many-arguments,
+        super-init-not-called,
+        protected-access,
+        no-name-in-module,
+        missing-return-doc,
+        missing-raises-doc,
+        missing-param-doc,
+        invalid-name,
+        inconsistent-return-statements,
+        fixme,
+        duplicate-code,
+
+
 
 [REPORTS]
 output-format=colorized
