@@ -26,7 +26,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
     RequestValidator
 ):
     """
-    Validates OAuth requests
+    Validates OAuth requests.
 
     This implements the ``oauthlib.oauth2.RequestValidator`` interface.
     """
@@ -50,7 +50,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         )
 
     def authenticate_client(self, request, *args, **kwargs):
-        """Authenticates a client, returns True if the client exists and its secret matches the request."""
+        """Authenticate a client, returns True if the client exists and its secret matches the request."""
         client = self.find_client(request.client_id)
 
         if client is None:
@@ -68,7 +68,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         return True
 
     def authenticate_client_id(self, client_id, request, *args, **kwargs):
-        """Authenticates a client_id, returns True if the client_id exists."""
+        """Authenticate a client_id, returns True if the client_id exists."""
         client = self.find_client(client_id)
 
         if client is None:
@@ -144,7 +144,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         return self._cached_find_token(value)
 
     def get_default_redirect_uri(self, client_id, request, *args, **kwargs):
-        """Returns the ``redirect_uri`` stored on the client with the given id."""
+        """Return the ``redirect_uri`` stored on the client with the given id."""
 
         client = self.find_client(client_id)
         if not client:
@@ -217,7 +217,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         return authzcode
 
     def save_bearer_token(self, token, request, *args, **kwargs):
-        """Saves a generated bearer token for the authenticated user to the database."""
+        """Save a generated bearer token for the authenticated user to the database."""
         expires = utcnow() + datetime.timedelta(seconds=token["expires_in"])
 
         refresh_token_expires = utcnow() + datetime.timedelta(
@@ -244,7 +244,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         return oauth_token
 
     def validate_client_id(self, client_id, request, *args, **kwargs):
-        """Checks if the provided client_id belongs to a valid AuthClient."""
+        """Check if the provided client_id belongs to a valid AuthClient."""
 
         client = self.find_client(client_id)
         return client is not None
@@ -281,7 +281,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
     def validate_grant_type(
         self, client_id, grant_type, client, request, *args, **kwargs
     ):
-        """Validates that the given client is allowed to use the give grant type."""
+        """Validate that the given client is allowed to use the give grant type."""
         if client.authclient.grant_type is None:
             return False
 
@@ -375,7 +375,7 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
         )
 
     def _find_token(self, value):
-        """Retrieve a token without knowing which kind it is"""
+        """Retrieve a token without knowing which kind it is."""
 
         if value is None:
             return None

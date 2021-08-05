@@ -13,7 +13,7 @@ from h.security.permissions import Permission
     permission=Permission.AdminPage.STAFF,
 )
 def staff_index(request):
-    """A list of all the staff members as an HTML page."""
+    """Get a list of all the staff members as an HTML page."""
     staff = request.db.query(models.User).filter(models.User.staff)
     return {
         "staff": [u.userid for u in staff],

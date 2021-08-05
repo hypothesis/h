@@ -3,7 +3,7 @@ from urllib.parse import SplitResult, urlsplit
 
 def url_in_scope(url, scope_urls):
     """
-    Does the URL match any of the scopes represented by ``scope_urls``?
+    Return whether the URL match any of the scopes represented by ``scope_urls``.
 
     Return True if the URL matches one or more of the provided patterns (if the
     URL string begins with any of the scope URL strings)
@@ -18,7 +18,7 @@ def url_in_scope(url, scope_urls):
 
 def parse_scope_from_url(url):
     """
-    Return a tuple representing the origin and path of a URL
+    Return a tuple representing the origin and path of a URL.
 
     :arg url: The URL from which to derive scope
     :type url: str
@@ -30,7 +30,7 @@ def parse_scope_from_url(url):
 
 
 def _parse_path(url):
-    """Return the path component of a URL string"""
+    """Return the path component of a URL string."""
     if url is None:
         return None
     parsed = urlsplit(url)

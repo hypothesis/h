@@ -1,5 +1,5 @@
 """
-Add AuthClient table
+Add AuthClient table.
 
 Revision ID: bdaa06b14557
 Revises: afd433075707

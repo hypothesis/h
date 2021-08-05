@@ -1,17 +1,17 @@
-"""Add Document URI and Meta updated index
+"""
+Add Document URI and Meta updated index.
 
 Revision ID: f3b8e76ae9f5
 Revises: fde6cdcdd39a
 Create Date: 2016-05-13 14:58:37.679724
 
 """
+import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "f3b8e76ae9f5"
 down_revision = "fde6cdcdd39a"
-
-import sqlalchemy as sa
-from alembic import op
 
 
 def upgrade():

@@ -41,7 +41,7 @@ class AuthTicketService:
         return self._userid
 
     def groups(self):
-        """Returns security principals of the logged-in user."""
+        """Return security principals of the logged-in user."""
 
         if self._userid is None:
             raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
@@ -51,8 +51,7 @@ class AuthTicketService:
 
     def verify_ticket(self, principal, ticket_id):
         """
-        Verifies an authentication claim (usually extracted from a cookie)
-        against the stored tickets.
+        Verify an authentication claim (usually extracted from a cookie) against the stored tickets.
 
         This will only successfully verify a ticket when it is found in the
         database, the principal is the same, and it hasn't expired yet.

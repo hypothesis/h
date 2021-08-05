@@ -1,5 +1,5 @@
 """
-Add index to flag.user_id
+Add index to flag.user_id.
 
 Revision ID: e554d862135f
 Revises: 5655d56d7c29

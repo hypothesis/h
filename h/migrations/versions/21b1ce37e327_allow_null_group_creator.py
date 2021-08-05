@@ -1,5 +1,5 @@
 """
-Allow null group.creator
+Allow null group.creator.
 
 Revision ID: 21b1ce37e327
 Revises: 9389d52b037d

@@ -1,11 +1,11 @@
-"""API view decorators for response headers"""
+"""API view decorators for response headers."""
 
 from h.views.api import API_VERSION_DEFAULT
 from h.views.api.helpers.media_types import media_type_for_version, version_media_types
 
 
 def version_media_type_header(subtype="json"):
-    """View decorator to add response header indicating API version"""
+    """Add view decorator to add response header indicating API version."""
 
     def deco(wrapped):
         def wrapper(context, request):

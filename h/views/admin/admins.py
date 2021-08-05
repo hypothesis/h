@@ -13,7 +13,7 @@ from h.security.permissions import Permission
     permission=Permission.AdminPage.ADMINS,
 )
 def admins_index(request):
-    """A list of all the admin users as an HTML page."""
+    """Get a list of all the admin users as an HTML page."""
     admins = request.db.query(models.User).filter(models.User.admin)
     return {
         "admin_users": [u.userid for u in admins],

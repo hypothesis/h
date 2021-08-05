@@ -17,7 +17,8 @@ from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
 
 
 class DBAction:
-    """Base class for all DB actions.
+    """
+    Base class for all DB actions.
 
     Provides an interface and a couple of useful methods.
     """
@@ -26,7 +27,8 @@ class DBAction:
         self.db = db
 
     def execute(self, batch, **kwargs):
-        """Process a series of commands.
+        """
+        Process a series of commands.
 
         The commands are assumed to be appropriate for this action type.
         """
@@ -35,7 +37,8 @@ class DBAction:
 
     @staticmethod
     def _check_upsert_queries(batch, expected_keys):
-        """Validate the query for each command in `batch`.
+        """
+        Validate the query for each command in `batch`.
 
         This method allows you to assert that:
 
@@ -150,7 +153,8 @@ class GroupUpsertAction(DBAction):
 
 
 class GroupMembershipCreateAction(DBAction):
-    """Perform a bulk group membership create.
+    """
+    Perform a bulk group membership create.
 
     :raises ConflictingDataError: Upon trying to create a membership to a user
                                   or group that does not exist
@@ -160,6 +164,8 @@ class GroupMembershipCreateAction(DBAction):
         self, batch, on_duplicate="continue", **_
     ):
         """
+        Execute GroupMembershipCreateAction.
+
         :param on_duplicate: Specify behavior when a record already exists. The
                              default is "continue"
         """
@@ -203,7 +209,8 @@ class GroupMembershipCreateAction(DBAction):
 
 
 class UserUpsertAction(DBAction):
-    """Perform a bulk user upsert.
+    """
+    Perform a bulk user upsert.
 
     :raise ConflictingDataError: If two users attempt to use the same identity
     """

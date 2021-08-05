@@ -12,8 +12,9 @@ class DeleteGroupService:
 
     def delete(self, group):
         """
-        Deletes a group, its membership relations and all annotations in the
-        group.
+        Delete a group.
+
+        Including its membership relations and all annotations in the group.
         """
 
         self._delete_annotations(group)

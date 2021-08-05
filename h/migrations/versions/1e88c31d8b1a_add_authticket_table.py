@@ -1,5 +1,5 @@
 """
-Add authticket table
+Add authticket table.
 
 Revision ID: 1e88c31d8b1a
 Revises: f9d3058bec5f

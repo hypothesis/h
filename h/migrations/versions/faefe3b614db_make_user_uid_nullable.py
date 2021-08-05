@@ -1,5 +1,5 @@
 """
-Make user uid nullable
+Make user uid nullable.
 
 Revision ID: faefe3b614db
 Revises: 1a40e75a524d
@@ -26,7 +26,7 @@ def downgrade():
     # rolled back.
     op.execute(
         user.update()
-        .where(user.c.uid == None)
+        .where(user.c.uid == None)  # noqa
         .values(uid=sa.func.lower(sa.func.replace(user.c.username, ".", "")))
     )
     op.alter_column("user", "uid", nullable=False)

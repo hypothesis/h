@@ -54,7 +54,7 @@ def extract(request, parse=parser.parse):
 
 def check_url(request, query, unparse=parser.unparse):
     """
-    Checks the request and raises a redirect if implied by the query.
+    Check the request and raises a redirect if implied by the query.
 
     If a query contains a single group or user term, then the user is
     redirected to the specific group or user search page with that term

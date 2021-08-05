@@ -89,7 +89,7 @@ def _validate_creator(creator_username, authority, user_svc, parent_exc):
 
 
 def url_with_origin_validator(node, val):
-    """Validate that entered URL can be parsed into a scope"""
+    """Validate that entered URL can be parsed into a scope."""
     if not group_scope.parse_origin(val):
         raise colander.Invalid(
             node,

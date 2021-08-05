@@ -1,5 +1,5 @@
 """
-Add AuthClient grant/response type columns
+Add AuthClient grant/response type columns.
 
 Revision ID: b980b1a8f6af
 Revises: 1c995723a271

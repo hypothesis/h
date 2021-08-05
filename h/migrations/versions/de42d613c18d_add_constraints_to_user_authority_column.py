@@ -1,5 +1,5 @@
 """
-Add constraints to user authority column
+Add constraints to user authority column.
 
 Revision ID: de42d613c18d
 Revises: 2e2cc6a0c521

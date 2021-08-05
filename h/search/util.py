@@ -32,6 +32,8 @@ def wildcard_uri_is_valid(wildcard_uri):
 
 def add_default_scheme(uri):
     """
+    Add scheme to URI.
+
     In order to not prepend an extra http:// in cases where
     there may be wildcard characters in the scheme, add _ and *
     to the list of valid scheme characters.

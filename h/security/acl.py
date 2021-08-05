@@ -112,7 +112,8 @@ class ACL:
 
     @classmethod
     def for_annotation(cls, annotation):
-        """Return a Pyramid ACL for this annotation.
+        """
+        Return a Pyramid ACL for this annotation.
 
         :param annotation: Annotation in question
         """
@@ -166,7 +167,7 @@ class ACL:
         acls = ACL.for_group(annotation.group)
 
         for action, principal, permission in acls:
-            try:
+            try:  # pylint: disable=too-many-try-statements
                 for mapped_permission in permission_map.get(permission, []):
                     yield action, principal, mapped_permission
 

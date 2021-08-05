@@ -47,10 +47,8 @@ log = logging.getLogger(__name__)
 
 
 class WebSocketWSGIHandler(PyWSGIHandler):
-
     """
-    A WSGI handler that will perform the :rfc:`6455` upgrade and handshake
-    before calling the WSGI application.
+    A WSGI handler that will perform the :rfc:`6455` upgrade and handshake before calling the WSGI application.
 
     If the incoming request doesn't have a `'Upgrade'` header, the handler will
     simply fallback to the gevent builtin's handler and process it as per
@@ -97,7 +95,6 @@ class WebSocketWSGIHandler(PyWSGIHandler):
 
 
 class GEventWebSocketPool(Pool):
-
     """
     Simple pool of bound websockets.
 
@@ -125,7 +122,9 @@ class GEventWebSocketPool(Pool):
 
 class WSGIServer(PyWSGIServer):
     """
-    WSGI server that simply tracks websockets and send them a proper closing
+    WSGI server that handles websockets.
+
+    It simply tracks websockets and send them a proper closing
     handshake when the server terminates.
 
     Other than that, the server is the same as its

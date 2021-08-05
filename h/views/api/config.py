@@ -37,7 +37,6 @@ def add_api_view(
     subtype="json",
     **settings
 ):
-
     """
     Add a view configuration for an API view.
 
@@ -102,7 +101,7 @@ def add_api_view(
 
 def api_config(versions, link_name=None, description=None, **settings):
     """
-    A view configuration decorator for API views.
+    Add a view configuration decorator for API views.
 
     This is similar to Pyramid's `view_config` except that it uses
     `add_api_view` to register the view instead of `context.add_view`.

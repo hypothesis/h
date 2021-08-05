@@ -29,7 +29,7 @@ class AnnotationHTMLPresenter:
     @property
     def text_rendered(self):
         """
-        The body text of this annotation.
+        Get the body text of this annotation.
 
         This return value of this field is marked safe because it is rendered
         to HTML on write by :py:func:`h.util.markdown.render`, which must take
@@ -41,7 +41,7 @@ class AnnotationHTMLPresenter:
 
     @property
     def quote(self):
-        """The text in the document which this annotation refers to."""
+        """Get the text in the document which this annotation refers to."""
         selection = self._get_selection()
         if selection:
             return jinja2.escape(selection)
@@ -50,7 +50,8 @@ class AnnotationHTMLPresenter:
 
     @property
     def description(self):
-        """An HTML-formatted description of this annotation.
+        """
+        Get an HTML-formatted description of this annotation.
 
         The description contains the target text that the user selected to
         annotate, as a <blockquote>, and the body text of the annotation
@@ -76,7 +77,8 @@ class AnnotationHTMLPresenter:
 
     @property
     def created_day_string(self):
-        """A simple created day string for this annotation.
+        """
+        Get a simple created day string for this annotation.
 
         Returns a day string like '2015-03-11' from the annotation's 'created'
         date.

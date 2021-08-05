@@ -1,5 +1,5 @@
 """
-Fill in missing Annotation.document_id
+Fill in missing Annotation.document_id.
 
 Revision ID: bcdd81e23920
 Revises: addee5d1686f

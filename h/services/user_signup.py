@@ -12,7 +12,6 @@ log = logging.getLogger(__name__)
 
 
 class UserSignupService:
-
     """A service for registering users."""
 
     def __init__(

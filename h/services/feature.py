@@ -67,10 +67,7 @@ class FeatureService:
         return features[name]
 
     def all(self, user=None):
-        """
-        Returns a dict mapping feature flag names to enabled states
-        for the specified `user`.
-        """
+        """Return a dict mapping feature flag names to enabled states for the specified `user`."""
         return {f.name: self._state(f, user=user) for f in self._cached_load()}
 
     def _load(self):

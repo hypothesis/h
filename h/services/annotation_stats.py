@@ -44,9 +44,7 @@ class AnnotationStatsService:
         return search_result.total
 
     def group_annotation_count(self, pubid):
-        """
-        Return the count of searchable top level annotations for this group.
-        """
+        """Return the count of searchable top level annotations for this group."""
         params = MultiDict({"limit": 0, "group": pubid})
         return self._search(params)
 

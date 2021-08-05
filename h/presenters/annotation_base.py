@@ -1,6 +1,4 @@
-"""
-A base presenter for common properties needed when rendering annotations.
-"""
+"""A base presenter for common properties needed when rendering annotations."""
 
 from h.util.datetime import utc_iso8601
 

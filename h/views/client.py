@@ -18,9 +18,7 @@ DEFAULT_CLIENT_URL = "https://cdn.hypothes.is/hypothesis"
 
 
 def _client_url(request):
-    """
-    Return the configured URL for the client.
-    """
+    """Return the configured URL for the client."""
     url = request.registry.settings.get("h.client_url", DEFAULT_CLIENT_URL)
     url = render_url_template(url, example_url=request.url)
 

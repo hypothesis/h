@@ -37,7 +37,6 @@ FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
-
     """A feature flag for the application."""
 
     __tablename__ = "feature"

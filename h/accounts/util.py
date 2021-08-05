@@ -1,6 +1,4 @@
-"""
-Helpers for account forms
-"""
+"""Helpers for account forms."""
 import re
 from urllib.parse import urlparse
 

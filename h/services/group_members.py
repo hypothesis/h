@@ -4,12 +4,11 @@ from h import session
 
 
 class GroupMembersService:
-
     """A service for manipulating group membership."""
 
     def __init__(self, db, user_fetcher, publish):
         """
-        Create a new GroupMembersService
+        Create a new GroupMembersService.
 
         :param db: the SQLAlchemy db object
         :param user_fetcher: a callable for fetching users by userid
@@ -33,8 +32,7 @@ class GroupMembersService:
 
     def update_members(self, group, userids):
         """
-        Update this group's membership to be the list of users indicated by
-        userids.
+        Update this group's membership to be the list of users indicated by userids.
 
         The users indicated by userids will *replace* the members of this group.
         Any pre-existing member whose userid is not present in userids will

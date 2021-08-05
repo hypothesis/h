@@ -1,5 +1,5 @@
 """
-Add authority column to user table
+Add authority column to user table.
 
 Revision ID: f48100c9af86
 Revises: 64cf31f9f721

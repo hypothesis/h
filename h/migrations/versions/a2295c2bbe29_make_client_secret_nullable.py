@@ -1,5 +1,5 @@
 """
-Make Client.secret nullable
+Make Client.secret nullable.
 
 Revision ID: a2295c2bbe29
 Revises: 05bd63575f19

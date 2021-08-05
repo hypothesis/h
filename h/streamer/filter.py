@@ -30,7 +30,8 @@ class SocketFilter:
 
     @classmethod
     def matching(cls, sockets, annotation, session):
-        """Find sockets with matching filters for the given annotation.
+        """
+        Find sockets with matching filters for the given annotation.
 
         For this to work, the sockets must have first had `set_filter()` called
         on them.
@@ -70,7 +71,8 @@ class SocketFilter:
 
     @classmethod
     def set_filter(cls, socket, filter_):
-        """Add filtering information to a socket for use with `matching()`.
+        """
+        Add filtering information to a socket for use with `matching()`.
 
         :param socket: Socket to add filtering information too
         :param filter_: Filter JSON to process

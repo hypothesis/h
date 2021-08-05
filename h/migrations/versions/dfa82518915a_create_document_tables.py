@@ -1,4 +1,5 @@
-"""Create document tables
+"""
+Create document tables.
 
 Revision ID: dfa82518915a
 Revises: 4c0c44605c09
@@ -6,13 +7,13 @@ Create Date: 2016-02-10 14:52:08.236839
 
 """
 
-# revision identifiers, used by Alembic.
-revision = "dfa82518915a"
-down_revision = "4c0c44605c09"
-
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+
+# revision identifiers, used by Alembic.
+revision = "dfa82518915a"
+down_revision = "4c0c44605c09"
 
 
 def upgrade():

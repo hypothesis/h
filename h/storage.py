@@ -51,8 +51,7 @@ def fetch_annotation(session, id_):
 
 def fetch_ordered_annotations(session, ids, query_processor=None):
     """
-    Fetch all annotations with the given ids and order them based on the list
-    of ids.
+    Fetch all annotations with the given ids and order them based on the list of ids.
 
     The optional `query_processor` parameter allows for passing in a function
     that can change the query before it is run, especially useful for

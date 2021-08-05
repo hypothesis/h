@@ -17,7 +17,7 @@ DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())
 
 
 def popall(multidict, key):
-    """Pops and returns all values of the key in multidict"""
+    """Pop and returns all values of the key in multidict."""
     values = multidict.getall(key)
     if values:
         del multidict[key]
@@ -126,7 +126,7 @@ class Sorter:
     @staticmethod
     def _parse_date(str_value):
         """
-        Converts a string to a float representing miliseconds since the epoch.
+        Convert a string to a float representing miliseconds since the epoch.
 
         Since the elasticsearch date parser is not run on search_after,
         the date must be converted to ms since the epoch as that is how
@@ -155,7 +155,6 @@ class Sorter:
 
 
 class TopLevelAnnotationsFilter:
-
     """Matches top-level annotations only, filters out replies."""
 
     def __call__(self, search, _):
@@ -163,10 +162,7 @@ class TopLevelAnnotationsFilter:
 
 
 class AuthorityFilter:
-
-    """
-    Match only annotations created by users belonging to a specific authority.
-    """
+    """Match only annotations created by users belonging to a specific authority."""
 
     def __init__(self, authority):
         self.authority = authority
@@ -176,7 +172,6 @@ class AuthorityFilter:
 
 
 class AuthFilter:
-
     """
     A filter that selects only annotations the user is authorised to see.
 
@@ -203,7 +198,6 @@ class AuthFilter:
 
 
 class GroupFilter:
-
     """
     Filter that limits which groups annotations are returned from.
 
@@ -226,7 +220,6 @@ class GroupFilter:
 
 
 class UriCombinedWildcardFilter:
-
     """
     A filter that selects only annotations where the uri matches.
 
@@ -243,7 +236,8 @@ class UriCombinedWildcardFilter:
     """
 
     def __init__(self, request, separate_keys=False):
-        """Initialize a new UriFilter.
+        """
+        Initialize a new UriFilter.
 
         :param request: the pyramid.request object
         :param separate_keys: if True will treat wildcard_uri as wildcards and uri/url
@@ -301,8 +295,8 @@ class UriCombinedWildcardFilter:
 
     @staticmethod
     def _wildcard_uri_normalized(wildcard_uri):
-        """
-        Same as uri.normalized but it replaces _'s with ?'s after normalization.
+        r"""
+        Get the same as uri.normalized but it replaces _'s with ?'s after normalization.
 
         Although elasticsearch uses ? we use _ since ? is a special reserved url
         character and this means we can avoid dealing with normalization headaches.
@@ -324,10 +318,7 @@ class UriCombinedWildcardFilter:
 
 
 class UserFilter:
-
-    """
-    A filter that selects only annotations where the 'user' parameter matches.
-    """
+    """A filter that selects only annotations where the 'user' parameter matches."""
 
     def __call__(self, search, params):
         if "user" not in params:
@@ -339,7 +330,6 @@ class UserFilter:
 
 
 class DeletedFilter:
-
     """
     A filter that only returns non-deleted documents.
 
@@ -375,10 +365,7 @@ class HiddenFilter:
 
 
 class AnyMatcher:
-
-    """
-    Matches the contents of a selection of fields against the `any` parameter.
-    """
+    """Match the contents of a selection of fields against the `any` parameter."""
 
     def __call__(self, search, params):
         if "any" not in params:
@@ -394,8 +381,7 @@ class AnyMatcher:
 
 
 class TagsMatcher:
-
-    """Matches the tags field against 'tag' or 'tags' parameters."""
+    """Match the tags field against 'tag' or 'tags' parameters."""
 
     def __call__(self, search, params):
         tags = set(popall(params, "tag") + popall(params, "tags"))
@@ -406,8 +392,7 @@ class TagsMatcher:
 
 
 class RepliesMatcher:
-
-    """Matches any replies to any of the given annotation ids."""
+    """Match any replies to any of the given annotation ids."""
 
     def __init__(self, ids):
         self.annotation_ids = ids

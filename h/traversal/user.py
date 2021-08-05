@@ -39,7 +39,7 @@ class UserRoot(RootFactory):
 
         return UserContext(user)
 
-    def __acl__(self):
+    def __acl__(self):  # pylint: disable=no-self-use
         return ACL.for_user(user=None)
 
 

@@ -12,9 +12,7 @@ class ObjectState(Enum):
 
 
 class Tracker:
-    """
-    Observer which tracks whether a SQLAlchemy `Session` has uncommitted changes.
-    """
+    """Observer which tracks whether a SQLAlchemy `Session` has uncommitted changes."""
 
     def __init__(self, session):
         self.session = session
@@ -30,8 +28,7 @@ class Tracker:
 
     def uncommitted_changes(self):
         """
-        Return a list of changes to the `Session` which have not yet been
-        _committed_ to the DB.
+        Return a list of changes to the `Session` which have not yet been _committed_ to the DB.
 
         The result is a list of (identity key, ObjectState) tuples.
         """

@@ -11,7 +11,8 @@ _ = i18n.TranslationStringFactory(__package__)
 
 
 def _pubdate_string(timestamp):
-    """Return a RFC2822-formatted pubDate string for the given timestamp.
+    """
+    Return a RFC2822-formatted pubDate string for the given timestamp.
 
     Return a pubDate string like 'Tue, 03 Jun 2003 09:39:21 -0000'.
 
@@ -23,7 +24,8 @@ def _pubdate_string(timestamp):
 
 
 def _feed_item_from_annotation(annotation, annotation_url):
-    """Return an RSS feed item for the given annotation.
+    """
+    Return an RSS feed item for the given annotation.
 
     :returns: A logical representation of the RSS feed item as a dict,
         containing all of the data that a template would need to render the
@@ -48,7 +50,8 @@ def _feed_item_from_annotation(annotation, annotation_url):
 def feed_from_annotations(
     annotations, annotation_url, rss_url, html_url, title, description
 ):
-    """Return an RSS feed for the given list of annotations.
+    """
+    Return an RSS feed for the given list of annotations.
 
     :returns: A logical representation of an RSS feed as a Python dict
         containing all of the data that a template would need to render the

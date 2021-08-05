@@ -1,5 +1,5 @@
 """
-Make feature flag deletions cascade
+Make feature flag deletions cascade.
 
 Revision ID: 74bff6a7d9de
 Revises: 52a0b2e5a9c2

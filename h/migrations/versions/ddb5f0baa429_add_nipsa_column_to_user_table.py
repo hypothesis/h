@@ -1,5 +1,5 @@
 """
-Add NIPSA column to user table
+Add NIPSA column to user table.
 
 Revision ID: ddb5f0baa429
 Revises: 6d9257ad610d

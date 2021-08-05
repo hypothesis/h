@@ -4,7 +4,8 @@ from h.feeds import atom, rss
 
 
 def render_atom(request, annotations, atom_url, html_url, title, subtitle):
-    """Return a rendered Atom feed of the given annotations.
+    """
+    Return a rendered Atom feed of the given annotations.
 
     :param annotations: The list of annotations to render as the feed's entries
     :type annotations: list of dicts
@@ -51,7 +52,8 @@ def render_atom(request, annotations, atom_url, html_url, title, subtitle):
 
 
 def render_rss(request, annotations, rss_url, html_url, title, description):
-    """Return a rendered RSS feed of the given annotations.
+    """
+    Return a rendered RSS feed of the given annotations.
 
     :param annotations: The list of annotations to render as the feed's items
     :type annotations: list of dicts

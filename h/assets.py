@@ -1,4 +1,4 @@
-"""View for serving static assets under `/assets`"""
+"""View for serving static assets under `/assets`."""
 
 import importlib_resources
 from h_assets import Environment, assets_view

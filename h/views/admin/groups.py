@@ -20,7 +20,7 @@ _ = i18n.TranslationString
 )
 @paginator.paginate_query
 def groups_index(_context, request):
-    """Retrieve a paginated list of all groups, filtered by optional group name parameter"""
+    """Retrieve a paginated list of all groups, filtered by optional group name parameter."""
 
     group_svc = request.find_service(name="group")
     name = request.params.get("q")
@@ -34,7 +34,7 @@ def groups_index(_context, request):
     permission=Permission.AdminPage.GROUPS,
 )
 class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
-    """Views for admin create-group forms"""
+    """Views for admin create-group forms."""
 
     def __init__(self, request):
         self.request = request
@@ -56,7 +56,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
 
     @view_config(request_method="GET")
     def get(self):
-        """Render the admin create-group form"""
+        """Render the admin create-group form."""
         self.form.set_appstruct(
             {
                 "creator": self.request.user.username,
@@ -69,7 +69,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
     @view_config(request_method="POST")
     def post(self):
         def on_success(appstruct):
-            """Create a group on successful validation of POSTed form data"""
+            """Create a group on successful validation of POSTed form data."""
 
             organization = self.organizations[appstruct["organization"]]
             # We know this user exists because it is checked during schema validation
@@ -172,7 +172,7 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
         group = self.group
 
         def on_success(appstruct):
-            """Update the group resource on successful form validation"""
+            """Update the group resource on successful form validation."""
 
             organization = self.organizations[appstruct["organization"]]
             scopes = [GroupScope(scope=o) for o in appstruct["scopes"]]

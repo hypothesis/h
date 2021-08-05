@@ -62,7 +62,6 @@ class DocumentHTMLPresenter:
 
         If it contains escaped characters the returned value will be a Markup
         object so that it doesn't get double-escaped.
-
         """
         if self.filename:
             return jinja2.escape(unquote(self.filename))
@@ -80,7 +79,6 @@ class DocumentHTMLPresenter:
         Return a link to this document.
 
         Returns HTML strings like:
-
           <a href="{href}" title="{title}">{link_text}</a> {hostname}
 
           <em>Local file:</em> {title}<br>{hostname}
@@ -109,7 +107,6 @@ class DocumentHTMLPresenter:
         User-supplied values are escaped so the string is safe for raw
         rendering (the returned string is actually a Markup object and
         won't be escaped by Jinja2 when rendering).
-
         """
         return _format_document_link(
             self.href, self.title, self.link_text, self.hostname_or_filename
@@ -188,7 +185,8 @@ class DocumentHTMLPresenter:
 
 
 def _format_document_link(href, title, link_text, host_or_filename):
-    """Return a document link for the given components.
+    """
+    Return a document link for the given components.
 
     Helper function for the .document_link property below.
 

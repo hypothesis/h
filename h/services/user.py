@@ -12,7 +12,6 @@ class UserNotActivated(Exception):
 
 
 class UserService:
-
     """A service for retrieving and performing common operations on users."""
 
     def __init__(self, default_authority, session):

@@ -49,7 +49,7 @@ class GroupJSONPresenter:
 
 
 class GroupsJSONPresenter:
-    """Present a list of groups as JSON"""
+    """Present a list of groups as JSON."""
 
     def __init__(self, groups, request):
         self.groups = groups

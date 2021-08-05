@@ -12,7 +12,6 @@ from h.util.user import split_user
 
 
 class Annotation(Base):
-
     """Model class representing a single annotation."""
 
     __tablename__ = "annotation"

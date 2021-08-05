@@ -1,5 +1,5 @@
 """
-Disallow group.authority null
+Disallow group.authority null.
 
 Revision ID: 8990247b876c
 Revises: 140b450225cd

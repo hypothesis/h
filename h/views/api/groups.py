@@ -227,7 +227,8 @@ def remove_member(context, request):
     description="Add the user in the request params to a group.",
 )
 def add_member(context, request):
-    """Add a member to a given group.
+    """
+    Add a member to a given group.
 
     :raise HTTPNotFound: if the user is not found or if the use and group
       authorities don't match.
@@ -253,7 +254,8 @@ def add_member(context, request):
 
 # @TODO This is a duplication of code in h.views.api — move to a util module
 def _json_payload(request):
-    """Return a parsed JSON payload for the request.
+    """
+    Return a parsed JSON payload for the request.
 
     :raises PayloadError: if the body has no valid JSON body
     """

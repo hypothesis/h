@@ -18,7 +18,6 @@ def _generate_random_string(length=12):
 
 
 class Activation(Base):
-
     """
     Handles activations for users.
 

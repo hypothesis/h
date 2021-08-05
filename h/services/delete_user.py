@@ -8,7 +8,7 @@ class DeleteUserService:
 
     def delete(self, user):
         """
-        Deletes a user with all their group memberships and annotations.
+        Delete a user with all their group memberships and annotations.
 
         If a user owns groups with collaborators, meaning there are annotations
         in the group that have been made by other users, the user is unassigned
@@ -29,6 +29,7 @@ class DeleteUserService:
     def _groups_that_have_collaborators(self, groups, user):
         """
         Return list of groups that have annotations from other users.
+
         :param groups: List of group objects to evaluate.
         :type groups: list[h.models.Group]
         :param user: The user object and creator of the groups.

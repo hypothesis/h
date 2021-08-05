@@ -1,4 +1,5 @@
-"""Create annotation table
+"""
+Create annotation table.
 
 Revision ID: 4c0c44605c09
 Revises: 4886d7a14074
@@ -6,15 +7,15 @@ Create Date: 2016-01-20 12:58:16.249481
 
 """
 
-# revision identifiers, used by Alembic.
-revision = "4c0c44605c09"
-down_revision = "21f87f395e26"
-
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
 from h.db import types
+
+# revision identifiers, used by Alembic.
+revision = "4c0c44605c09"
+down_revision = "21f87f395e26"
 
 
 def upgrade():

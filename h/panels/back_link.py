@@ -9,9 +9,7 @@ from h.i18n import TranslationString as _  # noqa
 
 @panel_config(name="back_link", renderer="h:templates/panels/back_link.html.jinja2")
 def back_link(_context, request):
-    """
-    A link which takes the user back to the previous page on the site.
-    """
+    """Get a link which takes the user back to the previous page on the site."""
 
     referrer_path = urlparse(request.referrer or "").path
     current_username = request.user.username
@@ -29,9 +27,7 @@ def back_link(_context, request):
 
 
 def _matches_route(path, request, route_name):
-    """
-    Return ``True`` if ``path`` matches the URL pattern for a given route.
-    """
+    """Return ``True`` if ``path`` matches the URL pattern for a given route."""
 
     introspector = request.registry.introspector
 

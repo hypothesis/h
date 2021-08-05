@@ -72,7 +72,8 @@ class Blocklist:
 
 @json_view(route_name="badge")
 def badge(request):
-    """Return the number of public annotations on a given page.
+    """
+    Return the number of public annotations on a given page.
 
     This is for the number that's displayed on the Chrome extension's badge.
 

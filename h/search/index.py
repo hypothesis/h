@@ -16,10 +16,7 @@ PG_WINDOW_SIZE = 2500
 
 
 class BatchIndexer:
-    """
-    A convenience class for reindexing all annotations from the database to
-    the search index.
-    """
+    """A convenience class for reindexing all annotations from the database to the search index."""
 
     def __init__(self, session, es_client, request, target_index=None, op_type="index"):
         self.session = session
@@ -121,7 +118,7 @@ def _filtered_annotations(session, ids):
 
 
 def _annotation_filter():
-    """Default filter for all search indexing operations."""
+    """Set the default filter for all search indexing operations."""
     return sa.not_(models.Annotation.deleted)
 
 

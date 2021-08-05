@@ -1,5 +1,6 @@
 class UserJSONPresenter:
-    """Present a user.
+    """
+    Present a user.
 
     Format a user's data in JSON for use in API services. Only include
     properties that are public-facing.
@@ -18,7 +19,8 @@ class UserJSONPresenter:
 
 
 class TrustedUserJSONPresenter:
-    """Present a user to a trusted consumer.
+    """
+    Present a user to a trusted consumer.
 
     Format a user's data in JSON for use in API services, including any
     sensitive/private properties.

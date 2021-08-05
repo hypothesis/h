@@ -25,9 +25,7 @@ def authclient():
 )
 @click.pass_context
 def add(ctx, name, authority, type_):
-    """
-    Create a new OAuth client.
-    """
+    """Create a new OAuth client."""
     request = ctx.obj["bootstrap"]()
 
     client = models.AuthClient(name=name, authority=authority)

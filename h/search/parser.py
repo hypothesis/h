@@ -1,4 +1,6 @@
 """
+Parser for Lucene syntax.
+
 The query parser which converts our subset of the Apache Lucene syntax and
 transforms it into a MultiDict structure that h.search understands.
 """
@@ -47,7 +49,8 @@ Match = namedtuple("Match", ["key", "value"])
 
 
 def parse(q):
-    """Parse a free text, Lucene-like, query string into a MultiDict.
+    """
+    Parse a free text, Lucene-like, query string into a MultiDict.
 
     "user:luke tag:foobar tag:news hello world" is parsed into::
 

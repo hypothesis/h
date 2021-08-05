@@ -1,5 +1,5 @@
 """
-Add authclient redirect_uri check
+Add authclient redirect_uri check.
 
 Revision ID: 52a0b2e5a9c2
 Revises: a2295c2bbe29

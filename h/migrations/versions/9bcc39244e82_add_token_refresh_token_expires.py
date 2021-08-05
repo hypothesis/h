@@ -1,5 +1,5 @@
 """
-Add token refresh_token_expires
+Add token refresh_token_expires.
 
 Revision ID: 9bcc39244e82
 Revises: 74bff6a7d9de

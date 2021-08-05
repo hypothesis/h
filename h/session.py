@@ -44,7 +44,7 @@ def profile(request, authority=None):
 
 def user_info(user):
     """
-    Returns the `user_info` JSON object.
+    Return the `user_info` JSON object.
 
     This is being used in the JSON representation of an annotation,
     and for the user profile.
@@ -62,10 +62,10 @@ def pop_flash(request):
 
 
 def _current_groups(request, authority):
-    """Return a list of the groups the current user is a member of.
+    """
+    Return a list of the groups the current user is a member of.
 
     This list is meant to be returned to the client in the "session" model.
-
     """
 
     user = request.user

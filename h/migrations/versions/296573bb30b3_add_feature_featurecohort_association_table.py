@@ -1,17 +1,17 @@
-"""add feature_featurecohort association table
+"""
+Add feature_featurecohort association table.
 
 Revision ID: 296573bb30b3
 Revises: f6ffcfc50583
 Create Date: 2016-06-09 16:35:09.065224
 
 """
+import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "296573bb30b3"
 down_revision = "f6ffcfc50583"
-
-import sqlalchemy as sa
-from alembic import op
 
 
 def upgrade():

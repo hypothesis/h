@@ -1,8 +1,5 @@
 class GroupLinksService:
-
-    """
-    A service for providing appropriate links (URLs) for a given group object
-    """
+    """A service for providing appropriate links (URLs) for a given group object."""
 
     def __init__(self, default_authority, route_url):
         """
@@ -15,7 +12,7 @@ class GroupLinksService:
         self._route_url = route_url
 
     def get_all(self, group):
-        """Return a dict of all applicable links for this group"""
+        """Return a dict of all applicable links for this group."""
         links = {}
         if group.authority == self._default_authority:
             # Only groups for the default authority should have an activity page

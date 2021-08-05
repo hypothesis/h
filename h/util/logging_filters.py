@@ -1,4 +1,3 @@
-"""Logging Filters."""
 import logging
 
 # logging levels from https://docs.python.org/2/library/logging.html#logging-levels
@@ -18,6 +17,7 @@ class ExceptionFilter(logging.Filter):
     def __init__(self, ignore_exceptions):
         """
         Configure filtering out of the specified exceptions with specified logging level.
+
         Note if there are multiple exceptions that have the same name this will filter
         out all exceptions with that name.
 

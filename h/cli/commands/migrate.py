@@ -6,7 +6,6 @@ from alembic.config import Config
 
 
 class CommandLine(_CommandLine):
-
     """
     A modified version of the default Alembic CommandLine.
 

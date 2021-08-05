@@ -4,13 +4,12 @@ from h.security import derive_key
 
 
 class Error(Exception):
-
     """Base class for this package's custom exception classes."""
 
 
 class JSONError(Error):
-
-    """Exception raised when there's a problem with a request's JSON body.
+    """
+    Exception raised when there's a problem with a request's JSON body.
 
     This is for pre-validation problems such as no JSON body, body cannot
     be parsed as JSON, or top-level keys missing from the JSON.
@@ -19,7 +18,8 @@ class JSONError(Error):
 
 
 def get_user(request):
-    """Return the user for the request or None.
+    """
+    Return the user for the request or None.
 
     :rtype: h.models.User or None
 
@@ -34,8 +34,6 @@ def get_user(request):
 
 
 def includeme(config):
-    """A local identity provider."""
-
     # Add a `request.user` property.
     #
     # N.B. we use `property=True` and not `reify=True` here because it is

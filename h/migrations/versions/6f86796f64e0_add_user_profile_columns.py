@@ -1,5 +1,5 @@
 """
-Add user profile columns
+Add user profile columns.
 
 Revision ID: 6f86796f64e0
 Revises: 7cf52a00822b

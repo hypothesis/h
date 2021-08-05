@@ -1,5 +1,5 @@
 """
-Fill in missing denormalized Document.web_uri
+Fill in missing denormalized Document.web_uri.
 
 Revision ID: a44ef07b085a
 Revises: 58bb601c390f

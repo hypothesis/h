@@ -8,7 +8,7 @@ from h.i18n import TranslationString as _  # noqa
 @panel_config(name="navbar", renderer="h:templates/panels/navbar.html.jinja2")
 def navbar(_context, request, search=None, opts=None):
     """
-    The navigation bar displayed at the top of the page.
+    Get the navigation bar displayed at the top of the page.
 
     :param search: The current page's search state, if relevant.
     :type search: h.activity.query.ActivityResults

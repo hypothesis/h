@@ -1,4 +1,5 @@
-"""Add the text_rendered column to the annotation table
+"""
+Add the text_rendered column to the annotation table.
 
 Revision ID: 39b1935d9e7b
 Revises: 6b801ecc60f1

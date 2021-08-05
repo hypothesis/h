@@ -82,7 +82,7 @@ class JWTAuthorizationGrant(GrantTypeBase):  # pylint: disable=abstract-method
 
     def validate_token_request(self, request):
         """
-        Validates a token request.
+        Validate a token request.
 
         Sets the ``client_id`` property on the passed-in request to the JWT
         issuer, and finds the user based on the JWT subject and sets it as

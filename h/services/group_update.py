@@ -6,7 +6,7 @@ from h.services.exceptions import ConflictError, ValidationError
 class GroupUpdateService:
     def __init__(self, session):
         """
-        Create a new GroupUpdateService
+        Create a new GroupUpdateService.
 
         :param session: the SQLAlchemy session object
         """

@@ -1,4 +1,5 @@
-"""Add constraints to user.sidebar_tutorial_dismissed column.
+"""
+Add constraints to user.sidebar_tutorial_dismissed column.
 
 Revision ID: 4886d7a14074
 Revises: 6f6a853fa2a
@@ -6,12 +7,12 @@ Create Date: 2016-01-07 12:51:33.807404
 
 """
 
+import sqlalchemy as sa
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision = "4886d7a14074"
 down_revision = "6f6a853fa2a"
-
-import sqlalchemy as sa
-from alembic import op
 
 
 def upgrade():

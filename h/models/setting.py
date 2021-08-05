@@ -4,7 +4,6 @@ from h.db import Base, mixins
 
 
 class Setting(Base, mixins.Timestamps):
-
     """A setting set by the application and shared with other processes."""
 
     __tablename__ = "setting"

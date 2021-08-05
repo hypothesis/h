@@ -25,7 +25,6 @@ def _validate_wildcard_uri(node, value):
 
 
 class AnnotationSchema(JSONSchema):
-
     """Validate an annotation object."""
 
     schema = {
@@ -98,7 +97,6 @@ class AnnotationSchema(JSONSchema):
 
 
 class CreateAnnotationSchema:
-
     """Validate the POSTed data of a create annotation request."""
 
     def __init__(self, request):
@@ -152,7 +150,6 @@ class CreateAnnotationSchema:
 
 
 class UpdateAnnotationSchema:
-
     """Validate the POSTed data of an update annotation request."""
 
     def __init__(self, request, existing_target_uri, groupid):
