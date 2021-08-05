@@ -15,7 +15,6 @@ class TestSidebarApp:
             "websocketUrl": "wss://example.com/ws",
             "sentry": {"dsn": "test-sentry-dsn", "environment": "dev"},
             "authDomain": "example.com",
-            "googleAnalytics": "UA-4567",
             "oauthClientId": "test-client-id",
             "rpcAllowedOrigins": "https://lti.hypothes.is",
         }
@@ -35,7 +34,7 @@ class TestSidebarApp:
 
         assert (
             csp_header
-            == "script-src http://example.com https://www.google-analytics.com; style-src http://example.com 'unsafe-inline'"
+            == "script-src http://example.com; style-src http://example.com 'unsafe-inline'"
         )
 
 
@@ -61,7 +60,6 @@ def pyramid_settings(pyramid_settings):
 
     pyramid_settings.update(
         {
-            "ga_client_tracking_id": "UA-4567",
             "h.client_oauth_id": "test-client-id",
             "h.sentry_dsn_client": "test-sentry-dsn",
             "h.sentry_environment": "dev",

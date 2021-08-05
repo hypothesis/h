@@ -50,7 +50,6 @@ def sidebar_app(request, extra=None):
     """
 
     settings = request.registry.settings
-    ga_client_tracking_id = settings.get("ga_client_tracking_id")
     sentry_public_dsn = settings.get("h.sentry_dsn_client")
     websocket_url = settings.get("h.websocket_url")
 
@@ -74,9 +73,6 @@ def sidebar_app(request, extra=None):
             {"sentry": {"dsn": sentry_public_dsn, "environment": sentry_environment}}
         )
 
-    if ga_client_tracking_id:
-        app_config.update({"googleAnalytics": ga_client_tracking_id})
-
     ctx = {
         "app_config": json.dumps(app_config),
         "client_url": _client_url(request),
@@ -93,7 +89,6 @@ def sidebar_app(request, extra=None):
     # risks, this also helps to reduce noise in Sentry reports due to script
     # tags added by e.g. browser extensions.
     client_origin = origin(_client_url(request))
-    script_src = f"{client_origin} https://www.google-analytics.com"
 
     # nb. Inline styles are currently allowed for the client because LaTeX
     # math rendering using KaTeX relies on them.
@@ -101,7 +96,7 @@ def sidebar_app(request, extra=None):
 
     request.response.headers[
         "Content-Security-Policy"
-    ] = f"script-src {script_src}; style-src {style_src}"
+    ] = f"script-src {client_origin}; style-src {style_src}"
 
     return ctx
 
