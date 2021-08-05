@@ -1,6 +1,7 @@
 from unittest.mock import sentinel
 
 import pytest
+from sqlalchemy import event
 
 from h.services.annotation_json_presentation import AnnotationJSONPresentationService
 
@@ -52,6 +53,39 @@ class TestAnnotationJSONPresentationService:
         assert result == [
             AnnotationJSONPresenter.return_value.asdict.return_value,
         ]
+
+    @pytest.mark.parametrize("property", ("document", "moderation"))
+    @pytest.mark.parametrize("with_preload", (True, False))
+    def test_present_all_preloading_is_effective(
+        self, svc, annotation, db_session, query_counter, property, with_preload
+    ):
+        # Ensure SQLAlchemy forgets all about our annotation
+        db_session.flush()
+        db_session.expire(annotation)
+        if with_preload:
+            svc.present_all([annotation.id])
+
+        query_counter.reset()
+        getattr(annotation, property)
+
+        # If we preloaded, we shouldn't execute any queries (and vice versa)
+        assert bool(query_counter.count) != with_preload
+
+    @pytest.fixture
+    def query_counter(self, db_engine):
+        class QueryCounter:
+            count = 0
+
+            def __call__(self, *args, **kwargs):
+                print(args, kwargs)
+                self.count += 1
+
+            def reset(self):
+                self.count = 0
+
+        query_counter = QueryCounter()
+        event.listen(db_engine, "before_cursor_execute", query_counter)
+        return query_counter
 
     @pytest.fixture
     def svc(self, db_session):
