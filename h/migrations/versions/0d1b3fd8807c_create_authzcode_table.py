@@ -1,5 +1,5 @@
 """
-Create authzcode table
+Create authzcode table.
 
 Revision ID: 0d1b3fd8807c
 Revises: b980b1a8f6af

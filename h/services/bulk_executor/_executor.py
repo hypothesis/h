@@ -18,6 +18,8 @@ class BulkExecutor(Executor):
 
     def __init__(self, db, authority):
         """
+        Initialize BulkExecutor.
+
         :param db: DB session object
         :param authority: Restrict all request to this authority
         """

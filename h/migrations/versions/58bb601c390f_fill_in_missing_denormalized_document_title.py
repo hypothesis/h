@@ -1,5 +1,5 @@
 """
-Fill in missing denormalized Document.title
+Fill in missing denormalized Document.title.
 
 Revision ID: 58bb601c390f
 Revises: 3e1727613916

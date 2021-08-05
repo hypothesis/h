@@ -1,5 +1,5 @@
 """
-Add expires column to token table
+Add expires column to token table.
 
 Revision ID: 64cf31f9f721
 Revises: d536d9a342f3

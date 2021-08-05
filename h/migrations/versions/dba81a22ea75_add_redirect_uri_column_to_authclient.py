@@ -1,5 +1,5 @@
 """
-Add redirect_uri column to authclient
+Add redirect_uri column to authclient.
 
 Revision ID: dba81a22ea75
 Revises: 0d1b3fd8807c

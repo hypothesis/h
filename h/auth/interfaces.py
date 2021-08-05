@@ -7,4 +7,4 @@ class IAuthenticationToken(Interface):  # pylint:disable=inherit-non-class
     userid = Attribute("""The userid to which this token was issued.""")
 
     def is_valid(self):
-        """Checks token validity (such as expiry date)."""
+        """Check token validity (such as expiry date)."""

@@ -2,10 +2,10 @@ from h.presenters.annotation_base import AnnotationBasePresenter
 
 
 class AnnotationJSONLDPresenter(AnnotationBasePresenter):
-
     """
-    Presenter for annotations that renders a JSON-LD format compatible with the
-    draft Web Annotation Data Model, as defined at:
+    Presenter for annotations that renders JSON-LD.
+
+    JSON-LD compatible with the draft Web Annotation Data Model, as defined at:
 
       https://www.w3.org/TR/annotation-model/
     """

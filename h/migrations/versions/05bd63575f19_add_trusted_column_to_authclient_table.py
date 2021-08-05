@@ -1,5 +1,5 @@
 """
-Add trusted column to authclient table
+Add trusted column to authclient table.
 
 Revision ID: 05bd63575f19
 Revises: dfb8b45674db

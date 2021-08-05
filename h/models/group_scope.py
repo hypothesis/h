@@ -55,12 +55,13 @@ class GroupScope(Base):
 
     @property
     def scope(self):
-        """Return a URL composed from the origin and path attrs"""
+        """Return a URL composed from the origin and path attrs."""
         return urljoin(self._origin, self._path)
 
     @scope.setter
     def scope(self, value):
-        """Take a URL and split it into origin, path
+        """
+        Take a URL and split it into origin and path.
 
         :raises ValueError: if URL is invalid (origin cannot be parsed)
         """

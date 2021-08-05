@@ -1,5 +1,5 @@
 """
-Add group.description column
+Add group.description column.
 
 Revision ID: 7cf52a00822b
 Revises: 9e6b4f70f588

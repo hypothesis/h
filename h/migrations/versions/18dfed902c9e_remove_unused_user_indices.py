@@ -1,5 +1,5 @@
 """
-Remove unused user indices
+Remove unused user indices.
 
 Revision ID: 18dfed902c9e
 Revises: 7e2443f8d7d6

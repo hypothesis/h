@@ -1,5 +1,5 @@
 """
-Remove NIPSA table
+Remove NIPSA table.
 
 Revision ID: 53a74d7ae1b0
 Revises: 1e88c31d8b1a

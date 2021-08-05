@@ -1,5 +1,5 @@
 """
-add annotation moderation table
+Add annotation moderation table.
 
 Revision ID: 50df3e6782aa
 Revises: e554d862135f

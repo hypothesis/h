@@ -60,7 +60,7 @@ def default_authority(request):
 
 def client_authority(request):
     """
-    Return the authority associated with an authenticated auth_client or None
+    Return the authority associated with an authenticated auth_client or None.
 
     Once a request with an auth_client is authenticated, a principal is set
     indicating the auth_client's verified authority
@@ -80,7 +80,7 @@ def client_authority(request):
 
 def verify_auth_client(client_id, client_secret, db_session):
     """
-    Return matching AuthClient or None
+    Return matching AuthClient or None.
 
     Attempt to retrieve the :py:class:`h.models.auth_client.AuthClient` record
     indicated by ``client_id`` and ``client_secret`` and perform some validation
@@ -115,7 +115,7 @@ def verify_auth_client(client_id, client_secret, db_session):
 
 def principals_for_auth_client(client):
     """
-    Return the list of additional principals for an auth client
+    Return the list of additional principals for an auth client.
 
     :type client: :py:class:`h.models.auth_client.AuthClient`
     :rtype: list
@@ -136,7 +136,7 @@ def principals_for_auth_client(client):
 
 def principals_for_auth_client_user(user, client):
     """
-    Return a union of client and user principals for forwarded user
+    Return a union of client and user principals for forwarded user.
 
     :type user: :py:class:`h.models.user.User`
     :type client: :py:class:`h.models.auth_client.AuthClient`

@@ -11,7 +11,8 @@ from h.views.api.helpers.angular import AngularRouteTemplater
     http_cache=(60 * 5, {"public": True}),
 )
 def index(_context, request):
-    """Return the API descriptor document.
+    """
+    Return the API descriptor document.
 
     Clients may use this to discover endpoints for the API.
     """
@@ -38,7 +39,8 @@ def index(_context, request):
     http_cache=(60 * 5, {"public": True}),
 )
 def index_v2(_context, request):
-    """Return the API descriptor document.
+    """
+    Return the API descriptor document.
 
     Clients may use this to discover endpoints for the API.
     """

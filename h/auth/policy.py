@@ -60,7 +60,7 @@ class AuthenticationPolicy:
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class APIAuthenticationPolicy:
     """
-    An authentication policy for Hypothesis API endpoints
+    An authentication policy for Hypothesis API endpoints.
 
     Two types of authentication apply to Hypothesis API endpoints:
 
@@ -93,7 +93,7 @@ class APIAuthenticationPolicy:
 
     def effective_principals(self, request):
         """
-        Return the request's effective principals
+        Return the request's effective principals.
 
         The ``effective_principals`` method of classes that implement
         Pyramid's Authentication Interface always returns at least one principal:
@@ -126,9 +126,8 @@ class APIAuthenticationPolicy:
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthClientPolicy:
-
     """
-    An authentication policy for registered AuthClients
+    An authentication policy for registered AuthClients.
 
     Authentication for a request to API routes with HTTP Basic Authentication
     credentials that represent a registered AuthClient with
@@ -166,7 +165,7 @@ class AuthClientPolicy:
 
     def unauthenticated_userid(self, request):
         """
-        Return the forwarded userid or the auth_client's id
+        Return the forwarded userid or the auth_client's id.
 
         If a forwarded user header is set, return the ``userid`` (its value)
         Otherwise return the username parsed from the Basic Auth header
@@ -184,7 +183,7 @@ class AuthClientPolicy:
 
     def authenticated_userid(self, request):
         """
-        Return any forwarded userid or None
+        Return any forwarded userid or None.
 
         Rely mostly on
         :py:meth:`pyramid.authentication.BasicAuthAuthenticationPolicy.authenticated_userid`,
@@ -219,7 +218,7 @@ class AuthClientPolicy:
 
     def effective_principals(self, request):
         """
-        Return a list of principals for the request
+        Return a list of principals for the request.
 
         This will concatenate the principals returned by
         :py:meth:`~h.auth.policy.AuthClientPolicy.check`
@@ -246,8 +245,7 @@ class AuthClientPolicy:
     @staticmethod
     def check(username, password, request):
         """
-        Return list of appropriate principals or None if authentication is
-        unsuccessful.
+        Return list of appropriate principals or None if authentication is unsuccessful.
 
         Validate the basic auth credentials from the request by matching them to
         an auth_client record in the DB.
@@ -293,13 +291,12 @@ class AuthClientPolicy:
 
     @staticmethod
     def _forwarded_userid(request):
-        """Return forwarded userid or None"""
+        """Return forwarded userid or None."""
         return request.headers.get("X-Forwarded-User", None)
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
-
     """
     A bearer token authentication policy.
 
@@ -363,7 +360,7 @@ def _is_api_request(request):
 
 def _is_client_request(request):
     """
-    Is client_auth authentication valid for the given request?
+    Return if this is client_auth authentication valid for the given request.
 
     Uuthentication should be performed by
     :py:class:`~h.auth.policy.AuthClientPolicy` only for requests

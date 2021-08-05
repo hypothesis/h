@@ -1,4 +1,4 @@
-"""Schema for validating API group resources"""
+"""Schema for validating API group resources."""
 
 from h.i18n import TranslationString as _
 from h.models.group import (
@@ -21,7 +21,7 @@ GROUP_SCHEMA_PROPERTIES = {
 
 
 class GroupAPISchema(JSONSchema):
-    """Base class for validating group resource API data"""
+    """Base class for validating group resource API data."""
 
     schema = {"type": "object", "properties": GROUP_SCHEMA_PROPERTIES}
 
@@ -98,7 +98,7 @@ class GroupAPISchema(JSONSchema):
 
     @staticmethod
     def _whitelisted_fields_only(appstruct):
-        """Return a new appstruct containing only schema-defined fields"""
+        """Return a new appstruct containing only schema-defined fields."""
 
         new_appstruct = {}
 
@@ -110,7 +110,7 @@ class GroupAPISchema(JSONSchema):
 
 
 class CreateGroupAPISchema(GroupAPISchema):
-    """Schema for validating create-group API data"""
+    """Schema for validating create-group API data."""
 
     schema = {
         "type": "object",
@@ -121,7 +121,7 @@ class CreateGroupAPISchema(GroupAPISchema):
 
 class UpdateGroupAPISchema(GroupAPISchema):
     """
-    Class for validating update-group API data
+    Class for validating update-group API data.
 
     Currently identical to base schema
     """

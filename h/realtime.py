@@ -13,7 +13,9 @@ from h.tasks import RETRY_POLICY_QUICK, RETRY_POLICY_VERY_QUICK
 
 class Consumer(ConsumerMixin):
     """
-    A realtime consumer that listens to the configured routing key and calls
+    A realtime consumer.
+
+    Listens to the configured routing key and calls
     the wrapped handler function on receiving a matching message.
 
     Conforms to the :py:class:`kombu.mixins.ConsumerMixin` interface.
@@ -46,16 +48,13 @@ class Consumer(ConsumerMixin):
         return "realtime-{}-{}".format(self.routing_key, self._random_id())
 
     def handle_message(self, body, message):
-        """
-        Handles a realtime message by acknowledging it and then calling the
-        wrapped handler.
-        """
+        """Handle a realtime message by acknowledging it and then calling the wrapped handler."""
         message.ack()
         self.handler(body)
 
     @staticmethod
     def _random_id():
-        """Generate a short random string"""
+        """Generate a short random string."""
         data = struct.pack("Q", random.getrandbits(64))
         return base64.urlsafe_b64encode(data).strip(b"=")
 
@@ -75,14 +74,16 @@ class Publisher:
         self.exchange = get_exchange()
 
     def publish_annotation(self, payload):
-        """Publish an annotation message with the routing key 'annotation'.
+        """
+        Publish an annotation message with the routing key 'annotation'.
 
         :raise RealtimeMessageQueueError: When we cannot queue the message
         """
         self._publish("annotation", payload)
 
     def publish_user(self, payload):
-        """Publish a user message with the routing key 'user'.
+        """
+        Publish a user message with the routing key 'user'.
 
         :raise RealtimeMessageQueueError: When we cannot queue the message
         """
@@ -111,7 +112,7 @@ class Publisher:
 
 
 def get_exchange():
-    """Returns a configures `kombu.Exchange` to use for realtime messages."""
+    """Return and configures `kombu.Exchange` to use for realtime messages."""
 
     return kombu.Exchange(
         "realtime", type="direct", durable=False, delivery_mode="transient"
@@ -119,7 +120,8 @@ def get_exchange():
 
 
 def get_connection(settings, fail_fast=False):
-    """Returns a `kombu.Connection` based on the application's settings.
+    """
+    Return a `kombu.Connection` based on the application's settings.
 
     :param settings: Application settings
     :param fail_fast: Make the connection fail if we cannot get a connection

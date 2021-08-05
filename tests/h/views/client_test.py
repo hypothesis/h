@@ -33,7 +33,6 @@ class TestSidebarApp:
         csp_header = pyramid_request.response.headers["Content-Security-Policy"]
 
         assert (
-            # pylint: disable=line-too-long
             csp_header
             == "script-src http://example.com; style-src http://example.com 'unsafe-inline'"
         )

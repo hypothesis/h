@@ -1,5 +1,5 @@
 """
-add refresh_token column to token table
+Add refresh_token column to token table.
 
 Revision ID: c739ee2ae59c
 Revises: 9f5e274b202c

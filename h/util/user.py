@@ -5,7 +5,8 @@ from h.exceptions import InvalidUserId
 
 
 def split_user(userid):
-    """Return the user and domain parts from the given user id as a dict.
+    """
+    Return the user and domain parts from the given user id as a dict.
 
     For example if userid is u'acct:seanh@hypothes.is' then return
     {'username': u'seanh', 'domain': u'hypothes.is'}'

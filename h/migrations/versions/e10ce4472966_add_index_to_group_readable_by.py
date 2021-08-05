@@ -1,5 +1,5 @@
 """
-Add index to group.readable_by
+Add index to group.readable_by.
 
 Revision ID: e10ce4472966
 Revises: f0f42ffaa27d

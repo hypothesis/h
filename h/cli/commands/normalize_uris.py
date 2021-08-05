@@ -15,9 +15,7 @@ class Window(namedtuple("Window", ["start", "end"])):
 @click.command("normalize-uris")
 @click.pass_context
 def normalize_uris(ctx):
-    """
-    Normalize all URIs in the database and reindex the changed annotations.
-    """
+    """Normalize all URIs in the database and reindex the changed annotations."""
 
     request = ctx.obj["bootstrap"]()
 

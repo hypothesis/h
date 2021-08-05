@@ -120,7 +120,7 @@ def handle_message(message, session=None):
 
 
 def handle_client_id_message(message, session=None):
-    """A client telling us its client ID."""
+    """Answer to a client telling us its client ID."""
     if "value" not in message.payload:
         message.reply(
             {
@@ -137,7 +137,7 @@ MESSAGE_HANDLERS["client_id"] = handle_client_id_message  # noqa: E305
 
 
 def handle_filter_message(message, session=None):
-    """A client updating its streamer filter."""
+    """Answer to a client updating its streamer filter."""
     if "filter" not in message.payload:
         message.reply(
             {
@@ -171,7 +171,7 @@ MESSAGE_HANDLERS["filter"] = handle_filter_message  # noqa: E305
 
 
 def handle_ping_message(message, session=None):
-    """A client requesting a pong."""
+    """Answer to a client requesting a pong."""
     message.reply({"type": "pong"})
 
 
@@ -179,7 +179,7 @@ MESSAGE_HANDLERS["ping"] = handle_ping_message  # noqa: E305
 
 
 def handle_whoami_message(message, session=None):
-    """A client requesting information on its auth state."""
+    """Answer to a client requesting information on its auth state."""
     message.reply({"type": "whoyouare", "userid": message.socket.authenticated_userid})
 
 
@@ -187,7 +187,7 @@ MESSAGE_HANDLERS["whoami"] = handle_whoami_message  # noqa: E305
 
 
 def handle_unknown_message(message, session=None):
-    """Message type missing or not recognised."""
+    """Handle message type missing or not recognised."""
     type_ = json.dumps(message.payload.get("type"))
     message.reply(
         {

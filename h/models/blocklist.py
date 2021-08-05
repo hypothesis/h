@@ -5,8 +5,8 @@ from h.db import Base
 
 
 class Blocklist(Base):
-
-    """A list of URIs for which the badge API will always return 0.
+    """
+    A list of URIs for which the badge API will always return 0.
 
     This means that the Chrome extension will never show a number of
     annotations on its badge for these URIs.

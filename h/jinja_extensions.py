@@ -11,10 +11,7 @@ SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
 
 class Filters(Extension):  # pylint:disable=abstract-method
-
-    """
-    Set up filters for Jinja2.
-    """
+    """Set up filters for Jinja2."""
 
     def __init__(self, environment):
         super().__init__(environment)
@@ -62,10 +59,7 @@ def to_json(value):
 
 
 class SvgIcon(Extension):  # pylint: disable=abstract-method
-
-    """
-    Setup helpers for rendering icons.
-    """
+    """Setup helpers for rendering icons."""
 
     def __init__(self, environment):
         super().__init__(environment)

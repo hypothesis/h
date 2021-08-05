@@ -125,8 +125,7 @@ class Document(Base, mixins.Timestamps):
 
 def merge_documents(session, documents, updated=None):
     """
-    Takes a list of documents and merges them together. It returns the new
-    master document.
+    Take a list of documents and merges them together. It returns the new master document.
 
     The support for setting a specific value for the `updated` should only
     be used during the Postgres migration. It should be removed afterwards.

@@ -2,7 +2,6 @@ import elasticsearch
 
 
 class Client:
-
     """
     A convenience wrapper around a connection to Elasticsearch.
 
@@ -57,7 +56,7 @@ class Client:
 
     @property
     def version(self):
-        """The version of the elasticsearch library."""
+        """Get the version of the elasticsearch library."""
         return self._version
 
 

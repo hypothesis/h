@@ -1,5 +1,5 @@
 """
-Add authority_provided_id field, index to group
+Add authority_provided_id field, index to group.
 
 This will allow clients of the API, in certain circumstances, to set a
 unique-to-authority identifier on a group, versus having to use the

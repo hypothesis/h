@@ -3,15 +3,11 @@ from h.i18n import TranslationString as _  # noqa: N813
 
 
 class DuplicateUserError(Exception):
-    """Indicates that data violates user uniqueness constraints"""
+    """Indicates that data violates user uniqueness constraints."""
 
 
 class UserUniqueService:
-
-    """
-    A service for ensuring that data represents a unique user and will
-    not constitute a duplicate user.
-    """
+    """A service for ensuring that data represents a unique user and will not constitute a duplicate user."""
 
     def __init__(self, session, user_service):
         """
@@ -24,8 +20,9 @@ class UserUniqueService:
 
     def ensure_unique(self, data, authority):
         """
-        Ensure the provided `data` would constitute a new, non-duplicate
-        user. Check for conflicts in email, username, identity.
+        Ensure the provided `data` would constitute a new, non-duplicate user.
+
+        Check for conflicts in email, username, identity.
 
         :param data: dictionary of new-user data. Will check `email`, `username`
                      and any `identities` dictionaries provided

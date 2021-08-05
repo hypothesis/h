@@ -1,20 +1,20 @@
 """
-Fix document_uri type fields
+Fix document_uri type fields.
 
 Revision ID: 467ea2898660
 Revises: 40740282ae9e
 Create Date: 2016-06-16 18:37:20.703447
 """
-
-revision = "467ea2898660"
-down_revision = "40740282ae9e"
-
 import logging
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+revision = "467ea2898660"
+down_revision = "40740282ae9e"
+
 
 log = logging.getLogger(__name__)
 

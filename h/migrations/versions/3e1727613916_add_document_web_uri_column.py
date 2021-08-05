@@ -1,5 +1,5 @@
 """
-Add document web_uri column
+Add document web_uri column.
 
 Revision ID: 3e1727613916
 Revises: a001b7b4c78e

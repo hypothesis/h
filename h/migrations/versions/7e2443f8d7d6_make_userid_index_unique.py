@@ -1,5 +1,5 @@
 """
-Make userid index unique
+Make userid index unique.
 
 Revision ID: 7e2443f8d7d6
 Revises: faefe3b614db

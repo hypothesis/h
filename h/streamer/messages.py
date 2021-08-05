@@ -23,8 +23,7 @@ Message = namedtuple("Message", ["topic", "payload"])
 
 def process_messages(settings, routing_key, work_queue, raise_error=True):
     """
-    Configure, start, and monitor a realtime consumer for the specified
-    routing key.
+    Configure, start, and monitor a realtime consumer for the specified routing key.
 
     This sets up a :py:class:`h.realtime.Consumer` to route messages from
     `routing_key` to the passed `work_queue`, and starts it. The consumer

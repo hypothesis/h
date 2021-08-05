@@ -1,5 +1,5 @@
 """
-Add flag table
+Add flag table.
 
 Revision ID: 5655d56d7c29
 Revises: c322c57b49db

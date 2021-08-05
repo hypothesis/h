@@ -1,5 +1,5 @@
 """
-Add `setting` table
+Add `setting` table.
 
 Revision ID: 90412d879d1f
 Revises: 8ae9d103551f

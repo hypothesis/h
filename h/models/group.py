@@ -118,8 +118,7 @@ class Group(Base, mixins.Timestamps):
     @groupid.setter
     def groupid(self, value):
         """
-        Deconstruct a formatted ``groupid`` and set its constituent properties
-        on the instance.
+        Deconstruct a formatted ``groupid`` and set its constituent properties on the instance.
 
         If ``groupid`` is set to None, set ``authority_provided_id`` to None
         but leave authority untouched—this allows a caller to nullify the
@@ -182,13 +181,13 @@ class Group(Base, mixins.Timestamps):
 
     @property
     def slug(self):
-        """A version of this group's name suitable for use in a URL."""
+        """Get a version of this group's name suitable for use in a URL."""
         return slugify.slugify(self.name)
 
     @property
     def type(self):
         """
-        The "type" of this group, e.g. "open" or "private".
+        Get the "type" of this group, e.g. "open" or "private".
 
         :rtype: string
         :raises ValueError: if the type of the group isn't recognized

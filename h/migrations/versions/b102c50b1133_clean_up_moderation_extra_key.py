@@ -1,5 +1,5 @@
 """
-Clean up moderation extra key
+Clean up moderation extra key.
 
 Revision ID: b102c50b1133
 Revises: 50df3e6782aa
@@ -40,7 +40,9 @@ class Annotation(Base):
 def upgrade():
     session = Session(bind=op.get_bind())
 
-    anns = session.query(Annotation).filter(Annotation.extra.has_key("moderation"))
+    anns = session.query(Annotation).filter(
+        Annotation.extra.has_key("moderation"),  # noqa
+    )
     found = 0
     for ann in anns:
         del ann.extra["moderation"]

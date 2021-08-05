@@ -3,7 +3,6 @@ from h.models import group
 
 
 class GroupListService:
-
     """
     A service for providing filtered lists of groups.
 
@@ -24,7 +23,8 @@ class GroupListService:
         self.default_authority = default_authority
 
     def _authority(self, user=None, authority=None):
-        """Determine which authority to use.
+        """
+        Determine which authority to use.
 
         Determine the appropriate authority to use for querying groups.
         User's authority will always supersede if present; otherwise provide
@@ -37,8 +37,9 @@ class GroupListService:
 
     def session_groups(self, authority, user=None):
         """
-        Return a list of groups relevant to the user-session combination,
-        in this order:
+        Return a list of groups relevant to the user-session combination.
+
+        In this order:
 
         - WORLD GROUP:
           The special world group is returned if `authority` is the default
@@ -207,7 +208,7 @@ class GroupListService:
 
     @staticmethod
     def _sort(groups):
-        """sort a list of groups of a single type"""
+        """Sort a list of groups of a single type."""
         return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
 
 

@@ -1,6 +1,4 @@
-"""
-Support for providing Angular-compatible routes for the client.
-"""
+"""Support for providing Angular-compatible routes for the client."""
 
 
 class AngularRouteTemplater:
@@ -31,7 +29,8 @@ class AngularRouteTemplater:
             return ":{}".format(self.name)
 
     def __init__(self, route_url, params):
-        """Instantiate the templater with a route-generating function.
+        """
+        Instantiate the templater with a route-generating function.
 
         Typically, the route-generating function will be ``request.route_url``,
         but can be any function that takes a route name and keyword arguments

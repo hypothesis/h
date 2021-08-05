@@ -1,5 +1,5 @@
 """
-Add authority column to group
+Add authority column to group.
 
 Revision ID: 3acf258322d5
 Revises: c36369fe730f

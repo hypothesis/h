@@ -1,5 +1,5 @@
 """
-Remove uniqueness constraint on token.userid
+Remove uniqueness constraint on token.userid.
 
 Revision ID: e15e47228c43
 Revises: 5dce9a8c42c2

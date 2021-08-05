@@ -1,5 +1,5 @@
 """
-Update user unique constraints
+Update user unique constraints.
 
 Revision ID: b0e1a12de5e8
 Revises: bdaa06b14557

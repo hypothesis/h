@@ -1,6 +1,6 @@
 def csp_protected_view(view, info):
     """
-    A view deriver which adds Content-Security-Policy headers to responses.
+    Add Content-Security-Policy headers to responses.
 
     By default, a global policy is applied to every view.
 

@@ -2,10 +2,7 @@ from h.models.organization import Organization
 
 
 class ListOrganizationsService:
-
-    """
-    A service for providing a list of organizations.
-    """
+    """A service for providing a list of organizations."""
 
     def __init__(self, session):
         """
@@ -17,8 +14,9 @@ class ListOrganizationsService:
 
     def organizations(self, authority=None):
         """
-        Return a list of organizations filtered on authority and
-        sorted by name. If authority is None, return a list of
+        Return a list of organizations filtered on authority and sorted by name.
+
+        If authority is None, return a list of
         all organizations.
         """
         filter_args = {}
@@ -34,8 +32,5 @@ class ListOrganizationsService:
 
 
 def list_organizations_factory(_context, request):
-    """
-    Return a ListOrganizationsService instance for the passed
-    context.
-    """
+    """Return a ListOrganizationsService instance for the passed context."""
     return ListOrganizationsService(session=request.db)

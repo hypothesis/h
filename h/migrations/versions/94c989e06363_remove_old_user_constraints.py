@@ -1,5 +1,5 @@
 """
-Remove old user constraints
+Remove old user constraints.
 
 These were created in b0e1a12de5e8 in order to avoid making that migration
 irreversible. This is the irreversible part.

@@ -1,5 +1,5 @@
 """
-Relax password constraints
+Relax password constraints.
 
 Revision ID: 504a6a4db06d
 Revises: de42d613c18d

@@ -1,5 +1,5 @@
 """
-Add constraints to user NIPSA column
+Add constraints to user NIPSA column.
 
 Revision ID: f9d3058bec5f
 Revises: b7117b569f8b

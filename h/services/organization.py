@@ -4,7 +4,6 @@ from h.models import Organization
 
 
 class OrganizationService:
-
     """A service for manipulating organizations."""
 
     def __init__(self, session):
@@ -41,7 +40,8 @@ class OrganizationService:
         return self.session.query(Organization).filter_by(pubid=pubid).one_or_none()
 
     def get_default(self, authority=None):
-        """Get the default org with an option to create it if missing.
+        """
+        Get the default org with an option to create it if missing.
 
         :param authority: Create an org with this authority if none is found
         :return: The public organization or None.

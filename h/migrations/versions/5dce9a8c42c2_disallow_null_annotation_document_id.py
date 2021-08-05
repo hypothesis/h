@@ -1,5 +1,5 @@
 """
-Disallow null annotation document_id
+Disallow null annotation document_id.
 
 Revision ID: 5dce9a8c42c2
 Revises: bcdd81e23920

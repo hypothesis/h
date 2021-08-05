@@ -9,7 +9,7 @@ class RootFactory:
 
 
 class Root(RootFactory):
-    """This app's default root factory."""
+    """The app's default root factory."""
 
     @classmethod
     def __acl__(cls):

@@ -6,7 +6,7 @@ from h.services.exceptions import ConflictError, ValidationError
 class UserUpdateService:
     def __init__(self, session):
         """
-        Create a new UserUpdateService
+        Create a new UserUpdateService.
 
         :param session: the SQLAlchemy session object
         """

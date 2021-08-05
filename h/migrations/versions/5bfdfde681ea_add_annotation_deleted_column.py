@@ -1,5 +1,5 @@
 """
-Add annotation deleted column
+Add annotation deleted column.
 
 Revision ID: 5bfdfde681ea
 Revises: 90412d879d1f

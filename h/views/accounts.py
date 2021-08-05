@@ -164,7 +164,6 @@ class AuthController:
     renderer="h:templates/accounts/forgot_password.html.jinja2",
 )
 class ForgotPasswordController:
-
     """Controller for handling forgotten password forms."""
 
     def __init__(self, request):
@@ -214,7 +213,6 @@ class ForgotPasswordController:
     route_name="account_reset", renderer="h:templates/accounts/reset.html.jinja2"
 )
 class ResetController:
-
     """Controller for handling password reset forms."""
 
     def __init__(self, request):
@@ -430,7 +428,7 @@ class AccountController:
 
     @view_config(request_method="POST", request_param="__formid__=email")
     def post_email_form(self):
-        """Called by Pyramid when the change email form is submitted."""
+        # Called by Pyramid when the change email form is submitted.
         return form.handle_form_submission(
             self.request,
             self.forms["email"],
@@ -440,7 +438,7 @@ class AccountController:
 
     @view_config(request_method="POST", request_param="__formid__=password")
     def post_password_form(self):
-        """Called by Pyramid when the change password form is submitted."""
+        # Called by Pyramid when the change password form is submitted.
         return form.handle_form_submission(
             self.request,
             self.forms["password"],
@@ -483,7 +481,7 @@ class EditProfileController:
 
     @view_config(request_method="GET")
     def get(self):
-        """Render the 'Edit Profile' form"""
+        """Render the 'Edit Profile' form."""
         user = self.request.user
         self.form.set_appstruct(
             {

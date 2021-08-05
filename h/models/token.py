@@ -7,8 +7,7 @@ from h.db import Base, mixins
 
 
 class Token(Base, mixins.Timestamps):
-
-    """
+    r"""
     An API access token for a user.
 
     These fall into two categories:
@@ -56,7 +55,7 @@ class Token(Base, mixins.Timestamps):
 
     @property
     def expired(self):
-        """True if this access token has expired, False otherwise."""
+        """Return True if this access token has expired, False otherwise."""
         if self.expires:
             return datetime.datetime.utcnow() > self.expires
 
@@ -64,7 +63,7 @@ class Token(Base, mixins.Timestamps):
 
     @property
     def refresh_token_expired(self):
-        """True if this refresh token has expired, False otherwise."""
+        """Return True if this refresh token has expired, False otherwise."""
         if self.refresh_token_expires:
             return datetime.datetime.utcnow() > self.refresh_token_expires
 
@@ -72,7 +71,7 @@ class Token(Base, mixins.Timestamps):
 
     @property
     def ttl(self):
-        """The amount of time from now until this token expires, in seconds."""
+        """Get the amount of time from now until this token expires, in seconds."""
         if not self.expires:
             return None
 

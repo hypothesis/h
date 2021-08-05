@@ -97,9 +97,7 @@ def stream_tag_redirect(request):
 
 @view_config(route_name="stream.user_query")
 def stream_user_redirect(request):
-    """
-    Redirect to a user's activity page.
-    """
+    """Redirect to a user's activity page."""
 
     user = request.matchdict["user"]
 

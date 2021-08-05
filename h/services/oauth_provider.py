@@ -71,8 +71,8 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         # WARNING! - Don't think because this is here it should be. This is
         # almost certainly a hack on a hack here to prevent the overloaded
         # method from throwing a fit. If you can get rid of this you should.
-
-        """Ensure the request is valid.
+        """
+        Ensure the request is valid.
 
         We are overriding the base class here to ensure that client_id is in
         place to allow 'unauthenticated' access to the revocation end-point.
@@ -103,7 +103,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
 
     def load_client_id_from_refresh_token(self, request):
         """
-        Custom validator which sets the client_id from a given refresh token
+        Add a custom validator which sets the client_id from a given refresh token.
 
         For the refresh token flow, RFC 6749 states that public clients only need
         to be verified when the `client_id` is provided. oauthlib seems to be

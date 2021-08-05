@@ -1,5 +1,5 @@
 """
-Fill in annotation text_rendered column
+Fill in annotation text_rendered column.
 
 Revision ID: d536d9a342f3
 Revises: 39b1935d9e7b

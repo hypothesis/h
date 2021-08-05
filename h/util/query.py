@@ -4,8 +4,7 @@ import sqlalchemy as sa
 
 def column_windows(session, column, windowsize=2000, where=None):
     """
-    Return a series of WHERE clauses against a given column that break it into
-    windows.
+    Return a series of WHERE clauses against a given column that break it into windows.
 
     :param session: the SQLAlchemy session object
     :param column: the SQLAlchemy column object with which to generate windows

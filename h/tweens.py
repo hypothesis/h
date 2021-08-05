@@ -14,7 +14,7 @@ resolver = DottedNameResolver(None)
 
 
 def conditional_http_tween_factory(handler, registry):
-    """A tween that sets up conditional response handling for some requests."""
+    """Set up conditional response handling for some requests."""
 
     def conditional_http_tween(request):
         response = handler(request)
@@ -109,9 +109,7 @@ def security_header_tween_factory(handler, registry):
 
 
 def cache_header_tween_factory(handler, registry):
-    """
-    Sets default caching headers on responses depending on the content type.
-    """
+    """Set default caching headers on responses depending on the content type."""
 
     def cache_header_tween(request):
         resp = handler(request)
@@ -127,8 +125,9 @@ def cache_header_tween_factory(handler, registry):
 
 def rollback_db_session_on_exception_factory(handler, registry):
     """
-    Catches exceptions and rolls the database handle back so it can be reliably
-    used again regardless of what exception caused the error.
+    Catch exceptions and rolls the database back.
+
+    Thas way it can be reliably used again regardless of what exception caused the error.
     """
 
     # Intended to be run before excview_tween_factory here:

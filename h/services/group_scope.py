@@ -7,7 +7,8 @@ class GroupScopeService:
         self._session = session
 
     def fetch_by_scope(self, url):
-        """Return GroupScope records that match the given URL
+        """
+        Return GroupScope records that match the given URL.
 
         :arg url: URL to find matching scopes for
         :type url: str

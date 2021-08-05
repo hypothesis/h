@@ -3,7 +3,7 @@ from h.views.api import API_VERSIONS
 
 def media_type_for_version(version, subtype="json"):
     """
-    Return the media type corresponding to a particular version string
+    Return the media type corresponding to a particular version string.
 
     :arg version:  The major API version, e.g. ``"v1"``
     :type version: str
@@ -17,7 +17,7 @@ def media_type_for_version(version, subtype="json"):
 
 def valid_media_types():
     """
-    Return a list of all valid API media types
+    Return a list of all valid API media types.
 
     This represents a list of all of the Accept header values that are known to
     the API. This includes all version-specific media types.
@@ -36,7 +36,7 @@ def valid_media_types():
 
 def version_media_types(versions=None):
     """
-    Return the media types corresponding to versions
+    Return the media types corresponding to versions.
 
     :arg versions: media types will be returned for these versions, e.g. "v1",
                    defaults to all known versions

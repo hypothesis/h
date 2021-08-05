@@ -1,5 +1,5 @@
 """
-Add normalised username index
+Add normalised username index.
 
 Revision ID: 1a40e75a524d
 Revises: 02db2fa6ea98

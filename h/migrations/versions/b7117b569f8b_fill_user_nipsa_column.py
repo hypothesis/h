@@ -1,5 +1,5 @@
 """
-Fill user NIPSA column
+Fill user NIPSA column.
 
 Revision ID: b7117b569f8b
 Revises: ddb5f0baa429

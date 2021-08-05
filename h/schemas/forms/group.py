@@ -24,7 +24,6 @@ def unblacklisted_group_name_slug(node, value):
 
 
 def group_schema(autofocus_name=False):
-
     """Return a schema for the form for creating or editing a group."""
 
     schema = CSRFSchema()

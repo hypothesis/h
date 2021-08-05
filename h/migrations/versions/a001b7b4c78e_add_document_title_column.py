@@ -1,5 +1,5 @@
 """
-Add document title column
+Add document title column.
 
 Revision ID: a001b7b4c78e
 Revises: 94c989e06363

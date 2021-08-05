@@ -1,4 +1,5 @@
-"""Remove trailing # from PDF URNs.
+"""
+Remove trailing # from PDF URNs.
 
 Revision ID: 9e6b4f70f588
 Revises: 467ea2898660

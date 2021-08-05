@@ -18,7 +18,8 @@ log = logging.getLogger(__name__)
 
 
 def handles_oauth_errors(wrapped):
-    """Catch oauthlib errors and raise an appropriate exception.
+    """
+    Catch oauthlib errors and raise an appropriate exception.
 
     This prevents unhandled errors from crashing the app.
     """

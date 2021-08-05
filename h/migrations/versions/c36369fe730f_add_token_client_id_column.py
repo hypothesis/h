@@ -1,5 +1,5 @@
 """
-Add token.client_id column
+Add token.client_id column.
 
 Revision ID: c36369fe730f
 Revises: e15e47228c43

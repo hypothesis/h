@@ -31,7 +31,7 @@ class DeveloperTokenService:
 
     def create(self, userid):
         """
-        Creates a developer token for the given userid.
+        Create a developer token for the given userid.
 
         :param userid: The userid for which the developer token gets created.
         :type userid: unicode

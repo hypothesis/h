@@ -7,7 +7,7 @@ from h.db.types import _get_hex_from_urlsafe, _get_urlsafe_from_hex
 
 @click.group("annotation-id")
 def annotation_id():
-    """Utility commands to convert annotation IDS."""
+    """Add sutility commands to convert annotation IDS."""
 
 
 @annotation_id.command("from-urlsafe")

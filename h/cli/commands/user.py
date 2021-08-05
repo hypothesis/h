@@ -117,7 +117,7 @@ def password(ctx, username, authority, password):
 @click.pass_context
 def delete(ctx, username, authority):
     """
-    Deletes a user with all their group memberships and annotations.
+    Delete a user with all their group memberships and annotations.
 
     You must specify the username of a user to delete.
     """

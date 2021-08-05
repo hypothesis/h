@@ -1,5 +1,5 @@
 """
-Add world group
+Add world group.
 
 Revision ID: 1c995723a271
 Revises: 21b1ce37e327

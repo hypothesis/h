@@ -1,4 +1,4 @@
-"""Tools for generating links to domain objects. """
+"""Tools for generating links to domain objects."""
 
 from pyramid.request import Request
 
@@ -8,7 +8,6 @@ LINK_GENERATORS_KEY = "h.links.link_generators"
 
 
 class LinksService:
-
     """A service for generating links to annotations."""
 
     def __init__(self, base_url, registry):
@@ -75,7 +74,7 @@ def links_factory(_context, request):
 
 def add_annotation_link_generator(config, name, generator, hidden=False):
     """
-    Registers a function which generates a named link for an annotation.
+    Register a function which generates a named link for an annotation.
 
     Annotation hypermedia links are added to the rendered annotations in a
     `links` property or similar. `name` is the unique identifier for the link

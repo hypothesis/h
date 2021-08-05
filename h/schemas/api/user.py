@@ -72,7 +72,7 @@ class UpdateUserAPISchema(JSONSchema):
 
     @staticmethod
     def _whitelisted_properties_only(appstruct):
-        """Return a new appstruct containing only schema-defined fields"""
+        """Return a new appstruct containing only schema-defined fields."""
 
         new_appstruct = {}
 

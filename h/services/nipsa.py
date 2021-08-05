@@ -2,11 +2,7 @@ from h.models import User
 
 
 class NipsaService:
-
-    """
-    A service which provides access to the state of "not-in-public-site-areas"
-    (NIPSA) flags on userids.
-    """
+    """A service which provides access to the state of "not-in-public-site-areas" (NIPSA) flags on userids."""
 
     def __init__(self, session, get_search_index):
         self.session = session

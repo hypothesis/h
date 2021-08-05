@@ -1,5 +1,5 @@
 """
-Add group access flags
+Add group access flags.
 
 Revision ID: af88524994ce
 Revises: 8990247b876c

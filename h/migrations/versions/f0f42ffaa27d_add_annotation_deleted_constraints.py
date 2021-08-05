@@ -1,5 +1,5 @@
 """
-Add constraints and defaults to annotation deleted column
+Add constraints and defaults to annotation deleted column.
 
 Revision ID: f0f42ffaa27d
 Revises: 9cbc5c5ad23d

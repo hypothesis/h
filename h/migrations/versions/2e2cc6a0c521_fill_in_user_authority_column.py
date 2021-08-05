@@ -1,5 +1,5 @@
 """
-Fill in user authority column
+Fill in user authority column.
 
 Revision ID: 2e2cc6a0c521
 Revises: f48100c9af86

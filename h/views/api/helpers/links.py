@@ -1,8 +1,8 @@
-"""Helpers for generating and retrieving service link metadata"""
+"""Helpers for generating and retrieving service link metadata."""
 
 
 class ServiceLink:
-    """Encapsulate metadata about an API service"""
+    """Encapsulate metadata about an API service."""
 
     def __init__(self, name, route_name, method="GET", description=None):
         self.name = name
@@ -12,7 +12,7 @@ class ServiceLink:
 
     def primary_method(self):
         """
-        Determine the primary HTTP method for this service
+        Determine the primary HTTP method for this service.
 
         If the ``method`` indicated is a tuple, the first entry will be
         returned.
@@ -29,7 +29,7 @@ class ServiceLink:
 
 def register_link(link, versions, registry):
     """
-    Register an API service's metadata for its supported versions
+    Register an API service's metadata for its supported versions.
 
     Add an entry for the indicated ``link`` onto the ``registry`` for each
     of the versions it claims to supported. These entries include basic
@@ -55,7 +55,7 @@ def register_link(link, versions, registry):
 
 
 def format_nested_links(api_links, templater):
-    """Format API link metadata as nested dicts for V1 variant of API index"""
+    """Format API link metadata as nested dicts for V1 variant of API index."""
     formatted_links = {}
     for link in api_links:
         method_info = {

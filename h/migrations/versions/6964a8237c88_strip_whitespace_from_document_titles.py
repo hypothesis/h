@@ -1,5 +1,5 @@
 """
-strip whitespace from document titles
+Strip whitespace from document titles.
 
 Revision ID: 6964a8237c88
 Revises: 5e535a075f16

@@ -1,5 +1,5 @@
 """
-Add annotation document_id column
+Add annotation document_id column.
 
 Revision ID: addee5d1686f
 Revises: 63e8b1fe1d4b

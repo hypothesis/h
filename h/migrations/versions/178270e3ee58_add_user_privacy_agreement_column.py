@@ -1,5 +1,5 @@
 """
-Add user privacy agreement column
+Add user privacy agreement column.
 
 Add a column to track user's most recent acceptance of privacy policy
 """

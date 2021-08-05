@@ -1,5 +1,5 @@
 """
-Remove user uid column
+Remove user uid column.
 
 Revision ID: c322c57b49db
 Revises: 18dfed902c9e

@@ -1,5 +1,5 @@
 """
-Backfill group access flags
+Backfill group access flags.
 
 Revision ID: 8ae9d103551f
 Revises: af88524994ce

@@ -8,7 +8,8 @@ _ = i18n.TranslationStringFactory(__package__)
 
 
 def _feed_entry_from_annotation(annotation, annotation_url, annotation_api_url=None):
-    """Return an Atom feed entry for the given annotation.
+    """
+    Return an Atom feed entry for the given annotation.
 
     :returns: A logical representation of the Atom feed entry as a dict,
         containing all of the data that a template would need to render the
@@ -63,7 +64,8 @@ def feed_from_annotations(
     title=None,
     subtitle=None,
 ):
-    """Return an Atom feed for the given list of annotations.
+    """
+    Return an Atom feed for the given list of annotations.
 
     :returns: A logical representation of an Atom feed as a Python dict
         containing all of the data that a template would need to render the

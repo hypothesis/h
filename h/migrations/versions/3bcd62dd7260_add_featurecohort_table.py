@@ -1,4 +1,5 @@
-"""add cohort table
+"""
+Add cohort table.
 
 Revision ID: 3bcd62dd7260
 Revises: dfa82518915a
@@ -6,12 +7,12 @@ Create Date: 2016-05-10 17:01:02.704596
 
 """
 
+import sqlalchemy as sa
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision = "3bcd62dd7260"
 down_revision = "dfa82518915a"
-
-import sqlalchemy as sa
-from alembic import op
 
 
 def upgrade():

@@ -1,5 +1,5 @@
 """
-Add index to annotation thread root
+Add index to annotation thread root.
 
 Revision ID: 9389d52b037d
 Revises: b102c50b1133

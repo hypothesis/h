@@ -64,7 +64,7 @@ class Search:
 
     def run(self, params):
         """
-        Execute the search query
+        Execute the search query.
 
         :param params: the search parameters that will be popped by each of the filters.
         :type params: webob.multidict.MultiDict
@@ -95,9 +95,7 @@ class Search:
         self._aggregations.append(aggregation)
 
     def _search(self, modifiers, aggregations, params):
-        """
-        Applies the modifiers, aggregations, and executes the search.
-        """
+        """Apply the modifiers, aggregations, and executes the search."""
         # Don't return any fields, just the metadata so set _source=False.
         search = elasticsearch_dsl.Search(
             using=self.es.conn, index=self.es.index
