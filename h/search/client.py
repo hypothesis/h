@@ -3,7 +3,7 @@ import elasticsearch
 
 class Client:
     """
-    A convenience wrapper around a connection to Elasticsearch.
+    Adds a convenience wrapper around a connection to Elasticsearch.
 
     Holds a connection object, an index name, the elasticsearch library version,
     and the name of the mapping type.

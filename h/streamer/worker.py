@@ -96,7 +96,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
 
 class GEventWebSocketPool(Pool):
     """
-    Simple pool of bound websockets.
+    Creates a simple pool of bound websockets.
 
     Internally it uses a gevent group to track the websockets. The server
     should call the ``clear`` method to initiate the closing handshake when the

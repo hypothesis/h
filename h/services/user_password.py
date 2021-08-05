@@ -5,7 +5,7 @@ from h.security import password_context
 
 class UserPasswordService:
     """
-    A service for checking and updating user passwords.
+    Adds a service for checking and updating user passwords.
 
     This service is responsible for verifying and updating user passwords, and
     specifically for ensuring that we automatically upgrade user password

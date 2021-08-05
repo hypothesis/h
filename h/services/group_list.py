@@ -4,7 +4,7 @@ from h.models import group
 
 class GroupListService:
     """
-    A service for providing filtered lists of groups.
+    Adds a service for providing filtered lists of groups.
 
     This service filters groups by user session, scope, etc.
 
