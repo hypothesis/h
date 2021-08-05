@@ -1,8 +1,3 @@
-# pylint: disable=no-self-use
-"""
-The `conftest` module is automatically loaded by pytest and serves as a place
-to put fixture functions that are useful application-wide.
-"""
 import functools
 import os
 from unittest import mock
@@ -35,7 +30,6 @@ Session = sessionmaker()
 
 
 class DummyFeature:
-
     """
     A dummy feature flag looker-upper.
 
@@ -56,11 +50,6 @@ class DummyFeature:
 
 
 class DummySession:
-
-    """
-    A dummy database session.
-    """
-
     def __init__(self):
         self.added = []
         self.deleted = []
@@ -207,7 +196,7 @@ def patch(request):
 
 @pytest.fixture
 def pyramid_config(pyramid_settings, pyramid_request):
-    """Pyramid configurator object."""
+    """Return Pyramid configurator object."""
     with testing.testConfig(
         request=pyramid_request, settings=pyramid_settings
     ) as config:
@@ -220,7 +209,7 @@ def pyramid_config(pyramid_settings, pyramid_request):
 
 @pytest.fixture
 def pyramid_request(db_session, fake_feature, pyramid_settings):
-    """Dummy Pyramid request object."""
+    """Return pyramid request object."""
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
     request.default_authority = TEST_AUTHORITY
     request.create_form = mock.Mock()
@@ -236,12 +225,12 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
 
 @pytest.fixture
 def pyramid_csrf_request(pyramid_request):
-    """Dummy Pyramid request object with a valid CSRF token."""
+    """Return a dummy Pyramid request object with a valid CSRF token."""
     pyramid_request.headers["X-CSRF-Token"] = pyramid_request.session.get_csrf_token()
     return pyramid_request
 
 
 @pytest.fixture
 def pyramid_settings():
-    """Default app settings."""
+    """Return the default app settings."""
     return {"sqlalchemy.url": TEST_DATABASE_URL}

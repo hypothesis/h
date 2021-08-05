@@ -83,7 +83,7 @@ class TestAnnotationBasePresenter:
 
 
 class Berlin(datetime.tzinfo):
-    """Berlin timezone, without DST support"""
+    """Berlin timezone, without DST support."""
 
     def dst(self, dt):
         return datetime.timedelta()

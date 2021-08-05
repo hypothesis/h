@@ -33,11 +33,9 @@ class TestExtract:
     def test_overrides_group_term_for_group_search_requests(
         self, parse, pyramid_request
     ):
-        """
-        If the query sent to a group search page includes a group, we override
-        it, because otherwise we'll display the union of the results for those
-        two groups, which makes no sense.
-        """
+        # If the query sent to a group search page includes a group, we override
+        # it, because otherwise we'll display the union of the results for those
+        # two groups, which makes no sense.
         parse.return_value = MultiDict({"foo": "bar", "group": "whattheusersent"})
         pyramid_request.matched_route.name = "group_read"
         pyramid_request.matchdict["pubid"] = "abcd1234"
@@ -48,11 +46,9 @@ class TestExtract:
         assert result.dict_of_lists() == {"foo": ["bar"], "group": ["abcd1234"]}
 
     def test_overrides_user_term_for_user_search_requests(self, parse, pyramid_request):
-        """
-        If the query sent to a user search page includes a user, we override
-        it, because otherwise we'll display the union of the results for those
-        two users, which makes no sense.
-        """
+        # If the query sent to a user search page includes a user, we override
+        # it, because otherwise we'll display the union of the results for those
+        # two users, which makes no sense.
         parse.return_value = MultiDict({"foo": "bar", "user": "whattheusersent"})
         pyramid_request.matched_route.name = "activity.user_search"
         pyramid_request.matchdict["username"] = "josiah"

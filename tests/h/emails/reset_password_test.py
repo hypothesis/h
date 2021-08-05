@@ -48,7 +48,7 @@ class TestGenerate:
     def test_jinja_templates_render(
         self, pyramid_config, pyramid_request, serializer, user
     ):
-        """Ensure that the jinja templates don't contain syntax errors"""
+        """Ensure that the jinja templates don't contain syntax errors."""
         pyramid_config.include("pyramid_jinja2")
         pyramid_request.registry.password_reset_serializer = serializer
 

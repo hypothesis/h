@@ -8,10 +8,8 @@ from h.util.db import lru_cache_in_transaction, on_transaction_end
 
 class TestLRUCacheInTransaction:
     def test_caches_during_transaction(self, db_session, mock_transaction):
-        """
-        Return values should be cached during the transaction, and the cache
-        cleared when the transaction ends.
-        """
+        # Return values should be cached during the transaction, and the cache
+        # cleared when the transaction ends.
 
         @lru_cache_in_transaction(db_session)
         def random_float(*args, **kwargs):
@@ -34,9 +32,7 @@ class TestLRUCacheInTransaction:
     def test_cache_not_cleared_for_nested_transaction(
         self, db_session, mock_transaction
     ):
-        """
-        The cache should not be cleared when a nested transaction ends.
-        """
+        """The cache should not be cleared when a nested transaction ends."""
 
         @lru_cache_in_transaction(db_session)
         def random_float(*args, **kwargs):

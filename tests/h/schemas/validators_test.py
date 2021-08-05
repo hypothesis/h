@@ -41,7 +41,5 @@ class TestEmail:
 
     @pytest.fixture
     def schema_node(self):
-        """
-        Mock for `colander.SchemaNode` arg that validator callables require.
-        """
+        """Mock for `colander.SchemaNode` arg that validator callables require."""
         return Mock(spec_set=[])

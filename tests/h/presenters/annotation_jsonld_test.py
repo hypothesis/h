@@ -62,11 +62,9 @@ class TestAnnotationJSONLDPresenter:
         ]
 
     def test_rewrites_rangeselectors_same_element(self, presenter, annotation):
-        """
-        A RangeSelector that starts and ends in the same element should be
-        rewritten to an XPathSelector refinedBy a TextPositionSelector, for
-        the sake of simplicity.
-        """
+        # A RangeSelector that starts and ends in the same element should be
+        # rewritten to an XPathSelector refinedBy a TextPositionSelector, for
+        # the sake of simplicity.
         annotation.target_selectors = [
             {
                 "type": "RangeSelector",
@@ -88,11 +86,9 @@ class TestAnnotationJSONLDPresenter:
         ]
 
     def test_rewrites_rangeselectors_different_element(self, presenter, annotation):
-        """
-        A RangeSelector that starts and ends in the different elements should
-        be rewritten to a RangeSelector bounded by two XPathSelectors, each of
-        which is refinedBy a "point"-like TextPositionSelector.
-        """
+        # A RangeSelector that starts and ends in the different elements should
+        # be rewritten to a RangeSelector bounded by two XPathSelectors, each of
+        # which is refinedBy a "point"-like TextPositionSelector.
         annotation.target_selectors = [
             {
                 "type": "RangeSelector",

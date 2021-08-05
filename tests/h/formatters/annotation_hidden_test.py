@@ -62,7 +62,8 @@ class TestNonAuthorHiding:
 
 
 class TestAuthorHiding:
-    """The author usually does not see their annotations have been hidden.
+    """
+    The author usually does not see their annotations have been hidden.
 
     The one exception is when they are also a moderator for the group.
     """

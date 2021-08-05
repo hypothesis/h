@@ -36,7 +36,6 @@ def update_annotation_schema_validate(
     ids=["CreateAnnotationSchema.validate()", "UpdateAnnotationSchema.validate()"],
 )
 class TestCreateUpdateAnnotationSchema:
-
     """Shared tests for CreateAnnotationSchema and UpdateAnnotationSchema."""
 
     def test_it_does_not_raise_for_minimal_valid_data(self, pyramid_request, validate):
@@ -285,13 +284,10 @@ class TestCreateUpdateAnnotationSchema:
     def test_it_does_not_pass_modified_dict_to_document_metas_from_data(
         self, document_claims, pyramid_request, validate
     ):
-        """
+        # If document_uris_from_data() modifies the document dict that it's
+        # given, the original dict (or one with the same values as it) should be
+        # passed t document_metas_from_data(), not the modified copy.
 
-        If document_uris_from_data() modifies the document dict that it's
-        given, the original dict (or one with the same values as it) should be
-        passed t document_metas_from_data(), not the modified copy.
-
-        """
         document = {
             "top_level_key": "original_value",
             "sub_dict": {"key": "original_value"},

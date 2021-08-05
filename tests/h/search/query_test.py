@@ -183,14 +183,12 @@ class TestSorter:
     def test_incomplete_date_defaults_to_min_datetime_values(
         self, es_dsl_search, pyramid_request
     ):
-        """
-        The default date should be:
-            1970, 1st month, 1st day, 0 hrs, 0 min, 0 sec, 0 ms
-        """
         sorter = query.Sorter()
 
         params = {"search_after": "2018"}
 
+        # The default date should be:
+        #    1970, 1st month, 1st day, 0 hrs, 0 min, 0 sec, 0 ms
         q = sorter(es_dsl_search, params).to_dict()
 
         assert q["search_after"] == [1514764800000.0]
@@ -574,9 +572,7 @@ class TestUriCombinedWildcardFilter:
     def test_matches(
         self, get_search, Annotation, params, expected_ann_indexes, separate_keys
     ):
-        """
-        All uri matches (wildcard and exact) are OR'd.
-        """
+        """All uri matches (wildcard and exact) are OR'd."""
         search = get_search(separate_keys)
 
         ann_ids = [
@@ -814,11 +810,6 @@ class TestAnyMatcher:
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
     def test_ands_any_matches(self, search, Annotation):
-        """
-        Any is expected to match all of the following fields;
-        quote, text, uri.parts, and tags
-        that contain any of the passed keywords.
-        """
         _ = Annotation(text="bar is best").id
         _ = Annotation(tags=["foo"]).id
 
@@ -832,6 +823,8 @@ class TestAnyMatcher:
         params = webob.multidict.MultiDict()
         params.add("any", "foo")
         params.add("any", "bar")
+        # Any is expected to match all of quote, text, uri.parts, and tags
+        # containing any of the passed keywords.
         result = search.run(params)
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)

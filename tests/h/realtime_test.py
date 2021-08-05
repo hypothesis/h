@@ -149,7 +149,7 @@ class TestGetExchange:
         assert not exchange.durable
 
     def test_delivery_mode(self):
-        """Test that delivery mode is 1 (transient)"""
+        """Test that delivery mode is 1 (transient)."""
         exchange = realtime.get_exchange()
         assert exchange.delivery_mode == 1
 

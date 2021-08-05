@@ -114,7 +114,6 @@ class TestSearchController:
     "search",
 )
 class TestGroupSearchController:
-
     """Tests unique to GroupSearchController."""
 
     def test_renders_join_template_when_no_read_permission(
@@ -136,9 +135,7 @@ class TestGroupSearchController:
     def test_renders_join_template_when_not_logged_in(
         self, controller, factories, pyramid_request, group
     ):
-        """
-        If user is logged out and has no read permission, prompt to login and join.
-        """
+        """If user is logged out and has no read permission, prompt to login and join."""
 
         def fake_has_permission(permission, context=None):
             return False
@@ -635,12 +632,10 @@ class TestGroupSearchController:
         annotation_stats_service,
         pyramid_request,
     ):
-        """
-        In cases where the annotation count returned from search is the same calc
-        as the annotation count that would be returned from the stats service,
-        re-use that value rather than executing another query inside the stats
-        service.
-        """
+        # In cases where the annotation count returned from search is the same calc
+        # as the annotation count that would be returned from the stats service,
+        # re-use that value rather than executing another query inside the stats
+        # service.
         controller.parsed_query_params = MultiDict({"group": test_group})
         result = controller.search()["stats"]
         annotation_stats_service.group_annotation_count.assert_not_called()
@@ -726,7 +721,8 @@ class TestGroupSearchController:
     def test_leave_removes_empty_query_from_url(
         self, controller, test_group, pyramid_request, group_leave_request, q
     ):
-        """It should remove an empty q from the URL it redirects to.
+        """
+        It should remove an empty q from the URL it redirects to.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
         """
@@ -840,7 +836,8 @@ class TestGroupSearchController:
     def test_toggle_user_facet_removes_empty_query(
         self, controller, test_group, pyramid_request, toggle_user_facet_request, q
     ):
-        """It should remove an empty query from the URL.
+        """
+        It should remove an empty query from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
         """
@@ -975,12 +972,10 @@ class TestUserSearchController:
     def test_search_reuses_user_annotation_count_if_able(
         self, controller, pyramid_config, query, annotation_stats_service, user
     ):
-        """
-        In cases where the annotation count returned from search is the same calc
-        as the annotation count that would be returned from the stats service,
-        re-use that value rather than executing another query inside the stats
-        service.
-        """
+        # In cases where the annotation count returned from search is the same calc
+        # as the annotation count that would be returned from the stats service,
+        # re-use that value rather than executing another query inside the stats
+        # service.
         controller.parsed_query_params = MultiDict({"user": user})
         result = controller.search()["stats"]
         annotation_stats_service.user_annotation_count.assert_not_called()
@@ -1065,7 +1060,8 @@ class TestUserSearchController:
 
     @pytest.mark.parametrize("q", ["", "   "])
     def test_back_removes_empty_query(self, controller, user, pyramid_request, q):
-        """It should remove an empty q param from the URL.
+        """
+        It should remove an empty q param from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
         """
@@ -1127,7 +1123,8 @@ class TestGroupAndUserSearchController:
     def test_delete_lozenge_removes_empty_queries(
         self, controller, delete_lozenge_request, q
     ):
-        """It should remove an empty q from the URL.
+        """
+        It should remove an empty q from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
         """
@@ -1189,7 +1186,8 @@ class TestGroupAndUserSearchController:
     def test_toggle_tag_facet_removes_empty_query(
         self, controller, toggle_tag_facet_request, q
     ):
-        """It should remove an empty q from the URL.
+        """
+        It should remove an empty q from the URL.
 
         We don't want to redirect to a URL with a pointless trailing empty ?q=.
         """
@@ -1203,6 +1201,7 @@ class TestGroupAndUserSearchController:
     def controller(self, request):
         """
         Return a UserSearchController and a GroupSearchController.
+
         Any test that uses this fixture will be called twice - once with a
         UserSearchController instance as the controller argument, and once with
         a GroupSearchController.

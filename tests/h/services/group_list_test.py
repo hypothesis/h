@@ -291,14 +291,14 @@ class TestGroupListFactory:
 
 @pytest.fixture
 def other_authority():
-    """Return a consistent, different authority for groups in these tests"""
+    """Return a consistent, different authority for groups in these tests."""
     return "surreptitious.com"
 
 
 @pytest.fixture
 def default_authority(pyramid_request):
     """
-    Return the test env request's default authority, i.e. 'example.com'
+    Return the test env request's default authority, i.e. 'example.com'.
 
     Return the default authority—this automatically has a `__world__` group
     """

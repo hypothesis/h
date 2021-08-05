@@ -12,9 +12,7 @@ from h.views.admin.oauthclients import (
 
 
 class FakeForm:
-    """
-    Fake implementation of `deform.form.Form`.
-    """
+    """Fake implementation of `deform.form.Form`."""
 
     appstruct = None
 
@@ -260,9 +258,7 @@ class TestAuthClientEditController:
 
 @pytest.fixture
 def form_post():
-    """
-    POST data fixture for submission of authclient create and edit forms.
-    """
+    """POST data fixture for submission of authclient create and edit forms."""
     return {
         "name": "new-name",
         "authority": "newauth.org",

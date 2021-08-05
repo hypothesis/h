@@ -17,7 +17,8 @@ def group_service(pyramid_config):
 
 @pytest.fixture
 def Annotation(factories, index_annotations):
-    """Create and index an annotation.
+    """
+    Create and index an annotation.
 
     Looks like factories.Annotation() but automatically uses the build()
     strategy and automatically indexes the annotation into the test

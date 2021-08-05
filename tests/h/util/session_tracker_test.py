@@ -9,9 +9,7 @@ from h.util.session_tracker import ObjectState, Tracker
 
 
 def generate_ann_id():
-    """
-    Generate a random annotation identifier in the encoded form used by the API.
-    """
+    """Generate a random annotation identifier in the encoded form used by the API."""
     return _get_urlsafe_from_hex(str(uuid4()))
 
 

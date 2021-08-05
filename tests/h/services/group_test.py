@@ -102,7 +102,9 @@ class TestFilterByName:
 
 
 class TestGroupServiceGroupIds:
-    """Unit tests for methods related to group IDs:
+    """
+    Unit tests for methods related to group IDs.
+
     - :py:meth:`GroupService.groupids_readable_by`
     - :py:meth:`GroupService.groupids_created_by`
     """
@@ -219,7 +221,7 @@ class GroupWithName(Matcher):
         self.name = name
 
     def __eq__(self, group):
-        """Return True if group is instance of :class:h.models.Group and has matching name"""
+        """Return True if group is instance of :class:h.models.Group and has matching name."""
         if not isinstance(group, Group):
             return False
         return group.name == self.name
