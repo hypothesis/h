@@ -2,7 +2,6 @@ import datetime
 from unittest.mock import create_autospec
 
 import pytest
-from h_matchers import Any
 from pyramid import security
 
 from h.formatters import AnnotationFlagFormatter
@@ -13,42 +12,40 @@ class TestAnnotationJSONPresenter:
     def test_asdict(self, presenter, annotation, links_service, DocumentJSONPresenter):
         annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
         annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
-        annotation.references = ["referenced-id-1", "referenced-id-2"]
         annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
 
         result = presenter.asdict()
 
         links_service.get_all.assert_called_once_with(annotation)
 
-        assert result == Any.dict.containing(
-            {
-                "id": annotation.id,
-                "created": "2016-02-24T18:03:25.000768+00:00",
-                "updated": "2016-02-29T10:24:05.000564+00:00",
-                "user": annotation.userid,
-                "uri": annotation.target_uri,
-                "group": annotation.groupid,
-                "text": annotation.text,
-                "tags": annotation.tags,
-                "permissions": {
-                    "read": [annotation.userid],
-                    "admin": [annotation.userid],
-                    "update": [annotation.userid],
-                    "delete": [annotation.userid],
-                },
-                "target": [
-                    {
-                        "source": annotation.target_uri,
-                        "selector": annotation.target_selectors,
-                    }
-                ],
-                "document": DocumentJSONPresenter.return_value.asdict.return_value,
-                "links": links_service.get_all.return_value,
-                "references": annotation.references,
-                "extra-1": "foo",
-                "extra-2": "bar",
-            }
-        )
+        assert result == {
+            "id": annotation.id,
+            "created": "2016-02-24T18:03:25.000768+00:00",
+            "updated": "2016-02-29T10:24:05.000564+00:00",
+            "user": annotation.userid,
+            "uri": annotation.target_uri,
+            "group": annotation.groupid,
+            "text": annotation.text,
+            "tags": annotation.tags,
+            "permissions": {
+                "read": [annotation.userid],
+                "admin": [annotation.userid],
+                "update": [annotation.userid],
+                "delete": [annotation.userid],
+            },
+            "target": [
+                {
+                    "source": annotation.target_uri,
+                    "selector": annotation.target_selectors,
+                }
+            ],
+            "document": DocumentJSONPresenter.return_value.asdict.return_value,
+            "links": links_service.get_all.return_value,
+            "references": annotation.references,
+            "user_info": {"display_name": annotation.user.display_name},
+            "extra-1": "foo",
+            "extra-2": "bar",
+        }
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
         DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
@@ -110,7 +107,13 @@ class TestAnnotationJSONPresenter:
 
     @pytest.fixture
     def annotation(self, factories):
-        return factories.Annotation(groupid="NOT WORLD")
+        references = factories.Annotation.create_batch(size=2)
+
+        return factories.Annotation(
+            groupid="NOT WORLD",
+            user=factories.User(),
+            references=[reference.id for reference in references],
+        )
 
     @pytest.fixture
     def get_formatter(self):

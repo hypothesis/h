@@ -6,6 +6,7 @@ from pyramid.security import principals_allowed_by_permission
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security.permissions import Permission
+from h.session import user_info
 from h.traversal import AnnotationContext
 
 
@@ -19,9 +20,9 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         self._formatters = tuple(formatters or [])
 
     def asdict(self):
-        annotation = deepcopy(self.annotation.extra) or {}
+        model = deepcopy(self.annotation.extra) or {}
 
-        annotation.update(
+        model.update(
             {
                 "id": self.annotation.id,
                 "created": self.created,
@@ -46,13 +47,15 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             }
         )
 
+        model.update(user_info(self.annotation.user))
+
         if self.annotation.references:
-            annotation["references"] = self.annotation.references
+            model["references"] = self.annotation.references
 
         for formatter in self._formatters:
-            annotation.update(formatter.format(self.annotation))
+            model.update(formatter.format(self.annotation))
 
-        return annotation
+        return model
 
     def _get_read_permission(self):
         if not self.annotation.shared:
