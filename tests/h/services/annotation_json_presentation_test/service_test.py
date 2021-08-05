@@ -19,13 +19,11 @@ class TestAnnotationJSONPresentationService:
         formatters.AnnotationModerationFormatter.assert_called_once_with(
             sentinel.flag_svc, sentinel.user, sentinel.has_permission
         )
-        formatters.AnnotationUserInfoFormatter.assert_called_once_with()
 
         assert svc.formatters == [
             formatters.AnnotationFlagFormatter.return_value,
             formatters.AnnotationHiddenFormatter.return_value,
             formatters.AnnotationModerationFormatter.return_value,
-            formatters.AnnotationUserInfoFormatter.return_value,
         ]
 
     def test_present(self, svc, annotation, AnnotationJSONPresenter):

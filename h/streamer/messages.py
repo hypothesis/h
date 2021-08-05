@@ -6,7 +6,6 @@ from gevent.queue import Full
 from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
-from h.formatters import AnnotationUserInfoFormatter
 from h.realtime import Consumer
 from h.security.permissions import Permission
 from h.streamer import websocket
@@ -160,9 +159,7 @@ def _generate_annotation_event(request, message, annotation):
         payload = {"id": message["annotation_id"]}
     else:
         payload = presenters.AnnotationJSONPresenter(
-            annotation,
-            links_service=request.find_service(name="links"),
-            formatters=[AnnotationUserInfoFormatter()],
+            annotation, links_service=request.find_service(name="links")
         ).asdict()
 
     return {

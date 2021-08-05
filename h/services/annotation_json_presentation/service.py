@@ -14,7 +14,6 @@ class AnnotationJSONPresentationService:
             formatters.AnnotationFlagFormatter(flag_svc, user),
             formatters.AnnotationHiddenFormatter(has_permission, user),
             formatters.AnnotationModerationFormatter(flag_svc, user, has_permission),
-            formatters.AnnotationUserInfoFormatter(),
         ]
 
     def present(self, annotation):
