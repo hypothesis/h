@@ -1,8 +1,9 @@
 from sqlalchemy.orm import subqueryload
 
-from h import formatters, storage
+from h import storage
 from h.models import Annotation
 from h.presenters import AnnotationJSONPresenter
+from h.services.annotation_json_presentation import _formatters
 
 
 class AnnotationJSONPresentationService:
@@ -11,9 +12,9 @@ class AnnotationJSONPresentationService:
         self.links_svc = links_svc
 
         self.formatters = [
-            formatters.AnnotationFlagFormatter(flag_svc, user),
-            formatters.AnnotationHiddenFormatter(has_permission, user),
-            formatters.AnnotationModerationFormatter(flag_svc, user, has_permission),
+            _formatters.FlagFormatter(flag_svc, user),
+            _formatters.HiddenFormatter(has_permission, user),
+            _formatters.ModerationFormatter(flag_svc, user, has_permission),
         ]
 
     def present(self, annotation):
