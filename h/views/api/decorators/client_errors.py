@@ -6,7 +6,7 @@ from h.views.api.helpers.media_types import valid_media_types
 
 
 def unauthorized_to_not_found(wrapped):
-    """Add view decorator to convert all 403 exceptions to 404s."""
+    """Decorate a view to convert all 403 exceptions to 404s."""
 
     def wrapper(_context, request):
         # We convert all 403s to 404s—replace the current context with a 404
@@ -18,7 +18,7 @@ def unauthorized_to_not_found(wrapped):
 
 
 def normalize_not_found(wrapped):
-    """Add view decorator to make 404 error messages more readable."""
+    """Decorate a view to make 404 error messages more readable."""
 
     def wrapper(_context, request):
         # Replace incoming 404 with one that has a sensible message
@@ -29,7 +29,7 @@ def normalize_not_found(wrapped):
 
 
 def validate_media_types(wrapped):
-    """Add view decorator to convert certain 4xx errors to 406s."""
+    """Decorate a view to convert certain 4xx errors to 406s."""
 
     def wrapper(context, request):
         # If Accept has been set

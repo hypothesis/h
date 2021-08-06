@@ -112,7 +112,7 @@ class Publisher:
 
 
 def get_exchange():
-    """Return and configures `kombu.Exchange` to use for realtime messages."""
+    """Get a configured `kombu.Exchange` to use for realtime messages."""
 
     return kombu.Exchange(
         "realtime", type="direct", durable=False, delivery_mode="transient"

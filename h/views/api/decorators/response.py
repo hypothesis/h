@@ -5,7 +5,7 @@ from h.views.api.helpers.media_types import media_type_for_version, version_medi
 
 
 def version_media_type_header(subtype="json"):
-    """Add view decorator to add response header indicating API version."""
+    """Decorate a view to add response header indicating API version."""
 
     def deco(wrapped):
         def wrapper(context, request):

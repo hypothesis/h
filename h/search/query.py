@@ -17,7 +17,7 @@ DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())
 
 
 def popall(multidict, key):
-    """Pop and returns all values of the key in multidict."""
+    """Pop and return all values of the key in multidict."""
     values = multidict.getall(key)
     if values:
         del multidict[key]
@@ -162,7 +162,7 @@ class TopLevelAnnotationsFilter:
 
 
 class AuthorityFilter:
-    """Match only annotations created by users belonging to a specific authority."""
+    """Match annotations created by users belonging to a specific authority."""
 
     def __init__(self, authority):
         self.authority = authority
@@ -296,7 +296,7 @@ class UriCombinedWildcardFilter:
     @staticmethod
     def _wildcard_uri_normalized(wildcard_uri):
         r"""
-        Get the same as uri.normalized but it replaces _'s with ?'s after normalization.
+        Normalize a URL (like `uri.normalized`) replacing "_" with "?" after normalization.
 
         Although elasticsearch uses ? we use _ since ? is a special reserved url
         character and this means we can avoid dealing with normalization headaches.
