@@ -6,7 +6,7 @@ from h.traversal.bulk_api import BulkAPIRoot
 
 
 class TestBulkAPIRoot:
-    def test_acl_matching_user(self, client_authority, ACL):
+    def test_acl_for_bulk_api(self, client_authority, ACL):
         acl = BulkAPIRoot(sentinel.request).__acl__()
 
         client_authority.assert_called_once_with(sentinel.request)

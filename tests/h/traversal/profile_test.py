@@ -6,7 +6,7 @@ from h.traversal.profile import ProfileRoot
 
 
 class TestProfileRoot:
-    def test_acl_matching_user(self, ACL):
+    def test_acl_for_profile(self, ACL):
         acl = ProfileRoot(sentinel.request).__acl__()
 
         ACL.for_profile.assert_called_once_with()
