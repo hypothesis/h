@@ -14,7 +14,6 @@ class TestAnnotationJSONPresentationServiceFactory:
         pyramid_request,
         AnnotationJSONPresentationService,
         flag_service,
-        flag_count_service,
         links_service,
         user_service,
     ):
@@ -30,7 +29,6 @@ class TestAnnotationJSONPresentationServiceFactory:
             has_permission=pyramid_request.has_permission,
             links_svc=links_service,
             flag_svc=flag_service,
-            flag_count_svc=flag_count_service,
             user_svc=user_service,
         )
 
