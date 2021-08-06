@@ -196,6 +196,20 @@ class TestAnnotationUser:
 
         assert annotation.user == user
 
+    @pytest.mark.parametrize(
+        "bad_userid",
+        (
+            "missing@acct.com",
+            "acct:no_authority",
+            "acct:no_authority@",
+            "acct:@no_user.com",
+        ),
+    )
+    def test_it_returns_None_invalid_userids(self, factories, bad_userid):
+        annotation = factories.Annotation(userid=bad_userid)
+
+        assert annotation.user is None
+
     @pytest.fixture
     def user(self, factories):
         return factories.User()
