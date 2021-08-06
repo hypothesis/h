@@ -31,7 +31,7 @@ def stream_atom(request):
 
 @view_config(route_name="stream_rss")
 def stream_rss(request):
-    """Get a RSS feed of the /stream page."""
+    """Get an RSS feed of the /stream page."""
     return render_rss(
         request=request,
         annotations=_annotations(request),

@@ -171,7 +171,7 @@ MESSAGE_HANDLERS["filter"] = handle_filter_message  # noqa: E305
 
 
 def handle_ping_message(message, session=None):
-    """Answer to a client requesting a pong."""
+    """Reply to a client requesting a pong."""
     message.reply({"type": "pong"})
 
 
@@ -179,7 +179,7 @@ MESSAGE_HANDLERS["ping"] = handle_ping_message  # noqa: E305
 
 
 def handle_whoami_message(message, session=None):
-    """Answer to a client requesting information on its auth state."""
+    """Reply to a client requesting information on its auth state."""
     message.reply({"type": "whoyouare", "userid": message.socket.authenticated_userid})
 
 
@@ -187,7 +187,7 @@ MESSAGE_HANDLERS["whoami"] = handle_whoami_message  # noqa: E305
 
 
 def handle_unknown_message(message, session=None):
-    """Handle message type missing or not recognised."""
+    """Handle the message type being missing or not recognised."""
     type_ = json.dumps(message.payload.get("type"))
     message.reply(
         {

@@ -46,7 +46,7 @@ class lru_cache_in_transaction:  # noqa: N801
 
 def on_transaction_end(session):
     """
-    Add a decorator for a function which should run after a top-level transaction ended.
+    Decorate a function which should run after a top-level transaction ended.
 
     Transactions that are either implicitly or explicitly committed or rolled back will be
     closed at the end of a Pyramid view. This is here for cleaning up caches so that
