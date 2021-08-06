@@ -6,7 +6,6 @@ from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.delete_group import DeleteGroupService
 from h.services.flag import FlagService
-from h.services.flag_count import FlagCountService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
 from h.services.group_links import GroupLinksService
@@ -26,7 +25,6 @@ __all__ = (
     "delete_group_service",
     "links_service",
     "list_organizations_service",
-    "flag_count_service",
     "flag_service",
     "group_create_service",
     "group_links_service",
@@ -80,14 +78,6 @@ def list_organizations_service(mock_service, default_organization):
 
     list_organizations_service.organizations.return_value = [default_organization]
     return list_organizations_service
-
-
-@pytest.fixture
-def flag_count_service(pyramid_config):
-    service = create_autospec(FlagCountService, instance=True, spec_set=True)
-    pyramid_config.register_service(service, name="flag_count")
-
-    return service
 
 
 @pytest.fixture

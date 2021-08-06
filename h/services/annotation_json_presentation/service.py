@@ -6,25 +6,14 @@ from h.presenters import AnnotationJSONPresenter
 
 
 class AnnotationJSONPresentationService:
-    def __init__(
-        self,
-        session,
-        user,
-        links_svc,
-        flag_svc,
-        flag_count_svc,
-        user_svc,
-        has_permission,
-    ):
+    def __init__(self, session, user, links_svc, flag_svc, user_svc, has_permission):
         self.session = session
         self.links_svc = links_svc
 
         self.formatters = [
             formatters.AnnotationFlagFormatter(flag_svc, user),
             formatters.AnnotationHiddenFormatter(has_permission, user),
-            formatters.AnnotationModerationFormatter(
-                flag_count_svc, user, has_permission
-            ),
+            formatters.AnnotationModerationFormatter(flag_svc, user, has_permission),
             formatters.AnnotationUserInfoFormatter(self.session, user_svc),
         ]
 

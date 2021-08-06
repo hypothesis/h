@@ -70,14 +70,48 @@ class TestFlagServiceCreate:
         )
 
 
+class TestFlagServiceCount:
+    def test_flag_count_returns_zero_for_unflagged_annotation(self, svc, unflagged):
+        assert not svc.flag_count(unflagged)
+
+    def test_flag_count_returns_flag_count_for_flagged_annotation(self, svc, flagged):
+        assert svc.flag_count(flagged) == 2
+
+    def test_flag_counts_returns_empty_dict_for_no_ids(self, svc):
+        assert svc.flag_counts([]) == {}
+
+    def test_flag_counts_returns_all_ids_in_result(self, svc, flagged, unflagged):
+        ann_ids = [flagged.id, unflagged.id]
+
+        flag_counts = svc.flag_counts(ann_ids)
+
+        assert set(flag_counts.keys()) == set(ann_ids)
+
+    def test_flag_counts_returns_zero_for_unflagged_annotation(self, svc, unflagged):
+        flag_counts = svc.flag_counts([unflagged.id])
+
+        assert not flag_counts[unflagged.id]
+
+    def test_flag_counts_returns_flag_count_for_flagged_annotation(self, svc, flagged):
+        flag_counts = svc.flag_counts([flagged.id])
+
+        assert flag_counts[flagged.id] == 2
+
+    @pytest.fixture
+    def unflagged(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def flagged(self, factories):
+        annotation = factories.Annotation()
+        factories.Flag.create_batch(2, annotation=annotation)
+        return annotation
+
+
 class TestFlagServiceFactory:
     def test_it_returns_flag_service(self, pyramid_request):
         svc = flag.flag_service_factory(None, pyramid_request)
         assert isinstance(svc, flag.FlagService)
-
-    def test_it_provides_request_db_as_session(self, pyramid_request):
-        svc = flag.flag_service_factory(None, pyramid_request)
-        assert svc.session == pyramid_request.db
 
 
 @pytest.fixture

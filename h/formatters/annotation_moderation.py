@@ -12,8 +12,8 @@ class AnnotationModerationFormatter:
     flagged the annotation.
     """
 
-    def __init__(self, flag_count_svc, user, has_permission):
-        self._flag_count_svc = flag_count_svc
+    def __init__(self, flag_svc, user, has_permission):
+        self._flag_svc = flag_svc
         self._user = user
         self._has_permission = has_permission
 
@@ -28,7 +28,7 @@ class AnnotationModerationFormatter:
         if not annotation_ids:
             return None
 
-        flag_counts = self._flag_count_svc.flag_counts(annotation_ids)
+        flag_counts = self._flag_svc.flag_counts(annotation_ids)
         self._cache.update(flag_counts)
         return flag_counts
 
@@ -47,6 +47,6 @@ class AnnotationModerationFormatter:
         if id_ in self._cache:
             return self._cache[id_]
 
-        flag_count = self._flag_count_svc.flag_count(annotation)
+        flag_count = self._flag_svc.flag_count(annotation)
         self._cache[id_] = flag_count
         return flag_count
