@@ -1,58 +1,65 @@
 import pytest
 
 from h.services.annotation_json_presentation._formatters.flag import FlagFormatter
-from h.services.flag import FlagService
 
 
 class TestFlagFormatter:
-    def test_preload_sets_found_flags_to_true(self, flags, formatter, current_user):
-        annotation_ids = [f.annotation_id for f in flags[current_user]]
+    @pytest.mark.parametrize("flagged", (True, False))
+    def test_single_item_formatting(self, formatter, annotation, flag_service, flagged):
+        flag_service.flagged.return_value = flagged
 
-        expected = {id_: True for id_ in annotation_ids}
-        assert formatter.preload(annotation_ids) == expected
+        result = formatter.format(annotation)
 
-    def test_preload_sets_missing_flags_to_false(self, flags, formatter, other_user):
-        annotation_ids = [f.annotation_id for f in flags[other_user]]
+        assert result == {"flagged": flagged}
 
-        expected = {id_: False for id_ in annotation_ids}
-        assert formatter.preload(annotation_ids) == expected
+    def test_unauthenticated_users_do_not_see_flags(self, annotation, flag_service):
+        formatter = FlagFormatter(flag_service, user=None)
+        flag_service.flagged.return_value = True
 
-    def test_format_for_existing_flag(self, formatter, factories, current_user):
-        flag = factories.Flag(user=current_user)
+        result = formatter.format(annotation)
 
-        assert formatter.format(flag.annotation) == {"flagged": True}
+        assert result == {"flagged": False}
 
-    def test_format_for_missing_flag(self, formatter, factories):
-        annotation = factories.Annotation()
+    def test_preloading(self, formatter, factories, flag_service, user):
+        annotation, annotation_flagged = factories.Annotation.create_batch(2)
+        annotation_ids = [annotation.id, annotation_flagged.id]
+        flag_service.all_flagged.return_value = {annotation_flagged.id}
 
-        assert formatter.format(annotation) == {"flagged": False}
+        result = formatter.preload(annotation_ids)
 
-    def test_format_for_unauthenticated_user(self, flag_service, factories):
-        annotation = factories.Annotation()
+        flag_service.all_flagged.assert_called_once_with(
+            user=user, annotation_ids=annotation_ids
+        )
+        assert result == {annotation.id: False, annotation_flagged.id: True}
 
+    def test_preloading_short_circuits_with_no_user(self, flag_service):
         formatter = FlagFormatter(flag_service, user=None)
 
-        assert formatter.format(annotation) == {"flagged": False}
+        formatter.preload([])
+
+        flag_service.all_flagged.assert_not_called()
+
+    def test_preloading_is_effective_at_preventing_calls(
+        self, formatter, annotation, flag_service
+    ):
+        formatter.preload([annotation.id])
+        flag_service.all_flagged.return_value = {}
+
+        result = formatter.format(annotation)
+
+        flag_service.all_flagged.assert_called()
+        flag_service.flagged.assert_not_called()
+        # Check it still actually works
+        assert result == {"flagged": False}
 
     @pytest.fixture
-    def current_user(self, factories):
+    def annotation(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def user(self, factories):
         return factories.User()
 
     @pytest.fixture
-    def other_user(self, factories):
-        return factories.User()
-
-    @pytest.fixture
-    def formatter(self, flag_service, current_user):
-        return FlagFormatter(flag_service, current_user)
-
-    @pytest.fixture
-    def flag_service(self, db_session):
-        return FlagService(db_session)
-
-    @pytest.fixture
-    def flags(self, factories, current_user, other_user):
-        return {
-            current_user: factories.Flag.create_batch(3, user=current_user),
-            other_user: factories.Flag.create_batch(2, user=other_user),
-        }
+    def formatter(self, flag_service, user):
+        return FlagFormatter(flag_service, user)

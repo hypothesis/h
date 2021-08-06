@@ -22,26 +22,21 @@ class FlagFormatter:
             user=self.user, annotation_ids=annotation_ids
         )
 
-        flags = {
-            annotation_id: (annotation_id in flagged_ids)
-            for annotation_id in annotation_ids
-        }
-        self._cache.update(flags)
-        return flags
+        for annotation_id in annotation_ids:
+            self._cache[annotation_id] = annotation_id in flagged_ids
+
+        return self._cache
 
     def format(self, annotation):
-        flagged = self._load(annotation)
-        return {"flagged": flagged}
+        return {"flagged": self._is_flagged(annotation)}
 
-    def _load(self, annotation):
+    def _is_flagged(self, annotation):
         if self.user is None:
             return False
 
-        id_ = annotation.id
+        if annotation.id not in self._cache:
+            self._cache[annotation.id] = self.flag_service.flagged(
+                user=self.user, annotation=annotation
+            )
 
-        if id_ in self._cache:
-            return self._cache[id_]
-
-        flagged = self.flag_service.flagged(user=self.user, annotation=annotation)
-        self._cache[id_] = flagged
-        return self._cache[id_]
+        return self._cache[annotation.id]
