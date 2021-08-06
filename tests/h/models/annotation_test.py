@@ -185,6 +185,22 @@ class TestAnnotationGroup:
         return factories.Group(pubid="12345678")
 
 
+class TestAnnotationUser:
+    def test_it(self, user, factories):
+        annotation = factories.Annotation(user=user)
+
+        assert annotation.user == user
+
+    def test_it_works_with_userid(self, user, factories):
+        annotation = factories.Annotation(userid=user.userid)
+
+        assert annotation.user == user
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+
 class TestThread:
     def test_empty_thread(self, root):
         assert root.thread == []
