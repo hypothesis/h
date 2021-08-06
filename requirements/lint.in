@@ -1,1 +1,5 @@
-flake8
+pylint
+pydocstyle
+pycodestyle
+-r tests.txt
+-r functests.txt
