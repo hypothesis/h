@@ -58,7 +58,11 @@ class AnnotationHiddenFormatter:
         return self._user and self._user.userid == annotation.userid
 
     def _is_hidden(self, annotation):
-        if annotation.id not in self._cache:
-            self._cache[annotation.id] = annotation.is_hidden
+        id_ = annotation.id
 
-        return self._cache[annotation.id]
+        if id_ in self._cache:
+            return self._cache[id_]
+
+        hidden = self._moderation_svc.hidden(annotation)
+        self._cache[id_] = hidden
+        return self._cache[id_]

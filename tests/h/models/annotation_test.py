@@ -219,15 +219,6 @@ class TestThread:
         return factories.Annotation(references=[root.id, reply.id])
 
 
-@pytest.mark.parametrize("has_moderation", (True, False))
-def test_is_hidden(factories, has_moderation):
-    annotation = factories.Annotation(
-        moderation=factories.AnnotationModeration() if has_moderation else None
-    )
-
-    assert annotation.is_hidden == has_moderation
-
-
 @pytest.fixture
 def markdown(patch):
     return patch("h.models.annotation.markdown")

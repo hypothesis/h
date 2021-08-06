@@ -1,7 +1,6 @@
 from pyramid.httpexceptions import HTTPNoContent
 
 from h import events
-from h.models import AnnotationModeration
 from h.security.permissions import Permission
 from h.views.api.config import api_config
 
@@ -15,10 +14,9 @@ from h.views.api.config import api_config
     permission=Permission.Annotation.MODERATE,
 )
 def create(context, request):
-    annotation = context.annotation
 
-    if not annotation.is_hidden:
-        annotation.moderation = AnnotationModeration()
+    svc = request.find_service(name="annotation_moderation")
+    svc.hide(context.annotation)
 
     event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
@@ -35,7 +33,9 @@ def create(context, request):
     permission=Permission.Annotation.MODERATE,
 )
 def delete(context, request):
-    context.annotation.moderation = None
+
+    svc = request.find_service(name="annotation_moderation")
+    svc.unhide(context.annotation)
 
     event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
