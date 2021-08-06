@@ -22,6 +22,19 @@ def _normalise_username(username):
     return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
+def split_userid(userid):
+    """Return an SQL tuple for use in comparisons.
+
+    :param userid: The user id to split
+    :returns: An ORM tuple which can be used in relationships and queries
+    """
+    without_acct = sa.func.ltrim(userid, "acct:")
+    username = _normalise_username(sa.func.split_part(without_acct, "@", 1))
+    authority = sa.func.split_part(without_acct, "@", 2)
+
+    return sa.tuple_(username, authority)
+
+
 class UsernameComparator(Comparator):  # pylint: disable=abstract-method
     """
     Custom comparator for :py:attr:`~h.models.user.User.username`.
