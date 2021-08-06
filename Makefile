@@ -64,7 +64,7 @@ sql: python
 	@tox -qe dockercompose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
-lint: backend-lint frontend-lint
+lint: frontend-lint backend-lint
 
 .PHONY: backend-lint
 backend-lint: python
