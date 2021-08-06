@@ -6,7 +6,7 @@ from h.presenters import AnnotationJSONPresenter
 
 
 class AnnotationJSONPresentationService:
-    def __init__(self, session, user, links_svc, flag_svc, user_svc, has_permission):
+    def __init__(self, session, user, links_svc, flag_svc, has_permission):
         self.session = session
         self.links_svc = links_svc
 
@@ -14,7 +14,7 @@ class AnnotationJSONPresentationService:
             formatters.AnnotationFlagFormatter(flag_svc, user),
             formatters.AnnotationHiddenFormatter(has_permission, user),
             formatters.AnnotationModerationFormatter(flag_svc, user, has_permission),
-            formatters.AnnotationUserInfoFormatter(self.session, user_svc),
+            formatters.AnnotationUserInfoFormatter(),
         ]
 
     def present(self, annotation):
@@ -26,9 +26,10 @@ class AnnotationJSONPresentationService:
         def eager_load_related_items(query):
             return query.options(
                 # Ensure that accessing `annotation.document` or `.moderation`
-                # doesn't trigger any more queries by pre-loading these
+                # etc. doesn't trigger any more queries by pre-loading these
                 subqueryload(Annotation.document),
                 subqueryload(Annotation.moderation),
+                subqueryload(Annotation.user),
             )
 
         annotations = storage.fetch_ordered_annotations(

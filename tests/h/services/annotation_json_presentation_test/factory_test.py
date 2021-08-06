@@ -15,7 +15,6 @@ class TestAnnotationJSONPresentationServiceFactory:
         AnnotationJSONPresentationService,
         flag_service,
         links_service,
-        user_service,
     ):
         service = annotation_json_presentation_service_factory(
             sentinel.context, pyramid_request
@@ -29,7 +28,6 @@ class TestAnnotationJSONPresentationServiceFactory:
             has_permission=pyramid_request.has_permission,
             links_svc=links_service,
             flag_svc=flag_service,
-            user_svc=user_service,
         )
 
     @pytest.fixture

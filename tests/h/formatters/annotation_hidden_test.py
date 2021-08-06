@@ -15,7 +15,7 @@ class TestAnnotationHiddenFormatter:
         assert formatter.format(annotation) == {"hidden": False}
 
     def test_the_author_can_see_it(self, formatter, annotation, user):
-        annotation.userid = user.userid
+        annotation.user = user
 
         assert formatter.format(annotation) == {"hidden": False}
 

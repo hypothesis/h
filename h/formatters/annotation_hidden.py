@@ -44,4 +44,4 @@ class AnnotationHiddenFormatter:
         )
 
     def _current_user_is_author(self, annotation):
-        return self._user and self._user.userid == annotation.userid
+        return self._user and self._user == annotation.user
