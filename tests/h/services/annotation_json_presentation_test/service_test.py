@@ -19,9 +19,7 @@ class TestAnnotationJSONPresentationService:
         formatters.AnnotationModerationFormatter.assert_called_once_with(
             sentinel.flag_svc, sentinel.user, sentinel.has_permission
         )
-        formatters.AnnotationUserInfoFormatter.assert_called_once_with(
-            db_session, sentinel.user_svc
-        )
+        formatters.AnnotationUserInfoFormatter.assert_called_once_with()
 
         assert svc.formatters == [
             formatters.AnnotationFlagFormatter.return_value,
@@ -54,19 +52,28 @@ class TestAnnotationJSONPresentationService:
             AnnotationJSONPresenter.return_value.asdict.return_value,
         ]
 
-    @pytest.mark.parametrize("property", ("document", "moderation"))
+    @pytest.mark.parametrize("property", ("document", "moderation", "user"))
     @pytest.mark.parametrize("with_preload", (True, False))
     def test_present_all_preloading_is_effective(
-        self, svc, annotation, db_session, query_counter, property, with_preload
+        self, svc, factories, db_session, query_counter, property, with_preload
     ):
         # Ensure SQLAlchemy forgets all about our annotation
+        annotations = factories.Annotation.create_batch(size=3)
+        annotation_ids = [annotation.id for annotation in annotations]
         db_session.flush()
-        db_session.expire(annotation)
+        db_session.expire_all()
+        query_counter.reset()
+
         if with_preload:
-            svc.present_all([annotation.id])
+            svc.present_all(annotation_ids)
+
+            # Check we aren't just issuing millions of queries to make this
+            # happen. There should be one for each type (annotation, doc, etc)
+            assert query_counter.count == 4
 
         query_counter.reset()
-        getattr(annotation, property)
+        getattr(annotations[0], property)
+        getattr(annotations[1], property)
 
         # If we preloaded, we shouldn't execute any queries (and vice versa)
         assert bool(query_counter.count) != with_preload
@@ -77,7 +84,6 @@ class TestAnnotationJSONPresentationService:
             count = 0
 
             def __call__(self, *args, **kwargs):
-                print(args, kwargs)
                 self.count += 1
 
             def reset(self):
@@ -94,7 +100,6 @@ class TestAnnotationJSONPresentationService:
             user=sentinel.user,
             links_svc=sentinel.links_svc,
             flag_svc=sentinel.flag_svc,
-            user_svc=sentinel.user_svc,
             has_permission=sentinel.has_permission,
         )
 
