@@ -21,5 +21,5 @@ class TestOrganizationLogo:
             organization_logo(organization_context, mock.sentinel.request)
 
     @pytest.fixture
-    def organization_context(self, factories, pyramid_request):
-        return OrganizationContext(factories.Organization(), pyramid_request)
+    def organization_context(self, factories):
+        return OrganizationContext(factories.Organization())

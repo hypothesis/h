@@ -31,12 +31,12 @@ class TestOrganizationRoot:
 
 
 class TestOrganizationContext:
-    def test_it_returns_parent(self, Root):
-        context = OrganizationContext(sentinel.request, sentinel.organization)
+    def test_acl_for_admin_pages(self, ACL):
+        acl = OrganizationContext(sentinel.organization).__acl__()
 
-        assert context.__parent__ == Root.return_value
-        Root.assert_called_once_with(sentinel.request)
+        ACL.for_admin_pages.assert_called_once_with()
+        assert acl == ACL.for_admin_pages.return_value
 
     @pytest.fixture
-    def Root(self, patch):
-        return patch("h.traversal.organization.Root")
+    def ACL(self, patch):
+        return patch("h.traversal.organization.ACL")

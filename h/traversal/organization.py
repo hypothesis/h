@@ -1,10 +1,8 @@
 from dataclasses import dataclass
-from functools import cached_property
-
-from pyramid.request import Request
 
 from h.models import Organization
-from h.traversal.root import Root, RootFactory
+from h.security.acl import ACL
+from h.traversal.root import RootFactory
 
 
 class OrganizationRoot(RootFactory):
@@ -17,16 +15,15 @@ class OrganizationRoot(RootFactory):
         if organization is None:
             raise KeyError()
 
-        return OrganizationContext(request=self.request, organization=organization)
+        return OrganizationContext(organization=organization)
 
 
 @dataclass
 class OrganizationContext:
     """Context for organization-based views."""
 
-    request: Request
     organization: Organization = None
 
-    @cached_property
-    def __parent__(self):
-        return Root(self.request)
+    @classmethod
+    def __acl__(cls):
+        return ACL.for_admin_pages()

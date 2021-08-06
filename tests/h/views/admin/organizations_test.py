@@ -185,10 +185,9 @@ class TestOrganizationEditController:
     @pytest.fixture
     def get_controller(self, organization, pyramid_request):
         def get_controller():
-            organization_context = OrganizationContext(
-                request=pyramid_request, organization=organization
+            return OrganizationEditController(
+                OrganizationContext(organization), pyramid_request
             )
-            return OrganizationEditController(organization_context, pyramid_request)
 
         return get_controller
 
