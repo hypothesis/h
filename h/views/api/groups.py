@@ -7,7 +7,7 @@ from pyramid.httpexceptions import (
 )
 
 from h.auth.util import client_authority
-from h.i18n import TranslationString as _  # noqa: N813
+from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.security import Permission

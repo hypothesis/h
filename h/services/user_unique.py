@@ -1,5 +1,5 @@
 from h import models
-from h.i18n import TranslationString as _  # noqa: N813
+from h.i18n import TranslationString as _
 
 
 class DuplicateUserError(Exception):

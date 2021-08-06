@@ -27,7 +27,7 @@ class TestAnnotationHTMLPresenter:
     def test_quote_with_no_selector(self, annotation, presenter):
         annotation.target_selectors = []
 
-        assert presenter.quote == ""
+        assert not presenter.quote
 
     def test_username(self, annotation, presenter):
         annotation.userid = "acct:jdoe@hypothes.is"
@@ -56,7 +56,7 @@ class TestAnnotationHTMLPresenter:
         assert getattr(presenter, method) == getattr(presenter.document, proxied_method)
 
         presenter.document = None
-        assert getattr(presenter, method) == ""
+        assert not getattr(presenter, method)
 
     @pytest.mark.parametrize(
         "value,expected",

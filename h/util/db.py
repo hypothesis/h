@@ -3,7 +3,7 @@ from functools import lru_cache
 import sqlalchemy
 
 
-class lru_cache_in_transaction:  # noqa: N801
+class lru_cache_in_transaction:
     """
     Adds memoizing decorator.
 

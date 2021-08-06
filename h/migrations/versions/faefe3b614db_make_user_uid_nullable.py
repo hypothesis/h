@@ -26,7 +26,7 @@ def downgrade():
     # rolled back.
     op.execute(
         user.update()
-        .where(user.c.uid == None)  # noqa
+        .where(user.c.uid == None)  # noqa: E711
         .values(uid=sa.func.lower(sa.func.replace(user.c.username, ".", "")))
     )
     op.alter_column("user", "uid", nullable=False)

@@ -82,7 +82,7 @@ def test_cors_sets_allow_origin_for_preflight(headers):
     assert resp.headers["Access-Control-Allow-Origin"] == "http://example.com"
 
 
-def test_cors_sets_allow_methods_OPTIONS_for_preflight(headers):  # noqa
+def test_cors_sets_allow_methods_OPTIONS_for_preflight(headers):
     request = Request.blank("/", method="OPTIONS", headers=headers)
 
     resp = request.get_response(wsgi_testapp)

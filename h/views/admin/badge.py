@@ -3,7 +3,7 @@ from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
 
 from h import models
-from h.i18n import TranslationString as _  # noqa: N813
+from h.i18n import TranslationString as _
 from h.security import Permission
 
 

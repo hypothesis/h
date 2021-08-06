@@ -93,7 +93,7 @@ class TestDocumentURIsFromLinks:
 
         assert one([d for d in document_uris if d.get("content_type") == "text/html"])
 
-    def test_it_returns_multiple_document_URI_dicts(self):  # noqa
+    def test_it_returns_multiple_document_URI_dicts(self):
         """If there are multiple claims it should return multiple dicts."""
         link_dicts = [
             {"href": "http://example.com/example.html", "type": "text/html"},

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from pyramid_layout.panel import panel_config
 
-from h.i18n import TranslationString as _  # noqa
+from h.i18n import TranslationString as _
 
 
 @panel_config(name="back_link", renderer="h:templates/panels/back_link.html.jinja2")

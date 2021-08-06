@@ -9,7 +9,7 @@ from h_api.exceptions import JSONAPIError
 from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 
-from h.i18n import TranslationString as _  # noqa: N813
+from h.i18n import TranslationString as _
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
 from h.views.api.decorators import (

@@ -13,7 +13,7 @@ THIRD_MARCH_1968 = datetime.datetime(year=1968, month=3, day=3)
 FIFTH_NOVEMBER_1969 = datetime.datetime(year=1969, month=11, day=5)
 
 
-class timeframe_with:  # noqa: N801
+class timeframe_with:
     def __init__(self, label, document_buckets):
         self.label = label
         self.document_buckets = document_buckets

@@ -34,7 +34,7 @@ def upgrade():
         op.execute(
             user.update()
             .where(user.c.id == id_)
-            .where(user.c.password_updated == None)  # noqa
+            .where(user.c.password_updated == None)  # noqa: E711
             .values(password_updated=datetime.datetime.utcnow())
         )
 
