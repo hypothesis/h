@@ -89,7 +89,7 @@ def supervise(greenlets):
         gevent.joinall(greenlets, raise_error=True)
     except (KeyboardInterrupt, SystemExit):
         raise
-    except:  # noqa: E722 # pylint:disable=bare-except
+    except:  # pylint:disable=bare-except
         log.critical("Unexpected exception in streamer greenlet:", exc_info=True)
     else:
         log.critical("Unexpected early exit of streamer greenlets. Aborting!")

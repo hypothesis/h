@@ -2,7 +2,7 @@
 
 from pyramid import httpexceptions
 
-from h.i18n import TranslationString as _  # noqa: N813
+from h.i18n import TranslationString as _
 
 
 class OAuthAuthorizeError(  # pylint: disable=too-many-ancestors

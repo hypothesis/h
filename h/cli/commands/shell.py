@@ -13,12 +13,12 @@ BANNER = """Environment:
 
 def autodetect():
     try:
-        import bpython  # noqa
+        import bpython
 
         return "bpython"
     except ImportError:
         try:
-            import IPython  # noqa
+            import IPython
 
             return "ipython"
         except ImportError:

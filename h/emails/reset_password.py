@@ -1,6 +1,6 @@
 from pyramid.renderers import render
 
-from h.i18n import TranslationString as _  # noqa: N813
+from h.i18n import TranslationString as _
 
 
 def generate(request, user):

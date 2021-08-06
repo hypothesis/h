@@ -133,7 +133,7 @@ def handle_client_id_message(message, session=None):
     message.socket.client_id = message.payload["value"]
 
 
-MESSAGE_HANDLERS["client_id"] = handle_client_id_message  # noqa: E305
+MESSAGE_HANDLERS["client_id"] = handle_client_id_message
 
 
 def handle_filter_message(message, session=None):
@@ -167,7 +167,7 @@ def handle_filter_message(message, session=None):
     SocketFilter.set_filter(message.socket, filter_)
 
 
-MESSAGE_HANDLERS["filter"] = handle_filter_message  # noqa: E305
+MESSAGE_HANDLERS["filter"] = handle_filter_message
 
 
 def handle_ping_message(message, session=None):
@@ -175,7 +175,7 @@ def handle_ping_message(message, session=None):
     message.reply({"type": "pong"})
 
 
-MESSAGE_HANDLERS["ping"] = handle_ping_message  # noqa: E305
+MESSAGE_HANDLERS["ping"] = handle_ping_message
 
 
 def handle_whoami_message(message, session=None):
@@ -183,7 +183,7 @@ def handle_whoami_message(message, session=None):
     message.reply({"type": "whoyouare", "userid": message.socket.authenticated_userid})
 
 
-MESSAGE_HANDLERS["whoami"] = handle_whoami_message  # noqa: E305
+MESSAGE_HANDLERS["whoami"] = handle_whoami_message
 
 
 def handle_unknown_message(message, session=None):
@@ -201,4 +201,4 @@ def handle_unknown_message(message, session=None):
     )
 
 
-MESSAGE_HANDLERS[None] = handle_unknown_message  # noqa: E305
+MESSAGE_HANDLERS[None] = handle_unknown_message

@@ -7,13 +7,11 @@ from webtest import TestApp
 from h import db
 from h.app import create_app
 from tests.common import factories as factories_common
-from tests.common.fixtures import es_client  # noqa: F401 pylint:disable=unused-import
-from tests.common.fixtures import (  # noqa: F401 pylint:disable=unused-import
-    init_elasticsearch,
-)
+from tests.common.fixtures import es_client  # pylint:disable=unused-import
+from tests.common.fixtures import init_elasticsearch  # pylint:disable=unused-import
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
-from tests.functional.fixtures.authentication import *  # noqa: F403,F401 pylint:disable=wildcard-import,unused-wildcard-import
-from tests.functional.fixtures.groups import *  # noqa: F403,F401 pylint:disable=wildcard-import,unused-wildcard-import
+from tests.functional.fixtures.authentication import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from tests.functional.fixtures.groups import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 TEST_SETTINGS = {
     "es.url": ELASTICSEARCH_URL,
@@ -95,5 +93,5 @@ def pyramid_app():
 # Always unconditionally wipe the Elasticsearch index after every functional
 # test.
 @pytest.fixture(autouse=True)
-def always_delete_all_elasticsearch_documents(es_client):  # noqa: F811
+def always_delete_all_elasticsearch_documents(es_client):
     pass

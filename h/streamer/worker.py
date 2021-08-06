@@ -96,7 +96,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
 
 class GEventWebSocketPool(Pool):
     """
-    Creates a simple pool of bound websockets.
+    Simple pool of bound websockets.
 
     Internally it uses a gevent group to track the websockets. The server
     should call the ``clear`` method to initiate the closing handshake when the
@@ -114,7 +114,7 @@ class GEventWebSocketPool(Pool):
                 websocket = greenlet._run.__self__  # pylint: disable=protected-access
                 if websocket:
                     websocket.close(1001, "Server is shutting down")
-            except:  # noqa: E722 #pylint: disable=bare-except
+            except:  # pylint: disable=bare-except
                 pass
             finally:
                 self.discard(greenlet)

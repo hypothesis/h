@@ -298,7 +298,7 @@ class AuthClientPolicy:
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
     """
-    Adds a bearer token authentication policy.
+    A bearer token authentication policy.
 
     This is a Pyramid authentication policy in which the user's identity is
     provided by and authenticated by the presence of a valid authentication

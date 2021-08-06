@@ -2,7 +2,7 @@
 
 from pyramid_layout.panel import panel_config
 
-from h.i18n import TranslationString as _  # noqa
+from h.i18n import TranslationString as _
 
 
 @panel_config(name="navbar", renderer="h:templates/panels/navbar.html.jinja2")
