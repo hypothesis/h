@@ -9,9 +9,14 @@ from h.presenters.annotation_json import AnnotationJSONPresenter
 
 
 class TestAnnotationJSONPresenter:
-    def test_asdict(self, presenter, annotation, links_service, DocumentJSONPresenter):
+    def test_asdict(
+        self, presenter, annotation, links_service, DocumentJSONPresenter, factories
+    ):
         annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
         annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
+        annotation.references = (
+            [reference.id for reference in factories.Annotation.create_batch(size=2)],
+        )
         annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
 
         result = presenter.asdict()
@@ -49,6 +54,13 @@ class TestAnnotationJSONPresenter:
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
         DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
+
+    def test_asdict_without_references(self, presenter, annotation):
+        annotation.references = None
+
+        result = presenter.asdict()
+
+        assert "references" not in result
 
     def test_asdict_extra_inherits_correctly(self, presenter, annotation):
         annotation.extra = {"id": "DIFFERENT"}
@@ -107,12 +119,9 @@ class TestAnnotationJSONPresenter:
 
     @pytest.fixture
     def annotation(self, factories):
-        references = factories.Annotation.create_batch(size=2)
-
         return factories.Annotation(
             groupid="NOT WORLD",
             user=factories.User(),
-            references=[reference.id for reference in references],
         )
 
     @pytest.fixture
