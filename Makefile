@@ -11,7 +11,6 @@ help:
 	@echo "make shell             Launch a Python shell in the dev environment"
 	@echo "make sql               Connect to the dev database with a psql shell"
 	@echo "make lint              Run the code linter(s) and print any warnings"
-	@echo "make analyze           Slower and more thorough code quality analysis (pylint)"
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
 	@echo "make test              Run the unit tests"
@@ -74,10 +73,6 @@ backend-lint: python
 .PHONY: frontend-lint
 frontend-lint: node_modules/.uptodate
 	@npm run lint
-
-.PHONY: analyze
-analyze: python
-	@tox -qe analyze
 
 .PHONY: format
 format: backend-format frontend-format
