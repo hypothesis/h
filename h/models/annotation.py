@@ -7,7 +7,7 @@ from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
 from h.models.group import Group
-from h.models.user import User, split_userid
+from h.models.user import User, join_userid
 from h.util import markdown, uri
 from h.util.user import split_user
 
@@ -56,13 +56,19 @@ class Annotation(Base):
 
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
     #: annotation.
-
     userid = sa.Column(sa.UnicodeText, nullable=False, index=True)
     user = sa.orm.relationship(
         User,
-        primaryjoin=(User.userid == split_userid(userid)),
+        primaryjoin=(userid == join_userid(User.username, User.authority)),
         foreign_keys=[userid],
         lazy="select",
+        # WARNING! - This relationship can only be used one way, which is from
+        # the `userid` to the User object. You cannot set it the other way.
+        # It would be very nice if that worked, but from what I can tell it
+        # doesn't. Instead of setting the whole `acct:{username}@{authority}`
+        # we only get the authority. Or whichever column is last referenced
+        # if you express it a different way.
+        viewonly=True,
     )
 
     #: The string id of the group in which this annotation is published.

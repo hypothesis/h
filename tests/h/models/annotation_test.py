@@ -186,10 +186,11 @@ class TestAnnotationGroup:
 
 
 class TestAnnotationUser:
+    @pytest.mark.xfail(message="This direction has been disabled as it's not reliable")
     def test_it(self, user, factories):
         annotation = factories.Annotation(user=user)
 
-        assert annotation.user == user
+        assert annotation.userid == user.userid
 
     def test_it_works_with_userid(self, user, factories):
         annotation = factories.Annotation(userid=user.userid)
