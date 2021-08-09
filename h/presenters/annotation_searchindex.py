@@ -1,5 +1,6 @@
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
+from h.util.datetime import utc_iso8601
 from h.util.user import split_user
 
 
@@ -17,8 +18,8 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         result = {
             "authority": userid_parts["domain"],
             "id": self.annotation.id,
-            "created": self.created,
-            "updated": self.updated,
+            "created": utc_iso8601(self.annotation.created),
+            "updated": utc_iso8601(self.annotation.updated),
             "user": self.annotation.userid,
             "user_raw": self.annotation.userid,
             "uri": self.annotation.target_uri,

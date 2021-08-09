@@ -7,6 +7,7 @@ from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security.permissions import Permission
 from h.traversal import AnnotationContext
+from h.util.datetime import utc_iso8601
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
@@ -24,8 +25,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         annotation.update(
             {
                 "id": self.annotation.id,
-                "created": self.created,
-                "updated": self.updated,
+                "created": utc_iso8601(self.annotation.created),
+                "updated": utc_iso8601(self.annotation.updated),
                 "user": self.annotation.userid,
                 "uri": self.annotation.target_uri,
                 "text": self.text,

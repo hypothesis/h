@@ -1,4 +1,5 @@
 from h.presenters.annotation_base import AnnotationBasePresenter
+from h.util.datetime import utc_iso8601
 
 
 class AnnotationJSONLDPresenter(AnnotationBasePresenter):
@@ -22,8 +23,8 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
             "@context": self.CONTEXT_URL,
             "type": "Annotation",
             "id": self._links_service.get(self.annotation, "jsonld_id"),
-            "created": self.created,
-            "modified": self.updated,
+            "created": utc_iso8601(self.annotation.created),
+            "modified": utc_iso8601(self.annotation.updated),
             "creator": self.annotation.userid,
             "body": self._bodies,
             "target": self._target,

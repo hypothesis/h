@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 
 from h.presenters.annotation_base import AnnotationBasePresenter
@@ -10,40 +8,6 @@ class TestAnnotationBasePresenter:
         presenter = AnnotationBasePresenter(annotation)
 
         assert presenter.annotation == annotation
-
-    @pytest.mark.parametrize(
-        "created,expected",
-        (
-            (None, None),
-            (
-                datetime.datetime(2012, 3, 14, 23, 34, 47, 12),
-                "2012-03-14T23:34:47.000012+00:00",
-            ),
-        ),
-    )
-    def test_created(self, annotation, created, expected):
-        annotation.created = created
-
-        created = AnnotationBasePresenter(annotation).created
-
-        assert created == expected
-
-    @pytest.mark.parametrize(
-        "updated,expected",
-        (
-            (None, None),
-            (
-                datetime.datetime(1983, 8, 31, 7, 18, 20, 98763),
-                "1983-08-31T07:18:20.098763+00:00",
-            ),
-        ),
-    )
-    def test_updated_returns_none_if_missing(self, annotation, updated, expected):
-        annotation.updated = updated
-
-        updated = AnnotationBasePresenter(annotation).updated
-
-        assert updated == expected
 
     @pytest.mark.parametrize("text,expected", ((None, ""), ("text", "text")))
     def test_text(self, annotation, text, expected):

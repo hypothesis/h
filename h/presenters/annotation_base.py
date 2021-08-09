@@ -1,19 +1,9 @@
 """A base presenter for common properties needed when rendering annotations."""
 
-from h.util.datetime import utc_iso8601
-
 
 class AnnotationBasePresenter:
     def __init__(self, annotation):
         self.annotation = annotation
-
-    @property
-    def created(self):
-        return utc_iso8601(self.annotation.created)
-
-    @property
-    def updated(self):
-        return utc_iso8601(self.annotation.updated)
 
     @property
     def text(self):
