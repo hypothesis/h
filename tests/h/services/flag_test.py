@@ -11,6 +11,10 @@ class TestFlagServiceFlagged:
     def test_it_returns_false_when_flag_does_not_exist(self, svc, user, annotation):
         assert not svc.flagged(user, annotation)
 
+    def test_it_handles_missing_values(self, svc, user, annotation):
+        assert not svc.flagged(None, annotation)
+        assert not svc.flagged(user, None)
+
     def test_it_uses_the_cache_if_possible(self, svc, user, annotation):
         assert not svc.flagged(user, annotation)
 
