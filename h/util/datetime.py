@@ -3,6 +3,10 @@
 
 def utc_iso8601(datetime):
     """Convert a UTC datetime into an ISO8601 timestamp string."""
+
+    if not datetime:
+        return None
+
     return datetime.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
 
 

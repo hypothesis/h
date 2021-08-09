@@ -3,6 +3,7 @@ from pyramid import i18n
 
 import h.feeds.util
 from h import presenters, util
+from h.util.datetime import utc_iso8601
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -28,8 +29,8 @@ def _feed_entry_from_annotation(annotation, annotation_url, annotation_api_url=N
         ),
         "author": {"name": name},
         "title": annotation.title,
-        "updated": _utc_iso8601_string(annotation.updated),
-        "published": _utc_iso8601_string(annotation.created),
+        "updated": utc_iso8601(annotation.updated),
+        "published": utc_iso8601(annotation.created),
         "content": annotation.description,
         "links": [
             {
@@ -49,10 +50,6 @@ def _feed_entry_from_annotation(annotation, annotation_url, annotation_api_url=N
         )
 
     return entry
-
-
-def _utc_iso8601_string(timestamp):
-    return timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
 
 
 def feed_from_annotations(
@@ -94,6 +91,6 @@ def feed_from_annotations(
     }
 
     if annotations:
-        feed["updated"] = _utc_iso8601_string(annotations[0].updated)
+        feed["updated"] = utc_iso8601(annotations[0].updated)
 
     return feed
