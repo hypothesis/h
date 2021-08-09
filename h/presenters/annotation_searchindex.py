@@ -15,6 +15,8 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         docpresenter = DocumentSearchIndexPresenter(self.annotation.document)
         userid_parts = split_user(self.annotation.userid)
 
+        tags = self.annotation.tags or []
+
         result = {
             "authority": userid_parts["domain"],
             "id": self.annotation.id,
@@ -23,9 +25,9 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             "user": self.annotation.userid,
             "user_raw": self.annotation.userid,
             "uri": self.annotation.target_uri,
-            "text": self.text,
-            "tags": self.tags,
-            "tags_raw": self.tags,
+            "text": self.annotation.text or "",
+            "tags": tags,
+            "tags_raw": tags,
             "group": self.annotation.groupid,
             "shared": self.annotation.shared,
             "target": self.target,

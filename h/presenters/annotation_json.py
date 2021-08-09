@@ -30,8 +30,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                 "updated": utc_iso8601(self.annotation.updated),
                 "user": self.annotation.userid,
                 "uri": self.annotation.target_uri,
-                "text": self.text,
-                "tags": self.tags,
+                "text": self.annotation.text or "",
+                "tags": self.annotation.tags or [],
                 "group": self.annotation.groupid,
                 #  Convert our simple internal annotation storage format into the
                 #  legacy complex permissions dict format that is still used in
