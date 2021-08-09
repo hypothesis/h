@@ -106,10 +106,10 @@ class TestAnnotationJSONPresentationService:
             AnnotationJSONPresenter.return_value.asdict.return_value,
         ]
 
-    @pytest.mark.parametrize("property", ("document", "moderation"))
+    @pytest.mark.parametrize("attribute", ("document", "moderation"))
     @pytest.mark.parametrize("with_preload", (True, False))
     def test_present_all_preloading_is_effective(
-        self, svc, annotation, db_session, query_counter, property, with_preload
+        self, svc, annotation, db_session, query_counter, attribute, with_preload
     ):
         # Ensure SQLAlchemy forgets all about our annotation
         db_session.flush()
@@ -118,7 +118,7 @@ class TestAnnotationJSONPresentationService:
             svc.present_all([annotation.id])
 
         query_counter.reset()
-        getattr(annotation, property)
+        getattr(annotation, attribute)
 
         # If we preloaded, we shouldn't execute any queries (and vice versa)
         assert bool(query_counter.count) != with_preload
