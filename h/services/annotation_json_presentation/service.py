@@ -4,7 +4,6 @@ from h import storage
 from h.models import Annotation
 from h.presenters import AnnotationJSONPresenter
 from h.security.permissions import Permission
-from h.services.annotation_json_presentation import _formatters
 from h.traversal import AnnotationContext
 
 
@@ -16,8 +15,6 @@ class AnnotationJSONPresentationService:
         self.flag_svc = flag_svc
         self.user_svc = user_svc
         self._has_permission = has_permission
-
-        self.formatters = [_formatters.HiddenFormatter(has_permission, user)]
 
     def present(self, annotation):
         model = AnnotationJSONPresenter(
@@ -34,15 +31,23 @@ class AnnotationJSONPresentationService:
         return [self.present(annotation) for annotation in annotations]
 
     def _get_user_dependent_content(self, user, annotation):
+        # The flagged value depends on whether this particular user has flagged
         model = {"flagged": self.flag_svc.flagged(user=user, annotation=annotation)}
 
-        if self._current_user_is_moderator(annotation):
+        # Only moderators see the full flag count
+        user_is_moderator = self._current_user_is_moderator(annotation)
+        if user_is_moderator:
             model["moderation"] = {"flagCount": self.flag_svc.flag_count(annotation)}
 
-        # This is a dumb relic of when there was more than one, and it will
-        # be gone soon, but this minimises the churn in the tests for now
-        for formatter in self.formatters:
-            model.update(formatter.format(annotation))
+        # The hidden value depends on whether you are the author
+        if not annotation.is_hidden or self._current_user_is_author(annotation):
+            model["hidden"] = False
+        else:
+            model["hidden"] = True
+
+            # Non moderators have bad content hidden from them
+            if not user_is_moderator:
+                model.update({"text": "", "tags": []})
 
         return model
 
@@ -50,6 +55,9 @@ class AnnotationJSONPresentationService:
         return self._has_permission(
             Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
         )
+
+    def _current_user_is_author(self, annotation):
+        return self.user and self.user.userid == annotation.userid
 
     def _preload_data(self, user, annotation_ids):
         def eager_load_related_items(query):
