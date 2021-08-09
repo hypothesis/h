@@ -22,11 +22,6 @@ class HiddenFormatter:
         self._has_permission = has_permission
         self._user = user
 
-    def preload(self, annotation_ids):
-        """Preload annotation ids."""
-
-        # We don't do anything here but must meet the expected interface
-
     def format(self, annotation):
         if not annotation.is_hidden or self._current_user_is_author(annotation):
             return {"hidden": False}

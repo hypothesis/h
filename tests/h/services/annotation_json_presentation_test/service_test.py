@@ -1,24 +1,22 @@
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
+from h_matchers import Any
 from sqlalchemy import event
 
+from h.security.permissions import Permission
 from h.services.annotation_json_presentation import AnnotationJSONPresentationService
+from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONPresentationService:
-    def test_it_configures_formatters(self, svc, _formatters, db_session, flag_service):
+    def test_it_configures_formatters(
+        self, svc, _formatters, db_session, flag_service, has_permission
+    ):
         _formatters.HiddenFormatter.assert_called_once_with(
-            sentinel.has_permission, sentinel.user
+            has_permission, sentinel.user
         )
-        _formatters.ModerationFormatter.assert_called_once_with(
-            flag_service, sentinel.user, sentinel.has_permission
-        )
-
-        assert svc.formatters == [
-            _formatters.HiddenFormatter.return_value,
-            _formatters.ModerationFormatter.return_value,
-        ]
+        assert svc.formatters == [_formatters.HiddenFormatter.return_value]
 
     def test_present(
         self, svc, annotation, AnnotationJSONPresenter, flag_service, user_service
@@ -36,12 +34,29 @@ class TestAnnotationJSONPresentationService:
             formatter.format.assert_called_once_with(annotation)
 
         flag_service.flagged.assert_called_once_with(sentinel.user, annotation)
+        flag_service.flag_count.assert_called_once_with(annotation)
         assert result == {
             "presenter": 1,
             "HiddenFormatter": 1,
-            "ModerationFormatter": 1,
             "flagged": flag_service.flagged.return_value,
+            "moderation": {"flagCount": flag_service.flag_count.return_value},
         }
+
+    def test_present_only_shows_moderation_to_moderators(
+        self, svc, annotation, has_permission
+    ):
+        has_permission.return_value = False
+
+        result = svc.present(annotation)
+
+        has_permission.assert_called_once_with(
+            Permission.Annotation.MODERATE,
+            context=Any.instance_of(AnnotationContext).with_attrs(
+                {"annotation": annotation}
+            ),
+        )
+
+        assert "moderation" not in result
 
     def test_present_all(
         self,
@@ -56,10 +71,8 @@ class TestAnnotationJSONPresentationService:
 
         result = svc.present_all(annotation_ids)
 
-        for formatter in svc.formatters:
-            formatter.preload.assert_called_once_with(annotation_ids)
-
         flag_service.all_flagged.assert_called_once_with(sentinel.user, annotation_ids)
+        flag_service.flag_counts.assert_called_once_with(annotation_ids)
         user_service.fetch_all.assert_called_once_with([annotation.userid])
         AnnotationJSONPresenter.assert_called_once_with(
             annotation, links_service=svc.links_svc, user_service=user_service
@@ -101,19 +114,23 @@ class TestAnnotationJSONPresentationService:
         return query_counter
 
     @pytest.fixture
-    def svc(self, db_session, flag_service, user_service):
+    def svc(self, db_session, flag_service, user_service, has_permission):
         return AnnotationJSONPresentationService(
             session=db_session,
             user=sentinel.user,
             links_svc=sentinel.links_svc,
             flag_svc=flag_service,
             user_svc=user_service,
-            has_permission=sentinel.has_permission,
+            has_permission=has_permission,
         )
 
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation()
+
+    @pytest.fixture
+    def has_permission(self, pyramid_request):
+        return create_autospec(pyramid_request.has_permission)
 
     @pytest.fixture(autouse=True)
     def _formatters(self, patch):

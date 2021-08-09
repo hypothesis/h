@@ -8,6 +8,7 @@ class FlagService:
         self._session = session
 
         self._flagged_cache = {}
+        self._flag_count_cache = {}
 
     def create(self, user: User, annotation: Annotation):
         """
@@ -84,14 +85,27 @@ class FlagService:
         """
         Return the number of times a given annotation has been flagged.
 
+        You can make this more efficient for a large batch of annotations by
+        calling `flag_counts()` which will prime a cache of results.
+
         :param annotation: The annotation to check for flags.
         :returns: The number of times the annotation has been flagged.
         """
-        return (
+
+        if not annotation:
+            return 0
+
+        # This cache can be primed by calling `flag_counts()`
+        if annotation.id in self._flag_count_cache:
+            return self._flag_count_cache[annotation.id]
+
+        self._flag_count_cache[annotation.id] = flag_count = (
             self._session.query(sa.func.count(Flag.id))
             .filter(Flag.annotation_id == annotation.id)
             .scalar()
         )
+
+        return flag_count
 
     def flag_counts(self, annotation_ids):
         """
@@ -114,6 +128,10 @@ class FlagService:
         flag_counts = {f.annotation_id: f.flag_count for f in query}
         missing_ids = set(annotation_ids) - set(flag_counts.keys())
         flag_counts.update({id_: 0 for id_ in missing_ids})
+
+        # Prime the cache for `flag_count()`
+        self._flag_count_cache.update(flag_counts)
+
         return flag_counts
 
 
