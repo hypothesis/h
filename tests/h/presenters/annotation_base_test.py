@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from h.presenters.annotation_base import AnnotationBasePresenter, utc_iso8601
+from h.presenters.annotation_base import AnnotationBasePresenter
 
 
 class TestAnnotationBasePresenter:
@@ -80,20 +80,3 @@ class TestAnnotationBasePresenter:
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation.build()
-
-
-class Berlin(datetime.tzinfo):
-    """Berlin timezone, without DST support."""
-
-    def dst(self, dt):
-        return datetime.timedelta()
-
-
-def test_utc_iso8601():
-    t = datetime.datetime(2016, 2, 24, 18, 3, 25, 7685)
-    assert utc_iso8601(t) == "2016-02-24T18:03:25.007685+00:00"
-
-
-def test_utc_iso8601_ignores_timezone():
-    t = datetime.datetime(2016, 2, 24, 18, 3, 25, 7685, Berlin())
-    assert utc_iso8601(t) == "2016-02-24T18:03:25.007685+00:00"

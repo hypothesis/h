@@ -1,6 +1,8 @@
 """Unit tests for h/atom.py."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import mock
+
+import pytest
 
 from h import models
 from h.feeds import atom
@@ -131,46 +133,17 @@ def test_entry_title(factories):
         assert feed["entries"][0]["title"] == mock_title.return_value
 
 
-def test_entry_updated():
-    """The updated times of entries should come from the annotations."""
-    annotation = _annotation(
-        updated=datetime(
-            year=2016,
-            month=2,
-            day=29,
-            hour=16,
-            minute=39,
-            second=12,
-            microsecond=537626,
-        )
+def test_entry_dates(factories):
+    annotation = factories.Annotation(
+        created=datetime.utcnow(), updated=datetime.utcnow() + timedelta(hours=1)
     )
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda annotation: "annotation url"
     )
 
-    assert feed["entries"][0]["updated"] == "2016-02-29T16:39:12.537626+00:00"
-
-
-def test_entry_published():
-    """The published times of entries should come from the annotations."""
-    annotation = _annotation(
-        created=datetime(
-            year=2016,
-            month=5,
-            day=31,
-            hour=12,
-            minute=15,
-            second=45,
-            microsecond=537626,
-        )
-    )
-
-    feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url"
-    )
-
-    assert feed["entries"][0]["published"] == "2016-05-31T12:15:45.537626+00:00"
+    assert feed["entries"][0]["published"] == f"utc_iso8601_return:{annotation.created}"
+    assert feed["entries"][0]["updated"] == f"utc_iso8601_return:{annotation.updated}"
 
 
 def test_entry_content(factories):
@@ -223,45 +196,19 @@ def test_annotation_api_url_links(_, factories):
     }
 
 
-def test_feed_updated():
-    annotations = [
-        _annotation(
-            updated=datetime(
-                year=2015,
-                month=3,
-                day=11,
-                hour=10,
-                minute=45,
-                second=54,
-                microsecond=537626,
-            )
-        ),
-        _annotation(
-            updated=datetime(
-                year=2015,
-                month=2,
-                day=11,
-                hour=10,
-                minute=43,
-                second=54,
-                microsecond=537626,
-            )
-        ),
-        _annotation(
-            updated=datetime(
-                year=2015,
-                month=1,
-                day=11,
-                hour=10,
-                minute=43,
-                second=54,
-                microsecond=537626,
-            )
-        ),
-    ]
+def test_feed_updated(factories, utc_iso8601):
+    annotations = factories.Annotation.build_batch(3)
+    annotations[0].updated = datetime.utcnow()
 
     feed = atom.feed_from_annotations(
         annotations, "atom_url", lambda annotation: "annotation url"
     )
 
-    assert feed["updated"] == "2015-03-11T10:45:54.537626+00:00"
+    assert feed["updated"] == f"utc_iso8601_return:{annotations[0].updated}"
+
+
+@pytest.fixture(autouse=True)
+def utc_iso8601(patch):
+    utc_iso8601 = patch("h.feeds.atom.utc_iso8601")
+    utc_iso8601.side_effect = lambda date: f"utc_iso8601_return:{date}"
+    return utc_iso8601

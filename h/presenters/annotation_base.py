@@ -9,14 +9,10 @@ class AnnotationBasePresenter:
 
     @property
     def created(self):
-        if not self.annotation.created:
-            return None
         return utc_iso8601(self.annotation.created)
 
     @property
     def updated(self):
-        if not self.annotation.updated:
-            return None
         return utc_iso8601(self.annotation.updated)
 
     @property
