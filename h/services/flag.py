@@ -30,17 +30,27 @@ class FlagService:
         """
         Check if a given user has flagged a given annotation.
 
+        You can make this more efficient for a large batch of annotations by
+        calling `all_flagged()` which will prime a cache of results.
+
         :param user: The user to check for a flag.
         :param annotation: The annotation to check for a flag.
         :returns: True/False depending on the existence of a flag.
         """
+        if not user or not annotation:
+            return False
+
         # This cache can be primed by calling `all_flagged()`
         key = user.id, annotation.id
         if key in self._flagged_cache:
             return self._flagged_cache[key]
 
-        query = self._session.query(Flag).filter_by(user=user, annotation=annotation)
-        self._flagged_cache[key] = is_flagged = query.count() > 0
+        is_flagged = bool(
+            self._session.query(Flag)
+            .filter_by(user=user, annotation=annotation)
+            .first()
+        )
+        self._flagged_cache[key] = is_flagged
 
         return is_flagged
 
