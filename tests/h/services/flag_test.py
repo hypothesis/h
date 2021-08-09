@@ -4,13 +4,9 @@ from h import models
 from h.services import flag
 
 
-@pytest.mark.usefixtures("flags")
 class TestFlagServiceFlagged:
-    def test_it_returns_true_when_flag_exists(self, svc, flags):
-        user = flags[-1].user
-        annotation = flags[-1].annotation
-
-        assert svc.flagged(user, annotation) is True
+    def test_it_returns_true_when_flag_exists(self, svc, flag):
+        assert svc.flagged(flag.user, flag.annotation) is True
 
     def test_it_returns_false_when_flag_does_not_exist(self, svc, factories):
         user = factories.User()
@@ -18,26 +14,29 @@ class TestFlagServiceFlagged:
 
         assert not svc.flagged(user, annotation)
 
-    def test_it_lists_flagged_ids(self, svc, flags):
-        user = flags[-1].user
+    def test_it_lists_flagged_ids(self, svc, flag, noise):
+        annotation_ids = [flag.annotation_id for flag in noise]
+        annotation_ids.append(flag.annotation_id)
 
-        all_flagged = svc.all_flagged(user, [f.annotation_id for f in flags])
+        all_flagged = svc.all_flagged(flag.user, annotation_ids)
 
-        assert all_flagged == {flags[-1].annotation_id}
+        assert all_flagged == {flag.annotation_id}
 
-    @pytest.mark.usefixtures("flags")
     def test_it_handles_all_flagged_with_no_ids(self, svc, factories):
         user = factories.User()
+
         assert svc.all_flagged(user, []) == set()
 
-    def test_it_handles_all_flagged_with_no_user(self, svc, flags):
-        annotation_ids = [f.annotation_id for f in flags]
-
-        assert svc.all_flagged(None, annotation_ids) == set()
+    def test_it_handles_all_flagged_with_no_user(self, svc, flag):
+        assert svc.all_flagged(None, [flag.annotation_id]) == set()
 
     @pytest.fixture
-    def flags(self, factories):
-        return factories.Flag.create_batch(3)
+    def flag(self, factories):
+        return factories.Flag()
+
+    @pytest.fixture(autouse=True)
+    def noise(self, factories):
+        return factories.Flag.create_batch(2)
 
 
 class TestFlagServiceCreate:
