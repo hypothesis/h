@@ -7,36 +7,7 @@ class FlagService:
     def __init__(self, session):
         self._session = session
 
-    def flagged(self, user: User, annotation: Annotation):
-        """
-        Check if a given user has flagged a given annotation.
-
-        :param user: The user to check for a flag.
-        :param annotation: The annotation to check for a flag.
-        :returns: True/False depending on the existence of a flag.
-        """
-        query = self._session.query(Flag).filter_by(user=user, annotation=annotation)
-        return query.count() > 0
-
-    def all_flagged(self, user: User, annotation_ids):
-        """
-        Check which of the given annotation IDs the given user has flagged.
-
-        :param user: The user to check for a flag.
-        :param annotation_ids: The IDs of the annotations to check.
-        :returns The subset of the IDs that the given user has flagged.
-        """
-
-        # SQLAlchemy doesn't behave in the way we might expect when handed an
-        # `in_` condition with an empty sequence
-        if not annotation_ids:
-            return set()
-
-        query = self._session.query(Flag.annotation_id).filter(
-            Flag.annotation_id.in_(annotation_ids), Flag.user == user
-        )
-
-        return {f.annotation_id for f in query}
+        self._flagged_cache = {}
 
     def create(self, user: User, annotation: Annotation):
         """
@@ -54,6 +25,50 @@ class FlagService:
             return
 
         self._session.add(Flag(user=user, annotation=annotation))
+
+    def flagged(self, user: User, annotation: Annotation):
+        """
+        Check if a given user has flagged a given annotation.
+
+        :param user: The user to check for a flag.
+        :param annotation: The annotation to check for a flag.
+        :returns: True/False depending on the existence of a flag.
+        """
+        # This cache can be primed by calling `all_flagged()`
+        key = user.id, annotation.id
+        if key in self._flagged_cache:
+            return self._flagged_cache[key]
+
+        query = self._session.query(Flag).filter_by(user=user, annotation=annotation)
+        self._flagged_cache[key] = is_flagged = query.count() > 0
+
+        return is_flagged
+
+    def all_flagged(self, user: User, annotation_ids):
+        """
+        Check which of the given annotation IDs the given user has flagged.
+
+        :param user: The user to check for a flag.
+        :param annotation_ids: The IDs of the annotations to check.
+        :returns The subset of the IDs that the given user has flagged.
+        """
+
+        # SQLAlchemy doesn't behave in the way we might expect when handed an
+        # `in_` condition with an empty sequence
+        if not annotation_ids or not user:
+            return set()
+
+        query = self._session.query(Flag.annotation_id).filter(
+            Flag.annotation_id.in_(annotation_ids), Flag.user == user
+        )
+
+        flagged_ids = {f.annotation_id for f in query}
+
+        # Fill out the cache, so we can make use of it in flagged()
+        for annotation_id in annotation_ids:
+            self._flagged_cache[(user.id, annotation_id)] = annotation_id in flagged_ids
+
+        return {f.annotation_id for f in query}
 
     def flag_count(self, annotation: Annotation):
         """
