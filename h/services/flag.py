@@ -39,8 +39,12 @@ class FlagService:
         if key in self._flagged_cache:
             return self._flagged_cache[key]
 
-        query = self._session.query(Flag).filter_by(user=user, annotation=annotation)
-        self._flagged_cache[key] = is_flagged = query.count() > 0
+        is_flagged = bool(
+            self._session.query(Flag)
+            .filter_by(user=user, annotation=annotation)
+            .first()
+        )
+        self._flagged_cache[key] = is_flagged
 
         return is_flagged
 
