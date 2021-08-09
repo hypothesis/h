@@ -6,11 +6,6 @@ from h.presenters.annotation_base import AnnotationBasePresenter, utc_iso8601
 
 
 class TestAnnotationBasePresenter:
-    def test_constructor_args(self, annotation):
-        presenter = AnnotationBasePresenter(annotation)
-
-        assert presenter.annotation == annotation
-
     @pytest.mark.parametrize(
         "created,expected",
         (
@@ -24,7 +19,7 @@ class TestAnnotationBasePresenter:
     def test_created(self, annotation, created, expected):
         annotation.created = created
 
-        created = AnnotationBasePresenter(annotation).created
+        created = AnnotationBasePresenter.created(annotation)
 
         assert created == expected
 
@@ -41,7 +36,7 @@ class TestAnnotationBasePresenter:
     def test_updated_returns_none_if_missing(self, annotation, updated, expected):
         annotation.updated = updated
 
-        updated = AnnotationBasePresenter(annotation).updated
+        updated = AnnotationBasePresenter.updated(annotation)
 
         assert updated == expected
 
@@ -49,9 +44,9 @@ class TestAnnotationBasePresenter:
     def test_text(self, annotation, text, expected):
         annotation.text = text
 
-        presenter = AnnotationBasePresenter(annotation)
+        result = AnnotationBasePresenter.text(annotation)
 
-        assert presenter.text == expected
+        assert result == expected
 
     @pytest.mark.parametrize(
         "tags,expected",
@@ -59,12 +54,13 @@ class TestAnnotationBasePresenter:
     )
     def test_tags(self, annotation, tags, expected):
         annotation.tags = tags
-        presenter = AnnotationBasePresenter(annotation)
 
-        assert presenter.tags == expected
+        result = AnnotationBasePresenter.tags(annotation)
+
+        assert result == expected
 
     def test_target(self, annotation):
-        target = AnnotationBasePresenter(annotation).target
+        target = AnnotationBasePresenter.target(annotation)
 
         assert target == [
             {"source": annotation.target_uri, "selector": annotation.target_selectors}
@@ -73,7 +69,7 @@ class TestAnnotationBasePresenter:
     def test_target_missing_selectors(self, annotation):
         annotation.target_selectors = None
 
-        target = AnnotationBasePresenter(annotation).target
+        target = AnnotationBasePresenter.target(annotation)
 
         assert target == [{"source": annotation.target_uri}]
 

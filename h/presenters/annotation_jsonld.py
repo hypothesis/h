@@ -1,7 +1,7 @@
 from h.presenters.annotation_base import AnnotationBasePresenter
 
 
-class AnnotationJSONLDPresenter(AnnotationBasePresenter):
+class AnnotationJSONLDPresenter:
     """
     Presenter for annotations that renders JSON-LD.
 
@@ -11,8 +11,7 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
     """
 
     def __init__(self, annotation, links_service):
-        super().__init__(annotation)
-
+        self.annotation = annotation
         self._links_service = links_service
 
     CONTEXT_URL = "http://www.w3.org/ns/anno.jsonld"
@@ -22,8 +21,8 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
             "@context": self.CONTEXT_URL,
             "type": "Annotation",
             "id": self._links_service.get(self.annotation, "jsonld_id"),
-            "created": self.created,
-            "modified": self.updated,
+            "created": AnnotationBasePresenter.created(self.annotation),
+            "modified": AnnotationBasePresenter.updated(self.annotation),
             "creator": self.annotation.userid,
             "body": self._bodies,
             "target": self._target,
@@ -32,9 +31,9 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
     @property
     def _bodies(self):
         bodies = [
-            {"type": "TextualBody", "value": self.text, "format": "text/markdown"}
+            {"type": "TextualBody", "value": AnnotationBasePresenter.text(self.annotation), "format": "text/markdown"}
         ]
-        for tag in self.tags:
+        for tag in AnnotationBasePresenter.tags(self.annotation):
             bodies.append({"type": "TextualBody", "value": tag, "purpose": "tagging"})
         return bodies
 

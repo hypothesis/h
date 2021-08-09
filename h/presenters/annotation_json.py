@@ -9,12 +9,11 @@ from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
-class AnnotationJSONPresenter(AnnotationBasePresenter):
+class AnnotationJSONPresenter:
     """Present an annotation in the JSON format returned by API requests."""
 
     def __init__(self, annotation, links_service, formatters=None):
-        super().__init__(annotation)
-
+        self.annotation = annotation
         self._links_service = links_service
         self._formatters = tuple(formatters or [])
 
@@ -24,12 +23,12 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         annotation.update(
             {
                 "id": self.annotation.id,
-                "created": self.created,
-                "updated": self.updated,
+                "created": AnnotationBasePresenter.created(self.annotation),
+                "updated": AnnotationBasePresenter.updated(self.annotation),
                 "user": self.annotation.userid,
                 "uri": self.annotation.target_uri,
-                "text": self.text,
-                "tags": self.tags,
+                "text": AnnotationBasePresenter.text(self.annotation),
+                "tags": AnnotationBasePresenter.tags(self.annotation),
                 "group": self.annotation.groupid,
                 #  Convert our simple internal annotation storage format into the
                 #  legacy complex permissions dict format that is still used in
@@ -40,7 +39,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                     "update": [self.annotation.userid],
                     "delete": [self.annotation.userid],
                 },
-                "target": self.target,
+                "target": AnnotationBasePresenter.target(self.annotation),
                 "document": DocumentJSONPresenter(self.annotation.document).asdict(),
                 "links": self._links_service.get_all(self.annotation),
             }

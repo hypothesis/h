@@ -4,37 +4,34 @@ from h.util.datetime import utc_iso8601
 
 
 class AnnotationBasePresenter:
-    def __init__(self, annotation):
-        self.annotation = annotation
-
-    @property
-    def created(self):
-        if not self.annotation.created:
+    @classmethod
+    def created(cls, annotation):
+        if not annotation.created:
             return None
-        return utc_iso8601(self.annotation.created)
+        return utc_iso8601(annotation.created)
 
-    @property
-    def updated(self):
-        if not self.annotation.updated:
+    @classmethod
+    def updated(cls, annotation):
+        if not annotation.updated:
             return None
-        return utc_iso8601(self.annotation.updated)
+        return utc_iso8601(annotation.updated)
 
-    @property
-    def text(self):
-        if self.annotation.text:
-            return self.annotation.text
-        return ""
+    @classmethod
+    def format_date(cls, date):
+        return
 
-    @property
-    def tags(self):
-        if self.annotation.tags:
-            return self.annotation.tags
-        return []
+    @classmethod
+    def text(cls, annotation):
+        return annotation.text or ""
 
-    @property
-    def target(self):
-        target = {"source": self.annotation.target_uri}
-        if self.annotation.target_selectors:
-            target["selector"] = self.annotation.target_selectors
+    @classmethod
+    def tags(cls, annotation):
+        return annotation.tags or []
+
+    @classmethod
+    def target(cls, annotation):
+        target = {"source": annotation.target_uri}
+        if annotation.target_selectors:
+            target["selector"] = annotation.target_selectors
 
         return [target]

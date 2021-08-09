@@ -3,58 +3,55 @@ from h.presenters.document_searchindex import DocumentSearchIndexPresenter
 from h.util.user import split_user
 
 
-class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
+class AnnotationSearchIndexPresenter:
     """Present an annotation in the JSON format used in the search index."""
 
     def __init__(self, annotation, request):
-        super().__init__(annotation)
+        self.annotation = annotation
         self.request = request
 
     def asdict(self):
-        docpresenter = DocumentSearchIndexPresenter(self.annotation.document)
-        userid_parts = split_user(self.annotation.userid)
+        annotation = self.annotation
+
+        tags = AnnotationBasePresenter.tags(annotation)
 
         result = {
-            "authority": userid_parts["domain"],
-            "id": self.annotation.id,
-            "created": self.created,
-            "updated": self.updated,
-            "user": self.annotation.userid,
-            "user_raw": self.annotation.userid,
-            "uri": self.annotation.target_uri,
-            "text": self.text,
-            "tags": self.tags,
-            "tags_raw": self.tags,
-            "group": self.annotation.groupid,
-            "shared": self.annotation.shared,
-            "target": self.target,
-            "document": docpresenter.asdict(),
-            "thread_ids": self.annotation.thread_ids,
+            "authority": split_user(annotation.userid)["domain"],
+            "id": annotation.id,
+            "created": AnnotationBasePresenter.created(annotation),
+            "updated": AnnotationBasePresenter.updated(annotation),
+            "user": annotation.userid,
+            "user_raw": annotation.userid,
+            "uri": annotation.target_uri,
+            "text": AnnotationBasePresenter.text(annotation),
+            "tags": tags,
+            "tags_raw": tags,
+            "group": annotation.groupid,
+            "shared": annotation.shared,
+            "target": AnnotationBasePresenter.target(annotation),
+            "document": DocumentSearchIndexPresenter(annotation.document).asdict(),
+            "thread_ids": annotation.thread_ids,
         }
 
-        result["target"][0]["scope"] = [self.annotation.target_uri_normalized]
+        result["target"][0]["scope"] = [annotation.target_uri_normalized]
 
-        if self.annotation.references:
-            result["references"] = self.annotation.references
+        if annotation.references:
+            result["references"] = annotation.references
 
-        self._add_hidden(result)
-        self._add_nipsa(result, self.annotation.userid)
+        result["hidden"] = self._is_hidden(annotation)
+
+        if self.request.find_service(name="nipsa").is_flagged(annotation.userid):
+            result["nipsa"] = True
 
         return result
 
-    def _add_hidden(self, result):
+    def _is_hidden(self, annotation):
         # Mark an annotation as hidden if it and all of it's children have been
         # moderated and hidden.
-        parents_and_replies = [self.annotation.id] + self.annotation.thread_ids
+        parents_and_replies = [annotation.id] + annotation.thread_ids
 
         ann_mod_svc = self.request.find_service(name="annotation_moderation")
-        is_hidden = len(ann_mod_svc.all_hidden(parents_and_replies)) == len(
+        return len(ann_mod_svc.all_hidden(parents_and_replies)) == len(
             parents_and_replies
         )
 
-        result["hidden"] = is_hidden
-
-    def _add_nipsa(self, result, user_id):
-        nipsa_service = self.request.find_service(name="nipsa")
-        if nipsa_service.is_flagged(user_id):
-            result["nipsa"] = True
