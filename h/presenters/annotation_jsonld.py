@@ -33,10 +33,18 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
     @property
     def _bodies(self):
         bodies = [
-            {"type": "TextualBody", "value": self.text, "format": "text/markdown"}
+            {
+                "type": "TextualBody",
+                "value": self.annotation.text or "",
+                "format": "text/markdown",
+            }
         ]
-        for tag in self.tags:
-            bodies.append({"type": "TextualBody", "value": tag, "purpose": "tagging"})
+        if self.annotation.tags:
+            for tag in self.annotation.tags:
+                bodies.append(
+                    {"type": "TextualBody", "value": tag, "purpose": "tagging"}
+                )
+
         return bodies
 
     @property

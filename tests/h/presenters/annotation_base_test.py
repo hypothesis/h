@@ -9,24 +9,6 @@ class TestAnnotationBasePresenter:
 
         assert presenter.annotation == annotation
 
-    @pytest.mark.parametrize("text,expected", ((None, ""), ("text", "text")))
-    def test_text(self, annotation, text, expected):
-        annotation.text = text
-
-        presenter = AnnotationBasePresenter(annotation)
-
-        assert presenter.text == expected
-
-    @pytest.mark.parametrize(
-        "tags,expected",
-        ((None, []), (["interesting", "magic"], ["interesting", "magic"])),
-    )
-    def test_tags(self, annotation, tags, expected):
-        annotation.tags = tags
-        presenter = AnnotationBasePresenter(annotation)
-
-        assert presenter.tags == expected
-
     def test_target(self, annotation):
         target = AnnotationBasePresenter(annotation).target
 
