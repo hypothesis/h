@@ -70,7 +70,7 @@ class GroupAPISchema(JSONSchema):
         """
         groupid = appstruct.get("groupid", None)
         if groupid is None:  # Nothing to validate
-            return None
+            return
 
         if (self.group_authority is None) or (
             self.group_authority == self.default_authority
