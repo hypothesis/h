@@ -22,16 +22,6 @@ def _normalise_username(username):
     return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
-def join_userid(username, authority):
-    """Return a server side function to create userids.
-
-    :param username: The username
-    :param username: The authority
-    :return: An SQL function which returns a userid string
-    """
-    return sa.func.concat("acct:", _normalise_username(username), "@", authority)
-
-
 class UsernameComparator(Comparator):  # pylint: disable=abstract-method
     """
     Custom comparator for :py:attr:`~h.models.user.User.username`.

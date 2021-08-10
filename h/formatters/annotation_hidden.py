@@ -2,7 +2,7 @@ from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
-class HiddenFormatter:
+class AnnotationHiddenFormatter:
     """
     Formatter for dealing with annotations that a moderator has hidden.
 
@@ -44,4 +44,4 @@ class HiddenFormatter:
         )
 
     def _current_user_is_author(self, annotation):
-        return self._user and self._user == annotation.user
+        return self._user and self._user.userid == annotation.userid

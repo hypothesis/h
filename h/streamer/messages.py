@@ -6,6 +6,7 @@ from gevent.queue import Full
 from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
+from h.formatters import AnnotationUserInfoFormatter
 from h.realtime import Consumer
 from h.security.permissions import Permission
 from h.streamer import websocket
@@ -124,7 +125,7 @@ def handle_annotation_event(message, sockets, request, session):
     read_principals = principals_allowed_by_permission(
         AnnotationContext(annotation), Permission.Annotation.READ_REALTIME_UPDATES
     )
-    reply = _generate_annotation_event(request, message, annotation)
+    reply = _generate_annotation_event(session, request, message, annotation)
 
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
 
@@ -144,7 +145,7 @@ def handle_annotation_event(message, sockets, request, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(request, message, annotation):
+def _generate_annotation_event(session, request, message, annotation):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -158,8 +159,12 @@ def _generate_annotation_event(request, message, annotation):
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
+        user_service = request.find_service(name="user")
+        formatters = [AnnotationUserInfoFormatter(session, user_service)]
         payload = presenters.AnnotationJSONPresenter(
-            annotation, links_service=request.find_service(name="links")
+            annotation,
+            links_service=request.find_service(name="links"),
+            formatters=formatters,
         ).asdict()
 
     return {
