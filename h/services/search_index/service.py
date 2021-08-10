@@ -11,7 +11,9 @@ class SearchIndexService:
     # The DB setting that stores whether a full re-index is taking place
     REINDEX_SETTING_KEY = "reindex.new_index"
 
-    def __init__(self, request, es_client, session, settings, queue):
+    def __init__(  # pylint:disable=too-many-arguments
+        self, request, es_client, session, settings, queue
+    ):
         """
         Create an instance of the service.
 

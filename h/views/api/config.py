@@ -27,7 +27,7 @@ cors_policy = cors.policy(
 )
 
 
-def add_api_view(
+def add_api_view(  # pylint: disable=too-many-arguments
     config,
     view,
     versions,

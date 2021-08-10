@@ -38,7 +38,9 @@ class Queue:
         self._es = es
         self._batch_indexer = batch_indexer
 
-    def add_where(self, where, tag, priority, force=False, schedule_in=None):
+    def add_where(  # pylint: disable=too-many-arguments
+        self, where, tag, priority, force=False, schedule_in=None
+    ):
         """
         Queue annotations matching a filter to be synced to ElasticSearch.
 
