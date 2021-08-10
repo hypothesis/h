@@ -7,43 +7,39 @@ from h.services.annotation_json_presentation import AnnotationJSONPresentationSe
 
 
 class TestAnnotationJSONPresentationService:
-    def test_it_configures_formatters(self, svc, _formatters, db_session, flag_service):
-        _formatters.HiddenFormatter.assert_called_once_with(
+    def test_it_configures_formatters(
+        self, svc, formatters, db_session, flag_service, moderation_service
+    ):
+        formatters.AnnotationFlagFormatter.assert_called_once_with(
+            sentinel.flag_svc, sentinel.user
+        )
+        formatters.AnnotationHiddenFormatter.assert_called_once_with(
             sentinel.has_permission, sentinel.user
         )
-        _formatters.ModerationFormatter.assert_called_once_with(
-            flag_service, sentinel.user, sentinel.has_permission
+        formatters.AnnotationModerationFormatter.assert_called_once_with(
+            sentinel.flag_svc, sentinel.user, sentinel.has_permission
+        )
+        formatters.AnnotationUserInfoFormatter.assert_called_once_with(
+            db_session, sentinel.user_svc
         )
 
         assert svc.formatters == [
-            _formatters.HiddenFormatter.return_value,
-            _formatters.ModerationFormatter.return_value,
+            formatters.AnnotationFlagFormatter.return_value,
+            formatters.AnnotationHiddenFormatter.return_value,
+            formatters.AnnotationModerationFormatter.return_value,
+            formatters.AnnotationUserInfoFormatter.return_value,
         ]
 
-    def test_present(self, svc, annotation, AnnotationJSONPresenter, flag_service):
-        AnnotationJSONPresenter.return_value.asdict.return_value = {"presenter": 1}
-        for formatter in svc.formatters:
-            formatter.format.return_value = {formatter.__class__.__name__: 1}
-
+    def test_present(self, svc, annotation, AnnotationJSONPresenter):
         result = svc.present(annotation)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation, links_service=svc.links_svc
+            annotation, links_service=svc.links_svc, formatters=svc.formatters
         )
-        for formatter in svc.formatters:
-            formatter.format.assert_called_once_with(annotation)
 
-        flag_service.flagged.assert_called_once_with(sentinel.user, annotation)
-        assert result == {
-            "presenter": 1,
-            "HiddenFormatter": 1,
-            "ModerationFormatter": 1,
-            "flagged": flag_service.flagged.return_value,
-        }
+        assert result == AnnotationJSONPresenter.return_value.asdict.return_value
 
-    def test_present_all(
-        self, svc, factories, annotation, AnnotationJSONPresenter, flag_service
-    ):
+    def test_present_all(self, svc, factories, annotation, AnnotationJSONPresenter):
         annotation_ids = [annotation.id]
 
         result = svc.present_all(annotation_ids)
@@ -51,36 +47,26 @@ class TestAnnotationJSONPresentationService:
         for formatter in svc.formatters:
             formatter.preload.assert_called_once_with(annotation_ids)
 
-        flag_service.all_flagged.assert_called_once_with(sentinel.user, annotation_ids)
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation, links_service=svc.links_svc
+            annotation, links_service=svc.links_svc, formatters=svc.formatters
         )
         assert result == [
             AnnotationJSONPresenter.return_value.asdict.return_value,
         ]
 
-    @pytest.mark.parametrize("property", ("document", "moderation", "user"))
+    @pytest.mark.parametrize("property", ("document", "moderation"))
     @pytest.mark.parametrize("with_preload", (True, False))
     def test_present_all_preloading_is_effective(
-        self, svc, factories, db_session, query_counter, property, with_preload
+        self, svc, annotation, db_session, query_counter, property, with_preload
     ):
         # Ensure SQLAlchemy forgets all about our annotation
-        annotations = factories.Annotation.create_batch(size=3)
-        annotation_ids = [annotation.id for annotation in annotations]
         db_session.flush()
-        db_session.expire_all()
-        query_counter.reset()
-
+        db_session.expire(annotation)
         if with_preload:
-            svc.present_all(annotation_ids)
-
-            # Check we aren't just issuing millions of queries to make this
-            # happen. There should be one for each type (annotation, doc, etc)
-            assert query_counter.count == 4
+            svc.present_all([annotation.id])
 
         query_counter.reset()
-        getattr(annotations[0], property)
-        getattr(annotations[1], property)
+        getattr(annotation, property)
 
         # If we preloaded, we shouldn't execute any queries (and vice versa)
         assert bool(query_counter.count) != with_preload
@@ -91,6 +77,7 @@ class TestAnnotationJSONPresentationService:
             count = 0
 
             def __call__(self, *args, **kwargs):
+                print(args, kwargs)
                 self.count += 1
 
             def reset(self):
@@ -101,12 +88,13 @@ class TestAnnotationJSONPresentationService:
         return query_counter
 
     @pytest.fixture
-    def svc(self, db_session, flag_service):
+    def svc(self, db_session):
         return AnnotationJSONPresentationService(
             session=db_session,
             user=sentinel.user,
             links_svc=sentinel.links_svc,
-            flag_svc=flag_service,
+            flag_svc=sentinel.flag_svc,
+            user_svc=sentinel.user_svc,
             has_permission=sentinel.has_permission,
         )
 
@@ -115,8 +103,8 @@ class TestAnnotationJSONPresentationService:
         return factories.Annotation()
 
     @pytest.fixture(autouse=True)
-    def _formatters(self, patch):
-        return patch("h.services.annotation_json_presentation.service._formatters")
+    def formatters(self, patch):
+        return patch("h.services.annotation_json_presentation.service.formatters")
 
     @pytest.fixture(autouse=True)
     def AnnotationJSONPresenter(self, patch):

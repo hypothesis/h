@@ -185,37 +185,6 @@ class TestAnnotationGroup:
         return factories.Group(pubid="12345678")
 
 
-class TestAnnotationUser:
-    @pytest.mark.xfail(message="This direction has been disabled as it's not reliable")
-    def test_it(self, user, factories):
-        annotation = factories.Annotation(user=user)
-
-        assert annotation.userid == user.userid
-
-    def test_it_works_with_userid(self, user, factories):
-        annotation = factories.Annotation(userid=user.userid)
-
-        assert annotation.user == user
-
-    @pytest.mark.parametrize(
-        "bad_userid",
-        (
-            "missing@acct.com",
-            "acct:no_authority",
-            "acct:no_authority@",
-            "acct:@no_user.com",
-        ),
-    )
-    def test_it_returns_None_invalid_userids(self, factories, bad_userid):
-        annotation = factories.Annotation(userid=bad_userid)
-
-        assert annotation.user is None
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
-
-
 class TestThread:
     def test_empty_thread(self, root):
         assert root.thread == []

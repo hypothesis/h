@@ -3,19 +3,19 @@ from unittest.mock import create_autospec
 import pytest
 from h_matchers import Any
 
+from h.formatters.annotation_hidden import AnnotationHiddenFormatter
 from h.security.permissions import Permission
-from h.services.annotation_json_presentation._formatters.hidden import HiddenFormatter
 from h.traversal import AnnotationContext
 
 
-class TestHiddenFormatter:
+class TestAnnotationHiddenFormatter:
     def test_it_hides_moderated(self, formatter, annotation):
         annotation.moderation = None
 
         assert formatter.format(annotation) == {"hidden": False}
 
     def test_the_author_can_see_it(self, formatter, annotation, user):
-        annotation.user = user
+        annotation.userid = user.userid
 
         assert formatter.format(annotation) == {"hidden": False}
 
@@ -50,4 +50,4 @@ class TestHiddenFormatter:
 
     @pytest.fixture
     def formatter(self, has_permission, user):
-        return HiddenFormatter(has_permission, user)
+        return AnnotationHiddenFormatter(has_permission, user)

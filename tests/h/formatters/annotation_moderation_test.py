@@ -2,11 +2,11 @@ from unittest.mock import create_autospec, sentinel
 
 import pytest
 
+from h.formatters.annotation_moderation import AnnotationModerationFormatter
 from h.security.permissions import Permission
-from h.services.annotation_json_presentation._formatters import ModerationFormatter
 
 
-class TestModerationFormatter:
+class TestAnnotationModerationFormatter:
     def test_preload_sets_flag_counts(self, formatter, flag_service):
         flag_service.flag_counts.return_value = {"flagged": 2, "unflagged": 0}
 
@@ -18,7 +18,7 @@ class TestModerationFormatter:
         assert formatter._cache == flag_service.flag_counts.return_value
 
     def test_preload_skipped_without_user(self, flag_service):
-        formatter = ModerationFormatter(
+        formatter = AnnotationModerationFormatter(
             flag_service, user=None, has_permission=sentinel.has_permission
         )
 
@@ -76,10 +76,10 @@ class TestModerationFormatter:
 
     @pytest.fixture
     def formatter(self, flag_service, factories, has_permission):
-        return ModerationFormatter(flag_service, factories.User(), has_permission)
+        return AnnotationModerationFormatter(
+            flag_service, factories.User(), has_permission
+        )
 
     @pytest.fixture
     def AnnotationContext(self, patch):
-        return patch(
-            "h.services.annotation_json_presentation._formatters.moderation.AnnotationContext"
-        )
+        return patch("h.formatters.annotation_moderation.AnnotationContext")

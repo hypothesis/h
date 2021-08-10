@@ -4,58 +4,40 @@ from h import models
 from h.services import flag
 
 
+@pytest.mark.usefixtures("flags")
 class TestFlagServiceFlagged:
-    def test_it_returns_true_when_flag_exists(self, svc, flag):
-        assert svc.flagged(flag.user, flag.annotation) is True
+    def test_it_returns_true_when_flag_exists(self, svc, flags):
+        user = flags[-1].user
+        annotation = flags[-1].annotation
 
-    def test_it_returns_false_when_flag_does_not_exist(self, svc, user, annotation):
+        assert svc.flagged(user, annotation) is True
+
+    def test_it_returns_false_when_flag_does_not_exist(self, svc, factories):
+        user = factories.User()
+        annotation = factories.Annotation(userid=user.userid)
+
         assert not svc.flagged(user, annotation)
 
-    def test_it_handles_missing_values(self, svc, user, annotation):
-        assert not svc.flagged(None, annotation)
-        assert not svc.flagged(user, None)
+    def test_it_lists_flagged_ids(self, svc, flags):
+        user = flags[-1].user
 
-    def test_it_uses_the_cache_if_possible(self, svc, user, annotation):
-        assert not svc.flagged(user, annotation)
+        all_flagged = svc.all_flagged(user, [f.annotation_id for f in flags])
 
-        svc._flagged_cache[(user.id, annotation.id)] = True
+        assert all_flagged == {flags[-1].annotation_id}
 
-        assert svc.flagged(user, annotation)
-
-    def test_it_lists_flagged_ids(self, svc, user, flag, noise):
-        annotation_ids = [flag.annotation_id for flag in noise]
-        annotation_ids.append(flag.annotation_id)
-
-        all_flagged = svc.all_flagged(user, annotation_ids)
-
-        assert all_flagged == {flag.annotation_id}
-        assert svc._flagged_cache == {
-            (user.id, noise[0].annotation_id): False,
-            (user.id, noise[1].annotation_id): False,
-            (user.id, flag.annotation_id): True,
-        }
-
-    def test_it_handles_all_flagged_with_no_ids(self, svc, user):
+    @pytest.mark.usefixtures("flags")
+    def test_it_handles_all_flagged_with_no_ids(self, svc, factories):
+        user = factories.User()
         assert svc.all_flagged(user, []) == set()
 
-    def test_it_handles_all_flagged_with_no_user(self, svc, annotation):
-        assert svc.all_flagged(None, [annotation.id]) == set()
+    def test_it_handles_all_flagged_with_no_user(self, svc, flags):
+        annotation_ids = [f.annotation_id for f in flags]
+
+        assert svc.all_flagged(None, annotation_ids) == set()
 
     @pytest.fixture
-    def flag(self, factories, user, annotation):
-        return factories.Flag(user=user, annotation=annotation)
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
-
-    @pytest.fixture
-    def annotation(self, factories):
-        return factories.Annotation()
-
-    @pytest.fixture(autouse=True)
-    def noise(self, factories):
-        return factories.Flag.create_batch(2)
+    def flags(self, factories):
+        return factories.Flag.create_batch(3)
 
 
 class TestFlagServiceCreate:
