@@ -48,7 +48,7 @@ class DocumentMeta(Base, mixins.Timestamps):
         return "<DocumentMeta %s>" % self.id
 
 
-def create_or_update_document_meta(  # pylint:disable=redefined-builtin
+def create_or_update_document_meta(  # pylint:disable=redefined-builtin,too-many-arguments
     session, claimant, type, value, document, created, updated
 ):
     """

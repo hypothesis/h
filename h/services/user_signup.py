@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class UserSignupService:
     """A service for registering users."""
 
-    def __init__(
+    def __init__(  # pylint:disable=too-many-arguments
         self, default_authority, mailer, session, signup_email, password_service
     ):
         """

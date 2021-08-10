@@ -93,7 +93,7 @@ class GroupCreateService:
             **kwargs
         )
 
-    def _create(
+    def _create(  # pylint: disable=too-many-arguments
         self, name, userid, type_flags, scopes, add_creator_as_member, **kwargs
     ):
         """

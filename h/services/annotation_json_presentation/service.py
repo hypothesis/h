@@ -8,7 +8,10 @@ from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresentationService:
-    def __init__(self, session, user, links_svc, flag_svc, user_svc, has_permission):
+    def __init__(  # pylint: disable=too-many-arguments
+        self, session, user, links_svc, flag_svc, user_svc, has_permission
+    ):
+
         self.user = user
         self.session = session
         self.links_svc = links_svc
