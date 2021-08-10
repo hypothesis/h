@@ -6,16 +6,18 @@ from pyramid.security import principals_allowed_by_permission
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security.permissions import Permission
+from h.session import user_info
 from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
     """Present an annotation in the JSON format returned by API requests."""
 
-    def __init__(self, annotation, links_service, formatters=None):
+    def __init__(self, annotation, links_service, user_service, formatters=None):
         super().__init__(annotation)
 
         self._links_service = links_service
+        self._user_service = user_service
         self._formatters = tuple(formatters or [])
 
     def asdict(self):
@@ -45,6 +47,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                 "links": self._links_service.get_all(self.annotation),
             }
         )
+
+        annotation.update(user_info(self._user_service.fetch(self.annotation.userid)))
 
         if self.annotation.references:
             annotation["references"] = self.annotation.references
