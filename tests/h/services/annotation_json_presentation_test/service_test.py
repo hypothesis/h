@@ -19,27 +19,28 @@ class TestAnnotationJSONPresentationService:
         formatters.AnnotationModerationFormatter.assert_called_once_with(
             sentinel.flag_svc, sentinel.user, sentinel.has_permission
         )
-        formatters.AnnotationUserInfoFormatter.assert_called_once_with(
-            db_session, sentinel.user_svc
-        )
 
         assert svc.formatters == [
             formatters.AnnotationFlagFormatter.return_value,
             formatters.AnnotationHiddenFormatter.return_value,
             formatters.AnnotationModerationFormatter.return_value,
-            formatters.AnnotationUserInfoFormatter.return_value,
         ]
 
-    def test_present(self, svc, annotation, AnnotationJSONPresenter):
+    def test_present(self, svc, annotation, user_service, AnnotationJSONPresenter):
         result = svc.present(annotation)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation, links_service=svc.links_svc, formatters=svc.formatters
+            annotation,
+            links_service=svc.links_svc,
+            user_service=user_service,
+            formatters=svc.formatters,
         )
 
         assert result == AnnotationJSONPresenter.return_value.asdict.return_value
 
-    def test_present_all(self, svc, factories, annotation, AnnotationJSONPresenter):
+    def test_present_all(
+        self, svc, factories, annotation, user_service, AnnotationJSONPresenter
+    ):
         annotation_ids = [annotation.id]
 
         result = svc.present_all(annotation_ids)
@@ -48,7 +49,10 @@ class TestAnnotationJSONPresentationService:
             formatter.preload.assert_called_once_with(annotation_ids)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation, links_service=svc.links_svc, formatters=svc.formatters
+            annotation,
+            links_service=svc.links_svc,
+            user_service=user_service,
+            formatters=svc.formatters,
         )
         assert result == [
             AnnotationJSONPresenter.return_value.asdict.return_value,
@@ -77,7 +81,6 @@ class TestAnnotationJSONPresentationService:
             count = 0
 
             def __call__(self, *args, **kwargs):
-                print(args, kwargs)
                 self.count += 1
 
             def reset(self):
@@ -88,13 +91,13 @@ class TestAnnotationJSONPresentationService:
         return query_counter
 
     @pytest.fixture
-    def svc(self, db_session):
+    def svc(self, db_session, user_service):
         return AnnotationJSONPresentationService(
             session=db_session,
             user=sentinel.user,
             links_svc=sentinel.links_svc,
             flag_svc=sentinel.flag_svc,
-            user_svc=sentinel.user_svc,
+            user_svc=user_service,
             has_permission=sentinel.has_permission,
         )
 

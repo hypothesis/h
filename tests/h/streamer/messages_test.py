@@ -127,7 +127,7 @@ class TestHandleAnnotationEvent:
         handle_annotation_event,
         fetch_annotation,
         links_service,
-        AnnotationUserInfoFormatter,
+        user_service,
         AnnotationJSONPresenter,
     ):
         handle_annotation_event()
@@ -135,7 +135,7 @@ class TestHandleAnnotationEvent:
         AnnotationJSONPresenter.assert_called_once_with(
             fetch_annotation.return_value,
             links_service=links_service,
-            formatters=[AnnotationUserInfoFormatter.return_value],
+            user_service=user_service,
         )
         assert AnnotationJSONPresenter.return_value.asdict.called
 
@@ -288,10 +288,6 @@ class TestHandleAnnotationEvent:
     @pytest.fixture
     def principals_allowed_by_permission(self, patch):
         return patch("h.streamer.messages.principals_allowed_by_permission")
-
-    @pytest.fixture
-    def AnnotationUserInfoFormatter(self, patch):
-        return patch("h.streamer.messages.AnnotationUserInfoFormatter")
 
     @pytest.fixture
     def AnnotationContext(self, patch):
