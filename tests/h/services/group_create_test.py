@@ -230,7 +230,7 @@ class TestCreateOpenGroup:
             == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
         )
 
-    def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator):
+    def test_it_always_creates_new_scopes(self, factories, svc, creator):
         # It always creates a new scope, even if a scope with the given origin
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
@@ -378,7 +378,7 @@ class TestCreateRestrictedGroup:
         )
 
     def test_it_with_mismatched_authorities_raises_value_error(
-        self, db_session, svc, origins, creator, factories
+        self, svc, origins, creator, factories
     ):
         org = factories.Organization(name="My organization", authority="bar.com")
         with pytest.raises(ValueError):
@@ -390,7 +390,7 @@ class TestCreateRestrictedGroup:
                 organization=org,
             )
 
-    def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator):
+    def test_it_always_creates_new_scopes(self, factories, svc, creator):
         # It always creates a new scope, even if a scope with the given origin
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
@@ -443,7 +443,7 @@ class TestGroupCreateFactory:
 
 
 @pytest.fixture
-def usr_svc(pyramid_request, db_session):
+def usr_svc(db_session):
     def fetch(userid):
         # One doesn't want to couple to the user fetching service but
         # we do want to be able to fetch user models for internal

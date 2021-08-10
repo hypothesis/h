@@ -267,7 +267,8 @@ class TestUserGetByEmail:
         actual = models.User.get_by_email(db_session, user.email, user.authority)
         assert actual == user
 
-    def test_it_filters_by_email(self, db_session, users):
+    @pytest.mark.usefixtures("users")
+    def test_it_filters_by_email(self, db_session):
         authority = "example.com"
         email = "bogus@msn.com"
 

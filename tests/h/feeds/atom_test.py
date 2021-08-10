@@ -54,7 +54,7 @@ def test_feed_contains_entries(_feed_entry_from_annotation, factories):
         "feed entry for annotation 3",
     ]
 
-    def pop(*args, **kwargs):
+    def pop(*args, **kwargs):  # pylint:disable=unused-argument
         return entries.pop(0)
 
     _feed_entry_from_annotation.side_effect = pop
@@ -97,12 +97,11 @@ def test_entry_id(util, factories):
     """The ids of feed entries should come from tag_uri_for_annotation()."""
     annotation = factories.Annotation()
 
-    def annotation_url(ann):
-        return "annotation url"
+    feed = atom.feed_from_annotations(
+        [annotation], "atom_url", lambda _: "annotation url"
+    )
 
-    feed = atom.feed_from_annotations([annotation], "atom_url", annotation_url)
-
-    util.tag_uri_for_annotation.assert_called_once_with(annotation, annotation_url)
+    util.tag_uri_for_annotation.assert_called_once()
     assert feed["entries"][0]["id"] == util.tag_uri_for_annotation.return_value
 
 
@@ -111,7 +110,7 @@ def test_entry_author(factories):
     annotation = factories.Annotation(userid="acct:nobu@hypothes.is")
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url"
+        [annotation], "atom_url", lambda _: "annotation url"
     )
 
     assert feed["entries"][0]["author"]["name"] == "nobu"
@@ -126,7 +125,7 @@ def test_entry_title(factories):
         annotation = factories.Annotation()
 
         feed = atom.feed_from_annotations(
-            [annotation], "atom_url", lambda annotation: "annotation url"
+            [annotation], "atom_url", lambda _: "annotation url"
         )
 
         mock_title.assert_called_once_with()

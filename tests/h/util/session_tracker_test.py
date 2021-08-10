@@ -14,8 +14,9 @@ def generate_ann_id():
 
 
 class TestTracker:
+    @pytest.mark.usefixtures("session")
     def test_uncommitted_changes_returns_unflushed_changes(
-        self, tracker, session, expected_changes
+        self, tracker, expected_changes
     ):
         added_entry, changed_entry, deleted_entry = expected_changes
 

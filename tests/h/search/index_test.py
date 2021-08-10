@@ -84,7 +84,7 @@ class TestBatchIndexer:
         assert num_index_records == num_annotations // window_size
 
     def test_it_correctly_indexes_fields_for_bulk_actions(
-        self, batch_indexer, es_client, factories, get_indexed_ann
+        self, batch_indexer, factories, get_indexed_ann
     ):
         annotations = factories.Annotation.create_batch(2, groupid="group_a")
 
@@ -141,7 +141,9 @@ class TestBatchIndexer:
 
 
 @pytest.fixture
-def batch_indexer(db_session, es_client, pyramid_request, moderation_service):
+def batch_indexer(  # pylint:disable=unused-argument
+    db_session, es_client, pyramid_request, moderation_service
+):
     return BatchIndexer(db_session, es_client, pyramid_request)
 
 

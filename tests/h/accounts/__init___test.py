@@ -17,9 +17,7 @@ class TestGetUser:
 
         user_service.fetch.assert_called_once_with("userid")
 
-    def test_does_not_invalidate_session_if_not_authenticated(
-        self, pyramid_config, pyramid_request
-    ):
+    def test_does_not_invalidate_session_if_not_authenticated(self, pyramid_request):
         """
         If authenticated_userid is None it shouldn't invalidate the session.
 

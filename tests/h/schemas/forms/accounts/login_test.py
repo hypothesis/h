@@ -46,7 +46,7 @@ class TestLoginSchema:
 
         assert result["user"] is user
 
-    def test_invalid_with_bad_csrf(self, pyramid_request, user_service):
+    def test_invalid_with_bad_csrf(self, pyramid_request):
         schema = LoginSchema().bind(request=pyramid_request)
 
         with pytest.raises(BadCSRFToken):

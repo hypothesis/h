@@ -309,7 +309,7 @@ def delete_user_service(pyramid_request, annotation_delete_service):
 
 
 @pytest.fixture
-def annotation_delete_service(pyramid_config):
+def annotation_delete_service(pyramid_config):  # pylint:disable=unused-argument
     service = mock.create_autospec(
         AnnotationDeleteService, spec_set=True, instance=True
     )
@@ -327,6 +327,6 @@ def pyramid_config(
 
 
 @pytest.fixture
-def cliconfig(pyramid_config, pyramid_request):
+def cliconfig(pyramid_config, pyramid_request):  # pylint:disable=unused-argument
     pyramid_request.tm = mock.Mock()
     return {"bootstrap": mock.Mock(return_value=pyramid_request)}

@@ -319,7 +319,7 @@ class TestBulkGroupMembershipCreate:
         assert memberships == expected_memberships
 
     @pytest.fixture
-    def commands(self, db_session, user, groups):
+    def commands(self, user, groups):
         return [group_membership_create(user.id, group.id) for group in groups]
 
     @pytest.fixture

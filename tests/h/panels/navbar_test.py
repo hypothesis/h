@@ -30,7 +30,7 @@ class TestNavbar:
             for g in user.groups
         ]
 
-    def test_includes_groups_suggestions_when_logged_in(self, req, user, open_group):
+    def test_includes_groups_suggestions_when_logged_in(self, req, user):
         req.user = user
         result = navbar({}, req)
         assert result["groups_suggestions"] == [

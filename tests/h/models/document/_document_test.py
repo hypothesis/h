@@ -320,7 +320,7 @@ class TestUpdateDocumentMetadata:
         first.assert_called_once_with()
         assert result == first.return_value
 
-    def test_it_updates_document_updated(self, Document, merge_documents, caller):
+    def test_it_updates_document_updated(self, Document, caller):
         caller(updated=sentinel.updated)
 
         document = Document.find_or_create_by_uris.return_value.first.return_value
@@ -399,7 +399,7 @@ class TestUpdateDocumentMetadata:
         ]
 
     @pytest.fixture
-    def caller(self, db_session):
+    def caller(self):
         return functools.partial(
             update_document_metadata,
             session=sentinel.db_session,

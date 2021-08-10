@@ -48,7 +48,7 @@ class TestProcessWorkQueue:
         assert context_manager.__exit__.call_count == len(messages)
 
     @pytest.fixture
-    def process_work_queue(self, session, registry, message):
+    def process_work_queue(self, registry, message):
         def process_work_queue(queue=None):
             return streamer.process_work_queue(registry, queue or [message])
 

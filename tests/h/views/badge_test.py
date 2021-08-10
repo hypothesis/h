@@ -77,9 +77,7 @@ class TestBadge:
         search_run.assert_not_called()
         assert result == {"total": 0}
 
-    def test_it_sets_cache_headers_if_blocked(
-        self, badge_request, Blocklist, pyramid_request
-    ):
+    def test_it_sets_cache_headers_if_blocked(self, badge_request, pyramid_request):
         badge_request("http://example.com", annotated=True, blocked=True)
 
         cache_control = pyramid_request.response.cache_control

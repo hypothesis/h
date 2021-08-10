@@ -65,7 +65,7 @@ class TestRenameUserService:
         )
         assert not count
 
-    def test_rename_updates_tokens(self, service, user, db_session, factories):
+    def test_rename_updates_tokens(self, service, user, db_session):
         token = models.Token(userid=user.userid, value="foo")
         db_session.add(token)
 
@@ -76,17 +76,16 @@ class TestRenameUserService:
         )
         assert updated_token.userid == user.userid
 
+    @pytest.mark.usefixtures("annotations")
     def test_rename_changes_the_users_annotations_userid(
-        self, service, user, annotations, db_session
+        self, service, user, db_session
     ):
         service.rename(user, "panda")
 
         userids = [ann.userid for ann in db_session.query(models.Annotation)]
         assert {user.userid} == set(userids)
 
-    def test_rename_reindexes_the_users_annotations(
-        self, service, user, annotations, search_index
-    ):
+    def test_rename_reindexes_the_users_annotations(self, service, user, search_index):
         original_userid = user.userid
 
         service.rename(user, "panda")
@@ -112,7 +111,7 @@ class TestRenameUserService:
         return user
 
     @pytest.fixture
-    def annotations(self, user, factories, db_session, pyramid_request):
+    def annotations(self, user, factories, db_session):
         anns = []
         for _ in range(8):
             anns.append(factories.Annotation(userid=user.userid))

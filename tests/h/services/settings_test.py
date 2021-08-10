@@ -40,7 +40,7 @@ class TestSettingsService:
 
         assert db_session.query(Setting).get(setting.key) is None
 
-    def test_delete_is_noop_when_setting_missing(self, db_session, svc, factories):
+    def test_delete_is_noop_when_setting_missing(self, svc, factories):
         # create a random setting
         factories.Setting()
 

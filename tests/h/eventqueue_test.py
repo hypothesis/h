@@ -13,7 +13,7 @@ class DummyEvent:
 
 @pytest.mark.usefixtures("pyramid_config")
 class TestEventQueue:
-    def test_init_adds_response_callback(self, pyramid_request):
+    def test_init_adds_response_callback(self):
         request = mock.Mock()
         queue = eventqueue.EventQueue(request)
 

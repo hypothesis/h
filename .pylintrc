@@ -33,8 +33,6 @@ disable=bad-continuation,
         duplicate-code,
 
         # Ignored during pep8 -> pylint transition
-        unused-argument,
-        too-many-arguments,
         super-init-not-called,
         fixme,
 

@@ -36,7 +36,7 @@ class TestAuthenticateClient:
         assert oauth_request.client.authclient == client
 
     def test_returns_False_for_missing_client_id_request_param(
-        self, svc, client, oauth_request
+        self, svc, oauth_request
     ):
         assert not svc.authenticate_client(oauth_request)
 
@@ -93,7 +93,7 @@ class TestClientAuthenticationRequired:
         assert not svc.client_authentication_required(oauth_request)
 
     def test_returns_False_for_refresh_token_with_jwt_client(
-        self, svc, oauth_request, factories, client
+        self, svc, oauth_request, client
     ):
         oauth_request.client_id = client.id
         oauth_request.grant_type = "refresh_token"
@@ -181,7 +181,7 @@ class TestFindClient:
     def test_returns_none_for_invalid_client_id(self, svc):
         assert svc.find_client("bogus") is None
 
-    def test_returns_none_when_not_found(self, svc, client):
+    def test_returns_none_when_not_found(self, svc):
         id_ = str(uuid.uuid1())
         assert svc.find_client(id_) is None
 
@@ -275,7 +275,7 @@ class TestFindToken:
 
         assert token.value == token.value
 
-    def test_it_returns_None_when_token_is_missing(self, svc, token):
+    def test_it_returns_None_when_token_is_missing(self, svc):
         result = svc.find_token("missing-value")
 
         assert result is None
@@ -645,7 +645,7 @@ class TestValidateRefreshToken:
     def test_sets_user_when_token_valid(
         self, svc, client, oauth_request, token, user_service
     ):
-        def fake_fetch(userid, authority=None):
+        def fake_fetch(userid, authority=None):  # pylint:disable=unused-argument
             if userid == token.userid:
                 return mock.Mock(userid=userid)
             return None

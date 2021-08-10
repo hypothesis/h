@@ -255,7 +255,6 @@ class TestForgotPasswordController:
     def test_post_generates_mail(
         self,
         reset_password_email,
-        activation_model,
         factories,
         form_validating_to,
         pyramid_request,
@@ -271,7 +270,6 @@ class TestForgotPasswordController:
 
     def test_post_sends_mail(
         self,
-        reset_password_email,
         factories,
         form_validating_to,
         mailer,
@@ -335,7 +333,7 @@ class TestResetController:
         assert not result["has_code"]
 
     def test_get_with_prefilled_code_returns_rendered_form(
-        self, pyramid_request, ResetCode, form_validating_to
+        self, pyramid_request, form_validating_to
     ):
         pyramid_request.matchdict["code"] = "whatnot"
         controller = views.ResetController(pyramid_request)
@@ -411,7 +409,7 @@ class TestResetController:
         pyramid_config.add_route("account_reset", "/reset")
         pyramid_config.add_route("account_reset_with_code", "/reset-with-code")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def ResetCode(self, patch):
         return patch("h.views.accounts.ResetCode")
 

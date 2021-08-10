@@ -55,7 +55,9 @@ class Annotation(ModelFactory):
         ]
 
     @factory.post_generation
-    def make_metadata(self, create, extracted, **kwargs):
+    def make_metadata(  # pylint:disable=unused-argument
+        self, create, extracted, **kwargs
+    ):
         """Create associated document metadata for the annotation."""
         # The metadata objects are going to be added to the db, so if we're not
         # using the create strategy then simply don't make any.
@@ -118,7 +120,7 @@ class Annotation(ModelFactory):
         )
 
     @factory.post_generation
-    def make_id(self, create, extracted, **kwargs):
+    def make_id(self, create, extracted, **kwargs):  # pylint:disable=unused-argument
         """Add a randomly ID if the annotation doesn't have one yet."""
         # If using the create strategy don't generate an id.
         # models.Annotation.id's server_default function will generate one
@@ -136,7 +138,7 @@ class Annotation(ModelFactory):
         )
 
     @factory.post_generation
-    def timestamps(self, create, extracted, **kwargs):
+    def timestamps(self, create, extracted, **kwargs):  # pylint:disable=unused-argument
         # If using the create strategy let sqlalchemy set the created and
         # updated times when saving to the DB.
         if create:

@@ -76,7 +76,7 @@ class TestUserSignupService:
 
         assert len(user.identities) == 2
 
-    def test_signup_raises_with_invalid_identities(self, svc, db_session):
+    def test_signup_raises_with_invalid_identities(self, svc):
         dupe_identity = {"provider": "a", "provider_unique_id": 1}
         with pytest.raises(
             IntegrityError, match="violates unique constraint.*identity"
@@ -126,7 +126,7 @@ class TestUserSignupService:
         assert sub.active
 
     def test_signup_logs_conflict_error_when_account_with_email_already_exists(
-        self, svc, db_session, patch
+        self, svc, patch
     ):
         log = patch("h.services.user_signup.log")
 
@@ -153,7 +153,7 @@ class TestUserSignupService:
         ],
     )
     def test_signup_raises_conflict_error_when_account_already_exists(
-        self, svc, db_session, username, email
+        self, svc, username, email
     ):
         # This happens when two or more identical
         # concurrent signup requests race each other to the db.
@@ -230,7 +230,7 @@ class TestUserSignupServiceFactory:
 def user_password_service(pyramid_config):
     service = mock.Mock(spec_set=UserPasswordService())
 
-    def password_setter(user, password):
+    def password_setter(user, password):  # pylint:disable=unused-argument
         user.password = "fakehash"
 
     service.update_password.side_effect = password_setter

@@ -197,7 +197,7 @@ class TestFactory:
 
 
 @pytest.fixture
-def usr_group_members_service(pyramid_request, db_session):
+def usr_group_members_service(db_session):
     def fetch(userid):
         # One doesn't want to couple to the user fetching service but
         # we do want to be able to fetch user models for internal

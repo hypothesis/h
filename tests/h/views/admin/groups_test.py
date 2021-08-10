@@ -20,7 +20,7 @@ class FakeForm:
 
 @pytest.mark.usefixtures("group_service")
 class TestIndex:
-    def test_it_paginates_results(self, pyramid_request, routes, paginate):
+    def test_it_paginates_results(self, pyramid_request, paginate):
         groups.groups_index(None, pyramid_request)
 
         paginate.assert_called_once_with(pyramid_request, Any(), Any())
@@ -61,11 +61,7 @@ class TestGroupCreateView:
         list_organizations_service.organizations.assert_called_with()
 
     def test_init_binds_schema_with_organizations(
-        self,
-        pyramid_request,
-        organization,
-        AdminGroupSchema,
-        list_organizations_service,
+        self, pyramid_request, organization, AdminGroupSchema
     ):
         GroupCreateViews(pyramid_request)
 
@@ -88,9 +84,11 @@ class TestGroupCreateView:
         )
 
     def test_post_redirects_to_list_view_on_success(
-        self, pyramid_request, matchers, routes, handle_form_submission, base_appstruct
+        self, pyramid_request, matchers, handle_form_submission, base_appstruct
     ):
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             return on_success(base_appstruct)
 
         handle_form_submission.side_effect = call_on_success
@@ -110,7 +108,9 @@ class TestGroupCreateView:
         user_service,
         base_appstruct,
     ):
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             base_appstruct["group_type"] = "open"
             return on_success(base_appstruct)
 
@@ -137,7 +137,9 @@ class TestGroupCreateView:
         user_service,
         base_appstruct,
     ):
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             base_appstruct["group_type"] = "restricted"
             return on_success(base_appstruct)
 
@@ -168,7 +170,9 @@ class TestGroupCreateView:
         user = factories.User()
         user_service.fetch.return_value = user
 
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             base_appstruct["members"] = ["someusername"]
             return on_success(base_appstruct)
 
@@ -278,7 +282,9 @@ class TestGroupEditViews:
 
         list_organizations_service.organizations.return_value.append(updated_org)
 
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             return on_success(
                 {
                     "creator": fetched_user.username,
@@ -315,7 +321,6 @@ class TestGroupEditViews:
         self,
         factories,
         pyramid_request,
-        group_create_service,
         user_service,
         group_members_service,
         handle_form_submission,
@@ -329,7 +334,9 @@ class TestGroupEditViews:
         fetched_user = factories.User()
         user_service.fetch.return_value = fetched_user
 
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             return on_success(
                 {
                     "authority": pyramid_request.default_authority,
@@ -353,9 +360,7 @@ class TestGroupEditViews:
             group, [fetched_user.userid, fetched_user.userid]
         )
 
-    def test_delete_deletes_group(
-        self, group, delete_group_service, pyramid_request, routes
-    ):
+    def test_delete_deletes_group(self, group, delete_group_service, pyramid_request):
         view = GroupEditViews(GroupContext(group), pyramid_request)
 
         view.delete()

@@ -10,7 +10,7 @@ pytestmark = pytest.mark.usefixtures("moderation_service")
 
 @pytest.mark.usefixtures("nipsa_service")
 class TestAnnotationSearchIndexPresenter:
-    def test_asdict(self, DocumentSearchIndexPresenter, pyramid_request, factories):
+    def test_asdict(self, DocumentSearchIndexPresenter, pyramid_request):
         annotation = mock.MagicMock(
             id="xyz123",
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),

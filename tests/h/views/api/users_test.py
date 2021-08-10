@@ -118,7 +118,7 @@ class TestCreate:
 
         assert "nope" in str(exc.value)
 
-    def test_raises_for_invalid_json_body(self, pyramid_request, patch):
+    def test_raises_for_invalid_json_body(self, pyramid_request):
         type(pyramid_request).json_body = mock.PropertyMock(side_effect=ValueError())
 
         with pytest.raises(PayloadError):
@@ -184,7 +184,7 @@ class TestUpdate:
         assert result == TrustedUserJSONPresenter.return_value.asdict()
 
     def test_raises_when_schema_validation_fails(
-        self, context, pyramid_request, valid_payload, UpdateUserAPISchema
+        self, context, pyramid_request, UpdateUserAPISchema
     ):
         UpdateUserAPISchema.return_value.validate.side_effect = ValidationError(
             "validation failed"
@@ -193,7 +193,7 @@ class TestUpdate:
         with pytest.raises(ValidationError):
             update(context, pyramid_request)
 
-    def test_raises_for_invalid_json_body(self, context, pyramid_request, patch):
+    def test_raises_for_invalid_json_body(self, context, pyramid_request):
         type(pyramid_request).json_body = mock.PropertyMock(side_effect=ValueError())
 
         with pytest.raises(PayloadError):
@@ -231,7 +231,7 @@ def auth_client(factories):
 
 
 @pytest.fixture
-def user_signup_service(db_session, pyramid_config, user):
+def user_signup_service(pyramid_config, user):
     service = mock.Mock(
         spec_set=UserSignupService(
             default_authority="example.com",

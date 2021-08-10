@@ -5,9 +5,7 @@ from h import models
 
 
 class TestUserIdentity:
-    def test_you_can_save_and_then_retrieve_field_values(
-        self, db_session, matchers, user
-    ):
+    def test_you_can_save_and_then_retrieve_field_values(self, db_session, user):
         user_identity_1 = models.UserIdentity(
             provider="provider_1", provider_unique_id="1", user=user
         )

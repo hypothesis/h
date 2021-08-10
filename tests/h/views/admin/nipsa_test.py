@@ -33,7 +33,7 @@ class TestNipsaAddRemove:
         assert users["carl"] in nipsa_service.flagged
 
     @pytest.mark.parametrize("user", ["", "donkeys"])
-    def test_add_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
+    def test_add_raises_when_user_not_found(self, user, pyramid_request):
         pyramid_request.params = {"add": user, "authority": "example.com"}
 
         with pytest.raises(UserNotFoundError):
@@ -55,9 +55,7 @@ class TestNipsaAddRemove:
         assert users["kiki"] not in nipsa_service.flagged
 
     @pytest.mark.parametrize("user", ["", "donkeys", "\x00"])
-    def test_remove_raises_when_user_not_found(
-        self, user, nipsa_service, pyramid_request
-    ):
+    def test_remove_raises_when_user_not_found(self, user, pyramid_request):
         pyramid_request.params = {"remove": user}
 
         with pytest.raises(UserNotFoundError):

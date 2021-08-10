@@ -86,7 +86,6 @@ class TestAnnotationJSONPresentationService:
         self,
         svc,
         user,
-        factories,
         annotation,
         AnnotationJSONPresenter,
         flag_service,

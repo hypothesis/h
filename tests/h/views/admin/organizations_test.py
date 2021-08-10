@@ -33,9 +33,8 @@ class TestIndex:
             ("bio", ["BioPub"]),
         ],
     )
-    def test_it_returns_filtered_orgs(
-        self, orgs, pyramid_request, query, expected_orgs
-    ):
+    @pytest.mark.usefixtures("orgs")
+    def test_it_returns_filtered_orgs(self, pyramid_request, query, expected_orgs):
         if query:
             pyramid_request.GET["q"] = query
 
@@ -54,6 +53,18 @@ class TestIndex:
 
 @pytest.mark.usefixtures("routes")
 class TestOrganizationCreateController:
+    @staticmethod
+    def call_on_success(  # pylint: disable=unused-argument
+        request, form, on_success, on_failure
+    ):
+        return on_success(
+            {
+                "name": "New organization",
+                "authority": "example.organization",
+                "logo": "<svg>a logo</svg>",
+            }
+        )
+
     def test_get_sets_default_values(self, pyramid_request):
         controller = OrganizationCreateController(pyramid_request)
 
@@ -62,16 +73,7 @@ class TestOrganizationCreateController:
         assert response["form"] == {"authority": pyramid_request.default_authority}
 
     def test_post_creates_org(self, pyramid_request, handle_form_submission):
-        def call_on_success(request, form, on_success, on_failure):
-            return on_success(
-                {
-                    "name": "New organization",
-                    "authority": "example.organization",
-                    "logo": "<svg>a logo</svg>",
-                }
-            )
-
-        handle_form_submission.side_effect = call_on_success
+        handle_form_submission.side_effect = self.call_on_success
         controller = OrganizationCreateController(pyramid_request)
 
         controller.post()
@@ -87,16 +89,7 @@ class TestOrganizationCreateController:
     def test_post_redirects_to_list_view(
         self, pyramid_request, handle_form_submission, matchers
     ):
-        def call_on_success(request, form, on_success, on_failure):
-            return on_success(
-                {
-                    "name": "New organization",
-                    "authority": "example.organization",
-                    "logo": "<svg>a logo</svg>",
-                }
-            )
-
-        handle_form_submission.side_effect = call_on_success
+        handle_form_submission.side_effect = self.call_on_success
         controller = OrganizationCreateController(pyramid_request)
 
         response = controller.post()
@@ -137,7 +130,9 @@ class TestOrganizationEditController:
     def test_update_saves_org(
         self, get_controller, organization, handle_form_submission
     ):
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             return on_success(
                 {
                     "name": "Updated name",

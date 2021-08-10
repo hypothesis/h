@@ -22,7 +22,7 @@ class TestGroupScope:
         factories.GroupScope(scope="http://localhost:5000")
         db_session.flush()
 
-    def test_it_raises_if_scope_has_no_origin(self, db_session, factories):
+    def test_it_raises_if_scope_has_no_origin(self, factories):
         with pytest.raises(ValueError, match="Invalid URL"):
             factories.GroupScope(scope="diplodocus : 123")
 
@@ -47,9 +47,7 @@ class TestGroupScope:
 
         assert group_scope.group == group
 
-    def test_you_can_get_a_groups_scopes_by_the_scopes_property(
-        self, factories, matchers
-    ):
+    def test_you_can_get_a_groups_scopes_by_the_scopes_property(self, factories):
         group = factories.OpenGroup()
         scopes = [
             factories.GroupScope(group=group),

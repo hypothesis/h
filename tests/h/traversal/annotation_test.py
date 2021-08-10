@@ -18,7 +18,6 @@ class TestAnnotationRoot:
         pyramid_request,
         AnnotationContext,
         storage,
-        links_service,
     ):
         context = root[sentinel.annotation_id]
 

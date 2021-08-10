@@ -223,10 +223,10 @@ class TestACLForGroup:
             ["client_authority:DIFFERENT_AUTHORITY"], Permission.Group.ADMIN
         )
 
-    def test_staff_user_has_admin_permission_on_any_group(self, group, group_permits):
+    def test_staff_user_has_admin_permission_on_any_group(self, group_permits):
         assert group_permits([Role.STAFF], Permission.Group.ADMIN)
 
-    def test_admin_user_has_admin_permission_on_any_group(self, group, group_permits):
+    def test_admin_user_has_admin_permission_on_any_group(self, group_permits):
         assert group_permits([Role.ADMIN], Permission.Group.ADMIN)
 
     @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))
@@ -249,7 +249,7 @@ class TestACLForGroup:
         assert not permitted_principals_for(Permission.Group.MODERATE)
         assert not permitted_principals_for(Permission.Group.UPSERT)
 
-    def test_fallback_is_deny_all(self, group, group_permits):
+    def test_fallback_is_deny_all(self, group_permits):
         assert not group_permits([security.Everyone], "non_existant_permission")
 
     @pytest.fixture
@@ -340,7 +340,7 @@ class TestACLForAnnotation:
         for_group.assert_called_with(group)
 
     def test_it_mirrors_group_permissions_for_shared_deleted_annotations(
-        self, annotation, group, for_group, anno_permits
+        self, annotation, for_group, anno_permits
     ):
         annotation.shared = True
         annotation.deleted = True
@@ -348,7 +348,7 @@ class TestACLForAnnotation:
 
         anno_permits(["principal"], Permission.Annotation.READ_REALTIME_UPDATES)
 
-    def test_it_with_a_shared_annotation_with_no_group(self, annotation, anno_permits):
+    def test_it_with_a_shared_annotation_with_no_group(self, annotation):
         annotation.shared = True
         annotation.group = None
 

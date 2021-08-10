@@ -53,7 +53,7 @@ class TestLimiter:
             ("9801", OFFSET_MAX),
         ],
     )
-    def test_offset(self, es_dsl_search, pyramid_request, offset, from_):
+    def test_offset(self, es_dsl_search, offset, from_):
         limiter = query.Limiter()
 
         params = webob.multidict.MultiDict({"offset": offset})
@@ -76,9 +76,7 @@ class TestLimiter:
             (1.5, 1),
         ],
     )
-    def test_limit_output_within_bounds(
-        self, es_dsl_search, pyramid_request, limit, expected
-    ):
+    def test_limit_output_within_bounds(self, es_dsl_search, limit, expected):
         """Given any string input, output should be in the allowed range."""
         limiter = query.Limiter()
 
@@ -89,7 +87,7 @@ class TestLimiter:
         assert isinstance(q["size"], int)
         assert q["size"] == expected
 
-    def test_limit_set_to_default_when_missing(self, es_dsl_search, pyramid_request):
+    def test_limit_set_to_default_when_missing(self, es_dsl_search):
         limiter = query.Limiter()
 
         q = limiter(es_dsl_search, webob.multidict.MultiDict({})).to_dict()
@@ -180,9 +178,7 @@ class TestSorter:
         actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
         assert actual_order == expected_order
 
-    def test_incomplete_date_defaults_to_min_datetime_values(
-        self, es_dsl_search, pyramid_request
-    ):
+    def test_incomplete_date_defaults_to_min_datetime_values(self, es_dsl_search):
         sorter = query.Sorter()
 
         params = {"search_after": "2018"}
@@ -652,9 +648,7 @@ class TestUriCombinedWildcardFilter:
 
 
 class TestDeletedFilter:
-    def test_excludes_deleted_annotations(
-        self, search, es_client, Annotation, search_index
-    ):
+    def test_excludes_deleted_annotations(self, search, Annotation, search_index):
         deleted_ids = [Annotation(deleted=True).id]
         not_deleted_ids = [Annotation(deleted=False).id]
 
@@ -688,16 +682,8 @@ class TestHiddenFilter:
         else:
             assert result.annotation_ids == [annotation.id]
 
-    @pytest.mark.usefixtures("as_banned_user")
-    def test_visibility_annotations_to_self(
-        self,
-        pyramid_request,
-        search,
-        banned_user,
-        make_annotation,
-        is_nipsaed,
-        is_hidden,
-    ):
+    @pytest.mark.usefixtures("as_banned_user", "is_nipsaed", "is_hidden")
+    def test_visibility_annotations_to_self(self, search, banned_user, make_annotation):
         annotation = make_annotation(banned_user)
 
         result = search.run({})
@@ -746,7 +732,7 @@ class TestHiddenFilter:
         return search
 
     @pytest.fixture
-    def user(self, factories, pyramid_request):
+    def user(self, factories):
         return factories.User(username="notbanned")
 
     @pytest.fixture
@@ -1026,7 +1012,7 @@ class TestUsersAggregation:
 
 
 @pytest.fixture
-def search(pyramid_request, group_service):
+def search(pyramid_request, group_service):  # pylint:disable=unused-argument
     search = Search(pyramid_request)
     # Remove all default modifiers and aggregators except Sorter.
     search.clear()

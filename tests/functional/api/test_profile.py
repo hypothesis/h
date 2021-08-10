@@ -27,7 +27,7 @@ class TestGetProfile:
         assert res.json["userid"] == user.userid
 
     def test_it_returns_profile_for_third_party_authd_user(
-        self, app, open_group, third_party_user_with_token
+        self, app, third_party_user_with_token
     ):
         """Fetch a profile for a third-party account."""
 
@@ -135,7 +135,7 @@ class TestPatchProfile:
 
 
 @pytest.fixture
-def groups(db_session, factories):
+def groups(factories):
     groups = [
         factories.Group(),
         factories.Group(),

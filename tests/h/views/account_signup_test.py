@@ -55,16 +55,14 @@ class TestSignupController:
 
         assert not user_signup_service.signup.called
 
-    def test_post_displays_heading_and_message_on_success(
-        self, controller, pyramid_request
-    ):
+    def test_post_displays_heading_and_message_on_success(self, controller):
         result = controller.post()
 
         assert result["heading"] == "Account registration successful"
         assert "message" not in result
 
     def test_post_displays_heading_and_message_on_conflict_error(
-        self, controller, pyramid_request, user_signup_service
+        self, controller, user_signup_service
     ):
         user_signup_service.signup.side_effect = ConflictError(
             "The account bob@example.com is already registered."

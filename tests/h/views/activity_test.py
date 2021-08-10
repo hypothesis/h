@@ -19,9 +19,7 @@ GROUP_TYPE_OPTIONS = ("group", "open_group", "restricted_group")
 
 @pytest.mark.usefixtures("annotation_stats_service", "paginate", "query", "routes")
 class TestSearchController:
-    def test_controller_populates_parsed_query_params(
-        self, controller, pyramid_request, query
-    ):
+    def test_controller_populates_parsed_query_params(self, controller, query):
         assert controller.parsed_query_params == query.extract.return_value
 
     def test_search_checks_for_redirects(self, controller, pyramid_request, query):
@@ -116,15 +114,16 @@ class TestSearchController:
 class TestGroupSearchController:
     """Tests unique to GroupSearchController."""
 
+    @staticmethod
+    def fake_has_permission(permission, context=None):  # pylint:disable=unused-argument
+        return False
+
     def test_renders_join_template_when_no_read_permission(
         self, controller, pyramid_request, group
     ):
         """When the request has no read permission but join, it should render the join template."""
 
-        def fake_has_permission(permission, context=None):
-            return False
-
-        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.has_permission = mock.Mock(side_effect=self.fake_has_permission)
         pyramid_request.override_renderer = mock.PropertyMock()
 
         result = controller.search()
@@ -133,14 +132,11 @@ class TestGroupSearchController:
         assert result == {"group": group}
 
     def test_renders_join_template_when_not_logged_in(
-        self, controller, factories, pyramid_request, group
+        self, controller, pyramid_request, group
     ):
         """If user is logged out and has no read permission, prompt to login and join."""
 
-        def fake_has_permission(permission, context=None):
-            return False
-
-        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.has_permission = mock.Mock(side_effect=self.fake_has_permission)
 
         result = controller.search()
 
@@ -152,13 +148,11 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_raises_not_found_when_no_read_or_join_permissions(
-        self, controller, factories, pyramid_request, test_group, test_user
+    @pytest.mark.usefixtures("toggle_user_facet_request")
+    def test_raises_not_found_when_no_read_or_join_permissions(  # pylint:disable=unused-argument
+        self, controller, pyramid_request, test_group, test_user
     ):
-        def fake_has_permission(permission, context=None):
-            return False
-
-        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.has_permission = mock.Mock(side_effect=self.fake_has_permission)
 
         with pytest.raises(httpexceptions.HTTPNotFound):
             controller.search()
@@ -190,8 +184,8 @@ class TestGroupSearchController:
         [("group", None), ("open_group", "creator"), ("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_calls_search_with_the_request(
-        self, controller, factories, test_group, test_user, pyramid_request, search
+    def test_search_calls_search_with_the_request(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, search
     ):
         controller.search()
 
@@ -204,16 +198,16 @@ class TestGroupSearchController:
         [("group", None), ("open_group", "creator"), ("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_just_returns_search_result_if_group_does_not_exist(
-        self, controller, factories, test_group, test_user, pyramid_request, search
+    def test_search_just_returns_search_result_if_group_does_not_exist(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, pyramid_request, search
     ):
         pyramid_request.matchdict["pubid"] = "does_not_exist"
 
         assert controller.search() == search.return_value
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
-    def test_search_just_returns_search_result_if_user_not_logged_in(
-        self, controller, test_group, pyramid_request, search
+    def test_search_just_returns_search_result_if_user_not_logged_in(  # pylint:disable=unused-argument
+        self, controller, test_group, search
     ):
         assert controller.search() == search.return_value
 
@@ -222,8 +216,8 @@ class TestGroupSearchController:
         [("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_just_returns_search_result_if_user_not_a_member_of_group(
-        self, controller, test_group, test_user, factories, pyramid_request, search
+    def test_search_just_returns_search_result_if_user_not_a_member_of_group(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, search
     ):
 
         assert controller.search() == search.return_value
@@ -233,8 +227,8 @@ class TestGroupSearchController:
         [("no_creator_group", "member"), ("no_creator_open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_creator_is_none_if_group_creator_is_empty(
-        self, controller, factories, test_group, test_user, pyramid_request
+    def test_search_returns_group_creator_is_none_if_group_creator_is_empty(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user
     ):
         group_info = controller.search()["group_users_args"]
 
@@ -245,13 +239,8 @@ class TestGroupSearchController:
         [("no_creator_group", "member"), ("no_creator_open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_info_if_user_has_read_permissions(
-        self,
-        controller,
-        factories,
-        test_group,
-        test_user,
-        pyramid_request,
+    def test_search_returns_group_info_if_user_has_read_permissions(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user
     ):
         group_info = controller.search()["group"]
 
@@ -268,13 +257,11 @@ class TestGroupSearchController:
         [("no_organization_group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_does_not_return_organization_info_if_missing(
+    def test_search_does_not_return_organization_info_if_missing(  # pylint:disable=unused-argument
         self,
         controller,
-        factories,
         test_group,
         test_user,
-        pyramid_request,
     ):
         group_info = controller.search()["group"]
 
@@ -291,8 +278,8 @@ class TestGroupSearchController:
         [("no_creator_group", "member"), ("no_creator_open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_does_not_show_the_edit_link_to_non_admin_users(
-        self, controller, factories, test_group, test_user, pyramid_request
+    def test_search_does_not_show_the_edit_link_to_non_admin_users(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, pyramid_request
     ):
         def fake_has_permission(permission, context=None):
             return permission != Permission.Group.ADMIN
@@ -308,7 +295,7 @@ class TestGroupSearchController:
         [("open_group", "creator"), ("group", "creator")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_does_show_the_group_edit_link_to_group_creators(
+    def test_search_does_show_the_group_edit_link_to_group_creators(  # pylint:disable=unused-argument
         self, controller, test_group, test_user, pyramid_request
     ):
         pyramid_request.has_permission = mock.Mock(return_value=True)
@@ -322,8 +309,8 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
-        self, controller, factories, test_group, test_user, pyramid_request
+    def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, pyramid_request
     ):
         pyramid_request.params["more_info"] = ""
 
@@ -334,13 +321,13 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
-        self, controller, factories, test_group, test_user, pyramid_request
+    def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user
     ):
         assert not controller.search()["more_info"]
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
-    def test_search_returns_name_in_opts(self, controller, test_group, pyramid_request):
+    def test_search_returns_name_in_opts(self, controller, test_group):
         result = controller.search()
 
         assert result["opts"]["search_groupname"] == test_group.name
@@ -350,8 +337,8 @@ class TestGroupSearchController:
         [("group", "member"), ("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_creator(
-        self, controller, factories, pyramid_request, test_user, test_group
+    def test_search_returns_group_creator(  # pylint:disable=unused-argument
+        self, controller, test_user, test_group
     ):
         result = controller.search()
 
@@ -362,8 +349,8 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_members_usernames(
-        self, controller, pyramid_request, test_user, test_group
+    def test_search_returns_group_members_usernames(  # pylint:disable=unused-argument
+        self, controller, test_user, test_group
     ):
         result = controller.search()
 
@@ -376,8 +363,8 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_members_userid(
-        self, controller, pyramid_request, test_user, test_group
+    def test_search_returns_group_members_userid(  # pylint:disable=unused-argument
+        self, controller, test_user, test_group
     ):
         result = controller.search()
 
@@ -390,8 +377,9 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_members_faceted_by(
-        self, controller, pyramid_request, query, test_user, test_group
+    @pytest.mark.usefixtures("query")
+    def test_search_returns_group_members_faceted_by(  # pylint:disable=unused-argument
+        self, controller, test_user, test_group
     ):
         faceted_user = test_group.members[0]
         controller.parsed_query_params = MultiDict({"user": faceted_user.username})
@@ -431,8 +419,8 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_moderators_usernames(
-        self, controller, factories, pyramid_request, test_user, test_group
+    def test_search_returns_group_moderators_usernames(  # pylint:disable=unused-argument
+        self, controller, test_user, test_group
     ):
         result = controller.search()
 
@@ -445,8 +433,8 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_moderators_userid(
-        self, controller, factories, pyramid_request, test_user, test_group
+    def test_search_returns_group_moderators_userid(  # pylint:disable=unused-argument
+        self, controller, test_user, test_group
     ):
         result = controller.search()
 
@@ -459,8 +447,8 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_moderators_faceted_by(
-        self, controller, factories, pyramid_request, test_user, test_group
+    def test_search_returns_group_moderators_faceted_by(  # pylint:disable=unused-argument
+        self, controller, pyramid_request, test_user, test_group
     ):
         pyramid_request.params = {"q": "user:%s" % "does_not_matter"}
 
@@ -473,8 +461,8 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_annotation_count_for_group_moderators(
-        self, controller, pyramid_request, test_group, test_user, search, factories
+    def test_search_returns_annotation_count_for_group_moderators(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, search, factories
     ):
         user_1 = test_group.creator
         user_2 = factories.User()
@@ -499,8 +487,8 @@ class TestGroupSearchController:
         [("open_group", "user"), ("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_the_default_zero_message_to_the_template(
-        self, controller, factories, test_group, test_user, pyramid_request, search
+    def test_search_returns_the_default_zero_message_to_the_template(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, search
     ):
         """If there's a non-empty query it uses the default zero message."""
         search.return_value["q"] = "foo"
@@ -514,8 +502,8 @@ class TestGroupSearchController:
         [("open_group", "user"), ("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_the_group_zero_message_to_the_template(
-        self, controller, factories, test_group, test_user, pyramid_request, search
+    def test_search_returns_the_group_zero_message_to_the_template(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, search
     ):
         """If the query is empty it overrides the default zero message."""
         search.return_value["q"] = ""
@@ -533,14 +521,13 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
+    @pytest.mark.usefixtures("group_leave_request")
     def test_leave_leaves_the_group(
         self,
         controller,
         test_group,
         test_user,
-        group_leave_request,
         group_members_service,
-        pyramid_request,
         pyramid_config,
     ):
         pyramid_config.testing_securitypolicy(test_user.userid)
@@ -564,16 +551,15 @@ class TestGroupSearchController:
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == "http://example.com/search?q=foo+bar+gar"
 
-    def test_join_raises_not_found_when_not_joinable(
-        self, controller, pyramid_request, group
-    ):
+    @pytest.mark.usefixtures("group")
+    def test_join_raises_not_found_when_not_joinable(self, controller, pyramid_request):
         pyramid_request.has_permission = mock.Mock(return_value=False)
 
         with pytest.raises(httpexceptions.HTTPNotFound):
             controller.join()
 
     def test_join_adds_group_member(
-        self, controller, group, pyramid_request, pyramid_config, group_members_service
+        self, controller, group, pyramid_config, group_members_service
     ):
         pyramid_config.testing_securitypolicy("acct:doe@example.org")
 
@@ -601,15 +587,13 @@ class TestGroupSearchController:
         [("group", "member"), ("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_passes_the_group_annotation_count_to_the_template(
+    @pytest.mark.usefixtures("query")
+    def test_search_passes_the_group_annotation_count_to_the_template(  # pylint:disable=unused-argument
         self,
         controller,
-        factories,
         test_group,
         test_user,
-        query,
         annotation_stats_service,
-        pyramid_request,
     ):
         result = controller.search()["stats"]
         annotation_stats_service.group_annotation_count.assert_called_with(
@@ -622,15 +606,13 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_reuses_group_annotation_count_if_able(
+    @pytest.mark.usefixtures("query")
+    def test_search_reuses_group_annotation_count_if_able(  # pylint:disable=unused-argument
         self,
         controller,
-        factories,
         test_group,
         test_user,
-        query,
         annotation_stats_service,
-        pyramid_request,
     ):
         # In cases where the annotation count returned from search is the same calc
         # as the annotation count that would be returned from the stats service,
@@ -668,7 +650,7 @@ class TestGroupSearchController:
         ],
         indirect=["test_group", "test_user"],
     )
-    def test_search_sets_display_strings_for_group(
+    def test_search_sets_display_strings_for_group(  # pylint:disable=unused-argument
         self,
         controller,
         test_group,
@@ -676,7 +658,6 @@ class TestGroupSearchController:
         test_heading,
         test_subtitle,
         test_share_msg,
-        pyramid_request,
         search,
     ):
         info = controller.search()
@@ -693,8 +674,8 @@ class TestGroupSearchController:
         [("group", "member"), ("restricted_group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_sets_display_members_for_group(
-        self, controller, test_group, test_user, pyramid_request, search
+    def test_search_sets_display_members_for_group(  # pylint:disable=unused-argument
+        self, controller, test_group, test_user, search
     ):
         info = controller.search()["group_users_args"]
         userids = [i["userid"] for i in info[1]]
@@ -705,7 +686,7 @@ class TestGroupSearchController:
 
     @pytest.mark.parametrize("test_group", [("open_group")], indirect=["test_group"])
     def test_search_sets_display_members_for_open_group(
-        self, controller, test_group, pyramid_request, search
+        self, controller, test_group, search
     ):
         info = controller.search()["group_users_args"]
         userids = [i["userid"] for i in info[1]]
@@ -719,7 +700,7 @@ class TestGroupSearchController:
         "q,test_group", [("", "open_group"), ("   ", "group")], indirect=["test_group"]
     )
     def test_leave_removes_empty_query_from_url(
-        self, controller, test_group, pyramid_request, group_leave_request, q
+        self, controller, test_group, group_leave_request, q
     ):
         """
         It should remove an empty q from the URL it redirects to.
@@ -753,8 +734,8 @@ class TestGroupSearchController:
         )
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
-    @pytest.mark.usefixtures("toggle_user_facet_request")
-    def test_toggle_user_facet_returns_a_redirect(self, controller, test_group):
+    @pytest.mark.usefixtures("toggle_user_facet_request", "test_group")
+    def test_toggle_user_facet_returns_a_redirect(self, controller):
         result = controller.toggle_user_facet()
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
@@ -762,7 +743,7 @@ class TestGroupSearchController:
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     @pytest.mark.usefixtures("toggle_user_facet_request")
     def test_toggle_user_facet_adds_the_user_facet_into_the_url(
-        self, controller, pyramid_request, test_group
+        self, controller, test_group
     ):
         result = controller.toggle_user_facet()
 
@@ -773,7 +754,7 @@ class TestGroupSearchController:
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     def test_toggle_user_facet_removes_the_user_facet_from_the_url(
-        self, controller, test_group, pyramid_request, toggle_user_facet_request
+        self, controller, test_group, toggle_user_facet_request
     ):
         toggle_user_facet_request.params["q"] = 'user:"fred"'
 
@@ -787,7 +768,7 @@ class TestGroupSearchController:
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     def test_toggle_user_facet_preserves_query_when_adding_user_facet(
-        self, controller, test_group, pyramid_request, toggle_user_facet_request
+        self, controller, test_group, toggle_user_facet_request
     ):
         toggle_user_facet_request.params["q"] = "foo bar"
 
@@ -802,7 +783,7 @@ class TestGroupSearchController:
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     def test_toggle_user_facet_preserves_query_when_removing_user_facet(
-        self, controller, test_group, pyramid_request, toggle_user_facet_request
+        self, controller, test_group, toggle_user_facet_request
     ):
         toggle_user_facet_request.params["q"] = 'user:"fred" foo bar'
 
@@ -815,7 +796,7 @@ class TestGroupSearchController:
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     def test_toggle_user_facet_preserves_query_when_removing_one_of_multiple_username_facets(
-        self, controller, test_group, pyramid_request, toggle_user_facet_request
+        self, controller, test_group, toggle_user_facet_request
     ):
         toggle_user_facet_request.params["q"] = 'user:"foo" user:"fred" user:"bar"'
 
@@ -834,7 +815,7 @@ class TestGroupSearchController:
         indirect=["test_group"],
     )
     def test_toggle_user_facet_removes_empty_query(
-        self, controller, test_group, pyramid_request, toggle_user_facet_request, q
+        self, controller, test_group, toggle_user_facet_request, q
     ):
         """
         It should remove an empty query from the URL.
@@ -864,12 +845,14 @@ class TestGroupSearchController:
         return users[request.param]
 
     @pytest.fixture
-    def users(self, request, user, factories):
+    def users(self, request, user, factories):  # pylint:disable=unused-argument
         group = request.getfixturevalue("test_group")
         return {None: None, "creator": group.creator, "user": factories.User()}
 
     @pytest.fixture
-    def controller(self, request, group, pyramid_request, query):
+    def controller(  # pylint:disable=unused-argument
+        self, request, group, pyramid_request, query
+    ):
         test_group = group
         if "test_group" in request.fixturenames:
             test_group = request.getfixturevalue("test_group")
@@ -920,9 +903,7 @@ class TestGroupSearchController:
 class TestUserSearchController:
     """Tests unique to UserSearchController."""
 
-    def test_search_calls_search_with_request(
-        self, controller, pyramid_request, search
-    ):
+    def test_search_calls_search_with_request(self, controller, search):
         controller.search()
 
         search.assert_called_once_with(controller)
@@ -963,14 +944,15 @@ class TestUserSearchController:
         assert username == user.display_name
 
     def test_search_passes_the_user_annotation_counts_to_the_template(
-        self, controller, pyramid_config, annotation_stats_service, user
+        self, controller, annotation_stats_service, user
     ):
         result = controller.search()["stats"]
         annotation_stats_service.user_annotation_count.assert_called_with(user.userid)
         assert result["annotation_count"] == 6
 
+    @pytest.mark.usefixtures("query")
     def test_search_reuses_user_annotation_count_if_able(
-        self, controller, pyramid_config, query, annotation_stats_service, user
+        self, controller, annotation_stats_service, user
     ):
         # In cases where the annotation count returned from search is the same calc
         # as the annotation count that would be returned from the stats service,
@@ -982,7 +964,7 @@ class TestUserSearchController:
         assert result["annotation_count"] == 200
 
     def test_search_passes_the_other_user_details_to_the_template(
-        self, controller, factories, user
+        self, controller, user
     ):
         user_details = controller.search()["user"]
 
@@ -1035,7 +1017,7 @@ class TestUserSearchController:
         )
 
     def test_search_shows_the_getting_started_box_when_on_your_own_page(
-        self, controller, search, user
+        self, controller, search
     ):
         search.return_value["q"] = ""
 
@@ -1077,7 +1059,9 @@ class TestUserSearchController:
         )
 
     @pytest.fixture
-    def controller(self, user, pyramid_request, query):
+    def controller(
+        self, user, pyramid_request, query  # pylint:disable=unused-argument
+    ):
         return activity.UserSearchController(UserContext(user), pyramid_request)
 
     @pytest.fixture

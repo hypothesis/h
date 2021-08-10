@@ -24,7 +24,8 @@ class TestFetchByScope:
         assert scope_util.url_in_scope.call_count == len(sample_scopes)
         assert scopes == []
 
-    def test_it_returns_list_of_matching_scopes(self, svc, document_uri, sample_scopes):
+    @pytest.mark.usefixtures("sample_scopes")
+    def test_it_returns_list_of_matching_scopes(self, svc, document_uri):
         results = svc.fetch_by_scope(document_uri)
 
         matching_scope_scopes = [scope.scope for scope in results]

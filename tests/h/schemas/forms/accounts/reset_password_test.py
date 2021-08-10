@@ -83,9 +83,7 @@ class TestResetPasswordSchemaDeserialize:
         )
         assert appstruct["user"] == user
 
-    def test_it_is_invalid_if_user_has_already_reset_their_password(
-        self, schema, serializer, user
-    ):
+    def test_it_is_invalid_if_user_has_already_reset_their_password(self, schema, user):
         # This situation triggers if the users password has been used since
         # the token was issued. Note our DB dates are not timezone aware.
         user.password_updated = datetime.now() + timedelta(days=1)
@@ -101,7 +99,9 @@ class TestResetPasswordSchemaDeserialize:
         return ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
     @pytest.fixture(autouse=True)
-    def serializer(self, pyramid_csrf_request, pyramid_config):
+    def serializer(
+        self, pyramid_csrf_request, pyramid_config
+    ):  # pylint:disable=unused-argument
         # We must be after `pyramid_config` in the queue, as it replaces the
         # registry object with another one which undoes our changes here
 

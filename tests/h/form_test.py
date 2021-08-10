@@ -86,7 +86,7 @@ class TestCreateForm:
             renderer=Any.instance_of(form.Jinja2Renderer),
         )
 
-    def test_adds_feature_client_to_system_context(self, Form, patch, pyramid_request):
+    def test_adds_feature_client_to_system_context(self, patch, pyramid_request):
         Jinja2Renderer = patch("h.form.Jinja2Renderer")
 
         form.create_form(pyramid_request, mock.sentinel.schema)
@@ -95,7 +95,7 @@ class TestCreateForm:
             mock.sentinel.jinja2_env, {"feature": pyramid_request.feature}
         )
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def Form(self, patch):
         return patch("deform.Form")
 

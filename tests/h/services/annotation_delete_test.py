@@ -7,25 +7,19 @@ from h.services.annotation_delete import annotation_delete_service_factory
 
 
 class TestAnnotationDeleteService:
-    def test_it_marks_the_annotation_as_deleted(
-        self, svc, pyramid_request, factories, annotation
-    ):
+    def test_it_marks_the_annotation_as_deleted(self, svc, annotation):
         ann = annotation()
         svc.delete(ann)
 
         assert ann.deleted
 
-    def test_it_updates_the_updated_field(
-        self, svc, pyramid_request, factories, annotation, datetime
-    ):
+    def test_it_updates_the_updated_field(self, svc, annotation, datetime):
         ann = annotation()
         svc.delete(ann)
 
         assert ann.updated == datetime.utcnow.return_value
 
-    def test_it_publishes_a_delete_event(
-        self, svc, pyramid_request, factories, annotation
-    ):
+    def test_it_publishes_a_delete_event(self, svc, pyramid_request, annotation):
         ann = annotation()
         svc.delete(ann)
 
@@ -37,9 +31,7 @@ class TestAnnotationDeleteService:
             expected_event.action,
         ) == (actual_event.request, actual_event.annotation_id, actual_event.action)
 
-    def test_it_deletes_all_annotations(
-        self, svc, pyramid_request, factories, annotation
-    ):
+    def test_it_deletes_all_annotations(self, svc, annotation):
         svc.delete = mock.create_autospec(svc.delete, spec_set=True)
 
         anns = [annotation(), annotation()]

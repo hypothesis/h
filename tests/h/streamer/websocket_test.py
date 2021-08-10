@@ -119,7 +119,7 @@ class TestWebSocket:
         assert queue.empty()
 
     def test_invalid_incoming_message_closes_connection(
-        self, client, queue, fake_socket_close
+        self, client, fake_socket_close
     ):
         """Invalid messages should cause termination of the connection."""
         message = FakeMessage('{"foo":missingquotes}')

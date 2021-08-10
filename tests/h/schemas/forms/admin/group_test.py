@@ -171,7 +171,7 @@ class TestAdminGroupSchema:
 
 
 @pytest.fixture
-def group_data(factories, org):
+def group_data(org):
     """
     Return a serialized representation of the "Create Group" form.
 
@@ -192,7 +192,7 @@ def group_data(factories, org):
 
 @pytest.fixture
 def user_service(user_service, factories):
-    def fetch(username, authority):
+    def fetch(username, authority):  # pylint: disable=unused-argument
         if "invalid" in username:
             return False
 

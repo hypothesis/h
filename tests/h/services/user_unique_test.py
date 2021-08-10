@@ -40,9 +40,7 @@ class TestUserUniqueEnsureUnique:
     def test_it_allows_duplicate_username_at_different_authority(self, svc, user):
         svc.ensure_unique({"username": user.username}, authority="foo.com")
 
-    def test_it_raises_if_identities_uniqueness_violated(
-        self, svc, user, pyramid_request
-    ):
+    def test_it_raises_if_identities_uniqueness_violated(self, svc, pyramid_request):
         dupe_identity = {"provider": "provider_a", "provider_unique_id": "123"}
 
         with pytest.raises(
@@ -55,7 +53,7 @@ class TestUserUniqueEnsureUnique:
             )
 
     def test_it_raises_if_identities_uniqueness_violated_at_different_authority(
-        self, svc, user
+        self, svc
     ):
         # note that this is different from email and username behavior
         dupe_identity = {"provider": "provider_a", "provider_unique_id": "123"}
@@ -108,14 +106,14 @@ class TestUserUniqueEnsureUnique:
         )
 
     def test_it_does_not_fetch_by_username_if_not_present(
-        self, svc, user_model, db_session, pyramid_request
+        self, svc, user_model, pyramid_request
     ):
         svc.ensure_unique({"email": "foo@bar.com"}, pyramid_request.default_authority)
 
         user_model.get_by_username.assert_not_called()
 
     def test_it_does_not_fetch_by_email_if_not_present(
-        self, svc, user_model, db_session, pyramid_request
+        self, svc, user_model, pyramid_request
     ):
         svc.ensure_unique({"username": "doodle"}, pyramid_request.default_authority)
 

@@ -95,8 +95,9 @@ class TestOAuthAuthorizeController:
             scopes=DEFAULT_SCOPES,
         )
 
+    @pytest.mark.usefixtures("authenticated_user")
     def test_get_returns_redirect_immediately_for_trusted_clients(
-        self, controller, auth_client, authenticated_user, pyramid_request
+        self, controller, auth_client
     ):
         auth_client.trusted = True
 
@@ -183,7 +184,7 @@ class TestOAuthAuthorizeController:
 
         assert response.location == expected
 
-    def test_post_web_message_returns_expected_context(self, controller, auth_client):
+    def test_post_web_message_returns_expected_context(self, controller):
         response = controller.post_web_message()
 
         assert response == {

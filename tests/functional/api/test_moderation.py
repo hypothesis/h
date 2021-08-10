@@ -129,7 +129,7 @@ def world_annotation(user, db_session, factories):
 
 
 @pytest.fixture
-def group_annotation(user, group, db_session, factories):
+def group_annotation(group, db_session, factories):
     ann = factories.Annotation(
         userid="acct:someone@example.com", groupid=group.pubid, shared=True
     )
@@ -138,7 +138,7 @@ def group_annotation(user, group, db_session, factories):
 
 
 @pytest.fixture
-def private_group_annotation(user, group, db_session, factories):
+def private_group_annotation(group, db_session, factories):
     ann = factories.Annotation(
         userid="acct:someone@example.com", groupid=group.pubid, shared=False
     )

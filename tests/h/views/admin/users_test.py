@@ -107,7 +107,7 @@ def test_users_index_no_user_found(models, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_user_found(models, pyramid_request, db_session, factories):
+def test_users_index_user_found(models, pyramid_request, factories):
     pyramid_request.params = {"username": "bob", "authority": "foo.org"}
     user = factories.User.build(username="bob", authority="foo.org")
     models.User.get_by_username.return_value = user

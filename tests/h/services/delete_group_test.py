@@ -12,7 +12,7 @@ from h.services.delete_group import (
 
 @pytest.mark.usefixtures("annotation_delete_service")
 class TestDeleteGroupService:
-    def test_it_does_not_delete_public_group(self, svc, db_session, factories):
+    def test_it_does_not_delete_public_group(self, svc, factories):
         group = factories.Group()
         group.pubid = "__world__"
 
@@ -26,9 +26,7 @@ class TestDeleteGroupService:
 
         assert group in db_session.deleted
 
-    def test_it_deletes_annotations(
-        self, svc, factories, pyramid_request, annotation_delete_service
-    ):
+    def test_it_deletes_annotations(self, svc, factories, annotation_delete_service):
         group = factories.Group()
         annotations = [
             factories.Annotation(groupid=group.pubid).id,

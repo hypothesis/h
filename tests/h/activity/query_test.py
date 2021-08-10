@@ -239,7 +239,7 @@ class TestExecute:
         search.append_aggregation.assert_called_with(TagsAggregation.return_value)
 
     def test_it_does_not_add_a_users_aggregation(
-        self, pyramid_request, search, UsersAggregation
+        self, pyramid_request, UsersAggregation
     ):
         """On non-group pages there's no users aggregations."""
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
@@ -365,7 +365,7 @@ class TestExecute:
         )
 
     def test_it_buckets_the_annotations(
-        self, fetch_annotations, bucketing, pyramid_request, search
+        self, fetch_annotations, bucketing, pyramid_request
     ):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
@@ -396,9 +396,7 @@ class TestExecute:
             else:
                 assert False
 
-    def test_it_returns_each_annotations_group(
-        self, _fetch_groups, annotations, group_pubids, pyramid_request
-    ):
+    def test_it_returns_each_annotations_group(self, _fetch_groups, pyramid_request):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         presented_annotations = []
@@ -413,9 +411,7 @@ class TestExecute:
             else:
                 assert False
 
-    def test_it_returns_each_annotations_incontext_link(
-        self, annotations, links, pyramid_request
-    ):
+    def test_it_returns_each_annotations_incontext_link(self, links, pyramid_request):
         def incontext_link(request, annotation):
             assert (
                 request == pyramid_request
@@ -439,9 +435,7 @@ class TestExecute:
                 )
             )
 
-    def test_it_returns_each_annotations_html_link(
-        self, annotations, links, pyramid_request
-    ):
+    def test_it_returns_each_annotations_html_link(self, links, pyramid_request):
         def html_link(request, annotation):
             assert (
                 request == pyramid_request

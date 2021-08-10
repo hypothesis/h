@@ -64,7 +64,7 @@ class TestUserRoot:
 class TestUserByNameRoot:
     @pytest.mark.parametrize("returned_authority", (None, sentinel.client_authority))
     def test_it_fetches_the_requested_user(
-        self, pyramid_request, root, user_service, client_authority, returned_authority
+        self, pyramid_request, root, client_authority, returned_authority
     ):
         client_authority.return_value = returned_authority
 
@@ -92,7 +92,7 @@ class TestUserByNameRoot:
 
 @pytest.mark.usefixtures("user_service")
 class TestUserByIDRoot:
-    def test_it_fetches_the_requested_user(self, root, user_service):
+    def test_it_fetches_the_requested_user(self, root):
         context = root[sentinel.userid]
 
         root.get_user_context.assert_called_once_with(sentinel.userid, authority=None)

@@ -293,7 +293,9 @@ class TestCreateUpdateAnnotationSchema:
             "sub_dict": {"key": "original_value"},
         }
 
-        def document_uris_from_data(document, claimant):
+        def document_uris_from_data(
+            document, claimant  # pylint:disable=unused-argument
+        ):
             document["new_key"] = "new_value"
             document["top_level_key"] = "new_value"
             document["sub_dict"]["key"] = "new_value"

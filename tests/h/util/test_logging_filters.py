@@ -11,7 +11,7 @@ class TestExceptionFilter:
         with pytest.raises(ValueError):
             ExceptionFilter((("ReadTimeoutError", "WARNI"),))
 
-    def test_specify_level_as_int(self, logger):
+    def test_specify_level_as_int(self):
         ExceptionFilter((("ReadTimeoutError", logging.WARNING),))
 
     def test_does_not_log_specified_exceptions(self, logger, read_timeout_exception):
