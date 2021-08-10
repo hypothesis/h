@@ -66,6 +66,6 @@ class TestAddCommand:
 
 
 @pytest.fixture
-def cliconfig(pyramid_config, pyramid_request):
+def cliconfig(pyramid_request):
     pyramid_request.tm = mock.Mock()
     return {"bootstrap": mock.Mock(return_value=pyramid_request)}

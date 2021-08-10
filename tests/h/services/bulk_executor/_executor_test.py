@@ -103,9 +103,7 @@ class TestDBExecutor:
 
         assert executor.effective_user_id == user.id
 
-    def test_configure_raises_if_the_effective_user_does_not_exist(
-        self, executor, user
-    ):
+    def test_configure_raises_if_the_effective_user_does_not_exist(self, executor):
         with pytest.raises(InvalidDeclarationError):
             executor.configure(
                 Configuration.create(

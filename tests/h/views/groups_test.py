@@ -38,7 +38,9 @@ class TestGroupCreateController:
 
         # If the form submission is valid then handle_form_submission() should
         # call on_success() with the appstruct.
-        def call_on_success(request, form, on_success, on_failure):
+        def call_on_success(  # pylint: disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             on_success({"name": "my_new_group", "description": "foobar"})
 
         handle_form_submission.side_effect = call_on_success
@@ -62,7 +64,9 @@ class TestGroupCreateController:
 
         # If the form submission is valid then handle_form_submission() should
         # return the redirect that on_success() returns.
-        def return_on_success(request, form, on_success, on_failure):
+        def return_on_success(  # pylint: disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             return on_success({"name": "my_new_group"})
 
         handle_form_submission.side_effect = return_on_success
@@ -76,7 +80,9 @@ class TestGroupCreateController:
     ):
         # If the form submission is invalid then handle_form_submission() should
         # call on_failure().
-        def call_on_failure(request, form, on_success, on_failure):
+        def call_on_failure(  # pylint: disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             on_failure()
 
         handle_form_submission.side_effect = call_on_failure
@@ -90,7 +96,9 @@ class TestGroupCreateController:
     ):
         # If the form submission is invalid then handle_form_submission() should
         # return the template data that on_failure() returns.
-        def return_on_failure(request, form, on_success, on_failure):
+        def return_on_failure(  # pylint: disable=unused-argument
+            request, form, on_success, on_failure
+        ):
             return on_failure()
 
         handle_form_submission.side_effect = return_on_failure

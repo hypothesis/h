@@ -14,7 +14,7 @@ class TestGroupLinks:
         assert "html" in links
 
     def test_it_returns_no_activity_link_for_non_default_authority_group(
-        self, pyramid_request, factories, svc
+        self, factories, svc
     ):
         group = factories.OpenGroup(authority="foo.com")
         links = svc.get_all(group)
@@ -42,7 +42,7 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def svc(pyramid_request, db_session):
+def svc(pyramid_request):
     return GroupLinksService(
         default_authority=pyramid_request.default_authority,
         route_url=pyramid_request.route_url,

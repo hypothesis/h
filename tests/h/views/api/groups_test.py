@@ -134,7 +134,7 @@ class TestCreateGroup:
         )
 
     def test_it_raises_HTTPConflict_on_duplicate(
-        self, pyramid_request, CreateGroupAPISchema, group_service, factories
+        self, pyramid_request, group_service, factories
     ):
         # Return a different pre-existing group when we search by id
         group_service.fetch.return_value = factories.Group(
@@ -200,7 +200,7 @@ class TestUpdateGroup:
         )
 
     def test_it_raises_HTTPConflict_on_duplicate(
-        self, pyramid_request, UpdateGroupAPISchema, context, group_service, factories
+        self, pyramid_request, context, group_service, factories
     ):
         # Return a different pre-existing group when we search by id
         group_service.fetch.return_value = factories.Group(
@@ -211,7 +211,7 @@ class TestUpdateGroup:
             views.update(context, pyramid_request)
 
     def test_it_does_not_raise_HTTPConflict_if_duplicate_is_same_group(
-        self, pyramid_request, UpdateGroupAPISchema, context, group_service
+        self, pyramid_request, context, group_service
     ):
         group_service.fetch.return_value = context.group
 

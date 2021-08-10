@@ -9,9 +9,7 @@ from h.services.list_organizations import (
 class TestListOrganizations:
     ALT_AUTHORITY = "bar.com"
 
-    def test_returns_all_organizations_if_no_authority_specified(
-        self, svc, organizations, alt_organizations
-    ):
+    def test_returns_all_organizations_if_no_authority_specified(self, svc):
         results = svc.organizations()
 
         names = [org.name for org in results]
@@ -19,9 +17,7 @@ class TestListOrganizations:
         # The "Hypothesis" here is from the default org added by DB init
         assert names == ["Hypothesis", "alt_org_1", "alt_org_2", "org_1", "org_2"]
 
-    def test_returns_organizations_for_the_authority_specified(
-        self, svc, alt_organizations
-    ):
+    def test_returns_organizations_for_the_authority_specified(self, svc):
         results = svc.organizations(authority=self.ALT_AUTHORITY)
 
         names = [org.name for org in results]

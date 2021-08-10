@@ -192,7 +192,7 @@ class TestCreateAnnotation:
         assert annotation.group == parent_annotation.group
 
     def test_it_raises_if_parent_annotation_does_not_exist(
-        self, pyramid_request, annotation_data, other_group
+        self, pyramid_request, annotation_data
     ):
         annotation_data["references"] = ["MISSING_ID"]
 
@@ -355,13 +355,13 @@ class TestUpdateAnnotation:
 
 
 class TestValidateGroupScope:
-    def test_it_allows_matching_scopes(self, pyramid_request, scoped_group):
+    def test_it_allows_matching_scopes(self, scoped_group):
         storage._validate_group_scope(  # pylint:disable=protected-access
             scoped_group, "http://inscope.example.com"
         )
 
     def test_it_allows_mismatching_scopes_if_a_group_has_no_scopes(
-        self, pyramid_request, scoped_group, url_in_scope
+        self, scoped_group, url_in_scope
     ):
         scoped_group.scopes = []
 
@@ -372,7 +372,7 @@ class TestValidateGroupScope:
         url_in_scope.assert_not_called()
 
     def test_it_allows_mismatching_scopes_if_enforce_is_False(
-        self, pyramid_request, scoped_group, url_in_scope
+        self, scoped_group, url_in_scope
     ):
         scoped_group.enforce_scope = False
 
@@ -382,9 +382,7 @@ class TestValidateGroupScope:
 
         url_in_scope.assert_not_called()
 
-    def test_it_catches_mismatching_scopes(
-        self, pyramid_request, scoped_group, url_in_scope
-    ):
+    def test_it_catches_mismatching_scopes(self, scoped_group, url_in_scope):
         url_in_scope.return_value = False
 
         with pytest.raises(ValidationError):
@@ -405,7 +403,7 @@ class TestValidateGroupScope:
 
 
 @pytest.fixture
-def group(factories, db_session):
+def group(factories):
     # Set an authority_provided_id so our group_id is not None
     return factories.OpenGroup(authority_provided_id="group_auth_id")
 

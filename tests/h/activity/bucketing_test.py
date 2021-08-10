@@ -44,21 +44,19 @@ class TestDocumentBucket:
         bucket = bucketing.DocumentBucket(document)
         assert bucket.title == "The Document Title"
 
-    def test_init_uses_the_document_web_uri(self, db_session, document):
+    def test_init_uses_the_document_web_uri(self, document):
         document.web_uri = "http://example.com"
 
         bucket = bucketing.DocumentBucket(document)
         assert bucket.uri == "http://example.com"
 
-    def test_init_sets_None_uri_when_no_http_or_https_can_be_found(
-        self, db_session, document
-    ):
+    def test_init_sets_None_uri_when_no_http_or_https_can_be_found(self, document):
         document.web_uri = None
 
         bucket = bucketing.DocumentBucket(document)
         assert bucket.uri is None
 
-    def test_init_sets_the_domain_from_the_extracted_uri(self, db_session, document):
+    def test_init_sets_the_domain_from_the_extracted_uri(self, document):
         document.web_uri = "https://www.example.com/foobar.html"
 
         bucket = bucketing.DocumentBucket(document)
@@ -76,7 +74,7 @@ class TestDocumentBucket:
         bucket = bucketing.DocumentBucket(document)
         assert bucket.domain == "Local file"
 
-    def test_annotations_count_returns_count_of_annotations(self, db_session, document):
+    def test_annotations_count_returns_count_of_annotations(self, document):
         bucket = bucketing.DocumentBucket(document)
 
         for _ in range(7):

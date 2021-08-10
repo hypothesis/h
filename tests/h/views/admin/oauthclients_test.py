@@ -33,7 +33,7 @@ class FakeForm:
         return self.appstruct
 
 
-def test_index_lists_authclients_sorted_by_name(pyramid_request, routes):
+def test_index_lists_authclients_sorted_by_name(pyramid_request):
     clients = [
         AuthClient(authority="foo.org", name="foo"),
         AuthClient(authority="foo.org", name="bar"),
@@ -216,7 +216,7 @@ class TestAuthClientEditController:
 
         pyramid_request.db.delete.assert_called_with(auth_client)
 
-    def test_delete_redirects_to_index(self, auth_client, matchers, pyramid_request):
+    def test_delete_redirects_to_index(self, matchers, pyramid_request):
         pyramid_request.db.delete = create_autospec(
             pyramid_request.db.delete, return_value=None
         )

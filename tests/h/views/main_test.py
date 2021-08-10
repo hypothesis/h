@@ -7,7 +7,7 @@ from h.traversal import AnnotationContext
 from h.views import main
 
 
-def _fake_sidebar_app(request, extra):
+def _fake_sidebar_app(request, extra):  # pylint:disable=unused-argument
     return extra
 
 
@@ -67,7 +67,7 @@ class TestStreamUserRedirect:
         assert exc.value.location == "http://example.com/search?q=tag%3A%22foo+bar%22"
 
     def test_it_redirects_to_activity_page_if_q_length_great_than_2(
-        self, sidebar_app, pyramid_request
+        self, pyramid_request
     ):
         pyramid_request.params["q"] = "tag:foo:bar"
         pyramid_request.matchdict["tag"] = "foo:bar"

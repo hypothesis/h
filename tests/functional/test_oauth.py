@@ -18,12 +18,10 @@ class TestOAuth:
 
         self.assert_is_authorized(app, userid, access_token)
 
-    def test_request_fails_if_access_token_wrong(self, app, authclient, userid):
+    def test_request_fails_if_access_token_wrong(self, app):
         self.assert_is_not_authorised(app, access_token="wrong")
 
-    def test_request_fails_if_access_token_expired(
-        self, app, authclient, db_session, factories, userid
-    ):
+    def test_request_fails_if_access_token_expired(self, app, db_session, factories):
         token = factories.DeveloperToken(
             expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1)
         )
@@ -52,9 +50,7 @@ class TestOAuth:
         # Test that the old access token still works, too.
         self.assert_is_authorized(app, userid, old_access_token)
 
-    def test_refresh_token_request_fails_if_refresh_token_wrong(
-        self, app, authclient, userid
-    ):
+    def test_refresh_token_request_fails_if_refresh_token_wrong(self, app):
         app.post(
             "/api/token",
             {"grant_type": "refresh_token", "refresh_token": "wrong"},
@@ -62,7 +58,7 @@ class TestOAuth:
         )
 
     def test_refresh_token_request_fails_if_token_expired(
-        self, app, authclient, db_session, factories, userid
+        self, app, db_session, factories
     ):
         token = factories.DeveloperToken(
             expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1)

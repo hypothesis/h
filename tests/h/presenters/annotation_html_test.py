@@ -51,7 +51,7 @@ class TestAnnotationHTMLPresenter:
             ("title", "title"),
         ),
     )
-    def test_document_proxies(self, annotation, presenter, method, proxied_method):
+    def test_document_proxies(self, presenter, method, proxied_method):
         # Note that the "document" here is actually a `DocumentHTMLPresenter`
         assert getattr(presenter, method) == getattr(presenter.document, proxied_method)
 

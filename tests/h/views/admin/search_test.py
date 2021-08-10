@@ -47,9 +47,7 @@ class TestSearchAdminViews:
             f"Began reindexing annotations by {user.userid}"
         ]
 
-    def test_reindex_user_errors_if_user_not_found(
-        self, views, pyramid_request, search_index
-    ):
+    def test_reindex_user_errors_if_user_not_found(self, views, pyramid_request):
         pyramid_request.params = {"username": "johnsmith"}
 
         with pytest.raises(NotFoundError, match="User johnsmith not found"):
@@ -75,7 +73,7 @@ class TestSearchAdminViews:
         ]
 
     def test_reindex_group_errors_if_group_not_found(
-        self, views, pyramid_request, search_index, group_service
+        self, views, pyramid_request, group_service
     ):
         pyramid_request.params = {"groupid": "def456"}
         group_service.fetch_by_pubid.return_value = None

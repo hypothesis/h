@@ -26,7 +26,7 @@ class TestListGroupsSessionGroups:
 
 
 class TestAssociatedGroups:
-    def test_it_does_not_return_world_group(self, svc, sample_groups, user):
+    def test_it_does_not_return_world_group(self, svc, user):
         groups = svc.associated_groups(user)
 
         assert "__world__" not in [group.pubid for group in groups]
@@ -70,7 +70,7 @@ class TestAssociatedGroups:
 
         assert private_group not in groups
 
-    def test_it_returns_empty_list_if_user_is_None(self, svc, sample_groups):
+    def test_it_returns_empty_list_if_user_is_None(self, svc):
         groups = svc.associated_groups(user=None)
 
         assert groups == []
@@ -90,7 +90,7 @@ class TestAssociatedGroups:
 
 
 class TestListGroupsRequestGroups:
-    def test_it_returns_world_group(self, svc, default_authority, sample_groups):
+    def test_it_returns_world_group(self, svc, default_authority):
         groups = svc.request_groups(authority=default_authority)
 
         assert "__world__" in [group.pubid for group in groups]
@@ -107,7 +107,7 @@ class TestListGroupsRequestGroups:
         assert "__world__" not in [group.pubid for group in groups]
 
     def test_it_returns_scoped_groups_for_authority_and_document_uri(
-        self, svc, group_scope_service, default_authority, document_uri, sample_groups
+        self, svc, default_authority, document_uri, sample_groups
     ):
         groups = svc.request_groups(
             authority=default_authority, document_uri=document_uri
@@ -215,7 +215,7 @@ class TestScopedGroups:
         group_scope_service.fetch_by_scope.assert_called_once_with(document_uri)
 
     def test_it_returns_empty_list_if_no_matching_scopes(
-        self, svc, default_authority, document_uri, sample_groups, group_scope_service
+        self, svc, default_authority, document_uri, group_scope_service
     ):
         group_scope_service.fetch_by_scope.return_value = []
 
@@ -275,13 +275,14 @@ class TestWorldGroup:
         assert w_group is None
 
 
+@pytest.mark.usefixtures("group_scope_service")
 class TestGroupListFactory:
-    def test_group_list_factory(self, pyramid_request, group_scope_service):
+    def test_group_list_factory(self, pyramid_request):
         svc = group_list_factory(None, pyramid_request)
 
         assert isinstance(svc, GroupListService)
 
-    def test_uses_request_default_authority(self, pyramid_request, group_scope_service):
+    def test_uses_request_default_authority(self, pyramid_request):
         pyramid_request.default_authority = "bar.com"
 
         svc = group_list_factory(None, pyramid_request)

@@ -96,8 +96,6 @@ class TestGenerate:
         self,
         notification,
         pyramid_request,
-        html_renderer,
-        text_renderer,
         parent_user,
         reply_user,
     ):
@@ -141,7 +139,7 @@ class TestGenerate:
         assert text == "Text output"
 
     def test_returns_subject_with_reply_display_name(
-        self, notification, pyramid_request, reply_user
+        self, notification, pyramid_request
     ):
         _, subject, _, _ = generate(pyramid_request, notification)
 

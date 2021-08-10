@@ -37,10 +37,10 @@ def with_logged_in_user(login_user):
 
 
 @pytest.fixture
-def with_logged_in_staff_member(login_user, user):
+def with_logged_in_staff_member(login_user):
     login_user(staff=True)
 
 
 @pytest.fixture
-def with_logged_in_admin(login_user, user):
+def with_logged_in_admin(login_user):
     login_user(admin=True)

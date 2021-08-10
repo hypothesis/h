@@ -10,7 +10,7 @@ class TestNipsaService:
             "acct:flagged_user_2@example.com",
         }
 
-    def test_is_flagged_returns_true_for_flagged_users(self, svc, users):
+    def test_is_flagged_returns_true_for_flagged_users(self, svc):
         assert svc.is_flagged("acct:flagged_user@example.com")
 
     def test_is_flagged_returns_false_for_unflagged_users(self, svc):

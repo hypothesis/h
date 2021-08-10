@@ -36,7 +36,7 @@ class TestUserUpdate:
         assert updated_user.some_random_field == "whatever"
 
     def test_it_raises_ValidationError_if_authority_present_in_kwargs(
-        self, factories, svc, db_session
+        self, factories, svc
     ):
         user = factories.User()
 
@@ -46,7 +46,7 @@ class TestUserUpdate:
             svc.update(user, authority="something.com")
 
     def test_it_raises_ValidationError_if_email_fails_model_validation(
-        self, factories, svc, db_session
+        self, factories, svc
     ):
         user = factories.User()
 
@@ -56,7 +56,7 @@ class TestUserUpdate:
             svc.update(user, email="o" * 150)
 
     def test_it_raises_ValidationError_if_username_fails_model_validation(
-        self, factories, svc, db_session
+        self, factories, svc
     ):
         user = factories.User()
 
@@ -65,7 +65,7 @@ class TestUserUpdate:
         ):
             svc.update(user, username="lo")
 
-    def test_it_will_not_raise_on_malformed_email(self, factories, svc, db_session):
+    def test_it_will_not_raise_on_malformed_email(self, factories, svc):
         user = factories.User()
 
         # It's up to callers to validate email at this point
@@ -74,7 +74,7 @@ class TestUserUpdate:
         assert updated_user.email == "fingers"
 
     def test_it_raises_ConflictError_on_username_authority_uniqueness_violation(
-        self, factories, svc, db_session
+        self, factories, svc
     ):
         factories.User(username="user1", authority="baz.com")
         user2 = factories.User(username="user2", authority="baz.com")

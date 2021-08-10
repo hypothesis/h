@@ -46,7 +46,9 @@ def index_annotations(es_client, search_index):
 
 
 @pytest.fixture
-def search_index(es_client, pyramid_request, moderation_service):
+def search_index(  # pylint:disable=unused-argument
+    es_client, pyramid_request, moderation_service
+):
     return SearchIndexService(
         pyramid_request,
         es_client,

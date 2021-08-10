@@ -31,7 +31,7 @@ class TestMailerTest:
         assert isinstance(result, HTTPSeeOther)
         assert result.location == "/adm/mailer"
 
-    def test_sends_mail(self, mailer, pyramid_request, testmail):
+    def test_sends_mail(self, mailer, pyramid_request):
         pyramid_request.params["recipient"] = "meerkat@example.com"
 
         mailer_test(pyramid_request)
@@ -40,7 +40,7 @@ class TestMailerTest:
             ["meerkat@example.com"], "TEST", "text", "html"
         )
 
-    def test_redirects(self, mailer, pyramid_request, testmail):
+    def test_redirects(self, pyramid_request):
         pyramid_request.params["recipient"] = "meerkat@example.com"
 
         result = mailer_test(pyramid_request)

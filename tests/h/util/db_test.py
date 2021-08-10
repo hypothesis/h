@@ -12,7 +12,7 @@ class TestLRUCacheInTransaction:
         # cleared when the transaction ends.
 
         @lru_cache_in_transaction(db_session)
-        def random_float(*args, **kwargs):
+        def random_float(*args, **kwargs):  # pylint:disable=unused-argument
             return random.random()
 
         a = random_float("a")
@@ -35,7 +35,7 @@ class TestLRUCacheInTransaction:
         """The cache should not be cleared when a nested transaction ends."""
 
         @lru_cache_in_transaction(db_session)
-        def random_float(*args, **kwargs):
+        def random_float(*args, **kwargs):  # pylint:disable=unused-argument
             return random.random()
 
         a = random_float("a")

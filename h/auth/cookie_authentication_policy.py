@@ -18,7 +18,7 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
 
         return Identity(user=user)
 
-    def remember(self, request, userid, **kw):
+    def remember(self, request, userid, **kw):  # pylint:disable=unused-argument
         """Get a list of headers which will remember the user in a cookie."""
 
         self._add_vary_by_cookie(request)
@@ -52,7 +52,7 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
     @staticmethod
     @lru_cache  # Ensure we only add this once per request
     def _add_vary_by_cookie(request):
-        def vary_add(request, response):
+        def vary_add(request, response):  # pylint:disable=unused-argument
             vary = set(response.vary if response.vary is not None else [])
             vary.add("Cookie")
             response.vary = list(vary)

@@ -8,7 +8,8 @@ from h.streamer.app import create_app
 
 
 class TestIncludeMe:
-    def test_it_configures_pyramid_sentry_plugin(self, configure, config):
+    @pytest.mark.usefixtures("configure")
+    def test_it_configures_pyramid_sentry_plugin(self, config):
         create_app(None)
 
         config.add_settings.assert_any_call(
@@ -18,8 +19,8 @@ class TestIncludeMe:
             }
         )
 
-    @pytest.mark.usefixtures("with_kill_switch_on")
-    def test_it_respects_the_kill_switch(self, configure, config):
+    @pytest.mark.usefixtures("with_kill_switch_on", "configure")
+    def test_it_respects_the_kill_switch(self, config):
         create_app(None)
 
         config.add_settings.assert_not_called()

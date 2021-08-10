@@ -53,7 +53,7 @@ class TestDeveloperTokenService:
         return factories.DeveloperToken(userid=userid)
 
     @pytest.fixture
-    def userid(self, factories):
+    def userid(self):
         return "acct:john@doe.org"
 
 

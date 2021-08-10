@@ -127,7 +127,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
             raise InvalidRefreshTokenError()
 
     @staticmethod
-    def generate_access_token(oauth_request):
+    def generate_access_token(oauth_request):  # pylint: disable=unused-argument
         return ACCESS_TOKEN_PREFIX + token_urlsafe()
 
     @staticmethod

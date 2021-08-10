@@ -194,7 +194,7 @@ class TestProfile:
 
         assert profile["authority"] == third_party_domain
 
-    def test_user_info_authenticated(self, authenticated_request, patch):
+    def test_user_info_authenticated(self, authenticated_request):
         profile = session.profile(authenticated_request)
         user_info = profile["user_info"]
         assert user_info["display_name"] == authenticated_request.user.display_name

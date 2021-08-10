@@ -18,7 +18,7 @@ class TestDeleteUserService:
         assert user.groups == []
 
     def test_delete_deletes_annotations(
-        self, factories, pyramid_request, svc, annotation_delete_service
+        self, factories, svc, annotation_delete_service
     ):
         user = factories.User(username="bob")
         anns = [
@@ -32,7 +32,7 @@ class TestDeleteUserService:
             [mock.call(anns[0]), mock.call(anns[1])], any_order=True
         )
 
-    def test_delete_deletes_user(self, db_session, factories, pyramid_request, svc):
+    def test_delete_deletes_user(self, db_session, factories, svc):
         user = factories.User()
 
         svc.delete(user)

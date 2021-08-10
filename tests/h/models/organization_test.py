@@ -38,7 +38,7 @@ def test_none_logo_is_valid():
     assert org.logo is None
 
 
-def test_repr(db_session, factories):
+def test_repr():
     organization = models.Organization(
         name="My Organization", authority="example.com", pubid="test_pubid"
     )

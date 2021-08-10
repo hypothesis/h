@@ -38,7 +38,7 @@ class TestRedirectTween:
 
         assert response.status_code == 200
 
-    def test_it_redirects_for_redirected_routes(self, pyramid_request, pyramid_config):
+    def test_it_redirects_for_redirected_routes(self, pyramid_request):
         redirects = [
             Redirect(src="/foo", dst="http://bar", internal=False, prefix=False)
         ]

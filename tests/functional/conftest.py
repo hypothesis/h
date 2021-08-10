@@ -28,7 +28,7 @@ TEST_SETTINGS = {
 
 
 @pytest.fixture(scope="session")
-def app(pyramid_app, db_engine):
+def app(pyramid_app):
     return TestApp(pyramid_app)
 
 
@@ -93,5 +93,5 @@ def pyramid_app():
 # Always unconditionally wipe the Elasticsearch index after every functional
 # test.
 @pytest.fixture(autouse=True)
-def always_delete_all_elasticsearch_documents(es_client):
+def always_delete_all_elasticsearch_documents():
     pass

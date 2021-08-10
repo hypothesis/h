@@ -62,7 +62,6 @@ disable=
     duplicate-code,
 
     # Ignored during pep8 -> pylint transition
-    unused-argument,
     fixme,
     no-member, #  Intermittent failures with the same input
 

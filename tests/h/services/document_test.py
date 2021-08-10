@@ -15,15 +15,13 @@ class TestFetchByGroupid:
         )
 
     def test_it_does_not_return_documents_annotated_in_other_groups(
-        self, groups, annotations, other_annotations, svc
+        self, groups, other_annotations, svc
     ):
         docs = svc.fetch_by_groupid(groupid=groups["target_group"].pubid)
         for other_anno in other_annotations:
             assert other_anno.document not in docs
 
-    def test_it_returns_each_document_only_once(
-        self, svc, groups, annotations, db_session
-    ):
+    def test_it_returns_each_document_only_once(self, svc, groups, annotations):
         # This will make both annotations point to the same document
         annotations[1].document = annotations[0].document
         annotations[2].document = annotations[0].document
@@ -33,7 +31,7 @@ class TestFetchByGroupid:
         assert docs == [annotations[0].document]
 
     def test_it_returns_only_documents_with_shared_annotations_when_no_user(
-        self, annotations, groups, svc, db_session
+        self, annotations, groups, svc
     ):
         annotations[1].shared = False
         annotations[2].shared = False
@@ -43,7 +41,7 @@ class TestFetchByGroupid:
         assert docs == [annotations[0].document]
 
     def test_it_returns_only_documents_with_visible_annotations_for_user(
-        self, svc, annotations, groups, target_user, other_user, db_session
+        self, svc, annotations, groups, target_user, other_user
     ):
         # This makes an "only me" annotation, associated with our target user
         annotations[1].shared = False
@@ -67,7 +65,7 @@ class TestFetchByGroupid:
         )
 
     def test_it_returns_documents_ordered_by_last_activity_desc(
-        self, svc, annotations, groups, factories, db_session
+        self, svc, annotations, groups, factories
     ):
         # Update the document associated with ``annotations[1]``...
         annotations[1].document.title = "Bleep bloop"

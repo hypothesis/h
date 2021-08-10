@@ -51,7 +51,7 @@ class TestUserService:
         assert svc.fetch_by_identity("provider_a", "123") is freddo
         assert svc.fetch_by_identity("provider_b", "456") is freddo
 
-    def test_fetch_by_identity_returns_none_if_no_match(self, svc, users):
+    def test_fetch_by_identity_returns_none_if_no_match(self, svc):
         assert svc.fetch_by_identity("nonsense", "abc") is None
 
     def test_fetch_for_login_by_username(self, svc, users):
@@ -73,7 +73,7 @@ class TestUserService:
         with pytest.raises(UserNotActivated):
             svc.fetch_for_login("mirthe")
 
-    def test_fetch_for_login_by_email_not_activated(self, svc, users):
+    def test_fetch_for_login_by_email_not_activated(self, svc):
         with pytest.raises(UserNotActivated):
             svc.fetch_for_login("mirthe@deboer.com")
 
@@ -111,7 +111,7 @@ class TestUserService:
 
         # We need to capture the inline `clear_cache` function so we can
         # call it manually later
-        def on_transaction_end_decorator(session):
+        def on_transaction_end_decorator(session):  # pylint:disable=unused-argument
             def on_transaction_end(func):
                 funcs["clear_cache"] = func
 

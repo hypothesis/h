@@ -121,7 +121,7 @@ class TestGetNotification:
         assert result is None
 
     def test_returns_none_when_subscription_absent(
-        self, db_session, parent, pyramid_request, reply
+        self, db_session, pyramid_request, reply
     ):
         db_session.query(Subscriptions).delete()
 
