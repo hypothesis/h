@@ -1,5 +1,5 @@
 from h.auth.util import client_authority
-from h.security.acl import ACL
+from h.security import ACL
 from h.traversal.root import RootFactory
 
 

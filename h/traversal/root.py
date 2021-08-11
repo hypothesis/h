@@ -1,4 +1,4 @@
-from h.security.acl import ACL
+from h.security import ACL
 
 
 class RootFactory:

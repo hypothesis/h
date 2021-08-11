@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from h.models import Group
-from h.security.acl import ACL
+from h.security import ACL
 from h.traversal.root import RootFactory
 
 

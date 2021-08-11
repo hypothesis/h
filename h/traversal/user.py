@@ -5,7 +5,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
-from h.security.acl import ACL
+from h.security import ACL
 from h.traversal.root import RootFactory
 
 
