@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from h import storage
 from h.models import Annotation
-from h.security.acl import ACL
+from h.security import ACL
 from h.traversal.root import RootFactory
 
 
