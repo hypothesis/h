@@ -22,7 +22,7 @@ from pyramid import i18n
 from h import models, schemas
 from h.db import types
 from h.models.document import update_document_metadata
-from h.security.permissions import Permission
+from h.security import Permission
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 from h.util.uri import normalize as normalize_uri

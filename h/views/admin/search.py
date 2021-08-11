@@ -3,7 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
 from h import models
-from h.security.permissions import Permission
+from h.security import Permission
 
 
 class NotFoundError(Exception):

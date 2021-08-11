@@ -7,7 +7,7 @@ from h import i18n, models, paginator
 from h.models.annotation import Annotation
 from h.models.group_scope import GroupScope
 from h.schemas.forms.admin.group import AdminGroupSchema
-from h.security.permissions import Permission
+from h.security import Permission
 
 _ = i18n.TranslationString
 

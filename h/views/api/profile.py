@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session
 from h.presenters import GroupsJSONPresenter
-from h.security.permissions import Permission
+from h.security import Permission
 from h.views.api.config import api_config
 
 

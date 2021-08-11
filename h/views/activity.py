@@ -14,7 +14,7 @@ from h.models.group import ReadableBy
 from h.paginator import paginate
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
-from h.security.permissions import Permission
+from h.security import Permission
 from h.util.datetime import utc_us_style_date
 from h.util.user import split_user
 from h.views.groups import check_slug

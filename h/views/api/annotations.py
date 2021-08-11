@@ -26,7 +26,7 @@ from h.schemas.annotation import (
     UpdateAnnotationSchema,
 )
 from h.schemas.util import validate_query_params
-from h.security.permissions import Permission
+from h.security import Permission
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 

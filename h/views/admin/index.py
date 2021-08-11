@@ -3,7 +3,7 @@ import platform
 from pyramid.view import view_config
 
 from h import __version__
-from h.security.permissions import Permission
+from h.security import Permission
 
 
 @view_config(

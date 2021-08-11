@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPNoContent
 
 from h import events
 from h.models import AnnotationModeration
-from h.security.permissions import Permission
+from h.security import Permission
 from h.views.api.config import api_config
 
 

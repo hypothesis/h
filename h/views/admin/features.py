@@ -3,7 +3,7 @@ from pyramid.view import view_config
 
 from h import models, paginator
 from h.i18n import TranslationString as _  # noqa: N813
-from h.security.permissions import Permission
+from h.security import Permission
 
 
 @view_config(
