@@ -5,6 +5,8 @@ from Cryptodome.Hash import SHA512
 from Cryptodome.Protocol.KDF import HKDF
 from passlib.context import CryptContext
 
+from h.security.identity import Identity
+
 DEFAULT_ENTROPY = 32
 
 # We use a passlib CryptContext to define acceptable hashing algorithms for

@@ -4,7 +4,9 @@ import re
 import sqlalchemy as sa
 
 from h.auth import role
+from h.models import User
 from h.models.auth_client import AuthClient, GrantType
+from h.security import Identity
 
 
 def groupfinder(userid, request):
@@ -31,22 +33,54 @@ def groupfinder(userid, request):
     return principals_for_user(user)
 
 
-def principals_for_user(user):
-    """Return the list of additional principals for a user, or None."""
-    if user is None:
+def principals_for_identity(identity: Identity):
+    if not identity:
         return None
 
     principals = set()
-    principals.add(role.User)
-    if user.admin:
-        principals.add(role.Admin)
-    if user.staff:
-        principals.add(role.Staff)
-    for group in user.groups:
-        principals.add("group:{group.pubid}".format(group=group))
-    principals.add("authority:{authority}".format(authority=user.authority))
 
-    return list(principals)
+    if user := identity.user:
+        principals.add(role.User)
+        if user.admin:
+            principals.add(role.Admin)
+        if user.staff:
+            principals.add(role.Staff)
+        for group in user.groups:
+            principals.add("group:{group.pubid}".format(group=group))
+        principals.add("authority:{authority}".format(authority=user.authority))
+
+    if auth_client := identity.auth_client:
+        principals.add(
+            "client:{client_id}@{authority}".format(
+                client_id=auth_client.id, authority=auth_client.authority
+            )
+        )
+        principals.add(
+            "client_authority:{authority}".format(authority=auth_client.authority)
+        )
+        principals.add(role.AuthClient)
+
+    if identity.user and identity.auth_client:
+        principals.add(identity.user.userid)
+        principals.add(role.AuthClientUser)
+
+    return list(principals) or None
+
+
+def principals_for_user(user: User):
+    """Return the list of additional principals for a user, or None."""
+    return principals_for_identity(Identity(user=user))
+
+
+def principals_for_auth_client(client: AuthClient):
+    """Return the list of additional principals for an auth client."""
+
+    return principals_for_identity(Identity(auth_client=client))
+
+
+def principals_for_auth_client_user(user: User, client: AuthClient):
+    """Return a union of client and user principals for forwarded user."""
+    return principals_for_identity(Identity(user=user, auth_client=client))
 
 
 def default_authority(request):
@@ -111,53 +145,3 @@ def verify_auth_client(client_id, client_secret, db_session):
         return None
 
     return client
-
-
-def principals_for_auth_client(client):
-    """
-    Return the list of additional principals for an auth client.
-
-    :type client: :py:class:`h.models.auth_client.AuthClient`
-    :rtype: list
-    """
-
-    principals = set([])
-
-    principals.add(
-        "client:{client_id}@{authority}".format(
-            client_id=client.id, authority=client.authority
-        )
-    )
-    principals.add("client_authority:{authority}".format(authority=client.authority))
-    principals.add(role.AuthClient)
-
-    return list(principals)
-
-
-def principals_for_auth_client_user(user, client):
-    """
-    Return a union of client and user principals for forwarded user.
-
-    :type user: :py:class:`h.models.user.User`
-    :type client: :py:class:`h.models.auth_client.AuthClient`
-    :rtype: list
-    """
-
-    # Other auth policies that extend Pyramid auth policies, e.g.
-    # ``Pyramid.authentication.CallbackAuthenticationPolicy``, automatically
-    # get a ``userid`` principal via its ``effective_principals`` method.
-    # But :py:class:`h.auth.policy.AuthClientPolicy` overrides ``effective_principals``
-    # with its own method, so the ``userid`` principal needs to be added explicitly here
-    # for forwarded users
-    userid_principals = [user.userid]
-
-    user_principals = principals_for_user(user)
-    client_principals = principals_for_auth_client(client)
-    auth_client_principals = [role.AuthClientUser]
-
-    all_principals = (
-        userid_principals + user_principals + client_principals + auth_client_principals
-    )
-    distinct_principals = list(set(all_principals))
-
-    return distinct_principals
