@@ -7,7 +7,7 @@ from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
 from h.realtime import Consumer
-from h.security.permissions import Permission
+from h.security import Permission
 from h.streamer import websocket
 from h.streamer.contexts import request_context
 from h.streamer.filter import SocketFilter

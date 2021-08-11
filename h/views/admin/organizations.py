@@ -6,7 +6,7 @@ from sqlalchemy import func
 from h import form, i18n, models, paginator
 from h.models.organization import Organization
 from h.schemas.forms.admin.organization import OrganizationSchema
-from h.security.permissions import Permission
+from h.security import Permission
 
 _ = i18n.TranslationString
 

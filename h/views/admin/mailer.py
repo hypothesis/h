@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config
 
 from h.emails import test
-from h.security.permissions import Permission
+from h.security import Permission
 from h.tasks import mailer
 
 

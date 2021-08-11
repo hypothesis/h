@@ -3,7 +3,7 @@ from unittest.mock import sentinel
 import pytest
 
 from h.auth import role
-from h.security.permissions import Permission
+from h.security import Permission
 from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
 
 

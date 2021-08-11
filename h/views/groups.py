@@ -4,7 +4,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import form, i18n
 from h.schemas.forms.group import group_schema
-from h.security.permissions import Permission
+from h.security import Permission
 
 _ = i18n.TranslationString
 

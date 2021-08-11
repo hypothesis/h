@@ -6,8 +6,7 @@ from h import form, i18n
 from h.models import AuthClient
 from h.models.auth_client import GrantType, ResponseType
 from h.schemas.auth_client import CreateAuthClientSchema, EditAuthClientSchema
-from h.security import token_urlsafe
-from h.security.permissions import Permission
+from h.security import Permission, token_urlsafe
 
 _ = i18n.TranslationString
 

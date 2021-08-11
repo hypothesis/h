@@ -8,7 +8,7 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
-from h.security.permissions import Permission
+from h.security import Permission
 from h.services.annotation_stats import AnnotationStatsService
 from h.traversal import UserContext
 from h.traversal.group import GroupContext

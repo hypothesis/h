@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 
 from h import models
 from h.i18n import TranslationString as _  # noqa: N813
-from h.security.permissions import Permission
+from h.security import Permission
 
 
 @view_config(

@@ -10,7 +10,7 @@ from h.auth.util import client_authority
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
-from h.security.permissions import Permission
+from h.security import Permission
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 

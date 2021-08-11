@@ -8,8 +8,8 @@ from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.auth import role
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
+from h.security import Permission
 from h.security.acl import ACL
-from h.security.permissions import Permission
 
 
 class TestACLForAdminPages:

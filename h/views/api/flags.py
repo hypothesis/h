@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPNoContent
 
 from h import links
 from h.emails import flag_notification
-from h.security.permissions import Permission
+from h.security import Permission
 from h.tasks import mailer
 from h.views.api.config import api_config
 

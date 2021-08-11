@@ -10,7 +10,7 @@ from h import storage
 from h.models.annotation import Annotation
 from h.models.document import Document, DocumentURI
 from h.schemas import ValidationError
-from h.security.permissions import Permission
+from h.security import Permission
 from h.traversal.group import GroupContext
 
 pytestmark = pytest.mark.usefixtures("search_index")

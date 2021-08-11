@@ -7,7 +7,7 @@ from h_matchers import Any
 from pyramid import security
 from pyramid.request import Request
 
-from h.security.permissions import Permission
+from h.security import Permission
 from h.streamer import messages
 from h.streamer.websocket import WebSocket
 
