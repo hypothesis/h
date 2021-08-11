@@ -4,32 +4,6 @@ import re
 import sqlalchemy as sa
 
 from h.models.auth_client import AuthClient, GrantType
-from h.security.identity import Identity
-from h.security.principals import principals_for_identity
-
-
-def groupfinder(userid, request):
-    """
-    Return the list of additional principals for a userid, or None.
-
-    This loads the user and then calls ``principals_for_user``.
-
-    If `userid` identifies a valid user in the system, this function will
-    return the list of additional principals for that user. If `userid` is not
-    recognised as a valid user in the system, the function will return None.
-
-    :param userid: the userid claimed by the request.
-    :type userid: str
-    :param request: the request object
-    :type request: pyramid.request.Request
-
-    :returns: additional principals for the user (possibly empty) or None
-    :rtype: list or None
-    """
-    user_service = request.find_service(name="user")
-    user = user_service.fetch(userid)
-
-    return principals_for_identity(Identity(user=user))
 
 
 def default_authority(request):

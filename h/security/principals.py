@@ -2,6 +2,20 @@ from h.security.identity import Identity
 from h.security.role import Role
 
 
+def principals_for_userid(userid, request):
+    """
+    Return the list of additional principals for a valid userid, or None.
+
+    :param userid: Userid to get principals for
+    :param request: Pyramid request object
+    :returns: A list of principals or None
+    """
+
+    identity = Identity(user=request.find_service(name="user").fetch(userid))
+
+    return principals_for_identity(identity)
+
+
 def principals_for_identity(identity: Identity):
     """
     Get the security principals for a given identity.

@@ -1,37 +1,11 @@
 from unittest import mock
-from unittest.mock import sentinel
 
 import pytest
 import sqlalchemy as sa
-from h_matchers import Any
 
 from h.auth import util
 from h.models import AuthClient
 from h.models.auth_client import GrantType
-from h.security import Identity
-
-
-class TestPrincipalsForProxies:
-    def test_groupfinder(
-        self, principals_for_identity, user, pyramid_request, user_service
-    ):
-        result = util.groupfinder(sentinel.userid, pyramid_request)
-
-        user_service.fetch.assert_called_once_with(sentinel.userid)
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs(
-                {"user": user_service.fetch.return_value}
-            )
-        )
-        assert result == principals_for_identity.return_value
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
-
-    @pytest.fixture
-    def principals_for_identity(self, patch):
-        return patch("h.auth.util.principals_for_identity")
 
 
 class TestClientAuthority:
