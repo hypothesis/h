@@ -33,33 +33,9 @@ class TestPrincipalsForProxies:
         )
         assert result == principals_for_identity.return_value
 
-    def test_principals_for_auth_client(self, principals_for_identity, auth_client):
-        result = util.principals_for_auth_client(auth_client)
-
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs({"auth_client": auth_client})
-        )
-        assert result == principals_for_identity.return_value
-
-    def test_principals_for_auth_client_user(
-        self, principals_for_identity, user, auth_client
-    ):
-        result = util.principals_for_auth_client_user(user, auth_client)
-
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs(
-                {"user": user, "auth_client": auth_client}
-            )
-        )
-        assert result == principals_for_identity.return_value
-
     @pytest.fixture
     def user(self, factories):
         return factories.User()
-
-    @pytest.fixture
-    def auth_client(self, factories):
-        return factories.AuthClient()
 
     @pytest.fixture
     def principals_for_identity(self, patch):

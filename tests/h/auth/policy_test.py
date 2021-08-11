@@ -1,7 +1,9 @@
 import base64
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
+from h_matchers import Any
 from pyramid.interfaces import IAuthenticationPolicy
 from pyramid.security import Authenticated, Everyone
 
@@ -13,6 +15,7 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.exceptions import InvalidUserId
+from h.security import Identity
 
 API_PATHS = ("/api", "/api/foo", "/api/annotations/abc123")
 
@@ -536,85 +539,54 @@ class TestAuthClientAuthenticationPolicy:
     def test_remember_does_nothing(self, auth_policy, pyramid_request):
         assert auth_policy.remember(pyramid_request, "whoever") == []
 
-    def test_check_proxies_to_verify_auth_client(
-        self, pyramid_request, verify_auth_client
+    def test_check(
+        self, pyramid_request, verify_auth_client, user_service, principals_for_identity
     ):
-        AuthClientPolicy.check("someusername", "somepassword", pyramid_request)
+        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
+
+        results = AuthClientPolicy.check(
+            sentinel.username, sentinel.password, pyramid_request
+        )
 
         verify_auth_client.assert_called_once_with(
-            "someusername", "somepassword", pyramid_request.db
+            client_id=sentinel.username,
+            client_secret=sentinel.password,
+            db_session=pyramid_request.db,
+        )
+        user_service.fetch.assert_called_once_with(sentinel.forwarded_user)
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs(
+                {
+                    "auth_client": verify_auth_client.return_value,
+                    "user": user_service.fetch.return_value,
+                }
+            )
+        )
+        assert results == principals_for_identity.return_value
+
+    def test_check_with_no_forwarded_user(
+        self, pyramid_request, principals_for_identity
+    ):
+        pyramid_request.headers["X-Forwarded-User"] = None
+
+        AuthClientPolicy.check(sentinel.username, sentinel.password, pyramid_request)
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs({"user": None})
         )
 
-    def test_check_returns_None_if_verify_auth_client_fails(
-        self, pyramid_request, verify_auth_client
-    ):
-        verify_auth_client.return_value = None
+    def test_check_with_invalid_user(self, pyramid_request, user_service):
+        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
+        user_service.fetch.side_effect = InvalidUserId("someid")
 
-        principals = AuthClientPolicy.check(
-            "someusername", "somepassword", pyramid_request
+        results = AuthClientPolicy.check(
+            sentinel.username, sentinel.password, pyramid_request
         )
 
-        assert principals is None
+        assert results is None
 
-    def test_check_proxies_to_principals_for_auth_client_if_no_forwarded_user(
-        self, pyramid_request, verify_auth_client, principals_for_auth_client
-    ):
-
-        principals = AuthClientPolicy.check(
-            "someusername", "somepassword", pyramid_request
-        )
-
-        assert principals == principals_for_auth_client.return_value
-        principals_for_auth_client.assert_called_once_with(
-            verify_auth_client.return_value
-        )
-
-    def test_check_doesnt_proxy_to_principals_for_auth_client_if_forwarded_user(
-        self,
-        user_service,
-        pyramid_request,
-        verify_auth_client,
-        principals_for_auth_client,
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = "acct:flop@woebang.baz"
-
-        AuthClientPolicy.check("someusername", "somepassword", pyramid_request)
-
-        assert not principals_for_auth_client.call_count
-
-    def test_check_fetches_user_if_forwarded_user(
-        self, pyramid_request, verify_auth_client, user_service
-    ):
-
-        pyramid_request.headers["X-Forwarded-User"] = "acct:flop@woebang.baz"
-
-        AuthClientPolicy.check("someusername", "somepassword", pyramid_request)
-
-        user_service.fetch.assert_called_once_with("acct:flop@woebang.baz")
-
-    def test_check_returns_None_if_userid_is_invalid(
-        self, pyramid_request, verify_auth_client, user_service
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = "badly_formatted"
-        user_service.fetch.side_effect = InvalidUserId("badly_formatted")
-
-        principals = AuthClientPolicy.check(
-            mock.sentinel.username, mock.sentinel.password, pyramid_request
-        )
-
-        assert principals is None
-
-    def test_check_returns_None_if_fetch_forwarded_user_fails(
-        self, pyramid_request, verify_auth_client, user_service
-    ):
-        user_service.fetch.return_value = None
-        pyramid_request.headers["X-Forwarded-User"] = "acct:flop@woebang.baz"
-
-        principals = AuthClientPolicy.check(
-            "someusername", "somepassword", pyramid_request
-        )
-
-        assert principals is None
+    @pytest.fixture
+    def principals_for_identity(self, patch):
+        return patch("h.auth.policy.principals_for_identity")
 
     def test_check_returns_None_if_forwarded_user_authority_mismatch(
         self, pyramid_request, verify_auth_client, user_service, factories
@@ -632,39 +604,7 @@ class TestAuthClientAuthenticationPolicy:
 
         assert principals is None
 
-    def test_it_proxies_to_principals_for_user_if_fetch_forwarded_user_ok(
-        self,
-        pyramid_request,
-        verify_auth_client,
-        user_service,
-        factories,
-        principals_for_auth_client_user,
-    ):
-        matched_user = factories.User(authority="one.com")
-        verify_auth_client.return_value = factories.ConfidentialAuthClient(
-            authority="one.com"
-        )
-        user_service.fetch.return_value = matched_user
-        pyramid_request.headers["X-Forwarded-User"] = matched_user.userid
-
-        principals = AuthClientPolicy.check(
-            "someusername", "somepassword", pyramid_request
-        )
-
-        principals_for_auth_client_user.assert_called_once_with(
-            matched_user, verify_auth_client.return_value
-        )
-        assert principals == principals_for_auth_client_user.return_value
-
-    @pytest.fixture
-    def principals_for_auth_client(self, patch):
-        return patch("h.auth.util.principals_for_auth_client")
-
-    @pytest.fixture
-    def principals_for_auth_client_user(self, patch):
-        return patch("h.auth.util.principals_for_auth_client_user")
-
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def verify_auth_client(self, patch):
         return patch("h.auth.util.verify_auth_client")
 

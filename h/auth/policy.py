@@ -8,9 +8,10 @@ from zope import interface
 
 from h.auth import util
 from h.exceptions import InvalidUserId
-
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
+from h.security import Identity, principals_for_identity
+
 AUTH_CLIENT_API_WHITELIST = [
     ("api.groups", "POST"),
     ("api.group", "PATCH"),
@@ -261,33 +262,21 @@ class AuthClientPolicy:
         :returns: additional principals for the auth_client or None
         :rtype: list or None
         """
-        client_id = username
-        client_secret = password
-
         # validate that the credentials in BasicAuth header
         # match an AuthClient record in the db
-        client = util.verify_auth_client(client_id, client_secret, request.db)
 
-        if client is None:
-            return None
+        client = util.verify_auth_client(
+            client_id=username, client_secret=password, db_session=request.db
+        )
+        user = None
 
-        forwarded_userid = AuthClientPolicy._forwarded_userid(request)
+        if client and (forwarded_userid := AuthClientPolicy._forwarded_userid(request)):
+            try:
+                user = request.find_service(name="user").fetch(forwarded_userid)
+            except InvalidUserId:  # raised if userid is invalidly formatted
+                return None  # invalid user, so we are failing here
 
-        if (
-            forwarded_userid is None
-        ):  # No forwarded user; set principals for basic auth_client
-            return util.principals_for_auth_client(client)
-
-        user_service = request.find_service(name="user")
-        try:
-            user = user_service.fetch(forwarded_userid)
-        except InvalidUserId:  # raised if userid is invalidly formatted
-            return None  # invalid user, so we are failing here
-
-        if user and user.authority == client.authority:
-            return util.principals_for_auth_client_user(user, client)
-
-        return None
+        return principals_for_identity(Identity(user=user, auth_client=client))
 
     @staticmethod
     def _forwarded_userid(request):
