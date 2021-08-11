@@ -1,92 +1,69 @@
-from collections import namedtuple
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 import sqlalchemy as sa
+from h_matchers import Any
 
 from h.auth import util
 from h.models import AuthClient
 from h.models.auth_client import GrantType
-from h.security.role import Role
-
-FakeUser = namedtuple("FakeUser", ["authority", "admin", "staff", "groups"])
-FakeGroup = namedtuple("FakeGroup", ["pubid"])
+from h.security import Identity
 
 
-class TestGroupfinder:
-    def test_it_fetches_the_user(self, pyramid_request, user_service):
-        util.groupfinder("acct:bob@example.org", pyramid_request)
-        user_service.fetch.assert_called_once_with("acct:bob@example.org")
-
-    def test_it_returns_principals_for_user(
-        self, pyramid_request, user_service, principals_for_user
+class TestPrincipalsForProxies:
+    def test_groupfinder(
+        self, principals_for_identity, user, pyramid_request, user_service
     ):
-        result = util.groupfinder("acct:bob@example.org", pyramid_request)
+        result = util.groupfinder(sentinel.userid, pyramid_request)
 
-        principals_for_user.assert_called_once_with(user_service.fetch.return_value)
-        assert result == principals_for_user.return_value
+        user_service.fetch.assert_called_once_with(sentinel.userid)
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs(
+                {"user": user_service.fetch.return_value}
+            )
+        )
+        assert result == principals_for_identity.return_value
 
+    def test_principals_for_user(self, principals_for_identity, user):
+        result = util.principals_for_user(user)
 
-@pytest.mark.parametrize(
-    "user,principals",
-    (
-        # User isn't found in the database: they're not authenticated at all
-        (None, None),
-        # User found but not staff, admin, or a member of any groups: only role is Role.USER
-        (
-            FakeUser(authority="example.com", admin=False, staff=False, groups=[]),
-            ["authority:example.com", Role.USER],
-        ),
-        # User is admin: Role.ADMIN should be in principals
-        (
-            FakeUser(authority="foobar.org", admin=True, staff=False, groups=[]),
-            ["authority:foobar.org", Role.ADMIN, Role.USER],
-        ),
-        # User is staff: Role.STAFF should be in principals
-        (
-            FakeUser(authority="example.com", admin=False, staff=True, groups=[]),
-            ["authority:example.com", Role.STAFF, Role.USER],
-        ),
-        # User is admin and staff
-        (
-            FakeUser(authority="foobar.org", admin=True, staff=True, groups=[]),
-            ["authority:foobar.org", Role.ADMIN, Role.STAFF, Role.USER],
-        ),
-        # User is a member of some groups
-        (
-            FakeUser(
-                authority="example.com",
-                admin=False,
-                staff=False,
-                groups=[FakeGroup("giraffe"), FakeGroup("elephant")],
-            ),
-            ["authority:example.com", "group:giraffe", "group:elephant", Role.USER],
-        ),
-        # User is admin, staff, and a member of some groups
-        (
-            FakeUser(
-                authority="foobar.org",
-                admin=True,
-                staff=True,
-                groups=[FakeGroup("donkeys")],
-            ),
-            [
-                "authority:foobar.org",
-                "group:donkeys",
-                Role.ADMIN,
-                Role.STAFF,
-                Role.USER,
-            ],
-        ),
-    ),
-)
-def test_principals_for_user(user, principals):
-    result = util.principals_for_user(user)
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs({"user": user})
+        )
+        assert result == principals_for_identity.return_value
 
-    if principals is None:
-        assert result is None
-    else:
-        assert set(principals) == set(result)
+    def test_principals_for_auth_client(self, principals_for_identity, auth_client):
+        result = util.principals_for_auth_client(auth_client)
+
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs({"auth_client": auth_client})
+        )
+        assert result == principals_for_identity.return_value
+
+    def test_principals_for_auth_client_user(
+        self, principals_for_identity, user, auth_client
+    ):
+        result = util.principals_for_auth_client_user(user, auth_client)
+
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs(
+                {"user": user, "auth_client": auth_client}
+            )
+        )
+        assert result == principals_for_identity.return_value
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def auth_client(self, factories):
+        return factories.AuthClient()
+
+    @pytest.fixture
+    def principals_for_identity(self, patch):
+        return patch("h.auth.util.principals_for_identity")
 
 
 class TestClientAuthority:
@@ -140,89 +117,6 @@ class TestAuthDomain:
     def test_it_returns_str(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)
         assert isinstance(util.default_authority(pyramid_request), str)
-
-
-class TestPrincipalsForAuthClient:
-    def test_it_sets_auth_client_principal(self, auth_client):
-        principals = util.principals_for_auth_client(auth_client)
-
-        assert (
-            "client:{client_id}@{authority}".format(
-                client_id=auth_client.id, authority=auth_client.authority
-            )
-            in principals
-        )
-
-    def test_it_sets_client_authority_principal(self, auth_client):
-        principals = util.principals_for_auth_client(auth_client)
-
-        assert (
-            "client_authority:{authority}".format(authority=auth_client.authority)
-            in principals
-        )
-
-    def test_it_sets_authclient_Role(self, auth_client):
-        principals = util.principals_for_auth_client(auth_client)
-
-        assert Role.AUTH_CLIENT in principals
-
-    def test_it_does_not_set_user_Role(self, auth_client):
-        principals = util.principals_for_auth_client(auth_client)
-
-        assert Role.USER not in principals
-
-    def test_it_returns_principals_as_list(self, auth_client):
-        principals = util.principals_for_auth_client(auth_client)
-
-        assert isinstance(principals, list)
-
-
-class TestPrincipalsForAuthClientUser:
-    def test_it_proxies_to_principals_for_user(
-        self, principals_for_user, factories, auth_client
-    ):
-        user = factories.User()
-        util.principals_for_auth_client_user(user, auth_client)
-
-        principals_for_user.assert_called_once_with(user)
-
-    def test_it_proxies_to_principals_for_auth_client(
-        self, principals_for_auth_client, factories, auth_client
-    ):
-        util.principals_for_auth_client_user(factories.User(), auth_client)
-
-        principals_for_auth_client.assert_called_once_with(auth_client)
-
-    def test_it_adds_the_userid_principal(self, factories, auth_client):
-        user = factories.User(authority=auth_client.authority)
-
-        principals = util.principals_for_auth_client_user(user, auth_client)
-
-        assert user.userid in principals
-
-    def test_it_adds_the_authclientuser_Role(self, factories, auth_client):
-        user = factories.User(authority=auth_client.authority)
-
-        principals = util.principals_for_auth_client_user(user, auth_client)
-
-        assert Role.AUTH_CLIENT_FORWARDED_USER in principals
-
-    def test_it_returns_combined_principals(self, factories, auth_client):
-        user = factories.User(authority=auth_client.authority)
-        group = factories.Group()
-        user.groups.append(group)
-
-        principals = util.principals_for_auth_client_user(user, auth_client)
-
-        assert "group:{pubid}".format(pubid=group.pubid) in principals
-        assert (
-            "client:{client_id}@{authority}".format(
-                client_id=auth_client.id, authority=auth_client.authority
-            )
-            in principals
-        )
-        assert "authority:{authority}".format(authority=auth_client.authority)
-        assert Role.AUTH_CLIENT in principals
 
 
 class TestVerifyAuthClient:
@@ -333,13 +227,3 @@ def auth_client(factories):
     return factories.ConfidentialAuthClient(
         authority="weylandindustries.com", grant_type=GrantType.client_credentials
     )
-
-
-@pytest.fixture
-def principals_for_user(patch):
-    return patch("h.auth.util.principals_for_user")
-
-
-@pytest.fixture
-def principals_for_auth_client(patch):
-    return patch("h.auth.util.principals_for_auth_client")
