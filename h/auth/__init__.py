@@ -11,7 +11,7 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.auth.util import default_authority, groupfinder
-from h.security import derive_key
+from h.security.encryption import derive_key
 
 __all__ = ("TOKEN_POLICY",)
 

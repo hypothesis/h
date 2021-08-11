@@ -6,7 +6,7 @@ from hypothesis import assume, given
 from hypothesis import strategies as st
 from passlib.context import CryptContext
 
-from h.security import derive_key, password_context, token_urlsafe
+from h.security.encryption import derive_key, password_context, token_urlsafe
 
 REASONABLE_INFO = st.text(alphabet=string.printable)
 REASONABLE_KEY_MATERIAL = st.binary(min_size=8, max_size=128)
