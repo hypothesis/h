@@ -5,7 +5,7 @@ from pyramid_authsanity import interfaces
 from zope import interface
 
 from h import models
-from h.auth.util import principals_for_user
+from h.security import Identity, principals_for_identity
 
 TICKET_TTL = datetime.timedelta(days=7)
 
@@ -47,7 +47,7 @@ class AuthTicketService:
             raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
 
         user = self.usersvc.fetch(self._userid)
-        return principals_for_user(user)
+        return principals_for_identity(Identity(user=user))
 
     def verify_ticket(self, principal, ticket_id):
         """

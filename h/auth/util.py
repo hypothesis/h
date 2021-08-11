@@ -32,12 +32,6 @@ def groupfinder(userid, request):
     return principals_for_identity(Identity(user=user))
 
 
-def principals_for_user(user):
-    """Return the list of additional principals for a user, or None."""
-
-    return principals_for_identity(Identity(user=user))
-
-
 def default_authority(request):
     """
     Return the value of the h.authority config settings.
