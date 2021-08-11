@@ -4,7 +4,8 @@ import re
 import sqlalchemy as sa
 
 from h.models.auth_client import AuthClient, GrantType
-from h.security.role import Role
+from h.security.identity import Identity
+from h.security.principals import principals_for_identity
 
 
 def groupfinder(userid, request):
@@ -28,25 +29,36 @@ def groupfinder(userid, request):
     user_service = request.find_service(name="user")
     user = user_service.fetch(userid)
 
-    return principals_for_user(user)
+    return principals_for_identity(Identity(user=user))
 
 
 def principals_for_user(user):
     """Return the list of additional principals for a user, or None."""
-    if user is None:
-        return None
 
-    principals = set()
-    principals.add(Role.USER)
-    if user.admin:
-        principals.add(Role.ADMIN)
-    if user.staff:
-        principals.add(Role.STAFF)
-    for group in user.groups:
-        principals.add("group:{group.pubid}".format(group=group))
-    principals.add("authority:{authority}".format(authority=user.authority))
+    return principals_for_identity(Identity(user=user))
 
-    return list(principals)
+
+def principals_for_auth_client(client):
+    """
+    Return the list of additional principals for an auth client.
+
+    :type client: :py:class:`h.models.auth_client.AuthClient`
+    :rtype: list
+    """
+
+    return principals_for_identity(Identity(auth_client=client))
+
+
+def principals_for_auth_client_user(user, client):
+    """
+    Return a union of client and user principals for forwarded user.
+
+    :type user: :py:class:`h.models.user.User`
+    :type client: :py:class:`h.models.auth_client.AuthClient`
+    :rtype: list
+    """
+
+    return principals_for_identity(Identity(user=user, auth_client=client))
 
 
 def default_authority(request):
@@ -111,53 +123,3 @@ def verify_auth_client(client_id, client_secret, db_session):
         return None
 
     return client
-
-
-def principals_for_auth_client(client):
-    """
-    Return the list of additional principals for an auth client.
-
-    :type client: :py:class:`h.models.auth_client.AuthClient`
-    :rtype: list
-    """
-
-    principals = set([])
-
-    principals.add(
-        "client:{client_id}@{authority}".format(
-            client_id=client.id, authority=client.authority
-        )
-    )
-    principals.add("client_authority:{authority}".format(authority=client.authority))
-    principals.add(Role.AUTH_CLIENT)
-
-    return list(principals)
-
-
-def principals_for_auth_client_user(user, client):
-    """
-    Return a union of client and user principals for forwarded user.
-
-    :type user: :py:class:`h.models.user.User`
-    :type client: :py:class:`h.models.auth_client.AuthClient`
-    :rtype: list
-    """
-
-    # Other auth policies that extend Pyramid auth policies, e.g.
-    # ``Pyramid.authentication.CallbackAuthenticationPolicy``, automatically
-    # get a ``userid`` principal via its ``effective_principals`` method.
-    # But :py:class:`h.auth.policy.AuthClientPolicy` overrides ``effective_principals``
-    # with its own method, so the ``userid`` principal needs to be added explicitly here
-    # for forwarded users
-    userid_principals = [user.userid]
-
-    user_principals = principals_for_user(user)
-    client_principals = principals_for_auth_client(client)
-    auth_client_principals = [Role.AUTH_CLIENT_FORWARDED_USER]
-
-    all_principals = (
-        userid_principals + user_principals + client_principals + auth_client_principals
-    )
-    distinct_principals = list(set(all_principals))
-
-    return distinct_principals

@@ -4,4 +4,6 @@ from h.security.encryption import (  # noqa:F401
     password_context,
     token_urlsafe,
 )
+from h.security.identity import Identity  # noqa:F401
 from h.security.permissions import Permission  # noqa:F401
+from h.security.principals import principals_for_identity  # noqa:F401
