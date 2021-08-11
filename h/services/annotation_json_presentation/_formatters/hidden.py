@@ -2,7 +2,7 @@ from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
-class AnnotationHiddenFormatter:
+class HiddenFormatter:
     """
     Formatter for dealing with annotations that a moderator has hidden.
 
