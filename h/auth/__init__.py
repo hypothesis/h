@@ -10,7 +10,8 @@ from h.auth.policy import (
     AuthenticationPolicy,
     TokenAuthenticationPolicy,
 )
-from h.auth.util import default_authority, groupfinder
+from h.auth.util import default_authority
+from h.security import principals_for_userid
 from h.security.encryption import derive_key
 
 __all__ = ("TOKEN_POLICY",)
@@ -18,7 +19,7 @@ __all__ = ("TOKEN_POLICY",)
 log = logging.getLogger(__name__)
 
 # We export this for the websocket to use as it's main policy
-TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
+TOKEN_POLICY = TokenAuthenticationPolicy(callback=principals_for_userid)
 
 
 def includeme(config):  # pragma: no cover
@@ -56,7 +57,7 @@ def _get_policy(proxy_auth):  # pragma: no cover
         )
 
         fallback_policy = RemoteUserAuthenticationPolicy(
-            environ_key="HTTP_X_FORWARDED_USER", callback=groupfinder
+            environ_key="HTTP_X_FORWARDED_USER", callback=principals_for_userid
         )
 
     else:

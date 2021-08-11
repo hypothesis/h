@@ -102,8 +102,8 @@ class TestPostAnnotation:
         """
         Write an annotation to a group that doesn't allow writes.
 
-        This is a basic test to check that h is correctly configuring the
-        groupfinder.
+        This is a basic test to check that h is correctly configuring
+        principals_for_userid.
         """
 
         user, token = user_with_token
