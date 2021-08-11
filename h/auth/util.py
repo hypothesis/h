@@ -38,29 +38,6 @@ def principals_for_user(user):
     return principals_for_identity(Identity(user=user))
 
 
-def principals_for_auth_client(client):
-    """
-    Return the list of additional principals for an auth client.
-
-    :type client: :py:class:`h.models.auth_client.AuthClient`
-    :rtype: list
-    """
-
-    return principals_for_identity(Identity(auth_client=client))
-
-
-def principals_for_auth_client_user(user, client):
-    """
-    Return a union of client and user principals for forwarded user.
-
-    :type user: :py:class:`h.models.user.User`
-    :type client: :py:class:`h.models.auth_client.AuthClient`
-    :rtype: list
-    """
-
-    return principals_for_identity(Identity(user=user, auth_client=client))
-
-
 def default_authority(request):
     """
     Return the value of the h.authority config settings.

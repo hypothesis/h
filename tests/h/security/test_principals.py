@@ -12,6 +12,12 @@ class TestPrincipalsForIdentity:
     def test_it_with_an_empty_identity(self):
         assert principals_for_identity(Identity()) is None
 
+    def test_it_with_a_user_client_mismatch(self, identity):
+        identity.user.authority = "authority"
+        identity.auth_client.authority = "different_authority"
+
+        assert principals_for_identity(identity) is None
+
     @pytest.mark.parametrize("admin", (True, False))
     @pytest.mark.parametrize("staff", (True, False))
     @pytest.mark.parametrize("with_auth_client", (True, False))

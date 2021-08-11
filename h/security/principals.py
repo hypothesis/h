@@ -14,6 +14,17 @@ def principals_for_identity(identity: Identity):
 
     principals = set()
 
+    if identity.auth_client and identity.user:
+        # We deny all principals if there's an authority mismatch
+        if identity.auth_client.authority != identity.user.authority:
+            return None
+
+        # Standard pyramid policies like`CallbackAuthenticationPolicy`
+        # automatically add the user id in `effective_principals`, but our
+        # `h.auth.policy.AuthClientPolicy` overrides it and it's missing
+        principals.add(identity.user.userid)
+        principals.add(Role.AUTH_CLIENT_FORWARDED_USER)
+
     if user := identity.user:
         principals.add(Role.USER)
         if user.admin:
@@ -28,16 +39,6 @@ def principals_for_identity(identity: Identity):
         principals.add(f"client:{auth_client.id}@{auth_client.authority}")
         principals.add(f"client_authority:{auth_client.authority}")
         principals.add(Role.AUTH_CLIENT)
-
-    if identity.auth_client and identity.user:
-        # Other auth policies that extend Pyramid auth policies, e.g.
-        # `pyramid.authentication.CallbackAuthenticationPolicy`, automatically
-        # get a `userid` principal via its `effective_principals` method.
-        # But `h.auth.policy.AuthClientPolicy` overrides `effective_principals`
-        # with its own method, so the `userid` principal needs to be added
-        # explicitly here for forwarded users
-        principals.add(identity.user.userid)
-        principals.add(Role.AUTH_CLIENT_FORWARDED_USER)
 
     if not principals:
         return None

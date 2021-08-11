@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     # Set up authsanity
     settings = config.registry.settings
     settings["authsanity.source"] = "cookie"
@@ -45,7 +45,7 @@ def includeme(config):
     config.add_request_method(".tokens.auth_token", reify=True)
 
 
-def _get_policy(proxy_auth):
+def _get_policy(proxy_auth):  # pragma: no cover
     if proxy_auth:
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "
