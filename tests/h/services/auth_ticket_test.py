@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 
 import pytest
+from h_matchers import Any
 
 from h import models
+from h.security import Identity
 from h.services.auth_ticket import (
     TICKET_REFRESH_INTERVAL,
     TICKET_TTL,
@@ -26,24 +28,18 @@ class TestAuthTicketService:
         userid = svc.userid()
         assert ticket.user.userid == userid
 
-    @pytest.mark.usefixtures("principals_for_user")
-    def test_groups_loads_the_user(self, svc, ticket):
-        svc.verify_ticket(ticket.user_userid, ticket.id)
-
-        svc.groups()
-
-        assert svc.usersvc.fetch.call_count == 1
-        svc.usersvc.fetch.assert_called_once_with(ticket.user_userid)
-
-    def test_groups_returns_principals_for_user(self, svc, principals_for_user, ticket):
-        principals_for_user.return_value = ["foo", "bar", "baz"]
-        svc.usersvc.fetch.return_value = ticket.user
+    def test_groups(self, svc, ticket, principals_for_identity):
         svc.verify_ticket(ticket.user_userid, ticket.id)
 
         result = svc.groups()
 
-        principals_for_user.assert_called_once_with(ticket.user)
-        assert ["foo", "bar", "baz"] == result
+        svc.usersvc.fetch.assert_called_once_with(ticket.user_userid)
+        principals_for_identity.assert_called_once_with(
+            Any.instance_of(Identity).with_attrs(
+                {"user": svc.usersvc.fetch.return_value}
+            )
+        )
+        assert result == principals_for_identity.return_value
 
     def test_groups_raises_when_ticket_is_not_loaded(self, svc, ticket):
         with pytest.raises(AuthTicketNotLoadedError) as exc:
@@ -179,8 +175,8 @@ class TestAuthTicketService:
         return AuthTicketService(db_session, user_service)
 
     @pytest.fixture
-    def principals_for_user(self, patch):
-        return patch("h.services.auth_ticket.principals_for_user")
+    def principals_for_identity(self, patch):
+        return patch("h.services.auth_ticket.principals_for_identity")
 
     @pytest.fixture
     def ticket(self, factories, user, db_session):

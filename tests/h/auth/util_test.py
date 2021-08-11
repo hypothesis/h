@@ -25,14 +25,6 @@ class TestPrincipalsForProxies:
         )
         assert result == principals_for_identity.return_value
 
-    def test_principals_for_user(self, principals_for_identity, user):
-        result = util.principals_for_user(user)
-
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs({"user": user})
-        )
-        assert result == principals_for_identity.return_value
-
     @pytest.fixture
     def user(self, factories):
         return factories.User()
