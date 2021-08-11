@@ -8,35 +8,43 @@ from h.services.annotation_json_presentation import AnnotationJSONPresentationSe
 
 class TestAnnotationJSONPresentationService:
     def test_it_configures_formatters(
-        self, svc, formatters, db_session, flag_service, moderation_service
+        self, svc, _formatters, db_session, flag_service, moderation_service
     ):
-        formatters.AnnotationFlagFormatter.assert_called_once_with(
+        _formatters.FlagFormatter.assert_called_once_with(
             sentinel.flag_svc, sentinel.user
         )
-        formatters.AnnotationHiddenFormatter.assert_called_once_with(
+        _formatters.HiddenFormatter.assert_called_once_with(
             sentinel.has_permission, sentinel.user
         )
-        formatters.AnnotationModerationFormatter.assert_called_once_with(
+        _formatters.ModerationFormatter.assert_called_once_with(
             sentinel.flag_svc, sentinel.user, sentinel.has_permission
         )
 
         assert svc.formatters == [
-            formatters.AnnotationFlagFormatter.return_value,
-            formatters.AnnotationHiddenFormatter.return_value,
-            formatters.AnnotationModerationFormatter.return_value,
+            _formatters.FlagFormatter.return_value,
+            _formatters.HiddenFormatter.return_value,
+            _formatters.ModerationFormatter.return_value,
         ]
 
     def test_present(self, svc, annotation, user_service, AnnotationJSONPresenter):
+        AnnotationJSONPresenter.return_value.asdict.return_value = {"presenter": 1}
+        for formatter in svc.formatters:
+            formatter.format.return_value = {formatter.__class__.__name__: 1}
+
         result = svc.present(annotation)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation,
-            links_service=svc.links_svc,
-            user_service=user_service,
-            formatters=svc.formatters,
+            annotation, links_service=svc.links_svc, user_service=user_service
         )
+        for formatter in svc.formatters:
+            formatter.format.assert_called_once_with(annotation)
 
-        assert result == AnnotationJSONPresenter.return_value.asdict.return_value
+        assert result == {
+            "presenter": 1,
+            "FlagFormatter": 1,
+            "HiddenFormatter": 1,
+            "ModerationFormatter": 1,
+        }
 
     def test_present_all(
         self, svc, factories, annotation, user_service, AnnotationJSONPresenter
@@ -49,10 +57,7 @@ class TestAnnotationJSONPresentationService:
             formatter.preload.assert_called_once_with(annotation_ids)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            annotation,
-            links_service=svc.links_svc,
-            user_service=user_service,
-            formatters=svc.formatters,
+            annotation, links_service=svc.links_svc, user_service=user_service
         )
         assert result == [
             AnnotationJSONPresenter.return_value.asdict.return_value,
@@ -106,8 +111,8 @@ class TestAnnotationJSONPresentationService:
         return factories.Annotation()
 
     @pytest.fixture(autouse=True)
-    def formatters(self, patch):
-        return patch("h.services.annotation_json_presentation.service.formatters")
+    def _formatters(self, patch):
+        return patch("h.services.annotation_json_presentation.service._formatters")
 
     @pytest.fixture(autouse=True)
     def AnnotationJSONPresenter(self, patch):

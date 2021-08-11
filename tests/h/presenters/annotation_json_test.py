@@ -1,10 +1,8 @@
 import datetime
-from unittest.mock import create_autospec
 
 import pytest
 from pyramid import security
 
-from h.formatters import AnnotationFlagFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
 
 
@@ -54,6 +52,13 @@ class TestAnnotationJSONPresenter:
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
         DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
 
+    def test_asdict_without_references(self, presenter, annotation):
+        annotation.references = None
+
+        result = presenter.asdict()
+
+        assert "references" not in result
+
     def test_asdict_extra_inherits_correctly(self, presenter, annotation):
         annotation.extra = {"id": "DIFFERENT"}
 
@@ -63,27 +68,6 @@ class TestAnnotationJSONPresenter:
         assert presented["id"] == annotation.id
         # And we aren't mutated
         assert annotation.extra == {"id": "DIFFERENT"}
-
-    def test_asdict_merges_formatters(
-        self, annotation, links_service, user_service, get_formatter
-    ):
-        formatters = [
-            get_formatter({"flagged": "nope"}),
-            get_formatter({"nipsa": "maybe"}),
-        ]
-
-        presented = AnnotationJSONPresenter(
-            annotation,
-            links_service=links_service,
-            user_service=user_service,
-            formatters=formatters,
-        ).asdict()
-
-        assert presented["flagged"] == "nope"
-        assert presented["nipsa"] == "maybe"
-
-        for formatter in formatters:
-            formatter.format.assert_called_once_with(annotation)
 
     @pytest.mark.parametrize(
         "shared,readable_by,permission_template",
@@ -119,19 +103,6 @@ class TestAnnotationJSONPresenter:
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation(groupid="NOT WORLD")
-
-    @pytest.fixture
-    def get_formatter(self):
-        def get_formatter(payload=None):
-            # All formatters should have the same interface. We'll pick one at
-            # random to act as an exemplar
-            formatter = create_autospec(
-                AnnotationFlagFormatter, spec_set=True, instance=True
-            )
-            formatter.format.return_value = payload or {}
-            return formatter
-
-        return get_formatter
 
     @pytest.fixture(autouse=True)
     def DocumentJSONPresenter(self, patch):

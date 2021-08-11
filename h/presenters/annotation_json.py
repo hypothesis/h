@@ -13,12 +13,11 @@ from h.traversal import AnnotationContext
 class AnnotationJSONPresenter(AnnotationBasePresenter):
     """Present an annotation in the JSON format returned by API requests."""
 
-    def __init__(self, annotation, links_service, user_service, formatters=None):
+    def __init__(self, annotation, links_service, user_service):
         super().__init__(annotation)
 
         self._links_service = links_service
         self._user_service = user_service
-        self._formatters = tuple(formatters or [])
 
     def asdict(self):
         annotation = deepcopy(self.annotation.extra) or {}
@@ -52,9 +51,6 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
 
         if self.annotation.references:
             annotation["references"] = self.annotation.references
-
-        for formatter in self._formatters:
-            annotation.update(formatter.format(self.annotation))
 
         return annotation
 
