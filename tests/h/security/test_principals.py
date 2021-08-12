@@ -1,28 +1,8 @@
-from unittest.mock import sentinel
-
 import pytest
-from h_matchers import Any
 
 from h.security import Identity
-from h.security.principals import principals_for_identity, principals_for_userid
+from h.security.principals import principals_for_identity
 from h.security.role import Role
-
-
-class TestPrincipalsForUserid:
-    def test_it(self, pyramid_request, user_service, principals_for_identity):
-        result = principals_for_userid(sentinel.userid, pyramid_request)
-
-        user_service.fetch.assert_called_once_with(sentinel.userid)
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs(
-                {"user": user_service.fetch.return_value}
-            )
-        )
-        assert result == principals_for_identity.return_value
-
-    @pytest.fixture
-    def principals_for_identity(self, patch):
-        return patch("h.security.principals.principals_for_identity")
 
 
 class TestPrincipalsForIdentity:

@@ -11,7 +11,6 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.auth.util import default_authority
-from h.security import principals_for_userid
 from h.security.encryption import derive_key
 
 # We export this for the websocket to use as it's main policy
