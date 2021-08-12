@@ -732,9 +732,7 @@ class TestTokenAuthenticationPolicy:
 
         result = TokenAuthenticationPolicy().authenticated_userid(pyramid_request)
 
-        userid = user_service.fetch.return_value.userid
-        principals_for_userid.assert_called_once_with(userid, pyramid_request)
-        assert result is userid
+        assert result is user_service.fetch.return_value.userid
 
     def test_authenticated_userid_returns_None_with_no_user(
         self, pyramid_request, principals_for_userid
