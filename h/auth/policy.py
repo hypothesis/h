@@ -127,139 +127,6 @@ class APIAuthenticationPolicy:
         return forgot
 
 
-@interface.implementer(interfaces.IAuthenticationPolicy)
-class AuthClientPolicy:
-    """
-    An authentication policy for registered AuthClients.
-
-    Auth clients must be registered with grant type `client_credentials` and
-    will need to perform basic HTTP auth with their username and password set
-    to their auth client id, and secret.
-
-    A client can also pass an `X-Forwarded-User` header with the userid to
-    act as user in their authority. This will create a `request.user` and will
-    look like a normal login. This user will have an additional
-    principal, `client:{client_id}@{authority}` which lets you tell it apart
-    from regular users.
-
-    To differentiate between request with a token authenticated user and
-    a request with a forwarded user, the latter has an additional
-    principal, `client:{client_id}@{authority}`.
-    """
-
-    def unauthenticated_userid(self, request):
-        """
-        Return the forwarded userid or the auth_client's id.
-        """
-        if forwarded_userid := self._forwarded_userid(request):
-            return forwarded_userid
-
-        # Get the username from the basic auth header
-        if credentials := extract_http_basic_credentials(request):
-            return credentials.username
-
-        return None
-
-    def authenticated_userid(self, request):
-        """
-        Return the forwarded userid or None if missing or the login is invalid.
-        """
-        if (identity := self.identity(request)) and identity.user:
-            return identity.user.userid
-
-        return None
-
-    def effective_principals(self, request):
-        """
-        Return a list of principals for the request.
-
-        If authentication is unsuccessful then the only principal returned is
-        `Everyone`
-
-        :param request: Pyramid request to check
-        :returns: List of principals
-        """
-        effective_principals = [Everyone]
-
-        if identity := self.identity(request):
-            effective_principals.append(Authenticated)
-            effective_principals.append(identity.auth_client.id)
-            effective_principals.extend(principals_for_identity(identity))
-
-        return effective_principals
-
-    def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
-        """Not implemented for basic auth auth_client policy."""
-        return []
-
-    def forget(self, _request):  # pylint: disable=no-self-use
-        """Not implemented for basic auth auth_client policy."""
-        return []
-
-    def identity(self, request):
-        """Get an Identity object for valid credentials.
-
-        :param request: Pyramid request to inspect
-        :returns: An `Identity` object if the login is authenticated or None
-        """
-        # Credentials are required
-        auth_client = self._get_auth_client(request)
-        if not auth_client:
-            return None
-
-        user = None
-        if forwarded_userid := self._forwarded_userid(request):
-            # If we have a forwarded user it must be valid
-            try:
-                user = request.find_service(name="user").fetch(forwarded_userid)
-            except InvalidUserId:
-                return None
-
-            if not user:
-                return None
-
-            # If you forward a user it must exist and match your authority
-            if not user or user.authority != auth_client.authority:
-                return None
-
-        return Identity(auth_client=auth_client, user=user)
-
-    @classmethod
-    def _get_auth_client(cls, request):
-        """Get a matching auth client if the credentials are valid."""
-
-        credentials = extract_http_basic_credentials(request)
-        if not credentials:
-            return None
-
-        # It is important not to include the secret as part of the SQL query
-        # because the resulting code may be subject to a timing attack.
-        try:
-            auth_client = request.db.query(AuthClient).get(credentials.username)
-        except StatementError:
-            # The auth client id is malformed
-            return None
-
-        if auth_client is None:
-            return None
-        if auth_client.secret is None:
-            return None
-        if auth_client.grant_type != GrantType.client_credentials:
-            return None
-
-        # We fetch the auth_client by its ID and then do a constant-time
-        # comparison of the secret with that provided in the request.
-        if not hmac.compare_digest(auth_client.secret, credentials.password):
-            return None
-
-        return auth_client
-
-    @staticmethod
-    def _forwarded_userid(request):
-        """Return forwarded userid or None."""
-        return request.headers.get("X-Forwarded-User", None)
-
-
 class IdentityBasedPolicy:
     @classmethod
     def identity(cls, request) -> Optional[Identity]:
@@ -298,11 +165,27 @@ class IdentityBasedPolicy:
         return self.authenticated_userid(request)
 
     def effective_principals(self, request):
+        """
+        Return a list of principals for the request.
+
+        If authentication is unsuccessful then the only principal returned is
+        `Everyone`
+
+        :param request: Pyramid request to check
+        :returns: List of principals
+        """
         effective_principals = [Everyone]
 
         if identity := self.identity(request):
             effective_principals.append(Authenticated)
-            effective_principals.append(identity.user.userid)
+
+            # This is very suspicious to me. I think we probably want both of
+            # these
+            if identity.auth_client:
+                effective_principals.append(identity.auth_client.id)
+            else:
+                effective_principals.append(identity.user.userid)
+
             effective_principals.extend(principals_for_identity(identity))
 
         return effective_principals
@@ -312,6 +195,99 @@ class IdentityBasedPolicy:
 
     def forget(self, _request):  # pylint: disable=no-self-use
         return []
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class AuthClientPolicy(IdentityBasedPolicy):
+    """
+    An authentication policy for registered AuthClients.
+
+    Auth clients must be registered with grant type `client_credentials` and
+    will need to perform basic HTTP auth with their username and password set
+    to their auth client id, and secret.
+
+    A client can also pass an `X-Forwarded-User` header with the userid to
+    act as user in their authority. This will create a `request.user` and will
+    look like a normal login. This user will have an additional
+    principal, `client:{client_id}@{authority}` which lets you tell it apart
+    from regular users.
+    """
+
+    def unauthenticated_userid(self, request):
+        """Return the forwarded userid or the auth_client's id."""
+
+        if forwarded_userid := self._forwarded_userid(request):
+            return forwarded_userid
+
+        # Get the username from the basic auth header
+        if credentials := extract_http_basic_credentials(request):
+            return credentials.username
+
+        return None
+
+    def identity(self, request):
+        """
+        Get an Identity object for valid credentials.
+
+        :param request: Pyramid request to inspect
+        :returns: An `Identity` object if the login is authenticated or None
+        """
+        # Credentials are required
+        auth_client = self._get_auth_client(request)
+        if not auth_client:
+            return None
+
+        user = None
+        if forwarded_userid := self._forwarded_userid(request):
+            # If we have a forwarded user it must be valid
+            try:
+                user = request.find_service(name="user").fetch(forwarded_userid)
+            except InvalidUserId:
+                return None
+
+            # If you forward a user it must exist and match your authority
+            if not user or user.authority != auth_client.authority:
+                return None
+
+        return Identity(auth_client=auth_client, user=user)
+
+    @classmethod
+    def _get_auth_client(cls, request):
+        """Get a matching auth client if the credentials are valid."""
+
+        credentials = extract_http_basic_credentials(request)
+        if not credentials:
+            return None
+
+        # It is important not to include the secret as part of the SQL query
+        # because the resulting code may be subject to a timing attack.
+        try:
+            auth_client = request.db.query(AuthClient).get(credentials.username)
+        except StatementError:
+            # The auth client id is malformed
+            return None
+
+        if (
+            # The client must exist
+            auth_client is None
+            # Have a secret to compare with
+            or auth_client.secret is None
+            # And be the correct type
+            or auth_client.grant_type != GrantType.client_credentials
+        ):
+            return None
+
+        # We fetch the auth_client by its ID and then do a constant-time
+        # comparison of the secret with that provided in the request.
+        if not hmac.compare_digest(auth_client.secret, credentials.password):
+            return None
+
+        return auth_client
+
+    @staticmethod
+    def _forwarded_userid(request):
+        """Return forwarded userid or None."""
+        return request.headers.get("X-Forwarded-User", None)
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
