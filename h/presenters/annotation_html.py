@@ -14,14 +14,6 @@ class AnnotationHTMLPresenter:
         else:
             self.document = None
 
-    def _get_selection(self):
-        selectors = self.annotation.target_selectors
-        for selector in selectors:
-            if "exact" in selector:
-                return selector["exact"]
-
-        return None
-
     @property
     def uri(self):
         return jinja2.escape(self.annotation.target_uri)
@@ -157,3 +149,11 @@ class AnnotationHTMLPresenter:
     @property
     def tags(self):
         return self.annotation.tags
+
+    def _get_selection(self):
+        selectors = self.annotation.target_selectors
+        for selector in selectors:
+            if "exact" in selector:
+                return selector["exact"]
+
+        return None
