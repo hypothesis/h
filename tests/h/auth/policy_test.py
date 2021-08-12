@@ -407,149 +407,76 @@ class TestAPIAuthenticationPolicy:
         return pyramid_request
 
 
+@pytest.mark.usefixtures("user_service")
 class TestAuthClientAuthenticationPolicy:
-    def test_it_instantiates_a_BasicAuthAuthenticationPolicy(
-        self, BasicAuthAuthenticationPolicy
-    ):
-        AuthClientPolicy()
+    def test_unauthenticated_userid(self, pyramid_request):
+        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
 
-        BasicAuthAuthenticationPolicy.assert_called_once_with(
-            check=AuthClientPolicy.check
-        )
+        userid = AuthClientPolicy().unauthenticated_userid(pyramid_request)
 
-    def test_unauthenticated_userid_returns_forwarded_user_if_present(
-        self, auth_policy, pyramid_request
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = "filbert"
+        assert userid == "forwarded-user"
 
-        userid = auth_policy.unauthenticated_userid(pyramid_request)
-
-        assert userid == "filbert"
-
+    @pytest.mark.usefixtures("with_auth_client_credentials")
     def test_unauthenticated_userid_returns_clientid_if_no_forwarded_user(
-        self, auth_policy, pyramid_request, auth_client
+        self, pyramid_request, auth_client
     ):
-        userid = auth_policy.unauthenticated_userid(pyramid_request)
+        userid = AuthClientPolicy().unauthenticated_userid(pyramid_request)
 
         assert userid == auth_client.id
 
-    def test_unauthenticated_userid_proxies_to_basic_auth_if_no_forwarded_user(
-        self, pyramid_request, BasicAuthAuthenticationPolicy
+    @pytest.mark.usefixtures("with_auth_client_credentials")
+    def test_authenticated_userid(self, pyramid_request):
+        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
+
+        userid = AuthClientPolicy().unauthenticated_userid(pyramid_request)
+
+        assert userid == "forwarded-user"
+
+    @pytest.mark.usefixtures("with_auth_client_credentials")
+    def test_authenticated_userid_returns_None_with_no_forwarded_user(
+        self, pyramid_request
     ):
-        auth_policy = AuthClientPolicy()
-        unauth_id = auth_policy.unauthenticated_userid(pyramid_request)
+        pyramid_request.headers["X-Forwarded-User"] = None
 
-        BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.assert_called_once_with(
-            pyramid_request
-        )
-        assert (
-            unauth_id
-            == BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.return_value
-        )
-
-    def test_unauthenticated_userid_doesnt_proxy_to_basic_auth_if_forwarded_user(
-        self, pyramid_request, BasicAuthAuthenticationPolicy
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = "dingbat"
-        auth_policy = AuthClientPolicy()
-
-        auth_policy.unauthenticated_userid(pyramid_request)
-
-        assert not (
-            BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.call_count
-        )
-
-    def test_authenticated_userid_returns_None_if_no_forwarded_userid(
-        self, auth_policy, pyramid_request
-    ):
-        userid = auth_policy.authenticated_userid(pyramid_request)
+        userid = AuthClientPolicy().authenticated_userid(pyramid_request)
 
         assert userid is None
 
-    def test_authenticated_userid_proxies_to_basic_auth_policy_if_forwarded_user(
-        self, pyramid_request, BasicAuthAuthenticationPolicy
+    @pytest.mark.usefixtures("with_auth_client_credentials")
+    def test_effective_principals(
+        self, pyramid_request, principals_for_identity, auth_client
     ):
-        pyramid_request.headers["X-Forwarded-User"] = "dingbat"
-        auth_policy = AuthClientPolicy()
-        auth_policy.authenticated_userid(pyramid_request)
+        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
+        principals_for_identity.return_value = ["principal"]
 
-        BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.assert_called_once_with(
-            pyramid_request
-        )
-        BasicAuthAuthenticationPolicy.return_value.callback.assert_called_once_with(
-            BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.return_value,
-            pyramid_request,
-        )
+        principals = AuthClientPolicy().effective_principals(pyramid_request)
 
-    def test_authenticated_userid_does_not_proxy_if_no_forwarded_user(
-        self, pyramid_request, BasicAuthAuthenticationPolicy
+        expected_principals = [
+            Everyone,
+            Authenticated,
+            "principal",
+            # Is this intended or useful behavior? Or just what we got from
+            # the base policy?
+            auth_client.id,
+        ]
+        assert principals == Any.list.containing(expected_principals).only()
+
+    @pytest.mark.usefixtures("with_auth_client_credentials")
+    def test_effective_principals_when_check_returns_None(
+        self, pyramid_request, principals_for_identity, auth_client
     ):
-        auth_policy = AuthClientPolicy()
-        auth_policy.authenticated_userid(pyramid_request)
+        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
+        principals_for_identity.return_value = None
 
-        assert not (
-            BasicAuthAuthenticationPolicy.return_value.unauthenticated_userid.call_count
-        )
-        assert not BasicAuthAuthenticationPolicy.return_value.callback.call_count
+        principals = AuthClientPolicy().effective_principals(pyramid_request)
 
-    def test_authenticated_userid_returns_userid_if_callback_ok(
-        self, auth_policy, pyramid_request
-    ):
-        # check callback is mocked to return [], which is "OK"
-        pyramid_request.headers["X-Forwarded-User"] = "dingbat"
+        assert principals == [Everyone]
 
-        userid = auth_policy.authenticated_userid(pyramid_request)
+    def test_forget_does_nothing(self, pyramid_request):
+        assert AuthClientPolicy().forget(pyramid_request) == []
 
-        assert userid == "dingbat"
-
-    def test_authenticated_userid_returns_None_if_callback_not_OK(
-        self, check, pyramid_request
-    ):
-        check.return_value = None
-        policy = AuthClientPolicy(check=check)
-
-        pyramid_request.headers["X-Forwarded-User"] = "dingbat"
-
-        userid = policy.authenticated_userid(pyramid_request)
-
-        assert userid is None
-
-    def test_effective_principals_proxies_to_basic_auth(
-        self, pyramid_request, check, BasicAuthAuthenticationPolicy
-    ):
-        auth_policy = AuthClientPolicy()
-        auth_policy.effective_principals(pyramid_request)
-
-        BasicAuthAuthenticationPolicy.return_value.effective_principals.assert_called_once_with(
-            pyramid_request
-        )
-
-    def test_effective_principals_returns_list_containing_callback_return_value(
-        self, pyramid_request, check
-    ):
-        check.return_value = ["foople", "blueberry"]
-        policy = AuthClientPolicy(check=check)
-
-        principals = policy.effective_principals(pyramid_request)
-
-        assert "foople" in principals
-        assert "blueberry" in principals
-
-    def test_effective_principals_returns_only_Everyone_if_callback_returns_None(
-        self, pyramid_request, check
-    ):
-        check.return_value = None
-        policy = AuthClientPolicy(check=check)
-
-        principals = policy.effective_principals(pyramid_request)
-
-        assert principals == ["system.Everyone"]
-
-    def test_forget_does_nothing(self, auth_policy, pyramid_request):
-        assert auth_policy.forget(pyramid_request) == []
-
-    def test_remember_does_nothing(self, auth_policy, pyramid_request):
-        assert auth_policy.remember(pyramid_request, "whoever") == []
+    def test_remember_does_nothing(self, pyramid_request):
+        assert AuthClientPolicy().remember(pyramid_request, "whoever") == []
 
     def test_check(
         self, pyramid_request, verify_auth_client, user_service, principals_for_identity
@@ -636,24 +563,11 @@ class TestAuthClientAuthenticationPolicy:
         return verify_auth_client
 
     @pytest.fixture
-    def check(self):
-        check = mock.create_autospec(
-            AuthClientPolicy.check, spec_set=True, instance=True
-        )
-        check.return_value = []
-        return check
-
-    @pytest.fixture
     def auth_client(self, factories):
         return factories.ConfidentialAuthClient(authority="one.com")
 
     @pytest.fixture
-    def auth_policy(self, check):
-        auth_policy = AuthClientPolicy(check=check)
-        return auth_policy
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request, auth_client):
+    def with_auth_client_credentials(self, pyramid_request, auth_client):
         user_pass = "{client_id}:{client_secret}".format(
             client_id=auth_client.id, client_secret=auth_client.secret
         )
@@ -661,11 +575,6 @@ class TestAuthClientAuthenticationPolicy:
         pyramid_request.headers["Authorization"] = "Basic {creds}".format(
             creds=encoded.decode("ascii")
         )
-        return pyramid_request
-
-    @pytest.fixture
-    def BasicAuthAuthenticationPolicy(self, patch):
-        return patch("h.auth.policy.BasicAuthAuthenticationPolicy")
 
 
 class TestIdentityBasedPolicy:
