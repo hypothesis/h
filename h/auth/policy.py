@@ -1,10 +1,7 @@
 from typing import Optional
 
 from pyramid import interfaces
-from pyramid.authentication import (
-    BasicAuthAuthenticationPolicy,
-    extract_http_basic_credentials,
-)
+from pyramid.authentication import extract_http_basic_credentials
 from pyramid.security import Authenticated, Everyone
 from zope import interface
 
@@ -233,9 +230,40 @@ class AuthClientPolicy:
                 from a successful authentication
         """
 
-        return BasicAuthAuthenticationPolicy(check=self.check).effective_principals(
-            request
-        )
+        effective_principals = [Everyone]
+        # The parent has this but in our case we do something different?
+        # userid = self.unauthenticated_userid(request)
+        userid, _password = extract_http_basic_credentials(request)
+
+        if userid is None:
+            return effective_principals
+
+        if userid in (Authenticated, Everyone):
+            return effective_principals
+
+        if self.callback is None:
+            groups = []
+        else:
+            groups = self.callback(userid, request)
+
+        if groups is None:  # is None!
+            return effective_principals
+
+        effective_principals.append(Authenticated)
+        effective_principals.append(userid)
+        effective_principals.extend(groups)
+
+        return effective_principals
+
+    def callback(self, username, request):
+        # Username arg is ignored. Unfortunately
+        # extract_http_basic_credentials winds up getting called twice when
+        # authenticated_userid is called. Avoiding that, however,
+        # winds up duplicating logic from the superclass.
+        credentials = extract_http_basic_credentials(request)
+        if credentials:
+            username, password = credentials
+            return self.check(username, password, request)
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for basic auth client policy."""
