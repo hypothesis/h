@@ -95,7 +95,7 @@ class TestJWTAuthorizationGrantValidateTokenRequest:
         assert oauth_request.client_id == authclient.id
 
     def test_raises_for_missing_assertion(self, grant, oauth_request):
-        del oauth_request._params["assertion"]
+        del oauth_request._params["assertion"]  # pylint:disable=protected-access
 
         with pytest.raises(errors.InvalidRequestFatalError) as exc:
             grant.validate_token_request(oauth_request)

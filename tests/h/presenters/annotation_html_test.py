@@ -63,7 +63,7 @@ class TestAnnotationHTMLPresenter:
         [(None, Markup("")), ("", Markup("")), ("text", Markup("text"))],
     )
     def test_text_rendered(self, annotation, presenter, value, expected):
-        annotation._text_rendered = value
+        annotation._text_rendered = value  # pylint:disable=protected-access
 
         assert presenter.text_rendered == expected
 
@@ -92,7 +92,7 @@ class TestAnnotationHTMLPresenter:
         _ = presenter.hostname_or_filename
         _ = presenter.href
         _ = presenter.link_text
-        _ = presenter.title  # pylint:disable=redefined-variable-type
+        _ = presenter.title  # pylint: disable=redefined-variable-type
 
         DocumentHTMLPresenter.assert_not_called()
 

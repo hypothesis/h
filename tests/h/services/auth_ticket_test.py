@@ -131,6 +131,7 @@ class TestAuthTicketService:
     def test_add_ticket_caches_the_userid(self, svc, db_session, user):
         svc.usersvc.fetch.return_value = user
 
+        # pylint:disable=protected-access
         assert svc._userid is None
         svc.add_ticket(user.userid, "the-ticket-id")
         assert svc._userid == user.userid
@@ -158,6 +159,7 @@ class TestAuthTicketService:
     def test_remove_ticket_clears_userid_cache(self, svc, ticket):
         svc.verify_ticket(ticket.user_userid, ticket.id)
 
+        # pylint:disable=protected-access
         assert svc._userid is not None
         svc.remove_ticket(ticket.id)
         assert svc._userid is None

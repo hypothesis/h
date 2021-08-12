@@ -176,7 +176,7 @@ class TestCreateAnnotation:
     ):
         annotation = storage.create_annotation(pyramid_request, annotation_data)
 
-        search_index._queue.add_by_id.assert_called_once_with(
+        search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
             annotation.id, tag="storage.create_annotation", schedule_in=60
         )
 
@@ -345,7 +345,7 @@ class TestUpdateAnnotation:
     ):
         storage.update_annotation(pyramid_request, annotation.id, {})
 
-        search_index._queue.add_by_id.assert_called_once_with(
+        search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
             annotation.id, tag="storage.update_annotation", schedule_in=60
         )
 
@@ -356,14 +356,18 @@ class TestUpdateAnnotation:
 
 class TestValidateGroupScope:
     def test_it_allows_matching_scopes(self, pyramid_request, scoped_group):
-        storage._validate_group_scope(scoped_group, "http://inscope.example.com")
+        storage._validate_group_scope(  # pylint:disable=protected-access
+            scoped_group, "http://inscope.example.com"
+        )
 
     def test_it_allows_mismatching_scopes_if_a_group_has_no_scopes(
         self, pyramid_request, scoped_group, url_in_scope
     ):
         scoped_group.scopes = []
 
-        storage._validate_group_scope(scoped_group, "http://not-inscope.example.com")
+        storage._validate_group_scope(  # pylint:disable=protected-access
+            scoped_group, "http://not-inscope.example.com"
+        )
 
         url_in_scope.assert_not_called()
 
@@ -372,7 +376,9 @@ class TestValidateGroupScope:
     ):
         scoped_group.enforce_scope = False
 
-        storage._validate_group_scope(scoped_group, "http://not-inscope.example.com")
+        storage._validate_group_scope(  # pylint:disable=protected-access
+            scoped_group, "http://not-inscope.example.com"
+        )
 
         url_in_scope.assert_not_called()
 
@@ -382,7 +388,7 @@ class TestValidateGroupScope:
         url_in_scope.return_value = False
 
         with pytest.raises(ValidationError):
-            storage._validate_group_scope(
+            storage._validate_group_scope(  # pylint:disable=protected-access
                 scoped_group, "http://not-inscope.example.com"
             )
 

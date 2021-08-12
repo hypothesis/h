@@ -31,7 +31,9 @@ class TestBatchIndexer:
         )
 
         assert (
-            indexer._target_index == target_index if target_index else es_client.index
+            indexer._target_index == target_index  # pylint:disable=protected-access
+            if target_index
+            else es_client.index
         )
 
     def test_it_indexes_specific_annotations(

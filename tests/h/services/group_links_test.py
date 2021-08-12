@@ -33,7 +33,7 @@ class TestGroupLinksFactory:
 
         svc = group_links_factory(None, pyramid_request)
 
-        assert svc._default_authority == "bar.com"
+        assert svc._default_authority == "bar.com"  # pylint:disable=protected-access
 
 
 @pytest.fixture

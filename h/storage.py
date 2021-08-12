@@ -189,11 +189,9 @@ def update_annotation(request, id_, data):
             updated=annotation.updated,
         )
 
-    request.find_service(
+    request.find_service(  # pylint: disable=protected-access
         name="search_index"
-    )._queue.add_by_id(  # pylint: disable=protected-access
-        annotation.id, tag="storage.update_annotation", schedule_in=60
-    )
+    )._queue.add_by_id(annotation.id, tag="storage.update_annotation", schedule_in=60)
 
     return annotation
 

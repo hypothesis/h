@@ -18,7 +18,9 @@ class TestFlagServiceFlagged:
     def test_it_uses_the_cache_if_possible(self, svc, user, annotation):
         assert not svc.flagged(user, annotation)
 
-        svc._flagged_cache[(user.id, annotation.id)] = True
+        svc._flagged_cache[  # pylint:disable=protected-access
+            (user.id, annotation.id)
+        ] = True
 
         assert svc.flagged(user, annotation)
 
@@ -29,7 +31,7 @@ class TestFlagServiceFlagged:
         all_flagged = svc.all_flagged(user, annotation_ids)
 
         assert all_flagged == {flag.annotation_id}
-        assert svc._flagged_cache == {
+        assert svc._flagged_cache == {  # pylint:disable=protected-access
             (user.id, noise[0].annotation_id): False,
             (user.id, noise[1].annotation_id): False,
             (user.id, flag.annotation_id): True,
@@ -99,7 +101,7 @@ class TestFlagServiceCount:
         assert svc.flag_count(flagged) == 2
 
     def test_flag_count_uses_the_cache(self, svc, flagged):
-        svc._flag_count_cache[flagged.id] = 99999
+        svc._flag_count_cache[flagged.id] = 99999  # pylint:disable=protected-access
 
         assert svc.flag_count(flagged) == 99999
 
@@ -108,7 +110,9 @@ class TestFlagServiceCount:
 
         flag_counts = svc.flag_counts(ann_ids)
 
-        assert flag_counts == svc._flag_count_cache == {flagged.id: 2, unflagged.id: 0}
+        assert (  # pylint:disable=protected-access
+            flag_counts == svc._flag_count_cache == {flagged.id: 2, unflagged.id: 0}
+        )
 
     def test_flag_counts_returns_empty_dict_for_no_ids(self, svc):
         assert svc.flag_counts([]) == {}
