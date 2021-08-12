@@ -1,130 +1,91 @@
 import datetime
-from unittest import mock
 
-import jinja2
 import pytest
+from jinja2 import Markup
 
 from h.presenters.annotation_html import AnnotationHTMLPresenter
 
 
 class TestAnnotationHTMLPresenter:
-    def _annotation(self, annotation=None, **kwargs):
-        """
-        Return an AnnotationHTMLPresenter for the given annotation.
+    def test_uri_is_escaped(self, annotation, presenter):
+        annotation.target_uri = "http://<markup v='q' v2=\"q2\">"
 
-        If no annotation is given a mock will be used, and any keyword
-        arguments will be forwarded to the mock.Mock() constructor.
+        uri = presenter.uri
 
-        """
-        return AnnotationHTMLPresenter(annotation or mock.Mock(**kwargs))
+        assert uri == Markup("http://&lt;markup v=&#39;q&#39; v2=&#34;q2&#34;&gt;")
 
-    def test_uri_is_escaped(self):
-        spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
+    def test_quote(self, annotation, presenter):
+        annotation.target_selectors = [
+            {"decoy": 1},
+            # We pick the first selector with "exact" and escape it
+            {"exact": "<selected text>"},
+            {"decoy": 2},
+        ]
 
-        uri = self._annotation(target_uri="http://</a>" + spam_link).uri
+        assert presenter.quote == Markup("&lt;selected text&gt;")
 
-        assert jinja2.escape(spam_link) in uri
-        for char in ["<", ">", '"', "'"]:
-            assert char not in uri
+    def test_username(self, annotation, presenter):
+        annotation.userid = "acct:jdoe@hypothes.is"
 
-    def test_uri_returns_Markup(self):
-        assert isinstance(
-            self._annotation(target_uri="http://foo.com").uri, jinja2.Markup
-        )
+        assert presenter.username == "jdoe"
 
-    def test_quote(self):
-        annotation = self._annotation(
-            annotation=mock.Mock(
-                target_selectors=[{"exact": "selected text"}], text="entered text"
-            )
-        )
+    def test_shared(self, annotation, presenter):
+        assert presenter.shared == annotation.shared
 
-        assert annotation.quote == ("selected text")
-
-    def test_username(self):
-        annotation = self._annotation(
-            annotation=mock.Mock(userid="acct:jdoe@hypothes.is")
-        )
-
-        assert annotation.username == ("jdoe")
-
-    def test_shared(self):
-        annotation = self._annotation(annotation=mock.Mock())
-
-        assert annotation.shared == annotation.annotation.shared
-
-    def test_tags(self):
-        annotation = self._annotation(annotation=mock.Mock())
-
-        assert annotation.tags == annotation.annotation.tags
+    def test_tags(self, annotation, presenter):
+        assert presenter.tags == annotation.tags
 
     @pytest.mark.parametrize(
         "value,expected",
         [
-            (None, jinja2.Markup("")),
-            ("", jinja2.Markup("")),
-            ("donkeys with umbrellas", jinja2.Markup("donkeys with umbrellas")),
+            (None, Markup("")),
+            ("", Markup("")),
+            ("donkeys with umbrellas", Markup("donkeys with umbrellas")),
         ],
     )
-    def test_text_rendered(self, value, expected):
-        annotation = self._annotation(annotation=mock.Mock(text_rendered=value))
+    def test_text_rendered(self, annotation, presenter, value, expected):
+        annotation._text_rendered = value
 
-        assert annotation.text_rendered == expected
+        assert presenter.text_rendered == expected
 
-    def test_description(self):
-        annotation = self._annotation(
-            annotation=mock.Mock(
-                target_selectors=[{"exact": "selected text"}], text="entered text"
-            )
+    def test_description(self, annotation, presenter):
+        annotation.target_selectors = [{"exact": "selected text"}]
+        annotation.text = "entered text"
+
+        assert presenter.description == (
+            f"&lt;blockquote&gt;selected text&lt;/blockquote&gt;entered text"
         )
 
-        assert annotation.description == (
-            "&lt;blockquote&gt;selected text&lt;/blockquote&gt;entered text"
-        )
+    def test_created_day_string_from_annotation(self, annotation, presenter):
+        annotation.created = datetime.datetime(2015, 9, 4, 17, 37, 49, 517852)
 
-    def test_created_day_string_from_annotation(self):
-        annotation = self._annotation(
-            annotation=mock.Mock(
-                created=datetime.datetime(2015, 9, 4, 17, 37, 49, 517852)
-            )
-        )
-        assert annotation.created_day_string == "2015-09-04"
+        assert presenter.created_day_string == "2015-09-04"
 
-    def test_it_does_not_crash_when_annotation_has_no_document(self):
-        annotation = mock.Mock(document=None)
-        presenter = AnnotationHTMLPresenter(annotation)
-
-        # Some AnnotationHTMLPresenter properties rely on the annotation's
-        # document. Call them all to make sure that none of them crash when
-        # the document is None.
-        # pylint: disable=pointless-statement
-        presenter.document_link
-        presenter.hostname_or_filename
-        presenter.href
-        presenter.link_text
-        presenter.title
-
-    @mock.patch("h.presenters.annotation_html.DocumentHTMLPresenter")
     def test_it_does_not_init_DocumentHTMLPresenter_if_no_document(
-        self, DocumentHTMLPresenter
+        self, annotation, presenter, DocumentHTMLPresenter
     ):
-        """
-        It shouldn't init DocumentHTMLPresenter if document is None.
-
-        We don't want DocumentHTMLPresenter to be initialized with None for
-        a document, so make sure that AnnotationHTMLPresenter doesn't do so.
-
-        """
-        annotation = mock.Mock(document=None)
-        presenter = AnnotationHTMLPresenter(annotation)
+        annotation.document = None
 
         # Call all these as well to make sure that none of them cause a
         # DocumentHTMLPresenter to be initialized.
-        # pylint: disable=pointless-statement
-        presenter.document_link
-        presenter.hostname_or_filename
-        presenter.href
-        presenter.link_text
-        presenter.title
+        _ = presenter.document_link
+        _ = presenter.hostname_or_filename
+        _ = presenter.href
+        _ = presenter.link_text
+        _ = presenter.title
 
-        assert not DocumentHTMLPresenter.called
+        #  We don't want DocumentHTMLPresenter to be initialized with None for
+        #  a document, so make sure that AnnotationHTMLPresenter doesn't do so.
+        DocumentHTMLPresenter.assert_not_called()
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation.build()
+
+    @pytest.fixture
+    def presenter(self, annotation):
+        return AnnotationHTMLPresenter(annotation)
+
+    @pytest.fixture
+    def DocumentHTMLPresenter(self, patch):
+        return patch("h.presenters.annotation_html.DocumentHTMLPresenter")
