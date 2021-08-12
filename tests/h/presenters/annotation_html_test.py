@@ -24,24 +24,43 @@ class TestAnnotationHTMLPresenter:
 
         assert presenter.quote == Markup("&lt;selected text&gt;")
 
+    def test_quote_with_no_selector(self, annotation, presenter):
+        annotation.target_selectors = []
+
+        assert presenter.quote == ""
+
     def test_username(self, annotation, presenter):
         annotation.userid = "acct:jdoe@hypothes.is"
 
         assert presenter.username == "jdoe"
 
-    def test_shared(self, annotation, presenter):
-        assert presenter.shared == annotation.shared
+    @pytest.mark.parametrize(
+        "method", ("id", "created", "updated", "userid", "shared", "tags")
+    )
+    def test_annotation_proxies(self, annotation, presenter, method):
+        assert getattr(presenter, method) == getattr(annotation, method)
 
-    def test_tags(self, annotation, presenter):
-        assert presenter.tags == annotation.tags
+    @pytest.mark.parametrize(
+        "method,proxied_method",
+        (
+            ("document_link", "link"),
+            ("filename", "filename"),
+            ("hostname_or_filename", "hostname_or_filename"),
+            ("href", "href"),
+            ("link_text", "link_text"),
+            ("title", "title"),
+        ),
+    )
+    def test_document_proxies(self, annotation, presenter, method, proxied_method):
+        # Note that the "document" here is actually a `DocumentHTMLPresenter`
+        assert getattr(presenter, method) == getattr(presenter.document, proxied_method)
+
+        presenter.document = None
+        assert getattr(presenter, method) == ""
 
     @pytest.mark.parametrize(
         "value,expected",
-        [
-            (None, Markup("")),
-            ("", Markup("")),
-            ("donkeys with umbrellas", Markup("donkeys with umbrellas")),
-        ],
+        [(None, Markup("")), ("", Markup("")), ("text", Markup("text"))],
     )
     def test_text_rendered(self, annotation, presenter, value, expected):
         annotation._text_rendered = value
@@ -49,11 +68,11 @@ class TestAnnotationHTMLPresenter:
         assert presenter.text_rendered == expected
 
     def test_description(self, annotation, presenter):
-        annotation.target_selectors = [{"exact": "selected text"}]
-        annotation.text = "entered text"
+        annotation.target_selectors = [{"exact": "TARGET_SELECTOR"}]
+        annotation.text = "TEXT"
 
         assert presenter.description == (
-            f"&lt;blockquote&gt;selected text&lt;/blockquote&gt;entered text"
+            "&lt;blockquote&gt;TARGET_SELECTOR&lt;/blockquote&gt;TEXT"
         )
 
     def test_created_day_string_from_annotation(self, annotation, presenter):
@@ -62,9 +81,10 @@ class TestAnnotationHTMLPresenter:
         assert presenter.created_day_string == "2015-09-04"
 
     def test_it_does_not_init_DocumentHTMLPresenter_if_no_document(
-        self, annotation, presenter, DocumentHTMLPresenter
+        self, annotation, DocumentHTMLPresenter
     ):
         annotation.document = None
+        presenter = AnnotationHTMLPresenter(annotation)
 
         # Call all these as well to make sure that none of them cause a
         # DocumentHTMLPresenter to be initialized.
@@ -74,8 +94,6 @@ class TestAnnotationHTMLPresenter:
         _ = presenter.link_text
         _ = presenter.title
 
-        #  We don't want DocumentHTMLPresenter to be initialized with None for
-        #  a document, so make sure that AnnotationHTMLPresenter doesn't do so.
         DocumentHTMLPresenter.assert_not_called()
 
     @pytest.fixture
