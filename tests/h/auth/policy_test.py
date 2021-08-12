@@ -700,7 +700,6 @@ class TestTokenAuthenticationPolicy:
     def test_unauthenticated_userid_returns_None_for_invalid_token(
         self, pyramid_request, auth_token_service
     ):
-
         auth_token_service.validate.return_value = None
 
         assert (
@@ -711,10 +710,9 @@ class TestTokenAuthenticationPolicy:
         self, pyramid_request, auth_token_service, principals_for_userid
     ):
         principals_for_userid.return_value = ["principal"]
-        policy = TokenAuthenticationPolicy(callback=principals_for_userid)
-        pyramid_request.auth_token = "valid123"
+        pyramid_request.auth_token = sentinel.auth_token
 
-        result = policy.authenticated_userid(pyramid_request)
+        result = TokenAuthenticationPolicy().authenticated_userid(pyramid_request)
 
         userid = auth_token_service.validate.return_value.userid
         principals_for_userid.assert_called_once_with(userid, pyramid_request)
@@ -724,9 +722,8 @@ class TestTokenAuthenticationPolicy:
         self, pyramid_request, principals_for_userid
     ):
         principals_for_userid.return_value = None
-        policy = TokenAuthenticationPolicy(callback=principals_for_userid)
 
-        result = policy.authenticated_userid(pyramid_request)
+        result = TokenAuthenticationPolicy().authenticated_userid(pyramid_request)
 
         assert result is None
 
@@ -734,10 +731,9 @@ class TestTokenAuthenticationPolicy:
         self, pyramid_request, auth_token_service, principals_for_userid
     ):
         principals_for_userid.return_value = ["principal"]
-        policy = TokenAuthenticationPolicy(callback=principals_for_userid)
-        pyramid_request.auth_token = "valid123"
+        pyramid_request.auth_token = sentinel.auth_token
 
-        result = policy.effective_principals(pyramid_request)
+        result = TokenAuthenticationPolicy().effective_principals(pyramid_request)
 
         assert result == [
             Everyone,
@@ -746,6 +742,6 @@ class TestTokenAuthenticationPolicy:
             "principal",
         ]
 
-    @pytest.fixture
-    def principals_for_userid(self):
-        return create_autospec(principals_for_userid)
+    @pytest.fixture(autouse=True)
+    def principals_for_userid(self, patch):
+        return patch("h.auth.policy.principals_for_userid")

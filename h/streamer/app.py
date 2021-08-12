@@ -2,6 +2,7 @@ import os
 
 import pyramid
 
+from h.auth import TokenAuthenticationPolicy
 from h.config import configure
 from h.sentry_filters import SENTRY_FILTERS
 from h.streamer.worker import log
@@ -26,7 +27,7 @@ def create_app(_global_config, **settings):
 
     config.include("h.auth")
     # Override the default authentication policy.
-    config.set_authentication_policy("h.auth.TOKEN_POLICY")
+    config.set_authentication_policy(TokenAuthenticationPolicy())
 
     config.include("h.authz")
     config.include("h.db")
