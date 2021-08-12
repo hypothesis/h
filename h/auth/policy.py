@@ -1,11 +1,14 @@
 from pyramid import interfaces
-from pyramid.authentication import BasicAuthAuthenticationPolicy
+from pyramid.authentication import (
+    BasicAuthAuthenticationPolicy,
+    RemoteUserAuthenticationPolicy,
+)
 from pyramid.security import Authenticated, Everyone
 from zope import interface
 
 from h.auth import util
 from h.exceptions import InvalidUserId
-from h.security import Identity, principals_for_identity
+from h.security import Identity, principals_for_identity, principals_for_userid
 
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
@@ -376,6 +379,14 @@ class TokenAuthenticationPolicy:
     @staticmethod
     def _is_ws_request(request):
         return request.path == "/ws"
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class RemoteUserAuthPolicy(RemoteUserAuthenticationPolicy):
+    def __init__(self):
+        super().__init__(
+            environ_key="HTTP_X_FORWARDED_USER", callback=principals_for_userid
+        )
 
 
 def _is_api_request(request):
