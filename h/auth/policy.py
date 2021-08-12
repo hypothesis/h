@@ -1,14 +1,11 @@
 from pyramid import interfaces
-from pyramid.authentication import (
-    BasicAuthAuthenticationPolicy,
-    RemoteUserAuthenticationPolicy,
-)
+from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.security import Authenticated, Everyone
 from zope import interface
 
 from h.auth import util
 from h.exceptions import InvalidUserId
-from h.security import Identity, principals_for_identity, principals_for_userid
+from h.security import Identity, principals_for_identity
 
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
@@ -382,14 +379,36 @@ class TokenAuthenticationPolicy:
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class RemoteUserAuthPolicy(CallbackAuthenticationPolicy):
-    def __init__(self):
-        self.environ_key = "HTTP_X_FORWARDED_USER"
-        self.callback = principals_for_userid
+class RemoteUserAuthenticationPolicy:
+    """An authentication policy which blindly trusts a header."""
 
     def unauthenticated_userid(self, request):
-        """ The ``REMOTE_USER`` value found within the ``environ``."""
-        return request.environ.get(self.environ_key)
+        return request.environ.get("HTTP_X_FORWARDED_USER")
+
+    def identity(self, request):
+        user = request.find_service(name="user").fetch(
+            self.unauthenticated_userid(request)
+        )
+        if user is None:
+            return None
+
+        return Identity(user=user)
+
+    def authenticated_userid(self, request):
+        if identity := self.identity(request):
+            return identity.user.userid
+
+        return None
+
+    def effective_principals(self, request):
+        effective_principals = [Everyone]
+
+        if identity := self.identity(request):
+            effective_principals.append(Authenticated)
+            effective_principals.append(identity.user.userid)
+            effective_principals.extend(principals_for_identity(identity))
+
+        return effective_principals
 
     def remember(self, request, userid, **kw):
         return []
