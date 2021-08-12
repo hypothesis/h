@@ -382,11 +382,20 @@ class TokenAuthenticationPolicy:
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class RemoteUserAuthPolicy(RemoteUserAuthenticationPolicy):
+class RemoteUserAuthPolicy(CallbackAuthenticationPolicy):
     def __init__(self):
-        super().__init__(
-            environ_key="HTTP_X_FORWARDED_USER", callback=principals_for_userid
-        )
+        self.environ_key = "HTTP_X_FORWARDED_USER"
+        self.callback = principals_for_userid
+
+    def unauthenticated_userid(self, request):
+        """ The ``REMOTE_USER`` value found within the ``environ``."""
+        return request.environ.get(self.environ_key)
+
+    def remember(self, request, userid, **kw):
+        return []
+
+    def forget(self, request):
+        return []
 
 
 def _is_api_request(request):
