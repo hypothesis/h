@@ -92,28 +92,31 @@ class TestFlagServiceCount:
     def test_flag_count_returns_zero_for_unflagged_annotation(self, svc, unflagged):
         assert not svc.flag_count(unflagged)
 
+    def test_flag_count_returns_zero_for_None(self, svc):
+        assert not svc.flag_count(None)
+
     def test_flag_count_returns_flag_count_for_flagged_annotation(self, svc, flagged):
         assert svc.flag_count(flagged) == 2
 
-    def test_flag_counts_returns_empty_dict_for_no_ids(self, svc):
-        assert svc.flag_counts([]) == {}
+    def test_flag_count_uses_the_cache(self, svc, flagged):
+        svc._flag_count_cache[flagged.id] = 99999
 
-    def test_flag_counts_returns_all_ids_in_result(self, svc, flagged, unflagged):
+        assert svc.flag_count(flagged) == 99999
+
+    def test_flag_counts(self, svc, flagged, unflagged):
         ann_ids = [flagged.id, unflagged.id]
 
         flag_counts = svc.flag_counts(ann_ids)
 
-        assert set(flag_counts.keys()) == set(ann_ids)
+        assert flag_counts == svc._flag_count_cache == {flagged.id: 2, unflagged.id: 0}
+
+    def test_flag_counts_returns_empty_dict_for_no_ids(self, svc):
+        assert svc.flag_counts([]) == {}
 
     def test_flag_counts_returns_zero_for_unflagged_annotation(self, svc, unflagged):
         flag_counts = svc.flag_counts([unflagged.id])
 
         assert not flag_counts[unflagged.id]
-
-    def test_flag_counts_returns_flag_count_for_flagged_annotation(self, svc, flagged):
-        flag_counts = svc.flag_counts([flagged.id])
-
-        assert flag_counts[flagged.id] == 2
 
     @pytest.fixture
     def unflagged(self, factories):

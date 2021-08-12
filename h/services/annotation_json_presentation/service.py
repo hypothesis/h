@@ -69,7 +69,6 @@ class AnnotationJSONPresentationService:
         self.flag_svc.flag_counts(annotation_ids)
 
         # Optimise the user service `fetch()` call in the AnnotationJSONPresenter
-        self.user_svc.fetch_all(
-            [annotation.userid for annotation in annotations])
+        self.user_svc.fetch_all([annotation.userid for annotation in annotations])
 
         return annotations
