@@ -2,12 +2,12 @@
 import logging
 
 import pyramid_authsanity
-from pyramid.authentication import RemoteUserAuthenticationPolicy
 
 from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
     AuthenticationPolicy,
+    RemoteUserAuthPolicy,
     TokenAuthenticationPolicy,
 )
 from h.auth.util import default_authority
@@ -54,9 +54,7 @@ def _get_policy(proxy_auth):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-        fallback_policy = RemoteUserAuthenticationPolicy(
-            environ_key="HTTP_X_FORWARDED_USER", callback=principals_for_userid
-        )
+        fallback_policy = RemoteUserAuthPolicy()
 
     else:
         fallback_policy = pyramid_authsanity.AuthServicePolicy()
