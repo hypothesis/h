@@ -7,7 +7,7 @@ from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
     AuthenticationPolicy,
-    RemoteUserAuthPolicy,
+    RemoteUserAuthenticationPolicy,
     TokenAuthenticationPolicy,
 )
 from h.auth.util import default_authority
@@ -54,7 +54,7 @@ def _get_policy(proxy_auth):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-        fallback_policy = RemoteUserAuthPolicy()
+        fallback_policy = RemoteUserAuthenticationPolicy()
 
     else:
         fallback_policy = pyramid_authsanity.AuthServicePolicy()
