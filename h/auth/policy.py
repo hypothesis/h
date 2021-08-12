@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pyramid import interfaces
 from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.security import Authenticated, Everyone
@@ -285,24 +287,30 @@ class AuthClientPolicy:
         return request.headers.get("X-Forwarded-User", None)
 
 
-@interface.implementer(interfaces.IAuthenticationPolicy)
-class TokenAuthenticationPolicy:
-    """
-    A bearer token authentication policy.
+class IdentityBasedPolicy:
+    def identity(self, request) -> Optional[Identity]:
+        """
+        Get an Identity object for valid credentials.
 
-    This policy uses a bearer token which is validated against Token objects
-    in the DB. This can come from the `request.auth_token` (from
-    `h.auth.tokens.auth_token`) or in the case of Websocket requests the
-    GET parameter `access_token`.
-    """
+        Sub-classes should implement this to return an Identity object when
+        the request contains valid credentials.
 
-    def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
-        """Not implemented for token auth policy."""
-        return []
+        :param request: Pyramid request to inspect
+        :returns: An `Identity` object if the login is authenticated or None
+        """
+        return None
 
-    def forget(self, _request):  # pylint: disable=no-self-use
-        """Not implemented for token auth policy."""
-        return []
+    def authenticated_userid(self, request):
+        """
+        Return the userid implied by the token in the passed request, if any.
+
+        :param request: Pyramid request to inspect
+        :return: The userid authenticated for the passed request or None
+        """
+        if (identity := self.identity(request)) and identity.user:
+            return identity.user.userid
+
+        return None
 
     def unauthenticated_userid(self, request):  # pylint: disable=no-self-use
         """
@@ -316,30 +324,33 @@ class TokenAuthenticationPolicy:
         # which is to say they have to be valid.
         return self.authenticated_userid(request)
 
-    def authenticated_userid(self, request):
-        """
-        Return the userid implied by the token in the passed request, if any.
-
-        :param request: Pyramid request to inspect
-        :return: The userid authenticated for the passed request or None
-        """
-        if identity := self.identity(request):
-            return identity.user.userid
-
-        return None
-
     def effective_principals(self, request):
         effective_principals = [Everyone]
 
-        identity = self.identity(request)
-        if not identity:
-            return effective_principals
-
-        effective_principals.append(Authenticated)
-        effective_principals.append(identity.user.userid)
-        effective_principals.extend(principals_for_identity(identity))
+        if identity := self.identity(request):
+            effective_principals.append(Authenticated)
+            effective_principals.append(identity.user.userid)
+            effective_principals.extend(principals_for_identity(identity))
 
         return effective_principals
+
+    def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
+        return []
+
+    def forget(self, _request):  # pylint: disable=no-self-use
+        return []
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class TokenAuthenticationPolicy(IdentityBasedPolicy):
+    """
+    A bearer token authentication policy.
+
+    This policy uses a bearer token which is validated against Token objects
+    in the DB. This can come from the `request.auth_token` (from
+    `h.auth.tokens.auth_token`) or in the case of Websocket requests the
+    GET parameter `access_token`.
+    """
 
     def identity(self, request):
         """
@@ -379,7 +390,7 @@ class TokenAuthenticationPolicy:
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class RemoteUserAuthenticationPolicy:
+class RemoteUserAuthenticationPolicy(IdentityBasedPolicy):
     """An authentication policy which blindly trusts a header."""
 
     def unauthenticated_userid(self, request):
@@ -393,28 +404,6 @@ class RemoteUserAuthenticationPolicy:
             return None
 
         return Identity(user=user)
-
-    def authenticated_userid(self, request):
-        if identity := self.identity(request):
-            return identity.user.userid
-
-        return None
-
-    def effective_principals(self, request):
-        effective_principals = [Everyone]
-
-        if identity := self.identity(request):
-            effective_principals.append(Authenticated)
-            effective_principals.append(identity.user.userid)
-            effective_principals.extend(principals_for_identity(identity))
-
-        return effective_principals
-
-    def remember(self, request, userid, **kw):
-        return []
-
-    def forget(self, request):
-        return []
 
 
 def _is_api_request(request):
