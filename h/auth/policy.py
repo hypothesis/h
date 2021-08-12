@@ -1,7 +1,10 @@
 from typing import Optional
 
 from pyramid import interfaces
-from pyramid.authentication import BasicAuthAuthenticationPolicy
+from pyramid.authentication import (
+    BasicAuthAuthenticationPolicy,
+    extract_http_basic_credentials,
+)
 from pyramid.security import Authenticated, Everyone
 from zope import interface
 
@@ -158,9 +161,6 @@ class AuthClientPolicy:
     on behalf of an auth_client
     """
 
-    def __init__(self):
-        self._basic_auth_policy = BasicAuthAuthenticationPolicy(check=self.check)
-
     def unauthenticated_userid(self, request):
         """
         Return the forwarded userid or the auth_client's id.
@@ -172,12 +172,14 @@ class AuthClientPolicy:
                  :py:attr:`h.models.auth_client.AuthClient.id`
         :rtype: str
         """
-        forwarded_userid = AuthClientPolicy._forwarded_userid(request)
+        forwarded_userid = self._forwarded_userid(request)
         if forwarded_userid is not None:
             return forwarded_userid
 
         # username from BasicAuth header
-        return self._basic_auth_policy.unauthenticated_userid(request)
+        credentials = extract_http_basic_credentials(request)
+        if credentials:
+            return credentials.username
 
     def authenticated_userid(self, request):
         """
@@ -197,17 +199,22 @@ class AuthClientPolicy:
 
         :rtype: :py:attr:`h.models.user.User.userid` or ``None``
         """
-        forwarded_userid = AuthClientPolicy._forwarded_userid(request)
+        forwarded_userid = self._forwarded_userid(request)
 
         # only evaluate setting an authenticated_userid if forwarded user is present
         if forwarded_userid is None:
             return None
 
         # username extracted from BasicAuth header
-        auth_userid = self._basic_auth_policy.unauthenticated_userid(request)
+        credentials = extract_http_basic_credentials(request)
+        auth_userid = credentials.username if credentials else None
 
         # authentication of BasicAuth and forwarded user—this will invoke check
-        callback_ok = self._basic_auth_policy.callback(auth_userid, request)
+        credentials = extract_http_basic_credentials(request)
+        callback_ok = None
+        if credentials:
+            username, password = credentials
+            callback_ok = self.check(username, password, request)
 
         if callback_ok is None:
             return None
@@ -230,7 +237,10 @@ class AuthClientPolicy:
         :rtype: list ``['system.Everyone']`` concatenated with any principals
                 from a successful authentication
         """
-        return self._basic_auth_policy.effective_principals(request)
+
+        return BasicAuthAuthenticationPolicy(check=self.check).effective_principals(
+            request
+        )
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for basic auth client policy."""
