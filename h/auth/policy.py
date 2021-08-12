@@ -158,10 +158,8 @@ class AuthClientPolicy:
     on behalf of an auth_client
     """
 
-    def __init__(self, check=None):
-        if check is None:
-            check = AuthClientPolicy.check
-        self._basic_auth_policy = BasicAuthAuthenticationPolicy(check=check)
+    def __init__(self):
+        self._basic_auth_policy = BasicAuthAuthenticationPolicy(check=self.check)
 
     def unauthenticated_userid(self, request):
         """
