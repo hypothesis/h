@@ -217,35 +217,22 @@ class AuthClientPolicy:
         """
         Return a list of principals for the request.
 
-        This will concatenate the principals returned by
-        :py:meth:`~h.auth.policy.AuthClientPolicy.check`
-        (which is a list or None) with Pyramid's system principal(s).
+        If authentication is unsuccessful then the only principal returned is
+        `Everyone`
 
-        If :py:meth:`~h.auth.policy.AuthClientPolicy.check` returns None—that is,
-        if authentication is unsuccessful—the returned principals will only
-        contain Pyramid's ``system.Everyone`` principal
-        (and Pyramid will not consider the request as authenticated).
-
-        :rtype: list ``['system.Everyone']`` concatenated with any principals
-                from a successful authentication
+        :param request: Pyramid request to check
+        :returns: List of principals
         """
-
         effective_principals = [Everyone]
+
         # The parent has this but in our case we do something different?
         # userid = self.unauthenticated_userid(request)
-        userid, _password = extract_http_basic_credentials(request)
-
-        if userid is None:
+        credentials = extract_http_basic_credentials(request)
+        userid = credentials.username
+        if userid is None or userid in (Authenticated, Everyone):
             return effective_principals
 
-        if userid in (Authenticated, Everyone):
-            return effective_principals
-
-        if self.callback is None:
-            groups = []
-        else:
-            groups = self.callback(userid, request)
-
+        groups = self.check(credentials.username, credentials.password, request)
         if groups is None:  # is None!
             return effective_principals
 
@@ -254,16 +241,6 @@ class AuthClientPolicy:
         effective_principals.extend(groups)
 
         return effective_principals
-
-    def callback(self, username, request):
-        # Username arg is ignored. Unfortunately
-        # extract_http_basic_credentials winds up getting called twice when
-        # authenticated_userid is called. Avoiding that, however,
-        # winds up duplicating logic from the superclass.
-        credentials = extract_http_basic_credentials(request)
-        if credentials:
-            username, password = credentials
-            return self.check(username, password, request)
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for basic auth client policy."""
