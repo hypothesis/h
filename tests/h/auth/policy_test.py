@@ -1,6 +1,6 @@
 import base64
 from unittest import mock
-from unittest.mock import create_autospec, sentinel
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -15,7 +15,7 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.exceptions import InvalidUserId
-from h.security import Identity, principals_for_userid
+from h.security import Identity
 
 API_PATHS = ("/api", "/api/foo", "/api/annotations/abc123")
 
@@ -692,31 +692,43 @@ class TestTokenAuthenticationPolicy:
     def test_identity_returns_None_with_no_token(self, pyramid_request):
         pyramid_request.auth_token = None
 
-        assert TokenAuthenticationPolicy().identity(pyramid_request) == None
+        assert TokenAuthenticationPolicy().identity(pyramid_request) is None
 
     def test_identity_returns_None_for_invalid_tokens(
         self, pyramid_request, auth_token_service
     ):
         auth_token_service.validate.return_value = None
 
-        assert TokenAuthenticationPolicy().identity(pyramid_request) == None
+        assert TokenAuthenticationPolicy().identity(pyramid_request) is None
 
     def test_identity_returns_None_for_invalid_users(
         self, pyramid_request, user_service
     ):
         user_service.fetch.return_value = None
 
-        assert TokenAuthenticationPolicy().identity(pyramid_request) == None
+        assert TokenAuthenticationPolicy().identity(pyramid_request) is None
 
-    def test_unauthenticated_userid(self, pyramid_request, user_service):
+    @pytest.mark.parametrize(
+        "method", ("unauthenticated_userid", "authenticated_userid")
+    )
+    def test_userid_method(self, pyramid_request, user_service, method):
         pyramid_request.auth_token = sentinel.auth_token
 
-        result = TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request)
+        result = getattr(TokenAuthenticationPolicy(), method)(pyramid_request)
 
         assert result == user_service.fetch.return_value.userid
 
-    def test_unauthenticated_userid_returns_None_with_no_identity(
-        self, pyramid_request
+    @pytest.mark.parametrize(
+        "method", ("unauthenticated_userid", "authenticated_userid")
+    )
+    def test_userid_method_returns_None_with_no_identity(self, pyramid_request, method):
+        pyramid_request.auth_token = None
+
+        assert getattr(TokenAuthenticationPolicy(), method)(pyramid_request) is None
+
+    def test_authenticated_userid_returns_None_with_no_user(
+        self,
+        pyramid_request,
     ):
         pyramid_request.auth_token = None
 
@@ -724,29 +736,10 @@ class TestTokenAuthenticationPolicy:
             TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
         )
 
-    def test_authenticated_userid(
-        self, pyramid_request, user_service, principals_for_userid
-    ):
-        principals_for_userid.return_value = ["principal"]
-        pyramid_request.auth_token = sentinel.auth_token
-
-        result = TokenAuthenticationPolicy().authenticated_userid(pyramid_request)
-
-        assert result is user_service.fetch.return_value.userid
-
-    def test_authenticated_userid_returns_None_with_no_user(
-        self, pyramid_request, principals_for_userid
-    ):
-        principals_for_userid.return_value = None
-
-        result = TokenAuthenticationPolicy().authenticated_userid(pyramid_request)
-
-        assert result is None
-
     def test_effective_principals(
-        self, pyramid_request, user_service, principals_for_userid
+        self, pyramid_request, user_service, principals_for_identity
     ):
-        principals_for_userid.return_value = ["principal"]
+        principals_for_identity.return_value = ["principal"]
         pyramid_request.auth_token = sentinel.auth_token
 
         result = TokenAuthenticationPolicy().effective_principals(pyramid_request)
@@ -759,5 +752,5 @@ class TestTokenAuthenticationPolicy:
         ]
 
     @pytest.fixture(autouse=True)
-    def principals_for_userid(self, patch):
-        return patch("h.auth.policy.principals_for_userid")
+    def principals_for_identity(self, patch):
+        return patch("h.auth.policy.principals_for_identity")

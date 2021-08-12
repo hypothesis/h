@@ -1,14 +1,11 @@
 from pyramid import interfaces
-from pyramid.authentication import (
-    BasicAuthAuthenticationPolicy,
-    CallbackAuthenticationPolicy,
-)
+from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.security import Authenticated, Everyone
 from zope import interface
 
 from h.auth import util
 from h.exceptions import InvalidUserId
-from h.security import Identity, principals_for_identity, principals_for_userid
+from h.security import Identity, principals_for_identity
 
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
@@ -293,20 +290,11 @@ class TokenAuthenticationPolicy:
     """
     A bearer token authentication policy.
 
-    This is a Pyramid authentication policy in which the user's identity is
-    provided by and authenticated by the presence of a valid authentication
-    token associated with the request. The token is retrieved from the
-    ``request.auth_token`` property, which is provided by the
-    :py:func:`h.auth.token.auth_token` function.
-
-    It uses Pyramid's CallbackAuthenticationPolicy to divide responsibility
-    between this component (which is responsible only for establishing
-    identity), and a callback function, which is responsible for providing
-    additional principals for the authenticated user.
+    This policy uses a bearer token which is validated against Token objects
+    in the DB. This can come from the `request.auth_token` (from
+    `h.auth.tokens.auth_token`) or in the case of Websocket requests the
+    GET parameter `access_token`.
     """
-
-    def __init__(self):
-        self.callback = principals_for_userid
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for token auth policy."""
@@ -342,25 +330,14 @@ class TokenAuthenticationPolicy:
 
     def effective_principals(self, request):
         effective_principals = [Everyone]
-        userid = self.unauthenticated_userid(request)
 
-        if userid is None:
-            return effective_principals
-
-        if userid in (Authenticated, Everyone):
-            return effective_principals
-
-        if self.callback is None:
-            groups = []
-        else:
-            groups = self.callback(userid, request)
-
-        if groups is None:
+        identity = self.identity(request)
+        if not identity:
             return effective_principals
 
         effective_principals.append(Authenticated)
-        effective_principals.append(userid)
-        effective_principals.extend(groups)
+        effective_principals.append(identity.user.userid)
+        effective_principals.extend(principals_for_identity(identity))
 
         return effective_principals
 
