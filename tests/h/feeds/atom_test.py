@@ -196,7 +196,7 @@ def test_annotation_api_url_links(_, factories):
     }
 
 
-def test_feed_updated(factories, utc_iso8601):
+def test_feed_updated(factories):
     annotations = factories.Annotation.build_batch(3)
     annotations[0].updated = datetime.utcnow()
 

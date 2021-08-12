@@ -121,7 +121,9 @@ def db_session(db_engine):
 
     @sqlalchemy.event.listens_for(session, "after_transaction_end")
     def restart_savepoint(session, transaction):
-        if transaction.nested and not transaction._parent.nested:
+        if (  # pylint:disable=protected-access
+            transaction.nested and not transaction._parent.nested
+        ):
             session.begin_nested()
 
     try:

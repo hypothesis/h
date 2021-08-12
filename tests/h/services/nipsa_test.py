@@ -105,4 +105,4 @@ def test_nipsa_factory(pyramid_request, search_index):
 
     assert isinstance(svc, NipsaService)
     assert svc.session == pyramid_request.db
-    assert svc._get_search_index() == search_index
+    assert svc._get_search_index() == search_index  # pylint:disable=protected-access

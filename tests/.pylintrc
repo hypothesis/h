@@ -64,10 +64,7 @@ disable=
     # Ignored during pep8 -> pylint transition
     unused-argument,
     fixme,
-    protected-access,
-    invalid-name,
-    abstract-method,
-    no-member,
+    no-member, #  Intermittent failures with the same input
 
 # Just disable PyLint's name style checking for the tests, because we
 # frequently use lots of argument names that don't conform.

@@ -81,15 +81,15 @@ class TestJSONSchema:
 
 
 class Color(enum.Enum):
-    red = "#ff0000"
-    green = "#00ff00"
-    blue = "#0000ff"
+    RED = "#ff0000"
+    GREEN = "#00ff00"
+    BLUE = "#0000ff"
 
 
 class TestEnumType:
     def test_serialize_returns_a_string(self, color_type):
         node = Mock()
-        assert color_type.serialize(node, Color.red) == "red"
+        assert color_type.serialize(node, Color.RED) == "RED"
 
     def test_serialize_returns_an_empty_string_if_value_is_none(self, color_type):
         node = Mock()
@@ -101,7 +101,7 @@ class TestEnumType:
 
     def test_deserialize_returns_an_enum(self, color_type):
         node = Mock()
-        assert color_type.deserialize(node, "red") == Color.red
+        assert color_type.deserialize(node, "RED") == Color.RED
 
     def test_deserialize_raises_if_value_unknown(self, color_type):
         node = Mock()

@@ -18,7 +18,7 @@ class TestAddAnnotationById:
         search_index.add_annotation_by_id(root_annotation.id)
 
         storage.fetch_annotation.assert_called_once_with(
-            search_index._db, root_annotation.id
+            search_index._db, root_annotation.id  # pylint:disable=protected-access
         )
 
         add_annotation.assert_called_once_with(root_annotation)
@@ -47,6 +47,7 @@ class TestAddAnnotationById:
         search_index.add_annotation_by_id(reply_annotation.id)
 
         storage.fetch_annotation.assert_has_calls(
+            # pylint:disable=protected-access
             [
                 call(search_index._db, reply_annotation.id),
                 call(search_index._db, root_annotation.id),

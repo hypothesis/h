@@ -81,7 +81,10 @@ class TestGroupCreateView:
         view.post()
 
         handle_form_submission.assert_called_once_with(
-            view.request, view.form, Any.function(), view._template_context
+            view.request,
+            view.form,
+            Any.function(),
+            view._template_context,  # pylint:disable=protected-access
         )
 
     def test_post_redirects_to_list_view_on_success(
