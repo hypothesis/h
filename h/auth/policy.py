@@ -328,7 +328,7 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :rtype: unicode or None
         """
         token_str = None
-        if _is_ws_request(request):
+        if self._is_ws_request(request):
             token_str = request.GET.get("access_token", None)
         if token_str is None:
             token_str = getattr(request, "auth_token", None)
@@ -336,12 +336,15 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         if token_str is None:
             return None
 
-        svc = request.find_service(name="auth_token")
-        token = svc.validate(token_str)
+        token = request.find_service(name="auth_token").validate(token_str)
         if token is None:
             return None
 
         return token.userid
+
+    @staticmethod
+    def _is_ws_request(request):
+        return request.path == "/ws"
 
 
 def _is_api_request(request):
@@ -366,7 +369,3 @@ def _is_client_request(request):
     if request.matched_route:
         return (request.matched_route.name, request.method) in AUTH_CLIENT_API_WHITELIST
     return False
-
-
-def _is_ws_request(request):
-    return request.path == "/ws"
