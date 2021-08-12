@@ -656,7 +656,7 @@ class TestAuthClientAuthenticationPolicy:
         return patch("h.auth.policy.BasicAuthAuthenticationPolicy")
 
 
-@pytest.mark.usefixtures("auth_token_service")
+@pytest.mark.usefixtures("user_service", "auth_token_service")
 class TestTokenAuthenticationPolicy:
     def test_remember_does_nothing(self, pyramid_request):
         assert TokenAuthenticationPolicy().remember(pyramid_request, "foo") == []
@@ -669,52 +669,70 @@ class TestTokenAuthenticationPolicy:
             TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
         )
 
-    def test_unauthenticated_userid(self, pyramid_request, auth_token_service):
+    def test_identity(self, pyramid_request, auth_token_service, user_service):
         pyramid_request.auth_token = sentinel.auth_token
-        pyramid_request.GET["access_token"] = sentinel.decoy
 
-        result = TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request)
+        identity = TokenAuthenticationPolicy().identity(pyramid_request)
 
         auth_token_service.validate.assert_called_once_with(sentinel.auth_token)
-        assert result == auth_token_service.validate.return_value.userid
+        user_service.fetch.assert_called_once_with(
+            auth_token_service.validate.return_value.userid
+        )
+        assert identity == Identity(user=user_service.fetch.return_value)
 
-    def test_unauthenticated_userid_for_webservice(
+    def test_identify_for_webservice(self, pyramid_request, auth_token_service):
+        pyramid_request.auth_token = sentinel.decoy
+        pyramid_request.path = "/ws"
+        pyramid_request.GET["access_token"] = sentinel.access_token
+
+        TokenAuthenticationPolicy().identity(pyramid_request)
+
+        auth_token_service.validate.assert_called_once_with(sentinel.access_token)
+
+    def test_identity_returns_None_with_no_token(self, pyramid_request):
+        pyramid_request.auth_token = None
+
+        assert TokenAuthenticationPolicy().identity(pyramid_request) == None
+
+    def test_identity_returns_None_for_invalid_tokens(
         self, pyramid_request, auth_token_service
     ):
-        pyramid_request.path = "/ws"
-        pyramid_request.auth_token = sentinel.decoy
-        pyramid_request.GET["access_token"] = sentinel.access_token
+        auth_token_service.validate.return_value = None
+
+        assert TokenAuthenticationPolicy().identity(pyramid_request) == None
+
+    def test_identity_returns_None_for_invalid_users(
+        self, pyramid_request, user_service
+    ):
+        user_service.fetch.return_value = None
+
+        assert TokenAuthenticationPolicy().identity(pyramid_request) == None
+
+    def test_unauthenticated_userid(self, pyramid_request, user_service):
+        pyramid_request.auth_token = sentinel.auth_token
 
         result = TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request)
 
-        auth_token_service.validate.assert_called_once_with(sentinel.access_token)
-        assert result == auth_token_service.validate.return_value.userid
+        assert result == user_service.fetch.return_value.userid
 
-    def test_unauthenticated_userid_returns_None_with_no_token(self, pyramid_request):
+    def test_unauthenticated_userid_returns_None_with_no_identity(
+        self, pyramid_request
+    ):
         pyramid_request.auth_token = None
 
         assert (
             TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
         )
 
-    def test_unauthenticated_userid_returns_None_for_invalid_token(
-        self, pyramid_request, auth_token_service
-    ):
-        auth_token_service.validate.return_value = None
-
-        assert (
-            TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
-        )
-
     def test_authenticated_userid(
-        self, pyramid_request, auth_token_service, principals_for_userid
+        self, pyramid_request, user_service, principals_for_userid
     ):
         principals_for_userid.return_value = ["principal"]
         pyramid_request.auth_token = sentinel.auth_token
 
         result = TokenAuthenticationPolicy().authenticated_userid(pyramid_request)
 
-        userid = auth_token_service.validate.return_value.userid
+        userid = user_service.fetch.return_value.userid
         principals_for_userid.assert_called_once_with(userid, pyramid_request)
         assert result is userid
 
@@ -728,7 +746,7 @@ class TestTokenAuthenticationPolicy:
         assert result is None
 
     def test_effective_principals(
-        self, pyramid_request, auth_token_service, principals_for_userid
+        self, pyramid_request, user_service, principals_for_userid
     ):
         principals_for_userid.return_value = ["principal"]
         pyramid_request.auth_token = sentinel.auth_token
@@ -738,7 +756,7 @@ class TestTokenAuthenticationPolicy:
         assert result == [
             Everyone,
             Authenticated,
-            auth_token_service.validate.return_value.userid,
+            user_service.fetch.return_value.userid,
             "principal",
         ]
 

@@ -326,12 +326,22 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :returns: the userid authenticated for the passed request or None
         :rtype: unicode or None
         """
-        token_str = None
-        if self._is_ws_request(request):
-            token_str = request.GET.get("access_token", None)
-        if token_str is None:
-            token_str = getattr(request, "auth_token", None)
+        if identity := self.identity(request):
+            return identity.user.userid
 
+        return None
+
+    def identity(self, request):
+        """
+        Get an Identity object for valid credentials.
+
+        Validate the token from the request by matching them to Token records
+        in the DB.
+
+        :param request: Pyramid request to inspect
+        :returns: An `Identity` object if the login is authenticated or None
+        """
+        token_str = self._get_token(request)
         if token_str is None:
             return None
 
@@ -339,7 +349,19 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         if token is None:
             return None
 
-        return token.userid
+        user = request.find_service(name="user").fetch(token.userid)
+        if user is None:
+            return None
+
+        return Identity(user=user)
+
+    def _get_token(self, request):
+        token_str = None
+
+        if self._is_ws_request(request):
+            token_str = request.GET.get("access_token", None)
+
+        return token_str or getattr(request, "auth_token", None)
 
     @staticmethod
     def _is_ws_request(request):
