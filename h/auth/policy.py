@@ -201,25 +201,20 @@ class AuthClientPolicy:
         """
         forwarded_userid = self._forwarded_userid(request)
 
-        # only evaluate setting an authenticated_userid if forwarded user is present
+        # We require a forwarded user for an authenticated user
         if forwarded_userid is None:
             return None
 
-        # username extracted from BasicAuth header
+        # Extract username and password from basic auth header
         credentials = extract_http_basic_credentials(request)
-        auth_userid = credentials.username if credentials else None
-
-        # authentication of BasicAuth and forwarded user—this will invoke check
-        credentials = extract_http_basic_credentials(request)
-        callback_ok = None
-        if credentials:
-            username, password = credentials
-            callback_ok = self.check(username, password, request)
-
-        if callback_ok is None:
+        if not credentials:
             return None
 
-        return forwarded_userid  # This should always be a userid, not an auth_client id
+        if self.check(credentials.username, credentials.password, request) is None:
+            return None
+
+        # This should always be a userid, not an auth_client id
+        return forwarded_userid
 
     def effective_principals(self, request):
         """
