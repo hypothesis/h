@@ -3,7 +3,6 @@ from unittest import mock
 from unittest.mock import sentinel
 
 import pytest
-from h_matchers import Any
 from pyramid.interfaces import IAuthenticationPolicy
 from pyramid.security import Authenticated, Everyone
 
@@ -409,7 +408,7 @@ class TestAPIAuthenticationPolicy:
 
 
 @pytest.mark.usefixtures("user_service")
-class TestAuthClientAuthenticationPolicy:
+class TestAuthClientPolicy:
     def test_identity(self, pyramid_request, auth_client, user_service):
         pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
 
@@ -522,56 +521,6 @@ class TestAuthClientAuthenticationPolicy:
 
         assert AuthClientPolicy().unauthenticated_userid(pyramid_request) is None
 
-    def test_authenticated_userid(self, pyramid_request, user):
-        pyramid_request.headers["X-Forwarded-User"] = user.userid
-
-        assert AuthClientPolicy().authenticated_userid(pyramid_request) == user.userid
-
-    @pytest.mark.parametrize("header", ("X-Forwarded-User", "Authorization"))
-    def test_authenticated_userid_returns_None_with_missing_credentials(
-        self, pyramid_request, header
-    ):
-        pyramid_request.headers[header] = None
-
-        assert AuthClientPolicy().authenticated_userid(pyramid_request) is None
-
-    def test_effective_principals(
-        self, pyramid_request, principals_for_identity, auth_client
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
-        principals_for_identity.return_value = ["principal"]
-
-        principals = AuthClientPolicy().effective_principals(pyramid_request)
-
-        expected_principals = [
-            Everyone,
-            Authenticated,
-            "principal",
-            # Is this intended or useful behavior? Or just what we got from
-            # the base policy?
-            auth_client.id,
-        ]
-        assert principals == Any.list.containing(expected_principals).only()
-
-    def test_effective_principals_without_valid_credentials(
-        self, pyramid_request, auth_client
-    ):
-        pyramid_request.headers["Authorization"] = None
-
-        principals = AuthClientPolicy().effective_principals(pyramid_request)
-
-        assert principals == [Everyone]
-
-    def test_forget_does_nothing(self, pyramid_request):
-        assert AuthClientPolicy().forget(pyramid_request) == []
-
-    def test_remember_does_nothing(self, pyramid_request):
-        assert AuthClientPolicy().remember(pyramid_request, "whoever") == []
-
-    @pytest.fixture
-    def principals_for_identity(self, patch):
-        return patch("h.auth.policy.principals_for_identity")
-
     @pytest.fixture
     def auth_client(self, factories):
         return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
@@ -582,7 +531,7 @@ class TestAuthClientAuthenticationPolicy:
         pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
 
     @classmethod
-    def set_http_credentials(self, pyramid_request, client_id, client_secret):
+    def set_http_credentials(cls, pyramid_request, client_id, client_secret):
         encoded = base64.standard_b64encode(
             f"{client_id}:{client_secret}".encode("utf-8")
         )
@@ -626,9 +575,19 @@ class TestIdentityBasedPolicy:
 
         assert getattr(policy, method)(pyramid_request) is None
 
+    @pytest.mark.parametrize("with_auth_client", (True, False))
     def test_effective_principals(
-        self, policy, pyramid_request, identity, principals_for_identity
+        self,
+        policy,
+        pyramid_request,
+        identity,
+        principals_for_identity,
+        with_auth_client,
+        factories,
     ):
+        if with_auth_client:
+            identity.auth_client = factories.AuthClient()
+
         principals_for_identity.return_value = ["principal"]
 
         principals = policy.effective_principals(pyramid_request)
@@ -637,7 +596,9 @@ class TestIdentityBasedPolicy:
         assert principals == [
             Everyone,
             Authenticated,
-            identity.user.userid,
+            # I'm suspicious that this is an either or. I feel like both values
+            # should just be dependant on the presence of the relevant thing
+            identity.auth_client.id if with_auth_client else identity.user.userid,
             "principal",
         ]
 
