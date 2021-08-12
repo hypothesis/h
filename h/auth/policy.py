@@ -320,11 +320,20 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         """
         Return the userid implied by the token in the passed request, if any.
 
-        :param request: a request object
-        :type request: pyramid.request.Request
+        :param request: Pyramid request to inspect
+        :return: The userid authenticated for the passed request or None
+        """
 
-        :returns: the userid authenticated for the passed request or None
-        :rtype: unicode or None
+        # We actually just do the same thing for unauthenticated user ids,
+        # which is to say they have to be valid.
+        return self.authenticated_userid(request)
+
+    def authenticated_userid(self, request):
+        """
+        Return the userid implied by the token in the passed request, if any.
+
+        :param request: Pyramid request to inspect
+        :return: The userid authenticated for the passed request or None
         """
         if identity := self.identity(request):
             return identity.user.userid
