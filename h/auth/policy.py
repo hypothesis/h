@@ -8,7 +8,7 @@ from zope import interface
 
 from h.auth import util
 from h.exceptions import InvalidUserId
-from h.security import Identity, principals_for_identity
+from h.security import Identity, principals_for_identity, principals_for_userid
 
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
@@ -305,9 +305,8 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
     additional principals for the authenticated user.
     """
 
-    def __init__(self, callback=None, debug=False):
-        self.callback = callback
-        self.debug = debug
+    def __init__(self):
+        self.callback = principals_for_userid
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         """Not implemented for token auth policy."""
