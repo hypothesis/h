@@ -3,7 +3,7 @@ from pyramid.authentication import (
     BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy,
 )
-from pyramid.security import Authenticated
+from pyramid.security import Authenticated, Everyone
 from zope import interface
 
 from h.auth import util
@@ -289,7 +289,7 @@ class AuthClientPolicy:
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
+class TokenAuthenticationPolicy:
     """
     A bearer token authentication policy.
 
@@ -339,6 +339,30 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
             return identity.user.userid
 
         return None
+
+    def effective_principals(self, request):
+        effective_principals = [Everyone]
+        userid = self.unauthenticated_userid(request)
+
+        if userid is None:
+            return effective_principals
+
+        if userid in (Authenticated, Everyone):
+            return effective_principals
+
+        if self.callback is None:
+            groups = []
+        else:
+            groups = self.callback(userid, request)
+
+        if groups is None:
+            return effective_principals
+
+        effective_principals.append(Authenticated)
+        effective_principals.append(userid)
+        effective_principals.extend(groups)
+
+        return effective_principals
 
     def identity(self, request):
         """
