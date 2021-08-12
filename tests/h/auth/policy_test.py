@@ -17,6 +17,7 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.exceptions import InvalidUserId
+from h.models.auth_client import GrantType
 from h.security import Identity
 
 API_PATHS = ("/api", "/api/foo", "/api/annotations/abc123")
@@ -409,40 +410,131 @@ class TestAPIAuthenticationPolicy:
 
 @pytest.mark.usefixtures("user_service")
 class TestAuthClientAuthenticationPolicy:
+    def test_identity(self, pyramid_request, auth_client, user_service):
+        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
+
+        identity = AuthClientPolicy().identity(pyramid_request)
+
+        user_service.fetch.assert_called_once_with(sentinel.forwarded_user)
+        assert identity == Identity(
+            auth_client=auth_client, user=user_service.fetch.return_value
+        )
+
+    def test_identify_without_forwarded_user(self, pyramid_request, auth_client):
+        pyramid_request.headers["X-Forwarded-User"] = None
+
+        identity = AuthClientPolicy().identity(pyramid_request)
+
+        assert identity == Identity(auth_client=auth_client)
+
+    def test_identity_returns_None_without_credentials(self, pyramid_request):
+        pyramid_request.headers["Authorization"] = None
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identity_returns_None_if_auth_client_id_is_invalid(
+        self, pyramid_request, auth_client, db_session
+    ):
+        db_session.delete(auth_client)
+        db_session.flush()
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identity_returns_None_if_auth_client_missing(
+        self, pyramid_request, auth_client, db_session
+    ):
+        db_session.delete(auth_client)
+        db_session.flush()
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_if_auth_client_not_secret(
+        self, auth_client, pyramid_request
+    ):
+        self.set_http_credentials(pyramid_request, "NOT A UUID", auth_client.secret)
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_if_auth_client_not_client_type(
+        self, auth_client, pyramid_request
+    ):
+        auth_client.grant_type = None
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_if_auth_client_secret_is_None(
+        self, auth_client, pyramid_request
+    ):
+        auth_client.secret = None
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_if_auth_client_secrets_do_not_match(
+        self, auth_client, pyramid_request
+    ):
+        self.set_http_credentials(pyramid_request, auth_client.id, "WRONG SECRET")
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_if_forwarded_user_is_not_found(
+        self, user_service, pyramid_request
+    ):
+        user_service.fetch.return_value = None
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_if_forwarded_userid_is_invalid(
+        self, user_service, pyramid_request
+    ):
+        user_service.fetch.side_effect = InvalidUserId(sentinel.invalid_id)
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
+    def test_identify_returns_None_on_forwarded_userid_authority_mismatch(
+        self, user, auth_client, pyramid_request
+    ):
+        user.authority = "not" + auth_client.authority
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
     def test_unauthenticated_userid(self, pyramid_request):
         pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
 
-        userid = AuthClientPolicy().unauthenticated_userid(pyramid_request)
+        assert (
+            AuthClientPolicy().unauthenticated_userid(pyramid_request)
+            == "forwarded-user"
+        )
 
-        assert userid == "forwarded-user"
-
-    @pytest.mark.usefixtures("with_auth_client_credentials")
     def test_unauthenticated_userid_returns_clientid_if_no_forwarded_user(
         self, pyramid_request, auth_client
     ):
-        userid = AuthClientPolicy().unauthenticated_userid(pyramid_request)
-
-        assert userid == auth_client.id
-
-    @pytest.mark.usefixtures("with_auth_client_credentials")
-    def test_authenticated_userid(self, pyramid_request):
-        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
-
-        userid = AuthClientPolicy().unauthenticated_userid(pyramid_request)
-
-        assert userid == "forwarded-user"
-
-    @pytest.mark.usefixtures("with_auth_client_credentials")
-    def test_authenticated_userid_returns_None_with_no_forwarded_user(
-        self, pyramid_request
-    ):
         pyramid_request.headers["X-Forwarded-User"] = None
 
-        userid = AuthClientPolicy().authenticated_userid(pyramid_request)
+        assert (
+            AuthClientPolicy().unauthenticated_userid(pyramid_request) == auth_client.id
+        )
 
-        assert userid is None
+    def test_unauthenticated_userid_returns_None_if_no_credentials(
+        self, pyramid_request, auth_client
+    ):
+        pyramid_request.headers["Authorization"] = None
+        pyramid_request.headers["X-Forwarded-User"] = None
 
-    @pytest.mark.usefixtures("with_auth_client_credentials")
+        assert AuthClientPolicy().unauthenticated_userid(pyramid_request) is None
+
+    def test_authenticated_userid(self, pyramid_request, user):
+        pyramid_request.headers["X-Forwarded-User"] = user.userid
+
+        assert AuthClientPolicy().authenticated_userid(pyramid_request) == user.userid
+
+    @pytest.mark.parametrize("header", ("X-Forwarded-User", "Authorization"))
+    def test_authenticated_userid_returns_None_with_missing_credentials(
+        self, pyramid_request, header
+    ):
+        pyramid_request.headers[header] = None
+
+        assert AuthClientPolicy().authenticated_userid(pyramid_request) is None
+
     def test_effective_principals(
         self, pyramid_request, principals_for_identity, auth_client
     ):
@@ -461,12 +553,10 @@ class TestAuthClientAuthenticationPolicy:
         ]
         assert principals == Any.list.containing(expected_principals).only()
 
-    @pytest.mark.usefixtures("with_auth_client_credentials")
-    def test_effective_principals_when_check_returns_None(
-        self, pyramid_request, principals_for_identity, auth_client
+    def test_effective_principals_without_valid_credentials(
+        self, pyramid_request, auth_client
     ):
-        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
-        principals_for_identity.return_value = None
+        pyramid_request.headers["Authorization"] = None
 
         principals = AuthClientPolicy().effective_principals(pyramid_request)
 
@@ -478,103 +568,32 @@ class TestAuthClientAuthenticationPolicy:
     def test_remember_does_nothing(self, pyramid_request):
         assert AuthClientPolicy().remember(pyramid_request, "whoever") == []
 
-    def test_check(
-        self, pyramid_request, verify_auth_client, user_service, principals_for_identity
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
-
-        results = AuthClientPolicy.check(
-            sentinel.username, sentinel.password, pyramid_request
-        )
-
-        verify_auth_client.assert_called_once_with(
-            client_id=sentinel.username,
-            client_secret=sentinel.password,
-            db_session=pyramid_request.db,
-        )
-        user_service.fetch.assert_called_once_with(sentinel.forwarded_user)
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs(
-                {
-                    "auth_client": verify_auth_client.return_value,
-                    "user": user_service.fetch.return_value,
-                }
-            )
-        )
-        assert results == principals_for_identity.return_value
-
-    def test_check_with_no_forwarded_user(
-        self, pyramid_request, principals_for_identity
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = None
-
-        AuthClientPolicy.check(sentinel.username, sentinel.password, pyramid_request)
-        principals_for_identity.assert_called_once_with(
-            Any.instance_of(Identity).with_attrs({"user": None})
-        )
-
-    def test_check_with_invalid_user(self, pyramid_request, user_service):
-        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
-        user_service.fetch.side_effect = InvalidUserId("someid")
-
-        results = AuthClientPolicy.check(
-            sentinel.username, sentinel.password, pyramid_request
-        )
-
-        assert results is None
-
-    def test_check_returns_None_with_missing_user(self, pyramid_request, user_service):
-        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
-        user_service.fetch.return_value = None
-
-        results = AuthClientPolicy.check(
-            sentinel.username, sentinel.password, pyramid_request
-        )
-
-        assert results is None
-
-    def test_check_returns_None_if_forwarded_user_authority_mismatch(
-        self, pyramid_request, verify_auth_client, user_service, factories
-    ):
-        mismatched_user = factories.User(authority="two.com")
-        verify_auth_client.return_value = factories.ConfidentialAuthClient(
-            authority="one.com"
-        )
-        user_service.fetch.return_value = mismatched_user
-        pyramid_request.headers["X-Forwarded-User"] = mismatched_user.userid
-
-        principals = AuthClientPolicy.check(
-            "someusername", "somepassword", pyramid_request
-        )
-
-        assert principals is None
-
     @pytest.fixture
     def principals_for_identity(self, patch):
         return patch("h.auth.policy.principals_for_identity")
 
-    @pytest.fixture(autouse=True)
-    def verify_auth_client(self, patch, user_service):
-        verify_auth_client = patch("h.auth.util.verify_auth_client")
-        # Ensure the auth client authority and user authority match by default
-        verify_auth_client.return_value.authority = (
-            user_service.fetch.return_value.authority
-        )
-        return verify_auth_client
-
     @pytest.fixture
     def auth_client(self, factories):
-        return factories.ConfidentialAuthClient(authority="one.com")
+        return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
 
-    @pytest.fixture
-    def with_auth_client_credentials(self, pyramid_request, auth_client):
-        user_pass = "{client_id}:{client_secret}".format(
-            client_id=auth_client.id, client_secret=auth_client.secret
+    @pytest.fixture(autouse=True)
+    def with_credentials(self, pyramid_request, auth_client):
+        self.set_http_credentials(pyramid_request, auth_client.id, auth_client.secret)
+        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
+
+    @classmethod
+    def set_http_credentials(self, pyramid_request, client_id, client_secret):
+        encoded = base64.standard_b64encode(
+            f"{client_id}:{client_secret}".encode("utf-8")
         )
-        encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-        pyramid_request.headers["Authorization"] = "Basic {creds}".format(
-            creds=encoded.decode("ascii")
-        )
+        creds = encoded.decode("ascii")
+        pyramid_request.headers["Authorization"] = f"Basic {creds}"
+
+    @pytest.fixture(autouse=True)
+    def user(self, factories, auth_client, user_service):
+        user = factories.User(authority=auth_client.authority)
+        user_service.fetch.return_value = user
+        return user
 
 
 class TestIdentityBasedPolicy:
