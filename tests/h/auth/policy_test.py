@@ -1,6 +1,6 @@
 import base64
 from unittest import mock
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 from h_matchers import Any
@@ -15,7 +15,7 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.exceptions import InvalidUserId
-from h.security import Identity
+from h.security import Identity, principals_for_userid
 
 API_PATHS = ("/api", "/api/foo", "/api/annotations/abc123")
 
@@ -656,128 +656,96 @@ class TestAuthClientAuthenticationPolicy:
         return patch("h.auth.policy.BasicAuthAuthenticationPolicy")
 
 
-@pytest.mark.usefixtures("token_service")
+@pytest.mark.usefixtures("auth_token_service")
 class TestTokenAuthenticationPolicy:
     def test_remember_does_nothing(self, pyramid_request):
-        policy = TokenAuthenticationPolicy()
-
-        assert policy.remember(pyramid_request, "foo") == []
+        assert TokenAuthenticationPolicy().remember(pyramid_request, "foo") == []
 
     def test_forget_does_nothing(self, pyramid_request):
-        policy = TokenAuthenticationPolicy()
-
-        assert policy.forget(pyramid_request) == []
+        assert TokenAuthenticationPolicy().forget(pyramid_request) == []
 
     def test_unauthenticated_userid_is_none_if_no_token(self, pyramid_request):
-        policy = TokenAuthenticationPolicy()
+        assert (
+            TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
+        )
 
-        assert policy.unauthenticated_userid(pyramid_request) is None
+    def test_unauthenticated_userid(self, pyramid_request, auth_token_service):
+        pyramid_request.auth_token = sentinel.auth_token
+        pyramid_request.GET["access_token"] = sentinel.decoy
 
-    def test_unauthenticated_userid_returns_userid_from_token(self, pyramid_request):
-        policy = TokenAuthenticationPolicy()
+        result = TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request)
+
+        auth_token_service.validate.assert_called_once_with(sentinel.auth_token)
+        assert result == auth_token_service.validate.return_value.userid
+
+    def test_unauthenticated_userid_for_webservice(
+        self, pyramid_request, auth_token_service
+    ):
+        pyramid_request.path = "/ws"
+        pyramid_request.auth_token = sentinel.decoy
+        pyramid_request.GET["access_token"] = sentinel.access_token
+
+        result = TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request)
+
+        auth_token_service.validate.assert_called_once_with(sentinel.access_token)
+        assert result == auth_token_service.validate.return_value.userid
+
+    def test_unauthenticated_userid_returns_None_with_no_token(self, pyramid_request):
+        pyramid_request.auth_token = None
+
+        assert (
+            TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
+        )
+
+    def test_unauthenticated_userid_returns_None_for_invalid_token(
+        self, pyramid_request, auth_token_service
+    ):
+
+        auth_token_service.validate.return_value = None
+
+        assert (
+            TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
+        )
+
+    def test_authenticated_userid(
+        self, pyramid_request, auth_token_service, principals_for_userid
+    ):
+        principals_for_userid.return_value = ["principal"]
+        policy = TokenAuthenticationPolicy(callback=principals_for_userid)
         pyramid_request.auth_token = "valid123"
 
-        result = policy.unauthenticated_userid(pyramid_request)
+        result = policy.authenticated_userid(pyramid_request)
 
-        assert result == "acct:foo@example.com"
+        userid = auth_token_service.validate.return_value.userid
+        principals_for_userid.assert_called_once_with(userid, pyramid_request)
+        assert result is userid
 
-    def test_unauthenticated_userid_returns_none_if_token_invalid(
-        self, pyramid_request, token_service
+    def test_authenticated_userid_returns_None_with_no_user(
+        self, pyramid_request, principals_for_userid
     ):
-        policy = TokenAuthenticationPolicy()
-        token_service.validate.return_value = None
-        pyramid_request.auth_token = "abcd123"
-
-        result = policy.unauthenticated_userid(pyramid_request)
-
-        assert result is None
-
-    def test_unauthenticated_userid_returns_userid_from_query_params_token(
-        self, pyramid_request
-    ):
-        """When the path is `/ws` then we look into the query string parameters as well."""
-
-        policy = TokenAuthenticationPolicy()
-        pyramid_request.GET["access_token"] = "valid123"
-        pyramid_request.path = "/ws"
-
-        result = policy.unauthenticated_userid(pyramid_request)
-
-        assert result == "acct:foo@example.com"
-
-    def test_unauthenticated_userid_returns_none_for_invalid_query_param_token(
-        self, pyramid_request
-    ):
-        """When the path is `/ws` but the token is invalid, it should still return None."""
-
-        policy = TokenAuthenticationPolicy()
-        pyramid_request.GET["access_token"] = "expired"
-        pyramid_request.path = "/ws"
-
-        result = policy.unauthenticated_userid(pyramid_request)
-
-        assert result is None
-
-    def test_unauthenticated_userid_skips_query_param_for_non_ws_requests(
-        self, pyramid_request
-    ):
-        # When we have a valid token in the `access_token` query param, but it's
-        # not a request to /ws, then we should ignore this access token.
-
-        policy = TokenAuthenticationPolicy()
-        pyramid_request.GET["access_token"] = "valid123"
-        pyramid_request.path = "/api"
-
-        result = policy.unauthenticated_userid(pyramid_request)
-
-        assert result is None
-
-    def test_authenticated_userid_uses_callback(self, pyramid_request):
-        def callback(userid, request):
-            return None
-
-        policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = "valid123"
+        principals_for_userid.return_value = None
+        policy = TokenAuthenticationPolicy(callback=principals_for_userid)
 
         result = policy.authenticated_userid(pyramid_request)
 
         assert result is None
 
-    def test_effective_principals_uses_callback(self, pyramid_request):
-        def callback(userid, request):
-            return [userid + ".foo", "group:donkeys"]
-
-        policy = TokenAuthenticationPolicy(callback=callback)
+    def test_effective_principals(
+        self, pyramid_request, auth_token_service, principals_for_userid
+    ):
+        principals_for_userid.return_value = ["principal"]
+        policy = TokenAuthenticationPolicy(callback=principals_for_userid)
         pyramid_request.auth_token = "valid123"
 
         result = policy.effective_principals(pyramid_request)
 
-        assert set(result) > {
-            "acct:foo@example.com",
-            "acct:foo@example.com.foo",
-            "group:donkeys",
-        }
+        assert result == [
+            Everyone,
+            Authenticated,
+            auth_token_service.validate.return_value.userid,
+            "principal",
+        ]
 
     @pytest.fixture
-    def fake_token(self):
-        return DummyToken()
-
-    @pytest.fixture
-    def token_service(self, pyramid_config, fake_token):
-        def validate(token_str):
-            if token_str == "valid123":
-                return fake_token
-            return None
-
-        svc = mock.Mock(validate=mock.Mock(side_effect=validate))
-        pyramid_config.register_service(svc, name="auth_token")
-        return svc
-
-
-class DummyToken:
-    def __init__(self, userid="acct:foo@example.com", valid=True):
-        self.userid = userid
-        self._valid = valid
-
-    def is_valid(self):
-        return self._valid
+    def principals_for_userid(self):
+        return create_autospec(principals_for_userid)
