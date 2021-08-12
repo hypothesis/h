@@ -1,12 +1,15 @@
+import hmac
 from typing import Optional
 
 from pyramid import interfaces
 from pyramid.authentication import extract_http_basic_credentials
 from pyramid.security import Authenticated, Everyone
+from sqlalchemy.exc import StatementError
 from zope import interface
 
-from h.auth import util
 from h.exceptions import InvalidUserId
+from h.models import AuthClient
+from h.models.auth_client import GrantType
 from h.security import Identity, principals_for_identity
 
 #: List of route name-method combinations that should
@@ -129,89 +132,42 @@ class AuthClientPolicy:
     """
     An authentication policy for registered AuthClients.
 
-    Authentication for a request to API routes with HTTP Basic Authentication
-    credentials that represent a registered AuthClient with
-    grant type of ``client_credentials`` in the db.
+    Auth clients must be registered with grant type `client_credentials` and
+    will need to perform basic HTTP auth with their username and password set
+    to their auth client id, and secret.
 
-    Authentication can be of two types:
+    A client can also pass an `X-Forwarded-User` header with the userid to
+    act as user in their authority. This will create a `request.user` and will
+    look like a normal login. This user will have an additional
+    principal, `client:{client_id}@{authority}` which lets you tell it apart
+    from regular users.
 
-    * The client itself:
-
-      Some endpoints allow an authenticated auth_client to
-      take action on users within its authority, such as creating a user or
-      adding a user to a group. In this case, assuming credentials are valid,
-      the request will be authenticated, but no ``authenticated_userid`` (and
-      thus no request.user) will be set
-
-    * A user within the client's associated authority:
-
-      If an HTTP
-      ``X-Forwarded-User`` header is present, its value will be treated as a
-      ``userid`` and, if the client credentials are valid _and_ the userid
-      represents an extant user within the client's authority, the request
-      will be authenticated as that user. In this case, ``authenticated_userid``
-      will be set and there will ultimately be a request.user available.
-
-    Note: To differentiate between request with a Token-authenticated user and
-    a request with an auth_client forwarded user, the latter has an additional
-    principal, ``client:{client_id}@{authority}`` to mark it as being authenticated
-    on behalf of an auth_client
+    To differentiate between request with a token authenticated user and
+    a request with a forwarded user, the latter has an additional
+    principal, `client:{client_id}@{authority}`.
     """
 
     def unauthenticated_userid(self, request):
         """
         Return the forwarded userid or the auth_client's id.
-
-        If a forwarded user header is set, return the ``userid`` (its value)
-        Otherwise return the username parsed from the Basic Auth header
-
-        :return: :py:attr:`h.models.user.User.userid` or
-                 :py:attr:`h.models.auth_client.AuthClient.id`
-        :rtype: str
         """
-        forwarded_userid = self._forwarded_userid(request)
-        if forwarded_userid is not None:
+        if forwarded_userid := self._forwarded_userid(request):
             return forwarded_userid
 
-        # username from BasicAuth header
-        credentials = extract_http_basic_credentials(request)
-        if credentials:
+        # Get the username from the basic auth header
+        if credentials := extract_http_basic_credentials(request):
             return credentials.username
+
+        return None
 
     def authenticated_userid(self, request):
         """
-        Return any forwarded userid or None.
-
-        Rely mostly on
-        :py:meth:`pyramid.authentication.BasicAuthAuthenticationPolicy.authenticated_userid`,
-        but don't actually return a ``userid`` unless there is a forwarded user
-        header set—the auth client itself is not a "user"
-
-        Although this looks as if it trusts the return value of
-        :py:meth:`pyramid.authentication.BasicAuthAuthenticationPolicy.authenticated_userid`
-        irrationally, rest assured that :py:meth:`~h.auth.policy.AuthClientPolicy.check`
-        will always be called (via
-        :py:meth:`pyramid.authentication.BasicAuthAuthenticationPolicy.callback`)
-        before any non-None value is returned.
-
-        :rtype: :py:attr:`h.models.user.User.userid` or ``None``
+        Return the forwarded userid or None if missing or the login is invalid.
         """
-        forwarded_userid = self._forwarded_userid(request)
+        if (identity := self.identity(request)) and identity.user:
+            return identity.user.userid
 
-        # We require a forwarded user for an authenticated user
-        if forwarded_userid is None:
-            return None
-
-        # Extract username and password from basic auth header
-        credentials = extract_http_basic_credentials(request)
-        if not credentials:
-            return None
-
-        if self.check(credentials.username, credentials.password, request) is None:
-            return None
-
-        # This should always be a userid, not an auth_client id
-        return forwarded_userid
+        return None
 
     def effective_principals(self, request):
         """
@@ -225,69 +181,78 @@ class AuthClientPolicy:
         """
         effective_principals = [Everyone]
 
-        # The parent has this but in our case we do something different?
-        # userid = self.unauthenticated_userid(request)
-        credentials = extract_http_basic_credentials(request)
-        userid = credentials.username
-        if userid is None or userid in (Authenticated, Everyone):
-            return effective_principals
-
-        groups = self.check(credentials.username, credentials.password, request)
-        if groups is None:  # is None!
-            return effective_principals
-
-        effective_principals.append(Authenticated)
-        effective_principals.append(userid)
-        effective_principals.extend(groups)
+        if identity := self.identity(request):
+            effective_principals.append(Authenticated)
+            effective_principals.append(identity.auth_client.id)
+            effective_principals.extend(principals_for_identity(identity))
 
         return effective_principals
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
-        """Not implemented for basic auth client policy."""
+        """Not implemented for basic auth auth_client policy."""
         return []
 
     def forget(self, _request):  # pylint: disable=no-self-use
-        """Not implemented for basic auth client policy."""
+        """Not implemented for basic auth auth_client policy."""
         return []
 
-    @staticmethod
-    def check(username, password, request):
+    def identity(self, request):
+        """Get an Identity object for valid credentials.
+
+        :param request: Pyramid request to inspect
+        :returns: An `Identity` object if the login is authenticated or None
         """
-        Return list of appropriate principals or None if authentication is unsuccessful.
+        # Credentials are required
+        auth_client = self._get_auth_client(request)
+        if not auth_client:
+            return None
 
-        Validate the basic auth credentials from the request by matching them to
-        an auth_client record in the DB.
-
-        If an HTTP ``X-Forwarded-User`` header is present in the request, this
-        represents the intent to authenticate "on behalf of" a user within
-        the auth_client's authority. If this header is present, the user indicated
-        by its value (a :py:attr:`h.models.user.User.userid`) _must_ exist and
-        be within the auth_client's authority, or authentication will fail.
-
-        :param username: username parsed out of Authorization header (Basic)
-        :param password: password parsed out of Authorization header (Basic)
-        :returns: additional principals for the auth_client or None
-        :rtype: list or None
-        """
-        # validate that the credentials in BasicAuth header
-        # match an AuthClient record in the db
-
-        client = util.verify_auth_client(
-            client_id=username, client_secret=password, db_session=request.db
-        )
         user = None
-
-        if client and (forwarded_userid := AuthClientPolicy._forwarded_userid(request)):
+        if forwarded_userid := self._forwarded_userid(request):
+            # If we have a forwarded user it must be valid
             try:
                 user = request.find_service(name="user").fetch(forwarded_userid)
-            except InvalidUserId:  # raised if userid is invalidly formatted
-                return None  # invalid user, so we are failing here
-
-            # If you forward a user it must exist and match your authority
-            if not user or user.authority != client.authority:
+            except InvalidUserId:
                 return None
 
-        return principals_for_identity(Identity(user=user, auth_client=client))
+            if not user:
+                return None
+
+            # If you forward a user it must exist and match your authority
+            if not user or user.authority != auth_client.authority:
+                return None
+
+        return Identity(auth_client=auth_client, user=user)
+
+    @classmethod
+    def _get_auth_client(cls, request):
+        """Get a matching auth client if the credentials are valid."""
+
+        credentials = extract_http_basic_credentials(request)
+        if not credentials:
+            return None
+
+        # It is important not to include the secret as part of the SQL query
+        # because the resulting code may be subject to a timing attack.
+        try:
+            auth_client = request.db.query(AuthClient).get(credentials.username)
+        except StatementError:
+            # The auth client id is malformed
+            return None
+
+        if auth_client is None:
+            return None
+        if auth_client.secret is None:
+            return None
+        if auth_client.grant_type != GrantType.client_credentials:
+            return None
+
+        # We fetch the auth_client by its ID and then do a constant-time
+        # comparison of the secret with that provided in the request.
+        if not hmac.compare_digest(auth_client.secret, credentials.password):
+            return None
+
+        return auth_client
 
     @staticmethod
     def _forwarded_userid(request):
@@ -425,7 +390,7 @@ def _is_api_request(request):
 
 def _is_client_request(request):
     """
-    Return if this is client_auth authentication valid for the given request.
+    Return if this is auth_client_auth authentication valid for the given request.
 
     Uuthentication should be performed by
     :py:class:`~h.auth.policy.AuthClientPolicy` only for requests
