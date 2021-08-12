@@ -288,7 +288,8 @@ class AuthClientPolicy:
 
 
 class IdentityBasedPolicy:
-    def identity(self, request) -> Optional[Identity]:
+    @classmethod
+    def identity(cls, request) -> Optional[Identity]:
         """
         Get an Identity object for valid credentials.
 
@@ -296,7 +297,6 @@ class IdentityBasedPolicy:
         the request contains valid credentials.
 
         :param request: Pyramid request to inspect
-        :returns: An `Identity` object if the login is authenticated or None
         """
         return None
 

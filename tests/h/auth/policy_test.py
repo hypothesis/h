@@ -12,6 +12,7 @@ from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
     AuthenticationPolicy,
+    IdentityBasedPolicy,
     TokenAuthenticationPolicy,
 )
 from h.exceptions import InvalidUserId
@@ -666,19 +667,86 @@ class TestAuthClientAuthenticationPolicy:
         return patch("h.auth.policy.BasicAuthAuthenticationPolicy")
 
 
+class TestIdentityBasedPolicy:
+    def test_identity_method_does_nothing(self, pyramid_request):
+        assert IdentityBasedPolicy().identity(pyramid_request) is None
+
+    @pytest.mark.parametrize(
+        "method", ("authenticated_userid", "unauthenticated_userid")
+    )
+    def test_userid_methods(self, policy, pyramid_request, identity, method):
+        assert getattr(policy, method)(pyramid_request) == identity.user.userid
+
+    @pytest.mark.parametrize(
+        "method", ("authenticated_userid", "unauthenticated_userid")
+    )
+    def test_userid_methods_return_None_if_the_identity_has_no_user(
+        self, policy, pyramid_request, identity, method
+    ):
+        identity.user = None
+
+        assert getattr(policy, method)(pyramid_request) is None
+
+    @pytest.mark.parametrize(
+        "method", ("authenticated_userid", "unauthenticated_userid")
+    )
+    def test_userid_methods_return_None_if_the_identity_is_None(
+        self, policy, pyramid_request, method
+    ):
+        policy.returned_identity = None
+
+        assert getattr(policy, method)(pyramid_request) is None
+
+    def test_effective_principals(
+        self, policy, pyramid_request, identity, principals_for_identity
+    ):
+        principals_for_identity.return_value = ["principal"]
+
+        principals = policy.effective_principals(pyramid_request)
+
+        principals_for_identity.assert_called_once_with(identity)
+        assert principals == [
+            Everyone,
+            Authenticated,
+            identity.user.userid,
+            "principal",
+        ]
+
+    def test_effective_principals_with_no_identity(self, policy, pyramid_request):
+        policy.returned_identity = None
+
+        assert policy.effective_principals(pyramid_request) == [Everyone]
+
+    def test_remember_does_nothing(self, policy, pyramid_request):
+        assert policy.remember(pyramid_request, "foo") == []
+
+    def test_forget_does_nothing(self, policy, pyramid_request):
+        assert policy.forget(pyramid_request) == []
+
+    @pytest.fixture
+    def identity(self, factories):
+        return Identity(user=factories.User())
+
+    @pytest.fixture
+    def policy(self, identity):
+        class CustomPolicy(IdentityBasedPolicy):
+            returned_identity = None
+
+            def identity(self, _request):
+                return self.returned_identity
+
+        policy = CustomPolicy()
+        policy.returned_identity = identity
+
+        return policy
+
+    @pytest.fixture(autouse=True)
+    def principals_for_identity(self, patch):
+        return patch("h.auth.policy.principals_for_identity")
+
+
 @pytest.mark.usefixtures("user_service", "auth_token_service")
 class TestTokenAuthenticationPolicy:
-    def test_remember_does_nothing(self, pyramid_request):
-        assert TokenAuthenticationPolicy().remember(pyramid_request, "foo") == []
-
-    def test_forget_does_nothing(self, pyramid_request):
-        assert TokenAuthenticationPolicy().forget(pyramid_request) == []
-
-    def test_unauthenticated_userid_is_none_if_no_token(self, pyramid_request):
-        assert (
-            TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
-        )
-
     def test_identity(self, pyramid_request, auth_token_service, user_service):
         pyramid_request.auth_token = sentinel.auth_token
 
@@ -690,7 +758,7 @@ class TestTokenAuthenticationPolicy:
         )
         assert identity == Identity(user=user_service.fetch.return_value)
 
-    def test_identify_for_webservice(self, pyramid_request, auth_token_service):
+    def test_identity_for_webservice(self, pyramid_request, auth_token_service):
         pyramid_request.auth_token = sentinel.decoy
         pyramid_request.path = "/ws"
         pyramid_request.GET["access_token"] = sentinel.access_token
@@ -719,57 +787,3 @@ class TestTokenAuthenticationPolicy:
         user_service.fetch.return_value = None
 
         assert TokenAuthenticationPolicy().identity(pyramid_request) is None
-
-    @pytest.mark.parametrize(
-        "method", ("unauthenticated_userid", "authenticated_userid")
-    )
-    def test_userid_method(self, pyramid_request, user_service, method):
-        pyramid_request.auth_token = sentinel.auth_token
-
-        result = getattr(TokenAuthenticationPolicy(), method)(pyramid_request)
-
-        assert result == user_service.fetch.return_value.userid
-
-    @pytest.mark.parametrize(
-        "method", ("unauthenticated_userid", "authenticated_userid")
-    )
-    def test_userid_method_returns_None_with_no_identity(self, pyramid_request, method):
-        pyramid_request.auth_token = None
-
-        assert getattr(TokenAuthenticationPolicy(), method)(pyramid_request) is None
-
-    def test_authenticated_userid_returns_None_with_no_user(
-        self,
-        pyramid_request,
-    ):
-        pyramid_request.auth_token = None
-
-        assert (
-            TokenAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
-        )
-
-    def test_effective_principals(
-        self, pyramid_request, user_service, principals_for_identity
-    ):
-        principals_for_identity.return_value = ["principal"]
-        pyramid_request.auth_token = sentinel.auth_token
-
-        result = TokenAuthenticationPolicy().effective_principals(pyramid_request)
-
-        assert result == [
-            Everyone,
-            Authenticated,
-            user_service.fetch.return_value.userid,
-            "principal",
-        ]
-
-    def test_effective_principals_with_no_identity(self, pyramid_request):
-        pyramid_request.auth_token = None
-
-        result = TokenAuthenticationPolicy().effective_principals(pyramid_request)
-
-        assert result == [Everyone]
-
-    @pytest.fixture(autouse=True)
-    def principals_for_identity(self, patch):
-        return patch("h.auth.policy.principals_for_identity")
