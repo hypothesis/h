@@ -28,19 +28,6 @@ class TestAuthTicketService:
         user = svc.user()
         assert user == ticket.user
 
-    def test_groups(self, svc, ticket, principals_for_identity):
-        svc.verify_ticket(ticket.user_userid, ticket.id)
-
-        result = svc.groups()
-
-        principals_for_identity.assert_called_once_with(Identity(user=ticket.user))
-        assert result == principals_for_identity.return_value
-
-    def test_groups_raises_when_ticket_is_not_loaded(self, svc, ticket):
-        with pytest.raises(AuthTicketNotLoadedError) as exc:
-            svc.groups()
-        assert str(exc.value) == "auth ticket is not loaded yet"
-
     def test_verify_ticket_fails_when_id_is_None(self, svc):
         assert not svc.verify_ticket(self.userid, None)
 
@@ -170,10 +157,6 @@ class TestAuthTicketService:
     @pytest.fixture
     def svc(self, db_session, user_service):
         return AuthTicketService(db_session, user_service)
-
-    @pytest.fixture
-    def principals_for_identity(self, patch):
-        return patch("h.services.auth_ticket.principals_for_identity")
 
     @pytest.fixture
     def ticket(self, factories, user, db_session):
