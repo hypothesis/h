@@ -28,7 +28,9 @@ def includeme(config):  # pragma: no cover
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
-    set_authentication_policy(config)
+    config.set_authentication_policy(
+        _get_policy(config.registry.settings.get("h.proxy_auth"))
+    )
 
     # Allow retrieval of the authority from the request object.
     config.add_request_method(default_authority, name="default_authority", reify=True)
@@ -37,8 +39,8 @@ def includeme(config):  # pragma: no cover
     config.add_request_method("h.auth.tokens.auth_token", reify=True)
 
 
-def set_authentication_policy(config):  # pragma: no cover
-    if config.registry.settings.get("h.proxy_auth"):
+def _get_policy(proxy_auth):  # pragma: no cover
+    if proxy_auth:
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "
             "the X-Forwarded-User request header can ONLY be set by "
@@ -52,12 +54,9 @@ def set_authentication_policy(config):  # pragma: no cover
     else:
         fallback_policy = CookieAuthenticationPolicy()
 
-    config.set_authentication_policy(
-        AuthenticationPolicy(
-            api_policy=APIAuthenticationPolicy(
-                user_policy=TokenAuthenticationPolicy(),
-                client_policy=AuthClientPolicy(),
-            ),
-            fallback_policy=fallback_policy,
-        )
+    return AuthenticationPolicy(
+        api_policy=APIAuthenticationPolicy(
+            user_policy=TokenAuthenticationPolicy(), client_policy=AuthClientPolicy()
+        ),
+        fallback_policy=fallback_policy,
     )
