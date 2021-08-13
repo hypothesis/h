@@ -1,7 +1,7 @@
 """Authentication configuration."""
 import logging
 
-from h.auth.auth_service_policy import AuthCookie, AuthServicePolicy
+from h.auth.cookie_authentication_policy import CookieAuthenticationPolicy
 from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
@@ -28,22 +28,17 @@ def includeme(config):  # pragma: no cover
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
-    config.set_authentication_policy(
-        _get_policy(
-            proxy_auth=config.registry.settings.get("h.proxy_auth"),
-        )
-    )
+    set_authentication_policy(config)
 
     # Allow retrieval of the authority from the request object.
     config.add_request_method(default_authority, name="default_authority", reify=True)
 
     # Allow retrieval of the auth token (if present) from the request object.
     config.add_request_method("h.auth.tokens.auth_token", reify=True)
-    config.add_request_method(AuthCookie, name="auth_cookie", reify=True)
 
 
-def _get_policy(proxy_auth):  # pragma: no cover
-    if proxy_auth:
+def set_authentication_policy(config):  # pragma: no cover
+    if config.registry.settings.get("h.proxy_auth"):
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "
             "the X-Forwarded-User request header can ONLY be set by "
@@ -55,11 +50,14 @@ def _get_policy(proxy_auth):  # pragma: no cover
         fallback_policy = RemoteUserAuthenticationPolicy()
 
     else:
-        fallback_policy = AuthServicePolicy()
+        fallback_policy = CookieAuthenticationPolicy()
 
-    return AuthenticationPolicy(
-        api_policy=APIAuthenticationPolicy(
-            user_policy=TokenAuthenticationPolicy(), client_policy=AuthClientPolicy()
-        ),
-        fallback_policy=fallback_policy,
+    config.set_authentication_policy(
+        AuthenticationPolicy(
+            api_policy=APIAuthenticationPolicy(
+                user_policy=TokenAuthenticationPolicy(),
+                client_policy=AuthClientPolicy(),
+            ),
+            fallback_policy=fallback_policy,
+        )
     )
