@@ -1,10 +1,10 @@
 import datetime
 
 import sqlalchemy as sa
-from pyramid_authsanity import interfaces
 from zope import interface
 
 from h import models
+from h.auth.auth_service_policy import IAuthService
 from h.security import Identity, principals_for_identity
 
 TICKET_TTL = datetime.timedelta(days=7)
@@ -19,7 +19,7 @@ class AuthTicketNotLoadedError(Exception):
     pass
 
 
-@interface.implementer(interfaces.IAuthService)
+@interface.implementer(IAuthService)
 class AuthTicketService:
     def __init__(self, session, user_service):
         self.session = session

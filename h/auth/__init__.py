@@ -1,8 +1,7 @@
 """Authentication configuration."""
 import logging
 
-import pyramid_authsanity
-
+from h.auth.auth_service_policy import AuthServicePolicy
 from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
@@ -56,7 +55,7 @@ def _get_policy(proxy_auth):  # pragma: no cover
         fallback_policy = RemoteUserAuthenticationPolicy()
 
     else:
-        fallback_policy = pyramid_authsanity.AuthServicePolicy()
+        fallback_policy = AuthServicePolicy()
 
     return AuthenticationPolicy(
         api_policy=APIAuthenticationPolicy(
