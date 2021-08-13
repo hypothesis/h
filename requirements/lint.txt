@@ -132,7 +132,7 @@ h-assets==1.0.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-matchers==1.2.11
+h-matchers==1.2.12
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -145,7 +145,7 @@ hupper==1.10.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.14.5
+hypothesis==6.14.6
     # via -r requirements/tests.txt
 importlib-resources==5.2.1
     # via
@@ -267,7 +267,7 @@ py==1.10.0
     #   -r requirements/tests.txt
     #   pytest
 pycodestyle==2.7.0
-    # via -r requirements/analyze.in
+    # via -r requirements/lint.in
 pycparser==2.20
     # via
     #   -r requirements/functests.txt
@@ -278,13 +278,13 @@ pycryptodomex==3.10.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
 pydocstyle==6.1.1
-    # via -r requirements/analyze.in
+    # via -r requirements/lint.in
 pyjwt==2.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
 pylint==2.9.6
-    # via -r requirements/analyze.in
+    # via -r requirements/lint.in
 pyparsing==2.4.7
     # via
     #   -r requirements/functests.txt
