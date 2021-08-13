@@ -10,7 +10,6 @@ from h.auth.policy import (
     TokenAuthenticationPolicy,
 )
 from h.auth.util import default_authority
-from h.security.encryption import derive_key
 
 # We export this for the websocket to use as it's main policy
 __all__ = ("TokenAuthenticationPolicy",)
@@ -19,15 +18,7 @@ log = logging.getLogger(__name__)
 
 
 def includeme(config):  # pragma: no cover
-    # Set up authsanity
-    settings = config.registry.settings
-    settings["authsanity.source"] = "cookie"
-    settings["authsanity.cookie.max_age"] = 2592000
-    settings["authsanity.cookie.httponly"] = True
-    settings["authsanity.secret"] = derive_key(
-        settings["secret_key"], settings["secret_salt"], b"h.auth.cookie_secret"
-    )
-    config.include("pyramid_authsanity")
+    config.include("h.auth.auth_service_policy")
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
