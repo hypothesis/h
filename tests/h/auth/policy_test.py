@@ -584,9 +584,15 @@ class TestAuthClientAuthenticationPolicy:
 
         assert results is None
 
-    @pytest.fixture
-    def principals_for_identity(self, patch):
-        return patch("h.auth.policy.principals_for_identity")
+    def test_check_returns_None_with_missing_user(self, pyramid_request, user_service):
+        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
+        user_service.fetch.return_value = None
+
+        results = AuthClientPolicy.check(
+            sentinel.username, sentinel.password, pyramid_request
+        )
+
+        assert results is None
 
     def test_check_returns_None_if_forwarded_user_authority_mismatch(
         self, pyramid_request, verify_auth_client, user_service, factories
@@ -604,9 +610,18 @@ class TestAuthClientAuthenticationPolicy:
 
         assert principals is None
 
+    @pytest.fixture
+    def principals_for_identity(self, patch):
+        return patch("h.auth.policy.principals_for_identity")
+
     @pytest.fixture(autouse=True)
-    def verify_auth_client(self, patch):
-        return patch("h.auth.util.verify_auth_client")
+    def verify_auth_client(self, patch, user_service):
+        verify_auth_client = patch("h.auth.util.verify_auth_client")
+        # Ensure the auth client authority and user authority match by default
+        verify_auth_client.return_value.authority = (
+            user_service.fetch.return_value.authority
+        )
+        return verify_auth_client
 
     @pytest.fixture
     def check(self):
