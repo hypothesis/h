@@ -225,14 +225,6 @@ def _document(document, claimant):
     }
 
 
-def _format_jsonschema_error(error):
-    """Format a :py:class:`jsonschema.ValidationError` as a string."""
-    if error.path:
-        dotted_path = ".".join([str(c) for c in error.path])
-        return "{path}: {message}".format(path=dotted_path, message=error.message)
-    return error.message
-
-
 def _remove_protected_fields(appstruct):
     # Some fields are not to be set by the user, ignore them.
     for field in [
