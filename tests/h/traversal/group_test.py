@@ -2,8 +2,6 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.auth import role
-from h.security import Permission
 from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
 
 
@@ -17,26 +15,10 @@ class TestGroupContext:
         assert context.__acl__() == ACL.for_group.return_value
         ACL.for_group.assert_called_once_with(group)
 
-    @pytest.mark.parametrize(
-        "principal,has_upsert", ((role.User, True), ("other", False))
-    )
-    def test_it_without_a_group(
-        self, set_permissions, pyramid_request, principal, has_upsert
-    ):
-        set_permissions("acct:adminuser@foo", principals=[principal])
-
-        context = GroupContext(group=None)
-
-        assert context.group is None
-        assert (
-            bool(pyramid_request.has_permission(Permission.Group.UPSERT, context))
-            == has_upsert
-        )
-
 
 @pytest.mark.usefixtures("group_service", "GroupContext_")
 class TestGroupRoot:
-    def test_it_passes_on_acls(self, set_permissions, pyramid_request, ACL):
+    def test_it_passes_on_acls(self, pyramid_request, ACL):
         context = GroupRoot(pyramid_request)
 
         acls = context.__acl__()
