@@ -33,7 +33,10 @@ def includeme(config):  # pragma: no cover
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
     config.set_authentication_policy(
-        _get_policy(config.registry.settings.get("h.proxy_auth"))
+        _get_policy(
+            cookie_secret=cookie_secret,
+            proxy_auth=config.registry.settings.get("h.proxy_auth"),
+        )
     )
 
     # Allow retrieval of the authority from the request object.
@@ -43,7 +46,7 @@ def includeme(config):  # pragma: no cover
     config.add_request_method(".tokens.auth_token", reify=True)
 
 
-def _get_policy(proxy_auth):  # pragma: no cover
+def _get_policy(cookie_secret, proxy_auth):  # pragma: no cover
     if proxy_auth:
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "
