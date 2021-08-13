@@ -1,5 +1,3 @@
-import base64
-import os
 from functools import lru_cache
 
 from pyramid.interfaces import ISessionFactory
@@ -8,27 +6,18 @@ from h.auth.policy import IdentityBasedPolicy
 from h.security import Identity
 
 
-class AuthServicePolicy(IdentityBasedPolicy):
+class CookieAuthenticationPolicy(IdentityBasedPolicy):
     def unauthenticated_userid(self, request):
         """We do not allow the unauthenticated userid to be used."""
 
     def identity(self, request):
         self._add_vary_by_cookie(request)
 
-        auth_svc = request.find_service(name="auth_ticket")
-
-        # Another method has already verified the user for us!
-        if auth_svc.user:
-            return Identity(user=auth_svc.user)
-
-        userid, ticket_id = request.auth_cookie.get_value()
-        if ticket_id is None:
+        user = request.find_service(name="auth_cookie").verify_cookie()
+        if not user:
             return None
 
-        if user := auth_svc.verify_ticket(userid, ticket_id):
-            return Identity(user=user)
-
-        return None
+        return Identity(user=user)
 
     def remember(self, request, userid, **kw):
         """Returns a list of headers that are to be set from the source service."""
@@ -36,9 +25,6 @@ class AuthServicePolicy(IdentityBasedPolicy):
         self._add_vary_by_cookie(request)
 
         previous_userid = self.authenticated_userid(request)
-
-        ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
-        request.find_service(name="auth_ticket").add_ticket(userid, ticket)
 
         # Clear the previous session
         if self._has_session(request):
@@ -53,21 +39,18 @@ class AuthServicePolicy(IdentityBasedPolicy):
                 request.session.update(data)
                 request.session.new_csrf_token()
 
-        return request.auth_cookie.headers_remember([userid, ticket])
+        return request.find_service(name="auth_cookie").create_cookie(userid)
 
     def forget(self, request):
         """A list of headers which will delete appropriate cookies."""
 
         self._add_vary_by_cookie(request)
 
-        _, ticket_id = request.auth_cookie.get_value()
-        request.find_service(name="auth_ticket").remove_ticket(ticket_id)
-
         # Clear the session by invalidating it
         if self._has_session(request):
             request.session.invalidate()
 
-        return request.auth_cookie.headers_forget()
+        return request.find_service(name="auth_cookie").revoke_cookie()
 
     @staticmethod
     def _add_vary_by_cookie(request):
