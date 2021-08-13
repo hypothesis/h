@@ -61,11 +61,19 @@ class AnnotationJSONPresentationService:
 
     def _preload_data(self, user, annotation_ids):
         def eager_load_related_items(query):
+            # Ensure that accessing `annotation.document` or `.moderation`
+            # doesn't trigger any more queries by pre-loading these
+
             return query.options(
-                # Ensure that accessing `annotation.document` or `.moderation`
-                # doesn't trigger any more queries by pre-loading these
+                # Optimise access to the document which is called in
+                # `AnnotationJSONPresenter`
                 subqueryload(Annotation.document),
+                # Optimise the check used for "hidden" above
                 subqueryload(Annotation.moderation),
+                # Optimise the permissions check for MODERATE permissions,
+                # which ultimately depends on group permissions, causing a
+                # group lookup for every annotation without this
+                subqueryload(Annotation.group),
             )
 
         annotations = storage.fetch_ordered_annotations(
