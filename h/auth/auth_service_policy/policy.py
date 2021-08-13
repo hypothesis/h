@@ -1,25 +1,21 @@
 import base64
 import os
+from functools import lru_cache
 
-from pyramid.interfaces import IAuthenticationPolicy, ISessionFactory
-from zope.interface import implementer
+from pyramid.interfaces import ISessionFactory
 
 from h.auth.policy import IdentityBasedPolicy
 from h.security import Identity
 
-UNSET = object()
 
-
-@implementer(IAuthenticationPolicy)
 class AuthServicePolicy(IdentityBasedPolicy):
-    _have_session = UNSET
-
     def unauthenticated_userid(self, request):
         """We do not allow the unauthenticated userid to be used."""
 
     def identity(self, request):
-        auth_svc = request.find_service(name="auth_ticket")
         self._add_vary_by_cookie(request)
+
+        auth_svc = request.find_service(name="auth_ticket")
 
         # Another method has already verified the user for us!
         if auth_svc.user:
@@ -34,18 +30,16 @@ class AuthServicePolicy(IdentityBasedPolicy):
 
     def remember(self, request, userid, **kw):
         """Returns a list of headers that are to be set from the source service."""
-        if self._have_session is UNSET:
-            self._have_session = self._session_registered(request)
 
-        prev_userid = self.authenticated_userid(request)
         self._add_vary_by_cookie(request)
 
-        ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
+        prev_userid = self.authenticated_userid(request)
 
+        ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
         request.find_service(name="auth_ticket").add_ticket(userid, ticket)
 
         # Clear the previous session
-        if self._have_session:
+        if self._has_session(request):
             if prev_userid != userid:
                 request.session.invalidate()
             else:
@@ -62,16 +56,13 @@ class AuthServicePolicy(IdentityBasedPolicy):
     def forget(self, request):
         """A list of headers which will delete appropriate cookies."""
 
-        if self._have_session is UNSET:
-            self._have_session = self._session_registered(request)
-
         self._add_vary_by_cookie(request)
 
         _, ticket = request.auth_cookie.get_value()
         request.find_service(name="auth_ticket").remove_ticket(ticket)
 
         # Clear the session by invalidating it
-        if self._have_session:
+        if self._has_session(request):
             request.session.invalidate()
 
         return request.auth_cookie.headers_forget()
@@ -85,8 +76,6 @@ class AuthServicePolicy(IdentityBasedPolicy):
 
         request.add_response_callback(vary_add)
 
-    @staticmethod
-    def _session_registered(request):
-        factory = request.registry.queryUtility(ISessionFactory)
-
-        return False if factory is None else True
+    @lru_cache(1)
+    def _has_session(self, request):
+        return bool(request.registry.queryUtility(ISessionFactory))
