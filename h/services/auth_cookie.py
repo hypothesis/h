@@ -56,7 +56,7 @@ class AuthCookieService:
             ticket.expires = datetime.utcnow() + self.TICKET_TTL
 
         # Update the user cache to allow quick verification if we are called
-        self._user = ticket._user
+        self._user = ticket.user
 
         return self._user
 
@@ -72,20 +72,15 @@ class AuthCookieService:
         if self._user is None:
             raise ValueError("Cannot find user with userid %s" % userid)
 
-        ticket_id = (
-            base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
+        ticket = AuthTicket(
+            id=base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii"),
+            user=self._user,
+            user_userid=self._user.userid,
+            expires=datetime.utcnow() + self.TICKET_TTL,
         )
+        self._session.add(ticket)
 
-        self._session.add(
-            AuthTicket(
-                id=ticket_id,
-                user=self._user,
-                user_userid=self._user.userid,
-                expires=datetime.utcnow() + self.TICKET_TTL,
-            )
-        )
-
-        return self._cookie.get_headers([userid, ticket_id])
+        return self._cookie.get_headers([self._user.userid, ticket.id])
 
     def revoke_cookie(self):
         """Create headers to revoke the cookie used to log in a user.
