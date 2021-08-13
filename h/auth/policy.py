@@ -276,6 +276,10 @@ class AuthClientPolicy:
             except InvalidUserId:  # raised if userid is invalidly formatted
                 return None  # invalid user, so we are failing here
 
+            # If you forward a user it must exist and match your authority
+            if not user or user.authority != client.authority:
+                return None
+
         return principals_for_identity(Identity(user=user, auth_client=client))
 
     @staticmethod
