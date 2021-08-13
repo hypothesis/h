@@ -21,9 +21,11 @@ class AuthServicePolicy(IdentityBasedPolicy):
         if auth_svc.user:
             return Identity(user=auth_svc.user)
 
-        userid, ticket = request.auth_cookie.get_value()
+        userid, ticket_id = request.auth_cookie.get_value()
+        if ticket_id is None:
+            return None
 
-        if user := auth_svc.verify_ticket(userid, ticket):
+        if user := auth_svc.verify_ticket(userid, ticket_id):
             return Identity(user=user)
 
         return None
@@ -33,14 +35,14 @@ class AuthServicePolicy(IdentityBasedPolicy):
 
         self._add_vary_by_cookie(request)
 
-        prev_userid = self.authenticated_userid(request)
+        previous_userid = self.authenticated_userid(request)
 
         ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
         request.find_service(name="auth_ticket").add_ticket(userid, ticket)
 
         # Clear the previous session
         if self._has_session(request):
-            if prev_userid != userid:
+            if previous_userid != userid:
                 request.session.invalidate()
             else:
                 # We are logging in the same user that is already logged in, we
@@ -58,8 +60,8 @@ class AuthServicePolicy(IdentityBasedPolicy):
 
         self._add_vary_by_cookie(request)
 
-        _, ticket = request.auth_cookie.get_value()
-        request.find_service(name="auth_ticket").remove_ticket(ticket)
+        _, ticket_id = request.auth_cookie.get_value()
+        request.find_service(name="auth_ticket").remove_ticket(ticket_id)
 
         # Clear the session by invalidating it
         if self._has_session(request):
