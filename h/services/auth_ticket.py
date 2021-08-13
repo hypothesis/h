@@ -12,29 +12,12 @@ TICKET_TTL = datetime.timedelta(days=7)
 TICKET_REFRESH_INTERVAL = datetime.timedelta(minutes=1)
 
 
-class AuthTicketNotLoadedError(Exception):
-    pass
-
-
 class AuthTicketService:
     def __init__(self, session, user_service):
         self.session = session
         self.user_service = user_service
 
-        self._user = None
-
-    def user(self):
-        """
-        Return current userid, or None.
-
-        Raises ``AuthTicketNotLoadedError`` when auth ticket has not been
-        loaded yet, which signals the auth policy to call ``verify_ticket``.
-        """
-
-        if self._user is None:
-            raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
-
-        return self._user
+        self.user = None
 
     def verify_ticket(self, userid, ticket_id):
         """
@@ -58,9 +41,9 @@ class AuthTicketService:
         )
 
         if ticket is None:
-            return False
+            return None
 
-        self._user = ticket.user
+        self.user = ticket.user
 
         # We don't want to update the `expires` column of an auth ticket on
         # every single request, but only when the ticket hasn't been touched
@@ -68,32 +51,29 @@ class AuthTicketService:
         if (utcnow() - ticket.updated) > TICKET_REFRESH_INTERVAL:
             ticket.expires = utcnow() + TICKET_TTL
 
-        return True
+        return self.user
 
     def add_ticket(self, userid, ticket_id):
         """Store a new ticket with the user and ticket id in the database."""
 
-        user = self.user_service.fetch(userid)
-        if user is None:
+        self.user = self.user_service.fetch(userid)
+        if self.user is None:
             raise ValueError("Cannot find user with userid %s" % userid)
 
         ticket = models.AuthTicket(
             id=ticket_id,
-            user=user,
-            user_userid=user.userid,
+            user=self.user,
+            user_userid=self.user.userid,
             expires=(utcnow() + TICKET_TTL),
         )
         self.session.add(ticket)
-        # We cache the new userid, this will allow us to migrate the old
-        # session policy to this new ticket policy.
-        self._user = user
 
     def remove_ticket(self, ticket_id):
         """Delete a ticket by id from the database."""
 
         if ticket_id:
             self.session.query(models.AuthTicket).filter_by(id=ticket_id).delete()
-        self._user = None
+        self.user = None
 
 
 def auth_ticket_service_factory(_context, request):
