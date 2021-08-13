@@ -3,7 +3,6 @@ import datetime
 import sqlalchemy as sa
 
 from h import models
-from h.security import Identity, principals_for_identity
 
 TICKET_TTL = datetime.timedelta(days=7)
 
@@ -36,14 +35,6 @@ class AuthTicketService:
             raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
 
         return self._user
-
-    def groups(self):
-        """Return security principals of the logged-in user."""
-
-        if self._user is None:
-            raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
-
-        return principals_for_identity(Identity(user=self._user))
 
     def verify_ticket(self, userid, ticket_id):
         """

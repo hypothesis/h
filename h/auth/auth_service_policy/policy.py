@@ -5,57 +5,41 @@ from pyramid.interfaces import IAuthenticationPolicy, ISessionFactory
 from pyramid.security import Authenticated, Everyone
 from zope.interface import implementer
 
+from h.auth.policy import IdentityBasedPolicy
+from h.security import Identity
+from h.services.auth_ticket import AuthTicketNotLoadedError
+
 UNSET = object()
 
 
 @implementer(IAuthenticationPolicy)
-class AuthServicePolicy(object):
+class AuthServicePolicy(IdentityBasedPolicy):
     _have_session = UNSET
 
     def unauthenticated_userid(self, request):
         """We do not allow the unauthenticated userid to be used."""
 
-    def authenticated_userid(self, request):
-        """Returns the authenticated userid for this request."""
-
+    def identity(self, request):
         auth_svc = request.find_service(name="auth_ticket")
         self._add_vary_callback(request, request.auth_cookie.vary)
 
+        # Check and see if another method has pre-populated the user
         try:
-            userid = auth_svc.user().userid
+            return Identity(user=auth_svc.user())
+        except AuthTicketNotLoadedError:
+            pass
 
-        except Exception:
-            userid, ticket = request.auth_cookie.get_value()
+        userid, ticket = request.auth_cookie.get_value()
 
-            # Verify the userid and the ticket, even if None
-            auth_svc.verify_ticket(userid, ticket)
+        # Verify the userid and the ticket, even if None
+        if not auth_svc.verify_ticket(userid, ticket):
+            return None
 
-            try:
-                # This should now return None or the userid
-                userid = auth_svc.user().userid
-            except Exception:
-                userid = None
-
-        return userid
-
-    def effective_principals(self, request):
-        """A list of effective principals derived from request."""
-
-        effective_principals = [Everyone]
-
-        userid = self.authenticated_userid(request)
-
-        if userid is None:
-            return effective_principals
-
-        if userid in (Authenticated, Everyone):
-            return effective_principals
-
-        effective_principals.append(Authenticated)
-        effective_principals.append(userid)
-        effective_principals.extend(request.find_service(name="auth_ticket").groups())
-
-        return effective_principals
+        try:
+            # This should now return None or the userid
+            return Identity(user=auth_svc.user())
+        except AuthTicketNotLoadedError:
+            return None
 
     def remember(self, request, userid, **kw):
         """Returns a list of headers that are to be set from the source service."""
