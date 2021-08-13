@@ -1,7 +1,7 @@
 """Authentication configuration."""
 import logging
 
-from h.auth.auth_service_policy import AuthServicePolicy, factory_factory
+from h.auth.auth_service_policy import AuthCookie, AuthServicePolicy
 from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
@@ -22,19 +22,14 @@ log = logging.getLogger(__name__)
 def includeme(config):  # pragma: no cover
     settings = config.registry.settings
 
-    cookie_secret = derive_key(
+    settings["h_auth_cookie_secret"] = derive_key(
         settings["secret_key"], settings["secret_salt"], b"h.auth.cookie_secret"
-    )
-    config.register_service_factory(
-        factory_factory(secret=cookie_secret),
-        name="cookie",
     )
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
     config.set_authentication_policy(
         _get_policy(
-            cookie_secret=cookie_secret,
             proxy_auth=config.registry.settings.get("h.proxy_auth"),
         )
     )
@@ -43,10 +38,11 @@ def includeme(config):  # pragma: no cover
     config.add_request_method(default_authority, name="default_authority", reify=True)
 
     # Allow retrieval of the auth token (if present) from the request object.
-    config.add_request_method(".tokens.auth_token", reify=True)
+    config.add_request_method("h.auth.tokens.auth_token", reify=True)
+    config.add_request_method(AuthCookie, name="auth_cookie", reify=True)
 
 
-def _get_policy(cookie_secret, proxy_auth):  # pragma: no cover
+def _get_policy(proxy_auth):  # pragma: no cover
     if proxy_auth:
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "

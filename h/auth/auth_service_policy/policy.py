@@ -18,14 +18,14 @@ class AuthServicePolicy(object):
     def authenticated_userid(self, request):
         """Returns the authenticated userid for this request."""
 
-        cookie_svc, auth_svc = self._find_services(request)
-        self._add_vary_callback(request, cookie_svc.vary)
+        auth_svc = request.find_service(name="auth_ticket")
+        self._add_vary_callback(request, request.auth_cookie.vary)
 
         try:
             userid = auth_svc.userid()
 
         except Exception:
-            principal, ticket = cookie_svc.get_value()
+            principal, ticket = request.auth_cookie.get_value()
 
             # Verify the principal and the ticket, even if None
             auth_svc.verify_ticket(principal, ticket)
@@ -44,7 +44,6 @@ class AuthServicePolicy(object):
         effective_principals = [Everyone]
 
         userid = self.authenticated_userid(request)
-        _, auth_svc = self._find_services(request)
 
         if userid is None:
             return effective_principals
@@ -54,7 +53,7 @@ class AuthServicePolicy(object):
 
         effective_principals.append(Authenticated)
         effective_principals.append(userid)
-        effective_principals.extend(auth_svc.groups())
+        effective_principals.extend(request.find_service(name="auth_ticket").groups())
 
         return effective_principals
 
@@ -64,13 +63,11 @@ class AuthServicePolicy(object):
             self._have_session = self._session_registered(request)
 
         prev_userid = self.authenticated_userid(request)
-
-        cookie_svc, auth_svc = self._find_services(request)
-        self._add_vary_callback(request, cookie_svc.vary)
+        self._add_vary_callback(request, request.auth_cookie.vary)
 
         ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
 
-        auth_svc.add_ticket(principal, ticket)
+        request.find_service(name="auth_ticket").add_ticket(principal, ticket)
 
         # Clear the previous session
         if self._have_session:
@@ -85,7 +82,7 @@ class AuthServicePolicy(object):
                 request.session.update(data)
                 request.session.new_csrf_token()
 
-        return cookie_svc.headers_remember([principal, ticket])
+        return request.auth_cookie.headers_remember([principal, ticket])
 
     def forget(self, request):
         """A list of headers which will delete appropriate cookies."""
@@ -93,17 +90,16 @@ class AuthServicePolicy(object):
         if self._have_session is UNSET:
             self._have_session = self._session_registered(request)
 
-        cookie_svc, auth_svc = self._find_services(request)
-        self._add_vary_callback(request, cookie_svc.vary)
+        self._add_vary_callback(request, request.auth_cookie.vary)
 
-        _, ticket = cookie_svc.get_value()
-        auth_svc.remove_ticket(ticket)
+        _, ticket = request.auth_cookie.get_value()
+        request.find_service(name="auth_ticket").remove_ticket(ticket)
 
         # Clear the session by invalidating it
         if self._have_session:
             request.session.invalidate()
 
-        return cookie_svc.headers_forget()
+        return request.auth_cookie.headers_forget()
 
     @staticmethod
     def _add_vary_callback(request, vary_by):
@@ -113,13 +109,6 @@ class AuthServicePolicy(object):
             response.vary = list(vary)
 
         request.add_response_callback(vary_add)
-
-    @staticmethod
-    def _find_services(request):
-        cookie_svc = request.find_service(name="cookie")
-        auth_svc = request.find_service(name="auth_ticket")
-
-        return cookie_svc, auth_svc
 
     @staticmethod
     def _session_registered(request):
