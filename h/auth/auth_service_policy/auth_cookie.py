@@ -4,8 +4,6 @@ from webob.cookies import SignedCookieProfile
 class AuthCookie:
     """An authentication source that uses a unique cookie."""
 
-    vary = ["Cookie"]
-
     def __init__(self, request):
         cookie = SignedCookieProfile(
             secret=request.registry.settings["h_auth_cookie_secret"],
@@ -23,7 +21,7 @@ class AuthCookie:
         val = self.cookie.get_value()
 
         if val is None:
-            return [None, None]
+            return None, None
 
         return val
 
