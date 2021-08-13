@@ -22,17 +22,17 @@ class AuthServicePolicy(object):
         self._add_vary_callback(request, request.auth_cookie.vary)
 
         try:
-            userid = auth_svc.userid()
+            userid = auth_svc.user().userid
 
         except Exception:
-            principal, ticket = request.auth_cookie.get_value()
+            userid, ticket = request.auth_cookie.get_value()
 
-            # Verify the principal and the ticket, even if None
-            auth_svc.verify_ticket(principal, ticket)
+            # Verify the userid and the ticket, even if None
+            auth_svc.verify_ticket(userid, ticket)
 
             try:
                 # This should now return None or the userid
-                userid = auth_svc.userid()
+                userid = auth_svc.user().userid
             except Exception:
                 userid = None
 
@@ -57,7 +57,7 @@ class AuthServicePolicy(object):
 
         return effective_principals
 
-    def remember(self, request, principal, **kw):
+    def remember(self, request, userid, **kw):
         """Returns a list of headers that are to be set from the source service."""
         if self._have_session is UNSET:
             self._have_session = self._session_registered(request)
@@ -67,11 +67,11 @@ class AuthServicePolicy(object):
 
         ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
 
-        request.find_service(name="auth_ticket").add_ticket(principal, ticket)
+        request.find_service(name="auth_ticket").add_ticket(userid, ticket)
 
         # Clear the previous session
         if self._have_session:
-            if prev_userid != principal:
+            if prev_userid != userid:
                 request.session.invalidate()
             else:
                 # We are logging in the same user that is already logged in, we
@@ -82,7 +82,7 @@ class AuthServicePolicy(object):
                 request.session.update(data)
                 request.session.new_csrf_token()
 
-        return request.auth_cookie.headers_remember([principal, ticket])
+        return request.auth_cookie.headers_remember([userid, ticket])
 
     def forget(self, request):
         """A list of headers which will delete appropriate cookies."""
