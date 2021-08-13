@@ -18,14 +18,14 @@ class AuthServicePolicy(object):
     def authenticated_userid(self, request):
         """Returns the authenticated userid for this request."""
 
-        source_svc, auth_svc = self._find_services(request)
-        self._add_vary_callback(request, source_svc.vary)
+        cookie_svc, auth_svc = self._find_services(request)
+        self._add_vary_callback(request, cookie_svc.vary)
 
         try:
             userid = auth_svc.userid()
 
         except Exception:
-            principal, ticket = source_svc.get_value()
+            principal, ticket = cookie_svc.get_value()
 
             # Verify the principal and the ticket, even if None
             auth_svc.verify_ticket(principal, ticket)
@@ -65,8 +65,8 @@ class AuthServicePolicy(object):
 
         prev_userid = self.authenticated_userid(request)
 
-        source_svc, auth_svc = self._find_services(request)
-        self._add_vary_callback(request, source_svc.vary)
+        cookie_svc, auth_svc = self._find_services(request)
+        self._add_vary_callback(request, cookie_svc.vary)
 
         ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
 
@@ -85,7 +85,7 @@ class AuthServicePolicy(object):
                 request.session.update(data)
                 request.session.new_csrf_token()
 
-        return source_svc.headers_remember([principal, ticket])
+        return cookie_svc.headers_remember([principal, ticket])
 
     def forget(self, request):
         """A list of headers which will delete appropriate cookies."""
@@ -93,17 +93,17 @@ class AuthServicePolicy(object):
         if self._have_session is UNSET:
             self._have_session = self._session_registered(request)
 
-        source_svc, auth_svc = self._find_services(request)
-        self._add_vary_callback(request, source_svc.vary)
+        cookie_svc, auth_svc = self._find_services(request)
+        self._add_vary_callback(request, cookie_svc.vary)
 
-        _, ticket = source_svc.get_value()
+        _, ticket = cookie_svc.get_value()
         auth_svc.remove_ticket(ticket)
 
         # Clear the session by invalidating it
         if self._have_session:
             request.session.invalidate()
 
-        return source_svc.headers_forget()
+        return cookie_svc.headers_forget()
 
     @staticmethod
     def _add_vary_callback(request, vary_by):
@@ -116,10 +116,10 @@ class AuthServicePolicy(object):
 
     @staticmethod
     def _find_services(request):
-        source_svc = request.find_service(name="cookie")
+        cookie_svc = request.find_service(name="cookie")
         auth_svc = request.find_service(name="auth_ticket")
 
-        return source_svc, auth_svc
+        return cookie_svc, auth_svc
 
     @staticmethod
     def _session_registered(request):
