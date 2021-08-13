@@ -1,7 +1,7 @@
 """Authentication configuration."""
 import logging
 
-from h.auth.auth_service_policy import AuthServicePolicy
+from h.auth.auth_service_policy import AuthServicePolicy, factory_factory
 from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
@@ -14,11 +14,21 @@ from h.auth.util import default_authority
 # We export this for the websocket to use as it's main policy
 __all__ = ("TokenAuthenticationPolicy",)
 
+from h.security import derive_key
+
 log = logging.getLogger(__name__)
 
 
 def includeme(config):  # pragma: no cover
-    config.include("h.auth.auth_service_policy")
+    settings = config.registry.settings
+
+    cookie_secret = derive_key(
+        settings["secret_key"], settings["secret_salt"], b"h.auth.cookie_secret"
+    )
+    config.register_service_factory(
+        factory_factory(secret=cookie_secret),
+        name="cookie",
+    )
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
