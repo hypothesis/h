@@ -17,6 +17,9 @@ disable=bad-continuation,
         missing-yield-doc,
         missing-return-type-doc,
         missing-yield-type-doc,
+        missing-return-doc,
+        missing-raises-doc,
+        missing-param-doc,
         wrong-import-order,
         # We use isort to sort and group our imports, so we don't need PyLint to
         # check them for us.
@@ -26,22 +29,15 @@ disable=bad-continuation,
         # check formatting for us.
         bad-continuation,
         line-too-long,
-
         too-few-public-methods,
+        duplicate-code,
 
         # Ignored during pep8 -> pylint transition
         unused-argument,
         too-many-arguments,
         super-init-not-called,
-        protected-access,
-        no-name-in-module,
-        missing-return-doc,
-        missing-raises-doc,
-        missing-param-doc,
         invalid-name,
-        inconsistent-return-statements,
         fixme,
-        duplicate-code,
 
 
 
