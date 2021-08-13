@@ -106,7 +106,7 @@ class TestAnnotationJSONPresentationService:
             AnnotationJSONPresenter.return_value.asdict.return_value,
         ]
 
-    @pytest.mark.parametrize("attribute", ("document", "moderation"))
+    @pytest.mark.parametrize("attribute", ("document", "moderation", "group"))
     @pytest.mark.parametrize("with_preload", (True, False))
     def test_present_all_preloading_is_effective(
         self, svc, annotation, db_session, query_counter, attribute, with_preload
