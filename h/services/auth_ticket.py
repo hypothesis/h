@@ -21,15 +21,11 @@ class AuthTicketService:
 
     def verify_ticket(self, userid, ticket_id):
         """
-        Verify an authentication claim (usually extracted from a cookie) against the stored tickets.
+        Verify an authentication claim (from a cookie) against the stored tickets.
 
         This will only successfully verify a ticket when it is found in the
         database, the principal is the same, and it hasn't expired yet.
         """
-
-        if ticket_id is None:
-            return False
-
         ticket = (
             self.session.query(models.AuthTicket)
             .filter(
