@@ -3,8 +3,8 @@ import re
 
 import sqlalchemy as sa
 
-from h.auth import role
 from h.models.auth_client import AuthClient, GrantType
+from h.security.role import Role
 
 
 def groupfinder(userid, request):
@@ -37,11 +37,11 @@ def principals_for_user(user):
         return None
 
     principals = set()
-    principals.add(role.User)
+    principals.add(Role.USER)
     if user.admin:
-        principals.add(role.Admin)
+        principals.add(Role.ADMIN)
     if user.staff:
-        principals.add(role.Staff)
+        principals.add(Role.STAFF)
     for group in user.groups:
         principals.add("group:{group.pubid}".format(group=group))
     principals.add("authority:{authority}".format(authority=user.authority))
@@ -129,7 +129,7 @@ def principals_for_auth_client(client):
         )
     )
     principals.add("client_authority:{authority}".format(authority=client.authority))
-    principals.add(role.AuthClient)
+    principals.add(Role.AUTH_CLIENT)
 
     return list(principals)
 
@@ -153,7 +153,7 @@ def principals_for_auth_client_user(user, client):
 
     user_principals = principals_for_user(user)
     client_principals = principals_for_auth_client(client)
-    auth_client_principals = [role.AuthClientUser]
+    auth_client_principals = [Role.AUTH_CLIENT_FORWARDED_USER]
 
     all_principals = (
         userid_principals + user_principals + client_principals + auth_client_principals

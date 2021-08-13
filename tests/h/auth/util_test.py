@@ -4,9 +4,10 @@ from unittest import mock
 import pytest
 import sqlalchemy as sa
 
-from h.auth import role, util
+from h.auth import util
 from h.models import AuthClient
 from h.models.auth_client import GrantType
+from h.security.role import Role
 
 FakeUser = namedtuple("FakeUser", ["authority", "admin", "staff", "groups"])
 FakeGroup = namedtuple("FakeGroup", ["pubid"])
@@ -31,25 +32,25 @@ class TestGroupfinder:
     (
         # User isn't found in the database: they're not authenticated at all
         (None, None),
-        # User found but not staff, admin, or a member of any groups: only role is role.User
+        # User found but not staff, admin, or a member of any groups: only role is Role.USER
         (
             FakeUser(authority="example.com", admin=False, staff=False, groups=[]),
-            ["authority:example.com", role.User],
+            ["authority:example.com", Role.USER],
         ),
-        # User is admin: role.Admin should be in principals
+        # User is admin: Role.ADMIN should be in principals
         (
             FakeUser(authority="foobar.org", admin=True, staff=False, groups=[]),
-            ["authority:foobar.org", role.Admin, role.User],
+            ["authority:foobar.org", Role.ADMIN, Role.USER],
         ),
-        # User is staff: role.Staff should be in principals
+        # User is staff: Role.STAFF should be in principals
         (
             FakeUser(authority="example.com", admin=False, staff=True, groups=[]),
-            ["authority:example.com", role.Staff, role.User],
+            ["authority:example.com", Role.STAFF, Role.USER],
         ),
         # User is admin and staff
         (
             FakeUser(authority="foobar.org", admin=True, staff=True, groups=[]),
-            ["authority:foobar.org", role.Admin, role.Staff, role.User],
+            ["authority:foobar.org", Role.ADMIN, Role.STAFF, Role.USER],
         ),
         # User is a member of some groups
         (
@@ -59,7 +60,7 @@ class TestGroupfinder:
                 staff=False,
                 groups=[FakeGroup("giraffe"), FakeGroup("elephant")],
             ),
-            ["authority:example.com", "group:giraffe", "group:elephant", role.User],
+            ["authority:example.com", "group:giraffe", "group:elephant", Role.USER],
         ),
         # User is admin, staff, and a member of some groups
         (
@@ -72,9 +73,9 @@ class TestGroupfinder:
             [
                 "authority:foobar.org",
                 "group:donkeys",
-                role.Admin,
-                role.Staff,
-                role.User,
+                Role.ADMIN,
+                Role.STAFF,
+                Role.USER,
             ],
         ),
     ),
@@ -160,15 +161,15 @@ class TestPrincipalsForAuthClient:
             in principals
         )
 
-    def test_it_sets_authclient_role(self, auth_client):
+    def test_it_sets_authclient_Role(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 
-        assert role.AuthClient in principals
+        assert Role.AUTH_CLIENT in principals
 
-    def test_it_does_not_set_user_role(self, auth_client):
+    def test_it_does_not_set_user_Role(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 
-        assert role.User not in principals
+        assert Role.USER not in principals
 
     def test_it_returns_principals_as_list(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
@@ -199,12 +200,12 @@ class TestPrincipalsForAuthClientUser:
 
         assert user.userid in principals
 
-    def test_it_adds_the_authclientuser_role(self, factories, auth_client):
+    def test_it_adds_the_authclientuser_Role(self, factories, auth_client):
         user = factories.User(authority=auth_client.authority)
 
         principals = util.principals_for_auth_client_user(user, auth_client)
 
-        assert role.AuthClientUser in principals
+        assert Role.AUTH_CLIENT_FORWARDED_USER in principals
 
     def test_it_returns_combined_principals(self, factories, auth_client):
         user = factories.User(authority=auth_client.authority)
@@ -221,7 +222,7 @@ class TestPrincipalsForAuthClientUser:
             in principals
         )
         assert "authority:{authority}".format(authority=auth_client.authority)
-        assert role.AuthClient in principals
+        assert Role.AUTH_CLIENT in principals
 
 
 class TestVerifyAuthClient:

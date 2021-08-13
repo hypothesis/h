@@ -1,25 +1,25 @@
 from pyramid import security
 from pyramid.security import DENY_ALL, Allow
 
-from h.auth import role
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.security.permissions import Permission
+from h.security.role import Role
 
 
 class ACL:
     @classmethod
     def for_admin_pages(cls):
-        yield Allow, role.Staff, Permission.AdminPage.INDEX
-        yield Allow, role.Staff, Permission.AdminPage.GROUPS
-        yield Allow, role.Staff, Permission.AdminPage.MAILER
-        yield Allow, role.Staff, Permission.AdminPage.ORGANIZATIONS
-        yield Allow, role.Staff, Permission.AdminPage.USERS
-        yield Allow, role.Admin, security.ALL_PERMISSIONS
+        yield Allow, Role.STAFF, Permission.AdminPage.INDEX
+        yield Allow, Role.STAFF, Permission.AdminPage.GROUPS
+        yield Allow, Role.STAFF, Permission.AdminPage.MAILER
+        yield Allow, Role.STAFF, Permission.AdminPage.ORGANIZATIONS
+        yield Allow, Role.STAFF, Permission.AdminPage.USERS
+        yield Allow, Role.ADMIN, security.ALL_PERMISSIONS
         yield DENY_ALL
 
     @classmethod
     def for_user(cls, user=None):
-        yield Allow, role.AuthClient, Permission.User.CREATE
+        yield Allow, Role.AUTH_CLIENT, Permission.User.CREATE
 
         if not user:
             return
@@ -47,12 +47,12 @@ class ACL:
     @classmethod
     def for_profile(cls):
         # A user can always update their own profile
-        yield Allow, role.User, Permission.Profile.UPDATE
+        yield Allow, Role.USER, Permission.Profile.UPDATE
 
     @classmethod
     def for_group(cls, group=None):
         # Any logged in user may create a group
-        yield Allow, role.User, Permission.Group.CREATE
+        yield Allow, Role.USER, Permission.Group.CREATE
 
         if group:
             # Most permissions are contextual based on group
@@ -61,7 +61,7 @@ class ACL:
             # If and only if there's no group then give UPSERT permission to
             # users to allow them  to create a new group. Upserting an
             # existing group is a different
-            yield Allow, role.User, Permission.Group.UPSERT
+            yield Allow, Role.USER, Permission.Group.UPSERT
 
         yield DENY_ALL
 
@@ -100,10 +100,10 @@ class ACL:
         yield Allow, client_authority_principal, Permission.Group.MEMBER_ADD
         yield Allow, client_authority_principal, Permission.Group.ADMIN
 
-        # Those with the admin or staff role should be able to admin/edit any
+        # Those with the admin or staff Role should be able to admin/edit any
         # group
-        yield Allow, role.Staff, Permission.Group.ADMIN
-        yield Allow, role.Admin, Permission.Group.ADMIN
+        yield Allow, Role.STAFF, Permission.Group.ADMIN
+        yield Allow, Role.ADMIN, Permission.Group.ADMIN
 
         if group.creator:
             yield Allow, group.creator.userid, Permission.Group.ADMIN

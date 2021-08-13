@@ -6,10 +6,10 @@ from h_matchers import Any
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.auth import role
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.security import Permission
 from h.security.acl import ACL
+from h.security.role import Role
 
 
 class TestACLForAdminPages:
@@ -25,8 +25,8 @@ class TestACLForAdminPages:
     )
     def test_staff_permissions(self, admin_page_permits, permission):
         assert not admin_page_permits([], permission)
-        assert admin_page_permits([role.Staff], permission)
-        assert admin_page_permits([role.Admin], permission)
+        assert admin_page_permits([Role.STAFF], permission)
+        assert admin_page_permits([Role.ADMIN], permission)
 
     @pytest.mark.parametrize(
         "permission",
@@ -42,8 +42,8 @@ class TestACLForAdminPages:
     )
     def test_admin_only_permissions(self, admin_page_permits, permission):
         assert not admin_page_permits([], permission)
-        assert not admin_page_permits([role.Staff], permission)
-        assert admin_page_permits([role.Admin], permission)
+        assert not admin_page_permits([Role.STAFF], permission)
+        assert admin_page_permits([Role.ADMIN], permission)
 
     @pytest.fixture
     def admin_page_permits(self, permits):
@@ -75,7 +75,8 @@ class TestACLForUser:
     def test_a_user_is_not_required_for_create(self, permits):
         acl_object = ObjectWithACL(ACL.for_user(user=None))
 
-        permits(acl_object, [role.AuthClient], Permission.User.CREATE)
+        assert permits(acl_object, [Role.AUTH_CLIENT], Permission.User.CREATE)
+        assert not permits(acl_object, [Role.AUTH_CLIENT], Permission.User.READ)
 
     @pytest.fixture
     def user_permits(self, permits, user):
@@ -105,12 +106,15 @@ class TestForBulkAPI:
             == is_permitted
         )
 
+    def test_it_without_client_authority(self):
+        assert not list(ACL.for_bulk_api(client_authority=None))
+
 
 class TestACLForProfile:
     def test_it(self, permits):
         acl = ACL.for_profile()
 
-        assert permits(ObjectWithACL(acl), [role.User], Permission.Profile.UPDATE)
+        assert permits(ObjectWithACL(acl), [Role.USER], Permission.Profile.UPDATE)
         assert not permits(ObjectWithACL(acl), [], Permission.Profile.UPDATE)
 
 
@@ -118,15 +122,15 @@ class TestACLForGroup:
     def test_logged_in_users_get_create_permission(
         self, group_permits, no_group_permits
     ):
-        assert group_permits([role.User], Permission.Group.CREATE)
+        assert group_permits([Role.USER], Permission.Group.CREATE)
         assert not group_permits([], Permission.Group.CREATE)
-        assert no_group_permits([role.User], Permission.Group.CREATE)
+        assert no_group_permits([Role.USER], Permission.Group.CREATE)
         assert not no_group_permits([], Permission.Group.CREATE)
 
     def test_logged_in_users_get_upsert_permission_when_theres_no_group(
         self, no_group_permits
     ):
-        assert no_group_permits([role.User], Permission.Group.UPSERT)
+        assert no_group_permits([Role.USER], Permission.Group.UPSERT)
         assert not no_group_permits([], Permission.Group.UPSERT)
 
     def test_authority_joinable(self, group, group_permits):
@@ -220,10 +224,10 @@ class TestACLForGroup:
         )
 
     def test_staff_user_has_admin_permission_on_any_group(self, group, group_permits):
-        assert group_permits([role.Staff], Permission.Group.ADMIN)
+        assert group_permits([Role.STAFF], Permission.Group.ADMIN)
 
     def test_admin_user_has_admin_permission_on_any_group(self, group, group_permits):
-        assert group_permits([role.Admin], Permission.Group.ADMIN)
+        assert group_permits([Role.ADMIN], Permission.Group.ADMIN)
 
     @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))
     def test_creator_permissions(
@@ -312,7 +316,7 @@ class TestACLForAnnotation:
             (Permission.Group.READ, Permission.Annotation.READ_REALTIME_UPDATES),
         ),
     )
-    def test_it_mirrors_permissions_from_the_group_for_shared_annotations(
+    def test_it_mirrors_group_permissions_for_shared_annotations(
         self,
         annotation,
         group,
@@ -334,6 +338,15 @@ class TestACLForAnnotation:
         # specific. We can tell it's doing it's job of passing on the ACLs by
         # the assertions above
         for_group.assert_called_with(group)
+
+    def test_it_mirrors_group_permissions_for_shared_deleted_annotations(
+        self, annotation, group, for_group, anno_permits
+    ):
+        annotation.shared = True
+        annotation.deleted = True
+        for_group.return_value = [(security.Allow, "principal", Permission.Group.READ)]
+
+        anno_permits(["principal"], Permission.Annotation.READ_REALTIME_UPDATES)
 
     def test_it_with_a_shared_annotation_with_no_group(self, annotation, anno_permits):
         annotation.shared = True
