@@ -19,7 +19,7 @@ class AuthServicePolicy(IdentityBasedPolicy):
 
     def identity(self, request):
         auth_svc = request.find_service(name="auth_ticket")
-        self._add_vary_callback(request, request.auth_cookie.vary)
+        self._add_vary_by_cookie(request)
 
         # Another method has already verified the user for us!
         if auth_svc.user:
@@ -38,7 +38,7 @@ class AuthServicePolicy(IdentityBasedPolicy):
             self._have_session = self._session_registered(request)
 
         prev_userid = self.authenticated_userid(request)
-        self._add_vary_callback(request, request.auth_cookie.vary)
+        self._add_vary_by_cookie(request)
 
         ticket = base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
 
@@ -65,7 +65,7 @@ class AuthServicePolicy(IdentityBasedPolicy):
         if self._have_session is UNSET:
             self._have_session = self._session_registered(request)
 
-        self._add_vary_callback(request, request.auth_cookie.vary)
+        self._add_vary_by_cookie(request)
 
         _, ticket = request.auth_cookie.get_value()
         request.find_service(name="auth_ticket").remove_ticket(ticket)
@@ -77,10 +77,10 @@ class AuthServicePolicy(IdentityBasedPolicy):
         return request.auth_cookie.headers_forget()
 
     @staticmethod
-    def _add_vary_callback(request, vary_by):
+    def _add_vary_by_cookie(request):
         def vary_add(request, response):
             vary = set(response.vary if response.vary is not None else [])
-            vary |= set(vary_by)
+            vary.add("Cookie")
             response.vary = list(vary)
 
         request.add_response_callback(vary_add)
