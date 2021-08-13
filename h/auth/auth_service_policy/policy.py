@@ -2,12 +2,10 @@ import base64
 import os
 
 from pyramid.interfaces import IAuthenticationPolicy, ISessionFactory
-from pyramid.security import Authenticated, Everyone
 from zope.interface import implementer
 
 from h.auth.policy import IdentityBasedPolicy
 from h.security import Identity
-from h.services.auth_ticket import AuthTicketNotLoadedError
 
 UNSET = object()
 
@@ -23,23 +21,16 @@ class AuthServicePolicy(IdentityBasedPolicy):
         auth_svc = request.find_service(name="auth_ticket")
         self._add_vary_callback(request, request.auth_cookie.vary)
 
-        # Check and see if another method has pre-populated the user
-        try:
-            return Identity(user=auth_svc.user())
-        except AuthTicketNotLoadedError:
-            pass
+        # Another method has already verified the user for us!
+        if auth_svc.user:
+            return Identity(user=auth_svc.user)
 
         userid, ticket = request.auth_cookie.get_value()
 
-        # Verify the userid and the ticket, even if None
-        if not auth_svc.verify_ticket(userid, ticket):
-            return None
+        if user := auth_svc.verify_ticket(userid, ticket):
+            return Identity(user=user)
 
-        try:
-            # This should now return None or the userid
-            return Identity(user=auth_svc.user())
-        except AuthTicketNotLoadedError:
-            return None
+        return None
 
     def remember(self, request, userid, **kw):
         """Returns a list of headers that are to be set from the source service."""

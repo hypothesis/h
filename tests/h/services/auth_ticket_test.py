@@ -1,32 +1,26 @@
 from datetime import datetime, timedelta
 
 import pytest
-from h_matchers import Any
 
 from h import models
-from h.security import Identity
 from h.services.auth_ticket import (
     TICKET_REFRESH_INTERVAL,
     TICKET_TTL,
-    AuthTicketNotLoadedError,
     AuthTicketService,
     auth_ticket_service_factory,
 )
 
 
 class TestAuthTicketService:
-    def test_user_raises_when_ticket_has_not_been_loaded_yet(self, svc):
-        with pytest.raises(AuthTicketNotLoadedError) as exc:
-            svc.user()
-        assert str(exc.value) == "auth ticket is not loaded yet"
+    def test_user_is_None_when_ticket_has_not_been_loaded_yet(self, svc):
+        assert svc.user is None
 
     def test_user_returns_the_user(self, svc, ticket):
         svc.user_service.fetch.return_value = ticket.user
 
         svc.verify_ticket(ticket.user_userid, ticket.id)
 
-        user = svc.user()
-        assert user == ticket.user
+        assert svc.user == ticket.user
 
     def test_verify_ticket_fails_when_id_is_None(self, svc):
         assert not svc.verify_ticket(self.userid, None)
@@ -52,8 +46,10 @@ class TestAuthTicketService:
 
         assert not svc.verify_ticket(ticket.user_userid, ticket.id)
 
-    def test_verify_ticket_succeeds_when_ticket_is_valid(self, svc, db_session, ticket):
-        assert svc.verify_ticket(ticket.user_userid, ticket.id) is True
+    def test_verify_ticket_returns_the_user_when_ticket_is_valid(
+        self, svc, db_session, ticket
+    ):
+        assert svc.verify_ticket(ticket.user_userid, ticket.id) == ticket.user
 
     def test_verify_ticket_skips_extending_expiration_when_within_refresh_interval(
         self, svc, db_session, factories
@@ -113,10 +109,9 @@ class TestAuthTicketService:
     def test_add_ticket_caches_the_user(self, svc, db_session, user):
         svc.user_service.fetch.return_value = user
 
-        # pylint:disable=protected-access
-        assert svc._user is None
+        assert svc.user is None
         svc.add_ticket(user.userid, "the-ticket-id")
-        assert svc._user == user
+        assert svc.user == user
 
     @pytest.mark.usefixtures("ticket")
     def test_remove_ticket_skips_deleting_when_id_is_None(self, svc, db_session):
@@ -141,10 +136,9 @@ class TestAuthTicketService:
     def test_remove_ticket_clears_user_cache(self, svc, ticket):
         svc.verify_ticket(ticket.user_userid, ticket.id)
 
-        # pylint:disable=protected-access
-        assert svc._user is not None
+        assert svc.user is not None
         svc.remove_ticket(ticket.id)
-        assert svc._user is None
+        assert svc.user is None
 
     @property
     def userid(self):
