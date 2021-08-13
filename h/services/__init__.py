@@ -14,8 +14,7 @@ def includeme(config):
         ".annotation_stats.annotation_stats_factory", name="annotation_stats"
     )
     config.register_service_factory(
-        ".auth_ticket.auth_ticket_service_factory",
-        iface="pyramid_authsanity.interfaces.IAuthService",
+        ".auth_ticket.auth_ticket_service_factory", name="auth_ticket"
     )
     config.register_service_factory(
         ".auth_token.auth_token_service_factory", name="auth_token"
