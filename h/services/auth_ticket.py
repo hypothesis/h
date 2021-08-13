@@ -20,11 +20,11 @@ class AuthTicketNotLoadedError(Exception):
 class AuthTicketService:
     def __init__(self, session, user_service):
         self.session = session
-        self.usersvc = user_service
+        self.user_service = user_service
 
-        self._userid = None
+        self._user = None
 
-    def userid(self):
+    def user(self):
         """
         Return current userid, or None.
 
@@ -32,21 +32,20 @@ class AuthTicketService:
         loaded yet, which signals the auth policy to call ``verify_ticket``.
         """
 
-        if self._userid is None:
+        if self._user is None:
             raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
 
-        return self._userid
+        return self._user
 
     def groups(self):
         """Return security principals of the logged-in user."""
 
-        if self._userid is None:
+        if self._user is None:
             raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
 
-        user = self.usersvc.fetch(self._userid)
-        return principals_for_identity(Identity(user=user))
+        return principals_for_identity(Identity(user=self._user))
 
-    def verify_ticket(self, principal, ticket_id):
+    def verify_ticket(self, userid, ticket_id):
         """
         Verify an authentication claim (usually extracted from a cookie) against the stored tickets.
 
@@ -61,7 +60,7 @@ class AuthTicketService:
             self.session.query(models.AuthTicket)
             .filter(
                 models.AuthTicket.id == ticket_id,
-                models.AuthTicket.user_userid == principal,
+                models.AuthTicket.user_userid == userid,
                 models.AuthTicket.expires > sa.func.now(),
             )
             .one_or_none()
@@ -70,7 +69,7 @@ class AuthTicketService:
         if ticket is None:
             return False
 
-        self._userid = ticket.user_userid
+        self._user = ticket.user
 
         # We don't want to update the `expires` column of an auth ticket on
         # every single request, but only when the ticket hasn't been touched
@@ -80,12 +79,12 @@ class AuthTicketService:
 
         return True
 
-    def add_ticket(self, principal, ticket_id):
-        """Store a new ticket with the given id and principal in the database."""
+    def add_ticket(self, userid, ticket_id):
+        """Store a new ticket with the user and ticket id in the database."""
 
-        user = self.usersvc.fetch(principal)
+        user = self.user_service.fetch(userid)
         if user is None:
-            raise ValueError("Cannot find user with userid %s" % principal)
+            raise ValueError("Cannot find user with userid %s" % userid)
 
         ticket = models.AuthTicket(
             id=ticket_id,
@@ -96,14 +95,14 @@ class AuthTicketService:
         self.session.add(ticket)
         # We cache the new userid, this will allow us to migrate the old
         # session policy to this new ticket policy.
-        self._userid = user.userid
+        self._user = user
 
     def remove_ticket(self, ticket_id):
         """Delete a ticket by id from the database."""
 
         if ticket_id:
             self.session.query(models.AuthTicket).filter_by(id=ticket_id).delete()
-        self._userid = None
+        self._user = None
 
 
 def auth_ticket_service_factory(_context, request):
