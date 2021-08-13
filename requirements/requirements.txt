@@ -137,7 +137,6 @@ pyramid==1.10.8
     #   -r requirements/requirements.in
     #   h-assets
     #   h-pyramid-sentry
-    #   pyramid-authsanity
     #   pyramid-exclog
     #   pyramid-jinja2
     #   pyramid-layout
@@ -146,8 +145,6 @@ pyramid==1.10.8
     #   pyramid-sanity
     #   pyramid-services
     #   pyramid-tm
-pyramid-authsanity==1.1.0
-    # via -r requirements/requirements.in
 pyramid-exclog==1.0
     # via -r requirements/requirements.in
 pyramid-jinja2==2.8
@@ -161,9 +158,7 @@ pyramid-retry==2.1.1
 pyramid-sanity==1.0.2
     # via -r requirements/requirements.in
 pyramid-services==2.2
-    # via
-    #   -r requirements/requirements.in
-    #   pyramid-authsanity
+    # via -r requirements/requirements.in
 pyramid-tm==2.4
     # via -r requirements/requirements.in
 pyrsistent==0.17.3
@@ -252,7 +247,6 @@ zope.interface==5.1.0
     #   -r requirements/requirements.in
     #   gevent
     #   pyramid
-    #   pyramid-authsanity
     #   pyramid-retry
     #   pyramid-services
     #   repoze.sendmail
