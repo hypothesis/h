@@ -3,7 +3,6 @@ import os
 
 from pyramid.interfaces import IAuthenticationPolicy, ISessionFactory
 from pyramid.security import Authenticated, Everyone
-from pyramid_authsanity.interfaces import IAuthSourceService
 from zope.interface import implementer
 
 UNSET = object()
@@ -117,7 +116,7 @@ class AuthServicePolicy(object):
 
     @staticmethod
     def _find_services(request):
-        source_svc = request.find_service(IAuthSourceService)
+        source_svc = request.find_service(name="cookie")
         auth_svc = request.find_service(name="auth_ticket")
 
         return source_svc, auth_svc
