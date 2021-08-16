@@ -4,6 +4,11 @@ from zope import interface
 
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
+from h.auth.policy._basic_http_auth import AuthClientPolicy
+from h.auth.policy._cookie import CookieAuthenticationPolicy
+from h.auth.policy._remote_user import RemoteUserAuthenticationPolicy
+from h.auth.policy.bearer_token import TokenAuthenticationPolicy
+
 AUTH_CLIENT_API_WHITELIST = [
     ("api.groups", "POST"),
     ("api.group", "PATCH"),
@@ -19,9 +24,13 @@ AUTH_CLIENT_API_WHITELIST = [
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy:
-    def __init__(self, api_policy, fallback_policy):
-        self.api_policy = api_policy
-        self.fallback_policy = fallback_policy
+    def __init__(self, proxy_auth=False):
+        self.api_policy = APIAuthenticationPolicy()
+
+        if proxy_auth:
+            self.fallback_policy = RemoteUserAuthenticationPolicy()
+        else:
+            self.fallback_policy = CookieAuthenticationPolicy()
 
     def authenticated_userid(self, request):
         if _is_api_request(request):
@@ -68,9 +77,9 @@ class APIAuthenticationPolicy:
     that correspond to certain endpoint services.
     """
 
-    def __init__(self, user_policy, client_policy):
-        self._user_policy = user_policy
-        self._client_policy = client_policy
+    def __init__(self):
+        self._user_policy = TokenAuthenticationPolicy()
+        self._client_policy = AuthClientPolicy()
 
     def authenticated_userid(self, request):
         user_authid = self._user_policy.authenticated_userid(request)

@@ -1,14 +1,7 @@
 """Authentication configuration."""
 import logging
 
-from h.auth.policy import (
-    APIAuthenticationPolicy,
-    AuthClientPolicy,
-    AuthenticationPolicy,
-    CookieAuthenticationPolicy,
-    RemoteUserAuthenticationPolicy,
-    TokenAuthenticationPolicy,
-)
+from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
 from h.auth.util import default_authority
 from h.security import derive_key
 
@@ -28,18 +21,8 @@ def includeme(config):  # pragma: no cover
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
-    config.set_authentication_policy(
-        _get_policy(config.registry.settings.get("h.proxy_auth"))
-    )
 
-    # Allow retrieval of the authority from the request object.
-    config.add_request_method(default_authority, name="default_authority", reify=True)
-
-    # Allow retrieval of the auth token (if present) from the request object.
-    config.add_request_method("h.auth.tokens.auth_token", reify=True)
-
-
-def _get_policy(proxy_auth):  # pragma: no cover
+    proxy_auth = config.registry.settings.get("h.proxy_auth")
     if proxy_auth:
         log.warning(
             "Enabling proxy authentication mode: you MUST ensure that "
@@ -49,14 +32,10 @@ def _get_policy(proxy_auth):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-        fallback_policy = RemoteUserAuthenticationPolicy()
+    config.set_authentication_policy(AuthenticationPolicy(proxy_auth=proxy_auth))
 
-    else:
-        fallback_policy = CookieAuthenticationPolicy()
+    # Allow retrieval of the authority from the request object.
+    config.add_request_method(default_authority, name="default_authority", reify=True)
 
-    return AuthenticationPolicy(
-        api_policy=APIAuthenticationPolicy(
-            user_policy=TokenAuthenticationPolicy(), client_policy=AuthClientPolicy()
-        ),
-        fallback_policy=fallback_policy,
-    )
+    # Allow retrieval of the auth token (if present) from the request object.
+    config.add_request_method("h.auth.tokens.auth_token", reify=True)
