@@ -1,7 +1,3 @@
-from functools import lru_cache
-
-from pyramid.interfaces import ISessionFactory
-
 from h.auth.policy import IdentityBasedPolicy
 from h.security import Identity
 
@@ -27,17 +23,16 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
         previous_userid = self.authenticated_userid(request)
 
         # Clear the previous session
-        if self._has_session(request):
-            if previous_userid != userid:
-                request.session.invalidate()
-            else:
-                # We are logging in the same user that is already logged in, we
-                # still want to generate a new session, but we can keep the
-                # existing data
-                data = dict(request.session.items())
-                request.session.invalidate()
-                request.session.update(data)
-                request.session.new_csrf_token()
+        if previous_userid != userid:
+            request.session.invalidate()
+        else:
+            # We are logging in the same user that is already logged in, we
+            # still want to generate a new session, but we can keep the
+            # existing data
+            data = dict(request.session.items())
+            request.session.invalidate()
+            request.session.update(data)
+            request.session.new_csrf_token()
 
         return request.find_service(name="auth_cookie").create_cookie(userid)
 
@@ -47,8 +42,7 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
         self._add_vary_by_cookie(request)
 
         # Clear the session by invalidating it
-        if self._has_session(request):
-            request.session.invalidate()
+        request.session.invalidate()
 
         return request.find_service(name="auth_cookie").revoke_cookie()
 
@@ -60,7 +54,3 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
             response.vary = list(vary)
 
         request.add_response_callback(vary_add)
-
-    @lru_cache(1)
-    def _has_session(self, request):
-        return bool(request.registry.queryUtility(ISessionFactory))
