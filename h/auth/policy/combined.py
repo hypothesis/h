@@ -15,9 +15,9 @@ class AuthenticationPolicy(IdentityBasedPolicy):
         self._http_basic_auth_policy = AuthClientPolicy()
 
         if proxy_auth:
-            self.ui_policy = RemoteUserAuthenticationPolicy()
+            self._ui_policy = RemoteUserAuthenticationPolicy()
         else:
-            self.ui_policy = CookieAuthenticationPolicy()
+            self._ui_policy = CookieAuthenticationPolicy()
 
     def authenticated_userid(self, request):
         return self._call_sub_policies("authenticated_userid", request)
@@ -36,7 +36,7 @@ class AuthenticationPolicy(IdentityBasedPolicy):
 
     def _call_sub_policies(self, method, request, *args, **kwargs):
         if not self._is_api_request(request):
-            return getattr(self.ui_policy, method)(request, *args, **kwargs)
+            return getattr(self._ui_policy, method)(request, *args, **kwargs)
 
         result = getattr(self._bearer_token_policy, method)(request, *args, **kwargs)
 
