@@ -397,9 +397,11 @@ class RemoteUserAuthenticationPolicy(IdentityBasedPolicy):
         return request.environ.get("HTTP_X_FORWARDED_USER")
 
     def identity(self, request):
-        user = request.find_service(name="user").fetch(
-            self.unauthenticated_userid(request)
-        )
+        user_id = self.unauthenticated_userid(request)
+        if not user_id:
+            return None
+
+        user = request.find_service(name="user").fetch(user_id)
         if user is None:
             return None
 
