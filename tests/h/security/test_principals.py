@@ -1,4 +1,6 @@
 import pytest
+from h_matchers import Any
+from pyramid.security import Authenticated, Everyone
 
 from h.security import Identity
 from h.security.principals import principals_for_identity
@@ -7,10 +9,12 @@ from h.security.role import Role
 
 class TestPrincipalsForIdentity:
     def test_it_with_None(self):
-        assert principals_for_identity(None) is None
+        assert principals_for_identity(None) == [Everyone]
 
     def test_it_with_an_empty_identity(self):
-        assert principals_for_identity(Identity()) is None
+        principals = principals_for_identity(Identity())
+
+        assert principals == Any.list.containing([Everyone, Authenticated]).only()
 
     @pytest.mark.parametrize("admin", (True, False))
     @pytest.mark.parametrize("staff", (True, False))
@@ -24,9 +28,11 @@ class TestPrincipalsForIdentity:
 
         principals = principals_for_identity(identity)
 
+        user = identity.user
+        assert user.userid in principals
         assert Role.USER in principals
-        assert f"authority:{identity.user.authority}" in principals
-        for group in identity.user.groups:
+        assert f"authority:{user.authority}" in principals
+        for group in user.groups:
             assert f"group:{group.pubid}" in principals
 
         assert bool(Role.ADMIN in principals) == admin
@@ -40,6 +46,7 @@ class TestPrincipalsForIdentity:
         principals = principals_for_identity(identity)
 
         auth_client = identity.auth_client
+        assert auth_client.id in principals
         assert f"client:{auth_client.id}@{auth_client.authority}" in principals
         assert f"client_authority:{auth_client.authority}" in principals
         assert Role.AUTH_CLIENT in principals

@@ -3,7 +3,7 @@ from typing import Optional
 
 from pyramid import interfaces
 from pyramid.authentication import extract_http_basic_credentials
-from pyramid.security import Authenticated, Everyone
+from pyramid.security import Authenticated
 from sqlalchemy.exc import StatementError
 from zope import interface
 
@@ -174,21 +174,7 @@ class IdentityBasedPolicy:
         :param request: Pyramid request to check
         :returns: List of principals
         """
-        effective_principals = [Everyone]
-
-        if identity := self.identity(request):
-            effective_principals.append(Authenticated)
-
-            # This is very suspicious to me. I think we probably want both of
-            # these
-            if identity.auth_client:
-                effective_principals.append(identity.auth_client.id)
-            else:
-                effective_principals.append(identity.user.userid)
-
-            effective_principals.extend(principals_for_identity(identity))
-
-        return effective_principals
+        return principals_for_identity(self.identity(request))
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         return []
