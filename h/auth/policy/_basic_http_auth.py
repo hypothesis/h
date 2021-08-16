@@ -30,7 +30,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
 
     #: List of route name-method combinations that should
     #: allow AuthClient authentication
-    AUTH_CLIENT_API_WHITELIST = [
+    API_WHITELIST = [
         ("api.groups", "POST"),
         ("api.group", "PATCH"),
         ("api.group", "GET"),
@@ -50,7 +50,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
             return (
                 request.matched_route.name,
                 request.method,
-            ) in cls.AUTH_CLIENT_API_WHITELIST
+            ) in cls.API_WHITELIST
         return False
 
     def unauthenticated_userid(self, request):
