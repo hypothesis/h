@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services import AuthCookieService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.auth_token import AuthTokenService
@@ -23,6 +24,7 @@ from h.services.search_index._queue import Queue
 __all__ = (
     "mock_service",
     "annotation_delete_service",
+    "auth_cookie_service",
     "auth_token_service",
     "delete_group_service",
     "links_service",
@@ -46,11 +48,14 @@ from h.services.user import UserService
 
 @pytest.fixture
 def mock_service(pyramid_config):
-    def mock_service(service_class, name, spec_set=True, **kwargs):
+    def mock_service(service_class, name=None, iface=None, spec_set=True, **kwargs):
         service = create_autospec(
             service_class, instance=True, spec_set=spec_set, **kwargs
         )
-        pyramid_config.register_service(service, name=name)
+        if name:
+            pyramid_config.register_service(service, name=name)
+        else:
+            pyramid_config.register_service(service, iface=iface or service_class)
 
         return service
 
@@ -60,6 +65,11 @@ def mock_service(pyramid_config):
 @pytest.fixture
 def annotation_delete_service(mock_service):
     return mock_service(AnnotationDeleteService, name="annotation_delete")
+
+
+@pytest.fixture
+def auth_cookie_service(mock_service):
+    return mock_service(AuthCookieService)
 
 
 @pytest.fixture
