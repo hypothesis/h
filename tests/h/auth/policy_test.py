@@ -575,37 +575,13 @@ class TestIdentityBasedPolicy:
 
         assert getattr(policy, method)(pyramid_request) is None
 
-    @pytest.mark.parametrize("with_auth_client", (True, False))
     def test_effective_principals(
-        self,
-        policy,
-        pyramid_request,
-        identity,
-        principals_for_identity,
-        with_auth_client,
-        factories,
+        self, policy, pyramid_request, identity, principals_for_identity
     ):
-        if with_auth_client:
-            identity.auth_client = factories.AuthClient()
-
-        principals_for_identity.return_value = ["principal"]
-
         principals = policy.effective_principals(pyramid_request)
 
         principals_for_identity.assert_called_once_with(identity)
-        assert principals == [
-            Everyone,
-            Authenticated,
-            # I'm suspicious that this is an either or. I feel like both values
-            # should just be dependant on the presence of the relevant thing
-            identity.auth_client.id if with_auth_client else identity.user.userid,
-            "principal",
-        ]
-
-    def test_effective_principals_with_no_identity(self, policy, pyramid_request):
-        policy.returned_identity = None
-
-        assert policy.effective_principals(pyramid_request) == [Everyone]
+        assert principals == principals_for_identity.return_value
 
     def test_remember_does_nothing(self, policy, pyramid_request):
         assert policy.remember(pyramid_request, "foo") == []

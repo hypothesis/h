@@ -1,42 +1,51 @@
+from typing import Optional
+
+from pyramid.security import Authenticated, Everyone
+
 from h.security.identity import Identity
 from h.security.role import Role
 
 
-def principals_for_identity(identity: Identity):
+def principals_for_identity(identity: Optional[Identity]):
     """
     Get the security principals for a given identity.
 
-    :param identity: Identity to provide principals for
-    :returns: A list of principals or None
-    """
-    if not identity:
-        return None
+    Any identity which is passed is assumed to have passed authentication.
+    Passing None instead will return principals for an unauthenticated user.
 
-    principals = set()
+    :param identity: Identity to provide principals for or None
+    :returns: A list of principals
+    """
+
+    principals = {Everyone}
+
+    if not identity:
+        return list(principals)
+
+    principals.add(Authenticated)
 
     if user := identity.user:
+        principals.add(identity.user.userid)
+
         principals.add(Role.USER)
         if user.admin:
             principals.add(Role.ADMIN)
         if user.staff:
             principals.add(Role.STAFF)
+
         for group in user.groups:
             principals.add("group:{group.pubid}".format(group=group))
+
         principals.add("authority:{authority}".format(authority=user.authority))
 
     if auth_client := identity.auth_client:
-        principals.add(f"client:{auth_client.id}@{auth_client.authority}")
-        principals.add(f"client_authority:{auth_client.authority}")
+        principals.add(identity.auth_client.id)
         principals.add(Role.AUTH_CLIENT)
 
-    if identity.auth_client and identity.user:
-        # Standard pyramid policies like`CallbackAuthenticationPolicy`
-        # automatically add the user id in `effective_principals`, but our
-        # `h.auth.policy.AuthClientPolicy` overrides it and it's missing
-        principals.add(identity.user.userid)
-        principals.add(Role.AUTH_CLIENT_FORWARDED_USER)
+        principals.add(f"client:{auth_client.id}@{auth_client.authority}")
+        principals.add(f"client_authority:{auth_client.authority}")
 
-    if not principals:
-        return None
+    if identity.auth_client and identity.user:
+        principals.add(Role.AUTH_CLIENT_FORWARDED_USER)
 
     return list(principals)
