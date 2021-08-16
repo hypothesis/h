@@ -1,4 +1,5 @@
 """Service definitions that handle business logic."""
+from h.services.auth_cookie import AuthCookieService
 
 
 def includeme(config):
@@ -13,7 +14,7 @@ def includeme(config):
     config.register_service_factory(
         ".annotation_stats.annotation_stats_factory", name="annotation_stats"
     )
-    config.register_service_factory(".auth_cookie.factory", name="auth_cookie")
+    config.register_service_factory(".auth_cookie.factory", iface=AuthCookieService)
     config.register_service_factory(
         ".auth_token.auth_token_service_factory", name="auth_token"
     )

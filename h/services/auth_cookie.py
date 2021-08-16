@@ -23,7 +23,8 @@ class AuthCookieService:
         self._user = None
 
     def verify_cookie(self):
-        """Get the authenticated user by cookie (if any).
+        """
+        Get the authenticated user by cookie (if any).
 
         :return: The logged in `User` or None
         """
@@ -61,7 +62,8 @@ class AuthCookieService:
         return self._user
 
     def create_cookie(self, userid):
-        """Create headers for a persistent cookie to log in the user.
+        """
+        Create headers for a persistent cookie to log in the user.
 
         :param userid: Id of the user to log in
         :return: An iterable of headers to return to the browser
@@ -83,7 +85,8 @@ class AuthCookieService:
         return self._cookie.get_headers([self._user.userid, ticket.id])
 
     def revoke_cookie(self):
-        """Create headers to revoke the cookie used to log in a user.
+        """
+        Create headers to revoke the cookie used to log in a user.
 
         :return: An iterable of headers to return to the browser
         """

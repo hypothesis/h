@@ -1,5 +1,8 @@
+from functools import lru_cache
+
 from h.auth.policy import IdentityBasedPolicy
 from h.security import Identity
+from h.services import AuthCookieService
 
 
 class CookieAuthenticationPolicy(IdentityBasedPolicy):
@@ -9,14 +12,14 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
     def identity(self, request):
         self._add_vary_by_cookie(request)
 
-        user = request.find_service(name="auth_cookie").verify_cookie()
+        user = request.find_service(AuthCookieService).verify_cookie()
         if not user:
             return None
 
         return Identity(user=user)
 
     def remember(self, request, userid, **kw):
-        """Returns a list of headers that are to be set from the source service."""
+        """Get a list of headers which will remember the user in a cookie."""
 
         self._add_vary_by_cookie(request)
 
@@ -34,19 +37,20 @@ class CookieAuthenticationPolicy(IdentityBasedPolicy):
             request.session.update(data)
             request.session.new_csrf_token()
 
-        return request.find_service(name="auth_cookie").create_cookie(userid)
+        return request.find_service(AuthCookieService).create_cookie(userid)
 
     def forget(self, request):
-        """A list of headers which will delete appropriate cookies."""
+        """Get a list of headers which will delete appropriate cookies."""
 
         self._add_vary_by_cookie(request)
 
         # Clear the session by invalidating it
         request.session.invalidate()
 
-        return request.find_service(name="auth_cookie").revoke_cookie()
+        return request.find_service(AuthCookieService).revoke_cookie()
 
     @staticmethod
+    @lru_cache  # Ensure we only add this once per request
     def _add_vary_by_cookie(request):
         def vary_add(request, response):
             vary = set(response.vary if response.vary is not None else [])
