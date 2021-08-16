@@ -697,6 +697,7 @@ class TestTokenAuthenticationPolicy:
     def test_identity_returns_None_for_invalid_tokens(
         self, pyramid_request, auth_token_service
     ):
+        pyramid_request.auth_token = sentinel.auth_token
         auth_token_service.validate.return_value = None
 
         assert TokenAuthenticationPolicy().identity(pyramid_request) is None
@@ -704,6 +705,7 @@ class TestTokenAuthenticationPolicy:
     def test_identity_returns_None_for_invalid_users(
         self, pyramid_request, user_service
     ):
+        pyramid_request.auth_token = sentinel.auth_token
         user_service.fetch.return_value = None
 
         assert TokenAuthenticationPolicy().identity(pyramid_request) is None
@@ -750,6 +752,13 @@ class TestTokenAuthenticationPolicy:
             user_service.fetch.return_value.userid,
             "principal",
         ]
+
+    def test_effective_principals_with_no_identity(self, pyramid_request):
+        pyramid_request.auth_token = None
+
+        result = TokenAuthenticationPolicy().effective_principals(pyramid_request)
+
+        assert result == [Everyone]
 
     @pytest.fixture(autouse=True)
     def principals_for_identity(self, patch):
