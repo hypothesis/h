@@ -372,6 +372,16 @@ class TestAPIAuthenticationPolicy:
         assert not client_policy.forget.call_count
         assert forgot == user_policy.forget.return_value
 
+    def test_forget_does_not_proxy_with_no_matched_route(
+        self, pyramid_request, api_policy, user_policy, client_policy
+    ):
+        pyramid_request.matched_route = None
+        user_policy.forget.return_value = []
+
+        forgot = api_policy.forget(pyramid_request)
+        assert not client_policy.forget.call_count
+        assert forgot == user_policy.forget.return_value
+
     @pytest.fixture
     def client_policy(self):
         return mock.create_autospec(AuthClientPolicy, instance=True, spec_set=True)
