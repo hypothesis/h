@@ -3,7 +3,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from h.auth import CookieAuthenticationPolicy
+from h.auth.policy._cookie import CookieAuthenticationPolicy
 from h.security import Identity
 
 

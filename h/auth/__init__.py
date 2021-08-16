@@ -1,11 +1,11 @@
 """Authentication configuration."""
 import logging
 
-from h.auth.cookie_authentication_policy import CookieAuthenticationPolicy
 from h.auth.policy import (
     APIAuthenticationPolicy,
     AuthClientPolicy,
     AuthenticationPolicy,
+    CookieAuthenticationPolicy,
     RemoteUserAuthenticationPolicy,
     TokenAuthenticationPolicy,
 )
