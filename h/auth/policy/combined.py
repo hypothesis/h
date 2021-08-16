@@ -25,7 +25,8 @@ AUTH_CLIENT_API_WHITELIST = [
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy:
     def __init__(self, proxy_auth=False):
-        self.api_policy = APIAuthenticationPolicy()
+        self._bearer_token_policy = TokenAuthenticationPolicy()
+        self._http_basic_auth_policy = AuthClientPolicy()
 
         if proxy_auth:
             self.ui_policy = RemoteUserAuthenticationPolicy()
@@ -33,97 +34,37 @@ class AuthenticationPolicy:
             self.ui_policy = CookieAuthenticationPolicy()
 
     def authenticated_userid(self, request):
-        if _is_api_request(request):
-            return self.api_policy.authenticated_userid(request)
-
-        return self.ui_policy.authenticated_userid(request)
+        return self._call_sub_policies("authenticated_userid", request)
 
     def unauthenticated_userid(self, request):
-        if _is_api_request(request):
-            return self.api_policy.unauthenticated_userid(request)
-        return self.ui_policy.unauthenticated_userid(request)
+        return self._call_sub_policies("unauthenticated_userid", request)
+
+    def remember(self, request, userid, **kw):
+        return self._call_sub_policies("remember", request, userid, **kw)
+
+    def forget(self, request):
+        return self._call_sub_policies("forget", request)
 
     def effective_principals(self, request):
         if _is_api_request(request):
-            return self.api_policy.effective_principals(request)
+            user_principals = self._bearer_token_policy.effective_principals(request)
+            # If authentication via user_policy was not successful
+            if Authenticated not in user_principals and _is_client_request(request):
+                return self._http_basic_auth_policy.effective_principals(request)
+            return user_principals
         return self.ui_policy.effective_principals(request)
 
-    def remember(self, request, userid, **kw):
+    def _call_sub_policies(self, method, request, *args, **kwargs):
         if _is_api_request(request):
-            return self.api_policy.remember(request, userid, **kw)
-        return self.ui_policy.remember(request, userid, **kw)
-
-    def forget(self, request):
-        if _is_api_request(request):
-            return self.api_policy.forget(request)
-        return self.ui_policy.forget(request)
-
-
-@interface.implementer(interfaces.IAuthenticationPolicy)
-class APIAuthenticationPolicy:
-    """
-    An authentication policy for Hypothesis API endpoints.
-
-    Two types of authentication apply to Hypothesis API endpoints:
-
-    * Authentication for a single user using Token authentication
-    * Authentication for an auth_client, either as the client itself or
-      "on behalf of" a user within that client's authority
-
-    This policy delegates to :py:class:`~h.auth.TokenAuthenticationPolicy` and
-    :py:class:`~h.auth.AuthClientPolicy`, always preferring Token when available
-
-    Initially, the ``client_policy`` will only be used to authenticate requests
-    that correspond to certain endpoint services.
-    """
-
-    def __init__(self):
-        self._bearer_token_policy = TokenAuthenticationPolicy()
-        self._http_basic_auth_policy = AuthClientPolicy()
-
-    def authenticated_userid(self, request):
-        user_authid = self._bearer_token_policy.authenticated_userid(request)
-        if user_authid is None and _is_client_request(request):
-            return self._http_basic_auth_policy.authenticated_userid(request)
-        return user_authid
-
-    def unauthenticated_userid(self, request):
-        user_unauth_id = self._bearer_token_policy.unauthenticated_userid(request)
-        if user_unauth_id is None and _is_client_request(request):
-            return self._http_basic_auth_policy.unauthenticated_userid(request)
-        return user_unauth_id
-
-    def effective_principals(self, request):
-        """
-        Return the request's effective principals.
-
-        The ``effective_principals`` method of classes that implement
-        Pyramid's Authentication Interface always returns at least one principal:
-        :py:attr:`pyramid.security.Everyone`
-
-        The absence of :py:attr:`pyramid.security.Authenticated` in returned
-        principals means that authentication was not successful on this request
-        using the given policy.
-
-        :rtype: list Containing at minimum :py:attr:`pyramid.security.Everyone`
-        """
-        user_principals = self._bearer_token_policy.effective_principals(request)
-        # If authentication via user_policy was not successful
-        if Authenticated not in user_principals and _is_client_request(request):
-            return self._http_basic_auth_policy.effective_principals(request)
-        return user_principals
-
-    def remember(self, request, userid, **kw):
-        remembered = self._bearer_token_policy.remember(request, userid, **kw)
-        if remembered == [] and _is_client_request(request):
-            return self._http_basic_auth_policy.remember(request, userid, **kw)
-        return remembered
-
-    def forget(self, request):
-        forgot = self._bearer_token_policy.forget(request)
-        if forgot == [] and _is_client_request(request):
-            return self._http_basic_auth_policy.forget(request)
-        return forgot
+            result = getattr(self._bearer_token_policy, method)(
+                request, *args, **kwargs
+            )
+            if not result and _is_client_request(request):
+                return getattr(self._http_basic_auth_policy, method)(
+                    request, *args, **kwargs
+                )
+            return result
+        return getattr(self.ui_policy, method)(request, *args, **kwargs)
 
 
 def _is_api_request(request):
