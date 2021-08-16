@@ -185,7 +185,7 @@ pyparsing==2.4.7
     # via
     #   -r requirements/requirements.txt
     #   packaging
-pyramid==1.10.8
+pyramid==2.0
     # via
     #   -r requirements/requirements.txt
     #   h-assets
