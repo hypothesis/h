@@ -28,35 +28,35 @@ class AuthenticationPolicy:
         self.api_policy = APIAuthenticationPolicy()
 
         if proxy_auth:
-            self.fallback_policy = RemoteUserAuthenticationPolicy()
+            self.ui_policy = RemoteUserAuthenticationPolicy()
         else:
-            self.fallback_policy = CookieAuthenticationPolicy()
+            self.ui_policy = CookieAuthenticationPolicy()
 
     def authenticated_userid(self, request):
         if _is_api_request(request):
             return self.api_policy.authenticated_userid(request)
 
-        return self.fallback_policy.authenticated_userid(request)
+        return self.ui_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
         if _is_api_request(request):
             return self.api_policy.unauthenticated_userid(request)
-        return self.fallback_policy.unauthenticated_userid(request)
+        return self.ui_policy.unauthenticated_userid(request)
 
     def effective_principals(self, request):
         if _is_api_request(request):
             return self.api_policy.effective_principals(request)
-        return self.fallback_policy.effective_principals(request)
+        return self.ui_policy.effective_principals(request)
 
     def remember(self, request, userid, **kw):
         if _is_api_request(request):
             return self.api_policy.remember(request, userid, **kw)
-        return self.fallback_policy.remember(request, userid, **kw)
+        return self.ui_policy.remember(request, userid, **kw)
 
     def forget(self, request):
         if _is_api_request(request):
             return self.api_policy.forget(request)
-        return self.fallback_policy.forget(request)
+        return self.ui_policy.forget(request)
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
@@ -78,19 +78,19 @@ class APIAuthenticationPolicy:
     """
 
     def __init__(self):
-        self._user_policy = TokenAuthenticationPolicy()
-        self._client_policy = AuthClientPolicy()
+        self._bearer_token_policy = TokenAuthenticationPolicy()
+        self._http_basic_auth_policy = AuthClientPolicy()
 
     def authenticated_userid(self, request):
-        user_authid = self._user_policy.authenticated_userid(request)
+        user_authid = self._bearer_token_policy.authenticated_userid(request)
         if user_authid is None and _is_client_request(request):
-            return self._client_policy.authenticated_userid(request)
+            return self._http_basic_auth_policy.authenticated_userid(request)
         return user_authid
 
     def unauthenticated_userid(self, request):
-        user_unauth_id = self._user_policy.unauthenticated_userid(request)
+        user_unauth_id = self._bearer_token_policy.unauthenticated_userid(request)
         if user_unauth_id is None and _is_client_request(request):
-            return self._client_policy.unauthenticated_userid(request)
+            return self._http_basic_auth_policy.unauthenticated_userid(request)
         return user_unauth_id
 
     def effective_principals(self, request):
@@ -107,22 +107,22 @@ class APIAuthenticationPolicy:
 
         :rtype: list Containing at minimum :py:attr:`pyramid.security.Everyone`
         """
-        user_principals = self._user_policy.effective_principals(request)
+        user_principals = self._bearer_token_policy.effective_principals(request)
         # If authentication via user_policy was not successful
         if Authenticated not in user_principals and _is_client_request(request):
-            return self._client_policy.effective_principals(request)
+            return self._http_basic_auth_policy.effective_principals(request)
         return user_principals
 
     def remember(self, request, userid, **kw):
-        remembered = self._user_policy.remember(request, userid, **kw)
+        remembered = self._bearer_token_policy.remember(request, userid, **kw)
         if remembered == [] and _is_client_request(request):
-            return self._client_policy.remember(request, userid, **kw)
+            return self._http_basic_auth_policy.remember(request, userid, **kw)
         return remembered
 
     def forget(self, request):
-        forgot = self._user_policy.forget(request)
+        forgot = self._bearer_token_policy.forget(request)
         if forgot == [] and _is_client_request(request):
-            return self._client_policy.forget(request)
+            return self._http_basic_auth_policy.forget(request)
         return forgot
 
 
