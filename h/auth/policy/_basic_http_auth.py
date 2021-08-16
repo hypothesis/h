@@ -28,6 +28,31 @@ class AuthClientPolicy(IdentityBasedPolicy):
     from regular users.
     """
 
+    #: List of route name-method combinations that should
+    #: allow AuthClient authentication
+    AUTH_CLIENT_API_WHITELIST = [
+        ("api.groups", "POST"),
+        ("api.group", "PATCH"),
+        ("api.group", "GET"),
+        ("api.group_upsert", "PUT"),
+        ("api.group_member", "POST"),
+        ("api.users", "POST"),
+        ("api.user_read", "GET"),
+        ("api.user", "PATCH"),
+        ("api.bulk", "POST"),
+    ]
+
+    @classmethod
+    def handles(cls, request):
+        """Get whether this policy should accept this request."""
+
+        if request.matched_route:
+            return (
+                request.matched_route.name,
+                request.method,
+            ) in cls.AUTH_CLIENT_API_WHITELIST
+        return False
+
     def unauthenticated_userid(self, request):
         """Return the forwarded userid or the auth_client's id."""
 
