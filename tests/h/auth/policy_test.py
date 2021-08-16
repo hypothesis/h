@@ -809,6 +809,11 @@ class TestRemoteUserAuthenticationPolicy:
         user_service.fetch.assert_called_once_with(sentinel.forwarded_user)
         assert identity == Identity(user=user_service.fetch.return_value)
 
+    def test_identity_returns_None_for_no_forwarded_user(self, pyramid_request):
+        pyramid_request.environ["HTTP_X_FORWARDED_USER"] = None
+
+        assert RemoteUserAuthenticationPolicy().identity(pyramid_request) is None
+
     def test_identity_returns_None_for_no_user(self, pyramid_request, user_service):
         pyramid_request.environ["HTTP_X_FORWARDED_USER"] = sentinel.forwarded_user
         user_service.fetch.return_value = None
