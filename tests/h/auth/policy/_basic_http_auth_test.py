@@ -11,6 +11,23 @@ from h.security import Identity
 
 @pytest.mark.usefixtures("user_service")
 class TestAuthClientPolicy:
+    @pytest.mark.parametrize("route_name,method", AuthClientPolicy.API_WHITELIST)
+    def test_handles(self, pyramid_request, route_name, method):
+        pyramid_request.matched_route.name = route_name
+        pyramid_request.method = method
+
+        assert AuthClientPolicy.handles(pyramid_request)
+
+    def test_handles_rejects_unknown_routes(self, pyramid_request):
+        pyramid_request.matched_route.name = "not.recognised"
+
+        assert not AuthClientPolicy.handles(pyramid_request)
+
+    def test_handles_rejects_no_route(self, pyramid_request):
+        pyramid_request.matched_route = None
+
+        assert not AuthClientPolicy.handles(pyramid_request)
+
     def test_identity(self, pyramid_request, auth_client, user_service):
         pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
 
