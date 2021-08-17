@@ -69,7 +69,7 @@ h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
-importlib-resources==5.2.1
+importlib_resources==5.2.2
     # via
     #   -r requirements/requirements.in
     #   h-api
