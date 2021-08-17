@@ -110,11 +110,11 @@ faker==8.1.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
-gevent==21.1.2
+gevent==21.8.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-greenlet==1.0.0
+greenlet==1.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
