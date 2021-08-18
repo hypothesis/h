@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 def predicate(requires=None):
     def decorator(function):
         function.requires = requires or []
@@ -26,7 +29,13 @@ class PredicateBasedPermissions:
         for predicate in clause:
             value = statement_cache.get(predicate)
             if value is None:
-                value = statement_cache[predicate] = predicate(identity, context)
+                if isinstance(predicate, Enum):
+                    # We are going to assume this predicate is a permission
+                    value = self.permits(identity, context, predicate)
+                else:
+                    value = predicate(identity, context)
+
+                statement_cache[predicate] = value
 
             if not value:
                 return False
@@ -53,7 +62,8 @@ class PredicateBasedPermissions:
 
     @classmethod
     def _expand_predicate(cls, predicate):
-        for parent in predicate.requires:
-            yield from cls._expand_predicate(parent)
+        if hasattr(predicate, "requires"):
+            for parent in predicate.requires:
+                yield from cls._expand_predicate(parent)
 
         yield predicate

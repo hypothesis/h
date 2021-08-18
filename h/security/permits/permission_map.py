@@ -23,6 +23,8 @@ PERMISSION_MAP = {
     Permission.API.BULK_ACTION: [[authenticated_client_is_lms]],
     # A user can always update their own profile
     Permission.Profile.UPDATE: [[authenticated_user]],
+    # --------------------------------------------------------------------- #
+    # Groups
     Permission.Group.CREATE: [[authenticated_user]],
     Permission.Group.WRITE: [
         [group_writable_by_authority, group_matches_user_authority],
@@ -60,54 +62,26 @@ PERMISSION_MAP = {
         [group_created_by_user],
         [group_not_found, authenticated_user],
     ],
-}
-
-
-def _duplicate(permission, adding, or_=None):
-    return [clause + adding for clause in PERMISSION_MAP[permission]] + (or_ or [])
-
-
-ANNOTATIONS = {
     # --------------------------------------------------------------------- #
     # Annotations
     Permission.Annotation.CREATE: [[authenticated]],
     # You can be notified about an annotation even if it's been deleted
-    Permission.Annotation.READ_REALTIME_UPDATES: _duplicate(
-        Permission.Group.READ,
-        adding=[annotation_is_shared],
-        or_=[[annotation_is_not_shared, annotation_created_by_user]],
-    ),
-    Permission.Annotation.READ: _duplicate(
-        Permission.Group.READ,
-        adding=[annotation_not_deleted, annotation_is_shared],
-        or_=[
-            [
-                annotation_not_deleted,
-                annotation_is_not_shared,
-                annotation_created_by_user,
-            ]
-        ],
-    ),
-    Permission.Annotation.FLAG: _duplicate(
-        Permission.Group.FLAG,
-        adding=[annotation_not_deleted, annotation_is_shared],
-        or_=[
-            [
-                annotation_not_deleted,
-                annotation_is_not_shared,
-                annotation_created_by_user,
-            ]
-        ],
-    ),
-    Permission.Annotation.MODERATE: _duplicate(
-        Permission.Group.MODERATE, adding=[annotation_not_deleted, annotation_is_shared]
-    ),
+    Permission.Annotation.READ_REALTIME_UPDATES: [
+        [annotation_not_shared, annotation_created_by_user],
+        [annotation_shared, Permission.Group.READ],
+    ],
+    Permission.Annotation.READ: [
+        [annotation_live, annotation_not_shared, annotation_created_by_user],
+        [annotation_live, annotation_shared, Permission.Group.READ],
+    ],
+    Permission.Annotation.FLAG: [
+        [annotation_live, annotation_not_shared, annotation_created_by_user],
+        [annotation_live, annotation_shared, Permission.Group.FLAG],
+    ],
+    Permission.Annotation.MODERATE: [
+        [annotation_live, annotation_shared, Permission.Group.MODERATE]
+    ],
     # The user who created the annotation always has the these permissions
-    Permission.Annotation.UPDATE: [
-        [annotation_not_deleted, annotation_created_by_user],
-    ],
-    Permission.Annotation.DELETE: [
-        [annotation_not_deleted, annotation_created_by_user]
-    ],
+    Permission.Annotation.UPDATE: [[annotation_live, annotation_created_by_user]],
+    Permission.Annotation.DELETE: [[annotation_live, annotation_created_by_user]],
 }
-PERMISSION_MAP.update(ANNOTATIONS)

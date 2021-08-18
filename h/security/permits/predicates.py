@@ -58,17 +58,17 @@ def annotation_found(identity, context):
 
 
 @predicate(requires=[annotation_found])
-def annotation_is_shared(identity, context):
+def annotation_shared(identity, context):
     return context.annotation.shared
 
 
 @predicate(requires=[annotation_found])
-def annotation_is_not_shared(identity, context):
+def annotation_not_shared(identity, context):
     return not context.annotation.shared
 
 
 @predicate(requires=[annotation_found])
-def annotation_not_deleted(identity, context):
+def annotation_live(identity, context):
     return not context.annotation.deleted
 
 
