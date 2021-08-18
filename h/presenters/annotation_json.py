@@ -62,7 +62,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         # read the annotation, then the annotation is world readable.
         if self.annotation.groupid == "__world__" or identity_permits(
             identity=None,
-            context=AnnotationContext(self.annotation),
+            context=AnnotationContext(self.annotation, self.annotation.group),
             permission=Permission.Annotation.READ,
         ):
             return "group:__world__"

@@ -56,7 +56,8 @@ class AnnotationJSONPresentationService:
 
     def _current_user_is_moderator(self, annotation):
         return self._has_permission(
-            Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
+            Permission.Annotation.MODERATE,
+            context=AnnotationContext(annotation, annotation.group),
         )
 
     def _current_user_is_author(self, annotation):

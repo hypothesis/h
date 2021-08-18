@@ -123,7 +123,7 @@ def handle_annotation_event(message, sockets, request, session):
     reply = _generate_annotation_event(request, message, annotation)
 
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
-    annotation_context = AnnotationContext(annotation)
+    annotation_context = AnnotationContext(annotation, annotation.group)
 
     for socket in matching_sockets:
         # Don't send notifications back to the person who sent them

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from h import storage
-from h.models import Annotation
+from h.models import Annotation, Group
 from h.security import ACL
 from h.traversal.root import RootFactory
 
@@ -14,7 +14,7 @@ class AnnotationRoot(RootFactory):
         if annotation is None:
             raise KeyError()
 
-        return AnnotationContext(annotation)
+        return AnnotationContext(annotation, annotation.group)
 
     @classmethod
     def __acl__(cls):
@@ -26,6 +26,7 @@ class AnnotationContext:
     """Context for annotation-based views."""
 
     annotation: Annotation
+    group: Group
 
     def __acl__(self):
         return ACL.for_annotation(self.annotation)
