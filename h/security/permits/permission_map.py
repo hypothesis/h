@@ -3,14 +3,18 @@ from h.security.permits.predicates import *
 
 PERMISSION_MAP = {
     # Admin pages
-    (
-        Permission.AdminPage.INDEX,
-        Permission.AdminPage.GROUPS,
-        Permission.AdminPage.MAILER,
-        Permission.AdminPage.ORGANIZATIONS,
-        Permission.AdminPage.USERS,
-    ): [[user_is_staff]],
-    Permission.AdminPage: [[user_is_admin]],
+    Permission.AdminPage.ADMINS: [[user_is_admin]],
+    Permission.AdminPage.BADGE: [[user_is_admin]],
+    Permission.AdminPage.FEATURES: [[user_is_admin]],
+    Permission.AdminPage.GROUPS: [[user_is_admin], [user_is_staff]],
+    Permission.AdminPage.INDEX: [[user_is_admin], [user_is_staff]],
+    Permission.AdminPage.MAILER: [[user_is_admin], [user_is_staff]],
+    Permission.AdminPage.OAUTH_CLIENTS: [[user_is_admin]],
+    Permission.AdminPage.ORGANIZATIONS: [[user_is_admin], [user_is_staff]],
+    Permission.AdminPage.NIPSA: [[user_is_admin]],
+    Permission.AdminPage.SEARCH: [[user_is_admin]],
+    Permission.AdminPage.STAFF: [[user_is_admin]],
+    Permission.AdminPage.USERS: [[user_is_admin], [user_is_staff]],
     # User modification permissions
     Permission.User.CREATE: [[authenticated_client]],
     Permission.User.UPDATE: [[user_authority_matches_authenticated_client]],
@@ -27,7 +31,12 @@ PERMISSION_MAP = {
     Permission.Group.JOIN: [
         [group_joinable_by_authority, group_matches_user_authority]
     ],
-    (Permission.Group.READ, Permission.Group.MEMBER_READ): [
+    Permission.Group.READ: [
+        [group_readable_by_world],
+        [group_readable_by_members, group_has_user_as_member],
+        [group_authority_matches_authenticated_client],
+    ],
+    Permission.Group.MEMBER_READ: [
         [group_readable_by_world],
         [group_readable_by_members, group_has_user_as_member],
         [group_authority_matches_authenticated_client],
@@ -52,26 +61,6 @@ PERMISSION_MAP = {
         [group_not_found, authenticated_user],
     ],
 }
-
-
-def _expand_iterated_keys(mapping):
-    """Replace iterable items as keys with repeated keys."""
-
-    multi_value_keys = {}
-    for key, value in mapping.items():
-        try:
-            multi_value_keys[key] = list(key)
-        except TypeError:
-            continue
-
-    for key, multi_keys in multi_value_keys.items():
-        value = mapping.pop(key)
-
-        for new_key in multi_keys:
-            mapping[new_key] = value
-
-
-_expand_iterated_keys(PERMISSION_MAP)
 
 
 def _duplicate(permission, adding, or_=None):
@@ -111,11 +100,7 @@ ANNOTATIONS = {
         ],
     ),
     Permission.Annotation.MODERATE: _duplicate(
-        Permission.Group.MODERATE,
-        adding=[
-            annotation_not_deleted,
-            annotation_is_shared,
-        ],
+        Permission.Group.MODERATE, adding=[annotation_not_deleted, annotation_is_shared]
     ),
     # The user who created the annotation always has the these permissions
     Permission.Annotation.UPDATE: [
