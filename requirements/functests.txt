@@ -95,7 +95,7 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-importlib_resources==5.2.2
+importlib-resources==5.2.2
     # via
     #   -r requirements/requirements.txt
     #   h-api
@@ -261,7 +261,7 @@ six==1.15.0
     #   webtest
 soupsieve==2.2.1
     # via beautifulsoup4
-sqlalchemy==1.4.22
+sqlalchemy==1.4.23
     # via
     #   -r requirements/requirements.txt
     #   alembic
