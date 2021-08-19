@@ -147,7 +147,7 @@ hupper==1.10.2
     #   pyramid
 hypothesis==6.14.8
     # via -r requirements/tests.txt
-importlib_resources==5.2.2
+importlib-resources==5.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -404,7 +404,7 @@ soupsieve==2.2.1
     # via
     #   -r requirements/functests.txt
     #   beautifulsoup4
-sqlalchemy==1.4.22
+sqlalchemy==1.4.23
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
