@@ -11,9 +11,9 @@ from h.models import AuthTicket
 class AuthCookieService:
     TICKET_TTL = timedelta(days=7)
 
-    # We only want to update the `expires` column when the tickets `expires` is at
-    # least one minute smaller than the potential new value. This prevents that we
-    # update the `expires` column on every single request.
+    # We only want to update the `expires` column when the tickets `expires` is
+    # at least one minute smaller than the potential new value. This prevents
+    # that we update the `expires` column on every single request.
     TICKET_REFRESH_INTERVAL = timedelta(minutes=1)
 
     def __init__(self, session, user_service, cookie):
@@ -56,7 +56,7 @@ class AuthCookieService:
         if (datetime.utcnow() - ticket.updated) > self.TICKET_REFRESH_INTERVAL:
             ticket.expires = datetime.utcnow() + self.TICKET_TTL
 
-        # Update the user cache to allow quick verification if we are called
+        # Update the user cache to allow quick checking if we are called again
         self._user = ticket.user
 
         return self._user
@@ -69,7 +69,7 @@ class AuthCookieService:
         :return: An iterable of headers to return to the browser
         """
 
-        # Update the user cache to allow quick verification if we are called
+        # Update the user cache to allow quick checking if we are called again
         self._user = self._user_service.fetch(userid)
         if self._user is None:
             raise ValueError("Cannot find user with userid %s" % userid)
@@ -117,7 +117,7 @@ def factory(_context, request):
         salt="authsanity",
         cookie_name="auth",
         secure=False,
-        max_age=2592000,
+        max_age=30 * 24 * 3600,  # 30 days
         httponly=True,
     )
 

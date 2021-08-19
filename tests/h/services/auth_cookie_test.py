@@ -20,9 +20,11 @@ class TestAuthCookieService:
     def test_verify_cookie(self, service, auth_ticket):
         assert service.verify_cookie() == auth_ticket.user
         # We also set the cache as a side effect
-        assert service._user == auth_ticket.user
+
+        assert service._user == auth_ticket.user  # pylint: disable=protected-access
 
     def test_verify_cookie_short_circuits_if_user_cache_is_set(self, service):
+        # pylint: disable=protected-access
         service._user = sentinel.user
 
         assert service.verify_cookie() == service._user
@@ -87,7 +89,7 @@ class TestAuthCookieService:
 
         cookie.get_headers.assert_called_once_with([user.userid, auth_ticket.id])
         assert headers == cookie.get_headers.return_value
-        assert service._user == user
+        assert service._user == user  # pylint: disable=protected-access
 
     def test_create_cookie_raises_if_user_is_missing(self, service, user_service):
         user_service.fetch.return_value = None
@@ -101,7 +103,7 @@ class TestAuthCookieService:
 
         cookie.get_headers.assert_called_once_with(None, max_age=0)
         assert headers == cookie.get_headers.return_value
-        assert service._user is None
+        assert service._user is None  # pylint: disable=protected-access
         assert db_session.query(AuthTicket).first() is None
 
     def test_revoke_cookie_is_ok_without_a_cookie(self, service):
