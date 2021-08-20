@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
-from pyramid.authorization import Authenticated
 from pyramid.view import view_config, view_defaults
 
 from h import util
@@ -245,7 +244,7 @@ class GroupSearchController(SearchController):
     @view_config(
         request_method="POST",
         request_param="group_leave",
-        effective_principals=Authenticated,
+        is_authenticated=True,
     )
     def leave(self):
         """

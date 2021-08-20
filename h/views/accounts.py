@@ -6,7 +6,6 @@ import colander
 import deform
 import jinja2
 from pyramid import httpexceptions, security
-from pyramid.authorization import Authenticated
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 
@@ -355,7 +354,7 @@ class ActivateController:
             location=self.request.route_url("login", _query={"username": user.username})
         )
 
-    @view_config(request_method="GET", effective_principals=Authenticated)
+    @view_config(request_method="GET", is_authenticated=True)
     def get_when_logged_in(self):
         """Handle an activation link request while already logged in."""
         id_ = self.request.matchdict.get("id")
@@ -392,7 +391,7 @@ class ActivateController:
 @view_defaults(
     route_name="account",
     renderer="h:templates/accounts/account.html.jinja2",
-    effective_principals=Authenticated,
+    is_authenticated=True,
 )
 class AccountController:
     def __init__(self, request):
@@ -470,7 +469,7 @@ class AccountController:
 @view_defaults(
     route_name="account_profile",
     renderer="h:templates/accounts/profile.html.jinja2",
-    effective_principals=Authenticated,
+    is_authenticated=True,
 )
 class EditProfileController:
     def __init__(self, request):
@@ -519,7 +518,7 @@ class EditProfileController:
 @view_defaults(
     route_name="account_notifications",
     renderer="h:templates/accounts/notifications.html.jinja2",
-    effective_principals=Authenticated,
+    is_authenticated=True,
 )
 class NotificationsController:
     def __init__(self, request):
@@ -574,7 +573,7 @@ class NotificationsController:
 @view_defaults(
     route_name="account_developer",
     renderer="h:templates/accounts/developer.html.jinja2",
-    effective_principals=Authenticated,
+    is_authenticated=True,
 )
 class DeveloperController:
     def __init__(self, request):
