@@ -1,15 +1,13 @@
 from unittest import mock
-from unittest.mock import Mock, create_autospec, sentinel
+from unittest.mock import Mock, sentinel
 
 import pytest
 from gevent.queue import Queue
 from h_matchers import Any
-from pyramid import security
 from pyramid.request import Request
 
 from h.security import Permission
 from h.streamer import messages
-from h.streamer.websocket import WebSocket
 
 
 class TestProcessMessages:
@@ -191,30 +189,24 @@ class TestHandleAnnotationEvent:
 
         socket.send_json.assert_not_called()
 
-    @pytest.mark.parametrize(
-        "userid,can_see",
-        (
-            ("other_user", False),
-            ("nipsaed_user", True),
-        ),
-    )
+    @pytest.mark.parametrize("user_is_nipsaed", (True, False))
     def test_nipsaed_content_visibility(
         self,
         handle_annotation_event,
-        userid,
-        can_see,
+        user_is_nipsaed,
         socket,
         nipsa_service,
         fetch_annotation,
     ):
         """Should return None if the annotation is from a NIPSA'd user."""
         nipsa_service.is_flagged.return_value = True
-        fetch_annotation.return_value.userid = "nipsaed_user"
-        socket.authenticated_userid = userid
 
+        fetch_annotation.return_value.userid = (
+            socket.identity.user.userid if user_is_nipsaed else "other_user"
+        )
         handle_annotation_event(sockets=[socket])
 
-        assert bool(socket.send_json.call_count) == can_see
+        assert bool(socket.send_json.call_count) == user_is_nipsaed
 
     @pytest.mark.parametrize(
         "user_principals,can_see",
@@ -308,7 +300,7 @@ class TestHandleAnnotationEvent:
 
 class TestHandleUserEvent:
     def test_sends_session_change_when_joining_or_leaving_group(self, socket, message):
-        socket.authenticated_userid = message["userid"]
+        message["userid"] = socket.identity.user.userid
 
         messages.handle_user_event(message, [socket, socket], None, None)
 
@@ -326,7 +318,7 @@ class TestHandleUserEvent:
     def test_no_send_when_socket_is_not_event_users(self, socket, message):
         """Don't send session-change events if the event user is not the socket user."""
         message["userid"] = "amy"
-        socket.authenticated_userid = "bob"
+        socket.identity.user.username = "bob"
 
         messages.handle_user_event(message, [socket], None, None)
 
@@ -340,10 +332,3 @@ class TestHandleUserEvent:
             "group": "groupid",
             "session_model": sentinel.session_model,
         }
-
-
-@pytest.fixture
-def socket():
-    socket = create_autospec(WebSocket, instance=True)
-    socket.effective_principals = [security.Everyone, "group:__world__"]
-    return socket

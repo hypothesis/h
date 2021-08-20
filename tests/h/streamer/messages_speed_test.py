@@ -2,6 +2,7 @@ import pytest
 from _datetime import datetime
 from pyramid import security
 
+from h.security import Identity
 from h.streamer.app import create_app
 from h.streamer.contexts import request_context
 from h.streamer.messages import handle_annotation_event
@@ -83,7 +84,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
         socket = WebSocket(
             sock=None,
             environ={
-                "h.ws.authenticated_userid": "foo",
+                "h.ws.identity": Identity(),
                 "h.ws.effective_principals": [security.Everyone, "group:__world__"],
                 "h.ws.streamer_work_queue": None,
             },

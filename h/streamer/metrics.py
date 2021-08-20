@@ -17,9 +17,7 @@ def websocket_metrics(queue):
     See https://docs.newrelic.com/docs/agents/python-agent/supported-features/python-custom-metrics.
     """
     connections_active = len(WebSocket.instances)
-    connections_anonymous = sum(
-        1 for ws in WebSocket.instances if not ws.authenticated_userid
-    )
+    connections_anonymous = sum(1 for ws in WebSocket.instances if not ws.identity)
 
     # Allow us to tell the difference between reporting 0 and not reporting
     yield f"{PREFIX}/Alive", 1

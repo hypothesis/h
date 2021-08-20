@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from pyramid.interfaces import IAuthenticationPolicy
+
 from h.models import AuthClient, User
 
 
@@ -15,3 +17,14 @@ class Identity:
 
     user: User = None
     auth_client: AuthClient = None
+
+
+def get_identity(request):
+    """
+    Get the identity associated with a request.
+
+    This is a Pyramid 2.0 compatibility addition and should be removed when
+    we upgrade. This is used as a request method `identity()` to mirror that
+    added by Pyramid 2.0.
+    """
+    return request.registry.queryUtility(IAuthenticationPolicy).identity(request)

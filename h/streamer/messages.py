@@ -85,7 +85,7 @@ def handle_user_event(message, sockets, _request, _session):
     reply = None
 
     for socket in sockets:
-        if socket.authenticated_userid != message["userid"]:
+        if not socket.identity or socket.identity.user.userid != message["userid"]:
             continue
 
         if reply is None:
@@ -134,7 +134,11 @@ def handle_annotation_event(message, sockets, request, session):
             continue
 
         # Only send NIPSA'd annotations to the author
-        if annotator_nipsad and socket.authenticated_userid != annotation.userid:
+        if (
+            annotator_nipsad
+            and socket.identity
+            and socket.identity.user.userid != annotation.userid
+        ):
             continue
 
         # Check whether client is authorized to read this annotation.
