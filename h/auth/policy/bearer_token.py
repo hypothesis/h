@@ -1,11 +1,11 @@
-from pyramid import interfaces
-from zope import interface
+from pyramid.interfaces import ISecurityPolicy
+from zope.interface import implementer
 
 from h.auth.policy._identity_base import IdentityBasedPolicy
 from h.security import Identity
 
 
-@interface.implementer(interfaces.IAuthenticationPolicy)
+@implementer(ISecurityPolicy)
 class TokenAuthenticationPolicy(IdentityBasedPolicy):
     """
     A bearer token authentication policy.

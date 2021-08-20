@@ -1,5 +1,4 @@
 import pytest
-from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.models import Annotation, Document, DocumentMeta, Subscriptions
 from h.notification.reply import Notification, get_notification
@@ -20,9 +19,7 @@ FIXTURE_DATA = {
 }
 
 
-@pytest.mark.usefixtures(
-    "authz_policy", "fetch_annotation", "subscription", "user_service"
-)
+@pytest.mark.usefixtures("fetch_annotation", "subscription", "user_service")
 class TestGetNotification:
     def test_returns_correct_params_when_subscribed(
         self, parent, pyramid_request, reply, user_service
@@ -132,11 +129,6 @@ class TestGetNotification:
     @pytest.fixture
     def annotations(self):
         return {}
-
-    @pytest.fixture
-    def authz_policy(self, pyramid_config):
-
-        pyramid_config.set_authorization_policy(ACLAuthorizationPolicy())
 
     @pytest.fixture
     def fetch_annotation(self, patch, annotations):
