@@ -44,6 +44,7 @@ class WebSocket(_WebSocket):
     client_id = None
     filter = None
     query = None
+    identity = None
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
         super().__init__(
@@ -54,8 +55,8 @@ class WebSocket(_WebSocket):
             heartbeat_freq=30.0,
         )
 
-        self.authenticated_userid = environ["h.ws.authenticated_userid"]
         self.effective_principals = environ["h.ws.effective_principals"]
+        self.identity = environ["h.ws.identity"]
 
         self._work_queue = environ["h.ws.streamer_work_queue"]
 
@@ -180,7 +181,15 @@ MESSAGE_HANDLERS["ping"] = handle_ping_message
 
 def handle_whoami_message(message, session=None):  # pylint: disable=unused-argument
     """Reply to a client requesting information on its auth state."""
-    message.reply({"type": "whoyouare", "userid": message.socket.authenticated_userid})
+
+    message.reply(
+        {
+            "type": "whoyouare",
+            "userid": message.socket.identity.user.userid
+            if message.socket.identity
+            else None,
+        }
+    )
 
 
 MESSAGE_HANDLERS["whoami"] = handle_whoami_message

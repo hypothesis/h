@@ -5,15 +5,14 @@ from gevent.pool import Pool
 from gevent.queue import Queue
 from h_matchers import Any
 
+from h.security import Identity
 from h.streamer.metrics import websocket_metrics
 from h.streamer.websocket import WebSocket
 
 
 class TestWebsocketMetrics:
     def test_it_records_socket_metrics(self, generate_metrics, sockets):
-        sockets[0].authenticated_userid = "acct:jimsmith@hypothes.is"
-        sockets[1].authenticated_userid = None
-        sockets[2].authenticated_userid = None
+        sockets[0].identity = Identity()
 
         metrics = generate_metrics()
 
@@ -66,7 +65,7 @@ class TestWebsocketMetrics:
     def sockets(self):
         sockets = [create_autospec(WebSocket, instance=True) for _ in range(3)]
         for socket in sockets:
-            socket.authenticated_userid = None
+            socket.identity = None
 
         return sockets
 

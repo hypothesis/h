@@ -7,6 +7,7 @@ from h_matchers import Any
 from jsonschema import ValidationError
 from pyramid import security
 
+from h.security import Identity
 from h.streamer import websocket
 
 FakeMessage = namedtuple("FakeMessage", ["data"])
@@ -54,10 +55,6 @@ class TestMessage:
         message.reply({"foo": "bar"})
 
         assert not socket.send_json.called
-
-    @pytest.fixture
-    def socket(self):
-        return mock.Mock(spec_set=["send_json"])
 
 
 class TestWebSocket:
@@ -130,13 +127,9 @@ class TestWebSocket:
             client, reason="invalid message format"
         )
 
-    def test_socket_sets_auth_data_from_environ(self, client):
-        assert client.authenticated_userid == "janet"
-        assert client.effective_principals == [
-            security.Everyone,
-            security.Authenticated,
-            "group:__world__",
-        ]
+    def test_socket_sets_auth_data_from_environ(self, client, fake_environ):
+        assert client.identity == fake_environ["h.ws.identity"]
+        assert client.effective_principals == fake_environ["h.ws.effective_principals"]
 
     def test_socket_send_json(self, client, fake_socket_send):
         payload = {"foo": "bar"}
@@ -172,7 +165,7 @@ class TestWebSocket:
     @pytest.fixture
     def fake_environ(self, queue):
         return {
-            "h.ws.authenticated_userid": "janet",
+            "h.ws.identity": Identity(),
             "h.ws.effective_principals": [
                 security.Everyone,
                 security.Authenticated,
@@ -264,8 +257,7 @@ class TestHandleClientIDMessage:
         mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
 
     @pytest.fixture
-    def socket(self):
-        socket = mock.Mock()
+    def socket(self, socket):
         socket.client_id = None
         return socket
 
@@ -311,8 +303,7 @@ class TestHandleFilterMessage:
         return patch("h.streamer.websocket.SocketFilter")
 
     @pytest.fixture
-    def socket(self):
-        socket = mock.Mock()
+    def socket(self, socket):
         socket.filter = None
         return socket
 
@@ -330,22 +321,22 @@ class TestHandlePingMessage:
 
 
 class TestHandleWhoamiMessage:
-    @pytest.mark.parametrize("userid", [None, "acct:foo@example.com"])
-    def test_replies_with_whoyouare_message(self, socket, userid):
-        """Send back a `whoyouare` message with a userid (which may be null)."""
-        socket.authenticated_userid = userid
+    @pytest.mark.parametrize("with_identity", (True, False))
+    def test_replies_with_whoyouare_message(self, socket, with_identity):
+        if not with_identity:
+            socket.identity = False
+
         message = websocket.Message(socket=socket, payload={"type": "whoami"})
 
         with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_whoami_message(message)
 
-        mock_reply.assert_called_once_with({"type": "whoyouare", "userid": userid})
-
-    @pytest.fixture
-    def socket(self):
-        socket = mock.Mock()
-        socket.authenticated_userid = None
-        return socket
+        mock_reply.assert_called_once_with(
+            {
+                "type": "whoyouare",
+                "userid": socket.identity.user.userid if with_identity else None,
+            }
+        )
 
 
 class TestUnknownMessage:
