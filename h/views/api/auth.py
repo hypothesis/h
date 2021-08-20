@@ -236,19 +236,20 @@ class OAuthRevocationController:
 
 @api_config(versions=["v1", "v2"], route_name="api.debug_token", request_method="GET")
 def debug_token(request):
-    if not request.auth_token:
+    svc = request.find_service(name="auth_token")
+
+    bearer_token = svc.get_bearer_token(request)
+    if not bearer_token:
         raise OAuthTokenError(
             "Bearer token is missing in Authorization HTTP header", "missing_token"
         )
 
-    svc = request.find_service(name="auth_token")
-    token = svc.validate(request.auth_token)
-    if token is None:
+    if not svc.validate(bearer_token):
         raise OAuthTokenError(
             "Bearer token does not exist or is expired", "missing_token"
         )
 
-    token = svc.fetch(request.auth_token)
+    token = svc.fetch(bearer_token)
     return _present_debug_token(token)
 
 

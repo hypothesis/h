@@ -49,6 +49,25 @@ class TestAuthTokenService:
     def test_fetch_returns_database_model(self, svc, token):
         assert svc.fetch(token.value) == token
 
+    @pytest.mark.parametrize(
+        "header,expected",
+        (
+            ("Bearer abcdef123", "abcdef123"),
+            (None, None),
+            ("Bearer ", None),
+            ("", None),
+            ("abcdef123", None),
+            ("\x10", None),
+            (".\x00\"Ħ(\x12'𨳂\x05\U000df02a\U00095c2c셀", None),
+            ("\U000f022b\t\x07\x1c0\x04\x06", None),
+        ),
+    )
+    def test_get_bearer_token(self, pyramid_request, header, expected):
+        if header is not None:
+            pyramid_request.headers["Authorization"] = header
+
+        assert AuthTokenService.get_bearer_token(pyramid_request) == expected
+
     @pytest.mark.usefixtures("token")
     def test_fetch_returns_none_when_not_found(self, svc):
         assert svc.fetch("bogus") is None

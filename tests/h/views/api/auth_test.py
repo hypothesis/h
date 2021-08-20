@@ -1,7 +1,6 @@
 import datetime
 import json
 from unittest import mock
-from unittest.mock import sentinel
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -380,8 +379,10 @@ class TestDebugToken:
     def test_it(self, pyramid_request, auth_token_service, oauth_token):
         result = views.debug_token(pyramid_request)
 
-        auth_token_service.validate.assert_called_once_with(pyramid_request.auth_token)
-        auth_token_service.fetch.assert_called_once_with(pyramid_request.auth_token)
+        auth_token_service.get_bearer_token.assert_called_once_with(pyramid_request)
+        token_string = auth_token_service.get_bearer_token.return_value
+        auth_token_service.validate.assert_called_once_with(token_string)
+        auth_token_service.fetch.assert_called_once_with(token_string)
 
         assert result == {
             "client": {
@@ -401,8 +402,8 @@ class TestDebugToken:
 
         assert "client" not in result
 
-    def test_it_without_token_string(self, pyramid_request):
-        pyramid_request.auth_token = None
+    def test_it_without_token_string(self, pyramid_request, auth_token_service):
+        auth_token_service.get_bearer_token.return_value = None
 
         with pytest.raises(OAuthTokenError):
             views.debug_token(pyramid_request)
@@ -424,12 +425,6 @@ class TestDebugToken:
         auth_token_service.fetch.return_value = oauth_token
 
         return oauth_token
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.auth_token = sentinel.token_string
-
-        return pyramid_request
 
 
 class TestAPITokenError:

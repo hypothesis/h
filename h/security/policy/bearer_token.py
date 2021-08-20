@@ -26,11 +26,19 @@ class TokenPolicy(IdentityBasedPolicy):
         :param request: Pyramid request to inspect
         :returns: An `Identity` object if the login is authenticated or None
         """
-        token_str = self._get_token(request)
+        token_svc = request.find_service(name="auth_token")
+        token_str = None
+
+        if self._is_ws_request(request):
+            token_str = request.GET.get("access_token", None)
+
+        if token_str is None:
+            token_str = token_svc.get_bearer_token(request)
+
         if token_str is None:
             return None
 
-        token = request.find_service(name="auth_token").validate(token_str)
+        token = token_svc.validate(token_str)
         if token is None:
             return None
 
@@ -39,14 +47,6 @@ class TokenPolicy(IdentityBasedPolicy):
             return None
 
         return Identity(user=user)
-
-    def _get_token(self, request):
-        token_str = None
-
-        if self._is_ws_request(request):
-            token_str = request.GET.get("access_token", None)
-
-        return token_str or getattr(request, "auth_token", None)
 
     @staticmethod
     def _is_ws_request(request):
