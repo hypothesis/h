@@ -80,7 +80,6 @@ def includeme(config):
     # Core site modules
     config.include("h.assets")
     config.include("h.auth")
-    config.include("h.authz")
     config.include("h.db")
     config.include("h.eventqueue")
     config.include("h.form")

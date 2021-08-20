@@ -1,5 +1,5 @@
-from pyramid import interfaces
-from zope import interface
+from pyramid.interfaces import ISecurityPolicy
+from zope.interface import implementer
 
 from h.auth.policy._basic_http_auth import AuthClientPolicy
 from h.auth.policy._cookie import CookieAuthenticationPolicy
@@ -8,7 +8,7 @@ from h.auth.policy._remote_user import RemoteUserAuthenticationPolicy
 from h.auth.policy.bearer_token import TokenAuthenticationPolicy
 
 
-@interface.implementer(interfaces.IAuthenticationPolicy)
+@implementer(ISecurityPolicy)
 class AuthenticationPolicy(IdentityBasedPolicy):
     def __init__(self, proxy_auth=False):
         self._bearer_token_policy = TokenAuthenticationPolicy()

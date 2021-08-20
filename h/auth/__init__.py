@@ -32,7 +32,7 @@ def includeme(config):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-    config.set_authentication_policy(AuthenticationPolicy(proxy_auth=proxy_auth))
+    config.set_security_policy(AuthenticationPolicy(proxy_auth=proxy_auth))
 
     # Allow retrieval of the authority from the request object.
     config.add_request_method(default_authority, name="default_authority", reify=True)
