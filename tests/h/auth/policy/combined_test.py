@@ -2,42 +2,38 @@ from unittest.mock import patch, sentinel
 
 import pytest
 
-from h.auth.policy.combined import AuthenticationPolicy
+from h.auth.policy.combined import SecurityPolicy
 
 # pylint: disable=protected-access
 
 
-class TestAuthenticationPolicy:
-    def test_construction(
-        self, TokenAuthenticationPolicy, AuthClientPolicy, CookieAuthenticationPolicy
-    ):
-        policy = AuthenticationPolicy(proxy_auth=False)
+class TestSecurityPolicy:
+    def test_construction(self, TokenPolicy, AuthClientPolicy, CookiePolicy):
+        policy = SecurityPolicy(proxy_auth=False)
 
-        TokenAuthenticationPolicy.assert_called_once_with()
-        assert policy._bearer_token_policy == TokenAuthenticationPolicy.return_value
+        TokenPolicy.assert_called_once_with()
+        assert policy._bearer_token_policy == TokenPolicy.return_value
         AuthClientPolicy.assert_called_once_with()
         assert policy._http_basic_auth_policy == AuthClientPolicy.return_value
-        CookieAuthenticationPolicy.assert_called_once_with()
-        assert policy._ui_policy == CookieAuthenticationPolicy.return_value
+        CookiePolicy.assert_called_once_with()
+        assert policy._ui_policy == CookiePolicy.return_value
 
-    def test_construction_for_proxy_auth(self, RemoteUserAuthenticationPolicy):
-        policy = AuthenticationPolicy(proxy_auth=True)
+    def test_construction_for_proxy_auth(self, RemoteUserPolicy):
+        policy = SecurityPolicy(proxy_auth=True)
 
-        RemoteUserAuthenticationPolicy.assert_called_once_with()
-        assert policy._ui_policy == RemoteUserAuthenticationPolicy.return_value
+        RemoteUserPolicy.assert_called_once_with()
+        assert policy._ui_policy == RemoteUserPolicy.return_value
 
     @pytest.mark.parametrize(
         "method,args,kwargs",
         (
-            ("authenticated_userid", [], {}),
-            ("unauthenticated_userid", [], {}),
             ("remember", [sentinel.userid], {"kwargs": True}),
             ("forget", [], {}),
             ("identity", [], {}),
         ),
     )
     def test_most_methods_delegate(self, pyramid_request, method, args, kwargs):
-        policy = AuthenticationPolicy()
+        policy = SecurityPolicy()
 
         with patch.object(policy, "_call_sub_policies") as _call_sub_policies:
             auth_method = getattr(policy, method)
@@ -60,7 +56,7 @@ class TestAuthenticationPolicy:
     )
     def test_calls_are_routed_based_on_api_or_not(self, pyramid_request, path, is_ui):
         pyramid_request.path = path
-        policy = AuthenticationPolicy()
+        policy = SecurityPolicy()
 
         # Use `remember()` as an example, we've proven above which methods use
         # this
@@ -91,7 +87,7 @@ class TestAuthenticationPolicy:
     ):
         # Pick a URL instead of retesting which URLs trigger the API behavior
         pyramid_request.path = "/api/anything"
-        policy = AuthenticationPolicy()
+        policy = SecurityPolicy()
         policy._bearer_token_policy.remember.return_value = bearer_returns
         policy._http_basic_auth_policy.handles.return_value = basic_auth_handles
 
@@ -112,17 +108,17 @@ class TestAuthenticationPolicy:
             assert result == policy._bearer_token_policy.remember.return_value
 
     @pytest.fixture(autouse=True)
-    def TokenAuthenticationPolicy(self, patch):
-        return patch("h.auth.policy.combined.TokenAuthenticationPolicy")
+    def TokenPolicy(self, patch):
+        return patch("h.auth.policy.combined.TokenPolicy")
 
     @pytest.fixture(autouse=True)
     def AuthClientPolicy(self, patch):
         return patch("h.auth.policy.combined.AuthClientPolicy")
 
     @pytest.fixture(autouse=True)
-    def RemoteUserAuthenticationPolicy(self, patch):
-        return patch("h.auth.policy.combined.RemoteUserAuthenticationPolicy")
+    def RemoteUserPolicy(self, patch):
+        return patch("h.auth.policy.combined.RemoteUserPolicy")
 
     @pytest.fixture(autouse=True)
-    def CookieAuthenticationPolicy(self, patch):
-        return patch("h.auth.policy.combined.CookieAuthenticationPolicy")
+    def CookiePolicy(self, patch):
+        return patch("h.auth.policy.combined.CookiePolicy")

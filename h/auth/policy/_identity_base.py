@@ -1,6 +1,6 @@
 from typing import Optional
 
-from h.security import Identity, identity_permits, principals_for_identity
+from h.security import Identity, identity_permits
 
 
 class IdentityBasedPolicy:
@@ -37,30 +37,6 @@ class IdentityBasedPolicy:
             return identity.user.userid
 
         return None
-
-    def unauthenticated_userid(self, request):  # pylint: disable=no-self-use
-        """
-        Return the userid implied by the token in the passed request, if any.
-
-        :param request: Pyramid request to inspect
-        :return: The userid authenticated for the passed request or None
-        """
-
-        # We actually just do the same thing for unauthenticated user ids,
-        # which is to say they have to be valid.
-        return self.authenticated_userid(request)
-
-    def effective_principals(self, request):
-        """
-        Return a list of principals for the request.
-
-        If authentication is unsuccessful then the only principal returned is
-        `Everyone`
-
-        :param request: Pyramid request to check
-        :returns: List of principals
-        """
-        return principals_for_identity(self.identity(request))
 
     def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
         return []

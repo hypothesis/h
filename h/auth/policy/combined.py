@@ -2,28 +2,19 @@ from pyramid.interfaces import ISecurityPolicy
 from zope.interface import implementer
 
 from h.auth.policy._basic_http_auth import AuthClientPolicy
-from h.auth.policy._cookie import CookieAuthenticationPolicy
+from h.auth.policy._cookie import CookiePolicy
 from h.auth.policy._identity_base import IdentityBasedPolicy
-from h.auth.policy._remote_user import RemoteUserAuthenticationPolicy
-from h.auth.policy.bearer_token import TokenAuthenticationPolicy
+from h.auth.policy._remote_user import RemoteUserPolicy
+from h.auth.policy.bearer_token import TokenPolicy
 
 
 @implementer(ISecurityPolicy)
-class AuthenticationPolicy(IdentityBasedPolicy):
+class SecurityPolicy(IdentityBasedPolicy):
     def __init__(self, proxy_auth=False):
-        self._bearer_token_policy = TokenAuthenticationPolicy()
+        self._bearer_token_policy = TokenPolicy()
         self._http_basic_auth_policy = AuthClientPolicy()
 
-        if proxy_auth:
-            self._ui_policy = RemoteUserAuthenticationPolicy()
-        else:
-            self._ui_policy = CookieAuthenticationPolicy()
-
-    def authenticated_userid(self, request):
-        return self._call_sub_policies("authenticated_userid", request)
-
-    def unauthenticated_userid(self, request):
-        return self._call_sub_policies("unauthenticated_userid", request)
+        self._ui_policy = RemoteUserPolicy() if proxy_auth else CookiePolicy()
 
     def remember(self, request, userid, **kw):
         return self._call_sub_policies("remember", request, userid, **kw)

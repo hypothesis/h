@@ -2,16 +2,16 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.auth.policy.bearer_token import TokenAuthenticationPolicy
+from h.auth.policy.bearer_token import TokenPolicy
 from h.security import Identity
 
 
 @pytest.mark.usefixtures("user_service", "auth_token_service")
-class TestTokenAuthenticationPolicy:
+class TestTokenPolicy:
     def test_identity(self, pyramid_request, auth_token_service, user_service):
         pyramid_request.auth_token = sentinel.auth_token
 
-        identity = TokenAuthenticationPolicy().identity(pyramid_request)
+        identity = TokenPolicy().identity(pyramid_request)
 
         auth_token_service.validate.assert_called_once_with(sentinel.auth_token)
         user_service.fetch.assert_called_once_with(
@@ -24,14 +24,14 @@ class TestTokenAuthenticationPolicy:
         pyramid_request.path = "/ws"
         pyramid_request.GET["access_token"] = sentinel.access_token
 
-        TokenAuthenticationPolicy().identity(pyramid_request)
+        TokenPolicy().identity(pyramid_request)
 
         auth_token_service.validate.assert_called_once_with(sentinel.access_token)
 
     def test_identity_returns_None_with_no_token(self, pyramid_request):
         pyramid_request.auth_token = None
 
-        assert TokenAuthenticationPolicy().identity(pyramid_request) is None
+        assert TokenPolicy().identity(pyramid_request) is None
 
     def test_identity_returns_None_for_invalid_tokens(
         self, pyramid_request, auth_token_service
@@ -39,7 +39,7 @@ class TestTokenAuthenticationPolicy:
         pyramid_request.auth_token = sentinel.auth_token
         auth_token_service.validate.return_value = None
 
-        assert TokenAuthenticationPolicy().identity(pyramid_request) is None
+        assert TokenPolicy().identity(pyramid_request) is None
 
     def test_identity_returns_None_for_invalid_users(
         self, pyramid_request, user_service
@@ -47,4 +47,4 @@ class TestTokenAuthenticationPolicy:
         pyramid_request.auth_token = sentinel.auth_token
         user_service.fetch.return_value = None
 
-        assert TokenAuthenticationPolicy().identity(pyramid_request) is None
+        assert TokenPolicy().identity(pyramid_request) is None

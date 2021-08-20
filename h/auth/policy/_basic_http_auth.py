@@ -1,9 +1,7 @@
 import hmac
 
-from pyramid import interfaces
 from pyramid.authentication import extract_http_basic_credentials
 from sqlalchemy.exc import StatementError
-from zope import interface
 
 from h.auth.policy._identity_base import IdentityBasedPolicy
 from h.exceptions import InvalidUserId
@@ -12,7 +10,6 @@ from h.models.auth_client import GrantType
 from h.security import Identity
 
 
-@interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthClientPolicy(IdentityBasedPolicy):
     """
     An authentication policy for registered AuthClients.
@@ -53,18 +50,6 @@ class AuthClientPolicy(IdentityBasedPolicy):
             ) in cls.API_WHITELIST
         return False
 
-    def unauthenticated_userid(self, request):
-        """Return the forwarded userid or the auth_client's id."""
-
-        if forwarded_userid := self._forwarded_userid(request):
-            return forwarded_userid
-
-        # Get the username from the basic auth header
-        if credentials := extract_http_basic_credentials(request):
-            return credentials.username
-
-        return None
-
     def identity(self, request):
         """
         Get an Identity object for valid credentials.
@@ -78,7 +63,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
             return None
 
         user = None
-        if forwarded_userid := self._forwarded_userid(request):
+        if forwarded_userid := request.headers.get("X-Forwarded-User", None):
             # If we have a forwarded user it must be valid
             try:
                 user = request.find_service(name="user").fetch(forwarded_userid)
@@ -123,8 +108,3 @@ class AuthClientPolicy(IdentityBasedPolicy):
             return None
 
         return auth_client
-
-    @staticmethod
-    def _forwarded_userid(request):
-        """Return forwarded userid or None."""
-        return request.headers.get("X-Forwarded-User", None)

@@ -18,39 +18,22 @@ class TestIdentityBasedPolicy:
         )
         assert result == identity_permits.return_value
 
-    @pytest.mark.parametrize(
-        "method", ("authenticated_userid", "unauthenticated_userid")
-    )
-    def test_userid_methods(self, policy, pyramid_request, identity, method):
-        assert getattr(policy, method)(pyramid_request) == identity.user.userid
+    def test_authenticated_userid(self, policy, pyramid_request, identity):
+        assert policy.authenticated_userid(pyramid_request) == identity.user.userid
 
-    @pytest.mark.parametrize(
-        "method", ("authenticated_userid", "unauthenticated_userid")
-    )
-    def test_userid_methods_return_None_if_the_identity_has_no_user(
-        self, policy, pyramid_request, identity, method
+    def test_authenticated_userid_return_None_if_the_identity_has_no_user(
+        self, policy, pyramid_request, identity
     ):
         identity.user = None
 
-        assert getattr(policy, method)(pyramid_request) is None
+        assert policy.authenticated_userid(pyramid_request) is None
 
-    @pytest.mark.parametrize(
-        "method", ("authenticated_userid", "unauthenticated_userid")
-    )
-    def test_userid_methods_return_None_if_the_identity_is_None(
-        self, policy, pyramid_request, method
+    def test_authenticated_userid_return_None_if_the_identity_is_None(
+        self, policy, pyramid_request
     ):
         policy.returned_identity = None
 
-        assert getattr(policy, method)(pyramid_request) is None
-
-    def test_effective_principals(
-        self, policy, pyramid_request, identity, principals_for_identity
-    ):
-        principals = policy.effective_principals(pyramid_request)
-
-        principals_for_identity.assert_called_once_with(identity)
-        assert principals == principals_for_identity.return_value
+        assert policy.authenticated_userid(pyramid_request) is None
 
     def test_remember_does_nothing(self, policy, pyramid_request):
         assert policy.remember(pyramid_request, "foo") == []
@@ -78,7 +61,3 @@ class TestIdentityBasedPolicy:
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):
         return patch("h.auth.policy._identity_base.identity_permits")
-
-    @pytest.fixture(autouse=True)
-    def principals_for_identity(self, patch):
-        return patch("h.auth.policy._identity_base.principals_for_identity")
