@@ -9,6 +9,7 @@ class TestGetAnnotation:
         )
         data = res.json
         assert data["id"] == annotation.id
+        assert data["permissions"]["read"] == ["group:__world__"]
 
     def test_it_returns_http_404_for_private_annotation_when_unauthenticated(
         self, app, private_annotation
