@@ -1,11 +1,9 @@
 from copy import deepcopy
 
-from pyramid import security
-from pyramid.security import principals_allowed_by_permission
-
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security import Permission
+from h.security.permits import identity_permits
 from h.session import user_info
 from h.traversal import AnnotationContext
 from h.util.datetime import utc_iso8601
@@ -60,10 +58,14 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             # It's not shared so only the owner can read it
             return self.annotation.userid
 
-        if security.Everyone in principals_allowed_by_permission(
-            AnnotationContext(self.annotation), Permission.Annotation.READ
+        # If we can access this without an identity, anyone in the world
+        # can read this. We optimise by checking if we were going to write
+        # "group:__world__" anyway, to save the permission check.
+        if self.annotation.groupid == "__world__" or identity_permits(
+            identity=None,
+            context=AnnotationContext(self.annotation),
+            permission=Permission.Annotation.READ,
         ):
-            # Anyone in the world can read this
             return "group:__world__"
 
         # Only people in the group can read it
