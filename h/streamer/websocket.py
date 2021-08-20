@@ -55,7 +55,6 @@ class WebSocket(_WebSocket):
             heartbeat_freq=30.0,
         )
 
-        self.effective_principals = environ["h.ws.effective_principals"]
         self.identity = environ["h.ws.identity"]
 
         self._work_queue = environ["h.ws.streamer_work_queue"]

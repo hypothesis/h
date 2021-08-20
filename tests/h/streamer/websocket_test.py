@@ -5,7 +5,6 @@ import pytest
 from gevent.queue import Queue
 from h_matchers import Any
 from jsonschema import ValidationError
-from pyramid import security
 
 from h.security import Identity
 from h.streamer import websocket
@@ -129,7 +128,6 @@ class TestWebSocket:
 
     def test_socket_sets_auth_data_from_environ(self, client, fake_environ):
         assert client.identity == fake_environ["h.ws.identity"]
-        assert client.effective_principals == fake_environ["h.ws.effective_principals"]
 
     def test_socket_send_json(self, client, fake_socket_send):
         payload = {"foo": "bar"}
@@ -166,11 +164,6 @@ class TestWebSocket:
     def fake_environ(self, queue):
         return {
             "h.ws.identity": Identity(),
-            "h.ws.effective_principals": [
-                security.Everyone,
-                security.Authenticated,
-                "group:__world__",
-            ],
             "h.ws.registry": mock.sentinel.registry,
             "h.ws.streamer_work_queue": queue,
         }
