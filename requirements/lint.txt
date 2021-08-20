@@ -387,7 +387,6 @@ six==1.15.0
     #   jsonschema
     #   packaging
     #   python-dateutil
-    #   webtest
 snowballstemmer==2.1.0
     # via pydocstyle
 sortedcontainers==2.3.0
@@ -473,7 +472,7 @@ webob==1.8.7
     #   -r requirements/tests.txt
     #   pyramid
     #   webtest
-webtest==2.0.35
+webtest==3.0.0
     # via -r requirements/functests.txt
 wired==0.2.2
     # via
