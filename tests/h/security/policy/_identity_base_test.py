@@ -2,8 +2,8 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.auth.policy._identity_base import IdentityBasedPolicy
 from h.security import Identity
+from h.security.policy._identity_base import IdentityBasedPolicy
 
 
 class TestIdentityBasedPolicy:
@@ -60,4 +60,4 @@ class TestIdentityBasedPolicy:
 
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):
-        return patch("h.auth.policy._identity_base.identity_permits")
+        return patch("h.security.policy._identity_base.identity_permits")

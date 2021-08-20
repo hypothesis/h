@@ -1,8 +1,8 @@
 from pyramid.interfaces import ISecurityPolicy
 from zope.interface import implementer
 
-from h.auth.policy._identity_base import IdentityBasedPolicy
 from h.security import Identity
+from h.security.policy._identity_base import IdentityBasedPolicy
 
 
 @implementer(ISecurityPolicy)

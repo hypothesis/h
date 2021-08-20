@@ -3,11 +3,11 @@ import hmac
 from pyramid.authentication import extract_http_basic_credentials
 from sqlalchemy.exc import StatementError
 
-from h.auth.policy._identity_base import IdentityBasedPolicy
 from h.exceptions import InvalidUserId
 from h.models import AuthClient
 from h.models.auth_client import GrantType
 from h.security import Identity
+from h.security.policy._identity_base import IdentityBasedPolicy
 
 
 class AuthClientPolicy(IdentityBasedPolicy):

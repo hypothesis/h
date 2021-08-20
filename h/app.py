@@ -87,6 +87,7 @@ def includeme(config):
     config.include("h.renderers")
     config.include("h.routes")
     config.include("h.search")
+    config.include("h.security")
     config.include("h.services")
     config.include("h.session")
     config.include("h.viewderivers")

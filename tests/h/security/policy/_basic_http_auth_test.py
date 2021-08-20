@@ -3,10 +3,10 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.auth.policy._basic_http_auth import AuthClientPolicy
 from h.exceptions import InvalidUserId
 from h.models.auth_client import GrantType
 from h.security import Identity
+from h.security.policy._basic_http_auth import AuthClientPolicy
 
 
 @pytest.mark.usefixtures("user_service")

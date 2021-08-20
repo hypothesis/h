@@ -2,7 +2,7 @@ from unittest.mock import patch, sentinel
 
 import pytest
 
-from h.auth.policy.combined import SecurityPolicy
+from h.security.policy import SecurityPolicy
 
 # pylint: disable=protected-access
 
@@ -109,16 +109,16 @@ class TestSecurityPolicy:
 
     @pytest.fixture(autouse=True)
     def TokenPolicy(self, patch):
-        return patch("h.auth.policy.combined.TokenPolicy")
+        return patch("h.security.policy.combined.TokenPolicy")
 
     @pytest.fixture(autouse=True)
     def AuthClientPolicy(self, patch):
-        return patch("h.auth.policy.combined.AuthClientPolicy")
+        return patch("h.security.policy.combined.AuthClientPolicy")
 
     @pytest.fixture(autouse=True)
     def RemoteUserPolicy(self, patch):
-        return patch("h.auth.policy.combined.RemoteUserPolicy")
+        return patch("h.security.policy.combined.RemoteUserPolicy")
 
     @pytest.fixture(autouse=True)
     def CookiePolicy(self, patch):
-        return patch("h.auth.policy.combined.CookiePolicy")
+        return patch("h.security.policy.combined.CookiePolicy")

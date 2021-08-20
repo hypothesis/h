@@ -3,8 +3,8 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from h.auth.policy._cookie import CookiePolicy
 from h.security import Identity
+from h.security.policy._cookie import CookiePolicy
 
 
 @pytest.mark.usefixtures("auth_cookie_service")
