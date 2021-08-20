@@ -1,5 +1,6 @@
 import deform
-from pyramid import httpexceptions, security
+from pyramid import httpexceptions
+from pyramid.authorization import Authenticated
 from pyramid.view import view_config, view_defaults
 
 from h import form, i18n
@@ -12,7 +13,7 @@ _ = i18n.TranslationString
 @view_defaults(
     route_name="group_create",
     renderer="h:templates/groups/create.html.jinja2",
-    effective_principals=security.Authenticated,
+    effective_principals=Authenticated,
 )
 class GroupCreateController:
     def __init__(self, request):

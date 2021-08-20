@@ -3,8 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from h_matchers import Any
-from pyramid import security
-from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy, Allow, Authenticated, Everyone
 
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.security import Permission
@@ -166,10 +165,10 @@ class TestACLForGroup:
     def test_world_readable_and_flaggable(self, group, group_permits):
         group.readable_by = ReadableBy.world
 
-        assert group_permits([security.Everyone], Permission.Group.READ)
-        assert group_permits([security.Everyone], Permission.Group.MEMBER_READ)
-        assert group_permits([security.Authenticated], Permission.Group.FLAG)
-        assert not group_permits([security.Everyone], Permission.Group.FLAG)
+        assert group_permits([Everyone], Permission.Group.READ)
+        assert group_permits([Everyone], Permission.Group.MEMBER_READ)
+        assert group_permits([Authenticated], Permission.Group.FLAG)
+        assert not group_permits([Everyone], Permission.Group.FLAG)
 
     def test_members_readable_and_flaggable(self, group, group_permits):
         group.readable_by = ReadableBy.members
@@ -182,13 +181,13 @@ class TestACLForGroup:
         group.readable_by = None
 
         assert not group_permits(
-            [security.Everyone, f"group:{group.pubid}"], Permission.Group.READ
+            [Everyone, f"group:{group.pubid}"], Permission.Group.READ
         )
         assert not group_permits(
-            [security.Everyone, f"group:{group.pubid}"], Permission.Group.MEMBER_READ
+            [Everyone, f"group:{group.pubid}"], Permission.Group.MEMBER_READ
         )
         assert not group_permits(
-            [security.Authenticated, f"group:{group.pubid}"], Permission.Group.FLAG
+            [Authenticated, f"group:{group.pubid}"], Permission.Group.FLAG
         )
 
     @pytest.mark.parametrize(
@@ -250,7 +249,7 @@ class TestACLForGroup:
         assert not permitted_principals_for(Permission.Group.UPSERT)
 
     def test_fallback_is_deny_all(self, group_permits):
-        assert not group_permits([security.Everyone], "non_existant_permission")
+        assert not group_permits([Everyone], "non_existant_permission")
 
     @pytest.fixture
     def no_group_permits(self, permits):
@@ -279,7 +278,7 @@ class TestACLForAnnotation:
         acl = ACL.for_annotation(None)  # Doesn't require an annotation
 
         assert permits(
-            ObjectWithACL(acl), [security.Authenticated], Permission.Annotation.CREATE
+            ObjectWithACL(acl), [Authenticated], Permission.Annotation.CREATE
         )
         assert not permits(ObjectWithACL(acl), [], Permission.Annotation.CREATE)
 
@@ -327,8 +326,8 @@ class TestACLForAnnotation:
     ):
         annotation.shared = True
         for_group.return_value = [
-            (security.Allow, "principal_1", group_permission),
-            (security.Allow, "principal_2", group_permission),
+            (Allow, "principal_1", group_permission),
+            (Allow, "principal_2", group_permission),
         ]
 
         anno_permits(["principal_1"], annotation_permission)
@@ -344,7 +343,7 @@ class TestACLForAnnotation:
     ):
         annotation.shared = True
         annotation.deleted = True
-        for_group.return_value = [(security.Allow, "principal", Permission.Group.READ)]
+        for_group.return_value = [(Allow, "principal", Permission.Group.READ)]
 
         anno_permits(["principal"], Permission.Annotation.READ_REALTIME_UPDATES)
 
@@ -354,8 +353,8 @@ class TestACLForAnnotation:
 
         acl = ACL.for_annotation(annotation)
 
-        assert (security.Allow, Any(), Permission.Annotation.FLAG) not in acl
-        assert (security.Allow, Any(), Permission.Annotation.MODERATE) not in acl
+        assert (Allow, Any(), Permission.Annotation.FLAG) not in acl
+        assert (Allow, Any(), Permission.Annotation.MODERATE) not in acl
 
     @pytest.fixture
     def for_group(self):

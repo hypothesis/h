@@ -4,7 +4,7 @@ from functools import wraps
 from urllib.parse import parse_qs, urlparse
 
 from oauthlib.oauth2 import OAuth2Error
-from pyramid import security
+from pyramid.authorization import Authenticated
 from pyramid.httpexceptions import HTTPFound, exception_response
 from pyramid.view import view_config, view_defaults
 
@@ -88,7 +88,7 @@ class OAuthAuthorizeController:
 
     @view_config(
         request_method="POST",
-        effective_principals=security.Authenticated,
+        effective_principals=Authenticated,
         renderer="json",
     )
     def post(self):
@@ -103,7 +103,7 @@ class OAuthAuthorizeController:
     @view_config(
         request_method="POST",
         request_param="response_mode=web_message",
-        effective_principals=security.Authenticated,
+        effective_principals=Authenticated,
         renderer="h:templates/oauth/authorize_web_message.html.jinja2",
     )
     def post_web_message(self):

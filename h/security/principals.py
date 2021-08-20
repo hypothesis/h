@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pyramid.security import Authenticated, Everyone
+from pyramid.authorization import Authenticated, Everyone
 
 from h.security.identity import Identity
 from h.security.role import Role

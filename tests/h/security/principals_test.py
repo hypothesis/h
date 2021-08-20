@@ -1,6 +1,6 @@
 import pytest
 from h_matchers import Any
-from pyramid.security import Authenticated, Everyone
+from pyramid.authorization import Authenticated, Everyone
 
 from h.security import Identity
 from h.security.principals import principals_for_identity

@@ -1,7 +1,7 @@
 import datetime
 
 import pytest
-from pyramid import security
+from pyramid.authorization import Everyone
 
 from h.presenters.annotation_json import AnnotationJSONPresenter
 
@@ -74,7 +74,7 @@ class TestAnnotationJSONPresenter:
         (
             (False, [], "{annotation.userid}"),
             (True, [], "group:{annotation.groupid}"),
-            (True, [security.Everyone], "group:__world__"),
+            (True, [Everyone], "group:__world__"),
         ),
     )
     def test_read_permission(
