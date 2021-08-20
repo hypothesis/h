@@ -2,8 +2,8 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.auth.policy.bearer_token import TokenPolicy
 from h.security import Identity
+from h.security.policy.bearer_token import TokenPolicy
 
 
 @pytest.mark.usefixtures("user_service", "auth_token_service")

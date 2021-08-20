@@ -2,8 +2,8 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.auth.policy._remote_user import RemoteUserPolicy
 from h.security import Identity
+from h.security.policy._remote_user import RemoteUserPolicy
 
 
 @pytest.mark.usefixtures("user_service")

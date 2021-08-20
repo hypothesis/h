@@ -1,5 +1,5 @@
-from h.auth.policy._identity_base import IdentityBasedPolicy
 from h.security import Identity
+from h.security.policy._identity_base import IdentityBasedPolicy
 
 
 class RemoteUserPolicy(IdentityBasedPolicy):
