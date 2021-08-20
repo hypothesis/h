@@ -8,12 +8,11 @@ from h.security.policy._identity_base import IdentityBasedPolicy
 @implementer(ISecurityPolicy)
 class TokenPolicy(IdentityBasedPolicy):
     """
-    A bearer token authentication policy.
+    A Bearer token authentication policy.
 
     This policy uses a bearer token which is validated against Token objects
-    in the DB. This can come from the `request.auth_token` (from
-    `h.auth.tokens.auth_token`) or in the case of Websocket requests the
-    GET parameter `access_token`.
+    in the DB. This can come from the Bearer token header or in the case of
+    Websocket requests with the GET parameter `access_token`.
     """
 
     def identity(self, request):

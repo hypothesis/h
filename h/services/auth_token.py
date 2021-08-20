@@ -1,5 +1,33 @@
-from h import models
-from h.auth.tokens import Token
+from datetime import datetime
+from typing import Optional
+
+import newrelic.agent
+
+from h.models import Token
+
+
+class LongLivedToken:
+    """
+    A long-lived API token for a user.
+
+    This is a wrapper class that wraps an `h.models.Token` but is not a
+    sqlalchemy ORM class so it can be used after the request's db session has
+    been committed or invalidated without getting `DetachedInstanceError`s.
+    """
+
+    def __init__(self, token):
+        self.expires = token.expires
+        self.userid = token.userid
+
+        # Associates the userid with a given transaction/web request.
+        newrelic.agent.add_custom_parameter("userid", self.userid)
+
+    def is_valid(self):
+        """Return ``True`` if this token is not expired, ``False`` if it is."""
+        if self.expires is None:
+            return True
+
+        return datetime.utcnow() < self.expires
 
 
 class AuthTokenService:
@@ -7,30 +35,23 @@ class AuthTokenService:
         self._session = session
         self._validate_cache = {}
 
-    def validate(self, token_str):
+    def validate(self, token_str) -> Optional[LongLivedToken]:
         """
-        Load and validate a token.
-
-        This will return a token object implementing
-        ``h.auth.interfaces.IAuthenticationToken``, or ``None`` when the token
-        cannot be found, or is not valid.
+        Get a validated token from the token string or None.
 
         :param token_str: the token string
-        :type token_str: unicode
-
-        :returns: the token object, if found and valid, or ``None``.
         """
 
-        if token_str in self._validate_cache:
-            token = self._validate_cache[token_str]
-            if token is not None and token.is_valid():
-                return token
-            return None
+        if token_str not in self._validate_cache:
+            token = self.fetch(token_str)
 
-        token = self._fetch_auth_token(token_str)
-        self._validate_cache[token_str] = token
-        if token is not None and token.is_valid():
-            return token
+            self._validate_cache[token_str] = LongLivedToken(token) if token else None
+
+        if (
+            long_lived_token := self._validate_cache[token_str]
+        ) and long_lived_token.is_valid():
+            return long_lived_token
+
         return None
 
     def fetch(self, token_str):
@@ -46,9 +67,7 @@ class AuthTokenService:
 
         :returns: the token object or ``None``
         """
-        return (
-            self._session.query(models.Token).filter_by(value=token_str).one_or_none()
-        )
+        return self._session.query(Token).filter_by(value=token_str).one_or_none()
 
     @staticmethod
     def get_bearer_token(request):
@@ -73,14 +92,6 @@ class AuthTokenService:
             return None
 
         return token
-
-    def _fetch_auth_token(self, token_str):
-        token_model = self.fetch(token_str)
-        if token_model is not None:
-            token = Token(token_model)
-            return token
-
-        return None
 
 
 def auth_token_service_factory(_context, request):

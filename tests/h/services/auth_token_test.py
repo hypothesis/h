@@ -1,8 +1,13 @@
 import datetime
 
 import pytest
+from pytest import param
 
-from h.services.auth_token import AuthTokenService, auth_token_service_factory
+from h.services.auth_token import (
+    AuthTokenService,
+    LongLivedToken,
+    auth_token_service_factory,
+)
 
 
 class TestAuthTokenService:
@@ -82,6 +87,27 @@ class TestAuthTokenService:
 
     def time(self, days_delta=0):
         return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)
+
+
+def _seconds_from_now(seconds):
+    return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
+
+
+class TestLongLivedToken:
+    @pytest.mark.parametrize(
+        "expires,is_valid",
+        (
+            param(None, True, id="no expiry"),
+            param(_seconds_from_now(1800), True, id="future expiry"),
+            param(_seconds_from_now(-1800), False, id="past expiry"),
+        ),
+    )
+    def test_it(self, expires, is_valid, factories):
+        token = LongLivedToken(
+            factories.OAuth2Token(userid="acct:foo@example.com", expires=expires)
+        )
+
+        assert token.is_valid() == is_valid
 
 
 @pytest.mark.usefixtures("pyramid_settings")
