@@ -50,6 +50,30 @@ class AuthTokenService:
             self._session.query(models.Token).filter_by(value=token_str).one_or_none()
         )
 
+    @staticmethod
+    def get_bearer_token(request):
+        """
+        Fetch the token (if any) associated with a request.
+
+        :param request: the request object
+        :returns: the auth token carried by the request, or None
+        """
+        try:
+            header = request.headers["Authorization"]
+        except KeyError:
+            return None
+
+        if not header.startswith("Bearer "):
+            return None
+
+        token = str(header[len("Bearer ") :]).strip()
+        # If the token is empty at this point, it is clearly invalid and we
+        # should reject it.
+        if not token:
+            return None
+
+        return token
+
     def _fetch_auth_token(self, token_str):
         token_model = self.fetch(token_str)
         if token_model is not None:
