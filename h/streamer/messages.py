@@ -3,11 +3,10 @@ from collections import namedtuple
 from itertools import chain
 
 from gevent.queue import Full
-from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
 from h.realtime import Consumer
-from h.security import Permission
+from h.security import Permission, identity_permits
 from h.streamer import websocket
 from h.streamer.contexts import request_context
 from h.streamer.filter import SocketFilter
@@ -121,12 +120,10 @@ def handle_annotation_event(message, sockets, request, session):
         (first_socket,), matching_sockets
     )
 
-    read_principals = principals_allowed_by_permission(
-        AnnotationContext(annotation), Permission.Annotation.READ_REALTIME_UPDATES
-    )
     reply = _generate_annotation_event(request, message, annotation)
 
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
+    annotation_context = AnnotationContext(annotation)
 
     for socket in matching_sockets:
         # Don't send notifications back to the person who sent them
@@ -142,7 +139,11 @@ def handle_annotation_event(message, sockets, request, session):
             continue
 
         # Check whether client is authorized to read this annotation.
-        if not set(read_principals).intersection(socket.effective_principals):
+        if not identity_permits(
+            socket.identity,
+            annotation_context,
+            Permission.Annotation.READ_REALTIME_UPDATES,
+        ):
             continue
 
         socket.send_json(reply)

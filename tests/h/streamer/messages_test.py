@@ -208,32 +208,27 @@ class TestHandleAnnotationEvent:
 
         assert bool(socket.send_json.call_count) == user_is_nipsaed
 
-    @pytest.mark.parametrize(
-        "user_principals,can_see",
-        (
-            [[], False],
-            [["wrong_principal"], False],
-            [["principal"], True],
-            [["principal", "user_noise"], True],
-        ),
-    )
-    def test_visibility_is_based_on_acl(
+    @pytest.mark.parametrize("can_see", (True, False))
+    def test_visibility_is_based_on_identity(
         self,
         handle_annotation_event,
-        user_principals,
         can_see,
         AnnotationContext,
-        principals_allowed_by_permission,
+        identity_permits,
+        fetch_annotation,
         socket,
     ):
-        principals_allowed_by_permission.return_value = ["principal", "acl_noise"]
-        socket.effective_principals = user_principals
+        identity_permits.return_value = can_see
 
         handle_annotation_event(sockets=[socket])
 
-        principals_allowed_by_permission.assert_called_with(
-            AnnotationContext.return_value, Permission.Annotation.READ_REALTIME_UPDATES
+        AnnotationContext.assert_called_once_with(fetch_annotation.return_value)
+        identity_permits.assert_called_once_with(
+            socket.identity,
+            AnnotationContext.return_value,
+            Permission.Annotation.READ_REALTIME_UPDATES,
         )
+
         assert bool(socket.send_json.call_count) == can_see
 
     @pytest.fixture
@@ -271,19 +266,21 @@ class TestHandleAnnotationEvent:
             "src_client_id": "source_socket",
         }
 
+    @pytest.fixture
+    def AnnotationContext(self, patch):
+        return patch("h.streamer.messages.AnnotationContext")
+
     @pytest.fixture(autouse=True)
     def fetch_annotation(self, factories, patch):
         fetch = patch("h.streamer.messages.storage.fetch_annotation")
         fetch.return_value = factories.Annotation()
         return fetch
 
-    @pytest.fixture
-    def principals_allowed_by_permission(self, patch):
-        return patch("h.streamer.messages.principals_allowed_by_permission")
-
-    @pytest.fixture
-    def AnnotationContext(self, patch):
-        return patch("h.streamer.messages.AnnotationContext")
+    @pytest.fixture(autouse=True)
+    def identity_permits(self, patch):
+        identity_permits = patch("h.streamer.messages.identity_permits")
+        identity_permits.return_value = True
+        return identity_permits
 
     @pytest.fixture(autouse=True)
     def AnnotationJSONPresenter(self, patch):
