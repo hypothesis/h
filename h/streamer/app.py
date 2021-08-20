@@ -26,9 +26,6 @@ def create_app(_global_config, **settings):
     config.include("pyramid_services")
 
     config.include("h.auth")
-    # Temporary addition to get the `request.identity` method until
-    # Pyramid 2.0 comes along
-    config.include("h.security")
     # Override the default authentication policy.
     config.set_authentication_policy(TokenAuthenticationPolicy())
 
