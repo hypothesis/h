@@ -1,4 +1,4 @@
-from pyramid import security
+from pyramid.authorization import Authenticated
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPConflict,
@@ -202,7 +202,7 @@ def read_members(context, _request):
     request_method="DELETE",
     link_name="group.member.delete",
     description="Remove the current user from a group",
-    effective_principals=security.Authenticated,
+    effective_principals=Authenticated,
 )
 def remove_member(context, request):
     """Remove a member from the given group."""

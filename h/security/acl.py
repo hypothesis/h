@@ -1,5 +1,10 @@
-from pyramid import security
-from pyramid.security import DENY_ALL, Allow
+from pyramid.authorization import (
+    ALL_PERMISSIONS,
+    DENY_ALL,
+    Allow,
+    Authenticated,
+    Everyone,
+)
 
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.security.permissions import Permission
@@ -17,7 +22,7 @@ class ACL:
         # Admin staff absolutely *DO NOT* have all permissions. They only have
         # all permissions in the admin page context. This is just a lazy way
         # of not enumerating all the separate permissions in that context.
-        yield Allow, Role.ADMIN, security.ALL_PERMISSIONS
+        yield Allow, Role.ADMIN, ALL_PERMISSIONS
         yield DENY_ALL
 
     @classmethod
@@ -92,10 +97,10 @@ class ACL:
             yield Allow, in_group_principal, Permission.Group.FLAG
 
         elif group.readable_by == ReadableBy.world:
-            yield Allow, security.Everyone, Permission.Group.READ
-            yield Allow, security.Everyone, Permission.Group.MEMBER_READ
+            yield Allow, Everyone, Permission.Group.READ
+            yield Allow, Everyone, Permission.Group.MEMBER_READ
             # Any logged in user should be able to flag things they can see
-            yield Allow, security.Authenticated, Permission.Group.FLAG
+            yield Allow, Authenticated, Permission.Group.FLAG
 
         # auth_clients with matching authority
         yield Allow, client_authority_principal, Permission.Group.READ
@@ -119,7 +124,7 @@ class ACL:
 
         :param annotation: Annotation in question
         """
-        yield Allow, security.Authenticated, Permission.Annotation.CREATE
+        yield Allow, Authenticated, Permission.Annotation.CREATE
 
         if annotation:
             if annotation.shared:
