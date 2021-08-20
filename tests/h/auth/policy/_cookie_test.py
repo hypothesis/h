@@ -3,19 +3,14 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from h.auth.policy._cookie import CookieAuthenticationPolicy
+from h.auth.policy._cookie import CookiePolicy
 from h.security import Identity
 
 
 @pytest.mark.usefixtures("auth_cookie_service")
-class TestCookieAuthenticationPolicy:
-    def test_unauthenticated_userid_does_nothing(self, pyramid_request):
-        assert (
-            CookieAuthenticationPolicy().unauthenticated_userid(pyramid_request) is None
-        )
-
+class TestCookiePolicy:
     def test_identity(self, pyramid_request, auth_cookie_service):
-        identity = CookieAuthenticationPolicy().identity(pyramid_request)
+        identity = CookiePolicy().identity(pyramid_request)
 
         auth_cookie_service.verify_cookie.assert_called_once()
         assert identity == Identity(user=auth_cookie_service.verify_cookie.return_value)
@@ -23,13 +18,13 @@ class TestCookieAuthenticationPolicy:
     def test_identity_with_no_cookie(self, pyramid_request, auth_cookie_service):
         auth_cookie_service.verify_cookie.return_value = None
 
-        assert CookieAuthenticationPolicy().identity(pyramid_request) is None
+        assert CookiePolicy().identity(pyramid_request) is None
 
     def test_remember(self, pyramid_request, auth_cookie_service, user):
         pyramid_request.session["data"] = "old"
         auth_cookie_service.verify_cookie.return_value = user
 
-        result = CookieAuthenticationPolicy().remember(pyramid_request, sentinel.userid)
+        result = CookiePolicy().remember(pyramid_request, sentinel.userid)
 
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
@@ -45,7 +40,7 @@ class TestCookieAuthenticationPolicy:
         pyramid_request.session["_csrft_"] = "old_csrf_token"
         auth_cookie_service.verify_cookie.return_value = user
 
-        CookieAuthenticationPolicy().remember(pyramid_request, user.userid)
+        CookiePolicy().remember(pyramid_request, user.userid)
 
         assert pyramid_request.session["data"] == "old"
         assert pyramid_request.session["_csrft_"] != "old_csrf_token"
@@ -53,7 +48,7 @@ class TestCookieAuthenticationPolicy:
     def test_forget(self, pyramid_request, auth_cookie_service):
         pyramid_request.session["data"] = "old"
 
-        result = CookieAuthenticationPolicy().forget(pyramid_request)
+        result = CookiePolicy().forget(pyramid_request)
 
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
@@ -77,7 +72,7 @@ class TestCookieAuthenticationPolicy:
         self, pyramid_request, method, args, vary, expected_vary
     ):
         pyramid_request.response.vary = vary
-        getattr(CookieAuthenticationPolicy(), method)(pyramid_request, *args)
+        getattr(CookiePolicy(), method)(pyramid_request, *args)
 
         assert len(pyramid_request.response_callbacks) == 1
         callback = pyramid_request.response_callbacks[0]

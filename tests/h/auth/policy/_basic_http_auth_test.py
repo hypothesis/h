@@ -115,31 +115,6 @@ class TestAuthClientPolicy:
 
         assert AuthClientPolicy().identity(pyramid_request) is None
 
-    def test_unauthenticated_userid(self, pyramid_request):
-        pyramid_request.headers["X-Forwarded-User"] = "forwarded-user"
-
-        assert (
-            AuthClientPolicy().unauthenticated_userid(pyramid_request)
-            == "forwarded-user"
-        )
-
-    def test_unauthenticated_userid_returns_clientid_if_no_forwarded_user(
-        self, pyramid_request, auth_client
-    ):
-        pyramid_request.headers["X-Forwarded-User"] = None
-
-        assert (
-            AuthClientPolicy().unauthenticated_userid(pyramid_request) == auth_client.id
-        )
-
-    def test_unauthenticated_userid_returns_None_if_no_credentials(
-        self, pyramid_request
-    ):
-        pyramid_request.headers["Authorization"] = None
-        pyramid_request.headers["X-Forwarded-User"] = None
-
-        assert AuthClientPolicy().unauthenticated_userid(pyramid_request) is None
-
     @pytest.fixture
     def auth_client(self, factories):
         return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)

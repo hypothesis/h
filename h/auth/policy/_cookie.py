@@ -5,10 +5,7 @@ from h.security import Identity
 from h.services import AuthCookieService
 
 
-class CookieAuthenticationPolicy(IdentityBasedPolicy):
-    def unauthenticated_userid(self, request):
-        """We do not allow the unauthenticated userid to be used."""
-
+class CookiePolicy(IdentityBasedPolicy):
     def identity(self, request):
         self._add_vary_by_cookie(request)
 

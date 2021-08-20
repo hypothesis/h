@@ -1,12 +1,12 @@
 """Authentication configuration."""
 import logging
 
-from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
+from h.auth.policy import SecurityPolicy, TokenPolicy
 from h.auth.util import default_authority
 from h.security import derive_key
 
 # We export this for the websocket to use as it's main policy
-__all__ = ("TokenAuthenticationPolicy",)
+__all__ = ("TokenPolicy",)
 
 
 log = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ def includeme(config):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-    config.set_security_policy(AuthenticationPolicy(proxy_auth=proxy_auth))
+    config.set_security_policy(SecurityPolicy(proxy_auth=proxy_auth))
 
     # Allow retrieval of the authority from the request object.
     config.add_request_method(default_authority, name="default_authority", reify=True)
