@@ -220,7 +220,6 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     request.GET = request.params
     request.POST = request.params
     request.user = None
-    request.identity = None
     return request
 
 

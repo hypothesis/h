@@ -7,27 +7,25 @@ from h.streamer import streamer, views
 
 
 class TestWebsocketView:
-    def test_it_adds_auth_state_to_environ(self, pyramid_request):
-        pyramid_request.identity = Identity()
+    def test_it_adds_auth_state_to_environ(self, pyramid_request, pyramid_config):
+        pyramid_config.testing_securitypolicy(identity=Identity())
 
         views.websocket_view(pyramid_request)
 
         assert pyramid_request.environ["h.ws.identity"] == pyramid_request.identity
 
     def test_it_adds_work_queue_to_environ(self, pyramid_request):
-        pyramid_request.get_response = lambda _: None
-
         views.websocket_view(pyramid_request)
 
         assert (
             pyramid_request.environ["h.ws.streamer_work_queue"] == streamer.WORK_QUEUE
         )
 
-    def test_it_preloads_groups(self, pyramid_request, factories):
+    def test_it_preloads_groups(self, pyramid_request, pyramid_config, factories):
         user = factories.User.build()
         groups = PropertyMock()
         type(user).groups = groups
-        pyramid_request.identity = Identity(user=user)
+        pyramid_config.testing_securitypolicy(identity=Identity(user=user))
 
         views.websocket_view(pyramid_request)
 
