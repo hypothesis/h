@@ -1,43 +1,32 @@
-import pytest
-
-from h.auth import util
+from h.auth.util import client_authority, default_authority
+from h.security import Identity
 
 
 class TestClientAuthority:
-    @pytest.mark.parametrize(
-        "principals",
-        [
-            ["foo", "bar", "baz"],
-            ["authority", "foo"],
-            [],
-            ["client_authority:"],
-            [" client_authority:biz.biz", "foo"],
-            ["client_authority :biz.biz", "foo"],
-        ],
-    )
-    def test_it_returns_None_if_no_client_authority_principal_match(
-        self, principals, pyramid_request, pyramid_config
-    ):
-        pyramid_config.testing_securitypolicy("LYZADOODLE", groupids=principals)
+    def test_it_with_no_identity(self, pyramid_request, pyramid_config):
+        self.set_identity(pyramid_request, pyramid_config, identity=None)
 
-        assert util.client_authority(pyramid_request) is None
+        result = client_authority(pyramid_request)
 
-    @pytest.mark.parametrize(
-        "principals,authority",
-        [
-            (
-                ["foo", "bar", "baz", "client_authority:felicitous.com"],
-                "felicitous.com",
-            ),
-            (["client_authority:somebody.likes.me", "foo"], "somebody.likes.me"),
-        ],
-    )
-    def test_it_returns_authority_if_authority_principal_matchpyramid_requesi(
-        self, principals, authority, pyramid_request, pyramid_config
-    ):
-        pyramid_config.testing_securitypolicy("LYZADOODLE", groupids=principals)
+        assert result is None
 
-        assert util.client_authority(pyramid_request) == authority
+    def test_it_with_auth_client(self, pyramid_request, pyramid_config, factories):
+        identity = Identity(auth_client=factories.AuthClient())
+        self.set_identity(pyramid_request, pyramid_config, identity=identity)
+
+        result = client_authority(pyramid_request)
+
+        assert result == identity.auth_client.authority
+
+    def set_identity(self, pyramid_request, pyramid_config, identity):
+        # This should be simplified after the 2.0 upgrade as the other code
+        # path will not be required
+        try:
+            # Pyramid 2.0
+            pyramid_config.testing_securitypolicy(identity=identity)
+        except TypeError:
+            # Pyramid 1.x
+            pyramid_request.identity = identity
 
 
 class TestAuthDomain:
@@ -45,12 +34,12 @@ class TestAuthDomain:
         # Make sure h.authority isn't set.
         pyramid_request.registry.settings.pop("h.authority", None)
 
-        assert util.default_authority(pyramid_request) == pyramid_request.domain
+        assert default_authority(pyramid_request) == pyramid_request.domain
 
     def test_it_allows_overriding_request_domain(self, pyramid_request):
         pyramid_request.registry.settings["h.authority"] = "foo.org"
-        assert util.default_authority(pyramid_request) == "foo.org"
+        assert default_authority(pyramid_request) == "foo.org"
 
     def test_it_returns_str(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)
-        assert isinstance(util.default_authority(pyramid_request), str)
+        assert isinstance(default_authority(pyramid_request), str)
