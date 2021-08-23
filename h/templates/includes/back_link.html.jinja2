@@ -1,0 +1,4 @@
+{% set label = back_link_label(request) %}
+{% if label %}
+  <a class="link--footer" href="{{ request.referrer }}">← {{ label }}</a>
+{% endif %}
