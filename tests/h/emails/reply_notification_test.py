@@ -172,7 +172,7 @@ class TestGenerate:
     ):
         """Ensure that the jinja templates don't contain syntax errors."""
         pyramid_config.include("pyramid_jinja2")
-        pyramid_config.add_jinja2_extension("h.jinja_extensions.Filters")
+        pyramid_config.include("h.jinja_extensions")
 
         generate(pyramid_request, notification)
 
