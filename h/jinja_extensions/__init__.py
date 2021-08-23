@@ -1,6 +1,7 @@
 from urllib.parse import unquote
 
 from h.jinja_extensions import filters
+from h.jinja_extensions.back_link_label import back_link_label
 from h.jinja_extensions.svg_icon import svg_icon
 
 
@@ -15,6 +16,7 @@ def setup_jinja2_env(environment):
 
     # Globals provided by us
     environment.globals["svg_icon"] = svg_icon
+    environment.globals["back_link_label"] = back_link_label
 
 
 def includeme(config):  # pragma: no cover

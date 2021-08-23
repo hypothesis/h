@@ -3,7 +3,7 @@ from urllib.parse import unquote
 from h_matchers import Any
 from jinja2 import Environment
 
-from h.jinja_extensions import filters, setup_jinja2_env, svg_icon
+from h.jinja_extensions import back_link_label, filters, setup_jinja2_env, svg_icon
 
 
 class TestSetupJinja2Env:
@@ -21,4 +21,6 @@ class TestSetupJinja2Env:
             }
         )
 
-        assert environment.globals == Any.dict.containing({"svg_icon": svg_icon})
+        assert environment.globals == Any.dict.containing(
+            {"svg_icon": svg_icon, "back_link_label": back_link_label}
+        )

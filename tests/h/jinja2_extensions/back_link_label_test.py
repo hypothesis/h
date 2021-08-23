@@ -1,28 +1,19 @@
-from unittest.mock import Mock
-
 import pytest
 
-from h.panels.back_link import back_link
+from h.jinja_extensions.back_link_label import back_link_label
 
 
 @pytest.mark.usefixtures("routes")
-class TestBackLink:
-    def test_it_sets_back_location_from_referrer(self, pyramid_request):
-        pyramid_request.referrer = "https://example.com/prev-page"
-
-        result = back_link({}, pyramid_request)
-
-        assert result["back_location"] == "https://example.com/prev-page"
-
+class TestBackLinkLabel:
     @pytest.mark.parametrize(
         "referrer,label",
         [
-            ("https://example.com/users/currentuser", "Back to your profile page"),
+            ("https://example.com/users/current_user", "Back to your profile page"),
             (
-                "https://example.com/users/currentuser?q=tag:foo",
+                "https://example.com/users/current_user?q=tag:foo",
                 "Back to your profile page",
             ),
-            ("https://example.com/users/otheruser", None),
+            ("https://example.com/users/other_user", None),
             ("https://example.com/groups/abc/def", "Back to group overview page"),
             ("https://example.com/search", None),
             (None, None),
@@ -31,13 +22,11 @@ class TestBackLink:
     def test_it_sets_back_label(self, pyramid_request, referrer, label):
         pyramid_request.referrer = referrer
 
-        result = back_link({}, pyramid_request)
-
-        assert result["back_label"] == label
+        assert back_link_label(pyramid_request) == label
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.user = Mock(username="currentuser")
+    def pyramid_request(self, pyramid_request, factories):
+        pyramid_request.user = factories.User(username="current_user")
         return pyramid_request
 
     @pytest.fixture
