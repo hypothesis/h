@@ -35,8 +35,8 @@ def authenticated(identity, context):
     return identity
 
 
-# The `requires` here means that this requires needs `authenticate` to be True
-# before it's True. It also avoids attribute errors if identity is None
+# The `@requires` here means that this predicate needs `authenticate` to be
+# True before it's True. It also avoids attribute errors if identity is None
 @requires(authenticated)
 def authenticated_user(identity, context):
     return identity.user
@@ -169,7 +169,7 @@ def resolve_predicates(mapping):
     Expand predicates with requirements into concrete lists of predicates.
 
     This takes a permission map which contains predicates which reference
-    other ones (using `requires()`), and converts each clause to include the
+    other ones (using `@requires`), and converts each clause to include the
     parents in parent first order. This means any parent which is referred to
     by a predicate is executed before it, and no predicate appears more than once.
     """

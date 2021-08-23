@@ -1,13 +1,15 @@
 """
-Map of `Permission`s to "predicates" and a method for testing permissions.
+A method of working out which permissions are available.
 
-Predicates are simple functions which accept identity and context objects and
-return a truthy value.
+This is based on a map from `Permission`'s to a list of lists of "predicates"
+and other permissions. Predicates are simple functions which accept identity
+and context objects and return a truthy value.
 
-In order for a permission to be granted at least one clause (a row of
-predicates) must all evaluate to True. A clause is True if every predicate in
-it evaluates to True. If any predicate in a clause is False the whole clause is
-False.
+To tell if a permission is granted we look at the list of lists and see if for
+at least one sub-list:
+
+* Every predicate function included evaluates to True
+* Every permission included would also be granted (by recursing)
 """
 
 from h.security import Identity, Permission
@@ -126,30 +128,24 @@ def permits(identity: Identity, context, permission) -> bool:
     :param permission: Permission requested
     """
     if clauses := PERMISSION_MAP.get(permission):
-        for clause in clauses:
-            if _clause_true(clause, identity, context):
-                return True
-
-        return False
+        # Grant the permissions if for *any* single clause...
+        return any(
+            # .. *all* elements in it are true
+            all(_predicate_true(predicate, identity, context) for predicate in clause)
+            for clause in clauses
+        )
 
     return False
 
 
-def _clause_true(clause, identity, context):
-    """Check whether every item in a clause is true."""
-
-    # There are lots of optimisations you could do with this (like caching
-    # predicate results), but at the time of writing our predicates are so fast
-    # to evaluate it generally makes it slower to try.
-    for predicate in clause:
-        try:
-            if not predicate(identity, context):
-                return False
+def _predicate_true(predicate, identity, context):
+    """Check whether a predicate is true."""
+    try:
+        if not predicate(identity, context):
+            return False
 
         # If the "predicate" isn't callable, we'll assume it's a permission
         # and work out if we have that permission
-        except TypeError:
-            if not permits(identity, context, predicate):
-                return False
-
-    return True
+    except TypeError:
+        if not permits(identity, context, predicate):
+            return False
