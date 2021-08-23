@@ -23,16 +23,10 @@ def navbar_data(request):
     groups = request.find_service(name="group_list").associated_groups(request.user)
 
     return {
-        "settings_menu_items": [
-            {"title": _("Account details"), "link": request.route_url("account")},
-            {"title": _("Edit profile"), "link": request.route_url("account_profile")},
-            {
-                "title": _("Notifications"),
-                "link": request.route_url("account_notifications"),
-            },
-            {"title": _("Developer"), "link": request.route_url("account_developer")},
-        ],
-        "signout_item": {"title": _("Sign out"), "link": request.route_url("logout")},
+        "create_group_item": {
+            "title": _("Create new group"),
+            "link": request.route_url("group_create"),
+        },
         "groups_menu_items": [
             {
                 "title": group.name,
@@ -52,14 +46,20 @@ def navbar_data(request):
             }
             for group in groups
         ],
-        "create_group_item": {
-            "title": _("Create new group"),
-            "link": request.route_url("group_create"),
-        },
+        "q": request.params.get("q", ""),
+        "search_url": _get_search_url(request),
+        "settings_menu_items": [
+            {"title": _("Account details"), "link": request.route_url("account")},
+            {"title": _("Edit profile"), "link": request.route_url("account_profile")},
+            {
+                "title": _("Notifications"),
+                "link": request.route_url("account_notifications"),
+            },
+            {"title": _("Developer"), "link": request.route_url("account_developer")},
+        ],
+        "signout_item": {"title": _("Sign out"), "link": request.route_url("logout")},
         "username": username,
         "username_url": user_activity_url,
-        "search_url": _get_search_url(request),
-        "q": request.params.get("q", ""),
     }
 
 
