@@ -50,8 +50,8 @@ def includeme(config):
     config.add_request_method(in_debug_mode, "debug", reify=True)
 
     config.include("pyramid_jinja2")
-    config.add_jinja2_extension("h.jinja_extensions.Filters")
-    config.add_jinja2_extension("h.jinja_extensions.SvgIcon")
+    config.include("h.jinja_extensions")
+
     # Register a deferred action to setup the assets environment
     # when the configuration is committed.
     config.action(None, _configure_jinja2_assets, args=(config,))
