@@ -1,12 +1,10 @@
 """The navigation bar displayed at the top of most pages."""
 
-from pyramid_layout.panel import panel_config
 
 from h.i18n import TranslationString as _
 
 
-@panel_config(name="navbar", renderer="h:templates/panels/navbar.html.jinja2")
-def navbar(_context, request, search=None, opts=None):
+def navbar_data(request, search=None, opts=None):
     """
     Get the navigation bar displayed at the top of the page.
 
@@ -14,8 +12,6 @@ def navbar(_context, request, search=None, opts=None):
     :type search: h.activity.query.ActivityResults
     """
 
-    groups_menu_items = []
-    groups_suggestions = []
     user_activity_url = None
     username = None
 
@@ -24,37 +20,9 @@ def navbar(_context, request, search=None, opts=None):
             "activity.user_search", username=request.user.username
         )
         username = request.user.username
+
     # Make all groups associated with the user visible in the search auto complete.
-    list_group_service = request.find_service(name="group_list")
-    groups = list_group_service.associated_groups(request.user)
-
-    def _relationship(group, username):
-        if group.creator == username:
-            return "Creator"
-        return None
-
-    groups_menu_items = [
-        {
-            "title": group.name,
-            "link": request.route_url("group_read", pubid=group.pubid, slug=group.slug),
-        }
-        for group in groups
-    ]
-    groups_suggestions = [
-        {
-            "name": group.name,
-            "pubid": group.pubid,
-            "relationship": _relationship(group, request.user),
-        }
-        for group in groups
-    ]
-
-    route = request.matched_route
-
-    if route and route.name in ["group_read", "activity.user_search"]:
-        search_url = request.current_route_url()
-    else:
-        search_url = request.route_url("activity.search")
+    groups = request.find_service(name="group_list").associated_groups(request.user)
 
     return {
         "settings_menu_items": [
@@ -67,8 +35,25 @@ def navbar(_context, request, search=None, opts=None):
             {"title": _("Developer"), "link": request.route_url("account_developer")},
         ],
         "signout_item": {"title": _("Sign out"), "link": request.route_url("logout")},
-        "groups_menu_items": groups_menu_items,
-        "groups_suggestions": groups_suggestions,
+        "groups_menu_items": [
+            {
+                "title": group.name,
+                "link": request.route_url(
+                    "group_read", pubid=group.pubid, slug=group.slug
+                ),
+            }
+            for group in groups
+        ],
+        "groups_suggestions": [
+            {
+                "name": group.name,
+                "pubid": group.pubid,
+                "relationship": "Creator"
+                if group.creator.username == username
+                else None,
+            }
+            for group in groups
+        ],
         "create_group_item": {
             "title": _("Create new group"),
             "link": request.route_url("group_create"),
@@ -76,7 +61,17 @@ def navbar(_context, request, search=None, opts=None):
         "username": username,
         "username_url": user_activity_url,
         "search": search,
-        "search_url": search_url,
+        "search_url": _get_search_url(request),
         "q": request.params.get("q", ""),
         "opts": opts or {},
     }
+
+
+def _get_search_url(request):
+    if request.matched_route and request.matched_route.name in [
+        "group_read",
+        "activity.user_search",
+    ]:
+        return request.current_route_url()
+
+    return request.route_url("activity.search")

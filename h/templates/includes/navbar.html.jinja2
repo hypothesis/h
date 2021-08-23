@@ -1,0 +1,118 @@
+{% from 'dropdown_menu.html.jinja2' import dropdown_menu %}
+
+{% macro lozenge(facetName, facetValue) %}
+  <div class="lozenge">
+    <div class="lozenge__content">
+      <span class="lozenge__facet-name" data-ref="facetName">
+        {{ facetName }}:
+      </span>
+      <span class="lozenge__facet-value" data-ref="facetValue">
+        {{ facetValue }}
+      </span>
+    </div>
+    <button data-ref="deleteButton"
+            class="lozenge__close"
+            type="submit"
+            name="delete_lozenge"
+            title="{% trans %}Remove search term{% endtrans %}">
+      {{ svg_icon('lozenge-close') }}
+    </button>
+  </div>
+{% endmacro %}
+
+{% macro navbar(search=None, opts=None) %}
+  {% set nav = navbar_data(request, search=search, opts=opts) %}
+
+  <header class="nav-bar">
+    <template id="lozenge-template">
+      {{ lozenge('','') }}
+    </template>
+    <div class="nav-bar__content">
+      <a href="https://web.hypothes.is/" title="Hypothesis homepage" class="nav-bar__logo-container"><!--
+        !-->{{ svg_icon('logo', 'nav-bar__logo') }}</a>
+
+      <div class="nav-bar__search js-search-bar" data-ref="searchBar">
+        <form class="search-bar"
+              data-ref="searchBarForm"
+              id="search-bar"
+              action="{{ nav.search_url }}"
+              role="search">
+
+          {#- This seemingly pointless <input> is actually needed to make the
+              form work correctly. If you remove this input then when the user
+              presses Enter in the search bar input, the browser will act as if
+              the user had clicked one of the form's other submit elements
+              (e.g. the leave group button). #}
+          <input type="submit" class="nav-bar__search-hidden-input">
+
+          {{ svg_icon('search', 'search-bar__icon') }}
+          <div class="search-bar__lozenges" data-ref="searchBarLozenges">
+            {% if nav.opts['search_username'] %}
+              {{ lozenge('user', nav.opts['search_username']) }}
+            {% endif %}
+            {% if nav.opts['search_groupname'] %}
+              {{ lozenge('group', nav.opts['search_groupname']) }}
+            {% endif %}
+
+            <input class="search-bar__input js-input-autofocus"
+                   aria-autocomplete="list"
+                   aria-label="{{ _('Search annotations') }}"
+                   aria-haspopup="true"
+                   autocapitalize="off"
+                   autocomplete="off"
+                   data-ref="searchBarInput"
+                   name="q"
+                   placeholder="Search…"
+                   role="combobox"
+                   value="{{ nav.q }}">
+          </div>
+        </form>
+      </div>
+
+      <div class="u-stretch"></div>
+
+      <nav class="nav-bar-links">
+        {% if nav.username %}
+        <span class="nav-bar-links__item">
+          <a class="nav-bar-links__link" href="{{ nav.username_url }}">
+            {{ nav.username }}
+          </a>
+        </span>
+        <span class="nav-bar-links__item">
+        {% call dropdown_menu(nav.groups_menu_items,
+                              link_class='nav-bar-links__link',
+                              title='Groups',
+                              footer_item=nav.create_group_item) %}
+          Groups <span class="nav-bar-links__dropdown-arrow">▾</span>
+        {% endcall %}
+        </span>
+        <span class="nav-bar-links__item">
+        {% call dropdown_menu(nav.settings_menu_items,
+                              link_class='nav-bar-links__link',
+                              fallback_link='{{ request.route_url("account") }}',
+                              title='Settings',
+                              footer_item=nav.signout_item) %}
+            {{ svg_icon('settings') }}
+            <span class="nav-bar-links__dropdown-arrow" href="">▾</span>
+        {% endcall %}
+        </span>
+        {% else %}
+        <a class="nav-bar-links__item nav-bar-links__link"
+           href="{{ request.route_url('login') }}">Log in</a>
+        <a class="nav-bar-links__item nav-bar-links__link"
+           href="{{ request.route_url('signup') }}">Sign up</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  {% if nav.search %}
+  <script type="application/json" class="js-tag-suggestions">
+    {{nav.search.aggregations['tags'] | to_json}}
+  </script>
+  {% endif %}
+
+  <script type="application/json" class="js-group-suggestions">
+    {{nav.groups_suggestions | to_json}}
+  </script>
+{% endmacro %}
