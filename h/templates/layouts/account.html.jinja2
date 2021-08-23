@@ -10,7 +10,8 @@
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block header %}
-  {{ panel('navbar') }}
+  {% from "h:templates/includes/navbar.html.jinja2" import navbar with context %}
+  {{ navbar() }}
 {% endblock %}
 
 {% block content %}
