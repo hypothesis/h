@@ -301,7 +301,6 @@ pyramid==1.10.8
     #   h-pyramid-sentry
     #   pyramid-exclog
     #   pyramid-jinja2
-    #   pyramid-layout
     #   pyramid-mailer
     #   pyramid-retry
     #   pyramid-sanity
@@ -312,10 +311,6 @@ pyramid-exclog==1.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
 pyramid-jinja2==2.8
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-pyramid-layout==1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
