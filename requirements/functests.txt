@@ -192,7 +192,6 @@ pyramid==1.10.8
     #   h-pyramid-sentry
     #   pyramid-exclog
     #   pyramid-jinja2
-    #   pyramid-layout
     #   pyramid-mailer
     #   pyramid-retry
     #   pyramid-sanity
@@ -201,8 +200,6 @@ pyramid==1.10.8
 pyramid-exclog==1.0
     # via -r requirements/requirements.txt
 pyramid-jinja2==2.8
-    # via -r requirements/requirements.txt
-pyramid-layout==1.0
     # via -r requirements/requirements.txt
 pyramid-mailer==0.15.1
     # via -r requirements/requirements.txt

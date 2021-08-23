@@ -34,7 +34,6 @@ pycryptodomex
 pyparsing >= 2.1.5
 pyramid
 pyramid-exclog
-pyramid-layout
 pyramid-jinja2
 pyramid-services
 pyramid-mailer
