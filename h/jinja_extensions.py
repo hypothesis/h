@@ -65,7 +65,9 @@ class SvgIcon(Extension):  # pylint: disable=abstract-method
         super().__init__(environment)
 
         def read_icon(name):
-            with open("build/images/icons/{}.svg".format(name)) as handle:
+            with open(
+                "build/images/icons/{}.svg".format(name), encoding="utf8"
+            ) as handle:
                 return handle.read()
 
         environment.globals["svg_icon"] = partial(svg_icon, read_icon)
