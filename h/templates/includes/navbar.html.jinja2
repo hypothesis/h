@@ -21,7 +21,11 @@
 {% endmacro %}
 
 {% macro navbar(search=None, opts=None) %}
-  {% set nav = navbar_data(request, search=search, opts=opts) %}
+  {% set nav = navbar_data(request) %}
+
+  {% if not opts %}
+    {% set opts = {} %}
+  {% endif %}
 
   <header class="nav-bar">
     <template id="lozenge-template">
@@ -47,11 +51,11 @@
 
           {{ svg_icon('search', 'search-bar__icon') }}
           <div class="search-bar__lozenges" data-ref="searchBarLozenges">
-            {% if nav.opts['search_username'] %}
-              {{ lozenge('user', nav.opts['search_username']) }}
+            {% if opts['search_username'] %}
+              {{ lozenge('user', opts['search_username']) }}
             {% endif %}
-            {% if nav.opts['search_groupname'] %}
-              {{ lozenge('group', nav.opts['search_groupname']) }}
+            {% if opts['search_groupname'] %}
+              {{ lozenge('group', opts['search_groupname']) }}
             {% endif %}
 
             <input class="search-bar__input js-input-autofocus"
@@ -106,9 +110,9 @@
     </div>
   </header>
 
-  {% if nav.search %}
+  {% if search %}
   <script type="application/json" class="js-tag-suggestions">
-    {{nav.search.aggregations['tags'] | to_json}}
+    {{search.aggregations['tags'] | to_json}}
   </script>
   {% endif %}
 

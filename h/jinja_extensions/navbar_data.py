@@ -1,15 +1,13 @@
 """The navigation bar displayed at the top of most pages."""
 
-
 from h.i18n import TranslationString as _
 
 
-def navbar_data(request, search=None, opts=None):
+def navbar_data(request):
     """
     Get the navigation bar displayed at the top of the page.
 
-    :param search: The current page's search state, if relevant.
-    :type search: h.activity.query.ActivityResults
+    This is used in `templates/includes/navbar.html.jinja2`
     """
 
     user_activity_url = None
@@ -60,10 +58,8 @@ def navbar_data(request, search=None, opts=None):
         },
         "username": username,
         "username_url": user_activity_url,
-        "search": search,
         "search_url": _get_search_url(request),
         "q": request.params.get("q", ""),
-        "opts": opts or {},
     }
 
 
