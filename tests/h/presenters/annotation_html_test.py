@@ -88,11 +88,13 @@ class TestAnnotationHTMLPresenter:
 
         # Call all these as well to make sure that none of them cause a
         # DocumentHTMLPresenter to be initialized.
-        _ = presenter.document_link
-        _ = presenter.hostname_or_filename
-        _ = presenter.href
-        _ = presenter.link_text
-        _ = presenter.title  # pylint: disable=redefined-variable-type
+        _ = (
+            presenter.document_link,
+            presenter.hostname_or_filename,
+            presenter.href,
+            presenter.link_text,
+            presenter.title,
+        )
 
         DocumentHTMLPresenter.assert_not_called()
 
