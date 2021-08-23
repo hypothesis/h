@@ -13,7 +13,7 @@ amqp==5.0.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   kombu
-astroid==2.6.5
+astroid==2.7.2
     # via pylint
 attrs==20.2.0
     # via
@@ -243,6 +243,8 @@ plaster-pastedeploy==0.7
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
+platformdirs==2.2.0
+    # via pylint
 pluggy==0.13.1
     # via
     #   -r requirements/functests.txt
@@ -283,7 +285,7 @@ pyjwt==2.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pylint==2.9.6
+pylint==2.10.2
     # via -r requirements/lint.in
 pyparsing==2.4.7
     # via
