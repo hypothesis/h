@@ -58,7 +58,16 @@ node {
 onlyOnMaster {
     milestone()
     stage('qa deploy') {
-        deployApp(image: image, app: 'h', env: 'qa', region: "us-west-1")
+        parallel(
+            us_h: {
+                deployApp(image: image, app: "h", env: "qa", region: "us-west-1")
+            },
+            us_h_websocket: {
+		// Workaround to ensure all parallel builds happen. See https://hypothes-is.slack.com/archives/CR3E3S7K8/p1625041642057400
+                sleep 2
+                deployApp(image: image, app: "h-websocket", env: "qa", region: "us-west-1")
+            }
+        )
     }
 
     milestone()
@@ -69,12 +78,15 @@ onlyOnMaster {
     milestone()
     stage("prod Deploy") {
         parallel(
-            us: {
+            us_h: {
                 deployApp(image: image, app: "h", env: "prod", region: "us-west-1")
             },
-            ca: {
-		// Workaround to ensure all parallel builds happen. See https://hypothes-is.slack.com/archives/CR3E3S7K8/p1625041642057400
+            us_h_websocket: {
                 sleep 2
+                deployApp(image: image, app: "h-websocket", env: "prod", region: "us-west-1")
+            },
+            ca_h: {
+                sleep 4
                 deployApp(image: image, app: "h-ca", env: "prod", region: "ca-central-1")
             }
         )
