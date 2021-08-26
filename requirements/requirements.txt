@@ -14,7 +14,7 @@ bcrypt==3.2.0
     # via -r requirements/requirements.in
 billiard==3.6.4.0
     # via celery
-bleach==4.0.0
+bleach==4.1.0
     # via -r requirements/requirements.in
 celery==5.1.2
     # via -r requirements/requirements.in
