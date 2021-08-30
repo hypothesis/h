@@ -265,6 +265,10 @@ class TestURINormalise:
                 "http://example.com?a=1&X-Amz-Security-Token=abcde",
                 "httpx://example.com?a=1",
             ),
+            (
+                "https://drive.google.com/uc?id=foobar&export=download&resourcekey=abc",
+                "httpx://drive.google.com/uc?export=download&id=foobar",
+            ),
             # but don't be over-eager and remove close matches
             (
                 "http://example.com?gclid_foo=abcde",
