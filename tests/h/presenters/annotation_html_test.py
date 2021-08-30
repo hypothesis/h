@@ -92,7 +92,7 @@ class TestAnnotationHTMLPresenter:
         _ = presenter.hostname_or_filename
         _ = presenter.href
         _ = presenter.link_text
-        _ = presenter.title
+        _ = presenter.title  # pylint: disable=redefined-variable-type
 
         DocumentHTMLPresenter.assert_not_called()
 
