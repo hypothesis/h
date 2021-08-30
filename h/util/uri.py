@@ -99,6 +99,11 @@ BLACKLISTED_QUERY_PARAMS = [
         #    https://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html
         #
         r"(?i)^x-amz-security-token$",
+        #
+        # Google Drive resource key. Reference:
+        #
+        #    https://support.google.com/a/answer/10685032
+        r"^resourcekey$",
     )
 ]
 
