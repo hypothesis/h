@@ -343,7 +343,7 @@ pyrsistent==0.17.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-pytest==6.2.4
+pytest==6.2.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
