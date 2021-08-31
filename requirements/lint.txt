@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-alembic==1.6.5
+alembic==1.7.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -151,6 +151,7 @@ importlib-resources==5.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   alembic
     #   h-api
 iniconfig==1.1.1
     # via
@@ -351,14 +352,8 @@ python-dateutil==2.8.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   alembic
     #   elasticsearch-dsl
     #   faker
-python-editor==1.0.4
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   alembic
 python-slugify==5.0.2
     # via
     #   -r requirements/functests.txt

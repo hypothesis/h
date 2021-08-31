@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.6.5
+alembic==1.7.1
     # via -r requirements/requirements.in
 amqp==5.0.6
     # via kombu
@@ -72,6 +72,7 @@ hupper==1.10.2
 importlib-resources==5.2.2
     # via
     #   -r requirements/requirements.in
+    #   alembic
     #   h-api
 iso8601==0.1.13
     # via
@@ -166,10 +167,7 @@ pyrsistent==0.17.3
 python-dateutil==2.8.2
     # via
     #   -r requirements/requirements.in
-    #   alembic
     #   elasticsearch-dsl
-python-editor==1.0.4
-    # via alembic
 python-slugify==5.0.2
     # via -r requirements/requirements.in
 pytz==2021.1
