@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/tests.in
 #
-alembic==1.6.5
+alembic==1.7.1
     # via -r requirements/requirements.txt
 amqp==5.0.6
     # via
@@ -101,6 +101,7 @@ hypothesis==6.16.0
 importlib-resources==5.2.2
     # via
     #   -r requirements/requirements.txt
+    #   alembic
     #   h-api
 iniconfig==1.1.1
     # via pytest
@@ -225,13 +226,8 @@ pytest==6.2.5
 python-dateutil==2.8.2
     # via
     #   -r requirements/requirements.txt
-    #   alembic
     #   elasticsearch-dsl
     #   faker
-python-editor==1.0.4
-    # via
-    #   -r requirements/requirements.txt
-    #   alembic
 python-slugify==5.0.2
     # via -r requirements/requirements.txt
 pytz==2021.1
