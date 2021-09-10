@@ -1,4 +1,5 @@
 pytest
 factory-boy
 webtest
+pytest-reverse
 -r requirements.txt

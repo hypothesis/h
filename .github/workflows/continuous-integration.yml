@@ -66,12 +66,13 @@ jobs:
       uses: actions/cache@v2
       with:
         path: |
+          .tox/lint
           .tox/checkformatting
           .tox/tests
           .tox/coverage
         key: ${{ runner.os }}-tox-backend-${{ hashFiles('tox.ini', 'requirements/**', 'setup.py', 'setup.cfg') }}
     - name: Run tox
-      run: tox --parallel auto -e checkformatting,tests,coverage
+      run: tox --parallel auto -e checkformatting,tests,coverage,lint
 
   functests:
     name: Functional tests
@@ -116,7 +117,6 @@ jobs:
       uses: actions/cache@v2
       with:
         path: |
-          .tox/lint
           .tox/functests
         key: ${{ runner.os }}-tox-functests-${{ hashFiles('tox.ini', 'requirements/**', 'setup.py', 'setup.cfg') }}
 
@@ -133,7 +133,9 @@ jobs:
       run: gulp build
 
     - name: Run tox
-      run: tox --parallel auto -e lint,functests
+      # Note we run the func tests backwards here to prove there are no order
+      # dependent tests
+      run: tox -e functests -- tests/functional --reverse
 
   frontend:
     name: Frontend
