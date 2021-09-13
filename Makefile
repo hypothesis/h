@@ -131,8 +131,8 @@ docker:
 	@git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
 .PHONY: docker-ws
-docker-ws:
-	docker build -t hypothesis/hypothesis-ws:$(DOCKER_TAG) h/streamer 
+docker-ws: docker
+	docker build -t hypothesis/hypothesis-ws:$(DOCKER_TAG) h/streamer --build-arg DOCKER_TAG=$(DOCKER_TAG)
 
 .PHONY: run-docker
 run-docker:
@@ -143,6 +143,7 @@ run-docker:
 	#
 	# If you don't intend to use the client with the container, you can skip this.
 	@docker run \
+		--rm \
 		--net h_default \
 		-e "APP_URL=http://localhost:5000" \
 		-e "AUTHORITY=localhost" \
@@ -155,11 +156,13 @@ run-docker:
 		-e "NEW_RELIC_LICENSE_KEY" \
 		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \
+		--name hypothesis \
 		hypothesis/hypothesis:$(DOCKER_TAG)
 
 .PHONY: run-docker-ws
 run-docker-ws:
 	@docker run \
+		--rm \
 		--net h_default \
 		-e "APP_URL=http://localhost:5000" \
 		-e "AUTHORITY=localhost" \
@@ -172,6 +175,7 @@ run-docker-ws:
 		-e "NEW_RELIC_LICENSE_KEY" \
 		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \
+		--name hypothesis-ws \
 		hypothesis/hypothesis-ws:$(DOCKER_TAG)
 
 DOCKER_TAG = dev
