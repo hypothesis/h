@@ -47,6 +47,10 @@ def create_app(_global_config, **settings):
     config.add_route("annotation", "/a/{id}", static=True)
     config.add_route("api.annotation", "/api/annotations/{id}", static=True)
 
+    # Health check
+    config.scan("h.views.status")
+    config.add_route("status", "/_status")
+
     config.scan("h.streamer.views")
     config.scan("h.streamer.streamer")
     config.add_tween(
