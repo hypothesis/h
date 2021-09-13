@@ -1,4 +1,5 @@
-FROM hypothesis/hypothesis
+ARG DOCKER_TAG=latest
+FROM hypothesis/hypothesis:${DOCKER_TAG}
 
 WORKDIR /var/lib/hypothesis
 
