@@ -52,16 +52,26 @@ class TestGroupSearchController:
             status=404,
         )
 
-    @pytest.mark.usefixtures("with_logged_in_admin")
-    def test_admin_permissions(self, app, open_group):
-        # For ease of testing, we're just going to test the admin route. We
-        # also make sure the group is open so the admin user can read it
+    @pytest.mark.usefixtures("with_logged_in_user")
+    def test_users_can_edit_their_own_groups(self, app, open_group_owned_by_user):
+        response = app.get(
+            f"/groups/{open_group_owned_by_user.pubid}/{open_group_owned_by_user.slug}"
+        )
 
+        assert f"http://localhost/groups/{open_group_owned_by_user.pubid}/edit" in str(
+            response.html
+        )
+
+    @pytest.mark.usefixtures("with_logged_in_admin")
+    def test_admins_cannot_edit_groups_they_dont_own(self, app, open_group):
         response = app.get(f"/groups/{open_group.pubid}/{open_group.slug}")
 
-        # Permission.Group.EDIT
-        # The `group_edit_url` should be visible for those with edit
-        # permissions
-        # OAuth clients, staff and admins can edit a group
-        # The creator of thr group can also edit the group
-        assert f"http://localhost/groups/{open_group.pubid}/edit" in str(response.html)
+        assert f"http://localhost/groups/{open_group.pubid}/edit" not in str(
+            response.html
+        )
+
+    @pytest.fixture
+    def open_group_owned_by_user(self, factories, user, db_session):
+        open_group_owned_by_user = factories.OpenGroup(creator=user)
+        db_session.commit()
+        return open_group_owned_by_user

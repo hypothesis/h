@@ -224,11 +224,9 @@ class TestACLForGroup:
         )
 
     def test_staff_user_has_admin_permission_on_any_group(self, group_permits):
-        assert group_permits([Role.STAFF], Permission.Group.EDIT)
         assert group_permits([Role.STAFF], Permission.AdminPage.GROUPS)
 
     def test_admin_user_has_admin_permission_on_any_group(self, group_permits):
-        assert group_permits([Role.ADMIN], Permission.Group.EDIT)
         assert group_permits([Role.ADMIN], Permission.AdminPage.GROUPS)
 
     @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))

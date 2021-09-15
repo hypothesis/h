@@ -14,6 +14,9 @@ class ACL:
         yield Allow, Role.STAFF, Permission.AdminPage.MAILER
         yield Allow, Role.STAFF, Permission.AdminPage.ORGANIZATIONS
         yield Allow, Role.STAFF, Permission.AdminPage.USERS
+        # Admin staff absolutely *DO NOT* have all permissions. They only have
+        # all permissions in the admin page context. This is just a lazy way
+        # of not enumerating all the separate permissions in that context.
         yield Allow, Role.ADMIN, security.ALL_PERMISSIONS
         yield DENY_ALL
 
@@ -100,12 +103,7 @@ class ACL:
         yield Allow, client_authority_principal, Permission.Group.MEMBER_ADD
         yield Allow, client_authority_principal, Permission.Group.EDIT
 
-        # Do we need these permissions? Can / do our staff actually need edit
-        # permissions to the group? Our admins don't have any other permissions
-        yield Allow, Role.STAFF, Permission.Group.EDIT
-        yield Allow, Role.ADMIN, Permission.Group.EDIT
-        # We definitely need these permissions so the admin can edit the page
-        # in the admin interface
+        # Let admins and staff edit the group in the admin page interface
         yield Allow, Role.STAFF, Permission.AdminPage.GROUPS
         yield Allow, Role.ADMIN, Permission.AdminPage.GROUPS
 
