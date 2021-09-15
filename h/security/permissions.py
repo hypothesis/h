@@ -3,7 +3,7 @@ from enum import Enum
 
 class Permission:
     class Group(Enum):
-        ADMIN = "group:admin"  # Is this really "EDIT" or a combination?
+        EDIT = "group:edit"
         JOIN = "group:join"
         READ = "group:read"
         WRITE = "group:write"

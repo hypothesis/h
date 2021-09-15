@@ -191,7 +191,7 @@ class GroupSearchController(SearchController):
             self.group.creator.userid if self.group.creator else None,
         ]
 
-        if self.request.has_permission(Permission.Group.ADMIN, context=self.context):
+        if self.request.has_permission(Permission.Group.EDIT, context=self.context):
             result["group_edit_url"] = self.request.route_url(
                 "group_edit", pubid=self.group.pubid
             )

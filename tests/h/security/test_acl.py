@@ -217,18 +217,18 @@ class TestACLForGroup:
         self, group, group_permits
     ):
         assert group_permits(
-            [f"client_authority:{group.authority}"], Permission.Group.ADMIN
+            [f"client_authority:{group.authority}"], Permission.Group.EDIT
         )
         assert not group_permits(
-            ["client_authority:DIFFERENT_AUTHORITY"], Permission.Group.ADMIN
+            ["client_authority:DIFFERENT_AUTHORITY"], Permission.Group.EDIT
         )
 
     def test_staff_user_has_admin_permission_on_any_group(self, group_permits):
-        assert group_permits([Role.STAFF], Permission.Group.ADMIN)
+        assert group_permits([Role.STAFF], Permission.Group.EDIT)
         assert group_permits([Role.STAFF], Permission.AdminPage.GROUPS)
 
     def test_admin_user_has_admin_permission_on_any_group(self, group_permits):
-        assert group_permits([Role.ADMIN], Permission.Group.ADMIN)
+        assert group_permits([Role.ADMIN], Permission.Group.EDIT)
         assert group_permits([Role.ADMIN], Permission.AdminPage.GROUPS)
 
     @pytest.mark.parametrize("readable_by", (ReadableBy.members, ReadableBy.world))
@@ -237,7 +237,7 @@ class TestACLForGroup:
     ):
         group.readable_by = readable_by
 
-        assert group_permits(group.creator.userid, Permission.Group.ADMIN)
+        assert group_permits(group.creator.userid, Permission.Group.EDIT)
         assert group_permits(group.creator.userid, Permission.Group.UPSERT)
         assert permitted_principals_for(Permission.Group.MODERATE) == {
             group.creator.userid

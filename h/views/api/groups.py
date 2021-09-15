@@ -94,7 +94,7 @@ def read(context, request):
     versions=["v1", "v2"],
     route_name="api.group",
     request_method="PATCH",
-    permission=Permission.Group.ADMIN,
+    permission=Permission.Group.EDIT,
     link_name="group.update",
     description="Update a group",
 )
