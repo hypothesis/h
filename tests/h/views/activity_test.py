@@ -282,7 +282,7 @@ class TestGroupSearchController:
         self, controller, test_group, test_user, pyramid_request
     ):
         def fake_has_permission(permission, context=None):
-            return permission != Permission.Group.ADMIN
+            return permission != Permission.Group.EDIT
 
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
 

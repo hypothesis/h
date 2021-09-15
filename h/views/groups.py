@@ -67,7 +67,7 @@ class GroupCreateController:
 @view_defaults(
     route_name="group_edit",
     renderer="h:templates/groups/edit.html.jinja2",
-    permission=Permission.Group.ADMIN,
+    permission=Permission.Group.EDIT,
 )
 class GroupEditController:
     def __init__(self, context, request):

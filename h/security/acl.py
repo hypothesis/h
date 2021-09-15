@@ -98,19 +98,19 @@ class ACL:
         yield Allow, client_authority_principal, Permission.Group.READ
         yield Allow, client_authority_principal, Permission.Group.MEMBER_READ
         yield Allow, client_authority_principal, Permission.Group.MEMBER_ADD
-        yield Allow, client_authority_principal, Permission.Group.ADMIN
+        yield Allow, client_authority_principal, Permission.Group.EDIT
 
         # Do we need these permissions? Can / do our staff actually need edit
         # permissions to the group? Our admins don't have any other permissions
-        yield Allow, Role.STAFF, Permission.Group.ADMIN
-        yield Allow, Role.ADMIN, Permission.Group.ADMIN
+        yield Allow, Role.STAFF, Permission.Group.EDIT
+        yield Allow, Role.ADMIN, Permission.Group.EDIT
         # We definitely need these permissions so the admin can edit the page
         # in the admin interface
         yield Allow, Role.STAFF, Permission.AdminPage.GROUPS
         yield Allow, Role.ADMIN, Permission.AdminPage.GROUPS
 
         if group.creator:
-            yield Allow, group.creator.userid, Permission.Group.ADMIN
+            yield Allow, group.creator.userid, Permission.Group.EDIT
             yield Allow, group.creator.userid, Permission.Group.MODERATE
             yield Allow, group.creator.userid, Permission.Group.UPSERT
 

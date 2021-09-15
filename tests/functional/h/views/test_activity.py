@@ -59,7 +59,7 @@ class TestGroupSearchController:
 
         response = app.get(f"/groups/{open_group.pubid}/{open_group.slug}")
 
-        # Permission.Group.ADMIN
+        # Permission.Group.EDIT
         # The `group_edit_url` should be visible for those with edit
         # permissions
         # OAuth clients, staff and admins can edit a group
