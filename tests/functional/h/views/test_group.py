@@ -38,20 +38,21 @@ class TestGroupEditController:
         app.get(f"/groups/{user_owned_group.pubid}/edit")
 
     @pytest.mark.parametrize(
-        "is_staff,is_admin,expected_status",
+        "is_staff,is_admin",
         (
-            param(True, False, 200, id="staff"),
-            param(False, True, 200, id="admin"),
-            # Regular users can't edit other people's groups
-            param(False, False, 404, id="regular_user"),
+            # Doesn't matter if you are staff or an admin, you can't edit
+            # peoples groups using the user facing form
+            param(True, False, id="staff"),
+            param(False, True, id="admin"),
+            param(False, False, id="regular_user"),
         ),
     )
-    def test_editing_other_peoples_groups(
-        self, app, group, login_user, is_staff, is_admin, expected_status
+    def test_you_cannot_edit_other_peoples_groups(
+        self, app, group, login_user, is_staff, is_admin
     ):
         login_user(staff=is_staff, admin=is_admin)
 
-        app.get(f"/groups/{group.pubid}/edit", status=expected_status)
+        app.get(f"/groups/{group.pubid}/edit", status=404)
 
     @pytest.fixture
     def group(self, factories, db_session):
