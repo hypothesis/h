@@ -5,15 +5,15 @@ from h.jinja_extensions.svg_icon import svg_icon
 
 
 def setup_jinja2_env(environment):
-    # 3rd party filters
+    # Filters written by someone else (not hypothesis)
     environment.filters["url_unquote"] = unquote
 
-    # 1st party filters
+    # Filters written by us
     environment.filters["to_json"] = filters.to_json
     environment.filters["human_timestamp"] = filters.human_timestamp
     environment.filters["format_number"] = filters.format_number
 
-    # 1st party globals
+    # Globals provided by us
     environment.globals["svg_icon"] = svg_icon
 
 
