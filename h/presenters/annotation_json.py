@@ -58,9 +58,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             # It's not shared so only the owner can read it
             return self.annotation.userid
 
-        # If we can access this without an identity, anyone in the world
-        # can read this. We optimise by checking if we were going to write
-        # "group:__world__" anyway, to save the permission check.
+        # If the group is the public group, or an unauthorized person could
+        # read from it, it's world readable.
         if self.annotation.groupid == "__world__" or identity_permits(
             identity=None,
             context=AnnotationContext(self.annotation),
