@@ -19,8 +19,6 @@ class TestClientAuthority:
         assert result == identity.auth_client.authority
 
     def set_identity(self, pyramid_request, pyramid_config, identity):
-        # This should be simplified after the 2.0 upgrade as the other code
-        # path will not be required
         try:
             # Pyramid 2.0
             pyramid_config.testing_securitypolicy(identity=identity)

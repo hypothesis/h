@@ -13,7 +13,6 @@ def client_authority(request):
 
     :rtype: str or None
     """
-    # This function is kind of dumb and should be removed...
     if request.identity and request.identity.auth_client:
         return request.identity.auth_client.authority
 
