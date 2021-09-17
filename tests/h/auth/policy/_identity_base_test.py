@@ -1,3 +1,5 @@
+from unittest.mock import sentinel
+
 import pytest
 
 from h.auth.policy._identity_base import IdentityBasedPolicy
@@ -7,6 +9,14 @@ from h.security import Identity
 class TestIdentityBasedPolicy:
     def test_identity_method_does_nothing(self, pyramid_request):
         assert IdentityBasedPolicy().identity(pyramid_request) is None
+
+    def test_permits(self, policy, identity, pyramid_request, identity_permits):
+        result = policy.permits(pyramid_request, sentinel.context, sentinel.permission)
+
+        identity_permits.assert_called_once_with(
+            identity, sentinel.context, sentinel.permission
+        )
+        assert result == identity_permits.return_value
 
     @pytest.mark.parametrize(
         "method", ("authenticated_userid", "unauthenticated_userid")
@@ -64,6 +74,10 @@ class TestIdentityBasedPolicy:
         policy.returned_identity = identity
 
         return policy
+
+    @pytest.fixture(autouse=True)
+    def identity_permits(self, patch):
+        return patch("h.auth.policy._identity_base.identity_permits")
 
     @pytest.fixture(autouse=True)
     def principals_for_identity(self, patch):
