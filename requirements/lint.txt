@@ -205,7 +205,7 @@ mistune==0.8.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-newrelic==6.8.1.164
+newrelic==6.10.0.165
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
