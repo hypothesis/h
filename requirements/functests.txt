@@ -30,6 +30,7 @@ celery==5.1.2
 certifi==2021.5.30
     # via
     #   -r requirements/requirements.txt
+    #   requests
     #   sentry-sdk
 cffi==1.14.6
     # via
@@ -39,6 +40,8 @@ chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
     #   deform
+charset-normalizer==2.0.5
+    # via requests
 click==7.1.2
     # via
     #   -r requirements/requirements.txt
@@ -95,6 +98,8 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
+idna==3.2
+    # via requests
 importlib-resources==5.2.2
     # via
     #   -r requirements/requirements.txt
@@ -236,6 +241,8 @@ repoze.sendmail==4.3
     # via
     #   -r requirements/requirements.txt
     #   pyramid-mailer
+requests==2.26.0
+    # via -r requirements/functests.in
 sentry-sdk==0.17.6
     # via
     #   -r requirements/requirements.txt
@@ -283,6 +290,7 @@ urllib3==1.26.5
     # via
     #   -r requirements/requirements.txt
     #   elasticsearch
+    #   requests
     #   sentry-sdk
 venusian==3.0.0
     # via
@@ -309,6 +317,7 @@ webob==1.8.7
     #   -r requirements/requirements.txt
     #   pyramid
     #   webtest
+    #   wsgiproxy2
 webtest==3.0.0
     # via -r requirements/functests.in
 wired==0.2.2
@@ -319,6 +328,8 @@ ws4py==0.5.1
     # via -r requirements/requirements.txt
 wsaccel==0.6.3
     # via -r requirements/requirements.txt
+wsgiproxy2==0.5.1
+    # via -r requirements/functests.in
 zipp==3.4.1
     # via
     #   -r requirements/requirements.txt

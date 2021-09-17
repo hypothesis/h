@@ -2,4 +2,6 @@ pytest
 factory-boy
 webtest
 pytest-reverse
+requests
+wsgiproxy2
 -r requirements.txt

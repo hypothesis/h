@@ -1,7 +1,11 @@
 import contextlib
 import os
+from multiprocessing import Process
+from time import sleep
 
 import pytest
+import requests
+from pyramid.scripts import pserve
 from webtest import TestApp
 
 from h import db
@@ -30,6 +34,48 @@ TEST_SETTINGS = {
 @pytest.fixture(scope="session")
 def app(pyramid_app):
     return TestApp(pyramid_app)
+
+
+@pytest.fixture(scope="class")
+def ws_app():
+    # In order to run the websocket separately, set this to True and run the
+    # websocket with DATABASE_URL=postgresql://postgres@localhost/htest
+    EXTERNAL_WS = False
+
+    if EXTERNAL_WS:
+        yield TestApp("http://localhost:5001")
+        return
+
+    def serve():
+        os.environ["DATABASE_URL"] = TEST_SETTINGS["sqlalchemy.url"]
+        # First arg here is the script filename. The value is irrelevant
+        pserve.main(argv=["pserve", "conf/websocket-dev.ini"])
+
+    proc = Process(target=serve)
+    proc.start()
+
+    def health_check():
+        try:
+            return requests.get("http://localhost:5001").json()
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        return False
+
+    for _retry in range(6):
+        if health_check():
+            break
+
+        print("Waiting for WS to start...")
+        sleep(0.5)
+
+    if not health_check():
+        raise EnvironmentError("Could not start WS")
+
+    yield TestApp("http://localhost:5001")
+
+    proc.kill()
+    proc.join()
 
 
 @pytest.fixture(autouse=True)
