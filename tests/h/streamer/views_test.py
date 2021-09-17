@@ -1,21 +1,40 @@
+from unittest.mock import PropertyMock
+
+import pytest
+
 from h.security import Identity
 from h.streamer import streamer, views
 
 
-def test_websocket_view_adds_auth_state_to_environ(pyramid_request):
-    pyramid_request.identity = Identity()
-    pyramid_request.get_response = lambda _: None
+class TestWebsocketView:
+    def test_it_adds_auth_state_to_environ(self, pyramid_request):
+        pyramid_request.identity = Identity()
 
-    views.websocket_view(pyramid_request)
-    env = pyramid_request.environ
+        views.websocket_view(pyramid_request)
 
-    assert env["h.ws.identity"] == pyramid_request.identity
+        assert pyramid_request.environ["h.ws.identity"] == pyramid_request.identity
 
+    def test_it_adds_work_queue_to_environ(self, pyramid_request):
+        pyramid_request.get_response = lambda _: None
 
-def test_websocket_view_adds_work_queue_to_environ(pyramid_request):
-    pyramid_request.get_response = lambda _: None
+        views.websocket_view(pyramid_request)
 
-    views.websocket_view(pyramid_request)
-    env = pyramid_request.environ
+        assert (
+            pyramid_request.environ["h.ws.streamer_work_queue"] == streamer.WORK_QUEUE
+        )
 
-    assert env["h.ws.streamer_work_queue"] == streamer.WORK_QUEUE
+    def test_it_preloads_groups(self, pyramid_request, factories):
+        user = factories.User.build()
+        groups = PropertyMock()
+        type(user).groups = groups
+        pyramid_request.identity = Identity(user=user)
+
+        views.websocket_view(pyramid_request)
+
+        groups.assert_called_once_with()
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.get_response = lambda _: None
+
+        return pyramid_request
