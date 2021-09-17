@@ -1,6 +1,6 @@
 from typing import Optional
 
-from h.security import Identity, principals_for_identity
+from h.security import Identity, identity_permits, principals_for_identity
 
 
 class IdentityBasedPolicy:
@@ -15,6 +15,16 @@ class IdentityBasedPolicy:
         :param request: Pyramid request to inspect
         """
         return None
+
+    def permits(self, request, context, permission) -> bool:
+        """
+        Get whether a given request has the requested permission on the context.
+
+        :param request: Pyramid request to extract identity from
+        :param context: A context object
+        :param permission: The permission requested
+        """
+        return identity_permits(self.identity(request), context, permission)
 
     def authenticated_userid(self, request):
         """
