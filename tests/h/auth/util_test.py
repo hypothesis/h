@@ -4,7 +4,7 @@ from h.security import Identity
 
 class TestClientAuthority:
     def test_it_with_no_identity(self, pyramid_request, pyramid_config):
-        self.set_identity(pyramid_request, pyramid_config, identity=None)
+        pyramid_config.testing_securitypolicy(identity=None)
 
         result = client_authority(pyramid_request)
 
@@ -12,19 +12,11 @@ class TestClientAuthority:
 
     def test_it_with_auth_client(self, pyramid_request, pyramid_config, factories):
         identity = Identity(auth_client=factories.AuthClient())
-        self.set_identity(pyramid_request, pyramid_config, identity=identity)
+        pyramid_config.testing_securitypolicy(identity=identity)
 
         result = client_authority(pyramid_request)
 
         assert result == identity.auth_client.authority
-
-    def set_identity(self, pyramid_request, pyramid_config, identity):
-        try:
-            # Pyramid 2.0
-            pyramid_config.testing_securitypolicy(identity=identity)
-        except TypeError:
-            # Pyramid 1.x
-            pyramid_request.identity = identity
 
 
 class TestAuthDomain:
