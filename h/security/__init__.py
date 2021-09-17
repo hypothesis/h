@@ -6,6 +6,7 @@ from h.security.encryption import (  # noqa:F401
 )
 from h.security.identity import Identity, get_identity  # noqa:F401
 from h.security.permissions import Permission  # noqa:F401
+from h.security.permits import identity_permits
 from h.security.principals import principals_for_identity  # noqa:F401
 
 
