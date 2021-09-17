@@ -81,18 +81,29 @@ class TestAnnotationJSONPresenter:
         self,
         presenter,
         annotation,
-        principals_allowed_by_permission,
+        identity_permits,
         shared,
         readable_by,
         permission_template,
     ):
         annotation.shared = shared
-        principals_allowed_by_permission.return_value = readable_by
+        identity_permits.return_value = readable_by
 
         presented = presenter.asdict()
 
         permission = permission_template.format(annotation=annotation)
         assert presented["permissions"]["read"] == [permission]
+
+    def test_we_skip_the_read_permission_check_if_group_is_world(
+        self, presenter, annotation, identity_permits
+    ):
+        annotation.shared = True
+        annotation.groupid = "__world__"
+
+        presented = presenter.asdict()
+
+        identity_permits.assert_not_called()
+        assert presented["permissions"]["read"] == ["group:__world__"]
 
     @pytest.fixture
     def presenter(self, annotation, links_service, user_service):
@@ -109,5 +120,5 @@ class TestAnnotationJSONPresenter:
         return patch("h.presenters.annotation_json.DocumentJSONPresenter")
 
     @pytest.fixture(autouse=True)
-    def principals_allowed_by_permission(self, patch):
-        return patch("h.presenters.annotation_json.principals_allowed_by_permission")
+    def identity_permits(self, patch):
+        return patch("h.presenters.annotation_json.identity_permits")
