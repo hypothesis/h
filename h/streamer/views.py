@@ -10,7 +10,6 @@ def websocket_view(request):
     # Provide environment which the WebSocket handler can use...
     request.environ.update(
         {
-            "h.ws.effective_principals": request.effective_principals,
             "h.ws.streamer_work_queue": streamer.WORK_QUEUE,
             "h.ws.identity": request.identity,
         }
