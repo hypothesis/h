@@ -15,6 +15,15 @@ def websocket_view(request):
         }
     )
 
+    # Trigger lazy loading of the user groups so they are available later on
+    # when we do permissions checks. We do this here so it's done once, instead
+    # of per annotation. This means the groups are only correct as of now.
+    # We also need to do this while the user is associated with an SQLAlchemy
+    # session. By the time this reaches the socket server, the user will be
+    # disconnected.
+    if request.identity and request.identity.user:
+        _ = request.identity.user.groups
+
     app = WebSocketWSGIApplication(handler_cls=websocket.WebSocket)
     return request.get_response(app)
 
