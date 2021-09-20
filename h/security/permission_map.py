@@ -112,6 +112,37 @@ PERMISSION_MAP = {
 PERMISSION_MAP = resolve_predicates(PERMISSION_MAP)
 
 
+def identity_permits_clear(identity: Identity, context, permission) -> bool:
+    """
+    Check whether a given identity has permission to operate on a context.
+
+    For example the identity might include a user, and the context a group
+    and the permission might ask whether the user can edit that group.
+
+    :param identity: Identity object of the user
+    :param context: Context object representing the objects acted upon
+    :param permission: Permission requested
+    """
+
+    if clauses := PERMISSION_MAP.get(permission):
+        for clause in clauses:
+            all_ok = True
+            for predicate in clause:
+                if _predicate_true(predicate, identity, context):
+                    print(predicate, "? Yes")
+                    continue
+                else:
+                    print(predicate, "? NO")
+                    all_ok = False
+                    break
+
+            if all_ok:
+                print(f"Clause {clause} grants {permission}")
+                return True
+
+    return False
+
+
 def identity_permits(identity: Identity, context, permission) -> bool:
     """
     Check whether a given identity has permission to operate on a context.
@@ -137,11 +168,9 @@ def identity_permits(identity: Identity, context, permission) -> bool:
 def _predicate_true(predicate, identity, context):
     """Check whether a predicate is true."""
     try:
-        if not predicate(identity, context):
-            return False
+        return predicate(identity, context)
 
-        # If the "predicate" isn't callable, we'll assume it's a permission
-        # and work out if we have that permission
+    # If the "predicate" isn't callable, we'll assume it's a permission
+    # and work out if we have that permission
     except TypeError:
-        if not identity_permits(identity, context, predicate):
-            return False
+        return identity_permits(identity, context, predicate)
