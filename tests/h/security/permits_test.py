@@ -15,20 +15,22 @@ class TestIdentityPermits:
 
         principals_for_identity.assert_called_once_with(sentinel.identity)
         ACLAuthorizationPolicy.assert_called_once_with()
-        ACLAuthorizationPolicy.return_value.permits.assert_called_once_with(
+        ACLAuthorizationPolicy.return_value.identity_permits.assert_called_once_with(
             context=sentinel.context,
             principals=principals_for_identity.return_value,
             permission=sentinel.permission,
         )
-        assert result == ACLAuthorizationPolicy.return_value.permits.return_value
+        assert (
+            result == ACLAuthorizationPolicy.return_value.identity_permits.return_value
+        )
 
     @pytest.fixture
     def principals_for_identity(self, patch):
-        return patch("h.security.permits.principals_for_identity")
+        return patch("h.security.identity_permits.principals_for_identity")
 
     @pytest.fixture
     def ACLAuthorizationPolicy(self, patch):
-        return patch("h.security.permits.ACLAuthorizationPolicy")
+        return patch("h.security.identity_permits.ACLAuthorizationPolicy")
 
 
 class TestIdentityPermitsIntegrated:

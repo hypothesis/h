@@ -15,7 +15,7 @@ at least one sub-list:
 from h.security import Identity, Permission
 from h.security.predicates import *
 
-__all__ = ("permits",)
+__all__ = ("identity_permits",)
 
 
 PERMISSION_MAP = {
@@ -65,13 +65,9 @@ PERMISSION_MAP = {
         [group_readable_by_world, authenticated],
         [group_readable_by_members, group_has_user_as_member],
     ],
-    Permission.Group.ADMIN: [
+    Permission.Group.EDIT: [
         [group_authority_matches_authenticated_client],
         [group_created_by_user],
-        # Those with the admin or staff Role should be able to admin/edit any
-        # group
-        [user_is_staff],
-        [user_is_admin],
     ],
     Permission.Group.MEMBER_ADD: [[group_authority_matches_authenticated_client]],
     Permission.Group.MODERATE: [[group_created_by_user]],
@@ -116,7 +112,7 @@ PERMISSION_MAP = {
 PERMISSION_MAP = resolve_predicates(PERMISSION_MAP)
 
 
-def permits(identity: Identity, context, permission) -> bool:
+def identity_permits(identity: Identity, context, permission) -> bool:
     """
     Check whether a given identity has permission to operate on a context.
 
@@ -147,5 +143,5 @@ def _predicate_true(predicate, identity, context):
         # If the "predicate" isn't callable, we'll assume it's a permission
         # and work out if we have that permission
     except TypeError:
-        if not permits(identity, context, predicate):
+        if not identity_permits(identity, context, predicate):
             return False
