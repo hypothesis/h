@@ -49,13 +49,20 @@ class TestAnnotationRoot:
 
 
 class TestAnnotationContext:
-    def test__acl__(self, factories, ACL):
-        annotation = factories.Annotation()
+    def test_group(self, context):
+        assert context.group == context.annotation.group
 
-        acl = AnnotationContext(annotation).__acl__()
+    def test__acl__(self, context, ACL):
+        acl = context.__acl__()
 
-        ACL.for_annotation.assert_called_once_with(annotation)
+        ACL.for_annotation.assert_called_once_with(context.annotation)
         assert acl == ACL.for_annotation.return_value
+
+    @pytest.fixture
+    def context(self, factories):
+        return AnnotationContext(
+            factories.Annotation.build(group=factories.Group.build())
+        )
 
 
 @pytest.fixture(autouse=True)
