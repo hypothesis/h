@@ -151,12 +151,16 @@ def group_matches_user_authority(identity, context):
 
 @requires(authenticated_user, group_found)
 def group_created_by_user(identity, context):
-    return context.group.creator and context.group.creator == identity.user
+    return context.group.creator and context.group.creator.id == identity.user.id
 
 
 @requires(authenticated_user, group_found)
 def group_has_user_as_member(identity, context):
-    return context.group in identity.user.groups
+    # With detached groups like we have with the websocket, this doesn't work
+    # as SQLAlchemy does not consider them equal
+    # return context.group in identity.user.groups
+
+    return any(user_group.id == context.group.id for user_group in identity.user.groups)
 
 
 @requires(authenticated_client, group_found)
