@@ -27,5 +27,9 @@ class AnnotationContext:
 
     annotation: Annotation
 
+    @property
+    def group(self):
+        return self.annotation.group
+
     def __acl__(self):
         return ACL.for_annotation(self.annotation)
