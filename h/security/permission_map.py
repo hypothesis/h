@@ -112,37 +112,6 @@ PERMISSION_MAP = {
 PERMISSION_MAP = resolve_predicates(PERMISSION_MAP)
 
 
-def identity_permits_clear(identity: Identity, context, permission) -> bool:
-    """
-    Check whether a given identity has permission to operate on a context.
-
-    For example the identity might include a user, and the context a group
-    and the permission might ask whether the user can edit that group.
-
-    :param identity: Identity object of the user
-    :param context: Context object representing the objects acted upon
-    :param permission: Permission requested
-    """
-
-    if clauses := PERMISSION_MAP.get(permission):
-        for clause in clauses:
-            all_ok = True
-            for predicate in clause:
-                if _predicate_true(predicate, identity, context):
-                    print(predicate, "? Yes")
-                    continue
-                else:
-                    print(predicate, "? NO")
-                    all_ok = False
-                    break
-
-            if all_ok:
-                print(f"Clause {clause} grants {permission}")
-                return True
-
-    return False
-
-
 def identity_permits(identity: Identity, context, permission) -> bool:
     """
     Check whether a given identity has permission to operate on a context.
