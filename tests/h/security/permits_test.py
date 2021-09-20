@@ -8,7 +8,13 @@ from h.traversal import AnnotationContext, Root
 
 
 class TestIdentityPermits:
-    def test_it(self, principals_for_identity, ACLAuthorizationPolicy):
+    @pytest.mark.parametrize("permitted", (True, False))
+    def test_it(
+        self, principals_for_identity, permission_map, ACLAuthorizationPolicy, permitted
+    ):
+        permission_map.identity_permits.return_value = permitted
+        ACLAuthorizationPolicy.return_value.permits.return_value = permitted
+
         result = identity_permits(
             sentinel.identity, sentinel.context, sentinel.permission
         )
@@ -20,7 +26,11 @@ class TestIdentityPermits:
             principals=principals_for_identity.return_value,
             permission=sentinel.permission,
         )
-        assert result == ACLAuthorizationPolicy.return_value.permits.return_value
+        assert result is permitted
+
+    @pytest.fixture
+    def permission_map(self, patch):
+        return patch("h.security.permits.permission_map")
 
     @pytest.fixture
     def principals_for_identity(self, patch):
@@ -56,9 +66,6 @@ class TestIdentityPermitsIntegrated:
         assert not identity_permits(identity, admin_context, Permission.AdminPage.NIPSA)
         identity.user.admin = True
         assert identity_permits(identity, admin_context, Permission.AdminPage.NIPSA)
-
-        # We need the right context
-        assert not identity_permits(identity, anno_context, Permission.AdminPage.NIPSA)
 
     @pytest.fixture
     def user(self, factories, group):
