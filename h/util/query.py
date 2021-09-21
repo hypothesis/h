@@ -44,7 +44,11 @@ def column_windows(session, column, windowsize=2000, where=None):
 
     # Select every "windowsize'th" row from the inner query.
     if windowsize > 1:
-        query = query.filter(sa.text("rownum %% %d=1" % windowsize))
+        query = query.filter(
+            sa.text(
+                "rownum %% %d=1" % windowsize  # pylint:disable=consider-using-f-string
+            )
+        )
 
     intervals = [id for id, in query]
 

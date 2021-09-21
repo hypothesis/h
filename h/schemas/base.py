@@ -91,7 +91,7 @@ def enum_type(enum_cls):
             try:
                 return enum_cls[cstruct]
             except KeyError as err:
-                msg = '"{}" is not a known value'.format(cstruct)
+                msg = f'"{cstruct}" is not a known value'
                 raise colander.Invalid(node, msg) from err
 
         def serialize(self, _node, appstruct):  # pylint: disable= no-self-use
@@ -106,5 +106,5 @@ def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
         dotted_path = ".".join([str(c) for c in error.path])
-        return "{path}: {message}".format(path=dotted_path, message=error.message)
+        return f"{dotted_path}: {error.message}"
     return error.message

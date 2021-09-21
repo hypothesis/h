@@ -62,6 +62,7 @@ class SignupController:
         except ConflictError as exc:
             template_context["heading"] = _("Account already registered")
             template_context["message"] = _(
+                # pylint:disable=consider-using-f-string
                 "{failure_reason}".format(failure_reason=exc.args[0])
             )
 

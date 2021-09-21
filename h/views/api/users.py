@@ -61,9 +61,7 @@ def create(request):
     # Enforce authority match
     if appstruct["authority"] != client_authority_:
         raise ValidationError(
-            "authority '{auth_param}' does not match client authority".format(
-                auth_param=appstruct["authority"]
-            )
+            f"""authority '{appstruct["authority"]}' does not match client authority"""
         )
 
     user_unique_service = request.find_service(name="user_unique")

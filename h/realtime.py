@@ -45,7 +45,7 @@ class Consumer(ConsumerMixin):
         return [consumer_factory(queues=[queue], callbacks=[self.handle_message])]
 
     def generate_queue_name(self):
-        return "realtime-{}-{}".format(self.routing_key, self._random_id())
+        return f"realtime-{self.routing_key}-{self._random_id()}"
 
     def handle_message(self, body, message):
         """Handle a realtime message by acknowledging it and then calling the wrapped handler."""

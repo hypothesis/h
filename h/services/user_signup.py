@@ -90,9 +90,7 @@ class UserSignupService:
                         err.args[0],
                     )
                     raise ConflictError(
-                        "The email address {} has already been registered.".format(
-                            user.email
-                        )
+                        f"The email address {user.email} has already been registered."
                     ) from err
                 # If the exception is not related to the email or username, re-raise it.
                 raise

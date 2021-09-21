@@ -386,9 +386,7 @@ class UserSearchController(SearchController):
                 result["zero_message"] = "__SHOW_GETTING_STARTED__"
             else:
                 result["zero_message"] = _(
-                    "{name} has not made any annotations yet.".format(
-                        name=result["user"]["name"]
-                    )
+                    f"{result['user']['name']} has not made any annotations yet."
                 )
 
         return result

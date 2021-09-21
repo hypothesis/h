@@ -67,4 +67,4 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             return "group:__world__"
 
         # Only people in the group can read it
-        return "group:{}".format(self.annotation.groupid)
+        return f"group:{self.annotation.groupid}"

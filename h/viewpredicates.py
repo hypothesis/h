@@ -8,7 +8,7 @@ class FeaturePredicate:
         self.feature = feature
 
     def text(self):
-        return "feature = {feature}".format(feature=self.feature)
+        return f"feature = {self.feature}"
 
     phash = text
 

@@ -66,7 +66,7 @@ class DocumentURI(Base, mixins.Timestamps):
         return self._uri_normalized
 
     def __repr__(self):
-        return "<DocumentURI %s>" % self.id
+        return f"<DocumentURI {self.id}>"
 
 
 def create_or_update_document_uri(  # pylint: disable=redefined-builtin,too-many-arguments

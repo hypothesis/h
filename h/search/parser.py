@@ -87,7 +87,7 @@ def unparse(query):
         if key == "any":
             terms.append(_escape_term(val))
         else:
-            terms.append("{key}:{val}".format(key=key, val=_escape_term(val)))
+            terms.append(f"{key}:{_escape_term(val)}")
 
     return " ".join(terms)
 

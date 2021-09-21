@@ -72,4 +72,4 @@ class GroupScope(Base):
         self._path = parsed_path
 
     def __repr__(self):
-        return "<GroupScope %s>" % self.scope
+        return f"<GroupScope {self.scope}>"

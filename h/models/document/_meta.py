@@ -45,7 +45,7 @@ class DocumentMeta(Base, mixins.Timestamps):
         return self._claimant_normalized
 
     def __repr__(self):
-        return "<DocumentMeta %s>" % self.id
+        return f"<DocumentMeta {self.id}>"
 
 
 def create_or_update_document_meta(  # pylint:disable=redefined-builtin,too-many-arguments

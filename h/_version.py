@@ -51,9 +51,7 @@ def git_archive_version():
 
 def pep440_version(date, ref, dirty=False):
     """Build a PEP440-compliant version number from the passed information."""
-    return "{date}+g{ref}{dirty}".format(
-        date=date.strftime("%Y%m%d"), ref=ref, dirty=".dirty" if dirty else ""
-    )
+    return f"{date.strftime('%Y%m%d')}+g{ref}{'.dirty' if dirty else ''}"
 
 
 def get_version():

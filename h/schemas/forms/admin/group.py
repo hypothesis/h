@@ -120,7 +120,7 @@ def group_organization_select_widget(_node, kwargs):
     org_labels = []
     org_pubids = []
     for org in orgs.values():
-        org_labels.append("{} ({})".format(org.name, org.authority))
+        org_labels.append(f"{org.name} ({org.authority})")
         org_pubids.append(org.pubid)
 
     # `zip` returns an iterator. The `SelectWidget` constructor requires an

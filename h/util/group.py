@@ -20,7 +20,7 @@ def split_groupid(groupid):
             "authority_provided_id": match.groups()[0],
             "authority": match.groups()[1],
         }
-    raise ValueError("{groupid} isn't a valid groupid".format(groupid=groupid))
+    raise ValueError(f"{groupid} isn't a valid groupid")
 
 
 def is_groupid(maybe_groupid):

@@ -167,7 +167,7 @@ def document_uris_from_links(link_dicts, claimant):
 
         # Handle rel="..." links.
         if "rel" in link:
-            type_ = "rel-{}".format(link["rel"])
+            type_ = f"rel-{link['rel']}"
         else:
             type_ = ""
 
@@ -287,6 +287,6 @@ def doi_uri_from_string(string):
     if DOI_PATTERN.match(string) is None:
         return None
 
-    string = "doi:{}".format(string)
+    string = f"doi:{string}"
 
     return string

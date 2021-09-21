@@ -50,9 +50,7 @@ class UserUpdateService:
                 # We know this isn't authority, because the presence of authority
                 # would have already raised.
                 raise ConflictError(
-                    "username '{username}' is already in use".format(
-                        username=kwargs["username"]
-                    )
+                    """username '{kwargs["username"]}' is already in use"""
                 ) from err
 
             # Re-raise as this is an unexpected problem

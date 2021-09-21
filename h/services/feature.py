@@ -62,7 +62,7 @@ class FeatureService:
         features = self.all(user=user)
 
         if name not in features:
-            raise UnknownFeatureError("{0} is not a valid feature name".format(name))
+            raise UnknownFeatureError(f"{name} is not a valid feature name")
 
         return features[name]
 

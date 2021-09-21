@@ -41,9 +41,7 @@ class GroupUpdateService:
                 in repr(err)
             ):
                 raise ConflictError(
-                    "authority_provided_id '{id}' is already in use".format(
-                        id=kwargs["authority_provided_id"]
-                    )
+                    f"""authority_provided_id '{kwargs["authority_provided_id"]}' is already in use"""
                 ) from err
 
             # Re-raise as this is an unexpected problem

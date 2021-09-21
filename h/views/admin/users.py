@@ -69,6 +69,7 @@ def users_activate(request):
     user.activate()
 
     request.session.flash(
+        # pylint:disable=consider-using-f-string
         jinja2.Markup(_("User {name} has been activated!".format(name=user.username))),
         "success",
     )
@@ -109,8 +110,7 @@ def users_rename(request):
         )
     else:
         request.session.flash(
-            'The user "%s" will be renamed to "%s" in the backgroud. Refresh this page to see if it\'s already done'
-            % (old_username, new_username),
+            f'The user "{old_username}" will be renamed to "{new_username}" in the background. Refresh this page to see if it\'s already done'
             "success",
         )
 
@@ -134,8 +134,7 @@ def users_delete(request):
 
     svc.delete(user)
     request.session.flash(
-        "Successfully deleted user %s with authority %s"
-        % (user.username, user.authority),
+        f"Successfully deleted user {user.username} with authority {user.authority}"
         "success",
     )
 
@@ -155,6 +154,6 @@ def _form_request_user(request):
     user = user_service.fetch(userid)
 
     if user is None:
-        raise UserNotFoundError("Could not find user with userid %s" % userid)
+        raise UserNotFoundError(f"Could not find user with userid {userid}")
 
     return user

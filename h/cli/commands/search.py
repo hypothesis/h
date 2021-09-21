@@ -28,7 +28,7 @@ def reindex(ctx):
     es_client = request.es
 
     es_server_version = es_client.conn.info()["version"]["number"]
-    click.echo("reindexing into Elasticsearch {} cluster".format(es_server_version))
+    click.echo(f"reindexing into Elasticsearch {es_server_version} cluster")
 
     indexer.reindex(request.db, es_client, request)
 

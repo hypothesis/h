@@ -37,7 +37,7 @@ class Document(Base, mixins.Timestamps):
     )
 
     def __repr__(self):
-        return "<Document %s>" % self.id
+        return f"<Document {self.id}>"
 
     def update_web_uri(self):
         """

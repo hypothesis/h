@@ -39,7 +39,7 @@ class UsernameComparator(Comparator):  # pylint: disable=abstract-method
         return op(
             _normalise_username(self.__clause_element__()),
             _normalise_username(other),
-            **kwargs
+            **kwargs,
         )
 
 
@@ -219,9 +219,7 @@ class User(Base):
 
     @hybrid_property
     def userid(self):
-        return "acct:{username}@{authority}".format(
-            username=self.username, authority=self.authority
-        )
+        return f"acct:{self.username}@{self.authority}"
 
     @userid.comparator
     def userid(cls):  # pylint: disable=no-self-argument
@@ -277,8 +275,7 @@ class User(Base):
 
         if len(email) > EMAIL_MAX_LENGTH:
             raise ValueError(
-                "email must be less than {max} characters "
-                "long".format(max=EMAIL_MAX_LENGTH)
+                f"email must be less than {EMAIL_MAX_LENGTH} characters long"
             )
         return email
 
@@ -286,10 +283,8 @@ class User(Base):
     def validate_username(self, _key, username):  # pylint: disable=no-self-use
         if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
             raise ValueError(
-                "username must be between {min} and {max} "
-                "characters long".format(
-                    min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH
-                )
+                f"username must be between {USERNAME_MIN_LENGTH} and {USERNAME_MAX_LENGTH} "
+                "characters long"
             )
 
         if not re.match(USERNAME_PATTERN, username):
@@ -330,4 +325,4 @@ class User(Base):
         )
 
     def __repr__(self):
-        return "<User: %s>" % self.username
+        return f"<User: {self.username}>"

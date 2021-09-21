@@ -258,7 +258,7 @@ def _shared(permissions, groupid):
     :type groupid: unicode
 
     """
-    return permissions["read"] == ["group:{id}".format(id=groupid)]
+    return permissions["read"] == [f"group:{groupid}"]
 
 
 def _target_selectors(targets):

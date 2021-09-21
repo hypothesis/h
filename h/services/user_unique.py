@@ -30,6 +30,7 @@ class UserUniqueService:
 
         :param authority: Authority against which to do a duplicate check
         """
+        # pylint:disable=consider-using-f-string
         errors = []
 
         # check for duplicate email address

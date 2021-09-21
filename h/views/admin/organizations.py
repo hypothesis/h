@@ -23,9 +23,7 @@ def index(_context, request):
 
     filter_terms = []
     if q_param:
-        filter_terms.append(
-            func.lower(Organization.name).like("%{}%".format(q_param.lower()))
-        )
+        filter_terms.append(func.lower(Organization.name).like(f"%{q_param.lower()}%"))
 
     return (
         request.db.query(Organization)
@@ -62,7 +60,9 @@ class OrganizationCreateController:
 
             self.request.db.add(organization)
             self.request.session.flash(
-                Markup(_("Created new organization {}".format(name))), "success"
+                # pylint:disable=consider-using-f-string
+                Markup(_("Created new organization {}".format(name))),
+                "success",
             )
 
             return HTTPFound(location=self.request.route_url("admin.organizations"))
@@ -107,6 +107,7 @@ class OrganizationEditController:
             self.request.response.status_int = 400
             self.request.session.flash(
                 _(
+                    # pylint:disable=consider-using-f-string
                     "Cannot delete organization because it is associated with {} groups".format(
                         group_count
                     )
@@ -119,6 +120,7 @@ class OrganizationEditController:
         self.request.db.delete(self.organization)
         self.request.session.flash(
             _(
+                # pylint:disable=consider-using-f-string
                 "Successfully deleted organization %s" % (self.organization.name),
                 "success",
             )

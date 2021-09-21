@@ -13,7 +13,7 @@ def human_timestamp(timestamp, now=datetime.datetime.utcnow):
 
 
 def format_number(num):
-    return "{:,}".format(num)
+    return f"{num:,}"
 
 
 def to_json(value):

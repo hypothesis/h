@@ -84,7 +84,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
 
             type_ = appstruct["group_type"]
             if type_ not in ["open", "restricted"]:
-                raise Exception("Unsupported group type {}".format(type_))
+                raise Exception(f"Unsupported group type {type_}")
 
             group = create_fns[type_](
                 name=appstruct["name"],
@@ -106,7 +106,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
             self.group_members_svc.add_members(group, member_userids)
 
             self.request.session.flash(
-                Markup('Created new group "{name}"'.format(name=group.name)),
+                Markup(f'Created new group "{group.name}"'),
                 queue="success",
             )
 
@@ -161,6 +161,7 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
         self.request.find_service(name="delete_group").delete(self.group)
 
         self.request.session.flash(
+            # pylint:disable=consider-using-f-string
             _("Successfully deleted group %s" % (self.group.name), "success"),
             queue="success",
         )

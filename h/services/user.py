@@ -114,7 +114,7 @@ class UserService:
                 cache_key = (user.username, user.authority)
                 self._cache[cache_key] = user
 
-        return [v for k, v in self._cache.items() if k in cache_keys.keys()]
+        return [v for k, v in self._cache.items() if k in cache_keys]
 
     def fetch_by_identity(self, provider, provider_unique_id):
         """
@@ -168,7 +168,7 @@ class UserService:
         invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
         if invalid_keys:
             keys = ", ".join(sorted(invalid_keys))
-            raise TypeError("settings with keys %s are not allowed" % keys)
+            raise TypeError(f"settings with keys {keys} are not allowed")
 
         if "show_sidebar_tutorial" in kwargs:
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]

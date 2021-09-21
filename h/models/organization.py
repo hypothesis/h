@@ -30,14 +30,12 @@ class Organization(Base, mixins.Timestamps):
             Organization.NAME_MIN_CHARS <= len(name) <= Organization.NAME_MAX_CHARS
         ):
             raise ValueError(
-                "name must be between {min} and {max} characters long".format(
-                    min=Organization.NAME_MIN_CHARS, max=Organization.NAME_MAX_CHARS
-                )
+                f"name must be between {Organization.NAME_MIN_CHARS} and {Organization.NAME_MAX_CHARS} characters long"
             )
         return name
 
     def __repr__(self):
-        return "<Organization: %s>" % self.pubid
+        return f"<Organization: {self.pubid}>"
 
     @property
     def is_default(self):

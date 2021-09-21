@@ -12,7 +12,7 @@ def media_type_for_version(version, subtype="json"):
     :type subtype: str or None
     :rtype: str
     """
-    return "application/vnd.hypothesis.{}+{}".format(version, subtype)
+    return f"application/vnd.hypothesis.{version}+{subtype}"
 
 
 def valid_media_types():

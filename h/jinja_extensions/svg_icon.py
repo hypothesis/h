@@ -30,7 +30,7 @@ def svg_icon(name, css_class=""):
     # See http://stackoverflow.com/questions/8983041
     ElementTree.register_namespace("", SVG_NAMESPACE_URI)
 
-    with open("build/images/icons/{}.svg".format(name), encoding="utf8") as handle:
+    with open(f"build/images/icons/{name}.svg", encoding="utf8") as handle:
         svg_data = handle.read()
 
     root = ElementTree.fromstring(svg_data)
@@ -44,7 +44,7 @@ def svg_icon(name, css_class=""):
 
     # If the SVG has its own title, ignore it in favor of the title attribute
     # of the <svg> or its containing element, which is usually a link.
-    title_el = root.find("{{{}}}title".format(SVG_NAMESPACE_URI))
+    title_el = root.find(f"{{{SVG_NAMESPACE_URI}}}title")
     if title_el is not None:
         root.remove(title_el)
 

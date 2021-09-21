@@ -37,12 +37,12 @@ def add(ctx, username, email, password, authority):
         request.tm.commit()
     except sqlalchemy.exc.IntegrityError as err:
         upstream_error = "\n".join("    " + line for line in str(err).split("\n"))
-        message = "could not create user due to integrity constraint.\n\n{}".format(
-            upstream_error
+        message = (
+            f"could not create user due to integrity constraint.\n\n{upstream_error}"
         )
         raise click.ClickException(message)
 
-    click.echo("{username} created".format(username=username), err=True)
+    click.echo(f"{username} created", err=True)
 
 
 @user.command()
@@ -64,20 +64,13 @@ def admin(ctx, username, authority, on):  # pylint: disable=invalid-name
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        msg = 'no user with username "{}" and authority "{}"'.format(
-            username, authority
-        )
+        msg = f'no user with username "{username}" and authority "{authority}"'
         raise click.ClickException(msg)
 
     user.admin = on
     request.tm.commit()
 
-    click.echo(
-        "{username} is now {status}an administrator".format(
-            username=username, status="" if on else "NOT "
-        ),
-        err=True,
-    )
+    click.echo(f"{username} is now {'' if on else 'NOT '}an administrator", err=True)
 
 
 @user.command()
@@ -100,15 +93,13 @@ def password(ctx, username, authority, password):
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        msg = 'no user with username "{}" and authority "{}"'.format(
-            username, authority
-        )
+        msg = f'no user with username "{username}" and authority "{authority}"'
         raise click.ClickException(msg)
 
     password_service.update_password(user, password)
     request.tm.commit()
 
-    click.echo("Password changed for {}".format(username), err=True)
+    click.echo(f"Password changed for {username}", err=True)
 
 
 @user.command()
@@ -128,13 +119,11 @@ def delete(ctx, username, authority):
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        msg = 'no user with username "{}" and authority "{}"'.format(
-            username, authority
-        )
+        msg = f'no user with username "{username}" and authority "{authority}"'
         raise click.ClickException(msg)
 
     svc = request.find_service(name="delete_user")
     svc.delete(user)
     request.tm.commit()
 
-    click.echo("User {} deleted.".format(username), err=True)
+    click.echo(f"User {username} deleted.", err=True)

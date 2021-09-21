@@ -27,11 +27,11 @@ def annotation_page(context, request):
     annotation = context.annotation
     document = annotation.document
     if document and document.title:
-        title = "Annotation by {user} on {title}".format(
+        title = "Annotation by {user} on {title}".format(  # pylint:disable=consider-using-f-string
             user=annotation.userid.replace("acct:", ""), title=document.title
         )
     else:
-        title = "Annotation by {user}".format(
+        title = "Annotation by {user}".format(  # pylint:disable=consider-using-f-string
             user=annotation.userid.replace("acct:", "")
         )
 
@@ -72,7 +72,7 @@ def stream(_context, request):
         tag = query[1]
         if " " in tag:
             tag = '"' + tag + '"'
-        query = {"q": "tag:{}".format(tag)}
+        query = {"q": f"tag:{tag}"}
         location = request.route_url("activity.search", _query=query)
         raise httpexceptions.HTTPFound(location=location)
     atom = request.route_url("stream_atom")
@@ -90,7 +90,7 @@ def stream(_context, request):
 
 @view_config(route_name="stream.tag_query")
 def stream_tag_redirect(request):
-    query = {"q": "tag:{}".format(request.matchdict["tag"])}
+    query = {"q": f"tag:{request.matchdict['tag']}"}
     location = request.route_url("stream", _query=query)
     raise httpexceptions.HTTPFound(location=location)
 

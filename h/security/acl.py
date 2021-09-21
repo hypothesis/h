@@ -27,7 +27,7 @@ class ACL:
         if not user:
             return
 
-        client_authority = "client_authority:{}".format(user.authority)
+        client_authority = f"client_authority:{user.authority}"
 
         # auth_clients with the same authority as the user may update the user
         yield Allow, client_authority, Permission.User.UPDATE
