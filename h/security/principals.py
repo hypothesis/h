@@ -34,9 +34,9 @@ def principals_for_identity(identity: Optional[Identity]):
             principals.add(Role.STAFF)
 
         for group in user.groups:
-            principals.add("group:{group.pubid}".format(group=group))
+            principals.add(f"group:{group.pubid}")
 
-        principals.add("authority:{authority}".format(authority=user.authority))
+        principals.add(f"authority:{user.authority}")
 
     if auth_client := identity.auth_client:
         principals.add(identity.auth_client.id)

@@ -22,11 +22,11 @@ class AngularRouteTemplater:
 
         @property
         def url_safe(self):
-            return "__{}__".format(self.name)
+            return f"__{self.name}__"
 
         @property
         def placeholder(self):
-            return ":{}".format(self.name)
+            return ":{self.name}"
 
     def __init__(self, route_url, params):
         """

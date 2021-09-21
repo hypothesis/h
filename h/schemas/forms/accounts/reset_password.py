@@ -17,7 +17,7 @@ class ResetCode(colander.SchemaType):
         if appstruct is colander.null:
             return colander.null
         if not isinstance(appstruct, models.User):
-            raise colander.Invalid(node, "%r is not a User" % appstruct)
+            raise colander.Invalid(node, f"{appstruct!r} is not a User")
         request = node.bindings["request"]
         serializer = request.registry.password_reset_serializer
         return serializer.dumps(appstruct.username)

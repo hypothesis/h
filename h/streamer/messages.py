@@ -61,7 +61,7 @@ def handle_message(message, registry, session, topic_handlers):
         handler = topic_handlers[message.topic]
     except KeyError as err:
         raise RuntimeError(
-            "Don't know how to handle message from topic: " "{}".format(message.topic)
+            f"Don't know how to handle message from topic: {message.topic}"
         ) from err
 
     # N.B. We iterate over a non-weak list of instances because there's nothing

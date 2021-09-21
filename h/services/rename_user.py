@@ -33,7 +33,7 @@ class RenameUserService:
         )
         if existing_user and existing_user != user:
             raise UserRenameError(
-                'Another user already has the username "%s"' % new_username
+                f'Another user already has the username "{new_username}"'
             )
 
         return True

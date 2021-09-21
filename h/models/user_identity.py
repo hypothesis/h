@@ -15,6 +15,7 @@ class UserIdentity(Base):
     )
 
     def __repr__(self):
+        # pylint: disable=consider-using-f-string
         return "{}(provider={!r}, provider_unique_id={!r})".format(
             self.__class__.__name__, self.provider, self.provider_unique_id
         )

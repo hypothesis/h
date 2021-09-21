@@ -118,4 +118,4 @@ class AuthClient(Base, Timestamps):
     )
 
     def __repr__(self):
-        return "AuthClient(id={self.id!r})".format(self=self)
+        return f"AuthClient(id={self.id!r})"

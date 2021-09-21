@@ -37,4 +37,4 @@ class Flag(Base, Timestamps):
     user = sa.orm.relationship("User")
 
     def __repr__(self):
-        return "<Flag annotation_id=%s user_id=%s>" % (self.annotation_id, self.user_id)
+        return f"<Flag annotation_id={self.annotation_id} user_id={self.user_id}>"

@@ -146,9 +146,7 @@ class GroupCreateService:
     def _validate_authorities_match(group_authority, org_authority):
         if group_authority != org_authority:
             raise ValueError(
-                "Organization's authority {} must match the group creator's authority {}.".format(
-                    org_authority, group_authority
-                )
+                "Organization's authority {org_authority} must match the group creator's authority {group_authority}."
             )
 
 

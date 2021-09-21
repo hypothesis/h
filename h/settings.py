@@ -78,21 +78,18 @@ class SettingsManager:
                     "use of envvar %s is deprecated: %s", envvar, deprecated_msg
                 )
             val = self._environ[envvar]
-            cast_message = "environment variable {}={!r}".format(envvar, val)
+            cast_message = f"environment variable {envvar}={val!r}"
         elif default and name not in self.settings:
             val = default
-            cast_message = "{}'s default {!r}".format(name, val)
+            cast_message = f"{name}'s default {val!r}"
         elif required and name not in self.settings:
-            raise SettingError(
-                "error parsing environment variable "
-                "{varname} not found".format(varname=envvar)
-            )
+            raise SettingError(f"error parsing environment variable {envvar} not found")
         if val:
             try:
                 self.settings[name] = type_(val)
             except ValueError as err:
                 raise SettingError(
-                    "error casting {} as {}".format(cast_message, type_.__name__)
+                    f"error casting {cast_message} as {type_.__name__}"
                 ) from err
 
 

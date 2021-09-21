@@ -114,9 +114,7 @@ class Group(Base, mixins.Timestamps):
     def groupid(self):
         if self.authority_provided_id is None:
             return None
-        return "group:{authority_provided_id}@{authority}".format(
-            authority_provided_id=self.authority_provided_id, authority=self.authority
-        )
+        return f"group:{self.authority_provided_id}@{self.authority}"
 
     @groupid.setter
     def groupid(self, value):
@@ -156,8 +154,7 @@ class Group(Base, mixins.Timestamps):
     def validate_name(self, _key, name):  # pylint:disable=no-self-use
         if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:
             raise ValueError(
-                "name must be between {min} and {max} characters "
-                "long".format(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH)
+                f"name must be between {GROUP_NAME_MIN_LENGTH} and {GROUP_NAME_MAX_LENGTH} characters long"
             )
         return name
 
@@ -176,8 +173,8 @@ class Group(Base, mixins.Timestamps):
 
         if len(authority_provided_id) > AUTHORITY_PROVIDED_ID_MAX_LENGTH:
             raise ValueError(
-                "authority_provided_id must be {max} characters or fewer"
-                "characters long".format(max=AUTHORITY_PROVIDED_ID_MAX_LENGTH)
+                f"authority_provided_id must be {AUTHORITY_PROVIDED_ID_MAX_LENGTH} characters or fewer"
+                " characters long"
             )
 
         return authority_provided_id
@@ -220,7 +217,7 @@ class Group(Base, mixins.Timestamps):
         return self.readable_by == ReadableBy.world
 
     def __repr__(self):
-        return "<Group: %s>" % self.slug
+        return f"<Group: {self.slug}>"
 
     @classmethod
     def created_by(cls, session, user):

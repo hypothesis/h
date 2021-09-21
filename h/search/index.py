@@ -143,5 +143,5 @@ def _log_status(stream, log_every=1000):
             now = time.time()
             delta = now - then
             then = now
-            rate = log_every / delta
-            log.info("indexed {:d}k annotations, rate={:.0f}/s".format(i // 1000, rate))
+            rate = round(log_every / delta)
+            log.info("indexed %ik annotations, rate=%s/s", i // 1000, rate)

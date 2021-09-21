@@ -31,13 +31,13 @@ def features_index(request):
 def features_save(request):
     for feat in models.Feature.all(request.db):
         for attr in ["everyone", "admins", "staff"]:
-            val = request.POST.get("{0}[{1}]".format(feat.name, attr))
+            val = request.POST.get(f"{feat.name}[{attr}]")
             if val == "on":
                 setattr(feat, attr, True)
             else:
                 setattr(feat, attr, False)
         for cohort in request.db.query(models.FeatureCohort).all():
-            val = request.POST.get("{0}[cohorts][{1}]".format(feat.name, cohort.name))
+            val = request.POST.get(f"{feat.name}[cohorts][{cohort.name}]")
             if val == "on":
                 if cohort not in feat.cohorts:
                     feat.cohorts.append(cohort)
@@ -111,6 +111,7 @@ def cohorts_edit_add(request):
     if member is None:
         request.session.flash(
             _(
+                # pylint:disable=consider-using-f-string
                 "User {member_name} with authority {authority} doesn't exist.".format(
                     member_name=member_name, authority=member_authority
                 )
@@ -144,6 +145,7 @@ def cohorts_edit_remove(request):
     except ValueError:
         request.session.flash(
             _(
+                # pylint:disable=consider-using-f-string
                 "User {member_userid} doesn't exist.".format(
                     member_userid=member_userid
                 )

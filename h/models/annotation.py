@@ -227,4 +227,4 @@ class Annotation(Base):
         return self.moderation is not None
 
     def __repr__(self):
-        return "<Annotation %s>" % self.id
+        return f"<Annotation {self.id}>"

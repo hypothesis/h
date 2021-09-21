@@ -123,7 +123,7 @@ class OAuthAuthorizeController:
             _, credentials = self.oauth.validate_authorization_request(self.request.url)
         except OAuth2Error as err:
             raise OAuthAuthorizeError(
-                err.description or "Error: {}".format(self.context.error)
+                err.description or f"Error: {self.context.error}"
             ) from err
 
         if self.request.authenticated_userid is None:
@@ -173,9 +173,7 @@ class OAuthAuthorizeController:
         except KeyError as err:
             client_id = self.request.params.get("client_id")
             raise RuntimeError(
-                'created authorisation code for client "{}" but got no redirect location'.format(
-                    client_id
-                )
+                f'created authorisation code for client "{client_id}" but got no redirect location'
             ) from err
 
     @classmethod

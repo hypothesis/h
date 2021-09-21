@@ -67,9 +67,7 @@ class GroupService:
         filter_terms = []
 
         if name:
-            filter_terms.append(
-                sa.func.lower(Group.name).like("%{}%".format(name.lower()))
-            )
+            filter_terms.append(sa.func.lower(Group.name).like(f"%{name.lower()}%"))
 
         return (
             self.session.query(Group)

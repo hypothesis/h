@@ -36,9 +36,7 @@ def generate(request, notification):
         "reply_user_url": _get_user_url(notification.reply_user, request),
     }
 
-    subject = "{user} has replied to your annotation".format(
-        user=context["reply_user_display_name"]
-    )
+    subject = f"{context['reply_user_display_name']} has replied to your annotation"
     text = render(
         "h:templates/emails/reply_notification.txt.jinja2", context, request=request
     )

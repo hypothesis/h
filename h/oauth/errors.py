@@ -4,22 +4,22 @@ from oauthlib.oauth2 import InvalidGrantError, InvalidRequestFatalError
 class MissingJWTGrantTokenClaimError(InvalidGrantError):
     def __init__(self, claim, claim_description=None):
         if claim_description:
-            description = "Missing claim '{}' ({}) from grant token.".format(
-                claim, claim_description
+            description = (
+                f"Missing claim '{claim}' ({claim_description}) from grant token."
             )
         else:
-            description = "Missing claim '{}' from grant token.".format(claim)
+            description = f"Missing claim '{claim}' from grant token."
         super().__init__(description=description)
 
 
 class InvalidJWTGrantTokenClaimError(InvalidGrantError):
     def __init__(self, claim, claim_description=None):
         if claim_description:
-            description = "Invalid claim '{}' ({}) in grant token.".format(
-                claim, claim_description
+            description = (
+                f"Invalid claim '{claim}' ({claim_description}) in grant token."
             )
         else:
-            description = "Invalid claim '{}' in grant token.".format(claim)
+            description = f"Invalid claim '{claim}' in grant token."
         super().__init__(description=description)
 
 

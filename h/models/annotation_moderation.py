@@ -35,4 +35,4 @@ class AnnotationModeration(Base, Timestamps):
     )
 
     def __repr__(self):
-        return "<AnnotationModeration annotation_id=%s>" % self.annotation_id
+        return f"<AnnotationModeration annotation_id={self.annotation_id}>"

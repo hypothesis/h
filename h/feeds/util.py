@@ -20,6 +20,4 @@ def tag_uri_for_annotation(annotation, annotation_url):
 
     """
     domain = urlparse(annotation_url(annotation)).hostname
-    return "tag:{domain},{date}:{id_}".format(
-        domain=domain, date=FEED_TAG_DATE, id_=annotation.id
-    )
+    return f"tag:{domain},{FEED_TAG_DATE}:{annotation.id}"

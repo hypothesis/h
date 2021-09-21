@@ -18,8 +18,4 @@ class Subscriptions(Base):
         return session.query(cls).filter(func.lower(cls.uri) == func.lower(uri)).all()
 
     def __repr__(self):
-        return "<Subscription uri=%s type=%s active=%s>" % (
-            self.uri,
-            self.type,
-            self.active,
-        )
+        return f"<Subscription uri={self.uri} type={self.type} active={self.active}>"

@@ -56,14 +56,12 @@ class AnnotationHTMLPresenter:
         selection = self._get_selection()
         if selection:
             selection = jinja2.escape(selection)
-            description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
-                selection=selection
-            )
+            description += f"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;"
 
         text = self.annotation.text
         if text:
             text = jinja2.escape(text)
-            description += "{text}".format(text=text)
+            description += f"{text}"
 
         return description
 

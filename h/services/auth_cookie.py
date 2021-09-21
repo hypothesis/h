@@ -72,7 +72,7 @@ class AuthCookieService:
         # Update the user cache to allow quick checking if we are called again
         self._user = self._user_service.fetch(userid)
         if self._user is None:
-            raise ValueError("Cannot find user with userid %s" % userid)
+            raise ValueError(f"Cannot find user with userid {userid}")
 
         ticket = AuthTicket(
             id=base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii"),

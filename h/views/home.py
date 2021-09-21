@@ -11,7 +11,7 @@ def via_redirect(_context, request):
     if url is None:
         raise httpexceptions.HTTPBadRequest('"url" parameter missing')
 
-    via_link = "https://via.hypothes.is/{}".format(url)
+    via_link = f"https://via.hypothes.is/{url}"
     raise httpexceptions.HTTPFound(location=via_link)
 
 

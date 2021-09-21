@@ -32,17 +32,11 @@ def move_uri(ctx, old, new):
 
     prompt = (
         "Changing all annotations and document data matching:\n"
-        '"{old}"\nto:\n"{new}"\n'
-        "This will affect {ann_count} annotations, {doc_claimant} "
-        "document uri claimants, and {doc_uri} document uri self-claims "
+        f'"{old}"\nto:\n"{new}"\n'
+        f"This will affect {len(annotations)} annotations, {len(docuris_claimant)} "
+        f"document uri claimants, and {len(docuris_uri)} document uri self-claims "
         "or canonical uris.\n"
         "Are you sure? [y/N]"
-    ).format(
-        old=old,
-        new=new,
-        ann_count=len(annotations),
-        doc_claimant=len(docuris_claimant),
-        doc_uri=len(docuris_uri),
     )
     answer = click.prompt(prompt, default="n", show_default=False)
     if answer != "y":

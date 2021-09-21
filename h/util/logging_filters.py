@@ -36,10 +36,7 @@ class ExceptionFilter(logging.Filter):
                 self._ignore_exceptions.append((logging_levels[exc_level], exc_name))
             except KeyError as err:
                 raise ValueError(
-                    """The logging level provided ({})
-                                 is invalid. Valid options: {}""".format(
-                        exc_level, logging_levels.keys()
-                    )
+                    f"""The logging level provided ({exc_level}) is invalid. Valid options: {logging_levels.keys()}"""
                 ) from err
 
     def filter(self, record):

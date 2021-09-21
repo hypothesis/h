@@ -202,7 +202,7 @@ def handle_unknown_message(message, session=None):  # pylint: disable=unused-arg
             "type": "error",
             "error": {
                 "type": "invalid_type",
-                "description": "invalid message type: " "{:s}".format(type_),
+                "description": f"invalid message type: {type_}",
             },
         },
         ok=False,

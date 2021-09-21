@@ -14,7 +14,7 @@ def _colander_exception_msg(exc):
     msg_dict = exc.asdict()
     for child in exc.children:
         msg_dict.update(child.asdict())
-    msg_list = ["{}: {}".format(field, err) for field, err in msg_dict.items()]
+    msg_list = [f"{field}: {err}" for field, err in msg_dict.items()]
     return "\n".join(msg_list)
 
 
