@@ -74,9 +74,7 @@ class TestCheckURL:
             check_url(pyramid_request, query, unparse=unparse)
 
         assert e.value.location == (
-            "/act/groups/{pubid}/{slug}?q=UNPARSED_QUERY".format(
-                pubid=group.pubid, slug=group.slug
-            )
+            f"/act/groups/{group.pubid}/{group.slug}?q=UNPARSED_QUERY"
         )
 
     def test_does_not_redirect_to_group_page_if_group_does_not_exist(
@@ -417,7 +415,7 @@ class TestExecute:
                 request == pyramid_request
             ), "It should always pass the request to incontext_link"
             # Return a predictable per-annotation value for the incontext link.
-            return "incontext_link_for_annotation_{id}".format(id=annotation.id)
+            return f"incontext_link_for_annotation_{annotation.id}"
 
         links.incontext_link.side_effect = incontext_link
 
@@ -430,9 +428,7 @@ class TestExecute:
 
         for presented_annotation in presented_annotations:
             assert presented_annotation["incontext_link"] == (
-                "incontext_link_for_annotation_{id}".format(
-                    id=presented_annotation["annotation"].annotation.id
-                )
+                f"incontext_link_for_annotation_{presented_annotation['annotation'].annotation.id}"
             )
 
     def test_it_returns_each_annotations_html_link(self, links, pyramid_request):
@@ -441,7 +437,7 @@ class TestExecute:
                 request == pyramid_request
             ), "It should always pass the request to html_link"
             # Return a predictable per-annotation value for the html link.
-            return "html_link_for_annotation_{id}".format(id=annotation.id)
+            return f"html_link_for_annotation_{annotation.id}"
 
         links.html_link.side_effect = html_link
 
@@ -454,9 +450,7 @@ class TestExecute:
 
         for presented_annotation in presented_annotations:
             assert presented_annotation["html_link"] == (
-                "html_link_for_annotation_{id}".format(
-                    id=presented_annotation["annotation"].annotation.id
-                )
+                f"html_link_for_annotation_{presented_annotation['annotation'].annotation.id}"
             )
 
     def test_it_returns_the_total_number_of_matching_annotations(self, pyramid_request):

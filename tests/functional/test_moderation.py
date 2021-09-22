@@ -7,8 +7,8 @@ class TestModeration:
     ):
         _, token = moderator_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
-        annotation_url = "/api/annotations/{}".format(flagged_annotation.id)
+        headers = {"Authorization": f"Bearer {token.value}"}
+        annotation_url = f"/api/annotations/{flagged_annotation.id}"
         res = app.get(annotation_url, headers=headers)
 
         assert "moderation" in res.json

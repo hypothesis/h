@@ -6,11 +6,9 @@ class TestPutHide:
         self, app, group_annotation, user_with_token
     ):
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": str(f"Bearer {token.value}")}
 
-        res = app.put(
-            "/api/annotations/{id}/hide".format(id=group_annotation.id), headers=headers
-        )
+        res = app.put(f"/api/annotations/{group_annotation.id}/hide", headers=headers)
 
         # The creator of a group has moderation rights over the annotations in that group
         assert res.status_code == 204
@@ -19,10 +17,10 @@ class TestPutHide:
         self, app, world_annotation, user_with_token
     ):
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": str(f"Bearer {token.value}")}
 
         res = app.put(
-            "/api/annotations/{id}/hide".format(id=world_annotation.id),
+            f"/api/annotations/{world_annotation.id}/hide",
             headers=headers,
             expect_errors=True,
         )
@@ -32,7 +30,7 @@ class TestPutHide:
     def test_it_returns_http_404_if_no_authn(self, app, group_annotation):
 
         res = app.put(
-            "/api/annotations/{id}/hide".format(id=group_annotation.id),
+            f"/api/annotations/{group_annotation.id}/hide",
             expect_errors=True,
         )
 
@@ -41,12 +39,11 @@ class TestPutHide:
     def test_it_returns_http_404_if_annotation_is_private(
         self, app, private_group_annotation, user_with_token
     ):
-
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": str(f"Bearer {token.value}")}
 
         res = app.put(
-            "/api/annotations/{id}/hide".format(id=private_group_annotation.id),
+            f"/api/annotations/{private_group_annotation.id}/hide",
             headers=headers,
             expect_errors=True,
         )
@@ -59,10 +56,10 @@ class TestDeleteHide:
         self, app, group_annotation, user_with_token
     ):
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": str(f"Bearer {token.value}")}
 
         res = app.delete(
-            "/api/annotations/{id}/hide".format(id=group_annotation.id), headers=headers
+            f"/api/annotations/{group_annotation.id}/hide", headers=headers
         )
 
         # The creator of a group has moderation rights over the annotations in that group
@@ -72,10 +69,10 @@ class TestDeleteHide:
         self, app, world_annotation, user_with_token
     ):
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": str(f"Bearer {token.value}")}
 
         res = app.delete(
-            "/api/annotations/{id}/hide".format(id=world_annotation.id),
+            f"/api/annotations/{world_annotation.id}/hide",
             headers=headers,
             expect_errors=True,
         )
@@ -85,7 +82,7 @@ class TestDeleteHide:
     def test_it_returns_http_404_if_no_authn(self, app, group_annotation):
 
         res = app.delete(
-            "/api/annotations/{id}/hide".format(id=group_annotation.id),
+            f"/api/annotations/{group_annotation.id}/hide",
             expect_errors=True,
         )
 
@@ -96,10 +93,10 @@ class TestDeleteHide:
     ):
 
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": str(f"Bearer {token.value}")}
 
         res = app.delete(
-            "/api/annotations/{id}/hide".format(id=private_group_annotation.id),
+            f"/api/annotations/{private_group_annotation.id}/hide",
             headers=headers,
             expect_errors=True,
         )

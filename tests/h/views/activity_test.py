@@ -175,9 +175,7 @@ class TestGroupSearchController:
         with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
             controller.search()
 
-        assert exc.value.location == "/groups/{pubid}/{slug}".format(
-            pubid=test_group.pubid, slug=test_group.slug
-        )
+        assert exc.value.location == f"/groups/{test_group.pubid}/{test_group.slug}"
 
     @pytest.mark.parametrize(
         "test_group,test_user",
@@ -450,7 +448,7 @@ class TestGroupSearchController:
     def test_search_returns_group_moderators_faceted_by(  # pylint:disable=unused-argument
         self, controller, pyramid_request, test_user, test_group
     ):
-        pyramid_request.params = {"q": "user:%s" % "does_not_matter"}
+        pyramid_request.params = {"q": "user:does_not_matter"}
 
         result = controller.search()
         for moderator in result["group_users_args"][1]:
@@ -511,9 +509,7 @@ class TestGroupSearchController:
         result = controller.search()
 
         assert result["zero_message"] == (
-            "The group “{name}” has not made any annotations yet.".format(
-                name=test_group.name
-            )
+            f"The group “{test_group.name}” has not made any annotations yet."
         )
 
     @pytest.mark.parametrize(
@@ -728,9 +724,7 @@ class TestGroupSearchController:
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}?q=foo+bar".format(
-                pubid=test_group.pubid, slug=test_group.slug
-            )
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}?q=foo+bar"
         )
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
@@ -748,8 +742,8 @@ class TestGroupSearchController:
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}"
-            "?q=user%3Afred".format(pubid=test_group.pubid, slug=test_group.slug)
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}"
+            "?q=user%3Afred"
         )
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
@@ -761,9 +755,7 @@ class TestGroupSearchController:
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}".format(
-                pubid=test_group.pubid, slug=test_group.slug
-            )
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}"
         )
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
@@ -775,10 +767,8 @@ class TestGroupSearchController:
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}"
-            "?q=foo+bar+user%3Afred".format(
-                pubid=test_group.pubid, slug=test_group.slug
-            )
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}"
+            "?q=foo+bar+user%3Afred"
         )
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
@@ -790,8 +780,7 @@ class TestGroupSearchController:
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}"
-            "?q=foo+bar".format(pubid=test_group.pubid, slug=test_group.slug)
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}?q=foo+bar"
         )
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
@@ -803,10 +792,8 @@ class TestGroupSearchController:
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}"
-            "?q=user%3Afoo+user%3Abar".format(
-                pubid=test_group.pubid, slug=test_group.slug
-            )
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}"
+            "?q=user%3Afoo+user%3Abar"
         )
 
     @pytest.mark.parametrize(
@@ -827,9 +814,7 @@ class TestGroupSearchController:
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            "http://example.com/groups/{pubid}/{slug}".format(
-                pubid=test_group.pubid, slug=test_group.slug
-            )
+            f"http://example.com/groups/{test_group.pubid}/{test_group.slug}"
         )
 
     @pytest.fixture(scope="function")
@@ -1013,7 +998,7 @@ class TestUserSearchController:
         result = controller.search()
 
         assert result["zero_message"] == (
-            "{name} has not made any annotations yet.".format(name=user.display_name)
+            f"{user.display_name} has not made any annotations yet."
         )
 
     def test_search_shows_the_getting_started_box_when_on_your_own_page(
@@ -1035,9 +1020,7 @@ class TestUserSearchController:
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == (
-            "http://example.com/users/{username}?q=foo+bar".format(
-                username=user.username
-            )
+            f"http://example.com/users/{user.username}?q=foo+bar"
         )
 
     @pytest.mark.parametrize("q", ["", "   "])
@@ -1054,9 +1037,7 @@ class TestUserSearchController:
         result = controller.back()
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == (
-            "http://example.com/users/{username}".format(username=user.username)
-        )
+        assert result.location == (f"http://example.com/users/{user.username}")
 
     @pytest.fixture
     def controller(

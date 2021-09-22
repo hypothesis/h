@@ -41,7 +41,7 @@ class GroupCreateService:
             type_flags=PRIVATE_GROUP_TYPE_FLAGS,
             scopes=[],
             add_creator_as_member=True,
-            **kwargs
+            **kwargs,
         )
 
     def create_open_group(self, name, userid, scopes, **kwargs):
@@ -65,7 +65,7 @@ class GroupCreateService:
             type_flags=OPEN_GROUP_TYPE_FLAGS,
             scopes=scopes,
             add_creator_as_member=False,
-            **kwargs
+            **kwargs,
         )
 
     def create_restricted_group(self, name, userid, scopes, **kwargs):
@@ -90,7 +90,7 @@ class GroupCreateService:
             type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
             scopes=scopes,
             add_creator_as_member=True,
-            **kwargs
+            **kwargs,
         )
 
     def _create(  # pylint: disable=too-many-arguments
@@ -128,7 +128,7 @@ class GroupCreateService:
             readable_by=type_flags.readable_by,
             writeable_by=type_flags.writeable_by,
             scopes=group_scopes,
-            **kwargs
+            **kwargs,
         )
         self.db.add(group)
 
@@ -146,7 +146,7 @@ class GroupCreateService:
     def _validate_authorities_match(group_authority, org_authority):
         if group_authority != org_authority:
             raise ValueError(
-                "Organization's authority {org_authority} must match the group creator's authority {group_authority}."
+                f"Organization's authority {org_authority} must match the group creator's authority {group_authority}."
             )
 
 

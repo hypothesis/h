@@ -26,9 +26,7 @@ class timeframe_with:
 
     def __repr__(self):
         # pragma: no cover
-        return '{class_} "{label}" with {n} document buckets'.format(
-            class_=self.__class__, label=self.label, n=len(self.document_buckets)
-        )
+        return f'{self.__class__} "{self.label}" with {len(self.document_buckets)} document buckets'
 
 
 @pytest.mark.usefixtures("factories")

@@ -138,14 +138,12 @@ def auth_client(db_session, factories):
 
 @pytest.fixture
 def append_auth_client(auth_client):
-    user_pass = "{client_id}:{secret}".format(
-        client_id=auth_client.id, secret=auth_client.secret
-    )
+    user_pass = f"{auth_client.id}:{auth_client.secret}"
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
 
     def append_header(headers=None):
         headers = headers or {}
-        headers["Authorization"] = "Basic {creds}".format(creds=encoded.decode("ascii"))
+        headers["Authorization"] = f"Basic {encoded.decode('ascii')}"
         return headers
 
     return append_header
@@ -164,7 +162,7 @@ def append_token_auth(user_with_token):
     def append_header(headers=None):
         headers = headers or {}
         _, token = user_with_token
-        headers["Authorization"] = "Bearer {}".format(token.value)
+        headers["Authorization"] = f"Bearer {token.value}"
         return headers
 
     return append_header

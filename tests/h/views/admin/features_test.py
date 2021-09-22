@@ -132,7 +132,7 @@ def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
 
     pyramid_request.matchdict["id"] = cohort.id
     pyramid_request.params["add"] = "   benoit   "
-    pyramid_request.params["authority"] = "    %s   " % user.authority
+    pyramid_request.params["authority"] = f"    {user.authority}   "
     cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1

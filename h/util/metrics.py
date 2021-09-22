@@ -36,7 +36,7 @@ def record_search_query_params(params, separate_replies):
     ]
     # The New Relic Query Language does not permit _ at the begining
     # and offset is a reserved key word.
-    params = [(f"es_{k}", params[k]) for k in keys if k in params]
+    params = [(f"es_{key}", params[key]) for key in keys if key in params]
 
     # Record usage of _separate_replies which will help distinguish client calls
     # for loading the sidebar annotations from other API calls.

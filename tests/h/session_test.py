@@ -211,7 +211,7 @@ class TestProfile:
     def third_party_request(self, authority, third_party_domain, fake_feature):
         return FakeRequest(
             authority,
-            "acct:user@{}".format(third_party_domain),
+            f"acct:user@{third_party_domain}",
             third_party_domain,
             fake_feature,
         )
@@ -313,9 +313,7 @@ def unauthenticated_request(authority, fake_feature):
 
 @pytest.fixture
 def authenticated_request(authority, fake_feature):
-    return FakeRequest(
-        authority, "acct:user@{}".format(authority), authority, fake_feature
-    )
+    return FakeRequest(authority, f"acct:user@{authority}", authority, fake_feature)
 
 
 @pytest.fixture

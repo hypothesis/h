@@ -12,7 +12,7 @@ class TestAngularRouteTemplater:
 
     def test_route_with_id_placeholder(self):
         def route_url(route_name, **kwargs):
-            return "/{}/{}".format(route_name, kwargs["id"])
+            return f"/{route_name}/{kwargs['id']}"
 
         templater = AngularRouteTemplater(route_url, params=["id"])
 
@@ -20,7 +20,7 @@ class TestAngularRouteTemplater:
 
     def test_custom_parameter(self):
         def route_url(_, **kwargs):
-            return "/things/{}".format(kwargs["thing_id"])
+            return f"/things/{kwargs['thing_id']}"
 
         templater = AngularRouteTemplater(route_url, params=["thing_id"])
 
@@ -28,7 +28,7 @@ class TestAngularRouteTemplater:
 
     def test_multiple_parameters(self):
         def route_url(_, **kwargs):
-            return "/{}/{}".format(kwargs["foo"], kwargs["bar"])
+            return f"/{kwargs['foo']}/{kwargs['bar']}"
 
         templater = AngularRouteTemplater(route_url, params=["foo", "bar"])
 
@@ -36,7 +36,7 @@ class TestAngularRouteTemplater:
 
     def test_parameter_substrings(self):
         def route_url(_, **kwargs):
-            return "/api/{}/things/{}".format(kwargs["id"], kwargs["thing_id"])
+            return f"/api/{kwargs['id']}/things/{kwargs['thing_id']}"
 
         templater = AngularRouteTemplater(route_url, params=["id", "thing_id"])
 

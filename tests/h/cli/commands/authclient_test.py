@@ -34,7 +34,7 @@ class TestAddCommand:
         (authclient, output) = self._add_authclient(
             cli, cliconfig, db_session, type_="public"
         )
-        expected_id_and_secret = "Client ID: {}".format(authclient.id)
+        expected_id_and_secret = f"Client ID: {authclient.id}"
         assert expected_id_and_secret in output
 
     def test_it_prints_the_id_and_secret_for_confidential_client(
@@ -43,9 +43,9 @@ class TestAddCommand:
         (authclient, output) = self._add_authclient(
             cli, cliconfig, db_session, type_="confidential"
         )
-        expected_id_and_secret = "Client ID: {}\n".format(
-            authclient.id
-        ) + "Client Secret: {}".format(authclient.secret)
+        expected_id_and_secret = (
+            f"Client ID: {authclient.id}\nClient Secret: {authclient.secret}"
+        )
         assert expected_id_and_secret in output
 
     def _add_authclient(self, cli, cliconfig, db_session, type_):

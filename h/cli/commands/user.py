@@ -93,8 +93,9 @@ def password(ctx, username, authority, password):
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        msg = f'no user with username "{username}" and authority "{authority}"'
-        raise click.ClickException(msg)
+        raise click.ClickException(
+            f'no user with username "{username}" and authority "{authority}"'
+        )
 
     password_service.update_password(user, password)
     request.tm.commit()
@@ -119,8 +120,9 @@ def delete(ctx, username, authority):
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        msg = f'no user with username "{username}" and authority "{authority}"'
-        raise click.ClickException(msg)
+        raise click.ClickException(
+            f'no user with username "{username}" and authority "{authority}"'
+        )
 
     svc = request.find_service(name="delete_user")
     svc.delete(user)

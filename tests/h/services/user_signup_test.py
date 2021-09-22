@@ -159,7 +159,7 @@ class TestUserSignupService:
         # concurrent signup requests race each other to the db.
         with pytest.raises(
             ConflictError,
-            match="The email address {} has already been registered.".format(email),
+            match=f"The email address {email} has already been registered.",
         ):
             svc.signup(username="foo", email="foo@bar.com")
             svc.signup(username=username, email=email)
