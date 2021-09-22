@@ -61,7 +61,7 @@
                   <a class="admin-navbar__tab-link" href="{{ request.route_url(permission) }}">{{ title }}</a>
                 </li>
               {% else %}
-                <li class="admin-navbar__tab-item dropdown{% if id in page_id %} active{% endif %}">
+                <li class="admin-navbar__tab-item dropdown{% if id in page_id %} is-active{% endif %}">
                     <a href="#" class="admin-navbar__tab-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     {{ title }}
                     <span class="caret"></span>
