@@ -12,7 +12,7 @@ from h.security import Permission
     renderer="h:templates/admin/index.html.jinja2",
     permission=Permission.AdminPage.INDEX,
 )
-def index(_):
+def index(_request):
     return {
         "release_info": {
             "hostname": platform.node(),
