@@ -4,19 +4,19 @@
     ('admins', 'admin.admins', 'Administrators', []),
     ('badge', 'admin.badge', 'Badge', []),
     ('features', 'admin.features', 'Feature flags', [
-      ('features', 'admin.features', 'Manage feature flags'),
-      ('cohorts', 'admin.cohorts', 'Manage feature cohorts'),
+      ('admin.features', 'Manage feature flags'),
+      ('admin.cohorts', 'Manage feature cohorts'),
     ]),
     ('groups', 'admin.groups', 'Groups', [
-      ('groups', 'admin.groups', 'List Groups'),
-      ('groups_create', 'admin.groups_create', 'Create a Group'),
+      ('admin.groups', 'List Groups'),
+      ('admin.groups_create', 'Create a Group'),
     ]),
     ('mailer', 'admin.mailer', 'Mailer', []),
     ('nipsa', 'admin.nipsa', 'NIPSA', []),
     ('oauth', 'admin.oauthclients', 'OAuth clients', []),
     ('organizations', 'admin.organizations', 'Organizations', [
-      ('organizations', 'admin.organizations', 'List organizations'),
-      ('organizations_create', 'admin.organizations_create', 'Create an organization'),
+      ('admin.organizations', 'List organizations'),
+      ('admin.organizations_create', 'Create an organization'),
     ]),
     ('staff', 'admin.staff', 'Staff', []),
     ('users', 'admin.users', 'Users', []),
@@ -47,6 +47,7 @@
 
     {% include 'h:templates/includes/settings.html.jinja2' %}
   </head>
+
   <body>
     <nav class="admin-navbar">
       <div class="admin-navbar__container">
@@ -67,7 +68,7 @@
                     <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">
-                      {% for id, url, title in children %}
+                      {% for url, title in children %}
                         <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
                       {% endfor %}
                     </ul>
