@@ -6,11 +6,9 @@ class TestPutFlag:
         self, app, annotation, user_with_token
     ):
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
-        res = app.put(
-            "/api/annotations/{id}/flag".format(id=annotation.id), headers=headers
-        )
+        res = app.put(f"/api/annotations/{annotation.id}/flag", headers=headers)
 
         # This annotation was not created by this user but it is a shared annotation
         assert res.status_code == 204
@@ -20,12 +18,9 @@ class TestPutFlag:
     ):
 
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
-        res = app.put(
-            "/api/annotations/{id}/flag".format(id=private_annotation.id),
-            headers=headers,
-        )
+        res = app.put(f"/api/annotations/{private_annotation.id}/flag", headers=headers)
 
         # This annotation was created by this user
         assert res.status_code == 204
@@ -35,10 +30,10 @@ class TestPutFlag:
     ):
 
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.put(
-            "/api/annotations/{id}/flag".format(id=unreadable_annotation.id),
+            f"/api/annotations/{unreadable_annotation.id}/flag",
             headers=headers,
             expect_errors=True,
         )
@@ -48,9 +43,7 @@ class TestPutFlag:
 
     def test_it_returns_http_404_if_unauthenticated(self, app, annotation):
 
-        res = app.put(
-            "/api/annotations/{id}/flag".format(id=annotation.id), expect_errors=True
-        )
+        res = app.put(f"/api/annotations/{annotation.id}/flag", expect_errors=True)
 
         assert res.status_code == 404
 

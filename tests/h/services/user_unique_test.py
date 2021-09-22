@@ -15,7 +15,7 @@ class TestUserUniqueEnsureUnique:
 
         with pytest.raises(
             DuplicateUserError,
-            match=(".*user with email address '{}' already exists".format(dupe_email)),
+            match=(f".*user with email address '{dupe_email}' already exists"),
         ):
             svc.ensure_unique(
                 {"email": dupe_email}, authority=pyramid_request.default_authority
@@ -31,7 +31,7 @@ class TestUserUniqueEnsureUnique:
 
         with pytest.raises(
             DuplicateUserError,
-            match=(".*user with username '{}' already exists".format(dupe_username)),
+            match=(f".*user with username '{dupe_username}' already exists"),
         ):
             svc.ensure_unique(
                 {"username": dupe_username}, authority=pyramid_request.default_authority

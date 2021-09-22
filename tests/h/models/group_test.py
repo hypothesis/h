@@ -90,9 +90,7 @@ def test_it_returns_formatted_groupid_if_authority_provided_id(factories):
     group = factories.Group()
     group.authority_provided_id = "hithere"
 
-    assert group.groupid == "group:hithere@{authority}".format(
-        authority=group.authority
-    )
+    assert group.groupid == f"group:hithere@{group.authority}"
 
 
 def test_groupid_setter_raises_ValueError_if_groupid_invalid(factories):

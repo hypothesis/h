@@ -10,5 +10,5 @@ class Organization(ModelFactory):
         model = models.Organization
         sqlalchemy_session_persistence = "flush"
 
-    name = factory.Sequence(lambda n: "Test Organization {n}".format(n=str(n)))
+    name = factory.Sequence(lambda n: f"Test Organization {n}")
     authority = "example.com"

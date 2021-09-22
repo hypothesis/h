@@ -80,7 +80,7 @@ class TestBatchIndexer:
         for record in caplog.records:
             if record.filename == "index.py":
                 num_index_records = num_index_records + 1
-                assert "indexed 0k annotations, rate=" in record.msg
+                assert "indexed 0k annotations, rate=" in record.getMessage()
         assert num_index_records == num_annotations // window_size
 
     def test_it_correctly_indexes_fields_for_bulk_actions(

@@ -26,10 +26,7 @@ class Annotation(ModelFactory):
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(
-        lambda: "acct:{username}@{authority}".format(
-            username=FAKER.user_name(),  # pylint:disable=no-member
-            authority="localhost",
-        )
+        lambda: f"acct:{FAKER.user_name()}@localhost"  # pylint:disable=no-member
     )
     document = factory.SubFactory(Document)
     groupid = "__world__"

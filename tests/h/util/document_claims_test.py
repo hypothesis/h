@@ -354,7 +354,7 @@ class TestDocumentURIsFromHighwirePDF:
 class TestDOIURIFromString:
     @pytest.mark.parametrize("doi", ["10.1001/1234", "doi:10.1001/1234"])
     def test_it_prepends_doi_prefix(self, doi):
-        assert doi_uri_from_string(doi) == "doi:{}".format(strip_prefix("doi:", doi))
+        assert doi_uri_from_string(doi) == f"doi:{strip_prefix('doi:', doi)}"
 
     @pytest.mark.parametrize(
         "url",
@@ -369,7 +369,7 @@ class TestDOIURIFromString:
         # Many sites store DOI URLs rather than just identifiers in DOI fields.
         # We should ideally normalize the different forms, but for now we just
         # continue to accept them.
-        assert doi_uri_from_string(url) == "doi:{}".format(url)
+        assert doi_uri_from_string(url) == f"doi:{url}"
 
     @pytest.mark.parametrize(
         "doi",

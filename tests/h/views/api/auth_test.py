@@ -100,7 +100,7 @@ class TestOAuthAuthorizeController:
         auth_client.trusted = True
 
         response = controller.get()
-        expected = "{}?code=abcdef123456&state=foobar".format(auth_client.redirect_uri)
+        expected = f"{auth_client.redirect_uri}?code=abcdef123456&state=foobar"
 
         assert response.location == expected
 
@@ -137,7 +137,7 @@ class TestOAuthAuthorizeController:
     ):
         auth_client.trusted = True
 
-        headers = {"Location": "{}?code=abcdef123456".format(auth_client.redirect_uri)}
+        headers = {"Location": f"{auth_client.redirect_uri}?code=abcdef123456"}
         oauth_provider.create_authorization_response.return_value = (headers, None, 302)
 
         response = controller.get_web_message()
@@ -178,7 +178,7 @@ class TestOAuthAuthorizeController:
 
     def test_post_redirects_to_client(self, controller, auth_client):
         response = controller.post()
-        expected = "{}?code=abcdef123456&state=foobar".format(auth_client.redirect_uri)
+        expected = f"{auth_client.redirect_uri}?code=abcdef123456&state=foobar"
 
         assert response.location == expected
 
@@ -196,7 +196,7 @@ class TestOAuthAuthorizeController:
     ):
         auth_client.trusted = True
 
-        headers = {"Location": "{}?code=abcdef123456".format(auth_client.redirect_uri)}
+        headers = {"Location": f"{auth_client.redirect_uri}?code=abcdef123456"}
         oauth_provider.create_authorization_response.return_value = (headers, None, 302)
 
         response = controller.post_web_message()
@@ -224,9 +224,7 @@ class TestOAuthAuthorizeController:
         svc.validate_authorization_request.return_value = (scopes, credentials)
 
         headers = {
-            "Location": "{}?code=abcdef123456&state=foobar".format(
-                auth_client.redirect_uri
-            )
+            "Location": f"{auth_client.redirect_uri}?code=abcdef123456&state=foobar"
         }
         body = None
         status = 302

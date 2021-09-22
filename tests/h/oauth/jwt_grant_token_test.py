@@ -120,7 +120,7 @@ class TestVerifiedJWTGrantToken:
 
         assert (
             exc.value.description
-            == "Missing claim '{}' ({}) from grant token.".format(claim, description)
+            == f"Missing claim '{claim}' ({description}) from grant token."
         )
 
     def test_init_raises_for_invalid_aud(self, claims):
@@ -144,7 +144,7 @@ class TestVerifiedJWTGrantToken:
 
         assert (
             exc.value.description
-            == "Invalid claim '{}' ({}) in grant token.".format(claim, description)
+            == f"Invalid claim '{claim}' ({description}) in grant token."
         )
 
     def test_init_returns_token_when_expired_but_in_leeway(self, claims):

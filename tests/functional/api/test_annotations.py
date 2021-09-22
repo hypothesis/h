@@ -27,7 +27,7 @@ class TestGetAnnotation:
     ):
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
         res = app.get(
             "/api/annotations/" + private_annotation.id,
             headers=headers,
@@ -67,7 +67,7 @@ class TestGetAnnotationJSONLD:
     ):
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
         res = app.get(
             "/api/annotations/" + private_annotation.id + ".jsonld",
             headers=headers,
@@ -109,11 +109,11 @@ class TestPostAnnotation:
 
         user, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
         annotation = {
             "group": non_writeable_group.pubid,
             "permissions": {
-                "read": ["group:{}".format(non_writeable_group.pubid)],
+                "read": [f"group:{non_writeable_group.pubid}"],
                 "admin": [user.userid],
                 "update": [user.userid],
                 "delete": [user.userid],
@@ -133,7 +133,7 @@ class TestPostAnnotation:
     def test_it_returns_http_200_when_annotation_created(self, app, user_with_token):
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
         annotation = {
             "group": "__world__",
             "text": "My annotation",
@@ -152,11 +152,11 @@ class TestPatchAnnotation:
         """An annotation's creator (user) is blessed with the 'update' permission"""
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
         annotation_patch = {"text": "This is an updated annotation"}
 
         res = app.patch_json(
-            "/api/annotations/{id}".format(id=user_annotation.id),
+            f"/api/annotations/{user_annotation.id}",
             annotation_patch,
             headers=headers,
         )
@@ -169,7 +169,7 @@ class TestPatchAnnotation:
         annotation_patch = {"text": "whatever"}
 
         res = app.patch_json(
-            "/api/annotations/{id}".format(id=user_annotation.id),
+            f"/api/annotations/{user_annotation.id}",
             annotation_patch,
             expect_errors=True,
         )
@@ -182,12 +182,12 @@ class TestPatchAnnotation:
         """The user in this request is not the annotation's creator"""
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         annotation_patch = {"text": "whatever"}
 
         res = app.patch_json(
-            "/api/annotations/{id}".format(id=annotation.id),
+            f"/api/annotations/{annotation.id}",
             annotation_patch,
             headers=headers,
             expect_errors=True,
@@ -203,20 +203,16 @@ class TestDeleteAnnotation:
         """An annotation's creator (user) is blessed with the 'update' permission"""
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
-        res = app.delete(
-            "/api/annotations/{id}".format(id=user_annotation.id), headers=headers
-        )
+        res = app.delete(f"/api/annotations/{user_annotation.id}", headers=headers)
 
         assert res.status_code == 200
         assert res.json["id"] == user_annotation.id
 
     def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
 
-        res = app.delete(
-            "/api/annotations/{id}".format(id=user_annotation.id), expect_errors=True
-        )
+        res = app.delete(f"/api/annotations/{user_annotation.id}", expect_errors=True)
 
         assert res.status_code == 404
 
@@ -225,10 +221,10 @@ class TestDeleteAnnotation:
     ):
         """The user in this request is not the annotation's creator"""
         _, token = user_with_token
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.delete(
-            "/api/annotations/{id}".format(id=annotation.id),
+            f"/api/annotations/{annotation.id}",
             headers=headers,
             expect_errors=True,
         )

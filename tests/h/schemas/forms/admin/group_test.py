@@ -50,9 +50,7 @@ class TestAdminGroupSchema:
     ):
         group_data.pop(required_field)
 
-        with pytest.raises(
-            colander.Invalid, match=".*{field}.*".format(field=required_field)
-        ):
+        with pytest.raises(colander.Invalid, match=f".*{required_field}.*"):
             bound_schema.deserialize(group_data)
 
     @pytest.mark.parametrize("optional_field", ("description",))

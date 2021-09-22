@@ -20,7 +20,7 @@ class TestGetProfile:
 
         user, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.get("/api/profile", headers=headers)
 
@@ -33,7 +33,7 @@ class TestGetProfile:
 
         user, token = third_party_user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.get("/api/profile", headers=headers)
 
@@ -55,7 +55,7 @@ class TestGetProfileGroups:
         _, token = user_with_token
         user_groupids = [group.pubid for group in groups].sort()
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.get("/api/profile/groups", headers=headers)
 
@@ -66,7 +66,7 @@ class TestGetProfileGroups:
     def test_it_returns_group_properties(self, app, user_with_token):
         _, token = user_with_token
 
-        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.get("/api/profile/groups", headers=headers)
 
@@ -80,7 +80,7 @@ class TestPatchProfile:
 
         _, token = user_with_token
 
-        headers = {"Authorization": "Bearer {}".format(token.value)}
+        headers = {"Authorization": f"Bearer {token.value}"}
         profile = {"preferences": {"show_sidebar_tutorial": True}}
 
         res = app.patch_json("/api/profile", profile, headers=headers)
@@ -95,7 +95,7 @@ class TestPatchProfile:
 
         _, token = user_with_token
 
-        headers = {"Authorization": "Bearer {}".format(token.value)}
+        headers = {"Authorization": f"Bearer {token.value}"}
         profile = {"preferences": {"show_sidebar_tutorial": False}}
 
         res = app.patch_json("/api/profile", profile, headers=headers)
@@ -124,7 +124,7 @@ class TestPatchProfile:
     def test_it_raises_http_400_for_disallowed_setting(self, app, user_with_token):
         _, token = user_with_token
         profile = {"preferences": {"foo": "bar"}}
-        headers = {"Authorization": "Bearer {}".format(token.value)}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
         res = app.patch_json(
             "/api/profile", profile, headers=headers, expect_errors=True

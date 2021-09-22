@@ -45,7 +45,7 @@ def with_clean_db(db_engine):
     with contextlib.closing(db_engine.connect()) as conn:
         tx = conn.begin()
         tnames = ", ".join('"' + t.name + '"' for t in tables)
-        conn.execute("TRUNCATE {};".format(tnames))
+        conn.execute(f"TRUNCATE {tnames};")
         tx.commit()
 
     # We need to re-init the DB as it creates the default test group and

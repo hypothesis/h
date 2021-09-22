@@ -9,4 +9,4 @@ class Feature(ModelFactory):
     class Meta:
         model = models.Feature
 
-    name = factory.Sequence(lambda n: "feature_%d" % n)
+    name = factory.Sequence(lambda n: f"feature_{n}")

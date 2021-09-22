@@ -7,14 +7,14 @@ from h.models.auth_client import GrantType
 
 class TestReadUser:
     def test_it_returns_http_404_if_auth_client_missing(self, app, user):
-        url = "/api/users/{userid}".format(userid=user.userid)
+        url = f"/api/users/{user.userid}"
 
         res = app.get(url, expect_errors=True)
 
         assert res.status_code == 404
 
     def test_it_returns_user_when_successful(self, app, auth_client_header, user):
-        url = "/api/users/{userid}".format(userid=user.userid)
+        url = f"/api/users/{user.userid}"
 
         res = app.get(url, headers=auth_client_header)
 
@@ -109,14 +109,14 @@ class TestUpdateUser:
     def test_it_returns_http_200_when_successful(
         self, app, auth_client_header, user, patch_user_payload
     ):
-        url = "/api/users/{username}".format(username=user.username)
+        url = f"/api/users/{user.username}"
 
         res = app.patch_json(url, patch_user_payload, headers=auth_client_header)
 
         assert res.status_code == 200
 
     def test_it_ignores_unrecognized_parameters(self, app, auth_client_header, user):
-        url = "/api/users/{username}".format(username=user.username)
+        url = f"/api/users/{user.username}"
         payload = {"email": "fingers@bonzo.com", "authority": "nicetry.com"}
 
         res = app.patch_json(url, payload, headers=auth_client_header)
@@ -128,7 +128,7 @@ class TestUpdateUser:
     def test_it_returns_updated_user_when_successful(
         self, app, auth_client_header, user, patch_user_payload
     ):
-        url = "/api/users/{username}".format(username=user.username)
+        url = f"/api/users/{user.username}"
 
         res = app.patch_json(url, patch_user_payload, headers=auth_client_header)
 
@@ -138,7 +138,7 @@ class TestUpdateUser:
     def test_it_returns_http_404_if_auth_client_missing(
         self, app, user, patch_user_payload
     ):
-        url = "/api/users/{username}".format(username=user.username)
+        url = f"/api/users/{user.username}"
 
         res = app.patch_json(url, patch_user_payload, expect_errors=True)
 
@@ -149,7 +149,7 @@ class TestUpdateUser:
     ):
         user.authority = "somewhere.com"
         db_session.commit()
-        url = "/api/users/{username}".format(username=user.username)
+        url = f"/api/users/{user.username}"
 
         res = app.patch_json(
             url, patch_user_payload, headers=auth_client_header, expect_errors=True
@@ -177,11 +177,9 @@ def auth_client(db_session, factories):
 
 @pytest.fixture
 def auth_client_header(auth_client):
-    user_pass = "{client_id}:{secret}".format(
-        client_id=auth_client.id, secret=auth_client.secret
-    )
+    user_pass = f"{auth_client.id}:{auth_client.secret}"
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-    return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
+    return {"Authorization": f"Basic {encoded.decode('ascii')}"}
 
 
 @pytest.fixture

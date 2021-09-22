@@ -10,5 +10,5 @@ class UserIdentity(ModelFactory):
         model = models.UserIdentity
         sqlalchemy_session_persistence = "flush"
 
-    provider = factory.Sequence(lambda n: "test_provider_{n}".format(n=str(n)))
-    provider_unique_id = factory.Sequence(lambda n: "test_id_{n}".format(n=str(n)))
+    provider = factory.Sequence(lambda n: f"test_provider_{n}")
+    provider_unique_id = factory.Sequence(lambda n: f"test_id_{n}")

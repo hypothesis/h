@@ -12,13 +12,13 @@ class TestOrganizationSchema:
         bound_schema.deserialize(org_data)
 
     def test_it_raises_if_logo_is_too_long(self, org_data, bound_schema):
-        org_data["logo"] = '<svg xmlns="http://svg.com">{}</svg>'.format(
-            "a" * Organization.LOGO_MAX_CHARS + "b"
-        )
+        org_data[
+            "logo"
+        ] = f'<svg xmlns="http://svg.com">{"a" * Organization.LOGO_MAX_CHARS}b</svg>'
 
         with pytest.raises(
             colander.Invalid,
-            match="larger than {:,d} characters".format(Organization.LOGO_MAX_CHARS),
+            match=f"larger than {Organization.LOGO_MAX_CHARS:,d} characters",
         ):
             bound_schema.deserialize(org_data)
 

@@ -26,7 +26,7 @@ class AngularRouteTemplater:
 
         @property
         def placeholder(self):
-            return ":{self.name}"
+            return f":{self.name}"
 
     def __init__(self, route_url, params):
         """

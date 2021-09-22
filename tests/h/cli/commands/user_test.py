@@ -127,7 +127,7 @@ class TestAdminCommand:
         self, cli, cliconfig, non_admin_user, db_session
     ):
         result = cli.invoke(
-            user_cli.admin, ["bogus_%s" % non_admin_user.username], obj=cliconfig
+            user_cli.admin, [f"bogus_{non_admin_user.username}"], obj=cliconfig
         )
 
         assert result.exit_code == 1
@@ -197,7 +197,7 @@ class TestPasswordCommand:
     ):
         result = cli.invoke(
             user_cli.password,
-            ["bogus_%s" % user.username, "--password", "newpass"],
+            [f"bogus_{user.username}", "--password", "newpass"],
             obj=cliconfig,
         )
 
@@ -253,9 +253,7 @@ class TestDeleteUserCommand:
     def test_it_errors_when_user_could_not_be_found(
         self, cli, cliconfig, user, db_session
     ):
-        result = cli.invoke(
-            user_cli.delete, ["bogus_%s" % user.username], obj=cliconfig
-        )
+        result = cli.invoke(user_cli.delete, [f"bogus_{user.username}"], obj=cliconfig)
 
         assert result.exit_code == 1
         assert db_session.query(models.User).filter_by(id=user.id).count() == 1

@@ -39,7 +39,7 @@ class User(ModelFactory):
     class Params:
         inactive = factory.Trait(activation=factory.SubFactory(Activation))
         # A count that's appended to non-unique usernames to make them unique.
-        count = factory.Sequence(lambda n: "%d" % n)
+        count = factory.Sequence(lambda n: f"{n}")
         # The non-unique part of the generated username.
         non_unique_username = factory.Faker("user_name")
         # The domain (following ``@``) part of the generated email address.
