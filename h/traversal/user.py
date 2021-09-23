@@ -5,7 +5,6 @@ from pyramid.httpexceptions import HTTPBadRequest
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
-from h.traversal.root import RootFactory
 
 
 @dataclass
@@ -15,10 +14,9 @@ class UserContext:
     user: User
 
 
-class UserRoot(RootFactory):
+class UserRoot:
     def __init__(self, request):
-        super().__init__(request)
-
+        self.request = request
         self.user_service = self.request.find_service(name="user")
 
     def get_user_context(self, userid_or_username, authority):

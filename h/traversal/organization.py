@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
 from h.models import Organization
-from h.traversal.root import RootFactory
 
 
-class OrganizationRoot(RootFactory):
+class OrganizationRoot:
     """Root factory for routes which deal with organizations."""
+
+    def __init__(self, request):
+        self.request = request
 
     def __getitem__(self, pubid):
         organization = self.request.find_service(name="organization").get_by_public_id(
