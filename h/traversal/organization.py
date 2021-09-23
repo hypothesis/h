@@ -3,6 +3,13 @@ from dataclasses import dataclass
 from h.models import Organization
 
 
+@dataclass
+class OrganizationContext:
+    """Context for organization-based views."""
+
+    organization: Organization = None
+
+
 class OrganizationRoot:
     """Root factory for routes which deal with organizations."""
 
@@ -17,10 +24,3 @@ class OrganizationRoot:
             raise KeyError()
 
         return OrganizationContext(organization=organization)
-
-
-@dataclass
-class OrganizationContext:
-    """Context for organization-based views."""
-
-    organization: Organization = None

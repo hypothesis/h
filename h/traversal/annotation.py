@@ -4,6 +4,17 @@ from h import storage
 from h.models import Annotation
 
 
+@dataclass
+class AnnotationContext:
+    """Context for annotation-based views."""
+
+    annotation: Annotation
+
+    @property
+    def group(self):
+        return self.annotation.group
+
+
 class AnnotationRoot:
     """Root factory for routes whose context is an `AnnotationContext`."""
 
@@ -16,14 +27,3 @@ class AnnotationRoot:
             raise KeyError()
 
         return AnnotationContext(annotation)
-
-
-@dataclass
-class AnnotationContext:
-    """Context for annotation-based views."""
-
-    annotation: Annotation
-
-    @property
-    def group(self):
-        return self.annotation.group

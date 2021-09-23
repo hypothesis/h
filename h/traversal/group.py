@@ -4,6 +4,13 @@ from typing import Optional
 from h.models import Group
 
 
+@dataclass
+class GroupContext:
+    """Context for a single (optional) group."""
+
+    group: Optional[Group] = None
+
+
 class GroupRoot:
     """Root factory for group routes."""
 
@@ -25,10 +32,3 @@ class GroupRequiredRoot(GroupRoot):
             raise KeyError()
 
         return group_context
-
-
-@dataclass
-class GroupContext:
-    """Context for a single (optional) group."""
-
-    group: Optional[Group] = None
