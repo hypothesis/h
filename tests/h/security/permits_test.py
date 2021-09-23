@@ -4,7 +4,7 @@ import pytest
 
 from h.security import Identity, Permission
 from h.security.permits import PERMISSION_MAP, identity_permits
-from h.traversal import AnnotationContext, Root
+from h.traversal import AnnotationContext
 
 
 def always_true(_identity, _context):
@@ -85,10 +85,9 @@ class TestIdentityPermitsIntegrated:
         assert identity_permits(identity, anno_context, Permission.Annotation.MODERATE)
 
         # Once a user is an admin they can do admin things
-        admin_context = Root(sentinel.request)
-        assert not identity_permits(identity, admin_context, Permission.AdminPage.NIPSA)
+        assert not identity_permits(identity, None, Permission.AdminPage.NIPSA)
         identity.user.admin = True
-        assert identity_permits(identity, admin_context, Permission.AdminPage.NIPSA)
+        assert identity_permits(identity, None, Permission.AdminPage.NIPSA)
 
     @pytest.fixture
     def user(self, factories, group):

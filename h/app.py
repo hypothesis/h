@@ -30,7 +30,6 @@ def create_app(_global_config, **settings):
 
 
 def includeme(config):
-    config.set_root_factory("h.traversal:Root")
     config.scan("h.subscribers")
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)

@@ -126,12 +126,7 @@ def includeme(config):  # pylint: disable=too-many-statements
         traverse="/{id}",
     )
 
-    config.add_route(
-        "api.bulk",
-        "/api/bulk",
-        request_method="POST",
-        factory="h.traversal.BulkAPIRoot",
-    )
+    config.add_route("api.bulk", "/api/bulk", request_method="POST")
     config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
     config.add_route(
         "api.group_upsert",
@@ -147,7 +142,7 @@ def includeme(config):  # pylint: disable=too-many-statements
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{id}",
     )
-    config.add_route("api.profile", "/api/profile", factory="h.traversal.ProfileRoot")
+    config.add_route("api.profile", "/api/profile")
     config.add_route("api.profile_groups", "/api/profile/groups")
     config.add_route("api.debug_token", "/api/debug-token")
     config.add_route(

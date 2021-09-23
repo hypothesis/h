@@ -5,7 +5,6 @@ from pyramid.httpexceptions import HTTPBadRequest
 from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
-from h.security import ACL
 from h.traversal.root import RootFactory
 
 
@@ -14,9 +13,6 @@ class UserContext:
     """Context for user-centered views."""
 
     user: User
-
-    def __acl__(self):
-        return ACL.for_user(self.user)
 
 
 class UserRoot(RootFactory):
@@ -38,9 +34,6 @@ class UserRoot(RootFactory):
             raise KeyError()
 
         return UserContext(user)
-
-    def __acl__(self):  # pylint: disable=no-self-use
-        return ACL.for_user(user=None)
 
 
 class UserByNameRoot(UserRoot):

@@ -6,18 +6,8 @@ from h.traversal import AnnotationContext, AnnotationRoot
 
 
 class TestAnnotationRoot:
-    def test_create_permission_requires_authenticated_user(self, root, ACL):
-        acl = root.__acl__()
-
-        ACL.for_annotation.assert_called_once_with(annotation=None)
-        assert acl == ACL.for_annotation.return_value
-
     def test_getting_by_subscript_returns_AnnotationContext(
-        self,
-        root,
-        pyramid_request,
-        AnnotationContext,
-        storage,
+        self, root, pyramid_request, AnnotationContext, storage
     ):
         context = root[sentinel.annotation_id]
 
@@ -52,19 +42,8 @@ class TestAnnotationContext:
     def test_group(self, context):
         assert context.group == context.annotation.group
 
-    def test__acl__(self, context, ACL):
-        acl = context.__acl__()
-
-        ACL.for_annotation.assert_called_once_with(context.annotation)
-        assert acl == ACL.for_annotation.return_value
-
     @pytest.fixture
     def context(self, factories):
         return AnnotationContext(
             factories.Annotation.build(group=factories.Group.build())
         )
-
-
-@pytest.fixture(autouse=True)
-def ACL(patch):
-    return patch("h.traversal.annotation.ACL")
