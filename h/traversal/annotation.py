@@ -2,11 +2,13 @@ from dataclasses import dataclass
 
 from h import storage
 from h.models import Annotation
-from h.traversal.root import RootFactory
 
 
-class AnnotationRoot(RootFactory):
+class AnnotationRoot:
     """Root factory for routes whose context is an `AnnotationContext`."""
+
+    def __init__(self, request):
+        self.request = request
 
     def __getitem__(self, annotation_id):
         annotation = storage.fetch_annotation(self.request.db, annotation_id)

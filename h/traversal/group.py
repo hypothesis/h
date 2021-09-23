@@ -2,14 +2,13 @@ from dataclasses import dataclass
 from typing import Optional
 
 from h.models import Group
-from h.traversal.root import RootFactory
 
 
-class GroupRoot(RootFactory):
+class GroupRoot:
     """Root factory for group routes."""
 
     def __init__(self, request):
-        super().__init__(request)
+        self.request = request
         self.group_service = request.find_service(name="group")
 
     def __getitem__(self, pubid_or_groupid):
