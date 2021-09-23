@@ -4,31 +4,11 @@ import pytest
 from pyramid.httpexceptions import HTTPBadRequest
 
 from h.exceptions import InvalidUserId
-from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
-
-
-class TestUserContext:
-    def test_acl_matching_user(self, factories, ACL):
-        user = factories.User()
-
-        acl = UserContext(user).__acl__()
-
-        ACL.for_user.assert_called_once_with(user)
-        assert acl == ACL.for_user.return_value
-
-    @pytest.fixture
-    def ACL(self, patch):
-        return patch("h.traversal.user.ACL")
+from h.traversal.user import UserByIDRoot, UserByNameRoot, UserRoot
 
 
 @pytest.mark.usefixtures("user_service")
 class TestUserRoot:
-    def test_acl_matching_user(self, root, ACL):
-        acl = root.__acl__()
-
-        ACL.for_user.assert_called_once_with(user=None)
-        assert acl == ACL.for_user.return_value
-
     def test_get_user_context(self, root, user_service, UserContext):
         user = root.get_user_context(sentinel.userid, sentinel.authority)
 
@@ -104,8 +84,3 @@ class TestUserByIDRoot:
         root = UserByIDRoot(pyramid_request)
         with patch.object(root, "get_user_context"):
             yield root
-
-
-@pytest.fixture
-def ACL(patch):
-    return patch("h.traversal.user.ACL")

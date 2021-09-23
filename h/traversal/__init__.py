@@ -61,23 +61,17 @@ shouldn't return model objects directly).
 """
 
 from h.traversal.annotation import AnnotationContext, AnnotationRoot
-from h.traversal.bulk_api import BulkAPIRoot
 from h.traversal.group import GroupRequiredRoot, GroupRoot
 from h.traversal.organization import OrganizationContext, OrganizationRoot
-from h.traversal.profile import ProfileRoot
-from h.traversal.root import Root
 from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
 
 __all__ = (
-    "Root",
     "AnnotationContext",
     "AnnotationRoot",
-    "BulkAPIRoot",
     "GroupRequiredRoot",
     "GroupRoot",
     "OrganizationContext",
     "OrganizationRoot",
-    "ProfileRoot",
     "UserContext",
     "UserByNameRoot",
     "UserByIDRoot",

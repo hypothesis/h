@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 from h.security import Permission
-from h.traversal import Root
 
 
 def navbar_data_admin(request):
@@ -11,14 +10,8 @@ def navbar_data_admin(request):
     This is used in `templates/layouts/admin.html.jinja2`
     """
 
-    # The ACL based system only has the admin page ACLs attached to various
-    # contexts. On some of the admin pages we will have a GroupContext instead.
-    # We could fix that but it won't matter soon, so we'll create a context
-    # with the right ACL for now to determine which pages the user can see.
-    context = Root(request)
-
     for tab in deepcopy(_ADMIN_MENU):
-        if not request.has_permission(tab.pop("permission"), context=context):
+        if not request.has_permission(tab.pop("permission")):
             continue
 
         if route := tab.get("route"):

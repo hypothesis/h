@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from h.models import Group
-from h.security import ACL
 from h.traversal.root import RootFactory
 
 
@@ -16,10 +15,6 @@ class GroupRoot(RootFactory):
     def __getitem__(self, pubid_or_groupid):
         # Group could be `None` here!
         return GroupContext(group=self.group_service.fetch(pubid_or_groupid))
-
-    @classmethod
-    def __acl__(cls):
-        return ACL.for_group()
 
 
 class GroupRequiredRoot(GroupRoot):
@@ -38,6 +33,3 @@ class GroupContext:
     """Context for a single (optional) group."""
 
     group: Optional[Group] = None
-
-    def __acl__(self):
-        return ACL.for_group(self.group)

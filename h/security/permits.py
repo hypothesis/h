@@ -1,8 +1,10 @@
+from typing import Optional
+
 from h.security.identity import Identity
 from h.security.permission_map import PERMISSION_MAP
 
 
-def identity_permits(identity: Identity, context, permission) -> bool:
+def identity_permits(identity: Optional[Identity], context, permission) -> bool:
     """
     Check whether a given identity has permission to operate on a context.
 
