@@ -12,7 +12,6 @@ from h.security.identity import Identity  # noqa:F401
 from h.security.permissions import Permission  # noqa:F401
 from h.security.permits import identity_permits
 from h.security.policy import BearerTokenPolicy, SecurityPolicy
-from h.security.principals import principals_for_identity  # noqa:F401
 
 # We export this for the websocket to use as it's main policy
 __all__ = ("BearerTokenPolicy",)
