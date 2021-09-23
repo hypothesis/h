@@ -2,8 +2,7 @@ from copy import deepcopy
 
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
-from h.security import Permission
-from h.security.permits import identity_permits
+from h.security import Permission, identity_permits
 from h.session import user_info
 from h.traversal import AnnotationContext
 from h.util.datetime import utc_iso8601
