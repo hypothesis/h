@@ -1,44 +1,67 @@
-from unittest.mock import sentinel
+from unittest.mock import patch, sentinel
 
 import pytest
 
 from h.security import Identity, Permission
-from h.security.permits import identity_permits
+from h.security.permits import PERMISSION_MAP, identity_permits
 from h.traversal import AnnotationContext, Root
 
 
+def always_true(_identity, _context):
+    return True
+
+
+def always_false(_identity, _context):
+    return False
+
+
+def explode(_identity, _context):
+    assert False, "This should not be reached"  # pragma: no cover
+
+
 class TestIdentityPermits:
-    @pytest.mark.parametrize("permitted", (True, False))
-    def test_it(
-        self, principals_for_identity, permission_map, ACLAuthorizationPolicy, permitted
-    ):
-        permission_map.identity_permits.return_value = permitted
-        ACLAuthorizationPolicy.return_value.permits.return_value = permitted
+    # We aren't going to test the contents of the mapping, all we could really
+    # do there is copy it here. What we will do is test that the mechanism
+    # works
+    @pytest.mark.parametrize(
+        "clauses,grants",
+        (
+            # At least one clause must be true, so if there are none, it's false
+            ([], False),
+            # A clause requires each element in it to be true
+            ([[always_true]], True),
+            ([[always_false]], False),
+            ([[always_true, always_true]], True),
+            ([[always_true, always_true, always_false]], False),
+            # An empty clause is always true
+            ([[]], True),
+            # We lazy evaluate, so if anything in a clause is false we don't
+            # evaluate predicates beyond it
+            ([[always_false, explode]], False),
+            # Only one clause has to be true
+            ([[always_false], [always_true]], True),
+            ([[always_true], [always_false]], True),
+            ([[always_true], [explode]], True),
+        ),
+    )
+    def test_it(self, PERMISSION_MAP, clauses, grants):
+        PERMISSION_MAP[sentinel.permission] = clauses
 
         result = identity_permits(
             sentinel.identity, sentinel.context, sentinel.permission
         )
 
-        principals_for_identity.assert_called_once_with(sentinel.identity)
-        ACLAuthorizationPolicy.assert_called_once_with()
-        ACLAuthorizationPolicy.return_value.permits.assert_called_once_with(
-            context=sentinel.context,
-            principals=principals_for_identity.return_value,
-            permission=sentinel.permission,
+        assert result == grants
+
+    def test_it_denies_with_missing_permission(self):
+        assert not identity_permits(
+            sentinel.identity, sentinel.context, sentinel.non_existent_permission
         )
-        assert result is permitted
 
-    @pytest.fixture
-    def permission_map(self, patch):
-        return patch("h.security.permits.permission_map")
-
-    @pytest.fixture
-    def principals_for_identity(self, patch):
-        return patch("h.security.permits.principals_for_identity")
-
-    @pytest.fixture
-    def ACLAuthorizationPolicy(self, patch):
-        return patch("h.security.permits.ACLAuthorizationPolicy")
+    @pytest.fixture(autouse=True)
+    def PERMISSION_MAP(self):
+        with patch.dict(PERMISSION_MAP, {}) as mapping:
+            yield mapping
 
 
 class TestIdentityPermitsIntegrated:

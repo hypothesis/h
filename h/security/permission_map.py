@@ -12,10 +12,7 @@ at least one sub-list:
 * Every permission included would also be granted (by recursing)
 """
 
-from h.security import Identity, Permission
-
-__all__ = ("identity_permits",)
-
+from h.security import Permission
 from h.security import predicates as p
 from h.security.predicates import resolve_predicates
 
@@ -111,36 +108,3 @@ PERMISSION_MAP = {
 # This turns the abstract predicates above into lists which include all of
 # their parents in the correct order to evaluate them.
 PERMISSION_MAP = resolve_predicates(PERMISSION_MAP)
-
-
-def identity_permits(identity: Identity, context, permission) -> bool:
-    """
-    Check whether a given identity has permission to operate on a context.
-
-    For example the identity might include a user, and the context a group
-    and the permission might ask whether the user can edit that group.
-
-    :param identity: Identity object of the user
-    :param context: Context object representing the objects acted upon
-    :param permission: Permission requested
-    """
-    if clauses := PERMISSION_MAP.get(permission):
-        # Grant the permissions if for *any* single clause...
-        return any(
-            # .. *all* elements in it are true
-            all(_predicate_true(predicate, identity, context) for predicate in clause)
-            for clause in clauses
-        )
-
-    return False
-
-
-def _predicate_true(predicate, identity, context):
-    """Check whether a predicate is true."""
-    try:
-        return predicate(identity, context)
-
-    # If the "predicate" isn't callable, we'll assume it's a permission
-    # and work out if we have that permission
-    except TypeError:
-        return identity_permits(identity, context, predicate)
