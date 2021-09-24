@@ -53,11 +53,6 @@ PERMISSION_MAP = {
         [p.group_readable_by_members, p.group_has_user_as_member],
         [p.group_matches_authenticated_client_authority],
     ],
-    Permission.Group.MEMBER_READ: [
-        [p.group_readable_by_world],
-        [p.group_readable_by_members, p.group_has_user_as_member],
-        [p.group_matches_authenticated_client_authority],
-    ],
     Permission.Group.FLAG: [
         # Any logged in user should be able to flag things they can see
         [p.group_readable_by_world, p.authenticated],

@@ -188,7 +188,7 @@ def upsert(context, request):
     request_method="GET",
     link_name="group.members.read",
     description="Fetch all members of a group",
-    permission=Permission.Group.MEMBER_READ,
+    permission=Permission.Group.READ,
 )
 def read_members(context, _request):
     """Fetch the members of a group."""
