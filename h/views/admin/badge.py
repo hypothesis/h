@@ -11,7 +11,7 @@ from h.security import Permission
     route_name="admin.badge",
     request_method="GET",
     renderer="h:templates/admin/badge.html.jinja2",
-    permission=Permission.AdminPage.BADGE,
+    permission=Permission.AdminPage.HIGH_RISK,
 )
 def badge_index(request):
     return {"uris": request.db.query(models.Blocklist).all()}
@@ -21,7 +21,7 @@ def badge_index(request):
     route_name="admin.badge",
     request_method="POST",
     request_param="add",
-    permission=Permission.AdminPage.BADGE,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def badge_add(request):
@@ -46,7 +46,7 @@ def badge_add(request):
     route_name="admin.badge",
     request_method="POST",
     request_param="remove",
-    permission=Permission.AdminPage.BADGE,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def badge_remove(request):
