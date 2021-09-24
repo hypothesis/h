@@ -103,15 +103,7 @@ class TestJWTAuthorizationGrantValidateTokenRequest:
     def test_raises_when_client_id_authentication_fails(
         self, grant, oauth_request, request_validator, authclient
     ):
-        def fake_authenticate_client_id(client_id, request):
-            # Only return fail authentication when parameters match
-            if client_id == authclient.id and request == oauth_request:
-                return False
-            return True
-
-        request_validator.authenticate_client_id.side_effect = (
-            fake_authenticate_client_id
-        )
+        request_validator.authenticate_client_id.return_value = False
 
         with pytest.raises(errors.InvalidClientError):
             grant.validate_token_request(oauth_request)

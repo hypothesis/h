@@ -641,16 +641,11 @@ class TestValidateRefreshToken:
     def test_sets_user_when_token_valid(
         self, svc, client, oauth_request, token, user_service
     ):
-        def fake_fetch(userid, authority=None):  # pylint:disable=unused-argument
-            if userid == token.userid:
-                return mock.Mock(userid=userid)
-            return None
-
-        user_service.fetch.side_effect = fake_fetch
+        user_service.fetch.return_value = mock.Mock()
 
         assert oauth_request.user is None
         svc.validate_refresh_token(token.refresh_token, client, oauth_request)
-        assert oauth_request.user.userid == token.userid
+        assert oauth_request.user == user_service.fetch.return_value
 
     @pytest.fixture
     def token(self, factories, client):
