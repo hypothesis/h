@@ -20,6 +20,14 @@ class TestTokenPolicy:
         )
         assert identity == Identity(user=user_service.fetch.return_value)
 
+    def test_identity_caches(self, pyramid_request, auth_token_service):
+        policy = TokenPolicy()
+
+        policy.identity(pyramid_request)
+        policy.identity(pyramid_request)
+
+        auth_token_service.get_bearer_token.assert_called_once()
+
     def test_identity_for_webservice(self, pyramid_request, auth_token_service):
         pyramid_request.path = "/ws"
         pyramid_request.GET["access_token"] = sentinel.access_token
