@@ -1,4 +1,5 @@
 from pyramid.interfaces import ISecurityPolicy
+from pyramid.request import RequestLocalCache
 from zope.interface import implementer
 
 from h.security import Identity
@@ -15,6 +16,9 @@ class TokenPolicy(IdentityBasedPolicy):
     Websocket requests with the GET parameter `access_token`.
     """
 
+    def __init__(self):
+        self._identity_cache = RequestLocalCache(self._load_identity)
+
     def identity(self, request):
         """
         Get an Identity object for valid credentials.
@@ -25,6 +29,10 @@ class TokenPolicy(IdentityBasedPolicy):
         :param request: Pyramid request to inspect
         :returns: An `Identity` object if the login is authenticated or None
         """
+
+        return self._identity_cache.get_or_create(request)
+
+    def _load_identity(self, request):
         token_svc = request.find_service(name="auth_token")
         token_str = None
 

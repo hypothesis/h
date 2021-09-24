@@ -45,6 +45,26 @@ class TestSecurityPolicy:
             )
             assert result == _call_sub_policies.return_value
 
+    def test_identity_caches(self, pyramid_request, CookiePolicy):
+        policy = SecurityPolicy()
+
+        policy.identity(pyramid_request)
+        policy.identity(pyramid_request)
+
+        CookiePolicy.return_value.identity.assert_called_once()
+
+    @pytest.mark.parametrize("method,args", (("remember", ["userid"]), ("forget", [])))
+    def test_remember_and_forget_reset_cache(
+        self, pyramid_request, CookiePolicy, method, args
+    ):
+        policy = SecurityPolicy()
+
+        policy.identity(pyramid_request)
+        getattr(policy, method)(pyramid_request, *args)
+        policy.identity(pyramid_request)
+
+        assert CookiePolicy.return_value.identity.call_count == 2
+
     @pytest.mark.parametrize(
         "path,is_ui",
         (
