@@ -10,7 +10,7 @@ from h.security import Permission
     route_name="admin.staff",
     request_method="GET",
     renderer="h:templates/admin/staff.html.jinja2",
-    permission=Permission.AdminPage.STAFF,
+    permission=Permission.AdminPage.HIGH_RISK,
 )
 def staff_index(request):
     """Get a list of all the staff members as an HTML page."""
@@ -26,7 +26,7 @@ def staff_index(request):
     request_method="POST",
     request_param="add",
     renderer="h:templates/admin/staff.html.jinja2",
-    permission=Permission.AdminPage.STAFF,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def staff_add(request):
@@ -51,7 +51,7 @@ def staff_add(request):
     request_method="POST",
     request_param="remove",
     renderer="h:templates/admin/staff.html.jinja2",
-    permission=Permission.AdminPage.STAFF,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def staff_remove(request):

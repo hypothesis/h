@@ -32,18 +32,8 @@ class Permission:
         UPDATE = "profile:update"
 
     class AdminPage(Enum):
-        ADMINS = "admin:admins"
-        BADGE = "admin:badge"
-        FEATURES = "admin:features"
-        GROUPS = "admin:groups"
-        INDEX = "admin:index"
-        MAILER = "admin:mailer"
-        OAUTH_CLIENTS = "admin:oauth_clients"
-        ORGANIZATIONS = "admin:organizations"
-        NIPSA = "admin:nipsa"
-        SEARCH = "admin:search"
-        STAFF = "admin:staff"
-        USERS = "admin:users"
+        HIGH_RISK = "admin:high_risk"
+        LOW_RISK = "admin:low_risk"
 
     class API(Enum):
         BULK_ACTION = "api:bulk_action"

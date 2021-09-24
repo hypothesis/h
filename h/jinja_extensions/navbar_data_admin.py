@@ -27,25 +27,25 @@ def navbar_data_admin(request):
 _ADMIN_MENU = [
     {
         "id": "index",
-        "permission": Permission.AdminPage.INDEX,
+        "permission": Permission.AdminPage.LOW_RISK,
         "title": "Home",
         "route": "admin.index",
     },
     {
         "id": "admins",
-        "permission": Permission.AdminPage.ADMINS,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "Administrators",
         "route": "admin.admins",
     },
     {
         "id": "badge",
-        "permission": Permission.AdminPage.BADGE,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "Badge",
         "route": "admin.badge",
     },
     {
         "id": "features",
-        "permission": Permission.AdminPage.FEATURES,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "Feature flags",
         "children": [
             {"route": "admin.features", "title": "Manage feature flags"},
@@ -54,7 +54,7 @@ _ADMIN_MENU = [
     },
     {
         "id": "groups",
-        "permission": Permission.AdminPage.GROUPS,
+        "permission": Permission.AdminPage.LOW_RISK,
         "title": "Groups",
         "children": [
             {"route": "admin.groups", "title": "List Groups"},
@@ -63,25 +63,25 @@ _ADMIN_MENU = [
     },
     {
         "id": "mailer",
-        "permission": Permission.AdminPage.MAILER,
+        "permission": Permission.AdminPage.LOW_RISK,
         "title": "Mailer",
         "route": "admin.mailer",
     },
     {
         "id": "nipsa",
-        "permission": Permission.AdminPage.NIPSA,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "NIPSA",
         "route": "admin.nipsa",
     },
     {
         "id": "oauth",
-        "permission": Permission.AdminPage.OAUTH_CLIENTS,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "OAuth clients",
         "route": "admin.oauthclients",
     },
     {
         "id": "organizations",
-        "permission": Permission.AdminPage.ORGANIZATIONS,
+        "permission": Permission.AdminPage.LOW_RISK,
         "title": "Organizations",
         "children": [
             {"route": "admin.organizations", "title": "List organizations"},
@@ -90,19 +90,19 @@ _ADMIN_MENU = [
     },
     {
         "id": "staff",
-        "permission": Permission.AdminPage.STAFF,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "Staff",
         "route": "admin.staff",
     },
     {
         "id": "users",
-        "permission": Permission.AdminPage.USERS,
+        "permission": Permission.AdminPage.LOW_RISK,
         "title": "Users",
         "route": "admin.users",
     },
     {
         "id": "search",
-        "permission": Permission.AdminPage.SEARCH,
+        "permission": Permission.AdminPage.HIGH_RISK,
         "title": "Search",
         "route": "admin.search",
     },

@@ -18,18 +18,8 @@ from h.security.predicates import resolve_predicates
 
 PERMISSION_MAP = {
     # Admin pages
-    Permission.AdminPage.ADMINS: [[p.user_is_admin]],
-    Permission.AdminPage.BADGE: [[p.user_is_admin]],
-    Permission.AdminPage.FEATURES: [[p.user_is_admin]],
-    Permission.AdminPage.GROUPS: [[p.user_is_admin], [p.user_is_staff]],
-    Permission.AdminPage.INDEX: [[p.user_is_admin], [p.user_is_staff]],
-    Permission.AdminPage.MAILER: [[p.user_is_admin], [p.user_is_staff]],
-    Permission.AdminPage.OAUTH_CLIENTS: [[p.user_is_admin]],
-    Permission.AdminPage.ORGANIZATIONS: [[p.user_is_admin], [p.user_is_staff]],
-    Permission.AdminPage.NIPSA: [[p.user_is_admin]],
-    Permission.AdminPage.SEARCH: [[p.user_is_admin]],
-    Permission.AdminPage.STAFF: [[p.user_is_admin]],
-    Permission.AdminPage.USERS: [[p.user_is_admin], [p.user_is_staff]],
+    Permission.AdminPage.HIGH_RISK: [[p.user_is_admin]],
+    Permission.AdminPage.LOW_RISK: [[p.user_is_admin], [p.user_is_staff]],
     # User modification permissions
     Permission.User.CREATE: [[p.authenticated_client]],
     Permission.User.UPDATE: [[p.user_authority_matches_authenticated_client]],

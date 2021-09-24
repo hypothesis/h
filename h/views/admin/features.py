@@ -10,7 +10,7 @@ from h.security import Permission
     route_name="admin.features",
     request_method="GET",
     renderer="h:templates/admin/features.html.jinja2",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
 )
 def features_index(request):
 
@@ -25,7 +25,7 @@ def features_index(request):
 @view_config(
     route_name="admin.features",
     request_method="POST",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def features_save(request):
@@ -52,7 +52,7 @@ def features_save(request):
     route_name="admin.cohorts",
     request_method="GET",
     renderer="h:templates/admin/cohorts.html.jinja2",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
 )
 @paginator.paginate_query
 def cohorts_index(_context, request):
@@ -65,7 +65,7 @@ def cohorts_index(_context, request):
     request_method="POST",
     request_param="add",
     renderer="h:templates/admin/cohorts.html.jinja2",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def cohorts_add(request):
@@ -82,7 +82,7 @@ def cohorts_add(request):
     route_name="admin.cohorts_edit",
     request_method="GET",
     renderer="h:templates/admin/cohorts_edit.html.jinja2",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
 )
 def cohorts_edit(_context, request):
     id_ = request.matchdict["id"]
@@ -99,7 +99,7 @@ def cohorts_edit(_context, request):
     request_method="POST",
     request_param="add",
     renderer="h:templates/admin/cohorts_edit.html.jinja2",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def cohorts_edit_add(request):
@@ -131,7 +131,7 @@ def cohorts_edit_add(request):
     request_method="POST",
     request_param="remove",
     renderer="h:templates/admin/cohorts_edit.html.jinja2",
-    permission=Permission.AdminPage.FEATURES,
+    permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
 def cohorts_edit_remove(request):

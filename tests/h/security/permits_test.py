@@ -85,9 +85,9 @@ class TestIdentityPermitsIntegrated:
         assert identity_permits(identity, anno_context, Permission.Annotation.MODERATE)
 
         # Once a user is an admin they can do admin things
-        assert not identity_permits(identity, None, Permission.AdminPage.NIPSA)
+        assert not identity_permits(identity, None, Permission.AdminPage.HIGH_RISK)
         identity.user.admin = True
-        assert identity_permits(identity, None, Permission.AdminPage.NIPSA)
+        assert identity_permits(identity, None, Permission.AdminPage.HIGH_RISK)
 
     @pytest.fixture
     def user(self, factories, group):

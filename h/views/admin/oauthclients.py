@@ -21,7 +21,7 @@ def _response_type_for_grant_type(grant_type):
 @view_config(
     route_name="admin.oauthclients",
     renderer="h:templates/admin/oauthclients.html.jinja2",
-    permission=Permission.AdminPage.OAUTH_CLIENTS,
+    permission=Permission.AdminPage.HIGH_RISK,
 )
 def index(request):
     clients = request.db.query(AuthClient).order_by(AuthClient.name.asc()).all()
@@ -30,7 +30,7 @@ def index(request):
 
 @view_defaults(
     route_name="admin.oauthclients_create",
-    permission=Permission.AdminPage.OAUTH_CLIENTS,
+    permission=Permission.AdminPage.HIGH_RISK,
     renderer="h:templates/admin/oauthclients_create.html.jinja2",
 )
 class AuthClientCreateController:
@@ -92,7 +92,7 @@ class AuthClientCreateController:
 
 @view_defaults(
     route_name="admin.oauthclients_edit",
-    permission=Permission.AdminPage.OAUTH_CLIENTS,
+    permission=Permission.AdminPage.HIGH_RISK,
     renderer="h:templates/admin/oauthclients_edit.html.jinja2",
 )
 class AuthClientEditController:
