@@ -18,32 +18,22 @@ class TestOAuthProviderService:
     ):
         token_1, token_2 = factories.OAuth2Token(), factories.OAuth2Token()
         oauth_request.refresh_token = token_2.refresh_token
-
-        def fake_find_refresh_token(refresh_token):
-            if refresh_token == token_1.refresh_token:
-                return token_1
-            if refresh_token == token_2.refresh_token:
-                return token_2
-
-            return None
-
-        oauth_validator.find_refresh_token.side_effect = fake_find_refresh_token
-
         assert oauth_request.client_id is None
+
         svc.load_client_id_from_refresh_token(oauth_request)
-        assert oauth_request.client_id == token_2.authclient.id
+
+        oauth_validator.find_refresh_token.assert_called_once_with(
+            token_2.refresh_token
+        )
+        assert (
+            oauth_request.client_id
+            == oauth_validator.find_refresh_token.return_value.authclient.id
+        )
 
     def test_load_client_id_skips_setting_client_id_when_not_refresh_token(
-        self, svc, oauth_request, factories, oauth_validator
+        self, svc, oauth_request, oauth_validator
     ):
-        token = factories.OAuth2Token()
-
-        def fake_find_refresh_token(refresh_token):
-            if refresh_token == token.refresh_token:
-                return token
-            return None
-
-        oauth_validator.find_refresh_token.side_effect = fake_find_refresh_token
+        oauth_validator.find_refresh_token.return_value = None
 
         svc.load_client_id_from_refresh_token(oauth_request)
         assert oauth_request.client_id is None
