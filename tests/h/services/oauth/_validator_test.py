@@ -9,11 +9,7 @@ from oauthlib.oauth2 import InvalidClientIdError
 from h import models
 from h.models.auth_client import GrantType as AuthClientGrantType
 from h.models.auth_client import ResponseType as AuthClientResponseType
-from h.services.oauth_validator import (
-    Client,
-    OAuthValidatorService,
-    oauth_validator_service_factory,
-)
+from h.services.oauth._validator import Client, OAuthValidator
 
 
 class TestAuthenticateClient:
@@ -423,7 +419,7 @@ class TestSaveBearerToken:
         self, svc, token_payload, oauth_request, patch
     ):
         invalidate_refresh_token = patch(
-            "h.services.oauth_validator.OAuthValidatorService.invalidate_refresh_token"
+            "h.services.oauth._validator.OAuthValidator.invalidate_refresh_token"
         )
         oauth_request.grant_type = "refresh_token"
         oauth_request.refresh_token = "the-refresh-token"
@@ -438,7 +434,7 @@ class TestSaveBearerToken:
         self, svc, token_payload, oauth_request, patch
     ):
         invalidate_refresh_token = patch(
-            "h.services.oauth_validator.OAuthValidatorService.invalidate_refresh_token"
+            "h.services.oauth._validator.OAuthValidator.invalidate_refresh_token"
         )
 
         svc.save_bearer_token(token_payload, oauth_request)
@@ -707,20 +703,9 @@ class TestValidateScopes:
         assert not svc.validate_scopes("something", scopes, None)
 
 
-@pytest.mark.usefixtures("user_service")
-class TestOAuthValidatorServiceFactory:
-    def test_it_returns_oauth_service(self, pyramid_request):
-        svc = oauth_validator_service_factory(None, pyramid_request)
-        assert isinstance(svc, OAuthValidatorService)
-
-    def test_provides_user_service(self, pyramid_request, user_service):
-        svc = oauth_validator_service_factory(None, pyramid_request)
-        assert svc.user_svc == user_service
-
-
 @pytest.fixture
 def svc(db_session, user_service):
-    return OAuthValidatorService(db_session, user_service)
+    return OAuthValidator(db_session, user_service)
 
 
 @pytest.fixture
@@ -735,4 +720,4 @@ def client(factories):
 
 @pytest.fixture
 def utcnow(patch):
-    return patch("h.services.oauth_validator.utcnow")
+    return patch("h.services.oauth._validator.utcnow")
