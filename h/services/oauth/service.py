@@ -10,9 +10,9 @@ from oauthlib.oauth2 import (
 
 from h.security import token_urlsafe
 from h.services.oauth import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
+from h.services.oauth._bearer_token import BearerToken
 from h.services.oauth._errors import InvalidRefreshTokenError
 from h.services.oauth._jwt_grant import JWTAuthorizationGrant
-from h.services.oauth._tokens import BearerToken
 from h.services.oauth._validator import OAuthValidator
 
 ACCESS_TOKEN_TTL = datetime.timedelta(hours=1).total_seconds()

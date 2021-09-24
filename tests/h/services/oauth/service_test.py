@@ -16,15 +16,15 @@ class TestOAuthProviderService:
     def test_load_client_id_sets_client_id_from_refresh_token(
         self, svc, oauth_request, factories, oauth_validator
     ):
-        token_1, token_2 = factories.OAuth2Token(), factories.OAuth2Token()
-        oauth_request.refresh_token = token_2.refresh_token
+        _noise = factories.OAuth2Token()
+        token = factories.OAuth2Token()
+
+        oauth_request.refresh_token = token.refresh_token
         assert oauth_request.client_id is None
 
         svc.load_client_id_from_refresh_token(oauth_request)
 
-        oauth_validator.find_refresh_token.assert_called_once_with(
-            token_2.refresh_token
-        )
+        oauth_validator.find_refresh_token.assert_called_once_with(token.refresh_token)
         assert (
             oauth_request.client_id
             == oauth_validator.find_refresh_token.return_value.authclient.id
