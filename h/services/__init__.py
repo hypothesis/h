@@ -2,7 +2,7 @@
 from h.services.auth_cookie import AuthCookieService
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     config.register_service_factory(
         ".annotation_json_presentation.annotation_json_presentation_service_factory",
         name="annotation_json_presentation",
