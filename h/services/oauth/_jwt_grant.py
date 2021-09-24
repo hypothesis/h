@@ -38,7 +38,7 @@ import json
 from oauthlib.oauth2.rfc6749 import errors
 from oauthlib.oauth2.rfc6749.grant_types.base import GrantTypeBase
 
-from h.oauth.jwt_grant_token import JWTGrantToken
+from h.services.oauth._jwt_grant_token import JWTGrantToken
 
 
 class JWTAuthorizationGrant(GrantTypeBase):  # pylint: disable=abstract-method
