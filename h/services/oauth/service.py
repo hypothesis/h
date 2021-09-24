@@ -10,10 +10,10 @@ from oauthlib.oauth2 import (
 
 from h.oauth import BearerToken, InvalidRefreshTokenError, JWTAuthorizationGrant
 from h.security import token_urlsafe
+from h.services.oauth import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
+from h.services.oauth._validator import OAuthValidator
 
-ACCESS_TOKEN_PREFIX = "5768-"
 ACCESS_TOKEN_TTL = datetime.timedelta(hours=1).total_seconds()
-REFRESH_TOKEN_PREFIX = "4657-"
 REFRESH_TOKEN_TTL = datetime.timedelta(days=7).total_seconds()
 
 
@@ -135,7 +135,11 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         return REFRESH_TOKEN_PREFIX + token_urlsafe()
 
 
-def oauth_provider_service_factory(_context, request):
-    validator_svc = request.find_service(name="oauth_validator")
+def factory(_context, request):
     user_svc = request.find_service(name="user")
-    return OAuthProviderService(validator_svc, user_svc, request.domain)
+
+    return OAuthProviderService(
+        oauth_validator=OAuthValidator(session=request.db, user_svc=user_svc),
+        user_svc=user_svc,
+        domain=request.domain,
+    )

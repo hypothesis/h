@@ -57,12 +57,7 @@ def includeme(config):  # pragma: no cover
         ".list_organizations.list_organizations_factory", name="list_organizations"
     )
     config.register_service_factory(".nipsa.nipsa_factory", name="nipsa")
-    config.register_service_factory(
-        ".oauth_provider.oauth_provider_service_factory", name="oauth_provider"
-    )
-    config.register_service_factory(
-        ".oauth_validator.oauth_validator_service_factory", name="oauth_validator"
-    )
+    config.register_service_factory(".oauth.service.factory", name="oauth_provider")
     config.register_service_factory(
         ".organization.organization_factory", name="organization"
     )

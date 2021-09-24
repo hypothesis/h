@@ -6,12 +6,11 @@ from sqlalchemy.exc import StatementError
 
 from h import models
 from h.models.auth_client import GrantType as AuthClientGrantType
-from h.services.oauth_provider import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
+from h.services.oauth import ACCESS_TOKEN_PREFIX, DEFAULT_SCOPES, REFRESH_TOKEN_PREFIX
 from h.util.db import lru_cache_in_transaction
 from h.util.uri import render_url_template
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
-DEFAULT_SCOPES = ["annotation:read", "annotation:write"]
 
 
 class Client:
@@ -22,7 +21,7 @@ class Client:
         self.client_id = authclient.id
 
 
-class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstract-method
+class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-method
     RequestValidator
 ):
     """
@@ -388,12 +387,6 @@ class OAuthValidatorService(  # pylint: disable=too-many-public-methods, abstrac
             .order_by(models.Token.created.desc())
             .first()
         )
-
-
-def oauth_validator_service_factory(_context, request):
-    """Return a OAuthValidator instance for the passed context and request."""
-    user_svc = request.find_service(name="user")
-    return OAuthValidatorService(request.db, user_svc)
 
 
 def utcnow():

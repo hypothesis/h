@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPFound, exception_response
 from pyramid.view import view_config, view_defaults
 
 from h import models
-from h.services.oauth_validator import DEFAULT_SCOPES
+from h.services.oauth import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
 from h.views.api.config import api_config
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
