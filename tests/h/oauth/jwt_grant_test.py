@@ -9,7 +9,7 @@ from oauthlib.common import Request as OAuthRequest
 from oauthlib.oauth2.rfc6749 import errors
 
 from h.oauth.jwt_grant import JWTAuthorizationGrant
-from h.services.oauth_validator import Client
+from h.services.oauth._validator import Client
 from h.services.user import user_service_factory
 
 
