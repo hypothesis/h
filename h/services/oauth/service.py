@@ -37,17 +37,17 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
 
         auth_code_grant = AuthorizationCodeGrant(oauth_validator)
         jwt_auth_grant = JWTAuthorizationGrant(oauth_validator, user_svc, domain)
-        refresh_grant = RefreshTokenGrant(oauth_validator)
 
+        refresh_grant = RefreshTokenGrant(oauth_validator)
         refresh_grant.custom_validators.pre_token.append(
-            self.load_client_id_from_refresh_token
+            self._load_client_id_from_refresh_token
         )
 
         bearer = BearerToken(
             oauth_validator,
-            token_generator=self.generate_access_token,
+            token_generator=self._generate_access_token,
             expires_in=ACCESS_TOKEN_TTL,
-            refresh_token_generator=self.generate_refresh_token,
+            refresh_token_generator=self._generate_refresh_token,
             refresh_token_expires_in=REFRESH_TOKEN_TTL,
         )
 
@@ -57,6 +57,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
             response_types={"code": auth_code_grant},
             default_token_type=bearer,
         )
+
         TokenEndpoint.__init__(
             self,
             default_grant_type="authorization_code",
@@ -67,6 +68,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
             },
             default_token_type=bearer,
         )
+
         RevocationEndpoint.__init__(self, oauth_validator)
 
     def validate_revocation_request(self, request):
@@ -103,7 +105,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
 
         return super().validate_revocation_request(request)
 
-    def load_client_id_from_refresh_token(self, request):
+    def _load_client_id_from_refresh_token(self, request):
         """
         Add a custom validator which sets the client_id from a given refresh token.
 
@@ -129,11 +131,11 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
             raise InvalidRefreshTokenError()
 
     @staticmethod
-    def generate_access_token(oauth_request):  # pylint: disable=unused-argument
+    def _generate_access_token(oauth_request):  # pylint: disable=unused-argument
         return ACCESS_TOKEN_PREFIX + token_urlsafe()
 
     @staticmethod
-    def generate_refresh_token(_oauth_request):
+    def _generate_refresh_token(_oauth_request):
         return REFRESH_TOKEN_PREFIX + token_urlsafe()
 
 

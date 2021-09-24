@@ -22,7 +22,8 @@ class TestOAuthProviderService:
         oauth_request.refresh_token = token.refresh_token
         assert oauth_request.client_id is None
 
-        svc.load_client_id_from_refresh_token(oauth_request)
+        # pylint: disable=protected-access
+        svc._load_client_id_from_refresh_token(oauth_request)
 
         oauth_validator.find_refresh_token.assert_called_once_with(token.refresh_token)
         assert (
@@ -35,7 +36,8 @@ class TestOAuthProviderService:
     ):
         oauth_validator.find_refresh_token.return_value = None
 
-        svc.load_client_id_from_refresh_token(oauth_request)
+        # pylint: disable=protected-access
+        svc._load_client_id_from_refresh_token(oauth_request)
         assert oauth_request.client_id is None
 
     def test_load_client_id_raises_for_missing_refresh_token(
@@ -45,15 +47,18 @@ class TestOAuthProviderService:
         oauth_request.refresh_token = "missing"
 
         with pytest.raises(InvalidRefreshTokenError):
-            svc.load_client_id_from_refresh_token(oauth_request)
+            # pylint: disable=protected-access
+            svc._load_client_id_from_refresh_token(oauth_request)
 
     def test_generate_access_token(self, svc, token_urlsafe):
         token_urlsafe.return_value = "very-secret"
-        assert svc.generate_access_token(None) == "5768-very-secret"
+        # pylint: disable=protected-access
+        assert svc._generate_access_token(None) == "5768-very-secret"
 
     def test_generate_refresh_token(self, svc, token_urlsafe):
         token_urlsafe.return_value = "top-secret"
-        assert svc.generate_refresh_token(None) == "4657-top-secret"
+        # pylint: disable=protected-access
+        assert svc._generate_refresh_token(None) == "4657-top-secret"
 
     def test_validate_revocation_request_adds_revoke_marker(self, svc, oauth_request):
         try:
