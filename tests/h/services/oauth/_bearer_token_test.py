@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from oauthlib.common import Request as OAuthRequest
 
-from h.services.oauth._tokens import BearerToken
+from h.services.oauth._bearer_token import BearerToken
 
 
 class TestBearerToken:

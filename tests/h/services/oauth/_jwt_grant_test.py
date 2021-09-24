@@ -101,7 +101,7 @@ class TestJWTAuthorizationGrantValidateTokenRequest:
         assert exc.value.description == "Missing assertion."
 
     def test_raises_when_client_id_authentication_fails(
-        self, grant, oauth_request, request_validator, authclient
+        self, grant, oauth_request, request_validator
     ):
         request_validator.authenticate_client_id.return_value = False
 
