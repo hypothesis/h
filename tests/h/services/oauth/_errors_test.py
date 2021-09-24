@@ -1,6 +1,6 @@
 from json import loads
 
-from h.oauth.errors import (
+from h.services.oauth._errors import (
     InvalidJWTGrantTokenClaimError,
     MissingJWTGrantTokenClaimError,
 )

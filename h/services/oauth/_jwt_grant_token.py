@@ -7,7 +7,10 @@ from oauthlib.oauth2 import (
     InvalidRequestFatalError,
 )
 
-from h.oauth import errors
+from h.services.oauth._errors import (
+    InvalidJWTGrantTokenClaimError,
+    MissingJWTGrantTokenClaimError,
+)
 
 
 class JWTGrantToken:
@@ -37,7 +40,7 @@ class JWTGrantToken:
     def issuer(self):
         iss = self._claims.get("iss", None)
         if not iss:
-            raise errors.MissingJWTGrantTokenClaimError("iss", "issuer")
+            raise MissingJWTGrantTokenClaimError("iss", "issuer")
         return iss
 
     def verified(self, key, audience):
@@ -79,11 +82,11 @@ class VerifiedJWTGrantToken(JWTGrantToken):
             raise InvalidGrantError("Invalid grant token signature algorithm.") from err
         except jwt.MissingRequiredClaimError as err:
             if err.claim == "aud":
-                raise errors.MissingJWTGrantTokenClaimError("aud", "audience") from err
+                raise MissingJWTGrantTokenClaimError("aud", "audience") from err
 
-            raise errors.MissingJWTGrantTokenClaimError(err.claim) from err
+            raise MissingJWTGrantTokenClaimError(err.claim) from err
         except jwt.InvalidAudienceError as err:
-            raise errors.InvalidJWTGrantTokenClaimError("aud", "audience") from err
+            raise InvalidJWTGrantTokenClaimError("aud", "audience") from err
         except jwt.ImmatureSignatureError as err:
             raise InvalidGrantError("Grant token is not yet valid.") from err
         except jwt.ExpiredSignatureError as err:
@@ -104,15 +107,15 @@ class VerifiedJWTGrantToken(JWTGrantToken):
     def _timestamp_claim(self, key, description):
         claim = self._claims.get(key, None)
         if claim is None:
-            raise errors.MissingJWTGrantTokenClaimError(key, description)
+            raise MissingJWTGrantTokenClaimError(key, description)
         try:
             return datetime.datetime.utcfromtimestamp(claim)
         except (TypeError, ValueError) as err:
-            raise errors.InvalidJWTGrantTokenClaimError(key, description) from err
+            raise InvalidJWTGrantTokenClaimError(key, description) from err
 
     @property
     def subject(self):
         sub = self._claims.get("sub", None)
         if not sub:
-            raise errors.MissingJWTGrantTokenClaimError("sub", "subject")
+            raise MissingJWTGrantTokenClaimError("sub", "subject")
         return sub

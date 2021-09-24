@@ -9,13 +9,16 @@ from oauthlib.oauth2 import (
     InvalidRequestFatalError,
 )
 
-from h.oauth import InvalidJWTGrantTokenClaimError, MissingJWTGrantTokenClaimError
-from h.oauth.jwt_grant_token import JWTGrantToken, VerifiedJWTGrantToken
+from h.services.oauth._errors import (
+    InvalidJWTGrantTokenClaimError,
+    MissingJWTGrantTokenClaimError,
+)
+from h.services.oauth._jwt_grant_token import JWTGrantToken, VerifiedJWTGrantToken
 
 
 class TestJWTGrantToken:
     def test_init_decodes_token_without_verifying(self, patch):
-        jwt_decode = patch("h.oauth.jwt_grant_token.jwt.decode")
+        jwt_decode = patch("h.services.oauth._jwt_grant_token.jwt.decode")
 
         JWTGrantToken("abcdef123456")
 
@@ -45,7 +48,9 @@ class TestJWTGrantToken:
         assert exc.value.description == "Missing claim 'iss' (issuer) from grant token."
 
     def test_verified_initializes_verified_token(self, patch):
-        verified_token = patch("h.oauth.jwt_grant_token.VerifiedJWTGrantToken")
+        verified_token = patch(
+            "h.services.oauth._jwt_grant_token.VerifiedJWTGrantToken"
+        )
 
         jwttok = jwt_token({"iss": "test-issuer"})
         grant_token = JWTGrantToken(jwttok)
@@ -55,7 +60,9 @@ class TestJWTGrantToken:
         verified_token.assert_called_once_with(jwttok, "top-secret", "test-audience")
 
     def test_verified_returns_verified_token(self, patch):
-        verified_token = patch("h.oauth.jwt_grant_token.VerifiedJWTGrantToken")
+        verified_token = patch(
+            "h.services.oauth._jwt_grant_token.VerifiedJWTGrantToken"
+        )
 
         jwttok = jwt_token({"iss": "test-issuer"})
         grant_token = JWTGrantToken(jwttok)

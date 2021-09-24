@@ -6,7 +6,7 @@ from oauthlib.common import Request as OAuthRequest
 from oauthlib.oauth2 import InvalidRequestError
 
 from h.models import Token
-from h.oauth.errors import InvalidRefreshTokenError
+from h.services.oauth._errors import InvalidRefreshTokenError
 from h.services.oauth._validator import OAuthValidator
 from h.services.oauth.service import OAuthProviderService, factory
 
