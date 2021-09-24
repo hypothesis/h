@@ -7,10 +7,10 @@ source =
 omit =
     h/debug.py
     h/migrations/*
-    h/cli/commands/create_annotations.py
+    h/cli/*
 
 [report]
 show_missing = True
 precision = 2
-fail_under = 97.30
+fail_under = 98.19
 skip_covered = True
