@@ -9,8 +9,7 @@ from oauthlib.oauth2 import InvalidRequestFatalError
 from pyramid import httpexceptions
 
 from h.models.auth_client import ResponseType
-from h.services.oauth_provider import OAuthProviderService
-from h.services.oauth_validator import DEFAULT_SCOPES
+from h.services.oauth import DEFAULT_SCOPES
 from h.views.api import auth as views
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 
@@ -212,27 +211,30 @@ class TestOAuthAuthorizeController:
         return OAuthRequest("/")
 
     @pytest.fixture
-    def oauth_provider(self, pyramid_config, auth_client, oauth_request):
-        svc = mock.create_autospec(OAuthProviderService, instance=True)
-
+    def oauth_provider(self, auth_client, oauth_request, oauth_provider_service):
         scopes = ["annotation:read", "annotation:write"]
         credentials = {
             "client_id": auth_client.id,
             "state": "foobar",
             "request": oauth_request,
         }
-        svc.validate_authorization_request.return_value = (scopes, credentials)
+        oauth_provider_service.validate_authorization_request.return_value = (
+            scopes,
+            credentials,
+        )
 
         headers = {
             "Location": f"{auth_client.redirect_uri}?code=abcdef123456&state=foobar"
         }
         body = None
         status = 302
-        svc.create_authorization_response.return_value = (headers, body, status)
+        oauth_provider_service.create_authorization_response.return_value = (
+            headers,
+            body,
+            status,
+        )
 
-        pyramid_config.register_service(svc, name="oauth_provider")
-
-        return svc
+        return oauth_provider_service
 
     @pytest.fixture
     def auth_client(self, factories):

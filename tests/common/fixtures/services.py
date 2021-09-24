@@ -18,6 +18,7 @@ from h.services.group_update import GroupUpdateService
 from h.services.links import LinksService
 from h.services.list_organizations import ListOrganizationsService
 from h.services.nipsa import NipsaService
+from h.services.oauth.service import OAuthProviderService
 from h.services.organization import OrganizationService
 from h.services.search_index import SearchIndexService
 from h.services.search_index._queue import Queue
@@ -40,6 +41,7 @@ __all__ = (
     "group_update_service",
     "nipsa_service",
     "moderation_service",
+    "oauth_provider_service",
     "organization_service",
     "search_index",
     "user_service",
@@ -159,6 +161,11 @@ def nipsa_service(mock_service):
     nipsa_service.is_flagged.return_value = False
 
     return nipsa_service
+
+
+@pytest.fixture
+def oauth_provider_service(mock_service):
+    return mock_service(OAuthProviderService, name="oauth_provider")
 
 
 @pytest.fixture
