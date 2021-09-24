@@ -11,7 +11,6 @@ class Permission:
         CREATE = "group:create"
         FLAG = "group:flag"
         MODERATE = "group:moderate"
-        MEMBER_READ = "group:member:read"
         MEMBER_ADD = "group:member:add"
 
     class Annotation(Enum):
