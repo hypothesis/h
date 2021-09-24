@@ -93,7 +93,7 @@
         <span class="nav-bar-links__item">
         {% call dropdown_menu(nav.settings_menu_items,
                               link_class='nav-bar-links__link',
-                              fallback_link='{{ request.route_url("account") }}',
+                              fallback_link=request.route_url("account"),
                               title='Settings',
                               footer_item=nav.signout_item) %}
             {{ svg_icon('settings') }}
