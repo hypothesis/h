@@ -11,7 +11,7 @@ class TestClientAuthority:
         assert result is None
 
     def test_it_with_auth_client(self, pyramid_request, pyramid_config, factories):
-        identity = Identity(auth_client=factories.AuthClient())
+        identity = Identity.from_models(auth_client=factories.AuthClient())
         pyramid_config.testing_securitypolicy(identity=identity)
 
         result = client_authority(pyramid_request)

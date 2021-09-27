@@ -74,7 +74,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
             if not user or user.authority != auth_client.authority:
                 return None
 
-        return Identity(auth_client=auth_client, user=user)
+        return Identity.from_models(auth_client=auth_client, user=user)
 
     @classmethod
     def _get_auth_client(cls, request):

@@ -59,7 +59,7 @@ class TestPrincipalsForIdentity:
 
     @pytest.fixture
     def identity(self, factories):
-        return Identity(
+        return Identity.from_models(
             user=factories.User(groups=factories.Group.create_batch(2)),
             auth_client=factories.AuthClient(),
         )

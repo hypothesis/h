@@ -43,7 +43,7 @@ class TestIdentityBasedPolicy:
 
     @pytest.fixture
     def identity(self, factories):
-        return Identity(user=factories.User())
+        return Identity.from_models(user=factories.User())
 
     @pytest.fixture
     def policy(self, identity):

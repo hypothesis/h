@@ -34,7 +34,7 @@ class TestAuthClientPolicy:
         identity = AuthClientPolicy().identity(pyramid_request)
 
         user_service.fetch.assert_called_once_with(sentinel.forwarded_user)
-        assert identity == Identity(
+        assert identity == Identity.from_models(
             auth_client=auth_client, user=user_service.fetch.return_value
         )
 
@@ -43,7 +43,7 @@ class TestAuthClientPolicy:
 
         identity = AuthClientPolicy().identity(pyramid_request)
 
-        assert identity == Identity(auth_client=auth_client)
+        assert identity == Identity.from_models(auth_client=auth_client)
 
     def test_identity_returns_None_without_credentials(self, pyramid_request):
         pyramid_request.headers["Authorization"] = None

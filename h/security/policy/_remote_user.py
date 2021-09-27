@@ -14,4 +14,4 @@ class RemoteUserPolicy(IdentityBasedPolicy):
         if user is None:
             return None
 
-        return Identity(user=user)
+        return Identity.from_models(user=user)
