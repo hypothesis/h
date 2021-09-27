@@ -1,5 +1,3 @@
-from unittest.mock import PropertyMock
-
 import pytest
 
 from h.security import Identity
@@ -20,16 +18,6 @@ class TestWebsocketView:
         assert (
             pyramid_request.environ["h.ws.streamer_work_queue"] == streamer.WORK_QUEUE
         )
-
-    def test_it_preloads_groups(self, pyramid_request, pyramid_config, factories):
-        user = factories.User.build()
-        groups = PropertyMock()
-        type(user).groups = groups
-        pyramid_config.testing_securitypolicy(identity=Identity(user=user))
-
-        views.websocket_view(pyramid_request)
-
-        groups.assert_called_once_with()
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
