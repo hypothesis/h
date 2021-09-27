@@ -53,7 +53,7 @@ class TokenPolicy(IdentityBasedPolicy):
         if user is None:
             return None
 
-        return Identity(user=user)
+        return Identity.from_models(user=user)
 
     @staticmethod
     def _is_ws_request(request):

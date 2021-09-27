@@ -38,7 +38,7 @@ class TestIdentityPermitsIntegrated:
         # particular failure, but just give us sensitivity if this doesn't work
         # at all when you hook it together for real.
 
-        identity = Identity(user)
+        identity = Identity.from_models(user=user)
         anno_context = AnnotationContext(annotation=annotation)
 
         # A user can delete their own annotation
@@ -54,7 +54,7 @@ class TestIdentityPermitsIntegrated:
         # Once a user is an admin they can do admin things
         admin_context = Root(sentinel.request)
         assert not identity_permits(identity, admin_context, Permission.AdminPage.NIPSA)
-        user.admin = True
+        identity.user.admin = True
         assert identity_permits(identity, admin_context, Permission.AdminPage.NIPSA)
 
         # We need the right context

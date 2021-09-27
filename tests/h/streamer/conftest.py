@@ -11,6 +11,6 @@ from h.streamer.websocket import WebSocket
 def socket(factories):
     socket = create_autospec(WebSocket, instance=True)
     socket.effective_principals = [Everyone, "group:__world__"]
-    socket.identity = Identity(user=factories.User())
+    socket.identity = Identity.from_models(user=factories.User())
 
     return socket

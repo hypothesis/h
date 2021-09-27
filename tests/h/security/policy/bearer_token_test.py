@@ -18,7 +18,7 @@ class TestTokenPolicy:
         user_service.fetch.assert_called_once_with(
             auth_token_service.validate.return_value.userid
         )
-        assert identity == Identity(user=user_service.fetch.return_value)
+        assert identity == Identity.from_models(user=user_service.fetch.return_value)
 
     def test_identity_caches(self, pyramid_request, auth_token_service):
         policy = TokenPolicy()

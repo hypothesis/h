@@ -13,7 +13,9 @@ class TestCookiePolicy:
         identity = CookiePolicy().identity(pyramid_request)
 
         auth_cookie_service.verify_cookie.assert_called_once()
-        assert identity == Identity(user=auth_cookie_service.verify_cookie.return_value)
+        assert identity == Identity.from_models(
+            user=auth_cookie_service.verify_cookie.return_value
+        )
 
     def test_identity_with_no_cookie(self, pyramid_request, auth_cookie_service):
         auth_cookie_service.verify_cookie.return_value = None

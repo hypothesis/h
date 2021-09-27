@@ -13,7 +13,7 @@ class CookiePolicy(IdentityBasedPolicy):
         if not user:
             return None
 
-        return Identity(user=user)
+        return Identity.from_models(user=user)
 
     def remember(self, request, userid, **kw):  # pylint:disable=unused-argument
         """Get a list of headers which will remember the user in a cookie."""
