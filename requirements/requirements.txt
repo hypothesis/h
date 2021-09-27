@@ -125,7 +125,7 @@ psycopg2==2.9.1
     # via -r requirements/requirements.in
 pycparser==2.20
     # via cffi
-pycryptodomex==3.10.1
+pycryptodomex==3.10.4
     # via -r requirements/requirements.in
 pyjwt==2.1.0
     # via -r requirements/requirements.in
