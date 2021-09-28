@@ -3,8 +3,8 @@ import os
 import pyramid
 
 from h.config import configure
-from h.security import BearerTokenPolicy
 from h.sentry_filters import SENTRY_FILTERS
+from h.streamer.security import AccessTokenPolicy
 from h.streamer.worker import log
 
 
@@ -28,7 +28,7 @@ def create_app(_global_config, **settings):
     config.include("h.auth")
     config.include("h.security")
     # Override the default authentication policy.
-    config.set_security_policy(BearerTokenPolicy())
+    config.set_security_policy(AccessTokenPolicy())
 
     config.include("h.db")
     config.include("h.session")

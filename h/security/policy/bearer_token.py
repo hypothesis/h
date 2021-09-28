@@ -6,14 +6,12 @@ from h.security import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
 
 
-@implementer(ISecurityPolicy)
 class BearerTokenPolicy(IdentityBasedPolicy):
     """
     A Bearer token authentication policy.
 
-    This policy uses a bearer token which is validated against Token objects
-    in the DB. This can come from the Bearer token header or in the case of
-    Websocket requests with the GET parameter `access_token`.
+    This policy uses a Bearer token header which is validated against Token
+    objects in the DB.
     """
 
     def __init__(self):
@@ -32,20 +30,20 @@ class BearerTokenPolicy(IdentityBasedPolicy):
 
         return self._identity_cache.get_or_create(request)
 
+    @classmethod
+    def get_token_string(cls, request):
+        """Get the token from a request."""
+
+        # This is a customisation point which is used in
+        # `h.streamer.security.AccessTokenPolicy`
+        return request.find_service(name="auth_token").get_bearer_token(request)
+
     def _load_identity(self, request):
-        token_svc = request.find_service(name="auth_token")
-        token_str = None
-
-        if self._is_ws_request(request):
-            token_str = request.GET.get("access_token", None)
-
-        if token_str is None:
-            token_str = token_svc.get_bearer_token(request)
-
+        token_str = self.get_token_string(request)
         if token_str is None:
             return None
 
-        token = token_svc.validate(token_str)
+        token = request.find_service(name="auth_token").validate(token_str)
         if token is None:
             return None
 
@@ -54,7 +52,3 @@ class BearerTokenPolicy(IdentityBasedPolicy):
             return None
 
         return Identity.from_models(user=user)
-
-    @staticmethod
-    def _is_ws_request(request):
-        return request.path == "/ws"
