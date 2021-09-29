@@ -1,3 +1,6 @@
+import warnings
+from logging import getLogger
+
 import deform
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
@@ -7,6 +10,9 @@ from h.schemas.forms.group import group_schema
 from h.security import Permission
 
 _ = i18n.TranslationString
+
+
+LOG = getLogger(__name__)
 
 
 @view_defaults(
@@ -106,6 +112,14 @@ class GroupEditController:
     def _update_group(self, appstruct):
         self.group.name = appstruct["name"]
         self.group.description = appstruct["description"]
+
+        # This is to test that we can see warnings in the logs as part of our
+        # switch over to the new permissions system. This is temporary code
+        # and can be safely removed if you see it.
+        if self.group.description == "__TEMP_WARNING_TEST__":  # pragma: no cover
+            message = "Test warning has been triggered"
+            warnings.warn(message, PendingDeprecationWarning)
+            LOG.warning(message)
 
 
 @view_config(route_name="group_read_noslug", request_method="GET")
