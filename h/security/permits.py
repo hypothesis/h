@@ -1,4 +1,5 @@
 import warnings
+from logging import getLogger
 from typing import Optional
 
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -6,6 +7,8 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from h.security import permission_map
 from h.security.identity import Identity
 from h.security.principals import principals_for_identity
+
+LOG = getLogger(__name__)
 
 
 def identity_permits(identity: Optional[Identity], context, permission) -> bool:
@@ -32,9 +35,8 @@ def identity_permits(identity: Optional[Identity], context, permission) -> bool:
         map_allows = err  # pylint: disable=redefined-variable-type
 
     if map_allows != acl_allows:  # pragma: no cover
-        warnings.warn(
-            f"Permissions system disagree about {permission}: ACL={acl_allows}, MAP={map_allows}",
-            PendingDeprecationWarning,
-        )
+        message = f"Permissions system disagree about {permission}: ACL={acl_allows}, MAP={map_allows}"
+        warnings.warn(message, PendingDeprecationWarning)
+        LOG.warning(message)
 
     return acl_allows
