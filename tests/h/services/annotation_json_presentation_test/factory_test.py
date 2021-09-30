@@ -25,8 +25,6 @@ class TestAnnotationJSONPresentationServiceFactory:
 
         AnnotationJSONPresentationService.assert_called_once_with(
             session=pyramid_request.db,
-            user=pyramid_request.user,
-            has_permission=pyramid_request.has_permission,
             links_svc=links_service,
             flag_svc=flag_service,
             user_svc=user_service,

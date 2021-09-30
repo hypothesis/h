@@ -52,11 +52,15 @@ def search(request):
 
     out = {
         "total": result.total,
-        "rows": svc.present_all_for_user(result.annotation_ids),
+        "rows": svc.present_all_for_user(
+            annotation_ids=result.annotation_ids, user=request.user
+        ),
     }
 
     if separate_replies:
-        out["replies"] = svc.present_all_for_user(result.reply_ids)
+        out["replies"] = svc.present_all_for_user(
+            annotation_ids=result.reply_ids, user=request.user
+        )
 
     return out
 
@@ -79,7 +83,7 @@ def create(request):
     _publish_annotation_event(request, annotation, "create")
 
     svc = request.find_service(name="annotation_json_presentation")
-    return svc.present_for_user(annotation)
+    return svc.present_for_user(annotation=annotation, user=request.user)
 
 
 @api_config(
@@ -93,7 +97,7 @@ def create(request):
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     return request.find_service(name="annotation_json_presentation").present_for_user(
-        context.annotation
+        annotation=context.annotation, user=request.user
     )
 
 
@@ -135,7 +139,7 @@ def update(context, request):
     _publish_annotation_event(request, annotation, "update")
 
     return request.find_service(name="annotation_json_presentation").present_for_user(
-        annotation
+        annotation=annotation, user=request.user
     )
 
 
