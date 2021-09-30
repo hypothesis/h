@@ -1,5 +1,4 @@
 from h.presenters.annotation_html import AnnotationHTMLPresenter
-from h.presenters.annotation_json import AnnotationJSONPresenter
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
 from h.presenters.annotation_searchindex import AnnotationSearchIndexPresenter
 from h.presenters.document_html import DocumentHTMLPresenter
@@ -10,7 +9,6 @@ from h.presenters.user_json import TrustedUserJSONPresenter, UserJSONPresenter
 
 __all__ = (
     "AnnotationHTMLPresenter",
-    "AnnotationJSONPresenter",
     "AnnotationJSONLDPresenter",
     "AnnotationSearchIndexPresenter",
     "DocumentHTMLPresenter",

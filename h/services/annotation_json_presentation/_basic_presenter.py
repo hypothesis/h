@@ -7,8 +7,8 @@ from h.traversal import AnnotationContext
 from h.util.datetime import utc_iso8601
 
 
-class AnnotationJSONPresenter:
-    """Present an annotation in the JSON format returned by API requests."""
+class BasicJSONPresenter:
+    """Present an annotation in JSON without reference to the user."""
 
     def __init__(self, links_service, user_service):
         self._links_service = links_service
