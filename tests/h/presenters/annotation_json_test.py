@@ -8,14 +8,14 @@ from h.presenters.annotation_json import AnnotationJSONPresenter
 
 class TestAnnotationJSONPresenter:
     def test_asdict(
-        self, presenter, annotation, links_service, user_service, DocumentJSONPresenter
+        self, present, annotation, links_service, user_service, DocumentJSONPresenter
     ):
         annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
         annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
         annotation.references = ["referenced-id-1", "referenced-id-2"]
         annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
 
-        result = presenter.asdict()
+        result = present()
 
         links_service.get_all.assert_called_once_with(annotation)
         user_service.fetch.assert_called_once_with(annotation.userid)
@@ -47,17 +47,17 @@ class TestAnnotationJSONPresenter:
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
         DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
 
-    def test_asdict_without_references(self, presenter, annotation):
+    def test_asdict_without_references(self, present, annotation):
         annotation.references = None
 
-        result = presenter.asdict()
+        result = present()
 
         assert "references" not in result
 
-    def test_asdict_extra_inherits_correctly(self, presenter, annotation):
+    def test_asdict_extra_inherits_correctly(self, present, annotation):
         annotation.extra = {"id": "DIFFERENT"}
 
-        presented = presenter.asdict()
+        presented = present()
 
         # We can't override things (we are applied first)
         assert presented["id"] == annotation.id
@@ -74,7 +74,7 @@ class TestAnnotationJSONPresenter:
     )
     def test_read_permission(
         self,
-        presenter,
+        present,
         annotation,
         identity_permits,
         shared,
@@ -84,27 +84,32 @@ class TestAnnotationJSONPresenter:
         annotation.shared = shared
         identity_permits.return_value = readable_by
 
-        presented = presenter.asdict()
+        presented = present()
 
         permission = permission_template.format(annotation=annotation)
         assert presented["permissions"]["read"] == [permission]
 
     def test_we_skip_the_read_permission_check_if_group_is_world(
-        self, presenter, annotation, identity_permits
+        self, present, annotation, identity_permits
     ):
         annotation.shared = True
         annotation.groupid = "__world__"
 
-        presented = presenter.asdict()
+        presented = present()
 
         identity_permits.assert_not_called()
         assert presented["permissions"]["read"] == ["group:__world__"]
 
     @pytest.fixture
-    def presenter(self, annotation, links_service, user_service):
-        return AnnotationJSONPresenter(
-            annotation, links_service=links_service, user_service=user_service
+    def present(self, annotation, links_service, user_service):
+        presenter = AnnotationJSONPresenter(
+            links_service=links_service, user_service=user_service
         )
+
+        def present():
+            return presenter.present(annotation)
+
+        return present
 
     @pytest.fixture
     def annotation(self, factories):

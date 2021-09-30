@@ -4,7 +4,8 @@ from itertools import chain
 
 from gevent.queue import Full
 
-from h import presenters, realtime, storage
+from h import realtime, storage
+from h.presenters import AnnotationJSONPresenter
 from h.realtime import Consumer
 from h.security import Permission, identity_permits
 from h.streamer import websocket
@@ -159,15 +160,13 @@ def _generate_annotation_event(request, message, annotation):
     Returns None if the socket should not receive any message about this
     annotation event, otherwise a dict containing information about the event.
     """
-
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
-        payload = presenters.AnnotationJSONPresenter(
-            annotation,
+        payload = AnnotationJSONPresenter(
             links_service=request.find_service(name="links"),
             user_service=request.find_service(name="user"),
-        ).asdict()
+        ).present(annotation)
 
     return {
         "type": "annotation-notification",

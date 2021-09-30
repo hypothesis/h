@@ -11,16 +11,13 @@ from h.traversal import AnnotationContext
 
 class TestAnnotationJSONPresentationService:
     def test_present(
-        self, svc, user, annotation, AnnotationJSONPresenter, flag_service, user_service
+        self, svc, user, annotation, AnnotationJSONPresenter, flag_service
     ):
-        AnnotationJSONPresenter.return_value.asdict.return_value = {"presenter": 1}
+        AnnotationJSONPresenter.return_value.present.return_value = {"presenter": 1}
 
         result = svc.present(annotation)
 
-        AnnotationJSONPresenter.assert_called_once_with(
-            annotation, links_service=svc.links_svc, user_service=user_service
-        )
-
+        AnnotationJSONPresenter.return_value.present.assert_called_once_with(annotation)
         flag_service.flagged.assert_called_once_with(user, annotation)
         flag_service.flag_count.assert_called_once_with(annotation)
         assert result == {
@@ -71,7 +68,7 @@ class TestAnnotationJSONPresentationService:
         self, svc, annotation, has_permission, AnnotationJSONPresenter
     ):
         has_permission.return_value = True
-        AnnotationJSONPresenter.return_value.asdict.return_value = {
+        AnnotationJSONPresenter.return_value.present.return_value = {
             "text": sentinel.text,
             "tags": [sentinel.tags],
         }
@@ -98,11 +95,9 @@ class TestAnnotationJSONPresentationService:
         flag_service.all_flagged.assert_called_once_with(user, annotation_ids)
         flag_service.flag_counts.assert_called_once_with(annotation_ids)
         user_service.fetch_all.assert_called_once_with([annotation.userid])
-        AnnotationJSONPresenter.assert_called_once_with(
-            annotation, links_service=svc.links_svc, user_service=user_service
-        )
+        AnnotationJSONPresenter.return_value.present.assert_called_once_with(annotation)
         assert result == [
-            AnnotationJSONPresenter.return_value.asdict.return_value,
+            AnnotationJSONPresenter.return_value.present.return_value,
         ]
 
     @pytest.mark.parametrize("attribute", ("document", "moderation", "group"))
@@ -169,5 +164,5 @@ class TestAnnotationJSONPresentationService:
         AnnotationJSONPresenter = patch(
             "h.services.annotation_json_presentation.service.AnnotationJSONPresenter"
         )
-        AnnotationJSONPresenter.return_value.asdict.return_value = {}
+        AnnotationJSONPresenter.return_value.present.return_value = {}
         return AnnotationJSONPresenter
