@@ -1,5 +1,5 @@
 """
-Functional tests for client API errors
+Functional tests for client API errors.
 
 Uses create-group endpoint as it can raise all relevant client error codes.
 """
@@ -12,7 +12,7 @@ from h.models.auth_client import GrantType
 
 
 class Test400Errors:
-    """Creating a group can raise all of the client errors we want to test"""
+    # Creating a group can raise all of the client errors we want to test.
 
     def test_it_400s_if_invalid_payload(self, app, append_token_auth):
         group = {}

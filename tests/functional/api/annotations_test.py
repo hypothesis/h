@@ -3,7 +3,9 @@ import pytest
 
 class TestGetAnnotation:
     def test_it_returns_annotation_if_shared(self, app, annotation):
-        """Unauthenticated users may view shared annotations assuming they have group access"""
+        # Unauthenticated users may view shared annotations assuming they have
+        # group access.
+
         res = app.get(
             "/api/annotations/" + annotation.id, headers={"accept": "application/json"}
         )
@@ -39,7 +41,9 @@ class TestGetAnnotation:
 
 class TestGetAnnotationJSONLD:
     def test_it_returns_annotation_if_shared(self, app, annotation):
-        """Unauthenticated users may view shared annotations assuming they have group access"""
+        # Unauthenticated users may view shared annotations assuming they have
+        # group access.
+
         res = app.get(
             "/api/annotations/" + annotation.id + ".jsonld",
             headers={"accept": "application/json"},
@@ -100,12 +104,10 @@ class TestPostAnnotation:
     def test_it_returns_http_400_if_group_forbids_write(
         self, app, user_with_token, non_writeable_group
     ):
-        """
-        Write an annotation to a group that doesn't allow writes.
+        # Write an annotation to a group that doesn't allow writes.
 
-        This is a basic test to check that h is correctly configuring
-        principals_for_userid.
-        """
+        # This is a basic test to check that h is correctly configuring
+        # principals_for_userid.
 
         user, token = user_with_token
 
@@ -149,7 +151,9 @@ class TestPatchAnnotation:
     def test_it_updates_annotation_if_authorized(
         self, app, user_annotation, user_with_token
     ):
-        """An annotation's creator (user) is blessed with the 'update' permission"""
+        # An annotation's creator (user) is blessed with the 'update'
+        # permission.
+
         _, token = user_with_token
 
         headers = {"Authorization": f"Bearer {token.value}"}
@@ -165,7 +169,6 @@ class TestPatchAnnotation:
         assert res.status_code == 200
 
     def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
-
         annotation_patch = {"text": "whatever"}
 
         res = app.patch_json(
@@ -179,7 +182,8 @@ class TestPatchAnnotation:
     def test_it_returns_http_404_if_unauthorized(
         self, app, annotation, user_with_token
     ):
-        """The user in this request is not the annotation's creator"""
+        # The user in this request is not the annotation's creator.
+
         _, token = user_with_token
 
         headers = {"Authorization": f"Bearer {token.value}"}
@@ -200,7 +204,9 @@ class TestDeleteAnnotation:
     def test_it_deletes_annotation_if_authorized(
         self, app, user_annotation, user_with_token
     ):
-        """An annotation's creator (user) is blessed with the 'update' permission"""
+        # An annotation's creator (user) is blessed with the 'update'
+        # permission.
+
         _, token = user_with_token
 
         headers = {"Authorization": f"Bearer {token.value}"}
@@ -211,7 +217,6 @@ class TestDeleteAnnotation:
         assert res.json["id"] == user_annotation.id
 
     def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
-
         res = app.delete(f"/api/annotations/{user_annotation.id}", expect_errors=True)
 
         assert res.status_code == 404
@@ -219,7 +224,8 @@ class TestDeleteAnnotation:
     def test_it_returns_http_404_if_unauthorized(
         self, app, annotation, user_with_token
     ):
-        """The user in this request is not the annotation's creator"""
+        # The user in this request is not the annotation's creator.
+
         _, token = user_with_token
         headers = {"Authorization": f"Bearer {token.value}"}
 
