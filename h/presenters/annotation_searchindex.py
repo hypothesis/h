@@ -1,14 +1,13 @@
-from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
 from h.util.datetime import utc_iso8601
 from h.util.user import split_user
 
 
-class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
+class AnnotationSearchIndexPresenter:
     """Present an annotation in the JSON format used in the search index."""
 
     def __init__(self, annotation, request):
-        super().__init__(annotation)
+        self.annotation = annotation
         self.request = request
 
     def asdict(self):
@@ -30,7 +29,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             "tags_raw": tags,
             "group": self.annotation.groupid,
             "shared": self.annotation.shared,
-            "target": self.target,
+            "target": self.annotation.target,
             "document": docpresenter.asdict(),
             "thread_ids": self.annotation.thread_ids,
         }

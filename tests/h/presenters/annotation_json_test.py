@@ -35,12 +35,7 @@ class TestAnnotationJSONPresenter:
                 "update": [annotation.userid],
                 "delete": [annotation.userid],
             },
-            "target": [
-                {
-                    "source": annotation.target_uri,
-                    "selector": annotation.target_selectors,
-                }
-            ],
+            "target": annotation.target,
             "document": DocumentJSONPresenter.return_value.asdict.return_value,
             "links": links_service.get_all.return_value,
             "references": annotation.references,

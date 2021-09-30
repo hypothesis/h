@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.security import Permission
 from h.security.permits import identity_permits
@@ -9,12 +8,11 @@ from h.traversal import AnnotationContext
 from h.util.datetime import utc_iso8601
 
 
-class AnnotationJSONPresenter(AnnotationBasePresenter):
+class AnnotationJSONPresenter:
     """Present an annotation in the JSON format returned by API requests."""
 
     def __init__(self, annotation, links_service, user_service):
-        super().__init__(annotation)
-
+        self.annotation = annotation
         self._links_service = links_service
         self._user_service = user_service
 
@@ -40,7 +38,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                     "update": [self.annotation.userid],
                     "delete": [self.annotation.userid],
                 },
-                "target": self.target,
+                "target": self.annotation.target,
                 "document": DocumentJSONPresenter(self.annotation.document).asdict(),
                 "links": self._links_service.get_all(self.annotation),
             }
