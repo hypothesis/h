@@ -22,16 +22,16 @@ class AnnotationJSONPresentationService:
             links_service=self.links_svc, user_service=self.user_svc
         )
 
-    def present(self, annotation):
+    def present_for_user(self, annotation):
         model = self._presenter.present(annotation)
         model.update(self._get_user_dependent_content(self.user, annotation))
 
         return model
 
-    def present_all(self, annotation_ids):
+    def present_all_for_user(self, annotation_ids):
         annotations = self._preload_data(self.user, annotation_ids)
 
-        return [self.present(annotation) for annotation in annotations]
+        return [self.present_for_user(annotation) for annotation in annotations]
 
     def _get_user_dependent_content(self, user, annotation):
         # The flagged value depends on whether this particular user has flagged
