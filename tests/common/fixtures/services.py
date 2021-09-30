@@ -4,7 +4,7 @@ import pytest
 
 from h.services import AuthCookieService
 from h.services.annotation_delete import AnnotationDeleteService
-from h.services.annotation_json_presentation import AnnotationJSONPresentationService
+from h.services.annotation_json import AnnotationJSONService
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.auth_token import AuthTokenService
 from h.services.delete_group import DeleteGroupService
@@ -25,7 +25,7 @@ from h.services.search_index._queue import Queue
 __all__ = (
     "mock_service",
     "annotation_delete_service",
-    "annotation_json_presentation_service",
+    "annotation_json_service",
     "auth_cookie_service",
     "auth_token_service",
     "delete_group_service",
@@ -70,10 +70,8 @@ def annotation_delete_service(mock_service):
 
 
 @pytest.fixture
-def annotation_json_presentation_service(mock_service):
-    return mock_service(
-        AnnotationJSONPresentationService, name="annotation_json_presentation"
-    )
+def annotation_json_service(mock_service):
+    return mock_service(AnnotationJSONService, name="annotation_json")
 
 
 @pytest.fixture

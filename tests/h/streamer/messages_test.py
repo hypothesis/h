@@ -102,7 +102,7 @@ class TestHandleMessage:
         return patch("h.streamer.websocket.WebSocket")
 
 
-@pytest.mark.usefixtures("annotation_json_presentation_service", "nipsa_service")
+@pytest.mark.usefixtures("annotation_json_service", "nipsa_service")
 class TestHandleAnnotationEvent:
     def test_it_fetches_the_annotation(
         self, fetch_annotation, handle_annotation_event, session, message
@@ -121,25 +121,17 @@ class TestHandleAnnotationEvent:
         assert result is None
 
     def test_it_serializes_the_annotation(
-        self,
-        handle_annotation_event,
-        fetch_annotation,
-        annotation_json_presentation_service,
+        self, handle_annotation_event, fetch_annotation, annotation_json_service
     ):
         handle_annotation_event()
 
-        annotation_json_presentation_service.present.assert_called_once_with(
+        annotation_json_service.present.assert_called_once_with(
             fetch_annotation.return_value
         )
 
     @pytest.mark.parametrize("action", ["create", "update", "delete"])
     def test_notification_format(
-        self,
-        handle_annotation_event,
-        action,
-        message,
-        socket,
-        annotation_json_presentation_service,
+        self, handle_annotation_event, action, message, socket, annotation_json_service
     ):
         message["action"] = action
 
@@ -148,7 +140,7 @@ class TestHandleAnnotationEvent:
         if action == "delete":
             expected_payload = {"id": message["annotation_id"]}
         else:
-            expected_payload = annotation_json_presentation_service.present.return_value
+            expected_payload = annotation_json_service.present.return_value
 
         socket.send_json.assert_called_once_with(
             {

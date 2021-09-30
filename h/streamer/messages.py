@@ -162,9 +162,7 @@ def _generate_annotation_event(request, message, annotation):
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
-        payload = request.find_service(name="annotation_json_presentation").present(
-            annotation
-        )
+        payload = request.find_service(name="annotation_json").present(annotation)
 
     return {
         "type": "annotation-notification",

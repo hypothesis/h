@@ -1,10 +1,8 @@
-from h.services.annotation_json_presentation.service import (
-    AnnotationJSONPresentationService,
-)
+from h.services.annotation_json.service import AnnotationJSONService
 
 
-def annotation_json_presentation_service_factory(_context, request):
-    return AnnotationJSONPresentationService(
+def annotation_json_service_factory(_context, request):
+    return AnnotationJSONService(
         session=request.db,
         # Services
         links_service=request.find_service(name="links"),

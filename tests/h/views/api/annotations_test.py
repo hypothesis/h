@@ -10,7 +10,7 @@ from h.traversal import AnnotationContext
 from h.views.api import annotations as views
 
 
-@pytest.mark.usefixtures("annotation_json_presentation_service", "search_lib")
+@pytest.mark.usefixtures("annotation_json_service", "search_lib")
 class TestSearch:
     def test_it_searches(self, pyramid_request, search_lib):
         views.search(pyramid_request)
@@ -24,52 +24,52 @@ class TestSearch:
         search.run.assert_called_once_with(expected_params)
 
     def test_it_presents_search_results(
-        self, pyramid_request, search_run, annotation_json_presentation_service
+        self, pyramid_request, search_run, annotation_json_service
     ):
         search_run.return_value = SearchResult(2, ["row-1", "row-2"], [], {})
 
         views.search(pyramid_request)
 
-        annotation_json_presentation_service.present_all_for_user.assert_called_once_with(
+        annotation_json_service.present_all_for_user.assert_called_once_with(
             annotation_ids=["row-1", "row-2"], user=pyramid_request.user
         )
 
     def test_it_returns_search_results(
-        self, pyramid_request, search_run, annotation_json_presentation_service
+        self, pyramid_request, search_run, annotation_json_service
     ):
         search_run.return_value = SearchResult(2, ["row-1", "row-2"], [], {})
 
         expected = {
             "total": 2,
-            "rows": annotation_json_presentation_service.present_all_for_user.return_value,
+            "rows": annotation_json_service.present_all_for_user.return_value,
         }
 
         assert views.search(pyramid_request) == expected
 
     def test_it_presents_replies(
-        self, pyramid_request, search_run, annotation_json_presentation_service
+        self, pyramid_request, search_run, annotation_json_service
     ):
         pyramid_request.params = NestedMultiDict(MultiDict({"_separate_replies": "1"}))
         search_run.return_value = SearchResult(1, ["row-1"], ["reply-1", "reply-2"], {})
 
         views.search(pyramid_request)
 
-        annotation_json_presentation_service.present_all_for_user.assert_called_with(
+        annotation_json_service.present_all_for_user.assert_called_with(
             annotation_ids=["reply-1", "reply-2"], user=pyramid_request.user
         )
 
     def test_it_returns_replies(
-        self, pyramid_request, search_run, annotation_json_presentation_service
+        self, pyramid_request, search_run, annotation_json_service
     ):
         pyramid_request.params = NestedMultiDict(MultiDict({"_separate_replies": "1"}))
         search_run.return_value = SearchResult(1, ["row-1"], ["reply-1", "reply-2"], {})
 
         expected = {
             "total": 1,
-            "rows": annotation_json_presentation_service.present_all_for_user(
+            "rows": annotation_json_service.present_all_for_user(
                 annotation_ids=["row-1"], user=pyramid_request.user
             ),
-            "replies": annotation_json_presentation_service.present_all_for_user(
+            "replies": annotation_json_service.present_all_for_user(
                 annotation_ids=["reply-1", "reply-2"], user=pyramid_request.user
             ),
         }
@@ -89,17 +89,11 @@ class TestSearch:
     "AnnotationEvent",
     "create_schema",
     "links_service",
-    "annotation_json_presentation_service",
+    "annotation_json_service",
     "storage",
 )
 class TestCreate:
-    def test_it(
-        self,
-        pyramid_request,
-        create_schema,
-        storage,
-        annotation_json_presentation_service,
-    ):
+    def test_it(self, pyramid_request, create_schema, storage, annotation_json_service):
         result = views.create(pyramid_request)
 
         create_schema.assert_called_once_with(pyramid_request)
@@ -110,13 +104,11 @@ class TestCreate:
             pyramid_request, create_schema.return_value.validate.return_value
         )
 
-        annotation_json_presentation_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present_for_user.assert_called_once_with(
             annotation=storage.create_annotation.return_value, user=pyramid_request.user
         )
 
-        assert (
-            result == annotation_json_presentation_service.present_for_user.return_value
-        )
+        assert result == annotation_json_service.present_for_user.return_value
 
     def test_it_publishes_annotation_event(
         self, AnnotationEvent, pyramid_request, storage
@@ -169,19 +161,17 @@ class TestCreate:
         return patch("h.views.api.annotations.CreateAnnotationSchema")
 
 
-@pytest.mark.usefixtures("annotation_json_presentation_service")
+@pytest.mark.usefixtures("annotation_json_service")
 class TestRead:
     def test_it_returns_presented_annotation(
-        self, annotation_json_presentation_service, pyramid_request, annotation_context
+        self, annotation_json_service, pyramid_request, annotation_context
     ):
         result = views.read(annotation_context, pyramid_request)
 
-        annotation_json_presentation_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present_for_user.assert_called_once_with(
             annotation=annotation_context.annotation, user=pyramid_request.user
         )
-        assert (
-            result == annotation_json_presentation_service.present_for_user.return_value
-        )
+        assert result == annotation_json_service.present_for_user.return_value
 
 
 @pytest.mark.usefixtures("AnnotationJSONLDPresenter", "links_service")
@@ -228,7 +218,7 @@ class TestReadJSONLD:
 @pytest.mark.usefixtures(
     "AnnotationEvent",
     "links_service",
-    "annotation_json_presentation_service",
+    "annotation_json_service",
     "update_schema",
     "storage",
 )
@@ -239,7 +229,7 @@ class TestUpdate:
         pyramid_request,
         update_schema,
         storage,
-        annotation_json_presentation_service,
+        annotation_json_service,
     ):
         returned = views.update(annotation_context, pyramid_request)
 
@@ -258,14 +248,11 @@ class TestUpdate:
             update_schema.return_value.validate.return_value,
         )
 
-        annotation_json_presentation_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present_for_user.assert_called_once_with(
             annotation=storage.update_annotation.return_value, user=pyramid_request.user
         )
 
-        assert (
-            returned
-            == annotation_json_presentation_service.present_for_user.return_value
-        )
+        assert returned == annotation_json_service.present_for_user.return_value
 
     def test_it_publishes_annotation_event(
         self, annotation_context, AnnotationEvent, storage, pyramid_request

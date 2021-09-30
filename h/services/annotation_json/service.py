@@ -12,7 +12,7 @@ from h.traversal import AnnotationContext
 from h.util.datetime import utc_iso8601
 
 
-class AnnotationJSONPresentationService:
+class AnnotationJSONService:
     """A service for generating API compatible JSON for annotations."""
 
     def __init__(self, session, links_service, flag_service, user_service):

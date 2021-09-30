@@ -6,11 +6,11 @@ from pyramid.authorization import Everyone
 from sqlalchemy import event
 
 from h.security.permissions import Permission
-from h.services.annotation_json_presentation import AnnotationJSONPresentationService
+from h.services.annotation_json import AnnotationJSONService
 from h.traversal import AnnotationContext
 
 
-class TestAnnotationJSONPresentationService:
+class TestAnnotationJSONService:
     def test_present(
         self, service, annotation, links_service, user_service, DocumentJSONPresenter
     ):
@@ -229,7 +229,7 @@ class TestAnnotationJSONPresentationService:
 
     @pytest.fixture
     def service(self, db_session, links_service, flag_service, user_service):
-        return AnnotationJSONPresentationService(
+        return AnnotationJSONService(
             session=db_session,
             links_service=links_service,
             flag_service=flag_service,
@@ -250,14 +250,12 @@ class TestAnnotationJSONPresentationService:
 
     @pytest.fixture(autouse=True)
     def Identity(self, patch):
-        return patch("h.services.annotation_json_presentation.service.Identity")
+        return patch("h.services.annotation_json.service.Identity")
 
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):
-        return patch("h.services.annotation_json_presentation.service.identity_permits")
+        return patch("h.services.annotation_json.service.identity_permits")
 
     @pytest.fixture(autouse=True)
     def DocumentJSONPresenter(self, patch):
-        return patch(
-            "h.services.annotation_json_presentation.service.DocumentJSONPresenter"
-        )
+        return patch("h.services.annotation_json.service.DocumentJSONPresenter")
