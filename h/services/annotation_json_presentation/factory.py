@@ -7,7 +7,7 @@ def annotation_json_presentation_service_factory(_context, request):
     return AnnotationJSONPresentationService(
         session=request.db,
         # Services
-        links_svc=request.find_service(name="links"),
-        flag_svc=request.find_service(name="flag"),
-        user_svc=request.find_service(name="user"),
+        links_service=request.find_service(name="links"),
+        flag_service=request.find_service(name="flag"),
+        user_service=request.find_service(name="user"),
     )

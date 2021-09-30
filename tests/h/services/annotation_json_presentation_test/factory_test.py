@@ -25,9 +25,9 @@ class TestAnnotationJSONPresentationServiceFactory:
 
         AnnotationJSONPresentationService.assert_called_once_with(
             session=pyramid_request.db,
-            links_svc=links_service,
-            flag_svc=flag_service,
-            user_svc=user_service,
+            links_service=links_service,
+            flag_service=flag_service,
+            user_service=user_service,
         )
 
     @pytest.fixture

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import subqueryload
 
 from h import storage
-from h.models import Annotation
+from h.models import Annotation, User
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
 from h.services.annotation_json_presentation._basic_presenter import BasicJSONPresenter
@@ -9,27 +9,69 @@ from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresentationService:
-    def __init__(  # pylint: disable=too-many-arguments
-        self, session, links_svc, flag_svc, user_svc
-    ):
+    """A service for generating API compatible JSON for annotations."""
+
+    def __init__(self, session, links_service, flag_service, user_service):
+        """
+        Instantiate the service.
+
+        :param session: DB session
+        :param links_service: LinksService instance
+        :param flag_service: FlagService instance
+        :param user_service: UserService instance
+        """
         self._session = session
-        self._links_service = links_svc
-        self._user_service = user_svc
-        self._flag_service = flag_svc
+        self._links_service = links_service
+        self._flag_service = flag_service
+        self._user_service = user_service
+
         self._presenter = BasicJSONPresenter(
-            links_service=self._links_service, user_service=self._user_service
+            links_service=links_service, user_service=user_service
         )
 
-    def present(self, annotation):
+    def present(self, annotation: Annotation):
+        """
+        Get the JSON presentation of an annotation.
+
+        This representation does not contain any user specific information and
+        has only the data applicable to all users. This does not blank content
+        for moderated annotations.
+
+        :param annotation: Annotation to present
+        :return: A dict suitable for JSON serialisation
+        """
         return self._presenter.present(annotation)
 
-    def present_for_user(self, annotation, user):
+    def present_for_user(self, annotation: Annotation, user: User):
+        """
+        Get the JSON presentation of an annotation for a particular user.
+
+        This representation includes extra data the specific user is privy to
+        and also hides moderated content from users who should not see it.
+
+        :param annotation: Annotation to present
+        :param user: User that the annotation is being presented to
+        :return: A dict suitable for JSON serialisation
+        """
+
         model = self.present(annotation)
         model.update(self._get_user_dependent_content(annotation, user))
 
         return model
 
-    def present_all_for_user(self, annotation_ids, user):
+    def present_all_for_user(self, annotation_ids, user: User):
+        """
+        Get the JSON presentation of many annotations for a particular user.
+
+        This method is more efficient than repeatedly calling
+        `present_for_user` when generating a large number of annotations for
+        the same user, but returns the same information (but in a list).
+
+        :param annotation_ids: Annotation to present
+        :param user: User that the annotation is being presented to
+        :return: A list of dicts suitable for JSON serialisation.
+        """
+
         annotations = self._preload_data(user, annotation_ids)
 
         return [self.present_for_user(annotation, user) for annotation in annotations]

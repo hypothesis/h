@@ -10,8 +10,8 @@ from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONPresentationService:
-    def test_present(self, svc, BasicJSONPresenter):
-        result = svc.present(annotation=sentinel.annotation)
+    def test_present(self, service, BasicJSONPresenter):
+        result = service.present(annotation=sentinel.annotation)
 
         BasicJSONPresenter.return_value.present.assert_called_once_with(
             sentinel.annotation
@@ -19,11 +19,11 @@ class TestAnnotationJSONPresentationService:
         assert result == BasicJSONPresenter.return_value.present.return_value
 
     def test_present_for_user(
-        self, svc, user, annotation, BasicJSONPresenter, flag_service
+        self, service, user, annotation, BasicJSONPresenter, flag_service
     ):
         BasicJSONPresenter.return_value.present.return_value = {"presenter": 1}
 
-        result = svc.present_for_user(annotation, user)
+        result = service.present_for_user(annotation, user)
 
         BasicJSONPresenter.return_value.present.assert_called_once_with(annotation)
         flag_service.flagged.assert_called_once_with(user, annotation)
@@ -36,11 +36,11 @@ class TestAnnotationJSONPresentationService:
         }
 
     def test_present_for_user_only_shows_moderation_to_moderators(
-        self, svc, annotation, user, identity_permits, Identity
+        self, service, annotation, user, identity_permits, Identity
     ):
         identity_permits.return_value = False
 
-        result = svc.present_for_user(annotation, user)
+        result = service.present_for_user(annotation, user)
 
         Identity.from_models.assert_called_once_with(user=user)
         identity_permits.assert_called_once_with(
@@ -55,21 +55,21 @@ class TestAnnotationJSONPresentationService:
 
     @pytest.mark.usefixtures("with_hidden_annotation")
     def test_present_for_user_hidden_status_is_not_shown_to_creator(
-        self, svc, annotation, user
+        self, service, annotation, user
     ):
         annotation.userid = user.userid
 
-        result = svc.present_for_user(annotation, user)
+        result = service.present_for_user(annotation, user)
 
         assert not result["hidden"]
 
     @pytest.mark.usefixtures("with_hidden_annotation")
     def test_present_for_user_hidden_censors_content_for_normal_users(
-        self, svc, annotation, user, identity_permits
+        self, service, annotation, user, identity_permits
     ):
         identity_permits.return_value = False
 
-        result = svc.present_for_user(annotation, user)
+        result = service.present_for_user(annotation, user)
 
         assert result["hidden"]
         assert not result["text"]
@@ -77,7 +77,7 @@ class TestAnnotationJSONPresentationService:
 
     @pytest.mark.usefixtures("with_hidden_annotation")
     def test_present_for_user_hidden_shows_everything_to_moderators(
-        self, svc, annotation, user, identity_permits, BasicJSONPresenter
+        self, service, annotation, user, identity_permits, BasicJSONPresenter
     ):
         identity_permits.return_value = True
         BasicJSONPresenter.return_value.present.return_value = {
@@ -85,7 +85,7 @@ class TestAnnotationJSONPresentationService:
             "tags": [sentinel.tags],
         }
 
-        result = svc.present_for_user(annotation, user)
+        result = service.present_for_user(annotation, user)
 
         assert result["hidden"]
         assert result["text"]
@@ -93,7 +93,7 @@ class TestAnnotationJSONPresentationService:
 
     def test_present_all_for_user(
         self,
-        svc,
+        service,
         annotation,
         user,
         BasicJSONPresenter,
@@ -102,7 +102,7 @@ class TestAnnotationJSONPresentationService:
     ):
         annotation_ids = [annotation.id]
 
-        result = svc.present_all_for_user(annotation_ids, user)
+        result = service.present_all_for_user(annotation_ids, user)
 
         flag_service.all_flagged.assert_called_once_with(user, annotation_ids)
         flag_service.flag_counts.assert_called_once_with(annotation_ids)
@@ -115,13 +115,20 @@ class TestAnnotationJSONPresentationService:
     @pytest.mark.parametrize("attribute", ("document", "moderation", "group"))
     @pytest.mark.parametrize("with_preload", (True, False))
     def test_present_all_for_userpreloading_is_effective(
-        self, svc, annotation, user, db_session, query_counter, attribute, with_preload
+        self,
+        service,
+        annotation,
+        user,
+        db_session,
+        query_counter,
+        attribute,
+        with_preload,
     ):
         # Ensure SQLAlchemy forgets all about our annotation
         db_session.flush()
         db_session.expire(annotation)
         if with_preload:
-            svc.present_all_for_user([annotation.id], user)
+            service.present_all_for_user([annotation.id], user)
 
         query_counter.reset()
         getattr(annotation, attribute)
@@ -145,12 +152,12 @@ class TestAnnotationJSONPresentationService:
         return query_counter
 
     @pytest.fixture
-    def svc(self, db_session, flag_service, user_service):
+    def service(self, db_session, flag_service, user_service):
         return AnnotationJSONPresentationService(
             session=db_session,
-            links_svc=sentinel.links_svc,
-            flag_svc=flag_service,
-            user_svc=user_service,
+            links_service=sentinel.links_service,
+            flag_service=flag_service,
+            user_service=user_service,
         )
 
     @pytest.fixture
