@@ -1,8 +1,7 @@
-from h.presenters.annotation_base import AnnotationBasePresenter
 from h.util.datetime import utc_iso8601
 
 
-class AnnotationJSONLDPresenter(AnnotationBasePresenter):
+class AnnotationJSONLDPresenter:
     """
     Presenter for annotations that renders JSON-LD.
 
@@ -12,8 +11,7 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
     """
 
     def __init__(self, annotation, links_service):
-        super().__init__(annotation)
-
+        self.annotation = annotation
         self._links_service = links_service
 
     CONTEXT_URL = "http://www.w3.org/ns/anno.jsonld"

@@ -149,6 +149,14 @@ class Annotation(Base):
     def target_uri_normalized(self):
         return self._target_uri_normalized
 
+    @property
+    def target(self):
+        target = {"source": self.target_uri}
+        if self.target_selectors:
+            target["selector"] = self.target_selectors
+
+        return [target]
+
     @hybrid_property
     def text(self):
         return self._text
