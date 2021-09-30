@@ -8,11 +8,11 @@ from h.security.policy import SecurityPolicy
 
 
 class TestSecurityPolicy:
-    def test_construction(self, TokenPolicy, AuthClientPolicy, CookiePolicy):
+    def test_construction(self, BearerTokenPolicy, AuthClientPolicy, CookiePolicy):
         policy = SecurityPolicy(proxy_auth=False)
 
-        TokenPolicy.assert_called_once_with()
-        assert policy._bearer_token_policy == TokenPolicy.return_value
+        BearerTokenPolicy.assert_called_once_with()
+        assert policy._bearer_token_policy == BearerTokenPolicy.return_value
         AuthClientPolicy.assert_called_once_with()
         assert policy._http_basic_auth_policy == AuthClientPolicy.return_value
         CookiePolicy.assert_called_once_with()
@@ -128,8 +128,8 @@ class TestSecurityPolicy:
             assert result == policy._bearer_token_policy.remember.return_value
 
     @pytest.fixture(autouse=True)
-    def TokenPolicy(self, patch):
-        return patch("h.security.policy.combined.TokenPolicy")
+    def BearerTokenPolicy(self, patch):
+        return patch("h.security.policy.combined.BearerTokenPolicy")
 
     @pytest.fixture(autouse=True)
     def AuthClientPolicy(self, patch):
