@@ -31,7 +31,7 @@ class TestSearch:
         views.search(pyramid_request)
 
         annotation_json_presentation_service.present_all_for_user.assert_called_once_with(
-            ["row-1", "row-2"]
+            annotation_ids=["row-1", "row-2"], user=pyramid_request.user
         )
 
     def test_it_returns_search_results(
@@ -55,7 +55,7 @@ class TestSearch:
         views.search(pyramid_request)
 
         annotation_json_presentation_service.present_all_for_user.assert_called_with(
-            ["reply-1", "reply-2"]
+            annotation_ids=["reply-1", "reply-2"], user=pyramid_request.user
         )
 
     def test_it_returns_replies(
@@ -67,10 +67,10 @@ class TestSearch:
         expected = {
             "total": 1,
             "rows": annotation_json_presentation_service.present_all_for_user(
-                ["row-1"]
+                annotation_ids=["row-1"], user=pyramid_request.user
             ),
             "replies": annotation_json_presentation_service.present_all_for_user(
-                ["reply-1", "reply-2"]
+                annotation_ids=["reply-1", "reply-2"], user=pyramid_request.user
             ),
         }
 
@@ -111,7 +111,7 @@ class TestCreate:
         )
 
         annotation_json_presentation_service.present_for_user.assert_called_once_with(
-            storage.create_annotation.return_value
+            annotation=storage.create_annotation.return_value, user=pyramid_request.user
         )
 
         assert (
@@ -177,7 +177,7 @@ class TestRead:
         result = views.read(annotation_context, pyramid_request)
 
         annotation_json_presentation_service.present_for_user.assert_called_once_with(
-            annotation_context.annotation
+            annotation=annotation_context.annotation, user=pyramid_request.user
         )
         assert (
             result == annotation_json_presentation_service.present_for_user.return_value
@@ -259,7 +259,7 @@ class TestUpdate:
         )
 
         annotation_json_presentation_service.present_for_user.assert_called_once_with(
-            storage.update_annotation.return_value
+            annotation=storage.update_annotation.return_value, user=pyramid_request.user
         )
 
         assert (

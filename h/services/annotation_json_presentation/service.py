@@ -3,47 +3,49 @@ from sqlalchemy.orm import subqueryload
 from h import storage
 from h.models import Annotation
 from h.presenters import AnnotationJSONPresenter
+from h.security import Identity, identity_permits
 from h.security.permissions import Permission
 from h.traversal import AnnotationContext
 
 
 class AnnotationJSONPresentationService:
     def __init__(  # pylint: disable=too-many-arguments
-        self, session, user, links_svc, flag_svc, user_svc, has_permission
+        self, session, links_svc, flag_svc, user_svc
     ):
-
-        self.user = user
         self.session = session
         self.links_svc = links_svc
         self.flag_svc = flag_svc
         self.user_svc = user_svc
-        self._has_permission = has_permission
         self._presenter = AnnotationJSONPresenter(
             links_service=self.links_svc, user_service=self.user_svc
         )
 
-    def present_for_user(self, annotation):
+    def present_for_user(self, annotation, user):
         model = self._presenter.present(annotation)
-        model.update(self._get_user_dependent_content(self.user, annotation))
+        model.update(self._get_user_dependent_content(annotation, user))
 
         return model
 
-    def present_all_for_user(self, annotation_ids):
-        annotations = self._preload_data(self.user, annotation_ids)
+    def present_all_for_user(self, annotation_ids, user):
+        annotations = self._preload_data(user, annotation_ids)
 
-        return [self.present_for_user(annotation) for annotation in annotations]
+        return [self.present_for_user(annotation, user) for annotation in annotations]
 
-    def _get_user_dependent_content(self, user, annotation):
+    def _get_user_dependent_content(self, annotation, user):
         # The flagged value depends on whether this particular user has flagged
         model = {"flagged": self.flag_svc.flagged(user=user, annotation=annotation)}
 
         # Only moderators see the full flag count
-        user_is_moderator = self._current_user_is_moderator(annotation)
+        user_is_moderator = identity_permits(
+            identity=Identity.from_models(user=user),
+            context=AnnotationContext(annotation),
+            permission=Permission.Annotation.MODERATE,
+        )
         if user_is_moderator:
             model["moderation"] = {"flagCount": self.flag_svc.flag_count(annotation)}
 
         # The hidden value depends on whether you are the author
-        if not annotation.is_hidden or self._current_user_is_author(annotation):
+        if not annotation.is_hidden or self._user_is_author(user, annotation):
             model["hidden"] = False
         else:
             model["hidden"] = True
@@ -54,14 +56,9 @@ class AnnotationJSONPresentationService:
 
         return model
 
-    def _current_user_is_moderator(self, annotation):
-        return self._has_permission(
-            Permission.Annotation.MODERATE,
-            context=AnnotationContext(annotation),
-        )
-
-    def _current_user_is_author(self, annotation):
-        return self.user and self.user.userid == annotation.userid
+    @classmethod
+    def _user_is_author(cls, user, annotation):
+        return user and user.userid == annotation.userid
 
     def _preload_data(self, user, annotation_ids):
         def eager_load_related_items(query):
