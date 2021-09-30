@@ -2,9 +2,9 @@ from sqlalchemy.orm import subqueryload
 
 from h import storage
 from h.models import Annotation
-from h.presenters import AnnotationJSONPresenter
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
+from h.services.annotation_json_presentation._basic_presenter import BasicJSONPresenter
 from h.traversal import AnnotationContext
 
 
@@ -13,15 +13,18 @@ class AnnotationJSONPresentationService:
         self, session, links_svc, flag_svc, user_svc
     ):
         self._session = session
-        self._flag_service = flag_svc
         self._links_service = links_svc
         self._user_service = user_svc
-        self._presenter = AnnotationJSONPresenter(
+        self._flag_service = flag_svc
+        self._presenter = BasicJSONPresenter(
             links_service=self._links_service, user_service=self._user_service
         )
 
+    def present(self, annotation):
+        return self._presenter.present(annotation)
+
     def present_for_user(self, annotation, user):
-        model = self._presenter.present(annotation)
+        model = self.present(annotation)
         model.update(self._get_user_dependent_content(annotation, user))
 
         return model

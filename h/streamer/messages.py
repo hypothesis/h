@@ -5,7 +5,6 @@ from itertools import chain
 from gevent.queue import Full
 
 from h import realtime, storage
-from h.presenters import AnnotationJSONPresenter
 from h.realtime import Consumer
 from h.security import Permission, identity_permits
 from h.streamer import websocket
@@ -163,10 +162,9 @@ def _generate_annotation_event(request, message, annotation):
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
-        payload = AnnotationJSONPresenter(
-            links_service=request.find_service(name="links"),
-            user_service=request.find_service(name="user"),
-        ).present(annotation)
+        payload = request.find_service(name="annotation_json_presentation").present(
+            annotation
+        )
 
     return {
         "type": "annotation-notification",

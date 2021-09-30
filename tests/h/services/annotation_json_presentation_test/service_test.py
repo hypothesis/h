@@ -10,14 +10,22 @@ from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONPresentationService:
+    def test_present(self, svc, BasicJSONPresenter):
+        result = svc.present(annotation=sentinel.annotation)
+
+        BasicJSONPresenter.return_value.present.assert_called_once_with(
+            sentinel.annotation
+        )
+        assert result == BasicJSONPresenter.return_value.present.return_value
+
     def test_present_for_user(
-        self, svc, user, annotation, AnnotationJSONPresenter, flag_service
+        self, svc, user, annotation, BasicJSONPresenter, flag_service
     ):
-        AnnotationJSONPresenter.return_value.present.return_value = {"presenter": 1}
+        BasicJSONPresenter.return_value.present.return_value = {"presenter": 1}
 
         result = svc.present_for_user(annotation, user)
 
-        AnnotationJSONPresenter.return_value.present.assert_called_once_with(annotation)
+        BasicJSONPresenter.return_value.present.assert_called_once_with(annotation)
         flag_service.flagged.assert_called_once_with(user, annotation)
         flag_service.flag_count.assert_called_once_with(annotation)
         assert result == {
@@ -69,10 +77,10 @@ class TestAnnotationJSONPresentationService:
 
     @pytest.mark.usefixtures("with_hidden_annotation")
     def test_present_for_user_hidden_shows_everything_to_moderators(
-        self, svc, annotation, user, identity_permits, AnnotationJSONPresenter
+        self, svc, annotation, user, identity_permits, BasicJSONPresenter
     ):
         identity_permits.return_value = True
-        AnnotationJSONPresenter.return_value.present.return_value = {
+        BasicJSONPresenter.return_value.present.return_value = {
             "text": sentinel.text,
             "tags": [sentinel.tags],
         }
@@ -88,7 +96,7 @@ class TestAnnotationJSONPresentationService:
         svc,
         annotation,
         user,
-        AnnotationJSONPresenter,
+        BasicJSONPresenter,
         flag_service,
         user_service,
     ):
@@ -99,9 +107,9 @@ class TestAnnotationJSONPresentationService:
         flag_service.all_flagged.assert_called_once_with(user, annotation_ids)
         flag_service.flag_counts.assert_called_once_with(annotation_ids)
         user_service.fetch_all.assert_called_once_with([annotation.userid])
-        AnnotationJSONPresenter.return_value.present.assert_called_once_with(annotation)
+        BasicJSONPresenter.return_value.present.assert_called_once_with(annotation)
         assert result == [
-            AnnotationJSONPresenter.return_value.present.return_value,
+            BasicJSONPresenter.return_value.present.return_value,
         ]
 
     @pytest.mark.parametrize("attribute", ("document", "moderation", "group"))
@@ -166,9 +174,9 @@ class TestAnnotationJSONPresentationService:
         return patch("h.services.annotation_json_presentation.service.identity_permits")
 
     @pytest.fixture(autouse=True)
-    def AnnotationJSONPresenter(self, patch):
-        AnnotationJSONPresenter = patch(
-            "h.services.annotation_json_presentation.service.AnnotationJSONPresenter"
+    def BasicJSONPresenter(self, patch):
+        BasicJSONPresenter = patch(
+            "h.services.annotation_json_presentation.service.BasicJSONPresenter"
         )
-        AnnotationJSONPresenter.return_value.present.return_value = {}
-        return AnnotationJSONPresenter
+        BasicJSONPresenter.return_value.present.return_value = {}
+        return BasicJSONPresenter

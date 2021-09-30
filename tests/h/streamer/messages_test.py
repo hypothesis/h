@@ -102,7 +102,7 @@ class TestHandleMessage:
         return patch("h.streamer.websocket.WebSocket")
 
 
-@pytest.mark.usefixtures("nipsa_service", "user_service", "links_service")
+@pytest.mark.usefixtures("annotation_json_presentation_service", "nipsa_service")
 class TestHandleAnnotationEvent:
     def test_it_fetches_the_annotation(
         self, fetch_annotation, handle_annotation_event, session, message
@@ -124,22 +124,22 @@ class TestHandleAnnotationEvent:
         self,
         handle_annotation_event,
         fetch_annotation,
-        links_service,
-        user_service,
-        AnnotationJSONPresenter,
+        annotation_json_presentation_service,
     ):
         handle_annotation_event()
 
-        AnnotationJSONPresenter.assert_called_once_with(
-            links_service=links_service, user_service=user_service
-        )
-        AnnotationJSONPresenter.return_value.present.assert_called_once_with(
+        annotation_json_presentation_service.present.assert_called_once_with(
             fetch_annotation.return_value
         )
 
     @pytest.mark.parametrize("action", ["create", "update", "delete"])
     def test_notification_format(
-        self, handle_annotation_event, action, message, socket, AnnotationJSONPresenter
+        self,
+        handle_annotation_event,
+        action,
+        message,
+        socket,
+        annotation_json_presentation_service,
     ):
         message["action"] = action
 
@@ -148,7 +148,7 @@ class TestHandleAnnotationEvent:
         if action == "delete":
             expected_payload = {"id": message["annotation_id"]}
         else:
-            expected_payload = AnnotationJSONPresenter.return_value.present.return_value
+            expected_payload = annotation_json_presentation_service.present.return_value
 
         socket.send_json.assert_called_once_with(
             {
@@ -281,10 +281,6 @@ class TestHandleAnnotationEvent:
         identity_permits = patch("h.streamer.messages.identity_permits")
         identity_permits.return_value = True
         return identity_permits
-
-    @pytest.fixture(autouse=True)
-    def AnnotationJSONPresenter(self, patch):
-        return patch("h.streamer.messages.AnnotationJSONPresenter")
 
     @pytest.fixture(autouse=True)
     def SocketFilter(self, patch):

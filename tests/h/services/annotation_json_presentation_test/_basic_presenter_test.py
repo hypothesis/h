@@ -3,10 +3,10 @@ import datetime
 import pytest
 from pyramid.authorization import Everyone
 
-from h.presenters.annotation_json import AnnotationJSONPresenter
+from h.services.annotation_json_presentation._basic_presenter import BasicJSONPresenter
 
 
-class TestAnnotationJSONPresenter:
+class TestBasicJSONPresenter:
     def test_asdict(
         self, present, annotation, links_service, user_service, DocumentJSONPresenter
     ):
@@ -102,7 +102,7 @@ class TestAnnotationJSONPresenter:
 
     @pytest.fixture
     def present(self, annotation, links_service, user_service):
-        presenter = AnnotationJSONPresenter(
+        presenter = BasicJSONPresenter(
             links_service=links_service, user_service=user_service
         )
 
@@ -117,8 +117,12 @@ class TestAnnotationJSONPresenter:
 
     @pytest.fixture(autouse=True)
     def DocumentJSONPresenter(self, patch):
-        return patch("h.presenters.annotation_json.DocumentJSONPresenter")
+        return patch(
+            "h.services.annotation_json_presentation._basic_presenter.DocumentJSONPresenter"
+        )
 
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):
-        return patch("h.presenters.annotation_json.identity_permits")
+        return patch(
+            "h.services.annotation_json_presentation._basic_presenter.identity_permits"
+        )
