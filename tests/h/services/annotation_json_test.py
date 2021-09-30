@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -6,7 +7,7 @@ from pyramid.authorization import Everyone
 from sqlalchemy import event
 
 from h.security.permissions import Permission
-from h.services.annotation_json import AnnotationJSONService
+from h.services.annotation_json import AnnotationJSONService, factory
 from h.traversal import AnnotationContext
 
 
@@ -250,12 +251,42 @@ class TestAnnotationJSONService:
 
     @pytest.fixture(autouse=True)
     def Identity(self, patch):
-        return patch("h.services.annotation_json.service.Identity")
+        return patch("h.services.annotation_json.Identity")
 
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):
-        return patch("h.services.annotation_json.service.identity_permits")
+        return patch("h.services.annotation_json.identity_permits")
 
     @pytest.fixture(autouse=True)
     def DocumentJSONPresenter(self, patch):
-        return patch("h.services.annotation_json.service.DocumentJSONPresenter")
+        return patch("h.services.annotation_json.DocumentJSONPresenter")
+
+
+class TestFactory:
+    def test_it(
+        self,
+        pyramid_request,
+        AnnotationJSONService,
+        flag_service,
+        links_service,
+        user_service,
+    ):
+        service = factory(sentinel.context, pyramid_request)
+
+        assert service == AnnotationJSONService.return_value
+
+        AnnotationJSONService.assert_called_once_with(
+            session=pyramid_request.db,
+            links_service=links_service,
+            flag_service=flag_service,
+            user_service=user_service,
+        )
+
+    @pytest.fixture
+    def AnnotationJSONService(self, patch):
+        return patch("h.services.annotation_json.AnnotationJSONService")
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, factories):
+        pyramid_request.user = factories.User()
+        return pyramid_request
