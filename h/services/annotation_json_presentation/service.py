@@ -12,12 +12,12 @@ class AnnotationJSONPresentationService:
     def __init__(  # pylint: disable=too-many-arguments
         self, session, links_svc, flag_svc, user_svc
     ):
-        self.session = session
-        self.links_svc = links_svc
-        self.flag_svc = flag_svc
-        self.user_svc = user_svc
+        self._session = session
+        self._flag_service = flag_svc
+        self._links_service = links_svc
+        self._user_service = user_svc
         self._presenter = AnnotationJSONPresenter(
-            links_service=self.links_svc, user_service=self.user_svc
+            links_service=self._links_service, user_service=self._user_service
         )
 
     def present_for_user(self, annotation, user):
@@ -33,7 +33,9 @@ class AnnotationJSONPresentationService:
 
     def _get_user_dependent_content(self, annotation, user):
         # The flagged value depends on whether this particular user has flagged
-        model = {"flagged": self.flag_svc.flagged(user=user, annotation=annotation)}
+        model = {
+            "flagged": self._flag_service.flagged(user=user, annotation=annotation)
+        }
 
         # Only moderators see the full flag count
         user_is_moderator = identity_permits(
@@ -42,7 +44,9 @@ class AnnotationJSONPresentationService:
             permission=Permission.Annotation.MODERATE,
         )
         if user_is_moderator:
-            model["moderation"] = {"flagCount": self.flag_svc.flag_count(annotation)}
+            model["moderation"] = {
+                "flagCount": self._flag_service.flag_count(annotation)
+            }
 
         # The hidden value depends on whether you are the author
         if not annotation.is_hidden or self._user_is_author(user, annotation):
@@ -78,14 +82,14 @@ class AnnotationJSONPresentationService:
             )
 
         annotations = storage.fetch_ordered_annotations(
-            self.session, annotation_ids, query_processor=eager_load_related_items
+            self._session, annotation_ids, query_processor=eager_load_related_items
         )
 
         # This primes the cache for `flagged()` and `flag_count()`
-        self.flag_svc.all_flagged(user, annotation_ids)
-        self.flag_svc.flag_counts(annotation_ids)
+        self._flag_service.all_flagged(user, annotation_ids)
+        self._flag_service.flag_counts(annotation_ids)
 
         # Optimise the user service `fetch()` call in the AnnotationJSONPresenter
-        self.user_svc.fetch_all([annotation.userid for annotation in annotations])
+        self._user_service.fetch_all([annotation.userid for annotation in annotations])
 
         return annotations
