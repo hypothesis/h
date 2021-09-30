@@ -131,11 +131,11 @@ class TestHandleAnnotationEvent:
         handle_annotation_event()
 
         AnnotationJSONPresenter.assert_called_once_with(
-            fetch_annotation.return_value,
-            links_service=links_service,
-            user_service=user_service,
+            links_service=links_service, user_service=user_service
         )
-        assert AnnotationJSONPresenter.return_value.asdict.called
+        AnnotationJSONPresenter.return_value.present.assert_called_once_with(
+            fetch_annotation.return_value
+        )
 
     @pytest.mark.parametrize("action", ["create", "update", "delete"])
     def test_notification_format(
@@ -148,7 +148,7 @@ class TestHandleAnnotationEvent:
         if action == "delete":
             expected_payload = {"id": message["annotation_id"]}
         else:
-            expected_payload = AnnotationJSONPresenter.return_value.asdict.return_value
+            expected_payload = AnnotationJSONPresenter.return_value.present.return_value
 
         socket.send_json.assert_called_once_with(
             {
@@ -284,7 +284,7 @@ class TestHandleAnnotationEvent:
 
     @pytest.fixture(autouse=True)
     def AnnotationJSONPresenter(self, patch):
-        return patch("h.streamer.messages.presenters.AnnotationJSONPresenter")
+        return patch("h.streamer.messages.AnnotationJSONPresenter")
 
     @pytest.fixture(autouse=True)
     def SocketFilter(self, patch):

@@ -18,12 +18,12 @@ class AnnotationJSONPresentationService:
         self.flag_svc = flag_svc
         self.user_svc = user_svc
         self._has_permission = has_permission
+        self._presenter = AnnotationJSONPresenter(
+            links_service=self.links_svc, user_service=self.user_svc
+        )
 
     def present(self, annotation):
-        model = AnnotationJSONPresenter(
-            annotation, links_service=self.links_svc, user_service=self.user_svc
-        ).asdict()
-
+        model = self._presenter.present(annotation)
         model.update(self._get_user_dependent_content(self.user, annotation))
 
         return model
