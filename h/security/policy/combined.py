@@ -6,13 +6,13 @@ from h.security.policy._basic_http_auth import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy._identity_base import IdentityBasedPolicy
 from h.security.policy._remote_user import RemoteUserPolicy
-from h.security.policy.bearer_token import TokenPolicy
+from h.security.policy.bearer_token import BearerTokenPolicy
 
 
 @implementer(ISecurityPolicy)
 class SecurityPolicy(IdentityBasedPolicy):
     def __init__(self, proxy_auth=False):
-        self._bearer_token_policy = TokenPolicy()
+        self._bearer_token_policy = BearerTokenPolicy()
         self._http_basic_auth_policy = AuthClientPolicy()
         self._identity_cache = RequestLocalCache(self._load_identity)
 

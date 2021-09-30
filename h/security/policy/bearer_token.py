@@ -7,7 +7,7 @@ from h.security.policy._identity_base import IdentityBasedPolicy
 
 
 @implementer(ISecurityPolicy)
-class TokenPolicy(IdentityBasedPolicy):
+class BearerTokenPolicy(IdentityBasedPolicy):
     """
     A Bearer token authentication policy.
 
