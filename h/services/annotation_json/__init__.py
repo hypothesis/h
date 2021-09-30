@@ -1,2 +1,0 @@
-from h.services.annotation_json.factory import annotation_json_service_factory
-from h.services.annotation_json.service import AnnotationJSONService

@@ -178,3 +178,13 @@ class AnnotationJSONService:
 
         # Only people in the group can read it
         return f"group:{annotation.groupid}"
+
+
+def factory(_context, request):
+    return AnnotationJSONService(
+        session=request.db,
+        # Services
+        links_service=request.find_service(name="links"),
+        flag_service=request.find_service(name="flag"),
+        user_service=request.find_service(name="user"),
+    )
