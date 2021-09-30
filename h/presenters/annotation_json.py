@@ -16,9 +16,9 @@ class AnnotationJSONPresenter:
         self._user_service = user_service
 
     def asdict(self):
-        annotation = deepcopy(self.annotation.extra) or {}
+        model = deepcopy(self.annotation.extra) or {}
 
-        annotation.update(
+        model.update(
             {
                 "id": self.annotation.id,
                 "created": utc_iso8601(self.annotation.created),
@@ -43,12 +43,12 @@ class AnnotationJSONPresenter:
             }
         )
 
-        annotation.update(user_info(self._user_service.fetch(self.annotation.userid)))
+        model.update(user_info(self._user_service.fetch(self.annotation.userid)))
 
         if self.annotation.references:
-            annotation["references"] = self.annotation.references
+            model["references"] = self.annotation.references
 
-        return annotation
+        return model
 
     def _get_read_permission(self):
         if not self.annotation.shared:
