@@ -5,6 +5,7 @@ from pyramid.httpexceptions import HTTPConflict
 
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
+from h.security import Identity
 from h.services.user_unique import DuplicateUserError
 from h.traversal import UserContext
 from h.views.api.exceptions import PayloadError
@@ -32,7 +33,6 @@ class TestCreate:
         TrustedUserJSONPresenter,
     ):
         CreateUserAPISchema.return_value.validate.return_value = valid_payload
-        pyramid_request.json_body = valid_payload
 
         result = create(pyramid_request)
 
@@ -50,35 +50,28 @@ class TestCreate:
         assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
     def test_raises_when_schema_validation_fails(
-        self, pyramid_request, valid_payload, CreateUserAPISchema
+        self, pyramid_request, CreateUserAPISchema
     ):
-        create_schema = CreateUserAPISchema.return_value
-        create_schema.validate.side_effect = ValidationError("validation failed")
-
-        pyramid_request.json_body = valid_payload
+        CreateUserAPISchema.return_value.validate.side_effect = ValidationError(
+            "validation failed"
+        )
 
         with pytest.raises(ValidationError):
             create(pyramid_request)
 
-    def test_raises_ValidationError_when_authority_mismatch(
-        self, pyramid_request, valid_payload
-    ):
-        valid_payload["authority"] = "invalid.com"
-        pyramid_request.json_body = valid_payload
+    def test_raises_ValidationError_when_authority_mismatch(self, pyramid_request):
+        pyramid_request.json_body["authority"] = "invalid.com"
 
         with pytest.raises(ValidationError, match="does not match client authority"):
             create(pyramid_request)
 
     def test_raises_HTTPConflict_from_DuplicateUserError(
-        self, valid_payload, pyramid_request, user_unique_service
+        self, pyramid_request, user_unique_service
     ):
-        pyramid_request.json_body = valid_payload
         user_unique_service.ensure_unique.side_effect = DuplicateUserError("nope")
 
-        with pytest.raises(HTTPConflict) as exc:
+        with pytest.raises(HTTPConflict):
             create(pyramid_request)
-
-        assert "nope" in str(exc.value)
 
     def test_raises_for_invalid_json_body(self, pyramid_request):
         type(pyramid_request).json_body = mock.PropertyMock(side_effect=ValueError())
@@ -87,9 +80,9 @@ class TestCreate:
             create(pyramid_request)
 
     @pytest.fixture
-    def valid_payload(self):
+    def valid_payload(self, auth_client):
         return {
-            "authority": "weylandindustries.com",
+            "authority": auth_client.authority,
             "email": "jeremy@weylandtech.com",
             "username": "jeremy",
             "display_name": "Jeremy Weyland",
@@ -97,14 +90,13 @@ class TestCreate:
         }
 
     @pytest.fixture
+    def pyramid_request(self, pyramid_request, valid_payload):
+        pyramid_request.json_body = valid_payload
+        return pyramid_request
+
+    @pytest.fixture
     def CreateUserAPISchema(self, patch):
         return patch("h.views.api.users.CreateUserAPISchema")
-
-    @pytest.fixture(autouse=True)
-    def client_authority(self, patch):
-        client_authority = patch("h.views.api.users.client_authority")
-        client_authority.return_value = "weylandindustries.com"
-        return client_authority
 
 
 @pytest.mark.usefixtures("user_update_service")
@@ -118,7 +110,6 @@ class TestUpdate:
         user_update_service,
         TrustedUserJSONPresenter,
     ):
-        pyramid_request.json_body = valid_payload
         UpdateUserAPISchema.return_value.validate.return_value = valid_payload
 
         result = update(context, pyramid_request)
@@ -151,11 +142,8 @@ class TestUpdate:
             update(context, pyramid_request)
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, user):
-        # Add a nominal json_body so that _json_payload() parsing of
-        # it doesn't raise
-        pyramid_request.json_body = {}
-        pyramid_request.matchdict["username"] = user.username
+    def pyramid_request(self, pyramid_request, valid_payload):
+        pyramid_request.json_body = valid_payload
         return pyramid_request
 
     @pytest.fixture
@@ -169,21 +157,21 @@ class TestUpdate:
 
 @pytest.fixture
 def auth_client(factories):
-    return factories.ConfidentialAuthClient(
-        authority="weylandindustries.com", grant_type=GrantType.client_credentials
+    return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
+
+
+@pytest.fixture
+def context(factories, auth_client):
+    return UserContext(user=factories.User(authority=auth_client.authority))
+
+
+@pytest.fixture(autouse=True)
+def with_auth_client(auth_client, pyramid_config):
+    pyramid_config.testing_securitypolicy(
+        identity=Identity.from_models(auth_client=auth_client)
     )
 
 
 @pytest.fixture(autouse=True)
 def TrustedUserJSONPresenter(patch):
     return patch("h.views.api.users.TrustedUserJSONPresenter")
-
-
-@pytest.fixture
-def user(factories, auth_client):
-    return factories.User(authority=auth_client.authority)
-
-
-@pytest.fixture
-def context(user):
-    return UserContext(user=user)
