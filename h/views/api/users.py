@@ -54,27 +54,26 @@ def create(request):
                              authority
     :raises HTTPConflict:    if user already exists
     """
-    client_authority_ = client_authority(request)
-    schema = CreateUserAPISchema()
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = CreateUserAPISchema().validate(_json_payload(request))
 
     # Enforce authority match
+    client_authority_ = client_authority(request)
     if appstruct["authority"] != client_authority_:
         raise ValidationError(
             f"""authority '{appstruct["authority"]}' does not match client authority"""
         )
 
     user_unique_service = request.find_service(name="user_unique")
-
     try:
         user_unique_service.ensure_unique(appstruct, authority=client_authority_)
     except DuplicateUserError as err:
         raise HTTPConflict(str(err)) from err
 
-    user_signup_service = request.find_service(name="user_signup")
-    user = user_signup_service.signup(require_activation=False, **appstruct)
-    presenter = TrustedUserJSONPresenter(user)
-    return presenter.asdict()
+    user = request.find_service(name="user_signup").signup(
+        require_activation=False, **appstruct
+    )
+
+    return TrustedUserJSONPresenter(user).asdict()
 
 
 @api_config(
@@ -92,14 +91,11 @@ def update(context, request):
     This API endpoint allows authorised clients (those able to provide a valid
     Client ID and Client Secret) to update users in their authority.
     """
-    schema = UpdateUserAPISchema()
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = UpdateUserAPISchema().validate(_json_payload(request))
 
-    user_update_service = request.find_service(name="user_update")
-    user = user_update_service.update(context.user, **appstruct)
+    user = request.find_service(name="user_update").update(context.user, **appstruct)
 
-    presenter = TrustedUserJSONPresenter(user)
-    return presenter.asdict()
+    return TrustedUserJSONPresenter(user).asdict()
 
 
 def _json_payload(request):

@@ -12,68 +12,42 @@ from h.views.api.users import create, read, update
 
 
 class TestRead:
-    def test_it_presents_user(self, pyramid_request, context, TrustedUserJSONPresenter):
-        read(context, pyramid_request)
+    def test_it(self, pyramid_request, context, TrustedUserJSONPresenter):
+        result = read(context, pyramid_request)
 
         TrustedUserJSONPresenter.assert_called_once_with(context.user)
-        TrustedUserJSONPresenter.return_value.asdict.assert_called_once_with()
-
-    def test_it_returns_presented_user(
-        self, pyramid_request, context, TrustedUserJSONPresenter
-    ):
-        result = read(context, pyramid_request)
         assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
 
 @pytest.mark.usefixtures("user_signup_service", "user_unique_service")
 class TestCreate:
-    def test_signs_up_user(self, pyramid_request, user_signup_service, valid_payload):
-        pyramid_request.json_body = valid_payload
-
-        create(pyramid_request)
-
-        user_signup_service.signup.assert_called_once_with(
-            require_activation=False,
-            authority="weylandindustries.com",
-            username="jeremy",
-            email="jeremy@weylandtech.com",
-            display_name="Jeremy Weyland",
-            identities=[{"provider": "provider_a", "provider_unique_id": "abc123"}],
-        )
-
-    def test_it_presents_user(
+    def test_it(
         self,
         pyramid_request,
-        valid_payload,
-        user,
-        TrustedUserJSONPresenter,
         user_signup_service,
+        user_unique_service,
+        auth_client,
+        valid_payload,
+        CreateUserAPISchema,
+        TrustedUserJSONPresenter,
     ):
-        user_signup_service.signup.return_value = user
-
+        CreateUserAPISchema.return_value.validate.return_value = valid_payload
         pyramid_request.json_body = valid_payload
-        create(pyramid_request)
 
-        TrustedUserJSONPresenter.assert_called_once_with(user)
-
-    def test_it_returns_presented_user(
-        self, pyramid_request, valid_payload, TrustedUserJSONPresenter
-    ):
-        pyramid_request.json_body = valid_payload
         result = create(pyramid_request)
 
-        assert result == TrustedUserJSONPresenter.return_value.asdict()
-
-    def test_it_validates_the_input(
-        self, pyramid_request, valid_payload, CreateUserAPISchema
-    ):
-        create_schema = CreateUserAPISchema.return_value
-        create_schema.validate.return_value = valid_payload
-        pyramid_request.json_body = valid_payload
-
-        create(pyramid_request)
-
-        create_schema.validate.assert_called_once_with(valid_payload)
+        CreateUserAPISchema.assert_called_with()
+        CreateUserAPISchema.return_value.validate.assert_called_once_with(valid_payload)
+        user_unique_service.ensure_unique.assert_called_with(
+            valid_payload, authority=auth_client.authority
+        )
+        user_signup_service.signup.assert_called_once_with(
+            require_activation=False, **valid_payload
+        )
+        user = user_signup_service.signup.return_value
+        TrustedUserJSONPresenter.assert_called_with(user)
+        TrustedUserJSONPresenter.return_value.asdict.assert_called_once_with()
+        assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
     def test_raises_when_schema_validation_fails(
         self, pyramid_request, valid_payload, CreateUserAPISchema
@@ -94,23 +68,6 @@ class TestCreate:
 
         with pytest.raises(ValidationError, match="does not match client authority"):
             create(pyramid_request)
-
-    def test_it_proxies_uniqueness_check_to_service(
-        self,
-        valid_payload,
-        pyramid_request,
-        user_unique_service,
-        CreateUserAPISchema,
-        auth_client,
-    ):
-        pyramid_request.json_body = valid_payload
-        CreateUserAPISchema().validate.return_value = valid_payload
-
-        create(pyramid_request)
-
-        user_unique_service.ensure_unique.assert_called_with(
-            valid_payload, authority=auth_client.authority
-        )
 
     def test_raises_HTTPConflict_from_DuplicateUserError(
         self, valid_payload, pyramid_request, user_unique_service
@@ -150,41 +107,32 @@ class TestCreate:
         return client_authority
 
 
-@pytest.mark.usefixtures("user_service", "user_update_service")
+@pytest.mark.usefixtures("user_update_service")
 class TestUpdate:
-    def test_it_validates_request_payload(
-        self, pyramid_request, context, UpdateUserAPISchema
+    def test_it(
+        self,
+        context,
+        pyramid_request,
+        valid_payload,
+        UpdateUserAPISchema,
+        user_update_service,
+        TrustedUserJSONPresenter,
     ):
-        data = {"display_name": "Rudolph Blimp", "email": "fingers@perplexology.com"}
-        pyramid_request.json_body = data
-
-        update(context, pyramid_request)
-
-        UpdateUserAPISchema.return_value.validate.assert_called_once_with(data)
-
-    def test_it_proxies_to_user_update_service(
-        self, pyramid_request, context, user_update_service, UpdateUserAPISchema
-    ):
-        appstruct = {
-            "display_name": "Rudolph Blimp",
-            "email": "fingers@perplexology.com",
-        }
-        UpdateUserAPISchema.return_value.validate.return_value = appstruct
-        user_update_service.update.return_value = context.user
-
-        update(context, pyramid_request)
-
-        user_update_service.update.assert_called_once_with(context.user, **appstruct)
-
-    def test_it_presents_updated_user_returned_from_service(
-        self, pyramid_request, context, TrustedUserJSONPresenter, user_update_service
-    ):
-        user_update_service.update.return_value = context.user
+        pyramid_request.json_body = valid_payload
+        UpdateUserAPISchema.return_value.validate.return_value = valid_payload
 
         result = update(context, pyramid_request)
 
-        TrustedUserJSONPresenter.assert_called_once_with(context.user)
-        assert result == TrustedUserJSONPresenter.return_value.asdict()
+        UpdateUserAPISchema.assert_called_with()
+        UpdateUserAPISchema.return_value.validate.assert_called_once_with(valid_payload)
+        user_update_service.update.assert_called_once_with(
+            context.user, **valid_payload
+        )
+
+        user = user_update_service.update.return_value
+        TrustedUserJSONPresenter.assert_called_with(user)
+        TrustedUserJSONPresenter.return_value.asdict.assert_called_once_with()
+        assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
     def test_raises_when_schema_validation_fails(
         self, context, pyramid_request, UpdateUserAPISchema
