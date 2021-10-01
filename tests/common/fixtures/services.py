@@ -43,9 +43,15 @@ __all__ = (
     "organization_service",
     "search_index",
     "user_service",
+    "user_signup_service",
+    "user_unique_service",
+    "user_update_service",
 )
 
 from h.services.user import UserService
+from h.services.user_signup import UserSignupService
+from h.services.user_unique import UserUniqueService
+from h.services.user_update import UserUpdateService
 
 
 @pytest.fixture
@@ -173,3 +179,18 @@ def search_index(mock_service):
 @pytest.fixture
 def user_service(mock_service):
     return mock_service(UserService, name="user")
+
+
+@pytest.fixture
+def user_signup_service(mock_service):
+    return mock_service(UserSignupService, name="user_signup")
+
+
+@pytest.fixture
+def user_unique_service(mock_service):
+    return mock_service(UserUniqueService, name="user_unique")
+
+
+@pytest.fixture
+def user_update_service(mock_service):
+    return mock_service(UserUpdateService, name="user_update")

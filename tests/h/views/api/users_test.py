@@ -5,9 +5,7 @@ from pyramid.httpexceptions import HTTPConflict
 
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
-from h.services.user_signup import UserSignupService
-from h.services.user_unique import DuplicateUserError, UserUniqueService
-from h.services.user_update import UserUpdateService
+from h.services.user_unique import DuplicateUserError
 from h.traversal import UserContext
 from h.views.api.exceptions import PayloadError
 from h.views.api.users import create, read, update
@@ -27,7 +25,9 @@ class TestRead:
         assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
 
-@pytest.mark.usefixtures("client_authority", "user_signup_service", "user_unique_svc")
+@pytest.mark.usefixtures(
+    "client_authority", "user_signup_service", "user_unique_service"
+)
 class TestCreate:
     def test_signs_up_user(self, pyramid_request, user_signup_service, valid_payload):
         pyramid_request.json_body = valid_payload
@@ -44,8 +44,15 @@ class TestCreate:
         )
 
     def test_it_presents_user(
-        self, pyramid_request, valid_payload, user, TrustedUserJSONPresenter
+        self,
+        pyramid_request,
+        valid_payload,
+        user,
+        TrustedUserJSONPresenter,
+        user_signup_service,
     ):
+        user_signup_service.signup.return_value = user
+
         pyramid_request.json_body = valid_payload
         create(pyramid_request)
 
@@ -94,7 +101,7 @@ class TestCreate:
         self,
         valid_payload,
         pyramid_request,
-        user_unique_svc,
+        user_unique_service,
         CreateUserAPISchema,
         auth_client,
     ):
@@ -103,15 +110,15 @@ class TestCreate:
 
         create(pyramid_request)
 
-        user_unique_svc.ensure_unique.assert_called_with(
+        user_unique_service.ensure_unique.assert_called_with(
             valid_payload, authority=auth_client.authority
         )
 
     def test_raises_HTTPConflict_from_DuplicateUserError(
-        self, valid_payload, pyramid_request, user_unique_svc
+        self, valid_payload, pyramid_request, user_unique_service
     ):
         pyramid_request.json_body = valid_payload
-        user_unique_svc.ensure_unique.side_effect = DuplicateUserError("nope")
+        user_unique_service.ensure_unique.side_effect = DuplicateUserError("nope")
 
         with pytest.raises(HTTPConflict) as exc:
             create(pyramid_request)
@@ -144,7 +151,7 @@ class TestCreate:
 @pytest.mark.usefixtures(
     "auth_client",
     "user_service",
-    "user_update_svc",
+    "user_update_service",
     "UpdateUserAPISchema",
     "TrustedUserJSONPresenter",
 )
@@ -159,24 +166,24 @@ class TestUpdate:
 
         UpdateUserAPISchema.return_value.validate.assert_called_once_with(data)
 
-    def test_it_proxies_to_user_update_svc(
-        self, pyramid_request, context, user_update_svc, UpdateUserAPISchema
+    def test_it_proxies_to_user_update_service(
+        self, pyramid_request, context, user_update_service, UpdateUserAPISchema
     ):
         appstruct = {
             "display_name": "Rudolph Blimp",
             "email": "fingers@perplexology.com",
         }
         UpdateUserAPISchema.return_value.validate.return_value = appstruct
-        user_update_svc.update.return_value = context.user
+        user_update_service.update.return_value = context.user
 
         update(context, pyramid_request)
 
-        user_update_svc.update.assert_called_once_with(context.user, **appstruct)
+        user_update_service.update.assert_called_once_with(context.user, **appstruct)
 
     def test_it_presents_updated_user_returned_from_service(
-        self, pyramid_request, context, TrustedUserJSONPresenter, user_update_svc
+        self, pyramid_request, context, TrustedUserJSONPresenter, user_update_service
     ):
-        user_update_svc.update.return_value = context.user
+        user_update_service.update.return_value = context.user
 
         result = update(context, pyramid_request)
 
@@ -211,53 +218,12 @@ class TestUpdate:
     def valid_payload(self):
         return {"email": "jeremy@weylandtech.com", "display_name": "Jeremy Weyland"}
 
-    @pytest.fixture
-    def user_service(self, user_service, user):
-        def fake_fetch(username, authority):
-            if username == user.username and authority == user.authority:
-                return user
-            return None
-
-        user_service.fetch.side_effect = fake_fetch
-
-        return user_service
-
 
 @pytest.fixture
 def auth_client(factories):
     return factories.ConfidentialAuthClient(
         authority="weylandindustries.com", grant_type=GrantType.client_credentials
     )
-
-
-@pytest.fixture
-def user_signup_service(pyramid_config, user):
-    service = mock.Mock(
-        spec_set=UserSignupService(
-            default_authority="example.com",
-            mailer=None,
-            session=None,
-            password_service=None,
-            signup_email=None,
-        )
-    )
-    service.signup.return_value = user
-    pyramid_config.register_service(service, name="user_signup")
-    return service
-
-
-@pytest.fixture
-def user_unique_svc(pyramid_config):
-    svc = mock.create_autospec(UserUniqueService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name="user_unique")
-    return svc
-
-
-@pytest.fixture
-def user_update_svc(pyramid_config):
-    svc = mock.create_autospec(UserUpdateService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name="user_update")
-    return svc
 
 
 @pytest.fixture
