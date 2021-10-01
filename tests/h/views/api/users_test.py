@@ -25,9 +25,7 @@ class TestRead:
         assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
 
-@pytest.mark.usefixtures(
-    "client_authority", "user_signup_service", "user_unique_service"
-)
+@pytest.mark.usefixtures("user_signup_service", "user_unique_service")
 class TestCreate:
     def test_signs_up_user(self, pyramid_request, user_signup_service, valid_payload):
         pyramid_request.json_body = valid_payload
@@ -132,12 +130,6 @@ class TestCreate:
             create(pyramid_request)
 
     @pytest.fixture
-    def client_authority(self, patch):
-        client_authority = patch("h.views.api.users.client_authority")
-        client_authority.return_value = "weylandindustries.com"
-        return client_authority
-
-    @pytest.fixture
     def valid_payload(self):
         return {
             "authority": "weylandindustries.com",
@@ -147,14 +139,18 @@ class TestCreate:
             "identities": [{"provider": "provider_a", "provider_unique_id": "abc123"}],
         }
 
+    @pytest.fixture
+    def CreateUserAPISchema(self, patch):
+        return patch("h.views.api.users.CreateUserAPISchema")
 
-@pytest.mark.usefixtures(
-    "auth_client",
-    "user_service",
-    "user_update_service",
-    "UpdateUserAPISchema",
-    "TrustedUserJSONPresenter",
-)
+    @pytest.fixture(autouse=True)
+    def client_authority(self, patch):
+        client_authority = patch("h.views.api.users.client_authority")
+        client_authority.return_value = "weylandindustries.com"
+        return client_authority
+
+
+@pytest.mark.usefixtures("user_service", "user_update_service")
 class TestUpdate:
     def test_it_validates_request_payload(
         self, pyramid_request, context, UpdateUserAPISchema
@@ -218,6 +214,10 @@ class TestUpdate:
     def valid_payload(self):
         return {"email": "jeremy@weylandtech.com", "display_name": "Jeremy Weyland"}
 
+    @pytest.fixture(autouse=True)
+    def UpdateUserAPISchema(self, patch):
+        return patch("h.views.api.users.UpdateUserAPISchema")
+
 
 @pytest.fixture
 def auth_client(factories):
@@ -226,17 +226,7 @@ def auth_client(factories):
     )
 
 
-@pytest.fixture
-def CreateUserAPISchema(patch):
-    return patch("h.views.api.users.CreateUserAPISchema")
-
-
-@pytest.fixture
-def UpdateUserAPISchema(patch):
-    return patch("h.views.api.users.UpdateUserAPISchema")
-
-
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def TrustedUserJSONPresenter(patch):
     return patch("h.views.api.users.TrustedUserJSONPresenter")
 
@@ -248,4 +238,4 @@ def user(factories, auth_client):
 
 @pytest.fixture
 def context(user):
-    return mock.create_autospec(UserContext, instance=True, user=user)
+    return UserContext(user=user)
