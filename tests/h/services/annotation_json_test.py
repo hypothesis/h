@@ -243,7 +243,9 @@ class TestAnnotationJSONService:
 
     @pytest.fixture
     def annotation(self, factories):
-        return factories.Annotation(moderation=None, groupid="NOT WORLD")
+        return factories.Annotation(
+            moderation=None, groupid="NOT WORLD", tags=["some-tags"]
+        )
 
     @pytest.fixture
     def with_hidden_annotation(self, annotation, factories):
