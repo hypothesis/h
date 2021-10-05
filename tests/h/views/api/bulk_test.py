@@ -6,13 +6,12 @@ import pytest
 from h_api.exceptions import SchemaValidationError
 from webob import Response
 
+from h.security import Identity
 from h.views.api.bulk import bulk
 
 
 class TestBulk:
-    def test_it_calls_bulk_api_correctly(
-        self, pyramid_request, BulkAPI, bulk_executor, client_authority
-    ):
+    def test_it_calls_bulk_api_correctly(self, pyramid_request, BulkAPI, bulk_executor):
         bulk(pyramid_request)
 
         BulkAPI.from_byte_stream.assert_called_once_with(
@@ -20,10 +19,8 @@ class TestBulk:
         )
 
         bulk_executor.assert_called_once_with(
-            pyramid_request.db, authority=client_authority.return_value
+            pyramid_request.db, authority=pyramid_request.identity.auth_client.authority
         )
-
-        client_authority.assert_called_once_with(pyramid_request)
 
     def test_it_formats_responses_correctly(self, pyramid_request, return_values):
         result = bulk(pyramid_request)
@@ -70,8 +67,10 @@ class TestBulk:
         BulkAPI.from_byte_stream.return_value = None
 
     @pytest.fixture(autouse=True)
-    def client_authority(self, patch):
-        return patch("h.views.api.bulk.client_authority")
+    def with_auth_client(self, factories, pyramid_config):
+        pyramid_config.testing_securitypolicy(
+            identity=Identity.from_models(auth_client=factories.AuthClient())
+        )
 
     @pytest.fixture(autouse=True)
     def BulkAPI(self, patch, return_values):

@@ -1,6 +1,5 @@
 from pyramid.httpexceptions import HTTPConflict
 
-from h.auth.util import client_authority
 from h.presenters import TrustedUserJSONPresenter
 from h.schemas import ValidationError
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
@@ -57,15 +56,15 @@ def create(request):
     appstruct = CreateUserAPISchema().validate(_json_payload(request))
 
     # Enforce authority match
-    client_authority_ = client_authority(request)
-    if appstruct["authority"] != client_authority_:
+    client_authority = request.identity.auth_client.authority
+    if appstruct["authority"] != client_authority:
         raise ValidationError(
             f"""authority '{appstruct["authority"]}' does not match client authority"""
         )
 
     user_unique_service = request.find_service(name="user_unique")
     try:
-        user_unique_service.ensure_unique(appstruct, authority=client_authority_)
+        user_unique_service.ensure_unique(appstruct, authority=client_authority)
     except DuplicateUserError as err:
         raise HTTPConflict(str(err)) from err
 
