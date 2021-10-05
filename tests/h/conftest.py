@@ -202,6 +202,7 @@ def pyramid_config(pyramid_settings, pyramid_request):
     ) as config:
         # Include pyramid_services so it's easy to set up fake services in tests
         config.include("pyramid_services")
+        config.include("h.security.request_methods")
         apply_request_extensions(pyramid_request)
 
         yield config

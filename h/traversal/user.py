@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from pyramid.httpexceptions import HTTPBadRequest
 
-from h.auth.util import client_authority
 from h.exceptions import InvalidUserId
 from h.models import User
 
@@ -39,8 +38,7 @@ class UserByNameRoot(UserRoot):
 
     def __getitem__(self, username):
         return self.get_user_context(
-            username,
-            authority=client_authority(self.request) or self.request.default_authority,
+            username, authority=self.request.effective_authority
         )
 
 
