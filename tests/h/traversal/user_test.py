@@ -42,25 +42,13 @@ class TestUserRoot:
 
 @pytest.mark.usefixtures("user_service")
 class TestUserByNameRoot:
-    @pytest.mark.parametrize("returned_authority", (None, sentinel.client_authority))
-    def test_it_fetches_the_requested_user(
-        self, pyramid_request, root, client_authority, returned_authority
-    ):
-        client_authority.return_value = returned_authority
-
+    def test_it_fetches_the_requested_user(self, root, pyramid_request):
         context = root[sentinel.username]
 
-        client_authority.assert_called_once_with(pyramid_request)
         root.get_user_context.assert_called_once_with(
-            sentinel.username,
-            authority=client_authority.return_value
-            or pyramid_request.default_authority,
+            sentinel.username, authority=pyramid_request.effective_authority
         )
         assert context == root.get_user_context.return_value
-
-    @pytest.fixture(autouse=True)
-    def client_authority(self, patch):
-        return patch("h.traversal.user.client_authority")
 
     @pytest.fixture
     def root(self, pyramid_request):

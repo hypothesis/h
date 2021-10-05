@@ -5,7 +5,6 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
 )
 
-from h.auth.util import client_authority
 from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
@@ -49,7 +48,7 @@ def create(request):
     """Create a group from the POST payload."""
     appstruct = CreateGroupAPISchema(
         default_authority=request.default_authority,
-        group_authority=client_authority(request) or request.default_authority,
+        group_authority=request.effective_authority,
     ).validate(_json_payload(request))
 
     group_service = request.find_service(name="group")
@@ -101,7 +100,7 @@ def update(context, request):
     """Update a group from a PATCH payload."""
     appstruct = UpdateGroupAPISchema(
         default_authority=request.default_authority,
-        group_authority=client_authority(request) or request.default_authority,
+        group_authority=request.effective_authority,
     ).validate(_json_payload(request))
 
     group_update_service = request.find_service(name="group_update")
@@ -152,7 +151,7 @@ def upsert(context, request):
     # here as we want to make sure properties required for a fresh object are present
     appstruct = CreateGroupAPISchema(
         default_authority=request.default_authority,
-        group_authority=client_authority(request) or request.default_authority,
+        group_authority=request.effective_authority,
     ).validate(_json_payload(request))
 
     group_update_service = request.find_service(name="group_update")
