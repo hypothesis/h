@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.7.3
+alembic==1.7.4
     # via -r requirements/requirements.in
 amqp==5.0.6
     # via kombu
@@ -69,6 +69,8 @@ h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
+importlib-metadata==4.8.1
+    # via alembic
 importlib-resources==5.2.2
     # via
     #   -r requirements/requirements.in
@@ -229,7 +231,9 @@ ws4py==0.5.1
 wsaccel==0.6.3
     # via -r requirements/requirements.in
 zipp==3.4.1
-    # via importlib-resources
+    # via
+    #   importlib-metadata
+    #   importlib-resources
 zope.deprecation==4.1.2
     # via
     #   deform

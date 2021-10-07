@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/functests.in
 #
-alembic==1.7.3
+alembic==1.7.4
     # via -r requirements/requirements.txt
 amqp==5.0.6
     # via
@@ -95,6 +95,10 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
+importlib-metadata==4.8.1
+    # via
+    #   -r requirements/requirements.txt
+    #   alembic
 importlib-resources==5.2.2
     # via
     #   -r requirements/requirements.txt
@@ -322,6 +326,7 @@ wsaccel==0.6.3
 zipp==3.4.1
     # via
     #   -r requirements/requirements.txt
+    #   importlib-metadata
     #   importlib-resources
 zope.deprecation==4.1.2
     # via
