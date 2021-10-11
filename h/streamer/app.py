@@ -25,7 +25,6 @@ def create_app(_global_config, **settings):
 
     config.include("pyramid_services")
 
-    config.include("h.auth")
     config.include("h.security")
     # Override the default authentication policy.
     config.set_security_policy(BearerTokenPolicy())

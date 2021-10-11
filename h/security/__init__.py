@@ -20,6 +20,8 @@ log = logging.getLogger(__name__)
 
 
 def includeme(config):  # pragma: no cover
+    config.include("h.security.request_methods")
+
     settings = config.registry.settings
 
     settings["h_auth_cookie_secret"] = derive_key(

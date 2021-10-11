@@ -2,7 +2,7 @@
 
 from pyramid.request import Request
 
-from h.auth import default_authority
+from h.security.request_methods import default_authority
 
 LINK_GENERATORS_KEY = "h.links.link_generators"
 
