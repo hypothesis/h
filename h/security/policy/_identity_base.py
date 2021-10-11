@@ -4,6 +4,13 @@ from h.security import Identity, identity_permits
 
 
 class IdentityBasedPolicy:
+    """
+    A base policy which will fill a policy based on returning an identity.
+
+    This means you only need to implement `identity()` to get a functioning
+    security policy.
+    """
+
     @classmethod
     def identity(cls, request) -> Optional[Identity]:  # pylint: disable=unused-argument
         """
