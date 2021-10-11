@@ -274,7 +274,7 @@ py==1.10.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pytest
-pycodestyle==2.7.0
+pycodestyle==2.8.0
     # via -r requirements/lint.in
 pycparser==2.20
     # via
