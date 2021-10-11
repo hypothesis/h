@@ -14,6 +14,8 @@ class BearerTokenPolicy(IdentityBasedPolicy):
     This policy uses a bearer token which is validated against Token objects
     in the DB. This can come from the Bearer token header or in the case of
     Websocket requests with the GET parameter `access_token`.
+
+    We use this for our API and Websocket requests.
     """
 
     def __init__(self):
@@ -36,9 +38,14 @@ class BearerTokenPolicy(IdentityBasedPolicy):
         token_svc = request.find_service(name="auth_token")
         token_str = None
 
+        # We only ever want to read the access token from GET parameters for
+        # websocket requests
         if self._is_ws_request(request):
             token_str = request.GET.get("access_token", None)
 
+        # We currently only accept a real bearer token in our API calls, but
+        # it's conceivable the WS spec will one day change to accept this:
+        # See: https://github.com/whatwg/html/issues/3062
         if token_str is None:
             token_str = token_svc.get_bearer_token(request)
 

@@ -6,6 +6,13 @@ from h.services import AuthCookieService
 
 
 class CookiePolicy(IdentityBasedPolicy):
+    """
+    An authentication policy based on cookies.
+
+    This policy kicks in when accessing the UI presented by `h` and also boot
+    straps the login for the client (when the popup shows).
+    """
+
     def identity(self, request):
         self._add_vary_by_cookie(request)
 
