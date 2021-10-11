@@ -1,3 +1,5 @@
+"""Data classes used to represent authenticated users."""
+
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -6,7 +8,11 @@ from h.models import AuthClient, Group, User
 
 @dataclass
 class LongLivedGroup:
-    """A Group object which isn't connected to SQLAlchemy."""
+    """
+    A Group object which isn't connected to SQLAlchemy.
+
+    This is used in a `LongLivedUser` for `Identity.from_models()`
+    """
 
     id: int
     pubid: str
@@ -20,7 +26,11 @@ class LongLivedGroup:
 
 @dataclass
 class LongLivedUser:
-    """A User object which isn't connected to SQLAlchemy."""
+    """
+    A User object which isn't connected to SQLAlchemy.
+
+    This is used in `Identity.from_models()`
+    """
 
     id: int
     userid: str
@@ -45,7 +55,11 @@ class LongLivedUser:
 
 @dataclass
 class LongLivedAuthClient:
-    """An AuthClient object which isn't connected to SQLAlchemy."""
+    """
+    An AuthClient object which isn't connected to SQLAlchemy.
+
+    This is used in `Identity.from_models()`
+    """
 
     id: str
     authority: str
@@ -71,7 +85,9 @@ class Identity:
     auth_client: Optional[LongLivedAuthClient] = None
 
     @classmethod
-    def from_models(cls, user=None, auth_client=None):
+    def from_models(cls, user: User = None, auth_client: AuthClient = None):
+        """Create an `Identity` object from SQLAlchemy models."""
+
         return Identity(
             user=LongLivedUser.from_model(user) if user else None,
             auth_client=LongLivedAuthClient.from_model(auth_client)
