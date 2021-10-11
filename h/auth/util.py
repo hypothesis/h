@@ -1,12 +1,3 @@
-def default_authority(request):
-    """
-    Return the value of the h.authority config settings.
-
-    Falls back on returning request.domain if h.authority isn't set.
-    """
-    return request.registry.settings.get("h.authority", request.domain)
-
-
 def client_authority(request):
     """
     Return the authority associated with an authenticated auth_client or None.
