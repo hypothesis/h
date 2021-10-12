@@ -30,17 +30,19 @@ class TestSearchAdminViews:
             "Began reindexing from 2020-09-09 00:00:00 to 2020-09-11 00:00:00"
         ]
 
+    @pytest.mark.parametrize("force", [True, False])
     def test_reindex_user_reindexes_annotations(
-        self, views, pyramid_request, search_index, factories
+        self, views, pyramid_request, search_index, factories, force
     ):
         user = factories.User(username="johnsmith")
         pyramid_request.params = {"username": "johnsmith"}
+        if force:
+            pyramid_request.params["reindex_user_force"] = "on"
 
         views.reindex_user()
 
         search_index.add_users_annotations.assert_called_once_with(
-            user.userid,
-            "reindex_user",
+            user.userid, "reindex_user", force=force
         )
 
         assert pyramid_request.session.peek_flash("success") == [
@@ -53,19 +55,21 @@ class TestSearchAdminViews:
         with pytest.raises(NotFoundError, match="User johnsmith not found"):
             views.reindex_user()
 
+    @pytest.mark.parametrize("force", [True, False])
     def test_reindex_group_reindexes_annotations(
-        self, views, pyramid_request, search_index, factories, group_service
+        self, views, pyramid_request, search_index, factories, group_service, force
     ):
         group = factories.Group(pubid="abc123")
         pyramid_request.params = {"groupid": "abc123"}
+        if force:
+            pyramid_request.params["reindex_group_force"] = "on"
         group_service.fetch_by_pubid.return_value = group
 
         views.reindex_group()
 
         group_service.fetch_by_pubid.assert_called_with(group.pubid)
         search_index.add_group_annotations.assert_called_once_with(
-            group.pubid,
-            "reindex_group",
+            group.pubid, "reindex_group", force=force
         )
 
         assert pyramid_request.session.peek_flash("success") == [

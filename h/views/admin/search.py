@@ -50,6 +50,8 @@ class SearchAdminViews:
     )
     def reindex_user(self):
         username = self.request.params["username"].strip()
+        force = bool(self.request.params.get("reindex_user_force"))
+
         user = models.User.get_by_username(
             self.request.db, username, self.request.default_authority
         )
@@ -57,7 +59,7 @@ class SearchAdminViews:
             raise NotFoundError(f"User {username} not found")
 
         self.request.find_service(name="search_index").add_users_annotations(
-            user.userid, tag="reindex_user"
+            user.userid, tag="reindex_user", force=force
         )
         return self._notify_reindexing_started(
             f"Began reindexing annotations by {user.userid}"
@@ -71,12 +73,14 @@ class SearchAdminViews:
     )
     def reindex_group(self):
         groupid = self.request.params["groupid"].strip()
+        force = bool(self.request.params.get("reindex_group_force"))
+
         group = self.request.find_service(name="group").fetch_by_pubid(groupid)
         if not group:
             raise NotFoundError(f"Group {groupid} not found")
 
         self.request.find_service(name="search_index").add_group_annotations(
-            groupid, tag="reindex_group"
+            groupid, tag="reindex_group", force=force
         )
         return self._notify_reindexing_started(
             f"Began reindexing annotations in group {groupid} ({group.name})"
