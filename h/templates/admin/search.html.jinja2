@@ -10,7 +10,7 @@
     </div>
 
     <div class="panel-body">
-      <form method="POST" class="form-inline">
+      <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
         {{ caller() }}
         <div class="form-group">
@@ -37,13 +37,17 @@
   {% endcall %}
 
   {% call reindex_form(heading="Reindex all annotations by a user", action="reindex_user") %}
-    <label for="username">Username</label>
-    <input required class="form-control" name="username" id="username">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input required class="form-control" name="username" id="username">
+    </div>
   {% endcall %}
 
   {% call reindex_form(heading="Reindex all annotations in a group", action="reindex_group") %}
-    <label for="groupid">Group ID</label>
-    <input required class="form-control" name="groupid" id="groupid">
+    <div class="form-group">
+      <label for="groupid">Group ID</label>
+      <input required class="form-control" name="groupid" id="groupid">
+    </div>
   {% endcall %}
 {% endblock %}
 
