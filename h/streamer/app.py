@@ -1,27 +1,12 @@
-import os
-
 import pyramid
 
 from h.config import configure
 from h.security import BearerTokenPolicy
 from h.sentry_filters import SENTRY_FILTERS
-from h.streamer.worker import log
 
 
 def create_app(_global_config, **settings):
     config = configure(settings=settings)
-
-    if os.environ.get("KILL_SWITCH_WEBSOCKET"):
-        log.warning("Websocket kill switch has been enabled.")
-        log.warning("The switch is the environment variable 'KILL_SWITCH_WEBSOCKET'")
-        log.warning("No websocket functionality will work until the switch is disabled")
-
-        # Add views to return messages so we don't get confused between
-        # disabled and missing end-points in the logs
-        config.scan("h.streamer.kill_switch_views")
-
-        # Quit out early without configuring any routes etc.
-        return config.make_wsgi_app()
 
     config.include("pyramid_services")
 

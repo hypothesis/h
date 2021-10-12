@@ -8,7 +8,6 @@ from h.streamer.app import create_app
 
 
 class TestIncludeMe:
-    @pytest.mark.usefixtures("configure")
     def test_it_configures_pyramid_sentry_plugin(self, config):
         create_app(None)
 
@@ -19,27 +18,11 @@ class TestIncludeMe:
             }
         )
 
-    @pytest.mark.usefixtures("with_kill_switch_on", "configure")
-    def test_it_respects_the_kill_switch(self, config):
-        create_app(None)
-
-        config.add_settings.assert_not_called()
-        config.add_tween.assert_not_called()
-        config.set_authentication_policy.assert_not_called()
-        config.add_route.assert_not_called()
-
-        config.scan.assert_called_once_with("h.streamer.kill_switch_views")
-
-    @pytest.fixture
-    def with_kill_switch_on(self, patch):
-        os = patch("h.streamer.app.os")
-        os.environ.get.side_effect = {"KILL_SWITCH_WEBSOCKET": 1}.get
-
     @pytest.fixture
     def config(self):
         return mock.create_autospec(Configurator, instance=True)
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def configure(self, patch, config):
         configure = patch("h.streamer.app.configure")
         configure.return_value = config
