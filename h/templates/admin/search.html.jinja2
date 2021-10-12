@@ -21,6 +21,13 @@
   </div>
 {% endmacro %}
 
+{% macro force_checkbox(name) %}
+  <div class="form-group form-check">
+    <input class="form-check-input" type="checkbox" checked id="{{ name }}" name="{{ name }}">
+    <label class="form-check-label" for="{{ name }}">Force <small class="text-muted">(Reindex all matching annotations even if they're already up to date in Elasticsearch.)</small></label>
+  </div>
+{% endmacro %}
+
 {% block content %}
   <p>This is the search index admin page.</p>
 
@@ -41,6 +48,8 @@
       <label for="username">Username</label>
       <input required class="form-control" name="username" id="username">
     </div>
+
+    {{ force_checkbox("reindex_user_force") }}
   {% endcall %}
 
   {% call reindex_form(heading="Reindex all annotations in a group", action="reindex_group") %}
@@ -48,6 +57,8 @@
       <label for="groupid">Group ID</label>
       <input required class="form-control" name="groupid" id="groupid">
     </div>
+
+    {{ force_checkbox("reindex_group_force") }}
   {% endcall %}
 {% endblock %}
 
