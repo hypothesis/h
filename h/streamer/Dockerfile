@@ -3,7 +3,7 @@ FROM hypothesis/hypothesis:${DOCKER_TAG}
 
 WORKDIR /var/lib/hypothesis
 
-COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY conf/websocket-separate.ini conf/websocket-separate.ini
 COPY conf/supervisord.conf conf/supervisord.conf
 
 # Start the web server by default
