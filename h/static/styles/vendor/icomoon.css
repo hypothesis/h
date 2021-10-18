@@ -1,6 +1,9 @@
 @font-face {
     font-family: 'h';
-  src: url('../fonts/h.woff') format('woff');
+
+    /* This URL assumes this CSS file will be served from `build/styles` and
+       fonts from `build/fonts` */
+    src: url('../fonts/h.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }

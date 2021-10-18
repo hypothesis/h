@@ -5,45 +5,19 @@ module.exports = function (config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['browserify', 'mocha', 'chai', 'sinon'],
+    frameworks: ['mocha', 'chai', 'sinon', 'source-map-support'],
 
     // list of files / patterns to load in the browser
     files: [
       // Test setup
-      './tests/bootstrap.js',
+      { pattern: '../../../build/scripts/tests.bundle.js', type: 'module' },
 
-      // Karma watching is disabled for these files because they are
-      // bundled with karma-browserify which handles watching itself via
-      // watchify
-      {
-        pattern: 'tests/**/*-test.js',
-        watched: false,
-        included: true,
-        served: true,
-      },
+      // Sourcemaps for test bundles.
+      { pattern: '../../../build/scripts/*.js.map', included: false },
     ],
 
     // list of files to exclude
     exclude: [],
-
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {
-      './tests/bootstrap.js': ['browserify'],
-      './tests/**/*-test.js': ['browserify'],
-    },
-
-    browserify: {
-      debug: true,
-      transform: [
-        [
-          'babelify',
-          {
-            plugins: ['mockable-imports'],
-          },
-        ],
-      ],
-    },
 
     mochaReporter: {
       // Display a helpful diff when comparing complex objects
