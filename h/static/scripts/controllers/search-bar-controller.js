@@ -1,13 +1,12 @@
-'use strict';
+import escapeHtml from 'escape-html';
 
-const escapeHtml = require('escape-html');
+import { Controller } from '../base/controller';
+import { cloneTemplate } from '../util/dom';
+import { getLozengeValues, shouldLozengify } from '../util/search-text-parser';
+import * as stringUtil from '../util/string';
 
-const Controller = require('../base/controller');
-const LozengeController = require('./lozenge-controller');
-const AutosuggestDropdownController = require('./autosuggest-dropdown-controller');
-const SearchTextParser = require('../util/search-text-parser');
-const { cloneTemplate } = require('../util/dom');
-const stringUtil = require('../util/string');
+import { AutosuggestDropdownController } from './autosuggest-dropdown-controller';
+import { LozengeController } from './lozenge-controller';
 
 const FACET_TYPE = 'FACET';
 const TAG_TYPE = 'TAG';
@@ -25,7 +24,7 @@ const normalizeStr = function (str) {
 /**
  * Controller for the search bar.
  */
-class SearchBarController extends Controller {
+export class SearchBarController extends Controller {
   constructor(element, options = {}) {
     super(element, options);
 
@@ -56,7 +55,7 @@ class SearchBarController extends Controller {
         {
           matchOn: 'url',
           title: 'url:',
-          explanation: `search by URL<br>for domain level search 
+          explanation: `search by URL<br>for domain level search
             add trailing /* eg. example.com/*`,
         },
         {
@@ -295,8 +294,9 @@ class SearchBarController extends Controller {
      * so they are hooked up with the proper event handling
      */
     const lozengifyInput = () => {
-      const { lozengeValues, incompleteInputValue } =
-        SearchTextParser.getLozengeValues(this._input.value);
+      const { lozengeValues, incompleteInputValue } = getLozengeValues(
+        this._input.value
+      );
 
       lozengeValues.forEach(addLozenge);
       this._input.value = incompleteInputValue;
@@ -309,7 +309,7 @@ class SearchBarController extends Controller {
 
       if (event.keyCode === SPACE_KEY_CODE) {
         const word = getTrimmedInputValue();
-        if (SearchTextParser.shouldLozengify(word)) {
+        if (shouldLozengify(word)) {
           event.preventDefault();
           addLozenge(word);
           this._input.value = '';
@@ -468,5 +468,3 @@ class SearchBarController extends Controller {
     }
   }
 }
-
-module.exports = SearchBarController;

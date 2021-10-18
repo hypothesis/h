@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Controllers provide client-side logic for server-rendered HTML.
  *
@@ -11,20 +9,20 @@
  * user-facing sites.
  */
 
-const CharacterLimitController = require('./character-limit-controller');
-const CopyButtonController = require('./copy-button-controller');
-const ConfirmSubmitController = require('./confirm-submit-controller');
-const DisableOnSubmitController = require('./disable-on-submit-controller');
-const DropdownMenuController = require('./dropdown-menu-controller');
-const FormController = require('./form-controller');
-const FormCancelController = require('./form-cancel-controller');
-const FormInputController = require('./form-input-controller');
-const FormSelectOnFocusController = require('./form-select-onfocus-controller');
-const InputAutofocusController = require('./input-autofocus-controller');
-const ListInputController = require('./list-input-controller');
-const TooltipController = require('./tooltip-controller');
+import { CharacterLimitController } from './character-limit-controller';
+import { CopyButtonController } from './copy-button-controller';
+import { ConfirmSubmitController } from './confirm-submit-controller';
+import { DisableOnSubmitController } from './disable-on-submit-controller';
+import { DropdownMenuController } from './dropdown-menu-controller';
+import { FormController } from './form-controller';
+import { FormCancelController } from './form-cancel-controller';
+import { FormInputController } from './form-input-controller';
+import { FormSelectOnFocusController } from './form-select-onfocus-controller';
+import { InputAutofocusController } from './input-autofocus-controller';
+import { ListInputController } from './list-input-controller';
+import { TooltipController } from './tooltip-controller';
 
-module.exports = {
+export default {
   '.js-character-limit': CharacterLimitController,
   '.js-copy-button': CopyButtonController,
   '.js-confirm-submit': ConfirmSubmitController,

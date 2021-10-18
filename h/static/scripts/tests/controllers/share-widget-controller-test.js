@@ -1,8 +1,6 @@
-'use strict';
+import syn from 'syn';
 
-const syn = require('syn');
-
-const ShareWidgetController = require('../../controllers/share-widget-controller');
+import { ShareWidgetController } from '../../controllers/share-widget-controller';
 
 describe('ShareWidgetController', () => {
   // this is pseudo duplicating you see in share_widget.html.jinja2

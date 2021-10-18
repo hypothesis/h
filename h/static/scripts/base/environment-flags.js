@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * EnvironmentFlags provides a facility to modify the appearance or behavior
  * of components on the page depending on the capabilities of the user agent.
@@ -15,7 +13,7 @@
  *               (if prefixed with "no-"). eg. "__env__=touch"
  *  "nojs=1"  -  Shorthand for "__env__=no-js-capable"
  */
-class EnvironmentFlags {
+export class EnvironmentFlags {
   /**
    * @param {Element} element - DOM element which environment flags will be added
    *                  to.
@@ -120,5 +118,3 @@ function envFlagsFromUrl(url) {
   }
   return flags;
 }
-
-module.exports = EnvironmentFlags;

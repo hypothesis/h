@@ -1,6 +1,4 @@
-'use strict';
-
-const FormCancelController = require('../../controllers/form-cancel-controller');
+import { FormCancelController } from '../../controllers/form-cancel-controller';
 
 describe('FormCancelController', () => {
   it('should close the window when clicked', () => {

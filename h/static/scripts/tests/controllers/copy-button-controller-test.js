@@ -1,7 +1,6 @@
-'use strict';
+import { CopyButtonController } from '../../controllers/copy-button-controller';
 
-const CopyButtonController = require('../../controllers/copy-button-controller');
-const { setupComponent } = require('./util');
+import { setupComponent } from './util';
 
 describe('CopyButtonController', () => {
   const template = `<div>

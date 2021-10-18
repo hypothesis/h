@@ -1,7 +1,6 @@
-'use strict';
+import { InputAutofocusController } from '../../controllers/input-autofocus-controller';
 
-const InputAutofocusController = require('../../controllers/input-autofocus-controller');
-const { setupComponent } = require('./util');
+import { setupComponent } from './util';
 
 /**
  * Send a 'keydown' event to the active element.

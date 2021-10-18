@@ -1,6 +1,4 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 /**
  * Button for canceling a form in a single-form page.
@@ -9,7 +7,7 @@ const Controller = require('../base/controller');
  * Forms which use inline editing have a cancel button that is shown below the
  * active field. That is managed by `FormController`.
  */
-class FormCancelController extends Controller {
+export class FormCancelController extends Controller {
   constructor(element, options) {
     super(element, options);
 
@@ -21,5 +19,3 @@ class FormCancelController extends Controller {
     });
   }
 }
-
-module.exports = FormCancelController;

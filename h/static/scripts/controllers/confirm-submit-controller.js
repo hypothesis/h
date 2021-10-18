@@ -1,6 +1,4 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 /* Turn a normal submit element into one that shows a confirm dialog.
  *
@@ -8,7 +6,7 @@ const Controller = require('../base/controller');
  * confirmation dialog positively.
  *
  */
-class ConfirmSubmitController extends Controller {
+export class ConfirmSubmitController extends Controller {
   constructor(element, options) {
     super(element);
 
@@ -28,5 +26,3 @@ class ConfirmSubmitController extends Controller {
     );
   }
 }
-
-module.exports = ConfirmSubmitController;

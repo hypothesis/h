@@ -1,8 +1,7 @@
-'use strict';
+import { LozengeController } from '../../controllers/lozenge-controller';
 
-const LozengeController = require('../../controllers/lozenge-controller');
-const lozengeTemplate = require('./lozenge-template');
-const { setupComponent } = require('./util');
+import lozengeTemplate from './lozenge-template';
+import { setupComponent } from './util';
 
 describe('LozengeController', () => {
   function createLozenge(content) {

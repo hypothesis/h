@@ -1,8 +1,6 @@
-'use strict';
+import { Controller } from '../base/controller';
 
-const Controller = require('../base/controller');
-
-class AdminUsersController extends Controller {
+export class AdminUsersController extends Controller {
   constructor(element, options) {
     super(element, options);
 
@@ -20,5 +18,3 @@ class AdminUsersController extends Controller {
     });
   }
 }
-
-module.exports = AdminUsersController;

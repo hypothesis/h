@@ -1,19 +1,20 @@
-'use strict';
-
 // configure error reporting
-const settings = require('./base/settings')(document);
-if (settings.raven) {
-  require('./base/raven').init(settings.raven);
+import { settings } from './base/settings';
+
+const appSettings = settings(document);
+if (appSettings.raven) {
+  require('./base/raven').init(appSettings.raven);
 }
 
 window.$ = window.jQuery = require('jquery');
-require('bootstrap');
+import 'bootstrap';
 
-const sharedControllers = require('./controllers');
-const upgradeElements = require('./base/upgrade-elements');
+import { upgradeElements } from './base/upgrade-elements';
+import * as sharedControllers from './controllers';
 
 // Additional controllers for admin site.
-const AdminUsersController = require('./controllers/admin-users-controller');
+
+import { AdminUsersController } from './controllers/admin-users-controller';
 
 const controllers = Object.assign(
   {},

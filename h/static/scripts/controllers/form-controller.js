@@ -1,9 +1,7 @@
-'use strict';
-
-const Controller = require('../base/controller');
-const { findRefs, setElementState } = require('../util/dom');
-const modalFocus = require('../util/modal-focus');
-const submitForm = require('../util/submit-form');
+import { Controller } from '../base/controller';
+import { findRefs, setElementState } from '../util/dom';
+import * as modalFocus from '../util/modal-focus';
+import { submitForm } from '../util/submit-form';
 
 function shouldAutosubmit(type) {
   const autosubmitTypes = ['checkbox', 'radio'];
@@ -40,7 +38,7 @@ function isHiddenField(el) {
  * the form is updated with the result, which may be a successfully updated form
  * or a re-rendered version of the form with validation errors indicated.
  */
-class FormController extends Controller {
+export class FormController extends Controller {
   constructor(element, options) {
     super(element, options);
 
@@ -327,5 +325,3 @@ class FormController extends Controller {
     this.options.reload(this.state.originalForm);
   }
 }
-
-module.exports = FormController;

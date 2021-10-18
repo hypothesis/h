@@ -1,6 +1,4 @@
-'use strict';
-
-const stringUtil = require('./string');
+import * as stringUtil from './string';
 
 const hyphenate = stringUtil.hyphenate;
 
@@ -16,7 +14,7 @@ const hyphenate = stringUtil.hyphenate;
  *                 the class `is-$k` will be added to the element if the value
  *                 is true or removed otherwise.
  */
-function setElementState(el, state) {
+export function setElementState(el, state) {
   Object.keys(state).forEach(key => {
     const stateClass = 'is-' + hyphenate(key);
     if (state[key]) {
@@ -34,7 +32,7 @@ function setElementState(el, state) {
  * This provides a way to label parts of a control in markup and get a
  * reference to them subsequently in code.
  */
-function findRefs(el) {
+export function findRefs(el) {
   const map = {};
 
   const descendantsWithRef = el.querySelectorAll('[data-ref]');
@@ -73,7 +71,7 @@ function firstElementChild(node) {
  *
  * @param {HTMLTemplateElement} templateEl
  */
-function cloneTemplate(templateEl) {
+export function cloneTemplate(templateEl) {
   if (templateEl.content) {
     // <template> supported natively.
     const content = templateEl.content.cloneNode(true);
@@ -83,9 +81,3 @@ function cloneTemplate(templateEl) {
     return templateEl.firstElementChild.cloneNode(true);
   }
 }
-
-module.exports = {
-  cloneTemplate,
-  findRefs,
-  setElementState,
-};

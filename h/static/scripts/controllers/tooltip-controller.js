@@ -1,6 +1,4 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 /**
  * A custom tooltip similar to the one used in Google Docs which appears
@@ -15,7 +13,7 @@ const Controller = require('../base/controller');
  * The tooltip's label is derived from the target element's 'aria-label'
  * attribute.
  */
-class TooltipController extends Controller {
+export class TooltipController extends Controller {
   constructor(el) {
     super(el);
 
@@ -58,5 +56,3 @@ class TooltipController extends Controller {
     });
   }
 }
-
-module.exports = TooltipController;

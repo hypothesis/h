@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @typedef SubmitError
  * @property {number} status - HTTP status code. 400 if form submission failed
@@ -58,7 +56,7 @@ function formUrl(form) {
  *         rejects the submission due to a validation error or the network
  *         request fails.
  */
-function submitForm(formEl, fetch = window.fetch) {
+export function submitForm(formEl, fetch = window.fetch) {
   let response;
   return fetch(formUrl(formEl), {
     body: new FormData(formEl),
@@ -90,5 +88,3 @@ function submitForm(formEl, fetch = window.fetch) {
       }
     });
 }
-
-module.exports = submitForm;

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Helper to set up a component for a controller test
  *
@@ -9,7 +7,7 @@
  * @param {Object} [options] - Options to pass to the controller constructor
  * @return {Controller} - The controller instance
  */
-function setupComponent(document, template, ControllerClass, options) {
+export function setupComponent(document, template, ControllerClass, options) {
   const container = document.createElement('div');
   container.innerHTML = template;
   const root = container.firstChild;
@@ -17,7 +15,3 @@ function setupComponent(document, template, ControllerClass, options) {
   container.remove();
   return new ControllerClass(root, options);
 }
-
-module.exports = {
-  setupComponent: setupComponent,
-};

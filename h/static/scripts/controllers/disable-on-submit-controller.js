@@ -1,13 +1,11 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 /**
  * For this form, disable all submit elements (inputs or buttons) after
  * the form has been submitted—helps prevent duplicate submission of form data.
  * Note that this will only work on buttons or inputs with `type="submit"`
  */
-class DisableOnSubmit extends Controller {
+export class DisableOnSubmitController extends Controller {
   constructor(element) {
     super(element);
 
@@ -20,5 +18,3 @@ class DisableOnSubmit extends Controller {
     });
   }
 }
-
-module.exports = DisableOnSubmit;

@@ -1,6 +1,4 @@
-'use strict';
-
-function CreateGroupFormController(element) {
+export function CreateGroupFormController(element) {
   // Create Group form handling
   const self = this;
   this._submitBtn = element.querySelector('.js-create-group-create-btn');
@@ -21,5 +19,3 @@ function CreateGroupFormController(element) {
     self._infoText.classList.remove('is-hidden');
   });
 }
-
-module.exports = CreateGroupFormController;

@@ -1,8 +1,9 @@
-'use strict';
-
-const Controller = require('../base/controller');
-const searchTextParser = require('../util/search-text-parser');
-const { setElementState } = require('../util/dom');
+import { Controller } from '../base/controller';
+import { setElementState } from '../util/dom';
+import {
+  hasKnownNamedQueryTerm,
+  getLozengeFacetNameAndValue,
+} from '../util/search-text-parser';
 
 /**
  * A lozenge representing a single search term.
@@ -16,7 +17,7 @@ const { setElementState } = require('../util/dom');
  *   deleteCallback,
  * });
  */
-class LozengeController extends Controller {
+export class LozengeController extends Controller {
   constructor(element, options) {
     super(element, options);
 
@@ -30,10 +31,8 @@ class LozengeController extends Controller {
     let facetName = '';
     let facetValue = options.content;
 
-    if (searchTextParser.hasKnownNamedQueryTerm(options.content)) {
-      const queryTerm = searchTextParser.getLozengeFacetNameAndValue(
-        options.content
-      );
+    if (hasKnownNamedQueryTerm(options.content)) {
+      const queryTerm = getLozengeFacetNameAndValue(options.content);
       facetName = queryTerm.facetName;
       facetValue = queryTerm.facetValue;
     }
@@ -70,5 +69,3 @@ class LozengeController extends Controller {
     }
   }
 }
-
-module.exports = LozengeController;

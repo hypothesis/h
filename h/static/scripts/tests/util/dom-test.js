@@ -1,6 +1,4 @@
-'use strict';
-
-const domUtil = require('../../util/dom');
+import * as domUtil from '../../util/dom';
 
 describe('util/dom', () => {
   function createDOM(html) {

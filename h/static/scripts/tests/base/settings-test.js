@@ -1,6 +1,4 @@
-'use strict';
-
-const settings = require('../../base/settings');
+import { settings } from '../../base/settings';
 
 function createJSONScriptTag(obj, className) {
   const el = document.createElement('script');

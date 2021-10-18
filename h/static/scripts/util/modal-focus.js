@@ -1,5 +1,3 @@
-'use strict';
-
 // Focus release function returned by most recent call to trap()
 let currentReleaseFn;
 
@@ -18,7 +16,7 @@ let currentReleaseFn;
  * @return {Function} A function which releases the modal focus, if it has not
  *        been changed by another call to trap() in the meantime.
  */
-function trap(elements, callback) {
+export function trap(elements, callback) {
   if (currentReleaseFn) {
     currentReleaseFn();
   }
@@ -65,7 +63,3 @@ function trap(elements, callback) {
   currentReleaseFn = releaseFn;
   return releaseFn;
 }
-
-module.exports = {
-  trap,
-};

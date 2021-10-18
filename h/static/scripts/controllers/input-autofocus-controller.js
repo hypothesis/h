@@ -1,6 +1,4 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 function isWordChar(event) {
   return (
@@ -16,7 +14,7 @@ function isWordChar(event) {
  * This provides behavior similar to Google.com where the user can "type" in the
  * search box even if it is not focused.
  */
-class InputAutofocusController extends Controller {
+export class InputAutofocusController extends Controller {
   constructor(element) {
     super(element);
 
@@ -37,5 +35,3 @@ class InputAutofocusController extends Controller {
     document.removeEventListener('keydown', this._onKeyDown);
   }
 }
-
-module.exports = InputAutofocusController;
