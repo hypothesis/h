@@ -1,23 +1,23 @@
-'use strict';
+import { settings } from './base/settings';
 
 // Configure error reporting
-const settings = require('./base/settings')(document);
-if (settings.raven) {
+const appSettings = settings(document);
+if (appSettings.raven) {
   const raven = require('./base/raven');
-  raven.init(settings.raven);
+  raven.init(appSettings.raven);
 }
 
-require('./polyfills');
+import './polyfills';
 
-const sharedControllers = require('./controllers');
-const upgradeElements = require('./base/upgrade-elements');
+import { upgradeElements } from './base/upgrade-elements';
+import sharedControllers from './controllers';
 
 // Additional controllers for user-facing site.
-const AuthorizeFormController = require('./controllers/authorize-form-controller');
-const CreateGroupFormController = require('./controllers/create-group-form-controller');
-const SearchBarController = require('./controllers/search-bar-controller');
-const SearchBucketController = require('./controllers/search-bucket-controller');
-const ShareWidgetController = require('./controllers/share-widget-controller');
+import { AuthorizeFormController } from './controllers/authorize-form-controller';
+import { CreateGroupFormController } from './controllers/create-group-form-controller';
+import { SearchBarController } from './controllers/search-bar-controller';
+import { SearchBucketController } from './controllers/search-bucket-controller';
+import { ShareWidgetController } from './controllers/share-widget-controller';
 
 const controllers = Object.assign(
   {

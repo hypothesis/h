@@ -1,7 +1,5 @@
-'use strict';
-
-const Controller = require('../../base/controller');
-const upgradeElements = require('../../base/upgrade-elements');
+import { Controller } from '../../base/controller';
+import { upgradeElements } from '../../base/upgrade-elements';
 
 class TestController extends Controller {
   constructor(element, options) {

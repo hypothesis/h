@@ -1,8 +1,6 @@
-'use strict';
+import { FormInputController } from '../../controllers/form-input-controller';
 
-const FormInputController = require('../../controllers/form-input-controller');
-
-const { setupComponent } = require('./util');
+import { setupComponent } from './util';
 
 describe('FormInputController', () => {
   const template = `

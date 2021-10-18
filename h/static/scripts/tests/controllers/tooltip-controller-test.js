@@ -1,6 +1,4 @@
-'use strict';
-
-const TooltipController = require('../../controllers/tooltip-controller');
+import { TooltipController } from '../../controllers/tooltip-controller';
 
 describe('TooltipController', () => {
   let targetEl;

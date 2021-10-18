@@ -1,9 +1,7 @@
-'use strict';
+import scrollIntoView from 'scroll-into-view';
 
-const scrollIntoView = require('scroll-into-view');
-
-const Controller = require('../base/controller');
-const setElementState = require('../util/dom').setElementState;
+import { Controller } from '../base/controller';
+import { setElementState } from '../util/dom';
 
 /**
  * @typedef Options
@@ -16,7 +14,7 @@ const setElementState = require('../util/dom').setElementState;
 /**
  * Controller for buckets of results in the search result list
  */
-class SearchBucketController extends Controller {
+export class SearchBucketController extends Controller {
   /**
    * @param {Element} element
    * @param {Options} options
@@ -67,5 +65,3 @@ class SearchBucketController extends Controller {
     }
   }
 }
-
-module.exports = SearchBucketController;

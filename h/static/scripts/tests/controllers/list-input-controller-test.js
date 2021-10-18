@@ -1,7 +1,6 @@
-'use strict';
+import { ListInputController } from '../../controllers/list-input-controller';
 
-const ListInputController = require('../../controllers/list-input-controller');
-const { setupComponent } = require('./util');
+import { setupComponent } from './util';
 
 describe('ListInputController', () => {
   const template = `

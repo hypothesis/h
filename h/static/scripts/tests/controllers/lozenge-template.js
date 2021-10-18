@@ -1,7 +1,4 @@
-'use strict';
-
-// Template copied from navbar.html.jinja2
-module.exports = `<div class="lozenge">
+export default `<div class="lozenge">
   <div class="lozenge__content">
     <span class="lozenge__facet-name" data-ref="facetName">
       {{ facetName }}:

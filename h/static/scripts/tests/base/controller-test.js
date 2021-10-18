@@ -1,6 +1,4 @@
-'use strict';
-
-const Controller = require('../../base/controller');
+import { Controller } from '../../base/controller';
 
 class TestController extends Controller {
   constructor(element, options) {

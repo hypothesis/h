@@ -1,7 +1,6 @@
-'use strict';
+import { DropdownMenuController } from '../../controllers/dropdown-menu-controller';
 
-const DropdownMenuController = require('../../controllers/dropdown-menu-controller');
-const util = require('./util');
+import * as util from './util';
 
 const TEMPLATE = [
   '<div class="js-dropdown-menu">',

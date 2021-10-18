@@ -1,6 +1,4 @@
-'use strict';
-
-const stringUtil = require('../../util/string');
+import * as stringUtil from '../../util/string';
 
 describe('util/string', () => {
   describe('hyphenate', () => {

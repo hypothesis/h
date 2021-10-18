@@ -1,6 +1,4 @@
-'use strict';
-
-const modalFocus = require('../../util/modal-focus');
+import * as modalFocus from '../../util/modal-focus';
 
 describe('util/modal-focus', () => {
   // Elements inside the focus group

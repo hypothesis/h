@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = {
+export default {
   /**
    * compare two list arrays and decide if they have changed
    *

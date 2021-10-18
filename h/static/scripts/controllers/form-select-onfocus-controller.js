@@ -1,8 +1,6 @@
-'use strict';
+import { Controller } from '../base/controller';
 
-const Controller = require('../base/controller');
-
-class FormSelectOnFocusController extends Controller {
+export class FormSelectOnFocusController extends Controller {
   constructor(element) {
     super(element);
 
@@ -16,5 +14,3 @@ class FormSelectOnFocusController extends Controller {
     });
   }
 }
-
-module.exports = FormSelectOnFocusController;

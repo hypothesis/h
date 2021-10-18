@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Helper for writing parameterized tests.
  *
@@ -29,7 +27,7 @@
  *        from the `fixtures` array.
  * @param {Array<T>} fixtures - Array of fixture objects.
  */
-function unroll(description, testFn, fixtures) {
+export function unroll(description, testFn, fixtures) {
   fixtures.forEach(fixture => {
     const caseDescription = Object.keys(fixture).reduce((desc, key) => {
       return desc.replace('#' + key, String(fixture[key]));
@@ -55,7 +53,3 @@ function unroll(description, testFn, fixtures) {
     });
   });
 }
-
-module.exports = {
-  unroll: unroll,
-};

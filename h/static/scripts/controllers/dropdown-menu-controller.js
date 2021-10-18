@@ -1,12 +1,11 @@
-'use strict';
+import { Controller } from '../base/controller';
 
-const Controller = require('../base/controller');
-const setElementState = require('../util/dom').setElementState;
+import { setElementState } from '../util/dom';
 
 /**
  * Controller for dropdown menus.
  */
-class DropdownMenuController extends Controller {
+export class DropdownMenuController extends Controller {
   constructor(element) {
     super(element);
 
@@ -53,5 +52,3 @@ class DropdownMenuController extends Controller {
     );
   }
 }
-
-module.exports = DropdownMenuController;

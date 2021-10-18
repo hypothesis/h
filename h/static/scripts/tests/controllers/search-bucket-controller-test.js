@@ -1,7 +1,6 @@
-'use strict';
+import { SearchBucketController } from '../../controllers/search-bucket-controller';
 
-const SearchBucketController = require('../../controllers/search-bucket-controller');
-const util = require('./util');
+import * as util from './util';
 
 const TEMPLATE = `<div class="js-search-bucket">
   <div data-ref="header">

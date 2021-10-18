@@ -1,7 +1,5 @@
-'use strict';
-
-const searchTextParser = require('../../util/search-text-parser');
-const unroll = require('../util').unroll;
+import * as searchTextParser from '../../util/search-text-parser';
+import { unroll } from '../util';
 
 describe('SearchTextParser', () => {
   unroll(

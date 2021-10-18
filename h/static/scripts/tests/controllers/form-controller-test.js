@@ -1,8 +1,6 @@
-'use strict';
-
-const { hyphenate } = require('../../util/string');
-const upgradeElements = require('../../base/upgrade-elements');
-const FormController = require('../../controllers/form-controller');
+import { upgradeElements } from '../../base/upgrade-elements';
+import { FormController, $imports } from '../../controllers/form-controller';
+import { hyphenate } from '../../util/string';
 
 /**
  * Converts a map of data attribute names to string values into a string
@@ -74,8 +72,8 @@ describe('FormController', () => {
 
   function initForm(template) {
     fakeSubmitForm = sinon.stub();
-    FormController.$imports.$mock({
-      '../util/submit-form': fakeSubmitForm,
+    $imports.$mock({
+      '../util/submit-form': { submitForm: fakeSubmitForm },
     });
 
     const container = document.createElement('div');
@@ -109,7 +107,7 @@ describe('FormController', () => {
   afterEach(() => {
     ctrl.beforeRemove();
     ctrl.element.remove();
-    FormController.$imports.$restore();
+    $imports.$restore();
   });
 
   function isEditing() {

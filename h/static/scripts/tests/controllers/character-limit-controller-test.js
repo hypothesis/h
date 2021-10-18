@@ -1,7 +1,6 @@
-'use strict';
+import { CharacterLimitController } from '../../controllers/character-limit-controller';
 
-const CharacterLimitController = require('../../controllers/character-limit-controller');
-const util = require('./util');
+import * as util from './util';
 
 describe('CharacterLimitController', () => {
   let ctrl;

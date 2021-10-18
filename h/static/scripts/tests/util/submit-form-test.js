@@ -1,9 +1,7 @@
-'use strict';
+import fetchMock from 'fetch-mock';
 
-const fetchMock = require('fetch-mock');
-
-const submitForm = require('../../util/submit-form');
-const { unroll } = require('../util');
+import { submitForm } from '../../util/submit-form';
+import { unroll } from '../util';
 
 describe('submitForm', () => {
   const FORM_URL = 'http://example.org/things';

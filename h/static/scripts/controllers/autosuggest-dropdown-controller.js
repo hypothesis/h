@@ -1,8 +1,8 @@
-'use strict';
+import { Controller } from '../base/controller';
 
-const Controller = require('../base/controller');
-const setElementState = require('../util/dom').setElementState;
-const updateHelper = require('../util/update-helpers.js');
+import { setElementState } from '../util/dom';
+
+import updateHelper from '../util/update-helpers.js';
 
 const ENTER = 13;
 const UP = 38;
@@ -11,7 +11,7 @@ const DOWN = 40;
 /**
  * Controller for adding autosuggest control to a piece of the page
  */
-class AutosuggestDropdownController extends Controller {
+export class AutosuggestDropdownController extends Controller {
   /*
    * @typedef {Object} ConfigOptions
    * @property {Function} renderListItem - called with every item in the list
@@ -465,5 +465,3 @@ class AutosuggestDropdownController extends Controller {
     });
   }
 }
-
-module.exports = AutosuggestDropdownController;

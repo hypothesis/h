@@ -1,6 +1,4 @@
-'use strict';
-
-const { findRefs } = require('../util/dom');
+import { findRefs } from '../util/dom';
 
 /*
  * @typedef {Object} ControllerOptions
@@ -24,7 +22,7 @@ const { findRefs } = require('../util/dom');
  * the controller changes, `this.update()` is called to sync the DOM with this
  * state.
  */
-class Controller {
+export class Controller {
   /**
    * Initialize the controller.
    *
@@ -89,5 +87,3 @@ class Controller {
    */
   beforeRemove() {}
 }
-
-module.exports = Controller;

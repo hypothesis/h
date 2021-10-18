@@ -1,6 +1,4 @@
-'use strict';
-
-const raven = require('../../base/raven');
+import * as raven from '../../base/raven';
 
 describe('raven', () => {
   let fakeRavenJS;
@@ -16,7 +14,7 @@ describe('raven', () => {
     };
 
     raven.$imports.$mock({
-      'raven-js': fakeRavenJS,
+      'raven-js': { default: fakeRavenJS },
     });
   });
 

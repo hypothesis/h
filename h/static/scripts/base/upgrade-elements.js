@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Mark an element as having been upgraded.
  */
@@ -46,7 +44,7 @@ function removeControllers(root) {
  *        controller class will be constructed and passed the element in
  *        order to upgrade it.
  */
-function upgradeElements(root, controllers) {
+export function upgradeElements(root, controllers) {
   // A helper which replaces the content (including the root element) of
   // an upgraded element with new markup and re-applies element upgrades to
   // the new root element
@@ -90,5 +88,3 @@ function upgradeElements(root, controllers) {
     });
   });
 }
-
-module.exports = upgradeElements;

@@ -1,6 +1,4 @@
-'use strict';
-
-const AdminUsersController = require('../../controllers/admin-users-controller');
+import { AdminUsersController } from '../../controllers/admin-users-controller';
 
 function submitEvent() {
   return new Event('submit', { bubbles: true, cancelable: true });

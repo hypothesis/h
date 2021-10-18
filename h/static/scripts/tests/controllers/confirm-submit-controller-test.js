@@ -1,7 +1,6 @@
-'use strict';
+import { ConfirmSubmitController } from '../../controllers/confirm-submit-controller';
 
-const ConfirmSubmitController = require('../../controllers/confirm-submit-controller');
-const util = require('./util');
+import * as util from './util';
 
 describe('ConfirmSubmitController', () => {
   let ctrl;

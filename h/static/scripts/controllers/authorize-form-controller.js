@@ -1,11 +1,9 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 /**
  * Controller for the OAuth authorization popup.
  */
-class AuthorizeFormController extends Controller {
+export class AuthorizeFormController extends Controller {
   constructor(element) {
     super(element);
 
@@ -59,5 +57,3 @@ class AuthorizeFormController extends Controller {
     this.refs.acceptBtn.disabled = !this.state.submitting;
   }
 }
-
-module.exports = AuthorizeFormController;

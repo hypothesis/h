@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Script which runs in the small HTML page served by the OAuth Authorization
  * endpoint after successful authorization.
@@ -8,7 +6,9 @@
  * authorization.
  */
 
-const settings = require('./base/settings')(document);
+import { settings } from './base/settings';
+
+const appSettings = settings(document);
 
 function sendAuthResponse() {
   if (!window.opener) {
@@ -18,8 +18,8 @@ function sendAuthResponse() {
 
   const msg = {
     type: 'authorization_response',
-    code: settings.code,
-    state: settings.state,
+    code: appSettings.code,
+    state: appSettings.state,
   };
 
   // `document.documentMode` is a non-standard IE-only property.
@@ -54,7 +54,7 @@ function sendAuthResponse() {
     return;
   }
 
-  window.opener.postMessage(msg, settings.origin);
+  window.opener.postMessage(msg, appSettings.origin);
   window.close();
 }
 

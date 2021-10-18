@@ -1,6 +1,4 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 const CONFIG_ATTR = 'share-widget-config';
 const TRIGGER_SELECTOR = `[${CONFIG_ATTR}]`;
@@ -179,7 +177,7 @@ class ShareWidget {
  * lifecycle of a controller to be into the appropriate method invocations on
  * the libraries api
  */
-class ShareWidgetController extends Controller {
+export class ShareWidgetController extends Controller {
   constructor(element, options = {}) {
     super(element, options);
 
@@ -195,5 +193,3 @@ class ShareWidgetController extends Controller {
     }
   }
 }
-
-module.exports = ShareWidgetController;

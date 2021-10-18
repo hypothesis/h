@@ -1,6 +1,4 @@
-'use strict';
-
-const EnvironmentFlags = require('../../base/environment-flags');
+import { EnvironmentFlags } from '../../base/environment-flags';
 
 const TIMEOUT_DELAY = 10000;
 

@@ -1,13 +1,11 @@
-'use strict';
+import syn from 'syn';
 
-const syn = require('syn');
-
-const { cloneTemplate } = require('../../util/dom');
-const lozengeTemplate = require('./lozenge-template');
-const util = require('./util');
-const unroll = require('../util').unroll;
-const LozengeController = require('../../controllers/lozenge-controller');
-const SearchBarController = require('../../controllers/search-bar-controller');
+import { LozengeController } from '../../controllers/lozenge-controller';
+import { SearchBarController } from '../../controllers/search-bar-controller';
+import { cloneTemplate } from '../../util/dom';
+import { unroll } from '../util';
+import lozengeTemplate from './lozenge-template';
+import * as util from './util';
 
 /**
  * Return the search terms displayed by all lozenges in a search bar.

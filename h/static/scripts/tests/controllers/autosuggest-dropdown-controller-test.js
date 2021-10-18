@@ -1,9 +1,7 @@
-'use strict';
+import syn from 'syn';
 
-const syn = require('syn');
-const unroll = require('../util').unroll;
-
-const AutosuggestDropdownController = require('../../controllers/autosuggest-dropdown-controller');
+import { AutosuggestDropdownController } from '../../controllers/autosuggest-dropdown-controller';
+import { unroll } from '../util';
 
 // syn's move functionality does not fire
 // mouseenter and mouseleave events.
@@ -56,7 +54,7 @@ describe('AutosuggestDropdownController', () => {
         },
         {
           title: 'url:',
-          explanation: `search by URL<br>for domain level search 
+          explanation: `search by URL<br>for domain level search
             add trailing /* eg. example.com/*`,
         },
         {

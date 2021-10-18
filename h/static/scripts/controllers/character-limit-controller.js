@@ -1,9 +1,7 @@
-'use strict';
+import { Controller } from '../base/controller';
+import { setElementState } from '../util/dom';
 
-const Controller = require('../base/controller');
-const { setElementState } = require('../util/dom');
-
-class CharacterLimitController extends Controller {
+export class CharacterLimitController extends Controller {
   constructor(element) {
     super(element);
 
@@ -22,5 +20,3 @@ class CharacterLimitController extends Controller {
     setElementState(this.refs.characterLimitCounter, { ready: true });
   }
 }
-
-module.exports = CharacterLimitController;

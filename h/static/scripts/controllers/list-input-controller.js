@@ -1,7 +1,5 @@
-'use strict';
-
-const Controller = require('../base/controller');
-const { cloneTemplate } = require('../util/dom');
+import { Controller } from '../base/controller';
+import { cloneTemplate } from '../util/dom';
 
 /**
  * Controller for list inputs.
@@ -11,7 +9,7 @@ const { cloneTemplate } = require('../util/dom');
  * minimum and maximum number of items and drag-and-drop re-ordering, which are
  * not yet implemented here.
  */
-class ListInputController extends Controller {
+export class ListInputController extends Controller {
   constructor(element) {
     super(element);
 
@@ -31,5 +29,3 @@ class ListInputController extends Controller {
     });
   }
 }
-
-module.exports = ListInputController;

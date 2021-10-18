@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Extracts a direct-linked annotation ID from the fragment of a URL.
  *
@@ -7,7 +5,7 @@
  *        fragment.
  * @return {string?} The annotation ID if present
  */
-function extractIDFromURL(url) {
+export function extractIDFromURL(url) {
   try {
     // Annotation IDs are url-safe-base64 identifiers
     // See https://tools.ietf.org/html/rfc4648#page-7
@@ -21,7 +19,3 @@ function extractIDFromURL(url) {
     return null;
   }
 }
-
-module.exports = {
-  extractIDFromURL: extractIDFromURL,
-};

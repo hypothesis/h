@@ -1,5 +1,3 @@
-'use strict';
-
 // Unicode combining characters
 // from http://xregexp.com/addons/unicode/unicode-categories.js line:30
 
@@ -10,13 +8,13 @@ const COMBINING_MARKS =
 /**
  * Convert a `camelCase` or `CapitalCase` string to `kebab-case`
  */
-function hyphenate(name) {
+export function hyphenate(name) {
   const uppercasePattern = /([A-Z])/g;
   return name.replace(uppercasePattern, '-$1').toLowerCase();
 }
 
 /** Convert a `kebab-case` string to `camelCase` */
-function unhyphenate(name) {
+export function unhyphenate(name) {
   const idx = name.indexOf('-');
   if (idx === -1) {
     return name;
@@ -42,7 +40,7 @@ function unhyphenate(name) {
  * @param {String} str
  * @return {String}
  */
-function normalize(str) {
+export function normalize(str) {
   if (!String.prototype.normalize) {
     return str;
   }
@@ -58,13 +56,6 @@ function normalize(str) {
  * @param {String} str
  * @return {String}
  */
-function fold(str) {
+export function fold(str) {
   return str.replace(COMBINING_MARKS, '');
 }
-
-module.exports = {
-  hyphenate: hyphenate,
-  unhyphenate: unhyphenate,
-  normalize: normalize,
-  fold: fold,
-};

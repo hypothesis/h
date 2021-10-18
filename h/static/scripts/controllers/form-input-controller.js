@@ -1,7 +1,5 @@
-'use strict';
-
-const Controller = require('../base/controller');
-const { setElementState } = require('../util/dom');
+import { Controller } from '../base/controller';
+import { setElementState } from '../util/dom';
 
 /**
  * Controller for individual form input fields.
@@ -13,7 +11,7 @@ const { setElementState } = require('../util/dom');
  * Note that for forms using inline editing much of the logic lives in the
  * form-level controller rather than here.
  */
-class FormInputController extends Controller {
+export class FormInputController extends Controller {
   constructor(element) {
     super(element);
 
@@ -29,5 +27,3 @@ class FormInputController extends Controller {
     setElementState(this.element, { error: this.state.hasError });
   }
 }
-
-module.exports = FormInputController;

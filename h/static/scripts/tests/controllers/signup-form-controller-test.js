@@ -1,6 +1,4 @@
-'use strict';
-
-const DisableOnSubmitController = require('../../controllers/disable-on-submit-controller');
+import { DisableOnSubmitController } from '../../controllers/disable-on-submit-controller';
 
 const TEMPLATE = `
   <form class="js-any-form js-disable-on-submit">

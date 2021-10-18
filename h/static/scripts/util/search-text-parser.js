@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Function which determines if it is possible to lozengify a given phrase.
  *
@@ -67,7 +65,7 @@ function canLozengify(phrase) {
  * // returns False
  * shouldLozengify('foo:"bar')
  */
-function shouldLozengify(phrase) {
+export function shouldLozengify(phrase) {
   // if the phrase has a facet and value
   if (phrase.indexOf(':') >= 0) {
     const queryTerm = getLozengeFacetNameAndValue(phrase);
@@ -103,7 +101,7 @@ function shouldLozengify(phrase) {
  * }
  * getLozengeValues('foo key:"foo bar" gar "unclosed')
  */
-function getLozengeValues(queryString) {
+export function getLozengeValues(queryString) {
   let inputTerms = '';
   let quoted;
   const queryTerms = [];
@@ -144,7 +142,7 @@ function getLozengeValues(queryString) {
  * // returns true
  * hasKnownNamedQueryTerm('user:foo')
  */
-function hasKnownNamedQueryTerm(queryTerm) {
+export function hasKnownNamedQueryTerm(queryTerm) {
   const knownNamedQueryTerms = ['user', 'uri', 'url', 'group', 'tag'];
 
   const facetName = getLozengeFacetNameAndValue(queryTerm).facetName;
@@ -173,7 +171,7 @@ function hasKnownNamedQueryTerm(queryTerm) {
  * }
  * getLozengeFacetNameAndValue('gar')
  */
-function getLozengeFacetNameAndValue(queryTerm) {
+export function getLozengeFacetNameAndValue(queryTerm) {
   let i;
   const lozengeFacetNameAndValue = {
     facetName: '',
@@ -195,10 +193,3 @@ function getLozengeFacetNameAndValue(queryTerm) {
 
   return lozengeFacetNameAndValue;
 }
-
-module.exports = {
-  shouldLozengify: shouldLozengify,
-  getLozengeValues: getLozengeValues,
-  getLozengeFacetNameAndValue: getLozengeFacetNameAndValue,
-  hasKnownNamedQueryTerm: hasKnownNamedQueryTerm,
-};

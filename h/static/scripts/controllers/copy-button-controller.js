@@ -1,12 +1,10 @@
-'use strict';
-
-const Controller = require('../base/controller');
+import { Controller } from '../base/controller';
 
 function isProbablyMobileSafari(userAgent) {
   return /\bMobile\b/.test(userAgent) && /\bSafari\b/.test(userAgent);
 }
 
-class CopyButtonController extends Controller {
+export class CopyButtonController extends Controller {
   constructor(element, options = {}) {
     super(element, options);
 
@@ -43,5 +41,3 @@ class CopyButtonController extends Controller {
     };
   }
 }
-
-module.exports = CopyButtonController;

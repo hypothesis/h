@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Return application configuration information from the host page.
  *
@@ -12,7 +10,7 @@
  *                                      <script> settings tags.
  * @param {string} settingsClass - The class name to match on <script> tags.
  */
-function settings(document, settingsClass) {
+export function settings(document, settingsClass) {
   if (!settingsClass) {
     settingsClass = 'js-hypothesis-settings';
   }
@@ -24,5 +22,3 @@ function settings(document, settingsClass) {
   }
   return config;
 }
-
-module.exports = settings;
