@@ -129,7 +129,7 @@ pycparser==2.20
     # via cffi
 pycryptodomex==3.11.0
     # via -r requirements/requirements.in
-pyjwt==2.2.0
+pyjwt==2.3.0
     # via -r requirements/requirements.in
 pyparsing==2.4.7
     # via
