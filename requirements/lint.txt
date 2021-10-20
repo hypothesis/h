@@ -152,7 +152,7 @@ importlib-metadata==4.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
-importlib_resources==5.2.3
+importlib-resources==5.2.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -397,7 +397,7 @@ soupsieve==2.2.1
     # via
     #   -r requirements/functests.txt
     #   beautifulsoup4
-sqlalchemy==1.4.25
+sqlalchemy==1.4.26
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
