@@ -75,7 +75,9 @@ def redirect_tween_factory(handler, registry, redirects=None):
         # will fail to boot. This is deliberate: a missing/corrupt redirects
         # file should result in a healthcheck failure.
 
-        with importlib_resources.open_text("h", "redirects") as handle:
+        with (importlib_resources.files("h") / "redirects").open(
+            encoding="utf-8"
+        ) as handle:
             redirects = parse_redirects(handle)
 
     def redirect_tween(request):
