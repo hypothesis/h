@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib-resources==5.2.3
+importlib_resources==5.3.0
     # via
     #   -r requirements/requirements.in
     #   alembic
