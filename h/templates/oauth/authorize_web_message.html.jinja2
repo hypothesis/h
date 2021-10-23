@@ -9,7 +9,7 @@
 }
 </script>
 {% for url in asset_urls('post_auth_js') %}
-<script src="{{ url }}"></script>
+<script type="module" src="{{ url }}"></script>
 {% endfor %}
 </script>
 </head>
