@@ -8,7 +8,6 @@ WORKDIR /tmp/frontend-build
 COPY package-lock.json ./
 COPY package.json ./
 RUN npm ci --production
-RUN npm install --global gulp-cli@2.3.0
 
 # Build h js/css.
 COPY .babelrc gulpfile.mjs rollup.config.mjs ./
