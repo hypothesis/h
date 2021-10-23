@@ -16,7 +16,7 @@ function bundleConfig(name, entryFile) {
     },
     output: {
       dir: 'build/scripts/',
-      format: 'iife',
+      format: 'es',
       chunkFileNames: '[name].bundle.js',
       entryFileNames: '[name].bundle.js',
     },

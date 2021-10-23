@@ -58,7 +58,7 @@
     {% include 'h:templates/includes/settings.html.jinja2' %}
 
     {% for url in asset_urls("header_js") %}
-    <script src="{{ url }}"></script>
+    <script type="module" src="{{ url }}"></script>
     {% endfor %}
   </head>
   <body class="body">
@@ -72,7 +72,7 @@
 
     {% block scripts %}
     {% for url in asset_urls("site_js") %}
-    <script src="{{ url }}"></script>
+    <script type="module" src="{{ url }}"></script>
     {% endfor %}
     {% endblock %}
   </body>
