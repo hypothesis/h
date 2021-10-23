@@ -11,7 +11,7 @@ RUN npm ci --production
 RUN npm install --global gulp-cli@2.3.0
 
 # Build h js/css.
-COPY gulpfile.js ./
+COPY .babelrc gulpfile.js ./
 COPY scripts/gulp ./scripts/gulp
 COPY h/static ./h/static
 RUN npm run build
