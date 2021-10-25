@@ -1,3 +1,4 @@
+// Template copied from navbar.html.jinja2
 export default `<div class="lozenge">
   <div class="lozenge__content">
     <span class="lozenge__facet-name" data-ref="facetName">
