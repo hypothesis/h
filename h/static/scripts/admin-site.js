@@ -1,20 +1,15 @@
-// configure error reporting
+import 'bootstrap';
+
+import { init as initRaven } from './base/raven';
 import { settings } from './base/settings';
+import { upgradeElements } from './base/upgrade-elements';
+import * as sharedControllers from './controllers';
+import { AdminUsersController } from './controllers/admin-users-controller';
 
 const appSettings = settings(document);
 if (appSettings.raven) {
-  require('./base/raven').init(appSettings.raven);
+  initRaven(appSettings.raven);
 }
-
-window.$ = window.jQuery = require('jquery');
-import 'bootstrap';
-
-import { upgradeElements } from './base/upgrade-elements';
-import * as sharedControllers from './controllers';
-
-// Additional controllers for admin site.
-
-import { AdminUsersController } from './controllers/admin-users-controller';
 
 const controllers = Object.assign(
   {},
