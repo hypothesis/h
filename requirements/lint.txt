@@ -152,7 +152,7 @@ importlib-metadata==4.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
-importlib_resources==5.3.0
+importlib-resources==5.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -293,7 +293,7 @@ pyjwt==2.3.0
     #   -r requirements/tests.txt
 pylint==2.11.1
     # via -r requirements/lint.in
-pyparsing==2.4.7
+pyparsing==3.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
