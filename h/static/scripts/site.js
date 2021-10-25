@@ -1,23 +1,17 @@
+import { init as initRaven } from './base/raven';
 import { settings } from './base/settings';
-
-// Configure error reporting
-const appSettings = settings(document);
-if (appSettings.raven) {
-  const raven = require('./base/raven');
-  raven.init(appSettings.raven);
-}
-
-import './polyfills';
-
 import { upgradeElements } from './base/upgrade-elements';
 import sharedControllers from './controllers';
-
-// Additional controllers for user-facing site.
 import { AuthorizeFormController } from './controllers/authorize-form-controller';
 import { CreateGroupFormController } from './controllers/create-group-form-controller';
 import { SearchBarController } from './controllers/search-bar-controller';
 import { SearchBucketController } from './controllers/search-bucket-controller';
 import { ShareWidgetController } from './controllers/share-widget-controller';
+
+const appSettings = settings(document);
+if (appSettings.raven) {
+  initRaven(appSettings.raven);
+}
 
 const controllers = Object.assign(
   {
