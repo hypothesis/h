@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.3.0
+importlib-resources==5.3.0
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -131,7 +131,7 @@ pycryptodomex==3.11.0
     # via -r requirements/requirements.in
 pyjwt==2.3.0
     # via -r requirements/requirements.in
-pyparsing==2.4.7
+pyparsing==3.0.1
     # via
     #   -r requirements/requirements.in
     #   packaging
