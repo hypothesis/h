@@ -1,7 +1,7 @@
 import { init as initRaven } from './base/raven';
 import { settings } from './base/settings';
 import { upgradeElements } from './base/upgrade-elements';
-import sharedControllers from './controllers';
+import { sharedControllers } from './controllers';
 import { AuthorizeFormController } from './controllers/authorize-form-controller';
 import { CreateGroupFormController } from './controllers/create-group-form-controller';
 import { SearchBarController } from './controllers/search-bar-controller';

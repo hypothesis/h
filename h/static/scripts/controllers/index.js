@@ -22,7 +22,7 @@ import { InputAutofocusController } from './input-autofocus-controller';
 import { ListInputController } from './list-input-controller';
 import { TooltipController } from './tooltip-controller';
 
-export default {
+export const sharedControllers = {
   '.js-character-limit': CharacterLimitController,
   '.js-copy-button': CopyButtonController,
   '.js-confirm-submit': ConfirmSubmitController,
