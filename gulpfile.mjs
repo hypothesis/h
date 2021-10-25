@@ -5,8 +5,8 @@ import {
   runTests,
   watchJS,
 } from '@hypothesis/frontend-build';
-import changed from 'gulp-changed';
 import gulp from 'gulp';
+import changed from 'gulp-changed';
 import gulpIf from 'gulp-if';
 import svgmin from 'gulp-svgmin';
 
