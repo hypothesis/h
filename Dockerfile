@@ -5,14 +5,13 @@ ENV NODE_ENV production
 
 # Install dependencies.
 WORKDIR /tmp/frontend-build
-COPY package-lock.json ./
-COPY package.json ./
-RUN npm ci --production
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Build h js/css.
 COPY .babelrc gulpfile.mjs rollup.config.mjs ./
 COPY h/static ./h/static
-RUN npm run build
+RUN yarn build
 
 # Stage 2: Build the rest of the app using the build output from Stage 1.
 FROM python:3.8.12-alpine3.13

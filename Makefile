@@ -72,7 +72,7 @@ backend-lint: python
 
 .PHONY: frontend-lint
 frontend-lint: node_modules/.uptodate
-	@npm run lint
+	@yarn lint
 
 .PHONY: format
 format: backend-format frontend-format
@@ -94,7 +94,7 @@ backend-checkformatting: python
 
 .PHONY: frontend-checkformatting
 frontend-checkformatting: node_modules/.uptodate
-	@npm run checkformatting
+	@yarn checkformatting
 
 .PHONY: test
 test: backend-tests frontend-tests
@@ -105,7 +105,7 @@ backend-tests: python
 
 .PHONY: frontend-tests
 frontend-tests: node_modules/.uptodate
-	@npm test
+	@yarn test
 
 .PHONY: coverage
 coverage: python
@@ -181,11 +181,11 @@ run-docker-ws:
 DOCKER_TAG = dev
 
 build/manifest.json: node_modules/.uptodate
-	@npm run build
+	@yarn build
 
-node_modules/.uptodate: package.json
+node_modules/.uptodate: package.json yarn.lock
 	@echo installing javascript dependencies
-	@node_modules/.bin/check-dependencies 2>/dev/null || npm install
+	@yarn install
 	@touch $@
 
 .PHONY: python
