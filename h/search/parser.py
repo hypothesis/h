@@ -12,7 +12,7 @@ import pyparsing as pp
 from webob.multidict import MultiDict
 
 # Enable memoizing of the parsing logic
-pp.ParserElement.enablePackrat()
+pp.ParserElement.enable_packrat()
 
 # Named fields we support when querying (e.g. `user:luke`)
 named_fields = ["user", "tag", "group", "uri", "url"]
@@ -65,7 +65,7 @@ def parse(query):
     Supported keys for fields are ``user``, ``group``, ``tag``, ``uri``.
     Any other search terms will get the key ``any``.
     """
-    parse_results = _make_parser().parseString(query)
+    parse_results = _make_parser().parse_string(query)
 
     # The parser returns all matched strings, even the field names, we use a
     # parse action to turn matches into a key/value pair (Match), but we need
@@ -99,8 +99,8 @@ def _make_parser():
 
     value = pp.MatchFirst(
         [
-            pp.dblQuotedString.copy().setParseAction(pp.removeQuotes),
-            pp.sglQuotedString.copy().setParseAction(pp.removeQuotes),
+            pp.dbl_quoted_string.copy().set_parse_action(pp.remove_quotes),
+            pp.sgl_quoted_string.copy().set_parse_action(pp.remove_quotes),
             pp.Empty() + pp.CharsNotIn("".join(whitespace)),
         ]
     )
@@ -110,10 +110,10 @@ def _make_parser():
     for field in named_fields:
         exp = pp.Suppress(
             pp.CaselessLiteral(field) + ":"
-        ) + value.copy().setParseAction(_decorate_match(field))
+        ) + value.copy().set_parse_action(_decorate_match(field))
         expressions.append(exp)
 
-    any_ = value.copy().setParseAction(_decorate_match("any"))
+    any_ = value.copy().set_parse_action(_decorate_match("any"))
     expressions.append(any_)
 
     return pp.ZeroOrMore(pp.MatchFirst(expressions))
