@@ -102,7 +102,7 @@ importlib-metadata==4.8.1
     # via
     #   -r requirements/requirements.txt
     #   alembic
-importlib-resources==5.3.0
+importlib_resources==5.4.0
     # via
     #   -r requirements/requirements.txt
     #   alembic
