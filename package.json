@@ -11,7 +11,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@babel/core": "^7.15.5",
+    "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.15.6",
     "@hypothesis/frontend-build": "^1.1.0",
     "@rollup/plugin-babel": "^5.3.0",
