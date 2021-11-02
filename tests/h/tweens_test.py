@@ -1,5 +1,5 @@
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, create_autospec
 
 import pytest
 from h_matchers import Any
@@ -44,13 +44,15 @@ class TestRedirectTween:
         ]
 
         pyramid_request.path = "/foo"
+        handler = create_autospec(lambda req: None)  # pragma: no cover
 
         tween = tweens.redirect_tween_factory(
-            lambda req: req.response, pyramid_request.registry, redirects
+            handler, pyramid_request.registry, redirects
         )
 
         response = tween(pyramid_request)
 
+        handler.assert_not_called()
         assert response.status_code == 301
         assert response.location == "http://bar"
 
