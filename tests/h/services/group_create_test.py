@@ -6,7 +6,6 @@ from h_matchers import Any
 from h.models import Group, GroupScope, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.services.group_create import GroupCreateService, group_create_factory
-from tests.common.matchers import Matcher
 
 
 class TestCreatePrivateGroup:
@@ -225,10 +224,7 @@ class TestCreateOpenGroup:
             name="test_group", userid=creator.userid, scopes=origins
         )
 
-        assert (
-            group.scopes
-            == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
-        )
+        assert group.scopes == list_of_group_scopes_with_origins(origins)
 
     def test_it_always_creates_new_scopes(self, factories, svc, creator):
         # It always creates a new scope, even if a scope with the given origin
@@ -372,10 +368,7 @@ class TestCreateRestrictedGroup:
             name="test_group", userid=creator.userid, scopes=origins
         )
 
-        assert (
-            group.scopes
-            == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
-        )
+        assert group.scopes == list_of_group_scopes_with_origins(origins)
 
     def test_it_with_mismatched_authorities_raises_value_error(
         self, svc, origins, creator, factories
@@ -442,6 +435,15 @@ class TestGroupCreateFactory:
         )
 
 
+def list_of_group_scopes_with_origins(origins):
+    return Any.list.containing(
+        [
+            Any.instance_of(GroupScope).with_attrs({"origin": origin})
+            for origin in origins
+        ]
+    ).only()
+
+
 @pytest.fixture
 def usr_svc(db_session):
     def fetch(userid):
@@ -471,13 +473,3 @@ def svc(db_session, usr_svc, publish):
 @pytest.fixture
 def creator(factories):
     return factories.User(username="group_creator")
-
-
-class GroupScopeWithOrigin(Matcher):
-    """Matches any GroupScope with the given origin."""
-
-    def __init__(self, origin):
-        super().__init__(
-            f"* any group with origin: {origin} *",
-            lambda other: isinstance(other, GroupScope) and other.origin == origin,
-        )

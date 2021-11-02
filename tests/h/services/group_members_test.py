@@ -2,9 +2,8 @@ from unittest import mock
 
 import pytest
 
-from h.models import GroupScope, User
+from h.models import User
 from h.services.group_members import GroupMembersService, group_members_factory
-from tests.common.matchers import Matcher
 
 
 class TestMemberJoin:
@@ -208,11 +207,6 @@ def usr_group_members_service(db_session):
 
 
 @pytest.fixture
-def origins():
-    return ["http://example.com"]
-
-
-@pytest.fixture
 def publish():
     return mock.Mock(spec_set=[])
 
@@ -225,17 +219,3 @@ def group_members_service(db_session, usr_group_members_service, publish):
 @pytest.fixture
 def creator(factories):
     return factories.User(username="group_creator")
-
-
-class GroupScopeWithOrigin(Matcher):
-    """Matches any GroupScope with the given origin."""
-
-    def __init__(
-        self, origin
-    ):  # pylint:disable=super-init-not-called #:(Overwriting __eq__ instead)
-        self.origin = origin
-
-    def __eq__(self, group_scope):
-        if not isinstance(group_scope, GroupScope):
-            return False
-        return group_scope.origin == self.origin
