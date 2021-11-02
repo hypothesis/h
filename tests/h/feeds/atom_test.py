@@ -4,20 +4,7 @@ from unittest import mock
 
 import pytest
 
-from h import models
 from h.feeds import atom
-
-
-def _annotation(**kwargs):
-    args = {
-        "userid": "acct:janebloggs@hypothes.is",
-        "created": datetime.utcnow(),
-        "updated": datetime.utcnow(),
-        "target_selectors": [],
-        "document": models.Document(),
-    }
-    args.update(kwargs)
-    return models.Annotation(**args)
 
 
 def test_feed_id():

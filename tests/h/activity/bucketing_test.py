@@ -2,8 +2,10 @@ import datetime
 from unittest.mock import Mock
 
 import pytest
+from h_matchers import Any
 
 from h.activity import bucketing
+from h.activity.bucketing import Timeframe
 from tests.common import factories
 
 UTCNOW = datetime.datetime(year=1970, month=2, day=21, hour=19, minute=30)
@@ -13,20 +15,10 @@ THIRD_MARCH_1968 = datetime.datetime(year=1968, month=3, day=3)
 FIFTH_NOVEMBER_1969 = datetime.datetime(year=1969, month=11, day=5)
 
 
-class timeframe_with:
-    def __init__(self, label, document_buckets):
-        self.label = label
-        self.document_buckets = document_buckets
-
-    def __eq__(self, timeframe):
-        return (
-            self.label == timeframe.label
-            and self.document_buckets == timeframe.document_buckets
-        )
-
-    def __repr__(self):
-        # pragma: no cover
-        return f'{self.__class__} "{self.label}" with {len(self.document_buckets)} document buckets'
+def timeframe_with(label, document_buckets):
+    return Any.instance_of(Timeframe).with_attrs(
+        {"label": label, "document_buckets": document_buckets}
+    )
 
 
 @pytest.mark.usefixtures("factories")

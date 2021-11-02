@@ -387,12 +387,8 @@ class TestExecute:
             for bucket in timeframe.document_buckets.values():
                 presented_annotations.extend(bucket.presented_annotations)
 
-        for annotation in annotations:
-            for presented_annotation in presented_annotations:
-                if presented_annotation["annotation"].annotation == annotation:
-                    break
-            else:
-                assert False
+        for presented_annotation, annotation in zip(presented_annotations, annotations):
+            assert presented_annotation["annotation"].annotation == annotation
 
     def test_it_returns_each_annotations_group(self, _fetch_groups, pyramid_request):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
@@ -402,12 +398,10 @@ class TestExecute:
             for bucket in timeframe.document_buckets.values():
                 presented_annotations.extend(bucket.presented_annotations)
 
-        for group in _fetch_groups.return_value:
-            for presented_annotation in presented_annotations:
-                if presented_annotation["group"] == group:
-                    break
-            else:
-                assert False
+        for presented_annotation, group in zip(
+            presented_annotations, _fetch_groups.return_value
+        ):
+            assert presented_annotation["group"] == group
 
     def test_it_returns_each_annotations_incontext_link(self, links, pyramid_request):
         def incontext_link(request, annotation):

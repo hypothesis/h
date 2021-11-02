@@ -47,19 +47,6 @@ class DummyFeature:
         return self.flags
 
 
-class DummySession:
-    def __init__(self):
-        self.added = []
-        self.deleted = []
-        self.flushed = False
-
-    def add(self, obj):
-        self.added.append(obj)
-
-    def flush(self):
-        self.flushed = True
-
-
 # A fake version of colander.Invalid
 class FakeInvalid:
     def __init__(self, errors):
@@ -144,11 +131,6 @@ def factories(db_session):
 @pytest.fixture
 def fake_feature():
     return DummyFeature()
-
-
-@pytest.fixture
-def fake_db_session():
-    return DummySession()
 
 
 @pytest.fixture
