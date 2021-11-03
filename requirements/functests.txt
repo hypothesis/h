@@ -99,7 +99,7 @@ importlib-metadata==4.8.1
     # via
     #   -r requirements/requirements.txt
     #   alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.txt
     #   alembic
@@ -121,7 +121,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.txt
     #   h-api
-kombu==5.1.0
+kombu==5.2.0
     # via
     #   -r requirements/requirements.txt
     #   celery

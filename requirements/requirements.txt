@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -88,7 +88,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.in
     #   h-api
-kombu==5.1.0
+kombu==5.2.0
     # via
     #   -r requirements/requirements.in
     #   celery
