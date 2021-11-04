@@ -23,8 +23,8 @@ class TestIncludeMe:
     @pytest.fixture
     def pyramid_config(self, pyramid_config):
         # Mock out jinja2 related stuff
-        pyramid_config.get_jinja2_environment = mock.create_autospec(
-            spec=lambda: JinjaEnvironment()  # pylint: disable=unnecessary-lambda
+        pyramid_config.get_jinja2_environment = mock.MagicMock(
+            return_value=JinjaEnvironment()
         )
 
         pyramid_config.registry["assets_env"] = Environment(
@@ -34,9 +34,7 @@ class TestIncludeMe:
             auto_reload=True,
         )
 
-        pyramid_config.add_jinja2_extension = mock.create_autospec(lambda name: True)
-
         # Prevent us from really loading the includes
-        pyramid_config.include = mock.create_autospec(lambda name: True)
+        pyramid_config.include = mock.MagicMock()
 
         return pyramid_config

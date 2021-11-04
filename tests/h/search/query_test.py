@@ -933,12 +933,11 @@ class TestTagsAggregation:
         result = search.run(webob.multidict.MultiDict({}))
 
         tag_results = result.aggregations["tags"]
-        count_for_tag_a = next(r for r in tag_results if r["tag"] == "tag_a")["count"]
-        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
-
         assert len(tag_results) == 2
-        assert count_for_tag_a == 2
-        assert count_for_tag_b == 1
+
+        by_tag = group_by_key(tag_results, "tag")
+        assert by_tag["tag_a"]["count"] == 2
+        assert by_tag["tag_b"]["count"] == 1
 
     def test_it_limits_number_of_annotation_counts_by_tag_returned(
         self, Annotation, search
@@ -955,12 +954,11 @@ class TestTagsAggregation:
         result = search.run(webob.multidict.MultiDict({}))
 
         tag_results = result.aggregations["tags"]
-        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
-        count_for_tag_c = next(r for r in tag_results if r["tag"] == "tag_c")["count"]
-
         assert len(tag_results) == bucket_limit
-        assert count_for_tag_b == 3
-        assert count_for_tag_c == 2
+
+        by_tag = group_by_key(tag_results, "tag")
+        assert by_tag["tag_b"]["count"] == 3
+        assert by_tag["tag_c"]["count"] == 2
 
 
 class TestUsersAggregation:
@@ -973,16 +971,11 @@ class TestUsersAggregation:
         result = search.run(webob.multidict.MultiDict({}))
 
         users_results = result.aggregations["users"]
-        count_pa = next(r for r in users_results if r["user"] == "acct:pa@example.com")[
-            "count"
-        ]
-        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")[
-            "count"
-        ]
-
         assert len(users_results) == 2
-        assert count_pa == 2
-        assert count_pb == 1
+
+        by_user = group_by_key(users_results, "user")
+        assert by_user["acct:pa@example.com"]["count"] == 2
+        assert by_user["acct:pb@example.com"]["count"] == 1
 
     def test_it_limits_number_of_annotation_counts_by_user_returned(
         self, Annotation, search
@@ -999,16 +992,15 @@ class TestUsersAggregation:
         result = search.run(webob.multidict.MultiDict({}))
 
         users_results = result.aggregations["users"]
-        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")[
-            "count"
-        ]
-        count_pc = next(r for r in users_results if r["user"] == "acct:pc@example.com")[
-            "count"
-        ]
-
         assert len(users_results) == bucket_limit
-        assert count_pb == 3
-        assert count_pc == 2
+
+        by_user = group_by_key(users_results, "user")
+        assert by_user["acct:pb@example.com"]["count"] == 3
+        assert by_user["acct:pc@example.com"]["count"] == 2
+
+
+def group_by_key(dict_items, key):
+    return {dict_item[key]: dict_item for dict_item in dict_items}
 
 
 @pytest.fixture
