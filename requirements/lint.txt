@@ -152,7 +152,7 @@ importlib-metadata==4.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -210,7 +210,7 @@ mistune==0.8.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-newrelic==7.2.2.169
+newrelic==7.2.3.170
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

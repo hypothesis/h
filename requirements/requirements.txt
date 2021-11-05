@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -101,7 +101,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mistune==0.8.4
     # via -r requirements/requirements.in
-newrelic==7.2.2.169
+newrelic==7.2.3.170
     # via -r requirements/requirements.in
 oauthlib==3.1.1
     # via -r requirements/requirements.in
