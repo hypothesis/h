@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -123,7 +123,7 @@ prompt-toolkit==3.0.18
     # via click-repl
 psycogreen==1.0.2
     # via -r requirements/requirements.in
-psycopg2==2.9.1
+psycopg2==2.9.2
     # via -r requirements/requirements.in
 pycparser==2.20
     # via cffi
