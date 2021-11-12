@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-alembic==1.7.4
+alembic==1.7.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -152,7 +152,7 @@ importlib-metadata==4.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

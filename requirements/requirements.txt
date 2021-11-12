@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.7.4
+alembic==1.7.5
     # via -r requirements/requirements.in
 amqp==5.0.6
     # via kombu
@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.in
     #   alembic
