@@ -99,7 +99,7 @@ importlib-metadata==4.8.1
     # via
     #   -r requirements/requirements.txt
     #   alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.txt
     #   alembic
@@ -185,7 +185,7 @@ pycryptodomex==3.11.0
     # via -r requirements/requirements.txt
 pyjwt==2.3.0
     # via -r requirements/requirements.txt
-pyparsing==3.0.4
+pyparsing==3.0.6
     # via
     #   -r requirements/requirements.txt
     #   packaging
