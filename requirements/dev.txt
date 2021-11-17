@@ -24,7 +24,7 @@ billiard==3.6.4.0
     #   celery
 bleach==4.1.0
     # via -r requirements/requirements.txt
-celery==5.1.2
+celery==5.2.1
     # via -r requirements/requirements.txt
 certifi==2021.10.8
     # via
@@ -38,7 +38,7 @@ chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
     #   deform
-click==7.1.2
+click==8.0.3
     # via
     #   -r requirements/requirements.txt
     #   celery
@@ -132,7 +132,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.txt
     #   h-api
-kombu==5.1.0
+kombu==5.2.2
     # via
     #   -r requirements/requirements.txt
     #   celery
