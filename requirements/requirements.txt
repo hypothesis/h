@@ -16,7 +16,7 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/requirements.in
-celery==5.1.2
+celery==5.2.1
     # via -r requirements/requirements.in
 certifi==2021.10.8
     # via
@@ -28,7 +28,7 @@ cffi==1.15.0
     #   bcrypt
 chameleon==3.8.1
     # via deform
-click==7.1.2
+click==8.0.3
     # via
     #   -r requirements/requirements.in
     #   celery
@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -88,7 +88,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.in
     #   h-api
-kombu==5.1.0
+kombu==5.2.2
     # via
     #   -r requirements/requirements.in
     #   celery
