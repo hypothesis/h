@@ -71,7 +71,7 @@ hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
-importlib_resources==5.4.0
+importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -184,7 +184,7 @@ six==1.15.0
     #   jsonschema
     #   packaging
     #   python-dateutil
-sqlalchemy==1.4.26
+sqlalchemy==1.4.27
     # via
     #   -r requirements/requirements.in
     #   alembic
