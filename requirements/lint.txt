@@ -185,7 +185,7 @@ jsonschema==3.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-api
-kombu==5.1.0
+kombu==5.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
