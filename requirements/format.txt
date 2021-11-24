@@ -6,7 +6,7 @@
 #
 black==21.11b1
     # via -r requirements/format.in
-click==8.0.1
+click==8.0.3
     # via black
 isort==5.10.1
     # via -r requirements/format.in
