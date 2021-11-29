@@ -30,7 +30,7 @@ class GroupCreateService:
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
-        :param kwargs: optional attributes to set on the group, as keyword
+        :param **kwargs: optional attributes to set on the group, as keyword
             arguments
 
         :returns: the created group
@@ -54,7 +54,7 @@ class GroupCreateService:
         :param userid: the userid of the group creator
         :param scopes: the list of URIs that the group will be scoped to
         :type scopes: list(str)
-        :param kwargs: optional attributes to set on the group, as keyword
+        :param **kwargs: optional attributes to set on the group, as keyword
             arguments
 
         :returns: the created group
@@ -79,7 +79,7 @@ class GroupCreateService:
         :param userid: the userid of the group creator
         :param scopes: the list of URIs that the group will be scoped to
         :type scopes: list(str)
-        :param kwargs: optional attributes to set on the group, as keyword
+        :param **kwargs: optional attributes to set on the group, as keyword
             arguments
 
         :returns: the created group

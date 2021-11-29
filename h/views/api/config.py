@@ -63,7 +63,7 @@ def add_api_view(  # pylint: disable=too-many-arguments
     :param bool enable_preflight: If ```True``, add support for CORS preflight
                                   requests for this view. If ``True``, a
                                   `route_name` must be specified.
-    :param dict settings: Arguments to pass on to ``config.add_view``
+    :param dict **settings: Arguments to pass on to ``config.add_view``
     """
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", (cors_policy, version_media_type_header(subtype)))
