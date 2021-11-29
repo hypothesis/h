@@ -204,7 +204,7 @@ class TestDocumentBucket:
 @pytest.mark.usefixtures("factories", "utcnow")
 class TestBucket:
     def test_no_annotations(self):
-        assert bucketing.bucket([]) == []
+        assert not bucketing.bucket([])
 
     @pytest.mark.parametrize(
         "annotation_datetime,timeframe_label",

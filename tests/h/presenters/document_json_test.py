@@ -23,7 +23,7 @@ class TestDocumentJSONPresenter:
         assert expected == presenter.asdict()
 
     def test_asdict_when_none_document(self):
-        assert {} == DocumentJSONPresenter(None).asdict()
+        assert not DocumentJSONPresenter(None).asdict()
 
     def test_asdict_does_not_render_other_meta_than_title(self, db_session):
         document = models.Document(

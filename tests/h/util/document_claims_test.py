@@ -25,7 +25,7 @@ class TestDocumentURIsFromLinks:
 
         document_uris = document_claims.document_uris_from_links(link_dicts, claimant)
 
-        assert document_uris == []
+        assert not document_uris
 
     def test_it_ignores_doi_links(self):
         """
@@ -47,7 +47,7 @@ class TestDocumentURIsFromLinks:
             link_dicts, claimant="http://localhost:5000/docs/help"
         )
 
-        assert document_uris == []
+        assert not document_uris
 
     def test_it_ignores_highwire_pdf_links(self):
         pdf_url = "http://example.com/example.pdf"
@@ -57,7 +57,7 @@ class TestDocumentURIsFromLinks:
             link_dicts, claimant="http://localhost:5000/docs/help"
         )
 
-        assert document_uris == []
+        assert not document_uris
 
     def test_it_returns_rel_alternate_document_uris_for_rel_alternate_links(self):
         alternate_url = "http://example.com/alternate"
@@ -213,7 +213,7 @@ class TestDocumentMetasFromData:
             document_data, "http://example/claimant"
         )
 
-        assert document_metas == []
+        assert not document_metas
 
     def test_document_metas_from_data_with_multiple_metadata_claims(self):
         """
@@ -251,7 +251,7 @@ class TestDocumentMetasFromData:
                 document_data, "http://example/claimant"
             )
 
-            assert document_metas == []
+            assert not document_metas
 
     def test_document_metas_from_data_allows_null_non_titles(self):
         """Null values are allowed if 'type' isn't 'title'."""
@@ -279,7 +279,7 @@ class TestDocumentMetasFromData:
                 document_data, "http://example/claimant"
             )
 
-            assert document_metas == []
+            assert not document_metas
 
     def test_document_metas_from_data_allows_empty_string_non_titles(self):
         """Empty strings are allowed if 'type' isn't 'title'."""
@@ -307,7 +307,7 @@ class TestDocumentMetasFromData:
                 document_data, "http://example/claimant"
             )
 
-            assert document_metas == []
+            assert not document_metas
 
     def test_document_metas_from_data_allows_whitespace_only_non_titles(self):
         """Whitespace-only strings are allowed if 'type' isn't 'title'."""

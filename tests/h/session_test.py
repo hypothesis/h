@@ -270,7 +270,7 @@ class TestUserInfo:
         assert result == {"user_info": {"display_name": None}}
 
     def test_format_returns_empty_dict_when_user_missing(self):
-        assert session.user_info(None) == {}
+        assert not session.user_info(None)
 
 
 class FakeRequest:

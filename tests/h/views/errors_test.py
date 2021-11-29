@@ -7,7 +7,7 @@ def test_notfound_view(pyramid_request):
     result = notfound(pyramid_request)
 
     assert pyramid_request.response.status_int == 404
-    assert result == {}
+    assert not result
 
 
 def test_error_view(patch, pyramid_request):
@@ -17,7 +17,7 @@ def test_error_view(patch, pyramid_request):
     result = error(exception, pyramid_request)
 
     handle_exception.assert_called_once_with(pyramid_request, exception)
-    assert result == {}
+    assert not result
 
 
 def test_json_error_view(patch, pyramid_request):

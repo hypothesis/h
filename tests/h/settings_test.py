@@ -100,7 +100,7 @@ class TestSettingsManager:
 
     def test_defaults_settings_to_empty_dict(self):
         settings_manager = SettingsManager()
-        assert settings_manager.settings == {}
+        assert not settings_manager.settings
 
     @pytest.mark.usefixtures("environ")
     def test_defaults_environ_to_osenviron(self):
