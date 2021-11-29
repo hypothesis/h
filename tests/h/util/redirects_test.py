@@ -138,13 +138,13 @@ class TestParse:
     def test_ignores_whitespace_only_lines(self, lines):
         result = parse(lines)
 
-        assert result == []
+        assert not result
 
     @given(lines=st.lists(st.text()))
     def test_ignores_comment_lines(self, lines):
         result = parse(["#" + line for line in lines])
 
-        assert result == []
+        assert not result
 
     def test_misformatted_line_raises(self):
         with pytest.raises(ParseError) as e:
