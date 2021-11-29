@@ -18,7 +18,7 @@ def requires(*parent_predicates):
     """
     Decorate a predicate to say it requires other predicates to be True first.
 
-    :param parent_predicates: A list of predicates that have to be true for
+    :param *parent_predicates: A list of predicates that have to be true for
     this predicate to be true as well.
     """
 
