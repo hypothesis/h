@@ -3654,10 +3654,10 @@ karma-source-map-support@^1.4.0:
   dependencies:
     source-map-support "^0.5.5"
 
-karma@^6.3.6:
-  version "6.3.6"
-  resolved "https://registry.yarnpkg.com/karma/-/karma-6.3.6.tgz#6f64cdd558c7d0c9da6fcdece156089582694611"
-  integrity sha512-xsiu3D6AjCv6Uq0YKXJgC6TvXX2WloQ5+XtHXmC1lwiLVG617DDV3W2DdM4BxCMKHlmz6l3qESZHFQGHAKvrew==
+karma@^6.3.9:
+  version "6.3.9"
+  resolved "https://registry.yarnpkg.com/karma/-/karma-6.3.9.tgz#cc309607f0fcdb58a88643184f3e4ba8bff26751"
+  integrity sha512-E/MqdLM9uVIhfuyVnrhlGBu4miafBdXEAEqCmwdEMh3n17C7UWC/8Kvm3AYKr91gc7scutekZ0xv6rxRaUCtnw==
   dependencies:
     body-parser "^1.19.0"
     braces "^3.0.2"
