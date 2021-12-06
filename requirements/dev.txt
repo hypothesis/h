@@ -148,7 +148,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 matplotlib-inline==0.1.2
     # via ipython
-mistune==0.8.4
+mistune==2.0.0
     # via -r requirements/requirements.txt
 newrelic==7.2.4.171
     # via -r requirements/requirements.txt

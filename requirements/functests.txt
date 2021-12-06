@@ -135,7 +135,7 @@ markupsafe==1.1.1
     #   jinja2
     #   mako
     #   pyramid-jinja2
-mistune==0.8.4
+mistune==2.0.0
     # via -r requirements/requirements.txt
 newrelic==7.2.4.171
     # via -r requirements/requirements.txt
