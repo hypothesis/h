@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/format.in
 #
-black==21.11b1
+black==21.12b0
     # via -r requirements/format.in
 click==8.0.3
     # via black
@@ -15,8 +15,6 @@ mypy-extensions==0.4.3
 pathspec==0.9.0
     # via black
 platformdirs==2.2.0
-    # via black
-regex==2021.4.4
     # via black
 tomli==1.0.4
     # via black
