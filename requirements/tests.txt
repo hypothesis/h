@@ -75,7 +75,7 @@ factory-boy==3.2.1
     # via -r requirements/tests.in
 faker==8.1.2
     # via factory-boy
-gevent==21.8.0
+gevent==21.12.0
     # via -r requirements/requirements.txt
 greenlet==1.1.1
     # via
