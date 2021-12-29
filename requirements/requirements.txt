@@ -6,7 +6,7 @@
 #
 alembic==1.7.5
     # via -r requirements/requirements.in
-amqp==5.0.6
+amqp==5.0.9
     # via kombu
 attrs==20.2.0
     # via jsonschema
@@ -16,7 +16,7 @@ billiard==3.6.4.0
     # via celery
 bleach==4.1.0
     # via -r requirements/requirements.in
-celery==5.2.1
+celery==5.2.3
     # via -r requirements/requirements.in
 certifi==2021.10.8
     # via
@@ -88,7 +88,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.in
     #   h-api
-kombu==5.2.2
+kombu==5.2.3
     # via
     #   -r requirements/requirements.in
     #   celery
@@ -169,7 +169,7 @@ python-dateutil==2.8.2
     #   elasticsearch-dsl
 python-slugify==5.0.2
     # via -r requirements/requirements.in
-pytz==2021.1
+pytz==2021.3
     # via celery
 repoze.sendmail==4.3
     # via pyramid-mailer
