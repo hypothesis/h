@@ -6,7 +6,7 @@
 #
 alembic==1.7.5
     # via -r requirements/requirements.txt
-amqp==5.0.6
+amqp==5.0.9
     # via
     #   -r requirements/requirements.txt
     #   kombu
@@ -25,7 +25,7 @@ billiard==3.6.4.0
     #   celery
 bleach==4.1.0
     # via -r requirements/requirements.txt
-celery==5.2.1
+celery==5.2.3
     # via -r requirements/requirements.txt
 certifi==2021.10.8
     # via
@@ -121,7 +121,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.txt
     #   h-api
-kombu==5.2.2
+kombu==5.2.3
     # via
     #   -r requirements/requirements.txt
     #   celery
@@ -232,7 +232,7 @@ python-dateutil==2.8.2
     #   faker
 python-slugify==5.0.2
     # via -r requirements/requirements.txt
-pytz==2021.1
+pytz==2021.3
     # via
     #   -r requirements/requirements.txt
     #   celery
