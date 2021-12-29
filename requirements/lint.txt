@@ -8,7 +8,7 @@ alembic==1.7.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-amqp==5.0.6
+amqp==5.0.9
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -185,7 +185,7 @@ jsonschema==3.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-api
-kombu==5.2.2
+kombu==5.2.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

@@ -6,7 +6,7 @@
 #
 alembic==1.7.5
     # via -r requirements/requirements.in
-amqp==5.0.6
+amqp==5.0.9
     # via kombu
 attrs==20.2.0
     # via jsonschema
@@ -88,7 +88,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.in
     #   h-api
-kombu==5.2.2
+kombu==5.2.3
     # via
     #   -r requirements/requirements.in
     #   celery
