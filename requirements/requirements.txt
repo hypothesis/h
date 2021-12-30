@@ -123,7 +123,7 @@ prompt-toolkit==3.0.18
     # via click-repl
 psycogreen==1.0.2
     # via -r requirements/requirements.in
-psycopg2==2.9.2
+psycopg2==2.9.3
     # via -r requirements/requirements.in
 pycparser==2.20
     # via cffi
