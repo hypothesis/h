@@ -403,7 +403,7 @@ sqlalchemy==1.4.28
     #   -r requirements/tests.txt
     #   alembic
     #   zope.sqlalchemy
-supervisor==4.2.2
+supervisor==4.2.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
