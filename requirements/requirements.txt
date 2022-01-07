@@ -5,32 +5,32 @@
 #    pip-compile requirements/requirements.in
 #
 alembic==1.7.5
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 amqp==5.0.6
     # via kombu
 attrs==20.2.0
     # via jsonschema
 bcrypt==3.2.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 billiard==3.6.4.0
     # via celery
 bleach==4.1.0
-    # via -r requirements/requirements.in
-celery==5.2.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
+celery==5.2.2
+    # via -r requirements.in
 certifi==2021.10.8
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   sentry-sdk
 cffi==1.15.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   bcrypt
 chameleon==3.8.1
     # via deform
 click==8.0.3
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -44,36 +44,36 @@ click-repl==0.2.0
 colander==1.8.2
     # via deform
 deform==2.0.15
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 elasticsearch==6.8.2
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   elasticsearch-dsl
 elasticsearch-dsl==6.3.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 gevent==21.8.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 greenlet==1.1.1
     # via
     #   gevent
     #   sqlalchemy
 gunicorn==20.1.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-api==1.0.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-assets==1.0.4
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-matchers==1.2.12
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-pyramid-sentry==1.2.3
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 hupper==1.10.2
     # via pyramid
 importlib-metadata==4.8.1
     # via alembic
 importlib-resources==5.4.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   alembic
     #   h-api
 iso8601==0.1.13
@@ -81,16 +81,16 @@ iso8601==0.1.13
     #   colander
     #   deform
 itsdangerous==2.0.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 jinja2==2.11.3
     # via pyramid-jinja2
 jsonschema==3.2.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   h-api
 kombu==5.2.2
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   celery
 mako==1.1.3
     # via alembic
@@ -100,15 +100,15 @@ markupsafe==1.1.1
     #   mako
     #   pyramid-jinja2
 mistune==0.8.4
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 newrelic==7.2.4.171
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 oauthlib==3.1.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 packaging==20.4
     # via bleach
 passlib==1.7.4
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pastedeploy==2.1.0
     # via plaster-pastedeploy
 peppercorn==0.6
@@ -122,22 +122,22 @@ plaster-pastedeploy==0.7
 prompt-toolkit==3.0.18
     # via click-repl
 psycogreen==1.0.2
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 psycopg2==2.9.2
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pycparser==2.20
     # via cffi
 pycryptodomex==3.12.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyjwt==2.3.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyparsing==3.0.6
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   packaging
 pyramid==2.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   h-assets
     #   h-pyramid-sentry
     #   pyramid-exclog
@@ -148,27 +148,27 @@ pyramid==2.0
     #   pyramid-services
     #   pyramid-tm
 pyramid-exclog==1.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-jinja2==2.8
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-mailer==0.15.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-retry==2.1.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-sanity==1.0.2
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-services==2.2
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-tm==2.4
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyrsistent==0.17.3
     # via jsonschema
 python-dateutil==2.8.2
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   elasticsearch-dsl
 python-slugify==5.0.2
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pytz==2021.1
     # via celery
 repoze.sendmail==4.3
@@ -186,16 +186,16 @@ six==1.15.0
     #   python-dateutil
 sqlalchemy==1.4.28
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   alembic
     #   zope.sqlalchemy
 supervisor==4.2.4
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 text-unidecode==1.3
     # via python-slugify
 transaction==3.0.1
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   pyramid-mailer
     #   pyramid-tm
     #   repoze.sendmail
@@ -211,7 +211,7 @@ urllib3==1.26.5
     #   sentry-sdk
 venusian==3.0.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   pyramid
 vine==5.0.0
     # via
@@ -227,9 +227,9 @@ webob==1.8.7
 wired==0.2.2
     # via pyramid-services
 ws4py==0.5.1
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 wsaccel==0.6.3
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 zipp==3.4.1
     # via
     #   importlib-metadata
@@ -243,7 +243,7 @@ zope.event==4.4
     # via gevent
 zope.interface==5.1.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   gevent
     #   pyramid
     #   pyramid-retry
@@ -253,7 +253,7 @@ zope.interface==5.1.0
     #   wired
     #   zope.sqlalchemy
 zope.sqlalchemy==1.3
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
