@@ -31,47 +31,36 @@ class TestRender:
 
 class TestSanitize:
     @pytest.mark.parametrize(
-        "text,expected",
+        "text",
         [
-            (
-                '<a href="https://example.org">example</a>',
-                '<a href="https://example.org" rel="nofollow noopener" target="_blank">example</a>',
-            ),
-            # Don't add rel and target attrs to mailto: links
-            ('<a href="mailto:foo@example.net">example</a>', None),
-            ('<a title="foobar">example</a>', None),
-            (
-                # pylint:disable=line-too-long
-                '<a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a>',
-                None,
-            ),
-            ("<blockquote>Foobar</blockquote>", None),
-            ("<code>foobar</code>", None),
-            ("<em>foobar</em>", None),
-            ("<hr>", None),
-            ("<h1>foobar</h1>", None),
-            ("<h2>foobar</h2>", None),
-            ("<h3>foobar</h3>", None),
-            ("<h4>foobar</h4>", None),
-            ("<h5>foobar</h5>", None),
-            ("<h6>foobar</h6>", None),
-            ('<img src="http://example.com/img.jpg">', None),
-            ('<img src="/img.jpg">', None),
-            ('<img alt="foobar" src="/img.jpg">', None),
-            ('<img src="/img.jpg" title="foobar">', None),
-            ('<img alt="hello" src="/img.jpg" title="foobar">', None),
-            ("<ol><li>foobar</li></ol>", None),
-            ("<p>foobar</p>", None),
-            ("<pre>foobar</pre>", None),
-            ("<strong>foobar</strong>", None),
-            ("<ul><li>foobar</li></ul>", None),
+            '<a href="mailto:foo@example.net">example</a>',  # Don't add rel and target attrs to mailto: links
+            '<a title="foobar">example</a>',
+            '<a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a>',
+            "<blockquote>Foobar</blockquote>",
+            "<code>foobar</code>",
+            "<em>foobar</em>",
+            "<hr>",
+            "<h1>foobar</h1>",
+            "<h2>foobar</h2>",
+            "<h3>foobar</h3>",
+            "<h4>foobar</h4>",
+            "<h5>foobar</h5>",
+            "<h6>foobar</h6>",
+            '<img src="http://example.com/img.jpg">',
+            '<img src="/img.jpg">',
+            '<img alt="foobar" src="/img.jpg">',
+            '<img src="/img.jpg" title="foobar">',
+            '<img alt="hello" src="/img.jpg" title="foobar">',
+            "<ol><li>foobar</li></ol>",
+            "<p>foobar</p>",
+            "<pre>foobar</pre>",
+            "<strong>foobar</strong>",
+            "<ul><li>foobar</li></ul>",
         ],
     )
-    def test_it_allows_markdown_html(self, text, expected):
-        if expected is None:
-            expected = text
-
-        assert markdown.sanitize(text) == expected
+    def test_it_allows_markdown_html(self, text):
+        # HTML tags that Markdown can output are allowed through unsanitized.
+        assert markdown.sanitize(text) == text
 
     @pytest.mark.parametrize(
         "text,expected",
