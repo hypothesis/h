@@ -84,12 +84,12 @@ class MathRenderer(mistune.Renderer):
 
 def render(text):
     if text is not None:
-        return sanitize(_get_markdown()(text))
+        return _sanitize(_get_markdown()(text))
 
     return None
 
 
-def sanitize(text):
+def _sanitize(text):
     return _get_cleaner().clean(text)
 
 

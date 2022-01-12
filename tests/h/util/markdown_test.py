@@ -16,29 +16,15 @@ class TestRender:
         actual = markdown.render(r"Foobar \(1 + 1 = 2\)")
         assert actual == "<p>Foobar \\(1 + 1 = 2\\)</p>\n"
 
-    def test_it_sanitizes_the_output(self, markdown_render, sanitize):
-        markdown.render("foobar")
-        sanitize.assert_called_once_with(markdown_render.return_value.return_value)
-
-    @pytest.fixture
-    def markdown_render(self, patch):
-        return patch("h.util.markdown._get_markdown")
-
-    @pytest.fixture
-    def sanitize(self, patch):
-        return patch("h.util.markdown.sanitize")
-
-
-class TestSanitize:
     @pytest.mark.parametrize(
         "text",
         [
-            '<a href="mailto:foo@example.net">example</a>',  # Don't add rel and target attrs to mailto: links
-            '<a title="foobar">example</a>',
-            '<a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a>',
+            '<p><a href="mailto:foo@example.net">example</a></p>',  # Don't add rel and target attrs to mailto: links
+            '<p><a title="foobar">example</a></p>',
+            '<p><a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a></p>',
             "<blockquote>Foobar</blockquote>",
-            "<code>foobar</code>",
-            "<em>foobar</em>",
+            "<p><code>foobar</code></p>",
+            "<p><em>foobar</em></p>",
             "<hr>",
             "<h1>foobar</h1>",
             "<h2>foobar</h2>",
@@ -46,21 +32,21 @@ class TestSanitize:
             "<h4>foobar</h4>",
             "<h5>foobar</h5>",
             "<h6>foobar</h6>",
-            '<img src="http://example.com/img.jpg">',
-            '<img src="/img.jpg">',
-            '<img alt="foobar" src="/img.jpg">',
-            '<img src="/img.jpg" title="foobar">',
-            '<img alt="hello" src="/img.jpg" title="foobar">',
+            '<p><img src="http://example.com/img.jpg"></p>',
+            '<p><img src="/img.jpg"></p>',
+            '<p><img alt="foobar" src="/img.jpg"></p>',
+            '<p><img src="/img.jpg" title="foobar"></p>',
+            '<p><img alt="hello" src="/img.jpg" title="foobar"></p>',
             "<ol><li>foobar</li></ol>",
             "<p>foobar</p>",
             "<pre>foobar</pre>",
-            "<strong>foobar</strong>",
+            "<p><strong>foobar</strong></p>",
             "<ul><li>foobar</li></ul>",
         ],
     )
     def test_it_allows_markdown_html(self, text):
         # HTML tags that Markdown can output are allowed through unsanitized.
-        assert markdown.sanitize(text) == text
+        assert markdown.render(text) == text
 
     @pytest.mark.parametrize(
         "text,expected",
@@ -68,22 +54,28 @@ class TestSanitize:
             ("<script>evil()</script>", "&lt;script&gt;evil()&lt;/script&gt;"),
             (
                 '<a href="#" onclick="evil()">foobar</a>',
-                '<a href="#" rel="nofollow noopener" target="_blank">foobar</a>',
+                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>\n',
             ),
             (
                 '<a href="#" onclick=evil()>foobar</a>',
-                '<a href="#" rel="nofollow noopener" target="_blank">foobar</a>',
+                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>\n',
             ),
-            ("<a href=\"javascript:alert('evil')\">foobar</a>", "<a>foobar</a>"),
-            ('<img src="/evil.jpg" onclick="evil()">', '<img src="/evil.jpg">'),
-            ("<img src=\"javascript:alert('evil')\">", "<img>"),
+            (
+                "<a href=\"javascript:alert('evil')\">foobar</a>",
+                "<p><a>foobar</a></p>\n",
+            ),
+            (
+                '<img src="/evil.jpg" onclick="evil()">',
+                '<p><img src="/evil.jpg"></p>\n',
+            ),
+            ("<img src=\"javascript:alert('evil')\">", "<p><img></p>\n"),
         ],
     )
     def test_it_escapes_evil_html(self, text, expected):
-        assert markdown.sanitize(text) == expected
+        assert markdown.render(text) == expected
 
     def test_it_adds_target_blank_and_rel_nofollow_to_links(self):
-        actual = markdown.sanitize('<a href="https://example.org">Hello</a>')
-        expected = '<a href="https://example.org" rel="nofollow noopener" target="_blank">Hello</a>'
+        actual = markdown.render('<a href="https://example.org">Hello</a>')
+        expected = '<p><a href="https://example.org" rel="nofollow noopener" target="_blank">Hello</a></p>\n'
 
         assert actual == expected
