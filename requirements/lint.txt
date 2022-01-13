@@ -206,7 +206,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mccabe==0.6.1
     # via pylint
-mistune==0.8.4
+mistune==2.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
