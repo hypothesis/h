@@ -22,6 +22,8 @@ idna==2.10
     # via requests
 imagesize==1.2.0
     # via sphinx
+importlib-metadata==4.10.1
+    # via sphinx
 jinja2==2.11.3
     # via sphinx
 livereload==2.6.3
@@ -42,7 +44,7 @@ six==1.15.0
     # via livereload
 snowballstemmer==2.1.0
     # via sphinx
-sphinx==4.3.2
+sphinx==4.4.0
     # via
     #   -r requirements/docs.in
     #   sphinx-autobuild
@@ -67,6 +69,5 @@ tornado==6.1
     # via livereload
 urllib3==1.26.5
     # via requests
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
+zipp==3.7.0
+    # via importlib-metadata
