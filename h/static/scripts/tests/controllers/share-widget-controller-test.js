@@ -17,10 +17,6 @@ describe('ShareWidgetController', () => {
           class="share-widget-target__icon">
           {{ svg_icon('facebook', 'share-widget-action') }}
         </a>
-        <a share-target-href="https://plus.google.com/share?url={href}"
-          class="share-widget-target__icon">
-          {{ svg_icon('google-plus', 'share-widget-action') }}
-        </a>
         <a share-target-href="mailto:?subject=Let%27s%20Annotate&amp;body={href}"
           class="share-widget-target__icon">
         </a>
