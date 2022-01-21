@@ -159,7 +159,7 @@ mistune==0.8.4
     # via -r requirements/requirements.txt
 mypy-extensions==0.4.3
     # via black
-newrelic==7.2.4.171
+newrelic==7.4.0.172
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
     # via -r requirements/requirements.txt
