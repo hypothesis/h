@@ -205,10 +205,11 @@ class OAuthAccessTokenController:
             self.request.POST,
             self.request.headers,
         )
+
         if status == 200:
             return json.loads(body)
 
-        raise exception_response(status, body=body)
+        raise exception_response(status, detail=body)
 
 
 class OAuthRevocationController:
@@ -229,7 +230,7 @@ class OAuthRevocationController:
         if status == 200:
             return {}
 
-        raise exception_response(status, body=body)
+        raise exception_response(status, detail=body)
 
 
 @api_config(versions=["v1", "v2"], route_name="api.debug_token", request_method="GET")
