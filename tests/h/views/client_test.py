@@ -12,7 +12,6 @@ class TestSidebarApp:
         ctx = client.sidebar_app(pyramid_request)
         expected_config = {
             "apiUrl": "http://example.com/api",
-            "websocketUrl": "wss://example.com/ws",
             "sentry": {"dsn": "test-sentry-dsn", "environment": "dev"},
             "authDomain": "example.com",
             "oauthClientId": "test-client-id",

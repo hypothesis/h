@@ -49,7 +49,6 @@ def sidebar_app(request, extra=None):
 
     settings = request.registry.settings
     sentry_public_dsn = settings.get("h.sentry_dsn_client")
-    websocket_url = settings.get("h.websocket_url")
 
     app_config = {
         "apiUrl": request.route_url("api.index"),
@@ -59,9 +58,6 @@ def sidebar_app(request, extra=None):
         # requests from.
         "rpcAllowedOrigins": settings.get("h.client_rpc_allowed_origins"),
     }
-
-    if websocket_url:
-        app_config.update({"websocketUrl": websocket_url})
 
     if sentry_public_dsn:
         # `h.sentry_environment` primarily refers to h's Sentry environment,
