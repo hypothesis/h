@@ -295,7 +295,7 @@ class TestOAuthAccessTokenController:
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             controller.post()
 
-        assert exc.value.body == body.encode()
+        assert exc.value.detail == body
 
     def test_get_raises_for_invalid_request(self, controller):
         controller.oauth.create_token_response.side_effect = InvalidRequestFatalError(
@@ -347,7 +347,7 @@ class TestOAuthRevocationController:
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             controller.post()
 
-        assert exc.value.body == body.encode()
+        assert exc.value.detail == body
 
     def test_get_raises_for_invalid_request(self, controller):
         controller.oauth.create_revocation_response.side_effect = (
