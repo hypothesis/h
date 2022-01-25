@@ -14,6 +14,7 @@ class TestLinks:
         pyramid_config.add_route("activity.search", "/search")
         pyramid_config.add_route("signup", "/signup")
         pyramid_config.add_route("stream.user_query", "/u/{user}")
+        pyramid_request.registry.settings["h.websocket_url"] = "wss://example.com/ws"
 
         links = views.links(testing.DummyResource(), pyramid_request)
 
@@ -28,4 +29,5 @@ class TestLinks:
             "search.tag": host + "/search?q=tag%3A%22:tag%22",
             "signup": host + "/signup",
             "user": host + "/u/:user",
+            "websocket": "wss://example.com/ws",
         }

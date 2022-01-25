@@ -21,6 +21,8 @@ def links(_context, request):
     oauth_authorize_url = request.route_url("oauth_authorize")
     oauth_revoke_url = request.route_url("oauth_revoke")
 
+    websocket_url = request.registry.settings.get("h.websocket_url")
+
     return {
         "account.settings": request.route_url("account"),
         "forgot-password": request.route_url("forgot_password"),
@@ -31,4 +33,5 @@ def links(_context, request):
         "search.tag": tag_search_url,
         "signup": request.route_url("signup"),
         "user": templater.route_template("stream.user_query"),
+        "websocket": websocket_url,
     }
