@@ -1,4 +1,3 @@
-import re
 from functools import lru_cache, partial
 
 import bleach
@@ -27,7 +26,29 @@ MARKDOWN_TAGS = [
     "strong",
     "ul",
 ]
-ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
+
+RENDER_MARKDOWN = mistune.Markdown().render
+
+
+def render(text):
+    """
+    Render Markdown text and remove dangerous HTML.
+
+    HTML which is provided by Markdown and some extensions are allowed.
+
+    :param text: Markdown format text to be rendered
+    :return: HTML text
+    """
+    if text is None:
+        return None
+
+    # We use a non-standard math extension to Markdown which is delimited
+    # by either `$$` or `\( some maths \)`. The escaped brackets are
+    # naturally converted into literal brackets in Markdown, so to preserve
+    # them we'll double escape them.
+    text = text.replace("\\(", "\\\\(").replace("\\)", "\\\\)")
+
+    return _get_cleaner().clean((RENDER_MARKDOWN(text)))
 
 
 def _filter_link_attributes(_tag, name, value):
@@ -41,56 +62,6 @@ def _filter_link_attributes(_tag, name, value):
         return True
 
     return False
-
-
-MARKDOWN_ATTRIBUTES = {"a": _filter_link_attributes, "img": ["alt", "src", "title"]}
-
-ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
-ALLOWED_ATTRIBUTES.update(MARKDOWN_ATTRIBUTES)
-
-
-class MathMarkdown(mistune.Markdown):
-    def output_block_math(self):
-        return self.renderer.block_math(self.token["text"])
-
-
-class MathInlineLexer(mistune.InlineLexer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.rules.inline_math = re.compile(r"\\\((.*?)\\\)", re.DOTALL)
-        self.default_rules.insert(0, "inline_math")
-
-    def output_inline_math(self, match):
-        return self.renderer.inline_math(match.group(1))
-
-
-class MathBlockLexer(mistune.BlockLexer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.rules.block_math = re.compile(r"^\$\$(.*?)\$\$", re.DOTALL)
-        self.default_rules.insert(0, "block_math")
-
-    def parse_block_math(self, match):
-        self.tokens.append({"type": "block_math", "text": match.group(1)})
-
-
-class MathRenderer(mistune.Renderer):
-    def block_math(self, text):  # pylint: disable=no-self-use
-        return f"<p>$${text}$$</p>\n"
-
-    def inline_math(self, text):  # pylint: disable=no-self-use
-        return f"\\({text}\\)"
-
-
-def render(text):
-    if text is not None:
-        return _sanitize(_get_markdown()(text))
-
-    return None
-
-
-def _sanitize(text):
-    return _get_cleaner().clean(text)
 
 
 def _linkify_target_blank(attrs, new=False):  # pylint: disable=unused-argument
@@ -125,6 +96,13 @@ def _linkify_rel(attrs, new=False):  # pylint: disable=unused-argument
     return attrs
 
 
+ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
+
+MARKDOWN_ATTRIBUTES = {"a": _filter_link_attributes, "img": ["alt", "src", "title"]}
+ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
+ALLOWED_ATTRIBUTES.update(MARKDOWN_ATTRIBUTES)
+
+
 @lru_cache(maxsize=None)
 def _get_cleaner():
     linkify_filter = partial(
@@ -134,13 +112,3 @@ def _get_cleaner():
         tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, filters=[linkify_filter]
     )
     return cleaner
-
-
-@lru_cache(maxsize=None)
-def _get_markdown():
-    return MathMarkdown(
-        renderer=MathRenderer(),
-        inline=MathInlineLexer,
-        block=MathBlockLexer,
-        escape=True,
-    )
