@@ -7,7 +7,7 @@ from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
 from h.models.group import Group
-from h.util import markdown, uri
+from h.util import markdown_render, uri
 from h.util.user import split_user
 
 
@@ -169,7 +169,7 @@ class Annotation(Base):
         # `text_rendered` field is safe for printing without further escaping.
         #
         # `markdown.render` does the hard work for now.
-        self._text_rendered = markdown.render(value)
+        self._text_rendered = markdown_render.render(value)
 
     @hybrid_property
     def text_rendered(self):

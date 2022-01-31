@@ -14,7 +14,7 @@ from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from h.util import markdown
+from h.util import markdown_render
 
 revision = "d536d9a342f3"
 down_revision = "39b1935d9e7b"
