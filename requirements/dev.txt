@@ -161,7 +161,7 @@ mypy-extensions==0.4.3
     # via black
 newrelic==7.4.0.172
     # via -r requirements/requirements.txt
-oauthlib==3.1.1
+oauthlib==3.2.0
     # via -r requirements/requirements.txt
 packaging==20.4
     # via
