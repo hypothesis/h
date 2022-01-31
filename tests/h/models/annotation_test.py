@@ -80,16 +80,16 @@ class TestTarget:
         assert "selector" not in annotation.target
 
 
-def test_text_setter_renders_markdown(markdown):
-    markdown.render.return_value = "<p>foobar</p>"
+def test_text_setter_renders_markdown(markdown_render):
+    markdown_render.render.return_value = "<p>foobar</p>"
 
     annotation = Annotation()
     annotation.text = "foobar"
 
-    markdown.render.assert_called_once_with("foobar")
+    markdown_render.render.assert_called_once_with("foobar")
 
     assert (  # pylint: disable=comparison-with-callable
-        annotation.text_rendered == markdown.render.return_value
+        annotation.text_rendered == markdown_render.render.return_value
     )
 
 
@@ -243,5 +243,5 @@ def test_is_hidden(factories, has_moderation):
 
 
 @pytest.fixture
-def markdown(patch):
-    return patch("h.models.annotation.markdown")
+def markdown_render(patch):
+    return patch("h.models.annotation.markdown_render")
