@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/format.in
 #
-black==21.12b0
+black==22.1.0
     # via -r requirements/format.in
 click==8.0.3
     # via black
@@ -16,7 +16,7 @@ pathspec==0.9.0
     # via black
 platformdirs==2.2.0
     # via black
-tomli==1.0.4
+tomli==2.0.0
     # via black
 typing-extensions==3.10.0.1
     # via black
