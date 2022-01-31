@@ -45,5 +45,5 @@ def send(self, recipients, subject, body, html=None):
         )
     except smtplib.socket.error as exc:
         # Exponential backoff in case the SMTP service is having problems.
-        countdown = self.default_retry_delay * 2 ** self.request.retries
+        countdown = self.default_retry_delay * 2**self.request.retries
         self.retry(exc=exc, countdown=countdown)
