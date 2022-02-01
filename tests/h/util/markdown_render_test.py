@@ -6,15 +6,15 @@ from h.util import markdown_render
 class TestRender:
     def test_it_renders_markdown(self):
         actual = markdown_render.render("_emphasis_ **bold**")
-        assert actual == "<p><em>emphasis</em> <strong>bold</strong></p>\n"
+        assert actual == "<p><em>emphasis</em> <strong>bold</strong></p>"
 
     def test_it_ignores_math_block(self):
         actual = markdown_render.render("$$1 + 1 = 2$$")
-        assert actual == "<p>$$1 + 1 = 2$$</p>\n"
+        assert actual == "<p>$$1 + 1 = 2$$</p>"
 
     def test_it_ignores_inline_math(self):
         actual = markdown_render.render(r"Foobar \(1 + 1 = 2\)")
-        assert actual == "<p>Foobar \\(1 + 1 = 2\\)</p>\n"
+        assert actual == "<p>Foobar \\(1 + 1 = 2\\)</p>"
 
     @pytest.mark.parametrize(
         "text",
@@ -54,21 +54,21 @@ class TestRender:
             ("<script>evil()</script>", "&lt;script&gt;evil()&lt;/script&gt;"),
             (
                 '<a href="#" onclick="evil()">foobar</a>',
-                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>\n',
+                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>',
             ),
             (
                 '<a href="#" onclick=evil()>foobar</a>',
-                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>\n',
+                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>',
             ),
             (
                 "<a href=\"javascript:alert('evil')\">foobar</a>",
-                "<p><a>foobar</a></p>\n",
+                "<p><a>foobar</a></p>",
             ),
             (
                 '<img src="/evil.jpg" onclick="evil()">',
-                '<p><img src="/evil.jpg"></p>\n',
+                '<p><img src="/evil.jpg"></p>',
             ),
-            ("<img src=\"javascript:alert('evil')\">", "<p><img></p>\n"),
+            ("<img src=\"javascript:alert('evil')\">", "<p><img></p>"),
         ],
     )
     def test_it_escapes_evil_html(self, text, expected):
@@ -76,6 +76,6 @@ class TestRender:
 
     def test_it_adds_target_blank_and_rel_nofollow_to_links(self):
         actual = markdown_render.render('<a href="https://example.org">Hello</a>')
-        expected = '<p><a href="https://example.org" rel="nofollow noopener" target="_blank">Hello</a></p>\n'
+        expected = '<p><a href="https://example.org" rel="nofollow noopener" target="_blank">Hello</a></p>'
 
         assert actual == expected
