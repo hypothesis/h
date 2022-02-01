@@ -109,6 +109,7 @@ importlib-metadata==4.8.1
     # via
     #   -r requirements/requirements.txt
     #   alembic
+    #   markdown
 importlib-resources==5.4.0
     # via
     #   -r requirements/requirements.txt
@@ -147,6 +148,8 @@ mako==1.1.3
     # via
     #   -r requirements/requirements.txt
     #   alembic
+markdown==3.3.6
+    # via -r requirements/requirements.txt
 markupsafe==1.1.1
     # via
     #   -r requirements/requirements.txt
@@ -155,8 +158,6 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 matplotlib-inline==0.1.2
     # via ipython
-mistune==0.8.4
-    # via -r requirements/requirements.txt
 mypy-extensions==0.4.3
     # via black
 newrelic==7.4.0.172
@@ -298,7 +299,7 @@ text-unidecode==1.3
     #   python-slugify
 toml==0.10.2
     # via ipdb
-tomli==1.2.3
+tomli==2.0.0
     # via black
 traitlets==5.0.5
     # via

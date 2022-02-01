@@ -24,7 +24,7 @@ importlib_resources
 itsdangerous
 jsonschema
 kombu
-mistune
+markdown
 newrelic
 oauthlib
 passlib

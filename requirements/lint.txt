@@ -152,6 +152,7 @@ importlib-metadata==4.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
+    #   markdown
 importlib-resources==5.4.0
     # via
     #   -r requirements/functests.txt
@@ -197,6 +198,10 @@ mako==1.1.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
+markdown==3.3.6
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 markupsafe==1.1.1
     # via
     #   -r requirements/functests.txt
@@ -206,10 +211,6 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mccabe==0.6.1
     # via pylint
-mistune==0.8.4
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
 newrelic==7.4.0.172
     # via
     #   -r requirements/functests.txt
