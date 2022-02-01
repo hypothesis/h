@@ -1,8 +1,8 @@
 from functools import lru_cache, partial
 
 import bleach
-import mistune
 from bleach.linkifier import LinkifyFilter
+from markdown import Markdown
 
 LINK_REL = "nofollow noopener"
 
@@ -27,7 +27,7 @@ MARKDOWN_TAGS = [
     "ul",
 ]
 
-RENDER_MARKDOWN = mistune.Markdown().render
+RENDER_MARKDOWN = Markdown().convert
 
 
 def render(text):
