@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.7.5
+alembic==1.7.6
     # via -r requirements/requirements.in
 amqp==5.0.9
     # via kombu
