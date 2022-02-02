@@ -87,7 +87,7 @@ onlyOnMaster {
             },
             ca_h: {
                 sleep 4
-                deployApp(image: image, app: "h-ca", env: "prod", region: "ca-central-1")
+                // deployApp(image: image, app: "h-ca", env: "prod", region: "ca-central-1")
             }
         )
     }
