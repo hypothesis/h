@@ -223,7 +223,7 @@ pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-pytest==6.2.5
+pytest==7.0.0
     # via -r requirements/tests.in
 python-dateutil==2.8.2
     # via
@@ -268,7 +268,7 @@ text-unidecode==1.3
     #   -r requirements/requirements.txt
     #   faker
     #   python-slugify
-toml==0.10.2
+tomli==2.0.0
     # via pytest
 transaction==3.0.1
     # via
