@@ -12,7 +12,10 @@ import pyparsing as pp
 from webob.multidict import MultiDict
 
 # Enable memoizing of the parsing logic
-pp.ParserElement.enable_packrat()
+try:
+    pp.ParserElement.enable_packrat()
+except AttributeError:
+    pp.ParserElement.enablePackrat()
 
 # Named fields we support when querying (e.g. `user:luke`)
 named_fields = ["user", "tag", "group", "uri", "url"]
