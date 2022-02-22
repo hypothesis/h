@@ -48,6 +48,23 @@ class TestAddCommand:
         )
         assert expected_id_and_secret in output
 
+    def test_it_creates_an_authclient_with_grant_type(self, cli, cliconfig, db_session):
+        result = cli.invoke(
+            authclient_cli.add,
+            ["--name", "AuthCode", "--authority", "example.org", "--type", "public",
+             "--grant-type", "authorization_code",
+             "--redirect-uri", "http://localhost:5000/app.html"], obj=cliconfig)
+        
+        assert not result.exit_code
+
+        authclient = (
+            db_session.query(models.AuthClient)
+            .filter(models.AuthClient.authority == "example.org")
+            .first()
+        )
+        assert authclient.grant_type.value == "authorization_code"
+        assert authclient.redirect_uri == "http://localhost:5000/app.html"
+
     def _add_authclient(self, cli, cliconfig, db_session, type_):
         result = cli.invoke(
             authclient_cli.add,
