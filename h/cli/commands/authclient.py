@@ -1,6 +1,7 @@
 import click
 
 from h import models
+from h.models.auth_client import GrantType
 from h.security import token_urlsafe
 
 
@@ -23,14 +24,27 @@ def authclient():
     prompt=True,
     help="The OAuth client type (public, or confidential)",
 )
+@click.option(
+    "--redirect-uri",
+    prompt=False,
+    help="URI for browser redirect after authorization. Required if grant type is 'authorization_code'"
+)
+@click.option(
+    "--grant-type",
+    type=click.Choice(GrantType.__members__),
+    prompt=False,
+    help="An allowable grant type"
+)
 @click.pass_context
-def add(ctx, name, authority, type_):
+def add(ctx, name, authority, type_, redirect_uri, grant_type):
     """Create a new OAuth client."""
     request = ctx.obj["bootstrap"]()
 
     client = models.AuthClient(name=name, authority=authority)
     if type_ == "confidential":
         client.secret = token_urlsafe()
+    client.redirect_uri = redirect_uri
+    client.grant_type = grant_type
     request.db.add(client)
     request.db.flush()
 
