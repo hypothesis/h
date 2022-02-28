@@ -358,7 +358,7 @@ python-dateutil==2.8.2
     #   -r requirements/tests.txt
     #   elasticsearch-dsl
     #   faker
-python-slugify==5.0.2
+python-slugify==6.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
