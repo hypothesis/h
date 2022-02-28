@@ -24,8 +24,6 @@ billiard==3.6.4.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-black==22.1.0
-    # via ipython
 bleach==4.1.0
     # via -r requirements/requirements.txt
 celery==5.2.3
@@ -45,7 +43,6 @@ chameleon==3.8.1
 click==8.0.3
     # via
     #   -r requirements/requirements.txt
-    #   black
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -117,7 +114,7 @@ importlib-resources==5.4.0
     #   h-api
 ipdb==0.13.9
     # via -r requirements/dev.in
-ipython==8.0.1
+ipython==8.1.0
     # via
     #   -r requirements/dev.in
     #   ipdb
@@ -158,8 +155,6 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 matplotlib-inline==0.1.2
     # via ipython
-mypy-extensions==0.4.3
-    # via black
 newrelic==7.4.0.172
     # via -r requirements/requirements.txt
 oauthlib==3.2.0
@@ -176,8 +171,6 @@ pastedeploy==2.1.0
     # via
     #   -r requirements/requirements.txt
     #   plaster-pastedeploy
-pathspec==0.9.0
-    # via black
 peppercorn==0.6
     # via
     #   -r requirements/requirements.txt
@@ -195,8 +188,6 @@ plaster-pastedeploy==0.7
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-platformdirs==2.4.1
-    # via black
 prompt-toolkit==3.0.18
     # via
     #   -r requirements/requirements.txt
@@ -299,8 +290,6 @@ text-unidecode==1.3
     #   python-slugify
 toml==0.10.2
     # via ipdb
-tomli==2.0.0
-    # via black
 traitlets==5.0.5
     # via
     #   ipython
@@ -318,8 +307,6 @@ translationstring==1.4
     #   colander
     #   deform
     #   pyramid
-typing-extensions==4.0.1
-    # via black
 urllib3==1.26.5
     # via
     #   -r requirements/requirements.txt
