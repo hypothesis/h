@@ -161,7 +161,7 @@ pyramid-sanity==1.0.2
     # via -r requirements/requirements.in
 pyramid-services==2.2
     # via -r requirements/requirements.in
-pyramid-tm==2.4
+pyramid-tm==2.5
     # via -r requirements/requirements.in
 pyrsistent==0.17.3
     # via jsonschema
