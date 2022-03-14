@@ -205,7 +205,7 @@ pyramid==2.0
     #   pyramid-sanity
     #   pyramid-services
     #   pyramid-tm
-pyramid-exclog==1.0
+pyramid-exclog==1.1
     # via -r requirements/requirements.txt
 pyramid-jinja2==2.8
     # via -r requirements/requirements.txt
