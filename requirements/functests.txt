@@ -220,7 +220,7 @@ pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-pytest==7.0.1
+pytest==7.1.0
     # via
     #   -r requirements/functests.in
     #   pytest-reverse
