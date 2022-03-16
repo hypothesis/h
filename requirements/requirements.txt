@@ -90,7 +90,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.in
     #   h-api
-kombu==5.2.3
+kombu==5.2.4
     # via
     #   -r requirements/requirements.in
     #   celery
