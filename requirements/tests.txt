@@ -207,7 +207,7 @@ pyramid==2.0
     #   pyramid-tm
 pyramid-exclog==1.1
     # via -r requirements/requirements.txt
-pyramid-jinja2==2.9.1
+pyramid-jinja2==2.9.2
     # via -r requirements/requirements.txt
 pyramid-mailer==0.15.1
     # via -r requirements/requirements.txt
