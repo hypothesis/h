@@ -299,7 +299,7 @@ vine==5.0.0
     #   amqp
     #   celery
     #   kombu
-waitress==2.0.0
+waitress==2.1.1
     # via webtest
 wcwidth==0.2.5
     # via
