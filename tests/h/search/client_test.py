@@ -13,10 +13,24 @@ class TestClient:
 
         conn.transport.close.assert_called_once_with()
 
+    @pytest.mark.parametrize(
+        "version,mapping_type",
+        (("6.9.9", "annotation"), ("7.0.0", "_doc"), ("7.0.1", "_doc")),
+    )
+    def test_mapping_type(self, client, conn, version, mapping_type):
+        conn.info.return_value = {"version": {"number": version}}
+
+        assert client.mapping_type == mapping_type
+
+    def test_server_version(self, client):
+        assert client.server_version == (1, 2, 3)
+
     @pytest.fixture
     def conn(self):
         # The ES library really confuses autospeccing
-        return create_autospec(Elasticsearch, instance=True, transport=MagicMock())
+        conn = create_autospec(Elasticsearch, instance=True, transport=MagicMock())
+        conn.info.return_value = {"version": {"number": "1.2.3"}}
+        return conn
 
     @pytest.fixture
     def client(self, conn):

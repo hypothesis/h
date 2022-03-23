@@ -124,10 +124,16 @@ def configure_index(client):
     """Create a new randomly-named index and return its name."""
     index_name = client.index + "-" + _random_id()
     mapping = ANNOTATION_MAPPING
+
+    if client.server_version >= (7, 0, 0):
+        mappings = mapping
+    else:
+        mappings = {client.mapping_type: mapping}
+
     client.conn.indices.create(
         index_name,
         body={
-            "mappings": {client.mapping_type: mapping},
+            "mappings": mappings,
             "settings": {"analysis": ANALYSIS_SETTINGS},
         },
     )

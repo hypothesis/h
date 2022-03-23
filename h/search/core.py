@@ -116,7 +116,7 @@ class Search:
 
         response = self._search(modifiers, self._aggregations, params)
 
-        total = response["hits"]["total"]
+        total = _get_total_hits(response)
         annotation_ids = [hit["_id"] for hit in response["hits"]["hits"]]
         aggregations = self._parse_aggregation_results(response.aggregations)
         return (total, annotation_ids, aggregations)
@@ -134,7 +134,7 @@ class Search:
             MultiDict({"limit": self._replies_limit}),
         )
 
-        if len(response["hits"]["hits"]) < response["hits"]["total"]:
+        if len(response["hits"]["hits"]) < _get_total_hits(response):
             log.warning(
                 "The number of reply annotations exceeded the page size "
                 "of the Elasticsearch query. We currently don't handle "
@@ -152,3 +152,10 @@ class Search:
         for agg in self._aggregations:
             results[agg.name] = agg.parse_result(aggregations)
         return results
+
+
+def _get_total_hits(response):
+    total = response["hits"]["total"]
+    if isinstance(total, int):
+        return total  # ES 6.x
+    return total["value"]  # ES 7.x

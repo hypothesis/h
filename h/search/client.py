@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from functools import cached_property
+from typing import Tuple
 
 import elasticsearch
 
@@ -9,11 +11,6 @@ class Client:
 
     index: str
     conn: elasticsearch.Elasticsearch
-    mapping_type = "annotation"
-    # Our existing Elasticsearch 1.x indexes have a single mapping type
-    # "annotation". For ES 6 we should change this to the preferred name
-    # of "_doc".
-    # See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
 
     def close(self):
         """Close the connection to the Elasticsearch server."""
@@ -22,6 +19,31 @@ class Client:
         # do `self._conn.close()` but this method is missing in v6, so we have
         # to close the underlying transport directly.
         self.conn.transport.close()
+
+    @cached_property
+    def mapping_type(self):
+        """Get the name of the index's mapping type (aka. document type)."""
+        # In Elasticsearch <= 6.x our indexes have a single mapping type called
+        # "annotation". In ES >= 7.x the concept of mapping types has been
+        # removed but indexing APIs use the dummy value `_doc`.
+        # See: https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
+
+        if self.server_version < (7, 0, 0):
+            return "annotation"
+
+        return "_doc"
+
+    @cached_property
+    def server_version(self) -> Tuple[int, int, int]:
+        """Get the version of the connected Elasticsearch cluster."""
+
+        version_str = self.conn.info()["version"]["number"]
+
+        # We assume the ES version has 3 parts. This has been true of all
+        # non pre-release versions historically.
+        major, minor, patch = [int(part) for part in version_str.split(".")]
+
+        return major, minor, patch
 
 
 def get_client(settings):

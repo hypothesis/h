@@ -167,6 +167,24 @@ class TestConfigureIndex:
             },
         )
 
+    def test_sets_correct_mappings_and_settings_for_es7(self, mock_es_client_v7):
+        configure_index(mock_es_client_v7)
+
+        mock_es_client_v7.conn.indices.create.assert_called_once_with(
+            Any(),
+            body={
+                "mappings": ANNOTATION_MAPPING,
+                "settings": {"analysis": ANALYSIS_SETTINGS},
+            },
+        )
+
+    @pytest.fixture
+    def mock_es_client_v7(self, mock_es_client):
+        mock_es_client.mapping_type = "_doc"
+        mock_es_client.server_version = (7, 10, 0)
+
+        return mock_es_client
+
 
 class TestGetAliasedIndex:
     def test_returns_underlying_index_name(self, mock_es_client):
