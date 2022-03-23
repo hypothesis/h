@@ -77,10 +77,12 @@ class BatchIndexer:
         action = {
             self.op_type: {
                 "_index": self._target_index,
-                "_type": self.es_client.mapping_type,
                 "_id": annotation.id,
             }
         }
+
+        if self.es_client.server_version < (7, 0, 0):
+            action[self.op_type]["_type"] = self.es_client.mapping_type
 
         data = presenters.AnnotationSearchIndexPresenter(
             annotation, self.request

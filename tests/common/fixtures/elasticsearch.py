@@ -44,6 +44,7 @@ def mock_es_client(es_client):
         spec_set=True,
         index="hypothesis",
         mapping_type="annotation",
+        server_version=(6, 2, 0),
     )
 
 
