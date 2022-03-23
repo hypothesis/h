@@ -1,12 +1,11 @@
+from typing import Tuple
+
 import elasticsearch
 
 
 class Client:
     """
     A convenience wrapper around a connection to Elasticsearch.
-
-    Holds a connection object, an index name, the elasticsearch library version,
-    and the name of the mapping type.
 
     :param host: Elasticsearch host URL
     :param index: index name
@@ -20,11 +19,9 @@ class Client:
         self._index = index
         self._conn = elasticsearch.Elasticsearch([host], **kwargs)
 
-        # Our existing Elasticsearch 1.x indexes have a single mapping type
-        # "annotation". For ES 6 we should change this to the preferred name
-        # of "_doc".
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
-        self._mapping_type = "annotation"
+        # The ES server version is initialized lazily, to avoid making a request
+        # to the server until it is needed.
+        self._server_version = None
 
     def close(self):
         """Close the connection to the Elasticsearch server."""
@@ -47,17 +44,33 @@ class Client:
         """
         Return the name of the index's mapping type (aka. document type).
 
-        The concept of mapping types is being removed from Elasticsearch and in
-        ES >= 6 an index only has a single mapping type.
+        In Elasticsearch <= 6.x our indexes have a single mapping type called
+        "annotation". In ES >= 7.x the concept of mapping types has been
+        removed but indexing APIs use the dummy value `_doc`.
 
         See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
         """
-        return self._mapping_type
+        if self.server_version < (7, 0, 0):
+            return "annotation"
+        return "_doc"
 
     @property
     def version(self):
         """Get the version of the elasticsearch library."""
         return self._version
+
+    @property
+    def server_version(self) -> Tuple[int, int, int]:
+        """Get the version of the connected Elasticsearch cluster."""
+        if not self._server_version:
+            version_str = self._conn.info()["version"]["number"]
+
+            # We assume the ES version has 3 parts. This has been true of all
+            # non pre-release versions historically.
+            major, minor, patch = [int(part) for part in version_str.split(".")]
+
+            self._server_version = (major, minor, patch)
+        return self._server_version
 
 
 def _get_client_settings(settings):

@@ -5,32 +5,31 @@ from h.search.client import Client, get_client
 
 
 class TestClient:
-    def test_it_sets_the_index_property(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
+    def test_it_sets_the_index_property(self, client):
         assert client.index == "hypothesis"
 
-    def test_it_sets_the_version_property(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
+    def test_it_sets_version(self, client):
         assert client.version >= (6, 4, 0) and client.version < (7, 0, 0)
 
-    def test_it_sets_the_conn_property(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
+    def test_it_sets_server_version(self, client):
+        assert client.server_version >= (6, 2, 0) and client.server_version < (8, 0, 0)
 
+    def test_it_sets_the_conn_property(self, client):
         assert isinstance(client.conn, elasticsearch.Elasticsearch)
 
-    def test_index_is_read_only(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
+    def test_index_is_read_only(self, client):
         with pytest.raises(AttributeError, match="can't set attribute"):
             client.index = "changed"
 
-    def test_conn_is_read_only(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
+    def test_conn_is_read_only(self, client):
         with pytest.raises(AttributeError, match="can't set attribute"):
             client.conn = "changed"
+
+    @pytest.fixture
+    def client(self):
+        client = Client(host="http://localhost:9200", index="hypothesis")
+        yield client
+        client.close()
 
 
 class TestGetClient:

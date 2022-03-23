@@ -164,6 +164,17 @@ class TestConfigureIndex:
             },
         )
 
+    def test_sets_correct_mappings_and_settings_for_es7(self, client_es7):
+        configure_index(client_es7)
+
+        client_es7.conn.indices.create.assert_called_once_with(
+            Any(),
+            body={
+                "mappings": ANNOTATION_MAPPING,
+                "settings": {"analysis": ANALYSIS_SETTINGS},
+            },
+        )
+
 
 class TestGetAliasedIndex:
     def test_returns_underlying_index_name(self, client):
@@ -278,8 +289,26 @@ def groups(pattern, text):
 @pytest.fixture
 def client():
     client = mock.create_autospec(
-        Client, spec_set=True, instance=True, version=elasticsearch.__version__
+        Client,
+        spec_set=True,
+        instance=True,
+        version=elasticsearch.__version__,
+        server_version=(6, 2, 0),
     )
     client.index = "foo"
     client.mapping_type = "annotation"
+    return client
+
+
+@pytest.fixture
+def client_es7():
+    client = mock.create_autospec(
+        Client,
+        spec_set=True,
+        instance=True,
+        version=elasticsearch.__version__,
+        server_version=(7, 10, 0),
+    )
+    client.index = "foo"
+    client.mapping_type = "_doc"
     return client
