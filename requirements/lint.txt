@@ -316,7 +316,7 @@ pyramid-exclog==1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pyramid-jinja2==2.9.2
+pyramid-jinja2==2.10
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
