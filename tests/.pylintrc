@@ -65,6 +65,9 @@ disable=
     fixme,
     no-member, #  Intermittent failures with the same input
 
+    # Ignored until https://github.com/PyCQA/pylint/issues/3804 is closed
+    comparison-with-callable,
+
 # Just disable PyLint's name style checking for the tests, because we
 # frequently use lots of argument names that don't conform.
 # For example we frequently create pytest fixtures that aren't named in

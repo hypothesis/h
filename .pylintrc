@@ -36,6 +36,9 @@ disable=bad-continuation,
         super-init-not-called,
         fixme,
 
+        # Ignored until https://github.com/PyCQA/pylint/issues/3804 is closed
+        comparison-with-callable,
+
 good-names=
     # PyLint's default good names.
     i,j,k,ex,Run,_,ok,
