@@ -248,8 +248,8 @@ class UserUpsertAction(DBAction):
                 text("lower(replace(username, '.'::text, ''::text)), authority")
             ],
             upsert=["display_name"],
-        ).returning(  # pylint: disable=protected-access
-            User.id, User.authority, User._username
+        ).returning(
+            User.id, User.authority, User._username  # pylint: disable=protected-access
         )
 
         return self._execute_statement(stmt).fetchall()
