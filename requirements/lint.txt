@@ -13,7 +13,7 @@ amqp==5.0.9
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   kombu
-astroid==2.9.0
+astroid==2.11.2
     # via pylint
 attrs==20.2.0
     # via
@@ -92,6 +92,8 @@ deform==2.0.15
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+dill==0.3.4
+    # via pylint
 elasticsearch==6.8.2
     # via
     #   -r requirements/functests.txt
@@ -292,7 +294,7 @@ pyjwt==2.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pylint==2.12.2
+pylint==2.13.3
     # via -r requirements/lint.in
 pyparsing==3.0.7
     # via
@@ -414,12 +416,11 @@ text-unidecode==1.3
     #   -r requirements/tests.txt
     #   faker
     #   python-slugify
-toml==0.10.2
-    # via pylint
 tomli==2.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   pylint
     #   pytest
 transaction==3.0.1
     # via
