@@ -24,7 +24,7 @@ distro==1.5.0
 docker[ssh]==5.0.0
     # via docker-compose
 docker-compose==1.29.2
-    # via -r requirements/dockercompose.in
+    # via -r dockercompose.in
 dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
@@ -33,7 +33,7 @@ idna==2.10
     # via requests
 jsonschema==3.2.0
     # via docker-compose
-paramiko==2.7.2
+paramiko==2.10.1
     # via docker
 pycparser==2.20
     # via cffi
@@ -54,6 +54,7 @@ six==1.15.0
     #   bcrypt
     #   dockerpty
     #   jsonschema
+    #   paramiko
     #   pynacl
     #   websocket-client
 texttable==1.6.3
