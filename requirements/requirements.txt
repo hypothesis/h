@@ -73,7 +73,7 @@ importlib-metadata==4.8.1
     # via
     #   alembic
     #   markdown
-importlib-resources==5.4.0
+importlib-resources==5.6.0
     # via
     #   -r requirements/requirements.in
     #   alembic
