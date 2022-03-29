@@ -153,7 +153,7 @@ importlib-metadata==4.8.1
     #   -r requirements/tests.txt
     #   alembic
     #   markdown
-importlib-resources==5.4.0
+importlib-resources==5.6.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
