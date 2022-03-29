@@ -11,8 +11,8 @@ class IdentityBasedPolicy:
     security policy.
     """
 
-    @classmethod
-    def identity(cls, request) -> Optional[Identity]:  # pylint: disable=unused-argument
+    # pylint: disable=no-self-use,unused-argument
+    def identity(self, request) -> Optional[Identity]:
         """
         Get an Identity object for valid credentials.
 
