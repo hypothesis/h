@@ -50,6 +50,7 @@ class TestCelery:
         sender.name = "wibble"
         sender.app.request.debug = True
 
+        einfo = None
         # Make a fake ExceptionInfo object
         try:
             raise RuntimeError("asplode!")
@@ -66,6 +67,7 @@ class TestCelery:
         sender.name = "wibble"
         sender.app.request.debug = False
 
+        einfo = None
         # Make a fake ExceptionInfo object
         try:
             raise RuntimeError("asplode!")
