@@ -28,7 +28,7 @@
     "jquery": "^3.6.0",
     "normalize.css": "^8.0.0",
     "popper.js": "^1.16.1",
-    "postcss": "^8.4.8",
+    "postcss": "^8.4.12",
     "raven-js": "^3.7.0",
     "rollup": "^2.68.0",
     "rollup-plugin-terser": "^7.0.2",
