@@ -1,0 +1,571 @@
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /><link href="style.css" rel="stylesheet" type="text/css" /><title>Unknown</title></head><body><div type="frontmatter" class="calibre" id="calibre_link-1">
+<section type="titlepage">
+</section>
+</div>
+
+
+<div type="bodymatter" class="calibre" id="calibre_link-0">
+<section id="calibre_link-2">
+<h1 class="unnumbered"></h1>
+<p class="calibre1">OXFORD PAPERBACK REFERENCE The Concise Oxford Dictionary of Mathematics</p>
+<p class="calibre1">Some entries in this dictionary have recommended web links. When you see the symbol at the end of an entry go to the dictionary’s web page at http://www.oup.com/uk/reference/ resources/mathematics, click on Web links in the Resources section and click straight through to the relevant websites. Christopher Clapham was until 1993 Senior Lecturer in Mathematics at the University of Aberdeen and has also taught at universities in Nigeria, Lesotho, and Malawi. He is the author of Introduction to Abstract Algebra and Introduction to Mathematical Analysis. He lives in Exeter. James Nicholson has a mathematics degree from Cambridge, and taught at Harrow School for twelve years before becoming Head of Mathematics at Belfast Royal Academy in 1990. He lives in Belfast, but now works mostly with the School of Education at Durham University. He is co-author of Statistics GCSE for AQA.</p>
+<pre class="calibre2"><code class="calibre3">                                 2</code></pre>
+<p class="calibre1">The most authoritative and up-to-date reference books for both students and the general reader. ABC of Music Accounting Allusions Animal Behaviour Archaeology Architecture and Landscape Architecture Art and Artists Art Terms Arthurian Literature and Legend Astronomy Battles</p>
+<pre class="calibre2"><code class="calibre3">                                 3</code></pre>
+<p class="calibre1">Better Wordpower Bible Biology British History British Place-Names Buddhism Business and Management Card Games Century of New Words Chemistry Christian Art Christian Church Classical Literature Classical Myth and Religion Classical World Computing Contemporary World History</p>
+<pre class="calibre2"><code class="calibre3">                                 4</code></pre>
+<p class="calibre1">Countries of the World Dance Earth Sciences Ecology Economics Education Encyclopedia Engineering* English Etymology English Folklore English Grammar English Language English Literature English Surnames Environment and Conservation Euphemisms Everyday Grammar</p>
+<pre class="calibre2"><code class="calibre3">                                 5</code></pre>
+<p class="calibre1">Family and Local History Finance and Banking First Names Food and Nutrition Foreign Words and Phrases Geography Humorous Quotations Idioms Irish History Islam Kings and Queens of Britain Law Law Enforcement Linguistics Literary Terms London Place-Names Mathematics</p>
+<pre class="calibre2"><code class="calibre3">                                 6</code></pre>
+<p class="calibre1">Medical Medicinal Drugs Modern Design Modern Quotations Modern Slang Music Musical Terms Musical Works Nicknames Nursing Philosophy Physics Plant Sciences Plays Pocket Fowler’s Modern English Usage Political Quotations Politics</p>
+<pre class="calibre2"><code class="calibre3">                                 7</code></pre>
+<p class="calibre1">Popes Proverbs Psychology Quotations Quotations by Subject Rhymes Rhyming Slang Saints Science Scientific Quotations Scottish History Shakespeare Ships and the Sea Slang Sociology Space Exploration Statistics</p>
+<pre class="calibre2"><code class="calibre3">                                 8</code></pre>
+<p class="calibre1">Superstitions Synonyms and Antonyms Weather Word Histories World History World Mythology World Religions Zoology *forthcoming</p>
+<pre class="calibre2"><code class="calibre3">                                 9</code></pre>
+<p class="calibre1">The Concise Oxford Dictionary of Mathematics</p>
+<p class="calibre1">FOURTH EDITION CHRISTOPHER CLAPHAM JAMES NICHOLSON</p>
+<pre class="calibre2"><code class="calibre3">                                10</code></pre>
+<p class="calibre1">Great Clarendon Street, Oxford OX2 6DP</p>
+<p class="calibre1">Oxford University Press is a department of the University of Oxford. It furthers the University’s objective of excellence in research, scholarship, and education by publishing worldwide in</p>
+<p class="calibre1">Oxford New York Auckland Cape Town Dar es Salaam Hong Kong Karachi Kuala Lumpur Madrid Melbourne Mexico City Nairobi New Delhi Shanghai Taipei Toronto</p>
+<p class="calibre1">With offices in Argentina Austria Brazil Chile Czech Republic France Greece Guatemala Hungary Italy Japan Poland Portugal Singapore South Korea Switzerland Thailand Turkey Ukraine Vietnam</p>
+<p class="calibre1">Oxford is a registered trade mark of Oxford University Press in the UK and in certain other countries</p>
+<p class="calibre1">Published in the United States by Oxford University Press Inc., New York</p>
+<p class="calibre1">© Christopher Clapham 1990, 1996 © Christopher Clapham and James Nicholson 2005, 2009</p>
+<p class="calibre1">First edition 1990 Second edition 1996</p>
+<pre class="calibre2"><code class="calibre3">                                11</code></pre>
+<p class="calibre1">Third edition 2005 Fourth edition 2009</p>
+<p class="calibre1">All rights reserved. No part of this publication may be reproduced, stored in a retrieval system, or transmitted, in any form or by any means, without the prior permission in writing of Oxford University Press, or as expressly permitted by law, or under terms agreed with the appropriate reprographics rights organization. Enquiries concerning reproduction outside the scope of the above should be sent to the Rights Department, Oxford University Press, at the address above</p>
+<p class="calibre1">You must not circulate this book in any other binding or cover and you must impose this same condition on any acquirer</p>
+<p class="calibre1">British Library Cataloguing in Publication Data Data available</p>
+<p class="calibre1">Library of Congress Cataloging in Publication Data Data available</p>
+<p class="calibre1">Typeset by SPI Publisher Services, Pondicherry, India Printed in Great Britain on acid-free paper by Clays Ltd., St Ives plc</p>
+<p class="calibre1">ISBN 978&ndash;0&ndash;19&ndash;923594&ndash;0</p>
+<p class="calibre1">1 3 5 7 9 10 8 6 4 2</p>
+<pre class="calibre2"><code class="calibre3">                                12</code></pre>
+<p class="calibre1">Contents</p>
+<p class="calibre1">Preface Dictionary APPENDICES 1 Table of areas and volumes 2 Table of centres of mass 3 Table of moments of inertia 4 Table of derivatives 5 Table of integrals 6 Table of common ordinary differential equations and solutions 7 Table of series 8 Table of convergence tests for series 9 Table of common inequalities 10 Table of trigonometric formulae 11 Table of symbols 12 Table of Greek letters</p>
+<pre class="calibre2"><code class="calibre3">                                13</code></pre>
+<p class="calibre1">13 Table of Roman numerals 14 Table of Fields Medal Winners</p>
+<pre class="calibre2"><code class="calibre3">                                14</code></pre>
+<p class="calibre1">Contributors</p>
+<p class="calibre1">C. Chatfield, BSc, PhD R. Cheal, BSc J. B. Gavin, BSc, MSc University of Bath J. R. Pulham, BSc, PhD University of Aberdeen D. P. Thomas, BSc, PhD University of Dundee</p>
+<pre class="calibre2"><code class="calibre3">                                15</code></pre>
+<p class="calibre1">Preface to Second Edition *</p>
+<p class="calibre1">This dictionary is intended to be a reference book that gives reliable definitions or clear and precise explanations of mathematical terms. The level is such that it will suit, among others, sixth-form pupils, college students and first-year university students who are taking mathematics as one of their courses. Such students will be able to look up any term they may meet and be led on to other entries by following up cross-references or by browsing more generally.</p>
+<p class="calibre1">The concepts and terminology of all those topics that feature in pure and applied mathematics and statistics courses at this level today are covered. There are also entries on mathematicians of the past and important mathematics of more general interest. Computing is not included. The reader’s attention is drawn to the appendices which give useful tables for ready reference.</p>
+<p class="calibre1">Some entries give a straight definition in an opening phrase. Others give the definition in the form of a complete sentence, sometimes following an explanation of the context. An asterisk is used to indicate words with their own entry, to which cross-reference can be made if required.</p>
+<p class="calibre1">This edition is more than half as large again as the first edition. A significant change has been the inclusion of entries covering applied mathematics and statistics. In these areas, I am very much indebted to the contributors, whose names are given on page v. I am most grateful to these colleagues for</p>
+<pre class="calibre2"><code class="calibre3">                                16</code></pre>
+<p class="calibre1">their specialist advice and drafting work. They are not, however, to be held responsible for the final form of the entries on their subjects. There has also been a considerable increase in the number of short biographies, so that all the major names are included. Other additional entries have greatly increased the comprehensiveness of the dictionary. The text has benefited from the comments of colleagues who have read different parts of it. Even though the names of all of them will not be given, I should like to acknowledge here their help and express my thanks. Christopher Clapham</p>
+<pre class="calibre2"><code class="calibre3">                                17</code></pre>
+<p class="calibre1">Preface to Third Edition</p>
+<p class="calibre1">Since the second edition was published the content and emphasis of applied mathematics and statistics at sixth-form, college and first-year university levels has changed considerably. This edition includes many more applied statistics entries as well as dealing comprehensively with the new decision and discrete mathematics courses, and a large number of new biographies on 20th-century mathematicians. I am grateful to the Headmaster and Governors of Belfast Royal Academy for their support and encouragement to take on this task, and to Louise, Joanne, and Laura for transcribing my notes. James Nicholson</p>
+<pre class="calibre2"><code class="calibre3">                                18</code></pre>
+<p class="calibre1">Preface to Fourth Edition</p>
+<p class="calibre1">Since the third edition was published there has been a dramatic increase in both access to the internet and the amount of information available. The major change to this edition is the introduction of a substantial number of weblinks, many of which contain dynamic or interactive illustrations related to the definition. James Nicholson</p>
+<pre class="calibre2"><code class="calibre3">                                19</code></pre>
+<p class="calibre1">a- Prefix meaning ‘not’. For example, an asymmetric figure is one which possesses no symmetry, which is not symmetrical.</p>
+<p class="calibre1">A The number 10 in hexadecimal notation.</p>
+<p class="calibre1">abacus A counting device consisting of rods on which beads can be moved so as to represent numbers.</p>
+<p class="calibre1">• A description of how one abacus works.</p>
+<p class="calibre1">abelian group Suppose that G is a *group with the operation . Then G is abelian if the operation is commutative; that is, if, for all elements a and b in G, a b = b a.</p>
+<p class="calibre1">Abel, Niels Henrik (1802&ndash;29) Norwegian mathematician who, at the age of 19, proved that the general equation of degree greater than 4 cannot be solved algebraically. In other words, there can be no formula for the roots of such an equation similar to the familiar formula for a quadratic equation. He was also responsible for fundamental developments in the theory of algebraic functions. He died in some poverty at the age of 26, just a few days before he would have received a letter announcing his appointment to a professorship in Berlin.</p>
+<p class="calibre1">Abel’s test A test for the convergence of an infinite series which states that if ∑an is a convergent sequence, and {bn} is monotically decreasing, i.e.&nbsp;bn+1 ≤ bn for all n, then ∑anbn is also convergent.</p>
+<pre class="calibre2"><code class="calibre3">                                20</code></pre>
+<p class="calibre1">above Greater than. The limit of a function at a from above is the limit of f(x) as x → a for values of x &gt; a. It is of particular importance when f(x) has a discontinuity at a, i.e.&nbsp;where the limits from above and from below do not coincide. It can be</p>
+<p class="calibre1">written as f(a+) or .</p>
+<p class="calibre1">abscissa The x-coordinate in a Cartesian coordinate system in the plane.</p>
+<p class="calibre1">absolute address In spreadsheets a formula which is to appear in a number of cells may wish to use the contents of another cell or cells. Since the relative position of those cells will be different each time the formula appears in a new location, the spreadsheet syntax allows an absolute address to be specified, identifying the actual row and column for each cell. When a formula is copied and pasted to another cell, a cell reference using an absolute address will remain unchanged. A formula can contain a mixture of absolute and *relative addresses.</p>
+<p class="calibre1">absolute error See ERROR.</p>
+<p class="calibre1">absolute frequency The number of occurrences of an event. For example, if a die is rolled 20 times and 4 sixes are observed the absolute frequency of sixes is 4 and the *relative frequency is 4/20.</p>
+<p class="calibre1">absolute measure of dispersion = MEASURE OF DISPERSION.</p>
+<p class="calibre1">absolutely convergent series A series {an} is said to be</p>
+<p class="calibre1">absolutely convergent if is *convergent. For</p>
+<pre class="calibre2"><code class="calibre3">                       21</code></pre>
+<p class="calibre1">example, if then the series is convergent but not absolutely convergent, whereas</p>
+<pre class="calibre2"><code class="calibre3">                          is absolutely convergent.</code></pre>
+<p class="calibre1">absolutely summable = ABSOLUTELY CONVERGENT.</p>
+<p class="calibre1">absolute value For any real number a, the absolute value (also called the *modulus) of a, denoted by |a|, is a itself if a ≥ 0, and −a if a ≤ 0. Thus |a| is positive except when a = 0. The following properties hold:</p>
+<ol class="calibre4">
+<li class="calibre5"><p class="calibre1">|ab| = |a||b|.</p></li>
+<li class="calibre5"><p class="calibre1">|a + b| ≤ |a| + |b|.</p></li>
+<li class="calibre5"><p class="calibre1">|a − b| ≥ ||a| − |b||.</p></li>
+<li class="calibre5"><p class="calibre1">For a &gt; 0, |x| ≤ a if and only if −a ≤ x ≤ a.</p></li>
+</ol>
+<p class="calibre1">absorbing state See RANDOM WALK. 22 absorption laws For all sets A and B (subsets of some *universal set), A ∩ (A ∪ B) = A and A ∪ (A ∩ B) = A. These are the absorption laws.</p>
+<p class="calibre1">abstract algebra The area of mathematics concerned with algebraic structures, such as <em class="calibre6">groups, </em>rings and <em class="calibre6">fields, involving sets of elements with particular operations satisfying certain axioms. The purpose is to derive, from the set of axioms, general results that are then applicable to any particular example of the algebraic structure in question. The theory of certain algebraic structures is highly developed; in particular, the theory of vector spaces is so extensive that its study, known as </em>linear algebra, would probably no longer be classified as abstract algebra.</p>
+<p class="calibre1">abstraction The process of making a general statement which summarizes what can be observed in particular instances. For example, we can say that x2 &lt; x for 0 &lt; x &lt; 1 and x2 &gt; x for x &lt; 0 or x &gt; 1. Mathematical theorems are essentially abstraction of concepts to a higher level.</p>
+<p class="calibre1">abundant number An integer that is smaller than the sum of its positive divisors, not including itself, For example, 12 is divisible by 1, 2, 3, 4 and 6, and 1 + 2 + 3 + 4 + 6 = 16 &gt; 12.</p>
+<p class="calibre1">acceleration Suppose that a particle is moving in a straight line, with a point O on the line taken as origin and one direction taken as positive. Let x be the <em class="calibre6">displacement of the particle at time t. The acceleration of the particle is equal to ẍ or d2x/dt2, the </em>rate of change of the *velocity with respect to t. If the velocity is positive (that is, if the particle is moving in the positive direction), the acceleration is positive when the particle is speeding up and negative when it is slowing down.</p>
+<pre class="calibre2"><code class="calibre3">                                23</code></pre>
+<p class="calibre1">However, if the velocity is negative, a positive acceleration means that the particle is slowing down and a negative acceleration means that it is speeding up.</p>
+<p class="calibre1">In the preceding paragraph, a common convention has been followed, in which the unit vector i in the positive direction along the line has been suppressed. Acceleration is in fact a vector quantity, and in the one-dimensional case above it is equal to ẍi.</p>
+<p class="calibre1">When the motion is in two or three dimensions, vectors are</p>
+<p class="calibre1">used explicitly. The acceleration a of a particle is a vector</p>
+<p class="calibre1">equal to the rate of change of the velocity v with respect to t.</p>
+<p class="calibre1">Thus a = dv/dt. If the particle has *position vector r, then</p>
+<p class="calibre1">. When Cartesian coordinates are used, r = xi</p>
+<ul class="calibre7">
+<li class="calibre5">yj + zk, and then .</li>
+</ul>
+<p class="calibre1">If a particle is travelling in a circle with constant speed, it still has an acceleration because of the changing direction of the velocity. This acceleration is towards the centre of the circle</p>
+<p class="calibre1">and has magnitude where v is the speed of the particle and r is the radius of the circle.</p>
+<p class="calibre1">Acceleration has the dimensions LT−2, and the SI unit of measurement is the metre per second per second, abbreviated to ’ms−2.</p>
+<p class="calibre1">acceleration&ndash;time graph A graph that shows acceleration plotted against time for a particle moving in a straight line. Let v(t) and a(t) be the velocity and acceleration, respectively, of the particle at time t. The acceleration&ndash;time graph is the graph y = a(t), where the t-axis is horizontal and the y-axis is</p>
+<pre class="calibre2"><code class="calibre3">                 24</code></pre>
+<p class="calibre1">vertical with the positive direction upwards. With the convention that any area below the horizontal axis is negative, the area under the graph between t = t1 and t = t2 is equal to v(t2) − v(t1). (Here a common convention has been followed, in which the unit vector i in the positive direction along the line has been suppressed. The velocity and acceleration of the particle are in fact vector quantities equal to v(t)i and a(t)i, respectively.)</p>
+<p class="calibre1">acceptance region See HYPOTHESIS TESTING.</p>
+<p class="calibre1">acceptance sampling A method of quality control where a sample is taken from a batch and a decision whether to accept the batch is made on the basis of the quality of the sample. The most simple method is to have a straight accept/reject criterion, but a more sophisticated approach is to take another sample if the evidence from the existing sample, or a set of samples, is not clearly indicating whether the batch should be accepted or rejected. One of the main advantages of this approach is reducing the cost of taking samples to satisfy quality control criteria.</p>
+<p class="calibre1">accuracy A measure of the precision of a numerical quantity, usually given to n <em class="calibre6">significant figures (where the proportional accuracy is the important aspect) or n </em>decimal places (where the absolute accuracy is more important).</p>
+<p class="calibre1">accurate (correct) to n decimal places Rounding a number with the accuracy specified by the number of *decimal places given in the rounded value. So e = 2.71828 … = 2.718 to three decimal places and = 2.72 to two decimal places.</p>
+<pre class="calibre2"><code class="calibre3">                                25</code></pre>
+<p class="calibre1"> is 9.30 correct to two decimal places. Where a number of quantities are being measured and added or subtracted, using values correct to the same number of decimal places ensures that they have the same degree of accuracy. However, if the units are changed, for example between centimetres and metres, then the accuracy of the measurements will be different if the same number of decimal places is used in the measurements.</p>
+<p class="calibre1">accurate (correct) to n significant figures Rounding a number with the accuracy specified by the number of *significant figures given in the rounded value. So e = 2.71828 … = 2.718 to four significant figures and = 2.72 to three significant figures. e−3 = 0.049787 … = 0.0498 correct to three significant figures. Rounding to the same number of significant figures ensures all the measurements have about the same proportionate accuracy. If the units are changed, for example between centimetres and metres, then the accuracy of the measurements will not be changed if the same number of significant figures is used in the measurements.</p>
+<p class="calibre1">Achilles paradox The paradox which arises from considering how overtaking takes place. Achilles gives a tortoise a head start in a race. To overtake, he must reach the tortoise’s initial position, then where the tortoise had moved to, and so on *ad infinitum. The conclusion that he cannot overtake because he has to cover an infinite sum of well-defined non-zero distances is false, hence the paradox.</p>
+<p class="calibre1">acre An imperial unit of surface area, which is 4840 square yards. This is the area of a furlong (220 yards) by a chain (22</p>
+<pre class="calibre2"><code class="calibre3">                                26</code></pre>
+<p class="calibre1">yards) which used to be standard units of measurement in the UK. A square mile contains 640 acres. In the metric system a *hectare is approximately 0.4 acre.</p>
+<p class="calibre1">action limits The outer limits set on a *control chart in a production process. If the observed value falls outside these limits, then action will be taken, often resetting the machine. For the means of samples of sizes n in a process with standard deviation σ with target mean μ, the action limits will be set at</p>
+<pre class="calibre2"><code class="calibre3">              .</code></pre>
+<p class="calibre1">active constraint An inequality such as y + 2x ≥ 13 is said to be active at a point on the boundary, i.e.&nbsp;where equality holds, for example (6, 1) and (0, 13).</p>
+<p class="calibre1">activity networks (edges as activities) The networks used in <em class="calibre6">critical path analysis where the edges (arcs) represent activities to be performed. Paths in the network represent the precedence relations between the activities, and </em>dummy activities are required to link paths where common activities appear, but the paths are at least partly independent. While this is a complication, each activity appears on only one edge and the sequence of activities needed is easier to follow than when the vertices are used to represent the activities. Once the activity network has been constructed from the precedence table, the *critical path algorithm (edges as activities) can be applied.</p>
+<p class="calibre1">activity networks (vertices as activities) The networks used in *critical path analysis where the vertices (nodes) represent activities to be performed. The edges (arcs) coming out from</p>
+<pre class="calibre2"><code class="calibre3">                                27</code></pre>
+<p class="calibre1">any vertex X join X to any vertex Y whose activity cannot start until X has been completed, and the edge is labelled with the time taken for activity X. Note that there will often be more than one such activity, in which case each edge will carry the same time. The construction of an activity network requires a listing of the activities, their duration, and the precedence relations which identify which activities are dependent on the prior completion of other activities. With this structure, <em class="calibre6">dummy activities are not needed, but the same activity will be represented by more than one edge when more than one other activity depends on its prior completion, and the sequence of activities is less easy to follow than the alternative structure </em>activity networks (edges as activities).</p>
+<p class="calibre1">acute angle An angle that is less than a <em class="calibre6">right angle. An </em>acute-angled triangle is one all of whose angles are acute.</p>
+<p class="calibre1">adders (in combinatorial circuits) The half-adder and full adders are sections of circuits which use a system of logic gates to add binary digits, by using a combination for which the truth table output is identical to the output required by the binary addition.</p>
+<p class="calibre1">• An article demonstrating how a simple adder works.</p>
+<p class="calibre1">addition (of complex numbers) Let the complex numbers z1 and z2, where z1 = a + bi and z2 = c + di, be represented by the points P1 and P2 in the *complex plane. Then z1 + z2 = (a + c) + (b + d)i, and z1 + z2 is represented in the complex plane</p>
+<pre class="calibre2"><code class="calibre3">                                28</code></pre>
+<p class="calibre1">by the point Q such that OP1QP2 is a parallelogram; that is,</p>
+<p class="calibre1">such that . Thus, if the complex number</p>
+<p class="calibre1">z is associated with the *directed line-segment , where P represents z, then the addition of complex numbers corresponds exactly to the addition of the directed line-segments.</p>
+<p class="calibre1">addition (of directed line-segments) See ADDITION (of vectors).</p>
+<p class="calibre1">addition (of matrices) Let A and B be m × n matrices, with A = [aij] and B = [bij]. The operation of addition is defined by taking the SUM A + B to be the m × n matrix C, where C = [cij] and cij = aij + bij. The sum A + B is not defined if A and B are not of the same order. This operation + of addition on the set of all m × n matrices is <em class="calibre6">associative and </em>commutative.</p>
+<p class="calibre1">addition (of vectors) Given vectors a and b, let and be *directed line-segments that represent a and b, with the same initial point O. The sum of and is the directed</p>
+<pre class="calibre2"><code class="calibre3">                                29</code></pre>
+<p class="calibre1">line-segment , where OACB is a parallelogram, and the</p>
+<p class="calibre1">SUM a + b is defined to be the vector c represented by . This is called the parallelogram law. Alternatively, the sum of vectors a and b can be defined by representing a by a directed</p>
+<p class="calibre1">line-segment and b by where the final point of the</p>
+<p class="calibre1">first</p>
+<p class="calibre1">directed line-segment is the initial point of the second. Then a</p>
+<ul class="calibre7">
+<li class="calibre5">b is the vector represented by . This is called the triangle law. Addition of vectors has the following properties, which hold for all a, b and c:</li>
+</ul>
+<ol class="calibre4">
+<li class="calibre5"><p class="calibre1">a + b = b + a, the commutative law.</p></li>
+<li class="calibre5"><p class="calibre1">a + (b + c) = (a + b) + c, the associative law.</p></li>
+<li class="calibre5"><p class="calibre1">a + 0 = 0 + a = a, where 0 is the zero vector.</p></li>
+<li class="calibre5"><p class="calibre1">a + (−a) = (−a) + a = 0, where −a is the negative of a.</p></li>
+</ol>
+<p class="calibre1">addition formula See COMPOUND ANGLE FORMULA. 30 addition law If A and B are two events then the addition law states that the Pr(A or B) = Pr(A) + Pr(B) − Pr(A and B), or</p>
+<p class="calibre1">using set notation P(A ∪ B) = P(A) + P(B) − P(A ∩ B). In the special case where A and B are *mutually exclusive events</p>
+<p class="calibre1">this reduces to P(A ∪ B) = P(A) + P(B).</p>
+<p class="calibre1">addition modulo n See MODULO N, ADDITION and MULTIPLICATION.</p>
+<p class="calibre1">additive function A function for which f(x + y) = f(x) + f(y). For example, f(x) = 3x is an additive function since f(x + y) =</p>
+<p class="calibre1">3(x + y) = f(x) + f(y) but is not additive since</p>
+<p class="calibre1">is not in general equal to .</p>
+<p class="calibre1">additive group A <em class="calibre6">group with the operation +, called addition, may be called an additive group. The operation in a group is normally denoted by addition only if it is </em>commutative, so an additive group is usually *abelian.</p>
+<p class="calibre1">additive identity The identity element under an operation of addition, usually denoted by 0, so a + 0 = 0 + a = a.</p>
+<p class="calibre1">additive inverse See INVERSE ELEMENT.</p>
+<p class="calibre1">adherent point A point of the *closure of a set.</p>
+<p class="calibre1">ad infinitum Repeating infinitely many times.</p>
+<p class="calibre1">adj Abbreviation for *adjoint.</p>
+<p class="calibre1">adjacency matrix For a *simple graph G, with n vertices v1, v2, …, vn, the adjacency matrix A is the n × n matrix [aij]</p>
+<pre class="calibre2"><code class="calibre3">                        31</code></pre>
+<p class="calibre1">with aij = 1, if vi is joined to vj, and aij = 0, otherwise. The matrix A is <em class="calibre6">symmetric and the diagonal entries are zero. The number of ones in any row (or column) is equal to the </em>degree of the corresponding vertex. An example of a graph and its adjacency matrix A is shown below.</p>
+<p class="calibre1">adjacent angles A pair of angles on a straight line formed by a line or half-line meeting it. Adjacent angles will add to 180°.</p>
+<p class="calibre1">adjacent edges A pair of edges in a graph joined by a common vertex. adjacent side The side of a right-angled triangle between the right angle and the given angle. adjacent vertices A pair of vertices in a *graph joined by a common edge.</p>
+<pre class="calibre2"><code class="calibre3">                                32</code></pre>
+<p class="calibre1">adjoint The adjoint of a square matrix A, denoted by adj A, is</p>
+<p class="calibre1">the transpose of the matrix of cofactors of A. For A = [aij], let</p>
+<p class="calibre1">Aij denote the *cofactor of the entry =ai[j.ATij]hTe.nFothreexmaamtrpixle,oaf cofactors is the matrix [Aij] and adj A</p>
+<p class="calibre1">3 × 3 matrix A and its adjoint can be written</p>
+<p class="calibre1">In the 2 × 2 case, a matrix A and its adjoint have the form</p>
+<p class="calibre1">The adjoint is important because it can be used to find the *inverse of a matrix. From the properties of cofactors, it can be shown that A adj A = (det A)I. It follows that, when det A ≠ 0, the inverse of A is (1/det A) adj A.</p>
+<p class="calibre1">adjugate = ADJOINT.</p>
+<p class="calibre1">aerodynamic drag A body moving through the air, such as an aeroplane flying in the Earth’s atmosphere, experiences a force due to the flow of air over the surface of the body. The force is the sum of the aerodynamic drag, which is tangential to the flight path, and the LIFT, which is normal to the flight path.</p>
+<p class="calibre1">affine geometry A geometry in which some properties are preserved by *parallel projection from one plane to another.</p>
+<pre class="calibre2"><code class="calibre3">                                33</code></pre>
+<p class="calibre1">However, others are not, and in particular *Euclid’s third and fourth axioms do not hold.</p>
+<p class="calibre1">affine transformation A <em class="calibre6">transformation which preserves </em>collinearity and therefore the straightness and parallel nature of lines, and the ratios of distances.</p>
+<p class="calibre1">aggregate Census returns are used to construct aggregate statistics concerning a wide range of characteristics such as economic, social, health, education, often grouped by geographical region, gender, age, etc. The name derives from the way they are compiled as counts from a large number of individual census returns. Other examples of aggregate statistics include indices such as the *retail price index.</p>
+<p class="calibre1">agree If f(x) and g(x) are defined on a set S, and f(x) = g(x) for all x ∈ S, then f and g agree on the set S.</p>
+<p class="calibre1">air resistance The resistance to motion experienced by an object moving through the air caused by the flow of air over the surface of the object. It is a force that affects, for example, the speed of a drop of rain or of a parachutist falling towards the Earth’s surface. As well as depending on the nature of the object, air resistance depends on the speed of the object. Possible *mathematical models are to assume that the magnitude of the air resistance is proportional to the speed or to the square of the speed.</p>
+<p class="calibre1">Aitken’s method (in numerical methods) If an iterative formula xr+1 = f(xr) is to be used to solve an equation, Aitken’s method of accelerating convergence uses the initial value and the first two values obtained by the formula to calculate a better approximation than the iterative formula</p>
+<pre class="calibre2"><code class="calibre3">                                34</code></pre>
+<p class="calibre1">would produce. This can then be used as a new starting point from which to repeat the process until the required accuracy has been reached. While this is computationally intensive, it is the sort of process which spreadsheets handle very easily.</p>
+<p class="calibre1">If x0, x1, x2 are the initial value and the first two iterations and Δxr = xr+1 − xr, Δ2xr = Δxr+1 − Δxr are the forward</p>
+<p class="calibre1">differences then</p>
+<pre class="calibre2"><code class="calibre3">               . More generally this will be expressed as
+
+                         .</code></pre>
+<p class="calibre1">aleph Any infinite *cardinal number, usually denoted by the Hebrew letter ‫א‬. See also TRANSFINITE NUMBER.</p>
+<p class="calibre1">aleph-null The smallest infinite cardinal number. The cardinality of any set which can be put in one-to-one correspondence with the set of natural numbers. Such sets are said to be <em class="calibre6">countable or </em>denumerable. One of the apparent paradoxes in number theory is that the set of rational numbers between 0 and 1, the set of all rational numbers, and the set of natural numbers all have the same cardinality. The symbol ‫א‬0 is used.</p>
+<p class="calibre1">algebra The area of mathematics related to the general properties of arithmetic. Relationships can be summarized by using variables, usually denoted by letters x, y, n, … to stand for unknown quantities, whose value(s) may be determined by solving the resulting equations. See also ABSTRACT ALGEBRA and LINEAR ALGEBRA.</p>
+<pre class="calibre2"><code class="calibre3">                            35</code></pre>
+<p class="calibre1">Algebra, Fundamental Theorem of See FUNDAMENTAL THEOREM OF ALGEBRA.</p>
+<p class="calibre1">algebra of sets The set of all subsets of a <em class="calibre6">universal set E is closed under the binary operations ∪ (</em>union) and ∩ (<em class="calibre6">intersection) and the unary operation ′ (</em>complementation). The following are some of the properties, or laws, that hold for subsets A, B and C of E:</p>
+<ol class="calibre4">
+<li class="calibre5"><p class="calibre1">A ∪ (B ∪ C) = (A ∪ B) ∪ C and A ∩ (B ∩ C) = (A ∩ B) ∩ C, the associative properties.</p></li>
+<li class="calibre5"><p class="calibre1">A ∪ B = B ∪ A and A ∩ B = B ∩ A, the commutative properties.</p></li>
+<li class="calibre5"><p class="calibre1">A ∪ Ø = A and A ∩ Ø = Ø, where Ø is the *empty set.</p></li>
+<li class="calibre5"><p class="calibre1">A ∪ E = E and A ∩ E = A.</p></li>
+<li class="calibre5"><p class="calibre1">A ∪ A = A and A ∩ A = A.</p></li>
+<li class="calibre5"><p class="calibre1">A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) and A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C), the distributive properties.</p></li>
+<li class="calibre5"><p class="calibre1">A ∪ A′ = E and A ∩ A′ = Ø.</p></li>
+<li class="calibre5"><p class="calibre1">E′ = Ø and Ø′ = E.</p></li>
+<li class="calibre5"><p class="calibre1">(A′)′ = A.</p></li>
+<li class="calibre5"><p class="calibre1">(A ∪ B)′ = A′ ∩ B′ and (A ∩ B)′ = A′ ∪ B′, De Morgan’s laws.</p>
+<pre class="calibre2"><code class="calibre3">                            36</code></pre>
+<p class="calibre1">The application of these laws to subsets of E is known as the algebra of sets. Despite some similarities with the algebra of numbers, there are important and striking differences.</p></li>
+</ol>
+<p class="calibre1">algebraic closure The extension of a given set to include all the roots of polynomials with coefficients in the given set. The smallest algebraically closed set of numbers is C, the set of complex numbers, since the very simple equation x2 + 1 = 0 has a complex solution.</p>
+<p class="calibre1">algebraic geometry The area of mathematics related to the study of *geometry by algebraic methods.</p>
+<p class="calibre1">algebraic number A real number that is the root of a <em class="calibre6">polynomial equation with integer coefficients. All </em>rational numbers are algebraic, since a/b is the root of the equation bx − a = 0. Some *irrational numbers are algebraic; for example,</p>
+<pre class="calibre2"><code class="calibre3">  is the root of the equation x2 − 2 = 0. An irrational</code></pre>
+<p class="calibre1">number that is not algebraic (such as π) is called a *transcendental number.</p>
+<p class="calibre1">algebraic structure The term used to describe an abstract concept defined as consisting of certain elements with operations satisfying given axioms. Thus, a <em class="calibre6">group or a </em>ring or a *field is an algebraic structure. The purpose of the definition is to recognize similarities that appear in different contexts within mathematics and to encapsulate these by means of a set of axioms.</p>
+<p class="calibre1">algebraic system A set together with the <em class="calibre6">operations and </em>relations defined on that set.</p>
+<pre class="calibre2"><code class="calibre3">                                37</code></pre>
+<p class="calibre1">algorithm A precisely described routine procedure that can be applied and systematically followed through to a conclusion.</p>
+<p class="calibre1">algorithmic complexity The number of steps required in an algorithm depends on the process and on the number of items being operated on. An algorithm where the number of steps increases in direct proportion to the number of items is said to have linear complexity, so if there are three times as many items the algorithm will have three times as many steps. If the algorithm was of quadratic complexity then there would have been nine times as many steps.</p>
+<p class="calibre1">aliquant part A number or expression which is not an exact divisor of a given number or expression. For example, 2 is an aliquant part of any odd number, and x + 1 is an aliquant part of x2 + 1.</p>
+<p class="calibre1">aliquot part A number or expression which is an exact divisor of a given number or expression, and is usually required to be a proper divisor. For example, 2 is an aliquot part of any even number larger than 2, and x + 1 is an aliquot part of x2 − 1.</p>
+<p class="calibre1">almost all (almost everywhere) Holding for all values except on a set of *zero measure. The most striking example of a set of zero measure is the set of rational numbers, so if f(x) = a when x is rational, and f(x) = b when x is irrational, and g(x) = b everywhere, then f and g agree almost everywhere.</p>
+<p class="calibre1">almost surely = ALMOST EVERYWHERE in a probability measure.</p>
+<pre class="calibre2"><code class="calibre3">                                38</code></pre>
+<p class="calibre1">al-Khwārizmī See under KHWĀRIZMĪ, MUHAMMAD IBN MŪSĀ AL-.</p>
+<p class="calibre1">alternate angles See TRANSVERSAL.</p>
+<p class="calibre1">alternative hypothesis See HYPOTHESIS TESTING.</p>
+<p class="calibre1">alternating group The <em class="calibre6">subgroup of the </em>symmetric group,</p>
+<p class="calibre1">Sn, containing all the <em class="calibre6">even permutations of n objects. It has order n!/2. For n &gt; 4, it is the only proper, </em>normal subgroup</p>
+<p class="calibre1">of Sn apart from the <em class="calibre6">empty set. The alternating group is a </em>simple group.</p>
+<p class="calibre1">alternating series A series in which the sign alternates</p>
+<p class="calibre1">between positive and negative. So any series in the form an = (−1)npn or (−1)n−1pn where all pn &gt; 0 is alternating.</p>
+<p class="calibre1">altitude A line through one vertex of a triangle and perpendicular to the opposite side. The three altitudes of a triangle are concurrent at the *orthocentre.</p>
+<p class="calibre1">ambiguous case The case where two sides of a triangle are known, and an acute angle which is not the angle between the known sides. There can often be two possible triangles which satisfy all the given information, hence the name.</p>
+<p class="calibre1">39 If you know the length of AB, and of BC, and the acute angle at A, you can construct the triangle as follows. Draw AB. From A draw a line making the required angle to AB. Place the point of a compass at B and draw an arc of a circle with radius equal to the required length of BC. Where the line from A and the arc intersect is the position of C. Unless the angle at C is exactly 90° or the given information is inconsistent, there will be two different points of intersection and hence two possible triangles.</p>
+<p class="calibre1">• An animation showing the construction of the two possible solutions.</p>
+<p class="calibre1">amicable numbers A pair of numbers with the property that each is equal to the sum of the positive divisors of the other. (For the purposes of this definition, a number is not included as one of its own divisors.) For example, 220 and 284 are amicable numbers because the positive divisors of 220 are 1, 2, 4, 5, 10, 11, 20, 22, 44, 55 and 110, whose sum is 284, and</p>
+<pre class="calibre2"><code class="calibre3">                                40</code></pre>
+<p class="calibre1">the positive divisors of 284 are 1, 2, 4, 71 and 142, whose sum is 220.</p>
+<p class="calibre1">These numbers, known to the Pythagoreans, were used as symbols of friendship. The amicable numbers 17296 and 18416 were found by <em class="calibre6">Fermat, and a list of 64 pairs was produced by </em>Euler. In 1867, a sixteen-year-old Italian boy found the second smallest pair, 1184 and 1210, overlooked by Euler. More than 600 pairs are now known. It has not been shown whether or not there are infinitely many pairs of amicable numbers.</p>
+<p class="calibre1">amp Abbreviation and symbol for *amplitude.</p>
+<p class="calibre1">amplitude Suppose that x = A sin(ωt + α), where A(&gt;0), ω and α are constants. This may, for example, give the displacement x of a particle, moving in a straight line, at time t. The particle is thus oscillating about the origin O. The constant A is the amplitude, and gives the maximum distance in each direction from O that the particle attains.</p>
+<p class="calibre1">The term may also be used in the case of *damped oscillations to mean the corresponding coefficient, even though it is not constant. For example, if x = 5e−2t sin 3t the oscillations are said to have amplitude 5e−2t, which tends to zero as t tends to infinity.</p>
+<p class="calibre1">analog device A measuring instrument of a continuous quantity which shows the measurement on a continuous scale. For example, the hands of a clock (provided that the second hand moves smoothly).</p>
+<pre class="calibre2"><code class="calibre3">                                41</code></pre>
+<p class="calibre1">analysis The area of mathematics generally taken to include those topics that involve the use of limiting processes. Thus <em class="calibre6">differential calculus and </em>integral calculus certainly come under this heading. Besides these, there are other topics, such as the summation of infinite series, which involve ‘infinite’ processes of this sort. The *Binomial Theorem, a theorem of algebra, leads on into analysis when the index is no longer a positive integer, and the study of sine and cosine, which begins as trigonometry, becomes analysis when the power series for the functions are derived. The term ‘analysis’ has also come to be used to indicate a rather more rigorous approach to the topics of calculus, and to the foundations of the real number system.</p>
+<p class="calibre1">analysis of variance A general procedure for partitioning the overall variability in a set of data into components due to specified causes and random variation. It involves calculating such quantities as the ‘between-groups sum of squares’ and the ‘residual sum of squares’, and dividing by the <em class="calibre6">degrees of freedom to give so-called ‘mean squares’. The results are usually presented in an ANOVA table, the name being derived from the opening letters of the words ‘analysis of variance’. Such a table provides a concise summary from which the influence of the </em>explanatory variables can be estimated and hypotheses can be tested, usually by means of *F-tests.</p>
+<p class="calibre1">• A description of the analysis and its interpretation in a medical context.</p>
+<pre class="calibre2"><code class="calibre3">                                42</code></pre>
+<p class="calibre1">analytic (of a complex function) A single-valued function which is differentiable at every point of its domain. If the function is not differentiable everywhere it may be said to be analytic at points where it is differentiable.</p>
+<p class="calibre1">analytic geometry The area of mathematics relating to the study of *coordinate geometry.</p>
+<p class="calibre1">anchor ring = TORUS.</p>
+<p class="calibre1">and See CONJUNCTION.</p>
+<p class="calibre1">angle (between lines in space) Given two lines in space, let u1 and u2 be vectors with directions along the lines. Then the angle between the lines, even if they do not meet, is equal to the angle between the vectors u1 and u2 (see ANGLE (between vectors)), with the directions of u1 and u2 chosen so that the angle θ satisfies 0 ≤ θ ≤ π/2 (θ in radians), or 0 ≤ θ ≤ 90 (θ in degrees). If l1, m1, n1 and l2, m2, n2 are *direction ratios for directions along the lines, the angle θ between the lines is given by</p>
+<p class="calibre1">angle (between lines in the plane) In coordinate geometry of the plane, the angle a between two lines with gradients m1 and m2 is given by</p>
+<pre class="calibre2"><code class="calibre3">                                43</code></pre>
+<p class="calibre1">This is obtained from the formula for tan(A − B). In the special cases when m1m2 = 1 or when m1 or m2 is infinite, it has to be interpreted as follows: if m1m2 = −1, θ = 90°; if mi is infinite, θ = 90° − |tan−1 mj| where j ≠ i; and if m1 and m2 are both infinite, θ = 0.</p>
+<p class="calibre1">angle (between planes) Given two planes, let n1 and n2 be vectors *normal to the two planes. Then a method of obtaining the angle between the planes is to take the angle between n1 and n2 (see ANGLE (between vectors)), with the directions of n1 and n2 chosen so that the angle θ satisfies 0 ≤ θ ≤ π/2 (θ in radians), or 0 ≤ θ ≤ 90 (θ in degrees).</p>
+<p class="calibre1">angle (between vectors) Given vectors a and b, let and</p>
+<pre class="calibre2"><code class="calibre3">  be *directed line-segments representing a and b. Then</code></pre>
+<p class="calibre1">the angle θ between the vectors a and b is the angle ∠AOB, where θ is taken to satisfy 0 ≤ θ ≤ π (θ in radians), or 0 ≤ θ ≤ 180 (θ in degrees). It is given by</p>
+<p class="calibre1">angle of depression The angle a line makes below a plane, usually the horizontal, especially for a line of sight, or the direction of projection of a projectile.</p>
+<pre class="calibre2"><code class="calibre3">                                44</code></pre>
+<p class="calibre1">angle of elevation The angle a line makes above a plane, usually the horizontal, especially for a line of sight, or the direction of projection of a projectile. angle of friction The angle λ such that tan λ = μs, where μs is the coefficient of static friction. Consider a block resting on a horizontal plane, as shown in the figure. In the limiting case when the block is about to move to the right on account of an applied force of magnitude P, N = mg, P = F and F = μsN. Then the *contact force, whose components are N and F, makes an angle λ with the vertical.</p>
+<p class="calibre1">angle of inclination See INCLINED PLANE. angle of projection The angle that the direction in which a particle is projected makes with the horizontal. Thus it is the angle that the initial velocity makes with the horizontal. angular Relating to or measured in angles.</p>
+<pre class="calibre2"><code class="calibre3">                                45</code></pre>
+<p class="calibre1">angular acceleration Suppose that the particle P is moving in the plane, in a circle with centre at the origin O and radius r0. Let (r0, θ) be the *polar coordinates of P. At an elementary level, the angular acceleration may be defined to</p>
+<p class="calibre1">be .</p>
+<p class="calibre1">At a more advanced level, the angular acceleration α of the</p>
+<p class="calibre1">particle P is the vector defined by , where ω is the</p>
+<p class="calibre1">*angular velocity. Let i and j be unit vectors in the directions</p>
+<p class="calibre1">of the positive x- and y-axes and let k = i × j. Then, in the</p>
+<p class="calibre1">case above of a particle moving along a circular path,</p>
+<p class="calibre1">and . If r, v and a are the position vector, velocity and acceleration of P, then</p>
+<p class="calibre1">where er = i cos θ + j sin θ and eθ = −i sin θ + j cos θ (see CIRCULAR MOTION). Using the fact that v = ω × r, it follows that the acceleration a = α × r + ω × (ω × r).</p>
+<p class="calibre1">angular frequency The constant ω in the equation ẍ = −ω2x for <em class="calibre6">simple harmonic motion. In certain respects ωt, where t is the time, acts like an angle. The angular frequency ω is usually measured in radians per second. The </em>frequency of the oscillations is equal to ω/2π.</p>
+<p class="calibre1">angular measure There are two principal ways of measuring angles: by using <em class="calibre6">degrees, in more elementary work, and by using </em>radians, essential in more advanced work, in particular, when calculus is involved.</p>
+<p class="calibre1">46 angular momentum Suppose that the particle P of mass m has position vector r and is moving with velocity v. Then the angular momentum L of P about the point A with position vector rA is the vector defined by L = (r − rA) × mv. It is the <em class="calibre6">moment of the </em>linear momentum about the point A. See also CONSERVATION OF ANGULAR MOMENTUM.</p>
+<p class="calibre1">Consider a rigid body rotating with angular velocity ω about a fixed axis, and let L be the angular momentum of the rigid body about a point on the fixed axis. Then L = Iω, where I is the *moment of inertia of the rigid body about the fixed axis.</p>
+<p class="calibre1">To consider the general case, let ω and L now be column vectors representing the angular velocity of a rigid body and the angular momentum of the rigid body about a fixed point (or the centre of mass). Then L = Iω, where I is a 3 × 3 matrix, called the inertia matrix, whose elements involve the moments of inertia and the *products of inertia of the rigid body relative to axes through the fixed point (or centre of mass).</p>
+<p class="calibre1">The rotational motion of a rigid body depends on the angular momentum of the rigid body. In particular, the rate of change of the angular momentum about a fixed point (or centre of mass) equals the sum of the moments of the forces acting on the rigid body about the fixed point (or centre of mass).</p>
+<p class="calibre1">angular speed The magnitude of the *angular velocity.</p>
+<p class="calibre1">angular velocity Suppose that the particle P is moving in the plane, in a circle with centre at the origin O and radius r0. Let (r0, θ) be the *polar coordinates of P. At an elementary level, the angular velocity may be defined to be θ.</p>
+<pre class="calibre2"><code class="calibre3">                                47</code></pre>
+<p class="calibre1">At a more advanced level, the angular velocity ω of the</p>
+<p class="calibre1">particle P is the vector defined by , where i and j are</p>
+<p class="calibre1">unit vectors in the directions of the positive x- and y-axes, and</p>
+<p class="calibre1">k = i × j. If r and v are the position vector and velocity of P,</p>
+<p class="calibre1">then</p>
+<p class="calibre1">where er = i cos θ + j sin θ and e = −i sin θ + j cos θ (see CIRCULAR MOTION). By using the fact that k = er × eθ, it follows that the velocity v is given by v = ω θ r.</p>
+<p class="calibre1">Consider a rigid body rotating about a fixed axis, and take</p>
+<p class="calibre1">coordinate axes so that the z-axis is along the fixed axis. Let</p>
+<p class="calibre1">(r0, θ) be the polar coordinates of some point of the rigid</p>
+<p class="calibre1">body, not on the axis, lying in the plane z = 0. Then the</p>
+<p class="calibre1">angular velocity ω of the rigid body is defined by .</p>
+<p class="calibre1">In general, for a rigid body that is rotating, such as a top spinning about a fixed point, the rigid body possesses an angular velocity ω whose magnitude and direction depend on time.</p>
+<p class="calibre1">annualized percentage rate (APR) The true cost of borrowing money from a lender. Introduced in 1977 to provide consumers with a ‘true rate’ benchmark for comparison because lenders were quoting apparently very good headline rates, but charging interest on all of the initial loan for the whole period, taking no account of the reducing level of debt. Initially mortgages were excluded from the requirement that all loan illustrations show the APR, because of the variety of fees and charges associated with mortgages.</p>
+<pre class="calibre2"><code class="calibre3">  48</code></pre>
+<p class="calibre1">Now mortgages do have to display the APR, inclusive of all compulsory fees or charges associated with them. It represents an equivalent rate with interest payable annually in arrears.</p>
+<p class="calibre1">• An example of how APR is calculated.</p>
+<p class="calibre1">annulus (annuli) The region between two concentric circles. If the circles have radii r and r + w, the area of the annulus is</p>
+<p class="calibre1">equal to π(r + w)2 − πr2, which equals . It is</p>
+<p class="calibre1">therefore the same as the area of a rectangle of width w and</p>
+<p class="calibre1">length equal to the circumference of the circle midway in size</p>
+<p class="calibre1">between the two original circles.</p>
+<p class="calibre1">anonymity of survey data People will often answer personal questions differently depending on how anonymous they believe their answers will be. Since there is a high premium on gaining truthful responses, methods of ensuring anonymity or at least strict confidentiality in a survey are important.</p>
+<pre class="calibre2"><code class="calibre3">                                49</code></pre>
+<p class="calibre1">ANOVA See ANALYSIS OF VARIANCE.</p>
+<p class="calibre1">antecedent The clause in a conditional statement which expresses the condition. So in ‘if n is divisible by 2, n is even’ the antecedent is ‘n is divisible by 2’. Compare with *consequent.</p>
+<p class="calibre1">anti- A prefix denoting the *inverse of a function.</p>
+<p class="calibre1">anticlastic A surface is said to anticlastic at a point A if it is a turning point which has opposite signs of curvature in two perpendicular directions at the point, i.e.&nbsp;one being a maximum and one being a minimum, giving a *saddle-point.</p>
+<p class="calibre1">anticlockwise Movement in the opposite direction of timing as the hands of a clock normally take. In compass terms N → W → S → E is anticlockwise. In polar coordinates this is taken to be the positive direction.</p>
+<p class="calibre1">antiderivative Given a <em class="calibre6">real function f, any function ϕ such that ϕ′(x) = f(x), for all x (in the domain of f), is an antiderivative of f.&nbsp;If ϕ1 and ϕ2 are both antiderivatives of a </em>continuous function f, then ϕ1(x) and ϕ2(x) differ by a constant. In that case, the notation</p>
+<p class="calibre1">∫f(x) + dx</p>
+<p class="calibre1">may be used for an antiderivative of f, with the understanding that an arbitrary constant can be added to any antiderivative. Thus,</p>
+<p class="calibre1">∫f(x) dx + c,</p>
+<pre class="calibre2"><code class="calibre3">                                50</code></pre>
+<p class="calibre1">where c is an arbitrary constant, is an expression that gives all the antiderivatives.</p>
+<p class="calibre1">antidifferentiate The reverse process to <em class="calibre6">differentiation used as a method of </em>integration when not working from first principles as the limit of a sum of incremental elements.</p>
+<p class="calibre1">antilog Abbreviation for *antilogarithm.</p>
+<p class="calibre1">antilogarithm The antilogarithm of x, denoted by antilog x, is</p>
+<p class="calibre1">the number whose *logarithm is equal to x. For example,</p>
+<p class="calibre1">suppose that common logarithm tables are used to calculate</p>
+<p class="calibre1">2.75 × 3.12. Then, approximately, log 2.75 = 0.4393 and log</p>
+<p class="calibre1">3.12 = 0.4942 and 0.4393 + 0.4942 = 0.9335. Now antilog</p>
+<p class="calibre1">0.9335 is required and, from tables, the answer 8.58 is</p>
+<p class="calibre1">obtained. Now that logarithm tables have been superseded by</p>
+<p class="calibre1">calculators, the term ‘antilog’ is little used. If y is the number</p>
+<p class="calibre1">whose logarithm is x, then loga y = x. This is equivalent to y = ax (from the definition of logarithm). So, if base a is being uansetidlo, ga1n0tixloigsajuxstis10idxe, natnidcatlhiwsinthotaaxti;ofnoriscpormefmeroanblleo.garithms,</p>
+<p class="calibre1">antiparallel A pair of <em class="calibre6">directed lines or </em>vectors whose directions are <em class="calibre6">parallel but having the opposite </em>sense.</p>
+<p class="calibre1">antipodal points Two points on a sphere that are at opposite ends of a diameter.</p>
+<p class="calibre1">antiprism Normally, a convex *polyhedron with two ‘end’ faces that are congruent regular polygons lying in parallel planes in such a way that, with each vertex of one polygon joined by an edge to two vertices of the other polygon, the remaining faces are isosceles triangles. The term could be</p>
+<pre class="calibre2"><code class="calibre3">                        51</code></pre>
+<p class="calibre1">used for a polyhedron of a similar sort in which the end faces are not regular and the triangular faces are not isosceles, in which case the first definition would be said to give a right-regular antiprism. If the end faces are regular and the triangular faces are equilateral, the antiprism is a semi-regular polygon.</p>
+<p class="calibre1">antisymmetric matrix = SKEW-SYMMETRIC MATRIX.</p>
+<p class="calibre1">antisymmetric relation A binary relation ~ on a set S is antisymmetric if, for all a and b in S, whenever a ~ b and b ~ a, then a = b. For example, the relation ≤ on the set of integers is antisymmetric. (Compare this with the definition of an *asymmetric relation.)</p>
+<p class="calibre1">apex (apices) See BASE (of a triangle) and PYRAMID.</p>
+<p class="calibre1">aphelion See APSE.</p>
+<p class="calibre1">apogee See APSE.</p>
+<p class="calibre1">Apollonius’ circle Given two points A and B in the plane and a constant k, the locus of all points P such that AP/PB = k is a circle. A circle obtained like this is an Apollonius’ circle. Taking k = 1 gives a straight line, so either this value must be excluded or, in this context, a straight line must be considered to be a special case of a circle. In the figure, k = 2.</p>
+<pre class="calibre2"><code class="calibre3">                                52</code></pre>
+<p class="calibre1">• An interactive webpage where you can alter the ratio to see how the circle changes.</p>
+<p class="calibre1">Apollonius of Perga (about 262&ndash;190 BC) Greek mathematician whose most famous work The Conics was, until modern times, the definitive work on the *conic sections: the ellipse, parabola and hyperbola. He proposed the idea of epicyclic motion for the planets. Euclid, Archimedes and Apollonius were pre-eminent in the period covering the third century BC known as the Golden Age of Greek mathematics.</p>
+<p class="calibre1">a posteriori Not able to be known without experience, i.e.&nbsp;the truth or otherwise cannot be argued by logic from agreed definitions. For example, *Newton’s Laws of Motion describe the way bodies are observed to behave, rather than being deduced from principles in the way that the probabilities of the score when tossing a fair die are.</p>
+<pre class="calibre2"><code class="calibre3">                                53</code></pre>
+<p class="calibre1">apothem The line, or the length of the line, joining the centre of a regular polygon to the midpoint of one of its sides. This is also the radius of the inscribed circle.</p>
+<p class="calibre1">applied The practical application of knowledge as in *applied mathematics.</p>
+<p class="calibre1">applied mathematics The area of mathematics related to the study of natural phenomena, and includes mechanics of all types, probability, statistics, discrete and decision mathematics as well as the application of pure mathematics like matrices in solving real-world problems.</p>
+<p class="calibre1">approximate To find a value or expression for a quantity within a specified degree of accuracy.</p>
+<p class="calibre1">approximation When two quantities X and x are approximately equal, written X ≈ x, one of them may be used in suitable circumstances in place of, or as an approximation</p>
+<p class="calibre1">for, the other. For example, and .</p>
+<pre class="calibre2"><code class="calibre3">                          54</code></pre>
+<p class="calibre1">approximation theory The area of numerical analysis related to finding a simpler function f(x) which has approximately the same value as F(x) over a specified interval. The analysis is then carried out on the more accessible f(x) knowing that the difference will be small.</p>
+<p class="calibre1">APR = ANNUALIZED PERCENTAGE RATE.</p>
+<p class="calibre1">a priori Able to be known without experience, i.e.&nbsp;the truth or otherwise can be argued by logic from agreed definitions. For example, the probabilities of the score when tossing a fair die are deduced from the principle of equally likely outcomes.</p>
+<p class="calibre1">a priori (in statistics) Another term for *prior probabilility.</p>
+<p class="calibre1">apse A point in an *orbit at which the body is moving in a direction perpendicular to the radius vector. In an elliptical orbit in which the centre of attraction is at one focus there are two apses, the points at which the body is at its nearest and its furthest from the centre of attraction. When the centre of attraction is the Sun, the points at which the body is nearest and furthest are the perihelion and the aphelion. When the centre of attraction is the Earth, they are the perigee and the apogee.</p>
+<p class="calibre1">apsis (apses) = APSE.</p>
+<p class="calibre1">Arabic numeral See NUMERAL.</p>
+<p class="calibre1">arbitrary constant A non&ndash;numerical symbol which is not a variable in a generalized operation. For example, y = mx + c is the general equation of a straight line in two dimensions, where m and c are arbitrary constants which represent the</p>
+<pre class="calibre2"><code class="calibre3">                                55</code></pre>
+<p class="calibre1">gradient of the line and the y intercept. And ∫2x dx = x2 + c where c is an arbitrary constant whose value can be determined by a boundary condition.</p>
+<p class="calibre1">arc (of a curve) The part of a curve between two given points on the curve. If A and B are two points on a circle, there are two arcs AB. When A and B are not at opposite ends of a diameter, it is possible to distinguish between the longer and shorter arcs by referring to the major arc AB and the minor arc AB.</p>
+<p class="calibre1">arc (of a digraph) See DIGRAPH.</p>
+<p class="calibre1">arccos, arccosec, arccot, arcsin, arcsec, arctan See INVERSE TRIGONOMETRIC FUNCTION.</p>
+<p class="calibre1">arccosh, arccosech, arccoth, arcsinh, arcsech, arctanh See INVERSE HYPERBOLIC FUNCTION.</p>
+<p class="calibre1">Archimedean solid A convex <em class="calibre6">polyhedron is called semi-regular if the faces are regular polygons, though not all congruent, and if the vertices are all alike, in the sense that the different kinds of face are arranged in the same order around each vertex. Right-regular </em>prisms with square side faces and (right-regular) <em class="calibre6">antiprisms whose side faces are equilateral triangles are semi-regular. Apart from these, there are thirteen semi-regular polyhedra, known as the Archimedean solids. These include the </em>truncated tetrahedron, the <em class="calibre6">truncated cube, the </em>cuboctahedron and the *icosidodecahedron.</p>
+<pre class="calibre2"><code class="calibre3">                                56</code></pre>
+<p class="calibre1">• Links to the thirteen Archimedean solids, which can be manipulated to see the shapes fully Archimedean spiral A curve whose equation in polar coordinates is r = aθ, where a (&gt;0) is a constant. In the figure, OA = aπ, OB = 2aπ, and so OB = 2OA. See figure overleaf.</p>
+<p class="calibre1">• An animation showing the Archimedean spiral. Archimedes (287&ndash;212 BC) Greek mathematician who can be rated one of the greatest of all time. He made considerable contributions to geometry, discovering methods of finding, for example, the surface area and the volume of a sphere and the area of a segment of a parabola. His work on hydrostatics and equilibrium was also fundamental. His most fascinating work, The Method, was rediscovered as recently as 1906. He may or may not have shouted ‘Eureka’ and run naked through the streets, but he was certainly murdered by a Roman soldier, an event that marks the end of an era in mathematics.</p>
+<pre class="calibre2"><code class="calibre3">                                57</code></pre>
+<p class="calibre1">Archimedean spiral. Archimedes’ method Take a circle. Computing areas or perimeters of <em class="calibre6">inscribed and </em>circumscribed n-sided polygons generates two sequences, the first of which all underestimate the corresponding measurement of the circle, and the second sequence are all overestimates. This allows upper and lower limits to be placed on the values of computations of polygon measurements. arc length Let y = f(x) be the graph of a function f such that f′ is *continuous on [a, b]. The length of the arc, or arc length, of the curve y = f(x) between x = a and x = b equals</p>
+<p class="calibre1">Parametric form For the curve x = x(t), y = y(t)(t ∈ [α, β]), the arc length equals</p>
+<p class="calibre1">Polar form For the curve r = r(θ)(α ≤ θ ≤ β), the arc length equals</p>
+<pre class="calibre2"><code class="calibre3">                                58</code></pre>
+<p class="calibre1">area A measure of the extent of a surface, or the part of surface enclosed by some specified boundary. For simple geometrical shapes such as rectangles, triangles, cylinders etc. the areas can be calculated by simple formulae based on their dimensions. Other more complex plane figures or 3-dimensional surfaces require the use of integration, or numerical approximations to find their areas. area of a surface of revolution Let y = f(x) be the graph of a function f such that f′ is *continuous on [a, b] and f(x) ≥ 0 for all x in [a, b]. The area of the surface obtained by rotating, through one revolution about the x-axis, the arc of the curve y = f(x) between x = a and x = b, equals</p>
+<p class="calibre1">Parametric form For the curve x = x(t), y = y(t)(t ∈ [α, β]), the surface area equals</p>
+<p class="calibre1">Polar form For the curve r = r(θ)(α ≤ θ ≤ β), the surface area equals</p>
+<pre class="calibre2"><code class="calibre3">                                59</code></pre>
+<p class="calibre1">area under a curve Suppose that the curve y = f(x) lies above the x-axis, so that f(x) ≥ 0 for all x in [a, b]. The area under the curve, that is, the area of the region bounded by the curve, the x-axis and the lines x = a and x = b, equals</p>
+<p class="calibre1">The definition of *integral is made precisely in order to achieve this result.</p>
+<p class="calibre1">If f(x) ≤ 0 for all x in [a, b], the integral above is negative. However, it is still the case that its absolute value is equal to the area of the region bounded by the curve, the x-axis and the lines x = a and x = b. If y = f(x) crosses the x-axis, appropriate results hold. For example, if the regions A and B are as shown in the figure below, then</p>
+<pre class="calibre2"><code class="calibre3">                                60</code></pre>
+<p class="calibre1">area of region and area of region .</p>
+<p class="calibre1">It follows that</p>
+<p class="calibre1">Similarly, to find the area of the region bounded by a suitable curve, the y-axis, and lines y = c and y = d, an equation x = g(y) for the curve must be found. Then the required area equals</p>
+<pre class="calibre2"><code class="calibre3">                      61</code></pre>
+<p class="calibre1">assuming that the curve is to the right of the y-axis, so that g(y) ≥ 0 for all y in [c, d]. As before, the value of the integral is negative if g(y) ≤ 0. Polar areas If a curve has an equation r = r(θ) in polar coordinates, there is an integral that gives the area of the region bounded by an arc AB of the curve and the two radial lines OA and OB. Suppose that ∠xOA = α and ∠xOB = β. The area of the region described equals</p>
+<p class="calibre1">arg Abbreviation and symbol for the *argument of a complex number. Argand diagram = COMPLEX PLANE. Argand, Jean Robert (1768&ndash;1822) Swiss-born mathematician who was one of several people, including Gauss, who invented a geometrical representation for complex numbers. This explains the name Argand diagram.</p>
+<pre class="calibre2"><code class="calibre3">                                62</code></pre>
+<p class="calibre1">argument Suppose that the <em class="calibre6">complex number z is represented by the point P in the </em>complex plane. The argument of z, denoted by arg z, is the angle θ (in radians) that OP makes with the positive real axis Ox, with the angle given a positive sense anticlockwise from Ox. As with polar coordinates, the angle θ may be taken so that 0 ≤ arg z &lt; 2π. Usually, however, the angle θ is chosen so that −π &lt; arg z ≤ π. Sometimes, arg z is used to denote any of the values θ + 2 nπ, where n is an integer. In that case, the particular value that lies in a certain interval, specified or understood, such as [0, 2π) or (−π, π], is called the *principal value of arg z.</p>
+<p class="calibre1">Aristarchus of Samos (about 270 BC) Greek astronomer, noted for being the first to affirm that the Earth rotates and travels around the Sun. He treated astronomy mathematically and used geometrical methods to calculate the relative sizes of the Sun and Moon and their relative distances from the Earth.</p>
+<p class="calibre1">Aristotle (384&ndash;322 BC) Greek philosopher who made important contributions to mathematics through his work on deductive logic.</p>
+<p class="calibre1">arithmetic The area of mathematics relating to numerical calculations involving only the basic operations of addition, subtraction, multiplication, division and simple powers.</p>
+<p class="calibre1">Arithmetic, Fundamental Theorem of See FUNDAMENTAL THEOREM OF ARITHMETIC.</p>
+<p class="calibre1">arithmetic-geometric mean The limit of the series obtained by the *arithmetic-geometric mean iteration.</p>
+<pre class="calibre2"><code class="calibre3">                                63</code></pre>
+<p class="calibre1">arithmetic-geometric mean inequality The arithmetic mean of a set of non-negative numbers is never less than their</p>
+<p class="calibre1">geometric mean. So for any .</p>
+<p class="calibre1">Generally, for a set of numbers with equality if and only if all ai take the same value.</p>
+<p class="calibre1">arithmetic-geometric mean iteration If a and b are two positive real numbers, let a0 = a and</p>
+<pre class="calibre2"><code class="calibre3">                                            for n ≥ 0. Then
+
+                         is the *arithmetic-geometric mean.</code></pre>
+<p class="calibre1">arithmetic mean See MEAN.</p>
+<p class="calibre1">arithmetic progression = ARITHMETIC SERIES.</p>
+<p class="calibre1">arithmetic sequence A finite or infinite sequence of terms a1, a2, a3, … with a common difference d, so that a2 − a1 = d, a3 − a2 = d and so on. The first term is usually denoted by a. For example, 2, 5, 8, 11, … is the arithmetic sequence with a = 2, d = 3. In such an arithmetic sequence, the n-th term an is given by an = a +(n − 1)d.</p>
+<p class="calibre1">arithmetic series A series a1 + a2 + a3 + … (which may be finite or infinite) in which the terms form an *arithmetic sequence. Thus the terms have a common difference d, with ak − ak − 1 for all k ≥ 2. If the first term equals a, then ak = a + (k − 1)d.&nbsp;Let sn be the sum of the first n terms of an arithmetic series, so that</p>
+<p class="calibre1">64 sn = a + (a + d) + (a + 2d) + … + (a + (n-1)d),</p>
+<p class="calibre1">and let the last term here, a + (n-1)d be denoted by l. Then sn</p>
+<p class="calibre1">is given by the formula . The particular case in</p>
+<p class="calibre1">which a = 1 and d = 1 gives the sum of the first n natural</p>
+<p class="calibre1">numbers:</p>
+<p class="calibre1">arm One of the two lines forming an angle.</p>
+<p class="calibre1">arrangement See PERMUTATION.</p>
+<p class="calibre1">array An ordered collection of elements, usually numbers. A <em class="calibre6">vector is an example of a 1-dimensional array, and a </em>matrix is an example of a 2-dimensional array. Three or more dimensional arrays are used, but are more difficult to present on paper, though the subscript notation aij = the element in the i-th row and j-th column of a matrix is easy to extend to higher dimensions. For arrays to be equal requires all corresponding elements to have the same value, and therefore equal arrays have to be the same size.</p>
+<p class="calibre1">Āryabhata (about 476-550) Indian mathematician, author of one of the oldest Indian mathematical texts. Written in verse, the Āryabhatīya is a summary of miscellaneous rules for calculation and mensuration. It deals with, for example, the areas of certain plane figures, values for π, and the summation of *arithmetic series. Also included</p>
+<pre class="calibre2"><code class="calibre3">                                65</code></pre>
+<p class="calibre1">is the equivalent of a table of sines, based on the half-chord rather than the whole *chord of the Greeks.</p>
+<p class="calibre1">ASCII = American Standard Code for Information Interchange. A binary code representing characters used in VDUs, printers, etc.</p>
+<p class="calibre1">assignment problem A problem in which things of one type are to be matched with the same number of things of another type in a way that is, in a specified sense, the best possible. For example, when n workers are to be assigned to n jobs, it may be possible to specify the value vij to the company, measured in suitable units, if the i-th worker is assigned to the j-th job. The values vij may be displayed as the entries of an n × n matrix. By introducing suitable variables, the problem of assigning workers to jobs in such a way as to maximize the total value to the company can be formulated as a *linear programming problem.</p>
+<p class="calibre1">association = CORRELATION.</p>
+<p class="calibre1">associative The *binary operation on a set S is associative if, for all a, b and c in S, (a b) c = a (b c).</p>
+<p class="calibre1">assumption A statement that is presumed to be true in the particular circumstances. Any conclusions reached are dependent on the validity of the assumption.</p>
+<p class="calibre1">astroid A <em class="calibre6">hypocycloid in which the radius of the rolling circle is a quarter of the radius of the fixed circle. It has </em>parametric equations x = a cos3 t, y = a sin3 t, where a is the radius of the fixed circle.</p>
+<pre class="calibre2"><code class="calibre3">                                66</code></pre>
+<p class="calibre1">asymmetric A plane figure is asymmetric if it is neither symmetrical about a line nor symmetrical about a point.</p>
+<p class="calibre1">asymmetric relation A binary relation ~ on a set S is <em class="calibre6">asymmetric if, for all a and b in S, whenever a ~ b, then b ~ a does not hold. For example, the relation &lt; on the set of integers is asymmetric. (Compare this with the definition of an </em>antisymmetric relation.)</p>
+<p class="calibre1">asymptote A line l is an asymptote to a curve if the distance from a point P to the line l tends to zero as P tends to infinity along some unbounded part of the curve. Consider the following examples:</p>
+<pre class="calibre2"><code class="calibre3">                                67</code></pre>
+<p class="calibre1">Example (i) has x = −2 and x = 1 as vertical asymptotes, and y = 0 as a horizontal asymptote. Example (ii) has no vertical asymptotes, and y = 3 as a horizontal asymptote. To investigate example (iii), it can be rewritten as</p>
+<p class="calibre1">Then it can be seen that y = x − 1 is a slant asymptote, that is, an asymptote that is neither vertical nor horizontal.</p>
+<p class="calibre1">asymptotic distribution The limiting distribution of an infinite sequence of random variables. The most common example of this is the Central Limit Theorem which says that</p>
+<p class="calibre1">if , where {Xi} are a series of independent, identically distributed random variables with E{Xi} = μ and</p>
+<p class="calibre1">Var(Xi) = σ2 then the distribution of is</p>
+<p class="calibre1">asymptotically the standard normal distribution as n → ∞.</p>
+<p class="calibre1">asymptotic functions A pair of functions are said to be asymptotic if they approach one another infinitely closely as their arguments tend to a particular value, often infinity. This</p>
+<p class="calibre1">68 is often expressed as ’f(x) is asymptotic to g(x) at α if</p>
+<pre class="calibre2"><code class="calibre3">               .</code></pre>
+<p class="calibre1">asymptotic series A divergent series</p>
+<pre class="calibre2"><code class="calibre3">                                           is called anasymptotic</code></pre>
+<p class="calibre1">series for a function f(x) if</p>
+<pre class="calibre2"><code class="calibre3">                                             for every n.</code></pre>
+<p class="calibre1">Atiyah, Sir Michael Francis FRS (1929&ndash; ) British mathematician who made important contributions in topology, geometry, analysis, the transcendental theory of algebraic varieties, differential operators and quantum field theory. Awarded the *Fields Medal in 1966 and the Abel Prize in 2004.</p>
+<p class="calibre1">atmospheric pressure The *pressure at a point in the atmosphere due to the gravitational force acting on the air. This pressure depends on position and time and is measured by a barometer. The standard atmospheric pressure at sea level is taken to be 101 325 pascals, which is the definition of 1 atmosphere. The variations from place to place are comparatively small, but are the main cause of the wind patterns of the Earth. In general, the atmospheric pressure decreases with height.</p>
+<p class="calibre1">atto- Prefix used with *SI units to denote multiplication by 10−18.</p>
+<pre class="calibre2"><code class="calibre3">                                69</code></pre>
+<p class="calibre1">augmented matrix For a given set of m linear equations in n unknowns x1, x2, … xn,</p>
+<p class="calibre1">the augmented matrix is the matrix</p>
+<p class="calibre1">obtained by adjoining to the matrix of coefficients an extra column of entries taken from the right-hand sides of the equations. The solutions of a set of linear equations may be investigated by transforming the augmented matrix to *echelon form or reduced echelon form by elementary row operations. See GAUSSIAN ELIMINATION; GAUSS&ndash;JORDAN ELIMINATION. autocorrelation (serial correlation) If {xi} is an ordered sequence of observations then the product moment correlation</p>
+<pre class="calibre2"><code class="calibre3">                                70</code></pre>
+<p class="calibre1">coefficient between pairs (xi, xi + 1) is the autocorrelation of lag 1, and between pairs (xi, xi + k) is the autocorrelation of lag k. The values of k for which the autocorrelation is not negligible can provide important information as to the underlying structure of a time series.</p>
+<p class="calibre1">autocovariance Similar to *autocorrelation, but measuring the covariance between the sequences.</p>
+<p class="calibre1">automorphic function A function f(z) is <em class="calibre6">automorphic under a group of transformations if it is </em>analytic in a domain D except at *singular points and for all transformations T in the group that if z is in D then so is T(z).</p>
+<p class="calibre1">automorphism A one-to-one correspondence mapping the elements of a set onto itself, so the domain and range of the function are the same. For example, f(x) = x + 1 is an automorphism on R but g(x) = sin x is not.</p>
+<p class="calibre1">autonomous differential equation A differential equation where the independent variable does not explicitly occur. For</p>
+<p class="calibre1">example is autonomous, but</p>
+<pre class="calibre2"><code class="calibre3">                      is not.</code></pre>
+<p class="calibre1">auxiliary equation See LINEAR DIFFERENTIAL EQUATION WITH CONSTANT COEFFICIENTS.</p>
+<p class="calibre1">average deviation = MEAN DEVIATION.</p>
+<pre class="calibre2"><code class="calibre3">     71</code></pre>
+<p class="calibre1">average of a rate of a quantity The constant value for which the total change in the interval would have been the same as that observed. For example, a car may vary its instantaneous speed in the duration of a journey, but the average speed = total distance travelled/time of journey.</p>
+<p class="calibre1">average of a set of data Usually intended to refer to the *arithmetic mean.</p>
+<p class="calibre1">average speed The total distance travelled divided by the total time taken.</p>
+<p class="calibre1">average velocity The total displacement (as a vector) divided by the total time taken.</p>
+<p class="calibre1">axial plane One of the planes containing two of the coordinate axes in a 3-dimensional Cartesian coordinate system. For example, one of the axial planes is the yz-plane, or (y, z)-plane, containing the y-axis and the z-axis, and it has equation x = 0.</p>
+<p class="calibre1">axiom A statement whose truth is either to be taken as self-evident or to be assumed. Certain areas of mathematics involve choosing a set of axioms and discovering what results can be derived from them, providing proofs for the theorems that are obtained.</p>
+<p class="calibre1">axiomatic set theory The presentation of set theory as comprising axioms together with rules of inference.</p>
+<p class="calibre1">axiomatic system Any logical system which explicitly states <em class="calibre6">axioms from which </em>theorems can be deduced.</p>
+<pre class="calibre2"><code class="calibre3">                                72</code></pre>
+<p class="calibre1">axiom of choice States that for any set of *mutually exclusive sets there is at least one set that contains exactly one element in common with each of the non-empty sets. axis (axes) See COORDINATES (in the plane) and COORDINATES (in 3-dimensional space). axis (of a cone) See CONE. axis (of a cylinder) See CYLINDER. axis (of a parabola) See PARABOLA. axis of rotation A line about which a curve or slope is rotated to form a solid or surface. axis of symmetry A line in which the mirror image of a curve or geometrical figure maps onto itself. The condition for this is that for each point P on the curve or figure the point P′ is also, where the axis is the perpendicular bisector of PP′.</p>
+<pre class="calibre2"><code class="calibre3">                                73</code></pre>
+<p class="calibre1">A 74 B</p>
+<p class="calibre1">B The number 11 in *hexadecimal notation.</p>
+<p class="calibre1">Babbage, Charles (1792&ndash;1871) British mathematician and inventor of mechanical calculators. His ‘analytical engine’ was designed to perform mathematical operations mechanically using a number of features essential in the design of today’s computers but, partly through lack of funds, the project was not completed.</p>
+<p class="calibre1">back-substitution Suppose that a set of linear equations is in <em class="calibre6">echelon form. Then the last equation can be solved for the first unknown appearing in it, any other unknowns being set equal to </em>parameters taking arbitrary values. This solution can be substituted into the previous equation, which can then likewise be solved for the first unknown appearing in it. The process that continues in this way is back-substitution.</p>
+<p class="calibre1">backward difference If {(xi, fi)}, i = 0, 1, 2, … is a given set of function values with xi+1 = xi + h, fi = f(xi) then the backward difference at fi is defined by fi &ndash; fi&ndash;1 = f(xi) f(xi&ndash;1).</p>
+<p class="calibre1">backward induction The form of *mathematical induction which shows that if the proposition P(n) fails then the proposition must fail for some P(k), for some k ≤ n &ndash; 1. As with the standard form of induction, if P(1) is true, this means that P(2) must also be true and so on.</p>
+<p class="calibre1">backward scan In an *activity network (edges as activities), the backward scan identifies the latest time for each vertex</p>
+<pre class="calibre2"><code class="calibre3">                                75</code></pre>
+<p class="calibre1">(node). Starting with the sink, work backwards through the network, for each vertex calculate the sum of edge plus total time on next vertex for all paths leaving that vertex. Put in the largest of these times onto that vertex.</p>
+<p class="calibre1">balanced (of a set) A subset A of a *vector space where for each element x in A, tx belongs to A if |t| &lt; 1. For example, a sphere centred at the origin in Cartesian space is a balanced set.</p>
+<p class="calibre1">balanced block design See BLOCK DESIGN.</p>
+<p class="calibre1">ball A set in a <em class="calibre6">metric space containing all the points which are not more than a given distance from a fixed point. An </em>open ball does not include the surface where the distance is equal to the given constant and a closed ball does include the surface.</p>
+<p class="calibre1">Banach space A complete normed vector space on the real or complex numbers.</p>
+<p class="calibre1">Banach, Stefan (1892&ndash;1945) Polish mathematician who was a major contributor to the subject known as functional analysis. Much subsequent work was inspired by his exposition of the theory in a paper of 1932.</p>
+<p class="calibre1">banded matrix Where the elements are zero except in a band of diagonals around the leading diagonal.</p>
+<p class="calibre1">bar The superscript symbol, as in or is used to denote the <em class="calibre6">conjugate of a complex number or the </em>mean of a statistical variable.</p>
+<pre class="calibre2"><code class="calibre3">                                76</code></pre>
+<p class="calibre1">bar chart A diagram representing the *frequency distribution for nominal or discrete data with comparatively few possible values. It consists of a sequence of bars, or rectangles, corresponding to the possible values, and the length of each is proportional to the frequency. The bars have equal widths and are usually not touching. The figure shows the kinds of vehicles recorded in a small traffic survey.</p>
+<p class="calibre1">bar coding A method for automating stock control and till charging where each item carries a *Universal Product Code which is shown as a series of black bars, which are scanned by an optical reader. At many till charging points now, the customer will receive an itemised receipt showing the details of all their purchases, and the company’s stock records will be automatically updated by the sale. Barrow, Isaac (1630&ndash;77) English mathematician whose method of finding tangents, published in 1670, is essentially</p>
+<pre class="calibre2"><code class="calibre3">                                77</code></pre>
+<p class="calibre1">that now used in differential calculus. He may have been the first to appreciate that the problems of finding tangents and areas under curves are inversely related. When he resigned his chair at Cambridge, he was succeeded by *Newton, on Barrow’s recommendation.</p>
+<p class="calibre1">base (of an exponential function) See EXPONENTIAL FUNCTION TO BASE A.</p>
+<p class="calibre1">base (of an isosceles triangle) See ISOSCELES TRIANGLE.</p>
+<p class="calibre1">base (of logarithms) See LOGARITHMS.</p>
+<p class="calibre1">base (of natural logarithms) See E.</p>
+<p class="calibre1">base (of a pyramid) See PYRAMID.</p>
+<p class="calibre1">base (for representation of numbers) The integer represented as 4703 in standard decimal notation is written in this way because</p>
+<p class="calibre1">4703 = (4 × 103) + (7 × 102) + (0 × 10) + 3.</p>
+<p class="calibre1">The same integer can be written in terms of powers of 8 as follows:</p>
+<p class="calibre1">4703 = (1 × 84) + (1 × 83) + (1 × 82) + (3 × 8) + 7.</p>
+<p class="calibre1">The expression on the right-hand side is abbreviated to (11137)8 and is the *representation of this number to base 8. In general, if g is an integer greater than 1, any positive integer a can be written uniquely as</p>
+<pre class="calibre2"><code class="calibre3">                                78</code></pre>
+<p class="calibre1">a = cngn + cn&ndash;1gn&ndash;1 + … + c1g + c0,</p>
+<p class="calibre1">where each ci is a non-negative integer less than g. This is the representation of a to base g, and is abbreviated to (cncn&ndash;1 … c1c0)g. Real numbers, not just integers, can also be written to any base, by using figures after a ‘decimal’ point, just as familiar *decimal representations of real numbers are written to base 10. See also BINARY REPRESENTATION, DECIMAL and HEXADECIMAL.</p>
+<p class="calibre1">base (of a triangle) It may be convenient to consider one side of a triangle to be the base of the triangle. The vertex opposite the base may then be called the apex of the triangle, and the distance from the apex to the base the height of the triangle.</p>
+<p class="calibre1">base angles See ISOSCELES TRIANGLE.</p>
+<p class="calibre1">base field The <em class="calibre6">field used to define a </em>vector space.</p>
+<p class="calibre1">baseline risk The risk at the beginning of a time period or under specific conditions.</p>
+<p class="calibre1">base period The time used as a reference point for comparison of variables such as the Retail Price Index. An index of 100 is usually taken at the base period and the value at other periods is expressed proportionally, so if prices have risen 17% the index will record 117.</p>
+<p class="calibre1">base unit See SI UNITS.</p>
+<p class="calibre1">basic solution When <em class="calibre6">slack variables have been introduced into a </em>linear programming problem there are more equations</p>
+<pre class="calibre2"><code class="calibre3">                                79</code></pre>
+<p class="calibre1">than there are variables. If there are n more variables than equations the basic solutions are found by setting various combinations of n variables to zero, thus reducing the number of variables to the number of equations. If one of the slack variables is negative then that solution is not *feasible. For each solution, the n variables set to zero are called non-basic variables and the others are called basic variables.</p>
+<p class="calibre1">basic variables See BASIC SOLUTION.</p>
+<p class="calibre1">basis (bases) A set S of <em class="calibre6">vectors is a spanning set if any vector can be written as a linear combination of those in S. If, in addition, the vectors in S are </em>linearly independent, then S is a basis. It follows that any vector can be written *uniquely as a linear combination of those in a basis. In 3-dimensional space, any set of three non-coplanar vectors u, v, w is a basis, since any vector p can be written uniquely as p = xu + yv + zw. In 2-dimensional space, any set of 2 non-parallel vectors has this property and so is a basis. Any one of the vectors in a set currently being taken as a basis may be called a basis vector.</p>
+<p class="calibre1">basis theorem Any <em class="calibre6">linearly independent set of n vectors is a </em>basis of a *vector space of finite dimension n.</p>
+<p class="calibre1">basis vector See BASIS.</p>
+<p class="calibre1">Bayesian An approach where a *prior distribution is modified in the light of the outcomes of an experiment.</p>
+<p class="calibre1">Bayes’ Theorem The following theorem for calculating a posterior probability (see PRIOR PROBABILITY):</p>
+<pre class="calibre2"><code class="calibre3">                                80</code></pre>
+<p class="calibre1">Theorem Let A1, A2, …, Ak be mutually exclusive events whose union is the whole sample space of an experiment and</p>
+<p class="calibre1">let B be an event with Pr(B) ≠ 0. Then</p>
+<p class="calibre1">For example, let A1 be the event of tossing a double-headed coin, and A2 the event of tossing a normal coin. Suppose that</p>
+<p class="calibre1">one of the coins is chosen at random so that and</p>
+<p class="calibre1">. Let B be the event of obtaining ‘heads’. Then</p>
+<p class="calibre1">Pr(B | A1) = 1 and . So</p>
+<p class="calibre1">This says that, given that ‘heads’ was obtained, the probability that it was the double-headed coin that was tossed is 2/3.</p>
+<p class="calibre1">Here, Pr(Ai) is a prior probability and Pr(Ai | B) is a posterior probability.</p>
+<p class="calibre1">Bayes, Thomas (1702&ndash;61) English mathematician remembered for his work in probability, which led to a method of statistical inference based on the theorem that</p>
+<pre class="calibre2"><code class="calibre3">                                81</code></pre>
+<p class="calibre1">bears his name. His paper on the subject was not published until 1763, after his death.</p>
+<p class="calibre1">bearing The direction of the course upon which a ship is set or the direction in which an object is sighted may be specified by giving its bearing, the angle that the direction makes with north. The angle is measured in degrees in a clockwise direction from north. For example, north-east has a bearing of 45°, and west has a bearing of 270°.</p>
+<p class="calibre1">beats Suppose that a body capable of oscillating freely with *angular frequency ω is subject to an oscillatory applied force with angular frequency Ω. When ω and Ω are nearly equal, the motion appears to consist of oscillations with an amplitude that varies comparatively slowly. The beats occur as the amplitude achieves its maximum value. The effect can be heard when two notes whose frequencies are close together are sounded at the same time. Musical instruments can be tuned by listening for beats.</p>
+<p class="calibre1">Bellman’s principle of optimality Any part of an optimal path is itself optimal. This is one of the fundamental principles of *dynamic programming by which the length of the known optimal path is extended step by step until the complete path is known.</p>
+<p class="calibre1">bell-shaped curve See NORMAL DISTRIBUTION.</p>
+<p class="calibre1">belongs to If x is an element of a set S, then x belongs to S and this is written x ∈ S. Naturally, x ∉ S means that x does not belong to S.</p>
+<pre class="calibre2"><code class="calibre3">                                82</code></pre>
+<p class="calibre1">below (of functions) Less than. The limit of a function at a from below is the limit of f(x) as x → a for values of x &lt; a. It is of particular importance when f(x) has a discontinuity at a, i.e.&nbsp;where the limits from above and from below do not</p>
+<p class="calibre1">coincide. It can be written as .</p>
+<p class="calibre1">bending moment The effect at a point which is the sum of all the *moments of forces acting on the structure.</p>
+<p class="calibre1">Bernoulli distribution The discrete probability <em class="calibre6">distribution whose </em>probability mass function is given by Pr(X = 0) = 1 p and Pr(X = 1) = p.&nbsp;It is the *binomial distribution B(1, p).</p>
+<p class="calibre1">Bernoulli equation A differential equation which can be written in the form y′ + f(x)y = g(x)yn. The transformation z =</p>
+<p class="calibre1">y1&ndash;n gives . Dividing the original equation by yn gives y&ndash;nyʹ + f(x)y1&ndash;n = g(x) which</p>
+<p class="calibre1">reduces to which is in linear form</p>
+<p class="calibre1">and can be solved by use of an integrating factor.</p>
+<p class="calibre1">Bernoulli family A family from Basle that produced a stream of significant mathematicians, some of them very important indeed. The best known are the brothers Jacques (or James or Jakob) and Jean (or John or Johann), and Jean’s son Daniel. Jacques Bernoulli (1654&ndash;1705) did much work on the newly developed calculus, but is chiefly remembered for his contributions to probability theory: the Ars conjectandi was published, after his death, in 1713. The work of Jean Bernoulli (1667&ndash;1748) was more definitely within calculus: he discovered *l’Hôpital’s rule (see under H) and proposed</p>
+<pre class="calibre2"><code class="calibre3">                            83</code></pre>
+<p class="calibre1">the <em class="calibre6">brachistochrone problem. He was one of the founders of the </em>calculus of variations. In the next generation, Daniel Bernoulli (1700&ndash;82) was the member of the family whose mathematical work was mainly in hydrodynamics.</p>
+<p class="calibre1">Bernoulli number Can be defined through the power series</p>
+<p class="calibre1">expansion of</p>
+<p class="calibre1">The Bernoulli numbers are the coefficients of in this</p>
+<p class="calibre1">expansion, so when n = 1 it is and zero for all other odd n.</p>
+<p class="calibre1">For n = 0, 2, 4, 6, … they a…
