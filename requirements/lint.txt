@@ -35,7 +35,7 @@ billiard==3.6.4.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   celery
-bleach==4.1.0
+bleach==5.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -225,7 +225,6 @@ packaging==20.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   bleach
     #   pytest
 passlib==1.7.4
     # via

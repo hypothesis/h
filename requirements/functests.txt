@@ -23,7 +23,7 @@ billiard==3.6.4.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-bleach==4.1.0
+bleach==5.0.0
     # via -r requirements/requirements.txt
 celery==5.2.6
     # via -r requirements/requirements.txt
@@ -143,10 +143,7 @@ newrelic==7.10.0.175
 oauthlib==3.2.0
     # via -r requirements/requirements.txt
 packaging==20.4
-    # via
-    #   -r requirements/requirements.txt
-    #   bleach
-    #   pytest
+    # via pytest
 passlib==1.7.4
     # via -r requirements/requirements.txt
 pastedeploy==2.1.0
