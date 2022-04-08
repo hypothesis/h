@@ -24,7 +24,7 @@ billiard==3.6.4.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-bleach==4.1.0
+bleach==5.0.0
     # via -r requirements/requirements.txt
 celery==5.2.6
     # via -r requirements/requirements.txt
@@ -159,10 +159,6 @@ newrelic==7.10.0.175
     # via -r requirements/requirements.txt
 oauthlib==3.2.0
     # via -r requirements/requirements.txt
-packaging==20.4
-    # via
-    #   -r requirements/requirements.txt
-    #   bleach
 parso==0.8.2
     # via jedi
 passlib==1.7.4
@@ -212,9 +208,7 @@ pygments==2.9.0
 pyjwt==2.3.0
     # via -r requirements/requirements.txt
 pyparsing==3.0.7
-    # via
-    #   -r requirements/requirements.txt
-    #   packaging
+    # via -r requirements/requirements.txt
 pyramid==2.0
     # via
     #   -r requirements/requirements.txt
@@ -272,7 +266,6 @@ six==1.15.0
     #   click-repl
     #   elasticsearch-dsl
     #   jsonschema
-    #   packaging
     #   python-dateutil
 sqlalchemy==1.4.35
     # via

@@ -14,7 +14,7 @@ bcrypt==3.2.0
     # via -r requirements/requirements.in
 billiard==3.6.4.0
     # via celery
-bleach==4.1.0
+bleach==5.0.0
     # via -r requirements/requirements.in
 celery==5.2.6
     # via -r requirements/requirements.in
@@ -107,8 +107,6 @@ newrelic==7.10.0.175
     # via -r requirements/requirements.in
 oauthlib==3.2.0
     # via -r requirements/requirements.in
-packaging==20.4
-    # via bleach
 passlib==1.7.4
     # via -r requirements/requirements.in
 pastedeploy==2.1.0
@@ -134,9 +132,7 @@ pycryptodomex==3.14.1
 pyjwt==2.3.0
     # via -r requirements/requirements.in
 pyparsing==3.0.7
-    # via
-    #   -r requirements/requirements.in
-    #   packaging
+    # via -r requirements/requirements.in
 pyramid==2.0
     # via
     #   -r requirements/requirements.in
@@ -184,7 +180,6 @@ six==1.15.0
     #   click-repl
     #   elasticsearch-dsl
     #   jsonschema
-    #   packaging
     #   python-dateutil
 sqlalchemy==1.4.35
     # via
