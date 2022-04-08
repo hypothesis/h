@@ -54,11 +54,11 @@ class TestRender:
             ("<script>evil()</script>", "&lt;script&gt;evil()&lt;/script&gt;"),
             (
                 '<a href="#" onclick="evil()">foobar</a>',
-                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>',
+                '<p><a href="#" target="_blank" rel="nofollow noopener">foobar</a></p>',
             ),
             (
                 '<a href="#" onclick=evil()>foobar</a>',
-                '<p><a href="#" rel="nofollow noopener" target="_blank">foobar</a></p>',
+                '<p><a href="#" target="_blank" rel="nofollow noopener">foobar</a></p>',
             ),
             (
                 "<a href=\"javascript:alert('evil')\">foobar</a>",
@@ -76,6 +76,6 @@ class TestRender:
 
     def test_it_adds_target_blank_and_rel_nofollow_to_links(self):
         actual = markdown_render.render('<a href="https://example.org">Hello</a>')
-        expected = '<p><a href="https://example.org" rel="nofollow noopener" target="_blank">Hello</a></p>'
+        expected = '<p><a href="https://example.org" target="_blank" rel="nofollow noopener">Hello</a></p>'
 
         assert actual == expected
