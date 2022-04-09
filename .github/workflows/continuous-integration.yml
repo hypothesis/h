@@ -4,6 +4,9 @@ env:
   TOX_PARALLEL_NO_SPINNER: 1
   PYTEST_ADDOPTS: --exitfirst
 
+permissions:
+  contents: read
+
 jobs:
   metadata:
     name: Metadata
