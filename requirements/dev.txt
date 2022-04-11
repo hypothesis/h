@@ -207,7 +207,7 @@ pygments==2.9.0
     # via ipython
 pyjwt==2.3.0
     # via -r requirements/requirements.txt
-pyparsing==3.0.7
+pyparsing==3.0.8
     # via -r requirements/requirements.txt
 pyramid==2.0
     # via
