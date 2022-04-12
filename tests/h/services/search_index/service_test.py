@@ -1,5 +1,5 @@
 import datetime
-from unittest.mock import call, create_autospec, patch, sentinel
+from unittest.mock import MagicMock, call, create_autospec, patch, sentinel
 
 import pytest
 from h_matchers import Any
@@ -343,3 +343,11 @@ def report_exception(patch):
 @pytest.fixture(autouse=True)
 def storage(patch):
     return patch("h.services.search_index.service.storage")
+
+
+@pytest.fixture
+def mock_es_client(mock_es_client):
+    # The ES library uses some fancy decorators which confuse autospeccing
+    mock_es_client.conn.index = MagicMock()
+
+    return mock_es_client

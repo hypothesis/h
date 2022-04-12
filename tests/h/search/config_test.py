@@ -1,5 +1,6 @@
 import itertools
 import re
+from unittest.mock import MagicMock
 from urllib.parse import quote_plus
 
 import elasticsearch
@@ -127,7 +128,9 @@ class TestInit:
     def mock_es_client(self, mock_es_client):
         # By default, pretend that no index exists already...
         mock_es_client.conn.indices.exists.return_value = False
-        # Simulate the ICU Analysis plugin
+        # Simulate the ICU Analysis plugin, and get around some funky stuff
+        # the ES client library does which confuses autospeccing
+        mock_es_client.conn.cat.plugins = MagicMock()
         mock_es_client.conn.cat.plugins.return_value = "\n".join(
             ["foo", "analysis-icu"]
         )

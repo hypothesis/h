@@ -1,75 +1,65 @@
-import elasticsearch
+from unittest.mock import MagicMock, create_autospec, sentinel
+
 import pytest
+from elasticsearch import Elasticsearch
+from h_matchers import Any
 
 from h.search.client import Client, get_client
 
 
 class TestClient:
-    def test_it_sets_the_index_property(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
+    def test_close(self, client, conn):
+        client.close()
 
-        assert client.index == "hypothesis"
+        conn.transport.close.assert_called_once_with()
 
-    def test_it_sets_the_version_property(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
+    @pytest.fixture
+    def conn(self):
+        # The ES library really confuses autospeccing
+        return create_autospec(Elasticsearch, instance=True, transport=MagicMock())
 
-        assert client.version >= (6, 4, 0) and client.version < (7, 0, 0)
-
-    def test_it_sets_the_conn_property(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
-        assert isinstance(client.conn, elasticsearch.Elasticsearch)
-
-    def test_index_is_read_only(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
-        with pytest.raises(AttributeError, match="can't set attribute"):
-            client.index = "changed"
-
-    def test_conn_is_read_only(self):
-        client = Client(host="http://localhost:9200", index="hypothesis")
-
-        with pytest.raises(AttributeError, match="can't set attribute"):
-            client.conn = "changed"
+    @pytest.fixture
+    def client(self, conn):
+        return Client(index=sentinel.index, conn=conn)
 
 
 class TestGetClient:
-    def test_initializes_client_with_host(self, settings, patched_client):
-        get_client(settings)
-        args, _ = patched_client.call_args
-        assert args[0] == "search.svc"
-
-    def test_initializes_client_with_index(self, settings, patched_client):
-        get_client(settings)
-        args, _ = patched_client.call_args
-        assert args[1] == "my-index"
-
     @pytest.mark.parametrize(
-        "key,value,settingkey",
-        [
-            ("max_retries", 7, "es.client.max_retries"),
-            ("retry_on_timeout", True, "es.client.retry_on_timeout"),
-            ("timeout", 15, "es.client.timeout"),
-            ("maxsize", 4, "es.client_poolsize"),
-            ("max_retries", 7, "es.client.max_retries"),
-            ("retry_on_timeout", True, "es.client.retry_on_timeout"),
-            ("timeout", 15, "es.client.timeout"),
-            ("maxsize", 4, "es.client_poolsize"),
-        ],
+        "settings,expected",
+        (
+            (
+                # Check all the defaults
+                {},
+                {
+                    "verify_certs": True,
+                    "max_retries": 3,
+                    "retry_on_timeout": False,
+                    "timeout": 10,
+                },
+            ),
+            ({"es.client_poolsize": 4}, {"maxsize": 4}),
+            ({"es.client.timeout": 15}, {"timeout": 15}),
+            ({"es.client.retry_on_timeout": True}, {"retry_on_timeout": True}),
+            ({"es.client.max_retries": 7}, {"max_retries": 7}),
+        ),
     )
-    def test_client_configuration(
-        self, settings, patched_client, key, value, settingkey
-    ):
-        settings[settingkey] = value
-        get_client(settings)
+    def test_it(self, Client, Elasticsearch, settings, expected):
+        client = get_client(
+            {"es.url": sentinel.url, "es.index": sentinel.index, **settings}
+        )
 
-        _, kwargs = patched_client.call_args
-        assert kwargs[key] == value
+        args, kwargs = Elasticsearch.call_args
+        assert args, kwargs == (([sentinel.url],), Any.dict.containing(expected))
+
+        Client.assert_called_once_with(
+            index=sentinel.index, conn=Elasticsearch.return_value
+        )
+        assert client == Client.return_value
 
     @pytest.fixture
-    def settings(self):
-        return {"es.url": "search.svc", "es.index": "my-index"}
+    def Elasticsearch(self, patch):
+        return patch("h.search.client.elasticsearch.Elasticsearch")
 
     @pytest.fixture
-    def patched_client(self, patch):
+    def Client(self, patch):
         return patch("h.search.client.Client")
