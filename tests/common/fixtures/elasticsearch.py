@@ -5,7 +5,6 @@ import elasticsearch_dsl
 import pytest
 
 from h import search
-from h.search.client import Client
 
 ELASTICSEARCH_INDEX = "hypothesis-test"
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
@@ -19,10 +18,13 @@ def es_client():
     yield client
     # Push all changes to segments to make sure all annotations that were added get removed.
     elasticsearch_dsl.Index(client.index, using=client.conn).refresh()
+
+    # Pylint can't understand the ES library
+    # pylint: disable=unexpected-keyword-arg
     client.conn.delete_by_query(
         index=client.index,
         body={"query": {"match_all": {}}},
-        # This query occassionally fails with a version conflict.
+        # This query occasionally fails with a version conflict.
         # Forcing the deletion resolves the issue, but the exact
         # cause of the version conflict has not been found yet.
         conflicts="proceed",
@@ -35,13 +37,12 @@ def es_client():
 
 
 @pytest.fixture
-def mock_es_client():
+def mock_es_client(es_client):
     return create_autospec(
-        Client,
+        es_client,
         instance=True,
         spec_set=True,
         index="hypothesis",
-        version=(6, 2, 0),
         mapping_type="annotation",
     )
 

@@ -1,83 +1,45 @@
+from dataclasses import dataclass
+
 import elasticsearch
 
 
+@dataclass(frozen=True)
 class Client:
-    """
-    A convenience wrapper around a connection to Elasticsearch.
+    """A wrapper around an Elasticsearch connection with related settings."""
 
-    Holds a connection object, an index name, the elasticsearch library version,
-    and the name of the mapping type.
-
-    :param host: Elasticsearch host URL
-    :param index: index name
-    :param elasticsearch: Elasticsearch library defaulted to elasticsearch
-    """
-
-    def __init__(
-        self, host, index, elasticsearch=elasticsearch, **kwargs
-    ):  # pylint: disable=redefined-outer-name
-        self._version = elasticsearch.__version__
-        self._index = index
-        self._conn = elasticsearch.Elasticsearch([host], **kwargs)
-
-        # Our existing Elasticsearch 1.x indexes have a single mapping type
-        # "annotation". For ES 6 we should change this to the preferred name
-        # of "_doc".
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
-        self._mapping_type = "annotation"
+    index: str
+    conn: elasticsearch.Elasticsearch
+    mapping_type = "annotation"
+    # Our existing Elasticsearch 1.x indexes have a single mapping type
+    # "annotation". For ES 6 we should change this to the preferred name
+    # of "_doc".
+    # See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
 
     def close(self):
         """Close the connection to the Elasticsearch server."""
 
         # In the latest version of the `elasticsearch` package we could just
-        # do `self._conn.close()` but this method is missing in v6 so we have
+        # do `self._conn.close()` but this method is missing in v6, so we have
         # to close the underlying transport directly.
-        self._conn.transport.close()
-
-    @property
-    def index(self):
-        return self._index
-
-    @property
-    def conn(self):
-        return self._conn
-
-    @property
-    def mapping_type(self):
-        """
-        Return the name of the index's mapping type (aka. document type).
-
-        The concept of mapping types is being removed from Elasticsearch and in
-        ES >= 6 an index only has a single mapping type.
-
-        See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
-        """
-        return self._mapping_type
-
-    @property
-    def version(self):
-        """Get the version of the elasticsearch library."""
-        return self._version
-
-
-def _get_client_settings(settings):
-    kwargs = {}
-    kwargs["max_retries"] = settings.get("es.client.max_retries", 3)
-    kwargs["retry_on_timeout"] = settings.get("es.client.retry_on_timeout", False)
-    kwargs["timeout"] = settings.get("es.client.timeout", 10)
-
-    if "es.client_poolsize" in settings:
-        kwargs["maxsize"] = settings["es.client_poolsize"]
-
-    kwargs["verify_certs"] = True
-    return kwargs
+        self.conn.transport.close()
 
 
 def get_client(settings):
     """Return a client for the Elasticsearch index."""
-    host = settings["es.url"]
-    index = settings["es.index"]
-    kwargs = _get_client_settings(settings)
+
+    extra_settings = {
+        "verify_certs": True,
+        "max_retries": settings.get("es.client.max_retries", 3),
+        "retry_on_timeout": settings.get("es.client.retry_on_timeout", False),
+        "timeout": settings.get("es.client.timeout", 10),
+    }
+
+    if "es.client_poolsize" in settings:
+        extra_settings["maxsize"] = settings["es.client_poolsize"]
+
     # nb. No AWS credentials here because we assume that if using AWS-managed
     # ES, the cluster lives inside a VPC.
-    return Client(host, index, **kwargs)
+    return Client(
+        index=settings["es.index"],
+        conn=elasticsearch.Elasticsearch([settings["es.url"]], **extra_settings),
+    )
