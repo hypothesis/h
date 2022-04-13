@@ -3,6 +3,7 @@ from unittest.mock import create_autospec
 
 import elasticsearch_dsl
 import pytest
+from packaging.version import Version
 
 from h import search
 
@@ -44,7 +45,7 @@ def mock_es_client(es_client):
         spec_set=True,
         index="hypothesis",
         mapping_type="annotation",
-        server_version=(6, 2, 0),
+        server_version=Version("6.2.0"),
     )
 
 

@@ -6,6 +6,7 @@ from urllib.parse import quote_plus
 import elasticsearch
 import pytest
 from h_matchers import Any
+from packaging.version import Version
 
 from h.search.config import (
     ANALYSIS_SETTINGS,
@@ -181,7 +182,7 @@ class TestConfigureIndex:
     @pytest.fixture
     def mock_es_client_v7(self, mock_es_client):
         mock_es_client.mapping_type = "_doc"
-        mock_es_client.server_version = (7, 10, 0)
+        mock_es_client.server_version = Version("7.10.0")
 
         return mock_es_client
 
