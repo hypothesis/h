@@ -50,6 +50,11 @@ class TestUpdateSettingsCommand:
 
 
 @pytest.fixture
-def cliconfig(pyramid_request):
-    pyramid_request.es = mock.create_autospec(Client, spec_set=True, instance=True)
+def cliconfig(pyramid_request, mock_es_client):
+    pyramid_request.es = mock_es_client
     return {"bootstrap": mock.Mock(return_value=pyramid_request)}
+
+
+@pytest.fixture
+def mock_es_client():
+    return mock.create_autospec(Client, spec_set=True, instance=True)

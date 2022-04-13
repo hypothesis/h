@@ -86,52 +86,54 @@ def test_uri_part_tokenizer():
     ]
 
 
-@pytest.mark.usefixtures("client", "configure_index")
+@pytest.mark.usefixtures("mock_es_client", "configure_index")
 class TestInit:
-    def test_configures_index_when_index_missing(self, client, configure_index):
+    def test_configures_index_when_index_missing(self, mock_es_client, configure_index):
         """Calls configure_index when one doesn't exist."""
-        init(client)
+        init(mock_es_client)
 
-        configure_index.assert_called_once_with(client)
+        configure_index.assert_called_once_with(mock_es_client)
 
-    def test_configures_alias(self, client):
+    def test_configures_alias(self, mock_es_client):
         """Adds an alias to the newly-created index."""
-        init(client)
+        init(mock_es_client)
 
-        client.conn.indices.put_alias.assert_called_once_with(
+        mock_es_client.conn.indices.put_alias.assert_called_once_with(
             index="foo-abcd1234", name="foo"
         )
 
-    def test_does_not_recreate_extant_index(self, client, configure_index):
+    def test_does_not_recreate_extant_index(self, mock_es_client, configure_index):
         """Exits early if the index (or an alias) already exists."""
-        client.conn.indices.exists.return_value = True
+        mock_es_client.conn.indices.exists.return_value = True
 
-        init(client)
+        init(mock_es_client)
 
         assert not configure_index.called
 
-    def test_raises_if_icu_analysis_plugin_unavailable(self, client):
-        client.conn.cat.plugins.return_value = ""
+    def test_raises_if_icu_analysis_plugin_unavailable(self, mock_es_client):
+        mock_es_client.conn.cat.plugins.return_value = ""
 
         with pytest.raises(RuntimeError) as e:
-            init(client)
+            init(mock_es_client)
 
         assert "plugin is not installed" in str(e.value)
 
-    def test_skips_plugin_check(self, client, configure_index):
-        client.conn.cat.plugins.return_value = ""
+    def test_skips_plugin_check(self, mock_es_client, configure_index):
+        mock_es_client.conn.cat.plugins.return_value = ""
 
-        init(client, check_icu_plugin=False)
+        init(mock_es_client, check_icu_plugin=False)
 
-        configure_index.assert_called_once_with(client)
+        configure_index.assert_called_once_with(mock_es_client)
 
     @pytest.fixture
-    def client(self, client):
+    def mock_es_client(self, mock_es_client):
         # By default, pretend that no index exists already...
-        client.conn.indices.exists.return_value = False
+        mock_es_client.conn.indices.exists.return_value = False
         # Simulate the ICU Analysis plugin
-        client.conn.cat.plugins.return_value = "\n".join(["foo", "analysis-icu"])
-        return client
+        mock_es_client.conn.cat.plugins.return_value = "\n".join(
+            ["foo", "analysis-icu"]
+        )
+        return mock_es_client
 
     @pytest.fixture
     def configure_index(self, patch):
@@ -141,22 +143,22 @@ class TestInit:
 
 
 class TestConfigureIndex:
-    def test_creates_randomly_named_index(self, client):
-        configure_index(client)
+    def test_creates_randomly_named_index(self, mock_es_client):
+        configure_index(mock_es_client)
 
-        client.conn.indices.create.assert_called_once_with(
+        mock_es_client.conn.indices.create.assert_called_once_with(
             Any.string.matching("foo-[0-9a-f]{8}"), body=Any()
         )
 
-    def test_returns_index_name(self, client):
-        name = configure_index(client)
+    def test_returns_index_name(self, mock_es_client):
+        name = configure_index(mock_es_client)
 
         assert name == Any.string.matching("foo-[0-9a-f]{8}")
 
-    def test_sets_correct_mappings_and_settings(self, client):
-        configure_index(client)
+    def test_sets_correct_mappings_and_settings(self, mock_es_client):
+        configure_index(mock_es_client)
 
-        client.conn.indices.create.assert_called_once_with(
+        mock_es_client.conn.indices.create.assert_called_once_with(
             Any(),
             body={
                 "mappings": {"annotation": ANNOTATION_MAPPING},
@@ -166,42 +168,42 @@ class TestConfigureIndex:
 
 
 class TestGetAliasedIndex:
-    def test_returns_underlying_index_name(self, client):
+    def test_returns_underlying_index_name(self, mock_es_client):
         """If ``index`` is an alias, return the name of the concrete index."""
-        client.conn.indices.get_alias.return_value = {
+        mock_es_client.conn.indices.get_alias.return_value = {
             "target-index": {"aliases": {"foo": {}}}
         }
 
-        assert get_aliased_index(client) == "target-index"
+        assert get_aliased_index(mock_es_client) == "target-index"
 
-    def test_returns_none_when_no_alias(self, client):
+    def test_returns_none_when_no_alias(self, mock_es_client):
         """If ``index`` is a concrete index, return None."""
-        client.conn.indices.get_alias.side_effect = (
+        mock_es_client.conn.indices.get_alias.side_effect = (
             elasticsearch.exceptions.NotFoundError("test", "test desc")
         )
 
-        assert get_aliased_index(client) is None
+        assert get_aliased_index(mock_es_client) is None
 
-    def test_raises_if_aliased_to_multiple_indices(self, client):
+    def test_raises_if_aliased_to_multiple_indices(self, mock_es_client):
         """Raise if ``index`` is an alias pointing to multiple indices."""
-        client.conn.indices.get_alias.return_value = {
+        mock_es_client.conn.indices.get_alias.return_value = {
             "index-one": {"aliases": {"foo": {}}},
             "index-two": {"aliases": {"foo": {}}},
         }
 
         with pytest.raises(RuntimeError):
-            get_aliased_index(client)
+            get_aliased_index(mock_es_client)
 
 
 class TestUpdateAliasedIndex:
-    def test_updates_index_atomically(self, client):
+    def test_updates_index_atomically(self, mock_es_client):
         """Update the alias atomically."""
-        client.conn.indices.get_alias.return_value = {
+        mock_es_client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}
         }
 
-        update_aliased_index(client, "new-target")
-        client.conn.indices.update_aliases.assert_called_once_with(
+        update_aliased_index(mock_es_client, "new-target")
+        mock_es_client.conn.indices.update_aliases.assert_called_once_with(
             body={
                 "actions": [
                     {"add": {"index": "new-target", "alias": "foo"}},
@@ -210,61 +212,65 @@ class TestUpdateAliasedIndex:
             }
         )
 
-    def test_raises_if_called_for_concrete_index(self, client):
+    def test_raises_if_called_for_concrete_index(self, mock_es_client):
         """Raise if called for a concrete index."""
-        client.conn.indices.get_alias.side_effect = (
+        mock_es_client.conn.indices.get_alias.side_effect = (
             elasticsearch.exceptions.NotFoundError("test", "test desc")
         )
 
         with pytest.raises(RuntimeError):
-            update_aliased_index(client, "new-target")
+            update_aliased_index(mock_es_client, "new-target")
 
 
 class TestDeleteIndex:
-    def test_deletes_index(self, client):
-        delete_index(client, "unused-index")
+    def test_deletes_index(self, mock_es_client):
+        delete_index(mock_es_client, "unused-index")
 
-        client.conn.indices.delete.assert_called_once_with(index="unused-index")
+        mock_es_client.conn.indices.delete.assert_called_once_with(index="unused-index")
 
 
 class TestUpdateIndexSettings:
-    def test_succesfully_updates_the_index_settings(self, client):
-        client.conn.indices.get_alias.return_value = {
+    def test_succesfully_updates_the_index_settings(self, mock_es_client):
+        mock_es_client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}
         }
-        client.conn.indices.get_settings.return_value = {
+        mock_es_client.conn.indices.get_settings.return_value = {
             "old-target": {"settings": {"index": {"analysis": {"old_setting": "val"}}}}
         }
 
-        update_index_settings(client)
+        update_index_settings(mock_es_client)
 
-        client.conn.indices.put_settings.assert_called_once_with(
+        mock_es_client.conn.indices.put_settings.assert_called_once_with(
             index="old-target", body={"analysis": ANALYSIS_SETTINGS}
         )
-        client.conn.indices.put_mapping.assert_called_once_with(
-            index="old-target", doc_type=client.mapping_type, body=ANNOTATION_MAPPING
+        mock_es_client.conn.indices.put_mapping.assert_called_once_with(
+            index="old-target",
+            doc_type=mock_es_client.mapping_type,
+            body=ANNOTATION_MAPPING,
         )
 
-    def test_raises_original_exception_if_not_merge_mapping_exception(self, client):
-        client.conn.indices.get_alias.return_value = {
+    def test_raises_original_exception_if_not_merge_mapping_exception(
+        self, mock_es_client
+    ):
+        mock_es_client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}
         }
         error = elasticsearch.exceptions.RequestError
-        client.conn.indices.put_mapping.side_effect = error("test", "test desc")
+        mock_es_client.conn.indices.put_mapping.side_effect = error("test", "test desc")
 
         with pytest.raises(error):
-            update_index_settings(client)
+            update_index_settings(mock_es_client)
 
-    def test_raises_runtime_exception_if_merge_mapping_exception(self, client):
-        client.conn.indices.get_alias.return_value = {
+    def test_raises_runtime_exception_if_merge_mapping_exception(self, mock_es_client):
+        mock_es_client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}
         }
-        client.conn.indices.put_mapping.side_effect = (
+        mock_es_client.conn.indices.put_mapping.side_effect = (
             elasticsearch.exceptions.RequestError("test", "MergeMappingException")
         )
 
         with pytest.raises(RuntimeError):
-            update_index_settings(client)
+            update_index_settings(mock_es_client)
 
 
 def captures(patterns, text):
@@ -276,10 +282,10 @@ def groups(pattern, text):
 
 
 @pytest.fixture
-def client():
-    client = mock.create_autospec(
+def mock_es_client():
+    es_client = mock.create_autospec(
         Client, spec_set=True, instance=True, version=elasticsearch.__version__
     )
-    client.index = "foo"
-    client.mapping_type = "annotation"
-    return client
+    es_client.index = "foo"
+    es_client.mapping_type = "annotation"
+    return es_client
