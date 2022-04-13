@@ -1,13 +1,11 @@
 import itertools
 import re
-from unittest import mock
 from urllib.parse import quote_plus
 
 import elasticsearch
 import pytest
 from h_matchers import Any
 
-from h.search.client import Client
 from h.search.config import (
     ANALYSIS_SETTINGS,
     ANNOTATION_MAPPING,
@@ -99,7 +97,7 @@ class TestInit:
         init(mock_es_client)
 
         mock_es_client.conn.indices.put_alias.assert_called_once_with(
-            index="foo-abcd1234", name="foo"
+            index="foo-abcd1234", name=mock_es_client.index
         )
 
     def test_does_not_recreate_extant_index(self, mock_es_client, configure_index):
@@ -147,13 +145,13 @@ class TestConfigureIndex:
         configure_index(mock_es_client)
 
         mock_es_client.conn.indices.create.assert_called_once_with(
-            Any.string.matching("foo-[0-9a-f]{8}"), body=Any()
+            Any.string.matching(mock_es_client.index + "-[0-9a-f]{8}"), body=Any()
         )
 
     def test_returns_index_name(self, mock_es_client):
         name = configure_index(mock_es_client)
 
-        assert name == Any.string.matching("foo-[0-9a-f]{8}")
+        assert name == Any.string.matching(mock_es_client.index + "-[0-9a-f]{8}")
 
     def test_sets_correct_mappings_and_settings(self, mock_es_client):
         configure_index(mock_es_client)
@@ -199,15 +197,15 @@ class TestUpdateAliasedIndex:
     def test_updates_index_atomically(self, mock_es_client):
         """Update the alias atomically."""
         mock_es_client.conn.indices.get_alias.return_value = {
-            "old-target": {"aliases": {"foo": {}}}
+            "old-target": {"aliases": {mock_es_client.index: {}}}
         }
 
         update_aliased_index(mock_es_client, "new-target")
         mock_es_client.conn.indices.update_aliases.assert_called_once_with(
             body={
                 "actions": [
-                    {"add": {"index": "new-target", "alias": "foo"}},
-                    {"remove": {"index": "old-target", "alias": "foo"}},
+                    {"add": {"index": "new-target", "alias": mock_es_client.index}},
+                    {"remove": {"index": "old-target", "alias": mock_es_client.index}},
                 ]
             }
         )
@@ -279,13 +277,3 @@ def captures(patterns, text):
 
 def groups(pattern, text):
     return re.search(pattern, text).groups() or []
-
-
-@pytest.fixture
-def mock_es_client():
-    es_client = mock.create_autospec(
-        Client, spec_set=True, instance=True, version=elasticsearch.__version__
-    )
-    es_client.index = "foo"
-    es_client.mapping_type = "annotation"
-    return es_client

@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from h.indexer.reindexer import reindex
-from h.search import client
 
 
 @pytest.mark.usefixtures(
@@ -161,18 +160,6 @@ class TestReindex:
         indexer = BatchIndexer.return_value
         indexer.index.return_value = []
         return indexer
-
-    @pytest.fixture
-    def mock_es_client(self):
-        mock_es = mock.create_autospec(
-            client.Client,
-            instance=True,
-            spec_set=True,
-            index="hypothesis",
-            version=(1, 5, 0),
-        )
-        mock_es.mapping_type = "annotation"
-        return mock_es
 
     @pytest.fixture
     def settings_service(self, pyramid_config):

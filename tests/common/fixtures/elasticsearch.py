@@ -1,12 +1,16 @@
 import os
+from unittest.mock import create_autospec
 
 import elasticsearch_dsl
 import pytest
 
 from h import search
+from h.search.client import Client
 
 ELASTICSEARCH_INDEX = "hypothesis-test"
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
+
+__all__ = ("es_client", "mock_es_client", "init_elasticsearch")
 
 
 @pytest.fixture
@@ -28,6 +32,18 @@ def es_client():
 
     # Close connection to ES server to avoid ResourceWarning about a leaked TCP socket.
     client.close()
+
+
+@pytest.fixture
+def mock_es_client():
+    return create_autospec(
+        Client,
+        instance=True,
+        spec_set=True,
+        index="hypothesis",
+        version=(6, 2, 0),
+        mapping_type="annotation",
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
