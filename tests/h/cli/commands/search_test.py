@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 from h.cli.commands import search
-from h.search.client import Client
 
 
 class TestReindexCommand:
@@ -53,8 +52,3 @@ class TestUpdateSettingsCommand:
 def cliconfig(pyramid_request, mock_es_client):
     pyramid_request.es = mock_es_client
     return {"bootstrap": mock.Mock(return_value=pyramid_request)}
-
-
-@pytest.fixture
-def mock_es_client():
-    return mock.create_autospec(Client, spec_set=True, instance=True)

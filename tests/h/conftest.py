@@ -15,8 +15,7 @@ from h import db
 from h.models import Organization
 from h.settings import database_url
 from tests.common import factories as common_factories
-from tests.common.fixtures import es_client  # pylint:disable=unused-import
-from tests.common.fixtures import init_elasticsearch  # pylint:disable=unused-import
+from tests.common.fixtures.elasticsearch import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from tests.common.fixtures.services import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 TEST_AUTHORITY = "example.com"

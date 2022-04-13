@@ -7,9 +7,12 @@ from webtest import TestApp
 from h import db
 from h.app import create_app
 from tests.common import factories as factories_common
-from tests.common.fixtures import es_client  # pylint:disable=unused-import
-from tests.common.fixtures import init_elasticsearch  # pylint:disable=unused-import
-from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
+from tests.common.fixtures.elasticsearch import (  # pylint: disable=unused-import
+    ELASTICSEARCH_INDEX,
+    ELASTICSEARCH_URL,
+    es_client,
+    init_elasticsearch,
+)
 from tests.functional.fixtures.authentication import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from tests.functional.fixtures.groups import *  # pylint:disable=wildcard-import,unused-wildcard-import
 

@@ -5,7 +5,6 @@ import pytest
 from h_matchers import Any
 
 from h.events import AnnotationEvent
-from h.search.client import Client
 from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
 from h.services.settings import SettingsService
@@ -329,11 +328,6 @@ def search_index(mock_es_client, pyramid_request, settings_service, queue):
         settings=settings_service,
         queue=queue,
     )
-
-
-@pytest.fixture(autouse=True)
-def mock_es_client():
-    return create_autospec(Client, instance=True)
 
 
 @pytest.fixture(autouse=True)
