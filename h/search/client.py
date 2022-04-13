@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Tuple
 
 import elasticsearch
+from packaging.version import Version
 
 
 @dataclass(frozen=True)
@@ -28,22 +28,16 @@ class Client:
         # removed but indexing APIs use the dummy value `_doc`.
         # See: https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
 
-        if self.server_version < (7, 0, 0):
+        if self.server_version < Version("7.0.0"):
             return "annotation"
 
         return "_doc"
 
     @cached_property
-    def server_version(self) -> Tuple[int, int, int]:
+    def server_version(self) -> Version:
         """Get the version of the connected Elasticsearch cluster."""
 
-        version_str = self.conn.info()["version"]["number"]
-
-        # We assume the ES version has 3 parts. This has been true of all
-        # non pre-release versions historically.
-        major, minor, patch = [int(part) for part in version_str.split(".")]
-
-        return major, minor, patch
+        return Version(self.conn.info()["version"]["number"])
 
 
 def get_client(settings):

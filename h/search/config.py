@@ -11,6 +11,7 @@ import logging
 import os
 
 import elasticsearch
+from packaging.version import Version
 
 log = logging.getLogger(__name__)
 
@@ -123,12 +124,10 @@ def init(client, check_icu_plugin=True):
 def configure_index(client):
     """Create a new randomly-named index and return its name."""
     index_name = client.index + "-" + _random_id()
-    mapping = ANNOTATION_MAPPING
+    mappings = ANNOTATION_MAPPING
 
-    if client.server_version >= (7, 0, 0):
-        mappings = mapping
-    else:
-        mappings = {client.mapping_type: mapping}
+    if client.server_version < Version("7.0.0"):
+        mappings = {client.mapping_type: mappings}
 
     client.conn.indices.create(
         index_name,

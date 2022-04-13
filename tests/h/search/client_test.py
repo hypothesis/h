@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, create_autospec, sentinel
 import pytest
 from elasticsearch import Elasticsearch
 from h_matchers import Any
+from packaging.version import Version
 
 from h.search.client import Client, get_client
 
@@ -23,7 +24,7 @@ class TestClient:
         assert client.mapping_type == mapping_type
 
     def test_server_version(self, client):
-        assert client.server_version == (1, 2, 3)
+        assert client.server_version == Version("1.2.3")
 
     @pytest.fixture
     def conn(self):

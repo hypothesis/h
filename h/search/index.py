@@ -5,6 +5,7 @@ import time
 
 import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
+from packaging.version import Version
 from sqlalchemy.orm import subqueryload
 
 from h import models, presenters
@@ -81,7 +82,7 @@ class BatchIndexer:
             }
         }
 
-        if self.es_client.server_version < (7, 0, 0):
+        if self.es_client.server_version < Version("7.0.0"):
             action[self.op_type]["_type"] = self.es_client.mapping_type
 
         data = presenters.AnnotationSearchIndexPresenter(
