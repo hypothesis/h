@@ -31,13 +31,13 @@ class TestAddAnnotationById:
         add_annotation.assert_not_called()
 
     def test_it_does_nothing_if_the_annotation_is_deleted(
-        self, search_index, root_annotation, es_client
+        self, search_index, root_annotation, mock_es_client
     ):
         root_annotation.deleted = True
 
         search_index.add_annotation_by_id(root_annotation.id)
 
-        es_client.conn.index.assert_not_called()
+        mock_es_client.conn.index.assert_not_called()
 
     def test_it_also_adds_the_thread_root(
         self, search_index, reply_annotation, root_annotation, storage, add_annotation
@@ -78,7 +78,7 @@ class TestAddAnnotation:
         search_index,
         annotation,
         pyramid_request,
-        es_client,
+        mock_es_client,
         AnnotationSearchIndexPresenter,
     ):
         search_index.add_annotation(annotation)
@@ -86,7 +86,7 @@ class TestAddAnnotation:
         AnnotationSearchIndexPresenter.assert_called_once_with(
             annotation, pyramid_request
         )
-        es_client.conn.index.assert_called_once_with(
+        mock_es_client.conn.index.assert_called_once_with(
             index=Any(),
             doc_type=Any(),
             body=AnnotationSearchIndexPresenter.return_value.asdict.return_value,
@@ -95,13 +95,13 @@ class TestAddAnnotation:
         )
 
     def test_it_calls_elasticsearch_as_expected(
-        self, search_index, annotation, es_client
+        self, search_index, annotation, mock_es_client
     ):
         search_index.add_annotation(annotation)
 
-        es_client.conn.index.assert_called_once_with(
-            index=es_client.index,
-            doc_type=es_client.mapping_type,
+        mock_es_client.conn.index.assert_called_once_with(
+            index=mock_es_client.index,
+            doc_type=mock_es_client.mapping_type,
             body=Any(),
             id=Any(),
             refresh=False,
@@ -109,27 +109,27 @@ class TestAddAnnotation:
 
     @pytest.mark.usefixtures("with_reindex_in_progress")
     def test_it_calls_elasticsearch_again_for_a_reindex(
-        self, search_index, annotation, es_client
+        self, search_index, annotation, mock_es_client
     ):
         search_index.add_annotation(annotation)
 
-        assert es_client.conn.index.call_count == 2
-        es_client.conn.index.assert_called_with(
+        assert mock_es_client.conn.index.call_count == 2
+        mock_es_client.conn.index.assert_called_with(
             index="another_index",
-            doc_type=es_client.mapping_type,
+            doc_type=mock_es_client.mapping_type,
             body=Any(),
             id=annotation.id,
             refresh=False,
         )
 
     def test_it_does_nothing_if_the_annotation_is_deleted(
-        self, search_index, annotation, es_client
+        self, search_index, annotation, mock_es_client
     ):
         annotation.deleted = True
 
         search_index.add_annotation(annotation)
 
-        es_client.conn.index.assert_not_called()
+        mock_es_client.conn.index.assert_not_called()
 
     @pytest.fixture
     def annotation(self, factories):
@@ -188,12 +188,12 @@ class TestAddGroupAnnotations:
 
 class TestDeleteAnnotationById:
     @pytest.mark.parametrize("refresh", (True, False))
-    def test_delete_annotation(self, search_index, es_client, refresh):
+    def test_delete_annotation(self, search_index, mock_es_client, refresh):
         search_index.delete_annotation_by_id(sentinel.annotation_id, refresh)
 
-        es_client.conn.index.assert_called_once_with(
-            index=es_client.index,
-            doc_type=es_client.mapping_type,
+        mock_es_client.conn.index.assert_called_once_with(
+            index=mock_es_client.index,
+            doc_type=mock_es_client.mapping_type,
             body={"deleted": True},
             id=sentinel.annotation_id,
             refresh=refresh,
@@ -202,14 +202,14 @@ class TestDeleteAnnotationById:
     @pytest.mark.usefixtures("with_reindex_in_progress")
     @pytest.mark.parametrize("refresh", (True, False))
     def test_it_calls_elasticsearch_again_for_a_reindex(
-        self, search_index, es_client, refresh
+        self, search_index, mock_es_client, refresh
     ):
         search_index.delete_annotation_by_id(sentinel.annotation_id, refresh)
 
-        assert es_client.conn.index.call_count == 2
-        es_client.conn.index.assert_called_with(
+        assert mock_es_client.conn.index.call_count == 2
+        mock_es_client.conn.index.assert_called_with(
             index="another_index",
-            doc_type=es_client.mapping_type,
+            doc_type=mock_es_client.mapping_type,
             body=Any(),
             id=sentinel.annotation_id,
             refresh=refresh,
@@ -321,10 +321,10 @@ def queue():
 
 
 @pytest.fixture
-def search_index(es_client, pyramid_request, settings_service, queue):
+def search_index(mock_es_client, pyramid_request, settings_service, queue):
     return SearchIndexService(
         session=pyramid_request.db,
-        es_client=es_client,
+        es_client=mock_es_client,
         request=pyramid_request,
         settings=settings_service,
         queue=queue,
@@ -332,7 +332,7 @@ def search_index(es_client, pyramid_request, settings_service, queue):
 
 
 @pytest.fixture(autouse=True)
-def es_client():
+def mock_es_client():
     return create_autospec(Client, instance=True)
 
 
