@@ -27,6 +27,7 @@ kombu
 markdown
 newrelic
 oauthlib
+packaging
 passlib
 psycogreen
 psycopg2

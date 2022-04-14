@@ -142,8 +142,10 @@ newrelic==7.10.0.175
     # via -r requirements/requirements.txt
 oauthlib==3.2.0
     # via -r requirements/requirements.txt
-packaging==20.4
-    # via pytest
+packaging==21.3
+    # via
+    #   -r requirements/requirements.txt
+    #   pytest
 passlib==1.7.4
     # via -r requirements/requirements.txt
 pastedeploy==2.1.0
@@ -250,7 +252,6 @@ six==1.15.0
     #   click-repl
     #   elasticsearch-dsl
     #   jsonschema
-    #   packaging
     #   python-dateutil
 soupsieve==2.2.1
     # via beautifulsoup4

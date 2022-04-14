@@ -107,6 +107,8 @@ newrelic==7.10.0.175
     # via -r requirements/requirements.in
 oauthlib==3.2.0
     # via -r requirements/requirements.in
+packaging==21.3
+    # via -r requirements/requirements.in
 passlib==1.7.4
     # via -r requirements/requirements.in
 pastedeploy==2.1.0
@@ -132,7 +134,9 @@ pycryptodomex==3.14.1
 pyjwt==2.3.0
     # via -r requirements/requirements.in
 pyparsing==3.0.8
-    # via -r requirements/requirements.in
+    # via
+    #   -r requirements/requirements.in
+    #   packaging
 pyramid==2.0
     # via
     #   -r requirements/requirements.in

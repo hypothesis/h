@@ -159,6 +159,8 @@ newrelic==7.10.0.175
     # via -r requirements/requirements.txt
 oauthlib==3.2.0
     # via -r requirements/requirements.txt
+packaging==21.3
+    # via -r requirements/requirements.txt
 parso==0.8.2
     # via jedi
 passlib==1.7.4
@@ -208,7 +210,9 @@ pygments==2.9.0
 pyjwt==2.3.0
     # via -r requirements/requirements.txt
 pyparsing==3.0.8
-    # via -r requirements/requirements.txt
+    # via
+    #   -r requirements/requirements.txt
+    #   packaging
 pyramid==2.0
     # via
     #   -r requirements/requirements.txt
