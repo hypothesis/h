@@ -248,7 +248,7 @@ python-dateutil==2.8.2
     #   -r requirements/requirements.txt
     #   elasticsearch-dsl
     #   faker
-python-slugify==6.1.1
+python-slugify==6.1.2
     # via -r requirements/requirements.txt
 pytz==2021.3
     # via
