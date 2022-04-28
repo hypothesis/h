@@ -32,7 +32,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {"notebook_launch": "Allow access to notebook feature"}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
