@@ -43,7 +43,7 @@
     "eslint-config-hypothesis": "2.5",
     "eslint-plugin-mocha": "^10.0.3",
     "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-react-hooks": "^4.4.0",
+    "eslint-plugin-react-hooks": "^4.5.0",
     "fetch-mock": "^9.11.0",
     "karma": "^6.3.17",
     "karma-chai": "^0.1.0",
