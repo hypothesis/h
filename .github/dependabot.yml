@@ -24,3 +24,8 @@ updates:
     interval: monthly
     time: "10:00"
   open-pull-requests-limit: 10
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule: 
+    interval: daily
+  open-pull-requests-limit: 10
