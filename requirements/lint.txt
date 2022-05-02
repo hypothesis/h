@@ -22,7 +22,7 @@ attrs==20.2.0
     #   hypothesis
     #   jsonschema
     #   pytest
-bcrypt==3.2.0
+bcrypt==3.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -382,7 +382,6 @@ six==1.15.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   bcrypt
     #   bleach
     #   click-repl
     #   elasticsearch-dsl

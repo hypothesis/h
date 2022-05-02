@@ -16,7 +16,7 @@ attrs==20.2.0
     #   hypothesis
     #   jsonschema
     #   pytest
-bcrypt==3.2.0
+bcrypt==3.2.2
     # via -r requirements/requirements.txt
 billiard==3.6.4.0
     # via
@@ -246,7 +246,6 @@ sentry-sdk==0.17.6
 six==1.15.0
     # via
     #   -r requirements/requirements.txt
-    #   bcrypt
     #   bleach
     #   click-repl
     #   elasticsearch-dsl
