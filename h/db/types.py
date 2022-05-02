@@ -65,7 +65,32 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
         """
         if value is None:
             return None
-        return _url_safe_to_hex(value)
+
+        if not isinstance(value, str):
+            raise InvalidUUID(f"`url_safe` is {type(value)}, expected str")
+
+        byte_str = value.encode()
+
+        try:
+            hex_str = binascii.hexlify(
+                base64.urlsafe_b64decode(byte_str + b"==")
+            ).decode()
+        except binascii.Error as err:
+            raise InvalidUUID(f"{value!r} is not a valid encoded UUID") from err
+
+        lengths = len(byte_str), len(hex_str)
+
+        if lengths == (22, 32):  # A normal UUID
+            return hex_str
+
+        if lengths == (20, 30):
+            # These are ElasticSearch flake IDs, so to convert them into UUIDs we
+            # insert the magic nibbles at the appropriate points. See the comments
+            # on ES_FLAKE_MAGIC_BYTE for details.
+            byte_12, byte_16 = ES_FLAKE_MAGIC_BYTE
+            return hex_str[:12] + byte_12 + hex_str[12:15] + byte_16 + hex_str[15:]
+
+        raise InvalidUUID(f"{value!r} is not a valid encoded UUID")
 
     @staticmethod
     def hex_to_url_safe(value):
@@ -77,8 +102,26 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
         """
         if value is None:
             return None
-        hexstring = uuid.UUID(value).hex
-        return _hex_to_url_safe(hexstring)
+
+        # Validate and normalise hex string
+        hexstring = uuid.UUID(hex=value).hex
+
+        is_flake_id = (
+            hexstring[12] == ES_FLAKE_MAGIC_BYTE[0]
+            and hexstring[16] == ES_FLAKE_MAGIC_BYTE[1]
+        )
+
+        if is_flake_id:
+            # The hex representation of the flake ID is simply the UUID without the
+            # two magic nibbles.
+            data = binascii.unhexlify(
+                hexstring[0:12] + hexstring[13:16] + hexstring[17:32]
+            )
+            return base64.urlsafe_b64encode(data).decode()
+
+        # Encode UUID bytes and strip two bytes of padding
+        data = binascii.unhexlify(hexstring)
+        return base64.urlsafe_b64encode(data)[:-2].decode()
 
 
 class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-method
@@ -97,61 +140,6 @@ class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-m
 
     def process_result_value(self, value, dialect):
         return _transform_quote_selector(value, _unescape_null_byte)
-
-
-def _url_safe_to_hex(url_safe: str) -> str:
-    """Convert a URL-safe base 64 ID to a hex UUID."""
-
-    if not isinstance(url_safe, str):
-        raise InvalidUUID(f"`url_safe` is {type(url_safe)}, expected str")
-
-    byte_str = url_safe.encode()
-
-    try:
-        hex_str = binascii.hexlify(base64.urlsafe_b64decode(byte_str + b"==")).decode()
-    except binascii.Error as err:
-        raise InvalidUUID(f"{url_safe!r} is not a valid encoded UUID") from err
-
-    lengths = len(byte_str), len(hex_str)
-
-    if lengths == (22, 32):  # A normal UUID
-        return hex_str
-
-    if lengths == (20, 30):
-        # These are ElasticSearch flake IDs, so to convert them into UUIDs we
-        # insert the magic nibbles at the appropriate points. See the comments
-        # on ES_FLAKE_MAGIC_BYTE for details.
-        byte_12, byte_16 = ES_FLAKE_MAGIC_BYTE
-        return hex_str[:12] + byte_12 + hex_str[12:15] + byte_16 + hex_str[15:]
-
-    raise InvalidUUID(f"{url_safe!r} is not a valid encoded UUID")
-
-
-def _hex_to_url_safe(value):
-    """
-    Convert a hex UUID to a URL-safe base 64 ID.
-
-    :type value: unicode
-    :rtype: unicode
-    """
-
-    # Validate and normalise hex string
-    hexstring = uuid.UUID(hex=value).hex
-
-    is_flake_id = (
-        hexstring[12] == ES_FLAKE_MAGIC_BYTE[0]
-        and hexstring[16] == ES_FLAKE_MAGIC_BYTE[1]
-    )
-
-    if is_flake_id:
-        # The hex representation of the flake ID is simply the UUID without the
-        # two magic nibbles.
-        data = binascii.unhexlify(hexstring[0:12] + hexstring[13:16] + hexstring[17:32])
-        return base64.urlsafe_b64encode(data).decode()
-
-    # Encode UUID bytes and strip two bytes of padding
-    data = binascii.unhexlify(hexstring)
-    return base64.urlsafe_b64encode(data)[:-2].decode()
 
 
 def _transform_quote_selector(selectors, transform_func):
