@@ -6,7 +6,7 @@
 #
 attrs==20.3.0
     # via jsonschema
-bcrypt==3.2.0
+bcrypt==3.2.2
     # via paramiko
 certifi==2021.10.8
     # via requests
@@ -51,7 +51,6 @@ requests==2.25.1
     #   docker-compose
 six==1.15.0
     # via
-    #   bcrypt
     #   dockerpty
     #   jsonschema
     #   paramiko

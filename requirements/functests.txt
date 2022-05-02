@@ -15,7 +15,7 @@ attrs==20.2.0
     #   -r requirements/requirements.txt
     #   jsonschema
     #   pytest
-bcrypt==3.2.0
+bcrypt==3.2.2
     # via -r requirements/requirements.txt
 beautifulsoup4==4.9.3
     # via webtest
@@ -247,7 +247,6 @@ sentry-sdk==0.17.6
 six==1.15.0
     # via
     #   -r requirements/requirements.txt
-    #   bcrypt
     #   bleach
     #   click-repl
     #   elasticsearch-dsl
