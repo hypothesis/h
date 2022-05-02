@@ -20,6 +20,8 @@ UUID_FIXTURES_INVALID = [
     # Incorrect type
     123,
     [1, 2, 3],
+    # Not a valid b64 length
+    "abcde",
     # 20 bytes of not-base64-encoded data
     "!!!@@@^abcdef&@@@!!!",
     # 22 bytes of not-base64-encoded data
