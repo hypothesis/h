@@ -80,15 +80,14 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
             return None
 
         # Validate and normalise hex string
-        hex_string = uuid.UUID(hex=value).hex
+        hex_str = uuid.UUID(hex=value).hex
 
-        if cls._has_magic_byte(hex_string):  # ElasticSearch flake ID
-            data = binascii.unhexlify(cls._remove_magic_byte(hex_string))
-            return base64.urlsafe_b64encode(data).decode()
+        if cls._has_magic_byte(hex_str):  # ElasticSearch flake ID
+            hex_str = cls._remove_magic_byte(hex_str)
 
-        # Encode UUID bytes and strip two bytes of padding
-        data = binascii.unhexlify(hex_string)
-        return base64.urlsafe_b64encode(data)[:-2].decode()
+        # Encode UUID bytes and strip any padding
+        data = binascii.unhexlify(hex_str)
+        return base64.urlsafe_b64encode(data).decode().rstrip("=")
 
     # A magic byte (expressed as two hexadecimal nibbles) which we use to
     # expand a 15-byte ElasticSearch flake ID into a 16-byte UUID.
