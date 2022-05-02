@@ -3,14 +3,14 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.orm.util import identity_key
 
-from h.db.types import _get_urlsafe_from_hex
+from h.db.types import _hex_to_url_safe
 from h.models import Annotation, Document
 from h.util.session_tracker import ObjectState, Tracker
 
 
 def generate_ann_id():
     """Generate a random annotation identifier in the encoded form used by the API."""
-    return _get_urlsafe_from_hex(str(uuid4()))
+    return _hex_to_url_safe(str(uuid4()))
 
 
 class TestTracker:
