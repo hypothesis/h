@@ -65,7 +65,7 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
         """
         if value is None:
             return None
-        return _get_hex_from_urlsafe(value)
+        return _url_safe_to_hex(value)
 
     @staticmethod
     def hex_to_url_safe(value):
@@ -78,7 +78,7 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
         if value is None:
             return None
         hexstring = uuid.UUID(value).hex
-        return _get_urlsafe_from_hex(hexstring)
+        return _hex_to_url_safe(hexstring)
 
 
 class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-method
@@ -99,7 +99,7 @@ class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-m
         return _transform_quote_selector(value, _unescape_null_byte)
 
 
-def _get_hex_from_urlsafe(url_safe: str) -> str:
+def _url_safe_to_hex(url_safe: str) -> str:
     """Convert a URL-safe base 64 ID to a hex UUID."""
 
     if not isinstance(url_safe, str):
@@ -127,7 +127,7 @@ def _get_hex_from_urlsafe(url_safe: str) -> str:
     raise InvalidUUID(f"{url_safe!r} is not a valid encoded UUID")
 
 
-def _get_urlsafe_from_hex(value):
+def _hex_to_url_safe(value):
     """
     Convert a hex UUID to a URL-safe base 64 ID.
 
