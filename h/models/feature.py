@@ -12,6 +12,7 @@ FEATURES = {
         "using a cached version?"
     ),
     "client_display_names": "Render display names instead of user names in the client",
+    "html_side_by_side": "Enable side-by-side mode for web pages in the client",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
