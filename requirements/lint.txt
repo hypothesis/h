@@ -147,7 +147,7 @@ hupper==1.10.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.46.1
+hypothesis==6.46.2
     # via -r requirements/tests.txt
 importlib-metadata==4.8.1
     # via
