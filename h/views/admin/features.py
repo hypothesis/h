@@ -97,6 +97,19 @@ def cohorts_edit(_context, request):
 @view_config(
     route_name="admin.cohorts_edit",
     request_method="POST",
+    request_param="delete",
+    permission=Permission.AdminPage.HIGH_RISK,
+)
+def cohorts_delete(_context, request):
+    id_ = request.matchdict["id"]
+    cohort = request.db.query(models.FeatureCohort).get(id_)
+    request.db.delete(cohort)
+    return httpexceptions.HTTPFound(location=request.route_url("admin.cohorts"))
+
+
+@view_config(
+    route_name="admin.cohorts_edit",
+    request_method="POST",
     request_param="add",
     renderer="h:templates/admin/cohorts_edit.html.jinja2",
     permission=Permission.AdminPage.HIGH_RISK,

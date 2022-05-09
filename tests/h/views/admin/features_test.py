@@ -1,10 +1,12 @@
 from unittest import mock
 
 import pytest
+from pyramid.httpexceptions import HTTPFound
 
 from h import models
 from h.views.admin.features import (
     cohorts_add,
+    cohorts_delete,
     cohorts_edit,
     cohorts_edit_add,
     cohorts_edit_remove,
@@ -183,6 +185,26 @@ def test_cohorts_edit_with_users(factories, pyramid_request):
 
     assert result["cohort"].id == cohort.id
     assert len(result["cohort"].members) == 2
+
+
+def test_cohorts_delete(factories, pyramid_request):
+    cohort = models.FeatureCohort(name="Test Cohort")
+
+    # Add some members to the cohort. This is not essential, but it ensures
+    # that this facility can be used to delete a cohort which still has members.
+    user1 = factories.User(username="benoit")
+    user2 = factories.User(username="emily", authority="foo.org")
+    cohort.members.append(user1)
+    cohort.members.append(user2)
+
+    pyramid_request.db.add(cohort)
+    pyramid_request.db.flush()
+
+    pyramid_request.matchdict["id"] = cohort.id
+    result = cohorts_delete({}, pyramid_request)
+
+    assert cohort in pyramid_request.db.deleted
+    assert isinstance(result, HTTPFound)
 
 
 @mock.patch.dict("h.models.feature.FEATURES", {"feat": "A test feature"})
