@@ -10,6 +10,11 @@ load-plugins=pylint.extensions.bad_builtin,
              pylint.extensions.overlapping_exceptions,
              pylint.extensions.redefined_variable_type,
 
+# Fail if there are *any* messages from PyLint.
+# The letters refer to PyLint's message categories, see
+# https://pylint.pycqa.org/en/latest/messages/messages_introduction.html
+fail-on=C,E,F,I,R,W
+
 [MESSAGES CONTROL]
 disable=bad-continuation,
         missing-docstring,
