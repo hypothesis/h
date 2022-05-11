@@ -209,7 +209,7 @@ pygments==2.9.0
     # via ipython
 pyjwt==2.3.0
     # via -r requirements/requirements.txt
-pyparsing==3.0.8
+pyparsing==3.0.9
     # via
     #   -r requirements/requirements.txt
     #   packaging
