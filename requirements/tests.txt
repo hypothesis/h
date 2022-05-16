@@ -186,7 +186,7 @@ pycparser==2.20
     #   cffi
 pycryptodomex==3.14.1
     # via -r requirements/requirements.txt
-pyjwt==2.3.0
+pyjwt==2.4.0
     # via -r requirements/requirements.txt
 pyparsing==3.0.9
     # via

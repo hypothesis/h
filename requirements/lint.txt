@@ -289,7 +289,7 @@ pycryptodomex==3.14.1
     #   -r requirements/tests.txt
 pydocstyle==6.1.1
     # via -r requirements/lint.in
-pyjwt==2.3.0
+pyjwt==2.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
