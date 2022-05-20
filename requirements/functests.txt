@@ -27,7 +27,7 @@ bleach==5.0.0
     # via -r requirements/requirements.txt
 celery==5.2.6
     # via -r requirements/requirements.txt
-certifi==2022.5.18
+certifi==2022.5.18.1
     # via
     #   -r requirements/requirements.txt
     #   sentry-sdk
