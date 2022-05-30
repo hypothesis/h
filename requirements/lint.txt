@@ -39,7 +39,7 @@ bleach==5.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-celery==5.2.6
+celery==5.2.7
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
