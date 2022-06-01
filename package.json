@@ -41,7 +41,7 @@
     "diff": "^5.0.0",
     "eslint": "^8.14.0",
     "eslint-config-hypothesis": "2.5",
-    "eslint-plugin-mocha": "^10.0.4",
+    "eslint-plugin-mocha": "^10.0.5",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.5.0",
     "fetch-mock": "^9.11.0",
