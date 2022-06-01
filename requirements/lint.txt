@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-alembic==1.7.7
+alembic==1.8.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
