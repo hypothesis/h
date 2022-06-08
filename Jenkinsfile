@@ -47,7 +47,7 @@ node {
         }
     }
 
-    onlyOnMaster {
+    onlyOnMain {
         stage('release') {
             releaseApp(image: image)
             releaseApp(image: ws_only_image)
@@ -55,7 +55,7 @@ node {
     }
 }
 
-onlyOnMaster {
+onlyOnMain {
     milestone()
     stage('qa deploy') {
         parallel(

@@ -26,7 +26,7 @@ a JavaScript tool for generating OpenAPI/Swagger reference documentation.
 The documentation-building process above will regenerate API documentation output without intervention,
 but if you are making changes to an API description document (e.g. `hypothesis-v1.yaml`
 for v1 on the API),you may find it convenient to use the
-`ReDoc CLI tool <https://github.com/Rebilly/ReDoc/blob/master/cli/README.md>`_,
+`ReDoc CLI tool <https://github.com/Rebilly/ReDoc/blob/main/cli/README.md>`_,
 which can watch the spec file for changes:
 
 .. code-block:: bash

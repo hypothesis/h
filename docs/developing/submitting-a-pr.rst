@@ -4,7 +4,7 @@ Submitting a Pull Request
 To submit code or documentation to h you should submit a pull request.
 
 For trivial changes, such as documentation changes or minor errors,
-PRs may be submitted directly to master. This also applies to changes
+PRs may be submitted directly to main. This also applies to changes
 made through the GitHub editing interface. Authors do not need to
 sign the CLA for these, or follow fork or branch naming guidelines.
 
