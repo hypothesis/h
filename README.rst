@@ -1,11 +1,11 @@
 h
 =
 
-.. image:: https://github.com/hypothesis/h/workflows/Continuous%20integration/badge.svg?branch=master
-   :target: https://github.com/hypothesis/h/actions?query=branch%3Amaster
+.. image:: https://github.com/hypothesis/h/workflows/Continuous%20integration/badge.svg?branch=main
+   :target: https://github.com/hypothesis/h/actions?query=branch%3Amain
    :alt: Continuous integration
 .. image:: https://img.shields.io/badge/license-BSD-blue.svg
-   :target: https://github.com/hypothesis/h/blob/master/LICENSE
+   :target: https://github.com/hypothesis/h/blob/main/LICENSE
    :alt: BSD licensed
 .. image:: https://img.shields.io/badge/python-3.6-blue.svg
    :target: https://www.python.org/

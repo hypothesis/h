@@ -39,7 +39,7 @@ previous to your new schema.
 
 We use `Alembic <https://alembic.readthedocs.io/en/latest/>`_ to create and run
 migration scripts. See the Alembic docs (and look at existing scripts in
-`h/migrations/versions <https://github.com/hypothesis/h/tree/master/h/migrations/versions>`_)
+`h/migrations/versions <https://github.com/hypothesis/h/tree/main/h/migrations/versions>`_)
 for details. The ``make db`` command is a wrapper around Alembic. The
 steps to create a new migration script for h are:
 
