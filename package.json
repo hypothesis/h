@@ -30,7 +30,7 @@
     "popper.js": "^1.16.1",
     "postcss": "^8.4.14",
     "raven-js": "^3.7.0",
-    "rollup": "^2.75.5",
+    "rollup": "^2.75.6",
     "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.52.1",
     "scroll-into-view": "^1.16.0"
