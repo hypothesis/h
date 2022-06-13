@@ -103,6 +103,10 @@ elasticsearch-dsl==6.3.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+exceptiongroup==1.0.0rc8
+    # via
+    #   -r requirements/tests.txt
+    #   hypothesis
 factory-boy==3.2.1
     # via
     #   -r requirements/functests.txt
@@ -147,7 +151,7 @@ hupper==1.10.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.47.0
+hypothesis==6.47.2
     # via -r requirements/tests.txt
 importlib-metadata==4.8.1
     # via
