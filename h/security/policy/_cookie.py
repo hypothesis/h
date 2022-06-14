@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from h.security import Identity
+from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
 from h.services import AuthCookieService
 

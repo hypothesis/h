@@ -42,7 +42,6 @@ disable=
 
     # We use Black to format our code automatically, so we don't need PyLint to
     # check formatting for us.
-    bad-continuation,
     line-too-long,
 
     # Because of how pytest fixtures work it's frequently necessary for
@@ -51,7 +50,6 @@ disable=
 
     # Lots of test methods don't use self, but we still want to group our tests
     # into classes.
-    no-self-use,
     too-few-public-methods,
     too-many-public-methods,
 

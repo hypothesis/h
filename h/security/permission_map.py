@@ -12,8 +12,8 @@ at least one sub-list:
 * Every permission included would also be granted (by recursing)
 """
 
-from h.security import Permission
-from h.security import predicates as p
+import h.security.predicates as p
+from h.security.permissions import Permission
 from h.security.predicates import resolve_predicates
 
 PERMISSION_MAP = {

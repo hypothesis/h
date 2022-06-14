@@ -25,7 +25,7 @@ class Organization(Base, mixins.Timestamps):
     authority = sa.Column(sa.UnicodeText(), nullable=False)
 
     @sa.orm.validates("name")
-    def validate_name(self, _key, name):  # pylint: disable=no-self-use
+    def validate_name(self, _key, name):
         if not (
             Organization.NAME_MIN_CHARS <= len(name) <= Organization.NAME_MAX_CHARS
         ):

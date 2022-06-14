@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel, cyclic-import
 """
 Configure and expose the application database session.
 

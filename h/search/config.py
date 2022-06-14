@@ -168,7 +168,7 @@ def update_aliased_index(client, new_target):
     old_target = get_aliased_index(client)
     if old_target is None:
         raise RuntimeError(
-            "Cannot update aliased index for index that " "is not already aliased."
+            "Cannot update aliased index for index that is not already aliased."
         )
 
     client.conn.indices.update_aliases(

@@ -13,13 +13,13 @@ class CreateAuthClientSchema(CSRFSchema):
     name = colander.SchemaNode(
         colander.String(),
         title=_("Name"),
-        hint=_("This will be displayed to users in the " "authorization prompt"),
+        hint=_("This will be displayed to users in the authorization prompt"),
     )
 
     authority = colander.SchemaNode(
         colander.String(),
         title=_("Authority"),
-        hint=_("Set of users whose data this client " "can interact with"),
+        hint=_("Set of users whose data this client can interact with"),
     )
 
     grant_type = colander.SchemaNode(
