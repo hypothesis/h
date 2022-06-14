@@ -1,6 +1,7 @@
 from typing import Optional
 
-from h.security import Identity, identity_permits
+from h.security.identity import Identity
+from h.security.permits import identity_permits
 
 
 class IdentityBasedPolicy:
@@ -11,7 +12,7 @@ class IdentityBasedPolicy:
     security policy.
     """
 
-    # pylint: disable=no-self-use,unused-argument
+    # pylint: disable=unused-argument
     def identity(self, request) -> Optional[Identity]:
         """
         Get an Identity object for valid credentials.
@@ -45,8 +46,8 @@ class IdentityBasedPolicy:
 
         return None
 
-    def remember(self, _request, _userid, **_kwargs):  # pylint: disable=no-self-use
+    def remember(self, _request, _userid, **_kwargs):
         return []
 
-    def forget(self, _request):  # pylint: disable=no-self-use
+    def forget(self, _request):
         return []

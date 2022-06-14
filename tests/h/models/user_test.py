@@ -13,14 +13,14 @@ class TestUserIDComparator:
     def test__eq__returns_a_BinaryExpression(self, comparator, other):
         # We don't actually get a True here, just something which might
         # evaluate to true in the DB
-        assert isinstance(comparator.__eq__(other), BinaryExpression)
+        assert isinstance(comparator == other, BinaryExpression)
 
     @pytest.mark.parametrize(
         "non_matching",
         ("not_a_valid_user_id", "acct:DIFFERENT@authority", "acct:username@DIFFERENT"),
     )
     def test__eq___returns_False(self, comparator, non_matching):
-        assert not comparator.__eq__(non_matching)
+        assert not comparator == non_matching
 
     @pytest.fixture
     def comparator(self):

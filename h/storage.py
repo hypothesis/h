@@ -257,5 +257,5 @@ def _validate_group_scope(group, target_uri):
     if not url_in_scope(target_uri, group_scopes):
         raise schemas.ValidationError(
             "group scope: "
-            + _("Annotations for this target URI " "are not allowed in this group")
+            + _("Annotations for this target URI are not allowed in this group")
         )

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import sqlalchemy as sa
 
 from h.db import Base, mixins
-from h.models import Annotation
+from h.models.annotation import Annotation
 from h.models.document._exceptions import ConcurrentUpdateError
 from h.models.document._meta import create_or_update_document_meta
 from h.models.document._uri import DocumentURI, create_or_update_document_uri

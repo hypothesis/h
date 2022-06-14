@@ -51,7 +51,7 @@ class LoginSchema(CSRFSchema):
         except UserNotActivated as exc:
             err = colander.Invalid(node)
             err["username"] = _(
-                "Please check your email and open the link " "to activate your account."
+                "Please check your email and open the link to activate your account."
             )
             raise err from exc
 

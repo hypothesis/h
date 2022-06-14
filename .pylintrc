@@ -16,8 +16,7 @@ load-plugins=pylint.extensions.bad_builtin,
 fail-on=C,E,F,I,R,W
 
 [MESSAGES CONTROL]
-disable=bad-continuation,
-        missing-docstring,
+disable=missing-docstring,
         missing-type-doc,
         missing-yield-doc,
         missing-return-type-doc,
@@ -32,7 +31,6 @@ disable=bad-continuation,
 
         # We use Black to format our code automatically, so we don't need PyLint to
         # check formatting for us.
-        bad-continuation,
         line-too-long,
         too-few-public-methods,
         duplicate-code,

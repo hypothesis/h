@@ -123,7 +123,8 @@ class TestPublisher:
     @pytest.fixture
     def producer(self, patch):
         producer_pool = patch("h.realtime.producer_pool")
-        return producer_pool["foobar"].acquire().__enter__()
+        with producer_pool["foobar"].acquire() as pool:
+            yield pool
 
     @pytest.fixture
     def publisher(self, pyramid_request):

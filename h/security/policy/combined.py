@@ -4,7 +4,7 @@ from pyramid.interfaces import ISecurityPolicy
 from pyramid.request import RequestLocalCache
 from zope.interface import implementer
 
-from h.security import Identity
+from h.security.identity import Identity
 from h.security.policy._basic_http_auth import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy._identity_base import IdentityBasedPolicy

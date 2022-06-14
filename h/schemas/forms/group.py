@@ -19,7 +19,7 @@ def unblacklisted_group_name_slug(node, value):
     if slugify.slugify(value).lower() in {"edit", "leave"}:
         raise colander.Invalid(
             node,
-            _("Sorry, this group name is not allowed. " "Please choose another one."),
+            _("Sorry, this group name is not allowed. Please choose another one."),
         )
 
 

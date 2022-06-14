@@ -120,7 +120,7 @@ class User(Base):
     __tablename__ = "user"
 
     @declared_attr
-    def __table_args__(cls):  # pylint:disable=no-self-argument, no-self-use
+    def __table_args__(cls):  # pylint:disable=no-self-argument
         return (
             # (email, authority) must be unique
             sa.UniqueConstraint("email", "authority"),
@@ -269,7 +269,7 @@ class User(Base):
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
     @sa.orm.validates("email")
-    def validate_email(self, _key, email):  # pylint:disable=no-self-use
+    def validate_email(self, _key, email):
         if email is None:
             return email
 
@@ -280,7 +280,7 @@ class User(Base):
         return email
 
     @sa.orm.validates("_username")
-    def validate_username(self, _key, username):  # pylint: disable=no-self-use
+    def validate_username(self, _key, username):
         if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
             raise ValueError(
                 f"username must be between {USERNAME_MIN_LENGTH} and {USERNAME_MAX_LENGTH} "
@@ -289,7 +289,7 @@ class User(Base):
 
         if not re.match(USERNAME_PATTERN, username):
             raise ValueError(
-                "username must have only letters, numbers, " "periods, and underscores."
+                "username must have only letters, numbers, periods, and underscores."
             )
 
         return username
