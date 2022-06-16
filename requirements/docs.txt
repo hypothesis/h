@@ -8,7 +8,7 @@ alabaster==0.7.12
     # via sphinx
 babel==2.9.1
     # via sphinx
-certifi==2022.5.18.1
+certifi==2022.6.15
     # via requests
 chardet==4.0.0
     # via requests
