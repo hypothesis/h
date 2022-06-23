@@ -203,7 +203,7 @@ pycparser==2.20
     # via
     #   -r requirements/requirements.txt
     #   cffi
-pycryptodomex==3.14.1
+pycryptodomex==3.15.0
     # via -r requirements/requirements.txt
 pygments==2.9.0
     # via ipython
