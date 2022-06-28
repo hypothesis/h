@@ -22,7 +22,7 @@ billiard==3.6.4.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-bleach==5.0.0
+bleach==5.0.1
     # via -r requirements/requirements.txt
 celery==5.2.7
     # via -r requirements/requirements.txt
