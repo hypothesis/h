@@ -35,7 +35,7 @@ billiard==3.6.4.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   celery
-bleach==5.0.0
+bleach==5.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
