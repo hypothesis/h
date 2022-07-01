@@ -48,7 +48,7 @@ certifi==2022.6.15
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   sentry-sdk
-cffi==1.15.0
+cffi==1.15.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
