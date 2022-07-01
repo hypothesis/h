@@ -10,7 +10,7 @@ bcrypt==3.2.2
     # via paramiko
 certifi==2022.6.15
     # via requests
-cffi==1.15.0
+cffi==1.15.1
     # via
     #   bcrypt
     #   cryptography
