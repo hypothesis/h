@@ -53,7 +53,7 @@
     "karma-sinon": "^1.0.5",
     "karma-source-map-support": "^1.4.0",
     "mocha": "^10.0.0",
-    "prettier": "^2.6.2",
+    "prettier": "^2.7.1",
     "sinon": "^14.0.0",
     "syn": "^0.2.2"
   },
