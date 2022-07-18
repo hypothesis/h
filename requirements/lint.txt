@@ -204,7 +204,7 @@ mako==1.1.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
-markdown==3.3.7
+markdown==3.4.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

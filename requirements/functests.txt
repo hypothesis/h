@@ -130,7 +130,7 @@ mako==1.1.3
     # via
     #   -r requirements/requirements.txt
     #   alembic
-markdown==3.3.7
+markdown==3.4.1
     # via -r requirements/requirements.txt
 markupsafe==1.1.1
     # via
