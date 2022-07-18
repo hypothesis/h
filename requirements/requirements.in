@@ -17,7 +17,7 @@ cffi
 click
 deform
 elasticsearch==6.8.2
-elasticsearch-dsl==6.3.1
+elasticsearch-dsl==6.4.0
 gevent >= 1.4.0
 gunicorn >= 19.9.0
 importlib_resources

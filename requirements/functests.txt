@@ -68,7 +68,7 @@ elasticsearch==6.8.2
     # via
     #   -r requirements/requirements.txt
     #   elasticsearch-dsl
-elasticsearch-dsl==6.3.1
+elasticsearch-dsl==6.4.0
     # via -r requirements/requirements.txt
 factory-boy==3.2.1
     # via -r requirements/functests.in
