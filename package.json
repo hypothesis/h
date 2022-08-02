@@ -40,7 +40,7 @@
     "chai": "^4.3.6",
     "diff": "^5.0.0",
     "eslint": "^8.21.0",
-    "eslint-config-hypothesis": "2.5",
+    "eslint-config-hypothesis": "2.6",
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
