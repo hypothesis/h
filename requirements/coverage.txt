@@ -4,5 +4,5 @@
 #
 #    pip-compile --allow-unsafe requirements/coverage.in
 #
-coverage==6.4.2
+coverage==6.4.3
     # via -r requirements/coverage.in
