@@ -270,7 +270,7 @@ six==1.15.0
     #   elasticsearch-dsl
     #   jsonschema
     #   python-dateutil
-sqlalchemy==1.4.39
+sqlalchemy==1.4.40
     # via
     #   -r requirements/requirements.txt
     #   alembic
