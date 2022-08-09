@@ -625,18 +625,19 @@ class TestSearchParamsSchema:
 
         assert params == expected_params
 
-    def test_it_handles_duplicate_keys(self, schema):
-        expected_params = MultiDict(
-            [("url", "http://foobar"), ("url", "http://foobat")]
-        )
+    @pytest.mark.parametrize(
+        "key,examples",
+        (
+            ("url", ["http://foobar", "http://foobat"]),
+            ("group", ["inu3340958u", "97jdm5o457"]),
+        ),
+    )
+    def test_it_handles_duplicate_keys(self, schema, key, examples):
+        expected_params = MultiDict([(key, example) for example in examples])
         input_params = deepcopy(expected_params)
-        input_params.add("unknownparam", "foo")
-        input_params.add("unknownparam", "bar")
 
         params = validate_query_params(schema, NestedMultiDict(input_params))
-
-        assert params.getall("url") == ["http://foobar", "http://foobat"]
-        assert "unknownparam" not in params
+        assert params.getall(key) == examples
 
     def test_it_defaults_limit(self, schema):
 

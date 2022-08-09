@@ -344,36 +344,36 @@ class TestAuthFilter:
 
 
 class TestGroupFilter:
-    def test_matches_only_annotations_from_specified_group(
-        self, search, Annotation, group, group_service, pyramid_request
+    def test_matches_only_annotations_from_specified_groups(
+        self, search, Annotation, groups, group_service, pyramid_request
     ):
-        group_service.groupids_readable_by.return_value = [group.pubid]
+        group_pubids = [group.pubid for group in groups]
+        group_service.groupids_readable_by.return_value = group_pubids
         Annotation(groupid="other_group")
-        group_annotation_ids = [
-            Annotation(groupid=group.pubid).id,
-            Annotation(groupid=group.pubid).id,
-        ]
+        annotation_ids = [Annotation(groupid=pubid).id for pubid in group_pubids]
 
-        result = search.run(webob.multidict.MultiDict({"group": group.pubid}))
+        result = search.run(
+            webob.multidict.MultiDict((("group", pubid) for pubid in group_pubids))
+        )
 
         group_service.groupids_readable_by.assert_called_with(
-            pyramid_request.user, group_ids=[group.pubid]
+            pyramid_request.user, group_ids=group_pubids
         )
-        assert sorted(result.annotation_ids) == sorted(group_annotation_ids)
+        assert sorted(result.annotation_ids) == sorted(annotation_ids)
 
     def test_matches_only_annotations_in_groups_readable_by_user(
         self, search, Annotation, group_service
     ):
         group_service.groupids_readable_by.return_value = ["readable_group"]
         Annotation(groupid="unreadable_group", shared=True)
-        expected_ids = [
+        annotation_ids = [
             Annotation(groupid="readable_group").id,
             Annotation(groupid="readable_group").id,
         ]
 
         result = search.run(webob.multidict.MultiDict({}))
 
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
+        assert sorted(result.annotation_ids) == sorted(annotation_ids)
 
     @pytest.fixture
     def search(self, pyramid_request, search):
@@ -381,8 +381,8 @@ class TestGroupFilter:
         return search
 
     @pytest.fixture
-    def group(self, factories):
-        return factories.OpenGroup(name="group1", pubid="group1id")
+    def groups(self, factories):
+        return factories.OpenGroup.create_batch(2)
 
 
 class TestUserFilter:

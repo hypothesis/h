@@ -320,7 +320,8 @@ class SearchParamsSchema(colander.Schema):
                        instead.""",
     )
     group = colander.SchemaNode(
-        colander.String(),
+        colander.Sequence(),
+        colander.SchemaNode(colander.String()),
         missing=colander.drop,
         description="Limit the results to this group of annotations.",
     )
