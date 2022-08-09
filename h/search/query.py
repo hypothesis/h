@@ -362,6 +362,17 @@ class HiddenFilter:
         return search.filter(Q("bool", should=should_clauses))
 
 
+class RepliesFilter:
+    """A filter to limit to replies to specified ids."""
+
+    def __call__(self, search, params):
+        # Pop the key, so it's not picked up by the `KeyValueMatcher`
+        if references := popall(params, "references"):
+            return search.filter("terms", references=references)
+
+        return search
+
+
 class AnyMatcher:
     """Match the contents of a selection of fields against the `any` parameter."""
 

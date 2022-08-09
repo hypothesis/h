@@ -51,6 +51,7 @@ class Search:
             query.DeletedFilter(),
             query.AuthFilter(request),
             query.GroupFilter(request),
+            query.RepliesFilter(),
             query.UserFilter(),
             query.HiddenFilter(request),
             query.AnyMatcher(),

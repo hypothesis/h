@@ -753,6 +753,25 @@ class TestHiddenFilter:
         return group_service
 
 
+class TestRepliesFilter:
+    def test_it(self, search, Annotation):
+        parents = [Annotation(), Annotation()]
+        children = [Annotation(references=[parent.id]) for parent in parents]
+
+        result = search.run(
+            webob.multidict.MultiDict((("references", parent.id) for parent in parents))
+        )
+
+        assert sorted(result.annotation_ids) == sorted(child.id for child in children)
+
+    @pytest.fixture
+    def search(self, search):
+        # This filter is the code under test
+        search.append_modifier(query.RepliesFilter())
+
+        return search
+
+
 class TestAnyMatcher:
     def test_matches_uriparts(self, search, Annotation):
         Annotation(target_uri="http://bar.com")
