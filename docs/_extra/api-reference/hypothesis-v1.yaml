@@ -472,7 +472,10 @@ paths:
         - name: group
           in: query
           example: '8JmD3iz1'
-          description: Limit the results to annotations made in the specified group (by group ID).
+          description: |
+            Limit the results to annotations made in the specified group (by group ID).
+
+            This can be specified multiple times to retrieve multiple groups.
           schema:
             type: string
         - name: tag
