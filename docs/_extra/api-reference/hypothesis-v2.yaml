@@ -532,7 +532,11 @@ paths:
             type: string
         - name: references
           in: query
-          description: Returns annotations that are replies to this parent annotation ID.
+          description: |
+            Returns annotations that are replies to this parent annotation ID.
+
+            This can be specified multiple times to retrieve replies to
+            multiple annotations.
           schema:
             type: string
         - name: text
