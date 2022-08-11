@@ -1,0 +1,82 @@
+name: Release
+
+concurrency:
+  group: ${{ github.event.repository.name }}-release
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  continuous-integration:
+    uses: ./.github/workflows/continuous-integration.yml
+    name: continuous integration
+
+  create-image:
+    needs: continuous-integration
+    uses: hypothesis/workflows/.github/workflows/dockerhub.yml@main
+    with:
+      Application: ${{ github.event.repository.name }}
+    secrets: inherit
+
+  qa:
+    needs: create-image
+    name: ${{ github.event.repository.name }}
+    uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
+    with:
+      Application: ${{ github.event.repository.name }}
+      Environment: qa
+      Region: us-west-1
+      Operation: deploy
+      Version: latest
+    secrets: inherit
+
+  qa-websocket:
+    needs: create-image
+    name: ${{ github.event.repository.name }}
+    uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
+    with:
+      Application: h-websocket
+      Environment: qa
+      Region: us-west-1
+      Operation: deploy
+      Version: latest
+    secrets: inherit
+
+  prod:
+    needs: qa
+    name: ${{ github.event.repository.name }}
+    uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
+    with:
+      Application: ${{ github.event.repository.name }}
+      Environment: prod
+      Region: us-west-1
+      Operation: deploy
+      Version: latest
+    secrets: inherit
+
+  prod-websocket:
+    needs: qa-websocket
+    name: ${{ github.event.repository.name }}
+    uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
+    with:
+      Application: h-websocket
+      Environment: prod
+      Region: us-west-1
+      Operation: deploy
+      Version: latest
+    secrets: inherit
+
+  prod-ca-central-1:
+    needs: qa
+    name: ${{ github.event.repository.name }}
+    uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
+    with:
+      Application: ${{ github.event.repository.name }}
+      Environment: prod
+      Region: ca-central-1
+      Operation: deploy
+      Version: latest
+    secrets: inherit
