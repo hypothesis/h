@@ -18,7 +18,7 @@ jobs:
     needs: continuous-integration
     uses: hypothesis/workflows/.github/workflows/dockerhub.yml@main
     with:
-      Application: ${{ github.event.repository.name }}
+      Application: hypothesis
     secrets: inherit
 
   qa:
