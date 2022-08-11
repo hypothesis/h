@@ -35,7 +35,7 @@ jobs:
 
   qa-websocket:
     needs: create-image
-    name: ${{ github.event.repository.name }}
+    name: qa-websocket
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
       Application: h-websocket
@@ -59,7 +59,7 @@ jobs:
 
   prod-websocket:
     needs: qa-websocket
-    name: ${{ github.event.repository.name }}
+    name: prod-websocket
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
       Application: h-websocket
