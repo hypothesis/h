@@ -333,7 +333,7 @@ pyramid-retry==2.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pyramid-sanity==1.0.2
+pyramid-sanity==1.0.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
