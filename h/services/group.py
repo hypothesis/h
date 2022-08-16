@@ -90,22 +90,20 @@ class GroupService:
         know which groups from a specific list are readable by the user.
         """
 
-        query = self.session.query(Group.pubid)
-
         readable = Group.readable_by == ReadableBy.world
-        if user is None:
-            query.filter(readable)
-        else:
+        if user is not None:
             readable_member = sa.and_(
                 Group.readable_by == ReadableBy.members,
                 Group.members.any(User.id == user.id),
             )
-            query = query.filter(sa.or_(readable, readable_member))
+            readable = sa.or_(readable, readable_member)
 
         if pubids_or_groupids:
-            query = self._group_filter(query, pubids_or_groupids)
+            readable = sa.and_(self._group_filter(pubids_or_groupids), readable)
 
-        return [record.pubid for record in query]
+        return [
+            record.pubid for record in self.session.query(Group.pubid).filter(readable)
+        ]
 
     def groupids_created_by(self, user):
         """
@@ -123,9 +121,9 @@ class GroupService:
         ]
 
     @classmethod
-    def _group_filter(cls, query, pubids_or_groupids: List[str]):
+    def _group_filter(cls, pubids_or_groupids: List[str]):
         """
-        Apply a filter to a query to efficiently limit it to certain groups.
+        Get query clause to efficiently limit a query to certain groups.
 
         This works for a mixed list of pubids or groupids.
         """
@@ -155,7 +153,7 @@ class GroupService:
                     )
                 )
 
-        return query.filter(sa.or_(*clauses))
+        return sa.or_(*clauses)
 
 
 def groups_factory(_context, request):
