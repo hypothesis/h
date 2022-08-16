@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from logging import getLogger
 
 from dateutil import tz
 from dateutil.parser import parse
@@ -14,6 +15,8 @@ LIMIT_DEFAULT = 20
 LIMIT_MAX = 200
 OFFSET_MAX = 9800
 DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())
+
+LOG = getLogger(__name__)
 
 
 def popall(multidict, key):
@@ -212,6 +215,10 @@ class GroupFilter:
     def __call__(self, search, params):
         # Remove parameter if passed, preventing it being passed to default query
         group_ids = popall(params, "group") or None
+
+        if group_ids and len(group_ids) > 1:  # pragma: no cover
+            LOG.info("Search query called with multiple (%s) group_ids", len(group_ids))
+
         groups = self.group_service.groupids_readable_by(self.user, group_ids)
         return search.filter("terms", group=groups)
 
