@@ -322,6 +322,7 @@ class SearchParamsSchema(colander.Schema):
     group = colander.SchemaNode(
         colander.Sequence(),
         colander.SchemaNode(colander.String()),
+        validator=colander.Length(min=0, max=10),
         missing=colander.drop,
         description="Limit the results to this group of annotations.",
     )

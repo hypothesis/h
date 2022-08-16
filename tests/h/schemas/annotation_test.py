@@ -639,26 +639,29 @@ class TestSearchParamsSchema:
         params = validate_query_params(schema, NestedMultiDict(input_params))
         assert params.getall(key) == examples
 
-    def test_it_defaults_limit(self, schema):
+    @pytest.mark.parametrize("key,example,max_count", (("group", "kjas934nkj", 11),))
+    def test_it_prevents_too_many_groups(self, schema, key, example, max_count):
+        input_params = MultiDict([(key, example) for _ in range(max_count)])
 
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, NestedMultiDict(input_params))
+
+    def test_it_defaults_limit(self, schema):
         params = validate_query_params(schema, NestedMultiDict())
 
         assert params["limit"] == LIMIT_DEFAULT
 
     def test_it_defaults_offset(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert not params["offset"]
 
     def test_it_defaults_sort(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert params["sort"] == "updated"
 
     def test_it_defaults_order(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert params["order"] == "desc"
