@@ -1,8 +1,12 @@
+import logging
+
 import sqlalchemy as sa
 
 from h.models import Group, User
 from h.models.group import ReadableBy
 from h.util import group as group_util
+
+LOG = logging.getLogger(__name__)
 
 
 class GroupService:
@@ -98,6 +102,17 @@ class GroupService:
             readable = sa.or_(readable, readable_member)
 
         if group_ids:
+            # These group ids are actually "pubid"s. We are checking here to
+            # see if we have any actual groupids here?
+            # pragma: no cover
+            if any(groupid for groupid in group_ids if group_util.is_groupid(groupid)):
+                LOG.info(
+                    "groupids_readable_by was called with groupids "
+                    "(not pubids), user=%s, group_ids=%s",
+                    user,
+                    group_ids,
+                )
+
             readable = sa.and_(Group.pubid.in_(group_ids), readable)
 
         return [
