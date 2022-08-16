@@ -357,7 +357,7 @@ class TestGroupFilter:
         )
 
         group_service.groupids_readable_by.assert_called_with(
-            pyramid_request.user, pubids_or_groupids=group_pubids
+            pyramid_request.user, group_ids=group_pubids
         )
         assert sorted(result.annotation_ids) == sorted(annotation_ids)
 

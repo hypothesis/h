@@ -144,27 +144,18 @@ class TestGroupServiceGroupIds:
 
         assert group.pubid in svc.groupids_readable_by(user)
 
-    @pytest.mark.usefixtures("with_groups")
-    @pytest.mark.parametrize(
-        "group_ids,pubids",
-        (
-            (["pubid1"], ["pubid1"]),
-            (["pubid1", "pubid2"], ["pubid1", "pubid2"]),
-            (["group:auth_id_1a@auth_1"], ["authority_1a"]),
-            (
-                ["group:auth_id_1a@auth_1", "group:auth_id_1b@auth_1"],
-                ["authority_1a", "authority_1b"],
-            ),
-            (
-                ["pubid1", "group:auth_id_1a@auth_1", "group:auth_id_2@auth_2"],
-                ["pubid1", "authority_1a", "authority_2"],
-            ),
-        ),
-    )
-    def test_readable_by_applies_filter(self, svc, user, group_ids, pubids):
-        group_ids += ["A NOISE VALUE WHICH MATCHES NOTHING"]
+    def test_readable_by_applies_filter(self, svc, db_session, factories):
+        user = factories.User()
 
-        assert svc.groupids_readable_by(user, pubids_or_groupids=group_ids) == pubids
+        factories.Group(
+            readable_by=ReadableBy.world
+        )  # Group that shouldn't be returned
+        group = factories.Group(readable_by=ReadableBy.world)
+
+        db_session.flush()
+
+        pubids = [group.pubid, "doesnotexist"]
+        assert svc.groupids_readable_by(user, group_ids=pubids) == [group.pubid]
 
     def test_created_by_includes_created_groups(self, svc, factories):
         user = factories.User()
@@ -183,26 +174,6 @@ class TestGroupServiceGroupIds:
 
     def test_created_by_returns_empty_list_for_missing_user(self, svc):
         assert svc.groupids_created_by(None) == []
-
-    @pytest.fixture
-    def with_groups(self, factories, user):
-        factories.OpenGroup(pubid="NOISE")
-        factories.OpenGroup(pubid="pubid1")
-        factories.Group(pubid="pubid2").members.append(user)
-
-        factories.OpenGroup(
-            pubid="authority_1a", authority="auth_1", authority_provided_id="auth_id_1a"
-        )
-        factories.Group(
-            pubid="authority_1b", authority="auth_1", authority_provided_id="auth_id_1b"
-        ).members.append(user)
-        factories.OpenGroup(
-            pubid="authority_2", authority="auth_2", authority_provided_id="auth_id_2"
-        )
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
 
 
 @pytest.mark.usefixtures("user_service")

@@ -211,10 +211,8 @@ class GroupFilter:
 
     def __call__(self, search, params):
         # Remove parameter if passed, preventing it being passed to default query
-        pubids_or_groupids = popall(params, "group") or None
-        groups = self.group_service.groupids_readable_by(
-            self.user, pubids_or_groupids=pubids_or_groupids
-        )
+        group_ids = popall(params, "group") or None
+        groups = self.group_service.groupids_readable_by(self.user, group_ids)
         return search.filter("terms", group=groups)
 
 

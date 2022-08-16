@@ -1,6 +1,3 @@
-from collections import defaultdict
-from typing import List
-
 import sqlalchemy as sa
 
 from h.models import Group, User
@@ -78,34 +75,34 @@ class GroupService:
             .order_by(Group.created.desc())
         )
 
-    def groupids_readable_by(self, user: User, pubids_or_groupids=None):
+    def groupids_readable_by(self, user, group_ids=None):
         """
         Return a list of pubids for which the user has read access.
 
-        If the passed-in user is `None`, this returns the list of
+        If the passed-in user is ``None``, this returns the list of
         world-readable groups.
 
-        If `pubids_or_groupids` is specified, only the subset of groups from
-        that list is returned. This is more efficient if the caller wants to
-        know which groups from a specific list are readable by the user.
+        If `group_ids` is specified, only the subset of groups from that list is
+        returned. This is more efficient if the caller wants to know which
+        groups from a specific list are readable by the user.
+
+        :type user: `h.models.user.User`
         """
-
-        query = self.session.query(Group.pubid)
-
         readable = Group.readable_by == ReadableBy.world
-        if user is None:
-            query.filter(readable)
-        else:
+
+        if user is not None:
             readable_member = sa.and_(
                 Group.readable_by == ReadableBy.members,
                 Group.members.any(User.id == user.id),
             )
-            query = query.filter(sa.or_(readable, readable_member))
+            readable = sa.or_(readable, readable_member)
 
-        if pubids_or_groupids:
-            query = self._group_filter(query, pubids_or_groupids)
+        if group_ids:
+            readable = sa.and_(Group.pubid.in_(group_ids), readable)
 
-        return [record.pubid for record in query]
+        return [
+            record.pubid for record in self.session.query(Group.pubid).filter(readable)
+        ]
 
     def groupids_created_by(self, user):
         """
@@ -121,41 +118,6 @@ class GroupService:
         return [
             g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)
         ]
-
-    @classmethod
-    def _group_filter(cls, query, pubids_or_groupids: List[str]):
-        """
-        Apply a filter to a query to efficiently limit it to certain groups.
-
-        This works for a mixed list of pubids or groupids.
-        """
-
-        # We will build up filter clauses for a single efficient query
-        clauses = []
-
-        if pubids := [
-            id_ for id_ in pubids_or_groupids if not group_util.is_groupid(id_)
-        ]:
-            clauses.append(Group.pubid.in_(pubids))
-
-        if groupids := [
-            id_ for id_ in pubids_or_groupids if group_util.is_groupid(id_)
-        ]:
-            by_authority = defaultdict(list)
-            for parts in (group_util.split_groupid(groupid) for groupid in groupids):
-                by_authority[parts["authority"]].append(parts["authority_provided_id"])
-
-            # We'll probably only ever get called with a single authority, but
-            # there's no harm in being able to support multiple
-            for authority, authority_provided_ids in by_authority.items():
-                clauses.append(
-                    sa.and_(
-                        Group.authority == authority,
-                        Group.authority_provided_id.in_(authority_provided_ids),
-                    )
-                )
-
-        return query.filter(sa.or_(*clauses))
 
 
 def groups_factory(_context, request):
