@@ -6,17 +6,44 @@
 #
 black==22.6.0
     # via -r requirements/format.in
+build==0.8.0
+    # via pip-tools
 click==8.1.3
-    # via black
+    # via
+    #   black
+    #   pip-tools
 isort==5.10.1
     # via -r requirements/format.in
 mypy-extensions==0.4.3
     # via black
+packaging==21.3
+    # via build
 pathspec==0.9.0
     # via black
+pep517==0.13.0
+    # via build
+pip-sync-faster==0.0.2
+    # via -r requirements/format.in
+pip-tools==6.8.0
+    # via
+    #   -r requirements/format.in
+    #   pip-sync-faster
 platformdirs==2.2.0
     # via black
+pyparsing==3.0.9
+    # via packaging
 tomli==2.0.0
-    # via black
+    # via
+    #   black
+    #   build
+    #   pep517
 typing-extensions==3.10.0.1
     # via black
+wheel==0.37.1
+    # via pip-tools
+
+# The following packages are considered to be unsafe in a requirements file:
+pip==22.2.2
+    # via pip-tools
+setuptools==65.3.0
+    # via pip-tools

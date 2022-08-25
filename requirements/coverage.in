@@ -1,1 +1,3 @@
+pip-tools
+pip-sync-faster
 coverage
