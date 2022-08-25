@@ -1,3 +1,5 @@
+pip-tools
+pip-sync-faster
 sphinx-autobuild
 sphinx
 sphinx-rtd-theme

@@ -1,3 +1,5 @@
+pip-tools
+pip-sync-faster
 ipython
 ipdb
 factory-boy

@@ -1,3 +1,5 @@
+pip-tools
+pip-sync-faster
 pytest
 factory-boy
 webtest
