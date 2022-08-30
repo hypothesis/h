@@ -148,7 +148,7 @@ h-matchers==1.2.15
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-pyramid-sentry==1.2.3
+h-pyramid-sentry==1.2.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
