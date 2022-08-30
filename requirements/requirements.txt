@@ -65,7 +65,7 @@ h-assets==1.0.5
     # via -r requirements/requirements.in
 h-matchers==1.2.15
     # via -r requirements/requirements.in
-h-pyramid-sentry==1.2.3
+h-pyramid-sentry==1.2.4
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
