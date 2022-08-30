@@ -1,0 +1,128 @@
+# Run database migration commands inside the Docker container running
+# the Elastic Beanstalk application
+
+name: Tasks
+
+on:
+  workflow_dispatch:
+    inputs:
+      Task:
+        type: choice
+        description: "The task to perform"
+        required: true
+        options:
+          - 'db current revision'
+          - 'db upgrade to head'
+          - 'db upgrade to next'
+          - 'db downgrade to previous'
+          - 'search reindex'
+      Environment:
+        type: choice
+        description: "The environment to target"
+        required: true
+        default: 'qa'
+        options:
+          - 'qa'
+          - 'prod'
+      Timeout:
+        type: string
+        description: "The timeout in seconds"
+        default: '600'
+      Region:
+        type: choice
+        description: "The AWS region to target"
+        required: true
+        default: 'all'
+        options:
+          - 'all'
+          - 'ca-cental-1'
+          - 'us-west-1'
+      Destructive:
+        description: Check to confirm you are happy to proceed with a destructive operation
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+    - name: catch unauthorised destructive operations
+      run: |
+        if [[ "${{ inputs.Task }}" = 'db upgrade to head' ]] &&
+           [[ "${{ github.event.inputs.Destructive }}" = 'false' ]] ||
+           [[ "${{ inputs.Task }}" = 'db upgrade to next' ]] &&
+           [[ "${{ github.event.inputs.Destructive }}" = 'false' ]] ||
+           [[ "${{ inputs.Task }}" = 'db downgrade to previous' ]] &&
+           [[ "${{ github.event.inputs.Destructive }}" = 'false' ]]
+           [[ "${{ inputs.Task }}" = 'search reindex' ]] &&
+           [[ "${{ github.event.inputs.Destructive }}" = 'false' ]] ; then
+             echo "::error::'${{ inputs.Task }}' needs destructive option"
+             exit 1
+        else
+             echo "::notice::Preparing '${{ inputs.Task }}' update in ${{ inputs.Environment }}"
+             echo "::notice::Targeting regions - '${{ inputs.region }}'"
+             echo "::notice::Timeout - '${{ inputs.Timeout }}'"
+             exit 0
+        fi
+
+  current:
+    if: inputs.Task == 'db current revision'
+    needs: preflight
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: ${{ inputs.Environment }}
+      Timeout: ${{ inputs.Timeout }}
+      Region: ${{ inputs.Region }}
+      Command: 'hypothesis migrate current'
+    secrets: inherit
+
+  head:
+    if: inputs.Task == 'db upgrade to head' && github.event.inputs.Destructive == 'true'
+    needs: preflight
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: ${{ inputs.Environment }}
+      Timeout: ${{ inputs.Timeout }}
+      Region: ${{ inputs.Region }}
+      Command: 'hypothesis migrate upgrade head'
+    secrets: inherit
+
+  next:
+    if: inputs.Task == 'db upgrade to next' && github.event.inputs.Destructive == 'true'
+    needs: preflight
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: ${{ inputs.Environment }}
+      Timeout: ${{ inputs.Timeout }}
+      Region: ${{ inputs.Region }}
+      Command: 'hypothesis migrate upgrade +1'
+    secrets: inherit
+
+  downgrade:
+    if: inputs.Task == 'db downgrade to previous' && github.event.inputs.Destructive == 'true'
+    needs: preflight
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: ${{ inputs.Environment }}
+      Timeout: ${{ inputs.Timeout }}
+      Region: ${{ inputs.Region }}
+      Command: 'hypothesis migrate downgrade -1'
+    secrets: inherit
+
+  search:
+    if: inputs.Task == 'search reindex' && github.event.inputs.Destructive == 'true'
+    needs: preflight
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: ${{ inputs.Environment }}
+      Timeout: ${{ inputs.Timeout }}
+      Region: ${{ inputs.Region }}
+      Command: 'hypothesis search reindex'
+    secrets: inherit
