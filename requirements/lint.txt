@@ -165,6 +165,7 @@ importlib-metadata==4.8.1
     #   -r requirements/tests.txt
     #   alembic
     #   markdown
+    #   pip-sync-faster
 importlib-resources==5.9.0
     # via
     #   -r requirements/functests.txt
@@ -256,7 +257,7 @@ peppercorn==0.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/lint.in

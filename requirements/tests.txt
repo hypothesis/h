@@ -108,6 +108,7 @@ importlib-metadata==4.8.1
     #   -r requirements/requirements.txt
     #   alembic
     #   markdown
+    #   pip-sync-faster
 importlib-resources==5.9.0
     # via
     #   -r requirements/requirements.txt
@@ -167,7 +168,7 @@ peppercorn==0.6
     # via
     #   -r requirements/requirements.txt
     #   deform
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via -r requirements/tests.in
 pip-tools==6.8.0
     # via
