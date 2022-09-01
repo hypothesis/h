@@ -1506,10 +1506,10 @@ babel-plugin-dynamic-import-node@^2.3.3:
   dependencies:
     object.assign "^4.1.0"
 
-babel-plugin-mockable-imports@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-mockable-imports/-/babel-plugin-mockable-imports-2.0.0.tgz#78c01fcdd5f9ecbc7ded29165f4c3f6e3d458514"
-  integrity sha512-xYwXtDV8f3Jz0xOrs8NSbp5pdlfbaCCOotRb0zuJEs5+vJlMvzKjOymVCAMUNzDZJCruO4YQw93ppm4XTLKYBg==
+babel-plugin-mockable-imports@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/babel-plugin-mockable-imports/-/babel-plugin-mockable-imports-2.0.1.tgz#4f51c80cfb43f4900dcfab70f8f3ed6caaaf7c8a"
+  integrity sha512-/6rA20YQAwjRFtcAJ+677pON1NL1oynH0+jm1MRWHKVOq55nTUP7TX7k6UlrJFYBl0pdKakOC3TFLXXHvF/GfA==
 
 babel-plugin-polyfill-corejs2@^0.3.2:
   version "0.3.2"
