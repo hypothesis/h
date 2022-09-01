@@ -35,6 +35,8 @@ docopt==0.6.2
     # via docker-compose
 idna==2.10
     # via requests
+importlib-metadata==4.12.0
+    # via pip-sync-faster
 jsonschema==3.2.0
     # via docker-compose
 packaging==21.3
@@ -43,7 +45,7 @@ paramiko==2.10.1
     # via docker
 pep517==0.13.0
     # via build
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via -r requirements/dockercompose.in
 pip-tools==6.8.0
     # via
@@ -86,6 +88,8 @@ websocket-client==0.58.0
     #   docker-compose
 wheel==0.37.1
     # via pip-tools
+zipp==3.8.1
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==22.2.2

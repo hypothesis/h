@@ -27,7 +27,9 @@ idna==2.10
 imagesize==1.2.0
     # via sphinx
 importlib-metadata==4.10.1
-    # via sphinx
+    # via
+    #   pip-sync-faster
+    #   sphinx
 jinja2==2.11.3
     # via sphinx
 livereload==2.6.3
@@ -40,7 +42,7 @@ packaging==21.3
     #   sphinx
 pep517==0.13.0
     # via build
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via -r requirements/docs.in
 pip-tools==6.8.0
     # via
