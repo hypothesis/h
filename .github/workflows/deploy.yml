@@ -1,7 +1,7 @@
-name: Release
+name: Deploy
 
 concurrency:
-  group: ${{ github.event.repository.name }}-release
+  group: ${{ github.event.repository.name }}-deploy
   cancel-in-progress: true
 
 on:
