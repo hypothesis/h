@@ -36,7 +36,7 @@
     "scroll-into-view": "^1.16.2"
   },
   "devDependencies": {
-    "babel-plugin-mockable-imports": "^2.0.0",
+    "babel-plugin-mockable-imports": "^2.0.1",
     "chai": "^4.3.6",
     "diff": "^5.0.0",
     "eslint": "^8.21.0",
