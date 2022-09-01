@@ -136,7 +136,7 @@ gunicorn==20.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-api==1.0.1
+h-api==1.0.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
