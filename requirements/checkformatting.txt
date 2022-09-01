@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/checkformatting.in
 #
-black==22.6.0
+black==22.8.0
     # via -r requirements/checkformatting.in
 build==0.8.0
     # via pip-tools
