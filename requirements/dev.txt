@@ -18,7 +18,7 @@ attrs==20.2.0
     #   jsonschema
 backcall==0.2.0
     # via ipython
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via -r requirements/requirements.txt
 billiard==3.6.4.0
     # via
@@ -35,9 +35,7 @@ certifi==2022.9.14
     #   -r requirements/requirements.txt
     #   sentry-sdk
 cffi==1.15.1
-    # via
-    #   -r requirements/requirements.txt
-    #   bcrypt
+    # via -r requirements/requirements.txt
 chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt

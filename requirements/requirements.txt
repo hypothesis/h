@@ -10,7 +10,7 @@ amqp==5.0.9
     # via kombu
 attrs==20.2.0
     # via jsonschema
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via -r requirements/requirements.in
 billiard==3.6.4.0
     # via celery
@@ -23,9 +23,7 @@ certifi==2022.9.14
     #   -r requirements/requirements.in
     #   sentry-sdk
 cffi==1.15.1
-    # via
-    #   -r requirements/requirements.in
-    #   bcrypt
+    # via -r requirements/requirements.in
 chameleon==3.8.1
     # via deform
 click==8.1.3

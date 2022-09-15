@@ -22,7 +22,7 @@ attrs==20.2.0
     #   hypothesis
     #   jsonschema
     #   pytest
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -57,7 +57,6 @@ cffi==1.15.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   bcrypt
 chameleon==3.8.1
     # via
     #   -r requirements/functests.txt
