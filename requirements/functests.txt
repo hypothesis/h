@@ -144,7 +144,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 newrelic==8.1.0.180
     # via -r requirements/requirements.txt
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via -r requirements/requirements.txt
 packaging==21.3
     # via
