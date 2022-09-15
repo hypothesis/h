@@ -6,7 +6,7 @@
 #
 attrs==20.3.0
     # via jsonschema
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via paramiko
 build==0.8.0
     # via pip-tools
@@ -14,7 +14,6 @@ certifi==2022.9.14
     # via requests
 cffi==1.15.1
     # via
-    #   bcrypt
     #   cryptography
     #   pynacl
 chardet==4.0.0

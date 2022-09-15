@@ -15,7 +15,7 @@ attrs==20.2.0
     #   -r requirements/requirements.txt
     #   jsonschema
     #   pytest
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via -r requirements/requirements.txt
 beautifulsoup4==4.9.3
     # via webtest
@@ -34,9 +34,7 @@ certifi==2022.9.14
     #   -r requirements/requirements.txt
     #   sentry-sdk
 cffi==1.15.1
-    # via
-    #   -r requirements/requirements.txt
-    #   bcrypt
+    # via -r requirements/requirements.txt
 chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
