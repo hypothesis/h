@@ -147,10 +147,10 @@ def devdata(ctx):
         git_dir = os.path.join(tmpdirname, "devdata")
 
         # Clone the private devdata repo from GitHub.
-        # This will fail if your SSH key doesn't have access to the private
-        # repo.
+        # This will fail if Git->GitHub HTTPS authentication isn't set up or if
+        # your GitHub account doesn't have access to the private repo.
         subprocess.check_call(
-            ["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir]
+            ["git", "clone", "https://github.com/hypothesis/devdata.git", git_dir]
         )
 
         # Copy environment variables file into place.
