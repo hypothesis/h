@@ -18,7 +18,7 @@ attrs==20.2.0
     #   jsonschema
 backcall==0.2.0
     # via ipython
-bcrypt==4.0.0
+bcrypt==4.0.1
     # via -r requirements/requirements.txt
 billiard==3.6.4.0
     # via
