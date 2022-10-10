@@ -15,7 +15,7 @@ attrs==20.2.0
     #   -r requirements/requirements.txt
     #   jsonschema
     #   pytest
-bcrypt==4.0.0
+bcrypt==4.0.1
     # via -r requirements/requirements.txt
 beautifulsoup4==4.9.3
     # via webtest
