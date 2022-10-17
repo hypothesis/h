@@ -182,7 +182,7 @@ six==1.15.0
     #   elasticsearch-dsl
     #   jsonschema
     #   python-dateutil
-sqlalchemy==1.4.41
+sqlalchemy==1.4.42
     # via
     #   -r requirements/requirements.in
     #   alembic
