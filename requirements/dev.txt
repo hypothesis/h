@@ -159,7 +159,7 @@ matplotlib-inline==0.1.2
     # via ipython
 newrelic==8.2.1
     # via -r requirements/requirements.txt
-oauthlib==3.2.1
+oauthlib==3.2.2
     # via -r requirements/requirements.txt
 packaging==21.3
     # via
