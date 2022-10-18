@@ -227,7 +227,7 @@ newrelic==8.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-oauthlib==3.2.1
+oauthlib==3.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
