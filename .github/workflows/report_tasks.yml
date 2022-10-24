@@ -1,0 +1,49 @@
+# Run various tasks related to the report aggregations
+
+name: SQL tasks for report
+on:
+  workflow_dispatch:
+    inputs:
+      Task:
+        type: choice
+        description: "The SQL task to perform"
+        required: true
+        options:
+          - "hello_world"
+          - "bad_sql"
+          - "danger"
+          - "danger2"
+      Environment:
+        type: choice
+        description: "The environment to target"
+        required: true
+        default: 'qa'
+        options:
+          - 'qa'
+          - 'prod'
+      Destructive:
+        description: Check to confirm you are happy to proceed with a destructive operation
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  explode_on_danger:
+    name: "Check for approval for dangerous actions"
+    if: ${{ contains(fromJson('["danger", "danger2"]'), input.Task) && (inputs.Destructive == 'false')}}
+    steps:
+      - name: "Approval not given!"
+        run: |
+          echo "::error::'${{ inputs.Task }}' needs destructive option"
+          exit 1
+
+  run_task:
+    name: "Run ${{ inputs.Task }} SQL task"
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: ${{ inputs.Environment }}
+      Timeout: 3600
+      Region: 'all'
+      Command: 'python bin/run_sql_task.py --task ${{ inputs.Task }}'
+    secrets: inherit
