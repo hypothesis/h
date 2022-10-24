@@ -24,8 +24,7 @@ SELECT
     LENGTH(text) AS size,
     "references",
     tags
--- <<< Here is our fake-out partial run >>>
-FROM (SELECT * FROM annotation LIMIT 5000000) AS annotation
+FROM annotation
 JOIN "user" users ON
     users.authority = SPLIT_PART(annotation.userid, '@', 2)
     AND users.username = SUBSTRING(SPLIT_PART(annotation.userid, '@', 1), 6)
