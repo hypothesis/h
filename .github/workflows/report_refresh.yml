@@ -1,0 +1,19 @@
+# Update the nightly report stats etc.
+
+name: Report refresh
+on:
+  workflow_dispatch:
+#  schedule:
+#    - cron: '0 14 * * *'
+
+jobs:
+  refresh:
+    name: "Update report information"
+    uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
+    with:
+      App: ${{ github.event.repository.name }}
+      Env: 'qa'
+      Timeout: 3600
+      Region: 'all'
+      Command: 'python bin/run_sql_task.py --task hello_world'
+    secrets: inherit
