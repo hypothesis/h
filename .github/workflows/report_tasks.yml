@@ -1,6 +1,6 @@
-# Run various tasks related to the report aggregations
+# Run various SQL defined tasks, usually related to the report aggregations
 
-name: SQL tasks for report
+name: SQL tasks
 on:
   workflow_dispatch:
     inputs:
@@ -21,6 +21,15 @@ on:
         options:
           - 'qa'
           - 'prod'
+      Region:
+        type: choice
+        description: "The AWS region to target"
+        required: true
+        default: 'all'
+        options:
+          - 'all'
+          - 'ca-cental-1'
+          - 'us-west-1'
       Destructive:
         description: Check to confirm you are happy to proceed with a destructive operation
         type: boolean
@@ -28,22 +37,24 @@ on:
         default: false
 
 jobs:
-  explode_on_danger:
+  check_for_danger:
+    runs-on: ubuntu-latest
     name: "Check for approval for dangerous actions"
-    if: ${{ contains(fromJson('["danger", "danger2"]'), input.Task) && (inputs.Destructive == 'false')}}
     steps:
       - name: "Approval not given!"
+        if: contains(fromJson('["danger", "danger2"]'), inputs.Task) && inputs.Destructive == false
         run: |
           echo "::error::'${{ inputs.Task }}' needs destructive option"
           exit 1
 
   run_task:
-    name: "Run ${{ inputs.Task }} SQL task"
+    needs: check_for_danger
+    name: "Run '${{ inputs.Task }}' SQL task in ${{ inputs.Environment }} / ${{ inputs.Region }}"
     uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
     with:
       App: ${{ github.event.repository.name }}
       Env: ${{ inputs.Environment }}
       Timeout: 3600
-      Region: 'all'
-      Command: 'python bin/run_sql_task.py --task ${{ inputs.Task }}'
+      Region: ${{ inputs.Region }}
+      Command: 'python bin/run_sql_task.py --config-file conf/app.ini --task ${{ inputs.Task }}'
     secrets: inherit
