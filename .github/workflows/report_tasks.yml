@@ -9,10 +9,7 @@ on:
         description: "The SQL task to perform"
         required: true
         options:
-          - "hello_world"
-          - "bad_sql"
-          - "danger"
-          - "danger2"
+          - "report/create_from_scratch"
       Environment:
         type: choice
         description: "The environment to target"
@@ -42,7 +39,7 @@ jobs:
     name: "Check for approval for dangerous actions"
     steps:
       - name: "Approval not given!"
-        if: contains(fromJson('["danger", "danger2"]'), inputs.Task) && inputs.Destructive == false
+        if: contains(fromJson('["report/create_from_scratch"]'), inputs.Task) && inputs.Destructive == false
         run: |
           echo "::error::'${{ inputs.Task }}' needs destructive option"
           exit 1
