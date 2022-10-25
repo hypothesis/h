@@ -14,6 +14,6 @@ jobs:
       App: ${{ github.event.repository.name }}
       Env: 'qa'
       Timeout: 3600
-      Region: 'all'
-      Command: 'python bin/run_sql_task.py --task hello_world'
+      Region: 'us-west-1'
+      Command: 'python bin/run_sql_task.py --config-file conf/app.ini --task hello_world'
     secrets: inherit
