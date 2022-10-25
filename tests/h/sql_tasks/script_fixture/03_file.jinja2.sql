@@ -1,0 +1,1 @@
+SELECT '{{template_var}}';
