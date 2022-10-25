@@ -29,6 +29,16 @@ TEST_SETTINGS = {
     ),
 }
 
+TEST_ENVIRONMENT = {
+    "ELASTICSEARCH_URL": TEST_SETTINGS["es.url"],
+    "ELASTICSEARCH_INDEX": TEST_SETTINGS["es.index"],
+    "APP_URL": TEST_SETTINGS["h.app_url"],
+    "AUTH_DOMAIN": TEST_SETTINGS["h.authority"],
+    "SENTRY_DSN_FRONTEND": TEST_SETTINGS["h.sentry_dsn_frontend"],
+    "SECRET_KEY": TEST_SETTINGS["secret_key"],
+    "DATABASE_URL": TEST_SETTINGS["sqlalchemy.url"],
+}
+
 
 @pytest.fixture(scope="session")
 def app(pyramid_app):
