@@ -12,8 +12,8 @@ jobs:
     uses: hypothesis/workflows/.github/workflows/eb-task.yml@main
     with:
       App: ${{ github.event.repository.name }}
-      Env: 'qa'
+      Env: 'prod'
       Timeout: 3600
-      Region: 'us-west-1'
-      Command: 'python bin/run_sql_task.py --config-file conf/app.ini --task hello_world'
+      Region: 'all'
+      Command: 'python bin/run_sql_task.py --config-file conf/app.ini --task report/refresh'
     secrets: inherit
