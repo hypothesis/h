@@ -25,7 +25,7 @@ SELECT
     "references",
     tags
 -- <<< Here is our fake-out partial run >>>
-FROM (SELECT * FROM annotation LIMIT 500000) AS annotation
+FROM (SELECT * FROM annotation LIMIT 2000000) AS annotation
 JOIN "user" users ON
     users.authority = SPLIT_PART(annotation.userid, '@', 2)
     AND users.username = SUBSTRING(SPLIT_PART(annotation.userid, '@', 1), 6)
