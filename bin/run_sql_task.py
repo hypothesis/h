@@ -35,7 +35,7 @@ def main():
 
     with bootstrap(args.config_file) as env:
         request = env["request"]
-        dsn = env["registry"].settings["sqlalchemy.url"]
+        dsn = env["registry"].settings["sqlalchemy.url"].strip()
 
         scripts = SQLScript.from_dir(
             task_dir=TASK_ROOT / args.task,
