@@ -25,7 +25,7 @@ on:
         default: 'all'
         options:
           - 'all'
-          - 'ca-cental-1'
+          - 'ca-central-1'
           - 'us-west-1'
       Destructive:
         description: Check to confirm you are happy to proceed with a destructive operation
