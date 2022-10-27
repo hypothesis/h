@@ -3,8 +3,8 @@
 name: Report refresh
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: '0 14 * * *'
+  schedule:
+    - cron: '0 15 * * *'
 
 jobs:
   refresh:

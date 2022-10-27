@@ -41,9 +41,7 @@ jobs:
     name: "Check for approval for dangerous actions"
     steps:
       - name: "Approval not given!"
-        # Until we've run a full sync, running the refresh is dangerous. Then
-        # it's not and we can remove this once the nightly task is going
-        if: contains(fromJson('["report/refresh", "report/fast_recreate", "report/create_from_scratch"]'), inputs.Task) && inputs.Destructive == false
+        if: contains(fromJson('["report/fast_recreate", "report/create_from_scratch"]'), inputs.Task) && inputs.Destructive == false
         run: |
           echo "::error::'${{ inputs.Task }}' needs destructive option"
           exit 1
