@@ -5,9 +5,10 @@ This is a general mechanism for running tasks defined in SQL, however it's
 currently only used to perform the aggregations and mappings required for
 reporting.
 """
-
-
+import os
 from argparse import ArgumentParser
+from base64 import b64encode
+from hashlib import sha1
 
 import importlib_resources
 from psycopg2.extensions import parse_dsn
@@ -36,6 +37,12 @@ def main():
     with bootstrap(args.config_file) as env:
         request = env["request"]
         dsn = env["registry"].settings["sqlalchemy.url"].strip()
+
+        # Help debug the DSN errors we are getting in CA
+        print(f"DSN len {len(dsn)}: starts with '{dsn[:6]}'")
+        salt = b64encode(os.urandom(16))
+        print("SALT:", salt)
+        print("SHA1:", sha1(dsn.encode("utf-8") + salt).hexdigest())
 
         scripts = SQLScript.from_dir(
             task_dir=TASK_ROOT / args.task,
