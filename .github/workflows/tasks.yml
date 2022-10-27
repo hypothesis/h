@@ -27,7 +27,7 @@ on:
       Timeout:
         type: string
         description: "The timeout in seconds"
-        default: '600'
+        default: '900'
       Region:
         type: choice
         description: "The AWS region to target"
