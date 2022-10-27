@@ -145,7 +145,7 @@ markupsafe==1.1.1
     #   jinja2
     #   mako
     #   pyramid-jinja2
-newrelic==8.2.1
+newrelic==8.4.0
     # via -r requirements/requirements.txt
 oauthlib==3.2.2
     # via -r requirements/requirements.txt
