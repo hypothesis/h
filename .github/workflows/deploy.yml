@@ -31,7 +31,7 @@ jobs:
       Environment: qa
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   qa-websocket:
@@ -43,11 +43,11 @@ jobs:
       Environment: qa
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   prod:
-    needs: qa
+    needs: [create-image, qa]
     name: ${{ github.event.repository.name }}
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
@@ -55,11 +55,11 @@ jobs:
       Environment: prod
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   prod-websocket:
-    needs: qa-websocket
+    needs: [create-image, qa-websocket]
     name: prod-websocket
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
@@ -67,11 +67,11 @@ jobs:
       Environment: prod
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   prod-ca-central-1:
-    needs: qa
+    needs: [create-image, qa]
     name: ${{ github.event.repository.name }}
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
@@ -79,5 +79,5 @@ jobs:
       Environment: prod
       Region: ca-central-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
