@@ -22,5 +22,8 @@ services:
       - '127.0.0.1:15672:15672'
 
 networks:
+  # This external network allows FDW connections between H, LMS and report DBs.
+  # To avoid having unnecessary dependencies between the projects
+  # the network is created with `docker network crate dbs` in each project's Makefile (make services)
   dbs:
     external: true
