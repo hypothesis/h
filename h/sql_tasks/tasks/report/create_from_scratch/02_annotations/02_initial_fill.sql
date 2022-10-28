@@ -2,6 +2,11 @@ DROP INDEX IF EXISTS report.annotations_uuid_idx;
 DROP INDEX IF EXISTS report.annotations_created_idx;
 DROP INDEX IF EXISTS report.annotations_updated_idx;
 
+-- Without this it's possible to insert duplicate rows when run manually as
+-- there is no index to conflict on. When run as part of the task this
+-- shouldn't happen;
+TRUNCATE report.annotations;
+
 INSERT INTO report.annotations (
     uuid,
     user_id, group_id, document_id, authority_id,
@@ -33,8 +38,7 @@ JOIN "group" as groups ON
 JOIN report.authorities ON
     authorities.authority = users.authority
  -- Ensure our data is in created order for nice correlation
-ORDER BY annotation.created
-ON CONFLICT DO NOTHING;
+ORDER BY annotation.created;
 
 CREATE UNIQUE INDEX annotations_uuid_idx ON report.annotations (uuid);
 CREATE INDEX annotations_created_idx ON report.annotations (created);
