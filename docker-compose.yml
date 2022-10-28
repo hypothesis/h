@@ -7,6 +7,8 @@ services:
     healthcheck:
         test: ["CMD", "pg_isready", "-U", "postgres"]
         interval: 1s
+    networks:
+      - dbs
   elasticsearch:
     image: hypothesis/elasticsearch:latest
     ports:
@@ -18,3 +20,7 @@ services:
     ports:
       - '127.0.0.1:5672:5672'
       - '127.0.0.1:15672:15672'
+
+networks:
+  dbs:
+    external: true
