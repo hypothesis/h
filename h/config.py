@@ -116,6 +116,9 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
 
     settings_manager.set("h.websocket_url", "WEBSOCKET_URL")
 
+    # Reporting settings
+    settings_manager.set("h.report.fdw_users", "REPORT_FDW_USERS", type_=aslist)
+
     # Debug/development settings
     settings_manager.set("debug_query", "DEBUG_QUERY")
 
