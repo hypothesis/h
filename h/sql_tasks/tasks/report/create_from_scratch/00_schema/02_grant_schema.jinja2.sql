@@ -1,0 +1,1 @@
+../../fast_recreate/00_permissions/01_grant_schema.jinja2.sql
