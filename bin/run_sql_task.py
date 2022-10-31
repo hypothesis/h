@@ -37,7 +37,10 @@ def main():
 
         scripts = SQLScript.from_dir(
             task_dir=TASK_ROOT / args.task,
-            template_vars={"db_user": parse_dsn(dsn)["user"]},
+            template_vars={
+                "db_user": parse_dsn(dsn)["user"],
+                "fdw_users": env["registry"].settings.get("h.report.fdw_users", []),
+            },
         )
 
         # Run the update in a transaction, so we roll back if it goes wrong
