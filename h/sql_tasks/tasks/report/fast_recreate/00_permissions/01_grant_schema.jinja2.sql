@@ -11,3 +11,7 @@ GRANT SELECT ON  public."group" TO "{{fdw_user}}";
 GRANT USAGE ON SCHEMA report TO "{{fdw_user}}";
 GRANT SELECT ON ALL TABLES IN SCHEMA report TO "{{fdw_user}}";
 {% endfor %}
+
+
+-- Empty query in case fdw_users is empty.
+select null;
