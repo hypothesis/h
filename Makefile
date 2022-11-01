@@ -192,9 +192,9 @@ run-docker:
 		-e "ENABLE_NGINX=true" \
 		-e "ENABLE_WEB=true" \
 		-e "ENABLE_WEBSOCKET=true" \
-		-e "WEBSOCKET_CONFIG=conf/websocket-monolithic.ini" \
 		-e "ENABLE_WORKER=true" \
 		-p 5000:5000 \
+		-p 5001:5001 \
 		--name hypothesis \
 		hypothesis/hypothesis:$(DOCKER_TAG)
 

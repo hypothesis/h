@@ -56,7 +56,7 @@ COPY . .
 RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
 
 # Expose the default port.
-EXPOSE 5000
+EXPOSE 5000 5001
 
 # Set the application environment
 ENV PATH /var/lib/hypothesis/bin:$PATH
