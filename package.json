@@ -17,7 +17,7 @@
     "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-node-resolve": "^14.1.0",
-    "autoprefixer": "^10.4.12",
+    "autoprefixer": "^10.4.13",
     "bootstrap": "^4.6.2",
     "escape-html": "^1.0.3",
     "gulp": "^4.0.0",
