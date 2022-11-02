@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import gevent
 import importlib_resources
 import newrelic.agent
@@ -42,13 +40,13 @@ def websocket_metrics(queue):
         yield f"{PREFIX}/Worker/Pool/Used", pool.size - free
 
 
-NEW_RELIC_CONFIG_PATH = Path("conf/websocket-newrelic.ini")
+NEW_RELIC_CONFIG_REF = importlib_resources.files("h.streamer") / "conf/newrelic.ini"
 
 
 def metrics_process(registry, queue):  # pragma: no cover
     session = db.get_session(registry.settings)
 
-    with importlib_resources.as_file(NEW_RELIC_CONFIG_PATH) as config_file:
+    with importlib_resources.as_file(NEW_RELIC_CONFIG_REF) as config_file:
         newrelic.agent.initialize(config_file=config_file)
     newrelic.agent.register_application(timeout=5)
     application = newrelic.agent.application()
