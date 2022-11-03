@@ -22,9 +22,8 @@ jobs:
       Application: hypothesis
     secrets: inherit
 
-  qa:
+  QA:
     needs: create-image
-    name: ${{ github.event.repository.name }}
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -36,9 +35,9 @@ jobs:
       docker_tag: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
-  qa-websocket:
+  QA_WebSocket:
     needs: create-image
-    name: qa-websocket
+    name: QA (WebSocket)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -50,9 +49,8 @@ jobs:
       docker_tag: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
-  prod:
+  Production:
     needs: [create-image, qa]
-    name: ${{ github.event.repository.name }}
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -64,9 +62,9 @@ jobs:
       docker_tag: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
-  prod-websocket:
+  Production_WebSocket:
     needs: [create-image, qa-websocket]
-    name: prod-websocket
+    name: Production (WebSocket)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -78,9 +76,9 @@ jobs:
       docker_tag: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
-  prod-ca-central-1:
+  Production_Canada:
     needs: [create-image, qa]
-    name: ${{ github.event.repository.name }}
+    name: Production (Canada)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
