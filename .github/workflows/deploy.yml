@@ -50,7 +50,7 @@ jobs:
     secrets: inherit
 
   Production:
-    needs: [create-image, qa]
+    needs: [create-image, QA]
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -63,7 +63,7 @@ jobs:
     secrets: inherit
 
   Production_WebSocket:
-    needs: [create-image, qa-websocket]
+    needs: [create-image, QA_WebSocket]
     name: Production (WebSocket)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
@@ -77,7 +77,7 @@ jobs:
     secrets: inherit
 
   Production_Canada:
-    needs: [create-image, qa]
+    needs: [create-image, QA]
     name: Production (Canada)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
