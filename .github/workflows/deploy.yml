@@ -15,7 +15,8 @@ jobs:
     uses: ./.github/workflows/continuous-integration.yml
     name: continuous integration
 
-  create-image:
+  Docker_Hub:
+    name: Docker Hub
     needs: continuous-integration
     uses: hypothesis/workflows/.github/workflows/dockerhub.yml@main
     with:
@@ -23,7 +24,7 @@ jobs:
     secrets: inherit
 
   QA:
-    needs: create-image
+    needs: Docker_Hub
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -32,11 +33,11 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: h
       elasticbeanstalk_environment: qa
-      docker_tag: ${{ needs.create-image.outputs.docker_tag }}
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
 
   QA_WebSocket:
-    needs: create-image
+    needs: Docker_Hub
     name: QA (WebSocket)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
@@ -46,11 +47,11 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: h-websocket
       elasticbeanstalk_environment: qa
-      docker_tag: ${{ needs.create-image.outputs.docker_tag }}
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
 
   Production:
-    needs: [create-image, QA]
+    needs: [Docker_Hub, QA]
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: deploy
@@ -59,11 +60,11 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: h
       elasticbeanstalk_environment: prod
-      docker_tag: ${{ needs.create-image.outputs.docker_tag }}
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
 
   Production_WebSocket:
-    needs: [create-image, QA_WebSocket]
+    needs: [Docker_Hub, QA_WebSocket]
     name: Production (WebSocket)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
@@ -73,11 +74,11 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: h-websocket
       elasticbeanstalk_environment: prod
-      docker_tag: ${{ needs.create-image.outputs.docker_tag }}
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
 
   Production_Canada:
-    needs: [create-image, QA]
+    needs: [Docker_Hub, QA]
     name: Production (Canada)
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
@@ -87,5 +88,5 @@ jobs:
       aws_region: ca-central-1
       elasticbeanstalk_application: h
       elasticbeanstalk_environment: prod
-      docker_tag: ${{ needs.create-image.outputs.docker_tag }}
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
