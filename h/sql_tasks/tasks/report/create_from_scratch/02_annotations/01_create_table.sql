@@ -6,7 +6,7 @@ CREATE TABLE report.annotations (
     user_id INT NOT NULL,
     group_id INT NOT NULL,
     document_id INT NOT NULL,
-    authority_id SMALLINT NOT NULL,
+    authority report.authorities NOT NULL,
     created DATE NOT NULL,
     updated TIMESTAMP NOT NULL,
     deleted BOOLEAN NOT NULL,

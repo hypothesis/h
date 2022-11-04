@@ -9,7 +9,7 @@ TRUNCATE report.annotations;
 
 INSERT INTO report.annotations (
     uuid,
-    user_id, group_id, document_id, authority_id,
+    user_id, group_id, document_id, authority,
     created, updated,
     deleted, shared, size,
     parent_uuids, tags
@@ -19,7 +19,7 @@ SELECT
     users.id as user_id,
     groups.id as group_id,
     document_id,
-    authorities.id as authority_id,
+    users.authority::report.authorities,
     annotation.created::date,
     -- As we do our partial updates based on updated date, it's good if this
     -- is actually high res timestamp, so we get less overlap
@@ -35,8 +35,6 @@ JOIN "user" users ON
     AND users.username = SUBSTRING(SPLIT_PART(annotation.userid, '@', 1), 6)
 JOIN "group" as groups ON
     groups.pubid = annotation.groupid
-JOIN report.authorities ON
-    authorities.authority = users.authority
  -- Ensure our data is in created order for nice correlation
 ORDER BY annotation.created;
 

@@ -1,45 +1,31 @@
--- You can get values to maintain this table with the following query:
+-- This kind of sucks, but you can't update an enum value in the same
+-- transaction you use it. By committing here, we start a new transaction.
+-- However we are doing this within listed "destructive" actions, so the impact
+-- is less than if we did this on refreshes.
+COMMIT;
 
--- SELECT
---     -- Create a fake "primary" key
---     created::date,
---     authority
--- FROM (
---     SELECT
---         authority,
---         MIN(created) as created
---     FROM "group"
---     GROUP BY authority
---     ORDER BY created
--- ) as data
+-- We are adding values to the enum one by one as it allows us to easily
+-- maintain this enum by adding more rows if we need to in future
 
--- These values are required to be globally unique
+-- Values we care about the most
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'hypothes.is';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'lms.hypothes.is';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'lms.ca.hypothes.is';
 
-TRUNCATE report.authorities;
-
-INSERT INTO report.authorities (id, created, authority)
-VALUES
-    -- Values we care about the most
-    (1, '2015-09-22', 'hypothes.is'),
-    (2, '2018-10-12', 'lms.hypothes.is'),
-    (3, '2022-01-21', 'lms.ca.hypothes.is'),
-
-    -- Others
-    (1001, '2017-04-28', 'test.elifesciences.org'),
-    (1002, '2017-11-28', 'elifesciences.org'),
-    (1003, '2018-02-01', 'hypothesis-publisher-site.herokuapp.com'),
-    (1004, '2018-05-01', 'openlibhums.org'),
-    (1005, '2018-11-26', 'wk.silverchair.com'),
-    (1006, '2018-12-13', 'genesys.com'),
-    (1007, '2019-03-29', 'radicali.io'),
-    (1008, '2019-07-08', 'h.jonudell.info'),
-    (1009, '2019-11-15', 'fuel.press'),
-    (1010, '2020-02-24', 'getqurious.net'),
-    (1011, '2020-07-08', 'mijn.bsl.nl'),
-    (1012, '2021-04-21', 'pathstream.com'),
-    (1013, '2021-06-15', 'temp-h-ca.hypothes.is'),
-    (1014, '2021-08-10', 'app.noodlecase.com'),
-    (1015, '2021-12-15', 'allenai.org'),
-    (1016, '2022-04-08', 'csepub.com');
-
-ANALYSE report.authorities;
+-- Others
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'test.elifesciences.org';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'elifesciences.org';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'hypothesis-publisher-site.herokuapp.com';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'openlibhums.org';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'wk.silverchair.com';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'genesys.com';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'radicali.io';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'h.jonudell.info';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'fuel.press';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'getqurious.net';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'mijn.bsl.nl';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'pathstream.com';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'temp-h-ca.hypothes.is';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'app.noodlecase.com';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'allenai.org';
+ALTER TYPE report.authorities ADD VALUE IF NOT EXISTS 'csepub.com';
