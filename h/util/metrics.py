@@ -43,4 +43,4 @@ def record_search_query_params(params, separate_replies):
     if separate_replies:
         params.append(("es__separate_replies", separate_replies))
 
-    newrelic.agent.add_custom_parameters(params)
+    newrelic.agent.add_custom_attributes(params)

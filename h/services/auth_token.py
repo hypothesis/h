@@ -20,7 +20,7 @@ class LongLivedToken:
         self.userid = token.userid
 
         # Associates the userid with a given transaction/web request.
-        newrelic.agent.add_custom_parameter("userid", self.userid)
+        newrelic.agent.add_custom_attribute("userid", self.userid)
 
     def is_valid(self):
         """Return ``True`` if this token is not expired, ``False`` if it is."""
