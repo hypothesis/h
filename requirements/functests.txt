@@ -163,7 +163,7 @@ peppercorn==0.6
     #   deform
 pip-sync-faster==0.0.3
     # via -r requirements/functests.in
-pip-tools==6.9.0
+pip-tools==6.10.0
     # via
     #   -r requirements/functests.in
     #   pip-sync-faster
