@@ -44,7 +44,7 @@ pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
     # via -r requirements/docs.in
-pip-tools==6.9.0
+pip-tools==6.10.0
     # via
     #   -r requirements/docs.in
     #   pip-sync-faster

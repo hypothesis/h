@@ -261,7 +261,7 @@ pip-sync-faster==0.0.3
     #   -r requirements/functests.txt
     #   -r requirements/lint.in
     #   -r requirements/tests.txt
-pip-tools==6.9.0
+pip-tools==6.10.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/lint.in
