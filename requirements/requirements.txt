@@ -167,7 +167,7 @@ python-dateutil==2.8.2
     # via
     #   -r requirements/requirements.in
     #   elasticsearch-dsl
-python-slugify==6.1.2
+python-slugify==7.0.0
     # via -r requirements/requirements.in
 pytz==2021.3
     # via celery

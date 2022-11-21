@@ -41,7 +41,7 @@ pyramid-mailer
 pyramid-retry
 pyramid-tm
 python-dateutil
-python-slugify < 6.2.0
+python-slugify < 7.1.0
 supervisor >= 4.0.0
 sqlparse
 tabulate
