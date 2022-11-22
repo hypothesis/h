@@ -1,0 +1,1 @@
+../create_from_scratch/00_schema/01_create.jinja2.sql
