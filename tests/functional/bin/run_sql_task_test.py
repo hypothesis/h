@@ -17,6 +17,7 @@ class TestRunSQLTask:
             # Run all the jobs in one line in the order they are expected to
             # be able to run. We need "create from scratch" to have been done
             # to tests the others, but doing it over and over is slow
+            "report/create_dev_users",
             "report/create_from_scratch",
             "report/fast_recreate",
             "report/refresh",
