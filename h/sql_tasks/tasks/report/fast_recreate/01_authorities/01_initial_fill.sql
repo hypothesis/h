@@ -1,1 +1,0 @@
-../../create_from_scratch/01_authorities/02_initial_fill.sql
