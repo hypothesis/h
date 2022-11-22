@@ -65,6 +65,20 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
             JOIN users ON
                 users.registered_week = periods.timestamp_week
             GROUP BY period, timescale, authority_id
+        ),
+
+        annotations AS (
+            SELECT
+                period,
+                timescale,
+                authority_id,
+                SUM(shared) AS shared_annotations,
+                SUM(replies) AS reply_annotations,
+                SUM(count) AS annotations
+            FROM periods
+            JOIN report.annotation_group_counts ON
+                annotation_group_counts.created_week = periods.timestamp_week
+            GROUP BY period, timescale, authority_id
         )
 
     -- Fuse all the metrics together as separate columns
@@ -80,7 +94,10 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
         -- Metrics
         COALESCE(MAX(annotating_users), 0) as annotating_users,
         COALESCE(MAX(registering_users), 0) as registering_users,
-        COALESCE(MAX(total_users), 0) as total_users
+        COALESCE(MAX(total_users), 0) as total_users,
+        COALESCE(MAX(shared_annotations), 0) as shared_annotations,
+        COALESCE(MAX(reply_annotations), 0) as reply_annotations,
+        COALESCE(MAX(annotations), 0) as annotations
     FROM (
         SELECT
             period, timescale, authority_id,
@@ -91,15 +108,25 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
             -- it's available as primary data
             SUM(registering_users) OVER (
                 PARTITION BY timescale, authority_id ORDER BY period
-            ) AS total_users
+            ) AS total_users,
+            0 AS shared_annotations, 0 AS reply_annotations, 0 AS annotations
         FROM registering_users
 
         UNION ALL
 
         SELECT
             period, timescale, authority_id,
-            annotating_users, 0, 0
+            annotating_users, 0, 0,
+            0, 0, 0
         FROM annotating_users
+
+        UNION ALL
+
+        SELECT
+            period, timescale, authority_id,
+            0, 0, 0,
+            shared_annotations, reply_annotations, annotations
+        FROM annotations
     ) AS data
     GROUP BY timescale, period, authority_id
     ORDER BY timescale, period, authority_id
