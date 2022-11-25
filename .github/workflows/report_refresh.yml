@@ -15,5 +15,5 @@ jobs:
       Env: 'prod'
       Timeout: 3600
       Region: 'all'
-      Command: 'newrelic-admin run-program python bin/run_sql_task.py --config-file conf/app.ini --task report/refresh'
+      Command: 'newrelic-admin run-program python bin/run_data_task.py --config-file conf/app.ini --task report/refresh'
     secrets: inherit
