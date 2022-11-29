@@ -1,0 +1,40 @@
+{
+  "qa": {
+    "github_environment_name": "QA",
+    "github_environment_url": "https://qa.hypothes.is/search",
+    "aws_region": "us-west-1",
+    "elasticbeanstalk_application": "h",
+    "elasticbeanstalk_environment": "qa"
+  },
+  "qa_websocket": {
+    "github_environment_name": "QA (WebSocket)",
+    "github_environment_url": "https://qa.hypothes.is/docs/help",
+    "aws_region": "us-west-1",
+    "elasticbeanstalk_application": "h-websocket",
+    "elasticbeanstalk_environment": "qa"
+  },
+  "production": {
+    "needs": ["qa", "qa_websocket"],
+    "github_environment_name": "Production",
+    "github_environment_url": "https://hypothes.is/search",
+    "aws_region": "us-west-1",
+    "elasticbeanstalk_application": "h",
+    "elasticbeanstalk_environment": "prod"
+  },
+  "production_websocket": {
+    "needs": ["qa", "qa_websocket"],
+    "github_environment_name": "Production (WebSocket)",
+    "github_environment_url": "https://hypothes.is/docs/help",
+    "aws_region": "us-west-1",
+    "elasticbeanstalk_application": "h-websocket",
+    "elasticbeanstalk_environment": "prod"
+  },
+  "production_canada": {
+    "needs": ["qa", "qa_websocket"],
+    "github_environment_name": "Production (Canada)",
+    "github_environment_url": "https://ca.hypothes.is/search",
+    "aws_region": "ca-central-1",
+    "elasticbeanstalk_application": "h",
+    "elasticbeanstalk_environment": "prod"
+  }
+}
