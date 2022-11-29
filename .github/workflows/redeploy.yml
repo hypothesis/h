@@ -1,85 +1,83 @@
-name: Deploy
+name: Redeploy
 concurrency:
   group: deploy
   cancel-in-progress: true
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+    inputs:
+      qa:
+        type: boolean
+        description: Redeploy QA
+      qa_websocket:
+        type: boolean
+        description: Redeploy QA (WebSocket)
+      production:
+        type: boolean
+        description: Redeploy Production
+      production_websocket:
+        type: boolean
+        description: Redeploy Production (WebSocket)
+      production_canada:
+        type: boolean
+        description: Redeploy Production (Canada)
 jobs:
-  ci:
-    name: CI
-    uses: ./.github/workflows/ci.yml
-  docker_hub:
-    name: Docker Hub
-    needs: [ci]
-    uses: hypothesis/workflows/.github/workflows/dockerhub.yml@main
-    with:
-      Application: hypothesis
-    secrets: inherit
   qa:
     name: QA
-    needs: [docker_hub]
+    if: inputs.qa
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
-      operation: deploy
+      operation: redeploy
       github_environment_name: QA
       github_environment_url: https://qa.hypothes.is/search
       aws_region: us-west-1
       elasticbeanstalk_application: h
       elasticbeanstalk_environment: qa
-      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
   qa_websocket:
     name: QA (WebSocket)
-    needs: [docker_hub]
+    if: inputs.qa_websocket
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
-      operation: deploy
+      operation: redeploy
       github_environment_name: QA (WebSocket)
       github_environment_url: https://qa.hypothes.is/docs/help
       aws_region: us-west-1
       elasticbeanstalk_application: h-websocket
       elasticbeanstalk_environment: qa
-      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
   production:
     name: Production
-    needs: [docker_hub, qa, qa_websocket]
+    if: inputs.production
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
-      operation: deploy
+      operation: redeploy
       github_environment_name: Production
       github_environment_url: https://hypothes.is/search
       aws_region: us-west-1
       elasticbeanstalk_application: h
       elasticbeanstalk_environment: prod
-      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
   production_websocket:
     name: Production (WebSocket)
-    needs: [docker_hub, qa, qa_websocket]
+    if: inputs.production_websocket
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
-      operation: deploy
+      operation: redeploy
       github_environment_name: Production (WebSocket)
       github_environment_url: https://hypothes.is/docs/help
       aws_region: us-west-1
       elasticbeanstalk_application: h-websocket
       elasticbeanstalk_environment: prod
-      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
   production_canada:
     name: Production (Canada)
-    needs: [docker_hub, qa, qa_websocket]
+    if: inputs.production_canada
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
-      operation: deploy
+      operation: redeploy
       github_environment_name: Production (Canada)
       github_environment_url: https://ca.hypothes.is/search
       aws_region: ca-central-1
       elasticbeanstalk_application: h
       elasticbeanstalk_environment: prod
-      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
