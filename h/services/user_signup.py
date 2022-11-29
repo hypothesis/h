@@ -4,7 +4,8 @@ from functools import partial
 from sqlalchemy.exc import IntegrityError
 
 from h.emails import signup
-from h.models import Activation, Subscriptions, User, UserIdentity
+from h.models import Activation, User, UserIdentity
+from h.services import SubscriptionService
 from h.services.exceptions import ConflictError
 from h.tasks import mailer as tasks_mailer
 
@@ -15,22 +16,30 @@ class UserSignupService:
     """A service for registering users."""
 
     def __init__(  # pylint:disable=too-many-arguments
-        self, default_authority, mailer, session, signup_email, password_service
+        self,
+        default_authority,
+        mailer,
+        session,
+        signup_email,
+        password_service,
+        subscription_service: SubscriptionService,
     ):
         """
         Create a new user signup service.
 
-        :param default_authority: the default authority for new users
-        :param mailer: a mailer (such as `h.tasks.mailer`)
-        :param session: the SQLAlchemy session object
-        :param signup_email: a function for generating a signup email
-        :param password_service: the user password service
+        :param default_authority: Default authority for new users
+        :param mailer: Mailer (such as `h.tasks.mailer`)
+        :param session: SQLAlchemy session object
+        :param signup_email: Function for generating a signup email
+        :param password_service: User password service
+        :param subscription_service: Service for creating subscriptions
         """
         self.default_authority = default_authority
         self.mailer = mailer
         self.session = session
         self.signup_email = signup_email
         self.password_service = password_service
+        self.subscription_service = subscription_service
 
     def signup(self, require_activation=True, **kwargs):
         """
@@ -98,8 +107,10 @@ class UserSignupService:
         # FIXME: this is horrible, but is needed until the
         # notification/subscription system is made opt-out rather than opt-in
         # (at least from the perspective of the database).
-        sub = Subscriptions(uri=user.userid, type="reply", active=True)
-        self.session.add(sub)
+        for subscription in self.subscription_service.get_all_subscriptions(
+            user_id=user.userid
+        ):
+            subscription.active = True
 
         return user
 
@@ -127,4 +138,5 @@ def user_signup_service_factory(_context, request):
         session=request.db,
         signup_email=partial(signup.generate, request),
         password_service=request.find_service(name="user_password"),
+        subscription_service=request.find_service(SubscriptionService),
     )
