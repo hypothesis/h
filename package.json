@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "babel-plugin-mockable-imports": "^2.0.1",
-    "chai": "^4.3.6",
+    "chai": "^4.3.7",
     "diff": "^5.0.0",
     "eslint": "^8.26.0",
     "eslint-config-hypothesis": "2.6",
