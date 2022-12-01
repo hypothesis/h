@@ -32,7 +32,7 @@
     "raven-js": "^3.7.0",
     "rollup": "^2.79.1",
     "rollup-plugin-terser": "^7.0.2",
-    "sass": "^1.55.0",
+    "sass": "^1.56.1",
     "scroll-into-view": "^1.16.2"
   },
   "devDependencies": {
