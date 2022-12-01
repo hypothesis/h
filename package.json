@@ -42,7 +42,7 @@
     "eslint": "^8.26.0",
     "eslint-config-hypothesis": "2.6",
     "eslint-plugin-mocha": "^10.1.0",
-    "eslint-plugin-react": "^7.31.10",
+    "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
     "fetch-mock": "^9.11.0",
     "karma": "^6.4.1",
