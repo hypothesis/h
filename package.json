@@ -39,7 +39,7 @@
     "babel-plugin-mockable-imports": "^2.0.1",
     "chai": "^4.3.6",
     "diff": "^5.0.0",
-    "eslint": "^8.26.0",
+    "eslint": "^8.28.0",
     "eslint-config-hypothesis": "2.6",
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-react": "^7.31.10",
