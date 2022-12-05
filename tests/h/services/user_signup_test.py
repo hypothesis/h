@@ -4,7 +4,7 @@ from unittest.mock import sentinel
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from h.models import Activation, Subscriptions, User
+from h.models import Activation, User
 from h.services.exceptions import ConflictError
 from h.services.user_signup import UserSignupService, user_signup_service_factory
 
@@ -115,16 +115,15 @@ class TestUserSignupService:
         signup.generate.assert_not_called()
         tasks_mailer.send.delay.assert_not_called()
 
-    def test_signup_creates_reply_notification_subscription(self, db_session, svc):
-        svc.signup(username="foo", email="foo@bar.com")
+    def test_signup_creates_subscriptions(self, svc, subscription_service, factories):
+        subscription = factories.Subscriptions(active=False)
+        subscription_service.get_all_subscriptions.return_value = [subscription]
+        user = svc.signup(username="foo", email="foo@bar.com")
 
-        sub = (
-            db_session.query(Subscriptions)
-            .filter_by(uri="acct:foo@example.org")
-            .one_or_none()
+        subscription_service.get_all_subscriptions.assert_called_once_with(
+            user_id=user.userid
         )
-
-        assert sub.active
+        assert subscription.active
 
     def test_signup_logs_conflict_error_when_account_with_email_already_exists(
         self, svc, patch
@@ -166,11 +165,12 @@ class TestUserSignupService:
             svc.signup(username=username, email=email)
 
     @pytest.fixture
-    def svc(self, pyramid_request, user_password_service):
+    def svc(self, pyramid_request, user_password_service, subscription_service):
         return UserSignupService(
             request=pyramid_request,
             default_authority="example.org",
             password_service=user_password_service,
+            subscription_service=subscription_service,
         )
 
     @pytest.fixture(autouse=True)
@@ -184,13 +184,20 @@ class TestUserSignupService:
 
 @pytest.mark.usefixtures("user_password_service")
 class TestUserSignupServiceFactory:
-    def test_it(self, UserSignupService, pyramid_request, user_password_service):
+    def test_it(
+        self,
+        UserSignupService,
+        pyramid_request,
+        user_password_service,
+        subscription_service,
+    ):
         svc = user_signup_service_factory(sentinel.context, pyramid_request)
 
         UserSignupService.assert_called_once_with(
             request=pyramid_request,
             default_authority=pyramid_request.default_authority,
             password_service=user_password_service,
+            subscription_service=subscription_service,
         )
         assert svc == UserSignupService.return_value
 

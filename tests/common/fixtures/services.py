@@ -53,6 +53,7 @@ __all__ = (
     "subscription_service",
     "user_password_service",
     "user_service",
+    "user_password_service",
     "user_signup_service",
     "user_unique_service",
     "user_update_service",

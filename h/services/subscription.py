@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -36,6 +38,14 @@ class SubscriptionService:
             self._db_session.add(subscription)
 
         return subscription
+
+    def get_all_subscriptions(self, user_id: str) -> List[Subscriptions]:
+        """
+        Get all subscriptions for a particular user, creating any missing ones.
+
+        :param user_id: User id to get the subscriptions of
+        """
+        return [self.get_subscription(user_id, type_) for type_ in Subscriptions.Type]
 
 
 def service_factory(_context, request) -> SubscriptionService:
