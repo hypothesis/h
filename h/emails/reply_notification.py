@@ -2,7 +2,9 @@ from pyramid.renderers import render
 from pyramid.request import Request
 
 from h import links
+from h.models import Subscriptions
 from h.notification.reply import Notification
+from h.services import SubscriptionService
 
 
 def generate(request: Request, notification: Notification):
@@ -14,6 +16,10 @@ def generate(request: Request, notification: Notification):
     :returns: a 4-element tuple containing: recipients, subject, text, html
     """
 
+    unsubscribe_token = request.find_service(SubscriptionService).get_unsubscribe_token(
+        user_id=notification.parent_user.userid, type_=Subscriptions.Type.REPLY
+    )
+
     context = {
         "document_title": notification.document.title or notification.parent.target_uri,
         "document_url": notification.parent.target_uri,
@@ -24,7 +30,7 @@ def generate(request: Request, notification: Notification):
         "parent_user_url": _get_user_url(notification.parent_user, request),
         "unsubscribe_url": request.route_url(
             "unsubscribe",
-            token=_unsubscribe_token(request, notification.parent_user),
+            token=unsubscribe_token,
         ),
         # Reply related
         "reply": notification.reply,
@@ -51,8 +57,3 @@ def _get_user_url(user, request):
         return request.route_url("stream.user_query", user=user.username)
 
     return None
-
-
-def _unsubscribe_token(request, user):
-    serializer = request.registry.notification_serializer
-    return serializer.dumps({"type": "reply", "uri": user.userid})

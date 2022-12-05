@@ -1,23 +1,14 @@
 import datetime
-from unittest import mock
 
 import pytest
 
 from h.emails.reply_notification import generate
-from h.models import Annotation, Document
+from h.models import Annotation, Document, Subscriptions
 from h.notification.reply import Notification
 
 
-@pytest.mark.usefixtures("routes", "token_serializer", "html_renderer", "text_renderer")
 class TestGenerate:
-    def test_gets_in_context_link(self, notification, links, pyramid_request):
-        generate(pyramid_request, notification)
-
-        links.incontext_link.assert_called_once_with(
-            pyramid_request, notification.reply
-        )
-
-    def test_calls_renderers_with_appropriate_context(
+    def test_it(
         self,
         notification,
         parent_user,
@@ -26,8 +17,17 @@ class TestGenerate:
         html_renderer,
         text_renderer,
         links,
+        subscription_service,
     ):
         generate(pyramid_request, notification)
+
+        links.incontext_link.assert_called_once_with(
+            pyramid_request, notification.reply
+        )
+
+        subscription_service.get_unsubscribe_token.assert_called_once_with(
+            user_id=notification.parent_user.userid, type_=Subscriptions.Type.REPLY
+        )
 
         expected_context = {
             "document_title": "My fascinating page",
@@ -155,15 +155,6 @@ class TestGenerate:
 
         assert recipients == ["pat@ric.ia"]
 
-    def test_calls_token_serializer_with_correct_arguments(
-        self, notification, pyramid_request, token_serializer
-    ):
-        generate(pyramid_request, notification)
-
-        token_serializer.dumps.assert_called_once_with(
-            {"type": "reply", "uri": "acct:patricia@example.com"}
-        )
-
     def test_jinja_templates_render(
         self, notification, pyramid_config, pyramid_request
     ):
@@ -203,12 +194,6 @@ class TestGenerate:
         db_session.add(doc)
         db_session.flush()
         return doc
-
-    @pytest.fixture
-    def html_renderer(self, pyramid_config):
-        return pyramid_config.testing_add_renderer(
-            "h:templates/emails/reply_notification.html.jinja2"
-        )
 
     @pytest.fixture
     def links(self, patch):
@@ -256,21 +241,25 @@ class TestGenerate:
             username="ron", email="ron@thesmiths.com", display_name="Ron Burgundy"
         )
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
+    def subscription_service(self, subscription_service):
+        subscription_service.get_unsubscribe_token.return_value = "FAKETOKEN"
+        return subscription_service
+
+    @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
         pyramid_config.add_route("annotation", "/ann/{id}")
         pyramid_config.add_route("stream.user_query", "/stream/user/{user}")
         pyramid_config.add_route("unsubscribe", "/unsub/{token}")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
+    def html_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer(
+            "h:templates/emails/reply_notification.html.jinja2"
+        )
+
+    @pytest.fixture(autouse=True)
     def text_renderer(self, pyramid_config):
         return pyramid_config.testing_add_renderer(
             "h:templates/emails/reply_notification.txt.jinja2"
         )
-
-    @pytest.fixture
-    def token_serializer(self, pyramid_config):
-        serializer = mock.Mock(spec_set=["dumps"])
-        serializer.dumps.return_value = "FAKETOKEN"
-        pyramid_config.registry.notification_serializer = serializer
-        return serializer
