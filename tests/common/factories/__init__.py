@@ -15,6 +15,7 @@ from tests.common.factories.group_scope import GroupScope
 from tests.common.factories.job import Job, SyncAnnotationJob
 from tests.common.factories.organization import Organization
 from tests.common.factories.setting import Setting
+from tests.common.factories.subscriptions import Subscriptions
 from tests.common.factories.token import DeveloperToken, OAuth2Token
 from tests.common.factories.user import User
 from tests.common.factories.user_identity import UserIdentity

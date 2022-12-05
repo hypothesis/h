@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from h import storage
 from h.models import Subscriptions
+from h.services import SubscriptionService
 
 log = logging.getLogger(__name__)
 
@@ -100,12 +101,11 @@ def get_notification(
 
     # Bail if there is no active 'reply' subscription for the user being
     # replied to.
-    sub = (
-        request.db.query(Subscriptions)
-        .filter_by(active=True, type="reply", uri=parent.userid)
-        .first()
-    )
-    if sub is None:
+    if (
+        not request.find_service(SubscriptionService)
+        .get_subscription(user_id=parent.userid, type_=Subscriptions.Type.REPLY)
+        .active
+    ):
         return None
 
     return Notification(reply, reply_user, parent, parent_user, reply.document)
