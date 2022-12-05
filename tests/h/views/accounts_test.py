@@ -5,6 +5,7 @@ import pytest
 from h_matchers import Any
 from pyramid import httpexceptions
 
+from h.models import Subscriptions
 from h.services.developer_token import developer_token_service_factory
 from h.services.user_password import UserPasswordService
 from h.views import accounts as views
@@ -18,12 +19,6 @@ class FakeForm:
 
     def render(self):
         return self.appstruct
-
-
-class FakeSubscription:
-    def __init__(self, type_, active):
-        self.type = type_
-        self.active = active
 
 
 class FakeSerializer:
@@ -689,14 +684,12 @@ class TestAccountController:
 
 
 class TestNotificationsController:
-    def test_get(self, controller, authenticated_user, subscriptions_model):
-        subscriptions_model.get_subscriptions_for_uri.return_value = [
-            FakeSubscription("reply", True),
-            FakeSubscription("foo", False),
-        ]
-
+    def test_get(self, controller, authenticated_user, subscription_service):
         result = controller.get()
 
+        subscription_service.get_all_subscriptions.assert_called_once_with(
+            user_id=authenticated_user.userid
+        )
         controller.form.set_appstruct.assert_called_once_with(
             {"notifications": {"reply"}}
         )
@@ -710,15 +703,27 @@ class TestNotificationsController:
 
         assert result == {"user_has_email_address": None}
 
-    def test_post(self, controller, form_validating_to, subscriptions_model):
-        subs = [FakeSubscription("reply", True), FakeSubscription("foo", False)]
-        subscriptions_model.get_subscriptions_for_uri.return_value = subs
-        controller.form = form_validating_to({"notifications": {"foo"}})
+    @pytest.mark.parametrize("set_active", (True, False))
+    def test_post(
+        self,
+        controller,
+        authenticated_user,
+        form_validating_to,
+        subscription_service,
+        set_active,
+    ):
+        subscription = subscription_service.get_all_subscriptions.return_value[0]
+        subscription.active = not set_active
+        controller.form = form_validating_to(
+            {"notifications": {"reply"} if set_active else set()}
+        )
 
         result = controller.post()
 
-        assert not subs[0].active
-        assert subs[1].active is True
+        subscription_service.get_all_subscriptions.assert_called_once_with(
+            user_id=authenticated_user.userid
+        )
+        assert subscription.active if set_active else not subscription.active
         # This appears to be testing `h.form.handle_form_submission()`
         assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -746,12 +751,11 @@ class TestNotificationsController:
         return authenticated_user
 
     @pytest.fixture(autouse=True)
-    def routes(self, pyramid_config):
-        pyramid_config.add_route("account_notifications", "/p/notifications")
-
-    @pytest.fixture(autouse=True)
-    def subscriptions_model(self, patch):
-        return patch("h.models.Subscriptions")
+    def subscription_service(self, subscription_service, factories):
+        subscription_service.get_all_subscriptions.return_value = [
+            factories.Subscriptions(type=Subscriptions.Type.REPLY.value, active=True)
+        ]
+        return subscription_service
 
 
 @pytest.mark.usefixtures("pyramid_config")

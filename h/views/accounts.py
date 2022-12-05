@@ -25,6 +25,7 @@ from h.schemas.forms.accounts import (
     ResetCode,
     ResetPasswordSchema,
 )
+from h.services import SubscriptionService
 from h.tasks import mailer
 from h.util.view import json_view
 
@@ -524,6 +525,9 @@ class NotificationsController:
     def __init__(self, request):
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
+        self.subscription_svc: SubscriptionService = request.find_service(
+            SubscriptionService
+        )
         self.form = request.create_form(
             self.schema, buttons=(_("Save"),), use_inline_editing=True
         )
@@ -531,13 +535,15 @@ class NotificationsController:
     @view_config(request_method="GET")
     def get(self):
         """Render the notifications form."""
-        self.form.set_appstruct(
-            {
-                "notifications": set(
-                    n.type for n in self._user_notifications() if n.active
-                )
-            }
-        )
+        active_subscriptions = {
+            subscription.type
+            for subscription in self.subscription_svc.get_all_subscriptions(
+                user_id=self.request.authenticated_userid
+            )
+            if subscription.active
+        }
+
+        self.form.set_appstruct({"notifications": active_subscriptions})
         return self._template_data()
 
     @view_config(request_method="POST")
@@ -551,8 +557,11 @@ class NotificationsController:
         )
 
     def _update_notifications(self, appstruct):
-        for notification in self._user_notifications():
-            notification.active = notification.type in appstruct["notifications"]
+        active_subscriptions = set(appstruct["notifications"])
+        for subscription in self.subscription_svc.get_all_subscriptions(
+            user_id=self.request.authenticated_userid
+        ):
+            subscription.active = subscription.type in active_subscriptions
 
     def _template_data(self):
         user_has_email_address = self.request.user and self.request.user.email
@@ -562,12 +571,6 @@ class NotificationsController:
             data["form"] = self.form.render()
 
         return data
-
-    def _user_notifications(self):
-        """Fetch the notifications/subscriptions for the logged-in user."""
-        return models.Subscriptions.get_subscriptions_for_uri(
-            self.request.db, self.request.authenticated_userid
-        )
 
 
 @view_defaults(
