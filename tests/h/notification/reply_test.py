@@ -21,9 +21,13 @@ FIXTURE_DATA = {
 
 class TestGetNotification:
     def test_returns_correct_params_when_subscribed(
-        self, parent, pyramid_request, reply, user_service
+        self, parent, pyramid_request, reply, user_service, subscription_service
     ):
         result = get_notification(pyramid_request, reply, "create")
+
+        subscription_service.get_subscription.assert_called_once_with(
+            user_id=parent.userid, type_=Subscriptions.Type.REPLY
+        )
 
         assert isinstance(result, Notification)
         assert result.reply == reply
@@ -96,16 +100,9 @@ class TestGetNotification:
         assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_subscription_inactive(
-        self, pyramid_request, reply, subscription
+        self, pyramid_request, reply, subscription_service
     ):
-        subscription.active = False
-
-        assert get_notification(pyramid_request, reply, "create") is None
-
-    def test_returns_none_when_subscription_absent(
-        self, db_session, pyramid_request, reply
-    ):
-        db_session.query(Subscriptions).delete()
+        subscription_service.get_subscription.return_value.active = False
 
         assert get_notification(pyramid_request, reply, "create") is None
 
@@ -148,11 +145,11 @@ class TestGetNotification:
         return fetch_annotation
 
     @pytest.fixture(autouse=True)
-    def subscription(self, db_session):
-        sub = Subscriptions(type="reply", active=True, uri="acct:giraffe@safari.net")
-        db_session.add(sub)
-        db_session.flush()
-        return sub
+    def subscription_service(self, subscription_service, factories):
+        subscription_service.get_subscription.return_value = factories.Subscriptions(
+            active=True, type=Subscriptions.Type.REPLY.value
+        )
+        return subscription_service
 
     @pytest.fixture(autouse=True)
     def user_service(self, user_service, factories):
