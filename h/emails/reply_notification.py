@@ -1,17 +1,16 @@
 from pyramid.renderers import render
+from pyramid.request import Request
 
 from h import links
+from h.notification.reply import Notification
 
 
-def generate(request, notification):
+def generate(request: Request, notification: Notification):
     """
     Generate an email for a reply notification.
 
     :param request: the current request
-    :type request: pyramid.request.Request
     :param notification: the reply notification data structure
-    :type notification: h.notifications.reply.Notification
-
     :returns: a 4-element tuple containing: recipients, subject, text, html
     """
 
