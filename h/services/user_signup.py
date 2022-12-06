@@ -1,6 +1,6 @@
 import logging
-from functools import partial
 
+from pyramid.request import Request
 from sqlalchemy.exc import IntegrityError
 
 from h.emails import signup
@@ -15,27 +15,22 @@ log = logging.getLogger(__name__)
 class UserSignupService:
     """A service for registering users."""
 
-    def __init__(  # pylint:disable=too-many-arguments
+    def __init__(
         self,
-        default_authority,
-        mailer,
-        session,
-        signup_email,
+        request: Request,
+        default_authority: str,
         password_service: UserPasswordService,
     ):
         """
         Create a new user signup service.
 
+        :param request: Pyramid request object
         :param default_authority: Default authority for new users
-        :param mailer: Mailer (such as `h.tasks.mailer`)
-        :param session: SQLAlchemy session object
-        :param signup_email: Function for generating a signup email
         :param password_service: User password service
         """
+        self.request = request
+        self.session = request.db
         self.default_authority = default_authority
-        self.mailer = mailer
-        self.session = session
-        self.signup_email = signup_email
         self.password_service = password_service
 
     def signup(self, require_activation: bool = True, **kwargs) -> User:
@@ -115,19 +110,20 @@ class UserSignupService:
         self.session.flush()
 
         # Send the activation email
-        mail_params = self.signup_email(
-            user_id=user.id, email=user.email, activation_code=user.activation.code
+        mail_params = signup.generate(
+            request=self.request,
+            user_id=user.id,
+            email=user.email,
+            activation_code=user.activation.code,
         )
-        self.mailer.send.delay(*mail_params)
+        tasks_mailer.send.delay(*mail_params)
 
 
 def user_signup_service_factory(_context, request):
     """Return a UserSignupService instance for the passed context and request."""
 
     return UserSignupService(
+        request=request,
         default_authority=request.default_authority,
-        mailer=tasks_mailer,
-        session=request.db,
-        signup_email=partial(signup.generate, request),
         password_service=request.find_service(name="user_password"),
     )

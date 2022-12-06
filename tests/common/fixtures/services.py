@@ -44,6 +44,7 @@ __all__ = (
     "oauth_provider_service",
     "organization_service",
     "search_index",
+    "user_password_service",
     "user_service",
     "user_signup_service",
     "user_unique_service",
@@ -51,6 +52,7 @@ __all__ = (
 )
 
 from h.services.user import UserService
+from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService
 from h.services.user_unique import UserUniqueService
 from h.services.user_update import UserUpdateService
@@ -181,6 +183,11 @@ def search_index(mock_service):
         spec_set=False,
         _queue=create_autospec(Queue, spec_set=True, instance=True),
     )
+
+
+@pytest.fixture
+def user_password_service(mock_service):
+    return mock_service(UserPasswordService, name="user_password")
 
 
 @pytest.fixture
