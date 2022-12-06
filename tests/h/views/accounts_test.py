@@ -689,10 +689,14 @@ class TestAccountController:
 
 
 class TestNotificationsController:
-    def test_get_sets_subscriptions_data_in_form(
-        self, form_validating_to, pyramid_config, pyramid_request, subscriptions_model
+    def test_get(
+        self,
+        authenticated_user,
+        form_validating_to,
+        pyramid_config,
+        pyramid_request,
+        subscriptions_model,
     ):
-        pyramid_config.testing_securitypolicy("fiona")
         subscriptions_model.get_subscriptions_for_uri.return_value = [
             FakeSubscription("reply", True),
             FakeSubscription("foo", False),
@@ -700,79 +704,65 @@ class TestNotificationsController:
         controller = views.NotificationsController(pyramid_request)
         controller.form = form_validating_to({})
 
-        controller.get()
+        result = controller.get()
 
         controller.form.set_appstruct.assert_called_once_with(
             {"notifications": {"reply"}}
         )
-
-    def test_it_does_not_render_form_if_user_has_no_email_address(
-        self, factories, form_validating_to, pyramid_request
-    ):
-        controller = views.NotificationsController(pyramid_request)
-        controller.form = form_validating_to({})
-        pyramid_request.user = factories.User(username="cara")
-        pyramid_request.user.email = None
-
-        result = controller.get()
-
-        assert "form" not in result
-        assert result["user_has_email_address"] is None
-
-    def test_it_renders_form_if_user_has_email_address(
-        self, factories, form_validating_to, pyramid_request
-    ):
-        controller = views.NotificationsController(pyramid_request)
-        controller.form = form_validating_to({})
-        pyramid_request.user = factories.User(username="janedoe")
-
-        result = controller.get()
-
         assert "form" in result
-        assert result["user_has_email_address"] == pyramid_request.user.email
+        assert result["user_has_email_address"] == authenticated_user.email
 
-    def test_post_with_invalid_data_returns_form(
-        self, factories, invalid_form, pyramid_config, pyramid_request
+    def test_get_if_user_has_no_email_address(
+        self, authenticated_user, form_validating_to, pyramid_request
     ):
-        pyramid_request.POST = {}
-        pyramid_request.user = factories.User(username="cara")
-        pyramid_request.user.email = None
-        pyramid_config.testing_securitypolicy("jerry")
         controller = views.NotificationsController(pyramid_request)
-        controller.form = invalid_form()
+        controller.form = form_validating_to({})
+        authenticated_user.email = None
 
-        result = controller.post()
+        result = controller.get()
 
-        assert "form" not in result
-        assert result["user_has_email_address"] is None
+        assert result == {"user_has_email_address": None}
 
-    def test_post_with_valid_data_updates_subscriptions(
-        self, form_validating_to, pyramid_config, pyramid_request, subscriptions_model
+    def test_post(
+        self,
+        authenticated_user,
+        form_validating_to,
+        pyramid_config,
+        pyramid_request,
+        subscriptions_model,
     ):
         pyramid_request.POST = {}
-        pyramid_config.testing_securitypolicy("fiona")
         subs = [FakeSubscription("reply", True), FakeSubscription("foo", False)]
         subscriptions_model.get_subscriptions_for_uri.return_value = subs
         controller = views.NotificationsController(pyramid_request)
         controller.form = form_validating_to({"notifications": {"foo"}})
 
-        controller.post()
+        result = controller.post()
 
         assert not subs[0].active
         assert subs[1].active is True
+        # This appears to be testing `h.form.handle_form_submission()`
+        assert isinstance(result, httpexceptions.HTTPFound)
 
-    def test_post_with_valid_data_redirects(
-        self, form_validating_to, pyramid_config, pyramid_request, subscriptions_model
+    def test_post_with_invalid_data(
+        self, authenticated_user, invalid_form, pyramid_config, pyramid_request
     ):
         pyramid_request.POST = {}
-        pyramid_config.testing_securitypolicy("fiona")
-        subscriptions_model.get_subscriptions_for_uri.return_value = []
+        authenticated_user.email = None
         controller = views.NotificationsController(pyramid_request)
-        controller.form = form_validating_to({})
+        controller.form = invalid_form()
 
         result = controller.post()
 
-        assert isinstance(result, httpexceptions.HTTPFound)
+        assert result == {"user_has_email_address": None}
+
+    @pytest.fixture
+    def authenticated_user(self, pyramid_config, pyramid_request, factories):
+        authenticated_user = factories.User(email="email@example.com")
+        pyramid_config.testing_securitypolicy(userid=authenticated_user.userid)
+        pyramid_request.user = authenticated_user
+
+        return authenticated_user
 
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
