@@ -1,47 +1,20 @@
 """Factory classes for easily generating test objects."""
-from .activation import Activation
-from .annotation import Annotation
-from .annotation_moderation import AnnotationModeration
-from .auth_client import AuthClient, ConfidentialAuthClient
-from .auth_ticket import AuthTicket
-from .authz_code import AuthzCode
-from .base import set_session
-from .document import Document, DocumentMeta, DocumentURI
-from .feature import Feature
-from .flag import Flag
-from .group import Group, OpenGroup, RestrictedGroup
-from .group_scope import GroupScope
-from .job import Job, SyncAnnotationJob
-from .organization import Organization
-from .setting import Setting
-from .token import DeveloperToken, OAuth2Token
-from .user import User
-from .user_identity import UserIdentity
 
-__all__ = (
-    "Activation",
-    "Annotation",
-    "AnnotationModeration",
-    "AuthClient",
-    "AuthTicket",
-    "AuthzCode",
-    "ConfidentialAuthClient",
-    "DeveloperToken",
-    "Document",
-    "DocumentMeta",
-    "DocumentURI",
-    "Feature",
-    "Flag",
-    "Group",
-    "GroupScope",
-    "Job",
-    "OAuth2Token",
-    "OpenGroup",
-    "Organization",
-    "RestrictedGroup",
-    "Setting",
-    "SyncAnnotationJob",
-    "User",
-    "UserIdentity",
-    "set_session",
-)
+from tests.common.factories.activation import Activation
+from tests.common.factories.annotation import Annotation
+from tests.common.factories.annotation_moderation import AnnotationModeration
+from tests.common.factories.auth_client import AuthClient, ConfidentialAuthClient
+from tests.common.factories.auth_ticket import AuthTicket
+from tests.common.factories.authz_code import AuthzCode
+from tests.common.factories.base import set_session
+from tests.common.factories.document import Document, DocumentMeta, DocumentURI
+from tests.common.factories.feature import Feature
+from tests.common.factories.flag import Flag
+from tests.common.factories.group import Group, OpenGroup, RestrictedGroup
+from tests.common.factories.group_scope import GroupScope
+from tests.common.factories.job import Job, SyncAnnotationJob
+from tests.common.factories.organization import Organization
+from tests.common.factories.setting import Setting
+from tests.common.factories.token import DeveloperToken, OAuth2Token
+from tests.common.factories.user import User
+from tests.common.factories.user_identity import UserIdentity
