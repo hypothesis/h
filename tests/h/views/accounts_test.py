@@ -689,9 +689,7 @@ class TestAccountController:
 
 
 class TestNotificationsController:
-    def test_get(
-        self, controller, authenticated_user, form_validating_to, subscriptions_model
-    ):
+    def test_get(self, controller, authenticated_user, subscriptions_model):
         subscriptions_model.get_subscriptions_for_uri.return_value = [
             FakeSubscription("reply", True),
             FakeSubscription("foo", False),
@@ -712,15 +710,7 @@ class TestNotificationsController:
 
         assert result == {"user_has_email_address": None}
 
-    def test_post(
-        self,
-        controller,
-        authenticated_user,
-        form_validating_to,
-        pyramid_request,
-        subscriptions_model,
-    ):
-        pyramid_request.POST = {}
+    def test_post(self, controller, form_validating_to, subscriptions_model):
         subs = [FakeSubscription("reply", True), FakeSubscription("foo", False)]
         subscriptions_model.get_subscriptions_for_uri.return_value = subs
         controller.form = form_validating_to({"notifications": {"foo"}})
@@ -732,10 +722,7 @@ class TestNotificationsController:
         # This appears to be testing `h.form.handle_form_submission()`
         assert isinstance(result, httpexceptions.HTTPFound)
 
-    def test_post_with_invalid_data(
-        self, controller, authenticated_user, invalid_form, pyramid_request
-    ):
-        pyramid_request.POST = {}
+    def test_post_with_invalid_data(self, controller, authenticated_user, invalid_form):
         authenticated_user.email = None
         controller.form = invalid_form()
 
@@ -750,7 +737,7 @@ class TestNotificationsController:
 
         return controller
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def authenticated_user(self, pyramid_config, pyramid_request, factories):
         authenticated_user = factories.User(email="email@example.com")
         pyramid_config.testing_securitypolicy(userid=authenticated_user.userid)
