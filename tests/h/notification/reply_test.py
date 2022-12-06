@@ -19,7 +19,6 @@ FIXTURE_DATA = {
 }
 
 
-@pytest.mark.usefixtures("fetch_annotation", "subscription", "user_service")
 class TestGetNotification:
     def test_returns_correct_params_when_subscribed(
         self, parent, pyramid_request, reply, user_service
@@ -131,12 +130,6 @@ class TestGetNotification:
         return {}
 
     @pytest.fixture
-    def fetch_annotation(self, patch, annotations):
-        fetch_annotation = patch("h.notification.reply.storage.fetch_annotation")
-        fetch_annotation.side_effect = lambda _, id: annotations.get(id)
-        return fetch_annotation
-
-    @pytest.fixture
     def parent(self, annotations):
         parent = Annotation(**FIXTURE_DATA["parent"])
         annotations[parent.id] = parent
@@ -164,14 +157,20 @@ class TestGetNotification:
         annotations[reply.id] = reply
         return reply
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
+    def fetch_annotation(self, patch, annotations):
+        fetch_annotation = patch("h.notification.reply.storage.fetch_annotation")
+        fetch_annotation.side_effect = lambda _, id: annotations.get(id)
+        return fetch_annotation
+
+    @pytest.fixture(autouse=True)
     def subscription(self, db_session):
         sub = Subscriptions(type="reply", active=True, uri="acct:giraffe@safari.net")
         db_session.add(sub)
         db_session.flush()
         return sub
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def user_service(self, user_service, factories):
         users = {
             "acct:giraffe@safari.net": factories.User(),
