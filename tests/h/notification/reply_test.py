@@ -40,18 +40,14 @@ class TestGetNotification:
     def test_returns_none_when_annotation_is_not_reply(self, pyramid_request, reply):
         reply.references = None
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_parent_does_not_exist(
         self, annotations, parent, pyramid_request, reply
     ):
         del annotations[parent.id]
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_parent_user_does_not_exist(
         self, factories, pyramid_request, reply, user_service
@@ -59,9 +55,7 @@ class TestGetNotification:
         users = {"acct:elephant@safari.net": factories.User()}
         user_service.fetch.side_effect = users.get
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_parent_user_has_no_email_address(
         self, factories, pyramid_request, reply, user_service
@@ -87,43 +81,33 @@ class TestGetNotification:
         users = {"acct:giraffe@safari.net": factories.User()}
         user_service.fetch.side_effect = users.get
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_reply_by_same_user(self, parent, pyramid_request, reply):
         parent.userid = "acct:elephant@safari.net"
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_parent_user_cannot_read_reply(
         self, pyramid_request, reply
     ):
         reply.shared = False
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_subscription_inactive(
         self, pyramid_request, reply, subscription
     ):
         subscription.active = False
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     def test_returns_none_when_subscription_absent(
         self, db_session, pyramid_request, reply
     ):
         db_session.query(Subscriptions).delete()
 
-        result = get_notification(pyramid_request, reply, "create")
-
-        assert result is None
+        assert get_notification(pyramid_request, reply, "create") is None
 
     @pytest.fixture
     def annotations(self):
