@@ -688,7 +688,6 @@ class TestAccountController:
         pyramid_config.add_route("account", "/my/account")
 
 
-@pytest.mark.usefixtures("pyramid_config", "routes", "subscriptions_model")
 class TestNotificationsController:
     def test_get_sets_subscriptions_data_in_form(
         self, form_validating_to, pyramid_config, pyramid_request, subscriptions_model
@@ -775,9 +774,13 @@ class TestNotificationsController:
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
         pyramid_config.add_route("account_notifications", "/p/notifications")
+
+    @pytest.fixture(autouse=True)
+    def subscriptions_model(self, patch):
+        return patch("h.models.Subscriptions")
 
 
 @pytest.mark.usefixtures("pyramid_config")
@@ -892,11 +895,6 @@ class TestDeveloperController:
         userid = "acct:jane@example.com"
         pyramid_config.testing_securitypolicy(userid)
         return userid
-
-
-@pytest.fixture
-def subscriptions_model(patch):
-    return patch("h.models.Subscriptions")
 
 
 @pytest.fixture
