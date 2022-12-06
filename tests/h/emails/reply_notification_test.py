@@ -64,14 +64,11 @@ class TestGenerate:
         text_renderer,
         links,
     ):
-        """
-        It link to individual pages if bouncer isn't available.
+        # It links to individual pages if bouncer isn't available.
+        # If bouncer isn't enabled direct links in reply notification emails
+        # should fall back to linking to the reply's individual page, instead of
+        # the bouncer direct link.
 
-        If bouncer isn't enabled direct links in reply notification emails
-        should fall back to linking to the reply's individual page, instead of
-        the bouncer direct link.
-
-        """
         # incontext_link() returns None if bouncer isn't available.
         links.incontext_link.return_value = None
 

@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from h.emails import signup
 from h.models import Activation, Subscriptions, User, UserIdentity
 from h.services.exceptions import ConflictError
+from h.services.user_password import UserPasswordService
 from h.tasks import mailer as tasks_mailer
 
 log = logging.getLogger(__name__)
@@ -15,16 +16,21 @@ class UserSignupService:
     """A service for registering users."""
 
     def __init__(  # pylint:disable=too-many-arguments
-        self, default_authority, mailer, session, signup_email, password_service
+        self,
+        default_authority,
+        mailer,
+        session,
+        signup_email,
+        password_service: UserPasswordService,
     ):
         """
         Create a new user signup service.
 
-        :param default_authority: the default authority for new users
-        :param mailer: a mailer (such as `h.tasks.mailer`)
-        :param session: the SQLAlchemy session object
-        :param signup_email: a function for generating a signup email
-        :param password_service: the user password service
+        :param default_authority: Default authority for new users
+        :param mailer: Mailer (such as `h.tasks.mailer`)
+        :param session: SQLAlchemy session object
+        :param signup_email: Function for generating a signup email
+        :param password_service: User password service
         """
         self.default_authority = default_authority
         self.mailer = mailer
@@ -32,25 +38,21 @@ class UserSignupService:
         self.signup_email = signup_email
         self.password_service = password_service
 
-    def signup(self, require_activation=True, **kwargs):
+    def signup(self, require_activation: bool = True, **kwargs) -> User:
         """
         Create a new user.
 
-        If *require_activation* is ``True``, the user will be flagged as
+        If `require_activation` is `True`, the user will be flagged as
         requiring activation and an activation email will be sent.
 
-        :param require_activation: The name to use.
-        :type require_activation: bool.
-
         Remaining keyword arguments are used to construct a new
-        :py:class:`h.models.User` object.
+        `h.models.User` object.
 
-            * *identities*  A list of dictionaries representing identities to
-              add to the new user. Each dictionary will be passed as keyword args
-              to `h.models.UserIdentity`.
+            * `identities` - A list of dictionaries representing identities to
+              add to the new user. Each dictionary will be passed as keyword
+              args to `h.models.UserIdentity`.
 
-        :returns: the newly-created user object.
-        :rtype: h.models.User
+        :param require_activation: The name to use.
         """
         kwargs.setdefault("authority", self.default_authority)
 
@@ -121,6 +123,7 @@ class UserSignupService:
 
 def user_signup_service_factory(_context, request):
     """Return a UserSignupService instance for the passed context and request."""
+
     return UserSignupService(
         default_authority=request.default_authority,
         mailer=tasks_mailer,
