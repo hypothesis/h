@@ -1,12 +1,11 @@
 import datetime
-from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 from sqlalchemy.exc import IntegrityError
 
 from h.models import Activation, Subscriptions, User
 from h.services.exceptions import ConflictError
-from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService, user_signup_service_factory
 
 
@@ -93,26 +92,28 @@ class TestUserSignupService:
         user = svc.signup(username="foo", email="foo@bar.com", password="wibble")
 
         user_password_service.update_password.assert_called_once_with(user, "wibble")
-        assert user.password == "fakehash"
 
-    def test_passes_user_info_to_signup_email(self, svc, signup_email):
+    def test_signup_sends_email(self, svc, signup, tasks_mailer, pyramid_request):
+        signup.generate.return_value = ["signup", "args"]
+
         user = svc.signup(username="foo", email="foo@bar.com")
 
-        signup_email.assert_called_once_with(
-            user_id=user.id, email="foo@bar.com", activation_code=user.activation.code
+        signup.generate.assert_called_once_with(
+            request=pyramid_request,
+            user_id=user.id,
+            email="foo@bar.com",
+            activation_code=user.activation.code,
         )
 
-    def test_signup_sends_email(self, mailer, svc):
-        svc.signup(username="foo", email="foo@bar.com")
+        tasks_mailer.send.delay.assert_called_once_with(*signup.generate.return_value)
 
-        mailer.send.delay.assert_called_once_with(
-            ["test@example.com"], "My subject", "Text", "<p>HTML</p>"
-        )
-
-    def test_signup_does_not_send_email_when_activation_not_required(self, mailer, svc):
+    def test_signup_does_not_send_email_when_activation_not_required(
+        self, svc, signup, tasks_mailer
+    ):
         svc.signup(require_activation=False, username="foo", email="foo@bar.com")
 
-        assert not mailer.send.delay.called
+        signup.generate.assert_not_called()
+        tasks_mailer.send.delay.assert_not_called()
 
     def test_signup_creates_reply_notification_subscription(self, db_session, svc):
         svc.signup(username="foo", email="foo@bar.com")
@@ -165,75 +166,34 @@ class TestUserSignupService:
             svc.signup(username=username, email=email)
 
     @pytest.fixture
-    def svc(self, db_session, mailer, signup_email, user_password_service):
+    def svc(self, pyramid_request, user_password_service):
         return UserSignupService(
+            request=pyramid_request,
             default_authority="example.org",
-            mailer=mailer,
-            session=db_session,
             password_service=user_password_service,
-            signup_email=signup_email,
         )
 
-    @pytest.fixture
-    def mailer(self):
-        return mock.Mock(spec_set=["send"])
+    @pytest.fixture(autouse=True)
+    def tasks_mailer(self, patch):
+        return patch("h.services.user_signup.tasks_mailer")
 
-    @pytest.fixture
-    def signup_email(self):
-        signup_email = mock.Mock(spec_set=[])
-        signup_email.return_value = (
-            ["test@example.com"],
-            "My subject",
-            "Text",
-            "<p>HTML</p>",
-        )
-        return signup_email
+    @pytest.fixture(autouse=True)
+    def signup(self, patch):
+        return patch("h.services.user_signup.signup")
 
 
 @pytest.mark.usefixtures("user_password_service")
 class TestUserSignupServiceFactory:
-    def test_returns_user_signup_service(self, pyramid_request):
-        svc = user_signup_service_factory(None, pyramid_request)
+    def test_it(self, UserSignupService, pyramid_request, user_password_service):
+        svc = user_signup_service_factory(sentinel.context, pyramid_request)
 
-        assert isinstance(svc, UserSignupService)
-
-    def test_provides_request_default_authority_as_default_authority(
-        self, pyramid_request
-    ):
-        svc = user_signup_service_factory(None, pyramid_request)
-
-        assert svc.default_authority == pyramid_request.default_authority
-
-    def test_provides_request_db_as_session(self, pyramid_request):
-        svc = user_signup_service_factory(None, pyramid_request)
-
-        assert svc.session == pyramid_request.db
-
-    def test_wraps_email_module_as_signup_email(self, patch, pyramid_request):
-        signup_email = patch("h.emails.signup.generate")
-        svc = user_signup_service_factory(None, pyramid_request)
-
-        svc.signup_email(user_id=123, email="foo@bar.com", activation_code="abc456")
-
-        signup_email.assert_called_once_with(
-            pyramid_request, user_id=123, email="foo@bar.com", activation_code="abc456"
+        UserSignupService.assert_called_once_with(
+            request=pyramid_request,
+            default_authority=pyramid_request.default_authority,
+            password_service=user_password_service,
         )
+        assert svc == UserSignupService.return_value
 
-    def test_provides_user_password_service(self, pyramid_request):
-        svc = user_signup_service_factory(None, pyramid_request)
-        password_svc = pyramid_request.find_service(name="user_password")
-
-        assert svc.password_service == password_svc
-
-
-@pytest.fixture
-def user_password_service(pyramid_config):
-    service = mock.Mock(spec_set=UserPasswordService())
-
-    def password_setter(user, password):  # pylint:disable=unused-argument
-        user.password = "fakehash"
-
-    service.update_password.side_effect = password_setter
-
-    pyramid_config.register_service(service, name="user_password")
-    return service
+    @pytest.fixture
+    def UserSignupService(self, patch):
+        return patch("h.services.user_signup.UserSignupService")
