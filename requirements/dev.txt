@@ -112,7 +112,7 @@ importlib-metadata==4.8.1
     #   data-tasks
     #   markdown
     #   pip-sync-faster
-importlib-resources==5.10.0
+importlib-resources==5.10.1
     # via
     #   -r requirements.txt
     #   alembic
