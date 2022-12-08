@@ -10,7 +10,7 @@ bcrypt==4.0.1
     # via paramiko
 build==0.8.0
     # via pip-tools
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 cffi==1.15.1
     # via
@@ -27,7 +27,7 @@ distro==1.5.0
 docker[ssh]==5.0.0
     # via docker-compose
 docker-compose==1.29.2
-    # via -r requirements/dockercompose.in
+    # via -r dockercompose.in
 dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
@@ -45,10 +45,10 @@ paramiko==2.10.1
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r requirements/dockercompose.in
+    # via -r dockercompose.in
 pip-tools==6.11.0
     # via
-    #   -r requirements/dockercompose.in
+    #   -r dockercompose.in
     #   pip-sync-faster
 pycparser==2.20
     # via cffi
