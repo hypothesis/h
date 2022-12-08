@@ -32,7 +32,7 @@ do
     # Install tox in this version of Python if it's not already installed.
     if ! "$(pyenv root)/versions/$python_version/bin/tox" --version > /dev/null 2>&1
     then
-        "$(pyenv root)/versions/$python_version/bin/pip" install --quiet --disable-pip-version-check tox > /dev/null
+        "$(pyenv root)/versions/$python_version/bin/pip" install --quiet --disable-pip-version-check 'tox<4' > /dev/null
         pyenv rehash
     fi
 done < .python-version
