@@ -27,7 +27,7 @@ distro==1.5.0
 docker[ssh]==5.0.0
     # via docker-compose
 docker-compose==1.29.2
-    # via -r dockercompose.in
+    # via -r requirements/dockercompose.in
 dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
@@ -38,24 +38,22 @@ importlib-metadata==4.12.0
     # via pip-sync-faster
 jsonschema==3.2.0
     # via docker-compose
-packaging==21.3
+packaging==22.0
     # via build
 paramiko==2.10.1
     # via docker
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r dockercompose.in
+    # via -r requirements/dockercompose.in
 pip-tools==6.11.0
     # via
-    #   -r dockercompose.in
+    #   -r requirements/dockercompose.in
     #   pip-sync-faster
 pycparser==2.20
     # via cffi
 pynacl==1.4.0
     # via paramiko
-pyparsing==3.0.9
-    # via packaging
 pyrsistent==0.17.3
     # via jsonschema
 python-dotenv==0.17.1

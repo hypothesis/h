@@ -154,7 +154,7 @@ newrelic==8.2.1
     # via -r requirements/requirements.txt
 oauthlib==3.2.2
     # via -r requirements/requirements.txt
-packaging==21.3
+packaging==22.0
     # via
     #   -r requirements/requirements.txt
     #   build
@@ -207,9 +207,7 @@ pycryptodomex==3.16.0
 pyjwt==2.6.0
     # via -r requirements/requirements.txt
 pyparsing==3.0.9
-    # via
-    #   -r requirements/requirements.txt
-    #   packaging
+    # via -r requirements/requirements.txt
 pyramid==2.0
     # via
     #   -r requirements/requirements.txt

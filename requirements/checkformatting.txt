@@ -18,7 +18,7 @@ isort==5.10.1
     # via -r requirements/checkformatting.in
 mypy-extensions==0.4.3
     # via black
-packaging==21.3
+packaging==22.0
     # via build
 pathspec==0.9.0
     # via black
@@ -32,13 +32,10 @@ pip-tools==6.11.0
     #   pip-sync-faster
 platformdirs==2.5.2
     # via black
-pyparsing==3.0.9
-    # via packaging
 tomli==2.0.1
     # via
     #   black
     #   build
-    #   pep517
 typing-extensions==4.3.0
     # via black
 wheel==0.37.1
