@@ -7,6 +7,30 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '.cookiecutter/*'
+      - '.github/*'
+      - 'bin/create-testdb'
+      - 'bin/install-python'
+      - 'conf/development-app.ini'
+      - 'conf/supervisord-dev.conf'
+      - 'conf/websocket-dev.ini'
+      - 'docs/*'
+      - 'requirements/*'
+      - '!requirements/requirements.txt'
+      - 'tests/*'
+      - '.coveragerc'
+      - '.eslintrc'
+      - '.gitignore'
+      - '.isort.cfg'
+      - '.pylintrc'
+      - 'HACKING.md'
+      - 'LICENSE'
+      - 'README.rst'
+      - 'docker-compose.yml'
+      - 'pyproject.toml'
+      - 'setup.cfg'
+      - 'tox.ini'
 jobs:
   ci:
     name: CI
