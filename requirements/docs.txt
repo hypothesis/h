@@ -36,22 +36,20 @@ livereload==2.6.3
     # via sphinx-autobuild
 markupsafe==1.1.1
     # via jinja2
-packaging==21.3
+packaging==22.0
     # via
     #   build
     #   sphinx
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r docs.in
+    # via -r requirements/docs.in
 pip-tools==6.11.0
     # via
-    #   -r docs.in
+    #   -r requirements/docs.in
     #   pip-sync-faster
 pygments==2.9.0
     # via sphinx
-pyparsing==3.0.9
-    # via packaging
 pytz==2021.1
     # via babel
 requests==2.25.1
@@ -62,13 +60,13 @@ snowballstemmer==2.1.0
     # via sphinx
 sphinx==5.1.1
     # via
-    #   -r docs.in
+    #   -r requirements/docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
 sphinx-autobuild==2021.3.14
-    # via -r docs.in
+    # via -r requirements/docs.in
 sphinx-rtd-theme==1.1.1
-    # via -r docs.in
+    # via -r requirements/docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2

@@ -238,7 +238,7 @@ oauthlib==3.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-packaging==21.3
+packaging==22.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -333,7 +333,6 @@ pyparsing==3.0.9
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   packaging
 pyramid==2.0
     # via
     #   -r requirements/functests.txt
