@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/requirements.in
 #
-alembic==1.8.1
+alembic==1.9.0
     # via -r requirements/requirements.in
 amqp==5.0.9
     # via kombu

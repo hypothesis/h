@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/lint.in
 #
-alembic==1.8.1
+alembic==1.9.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
