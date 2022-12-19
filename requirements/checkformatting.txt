@@ -26,7 +26,7 @@ pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
     # via -r requirements/checkformatting.in
-pip-tools==6.11.0
+pip-tools==6.12.1
     # via
     #   -r requirements/checkformatting.in
     #   pip-sync-faster
