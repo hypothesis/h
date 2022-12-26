@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/dev.in
 #
-alembic==1.9.0
+alembic==1.9.1
     # via -r requirements/requirements.txt
 amqp==5.0.9
     # via
