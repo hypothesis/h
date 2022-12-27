@@ -43,10 +43,10 @@ packaging==22.0
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r requirements/docs.in
+    # via -r docs.in
 pip-tools==6.12.1
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   pip-sync-faster
 pygments==2.9.0
     # via sphinx
@@ -60,13 +60,13 @@ snowballstemmer==2.1.0
     # via sphinx
 sphinx==5.1.1
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
 sphinx-autobuild==2021.3.14
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinx-rtd-theme==1.1.1
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
@@ -87,7 +87,7 @@ tornado==6.1
     # via livereload
 urllib3==1.26.5
     # via requests
-wheel==0.37.1
+wheel==0.38.1
     # via pip-tools
 zipp==3.7.0
     # via importlib-metadata

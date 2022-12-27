@@ -27,7 +27,7 @@ distro==1.5.0
 docker[ssh]==5.0.0
     # via docker-compose
 docker-compose==1.29.2
-    # via -r requirements/dockercompose.in
+    # via -r dockercompose.in
 dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
@@ -45,10 +45,10 @@ paramiko==2.10.1
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r requirements/dockercompose.in
+    # via -r dockercompose.in
 pip-tools==6.12.1
     # via
-    #   -r requirements/dockercompose.in
+    #   -r dockercompose.in
     #   pip-sync-faster
 pycparser==2.20
     # via cffi
@@ -83,7 +83,7 @@ websocket-client==0.58.0
     # via
     #   docker
     #   docker-compose
-wheel==0.37.1
+wheel==0.38.1
     # via pip-tools
 zipp==3.8.1
     # via importlib-metadata
