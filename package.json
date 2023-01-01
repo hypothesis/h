@@ -54,7 +54,7 @@
     "karma-source-map-support": "^1.4.0",
     "mocha": "^10.2.0",
     "prettier": "^2.8.0",
-    "sinon": "^15.0.0",
+    "sinon": "^15.0.1",
     "syn": "^0.2.2"
   },
   "engines": {
