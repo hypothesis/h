@@ -15,7 +15,7 @@
     "@babel/preset-env": "^7.19.4",
     "@hypothesis/frontend-build": "^1.2.0",
     "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-commonjs": "^23.0.3",
+    "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "autoprefixer": "^10.4.13",
     "bootstrap": "^4.6.2",
