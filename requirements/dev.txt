@@ -120,7 +120,7 @@ importlib-resources==5.10.2
     #   h-api
 ipdb==0.13.11
     # via -r requirements/dev.in
-ipython==8.7.0
+ipython==8.8.0
     # via
     #   -r requirements/dev.in
     #   ipdb
