@@ -238,7 +238,7 @@ oauthlib==3.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-packaging==22.0
+packaging==23.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

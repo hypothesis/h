@@ -111,7 +111,7 @@ newrelic==8.5.0
     # via -r requirements/requirements.in
 oauthlib==3.2.2
     # via -r requirements/requirements.in
-packaging==22.0
+packaging==23.0
     # via -r requirements/requirements.in
 passlib==1.7.4
     # via -r requirements/requirements.in
