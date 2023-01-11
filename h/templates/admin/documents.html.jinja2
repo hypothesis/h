@@ -1,0 +1,76 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+{% set page_id = 'documents' %}
+{% set page_title = 'Documents' %}
+{% macro form(heading, action, submit_label) %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ heading }}</h3>
+    </div>
+
+    <div class="panel-body">
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}" />
+        {{ caller() }}
+        <div class="form-group">
+          <input
+            type="submit"
+            class="btn btn-default"
+            name="{{ action }}"
+            value="{{ submit_label }}"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+{% endmacro %}
+{% block content %}
+  <p>This page provides tools related to document metadata and URLs.</p>
+
+  {% call form(heading="Update annotation URLs", action="update_annotation_urls", submit_label="Update URLs") %}
+    <div class="form-group">
+      <p>
+        This will move annotations from one set of URLs to another. You must
+        provide a JSON object that maps old URLs to new URLs and document
+        metadata.
+      </p>
+      <p>
+        <b>This action cannot be undone</b>, so please review your URL mappings
+        and document metadata carefully.
+      </p>
+      <details>
+        <summary>Example JSON structure</summary>
+        <pre>
+{
+  "https://oldsite.com/page-a": {
+    "url": "https://newsite.com/page-a",
+    "document": { "title": "Welcome to page A" }
+  },
+  "https://oldsite.com/1234": {
+    "url": "https://newsite.com/articles/1234",
+    "document": { "title": "Welcome to page B" }
+  }
+}
+      </pre
+        >
+        <p>The keys of this object must exactly match the URL of the annotation(s) you want to move.</p>
+        <p>
+          The <code>document</code> field's structure is the same as in the
+          <a
+            href="https://h.readthedocs.io/en/latest/api-reference/#tag/annotations/paths/~1annotations/post"
+            >API for creating annotations</a
+          >.
+        </p>
+      </details>
+      <label for="url_mappings">URL updates:</label>
+      <textarea
+        id="url_mappings"
+        required
+        name="url_mappings"
+        style="display: block"
+        rows="10"
+        cols="80"
+        placeholder="URL mapping JSON..."
+      ></textarea>
+    </div>
+  {% endcall %}
+{% endblock %}

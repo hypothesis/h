@@ -42,6 +42,7 @@ def test_includeme():
         call("admin.features", "/admin/features"),
         call("admin.cohorts", "/admin/features/cohorts"),
         call("admin.cohorts_edit", "/admin/features/cohorts/{id}"),
+        call("admin.documents", "/admin/documents"),
         call("admin.groups", "/admin/groups"),
         call("admin.groups_create", "/admin/groups/new"),
         call(
