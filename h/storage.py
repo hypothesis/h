@@ -148,7 +148,14 @@ def create_annotation(request, data):
     return annotation
 
 
-def update_annotation(request, id_, data):
+def update_annotation(
+    request,
+    id_,
+    data,
+    update_timestamp=True,
+    reindex=False,
+    reindex_tag="storage.update_annotation",
+):  # pylint: disable=too-many-arguments
     """
     Update an existing annotation and its associated document metadata.
 
@@ -156,15 +163,30 @@ def update_annotation(request, id_, data):
     :param id_: the ID of the annotation to be updated, this is assumed to be a
         validated ID of an annotation that does already exists in the database
     :param data: the validated data with which to update the annotation
+    :param update_timestamp: Whether to update the last-edited timestamp of the
+        annotation.
+    :param reindex: Whether to force reindexing of the annotation in Elasticsearch.
+        If True, a job will be immediately queued to reindex the annotation.
+        If False, a job will be queued "soon" to check that the annotation in
+        Elasticsearch is up to date. See h.services.search_index.Queue.
+
+        This should be set to `False` if the caller intends to synchronously
+        trigger re-indexing of the annotation.
+    :param reindex_tag: Tag used by the reindexing job to identify the source of
+        the reindexing request.
     :returns: the updated annotation
     :rtype: h.models.Annotation
     """
     annotation = request.db.query(models.Annotation).get(id_)
     annotation.extra.update(data.pop("extra", {}))
-    annotation.updated = datetime.utcnow()
+
+    if update_timestamp:
+        annotation.updated = datetime.utcnow()
+
+    uri_changed = data.get("target_uri", annotation.target_uri) != annotation.target_uri
 
     # Pop the document so we don't set it directly
-    document = data.pop("document", None)
+    document = data.pop("document", {})
     for key, value in data.items():
         setattr(annotation, key, value)
 
@@ -180,18 +202,20 @@ def update_annotation(request, id_, data):
             "group: " + _("Invalid group specified for annotation")
         )
 
-    if document:
+    if document or uri_changed:
         annotation.document = update_document_metadata(
             request.db,
             annotation.target_uri,
-            document["document_meta_dicts"],
-            document["document_uri_dicts"],
+            document.get("document_meta_dicts", {}),
+            document.get("document_uri_dicts", {}),
             updated=annotation.updated,
         )
 
     request.find_service(  # pylint: disable=protected-access
         name="search_index"
-    )._queue.add_by_id(annotation.id, tag="storage.update_annotation", schedule_in=60)
+    )._queue.add_by_id(
+        annotation.id, tag=reindex_tag, schedule_in=0 if reindex else 60, force=reindex
+    )
 
     return annotation
 
