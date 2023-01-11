@@ -91,7 +91,7 @@ colander==1.8.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-coverage==7.0.4
+coverage==7.0.5
     # via -r requirements/tests.txt
 data-tasks==0.0.2
     # via
@@ -263,6 +263,11 @@ peppercorn==0.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
+pip==22.2.2
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   pip-tools
 pip-sync-faster==0.0.3
     # via
     #   -r requirements/functests.txt
@@ -411,6 +416,24 @@ sentry-sdk==0.17.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-pyramid-sentry
+setuptools==65.5.1
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   astroid
+    #   colander
+    #   gevent
+    #   gunicorn
+    #   jsonschema
+    #   pip-tools
+    #   plaster
+    #   pyramid
+    #   repoze-sendmail
+    #   supervisor
+    #   zope-deprecation
+    #   zope-event
+    #   zope-interface
+    #   zope-sqlalchemy
 six==1.15.0
     # via
     #   -r requirements/functests.txt
@@ -580,28 +603,3 @@ zope-sqlalchemy==1.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-
-# The following packages are considered to be unsafe in a requirements file:
-pip==22.2.2
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   pip-tools
-setuptools==65.5.1
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   astroid
-    #   colander
-    #   gevent
-    #   gunicorn
-    #   jsonschema
-    #   pip-tools
-    #   plaster
-    #   pyramid
-    #   repoze-sendmail
-    #   supervisor
-    #   zope-deprecation
-    #   zope-event
-    #   zope-interface
-    #   zope-sqlalchemy
