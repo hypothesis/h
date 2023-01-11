@@ -44,6 +44,12 @@ _ADMIN_MENU = [
         "route": "admin.badge",
     },
     {
+        "id": "documents",
+        "permission": Permission.AdminPage.HIGH_RISK,
+        "title": "Documents",
+        "route": "admin.documents",
+    },
+    {
         "id": "features",
         "permission": Permission.AdminPage.HIGH_RISK,
         "title": "Feature flags",

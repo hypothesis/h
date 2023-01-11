@@ -35,6 +35,7 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route("admin.features", "/admin/features")
     config.add_route("admin.cohorts", "/admin/features/cohorts")
     config.add_route("admin.cohorts_edit", "/admin/features/cohorts/{id}")
+    config.add_route("admin.documents", "/admin/documents")
     config.add_route("admin.groups", "/admin/groups")
     config.add_route("admin.groups_create", "/admin/groups/new")
     config.add_route(
