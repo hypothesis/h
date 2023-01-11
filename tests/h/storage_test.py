@@ -263,6 +263,18 @@ class TestUpdateAnnotation:
         assert result.created != datetime.utcnow.return_value
         assert result.updated == datetime.utcnow.return_value
 
+    def test_update_timestamps_disabled(
+        self, pyramid_request, annotation, annotation_data, datetime
+    ):
+        orig_updated = annotation.updated
+
+        result = storage.update_annotation(
+            pyramid_request, annotation.id, annotation_data, update_timestamp=False
+        )
+
+        assert orig_updated != datetime.utcnow.return_value
+        assert result.updated == orig_updated
+
     def test_it_validates_the_group_scope(
         self, pyramid_request, annotation, _validate_group_scope
     ):
@@ -314,6 +326,25 @@ class TestUpdateAnnotation:
         )
         assert result.document == update_document_metadata.return_value
 
+    def test_it_updates_document_if_uri_changed(
+        self, pyramid_request, annotation, update_document_metadata
+    ):
+        result = storage.update_annotation(
+            pyramid_request, annotation.id, {"target_uri": "https://new-url.com"}
+        )
+
+        update_document_metadata.assert_called_once_with(
+            pyramid_request.db, annotation.target_uri, {}, {}, updated=Any()
+        )
+        assert result.document == update_document_metadata.return_value
+
+    def test_it_does_not_update_document_if_no_document_or_uri_change(
+        self, pyramid_request, annotation, update_document_metadata
+    ):
+        storage.update_annotation(pyramid_request, annotation.id, {})
+
+        update_document_metadata.assert_not_called()
+
     def test_it_uses_the_updated_group_not_the_old_one(
         self, pyramid_request, annotation, group
     ):
@@ -327,13 +358,6 @@ class TestUpdateAnnotation:
         assert result.groupid == group.pubid
         assert result.group == group
 
-    def test_it_does_not_call_update_document_meta_if_no_document_in_data(
-        self, pyramid_request, annotation, update_document_metadata
-    ):
-        storage.update_annotation(pyramid_request, annotation.id, {})
-
-        update_document_metadata.assert_not_called()
-
     def test_it_raises_if_missing_group(self, pyramid_request, annotation):
         with pytest.raises(ValidationError):
             storage.update_annotation(
@@ -346,7 +370,25 @@ class TestUpdateAnnotation:
         storage.update_annotation(pyramid_request, annotation.id, {})
 
         search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
-            annotation.id, tag="storage.update_annotation", schedule_in=60
+            annotation.id, tag="storage.update_annotation", schedule_in=60, force=False
+        )
+
+    def test_it_uses_custom_reindex_tag(
+        self, annotation, pyramid_request, search_index
+    ):
+        storage.update_annotation(
+            pyramid_request, annotation.id, {}, reindex_tag="h.services.SomeService"
+        )
+
+        search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
+            annotation.id, tag="h.services.SomeService", schedule_in=60, force=False
+        )
+
+    def test_it_forces_reindexing(self, annotation, pyramid_request, search_index):
+        storage.update_annotation(pyramid_request, annotation.id, {}, reindex=True)
+
+        search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
+            annotation.id, tag=Any(), schedule_in=0, force=True
         )
 
     @pytest.fixture
