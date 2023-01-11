@@ -166,6 +166,8 @@ peppercorn==0.6
     # via
     #   -r requirements/requirements.txt
     #   deform
+pip==22.2.2
+    # via pip-tools
 pip-sync-faster==0.0.3
     # via -r requirements/functests.in
 pip-tools==6.12.1
@@ -258,6 +260,22 @@ sentry-sdk==0.17.6
     # via
     #   -r requirements/requirements.txt
     #   h-pyramid-sentry
+setuptools==65.5.1
+    # via
+    #   -r requirements/requirements.txt
+    #   colander
+    #   gevent
+    #   gunicorn
+    #   jsonschema
+    #   pip-tools
+    #   plaster
+    #   pyramid
+    #   repoze-sendmail
+    #   supervisor
+    #   zope-deprecation
+    #   zope-event
+    #   zope-interface
+    #   zope-sqlalchemy
 six==1.15.0
     # via
     #   -r requirements/requirements.txt
@@ -268,7 +286,7 @@ six==1.15.0
     #   python-dateutil
 soupsieve==2.2.1
     # via beautifulsoup4
-sqlalchemy==1.4.45
+sqlalchemy==1.4.46
     # via
     #   -r requirements/requirements.txt
     #   alembic
@@ -377,23 +395,3 @@ zope-interface==5.5.2
     #   zope-sqlalchemy
 zope-sqlalchemy==1.6
     # via -r requirements/requirements.txt
-
-# The following packages are considered to be unsafe in a requirements file:
-pip==22.2.2
-    # via pip-tools
-setuptools==65.5.1
-    # via
-    #   -r requirements/requirements.txt
-    #   colander
-    #   gevent
-    #   gunicorn
-    #   jsonschema
-    #   pip-tools
-    #   plaster
-    #   pyramid
-    #   repoze-sendmail
-    #   supervisor
-    #   zope-deprecation
-    #   zope-event
-    #   zope-interface
-    #   zope-sqlalchemy
