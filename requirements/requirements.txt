@@ -179,6 +179,20 @@ repoze-sendmail==4.3
     # via pyramid-mailer
 sentry-sdk==0.17.6
     # via h-pyramid-sentry
+setuptools==65.5.1
+    # via
+    #   colander
+    #   gevent
+    #   gunicorn
+    #   jsonschema
+    #   plaster
+    #   pyramid
+    #   repoze-sendmail
+    #   supervisor
+    #   zope-deprecation
+    #   zope-event
+    #   zope-interface
+    #   zope-sqlalchemy
 six==1.15.0
     # via
     #   bleach
@@ -186,7 +200,7 @@ six==1.15.0
     #   elasticsearch-dsl
     #   jsonschema
     #   python-dateutil
-sqlalchemy==1.4.45
+sqlalchemy==1.4.46
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -265,19 +279,3 @@ zope-interface==5.5.2
     #   zope-sqlalchemy
 zope-sqlalchemy==1.6
     # via -r requirements/requirements.in
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==65.5.1
-    # via
-    #   colander
-    #   gevent
-    #   gunicorn
-    #   jsonschema
-    #   plaster
-    #   pyramid
-    #   repoze-sendmail
-    #   supervisor
-    #   zope-deprecation
-    #   zope-event
-    #   zope-interface
-    #   zope-sqlalchemy
