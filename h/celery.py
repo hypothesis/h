@@ -34,7 +34,12 @@ celery.conf.update(
     task_acks_late=True,
     worker_disable_rate_limits=True,
     task_ignore_result=True,
-    imports=("h.tasks.cleanup", "h.tasks.indexer", "h.tasks.mailer"),
+    imports=(
+        "h.tasks.cleanup",
+        "h.tasks.indexer",
+        "h.tasks.mailer",
+        "h.tasks.url_migration",
+    ),
     task_routes={
         "h.tasks.indexer.add_annotation": "indexer",
         "h.tasks.indexer.add_annotations_between_times": "indexer",
