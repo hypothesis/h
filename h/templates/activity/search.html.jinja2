@@ -179,7 +179,7 @@
     {% trans %} {{title}} {% endtrans %}
     <span class="search-result-sidebar__subtitle-count">
       {{ users|length }}
-    <span>
+    </span>
   </h3>
   <ul>
     {% for user in users %}
@@ -207,7 +207,6 @@
       </li>
     {% endfor %}
     </ul>
-  </form>
 </section>
 {% endmacro %}
 
@@ -222,7 +221,7 @@
       <div class="search-result-sidebar__organization">
         <span class="search-result-sidebar__org-logo">
           {% if organization.logo %}
-            <img src="{{ organization.logo }}" alt="Organization logo" class='search-result-sidebar__logo'></img>
+            <img src="{{ organization.logo }}" alt="Organization logo" class='search-result-sidebar__logo'>
           {% endif %}
         </span>
         <span class="search-result-sidebar__org-name">
