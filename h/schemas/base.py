@@ -43,7 +43,7 @@ class CSRFSchema(colander.Schema):
 
 class JSONSchema:
     """
-    Validate data according to a Draft 4 JSON Schema.
+    Validate data according to a JSON Schema.
 
     Inherit from this class and override the `schema` class property with a
     valid JSON schema.
@@ -51,11 +51,20 @@ class JSONSchema:
 
     schema = {}
 
+    schema_version = 4
+    """The JSON Schema version used by this schema."""
+
     def __init__(self):
         format_checker = jsonschema.FormatChecker()
-        self.validator = jsonschema.Draft4Validator(
-            self.schema, format_checker=format_checker
-        )
+
+        if self.schema_version == 4:
+            validator_cls = jsonschema.Draft4Validator
+        elif self.schema_version == 7:
+            validator_cls = jsonschema.Draft7Validator
+        else:
+            raise ValueError("Unsupported schema version")
+
+        self.validator = validator_cls(self.schema, format_checker=format_checker)
 
     def validate(self, data):
         """
