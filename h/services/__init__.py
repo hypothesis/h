@@ -67,6 +67,9 @@ def includeme(config):  # pragma: no cover
     )
     config.register_service_factory(".search_index.factory", name="search_index")
     config.register_service_factory(".settings.settings_factory", name="settings")
+    config.register_service_factory(
+        ".url_migration.url_migration_factory", name="url_migration"
+    )
     config.register_service_factory(".user.user_service_factory", name="user")
     config.register_service_factory(
         ".user_unique.user_unique_factory", name="user_unique"
