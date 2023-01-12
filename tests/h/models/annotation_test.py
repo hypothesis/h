@@ -1,5 +1,8 @@
+from uuid import UUID
+
 import pytest
 
+from h.db.types import URLSafeUUID
 from h.models.annotation import Annotation
 
 
@@ -240,6 +243,11 @@ def test_is_hidden(factories, has_moderation):
     )
 
     assert annotation.is_hidden == has_moderation
+
+
+def test_uuid(factories):
+    annotation = factories.Annotation()
+    assert annotation.uuid == UUID(URLSafeUUID.url_safe_to_hex(annotation.id))
 
 
 @pytest.fixture

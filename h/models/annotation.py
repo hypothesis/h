@@ -1,4 +1,5 @@
 import datetime
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
@@ -135,6 +136,16 @@ class Annotation(Base):
         viewonly=True,
         uselist=True,
     )
+
+    @property
+    def uuid(self):
+        """
+        Return the UUID representation of the annotation's ID.
+
+        Annotation IDs are stored in the DB as a UUID but represented in the app
+        and API in a different format. This property returns the UUID version.
+        """
+        return UUID(types.URLSafeUUID.url_safe_to_hex(self.id))
 
     @hybrid_property
     def target_uri(self):
