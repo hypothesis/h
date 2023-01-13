@@ -127,7 +127,7 @@ def handle_annotation_event(message, sockets, request, session):
 
     for socket in matching_sockets:
         # Don't send notifications back to the person who sent them
-        if message["src_client_id"] == socket.client_id:
+        if socket.client_id and message.get("src_client_id") == socket.client_id:
             continue
 
         # Only send NIPSA'd annotations to the author
