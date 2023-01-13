@@ -41,7 +41,7 @@ click-repl==0.2.0
     # via celery
 colander==1.8.2
     # via deform
-data-tasks==0.0.2
+data-tasks==0.0.3
     # via -r requirements/requirements.in
 deform==2.0.15
     # via -r requirements/requirements.in
@@ -130,7 +130,9 @@ prompt-toolkit==3.0.18
 psycogreen==1.0.2
     # via -r requirements/requirements.in
 psycopg2==2.9.5
-    # via -r requirements/requirements.in
+    # via
+    #   -r requirements/requirements.in
+    #   data-tasks
 pycparser==2.20
     # via cffi
 pycryptodomex==3.16.0
