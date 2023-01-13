@@ -93,7 +93,7 @@ colander==1.8.2
     #   deform
 coverage==7.0.5
     # via -r requirements/tests.txt
-data-tasks==0.0.2
+data-tasks==0.0.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -310,6 +310,7 @@ psycopg2==2.9.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   data-tasks
 py==1.10.0
     # via
     #   -r requirements/functests.txt
