@@ -24,41 +24,54 @@ def _validate_wildcard_uri(node, value):
             )
 
 
+DOCUMENT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "dc": {
+            "type": "object",
+            "properties": {
+                "identifier": {"type": "array", "items": {"type": "string"}}
+            },
+        },
+        "highwire": {
+            "type": "object",
+            "properties": {
+                "doi": {"type": "array", "items": {"type": "string"}},
+                "pdf_url": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+        "link": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "href": {"type": "string"},
+                    "type": {"type": "string"},
+                },
+                "required": ["href"],
+            },
+        },
+    },
+}
+
+
+SELECTOR_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {"type": {"type": "string"}},
+        "required": ["type"],
+    },
+}
+
+
 class AnnotationSchema(JSONSchema):
     """Validate an annotation object."""
 
     schema = {
         "type": "object",
         "properties": {
-            "document": {
-                "type": "object",
-                "properties": {
-                    "dc": {
-                        "type": "object",
-                        "properties": {
-                            "identifier": {"type": "array", "items": {"type": "string"}}
-                        },
-                    },
-                    "highwire": {
-                        "type": "object",
-                        "properties": {
-                            "doi": {"type": "array", "items": {"type": "string"}},
-                            "pdf_url": {"type": "array", "items": {"type": "string"}},
-                        },
-                    },
-                    "link": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "href": {"type": "string"},
-                                "type": {"type": "string"},
-                            },
-                            "required": ["href"],
-                        },
-                    },
-                },
-            },
+            "document": copy.deepcopy(DOCUMENT_SCHEMA),
             "group": {"type": "string"},
             "permissions": {
                 "title": "Permissions",
@@ -78,20 +91,35 @@ class AnnotationSchema(JSONSchema):
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "properties": {
-                        "selector": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {"type": {"type": "string"}},
-                                "required": ["type"],
-                            },
-                        }
-                    },
+                    "properties": {"selector": copy.deepcopy(SELECTOR_SCHEMA)},
                 },
             },
             "text": {"type": "string"},
             "uri": {"type": "string"},
+        },
+    }
+
+
+class URLMigrationSchema(JSONSchema):
+    """Validate a URL migration request."""
+
+    schema_version = 7  # Required for `propertyNames`
+
+    schema = {
+        "type": "object",
+        # The restriction to HTTP(S) URLs is just to help catch mistakes
+        # in the input. We could relax this constraint if needed.
+        "propertyNames": {"pattern": "^https?:"},
+        "patternProperties": {
+            "": {
+                "type": "object",
+                "required": ["url"],
+                "properties": {
+                    "url": {"type": "string", "pattern": "^https?:"},
+                    "document": copy.deepcopy(DOCUMENT_SCHEMA),
+                    "selectors": copy.deepcopy(SELECTOR_SCHEMA),
+                },
+            }
         },
     }
 

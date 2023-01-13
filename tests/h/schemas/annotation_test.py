@@ -9,6 +9,7 @@ from h.schemas.annotation import (
     CreateAnnotationSchema,
     SearchParamsSchema,
     UpdateAnnotationSchema,
+    URLMigrationSchema,
 )
 from h.schemas.util import validate_query_params
 from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
@@ -737,6 +738,44 @@ class TestSearchParamsSchema:
     @pytest.fixture
     def schema(self):
         return SearchParamsSchema()
+
+
+class TestURLMigrationSchema:
+    def test_it_validates_valid_data(self, validate):
+        validate(
+            {
+                "https://example.com": {
+                    "url": "https://example.org",
+                    "document": {"title": "The new Example.com"},
+                    "selector": [{"type": "PageSelector", "index": 2, "label": "3"}],
+                }
+            }
+        )
+
+    def test_it_accepts_minimal_data(self, validate):
+        validate(
+            {
+                "https://example.com": {
+                    "url": "https://example.org",
+                }
+            }
+        )
+
+    def test_it_raises_for_invalid_source_url(self, validate):
+        with pytest.raises(ValidationError, match="not-a-url.*does not match"):
+            validate({"not-a-url": {"url": "https://foobar.org"}})
+
+    def test_it_raises_for_invalid_dest_url(self, validate):
+        with pytest.raises(ValidationError, match="also-not-a-url.*does not match"):
+            validate({"https://example.com": {"url": "also-not-a-url"}})
+
+    def test_it_raises_if_new_url_missing(self, validate):
+        with pytest.raises(ValidationError, match="url.*required"):
+            validate({"https://example.com": {}})
+
+    @pytest.fixture
+    def validate(self):
+        return URLMigrationSchema().validate
 
 
 @pytest.fixture
