@@ -52,6 +52,10 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
     import h.models  # pylint: disable=unused-import
 
     if should_drop:
+        # SQLAlchemy doesn't know about the report schema, and will end up
+        # trying to drop tables without cascade that have dependent tables
+        # in the report schema and failing. Clear it out first.
+        engine.execute("DROP SCHEMA IF EXISTS report CASCADE")
         base.metadata.reflect(engine)
         base.metadata.drop_all(engine)
     if should_create:
