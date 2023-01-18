@@ -168,7 +168,7 @@ class CreateAnnotationSchema:
         if new_appstruct["references"] and "groupid" in new_appstruct:
             del new_appstruct["groupid"]
 
-        new_appstruct["document"] = _document(
+        new_appstruct["document"] = transform_document(
             appstruct.pop("document", {}), new_appstruct["target_uri"]
         )
 
@@ -222,7 +222,7 @@ class UpdateAnnotationSchema:
                 new_appstruct[key] = appstruct.pop(key)
 
         if "document" in appstruct:
-            new_appstruct["document"] = _document(
+            new_appstruct["document"] = transform_document(
                 appstruct.pop("document"),
                 new_appstruct.get("target_uri", self.existing_target_uri),
             )
@@ -232,7 +232,7 @@ class UpdateAnnotationSchema:
         return new_appstruct
 
 
-def _document(document, claimant):
+def transform_document(document, claimant):
     """
     Return document meta and document URI data from the given document dict.
 

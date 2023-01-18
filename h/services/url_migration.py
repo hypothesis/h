@@ -6,7 +6,7 @@ from sqlalchemy.orm import load_only
 
 import h.storage
 from h.models import Annotation, DocumentURI
-from h.schemas.annotation import _document as transform_document
+from h.schemas.annotation import transform_document
 from h.tasks.url_migration import move_annotations
 from h.util.uri import normalize
 
