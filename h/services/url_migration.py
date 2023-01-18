@@ -21,12 +21,12 @@ class URLMigrationService:
 
     def move_annotations(self, annotation_ids, current_uri, new_url_info):
         """
-        Migrate a set of annotations from one URL to another.
-
-        This command is invoked as a Celery task by `update_annotation_urls`.
+        Migrate a set of annotations to a new URL.
 
         :param annotation_ids: IDs of annotations to migrate
         :param current_uri: The expected `target_uri` of each annotation.
+            This is used to catch cases where the URI changes in between the
+            move being scheduled and later executed (eg. via a Celery task).
         :param new_url_info: URL and document metadata to migrate annotations to.
             This is an entry from the mappings defined by the `URLMigrationSchema`
             schema.
