@@ -67,7 +67,10 @@ class TestURLMigrationService:
         self, db_session, factories, pyramid_request, update_annotation
     ):
         ann = factories.Annotation(target_uri="https://example.com")
-        ann.target_selectors = [{"type": "TextQuoteSelector", "exact": "foobar"}]
+        ann.target_selectors = [
+            {"type": "TextQuoteSelector", "exact": "foobar"},
+            {"type": "EPUBContentSelector", "cfi": "/2/4"},
+        ]
         db_session.flush()
 
         svc = URLMigrationService(pyramid_request)
@@ -76,7 +79,12 @@ class TestURLMigrationService:
             "https://example.com",
             {
                 "url": "https://example.org",
-                "selectors": [{"type": "PageSelector", "label": "3"}],
+                "selectors": [
+                    # New selector that is not in existing selectors. This should be added.
+                    {"type": "PageSelector", "label": "3"},
+                    # Selector that matches an existing selector. This should not be duplicated.
+                    {"type": "EPUBContentSelector", "cfi": "/2/4"},
+                ],
             },
         )
 
@@ -87,6 +95,7 @@ class TestURLMigrationService:
                 "target_uri": "https://example.org",
                 "target_selectors": [
                     {"type": "TextQuoteSelector", "exact": "foobar"},
+                    {"type": "EPUBContentSelector", "cfi": "/2/4"},
                     {"type": "PageSelector", "label": "3"},
                 ],
             },
@@ -162,10 +171,17 @@ class TestURLMigrationService:
         )
         pyramid_request.tm.commit.assert_called_once()
 
+        moved_ann_id = update_annotation.call_args[0][1]
+        remaining_ann_ids = [
+            a.id
+            for a in anns
+            if a.target_uri == "https://example.com" and a.id != moved_ann_id
+        ]
+
         # Remaining matching annotations should be moved in separate tasks.
         assert move_annotations_task.delay.call_count == 1
         move_annotations_task.delay.assert_called_with(
-            [anns[1].id, anns[3].id],
+            Any.list.containing(remaining_ann_ids).only(),
             "https://example.com",
             {"url": "https://example.org"},
         )
