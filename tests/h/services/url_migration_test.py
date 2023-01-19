@@ -60,7 +60,6 @@ class TestURLMigrationService:
                 ann.id,
                 {"target_uri": "https://example.org"},
                 update_timestamp=False,
-                reindex=True,
                 reindex_tag="URLMigrationService.move_annotations",
             )
 
@@ -92,7 +91,6 @@ class TestURLMigrationService:
                 ],
             },
             update_timestamp=False,
-            reindex=True,
             reindex_tag="URLMigrationService.move_annotations",
         )
 
@@ -128,7 +126,6 @@ class TestURLMigrationService:
                 "document": transform_document.return_value,
             },
             update_timestamp=False,
-            reindex=True,
             reindex_tag="URLMigrationService.move_annotations",
         )
 
@@ -161,7 +158,6 @@ class TestURLMigrationService:
             Any.of([a.id for a in anns]),
             {"target_uri": "https://example.org"},
             update_timestamp=False,
-            reindex=True,
             reindex_tag="URLMigrationService.move_annotations",
         )
         pyramid_request.tm.commit.assert_called_once()

@@ -384,11 +384,15 @@ class TestUpdateAnnotation:
             annotation.id, tag="h.services.SomeService", schedule_in=60, force=False
         )
 
-    def test_it_forces_reindexing(self, annotation, pyramid_request, search_index):
-        storage.update_annotation(pyramid_request, annotation.id, {}, reindex=True)
+    def test_it_forces_reindexing_if_update_timestamp_is_false(
+        self, annotation, pyramid_request, search_index
+    ):
+        storage.update_annotation(
+            pyramid_request, annotation.id, {}, update_timestamp=False
+        )
 
         search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
-            annotation.id, tag=Any(), schedule_in=0, force=True
+            annotation.id, tag=Any(), schedule_in=60, force=True
         )
 
     @pytest.fixture
