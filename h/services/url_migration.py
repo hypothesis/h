@@ -126,19 +126,15 @@ class URLMigrationService:
         # Schedule async tasks to move the remaining annotations.
         ann_ids = ann_ids[1:]
         anns_per_batch = 100
-        batch_count = 0
         for batch in chunks(iter(ann_ids), anns_per_batch):
             move_annotations.delay(batch, url, new_url_info)
-            batch_count += 1
 
-        if len(ann_ids) > 0:
-            log.info(
-                "Scheduled migration of %s annotations from %s to %s in %s batches",
-                len(ann_ids),
-                url,
-                new_url_info["url"],
-                batch_count,
-            )
+        log.info(
+            "Migrating %s annotations from %s to %s",
+            len(ann_ids) + 1,
+            url,
+            new_url_info["url"],
+        )
 
 
 def url_migration_factory(_context, request):
