@@ -153,7 +153,6 @@ def update_annotation(
     id_,
     data,
     update_timestamp=True,
-    reindex=False,
     reindex_tag="storage.update_annotation",
 ):  # pylint: disable=too-many-arguments
     """
@@ -165,13 +164,6 @@ def update_annotation(
     :param data: the validated data with which to update the annotation
     :param update_timestamp: Whether to update the last-edited timestamp of the
         annotation.
-    :param reindex: Whether to force reindexing of the annotation in Elasticsearch.
-        If True, a job will be immediately queued to reindex the annotation.
-        If False, a job will be queued "soon" to check that the annotation in
-        Elasticsearch is up to date. See h.services.search_index.Queue.
-
-        This should be set to `False` if the caller intends to synchronously
-        trigger re-indexing of the annotation.
     :param reindex_tag: Tag used by the reindexing job to identify the source of
         the reindexing request.
     :returns: the updated annotation
@@ -211,10 +203,15 @@ def update_annotation(
             updated=annotation.updated,
         )
 
+    # The search index service by default does not reindex if the existing ES
+    # entry's timestamp matches the DB timestamp. If we're not changing this
+    # timestamp, we need to force reindexing.
+    force_reindex = not update_timestamp
+
     request.find_service(  # pylint: disable=protected-access
         name="search_index"
     )._queue.add_by_id(
-        annotation.id, tag=reindex_tag, schedule_in=0 if reindex else 60, force=reindex
+        annotation.id, tag=reindex_tag, schedule_in=60, force=force_reindex
     )
 
     return annotation

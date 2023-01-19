@@ -78,8 +78,6 @@ class URLMigrationService:
                 ann_update_data,
                 # Don't update "edited" timestamp on annotation cards.
                 update_timestamp=False,
-                # Queue job to reindex annotation ASAP.
-                reindex=True,
                 reindex_tag="URLMigrationService.move_annotations",
             )
 
