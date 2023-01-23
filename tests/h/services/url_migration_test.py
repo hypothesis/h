@@ -8,9 +8,8 @@ from h.services.url_migration import URLMigrationService
 
 class TestURLMigrationService:
     def test_move_annotations_does_nothing_if_annotation_was_deleted(
-        self, pyramid_request, update_annotation
+        self, update_annotation, svc
     ):
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations(
             ["id-that-does-not-exist"],
             "https://somesite.com",
@@ -19,12 +18,11 @@ class TestURLMigrationService:
         update_annotation.assert_not_called()
 
     def test_move_annotations_does_nothing_if_url_no_longer_matches(
-        self, db_session, factories, pyramid_request, update_annotation
+        self, db_session, factories, update_annotation, svc
     ):
         ann = factories.Annotation(target_uri="https://example.com")
         db_session.flush()
 
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations(
             [ann.id],
             # Use a different URL to simulate the case where the annotation's
@@ -38,7 +36,7 @@ class TestURLMigrationService:
         update_annotation.assert_not_called()
 
     def test_move_annotations_updates_urls(
-        self, db_session, factories, pyramid_request, update_annotation
+        self, db_session, factories, pyramid_request, update_annotation, svc
     ):
         anns = [
             factories.Annotation(target_uri="https://example.com"),
@@ -46,7 +44,6 @@ class TestURLMigrationService:
         ]
         db_session.flush()
 
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations(
             [anns[0].id, anns[1].id],
             "https://example.com",
@@ -64,7 +61,7 @@ class TestURLMigrationService:
             )
 
     def test_move_annotations_updates_selectors(
-        self, db_session, factories, pyramid_request, update_annotation
+        self, db_session, factories, pyramid_request, update_annotation, svc
     ):
         ann = factories.Annotation(target_uri="https://example.com")
         ann.target_selectors = [
@@ -73,7 +70,6 @@ class TestURLMigrationService:
         ]
         db_session.flush()
 
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations(
             [ann.id],
             "https://example.com",
@@ -88,7 +84,7 @@ class TestURLMigrationService:
             },
         )
 
-        update_annotation.assert_called_with(
+        update_annotation.assert_called_once_with(
             pyramid_request,
             ann.id,
             {
@@ -110,11 +106,11 @@ class TestURLMigrationService:
         pyramid_request,
         update_annotation,
         transform_document,
+        svc,
     ):
         ann = factories.Annotation(target_uri="https://example.com")
         db_session.flush()
 
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations(
             [ann.id],
             "https://example.com",
@@ -127,7 +123,7 @@ class TestURLMigrationService:
         transform_document.assert_called_with(
             {"title": "The new example.com"}, "https://example.org"
         )
-        update_annotation.assert_called_with(
+        update_annotation.assert_called_once_with(
             pyramid_request,
             ann.id,
             {
@@ -145,6 +141,7 @@ class TestURLMigrationService:
         pyramid_request,
         update_annotation,
         move_annotations_task,
+        svc,
     ):
         anns = [
             factories.Annotation(target_uri="https://example.com"),
@@ -154,7 +151,6 @@ class TestURLMigrationService:
         ]
         db_session.flush()
 
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations_by_url(
             "https://example.com",
             {"url": "https://example.org"},
@@ -180,19 +176,14 @@ class TestURLMigrationService:
 
         # Remaining matching annotations should be moved in separate tasks.
         assert move_annotations_task.delay.call_count == 1
-        move_annotations_task.delay.assert_called_with(
+        move_annotations_task.delay.assert_called_once_with(
             Any.list.containing(remaining_ann_ids).only(),
             "https://example.com",
             {"url": "https://example.org"},
         )
 
     def test_move_annotations_by_url_handles_no_matches(
-        self,
-        db_session,
-        factories,
-        pyramid_request,
-        update_annotation,
-        move_annotations_task,
+        self, db_session, factories, update_annotation, move_annotations_task, svc
     ):
         # Make sure there are some non-matching annotations in the DB.
         factories.Annotation(target_uri="https://foo.com")
@@ -200,7 +191,6 @@ class TestURLMigrationService:
         factories.Annotation(target_uri="https://baz.com")
         db_session.flush()
 
-        svc = URLMigrationService(pyramid_request)
         svc.move_annotations_by_url(
             "https://example.com",
             {"url": "https://example.org"},
@@ -209,15 +199,15 @@ class TestURLMigrationService:
         update_annotation.assert_not_called()
         move_annotations_task.delay.assert_not_called()
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def transform_document(self, patch):
         return patch("h.services.url_migration.transform_document")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def update_annotation(self, patch):
         return patch("h.storage.update_annotation")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def move_annotations_task(self, patch):
         return patch("h.services.url_migration.move_annotations")
 
@@ -225,3 +215,7 @@ class TestURLMigrationService:
     def pyramid_request(self, pyramid_request):
         pyramid_request.tm = Mock(spec_set=["commit"])
         return pyramid_request
+
+    @pytest.fixture
+    def svc(self, pyramid_request):
+        return URLMigrationService(pyramid_request)
