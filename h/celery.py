@@ -32,7 +32,6 @@ celery.conf.update(
     # want for all of our queues, but it makes the failure-mode behaviour of
     # Celery the same as our old NSQ worker:
     task_acks_late=True,
-    worker_disable_rate_limits=True,
     task_ignore_result=True,
     imports=(
         "h.tasks.cleanup",
