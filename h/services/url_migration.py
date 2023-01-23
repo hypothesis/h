@@ -125,7 +125,7 @@ class URLMigrationService:
 
         # Schedule async tasks to move the remaining annotations.
         ann_ids = ann_ids[1:]
-        anns_per_batch = 100
+        anns_per_batch = 50
         for batch in chunks(iter(ann_ids), anns_per_batch):
             move_annotations.delay(batch, url, new_url_info)
 
