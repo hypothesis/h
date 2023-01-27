@@ -13,7 +13,7 @@ amqp==5.0.9
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   kombu
-astroid==2.11.6
+astroid==2.13.3
     # via pylint
 attrs==20.2.0
     # via
@@ -333,7 +333,7 @@ pyjwt==2.6.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pylint==2.14.5
+pylint==2.15.10
     # via -r requirements/lint.in
 pyparsing==3.0.9
     # via
@@ -421,7 +421,6 @@ setuptools==65.5.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   astroid
     #   colander
     #   gevent
     #   gunicorn
@@ -506,7 +505,7 @@ translationstring==1.4
     #   colander
     #   deform
     #   pyramid
-typing-extensions==3.10.0.2
+typing-extensions==4.4.0
     # via
     #   astroid
     #   pylint
