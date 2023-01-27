@@ -74,7 +74,7 @@ elasticsearch==6.8.2
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
     # via -r requirements/requirements.txt
-exceptiongroup==1.0.0rc8
+exceptiongroup==1.1.0
     # via hypothesis
 factory-boy==3.2.1
     # via -r requirements/tests.in
@@ -101,7 +101,7 @@ hupper==1.10.2
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-hypothesis==6.56.3
+hypothesis==6.65.2
     # via -r requirements/tests.in
 importlib-metadata==4.8.1
     # via
