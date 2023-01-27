@@ -327,7 +327,7 @@ pycryptodomex==3.16.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pydocstyle==6.1.1
+pydocstyle==6.3.0
     # via -r requirements/lint.in
 pyjwt==2.6.0
     # via
@@ -444,7 +444,7 @@ six==1.15.0
     #   elasticsearch-dsl
     #   jsonschema
     #   python-dateutil
-snowballstemmer==2.1.0
+snowballstemmer==2.2.0
     # via pydocstyle
 sortedcontainers==2.3.0
     # via
