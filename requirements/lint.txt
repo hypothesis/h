@@ -112,7 +112,7 @@ elasticsearch-dsl==6.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-exceptiongroup==1.0.0rc8
+exceptiongroup==1.1.0
     # via
     #   -r requirements/tests.txt
     #   hypothesis
@@ -160,7 +160,7 @@ hupper==1.10.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.56.3
+hypothesis==6.65.2
     # via -r requirements/tests.txt
 importlib-metadata==4.8.1
     # via
