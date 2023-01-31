@@ -114,8 +114,10 @@ elasticsearch-dsl==6.4.0
     #   -r requirements/tests.txt
 exceptiongroup==1.1.0
     # via
+    #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   hypothesis
+    #   pytest
 factory-boy==3.2.1
     # via
     #   -r requirements/functests.txt
@@ -311,11 +313,6 @@ psycopg2==2.9.5
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   data-tasks
-py==1.10.0
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   pytest
 pycodestyle==2.10.0
     # via -r requirements/lint.in
 pycparser==2.20
@@ -385,7 +382,7 @@ pyrsistent==0.17.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-pytest==7.1.3
+pytest==7.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
