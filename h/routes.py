@@ -181,6 +181,9 @@ def includeme(config):  # pylint: disable=too-many-statements
     # Client
     config.add_route("sidebar_app", "/app.html")
     config.add_route("notebook_app", "/notebook")
+    # This URL is temporary. Pending discussions to choose on the final one
+    # See also https://github.com/hypothesis/h/issues/7820
+    config.add_route("profile_app", "/user-profile")
     config.add_route("embed", "/embed.js")
 
     # Feeds
