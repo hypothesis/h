@@ -265,17 +265,12 @@ peppercorn==0.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-pip==22.2.2
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   pip-tools
 pip-sync-faster==0.0.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/lint.in
     #   -r requirements/tests.txt
-pip-tools==6.12.1
+pip-tools==6.12.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/lint.in
@@ -414,23 +409,6 @@ sentry-sdk==0.17.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-pyramid-sentry
-setuptools==65.5.1
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   colander
-    #   gevent
-    #   gunicorn
-    #   jsonschema
-    #   pip-tools
-    #   plaster
-    #   pyramid
-    #   repoze-sendmail
-    #   supervisor
-    #   zope-deprecation
-    #   zope-event
-    #   zope-interface
-    #   zope-sqlalchemy
 six==1.15.0
     # via
     #   -r requirements/functests.txt
