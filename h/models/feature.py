@@ -15,6 +15,7 @@ FEATURES = {
     "html_side_by_side": "Enable side-by-side mode for web pages in the client",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
+    "client_user_profile": "Enable client-side user profile and preferences management",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
