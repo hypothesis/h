@@ -24,18 +24,14 @@ pathspec==0.9.0
     # via black
 pep517==0.13.0
     # via build
-pip==22.2.2
-    # via pip-tools
 pip-sync-faster==0.0.3
     # via -r requirements/checkformatting.in
-pip-tools==6.12.1
+pip-tools==6.12.2
     # via
     #   -r requirements/checkformatting.in
     #   pip-sync-faster
 platformdirs==2.5.2
     # via black
-setuptools==65.5.1
-    # via pip-tools
 tomli==2.0.1
     # via
     #   black
