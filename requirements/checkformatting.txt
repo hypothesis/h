@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/checkformatting.in
 #
-black==22.12.0
+black==23.1.0
     # via -r requirements/checkformatting.in
 build==0.8.0
     # via pip-tools
@@ -19,7 +19,9 @@ isort==5.12.0
 mypy-extensions==0.4.3
     # via black
 packaging==23.0
-    # via build
+    # via
+    #   black
+    #   build
 pathspec==0.9.0
     # via black
 pep517==0.13.0
