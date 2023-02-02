@@ -18,7 +18,6 @@ def _login_redirect_url(request):
 @view_defaults(route_name="signup")
 class SignupController:
     def __init__(self, request):
-
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
         self.form = request.create_form(

@@ -62,7 +62,6 @@ def upgrade():
     num_without_conflicting_doc_uris = 0
 
     for doc_uri in document_uris:
-
         any_trailing_hash_found = False
 
         if doc_uri.claimant.endswith("#"):

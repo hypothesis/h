@@ -56,7 +56,6 @@ class TestEmbedRedirect:
 
 @pytest.fixture
 def pyramid_settings(pyramid_settings):
-
     pyramid_settings.update(
         {
             "h.client_oauth_id": "test-client-id",

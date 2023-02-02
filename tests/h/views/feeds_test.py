@@ -95,7 +95,6 @@ def search(patch):
 
 @pytest.fixture
 def search_run(search):
-
     result = SearchResult(
         total=123, annotation_ids=["foo", "bar"], reply_ids=[], aggregations={}
     )

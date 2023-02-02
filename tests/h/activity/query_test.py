@@ -202,7 +202,6 @@ class TestCheckURL:
     "links",
 )
 class TestExecute:
-
     PAGE_SIZE = 23
 
     def test_it_creates_a_search_query(self, pyramid_request, Search):

@@ -423,7 +423,6 @@ class TestRemoveMember:
     def test_it_removes_current_user(
         self, context, shorthand_request, authenticated_userid, group_members_service
     ):
-
         views.remove_member(context, shorthand_request)
 
         group_members_service.member_leave.assert_called_once_with(

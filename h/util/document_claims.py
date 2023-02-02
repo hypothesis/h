@@ -143,7 +143,6 @@ def document_uris_from_links(link_dicts, claimant):
     """
     document_uris = []
     for link in link_dicts:
-
         # In Py 3, `dict.keys()` does not return a list and cannot be compared
         # with a list, so explicitly convert the result.
         link_keys = list(link.keys())

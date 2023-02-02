@@ -217,7 +217,6 @@ class TestGroupSearchController:
     def test_search_just_returns_search_result_if_user_not_a_member_of_group(  # pylint:disable=unused-argument
         self, controller, test_group, test_user, search
     ):
-
         assert controller.search() == search.return_value
 
     @pytest.mark.parametrize(

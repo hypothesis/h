@@ -58,7 +58,6 @@ class CreateAuthClientSchema(CSRFSchema):
 
 
 class EditAuthClientSchema(CreateAuthClientSchema):
-
     # Read-only fields, listed in the form so that the user can easily copy and
     # paste them into their client's configuration.
 

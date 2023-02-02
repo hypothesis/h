@@ -16,7 +16,6 @@ class TestPutFlag:
     def test_it_returns_http_204_if_user_allowed_to_flag_private_annotation(
         self, app, private_annotation, user_with_token
     ):
-
         _, token = user_with_token
         headers = {"Authorization": f"Bearer {token.value}"}
 
@@ -28,7 +27,6 @@ class TestPutFlag:
     def test_it_returns_http_404_if_user_not_allowed_to_flag_private_annotation(
         self, app, unreadable_annotation, user_with_token
     ):
-
         _, token = user_with_token
         headers = {"Authorization": f"Bearer {token.value}"}
 
@@ -42,7 +40,6 @@ class TestPutFlag:
         assert res.status_code == 404
 
     def test_it_returns_http_404_if_unauthenticated(self, app, annotation):
-
         res = app.put(f"/api/annotations/{annotation.id}/flag", expect_errors=True)
 
         assert res.status_code == 404

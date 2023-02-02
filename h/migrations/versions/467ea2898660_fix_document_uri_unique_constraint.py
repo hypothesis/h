@@ -140,7 +140,6 @@ def delete_conflicting_document_uris(session):
     n = 0
 
     for doc_uri in doc_uris:
-
         conflicting_doc_uris = session.query(DocumentURI).filter(
             DocumentURI.claimant_normalized == doc_uri.claimant_normalized,
             DocumentURI.uri_normalized == doc_uri.uri_normalized,

@@ -7,7 +7,6 @@ from h.schemas.util import validate_query_params
 
 
 class QueryParamSchema(colander.Schema):
-
     int_field = colander.SchemaNode(colander.Integer(), missing=0)
 
     string_field = colander.SchemaNode(colander.String(), missing=None)

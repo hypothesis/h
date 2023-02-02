@@ -111,7 +111,6 @@ def _normalize_document_meta_window(session, window):
         if existing.count() > 0:
             session.delete(docmeta)
         else:
-
             docmeta._claimant_normalized = (  # pylint: disable=protected-access
                 uri.normalize(
                     docmeta.claimant,

@@ -137,7 +137,6 @@ class TestAdminCommand:
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
         self, cli, cliconfig, non_admin_user, db_session
     ):
-
         result = cli.invoke(
             user_cli.admin,
             ["--authority", "foo.com", non_admin_user.username],
@@ -209,7 +208,6 @@ class TestPasswordCommand:
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
         self, cli, cliconfig, user, db_session, password_service
     ):
-
         result = cli.invoke(
             user_cli.password,
             ["--authority", "foo.com", user.username, "--password", "newpass"],
@@ -261,7 +259,6 @@ class TestDeleteUserCommand:
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
         self, cli, cliconfig, user, db_session
     ):
-
         result = cli.invoke(
             user_cli.delete, ["--authority", "foo.com", user.username], obj=cliconfig
         )

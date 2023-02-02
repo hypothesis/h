@@ -152,7 +152,6 @@ class TestPaginate:
 
 @pytest.mark.usefixtures("paginate")
 class TestPaginateQuery:
-
     # The current page that will be returned by paginate().
     CURRENT_PAGE = 3
 
