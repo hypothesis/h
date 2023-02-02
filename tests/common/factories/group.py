@@ -33,7 +33,6 @@ class Group(ModelFactory):
 
 
 class OpenGroup(Group):
-
     name = factory.Sequence(lambda n: f"Open Group {n}")
 
     joinable_by = None

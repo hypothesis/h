@@ -198,7 +198,6 @@ class TestReadJSONLD:
         pyramid_request,
         links_service,
     ):
-
         presenter = mock.Mock()
         AnnotationJSONLDPresenter.return_value = presenter
         AnnotationJSONLDPresenter.CONTEXT_URL = "http://foo.com/context.jsonld"

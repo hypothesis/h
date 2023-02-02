@@ -33,7 +33,6 @@ def upgrade():
     changed = []
     to_delete = []
     for document_uri in session.query(DocumentURI):
-
         stripped_uri = document_uri.uri.strip()
         if not stripped_uri:
             to_delete.append(document_uri)

@@ -158,7 +158,6 @@ class TestHandleAnnotationEvent:
         socket,
         db_session,
     ):
-
         handle_annotation_event(sockets=[socket], session=db_session)
 
         SocketFilter.matching.assert_called_once_with(

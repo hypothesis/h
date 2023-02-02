@@ -14,7 +14,6 @@ from h.views.api.decorators.client_errors import (
 
 class TestUnauthorizedToNotFound:
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
-
         unauthorized_to_not_found(testview)(None, pyramid_request)
 
         assert testview.called

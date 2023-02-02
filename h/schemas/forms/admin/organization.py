@@ -38,7 +38,6 @@ def validate_logo(node, value):
 
 
 class OrganizationSchema(CSRFSchema):
-
     authority = colander.SchemaNode(colander.String(), title=_("Authority"))
 
     name = colander.SchemaNode(

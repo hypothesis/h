@@ -33,7 +33,6 @@ class TestFeatureRequestProperty:
 
     @pytest.fixture
     def pyramid_config(self, pyramid_config, pyramid_request):
-
         pyramid_config.add_request_method(
             FeatureRequestProperty, name="feature", reify=True
         )

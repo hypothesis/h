@@ -137,7 +137,6 @@ class TestPublisher:
 
 class TestGetExchange:
     def test_returns_the_exchange(self):
-
         exchange = realtime.get_exchange()
         assert isinstance(exchange, kombu.Exchange)
 

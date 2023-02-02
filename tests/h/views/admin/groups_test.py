@@ -275,7 +275,6 @@ class TestGroupEditViews:
         group,
         GroupScope,
     ):
-
         fetched_user = factories.User()
         user_service.fetch.return_value = fetched_user
         updated_org = factories.Organization()

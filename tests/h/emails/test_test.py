@@ -23,7 +23,6 @@ class TestGenerate:
     def test_appropriate_return_values(
         self, pyramid_request, html_renderer, text_renderer
     ):
-
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 

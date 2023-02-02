@@ -191,7 +191,6 @@ class TestRemoveMember:
     def test_it_removes_authed_user_from_group(
         self, app, group, group_member_with_token
     ):
-
         group_member, token = group_member_with_token
         headers = {"Authorization": "Bearer {}".format(token.value)}
 

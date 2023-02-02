@@ -28,7 +28,6 @@ class TestPutHide:
         assert res.status_code == 404
 
     def test_it_returns_http_404_if_no_authn(self, app, group_annotation):
-
         res = app.put(
             f"/api/annotations/{group_annotation.id}/hide",
             expect_errors=True,
@@ -80,7 +79,6 @@ class TestDeleteHide:
         assert res.status_code == 404
 
     def test_it_returns_http_404_if_no_authn(self, app, group_annotation):
-
         res = app.delete(
             f"/api/annotations/{group_annotation.id}/hide",
             expect_errors=True,
@@ -91,7 +89,6 @@ class TestDeleteHide:
     def test_it_returns_http_404_if_annotation_is_private(
         self, app, private_group_annotation, user_with_token
     ):
-
         _, token = user_with_token
         headers = {"Authorization": str(f"Bearer {token.value}")}
 

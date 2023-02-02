@@ -31,7 +31,7 @@ class ExceptionFilter(logging.Filter):
         logging_levels.update(LEVELS)
 
         self._ignore_exceptions = []
-        for (exc_name, exc_level) in ignore_exceptions:
+        for exc_name, exc_level in ignore_exceptions:
             try:
                 self._ignore_exceptions.append((logging_levels[exc_level], exc_name))
             except KeyError as err:

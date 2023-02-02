@@ -109,7 +109,6 @@ class TestSendReplyNotifications:
         emails,
         mailer,
     ):
-
         subscribers.send_reply_notifications(event)
 
         # This is a pure plumbing test, checking everything is connected to
@@ -155,7 +154,6 @@ class TestSyncAnnotation:
     def test_it_calls_sync_service(
         self, pyramid_request, search_index, transaction_manager
     ):
-
         event = AnnotationEvent(pyramid_request, {"id": "any"}, "action")
 
         subscribers.annotation_sync(event)
@@ -166,7 +164,6 @@ class TestSyncAnnotation:
 
     @pytest.fixture
     def transaction_manager(self, pyramid_request):
-
         pyramid_request.tm = mock.create_autospec(
             TransactionManager, instance=True, spec_set=True
         )

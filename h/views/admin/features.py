@@ -13,7 +13,6 @@ from h.security import Permission
     permission=Permission.AdminPage.HIGH_RISK,
 )
 def features_index(request):
-
     features = sorted(models.Feature.all(request.db), key=lambda f: f.name)
 
     return {

@@ -26,7 +26,6 @@ def _deferred_password_widget(_node, kwargs):
 
 
 class LoginSchema(CSRFSchema):
-
     username = colander.SchemaNode(
         colander.String(),
         title=_("Username / email"),

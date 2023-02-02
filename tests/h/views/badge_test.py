@@ -34,7 +34,6 @@ class TestBlocklist:
         assert not Blocklist.is_blocked(acceptable_url)
 
     def test_regex_golden_master(self):
-
         # This is a golden master test intended to facilitate refactoring
         # It just states that the regex is what it last was, this allows you
         # to change how it's generated and test if you have changed what is

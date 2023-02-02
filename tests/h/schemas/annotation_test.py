@@ -641,25 +641,21 @@ class TestSearchParamsSchema:
         assert params.getall(key) == examples
 
     def test_it_defaults_limit(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert params["limit"] == LIMIT_DEFAULT
 
     def test_it_defaults_offset(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert not params["offset"]
 
     def test_it_defaults_sort(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert params["sort"] == "updated"
 
     def test_it_defaults_order(self, schema):
-
         params = validate_query_params(schema, NestedMultiDict())
 
         assert params["order"] == "desc"
