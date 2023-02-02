@@ -51,9 +51,9 @@ elasticsearch==6.8.2
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
     # via -r requirements/requirements.in
-gevent==21.12.0
+gevent==22.10.2
     # via -r requirements/requirements.in
-greenlet==1.1.1
+greenlet==2.0.2
     # via
     #   gevent
     #   sqlalchemy
