@@ -241,11 +241,11 @@ class ResetController:
             user = ResetCode().deserialize(self.schema, code)
         except colander.Invalid as err:
             raise httpexceptions.HTTPNotFound() from err
-        else:
-            # N.B. the form field for the reset code is called 'user'. See the
-            # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
-            self.form.set_appstruct({"user": user})
-            self.form.set_widgets({"user": deform.widget.HiddenWidget()})
+
+        # N.B. the form field for the reset code is called 'user'. See the
+        # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
+        self.form.set_appstruct({"user": user})
+        self.form.set_widgets({"user": deform.widget.HiddenWidget()})
 
         return {"form": self.form.render(), "has_code": True}
 

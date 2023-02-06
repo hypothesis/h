@@ -95,8 +95,9 @@ class UserIDComparator(Comparator):  # pylint: disable=abstract-method
             except InvalidUserId:
                 # The value being compared isn't a valid userid
                 return False
-            else:
-                other = sa.tuple_(_normalise_username(val["username"]), val["domain"])
+
+            other = sa.tuple_(_normalise_username(val["username"]), val["domain"])
+
         return self.expression == other
 
     def in_(self, userids):  # pylint: disable=arguments-renamed
