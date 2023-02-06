@@ -57,10 +57,10 @@ class Limiter:
             val = int(offset)
         except ValueError:
             return 0
-        else:
-            # val must be 0 <= val <= OFFSET_MAX.
-            val = min(val, OFFSET_MAX)
-            val = max(val, 0)
+
+        # val must be 0 <= val <= OFFSET_MAX.
+        val = min(val, OFFSET_MAX)
+        val = max(val, 0)
         return val
 
     @staticmethod
@@ -70,12 +70,12 @@ class Limiter:
             val = int(limit)
         except ValueError:
             return LIMIT_DEFAULT
-        else:
-            # val must be 0 <= val <= LIMIT_MAX but if
-            # val < 0 then set it to the default.
-            val = min(val, LIMIT_MAX)
-            if val < 0:
-                return LIMIT_DEFAULT
+
+        # val must be 0 <= val <= LIMIT_MAX but if
+        # val < 0 then set it to the default.
+        val = min(val, LIMIT_MAX)
+        if val < 0:
+            return LIMIT_DEFAULT
 
         return val
 

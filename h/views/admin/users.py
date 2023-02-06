@@ -102,24 +102,26 @@ def users_rename(request):
 
     except (UserRenameError, ValueError) as exc:
         request.session.flash(str(exc), "error")
+
         return httpexceptions.HTTPFound(
             location=request.route_path(
                 "admin.users",
                 _query=(("username", old_username), ("authority", user.authority)),
             )
         )
-    else:
-        request.session.flash(
-            f'The user "{old_username}" will be renamed to "{new_username}" in the background. Refresh this page to see if it\'s already done'
-            "success",
-        )
 
-        return httpexceptions.HTTPFound(
-            location=request.route_path(
-                "admin.users",
-                _query=(("username", new_username), ("authority", user.authority)),
-            )
+    request.session.flash(
+        f'The user "{old_username}" will be renamed to "{new_username}" in the '
+        "background. Refresh this page to see if it's already done"
+        "success",
+    )
+
+    return httpexceptions.HTTPFound(
+        location=request.route_path(
+            "admin.users",
+            _query=(("username", new_username), ("authority", user.authority)),
         )
+    )
 
 
 @view_config(
