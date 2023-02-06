@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Setup python
         uses: actions/setup-python@v2
@@ -67,13 +67,13 @@ jobs:
       run: python -m pip install 'tox<4'
 
     - name: Checkout git repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Create test databases
       run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
 
     - name: Cache the .tox dir
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           .tox/lint
@@ -118,20 +118,20 @@ jobs:
       run: python -m pip install 'tox<4'
 
     - name: Checkout git repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Create test databases
       run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
 
     - name: Cache the .tox dir
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           .tox/functests
         key: ${{ runner.os }}-tox-functests-${{ hashFiles('tox.ini', 'requirements/**', 'setup.py', 'setup.cfg') }}
 
     - name: Cache the node_modules dir
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
@@ -153,10 +153,10 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache the node_modules dir
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
