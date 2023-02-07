@@ -181,20 +181,6 @@ repoze-sendmail==4.3
     # via pyramid-mailer
 sentry-sdk==0.17.6
     # via h-pyramid-sentry
-setuptools==65.5.1
-    # via
-    #   colander
-    #   gevent
-    #   gunicorn
-    #   jsonschema
-    #   plaster
-    #   pyramid
-    #   repoze-sendmail
-    #   supervisor
-    #   zope-deprecation
-    #   zope-event
-    #   zope-interface
-    #   zope-sqlalchemy
 six==1.15.0
     # via
     #   bleach
@@ -279,5 +265,5 @@ zope-interface==5.5.2
     #   transaction
     #   wired
     #   zope-sqlalchemy
-zope-sqlalchemy==1.6
+zope-sqlalchemy==2.0
     # via -r requirements/requirements.in
