@@ -265,5 +265,5 @@ zope-interface==5.5.2
     #   transaction
     #   wired
     #   zope-sqlalchemy
-zope-sqlalchemy==1.6
+zope-sqlalchemy==2.0
     # via -r requirements/requirements.in
