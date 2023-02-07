@@ -84,7 +84,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
 
             type_ = appstruct["group_type"]
             if type_ not in ["open", "restricted"]:
-                raise Exception(f"Unsupported group type {type_}")
+                raise ValueError(f"Unsupported group type {type_}")
 
             group = create_fns[type_](
                 name=appstruct["name"],

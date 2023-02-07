@@ -48,12 +48,9 @@ class TestEventQueue:
     ):
         queue = eventqueue.EventQueue(pyramid_request)
 
-        def failing_subscriber(event):
-            raise Exception("failing_subscriber failed")
-
         first_subscriber = mock.Mock()
         second_subscriber = mock.Mock()
-        second_subscriber.side_effect = failing_subscriber
+        second_subscriber.side_effect = ValueError
         third_subscriber = mock.Mock()
 
         subscribers = [first_subscriber, second_subscriber, third_subscriber]
@@ -73,9 +70,9 @@ class TestEventQueue:
     def test_publish_all_reraises_in_debug_mode(self, subscriber, pyramid_request):
         queue = eventqueue.EventQueue(pyramid_request)
         pyramid_request.debug = True
-        subscriber.side_effect = Exception("boom!")
+        subscriber.side_effect = ValueError("boom!")
 
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(ValueError) as excinfo:
             queue(DummyEvent(pyramid_request))
             queue.publish_all()
         assert str(excinfo.value) == "boom!"
