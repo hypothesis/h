@@ -70,12 +70,12 @@ class Annotation(ModelFactory):
             document_uri = DocumentURI.build(
                 document=None, claimant=self.target_uri, uri=self.target_uri
             )
-            return dict(
-                claimant=document_uri.claimant,
-                uri=document_uri.uri,
-                type=document_uri.type,
-                content_type=document_uri.content_type,
-            )
+            return {
+                "claimant": document_uri.claimant,
+                "uri": document_uri.uri,
+                "type": document_uri.type,
+                "content_type": document_uri.content_type,
+            }
 
         document_uri_dicts = [document_uri_dict() for _ in range(random.randint(1, 3))]
 
@@ -92,11 +92,11 @@ class Annotation(ModelFactory):
 
             document_meta = DocumentMeta.build(**kwargs)
 
-            return dict(
-                claimant=document_meta.claimant,
-                type=document_meta.type,
-                value=document_meta.value,
-            )
+            return {
+                "claimant": document_meta.claimant,
+                "type": document_meta.type,
+                "value": document_meta.value,
+            }
 
         document_meta_dicts = [
             document_meta_dict() for _ in range(random.randint(1, 3))

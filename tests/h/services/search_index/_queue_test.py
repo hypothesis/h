@@ -40,16 +40,16 @@ class TestQueue:
             == Any.list.containing(
                 [
                     Any.instance_of(Job).with_attrs(
-                        dict(
-                            enqueued_at=Any.instance_of(datetime_.datetime),
-                            scheduled_at=now + ONE_WEEK,
-                            tag="test_tag",
-                            priority=1234,
-                            kwargs={
+                        {
+                            "enqueued_at": Any.instance_of(datetime_.datetime),
+                            "scheduled_at": now + ONE_WEEK,
+                            "tag": "test_tag",
+                            "priority": 1234,
+                            "kwargs": {
                                 "annotation_id": self.database_id(annotation),
                                 "force": False,
                             },
-                        )
+                        }
                     )
                     for annotation in matching
                 ]
