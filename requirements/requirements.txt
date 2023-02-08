@@ -181,20 +181,6 @@ repoze-sendmail==4.3
     # via pyramid-mailer
 sentry-sdk==0.17.6
     # via h-pyramid-sentry
-setuptools==65.5.1
-    # via
-    #   colander
-    #   gevent
-    #   gunicorn
-    #   jsonschema
-    #   plaster
-    #   pyramid
-    #   repoze-sendmail
-    #   supervisor
-    #   zope-deprecation
-    #   zope-event
-    #   zope-interface
-    #   zope-sqlalchemy
 six==1.15.0
     # via
     #   bleach
@@ -202,7 +188,7 @@ six==1.15.0
     #   elasticsearch-dsl
     #   jsonschema
     #   python-dateutil
-sqlalchemy==1.4.46
+sqlalchemy==2.0.2
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -232,6 +218,8 @@ translationstring==1.4
     #   colander
     #   deform
     #   pyramid
+typing-extensions==4.4.0
+    # via sqlalchemy
 urllib3==1.26.5
     # via
     #   elasticsearch
