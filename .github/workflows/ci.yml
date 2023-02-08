@@ -15,30 +15,8 @@ env:
   PYTEST_ADDOPTS: --exitfirst
 
 jobs:
-  metadata:
-    name: Metadata
-    runs-on: ubuntu-latest
-    outputs:
-      python_headline_version: ${{ steps.list-python-versions.outputs.python_headline_version }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: List Python versions
-        id: list-python-versions
-        run: |
-          pip install hdev
-          echo "python_headline_version=`hdev python_version --style plain --first`" >> $GITHUB_OUTPUT
-
   backend:
     name: Backend
-    needs: metadata
     runs-on: ubuntu-latest
 
     services:
@@ -55,19 +33,19 @@ jobs:
           discovery.type: single-node
 
     steps:
+    - name: Checkout git repo
+      uses: actions/checkout@v3
+
     - name: Setup python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ needs.metadata.outputs.python_headline_version }}
+        python-version-file: '.python-version'
 
     - name: Update pip
       run: python -m pip install --upgrade pip
 
     - name: Install tox
       run: python -m pip install 'tox<4'
-
-    - name: Checkout git repo
-      uses: actions/checkout@v3
 
     - name: Create test databases
       run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
@@ -86,7 +64,6 @@ jobs:
 
   functests:
     name: Functional tests
-    needs: metadata
     runs-on: ubuntu-latest
 
     services:
@@ -106,19 +83,19 @@ jobs:
         - 5672:5672
 
     steps:
+    - name: Checkout git repo
+      uses: actions/checkout@v3
+
     - name: Setup python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ needs.metadata.outputs.python_headline_version }}
+        python-version-file: '.python-version'
 
     - name: Update pip
       run: python -m pip install --upgrade pip
 
     - name: Install tox
       run: python -m pip install 'tox<4'
-
-    - name: Checkout git repo
-      uses: actions/checkout@v3
 
     - name: Create test databases
       run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
