@@ -96,7 +96,7 @@ def _linkify_rel(attrs, new=False):  # pylint: disable=unused-argument
     return attrs
 
 
-ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
+ALLOWED_TAGS = set(bleach.ALLOWED_TAGS) | set(MARKDOWN_TAGS)
 
 MARKDOWN_ATTRIBUTES = {"a": _filter_link_attributes, "img": ["alt", "src", "title"]}
 ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
