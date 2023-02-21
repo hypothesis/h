@@ -39,6 +39,12 @@ def _client_url(request):
     csp_insecure_optout=True,  # This view adds its own custom Content Security Policy
     http_cache=(60 * 5, {"public": True}),
 )
+@view_config(
+    route_name="profile_app",
+    renderer="h:templates/app.html.jinja2",
+    csp_insecure_optout=True,  # This view adds its own custom Content Security Policy
+    http_cache=(60 * 5, {"public": True}),
+)
 def sidebar_app(request, extra=None):
     """
     Return the HTML for the Hypothesis client's sidebar application.
