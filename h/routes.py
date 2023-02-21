@@ -173,6 +173,7 @@ def includeme(config):  # pylint: disable=too-many-statements
         factory="h.traversal.UserByNameRoot",
         traverse="/{username}",
     )
+    config.add_route("api.email_digests", "/api/email_digests", request_method="GET")
     config.add_route("badge", "/api/badge")
     config.add_route("token", "/api/token")
     config.add_route("oauth_authorize", "/oauth/authorize")

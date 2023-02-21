@@ -1,6 +1,7 @@
 """Service definitions that handle business logic."""
 from h.services.auth_cookie import AuthCookieService
 from h.services.subscription import SubscriptionService
+from h.services.email_digests import EmailDigestsService
 
 
 def includeme(config):  # pragma: no cover
@@ -85,6 +86,9 @@ def includeme(config):  # pragma: no cover
     )
     config.register_service_factory(
         "h.services.subscription.service_factory", iface=SubscriptionService
+    )
+    config.register_service_factory(
+        "h.services.email_digests.factory", iface=EmailDigestsService
     )
 
     config.add_directive(
