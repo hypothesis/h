@@ -123,6 +123,7 @@ def test_includeme():
             traverse="/{id}",
         ),
         call("api.bulk.action", "/api/bulk", request_method="POST"),
+        call("api.bulk.annotation", "/api/bulk/annotation", request_method="POST"),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group_upsert",
