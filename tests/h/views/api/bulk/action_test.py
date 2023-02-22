@@ -7,12 +7,12 @@ from h_api.exceptions import SchemaValidationError
 from webob import Response
 
 from h.security import Identity
-from h.views.api.bulk import bulk
+from h.views.api.bulk.action import bulk_action
 
 
-class TestBulk:
+class TestBulkAction:
     def test_it_calls_bulk_api_correctly(self, pyramid_request, BulkAPI, bulk_executor):
-        bulk(pyramid_request)
+        bulk_action(pyramid_request)
 
         BulkAPI.from_byte_stream.assert_called_once_with(
             pyramid_request.body_file, executor=bulk_executor.return_value
@@ -23,7 +23,7 @@ class TestBulk:
         )
 
     def test_it_formats_responses_correctly(self, pyramid_request, return_values):
-        result = bulk(pyramid_request)
+        result = bulk_action(pyramid_request)
 
         assert isinstance(result, Response)
         assert result.status == "200 OK"
@@ -35,7 +35,7 @@ class TestBulk:
 
     @pytest.mark.usefixtures("no_return_content")
     def test_it_returns_204_if_no_content_is_to_be_returned(self, pyramid_request):
-        result = bulk(pyramid_request)
+        result = bulk_action(pyramid_request)
 
         assert result.status == "204 No Content"
 
@@ -50,7 +50,7 @@ class TestBulk:
         BulkAPI.from_byte_stream.side_effect = bad_generator
 
         with pytest.raises(SchemaValidationError):
-            bulk(pyramid_request)
+            bulk_action(pyramid_request)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
@@ -74,11 +74,11 @@ class TestBulk:
 
     @pytest.fixture(autouse=True)
     def BulkAPI(self, patch, return_values):
-        BulkAPI = patch("h.views.api.bulk.BulkAPI")
+        BulkAPI = patch("h.views.api.bulk.action.BulkAPI")
         BulkAPI.from_byte_stream.return_value = (value for value in return_values)
 
         return BulkAPI
 
     @pytest.fixture(autouse=True)
     def bulk_executor(self, patch):
-        return patch("h.views.api.bulk.BulkExecutor")
+        return patch("h.views.api.bulk.action.BulkExecutor")
