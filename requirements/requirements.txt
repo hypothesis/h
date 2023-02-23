@@ -51,8 +51,6 @@ elasticsearch==6.8.2
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
     # via -r requirements/requirements.in
-faker==17.0.0
-    # via -r requirements/requirements.in
 gevent==22.10.2
     # via -r requirements/requirements.in
 greenlet==2.0.2
@@ -175,7 +173,6 @@ python-dateutil==2.8.2
     # via
     #   -r requirements/requirements.in
     #   elasticsearch-dsl
-    #   faker
 python-slugify==8.0.0
     # via -r requirements/requirements.in
 pytz==2021.3

@@ -83,9 +83,7 @@ executing==0.8.2
 factory-boy==3.2.1
     # via -r requirements/dev.in
 faker==17.0.0
-    # via
-    #   -r requirements/requirements.txt
-    #   factory-boy
+    # via factory-boy
 gevent==22.10.2
     # via -r requirements/requirements.txt
 greenlet==2.0.2
