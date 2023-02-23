@@ -19,6 +19,7 @@ click
 deform
 elasticsearch==6.8.2
 elasticsearch-dsl==6.4.0
+faker  # Required temporarily for the fake bulk/annotation end-point
 gevent >= 1.4.0
 gunicorn >= 19.9.0
 importlib_resources
