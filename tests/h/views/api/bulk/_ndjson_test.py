@@ -20,6 +20,11 @@ class TestGetNDJSONResponse:
         lines = [json.loads(line) for line in lines if line]
         assert lines == return_values
 
+    def test_it_with_zero_items(self):
+        result = get_ndjson_response([])
+
+        assert not result.body.decode("utf-8")
+
     def test_it_returns_204_if_no_content_is_to_be_returned(self):
         result = get_ndjson_response(None)
 
