@@ -1,7 +1,6 @@
 import json
 
 import pytest
-from h_matchers import Any
 
 
 @pytest.mark.usefixtures("with_clean_db")
@@ -16,18 +15,35 @@ class TestBulkAnnotation:
 
         assert response.status_int == 400
 
-    def test_it_accepts_a_valid_request(self, make_request):
+    def test_it_accepts_a_valid_request(self, make_request, factories):
+        # We'll make the viewer the author for simplicity
+        user = factories.User(
+            authority="lms.hypothes.is", username="111111111122222222223333333333"
+        )
+        group = factories.Group(
+            authority="lms.hypothes.is",
+            authority_provided_id="1234567890",
+            members=[user],
+        )
+        factories.Annotation(
+            userid=user.userid,
+            group=group,
+            shared=True,
+            deleted=False,
+            updated="2018-11-13T20:20:39",
+        )
+
         response = make_request(
             {
                 "filter": {
                     "limit": 20,
-                    "audience": {"username": ["3a022b6c146dfd9df4ea8662178eac"]},
+                    "audience": {"username": [user.username]},
                     "updated": {
-                        "gt": "2018-11-13T20:20:39+00:00",
+                        "gt": "2018-11-12T20:20:39+00:00",
                         "lte": "2018-11-13T20:20:39+00:00",
                     },
                 },
-                "fields": ["group.authority_provided_id", "author.username"],
+                "fields": ["author.username", "group.authority_provided_id"],
             }
         )
 
@@ -40,12 +56,12 @@ class TestBulkAnnotation:
 
         lines = response.body.decode("utf-8").split("\n")
         data = [json.loads(line) for line in lines if line]
-        assert data == Any.list.comprised_of(
+        assert data == [
             {
-                "group": {"authority_provided_id": Any.string()},
-                "author": {"username": Any.string()},
+                "group": {"authority_provided_id": group.authority_provided_id},
+                "author": {"username": user.username},
             }
-        )
+        ]
 
     @pytest.fixture
     def make_request(self, app, auth_header_for_authority):

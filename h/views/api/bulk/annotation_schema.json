@@ -16,7 +16,7 @@
                     "lte": "2018-11-13T20:20:39+00:00"
                 }
             },
-            "fields": ["group.authority_provided_id", "author.username"]
+            "fields": ["author.username", "group.authority_provided_id"]
         }
     ],
 
@@ -34,7 +34,7 @@
 
             "type": "array",
             "items": {"type": "string"},
-            "enum": [["group.authority_provided_id", "author.username"]]
+            "enum": [["author.username", "group.authority_provided_id"]]
         },
 
         "filter": {

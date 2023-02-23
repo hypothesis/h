@@ -19,22 +19,38 @@ class TestBulkAnnotationSchema:
         return BulkAnnotationSchema()
 
 
+@pytest.mark.usefixtures("bulk_annotation_service", "with_auth_client")
 class TestBulkAnnotation:
-    def test_it_calls_bulk_api_correctly(
-        self, pyramid_request, valid_request, get_ndjson_response
+    def test_it(
+        self,
+        pyramid_request,
+        valid_request,
+        bulk_annotation_service,
+        get_ndjson_response,
     ):
-        valid_request["filter"]["limit"] = 10
+        bulk_annotation_service.annotation_search.return_value = [
+            [f"USERNAME_{i}", f"AUTHORITY_PROVIDED_ID_{i}"] for i in range(3)
+        ]
 
         response = bulk_annotation(pyramid_request)
 
-        get_ndjson_response.assert_called_once_with(
-            Any.iterable.of_size(10).comprised_of(
-                {
-                    "group": {"authority_provided_id": Any.string()},
-                    "author": {"username": Any.string()},
-                }
-            )
+        bulk_annotation_service.annotation_search.assert_called_once_with(
+            authority=pyramid_request.identity.auth_client.authority,
+            fields=valid_request["fields"],
+            **valid_request["filter"],
         )
+
+        return_data = [
+            {
+                "author": {"username": f"USERNAME_{i}"},
+                "group": {"authority_provided_id": f"AUTHORITY_PROVIDED_ID_{i}"},
+            }
+            for i in range(3)
+        ]
+        get_ndjson_response.assert_called_once_with(
+            Any.iterable.containing(return_data).only()
+        )
+
         assert response == get_ndjson_response.return_value
 
     def test_it_raises_with_invalid_request(self, pyramid_request):
@@ -54,7 +70,7 @@ class TestBulkAnnotation:
                     "lte": "2018-11-13T20:20:39+00:00",
                 },
             },
-            "fields": ["group.authority_provided_id", "author.username"],
+            "fields": ["author.username", "group.authority_provided_id"],
         }
 
         return pyramid_request.json
