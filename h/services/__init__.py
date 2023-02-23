@@ -1,5 +1,6 @@
 """Service definitions that handle business logic."""
 from h.services.auth_cookie import AuthCookieService
+from h.services.bulk_annotation import BulkAnnotationService
 from h.services.subscription import SubscriptionService
 
 
@@ -92,4 +93,8 @@ def includeme(config):  # pragma: no cover
     )
     config.add_request_method(
         ".feature.FeatureRequestProperty", name="feature", reify=True
+    )
+
+    config.register_service_factory(
+        "h.services.bulk_annotation.service_factory", iface=BulkAnnotationService
     )

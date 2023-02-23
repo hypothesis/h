@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services import BulkAnnotationService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
 from h.services.annotation_moderation import AnnotationModerationService
@@ -35,6 +36,7 @@ __all__ = (
     "annotation_json_service",
     "auth_cookie_service",
     "auth_token_service",
+    "bulk_annotation_service",
     "delete_group_service",
     "links_service",
     "list_organizations_service",
@@ -94,6 +96,11 @@ def auth_cookie_service(mock_service):
 @pytest.fixture
 def auth_token_service(mock_service):
     return mock_service(AuthTokenService, name="auth_token")
+
+
+@pytest.fixture
+def bulk_annotation_service(mock_service):
+    return mock_service(BulkAnnotationService)
 
 
 @pytest.fixture
