@@ -1,10 +1,10 @@
 import json
 
-from faker.factory import Factory
 from importlib_resources import files
 
 from h.schemas.base import JSONSchema
 from h.security import Permission
+from h.services import BulkAnnotationService
 from h.views.api.bulk._ndjson import get_ndjson_response
 from h.views.api.config import api_config
 
@@ -31,18 +31,31 @@ def bulk_annotation(request):
     # Once this has been applied, we know everything else is safe to use
     # without checking any further
     data = BulkAnnotationSchema().validate(request.json)
+    query_filter, fields = data["filter"], data["fields"]
 
-    query_filter = {"limit": data["filter"]["limit"]}
+    annotation_rows = request.find_service(BulkAnnotationService).annotation_search(
+        # Use the authority from the authenticated client to ensure the user
+        # is limited to items they have permission to request
+        authority=request.identity.auth_client.authority,
+        fields=fields,
+        **query_filter
+    )
 
-    # Currently we are just faking as many rows as the user asks for in `limit`
-    def get_rows(count):
-        faker = Factory.create()
+    present_row = _get_present_row(fields)
+    return get_ndjson_response((present_row(row) for row in annotation_rows))
 
-        for _ in range(count):
-            yield {
-                # pylint: disable=no-member
-                "group": {"authority_provided_id": faker.hexify("^" * 40)},
-                "author": {"username": faker.hexify("^" * 30)},
-            }
 
-    return get_ndjson_response(get_rows(query_filter["limit"]))
+def _get_present_row(fields):
+    # The schema enforces this, but we currently rely on it being hard coded
+    # so some belt and braces is in order. For example, the exact order matters
+    assert fields == ["author.username", "group.authority_provided_id"]
+
+    def present_row(row):
+        username, authority_provided_id = row
+
+        return {
+            "author": {"username": username},
+            "group": {"authority_provided_id": authority_provided_id},
+        }
+
+    return present_row

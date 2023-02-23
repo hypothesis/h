@@ -3,10 +3,10 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from h.security import Identity
 from h.views.api.bulk.action import bulk_action
 
 
+@pytest.mark.usefixtures("with_auth_client")
 class TestBulkAction:
     def test_it_calls_bulk_api_correctly(
         self, pyramid_request, BulkAPI, bulk_executor, get_ndjson_response
@@ -31,12 +31,6 @@ class TestBulkAction:
         pyramid_request.body_file = create_autospec(BytesIO)
 
         return pyramid_request
-
-    @pytest.fixture(autouse=True)
-    def with_auth_client(self, factories, pyramid_config):
-        pyramid_config.testing_securitypolicy(
-            identity=Identity.from_models(auth_client=factories.AuthClient())
-        )
 
     @pytest.fixture(autouse=True)
     def BulkAPI(self, patch):
