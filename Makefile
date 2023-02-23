@@ -138,7 +138,7 @@ checkdocs: python
 requirements/%.txt: requirements/%.in
 	@touch -a $(subst requirements.txt,dev.txt,$@)
 	@tox -qe $(subst requirements,dev,$(basename $(notdir $@))) --run-command 'pip --quiet --disable-pip-version-check install pip-tools'
-	@tox -qe $(subst requirements,dev,$(basename $(notdir $@))) --run-command 'pip-compile --allow-unsafe --quiet $(args) $<'
+	@tox -qe $(subst requirements,dev,$(basename $(notdir $@))) --run-command 'pip-compile --no-allow-unsafe --quiet $(args) $<'
 
 # Inform make of the dependencies between our requirements files so that it
 # knows what order to re-compile them in and knows to re-compile a file if a
