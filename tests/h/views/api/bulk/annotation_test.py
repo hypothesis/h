@@ -1,7 +1,10 @@
+from unittest.mock import sentinel
+
 import pytest
 from h_matchers import Any
 
 from h.schemas import ValidationError
+from h.services.bulk_annotation import BadDateFilter, BadFieldSpec, service_factory
 from h.views.api.bulk.annotation import BulkAnnotationSchema, bulk_annotation
 
 
@@ -59,6 +62,16 @@ class TestBulkAnnotation:
         with pytest.raises(ValidationError):
             bulk_annotation(pyramid_request)
 
+    @pytest.mark.usefixtures("valid_request")
+    @pytest.mark.parametrize("exception", (BadDateFilter, BadFieldSpec))
+    def test_it_raises_with_errors_from_the_bulk_service(
+        self, pyramid_request, bulk_annotation_service, exception
+    ):
+        bulk_annotation_service.annotation_search.side_effect = exception
+
+        with pytest.raises(ValidationError):
+            bulk_annotation(pyramid_request)
+
     @pytest.fixture
     def valid_request(self, pyramid_request):
         pyramid_request.json = {
@@ -78,3 +91,15 @@ class TestBulkAnnotation:
     @pytest.fixture(autouse=True)
     def get_ndjson_response(self, patch):
         return patch("h.views.api.bulk.annotation.get_ndjson_response")
+
+
+class TestServiceFactory:
+    def test_it(self, pyramid_request, BulkAnnotationService):
+        svc = service_factory(sentinel.context, pyramid_request)
+
+        BulkAnnotationService.assert_called_once_with(db_session=pyramid_request.db)
+        assert svc == BulkAnnotationService.return_value
+
+    @pytest.fixture
+    def BulkAnnotationService(self, patch):
+        return patch("h.services.bulk_annotation.BulkAnnotationService")
