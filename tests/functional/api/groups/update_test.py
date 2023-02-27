@@ -221,6 +221,7 @@ def first_party_group(db_session, factories, first_party_user):
         description="Original description",
         creator=first_party_user,
         authority=first_party_user.authority,
+        authority_provided_id=None,
     )
     db_session.commit()
     return group
