@@ -2,9 +2,11 @@ import json
 
 from importlib_resources import files
 
+from h.schemas import ValidationError
 from h.schemas.base import JSONSchema
 from h.security import Permission
 from h.services import BulkAnnotationService
+from h.services.bulk_annotation import BadDateFilter, BadFieldSpec
 from h.views.api.bulk._ndjson import get_ndjson_response
 from h.views.api.config import api_config
 
@@ -33,13 +35,23 @@ def bulk_annotation(request):
     data = BulkAnnotationSchema().validate(request.json)
     query_filter, fields = data["filter"], data["fields"]
 
-    annotation_rows = request.find_service(BulkAnnotationService).annotation_search(
-        # Use the authority from the authenticated client to ensure the user
-        # is limited to items they have permission to request
-        authority=request.identity.auth_client.authority,
-        fields=fields,
-        **query_filter
-    )
+    try:
+        annotation_rows = request.find_service(BulkAnnotationService).annotation_search(
+            # Use the authority from the authenticated client to ensure the user
+            # is limited to items they have permission to request
+            authority=request.identity.auth_client.authority,
+            fields=fields,
+            **query_filter,
+        )
+
+    except BadFieldSpec as err:
+        # Emulate the format of the normal ValidationError's from a schema
+        raise ValidationError(f"fields: {err}") from err
+
+    except BadDateFilter as err:
+        # We happen to know this is the updated field, because there's no other
+        # but, it could easily be something else in the future
+        raise ValidationError(str(err)) from err
 
     present_row = _get_present_row(fields)
     return get_ndjson_response((present_row(row) for row in annotation_rows))
