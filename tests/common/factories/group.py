@@ -1,4 +1,5 @@
 import factory
+from factory import Faker
 
 from h import models
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
@@ -20,6 +21,7 @@ class Group(ModelFactory):
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
     members = factory.LazyAttribute(lambda obj: [obj.creator])
+    authority_provided_id = Faker("hexify", text="^" * 30)
     enforce_scope = True
 
     @factory.post_generation

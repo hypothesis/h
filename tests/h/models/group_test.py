@@ -81,7 +81,7 @@ def test_it_returns_None_by_default_for_authority_provided_id():
 
 
 def test_it_returns_None_for_groupid_if_authority_provided_id_is_None(factories):
-    group = factories.Group()
+    group = factories.Group(authority_provided_id=None)
 
     assert group.groupid is None
 
