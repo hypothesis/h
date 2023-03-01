@@ -80,7 +80,7 @@ exceptiongroup==1.1.0
     #   pytest
 factory-boy==3.2.1
     # via -r requirements/tests.in
-faker==17.0.0
+faker==17.4.0
     # via factory-boy
 gevent==22.10.2
     # via -r requirements/requirements.txt
