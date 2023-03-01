@@ -122,7 +122,7 @@ factory-boy==3.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-faker==17.0.0
+faker==17.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
