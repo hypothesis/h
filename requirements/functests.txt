@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/functests.in
 #
-alembic==1.9.4
+alembic==1.10.0
     # via -r requirements/requirements.txt
 amqp==5.0.9
     # via
@@ -311,6 +311,10 @@ translationstring==1.4
     #   colander
     #   deform
     #   pyramid
+typing-extensions==4.5.0
+    # via
+    #   -r requirements/requirements.txt
+    #   alembic
 urllib3==1.26.5
     # via
     #   -r requirements/requirements.txt

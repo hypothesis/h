@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.9.4
+alembic==1.10.0
     # via -r requirements/requirements.in
 amqp==5.0.9
     # via kombu
@@ -221,6 +221,8 @@ translationstring==1.4
     #   colander
     #   deform
     #   pyramid
+typing-extensions==4.5.0
+    # via alembic
 urllib3==1.26.5
     # via
     #   elasticsearch
