@@ -5,7 +5,7 @@ from sqlalchemy.engine import Row
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
-from h.models import Annotation, AnnotationModeration, Group, User
+from h.models import Annotation, AnnotationModeration, Group, GroupMembership, User
 
 
 class BadDateFilter(Exception):
@@ -170,18 +170,20 @@ class BulkAnnotationService:
 
     @classmethod
     def _audience_groups_subquery(cls, authority, audience):
-        return sa.select(Group.id).join(
-            cls._AUDIENCE,
-            Group.members.any(
-                # pylint: disable=protected-access
-                User._username.in_(
+        return (
+            sa.select(Group.id)
+            .distinct()
+            .join(GroupMembership, GroupMembership.group_id == Group.id)
+            .join(cls._AUDIENCE, GroupMembership.user_id == cls._AUDIENCE.id)
+            .where(
+                cls._AUDIENCE._username.in_(  # pylint:disable=protected-access
                     [
                         username.lower().replace(".", "")
                         for username in audience["username"]
                     ]
                 ),
-                authority=authority,
-            ),
+                cls._AUDIENCE.authority == authority,
+            )
         )
 
 
