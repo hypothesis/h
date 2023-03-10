@@ -118,7 +118,7 @@ importlib-resources==5.12.0
     #   alembic
     #   data-tasks
     #   h-api
-ipdb==0.13.11
+ipdb==0.13.13
     # via -r requirements/dev.in
 ipython==8.8.0
     # via
