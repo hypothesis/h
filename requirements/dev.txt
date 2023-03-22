@@ -322,7 +322,7 @@ traitlets==5.0.5
     # via
     #   ipython
     #   matplotlib-inline
-transaction==3.0.1
+transaction==3.1.0
     # via
     #   -r requirements/requirements.txt
     #   pyramid-mailer
