@@ -62,20 +62,22 @@ Annotation:
     permissions:
       type: object
     target:
-      type: object
-      properties:
-        selector:
-          type: array
-          description: An array of selectors that refine this annotation's target
-          items:
-            type: object
-            description: >
-              A selector for refining the annotation target. See
-              [the Web Annotation Data Model W3C Recommendation](https://www.w3.org/TR/annotation-model/#selectors)
-              for details about different selector types and properties.
-            properties:
-              "type":
-                type: string
+      type: array
+      items:
+        type: object
+        properties:
+          selector:
+            type: array
+            description: An array of selectors that refine this annotation's target
+            items:
+              type: object
+              description: >
+                A selector for refining the annotation target. See
+                [the Web Annotation Data Model W3C Recommendation](https://www.w3.org/TR/annotation-model/#selectors)
+                for details about different selector types and properties.
+              properties:
+                "type":
+                  type: string
     references:
       type: array
       description: Annotation IDs for any annotations this annotation references (e.g. is a reply to)
