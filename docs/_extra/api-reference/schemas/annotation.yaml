@@ -167,7 +167,15 @@ Annotation:
                       type: string
                     index: number
                     label: string
-
+    document:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: array
+          items:
+            type: string
     links:
       type: object
       description: An object containing hypermedia links for this annotation
