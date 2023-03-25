@@ -7,7 +7,7 @@ User:
       type: string
       minLength: 3
       maxLength: 30
-      pattern: ^[A-Za-z0-9._]+$
+      pattern: ^[A-Za-z0-9._]{3,30}$
     userid:
       type: string
       pattern: ^acct:.+$
