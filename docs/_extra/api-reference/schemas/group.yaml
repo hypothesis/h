@@ -13,11 +13,13 @@ Group:
     id:
       type: string
     groupid:
-      type: string
-      description: >
-        Authority-unique identifier that may be set for groups that
-        are owned by a third-party authority. This field is currently present
-        but unused for first-party-authority groups.
+      oneOf:
+        - type: string
+          description: >
+            Authority-unique identifier that may be set for groups that
+            are owned by a third-party authority. This field is currently present
+            but unused for first-party-authority groups.
+        - type: null
     name:
       type: string
     links:
