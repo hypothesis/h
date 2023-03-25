@@ -84,6 +84,8 @@ Annotation:
       type: object
       properties:
         display_name:
-          type: string
-          description: The annotation creator's display name
-          example: "Felicity Nunsun"
+          oneOf:
+            - type: string
+              description: The annotation creator's display name
+              example: "Felicity Nunsun"
+            - type: null
