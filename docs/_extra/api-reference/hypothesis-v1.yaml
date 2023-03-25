@@ -53,6 +53,10 @@ info:
     * [The Authentication section of this document](https://h.readthedocs.io/en/latest/api-reference/v1/#section/Authentication)
     * [Hypothesis API authorization documentation](https://h.readthedocs.io/en/latest/api/authorization)
 
+    ## Sending Data
+    For `POST`, `PATCH` and `PUT` requests, you have to indicate the size of the payload by providing
+    [the `Content-Length` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length)
+    
     ## Expanding Resources
 
     Resources often contain links to related resources in their response bodies.
