@@ -35,3 +35,8 @@ Profile:
         This property will be a string of the format `"acct:username@authority"`
         if the request is authenticated. This property will be `null` if the
         request is not authenticated.
+    user_info:
+      type: object
+      properties:
+        display_name:
+          type: string
