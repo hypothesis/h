@@ -59,6 +59,35 @@ Annotation:
             items:
               oneOf:
                 - type: object
+                  description: Fragment Selector
+                  required:
+                    - type
+                    - value
+                    - conformsTo
+                  properties:
+                    "type":
+                      type: string
+                    value: string
+                    conformsTo: string
+                - type: object
+                  description: CSS Selector
+                  required:
+                    - type
+                    - value
+                  properties:
+                    "type":
+                      type: string
+                    value: string
+                - type: object
+                  description: XPath Selector
+                  required:
+                    - type
+                    - value
+                  properties:
+                    "type":
+                      type: string
+                    value: string
+                - type: object
                   description: Text Quote Selector
                   required:
                     - type
@@ -80,6 +109,26 @@ Annotation:
                       type: string
                     start: number
                     end: number
+                - type: object
+                  description: Data Position Selector
+                  required:
+                    - type
+                    - start
+                    - end
+                  properties:
+                    "type":
+                      type: string
+                    start: number
+                    end: number
+                - type: object
+                  description: SVG Selector
+                  required:
+                    - type
+                    - value
+                  properties:
+                    "type":
+                      type: string
+                    value: string
                 - type: object
                   description: Range Selector
                   required:
