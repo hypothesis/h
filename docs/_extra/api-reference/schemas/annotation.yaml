@@ -16,6 +16,8 @@ Annotation:
     - hidden
     - flagged
   properties:
+    consumer:
+      type: string
     id:
       type: string
     created:
