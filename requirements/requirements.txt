@@ -181,7 +181,7 @@ repoze-sendmail==4.3
     # via pyramid-mailer
 rfc3339-validator==0.1.4
     # via -r requirements/requirements.in
-sentry-sdk==0.17.6
+sentry-sdk==1.17.0
     # via h-pyramid-sentry
 six==1.15.0
     # via
@@ -223,7 +223,7 @@ translationstring==1.4
     #   pyramid
 typing-extensions==4.5.0
     # via alembic
-urllib3==1.26.5
+urllib3==1.26.15
     # via
     #   elasticsearch
     #   sentry-sdk
