@@ -100,7 +100,7 @@ kombu==5.2.4
     #   celery
 mako==1.2.2
     # via alembic
-markdown==3.4.2
+markdown==3.4.3
     # via -r requirements/requirements.in
 markupsafe==1.1.1
     # via
