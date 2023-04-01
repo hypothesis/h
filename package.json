@@ -25,7 +25,7 @@
     "gulp-cli": "^2.3.0",
     "gulp-if": "^3.0.0",
     "gulp-svgmin": "^4.0.1",
-    "jquery": "^3.6.3",
+    "jquery": "^3.6.4",
     "normalize.css": "^8.0.0",
     "popper.js": "^1.16.1",
     "postcss": "^8.4.21",
