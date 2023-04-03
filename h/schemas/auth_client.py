@@ -56,6 +56,22 @@ class CreateAuthClientSchema(CSRFSchema):
         ),
     )
 
+    def validator(self, node, value):
+        super().validator(node, value)
+
+        grant_type = value.get("grant_type")
+        redirect_url = value.get("redirect_url")
+
+        # There is currently a DB constraint that authorization_code clients
+        # must have a redirect URL. For browser extensions this can create a
+        # chicken-and-egg problem because the extension must be published to
+        # allocate an extension ID, which then appears in the redirect URL. The
+        # workaround in this case is to use a temporary URL and update it later.
+        if grant_type == GrantType.authorization_code and not redirect_url:
+            err = colander.Invalid(node)
+            err["redirect_url"] = _('Required when grant type is "authorization_code"')
+            raise err
+
 
 class EditAuthClientSchema(CreateAuthClientSchema):
     # Read-only fields, listed in the form so that the user can easily copy and
