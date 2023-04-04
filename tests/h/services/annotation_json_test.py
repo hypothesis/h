@@ -12,9 +12,7 @@ from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONService:
-    def test_present(
-        self, service, annotation, links_service, user_service, DocumentJSONPresenter
-    ):
+    def test_present(self, service, annotation, links_service, user_service):
         annotation.created = datetime(2016, 2, 24, 18, 3, 25, 768)
         annotation.updated = datetime(2016, 2, 29, 10, 24, 5, 564)
         annotation.references = ["referenced-id-1", "referenced-id-2"]
@@ -41,7 +39,7 @@ class TestAnnotationJSONService:
                 "delete": [annotation.userid],
             },
             "target": annotation.target,
-            "document": DocumentJSONPresenter.return_value.asdict.return_value,
+            "document": {"title": annotation.document.title},
             "links": links_service.get_all.return_value,
             "references": annotation.references,
             "extra-1": "foo",
@@ -49,15 +47,26 @@ class TestAnnotationJSONService:
             "user_info": {"display_name": user_service.fetch.return_value.display_name},
         }
 
-        DocumentJSONPresenter.assert_called_once_with(annotation.document)
-        DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
-
     def test_present_without_references(self, service, annotation):
         annotation.references = None
 
         result = service.present(annotation)
 
         assert "references" not in result
+
+    def test_present_without_a_document(self, service, annotation):
+        annotation.document = None
+
+        result = service.present(annotation)
+
+        assert not result["document"]
+
+    def test_present_without_a_document_title(self, service, annotation):
+        annotation.document.title = None
+
+        result = service.present(annotation)
+
+        assert not result["document"]
 
     def test_present_extra_inherits_correctly(self, service, annotation):
         annotation.extra = {"id": "DIFFERENT"}
@@ -258,10 +267,6 @@ class TestAnnotationJSONService:
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):
         return patch("h.services.annotation_json.identity_permits")
-
-    @pytest.fixture(autouse=True)
-    def DocumentJSONPresenter(self, patch):
-        return patch("h.services.annotation_json.DocumentJSONPresenter")
 
 
 class TestFactory:

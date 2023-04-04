@@ -4,7 +4,6 @@ from sqlalchemy.orm import subqueryload
 
 from h import storage
 from h.models import Annotation, User
-from h.presenters import DocumentJSONPresenter
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
 from h.session import user_info
@@ -42,6 +41,10 @@ class AnnotationJSONService:
         """
         model = deepcopy(annotation.extra) or {}
 
+        document = {}
+        if annotation.document and annotation.document.title:
+            document["title"] = annotation.document.title
+
         model.update(
             {
                 "id": annotation.id,
@@ -62,7 +65,7 @@ class AnnotationJSONService:
                     "delete": [annotation.userid],
                 },
                 "target": annotation.target,
-                "document": DocumentJSONPresenter(annotation.document).asdict(),
+                "document": document,
                 "links": self._links_service.get_all(annotation),
             }
         )
