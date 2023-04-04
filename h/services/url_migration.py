@@ -4,9 +4,9 @@ import logging
 from celery.utils import chunks
 from sqlalchemy.orm import load_only
 
-import h.storage
 from h.models import Annotation, DocumentURI
 from h.schemas.annotation import transform_document
+from h.services import AnnotationService
 from h.tasks.url_migration import move_annotations
 from h.util.uri import normalize
 
@@ -18,6 +18,7 @@ class URLMigrationService:
 
     def __init__(self, request):
         self.request = request
+        self._annotation_service = request.find_service(AnnotationService)
 
     def move_annotations(self, annotation_ids, current_uri, new_url_info):
         """
@@ -32,12 +33,9 @@ class URLMigrationService:
             schema.
         """
 
-        annotations = self.request.db.query(Annotation).filter(
-            Annotation.id.in_(annotation_ids)
-        )
         current_uri_normalized = normalize(current_uri)
 
-        for ann in annotations:
+        for ann in self._annotation_service.get_annotations_by_id(ids=annotation_ids):
             if ann.target_uri_normalized != current_uri_normalized:
                 # Skip annotation if it was updated since the task was
                 # scheduled.
@@ -72,10 +70,9 @@ class URLMigrationService:
             # Update the annotation's `target_uri` and associated document,
             # and create `Document*` entities for the new URL if they don't
             # already exist.
-            h.storage.update_annotation(
-                self.request,
-                ann.id,
-                ann_update_data,
+            self._annotation_service.update_annotation(
+                annotation=ann,
+                data=ann_update_data,
                 # Don't update "edited" timestamp on annotation cards.
                 update_timestamp=False,
                 reindex_tag="URLMigrationService.move_annotations",

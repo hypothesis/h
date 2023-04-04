@@ -27,6 +27,7 @@ from h.schemas.annotation import (
 )
 from h.schemas.util import validate_query_params
 from h.security import Permission
+from h.services import AnnotationService
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -133,9 +134,10 @@ def update(context, request):
     schema = UpdateAnnotationSchema(
         request, context.annotation.target_uri, context.annotation.groupid
     )
-    appstruct = schema.validate(_json_payload(request))
 
-    annotation = storage.update_annotation(request, context.annotation.id, appstruct)
+    annotation = request.find_service(AnnotationService).update_annotation(
+        annotation=context.annotation, data=schema.validate(_json_payload(request))
+    )
 
     _publish_annotation_event(request, annotation, "update")
 
