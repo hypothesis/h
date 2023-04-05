@@ -1,203 +1,120 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, call, patch, sentinel
 
 import pytest
-from h_matchers import Any
 
 from h.services.url_migration import URLMigrationService
 
 
 class TestURLMigrationService:
-    def test_move_annotations_does_nothing_if_annotation_was_deleted(
-        self, update_annotation, svc
+    def test_move_annotations(
+        self, svc, annotation_service, factories, update_annotation, transform_document
     ):
-        svc.move_annotations(
-            ["id-that-does-not-exist"],
-            "https://somesite.com",
-            {"url": "https://example.org"},
+        annotation = factories.Annotation(
+            target_selectors=[
+                {"type": "a", "other": "existing"},
+                {"type": "b", "other": "existing"},
+            ]
         )
-        update_annotation.assert_not_called()
-
-    def test_move_annotations_does_nothing_if_url_no_longer_matches(
-        self, db_session, factories, update_annotation, svc
-    ):
-        ann = factories.Annotation(target_uri="https://example.com")
-        db_session.flush()
+        annotation_service.search_annotations.return_value = [annotation]
 
         svc.move_annotations(
-            [ann.id],
-            # Use a different URL to simulate the case where the annotation's
-            # URL is changed in between a move being scheduled, and the move
-            # being executed.
-            "https://wrongsite.com",
-            {"url": "https://example.org"},
-        )
-
-        assert ann.target_uri == "https://example.com"
-        update_annotation.assert_not_called()
-
-    def test_move_annotations_updates_urls(
-        self, db_session, factories, pyramid_request, update_annotation, svc
-    ):
-        anns = [
-            factories.Annotation(target_uri="https://example.com"),
-            factories.Annotation(target_uri="https://example.com"),
-        ]
-        db_session.flush()
-
-        svc.move_annotations(
-            [anns[0].id, anns[1].id],
-            "https://example.com",
-            {"url": "https://example.org"},
-        )
-
-        assert update_annotation.call_count == 2
-        for ann in anns[0:2]:
-            update_annotation.assert_any_call(
-                pyramid_request,
-                ann.id,
-                {"target_uri": "https://example.org"},
-                update_timestamp=False,
-                reindex_tag="URLMigrationService.move_annotations",
-            )
-
-    def test_move_annotations_updates_selectors(
-        self, db_session, factories, pyramid_request, update_annotation, svc
-    ):
-        ann = factories.Annotation(target_uri="https://example.com")
-        ann.target_selectors = [
-            {"type": "TextQuoteSelector", "exact": "foobar"},
-            {"type": "EPUBContentSelector", "cfi": "/2/4"},
-        ]
-        db_session.flush()
-
-        svc.move_annotations(
-            [ann.id],
-            "https://example.com",
-            {
-                "url": "https://example.org",
+            annotation_ids=sentinel.annotation_ids,
+            current_uri=sentinel.current_uri,
+            new_url_info={
+                "url": sentinel.new_url,
+                "document": sentinel.document,
                 "selectors": [
-                    # New selector that is not in existing selectors. This should be added.
-                    {"type": "PageSelector", "label": "3"},
-                    # Selector that matches an existing selector. This should not be duplicated.
-                    {"type": "EPUBContentSelector", "cfi": "/2/4"},
+                    {"type": "b", "other": "new"},
+                    {"type": "c", "other": "new"},
                 ],
             },
         )
 
+        annotation_service.search_annotations.assert_called_once_with(
+            ids=sentinel.annotation_ids, target_uri=sentinel.current_uri
+        )
+        transform_document.assert_called_once_with(sentinel.document, sentinel.new_url)
         update_annotation.assert_called_once_with(
-            pyramid_request,
-            ann.id,
+            svc.request,
+            annotation.id,
             {
-                "target_uri": "https://example.org",
+                "target_uri": sentinel.new_url,
+                "document": transform_document.return_value,
                 "target_selectors": [
-                    {"type": "TextQuoteSelector", "exact": "foobar"},
-                    {"type": "EPUBContentSelector", "cfi": "/2/4"},
-                    {"type": "PageSelector", "label": "3"},
+                    {"type": "a", "other": "existing"},
+                    {"type": "b", "other": "existing"},
+                    {"type": "c", "other": "new"},
                 ],
             },
             update_timestamp=False,
             reindex_tag="URLMigrationService.move_annotations",
         )
 
-    def test_move_annotations_updates_documents(
-        self,
-        db_session,
-        factories,
-        pyramid_request,
-        update_annotation,
-        transform_document,
-        svc,
+    def test_move_annotations_minimal_example(
+        self, svc, annotation_service, factories, transform_document
     ):
-        ann = factories.Annotation(target_uri="https://example.com")
-        db_session.flush()
+        annotation = factories.Annotation()
+        annotation_service.search_annotations.return_value = [annotation]
 
         svc.move_annotations(
-            [ann.id],
-            "https://example.com",
-            {
-                "url": "https://example.org",
-                "document": {"title": "The new example.com"},
+            annotation_ids=sentinel.annotation_ids,
+            current_uri=sentinel.current_uri,
+            new_url_info={
+                "url": sentinel.new_url,
             },
         )
 
-        transform_document.assert_called_with(
-            {"title": "The new example.com"}, "https://example.org"
-        )
-        update_annotation.assert_called_once_with(
-            pyramid_request,
-            ann.id,
-            {
-                "target_uri": "https://example.org",
-                "document": transform_document.return_value,
-            },
-            update_timestamp=False,
-            reindex_tag="URLMigrationService.move_annotations",
-        )
+        transform_document.assert_not_called()
 
-    def test_move_annotations_by_url_moves_matching_annotations(
+    def test_move_annotations_by_url(
         self,
-        db_session,
+        svc,
         factories,
         pyramid_request,
-        update_annotation,
+        annotation_service,
+        move_annotations,
         move_annotations_task,
-        svc,
     ):
-        anns = [
-            factories.Annotation(target_uri="https://example.com"),
-            factories.Annotation(target_uri="https://example.com"),
-            factories.Annotation(target_uri="https://othersite.com"),
-            factories.Annotation(target_uri="https://example.com"),
-        ]
-        db_session.flush()
+        annotations = factories.Annotation.create_batch(7)
+        annotation_service.search_annotations.return_value = annotations
+        svc.BATCH_SIZE = 3
+        new_url_info = {"url": sentinel.new_url}
 
-        svc.move_annotations_by_url(
-            "https://example.com",
-            {"url": "https://example.org"},
+        svc.move_annotations_by_url(url=sentinel.url, new_url_info=new_url_info)
+
+        annotation_service.search_annotations.assert_called_once_with(
+            document_uri=sentinel.url
         )
-
-        # First annotation should be moved synchronously.
-        assert update_annotation.call_count == 1
-        update_annotation.assert_called_with(
-            pyramid_request,
-            Any.of([a.id for a in anns]),
-            {"target_uri": "https://example.org"},
-            update_timestamp=False,
-            reindex_tag="URLMigrationService.move_annotations",
+        move_annotations.assert_called_once_with(
+            [annotations[-1].id], sentinel.url, new_url_info
         )
         pyramid_request.tm.commit.assert_called_once()
 
-        moved_ann_id = update_annotation.call_args[0][1]
-        remaining_ann_ids = [
-            a.id
-            for a in anns
-            if a.target_uri == "https://example.com" and a.id != moved_ann_id
-        ]
-
-        # Remaining matching annotations should be moved in separate tasks.
-        assert move_annotations_task.delay.call_count == 1
-        move_annotations_task.delay.assert_called_once_with(
-            Any.list.containing(remaining_ann_ids).only(),
-            "https://example.com",
-            {"url": "https://example.org"},
+        move_annotations_task.delay.assert_has_calls(
+            [
+                call(
+                    [annotation.id for annotation in annotations[0:3]],
+                    sentinel.url,
+                    new_url_info,
+                ),
+                call(
+                    [annotation.id for annotation in annotations[3:6]],
+                    sentinel.url,
+                    new_url_info,
+                ),
+            ]
         )
 
-    def test_move_annotations_by_url_handles_no_matches(
-        self, db_session, factories, update_annotation, move_annotations_task, svc
+    def test_move_annotations_by_url_with_no_annotations(
+        self, svc, annotation_service, move_annotations
     ):
-        # Make sure there are some non-matching annotations in the DB.
-        factories.Annotation(target_uri="https://foo.com")
-        factories.Annotation(target_uri="https://bar.com")
-        factories.Annotation(target_uri="https://baz.com")
-        db_session.flush()
+        annotation_service.search_annotations.return_value = []
 
         svc.move_annotations_by_url(
-            "https://example.com",
-            {"url": "https://example.org"},
+            url=sentinel.url, new_url_info=sentinel.new_url_info
         )
 
-        update_annotation.assert_not_called()
-        move_annotations_task.delay.assert_not_called()
+        move_annotations.assert_not_called()
 
     @pytest.fixture(autouse=True)
     def transform_document(self, patch):
@@ -207,9 +124,14 @@ class TestURLMigrationService:
     def update_annotation(self, patch):
         return patch("h.storage.update_annotation")
 
-    @pytest.fixture(autouse=True)
+    @pytest.fixture
     def move_annotations_task(self, patch):
         return patch("h.services.url_migration.move_annotations")
+
+    @pytest.fixture
+    def move_annotations(self, svc):
+        with patch.object(svc, "move_annotations") as move_annotations:
+            yield move_annotations
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
@@ -217,5 +139,7 @@ class TestURLMigrationService:
         return pyramid_request
 
     @pytest.fixture
-    def svc(self, pyramid_request):
-        return URLMigrationService(pyramid_request)
+    def svc(self, pyramid_request, annotation_service):
+        return URLMigrationService(
+            request=pyramid_request, annotation_service=annotation_service
+        )
