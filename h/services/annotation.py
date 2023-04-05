@@ -1,5 +1,6 @@
 from typing import Iterable, List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session, subqueryload
 
 from h.models import Annotation
@@ -25,12 +26,12 @@ class AnnotationService:
         if not ids:
             return []
 
-        query = self._db.query(Annotation).filter(Annotation.id.in_(ids))
-
+        query = select(Annotation).where(Annotation.id.in_(ids))
         if eager_load:
-            query = query.options(subqueryload(prop) for prop in eager_load)
+            query = query.options(subqueryload(*eager_load))
 
-        return sorted(query, key=lambda annotation: ids.index(annotation.id))
+        annotations = self._db.execute(query).scalars()
+        return sorted(annotations, key=lambda annotation: ids.index(annotation.id))
 
 
 def service_factory(_context, request) -> AnnotationService:
