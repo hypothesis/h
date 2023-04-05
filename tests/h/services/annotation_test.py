@@ -43,6 +43,26 @@ class TestAnnotationService:
         # If we preloaded, we shouldn't execute any queries
         assert not query_counter.count
 
+    def test_search_annotations_with_document_uri(self, svc, factories):
+        annotation = factories.Annotation()
+        factories.Annotation()  # Add some noise
+
+        results = svc.search_annotations(
+            document_uri=annotation.document.document_uris[0].uri
+        )
+
+        assert results == [annotation]
+
+    def test_search_annotations_with_target_uri_and_ids(self, svc, factories):
+        annotation_1 = factories.Annotation()
+        factories.Annotation(target_uri=annotation_1.target_uri)
+
+        results = svc.search_annotations(
+            ids=[annotation_1.id], target_uri=annotation_1.target_uri
+        )
+
+        assert results == [annotation_1]
+
     @pytest.fixture
     def query_counter(self, db_engine):
         class QueryCounter:
