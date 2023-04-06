@@ -7,7 +7,7 @@ from h.services.url_migration import URLMigrationService
 
 class TestURLMigrationService:
     def test_move_annotations(
-        self, svc, annotation_service, factories, update_annotation, transform_document
+        self, svc, annotation_service, factories, transform_document
     ):
         annotation = factories.Annotation(
             target_selectors=[
@@ -34,9 +34,8 @@ class TestURLMigrationService:
             ids=sentinel.annotation_ids, target_uri=sentinel.current_uri
         )
         transform_document.assert_called_once_with(sentinel.document, sentinel.new_url)
-        update_annotation.assert_called_once_with(
-            svc.request,
-            annotation.id,
+        annotation_service.update_annotation.assert_called_once_with(
+            annotation,
             {
                 "target_uri": sentinel.new_url,
                 "document": transform_document.return_value,
@@ -70,7 +69,7 @@ class TestURLMigrationService:
         self,
         svc,
         factories,
-        pyramid_request,
+        transaction_manager,
         annotation_service,
         move_annotations,
         move_annotations_task,
@@ -88,7 +87,7 @@ class TestURLMigrationService:
         move_annotations.assert_called_once_with(
             [annotations[-1].id], sentinel.url, new_url_info
         )
-        pyramid_request.tm.commit.assert_called_once()
+        transaction_manager.commit.assert_called_once()
 
         move_annotations_task.delay.assert_has_calls(
             [
@@ -120,10 +119,6 @@ class TestURLMigrationService:
     def transform_document(self, patch):
         return patch("h.services.url_migration.transform_document")
 
-    @pytest.fixture(autouse=True)
-    def update_annotation(self, patch):
-        return patch("h.storage.update_annotation")
-
     @pytest.fixture
     def move_annotations_task(self, patch):
         return patch("h.services.url_migration.move_annotations")
@@ -134,12 +129,12 @@ class TestURLMigrationService:
             yield move_annotations
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.tm = Mock(spec_set=["commit"])
-        return pyramid_request
+    def transaction_manager(self):
+        return Mock(spec_set=["commit"])
 
     @pytest.fixture
-    def svc(self, pyramid_request, annotation_service):
+    def svc(self, annotation_service, transaction_manager):
         return URLMigrationService(
-            request=pyramid_request, annotation_service=annotation_service
+            transaction_manager=transaction_manager,
+            annotation_service=annotation_service,
         )

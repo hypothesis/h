@@ -214,83 +214,46 @@ class TestReadJSONLD:
         return patch("h.views.api.annotations.AnnotationJSONLDPresenter")
 
 
-@pytest.mark.usefixtures(
-    "AnnotationEvent",
-    "links_service",
-    "annotation_json_service",
-    "update_schema",
-    "storage",
-)
 class TestUpdate:
     def test_it(
         self,
         annotation_context,
         pyramid_request,
-        update_schema,
-        storage,
+        UpdateAnnotationSchema,
+        annotation_service,
         annotation_json_service,
+        AnnotationEvent,
     ):
         returned = views.update(annotation_context, pyramid_request)
 
-        update_schema.assert_called_once_with(
+        # Check it validates the annotation
+        UpdateAnnotationSchema.assert_called_once_with(
             pyramid_request,
             annotation_context.annotation.target_uri,
             annotation_context.annotation.groupid,
         )
-        update_schema.return_value.validate.assert_called_once_with(
-            pyramid_request.json_body
+        schema = UpdateAnnotationSchema.return_value
+        # Check it updates the annotation
+        schema.validate.assert_called_once_with(pyramid_request.json_body)
+        annotation_service.update_annotation.assert_called_once_with(
+            annotation_context.annotation,
+            schema.validate.return_value,
         )
-
-        storage.update_annotation.assert_called_once_with(
-            pyramid_request,
-            annotation_context.annotation.id,
-            update_schema.return_value.validate.return_value,
-        )
-
-        annotation_json_service.present_for_user.assert_called_once_with(
-            annotation=storage.update_annotation.return_value, user=pyramid_request.user
-        )
-
-        assert returned == annotation_json_service.present_for_user.return_value
-
-    def test_it_publishes_annotation_event(
-        self, annotation_context, AnnotationEvent, storage, pyramid_request
-    ):
-        views.update(annotation_context, pyramid_request)
-
+        # Check it publishes event
         AnnotationEvent.assert_called_once_with(
-            pyramid_request, storage.update_annotation.return_value.id, "update"
+            pyramid_request,
+            annotation_service.update_annotation.return_value.id,
+            "update",
         )
         pyramid_request.notify_after_commit.assert_called_once_with(
             AnnotationEvent.return_value
         )
-
-    def test_it_raises_if_storage_raises(
-        self, annotation_context, pyramid_request, storage
-    ):
-        storage.update_annotation.side_effect = ValidationError("asplode")
-
-        with pytest.raises(ValidationError):
-            views.update(annotation_context, pyramid_request)
-
-    def test_it_raises_if_validate_raises(
-        self, annotation_context, pyramid_request, update_schema
-    ):
-        update_schema.return_value.validate.side_effect = ValidationError("asplode")
-
-        with pytest.raises(ValidationError):
-            views.update(annotation_context, pyramid_request)
-
-    def test_it_raises_if_json_parsing_fails(self, annotation_context, pyramid_request):
-        """It raises PayloadError if parsing of the request body fails."""
-        # Make accessing the request.json_body property raise ValueError.
-        type(pyramid_request).json_body = {}
-        with mock.patch.object(
-            type(pyramid_request), "json_body", new_callable=mock.PropertyMock
-        ) as json_body:
-            json_body.side_effect = ValueError()
-            with pytest.raises(views.PayloadError):
-                views.update(annotation_context, pyramid_request)
+        # Check it presents the annotation
+        annotation_json_service.present_for_user.assert_called_once_with(
+            annotation=annotation_service.update_annotation.return_value,
+            user=pyramid_request.user,
+        )
+        assert returned == annotation_json_service.present_for_user.return_value
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
@@ -299,7 +262,7 @@ class TestUpdate:
         return pyramid_request
 
     @pytest.fixture
-    def update_schema(self, patch):
+    def UpdateAnnotationSchema(self, patch):
         return patch("h.views.api.annotations.UpdateAnnotationSchema")
 
 
