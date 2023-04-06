@@ -9,7 +9,9 @@ from h.db.types import InvalidUUID
 from h.models import Annotation, DocumentURI
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
+from h.security import Permission
 from h.services.search_index import SearchIndexService
+from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 from h.util.uri import normalize
 
@@ -19,8 +21,14 @@ _ = i18n.TranslationStringFactory(__package__)
 class AnnotationService:
     """A service for storing and retrieving annotations."""
 
-    def __init__(self, db_session: Session, search_index_service: SearchIndexService):
+    def __init__(
+        self,
+        db_session: Session,
+        has_permission: callable,
+        search_index_service: SearchIndexService,
+    ):
         self._db = db_session
+        self._has_permission = has_permission
         self._search_index_service = search_index_service
 
     def get_annotation_by_id(self, id_: str) -> Optional[Annotation]:
@@ -72,6 +80,51 @@ class AnnotationService:
         )
 
         return self._db.execute(query).scalars().all()
+
+    def create_annotation(self, data: dict) -> Annotation:
+        """
+        Create an annotation from already-validated data.
+
+        :param data: Annotation data that has already been validated by
+            `h.schemas.annotation.CreateAnnotationSchema`
+        """
+
+        # Set the group to be the same as the root annotation
+        if references := data["references"]:
+            if root_annotation := self.get_annotation_by_id(references[0]):
+                data["groupid"] = root_annotation.groupid
+            else:
+                raise ValidationError(
+                    "references.0: "
+                    + _("Annotation {id} does not exist").format(id=references[0])
+                )
+
+        document_data = data.pop("document", {})
+        annotation = Annotation(**data)
+
+        # Enable relationship loading, so we can access
+        # the group, even though we've not added this to the session yet
+        self._db.enable_relationship_loading(annotation)
+        self._validate_group(annotation)
+
+        annotation.created = annotation.updated = datetime.utcnow()
+        annotation.document = update_document_metadata(
+            self._db,
+            annotation.target_uri,
+            document_data["document_meta_dicts"],
+            document_data["document_uri_dicts"],
+            created=annotation.created,
+            updated=annotation.updated,
+        )
+
+        self._db.add(annotation)
+        self._db.flush()
+
+        self._search_index_service._queue.add_by_id(  # pylint: disable=protected-access
+            annotation.id, tag="storage.create_annotation", schedule_in=60
+        )
+
+        return annotation
 
     def update_annotation(
         self,
@@ -134,12 +187,20 @@ class AnnotationService:
         extra = data.get("extra", {})
         annotation.extra.update(extra)
 
-    @staticmethod
-    def _validate_group(annotation: Annotation):
+    def _validate_group(self, annotation: Annotation):
         group = annotation.group
         if not group:
             raise ValidationError(
                 "group: " + _(f"Invalid group id {annotation.groupid}")
+            )
+
+        # The user must have permission to create an annotation in the group
+        # they've asked to create one in.
+        if not self._has_permission(
+            Permission.Group.WRITE, context=GroupContext(annotation.group)
+        ):
+            raise ValidationError(
+                "group: " + _("You may not create annotations in the specified group!")
             )
 
         # If no scopes are present, or if the group is configured to allow
@@ -193,6 +254,7 @@ def service_factory(_context, request) -> AnnotationService:
 
     return AnnotationService(
         db_session=request.db,
+        has_permission=request.has_permission,
         search_index_service=request.find_service(  # pylint: disable=protected-access
             name="search_index"
         ),
