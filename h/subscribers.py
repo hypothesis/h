@@ -2,10 +2,11 @@ from h_pyramid_sentry import report_exception
 from kombu.exceptions import OperationalError
 from pyramid.events import BeforeRender, subscriber
 
-from h import __version__, emails, storage
+from h import __version__, emails
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 from h.notification import reply
+from h.services import AnnotationService
 from h.tasks import mailer
 
 
@@ -71,7 +72,9 @@ def send_reply_notifications(event):
     request = event.request
 
     with request.tm:
-        annotation = storage.fetch_annotation(request.db, event.annotation_id)
+        annotation = request.find_service(AnnotationService).get_annotation_by_id(
+            event.annotation_id
+        )
         notification = reply.get_notification(request, annotation, event.action)
 
         if notification is None:
