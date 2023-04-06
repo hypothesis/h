@@ -5,26 +5,11 @@ This module provides the core API with access to basic persistence functions
 for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
-# FIXME: This module was originally written to be a single point of
-#        indirection through which the storage backend could be swapped out on
-#        the fly. This helped us to migrate from Elasticsearch-based
-#        persistence to PostgreSQL persistence.
-#
-#        The purpose of this module is now primarily to serve as a place to
-#        wrap up the business logic of creating and retrieving annotations. As
-#        such, it probably makes more sense for this to be split up into a
-#        couple of different services at some point.
-
-from datetime import datetime
 
 from pyramid import i18n
 
-from h import models, schemas
+from h import models
 from h.db import types
-from h.models.document import update_document_metadata
-from h.security import Permission
-from h.traversal.group import GroupContext
-from h.util.group_scope import url_in_scope
 from h.util.uri import normalize as normalize_uri
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -47,70 +32,6 @@ def fetch_annotation(session, id_):
         return session.query(models.Annotation).get(id_)
     except types.InvalidUUID:
         return None
-
-
-def create_annotation(request, data):
-    """
-    Create an annotation from already-validated data.
-
-    :param request: the request object
-    :param data: an annotation data dict that has already been validated by
-        :py:class:`h.schemas.annotation.CreateAnnotationSchema`
-
-    :returns: the created and flushed annotation
-    """
-    document_data = data.pop("document", {})
-
-    # Replies must have the same group as their parent.
-    if data["references"]:
-        root_annotation_id = data["references"][0]
-
-        if root_annotation := fetch_annotation(request.db, root_annotation_id):
-            data["groupid"] = root_annotation.groupid
-        else:
-            raise schemas.ValidationError(
-                "references.0: "
-                + _("Annotation {id} does not exist").format(id=root_annotation_id)
-            )
-
-    # Create the annotation and enable relationship loading so we can access
-    # the group, even though we've not added this to the session yet
-    annotation = models.Annotation(**data)
-    request.db.enable_relationship_loading(annotation)
-
-    group = annotation.group
-    if not group:
-        raise schemas.ValidationError(
-            "group: " + _(f"Invalid group id {annotation.groupid}")
-        )
-
-    # The user must have permission to create an annotation in the group
-    # they've asked to create one in.
-    if not request.has_permission(Permission.Group.WRITE, context=GroupContext(group)):
-        raise schemas.ValidationError(
-            "group: " + _("You may not create annotations in the specified group!")
-        )
-
-    _validate_group_scope(group, data["target_uri"])
-
-    annotation.created = annotation.updated = datetime.utcnow()
-    annotation.document = update_document_metadata(
-        request.db,
-        annotation.target_uri,
-        document_data["document_meta_dicts"],
-        document_data["document_uri_dicts"],
-        created=annotation.created,
-        updated=annotation.updated,
-    )
-
-    request.db.add(annotation)
-    request.db.flush()
-
-    request.find_service(  # pylint: disable=protected-access
-        name="search_index"
-    )._queue.add_by_id(annotation.id, tag="storage.create_annotation", schedule_in=60)
-
-    return annotation
 
 
 def expand_uri(session, uri, normalized=False):
@@ -161,18 +82,3 @@ def expand_uri(session, uri, normalized=False):
         return [uri_normalized for _, _, uri_normalized in type_uris]
 
     return [plain_uri for _, plain_uri, _ in type_uris]
-
-
-def _validate_group_scope(group, target_uri):
-    # If no scopes are present, or if the group is configured to allow
-    # annotations outside of its scope, there's nothing to do here
-    if not group.scopes or not group.enforce_scope:
-        return
-    # The target URI must match at least one
-    # of a group's defined scopes, if the group has any
-    group_scopes = [scope.scope for scope in group.scopes]
-    if not url_in_scope(target_uri, group_scopes):
-        raise schemas.ValidationError(
-            "group scope: "
-            + _("Annotations for this target URI are not allowed in this group")
-        )
