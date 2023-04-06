@@ -17,7 +17,6 @@ objects and Pyramid ACLs in :mod:`h.traversal`.
 from pyramid import i18n
 
 from h import search as search_lib
-from h import storage
 from h.events import AnnotationEvent
 from h.presenters import AnnotationJSONLDPresenter
 from h.schemas.annotation import (
@@ -79,7 +78,9 @@ def create(request):
     schema = CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
 
-    annotation = storage.create_annotation(request, appstruct)
+    annotation = request.find_service(AnnotationService).create_annotation(
+        data=appstruct
+    )
 
     _publish_annotation_event(request, annotation, "create")
 
