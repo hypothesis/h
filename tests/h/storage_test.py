@@ -4,17 +4,6 @@ from h import storage
 from h.models.document import Document, DocumentURI
 
 
-class TestFetchAnnotation:
-    def test_it_fetches_and_returns_the_annotation(self, db_session, factories):
-        annotation = factories.Annotation()
-
-        actual = storage.fetch_annotation(db_session, annotation.id)
-        assert annotation == actual
-
-    def test_it_does_not_crash_if_id_is_invalid(self, db_session):
-        assert storage.fetch_annotation(db_session, "foo") is None
-
-
 class TestExpandURI:
     @pytest.mark.parametrize(
         "normalized,expected_uris",
