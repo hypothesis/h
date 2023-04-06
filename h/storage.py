@@ -1,37 +1,5 @@
-"""
-Annotation storage API.
-
-This module provides the core API with access to basic persistence functions
-for storing and retrieving annotations. Data passed to these functions is
-assumed to be validated.
-"""
-
-from pyramid import i18n
-
 from h import models
-from h.db import types
 from h.util.uri import normalize as normalize_uri
-
-_ = i18n.TranslationStringFactory(__package__)
-
-
-def fetch_annotation(session, id_):
-    """
-    Fetch the annotation with the given id.
-
-    :param session: the database session
-    :type session: sqlalchemy.orm.session.Session
-
-    :param id_: the annotation ID
-    :type id_: str
-
-    :returns: the annotation, if found, or None.
-    :rtype: h.models.Annotation, NoneType
-    """
-    try:
-        return session.query(models.Annotation).get(id_)
-    except types.InvalidUUID:
-        return None
 
 
 def expand_uri(session, uri, normalized=False):
