@@ -12,6 +12,12 @@ from h.services.annotation import service_factory
 
 
 class TestAnnotationService:
+    def test_get_annotation_by_id(self, svc, annotation):
+        assert svc.get_annotation_by_id(annotation.id) == annotation
+
+    def test_get_annotation_by_id_with_invalid_uuid(self, svc):
+        assert not svc.get_annotation_by_id("NOTVALID")
+
     @pytest.mark.parametrize("reverse", (True, False))
     def test_get_annotations_by_id(self, svc, factories, reverse):
         annotations = factories.Annotation.create_batch(3)
