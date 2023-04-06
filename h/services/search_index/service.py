@@ -1,7 +1,7 @@
 from h_pyramid_sentry import report_exception
 
-from h import storage
 from h.presenters import AnnotationSearchIndexPresenter
+from h.services import AnnotationService
 from h.tasks import indexer
 
 
@@ -12,7 +12,13 @@ class SearchIndexService:
     REINDEX_SETTING_KEY = "reindex.new_index"
 
     def __init__(  # pylint:disable=too-many-arguments
-        self, request, es_client, session, settings, queue
+        self,
+        request,
+        es_client,
+        session,
+        settings,
+        annotation_service: AnnotationService,
+        queue,
     ):
         """
         Create an instance of the service.
@@ -21,12 +27,14 @@ class SearchIndexService:
         :param es_client: Elasticsearch client
         :param session: DB session
         :param settings: Instance of settings (or other object with `get()`)
+        :param annotation_service: Annotation service
         :param queue: The sync_annotations job queue
         """
         self._request = request
         self._es = es_client
         self._db = session
         self._settings = settings
+        self._annotation_service = annotation_service
         self._queue = queue
 
     def add_annotation_by_id(self, annotation_id):
@@ -41,7 +49,7 @@ class SearchIndexService:
 
         :param annotation_id: Id of the annotation to add.
         """
-        annotation = storage.fetch_annotation(self._db, annotation_id)
+        annotation = self._annotation_service.get_annotation_by_id(annotation_id)
         if not annotation or annotation.deleted:
             return
 
