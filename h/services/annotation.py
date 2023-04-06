@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Query, Session, subqueryload
 
 from h import i18n
+from h.db.types import InvalidUUID
 from h.models import Annotation, DocumentURI
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
@@ -21,6 +22,17 @@ class AnnotationService:
     def __init__(self, db_session: Session, search_index_service: SearchIndexService):
         self._db = db_session
         self._search_index_service = search_index_service
+
+    def get_annotation_by_id(self, id_: str) -> Optional[Annotation]:
+        """
+        Fetch the annotation with the given id.
+
+        :param id_: Annotation ID to retrieve
+        """
+        try:
+            return self._db.query(Annotation).get(id_)
+        except InvalidUUID:
+            return None
 
     def get_annotations_by_id(
         self, ids: List[str], eager_load: Optional[List] = None
