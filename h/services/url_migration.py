@@ -3,7 +3,6 @@ import logging
 
 from celery.utils import chunks
 
-import h.storage
 from h.schemas.annotation import transform_document
 from h.services import AnnotationService
 from h.tasks.url_migration import move_annotations
@@ -17,8 +16,8 @@ class URLMigrationService:
     BATCH_SIZE = 50
     """How many annotations to migrate at once."""
 
-    def __init__(self, request, annotation_service: AnnotationService):
-        self.request = request
+    def __init__(self, transaction_manager, annotation_service: AnnotationService):
+        self._transaction_manager = transaction_manager
         self._annotation_service = annotation_service
 
     def move_annotations(self, annotation_ids, current_uri, new_url_info):
@@ -69,9 +68,8 @@ class URLMigrationService:
             # Update the annotation's `target_uri` and associated document,
             # and create `Document*` entities for the new URL if they don't
             # already exist.
-            h.storage.update_annotation(
-                self.request,
-                annotation.id,
+            self._annotation_service.update_annotation(
+                annotation,
                 update_data,
                 # Don't update "edited" timestamp on annotation cards.
                 update_timestamp=False,
@@ -104,7 +102,7 @@ class URLMigrationService:
 
         # Ensure new document is visible in tasks that move remaining
         # annotations.
-        self.request.tm.commit()
+        self._transaction_manager.commit()
 
         # Schedule async tasks to move the remaining annotations in chunks
         for batch in chunks(iter(annotation_ids), n=self.BATCH_SIZE):
@@ -120,5 +118,6 @@ class URLMigrationService:
 
 def url_migration_factory(_context, request):
     return URLMigrationService(
-        request=request, annotation_service=request.find_service(AnnotationService)
+        transaction_manager=request.tm,
+        annotation_service=request.find_service(AnnotationService),
     )
