@@ -21,7 +21,6 @@ attrs==20.2.0
     #   -r requirements/tests.txt
     #   hypothesis
     #   jsonschema
-    #   pytest
 bcrypt==4.0.1
     # via
     #   -r requirements/functests.txt
@@ -377,7 +376,7 @@ pyrsistent==0.17.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-pytest==7.2.2
+pytest==7.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

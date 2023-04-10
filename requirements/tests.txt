@@ -15,7 +15,6 @@ attrs==20.2.0
     #   -r requirements/requirements.txt
     #   hypothesis
     #   jsonschema
-    #   pytest
 bcrypt==4.0.1
     # via -r requirements/requirements.txt
 billiard==3.6.4.0
@@ -240,7 +239,7 @@ pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-pytest==7.2.2
+pytest==7.3.0
     # via -r requirements/tests.in
 python-dateutil==2.8.2
     # via
