@@ -156,7 +156,7 @@ newrelic==8.8.0
     # via -r requirements/requirements.txt
 oauthlib==3.2.2
     # via -r requirements/requirements.txt
-packaging==23.0
+packaging==23.1
     # via
     #   -r requirements/requirements.txt
     #   build

@@ -36,7 +36,7 @@ livereload==2.6.3
     # via sphinx-autobuild
 markupsafe==2.1.1
     # via jinja2
-packaging==23.0
+packaging==23.1
     # via
     #   build
     #   sphinx
