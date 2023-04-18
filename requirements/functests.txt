@@ -278,7 +278,7 @@ sqlalchemy==1.4.47
     #   alembic
     #   data-tasks
     #   zope-sqlalchemy
-sqlparse==0.4.3
+sqlparse==0.4.4
     # via
     #   -r requirements/requirements.txt
     #   data-tasks
