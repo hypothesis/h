@@ -2,9 +2,8 @@ from collections import namedtuple
 
 import newrelic.agent
 from pyramid.httpexceptions import HTTPFound
-from sqlalchemy.orm import subqueryload
 
-from h import links, presenters, storage
+from h import links, presenters
 from h.activity import bucketing
 from h.models import Annotation, Group
 from h.search import (
@@ -15,6 +14,7 @@ from h.search import (
     UsersAggregation,
     parser,
 )
+from h.services.annotation_read import AnnotationReadService
 
 
 class ActivityResults(
@@ -115,7 +115,7 @@ def execute(request, query, page_size):
 
     # Load all referenced annotations from the database, bucket them, and add
     # the buckets to result.timeframes.
-    anns = fetch_annotations(request.db, search_result.annotation_ids)
+    anns = _fetch_annotations(request, search_result.annotation_ids)
     result.timeframes.extend(bucketing.bucket(anns))
 
     # Fetch all groups
@@ -155,15 +155,10 @@ def aggregations_for(query):
 
 
 @newrelic.agent.function_trace()
-def fetch_annotations(session, ids):
-    def load_documents(query):
-        return query.options(subqueryload(Annotation.document))
-
-    annotations = storage.fetch_ordered_annotations(
-        session, ids, query_processor=load_documents
+def _fetch_annotations(request, ids):
+    return request.find_service(AnnotationReadService).get_annotations_by_id(
+        ids=ids, eager_load=[Annotation.document]
     )
-
-    return annotations
 
 
 @newrelic.agent.function_trace()

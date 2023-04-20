@@ -2,17 +2,11 @@ from pyramid import i18n
 from pyramid.view import view_config
 from webob.multidict import MultiDict
 
-from h import search
 from h.feeds import render_atom, render_rss
-from h.storage import fetch_ordered_annotations
+from h.search import Search
+from h.services.annotation_read import AnnotationReadService
 
 _ = i18n.TranslationStringFactory(__package__)
-
-
-def _annotations(request):
-    """Return the annotations from the search API."""
-    result = search.Search(request).run(MultiDict(request.params))
-    return fetch_ordered_annotations(request.db, result.annotation_ids)
 
 
 @view_config(route_name="stream_atom")
@@ -39,4 +33,13 @@ def stream_rss(request):
         title=request.registry.settings.get("h.feed.title") or _("Hypothesis Stream"),
         description=request.registry.settings.get("h.feed.description")
         or _("The Web. Annotated"),
+    )
+
+
+def _annotations(request):
+    """Return the annotations from the search API."""
+    result = Search(request).run(MultiDict(request.params))
+
+    return request.find_service(AnnotationReadService).get_annotations_by_id(
+        ids=result.annotation_ids
     )

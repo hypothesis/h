@@ -4,8 +4,8 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 from pyramid.authorization import Everyone
-from sqlalchemy import event
 
+from h.models import Annotation
 from h.security.permissions import Permission
 from h.services.annotation_json import AnnotationJSONService, factory
 from h.traversal import AnnotationContext
@@ -174,14 +174,24 @@ class TestAnnotationJSONService:
         assert result["tags"]
 
     def test_present_all_for_user(
-        self, service, annotation, user, flag_service, user_service
+        self,
+        service,
+        annotation,
+        user,
+        annotation_read_service,
+        flag_service,
+        user_service,
     ):
-        annotation_ids = [annotation.id]
+        annotation_read_service.get_annotations_by_id.return_value = [annotation]
 
-        result = service.present_all_for_user(annotation_ids, user)
+        result = service.present_all_for_user(sentinel.annotation_ids, user)
 
-        flag_service.all_flagged.assert_called_once_with(user, annotation_ids)
-        flag_service.flag_counts.assert_called_once_with(annotation_ids)
+        annotation_read_service.get_annotations_by_id.assert_called_once_with(
+            ids=sentinel.annotation_ids,
+            eager_load=[Annotation.document, Annotation.moderation, Annotation.group],
+        )
+        flag_service.all_flagged.assert_called_once_with(user, sentinel.annotation_ids)
+        flag_service.flag_counts.assert_called_once_with(sentinel.annotation_ids)
         user_service.fetch_all.assert_called_once_with([annotation.userid])
 
         assert result == [
@@ -189,49 +199,12 @@ class TestAnnotationJSONService:
             Any.dict.containing({"id": Any(), "hidden": False})
         ]
 
-    @pytest.mark.parametrize("attribute", ("document", "moderation", "group"))
-    @pytest.mark.parametrize("with_preload", (True, False))
-    def test_present_all_for_userpreloading_is_effective(
-        self,
-        service,
-        annotation,
-        user,
-        db_session,
-        query_counter,
-        attribute,
-        with_preload,
+    @pytest.fixture
+    def service(
+        self, annotation_read_service, links_service, flag_service, user_service
     ):
-        # Ensure SQLAlchemy forgets all about our annotation
-        db_session.flush()
-        db_session.expire(annotation)
-        if with_preload:
-            service.present_all_for_user([annotation.id], user)
-
-        query_counter.reset()
-        getattr(annotation, attribute)
-
-        # If we preloaded, we shouldn't execute any queries (and vice versa)
-        assert bool(query_counter.count) != with_preload
-
-    @pytest.fixture
-    def query_counter(self, db_engine):
-        class QueryCounter:
-            count = 0
-
-            def __call__(self, *args, **kwargs):
-                self.count += 1
-
-            def reset(self):
-                self.count = 0
-
-        query_counter = QueryCounter()
-        event.listen(db_engine, "before_cursor_execute", query_counter)
-        return query_counter
-
-    @pytest.fixture
-    def service(self, db_session, links_service, flag_service, user_service):
         return AnnotationJSONService(
-            session=db_session,
+            annotation_read_service=annotation_read_service,
             links_service=links_service,
             flag_service=flag_service,
             user_service=user_service,
@@ -269,26 +242,21 @@ class TestFactory:
         self,
         pyramid_request,
         AnnotationJSONService,
+        annotation_read_service,
         flag_service,
         links_service,
         user_service,
     ):
         service = factory(sentinel.context, pyramid_request)
 
-        assert service == AnnotationJSONService.return_value
-
         AnnotationJSONService.assert_called_once_with(
-            session=pyramid_request.db,
+            annotation_read_service=annotation_read_service,
             links_service=links_service,
             flag_service=flag_service,
             user_service=user_service,
         )
+        assert service == AnnotationJSONService.return_value
 
     @pytest.fixture
     def AnnotationJSONService(self, patch):
         return patch("h.services.annotation_json.AnnotationJSONService")
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request, factories):
-        pyramid_request.user = factories.User()
-        return pyramid_request

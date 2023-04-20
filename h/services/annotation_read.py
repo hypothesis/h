@@ -29,6 +29,7 @@ class AnnotationReadService:
     ) -> Iterable[Annotation]:
         """
         Get annotations in the same order as the provided ids.
+
         :param ids: the list of annotation ids
         :param eager_load: A list of annotation relationships to eager load
             like `Annotation.document`

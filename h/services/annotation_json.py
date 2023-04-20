@@ -1,12 +1,13 @@
 from copy import deepcopy
 
-from sqlalchemy.orm import subqueryload
-
-from h import storage
 from h.models import Annotation, User
 from h.presenters import DocumentJSONPresenter
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
+from h.services.annotation_read import AnnotationReadService
+from h.services.flag import FlagService
+from h.services.links import LinksService
+from h.services.user import UserService
 from h.session import user_info
 from h.traversal import AnnotationContext
 from h.util.datetime import utc_iso8601
@@ -15,16 +16,22 @@ from h.util.datetime import utc_iso8601
 class AnnotationJSONService:
     """A service for generating API compatible JSON for annotations."""
 
-    def __init__(self, session, links_service, flag_service, user_service):
+    def __init__(
+        self,
+        annotation_read_service: AnnotationReadService,
+        links_service: LinksService,
+        flag_service: FlagService,
+        user_service: UserService,
+    ):
         """
         Instantiate the service.
 
-        :param session: DB session
+        :param annotation_read_service: AnnotationReadService instance
         :param links_service: LinksService instance
         :param flag_service: FlagService instance
         :param user_service: UserService instance
         """
-        self._session = session
+        self._annotation_read_service = annotation_read_service
         self._links_service = links_service
         self._flag_service = flag_service
         self._user_service = user_service
@@ -133,33 +140,24 @@ class AnnotationJSONService:
         self._flag_service.all_flagged(user, annotation_ids)
         self._flag_service.flag_counts(annotation_ids)
 
-        annotations = storage.fetch_ordered_annotations(
-            self._session,
-            annotation_ids,
-            query_processor=self._eager_load_related_items,
+        annotations = self._annotation_read_service.get_annotations_by_id(
+            ids=annotation_ids,
+            eager_load=[
+                # Optimise access to the document
+                Annotation.document,
+                # Optimise the check used for "hidden" above
+                Annotation.moderation,
+                # Optimise the permissions check for MODERATE permissions,
+                # which ultimately depends on group permissions, causing a
+                # group lookup for every annotation without this
+                Annotation.group,
+            ],
         )
 
         # Optimise the user service `fetch()` call
         self._user_service.fetch_all([annotation.userid for annotation in annotations])
 
         return [self.present_for_user(annotation, user) for annotation in annotations]
-
-    @staticmethod
-    def _eager_load_related_items(query):
-        # Ensure that accessing `annotation.document` or `.moderation`
-        # doesn't trigger any more queries by pre-loading these
-
-        return query.options(
-            # Optimise access to the document which is called in
-            # `AnnotationJSONPresenter`
-            subqueryload(Annotation.document),
-            # Optimise the check used for "hidden" above
-            subqueryload(Annotation.moderation),
-            # Optimise the permissions check for MODERATE permissions,
-            # which ultimately depends on group permissions, causing a
-            # group lookup for every annotation without this
-            subqueryload(Annotation.group),
-        )
 
     @classmethod
     def _get_read_permission(cls, annotation):
@@ -182,8 +180,7 @@ class AnnotationJSONService:
 
 def factory(_context, request):
     return AnnotationJSONService(
-        session=request.db,
-        # Services
+        annotation_read_service=request.find_service(AnnotationReadService),
         links_service=request.find_service(name="links"),
         flag_service=request.find_service(name="flag"),
         user_service=request.find_service(name="user"),
