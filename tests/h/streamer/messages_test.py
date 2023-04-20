@@ -102,32 +102,42 @@ class TestHandleMessage:
         return patch("h.streamer.websocket.WebSocket")
 
 
-@pytest.mark.usefixtures("annotation_json_service", "nipsa_service")
+@pytest.mark.usefixtures(
+    "annotation_json_service", "annotation_read_service", "nipsa_service"
+)
 class TestHandleAnnotationEvent:
-    def test_it_fetches_the_annotation(
-        self, fetch_annotation, handle_annotation_event, session, message
+    def test_it(
+        self,
+        handle_annotation_event,
+        message,
+        socket,
+        annotation_read_service,
+        annotation_json_service,
+        SocketFilter,
     ):
-        handle_annotation_event(message=message, session=session)
+        handle_annotation_event(
+            message=message, sockets=[socket], session=sentinel.session
+        )
 
-        fetch_annotation.assert_called_once_with(session, message["annotation_id"])
+        annotation_read_service.get_annotation_by_id.assert_called_once_with(
+            message["annotation_id"]
+        )
+        annotation = annotation_read_service.get_annotation_by_id.return_value
+
+        SocketFilter.matching.assert_called_once_with(
+            [socket], annotation, sentinel.session
+        )
+
+        annotation_json_service.present.assert_called_once_with(annotation)
 
     def test_it_skips_notification_when_fetch_failed(
-        self, fetch_annotation, handle_annotation_event
+        self, handle_annotation_event, annotation_read_service
     ):
-        fetch_annotation.return_value = None
+        annotation_read_service.get_annotation_by_id.return_value = None
 
         result = handle_annotation_event()
 
         assert result is None
-
-    def test_it_serializes_the_annotation(
-        self, handle_annotation_event, fetch_annotation, annotation_json_service
-    ):
-        handle_annotation_event()
-
-        annotation_json_service.present.assert_called_once_with(
-            fetch_annotation.return_value
-        )
 
     @pytest.mark.parametrize("action", ["create", "update", "delete"])
     def test_notification_format(
@@ -148,20 +158,6 @@ class TestHandleAnnotationEvent:
                 "type": "annotation-notification",
                 "options": {"action": action},
             }
-        )
-
-    def test_it_filters_the_sockets(
-        self,
-        handle_annotation_event,
-        SocketFilter,
-        fetch_annotation,
-        socket,
-        db_session,
-    ):
-        handle_annotation_event(sockets=[socket], session=db_session)
-
-        SocketFilter.matching.assert_called_once_with(
-            [socket], fetch_annotation.return_value, db_session
         )
 
     def test_no_send_for_sender_socket(self, handle_annotation_event, socket, message):
@@ -187,12 +183,12 @@ class TestHandleAnnotationEvent:
         user_is_nipsaed,
         socket,
         nipsa_service,
-        fetch_annotation,
+        annotation_read_service,
     ):
         """Should return None if the annotation is from a NIPSA'd user."""
         nipsa_service.is_flagged.return_value = True
 
-        fetch_annotation.return_value.userid = (
+        annotation_read_service.get_annotation_by_id.return_value.userid = (
             socket.identity.user.userid if user_is_nipsaed else "other_user"
         )
         handle_annotation_event(sockets=[socket])
@@ -206,14 +202,16 @@ class TestHandleAnnotationEvent:
         can_see,
         AnnotationContext,
         identity_permits,
-        fetch_annotation,
+        annotation_read_service,
         socket,
     ):
         identity_permits.return_value = can_see
 
         handle_annotation_event(sockets=[socket])
 
-        AnnotationContext.assert_called_once_with(fetch_annotation.return_value)
+        AnnotationContext.assert_called_once_with(
+            annotation_read_service.get_annotation_by_id.return_value
+        )
         identity_permits.assert_called_once_with(
             socket.identity,
             AnnotationContext.return_value,
@@ -248,11 +246,11 @@ class TestHandleAnnotationEvent:
         return sentinel.db_session
 
     @pytest.fixture
-    def message(self, fetch_annotation):
+    def message(self, annotation_read_service):
         return {
             # This is a bit backward from how things really work, but it
             # ensures the id we look up gives us an annotation that matches
-            "annotation_id": fetch_annotation.return_value.id,
+            "annotation_id": annotation_read_service.return_value.id,
             "action": "update",
             "src_client_id": "source_socket",
         }
@@ -260,12 +258,6 @@ class TestHandleAnnotationEvent:
     @pytest.fixture
     def AnnotationContext(self, patch):
         return patch("h.streamer.messages.AnnotationContext")
-
-    @pytest.fixture(autouse=True)
-    def fetch_annotation(self, factories, patch):
-        fetch = patch("h.streamer.messages.storage.fetch_annotation")
-        fetch.return_value = factories.Annotation()
-        return fetch
 
     @pytest.fixture(autouse=True)
     def identity_permits(self, patch):

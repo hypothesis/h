@@ -5,22 +5,25 @@ import pytest
 from h.traversal import AnnotationContext, AnnotationRoot
 
 
+@pytest.mark.usefixtures("annotation_read_service")
 class TestAnnotationRoot:
     def test_getting_by_subscript_returns_AnnotationContext(
-        self, root, pyramid_request, AnnotationContext, storage
+        self, root, AnnotationContext, annotation_read_service
     ):
         context = root[sentinel.annotation_id]
 
-        storage.fetch_annotation.assert_called_once_with(
-            pyramid_request.db, sentinel.annotation_id
+        annotation_read_service.get_annotation_by_id.assert_called_once_with(
+            sentinel.annotation_id
         )
-        AnnotationContext.assert_called_once_with(storage.fetch_annotation.return_value)
+        AnnotationContext.assert_called_once_with(
+            annotation_read_service.get_annotation_by_id.return_value
+        )
         assert context == AnnotationContext.return_value
 
     def test_getting_by_subscript_raises_KeyError_if_annotation_missing(
-        self, root, storage
+        self, root, annotation_read_service
     ):
-        storage.fetch_annotation.return_value = None
+        annotation_read_service.get_annotation_by_id.return_value = None
 
         with pytest.raises(KeyError):
             assert root[sentinel.annotation_id]
@@ -28,10 +31,6 @@ class TestAnnotationRoot:
     @pytest.fixture
     def root(self, pyramid_request):
         return AnnotationRoot(pyramid_request)
-
-    @pytest.fixture
-    def storage(self, patch):
-        return patch("h.traversal.annotation.storage")
 
     @pytest.fixture
     def AnnotationContext(self, patch):
