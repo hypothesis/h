@@ -7,44 +7,12 @@ import sqlalchemy as sa
 from h_matchers import Any
 
 from h import storage
-from h.models.annotation import Annotation
 from h.models.document import Document, DocumentURI
 from h.schemas import ValidationError
 from h.security import Permission
 from h.traversal.group import GroupContext
 
 pytestmark = pytest.mark.usefixtures("search_index")
-
-
-class TestFetchOrderedAnnotations:
-    def test_it_returns_annotations_for_ids_in_the_same_order(
-        self, db_session, factories
-    ):
-        ann_1 = factories.Annotation(userid="luke")
-        ann_2 = factories.Annotation(userid="luke")
-
-        assert [ann_2, ann_1] == storage.fetch_ordered_annotations(
-            db_session, [ann_2.id, ann_1.id]
-        )
-        assert [ann_1, ann_2] == storage.fetch_ordered_annotations(
-            db_session, [ann_1.id, ann_2.id]
-        )
-
-    def test_it_allows_to_change_the_query(self, db_session, factories):
-        ann_1 = factories.Annotation(userid="luke")
-        ann_2 = factories.Annotation(userid="maria")
-
-        def only_maria(query):
-            return query.filter(Annotation.userid == "maria")
-
-        assert [ann_2] == storage.fetch_ordered_annotations(
-            db_session, [ann_2.id, ann_1.id], query_processor=only_maria
-        )
-
-    def test_it_handles_empty_ids(self):
-        results = storage.fetch_ordered_annotations(sentinel.db_session, ids=[])
-
-        assert results == []
 
 
 class TestExpandURI:
