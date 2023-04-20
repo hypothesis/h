@@ -7,7 +7,7 @@ from gevent.queue import Full
 from h import realtime
 from h.realtime import Consumer
 from h.security import Permission, identity_permits
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 from h.streamer import websocket
 from h.streamer.contexts import request_context
 from h.streamer.filter import SocketFilter
@@ -100,7 +100,7 @@ def handle_user_event(message, sockets, _request, _session):
 
 def handle_annotation_event(message, sockets, request, session):
     id_ = message["annotation_id"]
-    annotation = request.find_service(AnnotationService).get_annotation_by_id(id_)
+    annotation = request.find_service(AnnotationReadService).get_annotation_by_id(id_)
 
     if annotation is None:
         log.warning("received annotation event for missing annotation: %s", id_)

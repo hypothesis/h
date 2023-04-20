@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from h.models import Annotation
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 
 
 @dataclass
@@ -22,9 +22,9 @@ class AnnotationRoot:
         self.request = request
 
     def __getitem__(self, annotation_id):
-        annotation = self.request.find_service(AnnotationService).get_annotation_by_id(
-            annotation_id
-        )
+        annotation = self.request.find_service(
+            AnnotationReadService
+        ).get_annotation_by_id(annotation_id)
         if annotation is None:
             raise KeyError()
 

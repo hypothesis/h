@@ -3,7 +3,7 @@ from copy import deepcopy
 from h.models import Annotation, User
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
-from h.services.annotation import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 from h.services.flag import FlagService
 from h.services.links import LinksService
 from h.services.user import UserService
@@ -18,7 +18,7 @@ class AnnotationJSONService:
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        annotation_service: AnnotationService,
+        annotation_read_service: AnnotationReadService,
         links_service: LinksService,
         flag_service: FlagService,
         user_service: UserService,
@@ -26,12 +26,12 @@ class AnnotationJSONService:
         """
         Instantiate the service.
 
-        :param annotation_service: AnnotationService instance
+        :param annotation_read_service: AnnotationReadService instance
         :param links_service: LinksService instance
         :param flag_service: FlagService instance
         :param user_service: UserService instance
         """
-        self._annotation_service = annotation_service
+        self._annotation_read_service = annotation_read_service
         self._links_service = links_service
         self._flag_service = flag_service
         self._user_service = user_service
@@ -144,7 +144,7 @@ class AnnotationJSONService:
         self._flag_service.all_flagged(user, annotation_ids)
         self._flag_service.flag_counts(annotation_ids)
 
-        annotations = self._annotation_service.get_annotations_by_id(
+        annotations = self._annotation_read_service.get_annotations_by_id(
             ids=annotation_ids,
             eager_load=[
                 # Optimise access to the document
@@ -184,7 +184,7 @@ class AnnotationJSONService:
 
 def factory(_context, request):
     return AnnotationJSONService(
-        annotation_service=request.find_service(AnnotationService),
+        annotation_read_service=request.find_service(AnnotationReadService),
         links_service=request.find_service(name="links"),
         flag_service=request.find_service(name="flag"),
         user_service=request.find_service(name="user"),

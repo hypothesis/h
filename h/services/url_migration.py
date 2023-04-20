@@ -4,7 +4,7 @@ import logging
 from celery.utils import chunks
 
 from h.schemas.annotation import transform_document
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 from h.tasks.url_migration import move_annotations
 
 log = logging.getLogger(__name__)
@@ -16,9 +16,11 @@ class URLMigrationService:
     BATCH_SIZE = 50
     """How many annotations to migrate at once."""
 
-    def __init__(self, transaction_manager, annotation_service: AnnotationService):
+    def __init__(
+        self, transaction_manager, annotation_read_service: AnnotationReadService
+    ):
         self._transaction_manager = transaction_manager
-        self._annotation_service = annotation_service
+        self._annotation_read_service = annotation_read_service
 
     def move_annotations(self, annotation_ids, current_uri, new_url_info):
         """
@@ -34,7 +36,7 @@ class URLMigrationService:
         """
 
         # Skip annotation if it was updated since the task was scheduled
-        for annotation in self._annotation_service.search_annotations(
+        for annotation in self._annotation_read_service.search_annotations(
             ids=annotation_ids, target_uri=current_uri
         ):
             update_data = {"target_uri": new_url_info["url"]}
@@ -68,7 +70,7 @@ class URLMigrationService:
             # Update the annotation's `target_uri` and associated document,
             # and create `Document*` entities for the new URL if they don't
             # already exist.
-            self._annotation_service.update_annotation(
+            self._annotation_read_service.update_annotation(
                 annotation,
                 update_data,
                 # Don't update "edited" timestamp on annotation cards.
@@ -89,7 +91,7 @@ class URLMigrationService:
              This is an entry matching the `URLMigrationSchema` schema.
         """
         # Get the IDs of all annotations on the old URL
-        annotations = self._annotation_service.search_annotations(document_uri=url)
+        annotations = self._annotation_read_service.search_annotations(document_uri=url)
         annotation_ids = [annotation.id for annotation in annotations]
         if not annotation_ids:
             return
@@ -119,5 +121,5 @@ class URLMigrationService:
 def url_migration_factory(_context, request):
     return URLMigrationService(
         transaction_manager=request.tm,
-        annotation_service=request.find_service(AnnotationService),
+        annotation_read_service=request.find_service(AnnotationReadService),
     )

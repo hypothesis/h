@@ -6,7 +6,7 @@ from h import __version__, emails
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 from h.notification import reply
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 from h.tasks import mailer
 
 
@@ -72,7 +72,7 @@ def send_reply_notifications(event):
     request = event.request
 
     with request.tm:
-        annotation = request.find_service(AnnotationService).get_annotation_by_id(
+        annotation = request.find_service(AnnotationReadService).get_annotation_by_id(
             event.annotation_id
         )
         notification = reply.get_notification(request, annotation, event.action)

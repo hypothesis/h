@@ -4,7 +4,7 @@ from webob.multidict import MultiDict
 
 from h.feeds import render_atom, render_rss
 from h.search import Search
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -40,6 +40,6 @@ def _annotations(request):
     """Return the annotations from the search API."""
     result = Search(request).run(MultiDict(request.params))
 
-    return request.find_service(AnnotationService).get_annotations_by_id(
+    return request.find_service(AnnotationReadService).get_annotations_by_id(
         ids=result.annotation_ids
     )

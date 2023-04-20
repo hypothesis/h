@@ -1,7 +1,7 @@
 from h_pyramid_sentry import report_exception
 
 from h.presenters import AnnotationSearchIndexPresenter
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 from h.tasks import indexer
 
 
@@ -17,7 +17,7 @@ class SearchIndexService:
         es_client,
         session,
         settings,
-        annotation_service: AnnotationService,
+        annotation_read_service: AnnotationReadService,
         queue,
     ):
         """
@@ -34,7 +34,7 @@ class SearchIndexService:
         self._es = es_client
         self._db = session
         self._settings = settings
-        self._annotation_service = annotation_service
+        self._annotation_read_service = annotation_read_service
         self._queue = queue
 
     def add_annotation_by_id(self, annotation_id):
@@ -49,7 +49,7 @@ class SearchIndexService:
 
         :param annotation_id: Id of the annotation to add.
         """
-        annotation = self._annotation_service.get_annotation_by_id(annotation_id)
+        annotation = self._annotation_read_service.get_annotation_by_id(annotation_id)
         if not annotation or annotation.deleted:
             return
 

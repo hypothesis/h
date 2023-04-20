@@ -14,7 +14,7 @@ from h.search import (
     UsersAggregation,
     parser,
 )
-from h.services import AnnotationService
+from h.services.annotation_read import AnnotationReadService
 
 
 class ActivityResults(
@@ -156,7 +156,7 @@ def aggregations_for(query):
 
 @newrelic.agent.function_trace()
 def _fetch_annotations(request, ids):
-    return request.find_service(AnnotationService).get_annotations_by_id(
+    return request.find_service(AnnotationReadService).get_annotations_by_id(
         ids=ids, eager_load=[Annotation.document]
     )
 

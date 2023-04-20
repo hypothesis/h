@@ -2,7 +2,8 @@ import logging
 from collections import namedtuple
 
 from h.models import Subscriptions
-from h.services import AnnotationService, SubscriptionService
+from h.services import SubscriptionService
+from h.services.annotation_read import AnnotationReadService
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ def get_notification(
     # Now we know we're dealing with a reply
     reply = annotation
 
-    parent = request.find_service(AnnotationService).get_annotation_by_id(parent_id)
+    parent = request.find_service(AnnotationReadService).get_annotation_by_id(parent_id)
     if parent is None:
         return None
 

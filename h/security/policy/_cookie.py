@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
-from h.services import AuthCookieService
+from h.services.auth_cookie import AuthCookieService
 
 
 class CookiePolicy(IdentityBasedPolicy):

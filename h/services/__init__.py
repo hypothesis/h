@@ -1,5 +1,6 @@
 """Service definitions that handle business logic."""
-from h.services.annotation import AnnotationService
+from h.services.annotation_read import AnnotationReadService
+from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
 from h.services.bulk_annotation import BulkAnnotationService
 from h.services.subscription import SubscriptionService
@@ -7,7 +8,10 @@ from h.services.subscription import SubscriptionService
 
 def includeme(config):  # pragma: no cover
     config.register_service_factory(
-        "h.services.annotation.service_factory", iface=AnnotationService
+        "h.services.annotation_read.service_factory", iface=AnnotationReadService
+    )
+    config.register_service_factory(
+        "h.services.annotation_write.service_factory", iface=AnnotationWriteService
     )
     config.register_service_factory(".annotation_json.factory", name="annotation_json")
     config.register_service_factory(

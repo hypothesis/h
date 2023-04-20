@@ -1,24 +1,21 @@
 from datetime import datetime
-from typing import Iterable, List, Optional
 
-from sqlalchemy import select
-from sqlalchemy.orm import Query, Session, subqueryload
+from sqlalchemy.orm import Session
 
 from h import i18n
-from h.db.types import InvalidUUID
-from h.models import Annotation, DocumentURI
+from h.models import Annotation
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
+from h.services.annotation_read import AnnotationReadService
 from h.services.search_index import SearchIndexService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
-from h.util.uri import normalize
 
 _ = i18n.TranslationStringFactory(__package__)
 
 
-class AnnotationService:
+class AnnotationWriteService:
     """A service for storing and retrieving annotations."""
 
     def __init__(
@@ -26,60 +23,12 @@ class AnnotationService:
         db_session: Session,
         has_permission: callable,
         search_index_service: SearchIndexService,
+        annotation_read_service: AnnotationReadService,
     ):
         self._db = db_session
         self._has_permission = has_permission
         self._search_index_service = search_index_service
-
-    def get_annotation_by_id(self, id_: str) -> Optional[Annotation]:
-        """
-        Fetch the annotation with the given id.
-
-        :param id_: Annotation ID to retrieve
-        """
-        try:
-            return self._db.query(Annotation).get(id_)
-        except InvalidUUID:
-            return None
-
-    def get_annotations_by_id(
-        self, ids: List[str], eager_load: Optional[List] = None
-    ) -> Iterable[Annotation]:
-        """
-        Get annotations in the same order as the provided ids.
-
-        :param ids: the list of annotation ids
-        :param eager_load: A list of annotation relationships to eager load
-            like `Annotation.document`
-        """
-
-        if not ids:
-            return []
-
-        annotations = self._db.execute(
-            self._annotation_search_query(ids=ids, eager_load=eager_load)
-        ).scalars()
-
-        return sorted(annotations, key=lambda annotation: ids.index(annotation.id))
-
-    def search_annotations(
-        self,
-        ids: Optional[List[str]] = None,
-        target_uri: Optional[str] = None,
-        document_uri: Optional[str] = None,
-    ) -> Iterable[Annotation]:
-        """
-        Search for annotations using information stored in Postgres.
-
-        :param ids: Search by specified annotation ids
-        :param target_uri: Search by annotation target URI
-        :param document_uri: Search by document URI
-        """
-        query = self._annotation_search_query(
-            ids=ids, document_uri=document_uri, target_uri=target_uri
-        )
-
-        return self._db.execute(query).scalars().all()
+        self._annotation_read_service = annotation_read_service
 
     def create_annotation(self, data: dict) -> Annotation:
         """
@@ -91,7 +40,9 @@ class AnnotationService:
 
         # Set the group to be the same as the root annotation
         if references := data["references"]:
-            if root_annotation := self.get_annotation_by_id(references[0]):
+            if root_annotation := self._annotation_read_service.get_annotation_by_id(
+                references[0]
+            ):
                 data["groupid"] = root_annotation.groupid
             else:
                 raise ValidationError(
@@ -218,44 +169,16 @@ class AnnotationService:
                 + _("Annotations for this target URI are not allowed in this group")
             )
 
-    @staticmethod
-    def _annotation_search_query(
-        ids: Optional[List[str]] = None,
-        document_uri: Optional[str] = None,
-        target_uri: Optional[str] = None,
-        eager_load: Optional[List] = None,
-    ) -> Query:
-        """Create a query for searching for annotations."""
 
-        query = select(Annotation)
-
-        if ids:
-            query = query.where(Annotation.id.in_(ids))
-
-        if target_uri:
-            query = query.where(
-                Annotation.target_uri_normalized == normalize(target_uri)
-            )
-
-        if document_uri:
-            document_subquery = select(DocumentURI.document_id).where(
-                DocumentURI.uri_normalized == normalize(document_uri)
-            )
-            query = query.where(Annotation.document_id.in_(document_subquery))
-
-        if eager_load:
-            query = query.options(subqueryload(*eager_load))
-
-        return query
-
-
-def service_factory(_context, request) -> AnnotationService:
+def service_factory(_context, request) -> AnnotationWriteService:
     """Get an annotation service instance."""
 
-    return AnnotationService(
+    return AnnotationWriteService(
         db_session=request.db,
         has_permission=request.has_permission,
-        search_index_service=request.find_service(  # pylint: disable=protected-access
+        search_index_service=request.find_service(
+            # pylint: disable=protected-access
             name="search_index"
         ),
+        annotation_read_service=request.find_service(AnnotationReadService),
     )

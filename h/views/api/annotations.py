@@ -26,7 +26,7 @@ from h.schemas.annotation import (
 )
 from h.schemas.util import validate_query_params
 from h.security import Permission
-from h.services import AnnotationService
+from h.services.annotation_write import AnnotationWriteService
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -78,7 +78,7 @@ def create(request):
     schema = CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
 
-    annotation = request.find_service(AnnotationService).create_annotation(
+    annotation = request.find_service(AnnotationWriteService).create_annotation(
         data=appstruct
     )
 
@@ -137,7 +137,7 @@ def update(context, request):
     )
     appstruct = schema.validate(_json_payload(request))
 
-    annotation = request.find_service(AnnotationService).update_annotation(
+    annotation = request.find_service(AnnotationWriteService).update_annotation(
         context.annotation, data=appstruct
     )
 
