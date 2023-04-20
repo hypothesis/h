@@ -99,12 +99,13 @@ class TestPublishAnnotationEvent:
         return event
 
 
+@pytest.mark.usefixtures("annotation_read_service")
 class TestSendReplyNotifications:
     def test_it_sends_emails(
         self,
         event,
         pyramid_request,
-        storage,
+        annotation_read_service,
         reply,
         emails,
         mailer,
@@ -113,10 +114,10 @@ class TestSendReplyNotifications:
 
         # This is a pure plumbing test, checking everything is connected to
         # everything else as we expect
-        storage.fetch_annotation.assert_called_once_with(
-            pyramid_request.db, event.annotation_id
+        annotation_read_service.get_annotation_by_id.assert_called_once_with(
+            event.annotation_id
         )
-        annotation = storage.fetch_annotation.return_value
+        annotation = annotation_read_service.get_annotation_by_id.return_value
         reply.get_notification.assert_called_once_with(
             pyramid_request, annotation, event.action
         )
@@ -168,11 +169,6 @@ class TestSyncAnnotation:
             TransactionManager, instance=True, spec_set=True
         )
         return pyramid_request.tm
-
-
-@pytest.fixture(autouse=True)
-def storage(patch):
-    return patch("h.subscribers.storage")
 
 
 @pytest.fixture(autouse=True)
