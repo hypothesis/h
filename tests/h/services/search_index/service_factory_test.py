@@ -7,7 +7,13 @@ from h.services.search_index.service_factory import factory
 
 class TestFactory:
     def test_it(
-        self, pyramid_request, SearchIndexService, settings, BatchIndexer, Queue
+        self,
+        pyramid_request,
+        SearchIndexService,
+        settings,
+        BatchIndexer,
+        Queue,
+        annotation_read_service,
     ):
         result = factory(sentinel.context, pyramid_request)
 
@@ -25,6 +31,7 @@ class TestFactory:
             session=pyramid_request.db,
             settings=settings,
             queue=Queue.return_value,
+            annotation_read_service=annotation_read_service,
         )
         assert result == SearchIndexService.return_value
 

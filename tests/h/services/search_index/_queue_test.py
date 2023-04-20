@@ -393,7 +393,12 @@ class TestSync:
 
     @pytest.fixture
     def search_index(
-        self, es_client, pyramid_request, moderation_service, nipsa_service
+        self,
+        es_client,
+        pyramid_request,
+        moderation_service,
+        nipsa_service,
+        annotation_read_service,
     ):  # pylint:disable=unused-argument
         return SearchIndexService(
             pyramid_request,
@@ -401,6 +406,7 @@ class TestSync:
             session=pyramid_request.db,
             settings={},
             queue=queue,
+            annotation_read_service=annotation_read_service,
         )
 
     @pytest.fixture

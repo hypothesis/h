@@ -47,7 +47,7 @@ def index_annotations(es_client, search_index):
 
 @pytest.fixture
 def search_index(  # pylint:disable=unused-argument
-    es_client, pyramid_request, moderation_service
+    es_client, pyramid_request, moderation_service, annotation_read_service
 ):
     return SearchIndexService(
         pyramid_request,
@@ -55,6 +55,7 @@ def search_index(  # pylint:disable=unused-argument
         session=pyramid_request.db,
         settings={},
         queue=mock.create_autospec(Queue, spec_set=True, instance=True),
+        annotation_read_service=annotation_read_service,
     )
 
 
