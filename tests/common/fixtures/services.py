@@ -6,6 +6,7 @@ from h.services import BulkAnnotationService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
 from h.services.annotation_moderation import AnnotationModerationService
+from h.services.annotation_read import AnnotationReadService
 from h.services.auth_cookie import AuthCookieService
 from h.services.auth_token import AuthTokenService
 from h.services.delete_group import DeleteGroupService
@@ -34,6 +35,7 @@ __all__ = (
     "mock_service",
     "annotation_delete_service",
     "annotation_json_service",
+    "annotation_read_service",
     "auth_cookie_service",
     "auth_token_service",
     "bulk_annotation_service",
@@ -86,6 +88,11 @@ def annotation_delete_service(mock_service):
 @pytest.fixture
 def annotation_json_service(mock_service):
     return mock_service(AnnotationJSONService, name="annotation_json")
+
+
+@pytest.fixture
+def annotation_read_service(mock_service):
+    return mock_service(AnnotationReadService)
 
 
 @pytest.fixture
