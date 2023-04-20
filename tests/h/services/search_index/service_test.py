@@ -11,19 +11,23 @@ from h.services.settings import SettingsService
 
 
 class TestAddAnnotationById:
-    def test_it(self, search_index, root_annotation, storage, add_annotation):
-        storage.fetch_annotation.return_value = root_annotation
+    def test_it(
+        self, search_index, root_annotation, add_annotation, annotation_read_service
+    ):
+        annotation_read_service.get_annotation_by_id.return_value = root_annotation
 
         search_index.add_annotation_by_id(root_annotation.id)
 
-        storage.fetch_annotation.assert_called_once_with(
-            search_index._db, root_annotation.id  # pylint:disable=protected-access
+        annotation_read_service.get_annotation_by_id.assert_called_once_with(
+            root_annotation.id
         )
 
         add_annotation.assert_called_once_with(root_annotation)
 
-    def test_it_returns_with_no_annotation(self, search_index, storage, add_annotation):
-        storage.fetch_annotation.return_value = None
+    def test_it_returns_with_no_annotation(
+        self, search_index, annotation_read_service, add_annotation
+    ):
+        annotation_read_service.get_annotation_by_id.return_value = None
 
         search_index.add_annotation_by_id(sentinel.any_id)
 
@@ -39,18 +43,22 @@ class TestAddAnnotationById:
         mock_es_client.conn.index.assert_not_called()
 
     def test_it_also_adds_the_thread_root(
-        self, search_index, reply_annotation, root_annotation, storage, add_annotation
+        self,
+        search_index,
+        reply_annotation,
+        root_annotation,
+        annotation_read_service,
+        add_annotation,
     ):
-        storage.fetch_annotation.side_effect = [reply_annotation, root_annotation]
+        annotation_read_service.get_annotation_by_id.side_effect = (
+            reply_annotation,
+            root_annotation,
+        )
 
         search_index.add_annotation_by_id(reply_annotation.id)
 
-        storage.fetch_annotation.assert_has_calls(
-            # pylint:disable=protected-access
-            [
-                call(search_index._db, reply_annotation.id),
-                call(search_index._db, root_annotation.id),
-            ]
+        annotation_read_service.get_annotation_by_id.assert_has_calls(
+            [call(reply_annotation.id), call(root_annotation.id)]
         )
 
         add_annotation.assert_has_calls([call(reply_annotation), call(root_annotation)])
@@ -320,13 +328,16 @@ def queue():
 
 
 @pytest.fixture
-def search_index(mock_es_client, pyramid_request, settings_service, queue):
+def search_index(
+    mock_es_client, pyramid_request, settings_service, queue, annotation_read_service
+):
     return SearchIndexService(
         session=pyramid_request.db,
         es_client=mock_es_client,
         request=pyramid_request,
         settings=settings_service,
         queue=queue,
+        annotation_read_service=annotation_read_service,
     )
 
 
@@ -338,11 +349,6 @@ def indexer(patch):
 @pytest.fixture(autouse=True)
 def report_exception(patch):
     return patch("h.services.search_index.service.report_exception")
-
-
-@pytest.fixture(autouse=True)
-def storage(patch):
-    return patch("h.services.search_index.service.storage")
 
 
 @pytest.fixture

@@ -1,4 +1,5 @@
 from h.search.index import BatchIndexer
+from h.services import AnnotationReadService
 from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
 
@@ -16,4 +17,5 @@ def factory(_context, request):
             es=request.es,
             batch_indexer=BatchIndexer(request.db, request.es, request),
         ),
+        annotation_read_service=request.find_service(AnnotationReadService),
     )
