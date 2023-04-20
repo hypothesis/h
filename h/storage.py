@@ -20,33 +20,14 @@ from datetime import datetime
 from pyramid import i18n
 
 from h import models, schemas
-from h.db import types
 from h.models.document import update_document_metadata
 from h.security import Permission
+from h.services.annotation_read import AnnotationReadService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 from h.util.uri import normalize as normalize_uri
 
 _ = i18n.TranslationStringFactory(__package__)
-
-
-def fetch_annotation(session, id_):
-    """
-    Fetch the annotation with the given id.
-
-    :param session: the database session
-    :type session: sqlalchemy.orm.session.Session
-
-    :param id_: the annotation ID
-    :type id_: str
-
-    :returns: the annotation, if found, or None.
-    :rtype: h.models.Annotation, NoneType
-    """
-    try:
-        return session.query(models.Annotation).get(id_)
-    except types.InvalidUUID:
-        return None
 
 
 def fetch_ordered_annotations(session, ids, query_processor=None):
@@ -96,11 +77,13 @@ def create_annotation(request, data):
     """
     document_data = data.pop("document", {})
 
+    annotation_read: AnnotationReadService = request.find_service(AnnotationReadService)
+
     # Replies must have the same group as their parent.
     if data["references"]:
         root_annotation_id = data["references"][0]
 
-        if root_annotation := fetch_annotation(request.db, root_annotation_id):
+        if root_annotation := annotation_read.get_annotation_by_id(root_annotation_id):
             data["groupid"] = root_annotation.groupid
         else:
             raise schemas.ValidationError(

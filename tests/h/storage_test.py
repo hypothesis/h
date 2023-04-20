@@ -16,17 +16,6 @@ from h.traversal.group import GroupContext
 pytestmark = pytest.mark.usefixtures("search_index")
 
 
-class TestFetchAnnotation:
-    def test_it_fetches_and_returns_the_annotation(self, db_session, factories):
-        annotation = factories.Annotation()
-
-        actual = storage.fetch_annotation(db_session, annotation.id)
-        assert annotation == actual
-
-    def test_it_does_not_crash_if_id_is_invalid(self, db_session):
-        assert storage.fetch_annotation(db_session, "foo") is None
-
-
 class TestFetchOrderedAnnotations:
     def test_it_returns_annotations_for_ids_in_the_same_order(
         self, db_session, factories
@@ -130,6 +119,7 @@ class TestExpandURI:
         assert uris == expected_uris
 
 
+@pytest.mark.usefixtures("annotation_read_service")
 class TestCreateAnnotation:
     def test_it(self, pyramid_request, annotation_data, datetime):
         annotation = storage.create_annotation(pyramid_request, annotation_data)
@@ -181,10 +171,16 @@ class TestCreateAnnotation:
         )
 
     def test_it_sets_the_group_to_match_the_parent_for_replies(
-        self, pyramid_request, annotation_data, factories, other_group
+        self,
+        pyramid_request,
+        annotation_data,
+        factories,
+        other_group,
+        annotation_read_service,
     ):
         parent_annotation = factories.Annotation(group=other_group)
         annotation_data["references"] = [parent_annotation.id]
+        annotation_read_service.get_annotation_by_id.return_value = parent_annotation
 
         annotation = storage.create_annotation(pyramid_request, annotation_data)
 
@@ -192,8 +188,10 @@ class TestCreateAnnotation:
         assert annotation.group == parent_annotation.group
 
     def test_it_raises_if_parent_annotation_does_not_exist(
-        self, pyramid_request, annotation_data
+        self, pyramid_request, annotation_data, annotation_read_service
     ):
+        annotation_read_service.get_annotation_by_id.return_value = None
+
         annotation_data["references"] = ["MISSING_ID"]
 
         with pytest.raises(ValidationError):
