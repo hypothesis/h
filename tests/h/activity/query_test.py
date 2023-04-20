@@ -5,7 +5,8 @@ from h_matchers import Any
 from pyramid.httpexceptions import HTTPFound
 from webob.multidict import MultiDict
 
-from h.activity.query import check_url, execute, extract, fetch_annotations
+from h.activity.query import check_url, execute, extract
+from h.models import Annotation
 
 
 class TestExtract:
@@ -190,7 +191,7 @@ class TestCheckURL:
 
 
 @pytest.mark.usefixtures(
-    "fetch_annotations",
+    "annotation_read_service",
     "_fetch_groups",
     "bucketing",
     "presenters",
@@ -353,20 +354,22 @@ class TestExecute:
         assert result.timeframes == []
 
     def test_it_fetches_the_annotations_from_the_database(
-        self, fetch_annotations, pyramid_request, search
+        self, annotation_read_service, pyramid_request, search
     ):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        fetch_annotations.assert_called_once_with(
-            pyramid_request.db, search.run.return_value.annotation_ids
+        annotation_read_service.get_annotations_by_id.assert_called_once_with(
+            ids=search.run.return_value.annotation_ids, eager_load=[Annotation.document]
         )
 
     def test_it_buckets_the_annotations(
-        self, fetch_annotations, bucketing, pyramid_request
+        self, annotation_read_service, bucketing, pyramid_request
     ):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        bucketing.bucket.assert_called_once_with(fetch_annotations.return_value)
+        bucketing.bucket.assert_called_once_with(
+            annotation_read_service.get_annotations_by_id.return_value
+        )
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(
@@ -461,10 +464,6 @@ class TestExecute:
         assert result.aggregations == mock.sentinel.aggregations
 
     @pytest.fixture
-    def fetch_annotations(self, patch):
-        return patch("h.activity.query.fetch_annotations")
-
-    @pytest.fixture
     def _fetch_groups(self, group_pubids, patch):
         _fetch_groups = patch("h.activity.query._fetch_groups")
         _fetch_groups.return_value = [mock.Mock(pubid=pubid) for pubid in group_pubids]
@@ -478,7 +477,6 @@ class TestExecute:
         Return a single flat list of all 20 annotations that will be
         distributed among the timeframes and document buckets that our mock
         bucketing.bucket() will return.
-
         """
         return [
             factories.Annotation.build(id="annotation_" + str(i), groupid=group_pubid)
@@ -525,7 +523,6 @@ class TestExecute:
         Return a single flat list of all 7 document buckets that will be
         distributed among the timeframes that our mock bucketing.bucket() will
         return.
-
         """
 
         def document_bucket(annotations):
@@ -552,7 +549,6 @@ class TestExecute:
 
         Return a single flat list of all 20 pubids of the groups of the
         annotations that our mock bucket() will return.
-
         """
         return ["group_" + str(i) for i in range(20)]
 
@@ -605,16 +601,6 @@ class TestExecute:
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         return pyramid_request
-
-
-class TestFetchAnnotations:
-    def test_it_returns_annotations_by_ids(self, db_session, factories):
-        annotations = factories.Annotation.create_batch(3)
-        ids = [a.id for a in annotations]
-
-        result = fetch_annotations(db_session, ids)
-
-        assert annotations == result
 
 
 @pytest.fixture
