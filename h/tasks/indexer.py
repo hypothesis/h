@@ -15,7 +15,7 @@ class _BaseTaskWithRetry(ABC, Task):
     retry_kwargs = {"countdown": 5, "max_retries": 1}
 
 
-@celery.task(base=_BaseTaskWithRetry)
+@celery.task(base=_BaseTaskWithRetry, acks_late=True)
 def add_annotation(id_):
     search_index = celery.request.find_service(name="search_index")
     search_index.add_annotation_by_id(id_)
@@ -45,13 +45,13 @@ def add_group_annotations(groupid, tag, force, schedule_in):
     )
 
 
-@celery.task(base=_BaseTaskWithRetry)
+@celery.task(base=_BaseTaskWithRetry, acks_late=True)
 def delete_annotation(id_):
     search_index = celery.request.find_service(name="search_index")
     search_index.delete_annotation_by_id(id_)
 
 
-@celery.task(acks_late=False)
+@celery.task
 def sync_annotations(limit):
     search_index = celery.request.find_service(name="search_index")
 
@@ -66,7 +66,7 @@ def sync_annotations(limit):
     )
 
 
-@celery.task(acks_late=False)
+@celery.task
 def report_job_queue_metrics():
     metrics = celery.request.find_service(name="job_queue_metrics").metrics()
     newrelic.agent.record_custom_metrics(metrics)
