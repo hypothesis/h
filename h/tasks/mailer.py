@@ -16,7 +16,7 @@ __all__ = ("send",)
 log = get_task_logger(__name__)
 
 
-@celery.task(bind=True, max_retries=3)
+@celery.task(bind=True, max_retries=3, acks_late=True)
 def send(self, recipients, subject, body, html=None):
     """
     Send an email.

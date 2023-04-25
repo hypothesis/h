@@ -15,8 +15,6 @@ from kombu import Exchange, Queue
 
 __all__ = ("celery", "get_task_logger")
 
-from h.tasks import RETRY_POLICY_QUICK
-
 log = logging.getLogger(__name__)
 
 celery = Celery("h")
@@ -25,14 +23,27 @@ celery.conf.update(
         "CELERY_BROKER_URL",
         os.environ.get("BROKER_URL", "amqp://guest:guest@localhost:5672//"),
     ),
-    # What options should we have when sending messages to the queue?
-    broker_transport_options=RETRY_POLICY_QUICK,
-    accept_content=["json"],
-    # Enable at-least-once delivery mode. This probably isn't actually what we
-    # want for all of our queues, but it makes the failure-mode behaviour of
-    # Celery the same as our old NSQ worker:
-    task_acks_late=True,
-    task_ignore_result=True,
+    broker_transport_options={
+        # Celery's docs are very unclear about this but: when publishing a
+        # message to RabbitMQ these options end up getting passed to Kombu's
+        # _ensure_connection() function:
+        # https://github.com/celery/kombu/blob/3e098dc94ed2a389276ccf3606a0ded3da157d72/kombu/connection.py#L399-L453
+        #
+        # By default _ensure_connection() can spend over 6s trying to establish
+        # a connection to RabbitMQ if RabbitMQ is down. This means that if
+        # RabbitMQ goes down then all of our web processes can quickly become
+        # occupied trying to establish connections when web requests try to
+        # call Celery tasks with .delay() or .apply_async().
+        #
+        # These options change it to use a smaller number of retries and less
+        # time between retries so that attempts fail fast when RabbitMQ is down
+        # and our whole web app remains responsive.
+        #
+        # For more info see: https://github.com/celery/celery/issues/4627#issuecomment-396907957
+        "max_retries": 2,
+        "interval_start": 0.2,
+        "interval_step": 0.2,
+    },
     imports=(
         "h.tasks.cleanup",
         "h.tasks.indexer",
@@ -46,7 +57,6 @@ celery.conf.update(
         "h.tasks.indexer.add_users_annotations": "indexer",
         "h.tasks.indexer.delete_annotation": "indexer",
     },
-    task_serializer="json",
     task_queues=[
         Queue(
             "celery",
@@ -61,10 +71,6 @@ celery.conf.update(
             exchange=Exchange("indexer", type="direct", durable=True),
         ),
     ],
-    # Only accept one task at a time. This also probably isn't what we want
-    # (especially not for, say, a search indexer task) but it makes the
-    # behaviour consistent with the previous NSQ-based worker:
-    worker_prefetch_multiplier=1,
 )
 
 
