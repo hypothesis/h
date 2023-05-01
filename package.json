@@ -47,7 +47,7 @@
     "fetch-mock": "^9.11.0",
     "karma": "^6.4.1",
     "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.1",
+    "karma-chrome-launcher": "^3.2.0",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
     "karma-sinon": "^1.0.5",
