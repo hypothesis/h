@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.21.5",
-    "@babel/preset-env": "^7.21.4",
+    "@babel/preset-env": "^7.21.5",
     "@hypothesis/frontend-build": "^1.2.0",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^24.1.0",
