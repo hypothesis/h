@@ -1,16 +1,13 @@
 from datetime import datetime as datetime_
 from datetime import timedelta
-from unittest.mock import create_autospec, sentinel
+from unittest.mock import sentinel
 
 import pytest
-import sqlalchemy as sa
 from h_matchers import Any
 
 from h import storage
 from h.models.document import Document, DocumentURI
 from h.schemas import ValidationError
-from h.security import Permission
-from h.traversal.group import GroupContext
 
 pytestmark = pytest.mark.usefixtures("search_index")
 
@@ -85,134 +82,6 @@ class TestExpandURI:
         )
 
         assert uris == expected_uris
-
-
-@pytest.mark.usefixtures("annotation_read_service")
-class TestCreateAnnotation:
-    def test_it(self, pyramid_request, annotation_data, datetime):
-        annotation = storage.create_annotation(pyramid_request, annotation_data)
-
-        for param, value in annotation_data.items():
-            assert getattr(annotation, param) == value
-
-        assert annotation.created == datetime.utcnow.return_value
-        assert annotation.updated == datetime.utcnow.return_value
-
-        assert sa.inspect(annotation).persistent  # We saved it to the DB
-
-    def test_it_validates_the_group_scope(
-        self, pyramid_request, annotation_data, group, _validate_group_scope
-    ):
-        storage.create_annotation(pyramid_request, annotation_data)
-
-        _validate_group_scope.assert_called_once_with(
-            group, annotation_data["target_uri"]
-        )
-
-    def test_it_adds_document_metadata(
-        self, pyramid_request, annotation_data, update_document_metadata, datetime
-    ):
-        annotation_data["document"] = {
-            "document_meta_dicts": sentinel.document_meta_dicts,
-            "document_uri_dicts": sentinel.document_uri_dicts,
-        }
-
-        annotation = storage.create_annotation(pyramid_request, annotation_data)
-
-        update_document_metadata.assert_called_once_with(
-            pyramid_request.db,
-            annotation_data["target_uri"],
-            sentinel.document_meta_dicts,
-            sentinel.document_uri_dicts,
-            created=datetime.utcnow.return_value,
-            updated=datetime.utcnow.return_value,
-        )
-        assert annotation.document == update_document_metadata.return_value
-
-    def test_it_queues_the_search_index(
-        self, pyramid_request, annotation_data, search_index
-    ):
-        annotation = storage.create_annotation(pyramid_request, annotation_data)
-
-        search_index._queue.add_by_id.assert_called_once_with(  # pylint:disable=protected-access
-            annotation.id, tag="storage.create_annotation", schedule_in=60
-        )
-
-    def test_it_sets_the_group_to_match_the_parent_for_replies(
-        self,
-        pyramid_request,
-        annotation_data,
-        factories,
-        other_group,
-        annotation_read_service,
-    ):
-        parent_annotation = factories.Annotation(group=other_group)
-        annotation_data["references"] = [parent_annotation.id]
-        annotation_read_service.get_annotation_by_id.return_value = parent_annotation
-
-        annotation = storage.create_annotation(pyramid_request, annotation_data)
-
-        assert annotation.groupid
-        assert annotation.group == parent_annotation.group
-
-    def test_it_raises_if_parent_annotation_does_not_exist(
-        self, pyramid_request, annotation_data, annotation_read_service
-    ):
-        annotation_read_service.get_annotation_by_id.return_value = None
-
-        annotation_data["references"] = ["MISSING_ID"]
-
-        with pytest.raises(ValidationError):
-            storage.create_annotation(pyramid_request, annotation_data)
-
-    def test_it_raises_if_the_group_doesnt_exist(
-        self, pyramid_request, annotation_data
-    ):
-        annotation_data["groupid"] = "MISSING_ID"
-
-        with pytest.raises(ValidationError):
-            storage.create_annotation(pyramid_request, annotation_data)
-
-    def test_it_raises_if_write_permission_is_missing(
-        self, pyramid_request, annotation_data, has_permission
-    ):
-        has_permission.return_value = False
-
-        with pytest.raises(ValidationError):
-            storage.create_annotation(pyramid_request, annotation_data)
-
-        has_permission.assert_called_once_with(
-            Permission.Group.WRITE, context=Any.instance_of(GroupContext)
-        )
-
-    def test_it_does_not_crash_if_target_selectors_is_empty(
-        self, pyramid_request, annotation_data
-    ):
-        # Page notes have [] for target_selectors.
-        annotation_data["target_selectors"] = []
-
-        storage.create_annotation(pyramid_request, annotation_data)
-
-    @pytest.mark.xfail(reason="This test passed before due to over fixturing")
-    def test_it_does_not_crash_if_no_text_or_tags(
-        self, pyramid_request, annotation_data
-    ):
-        # Highlights have no text or tags.
-        annotation_data["text"] = annotation_data["tags"] = ""
-
-        # ValueError: Attribute 'tags' does not accept objects of type <class 'str'>
-        # So what should this be? None?
-        storage.create_annotation(pyramid_request, annotation_data)
-
-    @pytest.fixture
-    def other_group(self, factories):
-        # Set an authority_provided_id so our group_id is not None
-        return factories.OpenGroup(authority_provided_id="other_group_auth_id")
-
-    @pytest.fixture
-    def has_permission(self, pyramid_request):
-        pyramid_request.has_permission = create_autospec(pyramid_request.has_permission)
-        return pyramid_request.has_permission
 
 
 class TestUpdateAnnotation:

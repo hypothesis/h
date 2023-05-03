@@ -21,79 +21,10 @@ from pyramid import i18n
 
 from h import models, schemas
 from h.models.document import update_document_metadata
-from h.security import Permission
-from h.services.annotation_read import AnnotationReadService
-from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 from h.util.uri import normalize as normalize_uri
 
 _ = i18n.TranslationStringFactory(__package__)
-
-
-def create_annotation(request, data):
-    """
-    Create an annotation from already-validated data.
-
-    :param request: the request object
-    :param data: an annotation data dict that has already been validated by
-        :py:class:`h.schemas.annotation.CreateAnnotationSchema`
-
-    :returns: the created and flushed annotation
-    """
-    document_data = data.pop("document", {})
-
-    annotation_read: AnnotationReadService = request.find_service(AnnotationReadService)
-
-    # Replies must have the same group as their parent.
-    if data["references"]:
-        root_annotation_id = data["references"][0]
-
-        if root_annotation := annotation_read.get_annotation_by_id(root_annotation_id):
-            data["groupid"] = root_annotation.groupid
-        else:
-            raise schemas.ValidationError(
-                "references.0: "
-                + _("Annotation {id} does not exist").format(id=root_annotation_id)
-            )
-
-    # Create the annotation and enable relationship loading so we can access
-    # the group, even though we've not added this to the session yet
-    annotation = models.Annotation(**data)
-    request.db.enable_relationship_loading(annotation)
-
-    group = annotation.group
-    if not group:
-        raise schemas.ValidationError(
-            "group: " + _(f"Invalid group id {annotation.groupid}")
-        )
-
-    # The user must have permission to create an annotation in the group
-    # they've asked to create one in.
-    if not request.has_permission(Permission.Group.WRITE, context=GroupContext(group)):
-        raise schemas.ValidationError(
-            "group: " + _("You may not create annotations in the specified group!")
-        )
-
-    _validate_group_scope(group, data["target_uri"])
-
-    annotation.created = annotation.updated = datetime.utcnow()
-    annotation.document = update_document_metadata(
-        request.db,
-        annotation.target_uri,
-        document_data["document_meta_dicts"],
-        document_data["document_uri_dicts"],
-        created=annotation.created,
-        updated=annotation.updated,
-    )
-
-    request.db.add(annotation)
-    request.db.flush()
-
-    request.find_service(  # pylint: disable=protected-access
-        name="search_index"
-    )._queue.add_by_id(annotation.id, tag="storage.create_annotation", schedule_in=60)
-
-    return annotation
 
 
 def update_annotation(
