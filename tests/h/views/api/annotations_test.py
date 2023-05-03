@@ -3,9 +3,7 @@ from unittest import mock
 import pytest
 from webob.multidict import MultiDict, NestedMultiDict
 
-from h.schemas import ValidationError
 from h.search.core import SearchResult
-from h.services.annotation_delete import AnnotationDeleteService
 from h.traversal import AnnotationContext
 from h.views.api import annotations as views
 from h.views.api.exceptions import PayloadError
@@ -188,83 +186,51 @@ class TestReadJSONLD:
         return patch("h.views.api.annotations.AnnotationJSONLDPresenter")
 
 
-@pytest.mark.usefixtures(
-    "AnnotationEvent",
-    "links_service",
-    "annotation_json_service",
-    "update_schema",
-    "storage",
-)
 class TestUpdate:
     def test_it(
         self,
         annotation_context,
         pyramid_request,
-        update_schema,
-        storage,
+        UpdateAnnotationSchema,
+        annotation_write_service,
         annotation_json_service,
+        AnnotationEvent,
     ):
         returned = views.update(annotation_context, pyramid_request)
 
-        update_schema.assert_called_once_with(
+        # Check it validates the annotation
+        UpdateAnnotationSchema.assert_called_once_with(
             pyramid_request,
             annotation_context.annotation.target_uri,
             annotation_context.annotation.groupid,
         )
-        update_schema.return_value.validate.assert_called_once_with(
-            pyramid_request.json_body
+        schema = UpdateAnnotationSchema.return_value
+        # Check it updates the annotation
+        schema.validate.assert_called_once_with(pyramid_request.json_body)
+        annotation_write_service.update_annotation.assert_called_once_with(
+            annotation_context.annotation,
+            schema.validate.return_value,
         )
-
-        storage.update_annotation.assert_called_once_with(
-            pyramid_request,
-            annotation_context.annotation.id,
-            update_schema.return_value.validate.return_value,
-        )
-
-        annotation_json_service.present_for_user.assert_called_once_with(
-            annotation=storage.update_annotation.return_value, user=pyramid_request.user
-        )
-
-        assert returned == annotation_json_service.present_for_user.return_value
-
-    def test_it_publishes_annotation_event(
-        self, annotation_context, AnnotationEvent, storage, pyramid_request
-    ):
-        views.update(annotation_context, pyramid_request)
-
+        # Check it publishes event
         AnnotationEvent.assert_called_once_with(
-            pyramid_request, storage.update_annotation.return_value.id, "update"
+            pyramid_request,
+            annotation_write_service.update_annotation.return_value.id,
+            "update",
         )
         pyramid_request.notify_after_commit.assert_called_once_with(
             AnnotationEvent.return_value
         )
+        # Check it presents the annotation
+        annotation_json_service.present_for_user.assert_called_once_with(
+            annotation=annotation_write_service.update_annotation.return_value,
+            user=pyramid_request.user,
+        )
+        assert returned == annotation_json_service.present_for_user.return_value
 
-    def test_it_raises_if_storage_raises(
-        self, annotation_context, pyramid_request, storage
-    ):
-        storage.update_annotation.side_effect = ValidationError("asplode")
-
-        with pytest.raises(ValidationError):
+    @pytest.mark.usefixtures("with_invalid_json_body")
+    def test_it_raises_for_invalid_json(self, pyramid_request, annotation_context):
+        with pytest.raises(PayloadError):
             views.update(annotation_context, pyramid_request)
-
-    def test_it_raises_if_validate_raises(
-        self, annotation_context, pyramid_request, update_schema
-    ):
-        update_schema.return_value.validate.side_effect = ValidationError("asplode")
-
-        with pytest.raises(ValidationError):
-            views.update(annotation_context, pyramid_request)
-
-    def test_it_raises_if_json_parsing_fails(self, annotation_context, pyramid_request):
-        """It raises PayloadError if parsing of the request body fails."""
-        # Make accessing the request.json_body property raise ValueError.
-        type(pyramid_request).json_body = {}
-        with mock.patch.object(
-            type(pyramid_request), "json_body", new_callable=mock.PropertyMock
-        ) as json_body:
-            json_body.side_effect = ValueError()
-            with pytest.raises(views.PayloadError):
-                views.update(annotation_context, pyramid_request)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
@@ -273,7 +239,7 @@ class TestUpdate:
         return pyramid_request
 
     @pytest.fixture
-    def update_schema(self, patch):
+    def UpdateAnnotationSchema(self, patch):
         return patch("h.views.api.annotations.UpdateAnnotationSchema")
 
 
@@ -321,23 +287,3 @@ def with_invalid_json_body(pyramid_request):
     ) as json_body:
         json_body.side_effect = ValueError()
         yield json_body
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.notify_after_commit = mock.Mock(spec_set=[])
-    return pyramid_request
-
-
-@pytest.fixture
-def storage(patch):
-    return patch("h.views.api.annotations.storage")
-
-
-@pytest.fixture
-def annotation_delete_service(pyramid_config):
-    service = mock.create_autospec(
-        AnnotationDeleteService, spec_set=True, instance=True
-    )
-    pyramid_config.register_service(service, name="annotation_delete")
-    return service
