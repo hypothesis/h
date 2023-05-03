@@ -77,6 +77,71 @@ class AnnotationWriteService:
 
         return annotation
 
+    def update_annotation(
+        self,
+        annotation: Annotation,
+        data: dict,
+        update_timestamp: bool = True,
+        reindex_tag: str = "storage.update_annotation",
+    ) -> Annotation:
+        """
+        Update an annotation and its associated document metadata.
+
+        :param annotation: Annotation to be updated
+        :param data: Validated data with which to update the annotation
+        :param update_timestamp: Whether to update the last-edited timestamp of
+            the annotation.
+        :param reindex_tag: Tag used by the reindexing job to identify the
+            source of the reindexing request.
+        """
+        initial_target_uri = annotation.target_uri
+
+        self._update_annotation_values(annotation, data)
+        if update_timestamp:
+            annotation.updated = datetime.utcnow()
+
+        # Expire the group relationship, so we get the most up-to-date value
+        # instead of the one which was present when we loaded the model
+        # https://docs.sqlalchemy.org/en/13/faq/sessions.html#i-set-the-foo-id-attribute-on-my-instance-to-7-but-the-foo-attribute-is-still-none-shouldn-t-it-have-loaded-foo-with-id-7
+        self._db.expire(annotation, ["group"])
+        self._validate_group(annotation)
+
+        if (
+            document := data.get("document", {})
+        ) or annotation.target_uri != initial_target_uri:
+            annotation.document = update_document_metadata(
+                self._db,
+                annotation.target_uri,
+                document.get("document_meta_dicts", {}),
+                document.get("document_uri_dicts", {}),
+                updated=annotation.updated,
+            )
+
+        # The search index service by default does not reindex if the existing ES
+        # entry's timestamp matches the DB timestamp. If we're not changing this
+        # timestamp, we need to force reindexing.
+        # pylint: disable=protected-access
+        self._search_index_service._queue.add_by_id(
+            annotation.id,
+            tag=reindex_tag,
+            schedule_in=60,
+            force=not update_timestamp,
+        )
+
+        return annotation
+
+    @staticmethod
+    def _update_annotation_values(annotation: Annotation, data: dict):
+        for key, value in data.items():
+            # Don't set complex things
+            if key in ("document", "extra"):
+                continue
+
+            setattr(annotation, key, value)
+
+        extra = data.get("extra", {})
+        annotation.extra.update(extra)
+
     def _validate_group(self, annotation: Annotation):
         group = annotation.group
         if not group:
