@@ -389,12 +389,12 @@ class TestExecute:
             for bucket in timeframe.document_buckets.values():
                 presented_annotations.extend(bucket.presented_annotations)
 
-        for annotation in annotations:
-            for presented_annotation in presented_annotations:
-                if presented_annotation["annotation"].annotation == annotation:
-                    break
-            else:
-                assert False
+        assert set(annotations).intersection(
+            {
+                presented_anno["annotation"].annotation
+                for presented_anno in presented_annotations
+            }
+        )
 
     def test_it_returns_each_annotations_group(self, _fetch_groups, pyramid_request):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)

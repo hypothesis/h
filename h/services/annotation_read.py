@@ -46,14 +46,12 @@ class AnnotationReadService:
 
     @staticmethod
     def _annotation_search_query(
-        ids: Optional[List[str]] = None, eager_load: Optional[List] = None
+        ids: List[str] = None, eager_load: Optional[List] = None
     ) -> Query:
         """Create a query for searching for annotations."""
 
         query = select(Annotation)
-
-        if ids:
-            query = query.where(Annotation.id.in_(ids))
+        query = query.where(Annotation.id.in_(ids))
 
         if eager_load:
             query = query.options(*(subqueryload(prop) for prop in eager_load))
