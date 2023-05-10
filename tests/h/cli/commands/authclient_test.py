@@ -51,10 +51,21 @@ class TestAddCommand:
     def test_it_creates_an_authclient_with_grant_type(self, cli, cliconfig, db_session):
         result = cli.invoke(
             authclient_cli.add,
-            ["--name", "AuthCode", "--authority", "example.org", "--type", "public",
-             "--grant-type", "authorization_code",
-             "--redirect-uri", "http://localhost:5000/app.html"], obj=cliconfig)
-        
+            [
+                "--name",
+                "AuthCode",
+                "--authority",
+                "example.org",
+                "--type",
+                "public",
+                "--grant-type",
+                "authorization_code",
+                "--redirect-uri",
+                "http://localhost:5000/app.html",
+            ],
+            obj=cliconfig,
+        )
+
         assert not result.exit_code
 
         authclient = (
