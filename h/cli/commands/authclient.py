@@ -27,13 +27,13 @@ def authclient():
 @click.option(
     "--redirect-uri",
     prompt=False,
-    help="URI for browser redirect after authorization. Required if grant type is 'authorization_code'"
+    help="URI for browser redirect after authorization. Required if grant type is 'authorization_code'",
 )
 @click.option(
     "--grant-type",
     type=click.Choice(GrantType.__members__),
     prompt=False,
-    help="An allowable grant type"
+    help="An allowable grant type",
 )
 @click.pass_context
 def add(
