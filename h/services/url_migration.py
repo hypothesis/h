@@ -137,7 +137,7 @@ class URLMigrationService:
         )
 
 
-def url_migration_factory(_context, request):
+def service_factory(_context, request):
     return URLMigrationService(
         request=request,
         annotation_write_service=request.find_service(AnnotationWriteService),
