@@ -1,9 +1,9 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, sentinel
 
 import pytest
 from h_matchers import Any
 
-from h.services.url_migration import URLMigrationService
+from h.services.url_migration import URLMigrationService, service_factory
 
 
 class TestURLMigrationService:
@@ -208,3 +208,17 @@ class TestURLMigrationService:
         return URLMigrationService(
             request=pyramid_request, annotation_write_service=annotation_write_service
         )
+
+
+class TestServiceFactory:
+    def test_it(self, pyramid_request, URLMigrationService, annotation_write_service):
+        svc = service_factory(sentinel.context, pyramid_request)
+
+        URLMigrationService.assert_called_once_with(
+            request=pyramid_request, annotation_write_service=annotation_write_service
+        )
+        assert svc == URLMigrationService.return_value
+
+    @pytest.fixture
+    def URLMigrationService(self, patch):
+        return patch("h.services.url_migration.URLMigrationService")
