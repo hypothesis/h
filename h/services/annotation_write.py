@@ -158,15 +158,13 @@ class AnnotationWriteService:
                 "group: " + _("You may not create annotations in the specified group!")
             )
 
-        # If no scopes are present, or if the group is configured to allow
-        # annotations outside its scope, there's nothing to do here
-        if not group.scopes or not group.enforce_scope:
-            return
-
-        # The target URI must match at least one
-        # of a group's defined scopes, if the group has any
-        if not url_in_scope(
-            annotation.target_uri, [scope.scope for scope in group.scopes]
+        if (
+            group.scopes  # If we have scopes
+            and group.enforce_scope  # ... and we are enforcing them
+            # the target URI must match one of a group's defined scopes
+            and not url_in_scope(
+                annotation.target_uri, [scope.scope for scope in group.scopes]
+            )
         ):
             raise ValidationError(
                 "group scope: "
