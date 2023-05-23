@@ -26,6 +26,7 @@ from h.services.organization import OrganizationService
 from h.services.search_index import SearchIndexService
 from h.services.search_index._queue import Queue
 from h.services.subscription import SubscriptionService
+from h.services.url_migration import URLMigrationService
 from h.services.user import UserService
 from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService
@@ -57,6 +58,7 @@ __all__ = (
     "organization_service",
     "search_index",
     "subscription_service",
+    "url_migration_service",
     "user_password_service",
     "user_service",
     "user_password_service",
@@ -211,6 +213,11 @@ def search_index(mock_service):
 @pytest.fixture
 def subscription_service(mock_service):
     return mock_service(SubscriptionService)
+
+
+@pytest.fixture
+def url_migration_service(mock_service):
+    return mock_service(URLMigrationService, name="url_migration")
 
 
 @pytest.fixture
