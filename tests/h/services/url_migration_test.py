@@ -57,6 +57,7 @@ class TestURLMigrationService:
                 data={"target_uri": "https://example.org"},
                 update_timestamp=False,
                 reindex_tag="URLMigrationService.move_annotations",
+                enforce_write_permission=False,
             )
 
     def test_move_annotations_updates_selectors(
@@ -95,6 +96,7 @@ class TestURLMigrationService:
             },
             update_timestamp=False,
             reindex_tag="URLMigrationService.move_annotations",
+            enforce_write_permission=False,
         )
 
     def test_move_annotations_updates_documents(
@@ -123,6 +125,7 @@ class TestURLMigrationService:
             },
             update_timestamp=False,
             reindex_tag="URLMigrationService.move_annotations",
+            enforce_write_permission=False,
         )
 
     def test_move_annotations_by_url_moves_matching_annotations(
@@ -149,10 +152,11 @@ class TestURLMigrationService:
 
         # First annotation should be moved synchronously.
         annotation_write_service.update_annotation.assert_called_once_with(
-            anns[0],
-            {"target_uri": "https://example.org"},
+            annotation=anns[0],
+            data={"target_uri": "https://example.org"},
             update_timestamp=False,
             reindex_tag="URLMigrationService.move_annotations",
+            enforce_write_permission=False,
         )
         pyramid_request.tm.commit.assert_called_once()
 

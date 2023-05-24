@@ -79,6 +79,10 @@ class URLMigrationService:
                 # Don't update "edited" timestamp on annotation cards.
                 update_timestamp=False,
                 reindex_tag="URLMigrationService.move_annotations",
+                # This action is taken by the admin user most of the time, who
+                # will not have write permission in the relevant group, so we
+                # disable the check
+                enforce_write_permission=False,
             )
 
             log.info("Moved annotation %s to URL %s", ann.uuid, ann.target_uri)

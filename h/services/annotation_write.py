@@ -78,11 +78,13 @@ class AnnotationWriteService:
         return annotation
 
     def update_annotation(
+        # pylint: disable=too-many-arguments
         self,
         annotation: Annotation,
         data: dict,
         update_timestamp: bool = True,
         reindex_tag: str = "storage.update_annotation",
+        enforce_write_permission: bool = True,
     ) -> Annotation:
         """
         Update an annotation and its associated document metadata.
@@ -93,6 +95,8 @@ class AnnotationWriteService:
             the annotation.
         :param reindex_tag: Tag used by the reindexing job to identify the
             source of the reindexing request.
+        :param enforce_write_permission: Check that the user has permissions
+            to write to the group the annotation is in
         """
         initial_target_uri = annotation.target_uri
 
@@ -104,7 +108,9 @@ class AnnotationWriteService:
         # instead of the one which was present when we loaded the model
         # https://docs.sqlalchemy.org/en/13/faq/sessions.html#i-set-the-foo-id-attribute-on-my-instance-to-7-but-the-foo-attribute-is-still-none-shouldn-t-it-have-loaded-foo-with-id-7
         self._db.expire(annotation, ["group"])
-        self._validate_group(annotation)
+        self._validate_group(
+            annotation, enforce_write_permission=enforce_write_permission
+        )
 
         if (
             document := data.get("document", {})
@@ -142,16 +148,15 @@ class AnnotationWriteService:
         extra = data.get("extra", {})
         annotation.extra.update(extra)
 
-    def _validate_group(self, annotation: Annotation):
+    def _validate_group(self, annotation: Annotation, enforce_write_permission=True):
         group = annotation.group
         if not group:
             raise ValidationError(
                 "group: " + _(f"Invalid group id {annotation.groupid}")
             )
 
-        # The user must have permission to create an annotation in the group
-        # they've asked to create one in.
-        if not self._has_permission(
+        # The user must have permission to write to the group
+        if enforce_write_permission and not self._has_permission(
             Permission.Group.WRITE, context=GroupContext(annotation.group)
         ):
             raise ValidationError(
