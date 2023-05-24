@@ -95,9 +95,12 @@ class TestAnnotationWriteService:
                 },
             },
             update_timestamp=True,
+            enforce_write_permission=sentinel.enforce_write_permission,
         )
 
-        _validate_group.assert_called_once_with(annotation)
+        _validate_group.assert_called_once_with(
+            annotation, enforce_write_permission=sentinel.enforce_write_permission
+        )
         update_document_metadata.assert_called_once_with(
             db_session,
             result.target_uri,
@@ -145,6 +148,16 @@ class TestAnnotationWriteService:
         has_permission.assert_called_once_with(
             Permission.Group.WRITE, context=GroupContext(annotation.group)
         )
+
+    def test__validate_group_with_no_permission_and_checking_disabled(
+        self, svc, annotation, has_permission
+    ):
+        has_permission.return_value = False
+
+        # pylint: disable=protected-access
+        svc._validate_group(annotation, enforce_write_permission=False)
+
+        has_permission.assert_not_called()
 
     @pytest.mark.parametrize("enforce_scope", (True, False))
     @pytest.mark.parametrize("matching_scope", (True, False))

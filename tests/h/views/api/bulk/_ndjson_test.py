@@ -34,6 +34,7 @@ class TestGetNDJSONResponse:
         def failing_method():
             raise ValueError("Oh no!")
 
+            # pragma: nocover
             yield 1  # pylint: disable=unreachable
 
         with pytest.raises(ValueError):
