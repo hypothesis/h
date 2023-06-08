@@ -17,7 +17,7 @@ INSERT INTO report.annotations (
     uuid,
     user_id, group_id, document_id, authority_id,
     created, updated,
-    deleted, shared, size,
+    deleted, shared, anchored, size,
     parent_uuids, tags
 )
 SELECT
@@ -30,6 +30,7 @@ SELECT
     annotation.updated::date,
     deleted,
     shared,
+    JSONB_ARRAY_LENGTH(target_selectors) <> 0 AS anchored,
     LENGTH(text) AS size,
     "references",
     tags
@@ -51,6 +52,7 @@ ON CONFLICT (uuid) DO UPDATE SET
     group_id=EXCLUDED.group_id,
     deleted=EXCLUDED.deleted,
     shared=EXCLUDED.shared,
+    anchored=EXCLUDED.anchored,
     size=EXCLUDED.size,
     parent_uuids=EXCLUDED.parent_uuids,
     tags=EXCLUDED.tags;

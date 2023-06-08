@@ -11,7 +11,7 @@ INSERT INTO report.annotations (
     uuid,
     user_id, group_id, document_id, authority_id,
     created, updated,
-    deleted, shared, size,
+    deleted, shared, anchored, size,
     parent_uuids, tags
 )
 SELECT
@@ -26,6 +26,7 @@ SELECT
     annotation.updated,
     deleted,
     shared,
+    JSONB_ARRAY_LENGTH(target_selectors) <> 0 AS anchored,
     LENGTH(text) AS size,
     "references",
     tags

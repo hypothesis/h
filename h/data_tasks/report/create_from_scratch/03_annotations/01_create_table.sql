@@ -11,6 +11,7 @@ CREATE TABLE report.annotations (
     updated TIMESTAMP NOT NULL,
     deleted BOOLEAN NOT NULL,
     shared BOOLEAN NOT NULL,
+    anchored BOOLEAN NOT NULL,
     size INT,
     parent_uuids UUID[],
     tags TEXT[]
