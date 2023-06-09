@@ -90,7 +90,7 @@ colander==1.8.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-coverage==7.2.3
+coverage==7.2.7
     # via -r requirements/tests.txt
 data-tasks==0.0.3
     # via
