@@ -63,9 +63,10 @@ sphinx==6.1.3
     #   -r requirements/checkdocs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
+    #   sphinxcontrib-jquery
 sphinx-autobuild==2021.3.14
     # via -r requirements/checkdocs.in
-sphinx-rtd-theme==1.2.0
+sphinx-rtd-theme==1.2.2
     # via -r requirements/checkdocs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
@@ -73,7 +74,7 @@ sphinxcontrib-devhelp==1.0.2
     # via sphinx
 sphinxcontrib-htmlhelp==2.0.0
     # via sphinx
-sphinxcontrib-jquery==2.0.0
+sphinxcontrib-jquery==4.1
     # via sphinx-rtd-theme
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
