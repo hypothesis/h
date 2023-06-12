@@ -112,7 +112,9 @@ newrelic==8.8.0
 oauthlib==3.2.2
     # via -r requirements/requirements.in
 packaging==23.1
-    # via -r requirements/requirements.in
+    # via
+    #   -r requirements/requirements.in
+    #   zope-sqlalchemy
 passlib==1.7.4
     # via -r requirements/requirements.in
 pastedeploy==2.1.0
@@ -270,7 +272,7 @@ zope-interface==6.0
     #   transaction
     #   wired
     #   zope-sqlalchemy
-zope-sqlalchemy==2.0
+zope-sqlalchemy==3.0
     # via -r requirements/requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:

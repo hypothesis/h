@@ -170,6 +170,7 @@ packaging==23.1
     # via
     #   -r requirements/requirements.txt
     #   build
+    #   zope-sqlalchemy
 parso==0.8.2
     # via jedi
 passlib==1.7.4
@@ -402,7 +403,7 @@ zope-interface==6.0
     #   transaction
     #   wired
     #   zope-sqlalchemy
-zope-sqlalchemy==2.0
+zope-sqlalchemy==3.0
     # via -r requirements/requirements.txt
 
 # The following packages are considered to be unsafe in a requirements file:
