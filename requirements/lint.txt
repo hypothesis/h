@@ -8,7 +8,7 @@ alembic==1.11.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-amqp==5.0.9
+amqp==5.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -21,6 +21,12 @@ attrs==20.2.0
     #   -r requirements/tests.txt
     #   hypothesis
     #   jsonschema
+backports-zoneinfo[tzdata]==0.2.1
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   celery
+    #   kombu
 bcrypt==4.0.1
     # via
     #   -r requirements/functests.txt
@@ -29,7 +35,7 @@ beautifulsoup4==4.9.3
     # via
     #   -r requirements/functests.txt
     #   webtest
-billiard==3.6.4.0
+billiard==4.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -43,7 +49,7 @@ build==0.8.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pip-tools
-celery==5.2.7
+celery==5.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -70,7 +76,7 @@ click==8.1.3
     #   click-plugins
     #   click-repl
     #   pip-tools
-click-didyoumean==0.0.3
+click-didyoumean==0.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -206,7 +212,7 @@ jsonschema==3.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-api
-kombu==5.2.4
+kombu==5.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -387,17 +393,13 @@ python-dateutil==2.8.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   celery
     #   elasticsearch-dsl
     #   faker
 python-slugify==8.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytz==2021.3
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   celery
 repoze-sendmail==4.3
     # via
     #   -r requirements/functests.txt
@@ -489,7 +491,14 @@ typing-extensions==4.5.0
     #   -r requirements/tests.txt
     #   alembic
     #   astroid
+    #   kombu
     #   pylint
+tzdata==2023.3
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   backports-zoneinfo
+    #   celery
 urllib3==1.26.15
     # via
     #   -r requirements/functests.txt
