@@ -6,10 +6,12 @@
 #
 alembic==1.11.1
     # via -r requirements/requirements.in
-amqp==5.0.9
+amqp==5.1.1
     # via kombu
 attrs==20.2.0
     # via jsonschema
+backports-zoneinfo[tzdata]==0.2.1
+    # via kombu
 bcrypt==4.0.1
     # via -r requirements/requirements.in
 billiard==3.6.4.0
@@ -94,7 +96,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.in
     #   h-api
-kombu==5.2.4
+kombu==5.3.0
     # via
     #   -r requirements/requirements.in
     #   celery
@@ -222,7 +224,11 @@ translationstring==1.4
     #   deform
     #   pyramid
 typing-extensions==4.5.0
-    # via alembic
+    # via
+    #   alembic
+    #   kombu
+tzdata==2023.3
+    # via backports-zoneinfo
 urllib3==1.26.15
     # via
     #   elasticsearch

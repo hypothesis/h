@@ -8,7 +8,7 @@ alembic==1.11.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-amqp==5.0.9
+amqp==5.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -21,6 +21,11 @@ attrs==20.2.0
     #   -r requirements/tests.txt
     #   hypothesis
     #   jsonschema
+backports-zoneinfo[tzdata]==0.2.1
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   kombu
 bcrypt==4.0.1
     # via
     #   -r requirements/functests.txt
@@ -206,7 +211,7 @@ jsonschema==3.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-api
-kombu==5.2.4
+kombu==5.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -489,7 +494,13 @@ typing-extensions==4.5.0
     #   -r requirements/tests.txt
     #   alembic
     #   astroid
+    #   kombu
     #   pylint
+tzdata==2023.3
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   backports-zoneinfo
 urllib3==1.26.15
     # via
     #   -r requirements/functests.txt
