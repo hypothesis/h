@@ -1,4 +1,4 @@
-DROP MATERIALIZED VIEW IF EXISTS report.annotation_type_group_counts CASCADE;
+DROP TYPE IF EXISTS report.annotation_sub_type CASCADE;
 
 CREATE TYPE report.annotation_sub_type AS ENUM (
     -- This is not a good name for a sub-type of an annotation, we should
@@ -7,6 +7,8 @@ CREATE TYPE report.annotation_sub_type AS ENUM (
     -- Other primary types of annotation
     'reply', 'highlight', 'page_note'
 );
+
+DROP MATERIALIZED VIEW IF EXISTS report.annotation_type_group_counts CASCADE;
 
 -- There are various indicators of different sub-types of annotation, only
 -- certain combinations should happen together. This table shows all
