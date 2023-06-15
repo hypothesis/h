@@ -32,7 +32,7 @@ CREATE MATERIALIZED VIEW report.annotation_type_group_counts AS (
         authority_id,
         group_id,
         -- Cast to a date as it's 4 bytes instead of 8
-        DATE_TRUNC('day', created)::DATE AS created_day,
+        DATE_TRUNC('week', created)::DATE AS created_week,
         CASE
             WHEN ARRAY_LENGTH(parent_uuids, 1) IS NOT NULL
                 THEN 'reply'::report.annotation_sub_type
@@ -45,6 +45,6 @@ CREATE MATERIALIZED VIEW report.annotation_type_group_counts AS (
         shared,
         COUNT(1) AS count
     FROM report.annotations
-    GROUP BY created_day, authority_id, group_id, sub_type, shared
-    ORDER BY created_day, authority_id, group_id, count DESC
+    GROUP BY created_week, authority_id, group_id, sub_type, shared
+    ORDER BY created_week, authority_id, group_id, count DESC
 ) WITH NO DATA;
