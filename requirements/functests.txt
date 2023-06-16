@@ -6,7 +6,7 @@
 #
 alembic==1.11.1
     # via -r requirements/requirements.txt
-amqp==5.0.9
+amqp==5.1.1
     # via
     #   -r requirements/requirements.txt
     #   kombu
@@ -14,6 +14,10 @@ attrs==20.2.0
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
+backports-zoneinfo[tzdata]==0.2.1
+    # via
+    #   -r requirements/requirements.txt
+    #   kombu
 bcrypt==4.0.1
     # via -r requirements/requirements.txt
 beautifulsoup4==4.9.3
@@ -130,7 +134,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/requirements.txt
     #   h-api
-kombu==5.2.4
+kombu==5.3.1
     # via
     #   -r requirements/requirements.txt
     #   celery
@@ -314,6 +318,11 @@ typing-extensions==4.5.0
     # via
     #   -r requirements/requirements.txt
     #   alembic
+    #   kombu
+tzdata==2023.3
+    # via
+    #   -r requirements/requirements.txt
+    #   backports-zoneinfo
 urllib3==1.26.15
     # via
     #   -r requirements/requirements.txt
