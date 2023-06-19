@@ -45,7 +45,8 @@ class FeatureService:
     :type overrides: list
     """
 
-    def __init__(self, session, overrides=None):
+    def __init__(self, session, overrides=None, default_authority=None):
+        self.default_authority = default_authority
         self.session = session
         self.overrides = overrides
 
@@ -74,7 +75,7 @@ class FeatureService:
         """Load the feature flags from the database."""
         return models.Feature.all(self.session)
 
-    def _state(self, feature, user=None):
+    def _state(self, feature, user=None):  # pylint:disable=too-many-return-statements
         # Features that are explicitly overridden are on.
         if self.overrides is not None and feature.name in self.overrides:
             return True
@@ -82,6 +83,8 @@ class FeatureService:
         if feature.everyone:
             return True
         if user is not None:
+            if feature.first_party and user.authority == self.default_authority:
+                return True
             # Features that are on for admin are on if the user is an admin.
             if feature.admins and user.admin:
                 return True
@@ -96,7 +99,11 @@ class FeatureService:
 
 
 def feature_service_factory(_context, request):
-    return FeatureService(session=request.db, overrides=_feature_overrides(request))
+    return FeatureService(
+        session=request.db,
+        overrides=_feature_overrides(request),
+        default_authority=request.default_authority,
+    )
 
 
 def _feature_overrides(request):

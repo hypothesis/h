@@ -29,7 +29,7 @@ def features_index(request):
 )
 def features_save(request):
     for feat in models.Feature.all(request.db):
-        for attr in ["everyone", "admins", "staff"]:
+        for attr in ["everyone", "first_party", "admins", "staff"]:
             val = request.POST.get(f"{feat.name}[{attr}]")
             if val == "on":
                 setattr(feat, attr, True)
