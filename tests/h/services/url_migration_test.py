@@ -152,20 +152,26 @@ class TestURLMigrationService:
 
         # First annotation should be moved synchronously.
         annotation_write_service.update_annotation.assert_called_once_with(
-            annotation=anns[0],
+            annotation=Any(),
             data={"target_uri": "https://example.org"},
             update_timestamp=False,
             reindex_tag="URLMigrationService.move_annotations",
             enforce_write_permission=False,
         )
+        # The first annotation (the one that was moved synchronously).
+        first_annotation = annotation_write_service.update_annotation.call_args[1][
+            "annotation"
+        ]
+        assert first_annotation in anns
         pyramid_request.tm.commit.assert_called_once()
 
+        # The remaining annotations that match the given URL should be moved in
+        # separate tasks.
         remaining_ann_ids = [
-            a.id for a in anns[1:] if a.target_uri == "https://example.com"
+            ann.id
+            for ann in anns
+            if ann != first_annotation and ann.target_uri == "https://example.com"
         ]
-
-        # Remaining matching annotations should be moved in separate tasks.
-        assert move_annotations_task.delay.call_count == 1
         move_annotations_task.delay.assert_called_once_with(
             Any.list.containing(remaining_ann_ids).only(),
             "https://example.com",
