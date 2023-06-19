@@ -178,7 +178,9 @@ python-dateutil==2.8.2
 python-slugify==8.0.1
     # via -r requirements/requirements.in
 pytz==2021.3
-    # via celery
+    # via
+    #   -r requirements/requirements.in
+    #   celery
 repoze-sendmail==4.3
     # via pyramid-mailer
 rfc3339-validator==0.1.4
