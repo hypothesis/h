@@ -23,6 +23,7 @@
           <tr>
             <th></th>
             <th>Everyone</th>
+            <th>First party</th>
             <th>Admins</th>
             <th>Staff</th>
             <th>Cohorts</th>
@@ -38,6 +39,12 @@
                 type="checkbox"
                 name="{{ feat.name }}[everyone]"
                 {% if feat.everyone %}checked{% endif %}>
+            </td>
+            <td>
+              <input
+                type="checkbox"
+                name="{{ feat.name }}[first_party]"
+                {% if feat.first_party %}checked{% endif %}>
             </td>
             <td>
               <input

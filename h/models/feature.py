@@ -55,6 +55,14 @@ class Feature(Base):
         server_default=sa.sql.expression.false(),
     )
 
+    # Is the feature enabled for first-party users?
+    first_party = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
+
     # Is the feature enabled for admins?
     admins = sa.Column(
         sa.Boolean,

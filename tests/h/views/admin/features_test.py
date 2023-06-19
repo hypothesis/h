@@ -45,13 +45,22 @@ def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_reque
     Feature.all.return_value = [feature_foo, feature_bar]
     pyramid_request.POST = {
         "foo[everyone]": "on",
+        "foo[first_party]": "on",
         "foo[staff]": "on",
         "bar[admins]": "on",
     }
 
     features_save(pyramid_request)
 
-    assert feature_foo.everyone is feature_foo.staff is feature_bar.admins is True
+    expected_true = {
+        (feature_foo, "everyone"),
+        (feature_foo, "first_party"),
+        (feature_foo, "staff"),
+        (feature_bar, "admins"),
+    }
+    for feature in [feature_foo, feature_bar]:
+        for group in ["everyone", "first_party", "staff", "admins"]:
+            assert getattr(feature, group) is ((feature, group) in expected_true)
 
 
 @features_save_fixtures

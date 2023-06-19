@@ -64,6 +64,15 @@ class TestFeatureService:
 
         assert svc.enabled("on-for-everyone") is True
 
+    def test_enabled_if_first_party(self, db_session, factories):
+        user = factories.User(authority="foobar.com")
+        third_party_user = factories.User(authority="othersite.com")
+        svc = FeatureService(session=db_session, default_authority=user.authority)
+
+        assert svc.enabled("on-for-first-party") is False
+        assert svc.enabled("on-for-first-party", user) is True
+        assert svc.enabled("on-for-first-party", third_party_user) is False
+
     def test_enabled_false_when_admins_true_no_user(self, db_session):
         svc = FeatureService(session=db_session)
 
@@ -132,6 +141,7 @@ class TestFeatureService:
             "foo": False,
             "bar": False,
             "on-for-everyone": True,
+            "on-for-first-party": False,
             "on-for-staff": False,
             "on-for-admins": False,
             "on-for-cohort": False,
@@ -147,6 +157,7 @@ class TestFeatureService:
             "foo": False,
             "bar": False,
             "on-for-everyone": True,
+            "on-for-first-party": False,
             "on-for-staff": True,
             "on-for-admins": False,
             "on-for-cohort": False,
@@ -159,6 +170,7 @@ class TestFeatureService:
             factories.Feature(name="foo"),
             factories.Feature(name="bar"),
             factories.Feature(name="on-for-everyone", everyone=True),
+            factories.Feature(name="on-for-first-party", first_party=True),
             factories.Feature(name="on-for-staff", staff=True),
             factories.Feature(name="on-for-admins", admins=True),
             factories.Feature(name="on-for-cohort", cohorts=[cohort]),
