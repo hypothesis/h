@@ -317,11 +317,6 @@ def other_authority_user(factories, other_authority):
 
 
 @pytest.fixture
-def origin():
-    return "http://foo.com"
-
-
-@pytest.fixture
 def document_uri():
     return "http://foo.com/bar/fun.html"
 

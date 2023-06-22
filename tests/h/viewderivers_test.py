@@ -82,11 +82,8 @@ class TestCSPProtectedView:
             pyramid_config.add_view(view, route_name="testview", **kwargs)
             introspector = pyramid_config.registry.introspector
 
-            for view_ in introspector.get_category("views"):
-                if view_["introspectable"]["route_name"] == "testview":
-                    return view_["introspectable"]["derived_callable"]
-
-            return None
+            view_ = introspector.get_category("views")[0]
+            return view_["introspectable"]["derived_callable"]
 
         return _impl
 

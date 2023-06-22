@@ -31,11 +31,11 @@ class TestGetNDJSONResponse:
         assert result.status == "204 No Content"
 
     def test_it_captures_initial_errors(self):
-        def failing_method():
-            raise ValueError("Oh no!")
+        def failing_method(fail=True):
+            if fail:
+                raise ValueError("Oh no!")
 
-            # pragma: nocover
-            yield 1  # pylint: disable=unreachable
+            yield 1  # pragma: nocover
 
         with pytest.raises(ValueError):
             get_ndjson_response(failing_method())

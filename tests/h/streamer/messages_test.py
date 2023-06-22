@@ -38,8 +38,8 @@ class TestProcessMessages:
 
         _handler({"foo": "bar"})
 
-        result = work_queue.get_nowait()
-        assert result.topic == "queue_is_full"
+        result = work_queue.get_nowait()  # pragma: nocover
+        assert result.topic == "queue_is_full"  # pragma: nocover
 
     def test_it_raises_if_the_consumer_exits(self, work_queue):
         with pytest.raises(RuntimeError):

@@ -46,7 +46,10 @@ class TestRedirectTween:
         pyramid_request.path = "/foo"
 
         tween = tweens.redirect_tween_factory(
-            lambda req: req.response, pyramid_request.registry, redirects
+            # pragma: nocover
+            lambda req: req.response,
+            pyramid_request.registry,
+            redirects,
         )
 
         response = tween(pyramid_request)
@@ -58,7 +61,9 @@ class TestRedirectTween:
 class TestSecurityHeaderTween:
     def test_it_adds_security_headers_to_the_response(self, pyramid_request):
         tween = tweens.security_header_tween_factory(
-            lambda req: req.response, pyramid_request.registry
+            # pragma: nocover
+            lambda req: req.response,
+            pyramid_request.registry,
         )
 
         response = tween(pyramid_request)

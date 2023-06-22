@@ -92,10 +92,6 @@ class TestEventQueue:
         assert publish_all.called
 
     @pytest.fixture
-    def log(self, patch):
-        return patch("h.eventqueue.log")
-
-    @pytest.fixture
     def publish_all(self, patch):
         return patch("h.eventqueue.EventQueue.publish_all")
 
