@@ -24,9 +24,9 @@ class timeframe_with:
             and self.document_buckets == timeframe.document_buckets
         )
 
-    def __repr__(self):
-        # pragma: no cover
-        return f'{self.__class__} "{self.label}" with {len(self.document_buckets)} document buckets'
+    # pragma: nocover
+    def __repr__(self):  # pragma: nocover
+        return f'{self.__class__} "{self.label}" with {len(self.document_buckets)} document buckets'  # pragma: nocover
 
 
 @pytest.mark.usefixtures("factories")

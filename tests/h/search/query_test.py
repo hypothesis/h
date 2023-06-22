@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 import datetime
 
 import elasticsearch_dsl
@@ -924,91 +923,57 @@ class TestRepliesMatcher:
 
 
 class TestTagsAggregation:
-    def test_it_returns_annotation_counts_by_tag(self, Annotation, search):
+    @pytest.mark.parametrize(
+        "limit,expected",
+        (
+            [
+                2,
+                [
+                    {"count": 2, "tag": "tag_a"},
+                    {"count": 1, "tag": "tag_b"},
+                ],
+            ],
+            [1, [{"count": 2, "tag": "tag_a"}]],
+        ),
+    )
+    def test_it_returns_annotation_counts_by_tag(
+        self, Annotation, search, limit, expected
+    ):
         for _ in range(2):
             Annotation(tags=["tag_a"])
         Annotation(tags=["tag_b"])
 
-        search.append_aggregation(query.TagsAggregation())
+        search.append_aggregation(query.TagsAggregation(limit=limit))
         result = search.run(webob.multidict.MultiDict({}))
 
-        tag_results = result.aggregations["tags"]
-        count_for_tag_a = next(r for r in tag_results if r["tag"] == "tag_a")["count"]
-        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
-
-        assert len(tag_results) == 2
-        assert count_for_tag_a == 2
-        assert count_for_tag_b == 1
-
-    def test_it_limits_number_of_annotation_counts_by_tag_returned(
-        self, Annotation, search
-    ):
-        bucket_limit = 2
-
-        Annotation(tags=["tag_a"])
-        for _ in range(3):
-            Annotation(tags=["tag_b"])
-        for _ in range(2):
-            Annotation(tags=["tag_c"])
-
-        search.append_aggregation(query.TagsAggregation(bucket_limit))
-        result = search.run(webob.multidict.MultiDict({}))
-
-        tag_results = result.aggregations["tags"]
-        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
-        count_for_tag_c = next(r for r in tag_results if r["tag"] == "tag_c")["count"]
-
-        assert len(tag_results) == bucket_limit
-        assert count_for_tag_b == 3
-        assert count_for_tag_c == 2
+        assert result.aggregations["tags"] == expected
 
 
 class TestUsersAggregation:
-    def test_it_returns_annotation_counts_by_user(self, Annotation, search):
-        for _ in range(2):
-            Annotation(userid="acct:pa@example.com")
-        Annotation(userid="acct:pb@example.com")
-
-        search.append_aggregation(query.UsersAggregation())
-        result = search.run(webob.multidict.MultiDict({}))
-
-        users_results = result.aggregations["users"]
-        count_pa = next(r for r in users_results if r["user"] == "acct:pa@example.com")[
-            "count"
-        ]
-        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")[
-            "count"
-        ]
-
-        assert len(users_results) == 2
-        assert count_pa == 2
-        assert count_pb == 1
-
-    def test_it_limits_number_of_annotation_counts_by_user_returned(
-        self, Annotation, search
+    @pytest.mark.parametrize(
+        "limit,expected",
+        (
+            [
+                2,
+                [
+                    {"count": 2, "user": "acct:b@example.com"},
+                    {"count": 1, "user": "acct:a@example.com"},
+                ],
+            ],
+            [1, [{"count": 2, "user": "acct:b@example.com"}]],
+        ),
+    )
+    def test_it_returns_annotation_counts_by_user(
+        self, Annotation, search, limit, expected
     ):
-        bucket_limit = 2
-
-        Annotation(userid="acct:pa@example.com")
-        for _ in range(3):
-            Annotation(userid="acct:pb@example.com")
+        Annotation(userid="acct:a@example.com")
         for _ in range(2):
-            Annotation(userid="acct:pc@example.com")
+            Annotation(userid="acct:b@example.com")
 
-        search.append_aggregation(query.UsersAggregation(limit=bucket_limit))
+        search.append_aggregation(query.UsersAggregation(limit=limit))
         result = search.run(webob.multidict.MultiDict({}))
 
-        users_results = result.aggregations["users"]
-        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")[
-            "count"
-        ]
-        count_pc = next(r for r in users_results if r["user"] == "acct:pc@example.com")[
-            "count"
-        ]
-
-        assert len(users_results) == bucket_limit
-        assert count_pb == 3
-        assert count_pc == 2
+        assert result.aggregations["users"] == expected
 
 
 @pytest.fixture

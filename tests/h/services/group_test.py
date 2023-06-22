@@ -2,11 +2,11 @@ import datetime
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
-from h.models import Group, GroupScope, User
+from h.models import Group
 from h.models.group import ReadableBy
 from h.services.group import GroupService, groups_factory
-from tests.common.matchers import Matcher
 
 
 class TestGroupServiceFetch:
@@ -64,7 +64,9 @@ class TestFilterByName:
         filtered_groups = svc.filter_by_name(name="Hello")
 
         assert len(filtered_groups.all()) == 1
-        assert filtered_groups.all() == [GroupWithName("Hello")]
+        assert filtered_groups.all() == [
+            Any.instance_of(Group).with_attrs({"name": "Hello"})
+        ]
 
     def test_it_returns_all_groups_if_name_is_None(self, svc, groups):
         filtered_groups = svc.filter_by_name()
@@ -86,8 +88,8 @@ class TestFilterByName:
         filtered_groups = svc.filter_by_name("Finger")
 
         assert filtered_groups.all() == [
-            GroupWithName("Fingers"),
-            GroupWithName("Finger"),
+            Any.instance_of(Group).with_attrs({"name": "Fingers"}),
+            Any.instance_of(Group).with_attrs({"name": "Finger"}),
         ]
 
     @pytest.fixture
@@ -197,45 +199,5 @@ class TestGroupsFactory:
 
 
 @pytest.fixture
-def usr_svc(db_session):
-    def fetch(userid):
-        # One doesn't want to couple to the user fetching service but
-        # we do want to be able to fetch user models for internal
-        # module behavior tests
-        return db_session.query(User).filter_by(userid=userid).one_or_none()
-
-    return fetch
-
-
-@pytest.fixture
-def svc(db_session, usr_svc):
-    return GroupService(db_session, usr_svc)
-
-
-class GroupWithName(Matcher):
-    """Matches any Group with the given name."""
-
-    def __init__(
-        self, name
-    ):  # pylint:disable=super-init-not-called #:Overwriting __eq__ instead
-        self.name = name
-
-    def __eq__(self, group):
-        """Return True if group is instance of :class:h.models.Group and has matching name."""
-        if not isinstance(group, Group):
-            return False
-        return group.name == self.name
-
-
-class GroupScopeWithOrigin(Matcher):
-    """Matches any GroupScope with the given origin."""
-
-    def __init__(
-        self, origin
-    ):  # pylint:disable=super-init-not-called #: Overwriting __eq__ instead
-        self.origin = origin
-
-    def __eq__(self, group_scope):
-        if not isinstance(group_scope, GroupScope):
-            return False
-        return group_scope.origin == self.origin
+def svc(db_session, user_service):
+    return GroupService(db_session, user_service)

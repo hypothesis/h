@@ -404,12 +404,8 @@ class TestExecute:
             for bucket in timeframe.document_buckets.values():
                 presented_annotations.extend(bucket.presented_annotations)
 
-        for group in _fetch_groups.return_value:
-            for presented_annotation in presented_annotations:
-                if presented_annotation["group"] == group:
-                    break
-            else:
-                assert False
+        expected_groups = [anno["group"] for anno in presented_annotations]
+        assert _fetch_groups.return_value == expected_groups
 
     def test_it_returns_each_annotations_incontext_link(self, links, pyramid_request):
         def incontext_link(request, annotation):

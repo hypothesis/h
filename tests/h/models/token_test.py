@@ -46,7 +46,3 @@ class TestToken:
         token = Token(refresh_token_expires=refresh_token_expires)
 
         assert token.refresh_token_expired is True
-
-
-def one_hour_from_now():
-    return datetime.datetime.now() + datetime.timedelta(hours=1)

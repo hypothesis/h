@@ -123,14 +123,6 @@ class TestGroupAPISchema:
             )
 
     @pytest.fixture
-    def appstruct(self):
-        return {
-            "groupid": "group:valid_id@thirdparty.com",
-            "name": "DingDong!",
-            "description": "OH, hello there",
-        }
-
-    @pytest.fixture
     def schema(self):
         schema = GroupAPISchema(
             group_authority="hypothes.is", default_authority="hypothes.is"
