@@ -17,12 +17,13 @@ attrs==20.2.0
 backports-zoneinfo[tzdata]==0.2.1
     # via
     #   -r requirements/requirements.txt
+    #   celery
     #   kombu
 bcrypt==4.0.1
     # via -r requirements/requirements.txt
 beautifulsoup4==4.9.3
     # via webtest
-billiard==3.6.4.0
+billiard==4.1.0
     # via
     #   -r requirements/requirements.txt
     #   celery
@@ -30,7 +31,7 @@ bleach==6.0.0
     # via -r requirements/requirements.txt
 build==0.8.0
     # via pip-tools
-celery==5.2.7
+celery==5.3.1
     # via -r requirements/requirements.txt
 certifi==2023.5.7
     # via
@@ -50,7 +51,7 @@ click==8.1.3
     #   click-plugins
     #   click-repl
     #   pip-tools
-click-didyoumean==0.0.3
+click-didyoumean==0.3.0
     # via
     #   -r requirements/requirements.txt
     #   celery
@@ -247,14 +248,13 @@ pytest-reverse==1.6.0
 python-dateutil==2.8.2
     # via
     #   -r requirements/requirements.txt
+    #   celery
     #   elasticsearch-dsl
     #   faker
 python-slugify==8.0.1
     # via -r requirements/requirements.txt
 pytz==2023.3
-    # via
-    #   -r requirements/requirements.txt
-    #   celery
+    # via -r requirements/requirements.txt
 repoze-sendmail==4.3
     # via
     #   -r requirements/requirements.txt
@@ -323,6 +323,7 @@ tzdata==2023.3
     # via
     #   -r requirements/requirements.txt
     #   backports-zoneinfo
+    #   celery
 urllib3==1.26.15
     # via
     #   -r requirements/requirements.txt
