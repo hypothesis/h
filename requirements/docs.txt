@@ -43,10 +43,10 @@ packaging==23.1
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r requirements/docs.in
+    # via -r docs.in
 pip-tools==6.13.0
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   pip-sync-faster
 pygments==2.14.0
     # via sphinx
@@ -60,14 +60,14 @@ snowballstemmer==2.1.0
     # via sphinx
 sphinx==6.2.1
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
 sphinx-autobuild==2021.3.14
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinx-rtd-theme==1.2.2
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
@@ -86,7 +86,7 @@ tomli==2.0.1
     # via
     #   build
     #   pep517
-tornado==6.1
+tornado==6.3.2
     # via livereload
 urllib3==1.26.5
     # via requests
