@@ -9,3 +9,6 @@ ANALYSE report.authority_activity;
 
 REFRESH MATERIALIZED VIEW CONCURRENTLY report.annotation_type_group_counts;
 ANALYSE report.annotation_type_group_counts;
+
+REFRESH MATERIALIZED VIEW CONCURRENTLY report.annotation_counts;
+ANALYSE report.annotation_counts;
