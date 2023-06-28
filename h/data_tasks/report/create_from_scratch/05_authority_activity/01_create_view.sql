@@ -12,7 +12,7 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
 
         weeks AS (
             SELECT DISTINCT(created_week) AS timestamp_week
-            FROM report.annotation_user_counts
+            FROM report.annotation_counts
         ),
 
         timescales AS (
@@ -39,8 +39,8 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
                 authority_id,
                 COUNT(DISTINCT(user_id)) AS annotating_users
             FROM periods
-            JOIN report.annotation_user_counts ON
-                annotation_user_counts.created_week = periods.timestamp_week
+            JOIN report.annotation_counts ON
+                annotation_counts.created_week = periods.timestamp_week
             GROUP BY
                 period, timescale, authority_id
         ),
@@ -72,12 +72,12 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
                 period,
                 timescale,
                 authority_id,
-                SUM(shared) AS shared_annotations,
-                SUM(replies) AS reply_annotations,
-                SUM(count) AS annotations
+                SUM("count") AS annotations,
+                SUM("count") FILTER (WHERE shared=True) AS shared_annotations,
+                SUM("count") FILTER (WHERE sub_type='reply') AS reply_annotations
             FROM periods
-            JOIN report.annotation_group_counts ON
-                annotation_group_counts.created_week = periods.timestamp_week
+            JOIN report.annotation_counts ON
+                annotation_counts.created_week = periods.timestamp_week
             GROUP BY period, timescale, authority_id
         )
 

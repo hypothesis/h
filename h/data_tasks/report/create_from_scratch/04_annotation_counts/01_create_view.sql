@@ -1,3 +1,13 @@
+DROP TYPE IF EXISTS report.annotation_sub_type CASCADE;
+
+CREATE TYPE report.annotation_sub_type AS ENUM (
+    -- This is not a good name for a sub-type of an annotation, we should
+    -- change this
+    'annotation',
+    -- Other primary types of annotation
+    'reply', 'highlight', 'page_note'
+);
+
 -- This is a summary table which re-interprets the annotations data in terms of
 -- weekly counts split by a number of facets:
 --
