@@ -198,7 +198,7 @@ six==1.15.0
     #   jsonschema
     #   python-dateutil
     #   rfc3339-validator
-sqlalchemy==1.4.48
+sqlalchemy==2.0.17
     # via
     #   -r requirements/requirements.in
     #   alembic
@@ -232,6 +232,7 @@ typing-extensions==4.5.0
     # via
     #   alembic
     #   kombu
+    #   sqlalchemy
 tzdata==2023.3
     # via
     #   backports-zoneinfo

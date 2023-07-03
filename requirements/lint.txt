@@ -439,7 +439,7 @@ soupsieve==2.2.1
     # via
     #   -r requirements/functests.txt
     #   beautifulsoup4
-sqlalchemy==1.4.48
+sqlalchemy==2.0.17
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -498,6 +498,7 @@ typing-extensions==4.5.0
     #   astroid
     #   kombu
     #   pylint
+    #   sqlalchemy
 tzdata==2023.3
     # via
     #   -r requirements/functests.txt
