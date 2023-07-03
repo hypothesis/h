@@ -196,7 +196,7 @@ pickleshare==0.7.5
     # via ipython
 pip-sync-faster==0.0.3
     # via -r requirements/dev.in
-pip-tools==6.13.0
+pip-tools==6.14.0
     # via
     #   -r requirements/dev.in
     #   pip-sync-faster
@@ -323,6 +323,7 @@ tomli==2.0.1
     #   build
     #   ipdb
     #   pep517
+    #   pip-tools
 traitlets==5.0.5
     # via
     #   ipython
