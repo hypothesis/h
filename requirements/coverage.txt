@@ -18,7 +18,7 @@ pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
     # via -r requirements/coverage.in
-pip-tools==6.13.0
+pip-tools==6.14.0
     # via
     #   -r requirements/coverage.in
     #   pip-sync-faster
@@ -26,6 +26,7 @@ tomli==2.0.1
     # via
     #   build
     #   pep517
+    #   pip-tools
 wheel==0.38.1
     # via pip-tools
 zipp==3.8.1
