@@ -23,4 +23,7 @@
     GRANT SELECT ON report.annotation_counts TO "{{fdw_user}}";
     GRANT SELECT ON report.authorities TO "{{fdw_user}}";
     GRANT SELECT ON report.authority_activity TO "{{fdw_user}}";
+    GRANT SELECT ON report.groups TO "{{fdw_user}}";
+    GRANT SELECT ON report.users TO "{{fdw_user}}";
+    GRANT SELECT ON report.user_group TO "{{fdw_user}}";
 {% endfor %}
