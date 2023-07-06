@@ -198,7 +198,7 @@ six==1.15.0
     #   jsonschema
     #   python-dateutil
     #   rfc3339-validator
-sqlalchemy==1.4.48
+sqlalchemy==1.4.49
     # via
     #   -r requirements/requirements.in
     #   alembic
