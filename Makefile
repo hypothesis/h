@@ -29,10 +29,9 @@ help:
 	@echo "                       docker-compose in the 'h_default' network."
 
 .PHONY: services
-services: args?=up -d
+services: args?=up -d --wait
 services: python
-	@tox -qe dockercompose --run-command 'sh -c "docker network create dbs 2>/dev/null || true"'
-	@tox -qe dockercompose -- $(args)
+	@docker compose $(args)
 
 .PHONY: db
 db: args?=upgrade head
@@ -62,7 +61,7 @@ shell: python
 
 .PHONY: sql
 sql: python
-	@tox -qe dockercompose -- exec postgres psql --pset expanded=auto -U postgres
+	@docker compose exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
 lint: frontend-lint backend-lint

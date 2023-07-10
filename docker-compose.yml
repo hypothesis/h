@@ -13,6 +13,10 @@ services:
     image: hypothesis/elasticsearch:latest
     ports:
       - '127.0.0.1:9200:9200'
+    healthcheck:
+        test: curl --fail --silent http://localhost:9200 >/dev/null
+        interval: 3s
+        start_period: 1m
     environment:
       - discovery.type=single-node
   rabbit:
