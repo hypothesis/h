@@ -26,7 +26,7 @@ help:
 	@echo "                       This command exists for conveniently testing "
 	@echo "                       the Docker image locally in production mode. "
 	@echo "                       It assumes the services are being run using "
-	@echo "                       docker-compose in the 'h_default' network."
+	@echo "                       docker compose in the 'h_default' network."
 
 .PHONY: services
 services: args?=up -d --wait

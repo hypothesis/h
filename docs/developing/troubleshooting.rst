@@ -18,7 +18,7 @@ to either:
   access to the Docker daemon's port (consult the installation
   instructions for your operating system on the Docker website), or
 
-* Prefix all ``docker`` and ``docker-compose`` commands with ``sudo``.
+* Prefix all ``docker`` commands with ``sudo``.
 
 pyenv errors on macOS
 ---------------------
