@@ -177,7 +177,7 @@ importlib-metadata==4.8.1
     #   data-tasks
     #   markdown
     #   pip-sync-faster
-importlib-resources==5.12.0
+importlib-resources==6.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
