@@ -132,7 +132,7 @@ faker==17.4.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
-gevent==22.10.2
+gevent==23.7.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
