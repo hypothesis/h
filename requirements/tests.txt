@@ -42,7 +42,7 @@ chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
     #   deform
-click==8.1.4
+click==8.1.5
     # via
     #   -r requirements/requirements.txt
     #   celery

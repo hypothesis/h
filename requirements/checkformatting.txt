@@ -8,7 +8,7 @@ black==23.7.0
     # via -r requirements/checkformatting.in
 build==0.8.0
     # via pip-tools
-click==8.1.4
+click==8.1.5
     # via
     #   black
     #   pip-tools
