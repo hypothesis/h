@@ -6,7 +6,7 @@
 #
 build==0.8.0
     # via pip-tools
-click==8.1.5
+click==8.1.6
     # via pip-tools
 coverage==7.2.7
     # via -r requirements/coverage.in
