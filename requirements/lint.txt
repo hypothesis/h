@@ -142,7 +142,7 @@ greenlet==2.0.2
     #   -r requirements/tests.txt
     #   gevent
     #   sqlalchemy
-gunicorn==20.1.0
+gunicorn==21.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -250,6 +250,7 @@ packaging==23.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   build
+    #   gunicorn
     #   pytest
     #   zope-sqlalchemy
 passlib==1.7.4
