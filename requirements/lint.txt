@@ -67,7 +67,7 @@ chameleon==3.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-click==8.1.5
+click==8.1.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
