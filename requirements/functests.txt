@@ -79,7 +79,7 @@ elasticsearch-dsl==6.4.0
     # via -r requirements/requirements.txt
 exceptiongroup==1.1.0
     # via pytest
-factory-boy==3.2.1
+factory-boy==3.3.0
     # via -r requirements/functests.in
 faker==17.4.0
     # via factory-boy
