@@ -93,7 +93,7 @@ greenlet==2.0.2
     #   -r requirements/requirements.txt
     #   gevent
     #   sqlalchemy
-gunicorn==20.1.0
+gunicorn==21.2.0
     # via -r requirements/requirements.txt
 h-api==1.0.2
     # via -r requirements/requirements.txt
@@ -164,6 +164,7 @@ packaging==23.1
     # via
     #   -r requirements/requirements.txt
     #   build
+    #   gunicorn
     #   pytest
     #   zope-sqlalchemy
 passlib==1.7.4
