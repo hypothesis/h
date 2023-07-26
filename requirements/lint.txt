@@ -123,7 +123,7 @@ exceptiongroup==1.1.0
     #   -r requirements/tests.txt
     #   hypothesis
     #   pytest
-factory-boy==3.2.1
+factory-boy==3.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
