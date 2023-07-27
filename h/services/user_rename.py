@@ -5,7 +5,7 @@ class UserRenameError(Exception):
     pass
 
 
-class RenameUserService:
+class UserRenameService:
     """
     Renames a user and updates all its annotations.
 
@@ -87,9 +87,9 @@ class RenameUserService:
         )
 
 
-def rename_user_factory(_context, request):
+def service_factory(_context, request):
     """Return a RenameUserService instance for the passed context and request."""
-    return RenameUserService(
+    return UserRenameService(
         session=request.db,
         search_index=request.find_service(name="search_index"),
     )

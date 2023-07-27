@@ -5,7 +5,7 @@ import sqlalchemy
 
 from h.models import Annotation, Document
 from h.services.annotation_delete import AnnotationDeleteService
-from h.services.delete_user import delete_user_service_factory
+from h.services.user_delete import service_factory
 
 
 @pytest.mark.usefixtures("annotation_delete_service")
@@ -73,7 +73,7 @@ class TestDeleteUserService:
     @pytest.fixture
     def svc(self, db_session, pyramid_request):
         pyramid_request.db = db_session
-        return delete_user_service_factory({}, pyramid_request)
+        return service_factory({}, pyramid_request)
 
 
 @pytest.fixture

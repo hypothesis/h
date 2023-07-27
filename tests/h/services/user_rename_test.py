@@ -3,10 +3,10 @@ from unittest import mock
 import pytest
 
 from h import models
-from h.services.rename_user import RenameUserService, UserRenameError
+from h.services.user_rename import UserRenameError, UserRenameService
 
 
-class TestRenameUserService:
+class TestUserRenameService:
     def test_check_returns_true_when_new_username_does_not_exist(self, service, user):
         assert service.check(user, "panda") is True
 
@@ -98,11 +98,11 @@ class TestRenameUserService:
 
     @pytest.fixture
     def service(self, pyramid_request, search_index):
-        return RenameUserService(session=pyramid_request.db, search_index=search_index)
+        return UserRenameService(session=pyramid_request.db, search_index=search_index)
 
     @pytest.fixture
     def check(self, patch):
-        return patch("h.services.rename_user.RenameUserService.check")
+        return patch("h.services.user_rename.UserRenameService.check")
 
     @pytest.fixture
     def user(self, factories, db_session):

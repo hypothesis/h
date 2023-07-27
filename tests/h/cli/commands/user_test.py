@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from h import models
 from h.cli.commands import user as user_cli
 from h.services.annotation_delete import AnnotationDeleteService
-from h.services.delete_user import DeleteUserService
+from h.services.user_delete import UserDeleteService
 from h.services.user_password import UserPasswordService
 
 
@@ -300,7 +300,7 @@ def password_service(hasher):
 
 @pytest.fixture
 def delete_user_service(pyramid_request, annotation_delete_service):
-    return DeleteUserService(pyramid_request, annotation_delete_service)
+    return UserDeleteService(pyramid_request, annotation_delete_service)
 
 
 @pytest.fixture

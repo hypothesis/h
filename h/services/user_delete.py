@@ -1,7 +1,7 @@
 from h.models import Annotation, Group
 
 
-class DeleteUserService:
+class UserDeleteService:
     def __init__(self, request, annotation_delete_service):
         self.request = request
         self._annotation_delete_service = annotation_delete_service
@@ -70,6 +70,6 @@ class DeleteUserService:
             group.creator = None
 
 
-def delete_user_service_factory(_context, request):
+def service_factory(_context, request):
     annotation_delete_service = request.find_service(name="annotation_delete")
-    return DeleteUserService(request, annotation_delete_service)
+    return UserDeleteService(request, annotation_delete_service)

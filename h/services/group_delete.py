@@ -5,7 +5,7 @@ class DeletePublicGroupError(Exception):
     pass
 
 
-class DeleteGroupService:
+class GroupDeleteService:
     def __init__(self, request, annotation_delete_service):
         self.request = request
         self._annotation_delete_service = annotation_delete_service
@@ -28,6 +28,6 @@ class DeleteGroupService:
         self._annotation_delete_service.delete_annotations(annotations)
 
 
-def delete_group_service_factory(_context, request):
+def service_factory(_context, request):
     annotation_delete_service = request.find_service(name="annotation_delete")
-    return DeleteGroupService(request, annotation_delete_service)
+    return GroupDeleteService(request, annotation_delete_service)
