@@ -57,7 +57,7 @@ def includeme(config):  # pragma: no cover
     # Group related services
     config.register_service_factory("h.services.group.groups_factory", name="group")
     config.register_service_factory(
-        "h.services.delete_group.delete_group_service_factory", name="delete_group"
+        "h.services.group_delete.service_factory", name="delete_group"
     )
     config.register_service_factory(
         "h.services.group_create.group_create_factory", name="group_create"
@@ -111,13 +111,13 @@ def includeme(config):  # pragma: no cover
     # User related services
     config.register_service_factory("h.services.user.user_service_factory", name="user")
     config.register_service_factory(
-        "h.services.delete_user.delete_user_service_factory", name="delete_user"
+        "h.services.user_delete.service_factory", name="delete_user"
     )
     config.register_service_factory(
         "h.services.user_password.user_password_service_factory", name="user_password"
     )
     config.register_service_factory(
-        "h.services.rename_user.rename_user_factory", name="rename_user"
+        "h.services.user_rename.service_factory", name="rename_user"
     )
     config.register_service_factory(
         "h.services.user_signup.user_signup_service_factory", name="user_signup"

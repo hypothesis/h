@@ -10,10 +10,10 @@ from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
 from h.services.auth_token import AuthTokenService
 from h.services.bulk_annotation import BulkAnnotationService
-from h.services.delete_group import DeleteGroupService
 from h.services.flag import FlagService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
+from h.services.group_delete import GroupDeleteService
 from h.services.group_links import GroupLinksService
 from h.services.group_list import GroupListService
 from h.services.group_members import GroupMembersService
@@ -121,7 +121,7 @@ def bulk_annotation_service(mock_service):
 
 @pytest.fixture
 def delete_group_service(mock_service):
-    return mock_service(DeleteGroupService, name="delete_group")
+    return mock_service(GroupDeleteService, name="delete_group")
 
 
 @pytest.fixture

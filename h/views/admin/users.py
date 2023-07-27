@@ -6,7 +6,7 @@ from h import models
 from h.accounts.events import ActivationEvent
 from h.i18n import TranslationString as _
 from h.security import Permission
-from h.services.rename_user import UserRenameError
+from h.services.user_rename import UserRenameError
 
 
 class UserNotFoundError(Exception):
