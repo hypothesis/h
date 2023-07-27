@@ -3,6 +3,7 @@ from unittest.mock import sentinel
 
 import pytest
 import sqlalchemy
+from h_matchers import Any
 
 from h.models import Annotation, Document
 from h.services.annotation_delete import AnnotationDeleteService
@@ -21,15 +22,12 @@ class TestDeleteUserService:
         self, svc, factories, annotation_delete_service
     ):
         user = factories.User(username="bob")
-        anns = [
-            factories.Annotation(userid=user.userid),
-            factories.Annotation(userid=user.userid),
-        ]
+        annotations = factories.Annotation.create_batch(2, userid=user.userid)
 
         svc.delete_user(user)
 
-        annotation_delete_service.delete.assert_has_calls(
-            [mock.call(anns[0]), mock.call(anns[1])], any_order=True
+        annotation_delete_service.delete_annotations.assert_called_once_with(
+            Any.iterable.containing(annotations).only()
         )
 
     def test_delete_deletes_user(self, svc, db_session, factories):

@@ -23,9 +23,9 @@ class UserDeleteService:
         """
 
         # Delete all annotations
-        annotations = self._db.query(Annotation).filter_by(userid=user.userid)
-        for annotation in annotations:
-            self._annotation_delete_service.delete(annotation)
+        self._annotation_delete_service.delete_annotations(
+            annotations=self._db.query(Annotation).filter_by(userid=user.userid).all()
+        )
 
         # Delete or remove our link to groups we've created
         for group, annotations_by_other_users in self._db.execute(
