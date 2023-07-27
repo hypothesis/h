@@ -1,9 +1,16 @@
+import sqlalchemy as sa
+
 from h.models import Annotation, Group, User
+from h.services.annotation_delete import AnnotationDeleteService
 
 
 class UserDeleteService:
-    def __init__(self, request, annotation_delete_service):
-        self.request = request
+    def __init__(
+        self,
+        db_session: sa.orm.Session,
+        annotation_delete_service: AnnotationDeleteService,
+    ):
+        self._db = db_session
         self._annotation_delete_service = annotation_delete_service
 
     def delete_user(self, user: User):
@@ -15,7 +22,7 @@ class UserDeleteService:
         as creator but the group persists.
         """
 
-        created_groups = self.request.db.query(Group).filter(Group.creator == user)
+        created_groups = self._db.query(Group).filter(Group.creator == user)
         groups_to_unassign_creator = self._groups_that_have_collaborators(
             created_groups, user
         )
@@ -24,7 +31,7 @@ class UserDeleteService:
         self._delete_annotations(user)
         self._delete_groups(groups_to_delete)
         self._unassign_groups_creator(groups_to_unassign_creator)
-        self.request.db.delete(user)
+        self._db.delete(user)
 
     def _groups_that_have_collaborators(self, groups, user):
         """
@@ -47,7 +54,7 @@ class UserDeleteService:
             return []
 
         query = (
-            self.request.db.query(Annotation.groupid)
+            self._db.query(Annotation.groupid)
             .filter(Annotation.groupid.in_(group_ids), Annotation.userid != user.userid)
             .group_by(Annotation.groupid)
         )
@@ -56,13 +63,13 @@ class UserDeleteService:
         return [g for g in groups if g.pubid in groupids_with_other_user_anns]
 
     def _delete_annotations(self, user):
-        annotations = self.request.db.query(Annotation).filter_by(userid=user.userid)
+        annotations = self._db.query(Annotation).filter_by(userid=user.userid)
         for annotation in annotations:
             self._annotation_delete_service.delete(annotation)
 
     def _delete_groups(self, groups):
         for group in groups:
-            self.request.db.delete(group)
+            self._db.delete(group)
 
     @staticmethod
     def _unassign_groups_creator(groups):
@@ -71,5 +78,7 @@ class UserDeleteService:
 
 
 def service_factory(_context, request):
-    annotation_delete_service = request.find_service(name="annotation_delete")
-    return UserDeleteService(request, annotation_delete_service)
+    return UserDeleteService(
+        db_session=request.db,
+        annotation_delete_service=request.find_service(name="annotation_delete"),
+    )
