@@ -1,4 +1,4 @@
-from h.models import Annotation, Group
+from h.models import Annotation, Group, User
 
 
 class UserDeleteService:
@@ -6,7 +6,7 @@ class UserDeleteService:
         self.request = request
         self._annotation_delete_service = annotation_delete_service
 
-    def delete(self, user):
+    def delete_user(self, user: User):
         """
         Delete a user with all their group memberships and annotations.
 

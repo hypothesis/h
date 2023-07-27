@@ -13,7 +13,7 @@ class TestDeleteUserService:
     def test_delete_disassociate_group_memberships(self, factories, svc):
         user = factories.User()
 
-        svc.delete(user)
+        svc.delete_user(user)
 
         assert user.groups == []
 
@@ -26,7 +26,7 @@ class TestDeleteUserService:
             factories.Annotation(userid=user.userid),
         ]
 
-        svc.delete(user)
+        svc.delete_user(user)
 
         annotation_delete_service.delete.assert_has_calls(
             [mock.call(anns[0]), mock.call(anns[1])], any_order=True
@@ -35,7 +35,7 @@ class TestDeleteUserService:
     def test_delete_deletes_user(self, db_session, factories, svc):
         user = factories.User()
 
-        svc.delete(user)
+        svc.delete_user(user)
 
         assert user in db_session.deleted
 
@@ -46,7 +46,7 @@ class TestDeleteUserService:
         (group, creator, _, _, member_ann) = group_with_two_users
         db_session.delete(member_ann)
 
-        svc.delete(creator)
+        svc.delete_user(creator)
 
         assert sqlalchemy.inspect(group).was_deleted
 
@@ -56,7 +56,7 @@ class TestDeleteUserService:
         pyramid_request.db = db_session
         (group, creator, _, _, _) = group_with_two_users
 
-        svc.delete(creator)
+        svc.delete_user(creator)
 
         assert group.creator is None
 
@@ -66,7 +66,7 @@ class TestDeleteUserService:
         pyramid_request.db = db_session
         (group, _, member, _, _) = group_with_two_users
 
-        svc.delete(member)
+        svc.delete_user(member)
 
         assert group not in db_session.deleted
 

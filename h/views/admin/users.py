@@ -134,7 +134,7 @@ def users_delete(request):
     user = _form_request_user(request)
     svc = request.find_service(name="user_delete")
 
-    svc.delete(user)
+    svc.delete_user(user)
     request.session.flash(
         f"Successfully deleted user {user.username} with authority {user.authority}"
         "success",

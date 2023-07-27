@@ -200,7 +200,7 @@ class TestDeleteUserCommand:
         result = invoke_cli(user_cli.delete, [user.username])
 
         assert not result.exit_code
-        user_delete_service.delete.assert_called_once_with(user)
+        user_delete_service.delete_user.assert_called_once_with(user)
 
     def test_it_deletes_user_with_specific_authority(
         self, invoke_cli, user, user_delete_service
@@ -212,7 +212,7 @@ class TestDeleteUserCommand:
         )
 
         assert not result.exit_code
-        user_delete_service.delete.assert_called_once_with(user)
+        user_delete_service.delete_user.assert_called_once_with(user)
 
     def test_it_errors_when_user_could_not_be_found(
         self, invoke_cli, user_delete_service
@@ -220,7 +220,7 @@ class TestDeleteUserCommand:
         result = invoke_cli(user_cli.delete, ["bogus_username"])
 
         assert result.exit_code == 1
-        user_delete_service.delete.assert_not_called()
+        user_delete_service.delete_user.assert_not_called()
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
         self, invoke_cli, user, user_delete_service
@@ -228,7 +228,7 @@ class TestDeleteUserCommand:
         result = invoke_cli(user_cli.delete, ["--authority", "foo.com", user.username])
 
         assert result.exit_code == 1
-        user_delete_service.delete.assert_not_called()
+        user_delete_service.delete_user.assert_not_called()
 
     @pytest.fixture
     def user(self, factories):
