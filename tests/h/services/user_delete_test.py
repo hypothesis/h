@@ -1,16 +1,16 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 import sqlalchemy
 
 from h.models import Annotation, Document
 from h.services.annotation_delete import AnnotationDeleteService
-from h.services.user_delete import service_factory
+from h.services.user_delete import UserDeleteService, service_factory
 
 
-@pytest.mark.usefixtures("annotation_delete_service")
 class TestDeleteUserService:
-    def test_delete_disassociate_group_memberships(self, factories, svc):
+    def test_delete_disassociate_group_memberships(self, svc, factories):
         user = factories.User()
 
         svc.delete_user(user)
@@ -18,7 +18,7 @@ class TestDeleteUserService:
         assert user.groups == []
 
     def test_delete_deletes_annotations(
-        self, factories, svc, annotation_delete_service
+        self, svc, factories, annotation_delete_service
     ):
         user = factories.User(username="bob")
         anns = [
@@ -32,7 +32,7 @@ class TestDeleteUserService:
             [mock.call(anns[0]), mock.call(anns[1])], any_order=True
         )
 
-    def test_delete_deletes_user(self, db_session, factories, svc):
+    def test_delete_deletes_user(self, svc, db_session, factories):
         user = factories.User()
 
         svc.delete_user(user)
@@ -40,9 +40,8 @@ class TestDeleteUserService:
         assert user in db_session.deleted
 
     def test_delete_user_removes_groups_if_no_collaborators(
-        self, db_session, group_with_two_users, pyramid_request, svc
+        self, svc, db_session, group_with_two_users
     ):
-        pyramid_request.db = db_session
         (group, creator, _, _, member_ann) = group_with_two_users
         db_session.delete(member_ann)
 
@@ -51,9 +50,8 @@ class TestDeleteUserService:
         assert sqlalchemy.inspect(group).was_deleted
 
     def test_creator_is_none_if_groups_have_collaborators(
-        self, db_session, group_with_two_users, pyramid_request, svc
+        self, svc, group_with_two_users
     ):
-        pyramid_request.db = db_session
         (group, creator, _, _, _) = group_with_two_users
 
         svc.delete_user(creator)
@@ -61,9 +59,8 @@ class TestDeleteUserService:
         assert group.creator is None
 
     def test_delete_user_removes_only_groups_created_by_user(
-        self, db_session, group_with_two_users, pyramid_request, svc
+        self, svc, db_session, group_with_two_users
     ):
-        pyramid_request.db = db_session
         (group, _, member, _, _) = group_with_two_users
 
         svc.delete_user(member)
@@ -71,9 +68,10 @@ class TestDeleteUserService:
         assert group not in db_session.deleted
 
     @pytest.fixture
-    def svc(self, db_session, pyramid_request):
-        pyramid_request.db = db_session
-        return service_factory({}, pyramid_request)
+    def svc(self, db_session, annotation_delete_service):
+        return UserDeleteService(
+            db_session=db_session, annotation_delete_service=annotation_delete_service
+        )
 
 
 @pytest.fixture
@@ -110,3 +108,18 @@ def annotation_delete_service(pyramid_config):
     )
     pyramid_config.register_service(service, name="annotation_delete")
     return service
+
+
+class TestServiceFactory:
+    def test_it(self, pyramid_request, annotation_delete_service, UserDeleteService):
+        svc = service_factory(sentinel.context, pyramid_request)
+
+        UserDeleteService.assert_called_once_with(
+            db_session=pyramid_request.db,
+            annotation_delete_service=annotation_delete_service,
+        )
+        assert svc == UserDeleteService.return_value
+
+    @pytest.fixture
+    def UserDeleteService(self, patch):
+        return patch("h.services.user_delete.UserDeleteService")
