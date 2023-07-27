@@ -212,7 +212,7 @@ def test_users_delete_deletes_user(user_service, user_delete_service, pyramid_re
 
     users_delete(pyramid_request)
 
-    user_delete_service.delete.assert_called_once_with(user)
+    user_delete_service.delete_user.assert_called_once_with(user)
 
 
 @pytest.fixture(autouse=True)
