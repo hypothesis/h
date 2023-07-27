@@ -359,12 +359,12 @@ class TestGroupEditViews:
             group, [fetched_user.userid, fetched_user.userid]
         )
 
-    def test_delete_deletes_group(self, group, delete_group_service, pyramid_request):
+    def test_delete_deletes_group(self, group, group_delete_service, pyramid_request):
         view = GroupEditViews(GroupContext(group), pyramid_request)
 
         view.delete()
 
-        delete_group_service.delete.assert_called_once_with(group)
+        group_delete_service.delete.assert_called_once_with(group)
 
     def _expected_form(self, group):
         return {

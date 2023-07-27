@@ -124,7 +124,7 @@ def delete(ctx, username, authority):
             f'no user with username "{username}" and authority "{authority}"'
         )
 
-    svc = request.find_service(name="delete_user")
+    svc = request.find_service(name="user_delete")
     svc.delete(user)
     request.tm.commit()
 

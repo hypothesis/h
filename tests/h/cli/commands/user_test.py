@@ -299,7 +299,7 @@ def password_service(hasher):
 
 
 @pytest.fixture
-def delete_user_service(pyramid_request, annotation_delete_service):
+def user_delete_service(pyramid_request, annotation_delete_service):
     return UserDeleteService(pyramid_request, annotation_delete_service)
 
 
@@ -313,11 +313,11 @@ def annotation_delete_service(pyramid_config):  # pylint:disable=unused-argument
 
 @pytest.fixture
 def pyramid_config(
-    pyramid_config, signup_service, password_service, delete_user_service
+    pyramid_config, signup_service, password_service, user_delete_service
 ):
     pyramid_config.register_service(signup_service, name="user_signup")
     pyramid_config.register_service(password_service, name="user_password")
-    pyramid_config.register_service(delete_user_service, name="delete_user")
+    pyramid_config.register_service(user_delete_service, name="user_delete")
     return pyramid_config
 
 
