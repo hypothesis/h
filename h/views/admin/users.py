@@ -96,7 +96,7 @@ def users_rename(request):
     old_username = user.username
     new_username = request.params.get("new_username").strip()
 
-    svc = request.find_service(name="rename_user")
+    svc = request.find_service(name="user_rename")
     try:
         svc.rename(user, new_username)
 
@@ -132,7 +132,7 @@ def users_rename(request):
 )
 def users_delete(request):
     user = _form_request_user(request)
-    svc = request.find_service(name="delete_user")
+    svc = request.find_service(name="user_delete")
 
     svc.delete(user)
     request.session.flash(

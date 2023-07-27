@@ -42,11 +42,11 @@ __all__ = (
     "auth_cookie_service",
     "auth_token_service",
     "bulk_annotation_service",
-    "delete_group_service",
     "links_service",
     "list_organizations_service",
     "flag_service",
     "group_create_service",
+    "group_delete_service",
     "group_links_service",
     "group_list_service",
     "group_members_service",
@@ -120,11 +120,6 @@ def bulk_annotation_service(mock_service):
 
 
 @pytest.fixture
-def delete_group_service(mock_service):
-    return mock_service(GroupDeleteService, name="delete_group")
-
-
-@pytest.fixture
 def links_service(mock_service):
     return mock_service(LinksService, name="links")
 
@@ -150,6 +145,11 @@ def flag_service(pyramid_config):
 @pytest.fixture
 def group_create_service(mock_service):
     return mock_service(GroupCreateService, name="group_create")
+
+
+@pytest.fixture
+def group_delete_service(mock_service):
+    return mock_service(GroupDeleteService, name="group_delete")
 
 
 @pytest.fixture

@@ -158,7 +158,7 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
 
     @view_config(request_method="POST", route_name="admin.groups_delete")
     def delete(self):
-        self.request.find_service(name="delete_group").delete(self.group)
+        self.request.find_service(name="group_delete").delete(self.group)
 
         self.request.session.flash(
             # pylint:disable=consider-using-f-string

@@ -204,7 +204,7 @@ def test_users_delete_user_not_found_error(user_service, pyramid_request):
         users_delete(pyramid_request)
 
 
-def test_users_delete_deletes_user(user_service, delete_user_service, pyramid_request):
+def test_users_delete_deletes_user(user_service, user_delete_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
     user = mock.MagicMock()
 
@@ -212,7 +212,7 @@ def test_users_delete_deletes_user(user_service, delete_user_service, pyramid_re
 
     users_delete(pyramid_request)
 
-    delete_user_service.delete.assert_called_once_with(user)
+    user_delete_service.delete.assert_called_once_with(user)
 
 
 @pytest.fixture(autouse=True)
@@ -242,8 +242,8 @@ def annotation_stats_service(pyramid_config, pyramid_request):
 
 
 @pytest.fixture
-def delete_user_service(pyramid_config, pyramid_request):
+def user_delete_service(pyramid_config, pyramid_request):
     service = mock.create_autospec(UserDeleteService, instance=True, spec_set=True)
     service.return_value.request = pyramid_request
-    pyramid_config.register_service(service, name="delete_user")
+    pyramid_config.register_service(service, name="user_delete")
     return service
