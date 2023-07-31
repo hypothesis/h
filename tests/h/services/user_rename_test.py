@@ -1,9 +1,10 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 
 from h import models
-from h.services.user_rename import UserRenameError, UserRenameService
+from h.services.user_rename import UserRenameError, UserRenameService, service_factory
 
 
 class TestUserRenameService:
@@ -119,3 +120,17 @@ class TestUserRenameService:
         db_session.flush()
 
         return anns
+
+
+class TestServiceFactory:
+    def test_it(self, pyramid_request, search_index, UserRenameService):
+        svc = service_factory(sentinel.context, pyramid_request)
+
+        UserRenameService.assert_called_once_with(
+            session=pyramid_request.db, search_index=search_index
+        )
+        assert svc == UserRenameService.return_value
+
+    @pytest.fixture
+    def UserRenameService(self, patch):
+        return patch("h.services.user_rename.UserRenameService")

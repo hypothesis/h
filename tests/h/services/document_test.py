@@ -1,7 +1,9 @@
+from unittest.mock import sentinel
+
 import pytest
 from h_matchers import Any
 
-from h.services.document import DocumentService
+from h.services.document import DocumentService, document_service_factory
 
 
 class TestFetchByGroupid:
@@ -87,40 +89,46 @@ class TestFetchByGroupid:
             annotations[0].document,
         ]
 
+    @pytest.fixture
+    def target_user(self, factories):
+        return factories.User()
 
-@pytest.fixture
-def target_user(factories):
-    return factories.User()
+    @pytest.fixture
+    def other_user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def groups(self, factories):
+        return {"target_group": factories.Group(), "other_group": factories.Group()}
+
+    @pytest.fixture
+    def annotations(self, factories, groups):
+        return [
+            factories.Annotation(groupid=groups["target_group"].pubid, shared=True),
+            factories.Annotation(groupid=groups["target_group"].pubid, shared=True),
+            factories.Annotation(groupid=groups["target_group"].pubid, shared=True),
+        ]
+
+    @pytest.fixture
+    def other_annotations(self, factories, groups):
+        return [
+            factories.Annotation(groupid=groups["other_group"].pubid, shared=True),
+            factories.Annotation(groupid=groups["other_group"].pubid, shared=True),
+            factories.Annotation(groupid=groups["other_group"].pubid, shared=True),
+        ]
+
+    @pytest.fixture
+    def svc(self, db_session):
+        return DocumentService(session=db_session)
 
 
-@pytest.fixture
-def other_user(factories):
-    return factories.User()
+class TestServiceFactory:
+    def test_it(self, pyramid_request, DocumentService):
+        svc = document_service_factory(sentinel.context, pyramid_request)
 
+        DocumentService.assert_called_once_with(session=pyramid_request.db)
+        assert svc == DocumentService.return_value
 
-@pytest.fixture
-def groups(factories):
-    return {"target_group": factories.Group(), "other_group": factories.Group()}
-
-
-@pytest.fixture
-def annotations(factories, groups):
-    return [
-        factories.Annotation(groupid=groups["target_group"].pubid, shared=True),
-        factories.Annotation(groupid=groups["target_group"].pubid, shared=True),
-        factories.Annotation(groupid=groups["target_group"].pubid, shared=True),
-    ]
-
-
-@pytest.fixture
-def other_annotations(factories, groups):
-    return [
-        factories.Annotation(groupid=groups["other_group"].pubid, shared=True),
-        factories.Annotation(groupid=groups["other_group"].pubid, shared=True),
-        factories.Annotation(groupid=groups["other_group"].pubid, shared=True),
-    ]
-
-
-@pytest.fixture
-def svc(db_session):
-    return DocumentService(session=db_session)
+    @pytest.fixture
+    def DocumentService(self, patch):
+        return patch("h.services.document.DocumentService")
