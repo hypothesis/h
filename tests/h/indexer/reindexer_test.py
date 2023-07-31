@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from pytest import param
 
 from h.indexer.reindexer import reindex
 
@@ -29,11 +30,18 @@ class TestReindex:
 
         batchindexer.index.assert_called_once_with()
 
+    @pytest.mark.parametrize(
+        "indexer_returns",
+        (
+            param([["abc123", "def456"], ["abc123", "def456"]], id="constant_fail"),
+            param([["abc123", "def456"], []], id="fail_then_work"),
+        ),
+    )
     def test_retries_failed_annotations(
-        self, pyramid_request, mock_es_client, batchindexer
+        self, pyramid_request, mock_es_client, batchindexer, indexer_returns
     ):
         """Should call .index() a second time with any failed annotation IDs."""
-        batchindexer.index.return_value = ["abc123", "def456"]
+        batchindexer.index.side_effect = indexer_returns
 
         reindex(mock.sentinel.session, mock_es_client, pyramid_request)
 

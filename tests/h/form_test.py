@@ -218,9 +218,12 @@ class TestHandleFormSubmission:
 
         on_success.assert_called_once_with(mock.sentinel.appstruct)
 
-    def test_if_validation_succeeds_it_shows_a_flash_message(
-        self, form_validating_to, pyramid_request
+    @pytest.mark.parametrize("is_xhr", (True, False))
+    def test_if_validation_succeeds_it_shows_a_flash_message_if_not_xhr(
+        self, form_validating_to, pyramid_request, is_xhr
     ):
+        pyramid_request.is_xhr = is_xhr
+
         form.handle_form_submission(
             pyramid_request,
             form_validating_to("anything"),
@@ -228,7 +231,7 @@ class TestHandleFormSubmission:
             mock.sentinel.on_failure,
         )
 
-        assert pyramid_request.session.peek_flash("success")
+        assert bool(pyramid_request.session.peek_flash("success")) != is_xhr
 
     def test_if_validation_succeeds_it_calls_to_xhr_response(
         self, form_validating_to, matchers, pyramid_request, to_xhr_response
