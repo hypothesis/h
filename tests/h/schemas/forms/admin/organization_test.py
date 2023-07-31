@@ -8,7 +8,13 @@ pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 
 class TestOrganizationSchema:
-    def test_it_allows_valid_data(self, org_data, bound_schema):
+    @pytest.mark.parametrize(
+        "logo",
+        ("<svg>foo</svg>", '<ns:svg xmlns:ns="http://example.com">foo</ns:svg>'),
+    )
+    def test_it_allows_valid_data(self, org_data, bound_schema, logo):
+        org_data["logo"] = logo
+
         bound_schema.deserialize(org_data)
 
     def test_it_raises_if_logo_is_too_long(self, org_data, bound_schema):

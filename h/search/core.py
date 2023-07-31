@@ -157,5 +157,8 @@ class Search:
     def _get_total_hits(response):
         total = response["hits"]["total"]
         if isinstance(total, int):
-            return total  # ES 6.x
-        return total["value"]  # ES 7.x
+            # ES 6.x
+            return total
+
+        # ES 7.x
+        return total["value"]  # pragma: nocover
