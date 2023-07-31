@@ -1,20 +1,21 @@
-from h import models
+import pytest
+
+from h.models.blocklist import Blocklist
 
 
-def test_is_blocked(db_session):
-    db_session.add(models.Blocklist(uri="http://example.com"))
-    db_session.add(models.Blocklist(uri="http://example.com/bar"))
-    db_session.flush()
+class TestBlocklist:
+    @pytest.mark.parametrize(
+        "block_uri,uri,is_blocked",
+        (
+            ("http://example.com", "http://example.com", True),
+            ("http://example.com/path", "http://example.com/path", True),
+            (None, "http://example.com", False),
+            ("%//example.com%", "http://example.com", True),
+            ("%//example.com%", "http://example.com/path", True),
+        ),
+    )
+    def test_is_blocked(self, db_session, block_uri, uri, is_blocked):
+        if block_uri:
+            db_session.add(Blocklist(uri=block_uri))
 
-    assert models.Blocklist.is_blocked(db_session, "http://example.com")
-    assert models.Blocklist.is_blocked(db_session, "http://example.com/bar")
-    assert not models.Blocklist.is_blocked(db_session, "http://example.com/foo")
-
-
-def test_is_blocked_with_wildcards(db_session):
-    db_session.add(models.Blocklist(uri="%//example.com%"))
-    db_session.flush()
-
-    assert models.Blocklist.is_blocked(db_session, "http://example.com/")
-    assert models.Blocklist.is_blocked(db_session, "http://example.com/bar")
-    assert models.Blocklist.is_blocked(db_session, "http://example.com/foo")
+        assert Blocklist.is_blocked(db_session, uri) == is_blocked
