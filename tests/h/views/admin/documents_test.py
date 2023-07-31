@@ -8,12 +8,14 @@ from h.views.admin.documents import DocumentsAdminViews
 
 
 class TestDocumentsAdminViews:
+    def test_get(self, views):
+        assert not views.get()
+
     def test_update_annotation_urls_schedules_update(
-        self, pyramid_request, move_annotations_by_url, flash
+        self, views, pyramid_request, move_annotations_by_url, flash
     ):
         mappings = {"https://example.com": {"url": "https://example.org"}}
         pyramid_request.POST["url_mappings"] = json.dumps(mappings)
-        views = DocumentsAdminViews(pyramid_request)
 
         views.update_annotation_urls()
 
@@ -22,10 +24,9 @@ class TestDocumentsAdminViews:
         flash.assert_called_once_with("URL migration started for 1 URL(s)", "success")
 
     def test_it_errors_if_json_does_not_parse(
-        self, pyramid_request, move_annotations_by_url, flash
+        self, views, pyramid_request, move_annotations_by_url, flash
     ):
         pyramid_request.POST["url_mappings"] = "not-json"
-        views = DocumentsAdminViews(pyramid_request)
 
         views.update_annotation_urls()
 
@@ -36,10 +37,9 @@ class TestDocumentsAdminViews:
         move_annotations_by_url.chunks.assert_not_called()
 
     def test_it_errors_if_validation_fails(
-        self, pyramid_request, move_annotations_by_url, flash
+        self, views, pyramid_request, move_annotations_by_url, flash
     ):
         pyramid_request.POST["url_mappings"] = json.dumps({"not-a-url": "foo"})
-        views = DocumentsAdminViews(pyramid_request)
 
         views.update_annotation_urls()
 
@@ -52,6 +52,10 @@ class TestDocumentsAdminViews:
     @pytest.fixture(autouse=True)
     def move_annotations_by_url(self, patch):
         return patch("h.views.admin.documents.move_annotations_by_url")
+
+    @pytest.fixture
+    def views(self, pyramid_request):
+        return DocumentsAdminViews(pyramid_request)
 
     @pytest.fixture
     def flash(self, pyramid_request):
