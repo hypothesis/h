@@ -91,15 +91,22 @@ def test_entry_id(util, factories):
     assert feed["entries"][0]["id"] == util.tag_uri_for_annotation.return_value
 
 
-def test_entry_author(factories):
+@pytest.mark.parametrize(
+    "userid,name",
+    (
+        ("acct:username@hypothes.is", "username"),
+        ("malformed", "malformed"),
+    ),
+)
+def test_entry_author(factories, userid, name):
     """The authors of entries should come from the annotation usernames."""
-    annotation = factories.Annotation(userid="acct:nobu@hypothes.is")
+    annotation = factories.Annotation(userid=userid)
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda _: "annotation url"
     )
 
-    assert feed["entries"][0]["author"]["name"] == "nobu"
+    assert feed["entries"][0]["author"]["name"] == name
 
 
 def test_entry_title(factories):

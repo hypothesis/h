@@ -6,6 +6,7 @@ from pyramid import i18n
 
 import h.feeds.util
 from h import presenters, util
+from h.exceptions import InvalidUserId
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -35,7 +36,7 @@ def _feed_item_from_annotation(annotation, annotation_url):
     """
     try:
         name = util.user.split_user(annotation.userid)["username"]
-    except ValueError:
+    except InvalidUserId:
         name = annotation.userid
     return {
         "author": {"name": name},
