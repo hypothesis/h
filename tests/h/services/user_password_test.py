@@ -1,8 +1,10 @@
+from unittest.mock import sentinel
+
 import pytest
 from passlib.context import CryptContext
 
 from h.security import password_context
-from h.services.user_password import UserPasswordService
+from h.services.user_password import UserPasswordService, user_password_service_factory
 
 
 class TestUserPasswordService:
@@ -104,3 +106,15 @@ class TestUserPasswordService:
     @pytest.fixture
     def user(self, factories):
         return factories.User.build()
+
+
+class TestServiceFactory:
+    def test_it(self, UserPasswordService):
+        svc = user_password_service_factory(sentinel.context, sentinel.request)
+
+        UserPasswordService.assert_called_once_with()
+        assert svc == UserPasswordService.return_value
+
+    @pytest.fixture
+    def UserPasswordService(self, patch):
+        return patch("h.services.user_password.UserPasswordService")
