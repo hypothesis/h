@@ -1,11 +1,4 @@
-import sys
-
 from pyramid.view import view_config
-
-
-# Test seam. Patching `sys.exc_info` directly causes problems with pytest.
-def _exc_info():
-    return sys.exc_info()
 
 
 def handle_exception(request, exception):  # pylint: disable=unused-argument
