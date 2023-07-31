@@ -1,6 +1,8 @@
 import datetime
 from unittest import mock
 
+import pytest
+
 from h import models
 from h.feeds import rss
 
@@ -28,15 +30,22 @@ def _annotation(**kwargs):
     return models.Annotation(**args)
 
 
-def test_feed_from_annotations_item_author():
+@pytest.mark.parametrize(
+    "userid,name",
+    (
+        ("acct:username@hypothes.is", "username"),
+        ("malformed", "malformed"),
+    ),
+)
+def test_feed_from_annotations_item_author(userid, name):
     """Feed items should include the annotation's author."""
-    annotation = _annotation()
+    annotation = _annotation(userid=userid)
 
     feed = rss.feed_from_annotations(
         [annotation], _annotation_url(), mock.Mock(), "", "", ""
     )
 
-    assert feed["entries"][0]["author"] == {"name": "janebloggs"}
+    assert feed["entries"][0]["author"]["name"] == name
 
 
 def test_feed_annotations_pubDate():
