@@ -31,6 +31,11 @@ class TestAuthClient:
         db_session.add(client)
         db_session.flush()
 
+    def test___repr__(self):
+        client = AuthClient(id=123)
+
+        assert repr(client) == "AuthClient(id=123)"
+
     @pytest.fixture
     def client(self, db_session):
         client = AuthClient(authority="example.com")
