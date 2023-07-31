@@ -5,26 +5,11 @@ import pytest
 from h.util.view import handle_exception, json_view
 
 
-@pytest.mark.usefixtures("sys_exc_info")
 class TestHandleException:
     def test_sets_response_status_500(self, pyramid_request):
         handle_exception(pyramid_request, Mock())
 
         assert pyramid_request.response.status_int == 500
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        return pyramid_request
-
-    @pytest.fixture
-    def latest_exception(self):
-        return Exception("Last exception raised in thread")
-
-    @pytest.fixture
-    def sys_exc_info(self, patch, latest_exception):
-        sys_exc_info = patch("h.util.view._exc_info")
-        sys_exc_info.return_value = (type(latest_exception), latest_exception, None)
-        return sys_exc_info
 
 
 @pytest.mark.usefixtures("view_config")
