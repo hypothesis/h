@@ -48,6 +48,13 @@ class TestCSRFSchema:
 
 
 class TestJSONSchema:
+    def test_it_raises_for_unsupported_schema_versions(self):
+        class BadSchema(JSONSchema):
+            schema_version = 95
+
+        with pytest.raises(ValueError):
+            BadSchema()
+
     def test_it_returns_data_when_valid(self):
         data = {"foo": "baz", "bar": 123}
 

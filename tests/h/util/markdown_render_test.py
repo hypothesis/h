@@ -69,6 +69,7 @@ class TestRender:
                 '<p><img src="/evil.jpg"></p>',
             ),
             ("<img src=\"javascript:alert('evil')\">", "<p><img></p>"),
+            (None, None),
         ],
     )
     def test_it_escapes_evil_html(self, text, expected):
