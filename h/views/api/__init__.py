@@ -12,5 +12,5 @@ specifies a different version with a properly-formatted Accept header
 __all__ = ("API_VERSIONS", "API_VERSION_DEFAULT")
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     config.scan(__name__)

@@ -37,5 +37,5 @@ def csp_protected_view(view, info):
 csp_protected_view.options = ("csp_insecure_optout",)
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     config.add_view_deriver(csp_protected_view)

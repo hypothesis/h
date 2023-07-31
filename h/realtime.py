@@ -142,5 +142,5 @@ def get_connection(settings, fail_fast=False):
     return kombu.Connection(conn, **kwargs)
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     config.add_request_method(Publisher, name="realtime", reify=True)

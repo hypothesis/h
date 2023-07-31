@@ -67,5 +67,5 @@ class EventQueue:
         self.publish_all()
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     config.add_request_method(EventQueue, name="notify_after_commit", reify=True)
