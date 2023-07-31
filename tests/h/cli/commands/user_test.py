@@ -1,17 +1,15 @@
 from unittest import mock
 
 import pytest
-from passlib.context import CryptContext
 
 from h import models
 from h.cli.commands import user as user_cli
-from h.services.annotation_delete import AnnotationDeleteService
-from h.services.user_delete import UserDeleteService
-from h.services.user_password import UserPasswordService
 
 
 class TestAddCommand:
-    def test_it_adds_user_with_default_authority(self, cli, cliconfig, signup_service):
+    def test_it_adds_user_with_default_authority(
+        self, cli, cliconfig, user_signup_service
+    ):
         result = cli.invoke(
             user_cli.add,
             [
@@ -27,14 +25,16 @@ class TestAddCommand:
 
         assert not result.exit_code
 
-        signup_service.signup.assert_called_with(
+        user_signup_service.signup.assert_called_with(
             username="admin",
             email="admin@localhost",
             password="admin",
             require_activation=False,
         )
 
-    def test_it_adds_user_with_specific_authority(self, cli, cliconfig, signup_service):
+    def test_it_adds_user_with_specific_authority(
+        self, cli, cliconfig, user_signup_service
+    ):
         result = cli.invoke(
             user_cli.add,
             [
@@ -52,7 +52,7 @@ class TestAddCommand:
 
         assert not result.exit_code
 
-        signup_service.signup.assert_called_with(
+        user_signup_service.signup.assert_called_with(
             username="admin",
             email="admin@localhost",
             password="admin",
@@ -148,22 +148,17 @@ class TestAdminCommand:
         assert not user.admin
 
     @pytest.fixture
-    def admin_user(self, db_session, factories):
-        return self._user(db_session, factories, True)
+    def admin_user(self, factories):
+        return factories.User(admin=True)
 
     @pytest.fixture
-    def non_admin_user(self, db_session, factories):
-        return self._user(db_session, factories, False)
-
-    def _user(self, db_session, factories, admin):
-        user = factories.User(admin=admin)
-        db_session.flush()
-        return user
+    def non_admin_user(self, factories):
+        return factories.User(admin=False)
 
 
 class TestPasswordCommand:
     def test_it_changes_password(
-        self, cli, cliconfig, user, db_session, password_service
+        self, cli, cliconfig, user, db_session, user_password_service
     ):
         result = cli.invoke(
             user_cli.password, [user.username, "--password", "newpass"], obj=cliconfig
@@ -172,10 +167,10 @@ class TestPasswordCommand:
         assert not result.exit_code
 
         user = db_session.query(models.User).get(user.id)
-        assert password_service.check_password(user, "newpass")
+        user_password_service.update_password.assert_called_once_with(user, "newpass")
 
     def test_it_changes_password_with_specific_authority(
-        self, cli, cliconfig, user, db_session, password_service
+        self, cli, cliconfig, user, db_session, user_password_service
     ):
         user.authority = "partner.org"
         db_session.flush()
@@ -189,24 +184,23 @@ class TestPasswordCommand:
         assert not result.exit_code
 
         user = db_session.query(models.User).get(user.id)
-        assert password_service.check_password(user, "newpass")
+        user_password_service.update_password.assert_called_once_with(user, "newpass")
 
     def test_it_errors_when_user_could_not_be_found(
-        self, cli, cliconfig, user, db_session, password_service
+        self, cli, cliconfig, user_password_service
     ):
         result = cli.invoke(
             user_cli.password,
-            [f"bogus_{user.username}", "--password", "newpass"],
+            ["bogus_username", "--password", "newpass"],
             obj=cliconfig,
         )
 
         assert result.exit_code == 1
 
-        user = db_session.query(models.User).get(user.id)
-        assert not password_service.check_password(user, "newpass")
+        user_password_service.update_password.assert_not_called()
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
-        self, cli, cliconfig, user, db_session, password_service
+        self, cli, cliconfig, user, user_password_service
     ):
         result = cli.invoke(
             user_cli.password,
@@ -216,28 +210,24 @@ class TestPasswordCommand:
 
         assert result.exit_code == 1
 
-        user = db_session.query(models.User).get(user.id)
-        assert not password_service.check_password(user, "newpass")
+        user_password_service.update_password.assert_not_called()
 
     @pytest.fixture
-    def user(self, db_session, factories):
-        user = factories.User()
-        db_session.flush()
-        return user
+    def user(self, factories):
+        return factories.User()
 
 
 class TestDeleteUserCommand:
-    def test_it_deletes_user(self, cli, cliconfig, user, db_session):
+    def test_it_deletes_user(self, cli, cliconfig, user, user_delete_service):
         result = cli.invoke(user_cli.delete, [user.username], obj=cliconfig)
 
         assert not result.exit_code
-        assert not db_session.query(models.User).filter_by(id=user.id).count()
+        user_delete_service.delete.assert_called_once_with(user)
 
     def test_it_deletes_user_with_specific_authority(
-        self, cli, cliconfig, user, db_session
+        self, cli, cliconfig, user, user_delete_service
     ):
         user.authority = "partner.org"
-        db_session.flush()
 
         result = cli.invoke(
             user_cli.delete,
@@ -246,79 +236,29 @@ class TestDeleteUserCommand:
         )
 
         assert not result.exit_code
-        assert not db_session.query(models.User).filter_by(id=user.id).count()
+        user_delete_service.delete.assert_called_once_with(user)
 
     def test_it_errors_when_user_could_not_be_found(
-        self, cli, cliconfig, user, db_session
+        self, cli, cliconfig, user_delete_service
     ):
-        result = cli.invoke(user_cli.delete, [f"bogus_{user.username}"], obj=cliconfig)
+        result = cli.invoke(user_cli.delete, ["bogus_username"], obj=cliconfig)
 
         assert result.exit_code == 1
-        assert db_session.query(models.User).filter_by(id=user.id).count() == 1
+        user_delete_service.delete.assert_not_called()
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
-        self, cli, cliconfig, user, db_session
+        self, cli, cliconfig, user, user_delete_service
     ):
         result = cli.invoke(
             user_cli.delete, ["--authority", "foo.com", user.username], obj=cliconfig
         )
 
         assert result.exit_code == 1
-        assert db_session.query(models.User).filter_by(id=user.id).count() == 1
+        user_delete_service.delete.assert_not_called()
 
     @pytest.fixture
-    def user(self, db_session, factories):
-        user = factories.User()
-        db_session.flush()
-        return user
-
-
-@pytest.fixture
-def signup_service():
-    signup_service = mock.Mock(spec_set=["signup"])
-    return signup_service
-
-
-@pytest.fixture
-def hasher():
-    # Use a much faster hasher for testing purposes. DO NOT use as few as
-    # 5 rounds of bcrypt in production code under ANY CIRCUMSTANCES.
-    return CryptContext(
-        schemes=["bcrypt"],
-        bcrypt__ident="2b",
-        bcrypt__min_rounds=5,
-        bcrypt__max_rounds=5,
-    )
-
-
-@pytest.fixture
-def password_service(hasher):
-    password_service = UserPasswordService()
-    password_service.hasher = hasher
-    return password_service
-
-
-@pytest.fixture
-def user_delete_service(pyramid_request, annotation_delete_service):
-    return UserDeleteService(pyramid_request, annotation_delete_service)
-
-
-@pytest.fixture
-def annotation_delete_service(pyramid_config):  # pylint:disable=unused-argument
-    service = mock.create_autospec(
-        AnnotationDeleteService, spec_set=True, instance=True
-    )
-    return service
-
-
-@pytest.fixture
-def pyramid_config(
-    pyramid_config, signup_service, password_service, user_delete_service
-):
-    pyramid_config.register_service(signup_service, name="user_signup")
-    pyramid_config.register_service(password_service, name="user_password")
-    pyramid_config.register_service(user_delete_service, name="user_delete")
-    return pyramid_config
+    def user(self, factories):
+        return factories.User()
 
 
 @pytest.fixture
