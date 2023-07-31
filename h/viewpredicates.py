@@ -16,5 +16,5 @@ class FeaturePredicate:
         return request.feature(self.feature)
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     config.add_view_predicate("feature", FeaturePredicate)
