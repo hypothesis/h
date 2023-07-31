@@ -13,6 +13,9 @@ class TestDeveloperTokenService:
     ):
         assert svc.fetch(userid) == developer_token
 
+    def test_fetch_returns_none_for_missing_userid(self, svc):
+        assert svc.fetch(None) is None
+
     def test_fetch_returns_none_for_missing_developer_token(self, svc, userid):
         assert svc.fetch(userid) is None
 
