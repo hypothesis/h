@@ -315,7 +315,7 @@ psycopg2==2.9.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   data-tasks
-pycodestyle==2.10.0
+pycodestyle==2.11.0
     # via -r requirements/lint.in
 pycparser==2.20
     # via
