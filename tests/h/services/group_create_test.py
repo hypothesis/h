@@ -218,17 +218,24 @@ class TestCreateOpenGroup:
 
         publish.assert_not_called()
 
-    def test_it_sets_scopes(self, svc, creator):
-        origins = ["https://biopub.org", "http://example.com", "https://wikipedia.com"]
-
+    @pytest.mark.parametrize(
+        "origins",
+        (["http://example.com", "http://example.org"], [], None),
+    )
+    def test_it_sets_scopes(self, svc, creator, origins):
         group = svc.create_open_group(
             name="test_group", userid=creator.userid, scopes=origins
         )
 
-        assert (
-            group.scopes
-            == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
-        )
+        if origins:
+            assert (
+                group.scopes
+                == Any.list.containing(
+                    [GroupScopeWithOrigin(origin) for origin in origins]
+                ).only()
+            )
+        else:
+            assert group.scopes == []
 
     def test_it_always_creates_new_scopes(self, factories, svc, creator):
         # It always creates a new scope, even if a scope with the given origin
@@ -365,17 +372,24 @@ class TestCreateRestrictedGroup:
 
         publish.assert_called_once_with("group-join", group.pubid, creator.userid)
 
-    def test_it_sets_scopes(self, svc, creator):
-        origins = ["https://biopub.org", "http://example.com", "https://wikipedia.com"]
-
+    @pytest.mark.parametrize(
+        "origins",
+        (["http://example.com", "http://example.org"], [], None),
+    )
+    def test_it_sets_scopes(self, svc, creator, origins):
         group = svc.create_restricted_group(
             name="test_group", userid=creator.userid, scopes=origins
         )
 
-        assert (
-            group.scopes
-            == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
-        )
+        if origins:
+            assert (
+                group.scopes
+                == Any.list.containing(
+                    [GroupScopeWithOrigin(origin) for origin in origins]
+                ).only()
+            )
+        else:
+            assert group.scopes == []
 
     def test_it_with_mismatched_authorities_raises_value_error(
         self, svc, origins, creator, factories

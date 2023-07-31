@@ -1,4 +1,4 @@
-from unittest.mock import sentinel
+from unittest.mock import patch, sentinel
 
 import pytest
 from h_matchers import Any
@@ -41,6 +41,16 @@ class TestSubscriptionService:
                 "active": True,
             }
         )
+
+    def test_get_all_subscriptions(self, svc):
+        with patch.object(svc, "get_subscription") as get_subscription:
+            subscriptions = svc.get_all_subscriptions(sentinel.user_id)
+
+            # Despite the name, there is only one subscription type
+            get_subscription.assert_called_once_with(
+                sentinel.user_id, Subscriptions.Type.REPLY
+            )
+            assert subscriptions == [get_subscription.return_value]
 
     def test_get_unsubscribe_token(self, svc, SignedSerializer):
         result = svc.get_unsubscribe_token(
