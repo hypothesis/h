@@ -39,6 +39,6 @@ class SVGRenderer:
         return value
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     config.add_renderer(name="json_sorted", factory=json_sorted_factory)
     config.add_renderer(name="svg", factory=SVGRenderer)

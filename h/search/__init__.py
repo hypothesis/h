@@ -25,7 +25,7 @@ __all__ = (
 )
 
 
-def includeme(config):
+def includeme(config):  # pragma: nocover
     settings = config.registry.settings
 
     kwargs = {}
