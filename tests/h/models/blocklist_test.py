@@ -19,3 +19,8 @@ class TestBlocklist:
             db_session.add(Blocklist(uri=block_uri))
 
         assert Blocklist.is_blocked(db_session, uri) == is_blocked
+
+    def test___repr__(self):
+        blocklist = Blocklist(uri="http://example.com")
+
+        assert repr(blocklist) == "http://example.com"
