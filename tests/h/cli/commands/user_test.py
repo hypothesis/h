@@ -7,10 +7,8 @@ from h.cli.commands import user as user_cli
 
 
 class TestAddCommand:
-    def test_it_adds_user_with_default_authority(
-        self, cli, cliconfig, user_signup_service
-    ):
-        result = cli.invoke(
+    def test_it_adds_user_with_default_authority(self, invoke_cli, user_signup_service):
+        result = invoke_cli(
             user_cli.add,
             [
                 "--username",
@@ -20,7 +18,6 @@ class TestAddCommand:
                 "--password",
                 "admin",
             ],
-            obj=cliconfig,
         )
 
         assert not result.exit_code
@@ -33,9 +30,9 @@ class TestAddCommand:
         )
 
     def test_it_adds_user_with_specific_authority(
-        self, cli, cliconfig, user_signup_service
+        self, invoke_cli, user_signup_service
     ):
-        result = cli.invoke(
+        result = invoke_cli(
             user_cli.add,
             [
                 "--username",
@@ -47,7 +44,6 @@ class TestAddCommand:
                 "--authority",
                 "publisher.org",
             ],
-            obj=cliconfig,
         )
 
         assert not result.exit_code
@@ -62,18 +58,16 @@ class TestAddCommand:
 
 
 class TestAdminCommand:
-    def test_it_adds_admin(self, cli, cliconfig, non_admin_user, db_session):
-        result = cli.invoke(
-            user_cli.admin, ["--on", non_admin_user.username], obj=cliconfig
-        )
+    def test_it_adds_admin(self, invoke_cli, non_admin_user, db_session):
+        result = invoke_cli(user_cli.admin, ["--on", non_admin_user.username])
 
         assert not result.exit_code
 
         user = db_session.query(models.User).get(non_admin_user.id)
         assert user.admin
 
-    def test_it_adds_admin_by_default(self, cli, cliconfig, non_admin_user, db_session):
-        result = cli.invoke(user_cli.admin, [non_admin_user.username], obj=cliconfig)
+    def test_it_adds_admin_by_default(self, invoke_cli, non_admin_user, db_session):
+        result = invoke_cli(user_cli.admin, [non_admin_user.username])
 
         assert not result.exit_code
 
@@ -81,15 +75,13 @@ class TestAdminCommand:
         assert user.admin
 
     def test_it_adds_admin_with_specific_authority(
-        self, cli, cliconfig, non_admin_user, db_session
+        self, invoke_cli, non_admin_user, db_session
     ):
         non_admin_user.authority = "partner.org"
         db_session.flush()
 
-        result = cli.invoke(
-            user_cli.admin,
-            ["--authority", "partner.org", non_admin_user.username],
-            obj=cliconfig,
+        result = invoke_cli(
+            user_cli.admin, ["--authority", "partner.org", non_admin_user.username]
         )
 
         assert not result.exit_code
@@ -97,10 +89,8 @@ class TestAdminCommand:
         user = db_session.query(models.User).get(non_admin_user.id)
         assert user.admin
 
-    def test_it_removes_admin(self, cli, cliconfig, admin_user, db_session):
-        result = cli.invoke(
-            user_cli.admin, ["--off", admin_user.username], obj=cliconfig
-        )
+    def test_it_removes_admin(self, invoke_cli, admin_user, db_session):
+        result = invoke_cli(user_cli.admin, ["--off", admin_user.username])
 
         assert not result.exit_code
 
@@ -108,14 +98,12 @@ class TestAdminCommand:
         assert not user.admin
 
     def test_it_removes_admin_with_specific_authority(
-        self, cli, cliconfig, admin_user, db_session
+        self, invoke_cli, admin_user, db_session
     ):
         admin_user.authority = "partner.org"
 
-        result = cli.invoke(
-            user_cli.admin,
-            ["--off", "--authority", "partner.org", admin_user.username],
-            obj=cliconfig,
+        result = invoke_cli(
+            user_cli.admin, ["--off", "--authority", "partner.org", admin_user.username]
         )
 
         assert not result.exit_code
@@ -124,23 +112,19 @@ class TestAdminCommand:
         assert not user.admin
 
     def test_it_errors_when_user_could_not_be_found(
-        self, cli, cliconfig, non_admin_user, db_session
+        self, invoke_cli, non_admin_user, db_session
     ):
-        result = cli.invoke(
-            user_cli.admin, [f"bogus_{non_admin_user.username}"], obj=cliconfig
-        )
+        result = invoke_cli(user_cli.admin, [f"bogus_{non_admin_user.username}"])
 
         assert result.exit_code == 1
         user = db_session.query(models.User).get(non_admin_user.id)
         assert not user.admin
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
-        self, cli, cliconfig, non_admin_user, db_session
+        self, invoke_cli, non_admin_user, db_session
     ):
-        result = cli.invoke(
-            user_cli.admin,
-            ["--authority", "foo.com", non_admin_user.username],
-            obj=cliconfig,
+        result = invoke_cli(
+            user_cli.admin, ["--authority", "foo.com", non_admin_user.username]
         )
 
         assert result.exit_code == 1
@@ -158,11 +142,9 @@ class TestAdminCommand:
 
 class TestPasswordCommand:
     def test_it_changes_password(
-        self, cli, cliconfig, user, db_session, user_password_service
+        self, invoke_cli, user, db_session, user_password_service
     ):
-        result = cli.invoke(
-            user_cli.password, [user.username, "--password", "newpass"], obj=cliconfig
-        )
+        result = invoke_cli(user_cli.password, [user.username, "--password", "newpass"])
 
         assert not result.exit_code
 
@@ -170,15 +152,14 @@ class TestPasswordCommand:
         user_password_service.update_password.assert_called_once_with(user, "newpass")
 
     def test_it_changes_password_with_specific_authority(
-        self, cli, cliconfig, user, db_session, user_password_service
+        self, invoke_cli, user, db_session, user_password_service
     ):
         user.authority = "partner.org"
         db_session.flush()
 
-        result = cli.invoke(
+        result = invoke_cli(
             user_cli.password,
             ["--authority", "partner.org", user.username, "--password", "newpass"],
-            obj=cliconfig,
         )
 
         assert not result.exit_code
@@ -187,12 +168,10 @@ class TestPasswordCommand:
         user_password_service.update_password.assert_called_once_with(user, "newpass")
 
     def test_it_errors_when_user_could_not_be_found(
-        self, cli, cliconfig, user_password_service
+        self, invoke_cli, user_password_service
     ):
-        result = cli.invoke(
-            user_cli.password,
-            ["bogus_username", "--password", "newpass"],
-            obj=cliconfig,
+        result = invoke_cli(
+            user_cli.password, ["bogus_username", "--password", "newpass"]
         )
 
         assert result.exit_code == 1
@@ -200,12 +179,11 @@ class TestPasswordCommand:
         user_password_service.update_password.assert_not_called()
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
-        self, cli, cliconfig, user, user_password_service
+        self, invoke_cli, user, user_password_service
     ):
-        result = cli.invoke(
+        result = invoke_cli(
             user_cli.password,
             ["--authority", "foo.com", user.username, "--password", "newpass"],
-            obj=cliconfig,
         )
 
         assert result.exit_code == 1
@@ -218,40 +196,36 @@ class TestPasswordCommand:
 
 
 class TestDeleteUserCommand:
-    def test_it_deletes_user(self, cli, cliconfig, user, user_delete_service):
-        result = cli.invoke(user_cli.delete, [user.username], obj=cliconfig)
+    def test_it_deletes_user(self, invoke_cli, user, user_delete_service):
+        result = invoke_cli(user_cli.delete, [user.username])
 
         assert not result.exit_code
         user_delete_service.delete.assert_called_once_with(user)
 
     def test_it_deletes_user_with_specific_authority(
-        self, cli, cliconfig, user, user_delete_service
+        self, invoke_cli, user, user_delete_service
     ):
         user.authority = "partner.org"
 
-        result = cli.invoke(
-            user_cli.delete,
-            ["--authority", "partner.org", user.username],
-            obj=cliconfig,
+        result = invoke_cli(
+            user_cli.delete, ["--authority", "partner.org", user.username]
         )
 
         assert not result.exit_code
         user_delete_service.delete.assert_called_once_with(user)
 
     def test_it_errors_when_user_could_not_be_found(
-        self, cli, cliconfig, user_delete_service
+        self, invoke_cli, user_delete_service
     ):
-        result = cli.invoke(user_cli.delete, ["bogus_username"], obj=cliconfig)
+        result = invoke_cli(user_cli.delete, ["bogus_username"])
 
         assert result.exit_code == 1
         user_delete_service.delete.assert_not_called()
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
-        self, cli, cliconfig, user, user_delete_service
+        self, invoke_cli, user, user_delete_service
     ):
-        result = cli.invoke(
-            user_cli.delete, ["--authority", "foo.com", user.username], obj=cliconfig
-        )
+        result = invoke_cli(user_cli.delete, ["--authority", "foo.com", user.username])
 
         assert result.exit_code == 1
         user_delete_service.delete.assert_not_called()
@@ -262,6 +236,12 @@ class TestDeleteUserCommand:
 
 
 @pytest.fixture
-def cliconfig(pyramid_config, pyramid_request):  # pylint:disable=unused-argument
+def invoke_cli(cli, pyramid_request):
     pyramid_request.tm = mock.Mock()
-    return {"bootstrap": mock.Mock(return_value=pyramid_request)}
+
+    def invoke_cli(method, args):
+        return cli.invoke(
+            method, args, obj={"bootstrap": mock.Mock(return_value=pyramid_request)}
+        )
+
+    return invoke_cli
