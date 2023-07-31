@@ -126,7 +126,7 @@ class Sorter:
     @staticmethod
     def _parse_date(str_value):
         """
-        Convert a string to a float representing miliseconds since the epoch.
+        Convert a string to a float representing milliseconds since the epoch.
 
         Since the elasticsearch date parser is not run on search_after,
         the date must be converted to ms since the epoch as that is how
@@ -142,10 +142,6 @@ class Sorter:
         except ValueError:
             try:  # pylint: disable=too-many-try-statements
                 date = parse(str_value, default=DEFAULT_DATE)
-                # If timezone isn't specified assume it's utc.
-                if not date.tzinfo:
-                    date = date.replace(tzinfo=tz.tzutc())
-
                 return dt.timestamp(date) * 1000
 
             except ValueError:
