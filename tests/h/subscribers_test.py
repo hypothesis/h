@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 from kombu.exceptions import OperationalError
 from transaction import TransactionManager
 
@@ -135,11 +136,15 @@ class TestSendReplyNotifications:
 
         mailer.send.delay.assert_not_called()
 
-    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer):
-        mailer.send.side_effect = OperationalError
+    def test_it_fails_gracefully_if_the_task_does_not_queue(
+        self, event, mailer, report_exception
+    ):
+        mailer.send.delay.side_effect = OperationalError
 
         # No explosions please
         subscribers.send_reply_notifications(event)
+
+        report_exception.assert_called_once_with(Any.instance_of(OperationalError))
 
     @pytest.fixture
     def event(self, pyramid_request):

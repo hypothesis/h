@@ -1,7 +1,15 @@
 import pytest
+from h_matchers import Any
 from pyramid import httpexceptions
+from pyramid.httpexceptions import HTTPFound
 
-from h.views.admin.nipsa import UserNotFoundError, nipsa_add, nipsa_index, nipsa_remove
+from h.views.admin.nipsa import (
+    UserNotFoundError,
+    nipsa_add,
+    nipsa_index,
+    nipsa_remove,
+    user_not_found,
+)
 
 
 @pytest.mark.usefixtures("nipsa_service", "routes", "users")
@@ -77,6 +85,15 @@ class TestNipsaAddRemove:
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == "/adm/nipsa"
+
+
+class TestUserNotFound:
+    @pytest.mark.usefixtures("routes")
+    def test_it(self, pyramid_request):
+        response = user_not_found(ValueError("message"), pyramid_request)
+
+        assert response == Any.instance_of(HTTPFound)
+        assert response.location == "/adm/nipsa"
 
 
 class FakeNipsaService:

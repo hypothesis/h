@@ -83,14 +83,28 @@ class TestOAuthAuthorizeController:
     ):
         auth_client.trusted = True
 
-        view = getattr(controller, view_name)
-        view()
+        getattr(controller, view_name)()
 
         controller.oauth.create_authorization_response.assert_called_once_with(
             pyramid_request.url,
             credentials={"user": authenticated_user},
             scopes=DEFAULT_SCOPES,
         )
+
+    @pytest.mark.usefixtures("authenticated_user")
+    @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
+    def test_get_handles_missing_location_errors(
+        self, controller, auth_client, view_name
+    ):
+        controller.oauth.create_authorization_response.return_value = (
+            {"no_location_here": "oh_no"},
+            ...,
+            ...,
+        )
+        auth_client.trusted = True
+
+        with pytest.raises(RuntimeError):
+            getattr(controller, view_name)()
 
     @pytest.mark.usefixtures("authenticated_user")
     def test_get_returns_redirect_immediately_for_trusted_clients(

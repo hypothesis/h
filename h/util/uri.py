@@ -167,15 +167,12 @@ def normalize(uristr):
     if uri.hostname is None:
         return uristr
 
-    scheme = _normalize_scheme(uri)
     netloc = _normalize_netloc(uri)
     path = _normalize_path(uri)
     query = _normalize_query(uri)
     fragment = None
 
-    uri = SplitResult(scheme, netloc, path, query, fragment)
-
-    return uri.geturl()
+    return SplitResult("httpx", netloc, path, query, fragment).geturl()
 
 
 def origin(url):
@@ -186,15 +183,6 @@ def origin(url):
     """
     url_parts = urlsplit(url)
     return SplitResult(url_parts.scheme, url_parts.netloc, "", "", "").geturl()
-
-
-def _normalize_scheme(uri):
-    scheme = uri.scheme
-
-    if scheme in URL_SCHEMES:
-        scheme = "httpx"
-
-    return scheme
 
 
 def _normalize_netloc(uri):

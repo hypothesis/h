@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -31,7 +32,10 @@ class TestAnnotationJSONLDPresenter:
 
         assert result == expected
 
-    def test_it_returns_bodies(self, presenter, annotation):
+    @pytest.mark.parametrize("tags", ([sentinel.tag_1, sentinel.tag_2], None))
+    def test_it_returns_bodies(self, presenter, annotation, tags):
+        annotation.tags = tags
+
         result = presenter.asdict()
 
         expected_bodies = [
@@ -41,10 +45,11 @@ class TestAnnotationJSONLDPresenter:
                 "value": annotation.text,
             }
         ]
+
         expected_bodies.extend(
             [
                 {"type": "TextualBody", "value": tag, "purpose": "tagging"}
-                for tag in annotation.tags
+                for tag in annotation.tags or []
             ]
         )
         assert result["body"] == expected_bodies

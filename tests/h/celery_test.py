@@ -1,8 +1,11 @@
 from unittest import mock
+from unittest.mock import sentinel
 
+import pytest
 from billiard.einfo import ExceptionInfo
 
 from h import celery
+from h.celery import start
 
 
 class TestCelery:
@@ -77,3 +80,15 @@ class TestCelery:
         celery.report_failure(sender, "abc123", (), {}, einfo)
 
         assert not log.error.called
+
+
+class TestStart:
+    def test_it(self, celery):
+        start(sentinel.argv, sentinel.bootstrap)
+
+        assert celery.webapp_bootstrap == sentinel.bootstrap
+        celery.start.assert_called_with(sentinel.argv)
+
+    @pytest.fixture
+    def celery(self, patch):
+        return patch("h.celery.celery")

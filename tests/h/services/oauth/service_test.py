@@ -71,17 +71,20 @@ class TestOAuthProviderService:
         finally:
             assert oauth_request.h_revoke_request is True
 
+    @pytest.mark.parametrize("token_returned", (True, False))
     def test_validate_revocation_request_looks_up_token(
-        self, svc, oauth_request, token
+        self, svc, oauth_request, token, token_returned
     ):
         oauth_request.token = mock.sentinel.token
-        svc.oauth_validator.find_token.return_value = token
+        svc.oauth_validator.find_token.return_value = token if token_returned else None
         oauth_request.http_method = "POST"
 
         svc.validate_revocation_request(oauth_request)
 
         svc.oauth_validator.find_token.assert_called_once_with(mock.sentinel.token)
-        assert oauth_request.client_id == token.authclient.id
+        assert oauth_request.client_id == (
+            token.authclient.id if token_returned else None
+        )
 
     @pytest.fixture
     def token(self):

@@ -246,19 +246,26 @@ class TestDeleteIndex:
 
 
 class TestUpdateIndexSettings:
-    def test_succesfully_updates_the_index_settings(self, mock_es_client):
+    @pytest.mark.parametrize(
+        "old_analysis_settings", ({"some": "values"}, ANALYSIS_SETTINGS)
+    )
+    def test_updates_the_index_settings(self, mock_es_client, old_analysis_settings):
         mock_es_client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}
         }
         mock_es_client.conn.indices.get_settings.return_value = {
-            "old-target": {"settings": {"index": {"analysis": {"old_setting": "val"}}}}
+            "old-target": {"settings": {"index": {"analysis": old_analysis_settings}}}
         }
 
         update_index_settings(mock_es_client)
 
-        mock_es_client.conn.indices.put_settings.assert_called_once_with(
-            index="old-target", body={"analysis": ANALYSIS_SETTINGS}
-        )
+        if old_analysis_settings == ANALYSIS_SETTINGS:
+            mock_es_client.conn.indices.put_settings.assert_not_called()
+        else:
+            mock_es_client.conn.indices.put_settings.assert_called_once_with(
+                index="old-target", body={"analysis": ANALYSIS_SETTINGS}
+            )
+
         mock_es_client.conn.indices.put_mapping.assert_called_once_with(
             index="old-target",
             doc_type=mock_es_client.mapping_type,

@@ -1,14 +1,21 @@
 import datetime
-from unittest import mock
 
 import pytest
+from h_matchers import Any
+from pyramid.httpexceptions import HTTPFound
 
-from h.services.group import GroupService
-from h.views.admin.search import NotFoundError, SearchAdminViews
-
-pytestmark = pytest.mark.usefixtures("search_index")
+from h.views.admin.search import NotFoundError, SearchAdminViews, not_found
 
 
+class TestNotFound:
+    def test_it(self, pyramid_request):
+        response = not_found(ValueError("message"), pyramid_request)
+
+        assert response == Any.instance_of(HTTPFound)
+        assert response.location == "http://example.com/admin/search"
+
+
+@pytest.mark.usefixtures("search_index")
 class TestSearchAdminViews:
     def test_get(self, views):
         assert views.get() == {}
@@ -89,13 +96,7 @@ class TestSearchAdminViews:
     def views(self, pyramid_request):
         return SearchAdminViews(pyramid_request)
 
-    @pytest.fixture(autouse=True)
-    def routes(self, pyramid_config):
-        pyramid_config.add_route("admin.search", "/admin/search")
 
-
-@pytest.fixture
-def group_service(pyramid_config):
-    service = mock.create_autospec(GroupService, spec_set=True, instance=True)
-    pyramid_config.register_service(service, name="group")
-    return service
+@pytest.fixture(autouse=True)
+def routes(pyramid_config):
+    pyramid_config.add_route("admin.search", "/admin/search")
