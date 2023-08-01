@@ -1,21 +1,24 @@
+from typing import List
+
 import venusian
+from pyramid.config import Configurator
 
 from h.views.api import API_VERSION_DEFAULT, API_VERSIONS
 from h.views.api.decorators.response import version_media_type_header
 from h.views.api.helpers import cors, links
 from h.views.api.helpers.media_types import media_type_for_version
 
-#: Decorator that adds CORS headers to API responses.
-#:
-#: This decorator enables web applications not running on the same domain as h
-#: to make API requests and read the responses.
-#:
-#: For standard API views the decorator is automatically applied by the
-#: ``api_config`` decorator.
-#:
-#: Exception views need to independently apply this policy because any response
-#: headers set during standard request processing are discarded if an exception
-#: occurs and an exception view is invoked to generate the response instead.
+# Decorator that adds CORS headers to API responses.
+#
+# This decorator enables web applications not running on the same domain as h
+# to make API requests and read the responses.
+#
+# For standard API views the decorator is automatically applied by the
+# `api_config` decorator.
+#
+# Exception views need to independently apply this policy because any response
+# headers set during standard request processing are discarded if an exception
+# occurs and an exception view is invoked to generate the response instead.
 cors_policy = cors.policy(
     allow_headers=(
         "Authorization",
@@ -27,18 +30,16 @@ cors_policy = cors.policy(
 )
 
 
-def add_api_view(  # pylint: disable=too-many-arguments
-    config,
-    view,
-    versions,
-    link_name=None,
-    description=None,
-    enable_preflight=True,
-    subtype="json",
+def api_config(
+    versions: List[str],
+    link_name: str = None,
+    description: str = None,
+    enable_preflight: bool = True,
+    subtype: str = "json",
     **settings
 ):
     """
-    Add a view configuration for an API view.
+    Decorate a method to add view configuration for an API view.
 
     This configuration takes care of some common tasks for configuring
     API views:
@@ -47,24 +48,65 @@ def add_api_view(  # pylint: disable=too-many-arguments
       API method views, e.g. JSON and CORs support. As part of this, it also
       configures views to respond to requests for different versions of
       the API, via Accept header negotiation.
-    * If ``link_name`` is present, the view will be registered as one of the
-      available "links" that are returned by the ``api.index`` route for its
+    * If `link_name` is present, the view will be registered as one of the
+      available "links" that are returned by the `api.index` route for its
       version(s).
 
-    :param config:
-    :type config: :class:`pyramid.config.Configurator`
-    :param view: The view callable
     :param versions: API versions this view supports. Each entry must be one of
-                     the versions defined in :py:const:`h.views.api.API_VERSIONS`
-    :type versions: list[string] or None
-    :param str link_name: Dotted path of the metadata for this route in the output
-                          of the `api.index` view
-    :param str description: Description of the view to use in `api.index`
-    :param bool enable_preflight: If ```True``, add support for CORS preflight
-                                  requests for this view. If ``True``, a
-                                  `route_name` must be specified.
-    :param dict **settings: Arguments to pass on to ``config.add_view``
+        the versions defined in `h.views.api.API_VERSIONS`
+    :param link_name: Dotted path of the metadata for this route in the output
+        of the `api.index` view
+    :param description: Description of the view to use in `api.index`
+    :param enable_preflight: Add support for CORS preflight requests for this
+        view. This requires a `route_name` in settings
+    :param subtype: The JSON subtype being used in the accept MIME type
+    :param settings: kwargs to pass on to `config.add_view`
     """
+
+    def callback(context, _name, view):
+        # This callback is not executed right away, and only takes effect
+        # when a venusian scan is triggered over the code.
+        _add_api_view(
+            context.config,
+            view=view,
+            versions=versions,
+            link_name=link_name,
+            description=description,
+            enable_preflight=enable_preflight,
+            subtype=subtype,
+            **settings
+        )
+
+    def wrapper(wrapped):
+        # Register our decorator with venusian to be applied later
+        info = venusian.attach(wrapped, callback, category="pyramid")
+
+        # Set `attr` as required for class methods as views:
+        # https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/viewconfig.html#non-predicate-arguments
+        # Taken from Pyramid's `view_config` decorator implementation.
+
+        # This works because the above callback forms a closure around
+        # `settings`, but has not yet been executed. As we hold a reference to
+        # `settings` we can still modify it before the call is made
+        if info.scope == "class":  # pylint: disable=no-member
+            if settings.get("attr") is None:
+                settings["attr"] = wrapped.__name__
+
+        return wrapped
+
+    return wrapper
+
+
+def _add_api_view(  # pylint: disable=too-many-arguments
+    config: Configurator,
+    view: callable,
+    versions: List[str],
+    link_name: str = None,
+    description: str = None,
+    enable_preflight: bool = True,
+    subtype: str = "json",
+    **settings
+):
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", (cors_policy, version_media_type_header(subtype)))
 
@@ -97,35 +139,3 @@ def add_api_view(  # pylint: disable=too-many-arguments
 
     if enable_preflight:
         cors.add_preflight_view(config, settings["route_name"], cors_policy)
-
-
-def api_config(versions, link_name=None, description=None, **settings):
-    """
-    Add a view configuration decorator for API views.
-
-    This is similar to Pyramid's `view_config` except that it uses
-    `add_api_view` to register the view instead of `context.add_view`.
-    """
-
-    def callback(context, _name, view):
-        add_api_view(
-            context.config,
-            view=view,
-            versions=versions,
-            link_name=link_name,
-            description=description,
-            **settings
-        )
-
-    def wrapper(wrapped):
-        info = venusian.attach(wrapped, callback, category="pyramid")
-
-        # Support use as a class method decorator.
-        # Taken from Pyramid's `view_config` decorator implementation.
-        if info.scope == "class":  # pylint: disable=no-member
-            if settings.get("attr") is None:
-                settings["attr"] = wrapped.__name__
-
-        return wrapped
-
-    return wrapper

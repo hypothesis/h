@@ -1,191 +1,129 @@
-from unittest import mock
+from unittest.mock import call, patch, sentinel
 
 import pytest
+from h_matchers import Any
 
-from h.views.api import config as api_config
+from h.views.api.config import _add_api_view, cors_policy
 
 
-@pytest.mark.usefixtures("cors")
-class TestAddApiView:
-    def test_it_sets_default_accept_if_view_supports_default_version(
-        self, pyramid_config, view
-    ):
-        api_config.add_api_view(
-            pyramid_config, view, versions=["v1"], route_name="thing.read"
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
-        assert kwargs["accept"] == "application/json"
-
-    def test_it_doesnt_set_default_accept_if_view_doesnt_support_default_version(
-        self, pyramid_config, view
-    ):
-        api_config.add_api_view(
-            pyramid_config, view, versions=["v2"], route_name="thing.read"
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
-        assert kwargs["accept"] != "application/json"
-
-    def test_it_allows_accept_setting_override(self, pyramid_config, view):
-        api_config.add_api_view(
-            pyramid_config,
-            view,
-            versions=["v1"],
-            accept="application/xml",
-            route_name="thing.read",
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
-        assert kwargs["accept"] == "application/xml"
-
-    def test_it_sets_renderer_setting(self, pyramid_config, view):
-        api_config.add_api_view(
-            pyramid_config, view, versions=["v1"], route_name="thing.read"
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
-        assert kwargs["renderer"] == "json"
-
-    def test_it_allows_renderer_setting_override(self, pyramid_config, view):
-        api_config.add_api_view(
-            pyramid_config,
-            view,
-            versions=["v1"],
-            route_name="thing.read",
-            renderer="xml",
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
-        assert kwargs["renderer"] == "xml"
-
-    def test_it_sets_default_decorators(
-        self, pyramid_config, view, version_media_type_header
-    ):
-        api_config.add_api_view(
-            pyramid_config, view, versions=["v1"], route_name="thing.read"
-        )
-        _, kwargs = pyramid_config.add_view.call_args_list[0]
-
-        assert kwargs["decorator"] == (
-            api_config.cors_policy,
-            version_media_type_header("json"),
-        )
-
-    def test_it_adds_cors_preflight_view(self, pyramid_config, view, cors):
-        api_config.add_api_view(
-            pyramid_config, view, versions=["v1"], route_name="thing.read"
-        )
-        ([_, route_name, policy], _) = cors.add_preflight_view.call_args
-        assert route_name == "thing.read"
-        assert (
-            policy == api_config.cors_policy  # pylint: disable=comparison-with-callable
-        )
-
-    def test_it_does_not_add_cors_preflight_view_if_disabled(
-        self, pyramid_config, view, cors
-    ):
-        api_config.add_api_view(
-            pyramid_config,
-            view,
-            versions=["v1"],
-            route_name="thing.read",
-            enable_preflight=False,
-        )
-        assert not cors.add_preflight_view.call_count
-
-    def test_it_allows_decorator_override(self, pyramid_config, view):
-        decorator = mock.Mock()
-        api_config.add_api_view(
-            pyramid_config,
-            view,
-            versions=["v1"],
-            route_name="thing.read",
-            decorator=decorator,
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs["decorator"] == decorator
-
-    def test_it_adds_default_version_accept(
-        self, pyramid_config, view, media_type_for_version
-    ):
-        api_config.add_api_view(
-            pyramid_config, view, versions=["v1"], route_name="thing.read"
-        )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[1]
-
-        media_type_for_version.assert_called_once_with("v1", subtype="json")
-        assert kwargs["accept"] == media_type_for_version.return_value
-
-    def test_it_raises_ValueError_on_unrecognized_version(self, pyramid_config, view):
-        with pytest.raises(ValueError, match="Unrecognized API version"):
-            api_config.add_api_view(
-                pyramid_config, view, versions=["v3"], route_name="thing.read"
-            )
-
-    @pytest.mark.parametrize(
-        "link_name,route_name,description,request_method",
-        [
-            ("read", "thing.read", "Fetch a thing", None),
-            ("update", "thing.update", "Update a thing", ("PUT", "PATCH")),
-            ("delete", "thing.delete", "Delete a thing", "DELETE"),
-            (None, "thing.empty", None, None),
-        ],
-    )
-    def test_it_adds_api_links_to_registry(
+class TestAddAPIView:
+    @pytest.mark.parametrize("subtype", ("json", "ndjson"))
+    @pytest.mark.parametrize("enable_preflight", (True, False))
+    def test_it(
         self,
         pyramid_config,
-        view,
+        version_media_type_header,
+        cors,
         links,
-        link_name,
-        route_name,
-        description,
-        request_method,
+        subtype,
+        enable_preflight,
     ):
-        kwargs = {}
-        if request_method:
-            kwargs["request_method"] = request_method
+        # These items are all passed through verbatim to `add_view`
+        settings = {
+            "any_extra": sentinel.any_extra,
+            "request_method": sentinel.request_method,
+            "route_name": sentinel.route_name,
+        }
 
-        api_config.add_api_view(
-            pyramid_config,
-            view=view,
-            versions=["v1"],
-            link_name=link_name,
-            description=description,
-            route_name=route_name,
-            **kwargs
+        _add_api_view(
+            config=pyramid_config,
+            view=sentinel.view,
+            versions=["v2"],
+            link_name=sentinel.link_name,
+            description=sentinel.description,
+            enable_preflight=enable_preflight,
+            subtype=subtype,
+            **settings,
         )
 
-        if link_name:
-            links.register_link.assert_called_once_with(
-                link=links.ServiceLink(
-                    name=link_name,
-                    route_name=route_name,
-                    method=request_method,
-                    description=description,
-                ),
-                versions=["v1"],
-                registry=pyramid_config.registry,
+        links.ServiceLink.assert_called_once_with(
+            name=sentinel.link_name,
+            route_name=sentinel.route_name,
+            method=sentinel.request_method,
+            description=sentinel.description,
+        )
+        links.register_link.assert_called_once_with(
+            links.ServiceLink.return_value, ["v2"], pyramid_config.registry
+        )
+        version_media_type_header.assert_called_once_with(subtype)
+        pyramid_config.add_view.assert_called_once_with(
+            view=sentinel.view,
+            renderer="json",
+            decorator=(cors_policy, version_media_type_header.return_value),
+            accept=f"application/vnd.hypothesis.v2+{subtype}",
+            **settings,
+        )
+        if enable_preflight:
+            cors.add_preflight_view.assert_called_once_with(
+                pyramid_config, sentinel.route_name, cors_policy
             )
         else:
-            links.register_link.assert_not_called()
+            cors.add_preflight_view.assert_not_called()
 
-    @pytest.fixture
-    def media_type_for_version(self, patch):
-        return patch("h.views.api.config.media_type_for_version")
+    def test_it_with_minimal_args(
+        self, pyramid_config, version_media_type_header, cors, links
+    ):
+        _add_api_view(
+            config=pyramid_config,
+            view=sentinel.view,
+            versions=["v2"],
+            enable_preflight=False,
+        )
 
-    @pytest.fixture
-    def links(self, patch):
-        return patch("h.views.api.config.links")
+        links.register_link.assert_not_called()
+        version_media_type_header.assert_called_once_with("json")
+        pyramid_config.add_view.assert_called_once_with(
+            view=Any(),
+            renderer=Any(),
+            decorator=Any(),
+            accept="application/vnd.hypothesis.v2+json",
+        )
+        cors.add_preflight_view.assert_not_called()
 
-    @pytest.fixture
-    def pyramid_config(self, pyramid_config):
-        pyramid_config.add_view = mock.Mock()
-        return pyramid_config
+    @pytest.mark.parametrize("subtype", ("json", "ndjson"))
+    def test_it_with_v1(self, pyramid_config, version_media_type_header, subtype):
+        _add_api_view(
+            config=pyramid_config,
+            view=sentinel.view,
+            versions=["v1"],
+            enable_preflight=False,
+            subtype=subtype,
+        )
+
+        shared_view_settings = {
+            "view": sentinel.view,
+            "renderer": "json",
+            "decorator": (cors_policy, version_media_type_header.return_value),
+        }
+        pyramid_config.add_view.assert_has_calls(
+            [
+                call(**shared_view_settings, accept="application/json"),
+                call(
+                    **shared_view_settings,
+                    accept=f"application/vnd.hypothesis.v1+{subtype}",
+                ),
+            ]
+        )
+
+    def test_it_fails_with_unexpected_version_numbers(self, pyramid_config):
+        with pytest.raises(ValueError):
+            _add_api_view(
+                config=pyramid_config, view=sentinel.view, versions=["v99999"]
+            )
 
     @pytest.fixture
     def cors(self, patch):
         return patch("h.views.api.config.cors")
 
     @pytest.fixture
-    def view(self):
-        return mock.Mock()
+    def links(self, patch):
+        return patch("h.views.api.config.links")
 
     @pytest.fixture
     def version_media_type_header(self, patch):
         return patch("h.views.api.config.version_media_type_header")
+
+    @pytest.fixture(autouse=True)
+    def add_view(self, pyramid_config):
+        with patch.object(pyramid_config, "add_view") as add_view:
+            yield add_view
