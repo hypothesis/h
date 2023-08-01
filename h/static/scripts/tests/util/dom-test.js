@@ -64,7 +64,7 @@ describe('util/dom', () => {
 
     it('clones the first child of the template when <template> is not supported', () => {
       const template = createDOM(
-        '<fake-template><div id="child"></div></fake-template>'
+        '<fake-template><div id="child"></div></fake-template>',
       );
       const clone = domUtil.cloneTemplate(template);
       assert.deepEqual(clone.outerHTML, '<div id="child"></div>');

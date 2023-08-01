@@ -12,7 +12,7 @@ const mouseMove = (() => {
     if (_lastMovePos) {
       const prevEl = document.elementFromPoint(
         _lastMovePos.pageX,
-        _lastMovePos.pageY
+        _lastMovePos.pageY,
       );
       const leaveEvent = document.createEvent('Events');
       leaveEvent.initEvent('mouseleave', true, false);
@@ -100,17 +100,17 @@ describe('AutosuggestDropdownController', () => {
 
     const isSuggestionContainerVisible = () => {
       const suggestionContainer = container.querySelector(
-        '.' + defaultConfig.classNames.container
+        '.' + defaultConfig.classNames.container,
       );
       return suggestionContainer.classList.contains('is-open');
     };
 
     const getListItems = () => {
       const suggestionContainer = container.querySelector(
-        '.' + defaultConfig.classNames.container
+        '.' + defaultConfig.classNames.container,
       );
       return suggestionContainer.querySelectorAll(
-        '.' + defaultConfig.classNames.item
+        '.' + defaultConfig.classNames.item,
       );
     };
 
@@ -148,31 +148,33 @@ describe('AutosuggestDropdownController', () => {
 
       assert.isFalse(
         form.childNodes.length === 1,
-        'initializing should add container to dom'
+        'initializing should add container to dom',
       );
 
       const suggestionContainer = container.querySelector(
-        '.' + defaultConfig.classNames.container
+        '.' + defaultConfig.classNames.container,
       );
 
       assert.isOk(suggestionContainer);
       assert.isOk(
-        suggestionContainer.querySelector('.' + defaultConfig.classNames.header)
+        suggestionContainer.querySelector(
+          '.' + defaultConfig.classNames.header,
+        ),
       );
       assert.isOk(
-        suggestionContainer.querySelector('.' + defaultConfig.classNames.list)
+        suggestionContainer.querySelector('.' + defaultConfig.classNames.list),
       );
       assert.lengthOf(getListItems(), 4);
 
       assert.lengthOf(
         suggestionContainer.querySelectorAll('.a-title'),
         4,
-        'reflects our rendering'
+        'reflects our rendering',
       );
       assert.lengthOf(
         suggestionContainer.querySelectorAll('.an-explanation'),
         4,
-        'reflects our rendering'
+        'reflects our rendering',
       );
     });
 
@@ -201,7 +203,7 @@ describe('AutosuggestDropdownController', () => {
       assert.equal(
         reduceSpy.callCount,
         1,
-        'gets initial reduced list on initialize'
+        'gets initial reduced list on initialize',
       );
 
       assert.lengthOf(getListItems(), 4);
@@ -262,7 +264,7 @@ describe('AutosuggestDropdownController', () => {
           assert.propertyVal(
             selectedItem,
             'explanation',
-            'search for annotations with a tag'
+            'search for annotations with a tag',
           );
 
           assert.isFalse(isSuggestionContainerVisible(), 'post select hide');
@@ -293,7 +295,7 @@ describe('AutosuggestDropdownController', () => {
         new AutosuggestDropdownController(input, defaultConfig);
 
         const list = container.querySelector(
-          '.' + defaultConfig.classNames.list
+          '.' + defaultConfig.classNames.list,
         );
 
         syn.click(input).type(fixture.travel, () => {
@@ -303,15 +305,15 @@ describe('AutosuggestDropdownController', () => {
           } else {
             assert.isTrue(
               list.childNodes[fixture.selectedIndex].classList.contains(
-                defaultConfig.classNames.activeItem
-              )
+                defaultConfig.classNames.activeItem,
+              ),
             );
             assert.lengthOf(active, 1);
           }
           done();
         });
       },
-      navigationExpectations
+      navigationExpectations,
     );
 
     it('persists active navigation through list filter', done => {
@@ -323,23 +325,23 @@ describe('AutosuggestDropdownController', () => {
         .type('[down][down]', () => {
           assert.isTrue(
             list.childNodes[1].classList.contains(
-              defaultConfig.classNames.activeItem
-            )
+              defaultConfig.classNames.activeItem,
+            ),
           );
           assert.equal(
             list.childNodes[1].querySelector('.a-title').textContent.trim(),
-            defaultConfig.list[1].title
+            defaultConfig.list[1].title,
           );
         })
         .type('t', () => {
           assert.isTrue(
             list.childNodes[0].classList.contains(
-              defaultConfig.classNames.activeItem
-            )
+              defaultConfig.classNames.activeItem,
+            ),
           );
           assert.equal(
             list.childNodes[0].querySelector('.a-title').textContent.trim(),
-            defaultConfig.list[1].title
+            defaultConfig.list[1].title,
           );
           done();
         });
@@ -361,12 +363,12 @@ describe('AutosuggestDropdownController', () => {
         assert.propertyVal(
           selectedItem,
           'explanation',
-          'search for annotations with a tag'
+          'search for annotations with a tag',
         );
 
         assert.isFalse(
           form.onsubmit.called,
-          'should not submit the form on enter'
+          'should not submit the form on enter',
         );
 
         done();
@@ -384,8 +386,8 @@ describe('AutosuggestDropdownController', () => {
         assert.lengthOf(getCurrentActiveElements(), 1);
         assert.isTrue(
           list.childNodes[1].classList.contains(
-            defaultConfig.classNames.activeItem
-          )
+            defaultConfig.classNames.activeItem,
+          ),
         );
 
         mouseMove(center(list.childNodes[2]));
@@ -393,8 +395,8 @@ describe('AutosuggestDropdownController', () => {
         assert.lengthOf(getCurrentActiveElements(), 1);
         assert.isTrue(
           list.childNodes[2].classList.contains(
-            defaultConfig.classNames.activeItem
-          )
+            defaultConfig.classNames.activeItem,
+          ),
         );
 
         mouseMove(center(input));
@@ -416,24 +418,24 @@ describe('AutosuggestDropdownController', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(
             list.childNodes[2].classList.contains(
-              defaultConfig.classNames.activeItem
-            )
+              defaultConfig.classNames.activeItem,
+            ),
           );
         })
         .type('[down]', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(
             list.childNodes[3].classList.contains(
-              defaultConfig.classNames.activeItem
-            )
+              defaultConfig.classNames.activeItem,
+            ),
           );
         })
         .type('[up][up][up]', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(
             list.childNodes[0].classList.contains(
-              defaultConfig.classNames.activeItem
-            )
+              defaultConfig.classNames.activeItem,
+            ),
           );
 
           mouseMove(center(list.childNodes[2]));
@@ -441,8 +443,8 @@ describe('AutosuggestDropdownController', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(
             list.childNodes[2].classList.contains(
-              defaultConfig.classNames.activeItem
-            )
+              defaultConfig.classNames.activeItem,
+            ),
           );
 
           done();

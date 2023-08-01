@@ -25,7 +25,7 @@ describe('SearchTextParser', () => {
       { input: '"foo"bar:' },
       { input: "foo'bar" },
       { input: 'foo"bar' },
-    ]
+    ],
   );
 
   unroll(
@@ -41,6 +41,6 @@ describe('SearchTextParser', () => {
       { input: '' },
       { input: "foo:'bar" },
       { input: 'foo:"bar' },
-    ]
+    ],
   );
 });

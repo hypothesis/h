@@ -22,14 +22,14 @@ gulp.task('build-css', () =>
     './h/static/styles/help-page.scss',
     './h/static/styles/site.scss',
     './h/static/styles/vendor/icomoon.css',
-  ])
+  ]),
 );
 
 gulp.task('watch-css', () => {
   gulp.watch(
     'h/static/styles/**/*.scss',
     { ignoreInitial: false },
-    gulp.series('build-css')
+    gulp.series('build-css'),
   );
 });
 
@@ -80,7 +80,7 @@ gulp.task('watch-images', () => {
 const MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
 
 gulp.task('build-manifest', () =>
-  generateManifest({ pattern: MANIFEST_SOURCE_FILES })
+  generateManifest({ pattern: MANIFEST_SOURCE_FILES }),
 );
 gulp.task('watch-manifest', () => {
   gulp.watch(MANIFEST_SOURCE_FILES, gulp.series('build-manifest'));
@@ -90,8 +90,8 @@ gulp.task(
   'build',
   gulp.series(
     gulp.parallel(['build-js', 'build-css', 'build-fonts', 'build-images']),
-    'build-manifest'
-  )
+    'build-manifest',
+  ),
 );
 gulp.task(
   'watch',
@@ -101,7 +101,7 @@ gulp.task(
     'watch-fonts',
     'watch-images',
     'watch-manifest',
-  ])
+  ]),
 );
 
 gulp.task('test', () =>
@@ -110,5 +110,5 @@ gulp.task('test', () =>
     karmaConfig: './h/static/scripts/karma.config.js',
     rollupConfig: './rollup-tests.config.mjs',
     testsPattern: 'h/static/scripts/**/*-test.js',
-  })
+  }),
 );

@@ -10,7 +10,7 @@ window.envFlags.init();
 
 // Set up the Google Analytics command queue if we have a tracking ID.
 const gaTrackingId = document.querySelector(
-  'meta[name="google-analytics-tracking-id"]'
+  'meta[name="google-analytics-tracking-id"]',
 );
 if (gaTrackingId) {
   /* eslint-disable */

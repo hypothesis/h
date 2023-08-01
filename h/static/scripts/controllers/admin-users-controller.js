@@ -7,7 +7,7 @@ export class AdminUsersController extends Controller {
     const window_ = options.window || window;
     function confirmFormSubmit() {
       return window_.confirm(
-        "This will permanently delete all the user's data. Are you sure?"
+        "This will permanently delete all the user's data. Are you sure?",
       );
     }
 

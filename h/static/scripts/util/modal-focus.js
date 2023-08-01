@@ -56,7 +56,7 @@ export function trap(elements, callback) {
       document.removeEventListener(
         'focus',
         onFocusChange,
-        true /* useCapture */
+        true /* useCapture */,
       );
     }
   };

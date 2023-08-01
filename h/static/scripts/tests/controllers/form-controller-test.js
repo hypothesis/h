@@ -156,7 +156,7 @@ describe('FormController', () => {
 
   it('submits the form when "Save" is clicked', () => {
     fakeSubmitForm.returns(
-      Promise.resolve({ status: 200, form: UPDATED_FORM })
+      Promise.resolve({ status: 200, form: UPDATED_FORM }),
     );
     ctrl.refs.testSaveBtn.click();
     assert.calledWith(fakeSubmitForm, ctrl.element);
@@ -169,7 +169,7 @@ describe('FormController', () => {
   context('when form is successfully submitted', () => {
     it('updates form with new rendered version from server', () => {
       fakeSubmitForm.returns(
-        Promise.resolve({ status: 200, form: UPDATED_FORM })
+        Promise.resolve({ status: 200, form: UPDATED_FORM }),
       );
       return submitForm().then(() => {
         assert.isTrue(ctrl.element.classList.contains('is-updated'));
@@ -178,7 +178,7 @@ describe('FormController', () => {
 
     it('stops editing the form', () => {
       fakeSubmitForm.returns(
-        Promise.resolve({ status: 200, form: UPDATED_FORM })
+        Promise.resolve({ status: 200, form: UPDATED_FORM }),
       );
       return submitForm().then(() => {
         assert.isFalse(isEditing());
@@ -190,7 +190,7 @@ describe('FormController', () => {
     it('updates form with rendered version from server', () => {
       startEditing();
       fakeSubmitForm.returns(
-        Promise.reject({ status: 400, form: UPDATED_FORM })
+        Promise.reject({ status: 400, form: UPDATED_FORM }),
       );
       return submitForm().then(() => {
         assert.isTrue(ctrl.element.classList.contains('is-updated'));
@@ -200,7 +200,7 @@ describe('FormController', () => {
     it('marks updated form as dirty', () => {
       startEditing();
       fakeSubmitForm.returns(
-        Promise.reject({ status: 400, form: UPDATED_FORM })
+        Promise.reject({ status: 400, form: UPDATED_FORM }),
       );
       return submitForm().then(() => {
         assert.isTrue(ctrl.state.dirty);
@@ -210,7 +210,7 @@ describe('FormController', () => {
     it('continues editing current field', () => {
       startEditing();
       fakeSubmitForm.returns(
-        Promise.reject({ status: 400, form: UPDATED_FORM })
+        Promise.reject({ status: 400, form: UPDATED_FORM }),
       );
       return submitForm().then(() => {
         assert.isTrue(isEditing());
@@ -220,7 +220,7 @@ describe('FormController', () => {
     it('focuses the matching input field in the re-rendered form', () => {
       startEditing();
       fakeSubmitForm.returns(
-        Promise.reject({ status: 400, form: UPDATED_FORM })
+        Promise.reject({ status: 400, form: UPDATED_FORM }),
       );
 
       // Simulate the user saving the form by clicking the 'Save' button, which
@@ -236,7 +236,7 @@ describe('FormController', () => {
 
   it('enters the "saving" state while the form is being submitted', () => {
     fakeSubmitForm.returns(
-      Promise.resolve({ status: 200, form: UPDATED_FORM })
+      Promise.resolve({ status: 200, form: UPDATED_FORM }),
     );
     const saved = submitForm();
     assert.isTrue(isSaving());
@@ -247,7 +247,7 @@ describe('FormController', () => {
 
   it('displays an error if form submission fails without returning a new form', () => {
     fakeSubmitForm.returns(
-      Promise.reject({ status: 501, reason: 'Internal Server Error' })
+      Promise.reject({ status: 501, reason: 'Internal Server Error' }),
     );
     return submitForm().then(() => {
       assert.equal(submitError(), 'Internal Server Error');
@@ -337,11 +337,11 @@ describe('FormController', () => {
   context('when a checkbox is toggled', () => {
     beforeEach(() => {
       fakeSubmitForm.returns(
-        Promise.resolve({ status: 200, form: UPDATED_FORM })
+        Promise.resolve({ status: 200, form: UPDATED_FORM }),
       );
       ctrl.refs.checkboxInput.focus();
       ctrl.refs.checkboxInput.dispatchEvent(
-        new Event('change', { bubbles: true })
+        new Event('change', { bubbles: true }),
       );
     });
 
@@ -380,7 +380,7 @@ describe('FormController', () => {
               hideUntilActive: true,
             },
           },
-        ])
+        ]),
       );
     });
 
@@ -419,7 +419,7 @@ describe('FormController', () => {
         input.focus();
 
         const editing = containers.filter(el =>
-          el.classList.contains('is-editing')
+          el.classList.contains('is-editing'),
         );
         assert.equal(editing.length, 2);
       });
@@ -439,7 +439,7 @@ describe('FormController', () => {
               inactiveLabel: 'Password',
             },
           },
-        ])
+        ]),
       );
     });
 
@@ -461,7 +461,7 @@ describe('FormController', () => {
             ref: 'password',
             type: 'password',
           },
-        ])
+        ]),
       );
     });
 

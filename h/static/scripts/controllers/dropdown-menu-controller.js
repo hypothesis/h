@@ -25,7 +25,7 @@ export class DropdownMenuController extends Controller {
         element.ownerDocument.removeEventListener(
           'click',
           handleClickOutside,
-          true /* capture */
+          true /* capture */,
         );
       }
     };
@@ -39,7 +39,7 @@ export class DropdownMenuController extends Controller {
       element.ownerDocument.addEventListener(
         'click',
         handleClickOutside,
-        true /* capture */
+        true /* capture */,
       );
     });
   }
@@ -48,7 +48,7 @@ export class DropdownMenuController extends Controller {
     setElementState(this.refs.dropdownMenuContent, { open: state.open });
     this.refs.dropdownMenuToggle.setAttribute(
       'aria-expanded',
-      state.open.toString()
+      state.open.toString(),
     );
   }
 }

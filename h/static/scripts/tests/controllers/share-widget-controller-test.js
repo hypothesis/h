@@ -65,7 +65,7 @@ describe('ShareWidgetController', () => {
         const expectedLink = tmpl.replace('{href}', expectedURL);
         const actualLink = anchor.href;
         assert.equal(actualLink, expectedLink);
-      }
+      },
     );
   };
 
@@ -90,7 +90,7 @@ describe('ShareWidgetController', () => {
     document.body.appendChild(container);
 
     ctrl = new ShareWidgetController(
-      document.querySelector('.js-share-widget')
+      document.querySelector('.js-share-widget'),
     );
   });
 
@@ -111,25 +111,25 @@ describe('ShareWidgetController', () => {
       .click(document.body, () => {
         assert.isFalse(
           widgetIsVisble(),
-          'hidden after clicking another trigger while it is open'
+          'hidden after clicking another trigger while it is open',
         );
       })
       .click(btns[3].querySelector('b'), () => {
         assert.isTrue(
           widgetIsVisble(),
-          'opens when clicking elements inside of trigger'
+          'opens when clicking elements inside of trigger',
         );
       })
       .click(btns[2], () => {
         assert.isTrue(
           widgetIsVisble(),
-          'keeps trigger open when clicking another trigger while another dialog is open'
+          'keeps trigger open when clicking another trigger while another dialog is open',
         );
       })
       .click(btns[2], () => {
         assert.isFalse(
           widgetIsVisble(),
-          'close widget when clicking on the currently open trigger again'
+          'close widget when clicking on the currently open trigger again',
         );
         done();
       });

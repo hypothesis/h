@@ -21,7 +21,7 @@ const controllers = Object.assign(
     '.js-search-bucket': SearchBucketController,
     '.js-share-widget': ShareWidgetController,
   },
-  sharedControllers
+  sharedControllers,
 );
 
 if (window.envFlags && window.envFlags.get('js-capable')) {

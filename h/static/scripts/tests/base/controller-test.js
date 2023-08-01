@@ -43,7 +43,7 @@ describe('Controller', () => {
         },
         {
           open: true,
-        }
+        },
       );
     });
   });

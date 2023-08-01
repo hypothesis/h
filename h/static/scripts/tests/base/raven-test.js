@@ -34,7 +34,7 @@ describe('raven', () => {
         'dsn',
         sinon.match({
           release: 'release',
-        })
+        }),
       );
     });
 
@@ -48,7 +48,7 @@ describe('raven', () => {
         fakeRavenJS.setUserContext,
         sinon.match({
           id: 'acct:foobar@hypothes.is',
-        })
+        }),
       );
     });
 
@@ -70,7 +70,7 @@ describe('raven', () => {
       event.initEvent(
         'unhandledrejection',
         true /* bubbles */,
-        true /* cancelable */
+        true /* cancelable */,
       );
       event.reason = new Error('Some error');
       window.dispatchEvent(event);
@@ -78,7 +78,7 @@ describe('raven', () => {
       assert.calledWith(
         fakeRavenJS.captureException,
         event.reason,
-        sinon.match.any
+        sinon.match.any,
       );
     });
   });

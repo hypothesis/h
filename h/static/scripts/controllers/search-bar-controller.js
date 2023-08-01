@@ -92,7 +92,7 @@ export class SearchBarController extends Controller {
       // groupSuggestions are made available by the scoped template data.
       // see search.html.jinja2 for definition
       const groupSuggestionJSON = document.querySelector(
-        '.js-group-suggestions'
+        '.js-group-suggestions',
       );
       let groupSuggestions = [];
 
@@ -102,7 +102,7 @@ export class SearchBarController extends Controller {
         } catch (e) {
           console.error(
             'Could not parse .js-group-suggestions JSON content',
-            e
+            e,
           );
         }
       }
@@ -219,7 +219,7 @@ export class SearchBarController extends Controller {
     /** Return the controllers for all of the displayed lozenges. */
     const lozenges = () => {
       const lozElements = Array.from(
-        this.element.querySelectorAll('.js-lozenge')
+        this.element.querySelectorAll('.js-lozenge'),
       );
       return lozElements.map(el => el.controllers[0]);
     };
@@ -259,12 +259,12 @@ export class SearchBarController extends Controller {
       if (currentLozenges.length > 0) {
         this._lozengeContainer.insertBefore(
           lozengeEl,
-          currentLozenges[currentLozenges.length - 1].nextSibling
+          currentLozenges[currentLozenges.length - 1].nextSibling,
         );
       } else {
         this._lozengeContainer.insertBefore(
           lozengeEl,
-          this._lozengeContainer.firstChild
+          this._lozengeContainer.firstChild,
         );
       }
 
@@ -295,7 +295,7 @@ export class SearchBarController extends Controller {
      */
     const lozengifyInput = () => {
       const { lozengeValues, incompleteInputValue } = getLozengeValues(
-        this._input.value
+        this._input.value,
       );
 
       lozengeValues.forEach(addLozenge);
@@ -335,11 +335,11 @@ export class SearchBarController extends Controller {
 
       renderListItem: listItem => {
         let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(
-          listItem.title
+          listItem.title,
         )} </span>`;
         if (listItem.type === GROUP_TYPE && listItem.relationship) {
           itemContents += `<span class="search-bar__dropdown-menu-relationship"> ${escapeHtml(
-            listItem.relationship
+            listItem.relationship,
           )} </span>`;
         }
 
