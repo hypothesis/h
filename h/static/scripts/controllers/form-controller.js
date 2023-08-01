@@ -57,7 +57,7 @@ export class FormController extends Controller {
           input: parts.formInput,
           label: parts.label,
         };
-      }
+      },
     );
 
     this.on(
@@ -73,7 +73,7 @@ export class FormController extends Controller {
           focusedField: field,
         });
       },
-      true /* capture - focus does not bubble */
+      true /* capture - focus does not bubble */,
     );
 
     this.on('change', event => {
@@ -138,7 +138,7 @@ export class FormController extends Controller {
     if (state.editingFields.length === 1) {
       state.editingFields[0].container.parentElement.insertBefore(
         this.refs.formActions,
-        state.editingFields[0].container.nextSibling
+        state.editingFields[0].container.nextSibling,
       );
     }
 
@@ -231,7 +231,7 @@ export class FormController extends Controller {
           // messages.
           const newFormEl = this.options.reload(err.form);
           const newFormCtrl = newFormEl.controllers.find(
-            ctrl => ctrl instanceof FormController
+            ctrl => ctrl instanceof FormController,
           );
 
           // Resume editing the field where validation failed
@@ -265,7 +265,7 @@ export class FormController extends Controller {
    */
   _focusGroup() {
     const fieldContainers = this.state.editingFields.map(
-      field => field.container
+      field => field.container,
     );
     if (fieldContainers.length === 0) {
       return null;
@@ -294,7 +294,7 @@ export class FormController extends Controller {
         }
 
         return null;
-      }
+      },
     );
   }
 

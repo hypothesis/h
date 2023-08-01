@@ -15,7 +15,7 @@ import * as util from './util';
  */
 const getLozengeValues = ctrl => {
   return Array.from(
-    ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')
+    ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge'),
   ).map(el => {
     const facetName = el.querySelector('.lozenge__facet-name').textContent;
     const facetValue = el.querySelector('.lozenge__facet-value').textContent;
@@ -54,7 +54,7 @@ describe('SearchBarController', () => {
 
     const getItemTitles = function () {
       return Array.from(
-        dropdown.querySelectorAll('.search-bar__dropdown-menu-title')
+        dropdown.querySelectorAll('.search-bar__dropdown-menu-title'),
       ).map(node => {
         return node.textContent.trim();
       });
@@ -218,7 +218,7 @@ describe('SearchBarController', () => {
         .type('[enter]', () => {
           assert.equal(
             testEl.querySelector('input[type=hidden]').value,
-            'test'
+            'test',
           );
           assert.isTrue(submit.calledOnce);
           done();
@@ -248,7 +248,7 @@ describe('SearchBarController', () => {
               assert.lengthOf(
                 titles,
                 5,
-                'we should be enforcing the 5 item max'
+                'we should be enforcing the 5 item max',
               );
             })
             .type(
@@ -257,13 +257,13 @@ describe('SearchBarController', () => {
                 assert.deepEqual(
                   getItemTitles(),
                   ['user:', 'tag:', 'url:', 'group:'],
-                  'group suggestions go away as facet is removed'
+                  'group suggestions go away as facet is removed',
                 );
                 done();
-              }
+              },
             );
         },
-        [{ text: 'group:' }, { text: 'Group:' }, { text: 'GROUP:' }]
+        [{ text: 'group:' }, { text: 'Group:' }, { text: 'GROUP:' }],
       );
 
       it('orders groups by earliest value match first', done => {
@@ -273,14 +273,14 @@ describe('SearchBarController', () => {
             assert.deepEqual(
               getItemTitles(),
               ['aaac', 'aaab', 'aaaa', 'aaae', 'aaad'],
-              'default ordering based on original order with no input'
+              'default ordering based on original order with no input',
             );
           })
           .type('aad', () => {
             assert.deepEqual(
               getItemTitles(),
               ['aadf', 'aaad'],
-              'sorting by indexof score with some input'
+              'sorting by indexof score with some input',
             );
             done();
           });
@@ -293,14 +293,14 @@ describe('SearchBarController', () => {
             assert.deepEqual(
               getItemTitles(),
               ['multi word'],
-              'supports matching on a double quote initial input'
+              'supports matching on a double quote initial input',
             );
           })
           .type("[backspace][backspace][backspace][backspace]'mul", () => {
             assert.deepEqual(
               getItemTitles(),
               ['multi word'],
-              'supports matching on a single quote initial input'
+              'supports matching on a single quote initial input',
             );
             done();
           });
@@ -311,7 +311,7 @@ describe('SearchBarController', () => {
           assert.deepEqual(
             getItemTitles(),
             ['effort'],
-            'matches éffort with unicode value'
+            'matches éffort with unicode value',
           );
           done();
         });
@@ -324,24 +324,24 @@ describe('SearchBarController', () => {
             assert.equal(
               testEl.querySelector('input[type=hidden]').value.trim(),
               'group:pid8',
-              'pubid should be added to the hidden input'
+              'pubid should be added to the hidden input',
             );
             assert.deepEqual(
               getLozengeValues(ctrl),
               ['group:"multi word"'],
-              'adds and wraps multi word with quotes'
+              'adds and wraps multi word with quotes',
             );
           })
           .type('group:a[down][enter]', () => {
             assert.equal(
               testEl.querySelector('input[type=hidden]').value.trim(),
               'group:pid8 group:pid1',
-              'pubid should be added to the hidden input'
+              'pubid should be added to the hidden input',
             );
             assert.deepEqual(
               getLozengeValues(ctrl),
               ['group:"multi word"', 'group:aaac'],
-              'adds single word as is to lozenge'
+              'adds single word as is to lozenge',
             );
             done();
           });
@@ -352,12 +352,12 @@ describe('SearchBarController', () => {
           assert.equal(
             testEl.querySelector('input[type=hidden]').value.trim(),
             'group:pid10',
-            'pubid should be added to the hidden input'
+            'pubid should be added to the hidden input',
           );
           assert.deepEqual(
             getLozengeValues(ctrl),
             ['group:"<*>Haskell fans<*>"'],
-            'adds and wraps multi word with quotes'
+            'adds and wraps multi word with quotes',
           );
           done();
         });
@@ -387,19 +387,19 @@ describe('SearchBarController', () => {
               assert.lengthOf(
                 titles,
                 5,
-                'we should be enforcing the 5 item max'
+                'we should be enforcing the 5 item max',
               );
             })
             .type('[backspace][backspace][backspace][backspace]', () => {
               assert.deepEqual(
                 getItemTitles(),
                 ['user:', 'tag:', 'url:', 'group:'],
-                'tags go away as facet is removed'
+                'tags go away as facet is removed',
               );
               done();
             });
         },
-        [{ text: 'tag:' }, { text: 'Tag:' }, { text: 'TAG:' }]
+        [{ text: 'tag:' }, { text: 'Tag:' }, { text: 'TAG:' }],
       );
 
       it('orders tags by priority and indexOf score', done => {
@@ -409,14 +409,14 @@ describe('SearchBarController', () => {
             assert.deepEqual(
               getItemTitles(),
               ['aaac', 'aaad', 'aadf', 'aaag', 'aaaa'],
-              'default ordering based on priority'
+              'default ordering based on priority',
             );
           })
           .type('aad', () => {
             assert.deepEqual(
               getItemTitles(),
               ['aadf', 'aaad'],
-              'sorting by indexof score with equal priority'
+              'sorting by indexof score with equal priority',
             );
             done();
           });
@@ -429,21 +429,21 @@ describe('SearchBarController', () => {
             assert.deepEqual(
               getItemTitles(),
               ['multi word'],
-              'supports matching on a double quote initial input'
+              'supports matching on a double quote initial input',
             );
           })
           .type("[backspace][backspace][backspace][backspace]'mul", () => {
             assert.deepEqual(
               getItemTitles(),
               ['multi word'],
-              'supports matching on a single quote initial input'
+              'supports matching on a single quote initial input',
             );
           })
           .type('[down][enter][enter]', () => {
             assert.equal(
               testEl.querySelector('input[type=hidden]').value.trim(),
               'tag:"multi word"',
-              'selecting a multi word tag should wrap with quotes'
+              'selecting a multi word tag should wrap with quotes',
             );
             done();
           });
@@ -454,7 +454,7 @@ describe('SearchBarController', () => {
           assert.deepEqual(
             getItemTitles(),
             ['effort'],
-            'matches éffort with unicode value'
+            'matches éffort with unicode value',
           );
           done();
         });
@@ -553,12 +553,12 @@ describe('SearchBarController', () => {
 
     it('copies lozengifiable and unlozengifiable text from the input into the hidden input on init', () => {
       const { hiddenInput } = component(
-        "these are my tag:lozenges group:'unclosed quotes"
+        "these are my tag:lozenges group:'unclosed quotes",
       );
 
       assert.equal(
         hiddenInput.value,
-        "these are my tag:lozenges group:'unclosed quotes"
+        "these are my tag:lozenges group:'unclosed quotes",
       );
     });
 
@@ -692,7 +692,7 @@ describe('SearchBarController', () => {
         const ctrl = util.setupComponent(
           document,
           template,
-          SearchBarController
+          SearchBarController,
         );
 
         // Stub the submit method so it doesn't actually do a full page reload.
@@ -709,12 +709,12 @@ describe('SearchBarController', () => {
           assert.lengthOf(
             container.children,
             currentChildrenCount,
-            'lozenge add should be added as a child'
+            'lozenge add should be added as a child',
           );
 
           assert.ok(
             container.children[0].classList.contains('lozenge'),
-            'should be set as first child'
+            'should be set as first child',
           );
 
           done();
@@ -735,7 +735,7 @@ describe('SearchBarController', () => {
         const ctrl = util.setupComponent(
           document,
           template,
-          SearchBarController
+          SearchBarController,
         );
 
         // Stub the submit method so it doesn't actually do a full page reload.

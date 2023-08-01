@@ -106,7 +106,7 @@ class ShareWidget {
         target.href = target
           .getAttribute(TARGET_HREF_ATTR)
           .replace('{href}', encodeURI(config.url));
-      }
+      },
     );
 
     // scope access dialog

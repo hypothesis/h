@@ -21,14 +21,14 @@ describe('settings', () => {
 
   it('reads config from .js-hypothesis-settings <script> tags', () => {
     document.body.appendChild(
-      createJSONScriptTag({ key: 'value' }, 'js-hypothesis-settings')
+      createJSONScriptTag({ key: 'value' }, 'js-hypothesis-settings'),
     );
     assert.deepEqual(settings(document), { key: 'value' });
   });
 
   it('reads config from <script> tags with the specified class name', () => {
     document.body.appendChild(
-      createJSONScriptTag({ foo: 'bar' }, 'js-custom-settings')
+      createJSONScriptTag({ foo: 'bar' }, 'js-custom-settings'),
     );
     assert.deepEqual(settings(document), {});
     assert.deepEqual(settings(document, 'js-custom-settings'), { foo: 'bar' });

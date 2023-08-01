@@ -16,7 +16,7 @@ const controllers = Object.assign(
   {
     '.js-users-delete-form': AdminUsersController,
   },
-  sharedControllers
+  sharedControllers,
 );
 upgradeElements(document.body, controllers);
 window.envFlags.ready();

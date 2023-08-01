@@ -42,19 +42,19 @@ export class AutosuggestDropdownController extends Controller {
 
     if (!configOptions.renderListItem) {
       throw new Error(
-        'Missing renderListItem callback in AutosuggestDropdownController constructor'
+        'Missing renderListItem callback in AutosuggestDropdownController constructor',
       );
     }
 
     if (!configOptions.listFilter) {
       throw new Error(
-        'Missing listFilter function in AutosuggestDropdownController constructor'
+        'Missing listFilter function in AutosuggestDropdownController constructor',
       );
     }
 
     if (!configOptions.onSelect) {
       throw new Error(
-        'Missing onSelect callback in AutosuggestDropdownController constructor'
+        'Missing onSelect callback in AutosuggestDropdownController constructor',
       );
     }
 
@@ -118,7 +118,7 @@ export class AutosuggestDropdownController extends Controller {
 
     const listChanged = updateHelper.listIsDifferent(
       newState.list,
-      prevState.list
+      prevState.list,
     );
 
     if (listChanged) {
@@ -270,7 +270,7 @@ export class AutosuggestDropdownController extends Controller {
    */
   _getActiveListItemElement() {
     return this._listContainer.querySelector(
-      '.' + this.options.classNames.activeItem
+      '.' + this.options.classNames.activeItem,
     );
   }
 
@@ -334,7 +334,7 @@ export class AutosuggestDropdownController extends Controller {
     } else {
       this._input.parentNode.insertBefore(
         this._suggestionContainer,
-        this._input.nextSibling
+        this._input.nextSibling,
       );
     }
   }
@@ -360,11 +360,11 @@ export class AutosuggestDropdownController extends Controller {
       // But for now this binding has no real affect on small list perf
       li.addEventListener(
         'mouseenter',
-        this._toggleItemHoverState.bind(this, /*hovering*/ true)
+        this._toggleItemHoverState.bind(this, /*hovering*/ true),
       );
       li.addEventListener(
         'mouseleave',
-        this._toggleItemHoverState.bind(this, /*hovering*/ false)
+        this._toggleItemHoverState.bind(this, /*hovering*/ false),
       );
       li.addEventListener('mousedown', event => {
         // for situations like mobile, hovering might not be
@@ -440,7 +440,7 @@ export class AutosuggestDropdownController extends Controller {
         // capture phase needed to beat any other listener that could
         // stop propagation after inspecting input value
       },
-      /*useCapturePhase*/ true
+      /*useCapturePhase*/ true,
     );
 
     this._input.addEventListener(
@@ -453,7 +453,7 @@ export class AutosuggestDropdownController extends Controller {
         // capture phase needed to beat any other listener that could
         // stop propagation after inspecting input value
       },
-      /*useCapturePhase*/ true
+      /*useCapturePhase*/ true,
     );
 
     this._input.addEventListener('focus', () => {

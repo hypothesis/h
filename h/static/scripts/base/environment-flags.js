@@ -78,7 +78,7 @@ export class EnvironmentFlags {
 
     // Process flag overrides specified in URL
     const flags = envFlagsFromUrl(
-      url || this._element.ownerDocument.location.href
+      url || this._element.ownerDocument.location.href,
     );
     flags.forEach(flag => {
       if (flag.indexOf('no-') === 0) {

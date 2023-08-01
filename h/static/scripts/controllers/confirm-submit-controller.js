@@ -22,7 +22,7 @@ export class ConfirmSubmitController extends Controller {
           return;
         }
       },
-      /*capture*/ true
+      /*capture*/ true,
     );
   }
 }

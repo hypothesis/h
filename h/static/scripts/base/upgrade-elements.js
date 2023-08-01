@@ -79,7 +79,7 @@ export function upgradeElements(root, controllers) {
           el,
           ControllerClass,
           ':',
-          err.toString()
+          err.toString(),
         );
 
         // Re-raise error so that Raven can capture and report it

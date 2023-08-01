@@ -34,7 +34,7 @@ describe('submitForm', () => {
       }
       mockResponse(
         '<form><!-- updated form !--></form>',
-        testCase.expectedSubmitUrl
+        testCase.expectedSubmitUrl,
       );
 
       return submitForm(form, fetchMock.fetchMock).then(() => {
@@ -60,7 +60,7 @@ describe('submitForm', () => {
         action: null,
         expectedSubmitUrl: document.location.href,
       },
-    ]
+    ],
   );
 
   it('returns the markup for the updated form if validation succeeds', () => {
@@ -93,7 +93,7 @@ describe('submitForm', () => {
     return done.catch(err => {
       assert.match(
         err,
-        sinon.match({ status: 500, reason: 'Internal Server Error' })
+        sinon.match({ status: 500, reason: 'Internal Server Error' }),
       );
     });
   });

@@ -47,7 +47,7 @@ export class AuthorizeFormController extends Controller {
           type: 'authorization_canceled',
           state,
         },
-        '*'
+        '*',
       );
     }
   }

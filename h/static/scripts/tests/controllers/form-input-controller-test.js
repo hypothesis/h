@@ -18,7 +18,7 @@ describe('FormInputController', () => {
   it('sets `hasError` state of controller if rendered with "is-error" class', () => {
     const errorTemplate = template.replace(
       'js-form-input',
-      'js-form-input is-error'
+      'js-form-input is-error',
     );
     const ctrl = setupComponent(document, errorTemplate, FormInputController);
     assert.equal(ctrl.state.hasError, true);
