@@ -12,6 +12,6 @@ omit =
 [report]
 show_missing = True
 precision = 2
-fail_under = 98.46
+fail_under = 98.59
 
 skip_covered = True
