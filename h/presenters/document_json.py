@@ -3,12 +3,7 @@ class DocumentJSONPresenter:
         self.document = document
 
     def asdict(self):
-        if not self.document:
-            return {}
+        if self.document and (title := self.document.title):
+            return {"title": [title]}
 
-        document_dict = {}
-        title = self.document.title
-        if title:
-            document_dict["title"] = [title]
-
-        return document_dict
+        return {}
