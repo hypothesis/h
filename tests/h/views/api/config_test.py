@@ -1,9 +1,53 @@
+import sys
 from unittest.mock import call, patch, sentinel
 
 import pytest
 from h_matchers import Any
+from venusian import Scanner
 
-from h.views.api.config import _add_api_view, cors_policy
+from h.views.api.config import _add_api_view, api_config, cors_policy
+
+# Venusian deferred decorator loading works in a very global way, it seems like
+# we don't have a lot of choice but to decorate some dummy objects to test it
+API_CONFIG = {
+    "versions": [sentinel.versions],
+    "link_name": sentinel.link_name,
+    "description": sentinel.description,
+    "enable_preflight": sentinel.enable_preflight,
+    "subtype": sentinel.subtype,
+    "extras": sentinel.extras,
+}
+
+
+@api_config(**API_CONFIG)
+def function_view():
+    ...
+
+
+class ClassView:
+    @api_config(**API_CONFIG)
+    def method_view(self):
+        ...
+
+
+class TestAPIConfig:
+    def test_it_decorates_methods(self, _add_api_view):
+        _add_api_view.assert_any_call(sentinel.config, view=function_view, **API_CONFIG)
+
+    def test_it_decorates_classes(self, _add_api_view):
+        _add_api_view.assert_any_call(
+            sentinel.config, view=ClassView, attr="method_view", **API_CONFIG
+        )
+
+    @pytest.fixture(autouse=True)
+    def _add_api_view(self, patch):
+        return patch("h.views.api.config._add_api_view")
+
+    @pytest.fixture(autouse=True)
+    def with_venusian_scan(self):
+        # Use venusian to scan this file to load the decorators and run them
+        scanner = Scanner(config=sentinel.config)
+        scanner.scan(sys.modules[__name__], categories=["pyramid"])
 
 
 class TestAddAPIView:
