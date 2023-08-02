@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from webob.multidict import NestedMultiDict
 
-from h.paginator import paginate, paginate_query
+from h.paginator import PAGE_SIZE, paginate, paginate_query
 
 
 class TestPaginate:
@@ -155,9 +155,6 @@ class TestPaginateQuery:
     # The current page that will be returned by paginate().
     CURRENT_PAGE = 3
 
-    # The page_size argument that will be passed to paginate_query().
-    PAGE_SIZE = 10
-
     def test_it_calls_the_wrapped_view_callable(
         self, pyramid_request, view_callable, wrapped
     ):
@@ -171,7 +168,7 @@ class TestPaginateQuery:
         wrapped(mock.sentinel.context, pyramid_request)
 
         paginate.assert_called_once_with(
-            pyramid_request, mock.sentinel.total, self.PAGE_SIZE
+            pyramid_request, mock.sentinel.total, PAGE_SIZE
         )
 
     def test_it_offsets_the_query(self, wrapped, pyramid_request, query):
@@ -185,9 +182,9 @@ class TestPaginateQuery:
         """
         wrapped(mock.sentinel.context, pyramid_request)
 
-        # The current page is 3, and there are 10 results per page, so we
-        # would expect the 20 first results (the first two pages) to be offset.
-        query.offset.assert_called_once_with(20)
+        # The current page is 3, and there are 20 results per page, so we
+        # would expect the 40 first results (the first two pages) to be offset.
+        query.offset.assert_called_once_with(PAGE_SIZE * 2)
 
     def test_it_limits_the_query(self, wrapped, pyramid_request, query):
         """
@@ -199,7 +196,7 @@ class TestPaginateQuery:
         """
         wrapped(mock.sentinel.context, pyramid_request)
 
-        query.limit.assert_called_once_with(self.PAGE_SIZE)
+        query.limit.assert_called_once_with(PAGE_SIZE)
 
     def test_it_returns_the_query_results(self, wrapped, pyramid_request):
         results = wrapped(mock.sentinel.context, pyramid_request)["results"]
@@ -242,4 +239,4 @@ class TestPaginateQuery:
     @pytest.fixture
     def wrapped(self, view_callable):
         """Return a mock view callable wrapped in paginate_query()."""
-        return paginate_query(view_callable, self.PAGE_SIZE)
+        return paginate_query(view_callable)

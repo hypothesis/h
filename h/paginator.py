@@ -81,7 +81,7 @@ def paginate(request, total, page_size=PAGE_SIZE):  # pylint:disable=too-complex
     }
 
 
-def paginate_query(wrapped=None, page_size=PAGE_SIZE):
+def paginate_query(wrapped=None):
     """
     Decorate a view function, providing basic pagination facilities.
 
@@ -107,34 +107,19 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
             }
         }
 
-    You can also call :py:func:`paginate_query` as a function which returns a
-    decorator, if you wish to modify the options used by the function::
-
-        paginate = paginator.paginate_query(page_size=10)
-
-        @paginate_query
-        def my_view(...):
-            ...
-
     N.B. The wrapped view function must accept two arguments: the request
     context and the current request. This decorator does not support view
     functions which accept only a single argument.
     """
-    if wrapped is None:
-
-        def decorator(wrap):
-            return paginate_query(wrap, page_size=page_size)
-
-        return decorator
 
     @functools.wraps(wrapped)
     def wrapper(context, request):
         result = wrapped(context, request)
         total = result.count()
-        page = paginate(request, total, page_size)
-        offset = (page["cur"] - 1) * page_size
+        page = paginate(request, total, PAGE_SIZE)
+        offset = (page["cur"] - 1) * PAGE_SIZE
         return {
-            "results": result.offset(offset).limit(page_size).all(),
+            "results": result.offset(offset).limit(PAGE_SIZE).all(),
             "total": total,
             "page": page,
         }
