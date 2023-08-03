@@ -17,6 +17,7 @@ FEATURES = {
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
     "client_user_profile": "Enable client-side user profile and preferences management",
     "export_annotations": "Allow users to export annotations",
+    "import_annotations": "Allow users to import previously exported annotations",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
