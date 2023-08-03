@@ -73,5 +73,6 @@
   "prettier": {
     "arrowParens": "avoid",
     "singleQuote": true
-  }
+  },
+  "packageManager": "yarn@3.6.1"
 }

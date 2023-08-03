@@ -34,3 +34,13 @@ mail/
 tests/py3-actual-failures.txt
 
 .devdata.env
+
+# See https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored.
+# This is the "If you're not using Zero-Installs" list.
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
