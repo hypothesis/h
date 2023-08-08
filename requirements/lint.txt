@@ -310,7 +310,7 @@ psycogreen==1.0.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-psycopg2==2.9.6
+psycopg2==2.9.7
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
