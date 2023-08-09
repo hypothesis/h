@@ -38,6 +38,7 @@ tomli==2.0.1
     # via
     #   black
     #   build
+    #   pep517
     #   pip-tools
 typing-extensions==4.3.0
     # via black

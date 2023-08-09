@@ -65,7 +65,7 @@ greenlet==2.0.2
     #   sqlalchemy
 gunicorn==21.2.0
     # via -r requirements/requirements.in
-h-api==1.0.2
+h-api==1.1.0
     # via -r requirements/requirements.in
 h-assets==1.0.5
     # via -r requirements/requirements.in
@@ -79,6 +79,7 @@ importlib-metadata==4.8.1
     # via
     #   alembic
     #   data-tasks
+    #   h-api
     #   markdown
 importlib-resources==6.0.1
     # via
@@ -193,6 +194,7 @@ pytz==2023.3
     # via -r requirements/requirements.in
 referencing==0.30.2
     # via
+    #   h-api
     #   jsonschema
     #   jsonschema-specifications
 repoze-sendmail==4.3

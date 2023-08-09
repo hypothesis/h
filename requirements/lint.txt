@@ -147,7 +147,7 @@ gunicorn==21.2.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-api==1.0.2
+h-api==1.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -176,6 +176,7 @@ importlib-metadata==4.8.1
     #   -r requirements/tests.txt
     #   alembic
     #   data-tasks
+    #   h-api
     #   markdown
     #   pip-sync-faster
 importlib-resources==6.0.1
@@ -418,6 +419,7 @@ referencing==0.30.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   h-api
     #   jsonschema
     #   jsonschema-specifications
 repoze-sendmail==4.3
