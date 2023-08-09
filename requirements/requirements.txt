@@ -4,7 +4,7 @@
 #
 #    pip-compile --config=pyproject.toml requirements/requirements.in
 #
-alembic==1.11.1
+alembic==1.11.2
     # via -r requirements/requirements.in
 amqp==5.1.1
     # via kombu
