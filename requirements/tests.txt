@@ -10,11 +10,12 @@ amqp==5.1.1
     # via
     #   -r requirements/requirements.txt
     #   kombu
-attrs==20.2.0
+attrs==23.1.0
     # via
     #   -r requirements/requirements.txt
     #   hypothesis
     #   jsonschema
+    #   referencing
 backports-zoneinfo[tzdata]==0.2.1
     # via
     #   -r requirements/requirements.txt
@@ -95,7 +96,7 @@ greenlet==2.0.2
     #   sqlalchemy
 gunicorn==21.2.0
     # via -r requirements/requirements.txt
-h-api==1.0.2
+h-api==1.1.0
     # via -r requirements/requirements.txt
 h-assets==1.0.5
     # via -r requirements/requirements.txt
@@ -114,6 +115,7 @@ importlib-metadata==4.8.1
     #   -r requirements/requirements.txt
     #   alembic
     #   data-tasks
+    #   h-api
     #   markdown
     #   pip-sync-faster
 importlib-resources==6.0.1
@@ -122,6 +124,8 @@ importlib-resources==6.0.1
     #   alembic
     #   data-tasks
     #   h-api
+    #   jsonschema
+    #   jsonschema-specifications
 iniconfig==1.1.1
     # via pytest
 iso8601==0.1.13
@@ -136,10 +140,14 @@ jinja2==2.11.3
     #   -r requirements/requirements.txt
     #   data-tasks
     #   pyramid-jinja2
-jsonschema==3.2.0
+jsonschema==4.19.0
     # via
     #   -r requirements/requirements.txt
     #   h-api
+jsonschema-specifications==2023.7.1
+    # via
+    #   -r requirements/requirements.txt
+    #   jsonschema
 kombu==5.3.1
     # via
     #   -r requirements/requirements.txt
@@ -185,6 +193,10 @@ pip-tools==7.3.0
     # via
     #   -r requirements/tests.in
     #   pip-sync-faster
+pkgutil-resolve-name==1.3.10
+    # via
+    #   -r requirements/requirements.txt
+    #   jsonschema
 plaster==1.0
     # via
     #   -r requirements/requirements.txt
@@ -242,10 +254,6 @@ pyramid-services==2.2
     # via -r requirements/requirements.txt
 pyramid-tm==2.5
     # via -r requirements/requirements.txt
-pyrsistent==0.17.3
-    # via
-    #   -r requirements/requirements.txt
-    #   jsonschema
 pytest==7.4.0
     # via -r requirements/tests.in
 python-dateutil==2.8.2
@@ -258,12 +266,23 @@ python-slugify==8.0.1
     # via -r requirements/requirements.txt
 pytz==2023.3
     # via -r requirements/requirements.txt
+referencing==0.30.2
+    # via
+    #   -r requirements/requirements.txt
+    #   h-api
+    #   jsonschema
+    #   jsonschema-specifications
 repoze-sendmail==4.3
     # via
     #   -r requirements/requirements.txt
     #   pyramid-mailer
 rfc3339-validator==0.1.4
     # via -r requirements/requirements.txt
+rpds-py==0.9.2
+    # via
+    #   -r requirements/requirements.txt
+    #   jsonschema
+    #   referencing
 sentry-sdk==1.17.0
     # via
     #   -r requirements/requirements.txt
@@ -274,7 +293,6 @@ six==1.15.0
     #   bleach
     #   click-repl
     #   elasticsearch-dsl
-    #   jsonschema
     #   python-dateutil
     #   rfc3339-validator
 sortedcontainers==2.3.0
