@@ -4,7 +4,7 @@
 #
 #    pip-compile --config=pyproject.toml requirements/lint.in
 #
-alembic==1.11.2
+alembic==1.11.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
