@@ -12,7 +12,7 @@
   font-size: typography.$title-font-size;
 
   &:not(:last-of-type)::after {
-    content: " / ";
+    content: " | ";
   }
 
   .is-active {
