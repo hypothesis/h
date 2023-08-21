@@ -14,7 +14,7 @@ certifi==2023.7.22
     # via requests
 charset-normalizer==3.1.0
     # via requests
-click==8.1.6
+click==8.1.7
     # via pip-tools
 colorama==0.4.4
     # via sphinx-autobuild
@@ -43,10 +43,10 @@ packaging==23.1
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r docs.in
+    # via -r requirements/docs.in
 pip-tools==7.3.0
     # via
-    #   -r docs.in
+    #   -r requirements/docs.in
     #   pip-sync-faster
 pygments==2.15.0
     # via sphinx
@@ -60,14 +60,14 @@ snowballstemmer==2.1.0
     # via sphinx
 sphinx==6.2.1
     # via
-    #   -r docs.in
+    #   -r requirements/docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
 sphinx-autobuild==2021.3.14
-    # via -r docs.in
+    # via -r requirements/docs.in
 sphinx-rtd-theme==1.2.2
-    # via -r docs.in
+    # via -r requirements/docs.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
