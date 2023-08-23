@@ -58,7 +58,7 @@ six==1.16.0
     # via livereload
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==6.2.1
+sphinx==7.1.2
     # via
     #   -r requirements/checkdocs.in
     #   sphinx-autobuild
