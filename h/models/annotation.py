@@ -38,6 +38,11 @@ class Annotation(Base):
         types.URLSafeUUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
     )
 
+    #: Annotation PK: this was added after annotation.id and it's meant to replace it short term
+    #: For now we'll have a sequence and a nullable serial column.
+    pk_sequence = sa.Sequence("annotation_id_seq", cycle=False)
+    pk = sa.Column(sa.Integer, nullable=True, unique=True)
+
     #: The timestamp when the annotation was created.
     created = sa.Column(
         sa.DateTime,
