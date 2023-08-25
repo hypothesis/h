@@ -18,6 +18,7 @@ key to. So for convenience the test module can instead just do
 """
 from h.models.activation import Activation
 from h.models.annotation import Annotation
+from h.models.annotation_metadata import AnnotationMetadata
 from h.models.annotation_moderation import AnnotationModeration
 from h.models.auth_client import AuthClient
 from h.models.auth_ticket import AuthTicket
