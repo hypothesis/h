@@ -60,9 +60,7 @@ def authenticated_client(identity, _context):
 
 @requires(authenticated_client)
 def authenticated_client_is_lms(identity, _context):
-    authority = identity.auth_client.authority
-
-    return authority.startswith("lms.") and authority.endswith(".hypothes.is")
+    return identity.is_lms
 
 
 # Users

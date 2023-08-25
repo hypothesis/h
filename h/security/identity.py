@@ -84,6 +84,14 @@ class Identity:
     user: Optional[LongLivedUser] = None
     auth_client: Optional[LongLivedAuthClient] = None
 
+    @property
+    def is_lms(self):
+        if not self.auth_client:
+            return False
+
+        authority = self.auth_client.authority
+        return authority.startswith("lms.") and authority.endswith(".hypothes.is")
+
     @classmethod
     def from_models(cls, user: User = None, auth_client: AuthClient = None):
         """Create an `Identity` object from SQLAlchemy models."""
