@@ -27,6 +27,7 @@ class Annotation(Base):
         sa.Index("ix__annotation_tags", "tags", postgresql_using="gin"),
         sa.Index("ix__annotation_created", "created"),
         sa.Index("ix__annotation_updated", "updated"),
+        sa.Index("ix__annotation_user_id", "user_id"),
         # This is a functional index on the *first* of the annotation's
         # references, pointing to the top-level annotation it refers to. We're
         # using 1 here because Postgres uses 1-based array indexing.
@@ -60,9 +61,12 @@ class Annotation(Base):
         nullable=False,
     )
 
-    #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
-    #: annotation.
+    #: The full userid (e.g. 'acct:foo@example.com') of the owner of this annotation.
     userid = sa.Column(sa.UnicodeText, nullable=False, index=True)
+
+    #: FK to user.id. This is nullable while we fill up the values based on `userid` above.
+    user_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"), nullable=True)
+
     #: The string id of the group in which this annotation is published.
     #: Defaults to the global public group, "__world__".
     groupid = sa.Column(
