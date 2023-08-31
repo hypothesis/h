@@ -148,7 +148,7 @@ jsonschema-specifications==2023.7.1
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-kombu==5.3.1
+kombu==5.3.2
     # via
     #   -r requirements/requirements.txt
     #   celery

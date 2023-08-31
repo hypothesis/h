@@ -105,7 +105,7 @@ jsonschema==4.19.0
     #   h-api
 jsonschema-specifications==2023.7.1
     # via jsonschema
-kombu==5.3.1
+kombu==5.3.2
     # via
     #   -r requirements/requirements.in
     #   celery
