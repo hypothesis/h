@@ -1723,9 +1723,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:^15.1.0":
-  version: 15.1.0
-  resolution: "@rollup/plugin-node-resolve@npm:15.1.0"
+"@rollup/plugin-node-resolve@npm:^15.2.1":
+  version: 15.2.1
+  resolution: "@rollup/plugin-node-resolve@npm:15.2.1"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     "@types/resolve": 1.20.2
@@ -1738,7 +1738,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 83617cdbb90cb780251e8b16dc1671e35bde90b8d4d30e008aefe706b5b643057f6299bdd3226b2a30bf5e4f807a880169de3faa47b9f2ba38d39f294f85f951
+  checksum: e8f706db6ab826e80d1c9a85d2d1e736f2f78a34ea5d49dd0004d6603249a504696967674b2f021cd144536b88d24ffa058383f08b61b4b665be3c7bfacc006a
   languageName: node
   linkType: hard
 
@@ -4731,7 +4731,7 @@ __metadata:
     "@hypothesis/frontend-build": ^1.2.0
     "@rollup/plugin-babel": ^6.0.3
     "@rollup/plugin-commonjs": ^25.0.4
-    "@rollup/plugin-node-resolve": ^15.1.0
+    "@rollup/plugin-node-resolve": ^15.2.1
     "@rollup/plugin-terser": ^0.4.3
     autoprefixer: ^10.4.15
     babel-plugin-mockable-imports: ^2.0.1
