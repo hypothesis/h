@@ -25,6 +25,7 @@ class Annotation(Base):
         #   http://www.postgresql.org/docs/9.5/static/gin-intro.html
         #
         sa.Index("ix__annotation_tags", "tags", postgresql_using="gin"),
+        sa.Index("ix__annotation_created", "created"),
         sa.Index("ix__annotation_updated", "updated"),
         # This is a functional index on the *first* of the annotation's
         # references, pointing to the top-level annotation it refers to. We're
