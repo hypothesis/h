@@ -31,7 +31,7 @@ bleach==6.0.0
     # via -r requirements/requirements.txt
 build==0.8.0
     # via pip-tools
-celery==5.3.1
+celery==5.3.4
     # via -r requirements/requirements.txt
 certifi==2023.7.22
     # via
