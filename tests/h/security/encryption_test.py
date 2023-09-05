@@ -6,7 +6,12 @@ from hypothesis import assume, given
 from hypothesis import strategies as st
 from passlib.context import CryptContext
 
-from h.security.encryption import derive_key, password_context, token_urlsafe
+from h.security.encryption import (
+    decrypt_jwe_dict,
+    derive_key,
+    password_context,
+    token_urlsafe,
+)
 
 REASONABLE_INFO = st.text(alphabet=string.printable)
 REASONABLE_KEY_MATERIAL = st.binary(min_size=8, max_size=128)
@@ -152,3 +157,24 @@ def test_token_urlsafe_no_args():
 
     assert isinstance(tok, str)
     assert len(tok) > 32
+
+
+class TestDecryptDict:
+    def test_decrypt_dict(self, secret, jwe, json):
+        plain_text_dict = decrypt_jwe_dict(secret, "payload")
+
+        jwe.decrypt.assert_called_once_with("payload", secret.ljust(32))
+        json.loads.assert_called_once_with(jwe.decrypt.return_value)
+        assert plain_text_dict == json.loads.return_value
+
+    @pytest.fixture
+    def secret(self):
+        return b"VERY SECRET"
+
+    @pytest.fixture
+    def json(self, patch):
+        return patch("h.security.encryption.json")
+
+    @pytest.fixture
+    def jwe(self, patch):
+        return patch("h.security.encryption.jwe")
