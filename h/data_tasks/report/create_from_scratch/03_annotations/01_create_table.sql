@@ -14,5 +14,6 @@ CREATE TABLE report.annotations (
     anchored BOOLEAN NOT NULL,
     size INT,
     parent_uuids UUID[],
-    tags TEXT[]
+    tags TEXT[],
+    imported BOOLEAN NOT NULL
 );
