@@ -63,6 +63,7 @@ cffi==1.15.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   cryptography
 chameleon==3.8.1
     # via
     #   -r requirements/functests.txt
@@ -99,6 +100,11 @@ colander==1.8.2
     #   deform
 coverage==7.3.1
     # via -r requirements/tests.txt
+cryptography==41.0.3
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   python-jose
 data-tasks==0.0.3
     # via
     #   -r requirements/functests.txt
@@ -109,6 +115,11 @@ deform==2.0.15
     #   -r requirements/tests.txt
 dill==0.3.4
     # via pylint
+ecdsa==0.18.0
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   python-jose
 elasticsearch==6.8.2
     # via
     #   -r requirements/functests.txt
@@ -329,6 +340,12 @@ psycopg2==2.9.7
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   data-tasks
+pyasn1==0.5.0
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   python-jose
+    #   rsa
 pycodestyle==2.11.0
     # via -r requirements/lint.in
 pycparser==2.20
@@ -407,6 +424,10 @@ python-dateutil==2.8.2
     #   celery
     #   elasticsearch-dsl
     #   faker
+python-jose[cryptography]==3.3.0
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 python-slugify==8.0.1
     # via
     #   -r requirements/functests.txt
@@ -437,6 +458,11 @@ rpds-py==0.9.2
     #   -r requirements/tests.txt
     #   jsonschema
     #   referencing
+rsa==4.9
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   python-jose
 sentry-sdk==1.17.0
     # via
     #   -r requirements/functests.txt
@@ -448,6 +474,7 @@ six==1.15.0
     #   -r requirements/tests.txt
     #   bleach
     #   click-repl
+    #   ecdsa
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator

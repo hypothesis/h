@@ -38,7 +38,9 @@ certifi==2023.7.22
     #   -r requirements/requirements.txt
     #   sentry-sdk
 cffi==1.15.1
-    # via -r requirements/requirements.txt
+    # via
+    #   -r requirements/requirements.txt
+    #   cryptography
 chameleon==3.8.1
     # via
     #   -r requirements/requirements.txt
@@ -69,10 +71,18 @@ colander==1.8.2
     #   deform
 coverage==7.3.1
     # via -r requirements/tests.in
+cryptography==41.0.3
+    # via
+    #   -r requirements/requirements.txt
+    #   python-jose
 data-tasks==0.0.3
     # via -r requirements/requirements.txt
 deform==2.0.15
     # via -r requirements/requirements.txt
+ecdsa==0.18.0
+    # via
+    #   -r requirements/requirements.txt
+    #   python-jose
 elasticsearch==6.8.2
     # via
     #   -r requirements/requirements.txt
@@ -218,6 +228,11 @@ psycopg2==2.9.7
     # via
     #   -r requirements/requirements.txt
     #   data-tasks
+pyasn1==0.5.0
+    # via
+    #   -r requirements/requirements.txt
+    #   python-jose
+    #   rsa
 pycparser==2.20
     # via
     #   -r requirements/requirements.txt
@@ -262,6 +277,8 @@ python-dateutil==2.8.2
     #   celery
     #   elasticsearch-dsl
     #   faker
+python-jose[cryptography]==3.3.0
+    # via -r requirements/requirements.txt
 python-slugify==8.0.1
     # via -r requirements/requirements.txt
 pytz==2023.3.post1
@@ -283,6 +300,10 @@ rpds-py==0.9.2
     #   -r requirements/requirements.txt
     #   jsonschema
     #   referencing
+rsa==4.9
+    # via
+    #   -r requirements/requirements.txt
+    #   python-jose
 sentry-sdk==1.17.0
     # via
     #   -r requirements/requirements.txt
@@ -292,6 +313,7 @@ six==1.15.0
     #   -r requirements/requirements.txt
     #   bleach
     #   click-repl
+    #   ecdsa
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
