@@ -12,7 +12,7 @@ INSERT INTO report.annotations (
     user_id, group_id, document_id, authority_id,
     created, updated,
     deleted, shared, anchored, size,
-    parent_uuids, tags
+    parent_uuids, tags, imported
 )
 SELECT
     annotation.id as uuid,
@@ -29,7 +29,8 @@ SELECT
     JSONB_ARRAY_LENGTH(target_selectors) <> 0 AS anchored,
     LENGTH(text) AS size,
     "references",
-    tags
+    tags,
+    coalesce(extra ->'extra'->>'source' = 'import', false)
 FROM annotation
 JOIN "user" users ON
     users.authority = SPLIT_PART(annotation.userid, '@', 2)
