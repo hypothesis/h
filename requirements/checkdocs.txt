@@ -50,7 +50,7 @@ pip-tools==7.3.0
     #   pip-sync-faster
 pygments==2.15.0
     # via sphinx
-pytz==2023.3
+pytz==2023.3.post1
     # via babel
 requests==2.31.0
     # via sphinx
