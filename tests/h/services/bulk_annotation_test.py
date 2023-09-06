@@ -66,6 +66,8 @@ class TestBulkAnnotationService:
             ("shared", False, False),
             ("deleted", True, False),
             ("nipsad", True, False),
+            ("with_metadata", True, True),
+            ("with_metadata", False, True),
             ("moderated", True, False),
             ("updated", "2020-01-01", False),
             ("updated", "2020-01-02", True),
@@ -75,6 +77,7 @@ class TestBulkAnnotationService:
     )
     def test_it_with_single_annotation(self, svc, factories, key, value, visible):
         values = {
+            "with_metadata": True,
             "shared": True,
             "deleted": False,
             "nipsad": False,
@@ -93,9 +96,13 @@ class TestBulkAnnotationService:
             shared=values["shared"],
             deleted=values["deleted"],
             updated=values["updated"],
+            pk=1,
         )
         if values["moderated"]:
             factories.AnnotationModeration(annotation=anno)
+
+        if values["with_metadata"]:
+            factories.AnnotationMetadata(annotation=anno, data={"some": "value"})
 
         annotations = svc.annotation_search(
             authority=self.AUTHORITY,
@@ -108,6 +115,7 @@ class TestBulkAnnotationService:
                 BulkAnnotation(
                     username=author.username,
                     authority_provided_id=group.authority_provided_id,
+                    metadata={"some": "value"} if values["with_metadata"] else {},
                 )
             ]
         else:
