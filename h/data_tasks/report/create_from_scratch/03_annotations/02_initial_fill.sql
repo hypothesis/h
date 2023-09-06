@@ -1,6 +1,7 @@
 DROP INDEX IF EXISTS report.annotations_uuid_idx;
 DROP INDEX IF EXISTS report.annotations_created_idx;
 DROP INDEX IF EXISTS report.annotations_updated_idx;
+DROP INDEX IF EXISTS report.annotations_imported_idx;
 
 -- Without this it's possible to insert duplicate rows when run manually as
 -- there is no index to conflict on. When run as part of the task this
@@ -45,5 +46,6 @@ ORDER BY annotation.created;
 CREATE UNIQUE INDEX annotations_uuid_idx ON report.annotations (uuid);
 CREATE INDEX annotations_created_idx ON report.annotations (created);
 CREATE INDEX annotations_updated_idx ON report.annotations (updated);
+CREATE INDEX annotations_imported_idx ON report.annotations (imported);
 
 ANALYZE report.annotations;
