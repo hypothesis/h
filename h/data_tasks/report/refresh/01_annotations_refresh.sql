@@ -56,7 +56,11 @@ ON CONFLICT (uuid) DO UPDATE SET
     anchored=EXCLUDED.anchored,
     size=EXCLUDED.size,
     parent_uuids=EXCLUDED.parent_uuids,
-    tags=EXCLUDED.tags;
+    tags=EXCLUDED.tags,
+    imported=EXCLUDED.imported;
 
 -- Do we want to analyze every time we insert? This could take a while?
 ANALYSE report.annotations;
+
+-- Create the last added index here in `refresh` to avoid a full recreate
+CREATE INDEX IF NOT EXISTS annotations_imported_idx ON report.annotations (imported);
