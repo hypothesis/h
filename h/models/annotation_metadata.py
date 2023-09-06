@@ -16,6 +16,7 @@ class AnnotationMetadata(Base):
         nullable=False,
         unique=True,
     )
+    annotation = sa.orm.relationship("Annotation")
 
     data = sa.Column(
         MutableDict.as_mutable(pg.JSONB),
