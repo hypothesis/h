@@ -275,7 +275,7 @@ wired==0.2.2
     # via pyramid-services
 ws4py==0.5.1
     # via -r requirements/requirements.in
-wsaccel==0.6.4
+wsaccel==0.6.6
     # via -r requirements/requirements.in
 zipp==3.4.1
     # via
