@@ -15,31 +15,20 @@
                     "gt": "2018-11-13T20:20:39+00:00",
                     "lte": "2018-11-13T20:20:39+00:00"
                 }
-            },
-            "fields": ["author.username", "group.authority_provided_id"]
+            }
         }
     ],
 
     "properties": {
-        "fields": {"$ref": "#/$defs/fields"},
         "filter": {"$ref": "#/$defs/filter"}
     },
-    "required": ["filter", "fields"],
+    "required": ["filter"],
     "additionalProperties": false,
 
     "$defs": {
-        "fields": {
-            "title": "Fields",
-            "description": "A list of fields to include in the output",
-
-            "type": "array",
-            "items": {"type": "string"},
-            "enum": [["author.username", "group.authority_provided_id"]]
-        },
-
         "filter": {
             "title": "Filter query",
-            "description": "The fields to search for the annotations by",
+            "description": "The filters to search for the annotations by",
 
             "type": "object",
             "properties": {

@@ -4,7 +4,7 @@ import pytest
 from h_matchers import Any
 
 from h.schemas import ValidationError
-from h.services.bulk_annotation import BadDateFilter, BadFieldSpec, service_factory
+from h.services.bulk_annotation import BadDateFilter, BulkAnnotation, service_factory
 from h.views.api.bulk.annotation import BulkAnnotationSchema, bulk_annotation
 
 
@@ -32,14 +32,17 @@ class TestBulkAnnotation:
         get_ndjson_response,
     ):
         bulk_annotation_service.annotation_search.return_value = [
-            [f"USERNAME_{i}", f"AUTHORITY_PROVIDED_ID_{i}"] for i in range(3)
+            BulkAnnotation(
+                username=f"USERNAME_{i}",
+                authority_provided_id=f"AUTHORITY_PROVIDED_ID_{i}",
+            )
+            for i in range(3)
         ]
 
         response = bulk_annotation(pyramid_request)
 
         bulk_annotation_service.annotation_search.assert_called_once_with(
             authority=pyramid_request.identity.auth_client.authority,
-            fields=valid_request["fields"],
             **valid_request["filter"],
         )
 
@@ -63,11 +66,10 @@ class TestBulkAnnotation:
             bulk_annotation(pyramid_request)
 
     @pytest.mark.usefixtures("valid_request")
-    @pytest.mark.parametrize("exception", (BadDateFilter, BadFieldSpec))
     def test_it_raises_with_errors_from_the_bulk_service(
-        self, pyramid_request, bulk_annotation_service, exception
+        self, pyramid_request, bulk_annotation_service
     ):
-        bulk_annotation_service.annotation_search.side_effect = exception
+        bulk_annotation_service.annotation_search.side_effect = BadDateFilter
 
         with pytest.raises(ValidationError):
             bulk_annotation(pyramid_request)
@@ -83,7 +85,6 @@ class TestBulkAnnotation:
                     "lte": "2018-11-13T20:20:39+00:00",
                 },
             },
-            "fields": ["author.username", "group.authority_provided_id"],
         }
 
         return pyramid_request.json

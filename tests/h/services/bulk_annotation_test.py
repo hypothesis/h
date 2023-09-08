@@ -8,7 +8,7 @@ from sqlalchemy import select
 from h.models import Annotation
 from h.services.bulk_annotation import (
     BadDateFilter,
-    BadFieldSpec,
+    BulkAnnotation,
     BulkAnnotationService,
     date_match,
 )
@@ -86,9 +86,10 @@ class TestBulkAnnotationService:
 
         viewer = factories.User(authority=self.AUTHORITY)
         author = factories.User(authority=self.AUTHORITY, nipsa=values["nipsad"])
+        group = factories.Group(members=[author, viewer])
         anno = factories.Annotation(
             userid=author.userid,
-            group=factories.Group(members=[author, viewer]),
+            group=group,
             shared=values["shared"],
             deleted=values["deleted"],
             updated=values["updated"],
@@ -103,7 +104,12 @@ class TestBulkAnnotationService:
         )
 
         if visible:
-            assert annotations == [anno]
+            assert annotations == [
+                BulkAnnotation(
+                    username=author.username,
+                    authority_provided_id=group.authority_provided_id,
+                )
+            ]
         else:
             assert not annotations
 
@@ -134,61 +140,18 @@ class TestBulkAnnotationService:
         )
 
         # Only the first two annotations should match
-        assert matched_annos == Any.list.containing(annotations[:2]).only()
-
-    @pytest.mark.parametrize(
-        "fields,expected",
-        (
-            (["author.username"], ("USERNAME",)),
-            (["group.authority_provided_id"], ("AUTHORITY_PROVIDED_ID",)),
-            (
-                ["author.username", "group.authority_provided_id"],
-                ("USERNAME", "AUTHORITY_PROVIDED_ID"),
-            ),
-            (
-                ["group.authority_provided_id", "author.username"],
-                ("AUTHORITY_PROVIDED_ID", "USERNAME"),
-            ),
-        ),
-    )
-    def test_it_with_fields(self, svc, factories, fields, expected):
-        viewer = factories.User(authority=self.AUTHORITY)
-        author = factories.User(authority=self.AUTHORITY, username="USERNAME")
-        group = factories.Group(
-            members=[viewer, author], authority_provided_id="AUTHORITY_PROVIDED_ID"
+        assert (
+            matched_annos
+            == Any.list.containing(
+                [
+                    BulkAnnotation(
+                        username=author.username,
+                        authority_provided_id=annotation.group.authority_provided_id,
+                    )
+                    for annotation in annotations[:2]
+                ]
+            ).only()
         )
-        factories.Annotation(
-            userid=author.userid,
-            group=group,
-            shared=True,
-            deleted=False,
-            updated="2021-01-01",
-        )
-
-        results = svc.annotation_search(
-            authority=self.AUTHORITY,
-            audience={"username": [viewer.username]},
-            updated={"gt": "2020-01-01", "lte": "2099-01-01"},
-            fields=fields,
-        )
-
-        assert results == [expected]
-
-    @pytest.mark.parametrize(
-        "bad_fields",
-        (
-            param([], id="empty_list"),
-            param(["not.a_field"], id="bad_value"),
-        ),
-    )
-    def test_it_with_bad_fields(self, svc, bad_fields):
-        with pytest.raises(BadFieldSpec):
-            svc.annotation_search(
-                authority=self.AUTHORITY,
-                audience={"username": ["something"]},
-                updated={"gt": "2020-01-01", "lte": "2099-01-01"},
-                fields=bad_fields,
-            )
 
     @pytest.fixture
     def svc(self, db_session):

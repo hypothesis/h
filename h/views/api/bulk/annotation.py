@@ -6,7 +6,7 @@ from h.schemas import ValidationError
 from h.schemas.base import JSONSchema
 from h.security import Permission
 from h.services import BulkAnnotationService
-from h.services.bulk_annotation import BadDateFilter, BadFieldSpec
+from h.services.bulk_annotation import BadDateFilter, BulkAnnotation
 from h.views.api.bulk._ndjson import get_ndjson_response
 from h.views.api.config import api_config
 
@@ -33,41 +33,28 @@ def bulk_annotation(request):
     # Once this has been applied, we know everything else is safe to use
     # without checking any further
     data = BulkAnnotationSchema().validate(request.json)
-    query_filter, fields = data["filter"], data["fields"]
+    query_filter = data["filter"]
 
     try:
-        annotation_rows = request.find_service(BulkAnnotationService).annotation_search(
+        annotations = request.find_service(BulkAnnotationService).annotation_search(
             # Use the authority from the authenticated client to ensure the user
             # is limited to items they have permission to request
             authority=request.identity.auth_client.authority,
-            fields=fields,
             **query_filter,
         )
-
-    except BadFieldSpec as err:
-        # Emulate the format of the normal ValidationError's from a schema
-        raise ValidationError(f"fields: {err}") from err
 
     except BadDateFilter as err:
         # We happen to know this is the updated field, because there's no other
         # but, it could easily be something else in the future
         raise ValidationError(str(err)) from err
 
-    present_row = _get_present_row(fields)
-    return get_ndjson_response((present_row(row) for row in annotation_rows))
+    return get_ndjson_response(
+        (_present_annotation(annotation) for annotation in annotations)
+    )
 
 
-def _get_present_row(fields):
-    # The schema enforces this, but we currently rely on it being hard coded
-    # so some belt and braces is in order. For example, the exact order matters
-    assert fields == ["author.username", "group.authority_provided_id"]
-
-    def present_row(row):
-        username, authority_provided_id = row
-
-        return {
-            "author": {"username": username},
-            "group": {"authority_provided_id": authority_provided_id},
-        }
-
-    return present_row
+def _present_annotation(annotation: BulkAnnotation) -> dict:
+    return {
+        "author": {"username": annotation.username},
+        "group": {"authority_provided_id": annotation.authority_provided_id},
+    }
