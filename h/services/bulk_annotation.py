@@ -1,7 +1,7 @@
-from typing import List, Union
+from dataclasses import dataclass
+from typing import List
 
 import sqlalchemy as sa
-from sqlalchemy.engine import Row
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
@@ -10,10 +10,6 @@ from h.models import Annotation, AnnotationModeration, Group, GroupMembership, U
 
 class BadDateFilter(Exception):
     """There is something wrong with the date filter provided."""
-
-
-class BadFieldSpec(Exception):
-    """There is something wrong with the field you have specified."""
 
 
 def date_match(column: sa.Column, spec: dict):
@@ -58,18 +54,18 @@ def date_match(column: sa.Column, spec: dict):
     return sa.and_(*clauses)
 
 
+@dataclass
+class BulkAnnotation:
+    username: str
+    authority_provided_id: str
+
+
 class BulkAnnotationService:
     """A service for retrieving annotations in bulk."""
 
     # Aliases to distinguish between different types of user
     _AUTHOR = sa.orm.aliased(User, name="author")
     _AUDIENCE = sa.orm.aliased(User, name="audience")
-
-    # Acceptable values to pass in as `fields`
-    _FIELDS = {
-        "author.username": _AUTHOR.username,
-        "group.authority_provided_id": Group.authority_provided_id,
-    }
 
     def __init__(self, db_session: Session):
         """Initialise the service."""
@@ -82,51 +78,40 @@ class BulkAnnotationService:
         authority: str,
         audience: dict,
         updated: dict,
-        fields: list = None,
         limit=100000,
-    ) -> Union[List[Annotation], Row]:
+    ) -> List[BulkAnnotation]:
         """
         Get a list of annotations or rows viewable by an audience of users.
-
-        Using a fields argument will switch the return type from annotation
-        objects to row objects. This is more efficient if you only need a
-        few fields but less convenient if you want many fields. Check the
-        `_FIELDS` attribute for acceptable fields and names.
 
         :param authority: The authority to search by
         :param audience: A specification of how to find the users. e.g.
             {"username": [...]}
         :param updated: A specification of how to filter the updated date. e.g.
             {"gt": "2019-01-20", "lte": "2019-01-21"}
-        :param fields: A list of string descriptions of fields to return
-            instead of full annotation objects.
         :param limit: A limit of results to generate
 
         :raises BadDateFilter: For poorly specified date conditions
-        :raises BadFieldSpec: For poorly specified fields
         """
 
         results = self._db.execute(
-            self._search_query(
-                authority, audience=audience, updated=updated, fields=fields
-            ).limit(limit)
+            self._search_query(authority, audience=audience, updated=updated).limit(
+                limit
+            )
         )
 
-        if fields is None:
-            results = results.scalars()
-
-        return results.all()
+        return [
+            BulkAnnotation(
+                username=row.username, authority_provided_id=row.authority_provided_id
+            )
+            for row in results.all()
+        ]
 
     @classmethod
-    def _search_query(cls, authority, audience, updated, fields=None) -> Select:
+    def _search_query(cls, authority, audience, updated) -> Select:
         """Generate a query which can then be executed to find annotations."""
-
-        if fields is None:
-            query = sa.select(Annotation)
-        else:
-            query = sa.select(list(cls._field_names_to_columns(fields))).select_from(
-                Annotation
-            )
+        query = sa.select(
+            [cls._AUTHOR.username, Group.authority_provided_id]
+        ).select_from(Annotation)
 
         # Updated
         query = query.where(date_match(Annotation.updated, updated))
@@ -156,17 +141,6 @@ class BulkAnnotationService:
         )
 
         return query
-
-    @classmethod
-    def _field_names_to_columns(cls, field_names):
-        if not field_names:
-            raise BadFieldSpec("Fields cannot be present but empty")
-
-        for field_name in field_names:
-            column = cls._FIELDS.get(field_name)
-            if column is None:
-                raise BadFieldSpec(f"Unrecognised field: {field_name}")
-            yield column
 
     @classmethod
     def _audience_groups_subquery(cls, authority, audience):
