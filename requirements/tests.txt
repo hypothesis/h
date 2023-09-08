@@ -254,7 +254,7 @@ pyramid-services==2.2
     # via -r requirements/requirements.txt
 pyramid-tm==2.5
     # via -r requirements/requirements.txt
-pytest==7.4.1
+pytest==7.4.2
     # via -r requirements/tests.in
 python-dateutil==2.8.2
     # via
