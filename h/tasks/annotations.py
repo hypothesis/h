@@ -26,6 +26,7 @@ def fill_pk_and_user_id(batch_size=1000):
         )
         .where(Annotation.pk.is_(None))
         .order_by(Annotation.updated.asc())
+        .with_for_update(skip_locked=True)
         .limit(batch_size)
     ).cte("annotations")
 
