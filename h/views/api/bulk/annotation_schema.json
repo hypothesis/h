@@ -23,7 +23,7 @@
         "filter": {"$ref": "#/$defs/filter"}
     },
     "required": ["filter"],
-    "additionalProperties": false,
+    "additionalProperties": true,
 
     "$defs": {
         "filter": {
