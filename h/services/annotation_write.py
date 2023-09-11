@@ -10,6 +10,7 @@ from h.models import Annotation, AnnotationModeration, AnnotationSlim, User
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
+from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
 from h.services.search_index import SearchIndexService
 from h.traversal.group import GroupContext
@@ -21,17 +22,19 @@ _ = i18n.TranslationStringFactory(__package__)
 class AnnotationWriteService:
     """A service for storing and retrieving annotations."""
 
-    def __init__(
+    def __init__(  # pylint:disable=too-many-arguments
         self,
         db_session: Session,
         has_permission: Callable,
         search_index_service: SearchIndexService,
         annotation_read_service: AnnotationReadService,
+        annotation_metadata_service: AnnotationMetadataService,
     ):
         self._db = db_session
         self._has_permission = has_permission
         self._search_index_service = search_index_service
         self._annotation_read_service = annotation_read_service
+        self._annotation_metadata_service = annotation_metadata_service
 
     def create_annotation(self, data: dict) -> Annotation:
         """
@@ -53,6 +56,7 @@ class AnnotationWriteService:
                     + _("Annotation {id} does not exist").format(id=references[0])
                 )
 
+        annotation_metadata_jwe = data.pop("metadata_jwe", None)
         document_data = data.pop("document", {})
         annotation = Annotation(**data)
 
@@ -73,6 +77,11 @@ class AnnotationWriteService:
 
         self._db.add(annotation)
         self.upsert_annotation_slim(annotation)
+
+        if annotation_metadata_jwe:
+            self._annotation_metadata_service.set_annotation_metadata_from_jwe(
+                annotation, annotation_metadata_jwe
+            )
 
         self._search_index_service._queue.add_by_id(  # pylint: disable=protected-access
             annotation.id, tag="storage.create_annotation", schedule_in=60
@@ -262,4 +271,5 @@ def service_factory(_context, request) -> AnnotationWriteService:
         has_permission=request.has_permission,
         search_index_service=request.find_service(name="search_index"),
         annotation_read_service=request.find_service(AnnotationReadService),
+        annotation_metadata_service=request.find_service(AnnotationMetadataService),
     )
