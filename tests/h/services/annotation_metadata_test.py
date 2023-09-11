@@ -1,22 +1,25 @@
-from unittest.mock import sentinel, patch
-import os
+from unittest.mock import sentinel
 
 import pytest
 
-from h.services.annotation_metadata import AnnotationMetadataService, factory
 from h.models import AnnotationMetadata
+from h.services.annotation_metadata import AnnotationMetadataService, factory
 
 
 class TestAnnotationMetadataService:
     def test_it(self, svc, factories, decrypt_jwe_dict, db_session):
         decrypt_jwe_dict.side_effect = [{"some": "data"}, {"new": "data"}]
-        anno = factories.Annotation(pk=1)
+        anno = factories.Annotation()
+        anno_slim = factories.AnnotationSlim(annotation=anno)
+        db_session.flush()
 
         svc.set_annotation_metadata_from_jwe(anno, sentinel.jwe)
 
         decrypt_jwe_dict.assert_called_once_with("secret", sentinel.jwe)
         anno_metadata = (
-            db_session.query(AnnotationMetadata).filter_by(annotation_pk=anno.pk).one()
+            db_session.query(AnnotationMetadata)
+            .filter_by(annotation_id=anno_slim.id)
+            .one()
         )
         assert anno_metadata.data == {"some": "data"}
 
