@@ -1524,24 +1524,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-build@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@hypothesis/frontend-build@npm:1.2.0"
+"@hypothesis/frontend-build@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@hypothesis/frontend-build@npm:2.2.0"
   dependencies:
-    commander: ^8.2.0
-    fancy-log: ^1.3.3
-    glob: ^7.2.0
+    commander: ^10.0.0
+    fancy-log: ^2.0.0
+    glob: ^10.0.0
   peerDependencies:
     autoprefixer: ^10.3.7
     karma: ^6.3.4
     postcss: ^8.3.9
-    rollup: ^2.58.0
+    rollup: ^3.2.2
     sass: ^1.43.2
-    tailwindcss: ^2.2.19
+    tailwindcss: ^3.0.11
   peerDependenciesMeta:
     tailwindcss:
       optional: true
-  checksum: 32bf3c4d6130bf55c95a1b6be78486c299d3d2c89386c1fff4c14027fdf8381c3f7a6c2c55e22a766a5f0e1b871297ddb99f9912439faa6b3b09359aeebd38b3
+  checksum: 545da8a341c75ef049bc671fec3e9ab62c90869c1fedbe7fe8dbacc9bdf1c16ad19c3476da0c273310c523ab1a0f8333637d2a9480109cafe35636c500b985f9
   languageName: node
   linkType: hard
 
@@ -2868,6 +2868,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^10.0.0":
+  version: 10.0.1
+  resolution: "commander@npm:10.0.1"
+  checksum: 436901d64a818295803c1996cd856621a74f30b9f9e28a588e726b2b1670665bccd7c1a77007ebf328729f0139838a88a19265858a0fa7a8728c4656796db948
+  languageName: node
+  linkType: hard
+
 "commander@npm:^2.20.0":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
@@ -2879,13 +2886,6 @@ __metadata:
   version: 7.2.0
   resolution: "commander@npm:7.2.0"
   checksum: 53501cbeee61d5157546c0bef0fedb6cdfc763a882136284bed9a07225f09a14b82d2a84e7637edfd1a679fb35ed9502fd58ef1d091e6287f60d790147f68ddc
-  languageName: node
-  linkType: hard
-
-"commander@npm:^8.2.0":
-  version: 8.3.0
-  resolution: "commander@npm:8.3.0"
-  checksum: 0f82321821fc27b83bd409510bb9deeebcfa799ff0bf5d102128b500b7af22872c0c92cb6a0ebc5a4cf19c6b550fba9cedfa7329d18c6442a625f851377bacf0
   languageName: node
   linkType: hard
 
@@ -3957,7 +3957,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fancy-log@npm:^1.3.2, fancy-log@npm:^1.3.3":
+"fancy-log@npm:^1.3.2":
   version: 1.3.3
   resolution: "fancy-log@npm:1.3.3"
   dependencies:
@@ -3966,6 +3966,15 @@ __metadata:
     parse-node-version: ^1.0.0
     time-stamp: ^1.0.0
   checksum: 9482336fb7e2fb852bc7ee5a91bab03c0b16e9bc4c9901e06dbca8d3441a55608cffa652ca716171a9e2646a050785df2dbded22f16792a02858e3c91e93b216
+  languageName: node
+  linkType: hard
+
+"fancy-log@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "fancy-log@npm:2.0.0"
+  dependencies:
+    color-support: ^1.1.3
+  checksum: 5652bf35e6a0be68bc011cf38706c78c7724808311e88905a3e4623d0e86168f084a9f38109dce2b2f78078ae704e4b55095effda743b4795c37f30ddb70497e
   languageName: node
   linkType: hard
 
@@ -4503,7 +4512,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:7.2.0, glob@npm:^7.1.1, glob@npm:^7.1.3, glob@npm:^7.1.7, glob@npm:^7.2.0":
+"glob@npm:7.2.0, glob@npm:^7.1.1, glob@npm:^7.1.3, glob@npm:^7.1.7":
   version: 7.2.0
   resolution: "glob@npm:7.2.0"
   dependencies:
@@ -4514,6 +4523,21 @@ __metadata:
     once: ^1.3.0
     path-is-absolute: ^1.0.0
   checksum: 78a8ea942331f08ed2e055cb5b9e40fe6f46f579d7fd3d694f3412fe5db23223d29b7fee1575440202e9a7ff9a72ab106a39fee39934c7bedafe5e5f8ae20134
+  languageName: node
+  linkType: hard
+
+"glob@npm:^10.0.0":
+  version: 10.3.4
+  resolution: "glob@npm:10.3.4"
+  dependencies:
+    foreground-child: ^3.1.0
+    jackspeak: ^2.0.3
+    minimatch: ^9.0.1
+    minipass: ^5.0.0 || ^6.0.2 || ^7.0.0
+    path-scurry: ^1.10.1
+  bin:
+    glob: dist/cjs/src/bin.js
+  checksum: 176b97c124414401cb51329a93d2ba112cef8814adbed10348481916b9521b677773eee2691cb6b24d66632d8c8bb8913533f5ac4bfb2d0ef5454a1856082361
   languageName: node
   linkType: hard
 
@@ -4728,7 +4752,7 @@ __metadata:
   dependencies:
     "@babel/core": ^7.22.9
     "@babel/preset-env": ^7.22.14
-    "@hypothesis/frontend-build": ^1.2.0
+    "@hypothesis/frontend-build": ^2.2.0
     "@rollup/plugin-babel": ^6.0.3
     "@rollup/plugin-commonjs": ^25.0.4
     "@rollup/plugin-node-resolve": ^15.2.1
@@ -4764,7 +4788,7 @@ __metadata:
     postcss: ^8.4.29
     prettier: ^3.0.3
     raven-js: ^3.7.0
-    rollup: ^2.79.1
+    rollup: ^3.29.1
     sass: ^1.66.1
     scroll-into-view: ^1.16.2
     sinon: ^15.2.0
@@ -7677,9 +7701,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^2.79.1":
-  version: 2.79.1
-  resolution: "rollup@npm:2.79.1"
+"rollup@npm:^3.29.1":
+  version: 3.29.1
+  resolution: "rollup@npm:3.29.1"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -7687,7 +7711,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 6a2bf167b3587d4df709b37d149ad0300692cc5deb510f89ac7bdc77c8738c9546ae3de9322b0968e1ed2b0e984571f5f55aae28fa7de4cfcb1bc5402a4e2be6
+  checksum: eb92dbb83842f46782257c93e864dd12e9eef72eb98485a70a08026e50f7b557cfff7da71f677a4bd62906e597cc99284bf152b876f814a95b61f5a618a0f43e
   languageName: node
   linkType: hard
 
