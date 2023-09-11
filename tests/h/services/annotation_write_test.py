@@ -51,6 +51,20 @@ class TestAnnotationWriteService:
         )
         self.assert_annotation_slim(db_session, anno)
 
+    def test_create_annotation_with_metadata(
+        self, svc, create_data, annotation_metadata_service, factories
+    ):
+        group = factories.Group()
+        create_data["references"] = None
+        create_data["groupid"] = group.pubid
+        create_data["metadata_jwe"] = sentinel.metadata_jwe
+
+        result = svc.create_annotation(create_data)
+
+        annotation_metadata_service.set_annotation_metadata_from_jwe.assert_called_once_with(
+            result, sentinel.metadata_jwe
+        )
+
     def test_create_annotation_as_root(
         self, svc, create_data, factories, annotation_read_service
     ):
@@ -219,12 +233,20 @@ class TestAnnotationWriteService:
         return Mock(return_value=True)
 
     @pytest.fixture
-    def svc(self, db_session, has_permission, search_index, annotation_read_service):
+    def svc(
+        self,
+        db_session,
+        has_permission,
+        search_index,
+        annotation_read_service,
+        annotation_metadata_service,
+    ):
         return AnnotationWriteService(
             db_session=db_session,
             has_permission=has_permission,
             search_index_service=search_index,
             annotation_read_service=annotation_read_service,
+            annotation_metadata_service=annotation_metadata_service,
         )
 
     @pytest.fixture
@@ -259,6 +281,7 @@ class TestServiceFactory:
         AnnotationWriteService,
         search_index,
         annotation_read_service,
+        annotation_metadata_service,
     ):
         svc = service_factory(sentinel.context, pyramid_request)
 
@@ -267,6 +290,7 @@ class TestServiceFactory:
             has_permission=pyramid_request.has_permission,
             search_index_service=search_index,
             annotation_read_service=annotation_read_service,
+            annotation_metadata_service=annotation_metadata_service,
         )
         assert svc == AnnotationWriteService.return_value
 

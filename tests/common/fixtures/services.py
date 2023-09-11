@@ -4,10 +4,10 @@ import pytest
 
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
+from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_write import AnnotationWriteService
-from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.auth_cookie import AuthCookieService
 from h.services.auth_token import AuthTokenService
 from h.services.bulk_annotation import BulkAnnotationService
