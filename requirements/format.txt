@@ -4,7 +4,7 @@
 #
 #    pip-compile --config=pyproject.toml requirements/format.in
 #
-black==23.7.0
+black==23.9.1
     # via -r requirements/format.in
 build==0.8.0
     # via pip-tools
@@ -40,7 +40,7 @@ tomli==2.0.0
     #   build
     #   pep517
     #   pip-tools
-typing-extensions==3.10.0.1
+typing-extensions==4.7.1
     # via black
 wheel==0.38.1
     # via pip-tools
