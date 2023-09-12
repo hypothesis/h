@@ -166,12 +166,7 @@ class BulkAnnotationService:
             .join(GroupMembership, GroupMembership.group_id == Group.id)
             .join(cls._AUDIENCE, GroupMembership.user_id == cls._AUDIENCE.id)
             .where(
-                cls._AUDIENCE._username.in_(  # pylint:disable=protected-access
-                    [
-                        username.lower().replace(".", "")
-                        for username in audience["username"]
-                    ]
-                ),
+                cls._AUDIENCE.username.in_(audience["username"]),
                 cls._AUDIENCE.authority == authority,
             )
         )
