@@ -42,6 +42,12 @@ class UsernameComparator(Comparator):  # pylint: disable=abstract-method
             **kwargs,
         )
 
+    def in_(self, other):
+        # Normalize the RHS usernames in python
+        usernames = [username.lower().replace(".", "") for username in other]
+        # And compare them to the normalized LHS in postgres
+        return _normalise_username(self.__clause_element__()).in_(usernames)
+
 
 class UserIDComparator(Comparator):  # pylint: disable=abstract-method
     """

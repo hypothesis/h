@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import exc
 from sqlalchemy.sql.elements import BinaryExpression
 
-from h import models
-from h.models.user import UserIDComparator
+from h.models import Activation
+from h.models.user import User, UserIDComparator
 
 
 class TestUserIDComparator:
@@ -31,10 +31,10 @@ class TestUserModelDataConstraints:
     """Unit tests for :py:module:`h.models.User` data integrity constraints."""
 
     def test_cannot_create_dot_variant_of_user(self, db_session):
-        fred = models.User(
+        fred = User(
             authority="example.com", username="fredbloggs", email="fred@example.com"
         )
-        fred2 = models.User(
+        fred2 = User(
             authority="example.com", username="fred.bloggs", email="fred@example.org"
         )
 
@@ -44,10 +44,10 @@ class TestUserModelDataConstraints:
             db_session.flush()
 
     def test_cannot_create_case_variant_of_user(self, db_session):
-        bob = models.User(
+        bob = User(
             authority="example.com", username="BobJones", email="bob@example.com"
         )
-        bob2 = models.User(
+        bob2 = User(
             authority="example.com", username="bobjones", email="bob@example.org"
         )
 
@@ -57,29 +57,42 @@ class TestUserModelDataConstraints:
             db_session.flush()
 
     def test_filtering_by_username_matches_dot_variant_of_user(self, db_session):
-        fred = models.User(
+        fred = User(
             authority="example.com", username="fredbloggs", email="fred@example.com"
         )
         db_session.add(fred)
         db_session.flush()
 
-        result = db_session.query(models.User).filter_by(username="fred.bloggs").one()
+        result = db_session.query(User).filter_by(username="fred.bloggs").one()
+
+        assert result == fred
+
+    def test_filtering_by_username_matches_dot_variant_of_user_using_in(
+        self, db_session
+    ):
+        fred = User(
+            authority="example.com", username="fredbloggs", email="fred@example.com"
+        )
+        db_session.add(fred)
+        db_session.flush()
+
+        result = db_session.query(User).filter(User.username.in_(["Fred.bloggs"])).one()
 
         assert result == fred
 
     def test_filtering_by_username_matches_case_variant_of_user(self, db_session):
-        fred = models.User(
+        fred = User(
             authority="example.com", username="fredbloggs", email="fred@example.com"
         )
         db_session.add(fred)
         db_session.flush()
 
-        result = db_session.query(models.User).filter_by(username="FredBloggs").one()
+        result = db_session.query(User).filter_by(username="FredBloggs").one()
 
         assert result == fred
 
     def test_userid_derived_from_username_and_authority(self):
-        fred = models.User(
+        fred = User(
             authority="example.net", username="fredbloggs", email="fred@example.com"
         )
 
@@ -87,25 +100,25 @@ class TestUserModelDataConstraints:
 
     def test_cannot_create_user_with_too_short_username(self):
         with pytest.raises(ValueError):
-            models.User(username="aa")
+            User(username="aa")
 
     def test_cannot_create_user_with_too_long_username(self):
         with pytest.raises(ValueError):
-            models.User(username="1234567890123456789012345678901")
+            User(username="1234567890123456789012345678901")
 
     def test_cannot_create_user_with_invalid_chars(self):
         with pytest.raises(ValueError):
-            models.User(username="foo-bar")
+            User(username="foo-bar")
 
     def test_cannot_create_user_with_too_long_email(self):
         with pytest.raises(ValueError):
-            models.User(email="bob@b" + "o" * 100 + "b.com")
+            User(email="bob@b" + "o" * 100 + "b.com")
 
     def test_can_create_user_with_null_email(self):
-        models.User(email=None)
+        User(email=None)
 
     def test_can_change_email_to_null(self):
-        user = models.User(email="bob@bob.com")
+        user = User(email="bob@bob.com")
 
         user.email = None
 
@@ -132,16 +145,14 @@ class TestUserModelDataConstraints:
 
 class TestUserModelUserId:
     def test_userid_equals_query(self, db_session):
-        fred = models.User(
+        fred = User(
             authority="example.net", username="fredbloggs", email="fred@example.com"
         )
         db_session.add(fred)
         db_session.flush()
 
         result = (
-            db_session.query(models.User)
-            .filter_by(userid="acct:fredbloggs@example.net")
-            .one()
+            db_session.query(User).filter_by(userid="acct:fredbloggs@example.net").one()
         )
 
         assert result == fred
@@ -150,28 +161,24 @@ class TestUserModelUserId:
         # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
 
-        result = (
-            db_session.query(models.User)
-            .filter_by(userid="fredbloggsexample.net")
-            .all()
-        )
+        result = db_session.query(User).filter_by(userid="fredbloggsexample.net").all()
 
         assert result == []
 
     def test_userid_in_query(self, db_session):
-        fred = models.User(
+        fred = User(
             authority="example.net", username="fredbloggs", email="fred@example.net"
         )
-        alice = models.User(
+        alice = User(
             authority="foobar.com", username="alicewrites", email="alice@foobar.com"
         )
         db_session.add_all([fred, alice])
         db_session.flush()
 
         result = (
-            db_session.query(models.User)
+            db_session.query(User)
             .filter(
-                models.User.userid.in_(  # pylint:disable=no-member
+                User.userid.in_(  # pylint:disable=no-member
                     [
                         "acct:fredbloggs@example.net",
                         "acct:alicewrites@foobar.com",
@@ -190,17 +197,17 @@ class TestUserModelUserId:
         # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
 
-        fred = models.User(
+        fred = User(
             authority="example.net", username="fredbloggs", email="fred@example.com"
         )
         db_session.add(fred)
         db_session.flush()
 
         result = (
-            db_session.query(models.User)
+            db_session.query(User)
             .filter(
                 # pylint:disable=no-member
-                models.User.userid.in_(["acct:fredbloggs@example.net", "invalid"])
+                User.userid.in_(["acct:fredbloggs@example.net", "invalid"])
             )
             .all()
         )
@@ -213,11 +220,9 @@ class TestUserModelUserId:
         # potentially be thrown by split_user.
 
         result = (
-            db_session.query(models.User)
+            db_session.query(User)
             .filter(
-                models.User.userid.in_(  # pylint:disable=no-member
-                    ["fredbloggsexample.net"]
-                )
+                User.userid.in_(["fredbloggsexample.net"])  # pylint:disable=no-member
             )
             .all()
         )
@@ -244,17 +249,15 @@ class TestUserModel:
 
     def test_privacy_accepted_defaults_to_None(self):
         # nullable
-        assert getattr(models.User(), "privacy_accepted") is None
+        assert getattr(User(), "privacy_accepted") is None
 
     def test_repr(self, user):
         assert repr(user) == "<User: kiki>"
 
     @pytest.fixture
     def user(self, db_session):
-        user = models.User(
-            authority="example.com", username="kiki", email="kiki@kiki.com"
-        )
-        user.activation = models.Activation()
+        user = User(authority="example.com", username="kiki", email="kiki@kiki.com")
+        user.activation = Activation()
         db_session.add(user)
         db_session.flush()
 
@@ -264,7 +267,7 @@ class TestUserModel:
 class TestUserGetByEmail:
     def test_it_returns_a_user(self, db_session, users):
         user = users["meredith"]
-        actual = models.User.get_by_email(db_session, user.email, user.authority)
+        actual = User.get_by_email(db_session, user.email, user.authority)
         assert actual == user
 
     @pytest.mark.usefixtures("users")
@@ -272,24 +275,24 @@ class TestUserGetByEmail:
         authority = "example.com"
         email = "bogus@msn.com"
 
-        actual = models.User.get_by_email(db_session, email, authority)
+        actual = User.get_by_email(db_session, email, authority)
         assert actual is None
 
     def test_it_filters_email_case_insensitive(self, db_session, users):
         user = users["emily"]
         mixed_email = "eMiLy@mSn.com"
 
-        actual = models.User.get_by_email(db_session, mixed_email, user.authority)
+        actual = User.get_by_email(db_session, mixed_email, user.authority)
         assert actual == user
 
     def test_it_filters_by_authority(self, db_session, users):
         user = users["norma"]
 
-        actual = models.User.get_by_email(db_session, user.email, "example.com")
+        actual = User.get_by_email(db_session, user.email, "example.com")
         assert actual is None
 
     def test_you_cannot_get_users_with_no_emails(self, db_session):
-        assert not models.User.get_by_email(db_session, None, "example.com")
+        assert not User.get_by_email(db_session, None, "example.com")
 
     @pytest.fixture
     def users(self, db_session, factories):
@@ -313,14 +316,14 @@ class TestUserGetByActivation:
     def test_it(self, db_session, factories):
         activated_user = factories.User(activation=factories.Activation())
 
-        user = models.User.get_by_activation(db_session, activated_user.activation)
+        user = User.get_by_activation(db_session, activated_user.activation)
 
         assert user == activated_user
 
     def test_it_with_no_matches(self, db_session, factories):
         activation = factories.Activation()
 
-        user = models.User.get_by_activation(db_session, activation)
+        user = User.get_by_activation(db_session, activation)
 
         assert user is None
 
@@ -329,20 +332,20 @@ class TestUserGetByUsername:
     def test_it_returns_a_user(self, db_session, users):
         user = users["meredith"]
 
-        actual = models.User.get_by_username(db_session, user.username, user.authority)
+        actual = User.get_by_username(db_session, user.username, user.authority)
         assert actual == user
 
     def test_it_filters_by_username(self, db_session):
         authority = "example.com"
         username = "bogus"
 
-        actual = models.User.get_by_username(db_session, username, authority)
+        actual = User.get_by_username(db_session, username, authority)
         assert actual is None
 
     def test_it_filters_by_authority(self, db_session, users):
         user = users["norma"]
 
-        actual = models.User.get_by_username(db_session, user.username, "example.com")
+        actual = User.get_by_username(db_session, user.username, "example.com")
         assert actual is None
 
     @pytest.fixture
