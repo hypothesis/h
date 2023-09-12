@@ -431,7 +431,7 @@ zope-interface==6.0
     #   transaction
     #   wired
     #   zope-sqlalchemy
-zope-sqlalchemy==3.0
+zope-sqlalchemy==3.1
     # via -r requirements/requirements.txt
 
 # The following packages are considered to be unsafe in a requirements file:
