@@ -75,7 +75,10 @@ class TestBulkAnnotationService:
             ("updated", "2022-01-02", False),
         ),
     )
-    def test_it_with_single_annotation(self, svc, factories, key, value, visible):
+    @pytest.mark.parametrize("username", ["USERNAME", "username", "user.name"])
+    def test_it_with_single_annotation(
+        self, svc, factories, key, value, visible, username
+    ):
         values = {
             "with_metadata": True,
             "shared": True,
@@ -88,7 +91,9 @@ class TestBulkAnnotationService:
             values[key] = value
 
         viewer = factories.User(authority=self.AUTHORITY)
-        author = factories.User(authority=self.AUTHORITY, nipsa=values["nipsad"])
+        author = factories.User(
+            authority=self.AUTHORITY, nipsa=values["nipsad"], username=username
+        )
         group = factories.Group(members=[author, viewer])
         anno = factories.Annotation(
             userid=author.userid,
@@ -106,7 +111,7 @@ class TestBulkAnnotationService:
 
         annotations = svc.annotation_search(
             authority=self.AUTHORITY,
-            audience={"username": [viewer.username]},
+            audience={"username": ["USERNAME"]},
             updated={"gt": "2020-01-01", "lte": "2022-01-01"},
         )
 
