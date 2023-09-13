@@ -32,12 +32,8 @@ on:
       - 'setup.cfg'
       - 'tox.ini'
 jobs:
-  ci:
-    name: CI
-    uses: ./.github/workflows/ci.yml
   docker_hub:
     name: Docker Hub
-    needs: [ci]
     uses: hypothesis/workflows/.github/workflows/dockerhub.yml@main
     with:
       Application: hypothesis
