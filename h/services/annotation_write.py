@@ -110,6 +110,7 @@ class AnnotationWriteService:
         """
         initial_target_uri = annotation.target_uri
 
+        annotation_metadata = data.pop("metadata", None)
         self._update_annotation_values(annotation, data)
         if update_timestamp:
             annotation.updated = datetime.utcnow()
@@ -132,8 +133,10 @@ class AnnotationWriteService:
                 document.get("document_uri_dicts", {}),
                 updated=annotation.updated,
             )
-
         self.upsert_annotation_slim(annotation)
+
+        if annotation_metadata:
+            self._annotation_metadata_service.set(annotation, annotation_metadata)
 
         # The search index service by default does not reindex if the existing ES
         # entry's timestamp matches the DB timestamp. If we're not changing this

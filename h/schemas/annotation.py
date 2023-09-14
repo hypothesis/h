@@ -230,6 +230,8 @@ class UpdateAnnotationSchema:
                 new_appstruct.get("target_uri", self.existing_target_uri),
             )
 
+        new_appstruct["metadata"] = appstruct.pop("metadata", None)
+
         new_appstruct["extra"] = appstruct
 
         return new_appstruct
