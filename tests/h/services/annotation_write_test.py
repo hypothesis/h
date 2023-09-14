@@ -150,6 +150,20 @@ class TestAnnotationWriteService:
         )
         assert result.updated == then
 
+    def test_update_annotation_with_metadata(
+        self, svc, annotation, annotation_metadata_service
+    ):
+        result = svc.update_annotation(
+            annotation,
+            {"metadata": sentinel.metadata},
+            update_timestamp=False,
+            reindex_tag="custom_tag",
+        )
+
+        annotation_metadata_service.set.assert_called_once_with(
+            result, sentinel.metadata
+        )
+
     def test__validate_group_with_no_group(self, svc, annotation):
         annotation.group = None
 
