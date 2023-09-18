@@ -30,10 +30,16 @@ class TestUserIDComparator:
 class TestUserModelDataConstraints:
     """Unit tests for :py:module:`h.models.User` data integrity constraints."""
 
-    def test_cannot_create_dot_variant_of_user(self, db_session, fred):
-        db_session.add(
-            User(authority=fred.authority, username="fred.bloggs", email=fred.email)
+    def test_cannot_create_dot_variant_of_user(self, db_session):
+        fred = User(
+            authority="example.com", username="fredbloggs", email="fred@example.com"
         )
+        fred2 = User(
+            authority="example.com", username="fred.bloggs", email="fred@example.org"
+        )
+
+        db_session.add(fred)
+        db_session.add(fred2)
         with pytest.raises(exc.IntegrityError):
             db_session.flush()
 
@@ -50,25 +56,47 @@ class TestUserModelDataConstraints:
         with pytest.raises(exc.IntegrityError):
             db_session.flush()
 
-    def test_filtering_by_username_matches_dot_variant_of_user(self, db_session, fred):
+    def test_filtering_by_username_matches_dot_variant_of_user(self, db_session):
+        fred = User(
+            authority="example.com", username="fredbloggs", email="fred@example.com"
+        )
+        db_session.add(fred)
+        db_session.flush()
+
         result = db_session.query(User).filter_by(username="fred.bloggs").one()
 
         assert result == fred
 
     def test_filtering_by_username_matches_dot_variant_of_user_using_in(
-        self, db_session, fred
+        self, db_session
     ):
+        fred = User(
+            authority="example.com", username="fredbloggs", email="fred@example.com"
+        )
+        db_session.add(fred)
+        db_session.flush()
+
         result = db_session.query(User).filter(User.username.in_(["Fred.bloggs"])).one()
 
         assert result == fred
 
-    def test_filtering_by_username_matches_case_variant_of_user(self, db_session, fred):
+    def test_filtering_by_username_matches_case_variant_of_user(self, db_session):
+        fred = User(
+            authority="example.com", username="fredbloggs", email="fred@example.com"
+        )
+        db_session.add(fred)
+        db_session.flush()
+
         result = db_session.query(User).filter_by(username="FredBloggs").one()
 
         assert result == fred
 
-    def test_userid_derived_from_username_and_authority(self, fred):
-        assert fred.userid == "acct:fredbloggs@example.com"
+    def test_userid_derived_from_username_and_authority(self):
+        fred = User(
+            authority="example.net", username="fredbloggs", email="fred@example.com"
+        )
+
+        assert fred.userid == "acct:fredbloggs@example.net"
 
     def test_cannot_create_user_with_too_short_username(self):
         with pytest.raises(ValueError):
@@ -116,9 +144,15 @@ class TestUserModelDataConstraints:
 
 
 class TestUserModelUserId:
-    def test_userid_equals_query(self, db_session, fred):
+    def test_userid_equals_query(self, db_session):
+        fred = User(
+            authority="example.net", username="fredbloggs", email="fred@example.com"
+        )
+        db_session.add(fred)
+        db_session.flush()
+
         result = (
-            db_session.query(User).filter_by(userid="acct:fredbloggs@example.com").one()
+            db_session.query(User).filter_by(userid="acct:fredbloggs@example.net").one()
         )
 
         assert result == fred
@@ -127,15 +161,18 @@ class TestUserModelUserId:
         # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
 
-        result = db_session.query(User).filter_by(userid="fredbloggsexample.com").all()
+        result = db_session.query(User).filter_by(userid="fredbloggsexample.net").all()
 
         assert result == []
 
-    def test_userid_in_query(self, db_session, fred):
+    def test_userid_in_query(self, db_session):
+        fred = User(
+            authority="example.net", username="fredbloggs", email="fred@example.net"
+        )
         alice = User(
             authority="foobar.com", username="alicewrites", email="alice@foobar.com"
         )
-        db_session.add(alice)
+        db_session.add_all([fred, alice])
         db_session.flush()
 
         result = (
@@ -143,7 +180,7 @@ class TestUserModelUserId:
             .filter(
                 User.userid.in_(  # pylint:disable=no-member
                     [
-                        "acct:fredbloggs@example.com",
+                        "acct:fredbloggs@example.net",
                         "acct:alicewrites@foobar.com",
                         "acct:missing@bla.org",
                     ]
@@ -156,14 +193,21 @@ class TestUserModelUserId:
         assert fred in result
         assert alice in result
 
-    def test_userid_in_query_with_invalid_userid_mixed_in(self, db_session, fred):
+    def test_userid_in_query_with_invalid_userid_mixed_in(self, db_session):
         # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
+
+        fred = User(
+            authority="example.net", username="fredbloggs", email="fred@example.com"
+        )
+        db_session.add(fred)
+        db_session.flush()
+
         result = (
             db_session.query(User)
             .filter(
                 # pylint:disable=no-member
-                User.userid.in_(["acct:fredbloggs@example.com", "invalid"])
+                User.userid.in_(["acct:fredbloggs@example.net", "invalid"])
             )
             .all()
         )
@@ -313,12 +357,3 @@ class TestUserGetByUsername:
         }
         db_session.flush()
         return users
-
-
-@pytest.fixture
-def fred(db_session):
-    fred = User(authority="example.com", username="fredbloggs", email="fred@email.com")
-
-    db_session.add(fred)
-    db_session.flush()
-    return fred
