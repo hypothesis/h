@@ -63,8 +63,6 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
         # extension.
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
-        # Create sequences not used explicitly in a column here
-        engine.execute("CREATE SEQUENCE IF NOT EXISTS annotation_id_seq;")
 
     default_org = _maybe_create_default_organization(engine, authority)
     _maybe_create_world_group(engine, authority, default_org)
