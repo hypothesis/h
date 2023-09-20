@@ -5,6 +5,11 @@ from h_matchers import Any
 
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 @pytest.mark.usefixtures("group_links_service")
 class TestGroupJSONPresenter:

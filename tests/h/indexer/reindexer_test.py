@@ -4,6 +4,11 @@ import pytest
 
 from h.indexer.reindexer import reindex
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 @pytest.mark.usefixtures(
     "BatchIndexer",

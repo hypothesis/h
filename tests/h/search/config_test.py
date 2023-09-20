@@ -19,6 +19,11 @@ from h.search.config import (
     update_index_settings,
 )
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 def test_strip_scheme_char_filter():
     f = ANALYSIS_SETTINGS["char_filter"]["strip_scheme"]

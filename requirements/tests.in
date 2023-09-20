@@ -2,6 +2,9 @@ pip-tools
 pip-sync-faster
 coverage
 pytest
+pytest-cov
+pytest-xdist[psutil]
+filelock
 factory-boy
 hypothesis
 -r requirements.txt

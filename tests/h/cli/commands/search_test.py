@@ -5,6 +5,11 @@ import pytest
 
 from h.cli.commands import search
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 class TestReindexCommand:
     @pytest.mark.usefixtures("reindex")

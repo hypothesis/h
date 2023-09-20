@@ -7,6 +7,11 @@ import pytest
 
 from h.search.index import BatchIndexer
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 @pytest.mark.usefixtures("nipsa_service")
 class TestBatchIndexer:

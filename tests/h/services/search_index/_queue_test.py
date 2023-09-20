@@ -19,6 +19,12 @@ MINUS_5_MIN = datetime_.timedelta(minutes=-5)
 MINUS_5_MIN_IN_SECS = int(MINUS_5_MIN.total_seconds())
 
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
+
 class TestQueue:
     def test_add_where(self, queue, factories, db_session, now):
         matching = [

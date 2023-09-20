@@ -5,6 +5,11 @@ import sqlalchemy as sa
 
 from h.util.query import column_windows
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 ASCII_LOWERCASE = string.ascii_lowercase
 
 meta = sa.MetaData()

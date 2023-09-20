@@ -2,6 +2,11 @@ import pytest
 
 from h.search import util
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 @pytest.mark.parametrize(
     "wildcard_uri,expected",

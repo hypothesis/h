@@ -13,6 +13,11 @@ from webob.multidict import MultiDict
 
 from h import search
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 @pytest.mark.usefixtures("group_service", "nipsa_service")
 class TestSearch:
