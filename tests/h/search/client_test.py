@@ -7,6 +7,11 @@ from packaging.version import Version
 
 from h.search.client import Client, get_client
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 class TestClient:
     def test_close(self, client, conn):

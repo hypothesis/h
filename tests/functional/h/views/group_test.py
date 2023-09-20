@@ -1,6 +1,8 @@
 import pytest
 from pytest import param
 
+pytestmark = pytest.mark.usefixtures("init_elasticsearch")
+
 
 class TestGroupCreateController:
     @pytest.mark.usefixtures("with_logged_in_user")

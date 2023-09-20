@@ -7,6 +7,8 @@ from h_matchers import Any
 
 from h.models import Group, GroupMembership, User
 
+pytestmark = pytest.mark.usefixtures("init_elasticsearch")
+
 
 @pytest.mark.usefixtures("with_clean_db")
 class TestBulk:

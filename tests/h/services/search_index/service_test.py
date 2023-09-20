@@ -9,6 +9,11 @@ from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
 from h.services.settings import SettingsService
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 class TestAddAnnotationById:
     def test_it(

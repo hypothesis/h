@@ -14,7 +14,10 @@ LIMIT_MAX = query.LIMIT_MAX
 OFFSET_MAX = query.OFFSET_MAX
 
 
-pytestmark = pytest.mark.usefixtures("nipsa_service")
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch", "nipsa_service"),
+]
 
 
 class TestLimiter:

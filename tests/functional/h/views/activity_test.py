@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.usefixtures("init_elasticsearch")
+
 
 class TestGroupSearchController:
     @pytest.mark.usefixtures("with_logged_in_user")

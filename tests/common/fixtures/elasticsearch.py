@@ -49,7 +49,7 @@ def mock_es_client(es_client):
     )
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def init_elasticsearch(request):
     """
     Initialize the elasticsearch cluster.

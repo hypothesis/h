@@ -1,4 +1,7 @@
 """Functional tests for the /search page, without JavaScript."""
+import pytest
+
+pytestmark = pytest.mark.usefixtures("init_elasticsearch")
 
 
 def test_search_input_text_is_submitted_as_q_without_javascript(app):

@@ -5,6 +5,11 @@ from webob.multidict import MultiDict
 
 from h.search import parser
 
+pytestmark = [
+    pytest.mark.xdist_group("elasticsearch"),
+    pytest.mark.usefixtures("init_elasticsearch"),
+]
+
 
 @pytest.mark.parametrize(
     "query_in,query_out",
