@@ -1,6 +1,7 @@
 import sqlalchemy as sa
+from sqlalchemy import literal_column, select, union
 
-from h.models import Group, User
+from h.models import Group, GroupMembership
 from h.models.group import ReadableBy
 from h.util import group as group_util
 
@@ -88,21 +89,31 @@ class GroupService:
 
         :type user: `h.models.user.User`
         """
-        readable = Group.readable_by == ReadableBy.world
+        # Very few groups are readable by world, query those separately
+        readable_by_world_query = select(Group.pubid).where(
+            Group.readable_by == ReadableBy.world
+        )
+        query = readable_by_world_query
 
         if user is not None:
-            readable_member = sa.and_(
-                Group.readable_by == ReadableBy.members,
-                Group.members.any(User.id == user.id),
+            user_is_member_query = (
+                select(Group.pubid)
+                .join(GroupMembership)
+                .where(
+                    GroupMembership.user_id == user.id,
+                    Group.readable_by == ReadableBy.members,
+                )
             )
-            readable = sa.or_(readable, readable_member)
+            # Union these with the world readable ones
+            # We wrap a subquery around in case we need to apply the group_ids filter below
+            query = select(
+                union(readable_by_world_query, user_is_member_query).subquery()
+            )
 
         if group_ids:
-            readable = sa.and_(Group.pubid.in_(group_ids), readable)
+            query = query.where(literal_column("pubid").in_(group_ids))
 
-        return [
-            record.pubid for record in self.session.query(Group.pubid).filter(readable)
-        ]
+        return self.session.scalars(query).all()
 
     def groupids_created_by(self, user):
         """
