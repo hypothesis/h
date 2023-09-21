@@ -1,3 +1,4 @@
+import json
 from collections import namedtuple
 from unittest import mock
 
@@ -114,10 +115,12 @@ class TestWebSocket:
 
         assert queue.empty()
 
+    @pytest.mark.parametrize("debug", (True, False))
     def test_invalid_incoming_message_closes_connection(
-        self, client, fake_socket_close
+        self, client, fake_socket_close, debug
     ):
         """Invalid messages should cause termination of the connection."""
+        client.debug = debug
         message = FakeMessage('{"foo":missingquotes}')
 
         client.received_message(message)
@@ -145,6 +148,20 @@ class TestWebSocket:
 
         assert not fake_socket_send.called
 
+    def test_debug_mode(self, fake_environ, log):
+        sock = mock.Mock(spec_set=["sendall"])
+        fake_environ["h.ws.debug"] = True
+        client = websocket.WebSocket(sock, environ=fake_environ)
+
+        message = FakeMessage(json.dumps({"type": "whoami", "id": 1}))
+        log.info.reset_mock()
+
+        client.received_message(message)
+        client.send_json({"type": "whoyouare", "ok": True, "reply_to": 1})
+        client.closed(code=1006, reason="Client went away")
+
+        assert len(log.info.mock_calls) == 3
+
     @pytest.fixture(autouse=True)
     def with_no_socket_instances(self):
         # The instances set is automatically populated when web sockets are
@@ -163,6 +180,7 @@ class TestWebSocket:
     @pytest.fixture
     def fake_environ(self, queue):
         return {
+            "h.ws.debug": False,
             "h.ws.identity": Identity(),
             "h.ws.registry": mock.sentinel.registry,
             "h.ws.streamer_work_queue": queue,
@@ -183,32 +201,35 @@ class TestWebSocket:
 
 @pytest.mark.usefixtures("handlers")
 class TestHandleMessage:
-    def test_uses_unknown_handler_for_missing_type(self, unknown_handler):
+    def test_uses_unknown_handler_for_missing_type(self, socket, unknown_handler):
         """If the type is missing, call the `None` handler."""
-        socket = mock.Mock(spec_set=["close"])
         message = websocket.Message(socket, payload={"foo": "bar"})
 
         websocket.handle_message(message)
 
         unknown_handler.assert_called_once_with(message, session=None)
 
-    def test_uses_unknown_handler_for_unknown_type(self, unknown_handler):
+    def test_uses_unknown_handler_for_unknown_type(self, socket, unknown_handler):
         """If the type is unknown, call the `None` handler."""
-        socket = mock.Mock(spec_set=["close"])
         message = websocket.Message(socket, payload={"type": "donkeys", "foo": "bar"})
 
         websocket.handle_message(message)
 
         unknown_handler.assert_called_once_with(message, session=None)
 
-    def test_uses_appropriate_handler_for_known_type(self, foo_handler):
+    def test_uses_appropriate_handler_for_known_type(self, socket, foo_handler):
         """If the type is recognised, call the relevant handler."""
-        socket = mock.Mock(spec_set=["close"])
         message = websocket.Message(socket, payload={"type": "foo", "foo": "bar"})
 
         websocket.handle_message(message)
 
         foo_handler.assert_called_once_with(message, session=None)
+
+    def test_debug_mode(self, socket, log):
+        socket.debug = True
+        message = websocket.Message(socket, payload={"type": "foo", "foo": "bar"})
+        websocket.handle_message(message)
+        log.info.assert_called_once()
 
     @pytest.fixture
     def foo_handler(self):
@@ -217,6 +238,10 @@ class TestHandleMessage:
     @pytest.fixture
     def unknown_handler(self):
         return mock.Mock(spec_set=[])
+
+    @pytest.fixture
+    def socket(self):
+        return mock.create_autospec(websocket.WebSocket, instance=True, spec_set=True)
 
     @pytest.fixture
     def handlers(self, request, foo_handler, unknown_handler):
@@ -342,3 +367,8 @@ class TestUnknownMessage:
             websocket.handle_unknown_message(message)
 
         mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
+
+
+@pytest.fixture
+def log(patch):
+    return patch("h.streamer.websocket.log")
