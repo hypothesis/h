@@ -1,3 +1,4 @@
+from pyramid.settings import asbool
 from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 from ws4py.exc import HandshakeError
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
@@ -10,7 +11,7 @@ def websocket_view(request):
     # Provide environment which the WebSocket handler can use...
     request.environ.update(
         {
-            "h.ws.debug": bool(request.params.get("debug")),
+            "h.ws.debug": asbool(request.params.get("debug")),
             "h.ws.streamer_work_queue": streamer.WORK_QUEUE,
             "h.ws.identity": request.identity,
         }
