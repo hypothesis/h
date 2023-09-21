@@ -98,7 +98,7 @@ class WebSocket(_WebSocket):
 
     def send_json(self, payload):
         if self.debug:
-            log.info("Sending message %s", payload)
+            log.info("Sending message %s (terminated: %s)", payload, self.terminated)
         if not self.terminated:
             self.send(json.dumps(payload))
 
