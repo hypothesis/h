@@ -222,7 +222,7 @@ jinja2==2.11.3
     #   -r requirements/tests.txt
     #   data-tasks
     #   pyramid-jinja2
-jsonschema==4.19.0
+jsonschema==4.19.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
