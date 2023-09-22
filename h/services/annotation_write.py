@@ -1,9 +1,11 @@
 from datetime import datetime
 
+from sqlalchemy import exists, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from h import i18n
-from h.models import Annotation
+from h.models import Annotation, AnnotationModeration, AnnotationSlim, User
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
@@ -70,6 +72,7 @@ class AnnotationWriteService:
 
         self._db.add(annotation)
         self._db.flush()
+        self.upsert_annotation_slim(annotation)
 
         self._search_index_service._queue.add_by_id(  # pylint: disable=protected-access
             annotation.id, tag="storage.create_annotation", schedule_in=60
@@ -123,6 +126,8 @@ class AnnotationWriteService:
                 updated=annotation.updated,
             )
 
+        self.upsert_annotation_slim(annotation)
+
         # The search index service by default does not reindex if the existing ES
         # entry's timestamp matches the DB timestamp. If we're not changing this
         # timestamp, we need to force reindexing.
@@ -175,6 +180,53 @@ class AnnotationWriteService:
                 "group scope: "
                 + _("Annotations for this target URI are not allowed in this group")
             )
+
+    def upsert_annotation_slim(self, annotation):
+        moderated = self._db.scalar(
+            select(
+                exists(
+                    select(AnnotationModeration.id).where(
+                        AnnotationModeration.annotation_id == annotation.id
+                    )
+                )
+            )
+        )
+        user_id = self._db.scalar(
+            select(User.id).where(User.userid == annotation.userid)
+        )
+
+        stmt = insert(AnnotationSlim).values(
+            [
+                {
+                    # Index to upsert on
+                    "pubid": annotation.id,
+                    # Directly from the annotation
+                    "created": annotation.created,
+                    "updated": annotation.updated,
+                    "deleted": annotation.deleted,
+                    "shared": annotation.shared,
+                    "document_id": annotation.document_id,
+                    # Fields of AnnotationSlim
+                    "group_id": annotation.group.id,
+                    "user_id": user_id,
+                    "moderated": moderated,
+                }
+            ]
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["pubid"],
+            set_={
+                # Fields to update
+                "updated": stmt.excluded.updated,
+                "deleted": stmt.excluded.deleted,
+                "shared": stmt.excluded.shared,
+                "document_id": stmt.excluded.document_id,
+                "group_id": stmt.excluded.group_id,
+                "user_id": stmt.excluded.user_id,
+                "moderated": stmt.excluded.moderated,
+            },
+        )
+        self._db.execute(stmt)
 
 
 def service_factory(_context, request) -> AnnotationWriteService:

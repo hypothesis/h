@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch, sentinel
 import pytest
 from h_matchers import Any
 
-from h.models import Annotation
+from h.models import Annotation, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_write import AnnotationWriteService, service_factory
@@ -21,6 +21,7 @@ class TestAnnotationWriteService:
         search_index,
         annotation_read_service,
         _validate_group,
+        db_session,
     ):
         root_annotation = factories.Annotation()
         annotation_read_service.get_annotation_by_id.return_value = root_annotation
@@ -28,18 +29,18 @@ class TestAnnotationWriteService:
         create_data["groupid"] = "IGNORED"
         update_document_metadata.return_value = factories.Document()
 
-        result = svc.create_annotation(create_data)
+        anno = svc.create_annotation(create_data)
 
         annotation_read_service.get_annotation_by_id.assert_called_once_with(
             root_annotation.id
         )
-        _validate_group.assert_called_once_with(result)
+        _validate_group.assert_called_once_with(anno)
         # pylint: disable=protected-access
         search_index._queue.add_by_id.assert_called_once_with(
-            result.id, tag="storage.create_annotation", schedule_in=60
+            anno.id, tag="storage.create_annotation", schedule_in=60
         )
 
-        assert result == Any.instance_of(Annotation).with_attrs(
+        assert anno == Any.instance_of(Annotation).with_attrs(
             {
                 "userid": create_data["userid"],
                 "groupid": root_annotation.groupid,
@@ -48,6 +49,7 @@ class TestAnnotationWriteService:
                 "document": update_document_metadata.return_value,
             }
         )
+        self.assert_annotation_slim(db_session, anno)
 
     def test_create_annotation_as_root(
         self, svc, create_data, factories, annotation_read_service
@@ -83,7 +85,7 @@ class TestAnnotationWriteService:
         annotation.extra = {"key": "value"}
         annotation.updated = then
 
-        result = svc.update_annotation(
+        anno = svc.update_annotation(
             annotation,
             {
                 "target_uri": "new_target_uri",
@@ -103,21 +105,22 @@ class TestAnnotationWriteService:
         )
         update_document_metadata.assert_called_once_with(
             db_session,
-            result.target_uri,
+            anno.target_uri,
             {"meta": 1},
             {"uri": 1},
-            updated=result.updated,
+            updated=anno.updated,
         )
 
         # pylint: disable=protected-access
         search_index._queue.add_by_id.assert_called_once_with(
             annotation.id, tag="storage.update_annotation", schedule_in=60, force=False
         )
-        assert result.document == update_document_metadata.return_value
-        assert result.target_uri == "new_target_uri"
-        assert result.text == "new_text"
-        assert result.updated > then
-        assert result.extra == {"key": "value", "extra_key": "extra_value"}
+        assert anno.document == update_document_metadata.return_value
+        assert anno.target_uri == "new_target_uri"
+        assert anno.text == "new_text"
+        assert anno.updated > then
+        assert anno.extra == {"key": "value", "extra_key": "extra_value"}
+        self.assert_annotation_slim(db_session, anno)
 
     def test_update_annotation_with_non_defaults(self, svc, annotation, search_index):
         then = datetime.now() - timedelta(days=1)
@@ -191,7 +194,8 @@ class TestAnnotationWriteService:
 
     @pytest.fixture
     def annotation(self, factories):
-        return factories.Annotation()
+        user = factories.User()
+        return factories.Annotation(userid=user.userid)
 
     @pytest.fixture
     def has_permission(self):
@@ -218,6 +222,17 @@ class TestAnnotationWriteService:
         )
         update_document_metadata.return_value = factories.Document()
         return update_document_metadata
+
+    def assert_annotation_slim(self, db_session, annotation):
+        slim = db_session.query(AnnotationSlim).filter_by(pubid=annotation.id).one()
+
+        assert (
+            slim.user_id
+            == db_session.query(User).filter_by(userid=annotation.userid).one().id
+        )
+        assert slim.group_id == annotation.group.id
+        assert slim.document_id == annotation.document_id
+        assert slim.deleted == annotation.deleted
 
 
 class TestServiceFactory:
