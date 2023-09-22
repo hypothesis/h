@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from h.models import Annotation, AuthTicket, AuthzCode, Token
+from h.models import AuthTicket, AuthzCode, Token
 from h.tasks.cleanup import (
     purge_deleted_annotations,
     purge_expired_auth_tickets,
@@ -14,37 +14,10 @@ from h.tasks.cleanup import (
 
 @pytest.mark.usefixtures("celery")
 class TestPurgeDeletedAnnotations:
-    @pytest.mark.parametrize(
-        "deleted,mins_ago,purged",
-        [
-            # Deleted more than 10 minutes ago... should be purged.
-            (True, 30, True),
-            (True, 3600, True),
-            # Deleted less than 10 minutes ago... should NOT be purged.
-            (True, -30, False),  # annotation from the future! wooOOOooo!
-            (True, 0, False),
-            (True, 1, False),
-            (True, 9, False),
-            # Not deleted... should NOT be purged.
-            (False, -30, False),
-            (False, 0, False),
-            (False, 1, False),
-            (False, 9, False),
-            (False, 30, False),
-            (False, 3600, False),
-        ],
-    )
-    def test_purge(self, db_session, factories, deleted, mins_ago, purged):
-        updated = datetime.utcnow() - timedelta(minutes=mins_ago)
-        annotation = factories.Annotation(deleted=deleted, updated=updated)
-        db_session.add(annotation)
-
+    def test_purge(self, annotation_delete_service):
         purge_deleted_annotations()
 
-        if purged:
-            assert not db_session.query(Annotation).count()
-        else:
-            assert db_session.query(Annotation).count() == 1
+        annotation_delete_service.bulk_delete.assert_called_once()
 
 
 @pytest.mark.usefixtures("celery")
@@ -155,7 +128,7 @@ class TestPurgeRemovedFeatures:
 
 
 @pytest.fixture
-def celery(patch, db_session):
+def celery(patch, pyramid_request):
     cel = patch("h.tasks.cleanup.celery", autospec=False)
-    cel.request.db = db_session
+    cel.request = pyramid_request
     return cel
