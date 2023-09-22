@@ -141,6 +141,22 @@ class AnnotationWriteService:
 
         return annotation
 
+    def change_ownership(self, old_userid, new_userid):
+        annotations = (
+            self._db.query(Annotation)
+            .filter(Annotation.userid == old_userid)
+            .yield_per(100)
+        )
+
+        for annotation in annotations:
+            annotation.userid = new_userid
+
+        self._search_index_service.add_users_annotations(
+            old_userid,
+            tag="RenameUserService.rename",
+            schedule_in=30,
+        )
+
     @staticmethod
     def change_document(db, old_document_ids, new_document):
         db.query(Annotation).filter(

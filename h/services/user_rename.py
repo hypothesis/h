@@ -1,4 +1,5 @@
 from h import models
+from h.services.annotation_write import AnnotationWriteService
 
 
 class UserRenameError(Exception):
@@ -23,9 +24,10 @@ class UserRenameService:
     UserRenameError if the new username is already taken by another account.
     """
 
-    def __init__(self, session, search_index):
+    def __init__(self, session, search_index, annotation_write):
         self.session = session
         self._search_index = search_index
+        self._annotation_write = annotation_write
 
     def check(self, user, new_username):
         existing_user = models.User.get_by_username(
@@ -56,12 +58,7 @@ class UserRenameService:
         # can just update the userid.
         self._update_tokens(old_userid, new_userid)
 
-        self._change_annotations(old_userid, new_userid)
-        self._search_index.add_users_annotations(
-            old_userid,
-            tag="RenameUserService.rename",
-            schedule_in=30,
-        )
+        self._annotation_write.change_ownership(old_userid, new_userid)
 
     def _purge_auth_tickets(self, user):
         self.session.query(models.AuthTicket).filter(
@@ -73,23 +70,11 @@ class UserRenameService:
             models.Token.userid == old_userid
         ).update({"userid": new_userid}, synchronize_session="fetch")
 
-    def _change_annotations(self, old_userid, new_userid):
-        annotations = self._fetch_annotations(old_userid)
-
-        for annotation in annotations:
-            annotation.userid = new_userid
-
-    def _fetch_annotations(self, userid):
-        return (
-            self.session.query(models.Annotation)
-            .filter(models.Annotation.userid == userid)
-            .yield_per(100)
-        )
-
 
 def service_factory(_context, request):
     """Return a RenameUserService instance for the passed context and request."""
     return UserRenameService(
         session=request.db,
         search_index=request.find_service(name="search_index"),
+        annotation_write=request.find_service(AnnotationWriteService),
     )
