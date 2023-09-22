@@ -105,7 +105,7 @@ jinja2==2.11.3
     # via
     #   data-tasks
     #   pyramid-jinja2
-jsonschema==4.19.0
+jsonschema==4.19.1
     # via
     #   -r requirements.in
     #   h-api
