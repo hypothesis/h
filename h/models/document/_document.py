@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 import sqlalchemy as sa
 
 from h.db import Base, mixins
-from h.models.annotation import Annotation
 from h.models.document._exceptions import ConcurrentUpdateError
 from h.models.document._meta import create_or_update_document_meta
 from h.models.document._uri import DocumentURI, create_or_update_document_uri
@@ -153,12 +152,19 @@ def merge_documents(session, documents, updated=None):
 
     try:  # pylint:disable=too-many-try-statements
         session.flush()
-        session.query(Annotation).filter(
-            Annotation.document_id.in_(duplicate_ids)
-        ).update({Annotation.document_id: master.id}, synchronize_session="fetch")
+
+        # This service method was created from code existing here with
+        # the purpose of centralized model access in the service.
+        # It's pending to move the rest of this functions to a DocumentService that uses DI to get this service.
+        # In the meantime we are doing this import here to avoid a circular dependency.
+        # pylint:disable=import-outside-toplevel
+        from h.services.annotation_write import AnnotationWriteService
+
+        AnnotationWriteService.change_document(session, duplicate_ids, master)
         session.query(Document).filter(Document.id.in_(duplicate_ids)).delete(
             synchronize_session="fetch"
         )
+
     except sa.exc.IntegrityError as err:
         raise ConcurrentUpdateError("concurrent document merges") from err
 

@@ -143,6 +143,18 @@ class AnnotationWriteService:
         return annotation
 
     @staticmethod
+    def change_document(db, old_document_ids, new_document):
+        """Update the annotations that pointed to any of `old_document_ids` to point to `new_document` instead."""
+        db.query(Annotation).filter(
+            Annotation.document_id.in_(old_document_ids)
+        ).update({Annotation.document_id: new_document.id}, synchronize_session="fetch")
+        db.query(AnnotationSlim).filter(
+            AnnotationSlim.document_id.in_(old_document_ids)
+        ).update(
+            {AnnotationSlim.document_id: new_document.id}, synchronize_session="fetch"
+        )
+
+    @staticmethod
     def _update_annotation_values(annotation: Annotation, data: dict):
         for key, value in data.items():
             # Don't set complex things
