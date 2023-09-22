@@ -1,5 +1,5 @@
 # pylint: disable=no-member # Instance of 'Celery' has no 'request' member
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from h import models
 from h.celery import celery, get_task_logger
@@ -9,18 +9,7 @@ log = get_task_logger(__name__)
 
 @celery.task
 def purge_deleted_annotations():
-    """
-    Remove annotations marked as deleted from the database.
-
-    Deletes all annotations flagged as deleted more than 10 minutes ago. This
-    buffer period should ensure that this task doesn't delete annotations
-    deleted just before the task runs, which haven't yet been processed by the
-    streamer.
-    """
-    cutoff = datetime.utcnow() - timedelta(minutes=10)
-    celery.request.db.query(models.Annotation).filter_by(deleted=True).filter(
-        models.Annotation.updated < cutoff
-    ).delete()
+    celery.request.find_service(name="annotation_delete").bulk_delete()
 
 
 @celery.task
