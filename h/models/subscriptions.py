@@ -18,7 +18,9 @@ class Subscriptions(Base):
         REPLY = "reply"
 
     __tablename__ = "subscriptions"
-    __table_args__ = (sa.Index("subs_uri_idx_subscriptions", "uri"),)
+    __table_args__ = (
+        sa.Index("subs_uri_lower_idx_subscriptions", sa.func.lower("uri")),
+    )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
