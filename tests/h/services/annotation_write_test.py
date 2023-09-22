@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch, sentinel
 import pytest
 from h_matchers import Any
 
-from h.models import Annotation, AnnotationSlim, User
+from h.models import Annotation, AnnotationModeration, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_write import AnnotationWriteService, service_factory
@@ -178,6 +178,23 @@ class TestAnnotationWriteService:
                 svc._validate_group(annotation)  # pylint: disable=protected-access
         else:
             svc._validate_group(annotation)  # pylint: disable=protected-access
+
+    def test_hide_hides_the_annotation(self, annotation, svc):
+        annotation.moderation = None
+
+        svc.hide(annotation)
+
+        assert annotation.is_hidden
+
+    def test_hide_does_not_modify_an_already_hidden_annotation(self, annotation, svc):
+        moderation = AnnotationModeration()
+        annotation.moderation = moderation
+
+        svc.hide(annotation)
+
+        assert annotation.is_hidden
+        # It's the same one not a new one
+        assert annotation.moderation == moderation
 
     @pytest.fixture
     def create_data(self, factories):

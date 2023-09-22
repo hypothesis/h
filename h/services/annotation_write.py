@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Callable
 
 from sqlalchemy import exists, select
 from sqlalchemy.dialects.postgresql import insert
@@ -23,7 +24,7 @@ class AnnotationWriteService:
     def __init__(
         self,
         db_session: Session,
-        has_permission: callable,
+        has_permission: Callable,
         search_index_service: SearchIndexService,
         annotation_read_service: AnnotationReadService,
     ):
@@ -180,6 +181,15 @@ class AnnotationWriteService:
                 "group scope: "
                 + _("Annotations for this target URI are not allowed in this group")
             )
+
+    def hide(self, annotation):
+        """Hides  an annotation marking it it as "moderated"."""
+        if not annotation.is_hidden:
+            annotation.moderation = AnnotationModeration()
+
+    def unhide(self, annotation):
+        """Remove the moderation status of an annotation."""
+        annotation.moderation = None
 
     def upsert_annotation_slim(self, annotation):
         moderated = self._db.scalar(
