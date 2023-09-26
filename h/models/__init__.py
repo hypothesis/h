@@ -42,6 +42,7 @@ __all__ = (
     "Activation",
     "Annotation",
     "AnnotationModeration",
+    "AnnotationSlim",
     "AuthClient",
     "AuthTicket",
     "AuthzCode",
