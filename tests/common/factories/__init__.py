@@ -3,6 +3,7 @@
 from tests.common.factories.activation import Activation
 from tests.common.factories.annotation import Annotation
 from tests.common.factories.annotation_moderation import AnnotationModeration
+from tests.common.factories.annotation_slim import AnnotationSlim
 from tests.common.factories.auth_client import AuthClient, ConfidentialAuthClient
 from tests.common.factories.auth_ticket import AuthTicket
 from tests.common.factories.authz_code import AuthzCode

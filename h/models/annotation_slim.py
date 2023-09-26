@@ -30,6 +30,8 @@ class AnnotationSlim(Base):
     )
     """The value of annotation.id, named here pubid following the convention of group.pubid"""
 
+    annotation = sa.orm.relationship("Annotation")
+
     created = sa.Column(
         sa.DateTime,
         default=datetime.datetime.utcnow,
@@ -68,5 +70,10 @@ class AnnotationSlim(Base):
     )
 
     document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
+    document = sa.orm.relationship("Document")
+
     user_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"), nullable=False)
+    user = sa.orm.relationship("User")
+
     group_id = sa.Column(sa.Integer, sa.ForeignKey("group.id"), nullable=False)
+    group = sa.orm.relationship("Group")
