@@ -72,7 +72,6 @@ class AnnotationWriteService:
         )
 
         self._db.add(annotation)
-        self._db.flush()
         self.upsert_annotation_slim(annotation)
 
         self._search_index_service._queue.add_by_id(  # pylint: disable=protected-access
@@ -142,6 +141,18 @@ class AnnotationWriteService:
 
         return annotation
 
+    def hide(self, annotation):
+        """Hides  an annotation marking it it as "moderated"."""
+        if not annotation.is_hidden:
+            annotation.moderation = AnnotationModeration()
+
+        self.upsert_annotation_slim(annotation)
+
+    def unhide(self, annotation):
+        """Remove the moderation status of an annotation."""
+        annotation.moderation = None
+        self.upsert_annotation_slim(annotation)
+
     @staticmethod
     def change_document(db, old_document_ids, new_document):
         """Update the annotations that pointed to any of `old_document_ids` to point to `new_document` instead."""
@@ -194,16 +205,8 @@ class AnnotationWriteService:
                 + _("Annotations for this target URI are not allowed in this group")
             )
 
-    def hide(self, annotation):
-        """Hides  an annotation marking it it as "moderated"."""
-        if not annotation.is_hidden:
-            annotation.moderation = AnnotationModeration()
-
-    def unhide(self, annotation):
-        """Remove the moderation status of an annotation."""
-        annotation.moderation = None
-
     def upsert_annotation_slim(self, annotation):
+        self._db.flush()  # See the last model changes in the transaction
         moderated = self._db.scalar(
             select(
                 exists(
