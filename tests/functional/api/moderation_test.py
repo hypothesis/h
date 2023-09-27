@@ -109,6 +109,13 @@ def user(db_session, factories):
 
 
 @pytest.fixture
+def other_user(db_session, factories):
+    user = factories.User()
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
 def group(user, db_session, factories):
     group = factories.Group(creator=user)
     db_session.commit()
@@ -123,18 +130,18 @@ def world_annotation(user, db_session, factories):
 
 
 @pytest.fixture
-def group_annotation(group, db_session, factories):
+def group_annotation(group, db_session, factories, other_user):
     ann = factories.Annotation(
-        userid="acct:someone@example.com", groupid=group.pubid, shared=True
+        userid=other_user.userid, groupid=group.pubid, shared=True
     )
     db_session.commit()
     return ann
 
 
 @pytest.fixture
-def private_group_annotation(group, db_session, factories):
+def private_group_annotation(group, db_session, factories, other_user):
     ann = factories.Annotation(
-        userid="acct:someone@example.com", groupid=group.pubid, shared=False
+        userid=other_user.userid, groupid=group.pubid, shared=False
     )
     db_session.commit()
     return ann
