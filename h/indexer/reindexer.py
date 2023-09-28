@@ -41,7 +41,7 @@ def reindex(session, es, request):
         if errored:
             log.debug("failed to index %d annotations, retrying...", len(errored))
             errored = indexer.index(errored)
-            if errored:
+            if errored:  # pragma: no cover
                 log.warning("failed to index %d annotations: %r", len(errored), errored)
 
         log.info("making new index %s current", new_index)

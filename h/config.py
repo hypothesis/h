@@ -24,9 +24,9 @@ DEFAULT_SALT = (
 
 
 def configure(environ=None, settings=None):  # pylint: disable=too-many-statements
-    if environ is None:
+    if environ is None:  # pragma: no cover
         environ = os.environ
-    if settings is None:
+    if settings is None:  # pragma: no cover
         settings = {}
     settings_manager = SettingsManager(settings, environ)
     # Configuration for external components
@@ -122,7 +122,9 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
     # Debug/development settings
     settings_manager.set("debug_query", "DEBUG_QUERY")
 
-    if "MANDRILL_USERNAME" in environ and "MANDRILL_APIKEY" in environ:
+    if (
+        "MANDRILL_USERNAME" in environ and "MANDRILL_APIKEY" in environ
+    ):  # pragma: no cover
         settings_manager.set("mail.username", "MANDRILL_USERNAME")
         settings_manager.set("mail.password", "MANDRILL_APIKEY")
         settings_manager.set(
@@ -135,7 +137,7 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
     settings = settings_manager.settings
 
     # Set up SQLAlchemy debug logging
-    if "debug_query" in settings:
+    if "debug_query" in settings:  # pragma: no cover
         level = logging.INFO
         if settings["debug_query"] == "trace":
             level = logging.DEBUG

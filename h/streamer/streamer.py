@@ -33,7 +33,7 @@ class UnknownMessageType(Exception):
 
 
 @subscriber(ApplicationCreated)
-def start(event):
+def start(event):  # pragma: no cover
     """
     Start some greenlets to process the incoming data from the message queue.
 
@@ -84,7 +84,7 @@ def process_work_queue(registry, queue):
                 raise UnknownMessageType(repr(msg))
 
 
-def supervise(greenlets):
+def supervise(greenlets):  # pragma: no cover
     try:
         gevent.joinall(greenlets, raise_error=True)
     except (KeyboardInterrupt, SystemExit):

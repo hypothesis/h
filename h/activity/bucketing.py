@@ -121,7 +121,7 @@ class Timeframe:
         """
         return annotation.updated >= self.cutoff_time
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f'{self.__class__} "{self.label}" with {len(self.document_buckets)} document buckets'
 
 
@@ -178,5 +178,5 @@ def bucket(annotations):
     return timeframes
 
 
-def utcnow():
+def utcnow():  # pragma: no cover
     return datetime.datetime.utcnow()

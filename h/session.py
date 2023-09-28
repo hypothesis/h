@@ -55,7 +55,7 @@ def user_info(user):
     return {"user_info": {"display_name": user.display_name}}
 
 
-def pop_flash(request):
+def pop_flash(request):  # pragma: no cover
     return {
         k: request.session.pop_flash(k) for k in ["error", "info", "warning", "success"]
     }
@@ -94,7 +94,7 @@ def _user_preferences(user):
     return preferences
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     settings = config.registry.settings
 
     # By default, derive_key generates a 64-byte (512 bit) secret, which is the

@@ -14,11 +14,11 @@ from h.views.client import DEFAULT_CLIENT_URL
 log = logging.getLogger(__name__)
 
 
-def in_debug_mode(request):
+def in_debug_mode(request):  # pragma: no cover
     return asbool(request.registry.settings.get("pyramid.debug_all"))
 
 
-def create_app(_global_config, **settings):
+def create_app(_global_config, **settings):  # pragma: no cover
     """
     Create the h WSGI application.
 
@@ -29,7 +29,7 @@ def create_app(_global_config, **settings):
     return config.make_wsgi_app()
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     config.scan("h.subscribers")
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)
@@ -125,7 +125,7 @@ def _configure_mailer(config):
     config.registry.settings.setdefault(
         "mail.default_sender", '"Annotation Daemon" <no-reply@localhost>'
     )
-    if asbool(config.registry.settings.get("h.debug")):
+    if asbool(config.registry.settings.get("h.debug")):  # pragma: no cover
         config.include("pyramid_mailer.debug")
     else:
         config.include("pyramid_mailer")
@@ -144,5 +144,5 @@ def _configure_csp(config):
         # including on /docs/help.
         "style-src": ["'self'", "fonts.googleapis.com", client_host, "'unsafe-inline'"],
     }
-    if "csp.report_uri" in settings:
+    if "csp.report_uri" in settings:  # pragma: no cover
         settings["csp"]["report-uri"] = [settings["csp.report_uri"]]

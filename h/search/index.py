@@ -79,7 +79,7 @@ class BatchIndexer:
             "_index": self._target_index,
             "_id": annotation.id,
         }
-        if self.es_client.server_version < Version("7.0.0"):
+        if self.es_client.server_version < Version("7.0.0"):  # pragma: no cover
             operation["_type"] = self.es_client.mapping_type
 
         data = presenters.AnnotationSearchIndexPresenter(

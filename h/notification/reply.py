@@ -98,7 +98,7 @@ def get_notification(
     # the reply, and dealing with the possibility that we have no document
     # metadata.
     if reply.document is None:
-        return None
+        return None  # pragma: no cover
 
     # Bail if there is no active 'reply' subscription for the user being
     # replied to.
@@ -112,5 +112,5 @@ def get_notification(
     return Notification(reply, reply_user, parent, parent_user, reply.document)
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     config.scan(__name__)

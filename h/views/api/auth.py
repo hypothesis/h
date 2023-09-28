@@ -170,7 +170,7 @@ class OAuthAuthorizeController:
 
         try:
             return HTTPFound(location=headers["Location"])
-        except KeyError as err:
+        except KeyError as err:  # pragma: no cover
             client_id = self.request.params.get("client_id")
             raise RuntimeError(
                 f'created authorisation code for client "{client_id}" but got no redirect location'

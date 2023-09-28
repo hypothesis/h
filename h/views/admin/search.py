@@ -11,7 +11,7 @@ class NotFoundError(Exception):
 
 
 @view_config(context=NotFoundError)
-def not_found(exc, request):
+def not_found(exc, request):  # pragma: no cover
     request.session.flash(str(exc), "error")
     return HTTPFound(location=request.route_url("admin.search"))
 

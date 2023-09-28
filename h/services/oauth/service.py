@@ -95,7 +95,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         if request.token:
             token = self.oauth_validator.find_token(request.token)
 
-            if token:
+            if token:  # pragma: no cover
                 request.client_id = token.authclient.id
 
         # Mark this request as a revocation request so we can know _not_

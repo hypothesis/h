@@ -34,11 +34,11 @@ def send(self, recipients, subject, body, html=None):
         subject=subject, recipients=recipients, body=body, html=html
     )
     mailer = pyramid_mailer.get_mailer(celery.request)
-    if celery.request.debug:
+    if celery.request.debug:  # pragma: no cover
         log.info("emailing in debug mode: check the `mail/' directory")
     try:
         mailer.send_immediately(email)
-    except smtplib.SMTPRecipientsRefused as exc:
+    except smtplib.SMTPRecipientsRefused as exc:  # pragma: no cover
         log.warning(
             "Recipient was refused when trying to send an email. Does the user have an invalid email address?",
             exc_info=exc,

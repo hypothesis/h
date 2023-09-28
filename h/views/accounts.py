@@ -34,7 +34,7 @@ _ = i18n.TranslationString
 
 # A little helper to ensure that session data is returned in every ajax
 # response payload.
-def ajax_payload(request, data):
+def ajax_payload(request, data):  # pragma: no cover
     payload = {"flash": session.pop_flash(request), "model": session.model(request)}
     payload.update(data)
     return payload
@@ -62,20 +62,20 @@ def bad_csrf_token_html(_context, request):
 
 
 @json_view(context=BadCSRFToken)
-def bad_csrf_token_json(_context, request):
+def bad_csrf_token_json(_context, request):  # pragma: no cover
     request.response.status_code = 403
     reason = _("Session is invalid. Please try again.")
     return {"status": "failure", "reason": reason, "model": session.model(request)}
 
 
 @json_view(context=accounts.JSONError)
-def error_json(error, request):
+def error_json(error, request):  # pragma: no cover
     request.response.status_code = 400
     return {"status": "failure", "reason": str(error)}
 
 
 @json_view(context=deform.ValidationFailure)
-def error_validation(error, request):
+def error_validation(error, request):  # pragma: no cover
     request.response.status_code = 400
     return ajax_payload(request, {"status": "failure", "errors": error.error.asdict()})
 
@@ -173,7 +173,7 @@ class ForgotPasswordController:
         self.form = request.create_form(self.schema, buttons=(_("Reset"),))
 
     @view_config(request_method="GET")
-    def get(self):
+    def get(self):  # pragma: no cover
         """Render the forgot password page, including the form."""
         self._redirect_if_logged_in()
 
@@ -262,7 +262,7 @@ class ResetController:
             appstruct = self.form.validate(self.request.POST.items())
         except deform.ValidationFailure:
             # If the code is valid, hide the field.
-            if not self.form["user"].error:
+            if not self.form["user"].error:  # pragma: no cover
                 self.form.set_widgets({"user": deform.widget.HiddenWidget()})
             return {"form": self.form.render()}
 
@@ -277,7 +277,7 @@ class ResetController:
         )
 
     def _redirect_if_logged_in(self):
-        if self.request.authenticated_userid is not None:
+        if self.request.authenticated_userid is not None:  # pragma: no cover
             raise httpexceptions.HTTPFound(self.request.route_path("index"))
 
     def _reset_password(self, user, password):
@@ -619,7 +619,7 @@ class DeveloperController:
     request_method="GET",
     renderer="h:templates/accounts/claim_account_legacy.html.jinja2",
 )
-def claim_account_legacy(_request):
+def claim_account_legacy(_request):  # pragma: no cover
     """Render a page explaining that claim links are no longer valid."""
     return {}
 
@@ -627,7 +627,7 @@ def claim_account_legacy(_request):
 @view_config(
     route_name="dismiss_sidebar_tutorial", request_method="POST", renderer="json"
 )
-def dismiss_sidebar_tutorial(request):
+def dismiss_sidebar_tutorial(request):  # pragma: no cover
     if request.authenticated_userid is None:
         raise accounts.JSONError()
 

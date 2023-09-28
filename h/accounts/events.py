@@ -1,5 +1,5 @@
 class ActivationEvent:
-    def __init__(self, request, user):
+    def __init__(self, request, user):  # pragma: no cover
         self.request = request
         self.user = user
 

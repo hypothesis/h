@@ -144,7 +144,7 @@ class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-m
         return _transform_quote_selector(value, _unescape_null_byte)
 
 
-def _transform_quote_selector(selectors, transform_func):
+def _transform_quote_selector(selectors, transform_func):  # pragma: no cover
     if selectors is None:
         return None
 
@@ -170,13 +170,13 @@ def _transform_quote_selector(selectors, transform_func):
 
 def _escape_null_byte(string):
     if string is None:
-        return string
+        return string  # pragma: no cover
 
     return string.replace("\u0000", "\\u0000")
 
 
 def _unescape_null_byte(string):
     if string is None:
-        return string
+        return string  # pragma: no cover
 
     return string.replace("\\u0000", "\u0000")

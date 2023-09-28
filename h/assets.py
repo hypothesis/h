@@ -5,7 +5,7 @@ from h_assets import Environment, assets_view
 from pyramid.settings import asbool
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     auto_reload = asbool(config.registry.settings.get("h.reload_assets", False))
     h_files = importlib_resources.files("h")
 

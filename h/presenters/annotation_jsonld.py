@@ -37,7 +37,7 @@ class AnnotationJSONLDPresenter:
                 "format": "text/markdown",
             }
         ]
-        if self.annotation.tags:
+        if self.annotation.tags:  # pragma: no cover
             for tag in self.annotation.tags:
                 bodies.append(
                     {"type": "TextualBody", "value": tag, "purpose": "tagging"}

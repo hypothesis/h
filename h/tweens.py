@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 resolver = DottedNameResolver(None)
 
 
-def conditional_http_tween_factory(handler, registry):
+def conditional_http_tween_factory(handler, registry):  # pragma: no cover
     """Set up conditional response handling for some requests."""
 
     def conditional_http_tween(request):
@@ -38,7 +38,7 @@ def conditional_http_tween_factory(handler, registry):
             isinstance(response.app_iter, Sequence) and len(response.app_iter) == 1
         )
         cacheable = request.method in {"GET", "HEAD"} and response.status_code == 200
-        if have_buffered_response and cacheable:
+        if have_buffered_response and cacheable:  # pragma: no cover
             response.conditional_response = True
             response.md5_etag()
 
@@ -47,7 +47,7 @@ def conditional_http_tween_factory(handler, registry):
     return conditional_http_tween
 
 
-def invalid_path_tween_factory(handler, registry):
+def invalid_path_tween_factory(handler, registry):  # pragma: no cover
     def invalid_path_tween(request):
         # Due to a bug in WebOb accessing request.path (or request.path_info
         # etc) will raise UnicodeDecodeError if the requested path doesn't

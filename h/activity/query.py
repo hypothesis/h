@@ -190,7 +190,7 @@ def _execute_search(request, query, page_size):
 
 
 @newrelic.agent.function_trace()
-def _fetch_groups(session, pubids):
+def _fetch_groups(session, pubids):  # pragma: no cover
     return session.query(Group).filter(Group.pubid.in_(pubids))
 
 

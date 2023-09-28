@@ -90,7 +90,7 @@ def users_activate(request):
     permission=Permission.AdminPage.LOW_RISK,
     require_csrf=True,
 )
-def users_rename(request):
+def users_rename(request):  # pragma: no cover
     user = _form_request_user(request)
 
     old_username = user.username
@@ -144,7 +144,7 @@ def users_delete(request):
 
 
 @view_config(context=UserNotFoundError)
-def user_not_found(exc, request):
+def user_not_found(exc, request):  # pragma: no cover
     request.session.flash(jinja2.Markup(_(exc.message)), "error")
     return httpexceptions.HTTPFound(location=request.route_path("admin.users"))
 

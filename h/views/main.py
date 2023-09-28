@@ -55,7 +55,7 @@ def annotation_page(context, request):
 
 
 @view_config(route_name="robots", http_cache=(86400, {"public": True}))
-def robots(_context, request):
+def robots(_context, request):  # pragma: no cover
     return response.FileResponse(
         "h/static/robots.txt", request=request, content_type="text/plain"
     )
@@ -89,7 +89,7 @@ def stream(_context, request):
 
 
 @view_config(route_name="stream.tag_query")
-def stream_tag_redirect(request):
+def stream_tag_redirect(request):  # pragma: no cover
     query = {"q": f"tag:{request.matchdict['tag']}"}
     location = request.route_url("stream", _query=query)
     raise httpexceptions.HTTPFound(location=location)

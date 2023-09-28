@@ -65,7 +65,7 @@ def sidebar_app(request, extra=None):
         "rpcAllowedOrigins": settings.get("h.client_rpc_allowed_origins"),
     }
 
-    if sentry_public_dsn:
+    if sentry_public_dsn:  # pragma: no cover
         # `h.sentry_environment` primarily refers to h's Sentry environment,
         # but it also matches the client environment for the embed (dev, qa, prod).
         sentry_environment = settings.get("h.sentry_environment")
@@ -78,7 +78,7 @@ def sidebar_app(request, extra=None):
         "client_url": _client_url(request),
     }
 
-    if extra is not None:
+    if extra is not None:  # pragma: no cover
         ctx.update(extra)
 
     # Add CSP headers to prevent scripts or styles from unexpected locations

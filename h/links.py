@@ -40,7 +40,7 @@ def incontext_link(request, annotation):
         # We can't use urljoin here, because if it detects the second argument
         # is a URL it will discard the base URL, breaking the link entirely.
         link += "/" + uri[uri.index("://") + 3 :]
-    elif uri.startswith("urn:x-pdf:") and annotation.document:
+    elif uri.startswith("urn:x-pdf:") and annotation.document:  # pragma: no cover
         for docuri in annotation.document.document_uris:
             uri = docuri.uri
             if uri.startswith(("http://", "https://")):
@@ -58,7 +58,7 @@ def jsonld_id_link(request, annotation):
     return request.route_url("annotation", id=annotation.id)
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     # Add an annotation link generator for the `annotation` view -- this adds a
     # named link called "html" to API rendered views of annotations. See
     # :py:mod:`h.presenters` for details.

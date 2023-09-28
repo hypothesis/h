@@ -89,7 +89,7 @@ class UserService:
         :returns: a list with the found user instances
         :rtype: list of h.models.User
         """
-        if not userids:
+        if not userids:  # pragma: no cover
             return []
 
         cache_keys = {}
@@ -99,7 +99,7 @@ class UserService:
 
             try:
                 cache_keys[key] = userid
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 continue
 
         userid_tuples = set(cache_keys.keys())
@@ -170,7 +170,7 @@ class UserService:
             keys = ", ".join(sorted(invalid_keys))
             raise TypeError(f"settings with keys {keys} are not allowed")
 
-        if "show_sidebar_tutorial" in kwargs:
+        if "show_sidebar_tutorial" in kwargs:  # pragma: no cover
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
 
 

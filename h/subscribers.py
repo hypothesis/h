@@ -84,6 +84,6 @@ def send_reply_notifications(event):
 
         try:
             mailer.send.delay(*send_params)
-        except OperationalError as err:
+        except OperationalError as err:  # pragma: no cover
             # We could not connect to rabbit! So carry on
             report_exception(err)

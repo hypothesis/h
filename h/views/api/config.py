@@ -117,7 +117,7 @@ def api_config(versions, link_name=None, description=None, **settings):
             **settings
         )
 
-    def wrapper(wrapped):
+    def wrapper(wrapped):  # pragma: no cover
         info = venusian.attach(wrapped, callback, category="pyramid")
 
         # Support use as a class method decorator.

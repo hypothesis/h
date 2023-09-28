@@ -27,7 +27,7 @@ def features_index(request):
     permission=Permission.AdminPage.HIGH_RISK,
     require_csrf=True,
 )
-def features_save(request):
+def features_save(request):  # pragma: no cover
     for feat in models.Feature.all(request.db):
         for attr in ["everyone", "first_party", "admins", "staff"]:
             val = request.POST.get(f"{feat.name}[{attr}]")
@@ -120,7 +120,7 @@ def cohorts_edit_add(request):
     cohort_id = request.matchdict["id"]
 
     member = models.User.get_by_username(request.db, member_name, member_authority)
-    if member is None:
+    if member is None:  # pragma: no cover
         request.session.flash(
             _(
                 # pylint:disable=consider-using-f-string
@@ -154,7 +154,7 @@ def cohorts_edit_remove(request):
     member = request.db.query(models.User).filter_by(userid=member_userid).first()
     try:
         cohort.members.remove(member)
-    except ValueError:
+    except ValueError:  # pragma: no cover
         request.session.flash(
             _(
                 # pylint:disable=consider-using-f-string

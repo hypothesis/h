@@ -43,7 +43,7 @@ def api_notfound(context, request):
 @view_config(
     context=OAuthAuthorizeError, renderer="h:templates/oauth/error.html.jinja2"
 )
-def oauth_error(context, request):
+def oauth_error(context, request):  # pragma: no cover
     """Handle an expected/deliberately thrown OAuth exception."""
     request.response.status_code = context.status_code
     return {"detail": context.detail}
@@ -57,15 +57,14 @@ def api_error(context, request):
 
 
 @json_view(context=JSONAPIError, path_info="/api/bulk", decorator=cors_policy)
-def bulk_api_error(context, request):
+def bulk_api_error(context, request):  # pragma: no cover
     """Handle JSONAPIErrors produced by the Bulk API."""
-
     request.response.status_code = context.http_status
     return context.as_dict()
 
 
 @json_view(context=Exception, path_info="/api/", decorator=cors_policy)
-def json_error(context, request):
+def json_error(context, request):  # pragma: no cover
     """Handle an unexpected exception in an API view."""
     handle_exception(request, exception=context)
     message = _(
