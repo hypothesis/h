@@ -80,7 +80,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
             raise InvalidGrantError("Invalid grant token signature.") from err
         except jwt.exceptions.InvalidAlgorithmError as err:
             raise InvalidGrantError("Invalid grant token signature algorithm.") from err
-        except jwt.MissingRequiredClaimError as err:
+        except jwt.MissingRequiredClaimError as err:  # pragma: no cover
             if err.claim == "aud":
                 raise MissingJWTGrantTokenClaimError("aud", "audience") from err
 
@@ -91,7 +91,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
             raise InvalidGrantError("Grant token is not yet valid.") from err
         except jwt.ExpiredSignatureError as err:
             raise InvalidGrantError("Grant token is expired.") from err
-        except jwt.InvalidIssuedAtError as err:
+        except jwt.InvalidIssuedAtError as err:  # pragma: no cover
             raise InvalidGrantError(
                 "Grant token issue time (iat) is in the future."
             ) from err

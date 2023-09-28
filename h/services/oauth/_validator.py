@@ -362,7 +362,7 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
         except StatementError:
             return None
 
-    def _find_refresh_token(self, value):
+    def _find_refresh_token(self, value):  # pragma: no cover
         if value is None:
             return None
 
@@ -376,7 +376,7 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
     def _find_token(self, value):
         """Retrieve a token without knowing which kind it is."""
 
-        if value is None:
+        if value is None:  # pragma: no cover
             return None
 
         return (

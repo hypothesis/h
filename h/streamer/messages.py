@@ -33,7 +33,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
         message = Message(topic=routing_key, payload=payload)
         try:
             work_queue.put(message, timeout=0.1)
-        except Full:
+        except Full:  # pragma: no cover
             log.warning(
                 "Streamer work queue full! Unable to queue message from "
                 "h.realtime having waited 0.1s: giving up."

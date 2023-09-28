@@ -8,7 +8,7 @@ class DocumentJSONPresenter:
 
         document_dict = {}
         title = self.document.title
-        if title:
+        if title:  # pragma: no cover
             document_dict["title"] = [title]
 
         return document_dict

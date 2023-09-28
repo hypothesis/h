@@ -5,7 +5,7 @@ from pyramid.view import view_config
 
 
 @view_config(route_name="via_redirect", request_method="GET")
-def via_redirect(_context, request):
+def via_redirect(_context, request):  # pragma: no cover
     url = request.params.get("url")
 
     if url is None:

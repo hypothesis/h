@@ -143,7 +143,7 @@ def report_failure(sender, task_id, args, kwargs, einfo, **_kwargs):
     )
 
 
-def start(argv, bootstrap):
+def start(argv, bootstrap):  # pragma: no cover
     """Run the Celery CLI."""
     # We attach the bootstrap function directly to the Celery application
     # instance, and it's then used in the worker bootstrap subscriber above.

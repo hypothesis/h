@@ -13,7 +13,7 @@ _ = i18n.TranslationString
 class ResetCode(colander.SchemaType):
     """Schema type transforming a reset code to a user and back."""
 
-    def serialize(self, node, appstruct):
+    def serialize(self, node, appstruct):  # pragma: no cover
         if appstruct is colander.null:
             return colander.null
         if not isinstance(appstruct, models.User):

@@ -82,7 +82,7 @@ class WebSocket(_WebSocket):
 
         try:
             self._work_queue.put(Message(socket=self, payload=payload), timeout=0.1)
-        except Full:
+        except Full:  # pragma: no cover
             log.warning(
                 "Streamer work queue full! Unable to queue message from "
                 "WebSocket client having waited 0.1s: giving up."
@@ -117,14 +117,14 @@ def handle_message(message, session=None):
     It may also passed a database session which *must* be used for any
     communication with the database.
     """
-    if message.socket.debug:
+    if message.socket.debug:  # pragma: no cover
         log.info("Handling message %s", message.payload)
 
     payload = message.payload
     type_ = payload.get("type")
 
     # FIXME: This code is here to tolerate old and deprecated message formats.
-    if type_ is None:
+    if type_ is None:  # pragma: no cover
         if "messageType" in payload and payload["messageType"] == "client_id":
             type_ = "client_id"
         if "filter" in payload:

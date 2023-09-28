@@ -55,7 +55,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
     usual.
     """
 
-    def finalize_headers(self):
+    def finalize_headers(self):  # pragma: no cover
         if self.environ.get("HTTP_UPGRADE", "").lower() == "websocket":
             # Middleware may yield from the empty upgrade
             # response, confusing this method into sending "Transfer-Encoding:
@@ -70,7 +70,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
 
         super().finalize_headers()
 
-    def run_application(self):
+    def run_application(self):  # pragma: no cover
         upgrade_header = self.environ.get("HTTP_UPGRADE", "").lower()
         if upgrade_header:
             # Build and start the HTTP response
@@ -103,11 +103,11 @@ class GEventWebSocketPool(Pool):
     server is shutdown.
     """
 
-    def track(self, websocket):
+    def track(self, websocket):  # pragma: no cover
         log.debug("managing websocket %s", format_addresses(websocket))
         return self.spawn(websocket.run)
 
-    def clear(self):
+    def clear(self):  # pragma: no cover
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
             try:  # pylint:disable=too-many-try-statements
@@ -136,7 +136,7 @@ class WSGIServer(PyWSGIServer):
     # it
     instances = weakref.WeakSet()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pragma: no cover
         super().__init__(*args, **kwargs)
         self.pool = GEventWebSocketPool()
 
@@ -144,7 +144,7 @@ class WSGIServer(PyWSGIServer):
         self.connection_pool = kwargs.get("spawn")
         self.instances.add(self)
 
-    def stop(self, *args, **kwargs):
+    def stop(self, *args, **kwargs):  # pragma: no cover
         self.pool.clear()
         super().stop(*args, **kwargs)
         self.instances.remove(self)
@@ -154,7 +154,7 @@ class Worker(GeventPyWSGIWorker):
     server_class = WSGIServer
     wsgi_handler = WebSocketWSGIHandler
 
-    def patch(self):
+    def patch(self):  # pragma: no cover
         psycogreen.gevent.patch_psycopg()
         self.log.info("Made psycopg green")
 

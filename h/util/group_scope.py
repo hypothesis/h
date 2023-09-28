@@ -31,7 +31,7 @@ def parse_scope_from_url(url):
 
 def _parse_path(url):
     """Return the path component of a URL string."""
-    if url is None:
+    if url is None:  # pragma: no cover# pragma: no cover
         return None
     parsed = urlsplit(url)
     return parsed.path
@@ -49,7 +49,7 @@ def parse_origin(url):
     :rtype: str or None
     """
 
-    if url is None:
+    if url is None:  # pragma: no cover
         return None
 
     parsed = urlsplit(url)

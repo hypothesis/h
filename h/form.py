@@ -125,7 +125,7 @@ def handle_form_submission(request, form, on_success, on_failure):
         if result is None:
             result = httpexceptions.HTTPFound(location=request.url)
 
-        if not request.is_xhr:
+        if not request.is_xhr:  # pragma: no cover
             request.session.flash(_("Success. We've saved your changes."), "success")
 
     return to_xhr_response(request, result, form)

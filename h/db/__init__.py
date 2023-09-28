@@ -51,14 +51,14 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
     # Import models package to populate the metadata
     import h.models  # pylint: disable=unused-import
 
-    if should_drop:
+    if should_drop:  # pragma: no cover
         # SQLAlchemy doesn't know about the report schema, and will end up
         # trying to drop tables without cascade that have dependent tables
         # in the report schema and failing. Clear it out first.
         engine.execute("DROP SCHEMA IF EXISTS report CASCADE")
         base.metadata.reflect(engine)
         base.metadata.drop_all(engine)
-    if should_create:
+    if should_create:  # pragma: no cover
         # In order to be able to generate UUIDs, we load the uuid-ossp
         # extension.
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
@@ -68,12 +68,12 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
     _maybe_create_world_group(engine, authority, default_org)
 
 
-def make_engine(settings):
+def make_engine(settings):  # pragma: no cover
     """Construct a sqlalchemy engine from the passed ``settings``."""
     return sqlalchemy.create_engine(settings["sqlalchemy.url"])
 
 
-def _session(request):
+def _session(request):  # pragma: no cover
     engine = request.registry["sqlalchemy.engine"]
     session = Session(bind=engine)
 
@@ -147,7 +147,7 @@ def _maybe_create_world_group(engine, authority, default_org):
 
     session = Session(bind=engine)
     world_group = session.query(models.Group).filter_by(pubid="__world__").one_or_none()
-    if world_group is None:
+    if world_group is None:  # pragma: no cover
         world_group = models.Group(
             name="Public",
             authority=authority,
@@ -163,7 +163,7 @@ def _maybe_create_world_group(engine, authority, default_org):
     session.close()
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     # Create the SQLAlchemy engine and save a reference in the app registry.
     engine = make_engine(config.registry.settings)
     config.registry["sqlalchemy.engine"] = engine

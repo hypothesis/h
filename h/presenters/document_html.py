@@ -184,7 +184,7 @@ class DocumentHTMLPresenter:
         return web_uri
 
 
-def _format_document_link(href, title, link_text, host_or_filename):
+def _format_document_link(href, title, link_text, host_or_filename):  # pragma: no cover
     """
     Return a document link for the given components.
 

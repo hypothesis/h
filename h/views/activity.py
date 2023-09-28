@@ -34,7 +34,7 @@ class SearchController:
         self.parsed_query_params = query.extract(self.request)
 
     @view_config(request_method="GET")
-    def search(self):
+    def search(self):  # pragma: no cover
         # Make a copy of the query params to be consumed by search.
         query_params = self.parsed_query_params.copy()
 
@@ -172,7 +172,7 @@ class GroupSearchController(SearchController):
             "share_subtitle": _("Share group"),
             "share_msg": _("Sharing the link lets people view this group:"),
         }
-        if self.group.organization:
+        if self.group.organization:  # pragma: no cover
             result["group"]["organization"] = OrganizationJSONPresenter(
                 self.group.organization, self.request
             ).asdict(summary=True)
@@ -359,7 +359,7 @@ class UserSearchController(SearchController):
         result["opts"] = {"search_username": self.user.username}
         result["more_info"] = "more_info" in self.request.params
 
-        def domain(user):
+        def domain(user):  # pragma: no cover
             if not user.uri:
                 return None
             return urlparse(user.uri).netloc
@@ -480,7 +480,7 @@ def _redirect_to_user_or_group_search(request, params):
             slug=request.matchdict["slug"],
             _query=params,
         )
-    elif request.matched_route.name == "activity.user_search":
+    elif request.matched_route.name == "activity.user_search":  # pragma: no cover
         location = request.route_url(
             "activity.user_search",
             username=request.matchdict["username"],

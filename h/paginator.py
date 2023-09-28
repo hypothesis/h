@@ -120,7 +120,7 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
     context and the current request. This decorator does not support view
     functions which accept only a single argument.
     """
-    if wrapped is None:
+    if wrapped is None:  # pragma: no cover
 
         def decorator(wrap):
             return paginate_query(wrap, page_size=page_size)

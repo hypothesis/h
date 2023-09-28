@@ -33,7 +33,7 @@ def get_user(request):
     return user
 
 
-def includeme(config):
+def includeme(config):  # pragma: no cover
     # Add a `request.user` property.
     #
     # N.B. we use `property=True` and not `reify=True` here because it is

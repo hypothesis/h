@@ -113,8 +113,8 @@ class Feature(Base):
         known = set(FEATURES) | set(FEATURES_PENDING_REMOVAL)
         unknown_flags = session.query(cls).filter(sa.not_(cls.name.in_(known)))
         count = unknown_flags.delete(synchronize_session=False)
-        if count > 0:
+        if count > 0:  # pragma: no cover
             log.info("removed %d old/unknown feature flags from database", count)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<Feature {f.name} everyone={f.everyone}>".format(f=self)

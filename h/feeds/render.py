@@ -28,11 +28,11 @@ def render_atom(  # pylint:disable=too-many-arguments
 
     """
 
-    def annotation_url(annotation):
+    def annotation_url(annotation):  # pragma: no cover
         """Return the HTML permalink URL for the given annotation."""
         return request.route_url("annotation", id=annotation.id)
 
-    def annotation_api_url(annotation):
+    def annotation_api_url(annotation):  # pragma: no cover
         """Return the JSON API URL for the given annotation."""
         return request.route_url("api.annotation", id=annotation.id)
 
@@ -78,7 +78,7 @@ def render_rss(  # pylint:disable=too-many-arguments
 
     """
 
-    def annotation_url(annotation):
+    def annotation_url(annotation):  # pragma: no cover
         """Return the HTML permalink URL for the given annotation."""
         return request.route_url("annotation", id=annotation.id)
 

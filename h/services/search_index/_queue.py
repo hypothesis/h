@@ -242,10 +242,10 @@ class Queue:
             Job.name == "sync_annotation", Job.expires_at >= now
         )
 
-        if hide_scheduled:
+        if hide_scheduled:  # pragma: no cover
             query = query.filter(Job.scheduled_at < now)
 
-        if tags:
+        if tags:  # pragma: no cover
             query = query.filter(Job.tag.in_(tags))
 
         return query

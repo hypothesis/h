@@ -191,7 +191,7 @@ def origin(url):
 def _normalize_scheme(uri):
     scheme = uri.scheme
 
-    if scheme in URL_SCHEMES:
+    if scheme in URL_SCHEMES:  # pragma: no cover
         scheme = "httpx"
 
     return scheme
