@@ -69,7 +69,9 @@ class AnnotationSlim(Base):
         server_default=sa.sql.expression.false(),
     )
 
-    document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
+    document_id = sa.Column(
+        sa.Integer, sa.ForeignKey("document.id", ondelete="CASCADE"), nullable=False
+    )
     document = sa.orm.relationship("Document")
 
     user_id = sa.Column(
