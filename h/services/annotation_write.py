@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Callable
+from collections.abc import Callable
 
 from sqlalchemy import exists, select
 from sqlalchemy.dialects.postgresql import insert
