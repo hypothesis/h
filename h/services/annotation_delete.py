@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from h.events import AnnotationEvent
-from h.models import Annotation, AnnotationSlim
+from h.models import Annotation
 from h.services.annotation_write import AnnotationWriteService
 
 
@@ -36,20 +36,14 @@ class AnnotationDeleteService:
             self.delete(ann)
 
     def bulk_delete(self):
-        """
-        Remove annotations marked as deleted from the database.
-
-        Deletes all annotations flagged as deleted more than 10 minutes ago. This
-        buffer period should ensure that this task doesn't delete annotations
-        deleted just before the task runs, which haven't yet been processed by the
-        streamer.
-        """
-        cutoff = datetime.utcnow() - timedelta(minutes=10)
-        self.request.db.query(AnnotationSlim).filter_by(deleted=True).filter(
-            AnnotationSlim.updated < cutoff
-        ).delete()
+        """Expunge annotations marked as deleted from the database."""
         self.request.db.query(Annotation).filter_by(deleted=True).filter(
-            Annotation.updated < cutoff
+            # Deletes all annotations flagged as deleted more than 10 minutes ago. This
+            # buffer period should ensure that this task doesn't delete annotations
+            # deleted just before the task runs, which haven't yet been processed by the
+            # streamer.
+            Annotation.updated
+            < datetime.utcnow() - timedelta(minutes=10)
         ).delete()
 
 
