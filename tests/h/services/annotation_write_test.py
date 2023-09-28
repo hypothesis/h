@@ -196,6 +196,14 @@ class TestAnnotationWriteService:
         # It's the same one not a new one
         assert annotation.moderation == moderation
 
+    def test_unhide(self, annotation, svc):
+        moderation = AnnotationModeration()
+        annotation.moderation = moderation
+
+        svc.unhide(annotation)
+
+        assert not annotation.is_hidden
+
     @pytest.fixture
     def create_data(self, factories):
         user = factories.User()
