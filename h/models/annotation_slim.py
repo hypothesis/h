@@ -77,5 +77,7 @@ class AnnotationSlim(Base):
     )
     user = sa.orm.relationship("User")
 
-    group_id = sa.Column(sa.Integer, sa.ForeignKey("group.id"), nullable=False)
+    group_id = sa.Column(
+        sa.Integer, sa.ForeignKey("group.id", ondelete="CASCADE"), nullable=False
+    )
     group = sa.orm.relationship("Group")
