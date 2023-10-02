@@ -29,7 +29,7 @@
     "jquery": "^3.7.1",
     "normalize.css": "^8.0.0",
     "popper.js": "^1.16.1",
-    "postcss": "^8.4.29",
+    "postcss": "^8.4.31",
     "raven-js": "^3.7.0",
     "rollup": "^3.29.1",
     "sass": "^1.66.1",
