@@ -162,7 +162,7 @@ h-api==1.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-assets==1.0.5
+h-assets==1.0.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -188,6 +188,7 @@ importlib-metadata==4.8.1
     #   alembic
     #   data-tasks
     #   h-api
+    #   h-assets
     #   markdown
     #   pip-sync-faster
 importlib-resources==6.1.0

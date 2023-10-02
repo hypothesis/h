@@ -111,7 +111,7 @@ gunicorn==21.2.0
     # via -r requirements/requirements.txt
 h-api==1.1.0
     # via -r requirements/requirements.txt
-h-assets==1.0.5
+h-assets==1.0.6
     # via -r requirements/requirements.txt
 h-matchers==1.2.15
     # via -r requirements/requirements.txt
@@ -127,6 +127,7 @@ importlib-metadata==4.8.1
     #   alembic
     #   data-tasks
     #   h-api
+    #   h-assets
     #   markdown
     #   pip-sync-faster
 importlib-resources==6.1.0
