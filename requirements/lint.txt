@@ -13,7 +13,7 @@ amqp==5.1.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   kombu
-astroid==2.15.7
+astroid==2.15.8
     # via pylint
 attrs==23.1.0
     # via
@@ -363,7 +363,7 @@ pyjwt==2.8.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pylint==2.17.6
+pylint==2.17.7
     # via -r requirements/lint.in
 pyparsing==3.1.1
     # via
