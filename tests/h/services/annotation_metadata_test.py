@@ -15,7 +15,7 @@ class TestAnnotationMetadataService:
 
         svc.set_annotation_metadata_from_jwe(anno, sentinel.jwe)
 
-        decrypt_jwe_dict.assert_called_once_with("secret", sentinel.jwe)
+        decrypt_jwe_dict.assert_called_once_with("TEST_JWE_SECRET_LMS", sentinel.jwe)
         anno_metadata = (
             db_session.query(AnnotationMetadata)
             .filter_by(annotation_id=anno_slim.id)
@@ -29,6 +29,8 @@ class TestAnnotationMetadataService:
         assert anno_metadata.data == {"new": "data"}
 
     def test_factory(self, pyramid_request):
+        pyramid_request.registry.settings["jwe_secret_lms"] = "TEST_JWE_SECRET_LMS"
+
         svc = factory(sentinel.context, pyramid_request)
 
         assert isinstance(svc, AnnotationMetadataService)
@@ -40,8 +42,4 @@ class TestAnnotationMetadataService:
     @pytest.fixture
     def svc(self, db_session, pyramid_request):
         pyramid_request.db = db_session
-        return AnnotationMetadataService(db_session)
-
-    @pytest.fixture(autouse=True)
-    def environ(self, monkeypatch):
-        monkeypatch.setenv("JWE_SECRET_LMS", "secret")
+        return AnnotationMetadataService(db_session, secret="TEST_JWE_SECRET_LMS")

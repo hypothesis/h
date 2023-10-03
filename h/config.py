@@ -131,6 +131,8 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
         settings_manager.set("mail.port", "MANDRILL_PORT", default=587)
         settings_manager.set("mail.tls", "MANDRILL_TLS", default=True)
 
+    settings_manager.set("jwe_secret_lms", "JWE_SECRET_LMS")
+
     # Get resolved settings.
     settings = settings_manager.settings
 

@@ -27,6 +27,7 @@ TEST_SETTINGS = {
     "sqlalchemy.url": os.environ.get(
         "TEST_DATABASE_URL", "postgresql://postgres@localhost/htest"
     ),
+    "jwe_secret_lms": "TEST_JWE_SECRET_LMS",
 }
 
 TEST_ENVIRONMENT = {

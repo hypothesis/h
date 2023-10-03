@@ -1,5 +1,4 @@
 import json
-import os
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
@@ -10,9 +9,9 @@ from h.security import decrypt_jwe_dict
 
 
 class AnnotationMetadataService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, secret: str):
         self._db = db
-        self._secret = os.environ.get("JWE_SECRET_LMS")
+        self._secret = secret
 
     def set_annotation_metadata_from_jwe(self, annotation: Annotation, jwe: str):
         """
@@ -46,4 +45,7 @@ class AnnotationMetadataService:
 
 
 def factory(_context, request) -> AnnotationMetadataService:
-    return AnnotationMetadataService(db=request.db)
+    return AnnotationMetadataService(
+        db=request.db,
+        secret=request.registry.settings["jwe_secret_lms"],
+    )
