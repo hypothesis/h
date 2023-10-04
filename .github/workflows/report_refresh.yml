@@ -4,7 +4,7 @@ name: Report refresh
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 15 * * *'
+    - cron: '0 05 * * *'
 
 jobs:
   refresh:
