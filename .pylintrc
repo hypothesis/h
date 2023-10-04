@@ -3,9 +3,7 @@ jobs=0  # Speed up PyLint by using one process per CPU core.
 load-plugins=pylint.extensions.bad_builtin,
              pylint.extensions.broad_try_clause,
              pylint.extensions.check_elif,
-             pylint.extensions.comparetozero,
              pylint.extensions.docparams,
-             pylint.extensions.emptystring,
              pylint.extensions.mccabe,
              pylint.extensions.overlapping_exceptions,
              pylint.extensions.redefined_variable_type,
@@ -16,6 +14,8 @@ load-plugins=pylint.extensions.bad_builtin,
 fail-on=C,E,F,I,R,W
 
 [MESSAGES CONTROL]
+enable=use-implicit-booleaness-not-comparison-to-zero,
+       use-implicit-booleaness-not-comparison-to-string,
 disable=missing-docstring,
         missing-type-doc,
         missing-yield-doc,

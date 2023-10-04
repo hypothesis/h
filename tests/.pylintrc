@@ -5,9 +5,7 @@ jobs=0
 
 load-plugins=pylint.extensions.bad_builtin,
              pylint.extensions.check_elif,
-             pylint.extensions.comparetozero,
              pylint.extensions.docparams,
-             pylint.extensions.emptystring,
              pylint.extensions.overlapping_exceptions,
              pylint.extensions.redefined_variable_type,
 
@@ -22,6 +20,8 @@ enable=
     deprecated-pragma,
     useless-suppression,
     use-symbolic-message-instead,
+    use-implicit-booleaness-not-comparison-to-zero,
+    use-implicit-booleaness-not-comparison-to-string,
 disable=
     # Docstrings are encouraged but we don't want to enforce that everything
     # must have a docstring.
