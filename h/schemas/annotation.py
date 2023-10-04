@@ -96,7 +96,7 @@ class AnnotationSchema(JSONSchema):
             },
             "text": {"type": "string"},
             "uri": {"type": "string"},
-            "metadata_jwe": {"type": "string", "required": False},
+            "metadata": {"type": "object"},
         },
     }
 
@@ -173,7 +173,7 @@ class CreateAnnotationSchema:
             appstruct.pop("document", {}), new_appstruct["target_uri"]
         )
 
-        new_appstruct["metadata_jwe"] = appstruct.pop("metadata_jwe", None)
+        new_appstruct["metadata"] = appstruct.pop("metadata", None)
 
         new_appstruct["extra"] = appstruct
 

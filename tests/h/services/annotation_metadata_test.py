@@ -7,41 +7,38 @@ from h.services.annotation_metadata import AnnotationMetadataService, factory
 
 
 class TestAnnotationMetadataService:
-    def test_it(self, svc, factories, decrypt_jwe_dict, db_session):
-        decrypt_jwe_dict.side_effect = [{"some": "data"}, {"new": "data"}]
+    def test_it(self, svc, factories, db_session):
+        metadata = {"some": "data"}
         anno = factories.Annotation()
         anno_slim = factories.AnnotationSlim(annotation=anno)
         db_session.flush()
 
-        svc.set_annotation_metadata_from_jwe(anno, sentinel.jwe)
+        svc.set(anno, metadata)
 
-        decrypt_jwe_dict.assert_called_once_with("secret", sentinel.jwe)
         anno_metadata = (
             db_session.query(AnnotationMetadata)
             .filter_by(annotation_id=anno_slim.id)
             .one()
         )
-        assert anno_metadata.data == {"some": "data"}
+        assert anno_metadata.data == metadata
 
         # Second call updates the existing record
-        svc.set_annotation_metadata_from_jwe(anno, sentinel.jwe)
+        metadata = {"new": "data"}
+        svc.set(anno, metadata)
         db_session.refresh(anno_metadata)
-        assert anno_metadata.data == {"new": "data"}
+        assert anno_metadata.data == metadata
 
-    def test_factory(self, pyramid_request):
+    def test_factory(self, AnnotationMetadataService, db_session, pyramid_request):
         svc = factory(sentinel.context, pyramid_request)
 
-        assert isinstance(svc, AnnotationMetadataService)
-
-    @pytest.fixture
-    def decrypt_jwe_dict(self, patch):
-        return patch("h.services.annotation_metadata.decrypt_jwe_dict")
+        AnnotationMetadataService.assert_called_once_with(db=db_session)
+        assert svc == AnnotationMetadataService.return_value
 
     @pytest.fixture
     def svc(self, db_session, pyramid_request):
         pyramid_request.db = db_session
         return AnnotationMetadataService(db_session)
 
-    @pytest.fixture(autouse=True)
-    def environ(self, monkeypatch):
-        monkeypatch.setenv("JWE_SECRET_LMS", "secret")
+    @pytest.fixture
+    def AnnotationMetadataService(self, patch):
+        return patch("h.services.annotation_metadata.AnnotationMetadataService")

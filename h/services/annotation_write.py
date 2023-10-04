@@ -56,7 +56,7 @@ class AnnotationWriteService:
                     + _("Annotation {id} does not exist").format(id=references[0])
                 )
 
-        annotation_metadata_jwe = data.pop("metadata_jwe", None)
+        annotation_metadata = data.pop("metadata", None)
         document_data = data.pop("document", {})
         annotation = Annotation(**data)
 
@@ -78,10 +78,8 @@ class AnnotationWriteService:
         self._db.add(annotation)
         self.upsert_annotation_slim(annotation)
 
-        if annotation_metadata_jwe:
-            self._annotation_metadata_service.set_annotation_metadata_from_jwe(
-                annotation, annotation_metadata_jwe
-            )
+        if annotation_metadata:
+            self._annotation_metadata_service.set(annotation, annotation_metadata)
 
         self._search_index_service._queue.add_by_id(  # pylint: disable=protected-access
             annotation.id, tag="storage.create_annotation", schedule_in=60
