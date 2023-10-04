@@ -3,7 +3,6 @@
 import logging
 
 from h.security.encryption import (  # noqa:F401
-    decrypt_jwe_dict,
     derive_key,
     password_context,
     token_urlsafe,

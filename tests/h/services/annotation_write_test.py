@@ -57,12 +57,12 @@ class TestAnnotationWriteService:
         group = factories.Group()
         create_data["references"] = None
         create_data["groupid"] = group.pubid
-        create_data["metadata_jwe"] = sentinel.metadata_jwe
+        create_data["metadata"] = sentinel.metadata
 
         result = svc.create_annotation(create_data)
 
-        annotation_metadata_service.set_annotation_metadata_from_jwe.assert_called_once_with(
-            result, sentinel.metadata_jwe
+        annotation_metadata_service.set.assert_called_once_with(
+            result, sentinel.metadata
         )
 
     def test_create_annotation_as_root(
