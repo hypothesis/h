@@ -157,7 +157,7 @@ def merge_documents(session, documents, updated=None):
         # the purpose of centralized model access in the service.
         # It's pending to move the rest of this functions to a DocumentService that uses DI to get this service.
         # In the meantime we are doing this import here to avoid a circular dependency.
-        # pylint:disable=import-outside-toplevel
+        # pylint:disable=import-outside-toplevel,cyclic-import
         from h.services.annotation_write import AnnotationWriteService
 
         AnnotationWriteService.change_document(session, duplicate_ids, master)
