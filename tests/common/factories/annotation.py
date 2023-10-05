@@ -130,7 +130,7 @@ class Annotation(ModelFactory):
             return
 
         # Ids in the DB are in hex, but in the code they should be URL safe
-        self.id = URLSafeUUID().process_result_value(  # pylint:disable=attribute-defined-outside-init,invalid-name
+        self.id = URLSafeUUID().process_result_value(  # pylint:disable=attribute-defined-outside-init
             uuid.uuid4().hex, None
         )
 

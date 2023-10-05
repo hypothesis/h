@@ -1,5 +1,5 @@
 from h.search.index import BatchIndexer
-from h.services import AnnotationReadService
+from h.services.annotation_read import AnnotationReadService
 from h.services.search_index._queue import Queue
 from h.services.search_index.service import SearchIndexService
 
