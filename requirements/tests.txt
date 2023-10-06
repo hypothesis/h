@@ -421,7 +421,7 @@ zope-event==4.4
     # via
     #   -r requirements/requirements.txt
     #   gevent
-zope-interface==6.0
+zope-interface==6.1
     # via
     #   -r requirements/requirements.txt
     #   gevent
