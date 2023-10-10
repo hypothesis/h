@@ -20,7 +20,7 @@ bcrypt==4.0.1
     # via -r requirements/requirements.in
 billiard==4.1.0
     # via celery
-bleach==6.0.0
+bleach==6.1.0
     # via -r requirements/requirements.in
 celery==5.3.4
     # via -r requirements/requirements.in
