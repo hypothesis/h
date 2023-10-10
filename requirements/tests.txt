@@ -27,7 +27,7 @@ billiard==4.1.0
     # via
     #   -r requirements/requirements.txt
     #   celery
-bleach==6.0.0
+bleach==6.1.0
     # via -r requirements/requirements.txt
 build==0.8.0
     # via pip-tools
