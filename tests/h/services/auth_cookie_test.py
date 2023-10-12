@@ -148,7 +148,7 @@ class TestFactory:
             secret=pyramid_request.registry.settings["h_auth_cookie_secret"],
             salt="authsanity",
             cookie_name="auth",
-            secure=False,
+            secure=True,
             max_age=2592000,
             httponly=True,
         )
@@ -167,3 +167,8 @@ class TestFactory:
     @pytest.fixture
     def AuthCookieService(self, patch):
         return patch("h.services.auth_cookie.AuthCookieService")
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.scheme = "https"  # Simulate production environment
+        return pyramid_request

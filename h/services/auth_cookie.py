@@ -116,9 +116,9 @@ def factory(_context, request):
         secret=request.registry.settings["h_auth_cookie_secret"],
         salt="authsanity",
         cookie_name="auth",
-        secure=False,
         max_age=30 * 24 * 3600,  # 30 days
         httponly=True,
+        secure=request.scheme == "https",
     )
 
     return AuthCookieService(
