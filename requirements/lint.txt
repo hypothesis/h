@@ -345,7 +345,7 @@ pyasn1==0.5.0
     #   -r requirements/tests.txt
     #   python-jose
     #   rsa
-pycodestyle==2.11.0
+pycodestyle==2.11.1
     # via -r requirements/lint.in
 pycparser==2.20
     # via
