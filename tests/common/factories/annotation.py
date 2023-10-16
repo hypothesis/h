@@ -11,6 +11,9 @@ from h.models.document import update_document_metadata
 
 from .base import FAKER, ModelFactory
 from .document import Document, DocumentMeta, DocumentURI
+from .user import User
+
+AUTHORITY = "localhost"
 
 
 class Annotation(ModelFactory):
@@ -26,7 +29,7 @@ class Annotation(ModelFactory):
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(
-        lambda: f"acct:{FAKER.user_name()}@localhost"  # pylint:disable=no-member
+        lambda: f"acct:{FAKER.user_name()}@{AUTHORITY}"  # pylint:disable=no-member
     )
     document = factory.SubFactory(Document)
     groupid = "__world__"
@@ -151,3 +154,34 @@ class Annotation(ModelFactory):
         # pylint:disable=attribute-defined-outside-init
         self.created = self.created or datetime.datetime.now()
         self.updated = self.updated or datetime.datetime.now()
+
+    @factory.post_generation
+    def slim(self, create, extracted, **kwargs):  # pylint:disable=unused-argument
+        if not create or not kwargs.get("new"):
+            # If strategy is not `create` or `slim_new` is not explicitly passed, stop here.
+            return
+
+        # pylint:disable=import-outside-toplevel, cyclic-import
+        from .annotation_slim import AnnotationSlim
+
+        username = self.userid.split("@")[0].split("acct:")[1]
+        db = orm.object_session(self)
+        user = (
+            db.query(models.User)
+            .filter_by(username=username, authority=AUTHORITY)
+            .one_or_none()
+        )
+        if not user:
+            user = User(username=username, authority=AUTHORITY)
+
+        AnnotationSlim(
+            created=self.created,
+            updated=self.updated,
+            shared=self.shared,
+            deleted=self.deleted,
+            moderated=False,
+            annotation=self,
+            group=self.group,
+            document_id=self.document_id,
+            user=user,
+        )

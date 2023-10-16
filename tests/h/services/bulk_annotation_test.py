@@ -28,9 +28,9 @@ class TestDateMatch:
         ),
     )
     def test_it(self, db_session, factories, spec, expected):
-        factories.Annotation(text="0", created="2000-01-01")
-        factories.Annotation(text="1", created="2001-01-01")
-        factories.Annotation(text="2", created="2002-01-01")
+        factories.Annotation(text="0", created="2000-01-01", slim__new=True)
+        factories.Annotation(text="1", created="2001-01-01", slim__new=True)
+        factories.Annotation(text="2", created="2002-01-01", slim__new=True)
 
         annotations = (
             db_session.execute(
@@ -57,7 +57,7 @@ class TestDateMatch:
 
 
 class TestBulkAnnotationService:
-    AUTHORITY = "my.authority"
+    AUTHORITY = "localhost"
 
     @pytest.mark.parametrize(
         "key,value,visible",
@@ -98,6 +98,7 @@ class TestBulkAnnotationService:
             shared=values["shared"],
             deleted=values["deleted"],
             updated=values["updated"],
+            slim__new=True,
         )
         if values["moderated"]:
             factories.AnnotationModeration(annotation=anno)
@@ -127,6 +128,7 @@ class TestBulkAnnotationService:
                 group=factories.Group(members=group_members),
                 shared=True,
                 deleted=False,
+                slim__new=True,
             )
             for group_members in (
                 # The first two annotations should match, because they are in
