@@ -92,15 +92,14 @@ class TestBulkAnnotationService:
             authority=self.AUTHORITY, nipsa=values["nipsad"], username=username
         )
         group = factories.Group(members=[author, viewer])
-        anno = factories.Annotation(
-            userid=author.userid,
+        factories.AnnotationSlim(
+            user=author,
             group=group,
             shared=values["shared"],
             deleted=values["deleted"],
             updated=values["updated"],
+            moderated=values["moderated"],
         )
-        if values["moderated"]:
-            factories.AnnotationModeration(annotation=anno)
 
         annotations = svc.annotation_search(
             authority=self.AUTHORITY,
@@ -122,8 +121,8 @@ class TestBulkAnnotationService:
         *viewers, author = factories.User.create_batch(3, authority=self.AUTHORITY)
 
         annotations = [
-            factories.Annotation(
-                userid=author.userid,
+            factories.AnnotationSlim(
+                user=author,
                 group=factories.Group(members=group_members),
                 shared=True,
                 deleted=False,
