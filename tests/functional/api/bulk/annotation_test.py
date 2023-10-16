@@ -25,8 +25,8 @@ class TestBulkAnnotation:
             authority_provided_id="1234567890",
             members=[user],
         )
-        factories.Annotation(
-            userid=user.userid,
+        factories.AnnotationSlim(
+            user=user,
             group=group,
             shared=True,
             deleted=False,

@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
-from h.models import Annotation, AnnotationModeration, Group, GroupMembership, User
+from h.models import AnnotationSlim, Group, GroupMembership, User
 
 
 class BadDateFilter(Exception):
@@ -109,36 +109,34 @@ class BulkAnnotationService:
     @classmethod
     def _search_query(cls, authority, audience, updated) -> Select:
         """Generate a query which can then be executed to find annotations."""
-        query = sa.select(
-            [cls._AUTHOR.username, Group.authority_provided_id]
-        ).select_from(Annotation)
-
+        query = (
+            sa.select([cls._AUTHOR.username, Group.authority_provided_id]).select_from(
+                AnnotationSlim
+            )
+            # Always join on AUTHOR as we return its username
+            .join(cls._AUTHOR, cls._AUTHOR.id == AnnotationSlim.user_id)
+            # Always join on Group as we return the authority_provided_id
+            .join(Group, Group.id == AnnotationSlim.group_id)
+        )
         # Updated
-        query = query.where(date_match(Annotation.updated, updated))
+        query = query.where(date_match(AnnotationSlim.updated, updated))
 
         # Shared
-        query = query.where(Annotation.shared.is_(True))
+        query = query.where(AnnotationSlim.shared.is_(True))
 
         # Deleted
-        query = query.where(Annotation.deleted.is_(False))
+        query = query.where(AnnotationSlim.deleted.is_(False))
 
         # Audience
-        query = query.join(Group, Annotation.groupid == Group.pubid).where(
+        query = query.where(
             Group.id.in_(cls._audience_groups_subquery(authority, audience))
         )
 
         # NIPSA
-        query = query.join(
-            cls._AUTHOR,
-            cls._AUTHOR.username
-            == sa.func.split_part(sa.func.split_part(Annotation.userid, "@", 1), ":", 2)
-            and cls._AUTHOR.authority == authority,
-        ).where(cls._AUTHOR.nipsa.is_(False))
+        query = query.where(cls._AUTHOR.nipsa.is_(False))
 
         # Moderated
-        query = query.outerjoin(AnnotationModeration).where(
-            AnnotationModeration.id.is_(None)
-        )
+        query = query.where(AnnotationSlim.moderated.is_(False))
 
         return query
 
