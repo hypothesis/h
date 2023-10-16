@@ -1,10 +1,8 @@
 import base64
-import json
 import os
 
 from Cryptodome.Hash import SHA512
 from Cryptodome.Protocol.KDF import HKDF
-from jose import jwe
 from passlib.context import CryptContext
 
 DEFAULT_ENTROPY = 32
@@ -71,8 +69,3 @@ def token_urlsafe(nbytes=None):
         nbytes = DEFAULT_ENTROPY
     tok = os.urandom(nbytes)
     return base64.urlsafe_b64encode(tok).rstrip(b"=").decode("ascii")
-
-
-def decrypt_jwe_dict(secret: bytes, payload: str) -> dict:
-    """Decrypts the JWE payloads into a dictionary."""
-    return json.loads(jwe.decrypt(payload, secret.ljust(32)[:32]))
