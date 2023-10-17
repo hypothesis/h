@@ -1,0 +1,21 @@
+name: Frontend
+on:
+  workflow_call:
+  workflow_dispatch:
+jobs:
+  Frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Cache the node_modules dir
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+    - name: Format
+      run: make frontend-checkformatting
+    - name: Lint
+      run: make frontend-lint
+    - name: Test
+      run: gulp test

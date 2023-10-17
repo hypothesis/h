@@ -1,76 +1,132 @@
 name: CI
-
 on:
-  workflow_dispatch:
   push:
     paths-ignore:
       - '.cookiecutter/*'
-      - '.gitignore'
-      - 'HACKING.md'
+      - '.github/dependabot.yml'
+      - '.github/workflows/deploy.yml'
+      - '.github/workflows/redeploy.yml'
+      - 'bin/logger'
+      - 'conf/development-app.ini'
+      - 'app.ini'
+      - 'conf/supervisord*.conf'
+      - 'docs/*'
+      - 'requirements/*.in'
+      - 'requirements/dev.txt'
+      - '**/.gitignore'
+      - 'Dockerfile'
       - 'LICENSE'
+      - '*.md'
+      - 'docker-compose.yml'
+  workflow_dispatch:
   workflow_call:
-
-env:
-  TOX_PARALLEL_NO_SPINNER: 1
-  PYTEST_ADDOPTS: --exitfirst
-
+  schedule:
+  - cron: '0 1 * * *'
 jobs:
-  backend:
-    name: Backend
+  Format:
     runs-on: ubuntu-latest
-
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Cache the .tox dir
+        uses: actions/cache@v3
+        with:
+          path: .tox
+          key: format-${{ runner.os }}-tox-${{ hashFiles('tox.ini') }}-${{ hashFiles('requirements/*') }}
+          restore-keys: |
+            format-${{ runner.os }}-tox-
+      - run: python -m pip install 'tox<4'
+      - run: tox -e checkformatting
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Cache the .tox dir
+        uses: actions/cache@v3
+        with:
+          path: .tox
+          key: lint-${{ runner.os }}-tox-${{ hashFiles('tox.ini') }}-${{ hashFiles('requirements/*') }}
+          restore-keys: |
+            lint-${{ runner.os }}-tox-
+      - run: python -m pip install 'tox<4'
+      - run: tox -e lint
+  Tests:
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:11.5-alpine
         ports:
         - 5432:5432
-
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
       elasticsearch:
         image: hypothesis/elasticsearch:latest
         ports:
         - 9200:9200
         env:
           discovery.type: single-node
-
     steps:
-    - name: Checkout git repo
-      uses: actions/checkout@v3
-
-    - name: Setup python
-      uses: actions/setup-python@v4
-      with:
-        python-version-file: '.python-version'
-
-    - name: Update pip
-      run: python -m pip install --upgrade pip
-
-    - name: Install tox
-      run: python -m pip install 'tox<4'
-
-    - name: Create test databases
-      run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
-
-    - name: Cache the .tox dir
-      uses: actions/cache@v3
-      with:
-        path: |
-          .tox/lint
-          .tox/checkformatting
-          .tox/tests
-          .tox/coverage
-        key: ${{ runner.os }}-tox-backend-${{ hashFiles('tox.ini', 'requirements/**', 'setup.py', 'setup.cfg') }}
-    - name: Run tox
-      run: tox --parallel auto -e checkformatting,tests,coverage,lint
-
-  functests:
-    name: Functional tests
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Cache the .tox dir
+        uses: actions/cache@v3
+        with:
+          path: .tox
+          key: tests-${{ runner.os }}-tox-${{ hashFiles('tox.ini') }}-${{ hashFiles('requirements/*') }}
+          restore-keys: |
+            tests-${{ runner.os }}-tox-
+      - name: Create test database
+        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+      - run: python -m pip install 'tox<4'
+      - run: tox -e tests
+        env:
+          COVERAGE_FILE: .coverage.${{ matrix.python-version }}
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: .coverage.*
+  Coverage:
+    needs: tests
     runs-on: ubuntu-latest
-
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Cache the .tox dir
+        uses: actions/cache@v3
+        with:
+          path: .tox
+          key: coverage-${{ runner.os }}-tox-${{ hashFiles('tox.ini') }}-${{ hashFiles('requirements/*') }}
+          restore-keys: |
+            coverage-${{ runner.os }}-tox-
+      - name: Download coverage files
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+      - run: python -m pip install 'tox<4'
+      - run: tox -e coverage
+  Functests:
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:11.5-alpine
         ports:
         - 5432:5432
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
       elasticsearch:
         image: hypothesis/elasticsearch:latest
         ports:
@@ -81,68 +137,24 @@ jobs:
         image: rabbitmq:3.6-management-alpine
         ports:
         - 5672:5672
-
     steps:
-    - name: Checkout git repo
-      uses: actions/checkout@v3
-
-    - name: Setup python
-      uses: actions/setup-python@v4
-      with:
-        python-version-file: '.python-version'
-
-    - name: Update pip
-      run: python -m pip install --upgrade pip
-
-    - name: Install tox
-      run: python -m pip install 'tox<4'
-
-    - name: Create test databases
-      run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
-
-    - name: Cache the .tox dir
-      uses: actions/cache@v3
-      with:
-        path: |
-          .tox/functests
-        key: ${{ runner.os }}-tox-functests-${{ hashFiles('tox.ini', 'requirements/**', 'setup.py', 'setup.cfg') }}
-
-    - name: Cache the node_modules dir
-      uses: actions/cache@v3
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
-
-    - name: npm install
-      run: npm install
-
-    - name: gulp build
-      run: gulp build
-
-    - name: Run tox
-      # Note we run the func tests backwards here to prove there are no order
-      # dependent tests
-      run: tox -e functests -- tests/functional --reverse
-
-  frontend:
-    name: Frontend
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Cache the node_modules dir
-      uses: actions/cache@v3
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
-
-    - name: Format
-      run: make frontend-checkformatting
-
-    - name: Lint
-      run: make frontend-lint
-
-    - name: Test
-      run: gulp test
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Cache the .tox dir
+        uses: actions/cache@v3
+        with:
+          path: .tox
+          key: functests-${{ runner.os }}-tox-${{ hashFiles('tox.ini') }}-${{ hashFiles('requirements/*') }}
+          restore-keys: |
+            functests-${{ runner.os }}-tox-
+      - name: Create test database
+        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+      - run: python -m pip install 'tox<4'
+      - run: npm install
+      - run: gulp build
+      - run: tox -e functests
+  Frontend:
+    uses: ./.github/workflows/frontend.yml
