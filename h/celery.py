@@ -74,6 +74,7 @@ celery.conf.update(
     # task's @app.task() arguments.
     task_time_limit=240,
     imports=(
+        "h.tasks.annotations",
         "h.tasks.cleanup",
         "h.tasks.indexer",
         "h.tasks.mailer",
