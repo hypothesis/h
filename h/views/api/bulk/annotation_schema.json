@@ -36,7 +36,7 @@
                 "audience": {"$ref": "#/$defs/userFilter"},
                 "updated": {"$ref": "#/$defs/dateFilter"}
             },
-            "required": ["limit", "audience"],
+            "required": ["limit", "audience", "updated"],
             "additionalProperties": false
         },
 
