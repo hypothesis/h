@@ -109,36 +109,20 @@ class BulkAnnotationService:
     @classmethod
     def _search_query(cls, authority, audience, updated) -> Select:
         """Generate a query which can then be executed to find annotations."""
-        query = (
-            sa.select([cls._AUTHOR.username, Group.authority_provided_id]).select_from(
-                AnnotationSlim
-            )
-            # Always join on AUTHOR as we return its username
+        return (
+            sa.select([cls._AUTHOR.username, Group.authority_provided_id])
+            .select_from(AnnotationSlim)
             .join(cls._AUTHOR, cls._AUTHOR.id == AnnotationSlim.user_id)
-            # Always join on Group as we return the authority_provided_id
             .join(Group, Group.id == AnnotationSlim.group_id)
+            .where(
+                date_match(AnnotationSlim.updated, updated),
+                AnnotationSlim.shared.is_(True),
+                AnnotationSlim.deleted.is_(False),
+                cls._AUTHOR.nipsa.is_(False),
+                AnnotationSlim.moderated.is_(False),
+                Group.id.in_(cls._audience_groups_subquery(authority, audience)),
+            )
         )
-        # Updated
-        query = query.where(date_match(AnnotationSlim.updated, updated))
-
-        # Shared
-        query = query.where(AnnotationSlim.shared.is_(True))
-
-        # Deleted
-        query = query.where(AnnotationSlim.deleted.is_(False))
-
-        # Audience
-        query = query.where(
-            Group.id.in_(cls._audience_groups_subquery(authority, audience))
-        )
-
-        # NIPSA
-        query = query.where(cls._AUTHOR.nipsa.is_(False))
-
-        # Moderated
-        query = query.where(AnnotationSlim.moderated.is_(False))
-
-        return query
 
     @classmethod
     def _audience_groups_subquery(cls, authority, audience):
