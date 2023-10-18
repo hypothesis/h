@@ -43,7 +43,9 @@ class TestBulkAnnotation:
 
         bulk_annotation_service.annotation_search.assert_called_once_with(
             authority=pyramid_request.identity.auth_client.authority,
-            **valid_request["filter"],
+            audience=valid_request["filter"]["audience"],
+            limit=valid_request["filter"]["limit"],
+            updated=valid_request["filter"]["updated"],
         )
 
         return_data = [
