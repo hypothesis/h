@@ -4,7 +4,7 @@
 #
 #    pip-compile --config=pyproject.toml requirements/format.in
 #
-black==23.9.1
+black==23.10.0
     # via -r requirements/format.in
 build==0.8.0
     # via pip-tools
