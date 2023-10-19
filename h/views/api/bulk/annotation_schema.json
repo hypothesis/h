@@ -11,7 +11,7 @@
                 "audience": {
                     "username": ["3a022b6c146dfd9df4ea8662178eac"]
                 },
-                "updated": {
+                "created": {
                     "gt": "2018-11-13T20:20:39+00:00",
                     "lte": "2018-11-13T20:20:39+00:00"
                 }
@@ -34,9 +34,9 @@
             "properties": {
                 "limit": {"type": "integer", "minimum": 0, "maximum": 1000000},
                 "audience": {"$ref": "#/$defs/userFilter"},
-                "updated": {"$ref": "#/$defs/dateFilter"}
+                "created": {"$ref": "#/$defs/dateFilter"}
             },
-            "required": ["limit", "audience", "updated"],
+            "required": ["limit", "audience", "created"],
             "additionalProperties": false
         },
 

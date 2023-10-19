@@ -45,7 +45,7 @@ class TestBulkAnnotation:
             authority=pyramid_request.identity.auth_client.authority,
             audience=valid_request["filter"]["audience"],
             limit=valid_request["filter"]["limit"],
-            updated=valid_request["filter"]["updated"],
+            created=valid_request["filter"]["created"],
         )
 
         return_data = [
@@ -82,7 +82,7 @@ class TestBulkAnnotation:
             "filter": {
                 "limit": 2000,
                 "audience": {"username": ["3a022b6c146dfd9df4ea8662178eac"]},
-                "updated": {
+                "created": {
                     "gt": "2018-11-13T20:20:39+00:00",
                     "lte": "2018-11-13T20:20:39+00:00",
                 },

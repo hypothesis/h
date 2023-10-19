@@ -67,10 +67,10 @@ class TestBulkAnnotationService:
             ("deleted", True, False),
             ("nipsad", True, False),
             ("moderated", True, False),
-            ("updated", "2020-01-01", False),
-            ("updated", "2020-01-02", True),
-            ("updated", "2022-01-01", True),
-            ("updated", "2022-01-02", False),
+            ("created", "2020-01-01", False),
+            ("created", "2020-01-02", True),
+            ("created", "2022-01-01", True),
+            ("created", "2022-01-02", False),
         ),
     )
     @pytest.mark.parametrize("username", ["USERNAME", "username", "user.name"])
@@ -82,7 +82,7 @@ class TestBulkAnnotationService:
             "deleted": False,
             "nipsad": False,
             "moderated": False,
-            "updated": "2021-01-01",
+            "created": "2021-01-01",
         }
         if key:
             values[key] = value
@@ -97,14 +97,14 @@ class TestBulkAnnotationService:
             group=group,
             shared=values["shared"],
             deleted=values["deleted"],
-            updated=values["updated"],
+            created=values["created"],
             moderated=values["moderated"],
         )
 
         annotations = svc.annotation_search(
             authority=self.AUTHORITY,
             audience={"username": ["USERNAME"]},
-            updated={"gt": "2020-01-01", "lte": "2022-01-01"},
+            created={"gt": "2020-01-01", "lte": "2022-01-01"},
         )
 
         if visible:
@@ -140,7 +140,7 @@ class TestBulkAnnotationService:
         matched_annos = svc.annotation_search(
             authority=self.AUTHORITY,
             audience={"username": [viewer.username for viewer in viewers]},
-            updated={"gt": "2020-01-01", "lte": "2099-01-01"},
+            created={"gt": "2020-01-01", "lte": "2099-01-01"},
         )
 
         # Only the first two annotations should match

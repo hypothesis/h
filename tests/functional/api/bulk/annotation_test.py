@@ -30,7 +30,7 @@ class TestBulkAnnotation:
             group=group,
             shared=True,
             deleted=False,
-            updated="2018-11-13T20:20:39",
+            created="2018-11-13T20:20:39",
         )
 
         response = make_request(
@@ -38,7 +38,7 @@ class TestBulkAnnotation:
                 "filter": {
                     "limit": 20,
                     "audience": {"username": [user.username]},
-                    "updated": {
+                    "created": {
                         "gt": "2018-11-12T20:20:39+00:00",
                         "lte": "2018-11-13T20:20:39+00:00",
                     },

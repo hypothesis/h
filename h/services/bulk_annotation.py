@@ -77,7 +77,7 @@ class BulkAnnotationService:
         self,
         authority: str,
         audience: dict,
-        updated: dict,
+        created: dict,
         limit=100000,
     ) -> List[BulkAnnotation]:
         """
@@ -86,7 +86,7 @@ class BulkAnnotationService:
         :param authority: The authority to search by
         :param audience: A specification of how to find the users. e.g.
             {"username": [...]}
-        :param updated: A specification of how to filter the updated date. e.g.
+        :param created: A specification of how to filter the created date. e.g.
             {"gt": "2019-01-20", "lte": "2019-01-21"}
         :param limit: A limit of results to generate
 
@@ -94,7 +94,7 @@ class BulkAnnotationService:
         """
 
         results = self._db.execute(
-            self._search_query(authority, audience=audience, updated=updated).limit(
+            self._search_query(authority, audience=audience, created=created).limit(
                 limit
             )
         )
@@ -107,7 +107,7 @@ class BulkAnnotationService:
         ]
 
     @classmethod
-    def _search_query(cls, authority, audience, updated) -> Select:
+    def _search_query(cls, authority, audience, created) -> Select:
         """Generate a query which can then be executed to find annotations."""
         return (
             sa.select([cls._AUTHOR.username, Group.authority_provided_id])
@@ -115,7 +115,7 @@ class BulkAnnotationService:
             .join(cls._AUTHOR, cls._AUTHOR.id == AnnotationSlim.user_id)
             .join(Group, Group.id == AnnotationSlim.group_id)
             .where(
-                date_match(AnnotationSlim.updated, updated),
+                date_match(AnnotationSlim.created, created),
                 AnnotationSlim.shared.is_(True),
                 AnnotationSlim.deleted.is_(False),
                 cls._AUTHOR.nipsa.is_(False),
