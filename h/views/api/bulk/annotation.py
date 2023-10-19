@@ -41,12 +41,12 @@ def bulk_annotation(request):
             # is limited to items they have permission to request
             authority=request.identity.auth_client.authority,
             audience=query_filter["audience"],
-            updated=query_filter["updated"],
+            created=query_filter["created"],
             limit=query_filter["limit"],
         )
 
     except BadDateFilter as err:
-        # We happen to know this is the updated field, because there's no other
+        # We happen to know this is the created field, because there's no other
         # but, it could easily be something else in the future
         raise ValidationError(str(err)) from err
 
