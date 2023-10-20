@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
-from h.models import AnnotationSlim, Group, GroupMembership, User
+from h.models import AnnotationMetadata, AnnotationSlim, Group, GroupMembership, User
 
 
 class BadDateFilter(Exception):
@@ -58,6 +58,7 @@ def date_match(column: sa.Column, spec: dict):
 class BulkAnnotation:
     username: str
     authority_provided_id: str
+    metadata: dict
 
 
 class BulkAnnotationService:
@@ -101,7 +102,9 @@ class BulkAnnotationService:
 
         return [
             BulkAnnotation(
-                username=row.username, authority_provided_id=row.authority_provided_id
+                username=row.username,
+                authority_provided_id=row.authority_provided_id,
+                metadata=row.metadata,
             )
             for row in results.all()
         ]
@@ -110,10 +113,17 @@ class BulkAnnotationService:
     def _search_query(cls, authority, audience, created) -> Select:
         """Generate a query which can then be executed to find annotations."""
         return (
-            sa.select([cls._AUTHOR.username, Group.authority_provided_id])
+            sa.select(
+                [
+                    cls._AUTHOR.username,
+                    Group.authority_provided_id,
+                    sa.func.coalesce(AnnotationMetadata.data, "{}").label("metadata"),
+                ]
+            )
             .select_from(AnnotationSlim)
             .join(cls._AUTHOR, cls._AUTHOR.id == AnnotationSlim.user_id)
             .join(Group, Group.id == AnnotationSlim.group_id)
+            .outerjoin(AnnotationMetadata)
             .where(
                 date_match(AnnotationSlim.created, created),
                 AnnotationSlim.shared.is_(True),

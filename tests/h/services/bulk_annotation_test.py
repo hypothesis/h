@@ -66,6 +66,8 @@ class TestBulkAnnotationService:
             ("shared", False, False),
             ("deleted", True, False),
             ("nipsad", True, False),
+            ("with_metadata", True, True),
+            ("with_metadata", False, True),
             ("moderated", True, False),
             ("created", "2020-01-01", False),
             ("created", "2020-01-02", True),
@@ -83,6 +85,7 @@ class TestBulkAnnotationService:
             "nipsad": False,
             "moderated": False,
             "created": "2021-01-01",
+            "with_metadata": True,
         }
         if key:
             values[key] = value
@@ -92,7 +95,7 @@ class TestBulkAnnotationService:
             authority=self.AUTHORITY, nipsa=values["nipsad"], username=username
         )
         group = factories.Group(members=[author, viewer])
-        factories.AnnotationSlim(
+        anno_slim = factories.AnnotationSlim(
             user=author,
             group=group,
             shared=values["shared"],
@@ -100,6 +103,11 @@ class TestBulkAnnotationService:
             created=values["created"],
             moderated=values["moderated"],
         )
+
+        if values["with_metadata"]:
+            factories.AnnotationMetadata(
+                annotation_slim=anno_slim, data={"some": "value"}
+            )
 
         annotations = svc.annotation_search(
             authority=self.AUTHORITY,
@@ -112,6 +120,7 @@ class TestBulkAnnotationService:
                 BulkAnnotation(
                     username=author.username,
                     authority_provided_id=group.authority_provided_id,
+                    metadata={"some": "value"} if values["with_metadata"] else {},
                 )
             ]
         else:
@@ -151,6 +160,7 @@ class TestBulkAnnotationService:
                     BulkAnnotation(
                         username=author.username,
                         authority_provided_id=annotation.group.authority_provided_id,
+                        metadata={},
                     )
                     for annotation in annotations[:2]
                 ]
