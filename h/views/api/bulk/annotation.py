@@ -59,4 +59,5 @@ def _present_annotation(annotation: BulkAnnotation) -> dict:
     return {
         "author": {"username": annotation.username},
         "group": {"authority_provided_id": annotation.authority_provided_id},
+        "metadata": annotation.metadata,
     }

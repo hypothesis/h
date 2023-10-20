@@ -25,12 +25,15 @@ class TestBulkAnnotation:
             authority_provided_id="1234567890",
             members=[user],
         )
-        factories.AnnotationSlim(
+        annotation_slim = factories.AnnotationSlim(
             user=user,
             group=group,
             shared=True,
             deleted=False,
             created="2018-11-13T20:20:39",
+        )
+        factories.AnnotationMetadata(
+            annotation_slim=annotation_slim, data={"some": "value"}
         )
 
         response = make_request(
@@ -60,6 +63,7 @@ class TestBulkAnnotation:
             {
                 "group": {"authority_provided_id": group.authority_provided_id},
                 "author": {"username": user.username},
+                "metadata": {"some": "value"},
             }
         ]
 

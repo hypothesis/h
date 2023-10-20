@@ -35,6 +35,7 @@ class TestBulkAnnotation:
             BulkAnnotation(
                 username=f"USERNAME_{i}",
                 authority_provided_id=f"AUTHORITY_PROVIDED_ID_{i}",
+                metadata={"key": i},
             )
             for i in range(3)
         ]
@@ -52,6 +53,7 @@ class TestBulkAnnotation:
             {
                 "author": {"username": f"USERNAME_{i}"},
                 "group": {"authority_provided_id": f"AUTHORITY_PROVIDED_ID_{i}"},
+                "metadata": {"key": i},
             }
             for i in range(3)
         ]
