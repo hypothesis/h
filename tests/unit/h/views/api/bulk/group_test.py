@@ -2,12 +2,12 @@ import pytest
 from h_matchers import Any
 
 from h.schemas import ValidationError
-from h.services.bulk_api.annotation import BulkAnnotation
 from h.services.bulk_api.core import BadDateFilter
-from h.views.api.bulk.annotation import BulkAnnotationSchema, bulk_annotation
+from h.services.bulk_api.group import BulkGroup
+from h.views.api.bulk.group import BulkGroupSchema, bulk_group
 
 
-class TestBulkAnnotationSchema:
+class TestBulkGroupSchema:
     def test_it_is_a_valid_schema(self, schema):
         # Extremely basic self checking that this is a valid JSON schema
         assert not schema.validator.check_schema(schema.schema)
@@ -18,43 +18,34 @@ class TestBulkAnnotationSchema:
 
     @pytest.fixture
     def schema(self):
-        return BulkAnnotationSchema()
+        return BulkGroupSchema()
 
 
-@pytest.mark.usefixtures("bulk_annotation_service", "with_auth_client")
-class TestBulkAnnotation:
+@pytest.mark.usefixtures("bulk_group_service", "with_auth_client")
+class TestBulkGroup:
     def test_it(
         self,
         pyramid_request,
         valid_request,
-        bulk_annotation_service,
+        bulk_group_service,
         get_ndjson_response,
     ):
-        bulk_annotation_service.annotation_search.return_value = [
-            BulkAnnotation(
-                username=f"USERNAME_{i}",
+        bulk_group_service.group_search.return_value = [
+            BulkGroup(
                 authority_provided_id=f"AUTHORITY_PROVIDED_ID_{i}",
-                metadata={"key": i},
             )
             for i in range(3)
         ]
 
-        response = bulk_annotation(pyramid_request)
+        response = bulk_group(pyramid_request)
 
-        bulk_annotation_service.annotation_search.assert_called_once_with(
-            authority=pyramid_request.identity.auth_client.authority,
-            audience=valid_request["filter"]["audience"],
-            limit=valid_request["filter"]["limit"],
-            created=valid_request["filter"]["created"],
+        bulk_group_service.group_search.assert_called_once_with(
+            groups=valid_request["filter"]["groups"],
+            annotations_created=valid_request["filter"]["annotations_created"],
         )
 
         return_data = [
-            {
-                "author": {"username": f"USERNAME_{i}"},
-                "group": {"authority_provided_id": f"AUTHORITY_PROVIDED_ID_{i}"},
-                "metadata": {"key": i},
-            }
-            for i in range(3)
+            {"authority_provided_id": f"AUTHORITY_PROVIDED_ID_{i}"} for i in range(3)
         ]
         get_ndjson_response.assert_called_once_with(
             Any.iterable.containing(return_data).only()
@@ -66,24 +57,23 @@ class TestBulkAnnotation:
         pyramid_request.json = {"nope": True}
 
         with pytest.raises(ValidationError):
-            bulk_annotation(pyramid_request)
+            bulk_group(pyramid_request)
 
     @pytest.mark.usefixtures("valid_request")
     def test_it_raises_with_errors_from_the_bulk_service(
-        self, pyramid_request, bulk_annotation_service
+        self, pyramid_request, bulk_group_service
     ):
-        bulk_annotation_service.annotation_search.side_effect = BadDateFilter
+        bulk_group_service.group_search.side_effect = BadDateFilter
 
         with pytest.raises(ValidationError):
-            bulk_annotation(pyramid_request)
+            bulk_group(pyramid_request)
 
     @pytest.fixture
     def valid_request(self, pyramid_request):
         pyramid_request.json = {
             "filter": {
-                "limit": 2000,
-                "audience": {"username": ["3a022b6c146dfd9df4ea8662178eac"]},
-                "created": {
+                "groups": ["3a022b6c146dfd9df4ea8662178eac"],
+                "annotations_created": {
                     "gt": "2018-11-13T20:20:39+00:00",
                     "lte": "2018-11-13T20:20:39+00:00",
                 },
@@ -94,4 +84,4 @@ class TestBulkAnnotation:
 
     @pytest.fixture(autouse=True)
     def get_ndjson_response(self, patch):
-        return patch("h.views.api.bulk.annotation.get_ndjson_response")
+        return patch("h.views.api.bulk.group.get_ndjson_response")
