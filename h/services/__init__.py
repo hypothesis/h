@@ -3,7 +3,7 @@ from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
-from h.services.bulk_annotation import BulkAnnotationService
+from h.services.bulk_api import BulkAnnotationService, BulkGroupService
 from h.services.subscription import SubscriptionService
 
 
@@ -41,7 +41,10 @@ def includeme(config):  # pragma: no cover
         "h.services.auth_token.auth_token_service_factory", name="auth_token"
     )
     config.register_service_factory(
-        "h.services.bulk_annotation.service_factory", iface=BulkAnnotationService
+        "h.services.bulk_api.annotation.service_factory", iface=BulkAnnotationService
+    )
+    config.register_service_factory(
+        "h.services.bulk_api.group.service_factory", iface=BulkGroupService
     )
     config.register_service_factory(
         "h.services.developer_token.developer_token_service_factory",

@@ -6,7 +6,7 @@ from h.schemas import ValidationError
 from h.schemas.base import JSONSchema
 from h.security import Permission
 from h.services import BulkAnnotationService
-from h.services.bulk_annotation import BadDateFilter, BulkAnnotation
+from h.services.bulk_api import BadDateFilter, BulkAnnotation
 from h.views.api.bulk._ndjson import get_ndjson_response
 from h.views.api.config import api_config
 
