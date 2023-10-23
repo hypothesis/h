@@ -143,6 +143,7 @@ class User(Base):
             sa.Index(
                 "ix__user__nipsa", cls.nipsa, postgresql_where=cls.nipsa.is_(True)
             ),
+            sa.Index("ix__user__email", sa.func.lower("email")),
         )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
