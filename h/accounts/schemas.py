@@ -15,11 +15,10 @@ from h.models.user import (
 )
 from h.schemas import validators
 from h.schemas.base import CSRFSchema
+from h.schemas.forms.accounts.util import PASSWORD_MIN_LENGTH
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
-
-PASSWORD_MIN_LENGTH = 2  # FIXME: this is ridiculous
 
 
 @lru_cache(maxsize=None)

@@ -79,7 +79,7 @@ class TestRegisterSchema:
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"password": "a"})
-        assert exc.value.asdict()["password"] == ("Must be 2 characters or more.")
+        assert exc.value.asdict()["password"] == ("Must be 8 characters or more.")
 
     def test_it_is_invalid_when_username_too_short(self, pyramid_request, user_model):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
@@ -273,8 +273,8 @@ class TestPasswordChangeSchema:
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize(
                 {
-                    "new_password": "wibble",
-                    "new_password_confirm": "wibble!",
+                    "new_password": "foo-bar-baz",
+                    "new_password_confirm": "foo-bar-buzz",
                     "password": "flibble",
                 }
             )
@@ -292,8 +292,8 @@ class TestPasswordChangeSchema:
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize(
                 {
-                    "new_password": "wibble",
-                    "new_password_confirm": "wibble",
+                    "new_password": "foo-bar-baz",
+                    "new_password_confirm": "foo-bar-baz",
                     "password": "flibble",
                 }
             )
