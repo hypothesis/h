@@ -1,5 +1,5 @@
 # Stage 1: Build static frontend assets.
-FROM node:20.8-alpine as build
+FROM node:21.1-alpine as build
 
 ENV NODE_ENV production
 
