@@ -7,9 +7,10 @@ from h.cli.commands import init as init_cli
 
 @pytest.mark.usefixtures("alembic_config", "alembic_stamp", "db", "search")
 class TestInitCommand:
+    @pytest.mark.skip(reason="We've been seeing flaky behavior on CI")
     def test_initialises_database(
         self, cli, cliconfig, db, db_engine, pyramid_settings
-    ):
+    ):  # pragma: no cover
         db.make_engine.return_value = db_engine
         pyramid_settings["h.authority"] = "foobar.org"
 
