@@ -21,5 +21,4 @@ def fill_annotation_slim(batch_size=1000):
     )
 
     for annotation in annotations:
-        log.info("Created AnnotationSlim record for: %s", annotation.id)
         anno_write_svc.upsert_annotation_slim(annotation)
