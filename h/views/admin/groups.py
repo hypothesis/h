@@ -2,8 +2,12 @@ from jinja2 import Markup
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
-from h import form  # noqa F401
-from h import i18n, models, paginator
+from h import (
+    form,  # noqa F401
+    i18n,
+    models,
+    paginator,
+)
 from h.models.annotation import Annotation
 from h.models.group_scope import GroupScope
 from h.schemas.forms.admin.group import AdminGroupSchema
