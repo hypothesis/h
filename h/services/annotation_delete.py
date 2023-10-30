@@ -42,8 +42,7 @@ class AnnotationDeleteService:
             # buffer period should ensure that this task doesn't delete annotations
             # deleted just before the task runs, which haven't yet been processed by the
             # streamer.
-            Annotation.updated
-            < datetime.utcnow() - timedelta(minutes=10)
+            Annotation.updated < datetime.utcnow() - timedelta(minutes=10)
         ).delete()
 
 

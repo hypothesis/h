@@ -75,10 +75,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
         if upgrade_header:
             # Build and start the HTTP response
             self.environ["ws4py.socket"] = (
-                self.socket
-                or self.environ[  # pylint: disable=protected-access
-                    "wsgi.input"
-                ].rfile._sock
+                self.socket or self.environ["wsgi.input"].rfile._sock  # pylint: disable=protected-access
             )
             self.result = self.application(self.environ, self.start_response) or []
             self.process_result()

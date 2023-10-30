@@ -50,7 +50,7 @@ def column_windows(session, column, windowsize=2000, where=None):
             )
         )
 
-    intervals = [id for id, in query]
+    intervals = [id for (id,) in query]
 
     while intervals:
         start = intervals.pop(0)

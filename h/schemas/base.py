@@ -15,9 +15,7 @@ def deferred_csrf_token(_node, kwargs):
     return get_csrf_token(request)
 
 
-class ValidationError(
-    httpexceptions.HTTPBadRequest
-):  # pylint: disable=too-many-ancestors
+class ValidationError(httpexceptions.HTTPBadRequest):  # pylint: disable=too-many-ancestors
     pass
 
 

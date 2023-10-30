@@ -63,7 +63,7 @@ def email_node(**kwargs):
         widget=deform.widget.TextInputWidget(
             template="emailinput", autocomplete="username"
         ),
-        **kwargs
+        **kwargs,
     )
 
 
@@ -104,7 +104,7 @@ def new_password_node(**kwargs):
     return colander.SchemaNode(
         colander.String(),
         validator=validators.Length(min=PASSWORD_MIN_LENGTH),
-        **kwargs
+        **kwargs,
     )
 
 

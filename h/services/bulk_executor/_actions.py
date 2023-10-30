@@ -93,9 +93,7 @@ class GroupUpsertAction(DBAction):
 
     type_flags = PRIVATE_GROUP_TYPE_FLAGS
 
-    def execute(
-        self, batch, effective_user_id=None, **_
-    ):  # pylint: disable=arguments-differ
+    def execute(self, batch, effective_user_id=None, **_):  # pylint: disable=arguments-differ
         if effective_user_id is None:
             raise CommandSequenceError(
                 "Effective user must be configured before upserting groups"
@@ -249,7 +247,9 @@ class UserUpsertAction(DBAction):
             ],
             upsert=["display_name"],
         ).returning(
-            User.id, User.authority, User._username  # pylint: disable=protected-access
+            User.id,
+            User.authority,
+            User._username,  # pylint: disable=protected-access
         )
 
         return self._execute_statement(stmt).fetchall()

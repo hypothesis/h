@@ -40,7 +40,7 @@ def profile(request, authority=None):
             "features": request.feature.all(),
             "preferences": _user_preferences(user),
         },
-        **user_info(user)
+        **user_info(user),
     )
 
 

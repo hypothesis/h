@@ -16,9 +16,7 @@ annotation = sa.table("annotation", sa.column("deleted", sa.Boolean))
 
 def upgrade():
     op.execute(
-        annotation.update()
-        .where(annotation.c.deleted == None)
-        .values(deleted=False)  # noqa: E711
+        annotation.update().where(annotation.c.deleted == None).values(deleted=False)  # noqa: E711
     )
 
 

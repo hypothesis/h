@@ -295,7 +295,8 @@ class TestCreateUpdateAnnotationSchema:
         }
 
         def document_uris_from_data(
-            document, claimant  # pylint:disable=unused-argument
+            document,
+            claimant,  # pylint:disable=unused-argument
         ):
             document["new_key"] = "new_value"
             document["top_level_key"] = "new_value"
@@ -325,7 +326,8 @@ class TestCreateUpdateAnnotationSchema:
 
         """
         appstruct = validate(
-            pyramid_request, {"document": {"foo": "bar"}}  # This should be deleted.
+            pyramid_request,
+            {"document": {"foo": "bar"}},  # This should be deleted.
         )
 
         assert "foo" not in appstruct["document"]

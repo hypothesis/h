@@ -148,7 +148,7 @@ class TestAddApiView:
             link_name=link_name,
             description=description,
             route_name=route_name,
-            **kwargs
+            **kwargs,
         )
 
         if link_name:

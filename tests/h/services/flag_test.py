@@ -18,9 +18,7 @@ class TestFlagServiceFlagged:
     def test_it_uses_the_cache_if_possible(self, svc, user, annotation):
         assert not svc.flagged(user, annotation)
 
-        svc._flagged_cache[  # pylint:disable=protected-access
-            (user.id, annotation.id)
-        ] = True
+        svc._flagged_cache[(user.id, annotation.id)] = True  # pylint:disable=protected-access
 
         assert svc.flagged(user, annotation)
 
