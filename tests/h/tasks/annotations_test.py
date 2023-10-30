@@ -14,6 +14,7 @@ class TestFillPKAndUserId:
 
     def test_it(self, factories, annotation_write_service):
         annos = factories.Annotation.create_batch(10)
+        factories.Annotation.create_batch(10, deleted=True)
 
         fill_annotation_slim(batch_size=10)
 
