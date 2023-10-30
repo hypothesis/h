@@ -335,7 +335,7 @@ six==1.15.0
     #   rfc3339-validator
 sortedcontainers==2.3.0
     # via hypothesis
-sqlalchemy==1.4.49
+sqlalchemy==1.4.50
     # via
     #   -r requirements/requirements.txt
     #   alembic
