@@ -1896,19 +1896,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-terser@npm:^0.4.3":
-  version: 0.4.3
-  resolution: "@rollup/plugin-terser@npm:0.4.3"
+"@rollup/plugin-terser@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "@rollup/plugin-terser@npm:0.4.4"
   dependencies:
     serialize-javascript: ^6.0.1
     smob: ^1.0.0
     terser: ^5.17.4
   peerDependencies:
-    rollup: ^2.x || ^3.x
+    rollup: ^2.0.0||^3.0.0||^4.0.0
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 0d697e816f32e9609c48defbda6f3ed90548126fbf673451cfde2c576a7511073cd25d45a9669f179d0b89485e62f56cabeb65428c2232469ab6057ae5dc7709
+  checksum: 5472f659fbb7034488df91eb01ecd2ddf6d2cf203d049aa486139225ad5566254c6ec24aad1f5d1167e35f480212ede5160df9cc80e149a28874f78ed6a7fd9a
   languageName: node
   linkType: hard
 
@@ -4919,7 +4919,7 @@ __metadata:
     "@rollup/plugin-babel": ^6.0.3
     "@rollup/plugin-commonjs": ^25.0.7
     "@rollup/plugin-node-resolve": ^15.2.1
-    "@rollup/plugin-terser": ^0.4.3
+    "@rollup/plugin-terser": ^0.4.4
     autoprefixer: ^10.4.16
     babel-plugin-mockable-imports: ^2.0.1
     bootstrap: ^4.6.2
