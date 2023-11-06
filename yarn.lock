@@ -1660,24 +1660,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-build@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@hypothesis/frontend-build@npm:2.2.0"
+"@hypothesis/frontend-build@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@hypothesis/frontend-build@npm:3.0.0"
   dependencies:
-    commander: ^10.0.0
+    commander: ^11.0.0
     fancy-log: ^2.0.0
     glob: ^10.0.0
   peerDependencies:
     autoprefixer: ^10.3.7
     karma: ^6.3.4
     postcss: ^8.3.9
-    rollup: ^3.2.2
+    rollup: ^4.0.2
     sass: ^1.43.2
     tailwindcss: ^3.0.11
   peerDependenciesMeta:
     tailwindcss:
       optional: true
-  checksum: 545da8a341c75ef049bc671fec3e9ab62c90869c1fedbe7fe8dbacc9bdf1c16ad19c3476da0c273310c523ab1a0f8333637d2a9480109cafe35636c500b985f9
+  checksum: ea05f3c00bc9054cd37aaabb5bc391e39cf7c8abecfc002950a22a6fe61d13a28b89194d2bbba6619d234d37a1c8ca5874a191ad8e50485ed66e77805b8fe385
   languageName: node
   linkType: hard
 
@@ -3102,10 +3102,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^10.0.0":
-  version: 10.0.1
-  resolution: "commander@npm:10.0.1"
-  checksum: 436901d64a818295803c1996cd856621a74f30b9f9e28a588e726b2b1670665bccd7c1a77007ebf328729f0139838a88a19265858a0fa7a8728c4656796db948
+"commander@npm:^11.0.0":
+  version: 11.1.0
+  resolution: "commander@npm:11.1.0"
+  checksum: fd1a8557c6b5b622c89ecdfde703242ab7db3b628ea5d1755784c79b8e7cb0d74d65b4a262289b533359cd58e1bfc0bf50245dfbcd2954682a6f367c828b79ef
   languageName: node
   linkType: hard
 
@@ -5171,7 +5171,7 @@ __metadata:
   dependencies:
     "@babel/core": ^7.23.2
     "@babel/preset-env": ^7.23.2
-    "@hypothesis/frontend-build": ^2.2.0
+    "@hypothesis/frontend-build": ^3.0.0
     "@rollup/plugin-babel": ^6.0.3
     "@rollup/plugin-commonjs": ^25.0.7
     "@rollup/plugin-node-resolve": ^15.2.3
