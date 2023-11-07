@@ -18,6 +18,7 @@ FEATURES = {
     "client_user_profile": "Enable client-side user profile and preferences management",
     "export_annotations": "Allow users to export annotations",
     "import_annotations": "Allow users to import previously exported annotations",
+    "rounded_corners": "Enable rounded corners in UI components",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
