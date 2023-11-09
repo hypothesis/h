@@ -172,7 +172,7 @@ def invalid_form():
 @pytest.fixture
 def matchers():
     # pylint: disable=redefined-outer-name, import-outside-toplevel
-    from ..common import matchers
+    from tests.common import matchers
 
     return matchers
 

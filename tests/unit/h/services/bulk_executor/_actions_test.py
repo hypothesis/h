@@ -20,7 +20,7 @@ from h.services.bulk_executor._actions import (
     GroupUpsertAction,
     UserUpsertAction,
 )
-from tests.h.services.bulk_executor.conftest import (
+from tests.unit.h.services.bulk_executor.conftest import (
     AUTHORITY,
     group_membership_create,
     group_upsert_command,

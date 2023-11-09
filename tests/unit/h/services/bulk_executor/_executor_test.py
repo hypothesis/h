@@ -5,7 +5,7 @@ from h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from pytest import param
 
 from h.services.bulk_executor._executor import BulkExecutor
-from tests.h.services.bulk_executor.conftest import (
+from tests.unit.h.services.bulk_executor.conftest import (
     AUTHORITY,
     group_upsert_command,
     upsert_user_command,
