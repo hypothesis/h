@@ -88,7 +88,7 @@ importlib-metadata==4.8.1
     #   h-api
     #   h-assets
     #   markdown
-importlib-resources==6.1.0
+importlib-resources==6.1.1
     # via
     #   -r requirements/requirements.in
     #   alembic
