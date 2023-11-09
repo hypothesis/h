@@ -583,7 +583,7 @@ urllib3==1.26.18
     #   -r requirements/tests.txt
     #   elasticsearch
     #   sentry-sdk
-venusian==3.0.0
+venusian==3.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

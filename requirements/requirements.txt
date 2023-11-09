@@ -14,7 +14,6 @@ attrs==23.1.0
     #   referencing
 backports-zoneinfo[tzdata]==0.2.1
     # via
-    #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.0.1
@@ -273,7 +272,7 @@ urllib3==1.26.18
     # via
     #   elasticsearch
     #   sentry-sdk
-venusian==3.0.0
+venusian==3.1.0
     # via
     #   -r requirements/requirements.in
     #   pyramid
