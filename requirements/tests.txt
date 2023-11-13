@@ -367,7 +367,7 @@ tomli==2.0.0
     #   pep517
     #   pip-tools
     #   pytest
-transaction==3.1.0
+transaction==4.0
     # via
     #   -r requirements/requirements.txt
     #   pyramid-mailer
