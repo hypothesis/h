@@ -18,11 +18,11 @@ backports-zoneinfo[tzdata]==0.2.1
     #   kombu
 bcrypt==4.0.1
     # via -r requirements/requirements.in
-billiard==4.1.0
+billiard==4.2.0
     # via celery
 bleach==6.1.0
     # via -r requirements/requirements.in
-celery==5.3.4
+celery==5.3.5
     # via -r requirements/requirements.in
 certifi==2023.7.22
     # via
@@ -276,7 +276,7 @@ venusian==3.1.0
     # via
     #   -r requirements/requirements.in
     #   pyramid
-vine==5.0.0
+vine==5.1.0
     # via
     #   amqp
     #   celery
