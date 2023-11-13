@@ -19,7 +19,7 @@ class TestFillPKAndUserId:
         fill_annotation_slim(batch_size=10)
 
         annotation_write_service.upsert_annotation_slim.assert_has_calls(
-            [call(anno) for anno in reversed(annos)]
+            [call(anno) for anno in annos]
         )
 
     @pytest.fixture(autouse=True)
