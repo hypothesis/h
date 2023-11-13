@@ -19,6 +19,7 @@ FEATURES = {
     "export_annotations": "Allow users to export annotations",
     "import_annotations": "Allow users to import previously exported annotations",
     "rounded_corners": "Enable rounded corners in UI components",
+    "export_formats": "Allow users to select the format for their annotations export file",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
