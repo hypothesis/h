@@ -27,7 +27,7 @@ backports-zoneinfo[tzdata]==0.2.1
     #   kombu
 bcrypt==4.0.1
     # via -r requirements/requirements.txt
-billiard==4.1.0
+billiard==4.2.0
     # via
     #   -r requirements/requirements.txt
     #   celery
@@ -35,7 +35,7 @@ bleach==6.1.0
     # via -r requirements/requirements.txt
 build==0.8.0
     # via pip-tools
-celery==5.3.4
+celery==5.3.5
     # via -r requirements/requirements.txt
 certifi==2023.7.22
     # via
@@ -405,7 +405,7 @@ venusian==3.1.0
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-vine==5.0.0
+vine==5.1.0
     # via
     #   -r requirements/requirements.txt
     #   amqp
