@@ -16,7 +16,6 @@ def fill_annotation_slim(batch_size=1000):
         celery.request.db.query(Annotation)
         .outerjoin(AnnotationSlim)
         .where(AnnotationSlim.pubid.is_(None), Annotation.deleted.is_(False))
-        .order_by(Annotation.updated.desc())
         .limit(batch_size)
     )
 
