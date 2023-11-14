@@ -4,7 +4,7 @@ import os
 import alembic.command
 import alembic.config
 import click
-import sqlalchemy
+from sqlalchemy.exc import ProgrammingError
 
 from h import db, search
 
@@ -32,7 +32,7 @@ def _init_db(settings):
     # alembic, and we shouldn't call `db.init`.
     try:
         engine.execute("select 1 from alembic_version")
-    except sqlalchemy.exc.ProgrammingError:
+    except ProgrammingError:
         log.info("initializing database")
         db.init(engine, should_create=True, authority=settings["h.authority"])
 
