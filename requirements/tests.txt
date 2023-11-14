@@ -182,7 +182,7 @@ markupsafe==1.1.1
     #   jinja2
     #   mako
     #   pyramid-jinja2
-newrelic==9.1.1
+newrelic==9.1.2
     # via -r requirements/requirements.txt
 oauthlib==3.2.2
     # via -r requirements/requirements.txt
@@ -287,9 +287,7 @@ pytest==7.4.3
 pytest-cov==4.1.0
     # via -r requirements/tests.in
 pytest-xdist[psutil]==3.4.0
-    # via
-    #   -r requirements/tests.in
-    #   pytest-xdist
+    # via -r requirements/tests.in
 python-dateutil==2.8.2
     # via
     #   -r requirements/requirements.txt

@@ -266,7 +266,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==9.1.1
+newrelic==9.1.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -434,7 +434,7 @@ pytest-cov==4.1.0
     # via -r requirements/tests.txt
 pytest-reverse==1.7.0
     # via -r requirements/functests.txt
-pytest-xdist[psutil]==3.3.1
+pytest-xdist[psutil]==3.4.0
     # via
     #   -r requirements/tests.txt
     #   pytest-xdist
