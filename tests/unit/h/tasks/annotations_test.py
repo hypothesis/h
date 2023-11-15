@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest.mock import call
 
 import pytest
@@ -13,10 +14,14 @@ class TestFillPKAndUserId:
     USERNAME_2 = "USERNAME_2"
 
     def test_it(self, factories, annotation_write_service):
-        annos = factories.Annotation.create_batch(10)
+        now = datetime.now()
+        annos = factories.Annotation.create_batch(10, created=now)
         factories.Annotation.create_batch(10, deleted=True)
+        factories.Annotation.create_batch(10, created=now + timedelta(days=10))
 
-        fill_annotation_slim(batch_size=10)
+        fill_annotation_slim(
+            batch_size=10, since=now - timedelta(days=1), until=now + timedelta(days=1)
+        )
 
         annotation_write_service.upsert_annotation_slim.assert_has_calls(
             [call(anno) for anno in annos], any_order=True

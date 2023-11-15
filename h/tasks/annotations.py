@@ -6,7 +6,7 @@ log = get_task_logger(__name__)
 
 
 @celery.task
-def fill_annotation_slim(batch_size=1000):
+def fill_annotation_slim(batch_size=1000, since="2012-01-01", until="2017-12-31"):
     """Task to fill the new AnnotationSlim table in batches."""
     # pylint:disable=no-member
 
@@ -15,7 +15,12 @@ def fill_annotation_slim(batch_size=1000):
     annotations = (
         celery.request.db.query(Annotation)
         .outerjoin(AnnotationSlim)
-        .where(AnnotationSlim.pubid.is_(None), Annotation.deleted.is_(False))
+        .where(
+            AnnotationSlim.pubid.is_(None),
+            Annotation.deleted.is_(False),
+            Annotation.created >= since,
+            Annotation.created <= until,
+        )
         .limit(batch_size)
     )
 
