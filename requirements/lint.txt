@@ -243,7 +243,7 @@ jsonschema-specifications==2023.7.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-kombu==5.3.3
+kombu==5.3.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
