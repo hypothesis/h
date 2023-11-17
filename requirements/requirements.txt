@@ -14,6 +14,7 @@ attrs==23.1.0
     #   referencing
 backports-zoneinfo[tzdata]==0.2.1
     # via
+    #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.0.1
@@ -112,7 +113,7 @@ jsonschema==4.19.2
     #   h-api
 jsonschema-specifications==2023.7.1
     # via jsonschema
-kombu==5.3.3
+kombu==5.3.4
     # via
     #   -r requirements/requirements.in
     #   celery
