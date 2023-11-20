@@ -18,7 +18,6 @@ FEATURES = {
     "client_user_profile": "Enable client-side user profile and preferences management",
     "export_annotations": "Allow users to export annotations",
     "import_annotations": "Allow users to import previously exported annotations",
-    "rounded_corners": "Enable rounded corners in UI components",
     "export_formats": "Allow users to select the format for their annotations export file",
 }
 
@@ -40,7 +39,9 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {}
+FEATURES_PENDING_REMOVAL = {
+    "rounded_corners": "Enable rounded corners in UI components",
+}
 
 
 class Feature(Base):
