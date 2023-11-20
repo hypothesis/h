@@ -14,7 +14,6 @@ attrs==23.1.0
     #   referencing
 backports-zoneinfo[tzdata]==0.2.1
     # via
-    #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.0.1
@@ -25,7 +24,7 @@ bleach==6.1.0
     # via -r requirements/requirements.in
 celery==5.3.5
     # via -r requirements/requirements.in
-certifi==2023.7.22
+certifi==2023.11.17
     # via
     #   -r requirements/requirements.in
     #   sentry-sdk
