@@ -14,7 +14,6 @@ attrs==23.1.0
     #   referencing
 backports-zoneinfo[tzdata]==0.2.1
     # via
-    #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.0.1
@@ -107,7 +106,7 @@ jinja2==2.11.3
     # via
     #   data-tasks
     #   pyramid-jinja2
-jsonschema==4.19.2
+jsonschema==4.20.0
     # via
     #   -r requirements/requirements.in
     #   h-api
