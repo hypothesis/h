@@ -39,9 +39,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    "rounded_corners": "Enable rounded corners in UI components",
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
