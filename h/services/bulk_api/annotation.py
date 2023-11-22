@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
 from h.models import AnnotationMetadata, AnnotationSlim, Group, GroupMembership, User
-from h.services.bulk_api.core import date_match
+from h.services.bulk_api._helpers import date_match
 
 
 @dataclass

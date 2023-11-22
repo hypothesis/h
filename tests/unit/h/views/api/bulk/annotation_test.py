@@ -3,7 +3,7 @@ from h_matchers import Any
 
 from h.schemas import ValidationError
 from h.services.bulk_api.annotation import BulkAnnotation
-from h.services.bulk_api.core import BadDateFilter
+from h.services.bulk_api.exceptions import BadDateFilter
 from h.views.api.bulk.annotation import BulkAnnotationSchema, bulk_annotation
 
 

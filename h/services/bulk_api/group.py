@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from h.models import Annotation, Group
-from h.services.bulk_api.core import date_match
+from h.services.bulk_api._helpers import date_match
 
 
 @dataclass
