@@ -6,7 +6,8 @@ from h_matchers import Any
 from sqlalchemy import select
 
 from h.models import Annotation
-from h.services.bulk_api.core import BadDateFilter, date_match
+from h.services.bulk_api._helpers import date_match
+from h.services.bulk_api.exceptions import BadDateFilter
 
 
 class TestDateMatch:

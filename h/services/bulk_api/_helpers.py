@@ -1,8 +1,6 @@
 import sqlalchemy as sa
 
-
-class BadDateFilter(Exception):
-    """There is something wrong with the date filter provided."""
+from h.services.bulk_api.exceptions import BadDateFilter
 
 
 def date_match(column: sa.Column, spec: dict):
