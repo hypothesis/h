@@ -22,6 +22,16 @@ class BulkGroupService:
     def group_search(
         self, groups: List[str], annotations_created: dict
     ) -> List[BulkGroup]:
+        """
+        Get a list of groups.
+
+        :param groups: List of "authority_provided_id" to filter groups by.
+            The returned groups will be a subset of this list.
+        :param annotations_created: Filter by groups with annotations created in this date range.
+
+        :raises BadDateFilter: For poorly specified date conditions
+        """
+
         query = (
             sa.select([Group.authority_provided_id])
             .join(Annotation, Group.pubid == Annotation.groupid)
