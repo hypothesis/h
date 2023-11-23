@@ -22,7 +22,7 @@ billiard==4.2.0
     # via celery
 bleach==6.1.0
     # via -r requirements/requirements.in
-celery==5.3.5
+celery==5.3.6
     # via -r requirements/requirements.in
 certifi==2023.11.17
     # via

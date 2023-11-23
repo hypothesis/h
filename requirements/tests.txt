@@ -32,7 +32,7 @@ bleach==6.1.0
     # via -r requirements/requirements.txt
 build==0.8.0
     # via pip-tools
-celery==5.3.5
+celery==5.3.6
     # via -r requirements/requirements.txt
 certifi==2023.11.17
     # via
