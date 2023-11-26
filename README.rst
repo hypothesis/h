@@ -1,7 +1,7 @@
 h
 =
 
-.. image:: https://github.com/hypothesis/h/workflows/Continuous%20integration/badge.svg?branch=main
+.. image:: https://github.com/hypothesis/h/actions/workflows/ci.yml/badge.svg?branch=main
    :target: https://github.com/hypothesis/h/actions?query=branch%3Amain
    :alt: Continuous integration
 .. image:: https://img.shields.io/badge/license-BSD-blue.svg
