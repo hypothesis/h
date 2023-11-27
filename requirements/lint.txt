@@ -189,7 +189,7 @@ hupper==1.10.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.90.0
+hypothesis==6.91.0
     # via -r requirements/tests.txt
 importlib-metadata==4.8.1
     # via
@@ -434,7 +434,7 @@ pytest-cov==4.1.0
     # via -r requirements/tests.txt
 pytest-reverse==1.7.0
     # via -r requirements/functests.txt
-pytest-xdist[psutil]==3.4.0
+pytest-xdist[psutil]==3.5.0
     # via
     #   -r requirements/tests.txt
     #   pytest-xdist
