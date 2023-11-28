@@ -65,7 +65,7 @@ class TestBulkAnnotationService:
 
         annotations = svc.annotation_search(
             authority=self.AUTHORITY,
-            audience={"username": ["USERNAME"]},
+            username="USERNAME",
             created={"gt": "2020-01-01", "lte": "2022-01-01"},
         )
 
@@ -81,7 +81,7 @@ class TestBulkAnnotationService:
             assert not annotations
 
     def test_it_with_more_complex_grouping(self, svc, factories):
-        *viewers, author = factories.User.create_batch(3, authority=self.AUTHORITY)
+        viewer, author = factories.User.create_batch(2, authority=self.AUTHORITY)
 
         annotations = [
             factories.AnnotationSlim(
@@ -92,9 +92,9 @@ class TestBulkAnnotationService:
             )
             for group_members in (
                 # The first two annotations should match, because they are in
-                # groups the viewers are in
-                [author, viewers[0]],
-                [author, viewers[1]],
+                # groups the viewer is in
+                [author, viewer],
+                [author, viewer],
                 # This one is just noise and shouldn't match
                 [author],
             )
@@ -102,7 +102,7 @@ class TestBulkAnnotationService:
 
         matched_annos = svc.annotation_search(
             authority=self.AUTHORITY,
-            audience={"username": [viewer.username for viewer in viewers]},
+            username=viewer.username,
             created={"gt": "2020-01-01", "lte": "2099-01-01"},
         )
 

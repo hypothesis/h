@@ -40,7 +40,7 @@ def bulk_annotation(request):
             # Use the authority from the authenticated client to ensure the user
             # is limited to items they have permission to request
             authority=request.identity.auth_client.authority,
-            audience=query_filter["audience"],
+            username=query_filter["username"],
             created=query_filter["created"],
             limit=query_filter["limit"],
         )

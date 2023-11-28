@@ -32,16 +32,15 @@ class BulkAnnotationService:
     def annotation_search(
         self,
         authority: str,
-        audience: dict,
+        username: dict,
         created: dict,
         limit=100000,
     ) -> List[BulkAnnotation]:
         """
-        Get a list of annotations or rows viewable by an audience of users.
+        Get a list of annotations or rows viewable by a given user.
 
         :param authority: The authority to search by
-        :param audience: A specification of how to find the users. e.g.
-            {"username": [...]}
+        :param username: The username to search by
         :param created: A specification of how to filter the created date. e.g.
             {"gt": "2019-01-20", "lte": "2019-01-21"}
         :param limit: A limit of results to generate
@@ -50,7 +49,7 @@ class BulkAnnotationService:
         """
 
         results = self._db.execute(
-            self._search_query(authority, audience=audience, created=created).limit(
+            self._search_query(authority, username=username, created=created).limit(
                 limit
             )
         )
@@ -65,7 +64,7 @@ class BulkAnnotationService:
         ]
 
     @classmethod
-    def _search_query(cls, authority, audience, created) -> Select:
+    def _search_query(cls, authority, username, created) -> Select:
         """Generate a query which can then be executed to find annotations."""
         return (
             sa.select(
@@ -85,19 +84,19 @@ class BulkAnnotationService:
                 AnnotationSlim.deleted.is_(False),
                 cls._AUTHOR.nipsa.is_(False),
                 AnnotationSlim.moderated.is_(False),
-                Group.id.in_(cls._audience_groups_subquery(authority, audience)),
+                Group.id.in_(cls._audience_groups_subquery(authority, username)),
             )
         )
 
     @classmethod
-    def _audience_groups_subquery(cls, authority, audience):
+    def _audience_groups_subquery(cls, authority, username):
         return (
             sa.select(Group.id)
             .distinct()
             .join(GroupMembership, GroupMembership.group_id == Group.id)
             .join(cls._AUDIENCE, GroupMembership.user_id == cls._AUDIENCE.id)
             .where(
-                cls._AUDIENCE.username.in_(audience["username"]),
+                cls._AUDIENCE.username == username,
                 cls._AUDIENCE.authority == authority,
             )
         )
