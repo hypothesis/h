@@ -40,7 +40,7 @@ class TestBulkAnnotation:
             {
                 "filter": {
                     "limit": 20,
-                    "audience": {"username": [user.username]},
+                    "username": user.username,
                     "created": {
                         "gt": "2018-11-12T20:20:39+00:00",
                         "lte": "2018-11-13T20:20:39+00:00",

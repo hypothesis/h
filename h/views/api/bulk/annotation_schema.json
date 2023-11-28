@@ -8,9 +8,7 @@
         {
             "filter": {
                 "limit": 2000,
-                "audience": {
-                    "username": ["3a022b6c146dfd9df4ea8662178eac"]
-                },
+                "username": "3a022b6c146dfd9df4ea8662178eac",
                 "created": {
                     "gt": "2018-11-13T20:20:39+00:00",
                     "lte": "2018-11-13T20:20:39+00:00"
@@ -33,28 +31,12 @@
             "type": "object",
             "properties": {
                 "limit": {"type": "integer", "minimum": 0, "maximum": 1000000},
-                "audience": {"$ref": "#/$defs/userFilter"},
+                "username": {"type": "string", "pattern": "^[a-z0-9]{30}$"},
                 "created": {"$ref": "#/$defs/dateFilter"}
             },
-            "required": ["limit", "audience", "created"],
+            "required": ["limit", "username", "created"],
             "additionalProperties": false
         },
-
-        "userFilter": {
-            "description": "A filter to specify the users you want",
-
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {"type": "string", "pattern": "^[a-z0-9]{30}$"}
-                }
-            },
-            "required": ["username"],
-            "additionalProperties": false
-        },
-
         "dateFilter": {
             "description": "A filter to apply on a date",
 

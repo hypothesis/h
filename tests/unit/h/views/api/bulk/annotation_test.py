@@ -43,7 +43,7 @@ class TestBulkAnnotation:
 
         bulk_annotation_service.annotation_search.assert_called_once_with(
             authority=pyramid_request.identity.auth_client.authority,
-            audience=valid_request["filter"]["audience"],
+            username=valid_request["filter"]["username"],
             limit=valid_request["filter"]["limit"],
             created=valid_request["filter"]["created"],
         )
@@ -82,7 +82,7 @@ class TestBulkAnnotation:
         pyramid_request.json = {
             "filter": {
                 "limit": 2000,
-                "audience": {"username": ["3a022b6c146dfd9df4ea8662178eac"]},
+                "username": "3a022b6c146dfd9df4ea8662178eac",
                 "created": {
                     "gt": "2018-11-13T20:20:39+00:00",
                     "lte": "2018-11-13T20:20:39+00:00",
