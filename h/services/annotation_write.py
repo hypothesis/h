@@ -12,7 +12,7 @@ from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
-from h.services.search_index import SearchIndexService
+from h.services.job_queue.queue import QueueService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 
@@ -26,13 +26,13 @@ class AnnotationWriteService:
         self,
         db_session: Session,
         has_permission: Callable,
-        search_index_service: SearchIndexService,
+        queue_service: QueueService,
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
     ):
         self._db = db_session
         self._has_permission = has_permission
-        self._search_index_service = search_index_service
+        self._queue_service = queue_service
         self._annotation_read_service = annotation_read_service
         self._annotation_metadata_service = annotation_metadata_service
 
@@ -81,7 +81,7 @@ class AnnotationWriteService:
         if annotation_metadata:
             self._annotation_metadata_service.set(annotation, annotation_metadata)
 
-        self._search_index_service._queue.add_by_id(  # pylint: disable=protected-access
+        self._queue_service.add_by_id(
             annotation.id, tag="storage.create_annotation", schedule_in=60
         )
 
@@ -141,8 +141,7 @@ class AnnotationWriteService:
         # The search index service by default does not reindex if the existing ES
         # entry's timestamp matches the DB timestamp. If we're not changing this
         # timestamp, we need to force reindexing.
-        # pylint: disable=protected-access
-        self._search_index_service._queue.add_by_id(
+        self._queue_service.add_by_id(
             annotation.id,
             tag=reindex_tag,
             schedule_in=60,
@@ -270,7 +269,7 @@ def service_factory(_context, request) -> AnnotationWriteService:
     return AnnotationWriteService(
         db_session=request.db,
         has_permission=request.has_permission,
-        search_index_service=request.find_service(name="search_index"),
+        queue_service=request.find_service(name="queue_service"),
         annotation_read_service=request.find_service(AnnotationReadService),
         annotation_metadata_service=request.find_service(AnnotationMetadataService),
     )

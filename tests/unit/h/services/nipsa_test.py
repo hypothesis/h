@@ -25,10 +25,10 @@ class TestNipsaService:
         assert svc.is_flagged("acct:unflagged_user@example.com")
         assert users["unflagged_user"].nipsa is True
 
-    def test_flag_triggers_reindex_job(self, svc, users, search_index):
+    def test_flag_triggers_reindex_job(self, svc, users, queue_service):
         svc.flag(users["unflagged_user"])
 
-        search_index.add_users_annotations.assert_called_once_with(
+        queue_service.queue_users_annotations.assert_called_once_with(
             "acct:unflagged_user@example.com",
             "NipsaService.flag",
             force=True,
@@ -41,10 +41,10 @@ class TestNipsaService:
         assert not svc.is_flagged("acct:flagged_user@example.com")
         assert not users["flagged_user"].nipsa
 
-    def test_unflag_triggers_reindex_job(self, svc, users, search_index):
+    def test_unflag_triggers_reindex_job(self, svc, users, queue_service):
         svc.unflag(users["flagged_user"])
 
-        search_index.add_users_annotations.assert_called_once_with(
+        queue_service.queue_users_annotations.assert_called_once_with(
             "acct:flagged_user@example.com",
             "NipsaService.unflag",
             force=True,
@@ -86,8 +86,8 @@ class TestNipsaService:
         assert not svc.is_flagged("acct:flagged_user@example.com")
 
     @pytest.fixture
-    def svc(self, db_session, search_index):
-        return NipsaService(db_session, lambda: search_index)
+    def svc(self, db_session, queue_service):
+        return NipsaService(db_session, queue_service)
 
     @pytest.fixture(autouse=True)
     def users(self, db_session, factories):
@@ -100,9 +100,9 @@ class TestNipsaService:
         return users
 
 
-def test_nipsa_factory(pyramid_request, search_index):
+def test_nipsa_factory(pyramid_request, queue_service):
     svc = nipsa_factory(None, pyramid_request)
 
     assert isinstance(svc, NipsaService)
     assert svc.session == pyramid_request.db
-    assert svc._get_search_index() == search_index  # pylint:disable=protected-access
+    assert svc._queue_service == queue_service  # pylint:disable=protected-access

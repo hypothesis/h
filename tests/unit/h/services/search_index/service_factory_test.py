@@ -14,6 +14,7 @@ class TestFactory:
         BatchIndexer,
         Queue,
         annotation_read_service,
+        queue_service,
     ):
         result = factory(sentinel.context, pyramid_request)
 
@@ -24,6 +25,7 @@ class TestFactory:
             db=pyramid_request.db,
             es=pyramid_request.es,
             batch_indexer=BatchIndexer.return_value,
+            queue_service=queue_service,
         )
         SearchIndexService.assert_called_once_with(
             request=pyramid_request,

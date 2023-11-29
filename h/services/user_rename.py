@@ -23,9 +23,9 @@ class UserRenameService:
     UserRenameError if the new username is already taken by another account.
     """
 
-    def __init__(self, session, search_index):
+    def __init__(self, session, queue_service):
         self.session = session
-        self._search_index = search_index
+        self._queue_service = queue_service
 
     def check(self, user, new_username):
         existing_user = models.User.get_by_username(
@@ -57,7 +57,7 @@ class UserRenameService:
         self._update_tokens(old_userid, new_userid)
 
         self._change_annotations(old_userid, new_userid)
-        self._search_index.add_users_annotations(
+        self._queue_service.queue_users_annotations(
             old_userid,
             tag="RenameUserService.rename",
             schedule_in=30,
@@ -91,5 +91,5 @@ def service_factory(_context, request):
     """Return a RenameUserService instance for the passed context and request."""
     return UserRenameService(
         session=request.db,
-        search_index=request.find_service(name="search_index"),
+        queue_service=request.find_service(name="queue_service"),
     )

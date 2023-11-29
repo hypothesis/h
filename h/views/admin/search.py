@@ -20,6 +20,7 @@ def not_found(exc, request):  # pragma: no cover
 class SearchAdminViews:
     def __init__(self, request):
         self.request = request
+        self.queue_service = request.find_service(name="queue_service")
 
     @view_config(request_method="GET", renderer="h:templates/admin/search.html.jinja2")
     def get(self):
@@ -35,7 +36,7 @@ class SearchAdminViews:
         start_time = isoparse(self.request.params["start"].strip())
         end_time = isoparse(self.request.params["end"].strip())
 
-        self.request.find_service(name="search_index").add_annotations_between_times(
+        self.queue_service.queue_annotations_between_times(
             start_time, end_time, tag="reindex_date"
         )
         return self._notify_reindexing_started(
@@ -58,7 +59,7 @@ class SearchAdminViews:
         if not user:
             raise NotFoundError(f"User {username} not found")
 
-        self.request.find_service(name="search_index").add_users_annotations(
+        self.queue_service.queue_users_annotations(
             user.userid, tag="reindex_user", force=force
         )
         return self._notify_reindexing_started(
@@ -79,7 +80,7 @@ class SearchAdminViews:
         if not group:
             raise NotFoundError(f"Group {groupid} not found")
 
-        self.request.find_service(name="search_index").add_group_annotations(
+        self.queue_service.queue_group_annotations(
             groupid, tag="reindex_group", force=force
         )
         return self._notify_reindexing_started(

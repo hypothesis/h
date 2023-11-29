@@ -6,14 +6,12 @@ import pytest
 from h.services.group import GroupService
 from h.views.admin.search import NotFoundError, SearchAdminViews
 
-pytestmark = pytest.mark.usefixtures("search_index")
-
 
 class TestSearchAdminViews:
     def test_get(self, views):
         assert views.get() == {}
 
-    def test_reindex_date(self, views, search_index, pyramid_request):
+    def test_reindex_date(self, views, queue_service, pyramid_request):
         pyramid_request.params = {
             "start": "2020-09-09",
             "end": "2020-09-11",
@@ -21,10 +19,10 @@ class TestSearchAdminViews:
 
         views.reindex_date()
 
-        search_index.add_annotations_between_times.assert_called_once_with(
+        queue_service.queue_annotations_between_times.assert_called_once_with(
             datetime.datetime(year=2020, month=9, day=9),
             datetime.datetime(year=2020, month=9, day=11),
-            "reindex_date",
+            tag="reindex_date",
         )
         assert pyramid_request.session.peek_flash("success") == [
             "Began reindexing from 2020-09-09 00:00:00 to 2020-09-11 00:00:00"
@@ -32,7 +30,7 @@ class TestSearchAdminViews:
 
     @pytest.mark.parametrize("force", [True, False])
     def test_reindex_user_reindexes_annotations(
-        self, views, pyramid_request, search_index, factories, force
+        self, views, pyramid_request, queue_service, factories, force
     ):
         user = factories.User(username="johnsmith")
         pyramid_request.params = {"username": "johnsmith"}
@@ -41,8 +39,8 @@ class TestSearchAdminViews:
 
         views.reindex_user()
 
-        search_index.add_users_annotations.assert_called_once_with(
-            user.userid, "reindex_user", force=force
+        queue_service.queue_users_annotations.assert_called_once_with(
+            user.userid, tag="reindex_user", force=force
         )
 
         assert pyramid_request.session.peek_flash("success") == [
@@ -57,7 +55,7 @@ class TestSearchAdminViews:
 
     @pytest.mark.parametrize("force", [True, False])
     def test_reindex_group_reindexes_annotations(
-        self, views, pyramid_request, search_index, factories, group_service, force
+        self, views, pyramid_request, queue_service, factories, group_service, force
     ):
         group = factories.Group(pubid="abc123")
         pyramid_request.params = {"groupid": "abc123"}
@@ -68,8 +66,8 @@ class TestSearchAdminViews:
         views.reindex_group()
 
         group_service.fetch_by_pubid.assert_called_with(group.pubid)
-        search_index.add_group_annotations.assert_called_once_with(
-            group.pubid, "reindex_group", force=force
+        queue_service.queue_group_annotations.assert_called_once_with(
+            group.pubid, tag="reindex_group", force=force
         )
 
         assert pyramid_request.session.peek_flash("success") == [
@@ -86,7 +84,7 @@ class TestSearchAdminViews:
             views.reindex_group()
 
     @pytest.fixture
-    def views(self, pyramid_request):
+    def views(self, pyramid_request, queue_service):  # pylint:disable=unused-argument
         return SearchAdminViews(pyramid_request)
 
     @pytest.fixture(autouse=True)

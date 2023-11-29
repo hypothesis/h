@@ -28,51 +28,6 @@ class TestSearchIndexServicesWrapperTasks:
         )
 
 
-class TestAddAnnotationsBetweenTimes:
-    def test_it(self, search_index):
-        indexer.add_annotations_between_times(
-            sentinel.start_time, sentinel.end_time, sentinel.tag
-        )
-
-        search_index._queue.add_between_times.assert_called_once_with(  # pylint:disable=protected-access
-            sentinel.start_time, sentinel.end_time, sentinel.tag
-        )
-
-
-class TestAddUsersAnnotations:
-    def test_it(self, search_index):
-        indexer.add_users_annotations(
-            sentinel.userid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-        search_index._queue.add_by_user.assert_called_once_with(  # pylint:disable=protected-access
-            sentinel.userid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-
-class TestAddGroupAnnotations:
-    def test_it(self, search_index):
-        indexer.add_group_annotations(
-            sentinel.groupid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-        search_index._queue.add_by_group.assert_called_once_with(  # pylint:disable=protected-access
-            sentinel.groupid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-
 class TestSyncAnnotations:
     def test_it(self, newrelic, log, search_index):
         indexer.sync_annotations("test_queue")

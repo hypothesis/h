@@ -1,22 +1,13 @@
 from collections import defaultdict
-from datetime import datetime, timedelta
 
 from dateutil.parser import isoparse
-from sqlalchemy import and_, func, literal_column, select
-from zope.sqlalchemy import mark_changed
 
 from h.db.types import URLSafeUUID
-from h.models import Annotation, Job
+from h.models import Annotation
 
 
 class Queue:
     """A job queue for synchronizing annotations from Postgres to Elastic."""
-
-    class Priority:
-        SINGLE_ITEM = 1
-        SINGLE_USER = 100
-        SINGLE_GROUP = 100
-        BETWEEN_TIMES = 1000
 
     class Result:
         """String values for logging and metrics."""
@@ -33,97 +24,11 @@ class Queue:
         COMPLETED_TAG_TOTAL = "Completed/{tag}/Total"
         COMPLETED_TOTAL = "Completed/Total"
 
-    def __init__(self, db, es, batch_indexer):
+    def __init__(self, db, es, batch_indexer, queue_service):
         self._db = db
         self._es = es
         self._batch_indexer = batch_indexer
-
-    def add_where(  # pylint: disable=too-many-arguments
-        self, where, tag, priority, force=False, schedule_in=None
-    ):
-        """
-        Queue annotations matching a filter to be synced to ElasticSearch.
-
-        :param where: A list of SQLAlchemy BinaryExpression objects to limit
-            the annotations to be added
-        :param tag: The tag to add to the job on the queue. For documentation
-            purposes only
-        :param priority: Integer priority value (higher number is lower
-            priority)
-        :param force: Whether to force reindexing of the annotation even if
-            it's already indexed
-        :param schedule_in: A number of seconds from now to wait before making
-            the job available for processing. The annotation won't be synced
-            until at least `schedule_in` seconds from now
-        """
-        where_clause = and_(*where) if len(where) > 1 else where[0]
-        schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)
-
-        query = Job.__table__.insert().from_select(
-            [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
-            select(
-                [
-                    literal_column("'sync_annotation'"),
-                    literal_column(f"'{schedule_at}'"),
-                    literal_column(str(priority)),
-                    literal_column(repr(tag)),
-                    func.jsonb_build_object(
-                        "annotation_id", Annotation.id, "force", bool(force)
-                    ),
-                ]
-            ).where(where_clause),
-        )
-
-        self._db.execute(query)
-        mark_changed(self._db)
-
-    def add_between_times(self, start_time, end_time, tag, force=False):
-        """
-        Queue all annotations between two times to be synced to Elasticsearch.
-
-        See Queue.add_where() for documentation of the params.
-
-        :param start_time: The time to queue annotations from (inclusive)
-        :param end_time: The time to queue annotations until (inclusive)
-        """
-        where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
-        self.add_where(where, tag, Queue.Priority.BETWEEN_TIMES, force)
-
-    def add_by_id(self, annotation_id, tag, force=False, schedule_in=None):
-        """
-        Queue an annotation to be synced to Elasticsearch.
-
-        See Queue.add_where() for documentation of the params.
-
-        :param annotation_id: The ID of the annotation to be queued, in the
-            application-level URL-safe format
-        """
-        where = [Annotation.id == annotation_id]
-        self.add_where(where, tag, Queue.Priority.SINGLE_ITEM, force, schedule_in)
-
-    def add_by_user(self, userid, tag, force=False, schedule_in=None):
-        """
-        Queue all a user's annotations to be synced to Elasticsearch.
-
-        See Queue.add() for documentation of the params.
-
-        :param userid: The ID of the user in "acct:USERNAME@AUTHORITY" format
-        :type userid: unicode
-        """
-        where = [Annotation.userid == userid]
-        self.add_where(where, tag, Queue.Priority.SINGLE_USER, force, schedule_in)
-
-    def add_by_group(self, groupid, tag, force=False, schedule_in=None):
-        """
-        Queue all annotations in a group to be synced to Elasticsearch.
-
-        See Queue.add() for documentation of the params.
-
-        :param groupid: The pubid of the group
-        :type groupid: unicode
-        """
-        where = [Annotation.groupid == groupid]
-        self.add_where(where, tag, Queue.Priority.SINGLE_GROUP, force, schedule_in)
+        self._queue_service = queue_service
 
     def sync(self, limit):
         """
@@ -142,7 +47,9 @@ class Queue:
           job on the queue to be re-checked and removed the next time the
           method runs.
         """
-        jobs = self._get_jobs_from_queue(limit)
+        jobs = self._queue_service.get_jobs_from_queue(
+            name="sync_annotation", limit=limit
+        )
 
         if not jobs:
             return {}
@@ -218,37 +125,12 @@ class Queue:
                 counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
                 counts[Queue.Result.COMPLETED_TOTAL].add(job.id)
 
-        for job in job_complete:
-            self._db.delete(job)
+        self._queue_service.delete_jobs(job_complete)
 
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
         return {key: len(value) for key, value in counts.items()}
-
-    def _get_jobs_from_queue(self, limit):
-        return (
-            self._job_query()
-            .order_by(Job.priority, Job.enqueued_at)
-            .limit(limit)
-            .with_for_update(skip_locked=True)
-            .all()
-        )
-
-    def _job_query(self, tags=None, hide_scheduled=True):
-        now = datetime.utcnow()
-
-        query = self._db.query(Job).filter(
-            Job.name == "sync_annotation", Job.expires_at >= now
-        )
-
-        if hide_scheduled:  # pragma: no cover
-            query = query.filter(Job.scheduled_at < now)
-
-        if tags:  # pragma: no cover
-            query = query.filter(Job.tag.in_(tags))
-
-        return query
 
     def _get_annotations_from_db(self, annotation_ids):
         return {
