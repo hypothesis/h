@@ -1,4 +1,3 @@
-import datetime
 from unittest.mock import MagicMock, call, create_autospec, patch, sentinel
 
 import pytest
@@ -148,56 +147,6 @@ class TestAddAnnotation:
         return factories.Annotation.build()
 
 
-class TestAddAnnotationsBetweenTimes:
-    def test_it(self, indexer, search_index):
-        start_time = datetime.datetime(2020, 9, 9)
-        end_time = datetime.datetime(2020, 9, 11)
-
-        search_index.add_annotations_between_times(
-            start_time,
-            end_time,
-            "test_tag",
-        )
-
-        indexer.add_annotations_between_times.delay.assert_called_once_with(
-            start_time, end_time, "test_tag"
-        )
-
-
-class TestAddUsersAnnotations:
-    def test_it(self, indexer, search_index):
-        search_index.add_users_annotations(
-            sentinel.userid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-        indexer.add_users_annotations.delay.assert_called_once_with(
-            sentinel.userid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-
-class TestAddGroupAnnotations:
-    def test_it(self, indexer, search_index):
-        search_index.add_group_annotations(
-            sentinel.groupid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-        indexer.add_group_annotations.delay.assert_called_once_with(
-            sentinel.groupid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-
 class TestDeleteAnnotationById:
     @pytest.mark.parametrize("refresh", (True, False))
     def test_delete_annotation(self, search_index, mock_es_client, refresh):
@@ -262,7 +211,7 @@ class TestHandleAnnotationEvent:
         assert result == async_handler.return_value
 
     @pytest.fixture(autouse=True)
-    def handler_for(self, add_annotation_by_id, delete_annotation_by_id, indexer):
+    def handler_for(self, add_annotation_by_id, delete_annotation_by_id, indexer_tasks):
         handler_map = {
             True: {
                 "create": add_annotation_by_id,
@@ -270,9 +219,9 @@ class TestHandleAnnotationEvent:
                 "delete": delete_annotation_by_id,
             },
             False: {
-                "create": indexer.add_annotation.delay,
-                "update": indexer.add_annotation.delay,
-                "delete": indexer.delete_annotation.delay,
+                "create": indexer_tasks.add_annotation.delay,
+                "update": indexer_tasks.add_annotation.delay,
+                "delete": indexer_tasks.delete_annotation.delay,
             },
         }
 
@@ -347,8 +296,8 @@ def search_index(
 
 
 @pytest.fixture(autouse=True)
-def indexer(patch):
-    return patch("h.services.search_index.service.indexer")
+def indexer_tasks(patch):
+    return patch("h.services.search_index.service.indexer_tasks")
 
 
 @pytest.fixture(autouse=True)

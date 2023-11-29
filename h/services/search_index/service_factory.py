@@ -16,6 +16,7 @@ def factory(_context, request):
             db=request.db,
             es=request.es,
             batch_indexer=BatchIndexer(request.db, request.es, request),
+            queue_service=request.find_service(name="queue_service"),
         ),
         annotation_read_service=request.find_service(AnnotationReadService),
     )

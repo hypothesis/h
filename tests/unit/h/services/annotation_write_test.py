@@ -18,7 +18,7 @@ class TestAnnotationWriteService:
         create_data,
         factories,
         update_document_metadata,
-        search_index,
+        queue_service,
         annotation_read_service,
         _validate_group,
         db_session,
@@ -35,8 +35,7 @@ class TestAnnotationWriteService:
             root_annotation.id
         )
         _validate_group.assert_called_once_with(anno)
-        # pylint: disable=protected-access
-        search_index._queue.add_by_id.assert_called_once_with(
+        queue_service.add_by_id.assert_called_once_with(
             anno.id, tag="storage.create_annotation", schedule_in=60
         )
 
@@ -92,7 +91,7 @@ class TestAnnotationWriteService:
         db_session,
         annotation,
         update_document_metadata,
-        search_index,
+        queue_service,
         _validate_group,
     ):
         then = datetime.now() - timedelta(days=1)
@@ -125,8 +124,7 @@ class TestAnnotationWriteService:
             updated=anno.updated,
         )
 
-        # pylint: disable=protected-access
-        search_index._queue.add_by_id.assert_called_once_with(
+        queue_service.add_by_id.assert_called_once_with(
             annotation.id, tag="storage.update_annotation", schedule_in=60, force=False
         )
         assert anno.document == update_document_metadata.return_value
@@ -136,7 +134,7 @@ class TestAnnotationWriteService:
         assert anno.extra == {"key": "value", "extra_key": "extra_value"}
         self.assert_annotation_slim(db_session, anno)
 
-    def test_update_annotation_with_non_defaults(self, svc, annotation, search_index):
+    def test_update_annotation_with_non_defaults(self, svc, annotation, queue_service):
         then = datetime.now() - timedelta(days=1)
         annotation.updated = then
 
@@ -144,8 +142,7 @@ class TestAnnotationWriteService:
             annotation, {}, update_timestamp=False, reindex_tag="custom_tag"
         )
 
-        # pylint: disable=protected-access
-        search_index._queue.add_by_id.assert_called_once_with(
+        queue_service.add_by_id.assert_called_once_with(
             Any(), tag="custom_tag", schedule_in=Any(), force=True
         )
         assert result.updated == then
@@ -264,14 +261,14 @@ class TestAnnotationWriteService:
         self,
         db_session,
         has_permission,
-        search_index,
+        queue_service,
         annotation_read_service,
         annotation_metadata_service,
     ):
         return AnnotationWriteService(
             db_session=db_session,
             has_permission=has_permission,
-            search_index_service=search_index,
+            queue_service=queue_service,
             annotation_read_service=annotation_read_service,
             annotation_metadata_service=annotation_metadata_service,
         )
@@ -306,7 +303,7 @@ class TestServiceFactory:
         self,
         pyramid_request,
         AnnotationWriteService,
-        search_index,
+        queue_service,
         annotation_read_service,
         annotation_metadata_service,
     ):
@@ -315,7 +312,7 @@ class TestServiceFactory:
         AnnotationWriteService.assert_called_once_with(
             db_session=pyramid_request.db,
             has_permission=pyramid_request.has_permission,
-            search_index_service=search_index,
+            queue_service=queue_service,
             annotation_read_service=annotation_read_service,
             annotation_metadata_service=annotation_metadata_service,
         )
