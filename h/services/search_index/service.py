@@ -2,7 +2,7 @@ from h_pyramid_sentry import report_exception
 
 from h.presenters import AnnotationSearchIndexPresenter
 from h.services.annotation_read import AnnotationReadService
-from h.tasks import indexer
+from h.tasks import indexer as indexer_tasks
 
 
 class SearchIndexService:
@@ -75,34 +75,6 @@ class SearchIndexService:
 
         self._index_annotation_body(annotation.id, body, refresh=False)
 
-    @staticmethod
-    def add_annotations_between_times(start_time, end_time, tag):
-        """
-        Add all annotations between two times to the search index.
-
-        All annotations whose updated time is between the given start_time and
-        end_time (inclusive) will be queued for background indexing into
-        Elasticsearch.
-
-        :type start_time: datetime.datetime
-        :type end_time: datetime.datetime
-        """
-        indexer.add_annotations_between_times.delay(start_time, end_time, tag)
-
-    @staticmethod
-    def add_users_annotations(userid, tag, force=False, schedule_in=None):
-        """Add all of a users annotations to the search index."""
-        indexer.add_users_annotations.delay(
-            userid, tag, force=force, schedule_in=schedule_in
-        )
-
-    @staticmethod
-    def add_group_annotations(groupid, tag, force=False, schedule_in=None):
-        """Add all annotations in a group to the search index."""
-        indexer.add_group_annotations.delay(
-            groupid, tag, force=force, schedule_in=schedule_in
-        )
-
     def delete_annotation_by_id(self, annotation_id, refresh=False):
         """
         Mark an annotation as deleted in the search index.
@@ -130,11 +102,14 @@ class SearchIndexService:
         :param event: AnnotationEvent object
         """
         if event.action in ["create", "update"]:
-            sync_handler, async_task = self.add_annotation_by_id, indexer.add_annotation
+            sync_handler, async_task = (
+                self.add_annotation_by_id,
+                indexer_tasks.add_annotation,
+            )
         elif event.action == "delete":
             sync_handler, async_task = (
                 self.delete_annotation_by_id,
-                indexer.delete_annotation,
+                indexer_tasks.delete_annotation,
             )
         else:
             return False

@@ -86,20 +86,22 @@ class TestUserRenameService:
         userids = [ann.userid for ann in db_session.query(models.Annotation)]
         assert {user.userid} == set(userids)
 
-    def test_rename_reindexes_the_users_annotations(self, service, user, search_index):
+    def test_rename_reindexes_the_users_annotations(self, service, user, queue_service):
         original_userid = user.userid
 
         service.rename(user, "panda")
 
-        search_index.add_users_annotations.assert_called_once_with(
+        queue_service.queue_users_annotations.assert_called_once_with(
             original_userid,
             tag="RenameUserService.rename",
             schedule_in=30,
         )
 
     @pytest.fixture
-    def service(self, pyramid_request, search_index):
-        return UserRenameService(session=pyramid_request.db, search_index=search_index)
+    def service(self, pyramid_request, queue_service):
+        return UserRenameService(
+            session=pyramid_request.db, queue_service=queue_service
+        )
 
     @pytest.fixture
     def check(self, patch):
@@ -123,11 +125,11 @@ class TestUserRenameService:
 
 
 class TestServiceFactory:
-    def test_it(self, pyramid_request, search_index, UserRenameService):
+    def test_it(self, pyramid_request, queue_service, UserRenameService):
         svc = service_factory(sentinel.context, pyramid_request)
 
         UserRenameService.assert_called_once_with(
-            session=pyramid_request.db, search_index=search_index
+            session=pyramid_request.db, queue_service=queue_service
         )
         assert svc == UserRenameService.return_value
 

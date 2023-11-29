@@ -19,6 +19,7 @@ from h.services.group_links import GroupLinksService
 from h.services.group_list import GroupListService
 from h.services.group_members import GroupMembersService
 from h.services.group_update import GroupUpdateService
+from h.services.job_queue.queue import QueueService
 from h.services.links import LinksService
 from h.services.list_organizations import ListOrganizationsService
 from h.services.nipsa import NipsaService
@@ -61,6 +62,7 @@ __all__ = (
     "oauth_provider_service",
     "organization_service",
     "search_index",
+    "queue_service",
     "subscription_service",
     "url_migration_service",
     "user_delete_service",
@@ -223,6 +225,11 @@ def search_index(mock_service):
         spec_set=False,
         _queue=create_autospec(Queue, spec_set=True, instance=True),
     )
+
+
+@pytest.fixture
+def queue_service(mock_service):
+    return mock_service(QueueService, name="queue_service")
 
 
 @pytest.fixture
