@@ -5,6 +5,7 @@ pytest
 pytest-cov
 pytest-xdist[psutil]
 filelock
+freezegun
 factory-boy
 hypothesis
 -r requirements.txt
