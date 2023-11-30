@@ -20,6 +20,7 @@ def not_found(exc, request):  # pragma: no cover
 class SearchAdminViews:
     def __init__(self, request):
         self.request = request
+        self.queue_service = request.find_service(name="queue_service")
 
     @view_config(request_method="GET", renderer="h:templates/admin/search.html.jinja2")
     def get(self):

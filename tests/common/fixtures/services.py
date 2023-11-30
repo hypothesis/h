@@ -26,7 +26,6 @@ from h.services.nipsa import NipsaService
 from h.services.oauth.service import OAuthProviderService
 from h.services.organization import OrganizationService
 from h.services.search_index import SearchIndexService
-from h.services.search_index._queue import Queue
 from h.services.subscription import SubscriptionService
 from h.services.url_migration import URLMigrationService
 from h.services.user import UserService
@@ -219,12 +218,7 @@ def organization_service(mock_service):
 
 @pytest.fixture
 def search_index(mock_service):
-    return mock_service(
-        SearchIndexService,
-        "search_index",
-        spec_set=False,
-        _queue=create_autospec(Queue, spec_set=True, instance=True),
-    )
+    return mock_service(SearchIndexService, "search_index", spec_set=False)
 
 
 @pytest.fixture
