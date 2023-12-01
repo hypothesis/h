@@ -2020,6 +2020,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/expect@npm:^1.20.4":
+  version: 1.20.4
+  resolution: "@types/expect@npm:1.20.4"
+  checksum: c09a9abec2c1776dd8948920dc3bad87b1206c843509d3d3002040983b1769b2e3914202a6c20b72e5c3fb5738a1ab87cb7be9d3fe9efabf2a324173b222a224
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:*":
+  version: 20.10.1
+  resolution: "@types/node@npm:20.10.1"
+  dependencies:
+    undici-types: ~5.26.4
+  checksum: 9dfdcd2496ce535dba0ae496985d6e991a8a5d70a180db3a94c947a2123d99318a95dce4aa2a192f7e57c3afa3fdb44d6fd63e18efd49568950d6c239dadcc39
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:>=10.0.0":
   version: 18.11.9
   resolution: "@types/node@npm:18.11.9"
@@ -2031,6 +2047,16 @@ __metadata:
   version: 1.20.2
   resolution: "@types/resolve@npm:1.20.2"
   checksum: 61c2cad2499ffc8eab36e3b773945d337d848d3ac6b7b0a87c805ba814bc838ef2f262fc0f109bfd8d2e0898ff8bd80ad1025f9ff64f1f71d3d4294c9f14e5f6
+  languageName: node
+  linkType: hard
+
+"@types/vinyl@npm:^2.0.9":
+  version: 2.0.11
+  resolution: "@types/vinyl@npm:2.0.11"
+  dependencies:
+    "@types/expect": ^1.20.4
+    "@types/node": "*"
+  checksum: e921718775992ada7712a26da9635fb970bcdbcf4c4cc832344092d68710ffaf7dd3cce42b0050b2741b2cf75a30f3e1b87e1032ae26552db1faac17094d2b50
   languageName: node
   linkType: hard
 
@@ -2902,6 +2928,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chalk@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "chalk@npm:5.3.0"
+  checksum: 623922e077b7d1e9dedaea6f8b9e9352921f8ae3afe739132e0e00c275971bdd331268183b2628cf4ab1727c45ea1f28d7e24ac23ce1db1eb653c414ca8a5a80
+  languageName: node
+  linkType: hard
+
+"change-file-extension@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "change-file-extension@npm:0.1.0"
+  checksum: 9a2321a9a8ca7e2c274983ccf842511c6763b67bfcc8be5cab9ff81307b4f8afe5350dc04dec846d89bf4018e338032888d71925a788f2dabcf290e74bd68858
+  languageName: node
+  linkType: hard
+
 "check-error@npm:^1.0.3":
   version: 1.0.3
   resolution: "check-error@npm:1.0.3"
@@ -3643,6 +3683,13 @@ __metadata:
   version: 0.2.0
   resolution: "eastasianwidth@npm:0.2.0"
   checksum: 7d00d7cd8e49b9afa762a813faac332dee781932d6f2c848dc348939c4253f1d4564341b7af1d041853bc3f32c2ef141b58e0a4d9862c17a7f08f68df1e0f1ed
+  languageName: node
+  linkType: hard
+
+"easy-transform-stream@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "easy-transform-stream@npm:1.0.1"
+  checksum: 3d783ad3ffa21690c9e84ee54a9993a882f07e86416f15fe8dfcfb2c93ea28ce79f10775c2e56d846bba6a9e85e64f9f867c085d5906031c06c97c5a5234be46
   languageName: node
   linkType: hard
 
@@ -5065,21 +5112,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gulp-changed@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "gulp-changed@npm:4.0.3"
+"gulp-changed@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "gulp-changed@npm:5.0.1"
   dependencies:
-    make-dir: ^3.0.0
-    plugin-error: ^1.0.1
-    replace-ext: ^1.0.0
-    through2: ^3.0.1
+    change-file-extension: ^0.1.0
+    gulp-plugin-extras: ^0.3.0
     touch: ^3.1.0
   peerDependencies:
     gulp: ">=4"
   peerDependenciesMeta:
     gulp:
       optional: true
-  checksum: 42e342c6f41485a92b889d59090e6b530a05f59dd92e87e0cd48d1e019ae4126ad40eb9bed6c0b35d1a5d330aed0ae9181b3c8b4d1ab78fcbc0b6674e674fddb
+  checksum: db153d66a1ee8d8534198c42d27e5917a7632bce85e407d64c57e2cc988c029a0bf90061742bb73d9582fad1341a33acb5efe7860347d77cd2901cf3db840c47
   languageName: node
   linkType: hard
 
@@ -5128,6 +5173,17 @@ __metadata:
   dependencies:
     minimatch: ^3.0.3
   checksum: 1c0950be35013df1f6140ecca791b6cf475c88c81968b0bf7a2ea30ae36384d02ef49f5fb3e9a0cf01e8bdb845dc63179d4c04a63f1c224d8287e4e29954782b
+  languageName: node
+  linkType: hard
+
+"gulp-plugin-extras@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "gulp-plugin-extras@npm:0.3.0"
+  dependencies:
+    "@types/vinyl": ^2.0.9
+    chalk: ^5.3.0
+    easy-transform-stream: ^1.0.1
+  checksum: 4252ff696529df643ddc4b2482e58ef0e4a865bba95a23d02ff82d6a4f7ec2c17619a52404a4cec88d0cc906ab6eb0773dd0088b235b9c93a52cbacff9336c21
   languageName: node
   linkType: hard
 
@@ -5189,7 +5245,7 @@ __metadata:
     eslint-plugin-react-hooks: ^4.6.0
     fetch-mock: ^9.11.0
     gulp: ^4.0.0
-    gulp-changed: ^4.0.3
+    gulp-changed: ^5.0.1
     gulp-cli: ^2.3.0
     gulp-if: ^3.0.0
     gulp-svgmin: ^4.0.1
@@ -6608,15 +6664,6 @@ __metadata:
   dependencies:
     "@jridgewell/sourcemap-codec": ^1.4.15
   checksum: da10fecff0c0a7d3faf756913ce62bd6d5e7b0402be48c3b27bfd651b90e29677e279069a63b764bcdc1b8ecdcdb898f29a5c5ec510f2323e8d62ee057a6eb18
-  languageName: node
-  linkType: hard
-
-"make-dir@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "make-dir@npm:3.1.0"
-  dependencies:
-    semver: ^6.0.0
-  checksum: 484200020ab5a1fdf12f393fe5f385fc8e4378824c940fba1729dcd198ae4ff24867bc7a5646331e50cead8abff5d9270c456314386e629acec6dff4b8016b78
   languageName: node
   linkType: hard
 
@@ -8391,7 +8438,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^6.0.0, semver@npm:^6.3.0, semver@npm:^6.3.1":
+"semver@npm:^6.3.0, semver@npm:^6.3.1":
   version: 6.3.1
   resolution: "semver@npm:6.3.1"
   bin:
@@ -9411,6 +9458,13 @@ __metadata:
     object.reduce: ^1.0.0
     undertaker-registry: ^1.0.0
   checksum: 4378e3e9d9e5d6f2ceeb81eff0ae5d7c63b9eaba000fae3f0177197f991aabef29104eabf5188622d38f2e3c58dc96cfd9c182b822b6f405dbf3f63f123389d5
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~5.26.4":
+  version: 5.26.5
+  resolution: "undici-types@npm:5.26.5"
+  checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
   languageName: node
   linkType: hard
 
