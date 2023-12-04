@@ -32,7 +32,7 @@ class BulkAnnotationService:
     def annotation_search(
         self,
         authority: str,
-        username: dict,
+        username: str,
         created: dict,
         limit=100000,
     ) -> List[BulkAnnotation]:
