@@ -20,6 +20,7 @@ FEATURES = {
     "import_annotations": "Allow users to import previously exported annotations",
     "export_formats": "Allow users to select the format for their annotations export file",
     "page_numbers": "Display page numbers on annotations, if available",
+    "search_panel": "Use a sidebar panel to display search form",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
