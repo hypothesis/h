@@ -8,13 +8,25 @@ black==23.11.0
     # via -r requirements/checkformatting.in
 build==0.8.0
     # via pip-tools
+cerberus==1.3.5
+    # via plette
+certifi==2023.11.17
+    # via requests
+charset-normalizer==3.3.2
+    # via requests
 click==8.1.7
     # via
     #   black
     #   pip-tools
+distlib==0.3.7
+    # via requirementslib
+docopt==0.6.2
+    # via pipreqs
+idna==3.6
+    # via requests
 importlib-metadata==4.12.0
     # via pip-sync-faster
-isort==5.12.0
+isort==5.13.0
     # via -r requirements/checkformatting.in
 mypy-extensions==0.4.3
     # via black
@@ -25,25 +37,53 @@ packaging==23.2
 pathspec==0.9.0
     # via black
 pep517==0.13.0
-    # via build
+    # via
+    #   build
+    #   requirementslib
+pip-api==0.0.30
+    # via isort
 pip-sync-faster==0.0.3
     # via -r requirements/checkformatting.in
 pip-tools==7.3.0
     # via
     #   -r requirements/checkformatting.in
     #   pip-sync-faster
+pipreqs==0.4.13
+    # via isort
 platformdirs==2.5.2
-    # via black
+    # via
+    #   black
+    #   requirementslib
+plette[validation]==0.4.4
+    # via requirementslib
+pydantic==1.10.13
+    # via requirementslib
+requests==2.31.0
+    # via
+    #   requirementslib
+    #   yarg
+requirementslib==3.0.0
+    # via isort
 tomli==2.0.1
     # via
     #   black
     #   build
     #   pep517
     #   pip-tools
+tomlkit==0.12.3
+    # via
+    #   plette
+    #   requirementslib
 typing-extensions==4.3.0
-    # via black
+    # via
+    #   black
+    #   pydantic
+urllib3==2.1.0
+    # via requests
 wheel==0.38.1
     # via pip-tools
+yarg==0.1.9
+    # via pipreqs
 zipp==3.8.1
     # via importlib-metadata
 
