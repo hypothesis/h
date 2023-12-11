@@ -55,10 +55,13 @@ celery==5.3.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+cerberus==1.3.5
+    # via plette
 certifi==2023.11.17
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   requests
     #   sentry-sdk
 cffi==1.16.0
     # via
@@ -70,6 +73,8 @@ chameleon==3.8.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
+charset-normalizer==3.3.2
+    # via requests
 click==8.1.7
     # via
     #   -r requirements/functests.txt
@@ -119,6 +124,10 @@ deform==2.0.15
     #   -r requirements/tests.txt
 dill==0.3.4
     # via pylint
+distlib==0.3.7
+    # via requirementslib
+docopt==0.6.2
+    # via pipreqs
 ecdsa==0.18.0
     # via
     #   -r requirements/functests.txt
@@ -191,6 +200,8 @@ hupper==1.10.2
     #   pyramid
 hypothesis==6.91.0
     # via -r requirements/tests.txt
+idna==3.6
+    # via requests
 importlib-metadata==4.8.1
     # via
     #   -r requirements/functests.txt
@@ -221,7 +232,7 @@ iso8601==0.1.13
     #   -r requirements/tests.txt
     #   colander
     #   deform
-isort==5.12.0
+isort==5.13.0
     # via pylint
 itsdangerous==2.1.2
     # via
@@ -296,11 +307,14 @@ pep517==0.13.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   build
+    #   requirementslib
 peppercorn==0.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
+pip-api==0.0.30
+    # via isort
 pip-sync-faster==0.0.3
     # via
     #   -r requirements/functests.txt
@@ -312,6 +326,8 @@ pip-tools==7.3.0
     #   -r requirements/lint.in
     #   -r requirements/tests.txt
     #   pip-sync-faster
+pipreqs==0.4.13
+    # via isort
 pkgutil-resolve-name==1.3.10
     # via
     #   -r requirements/functests.txt
@@ -329,7 +345,11 @@ plaster-pastedeploy==0.7
     #   -r requirements/tests.txt
     #   pyramid
 platformdirs==2.2.0
-    # via pylint
+    # via
+    #   pylint
+    #   requirementslib
+plette[validation]==0.4.4
+    # via requirementslib
 pluggy==0.13.1
     # via
     #   -r requirements/functests.txt
@@ -370,6 +390,8 @@ pycryptodomex==3.19.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+pydantic==1.10.13
+    # via requirementslib
 pydocstyle==6.3.0
     # via -r requirements/lint.in
 pyjwt==2.8.0
@@ -470,6 +492,12 @@ repoze-sendmail==4.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid-mailer
+requests==2.31.0
+    # via
+    #   requirementslib
+    #   yarg
+requirementslib==3.0.0
+    # via isort
 rfc3339-validator==0.1.4
     # via
     #   -r requirements/functests.txt
@@ -547,7 +575,10 @@ tomli==2.0.0
     #   pylint
     #   pytest
 tomlkit==0.11.0
-    # via pylint
+    # via
+    #   plette
+    #   pylint
+    #   requirementslib
 transaction==4.0
     # via
     #   -r requirements/functests.txt
@@ -570,6 +601,7 @@ typing-extensions==4.5.0
     #   alembic
     #   astroid
     #   kombu
+    #   pydantic
     #   pylint
 tzdata==2023.3
     # via
@@ -582,6 +614,7 @@ urllib3==1.26.18
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   elasticsearch
+    #   requests
     #   sentry-sdk
 venusian==3.1.0
     # via
@@ -635,6 +668,8 @@ wsaccel==0.6.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+yarg==0.1.9
+    # via pipreqs
 zipp==3.4.1
     # via
     #   -r requirements/functests.txt
