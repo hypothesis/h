@@ -198,7 +198,7 @@ hupper==1.10.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.91.0
+hypothesis==6.92.0
     # via -r requirements/tests.txt
 idna==3.6
     # via requests
