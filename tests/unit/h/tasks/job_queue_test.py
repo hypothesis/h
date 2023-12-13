@@ -17,9 +17,10 @@ class TestAddAnnotationsBetweenTimes:
         )
 
 
-class TestAddUsersAnnotations:
+class TestAddAnnotationsFromUser:
     def test_it(self, queue_service):
         queue.add_users_annotations(
+        job_queue.add_annotations_from_user(
             sentinel.userid,
             sentinel.tag,
             force=sentinel.force,
@@ -34,9 +35,9 @@ class TestAddUsersAnnotations:
         )
 
 
-class TestAddGroupAnnotations:
+class TestAddAnnotationsFromGroup:
     def test_it(self, queue_service):
-        queue.add_group_annotations(
+        job_queue.add_annotations_from_group(
             sentinel.groupid,
             sentinel.tag,
             force=sentinel.force,
