@@ -2,7 +2,7 @@ from dateutil.parser import isoparse
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
-from h import models
+from h import models, tasks
 from h.security import Permission
 
 
@@ -20,7 +20,6 @@ def not_found(exc, request):  # pragma: no cover
 class SearchAdminViews:
     def __init__(self, request):
         self.request = request
-        self.queue_service = request.find_service(name="queue_service")
 
     @view_config(request_method="GET", renderer="h:templates/admin/search.html.jinja2")
     def get(self):
@@ -36,7 +35,7 @@ class SearchAdminViews:
         start_time = isoparse(self.request.params["start"].strip())
         end_time = isoparse(self.request.params["end"].strip())
 
-        self.queue_service.queue_annotations_between_times(
+        tasks.job_queue.add_annotations_between_times.delay(
             start_time, end_time, tag="reindex_date"
         )
         return self._notify_reindexing_started(
@@ -59,7 +58,7 @@ class SearchAdminViews:
         if not user:
             raise NotFoundError(f"User {username} not found")
 
-        self.queue_service.queue_users_annotations(
+        tasks.job_queue.add_annotations_from_user.delay(
             user.userid, tag="reindex_user", force=force
         )
         return self._notify_reindexing_started(
@@ -80,7 +79,7 @@ class SearchAdminViews:
         if not group:
             raise NotFoundError(f"Group {groupid} not found")
 
-        self.queue_service.queue_group_annotations(
+        tasks.job_queue.add_annotations_from_group.delay(
             groupid, tag="reindex_group", force=force
         )
         return self._notify_reindexing_started(

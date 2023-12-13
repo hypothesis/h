@@ -1,8 +1,8 @@
 from h_pyramid_sentry import report_exception
 
+from h import tasks
 from h.presenters import AnnotationSearchIndexPresenter
 from h.services.annotation_read import AnnotationReadService
-from h import tasks
 
 
 class SearchIndexService:

@@ -1,4 +1,4 @@
-from h import models
+from h import models, tasks
 
 
 class UserRenameError(Exception):
@@ -23,9 +23,8 @@ class UserRenameService:
     UserRenameError if the new username is already taken by another account.
     """
 
-    def __init__(self, session, queue_service):
+    def __init__(self, session):
         self.session = session
-        self._queue_service = queue_service
 
     def check(self, user, new_username):
         existing_user = models.User.get_by_username(
@@ -57,10 +56,8 @@ class UserRenameService:
         self._update_tokens(old_userid, new_userid)
 
         self._change_annotations(old_userid, new_userid)
-        self._queue_service.queue_users_annotations(
-            old_userid,
-            tag="RenameUserService.rename",
-            schedule_in=30,
+        tasks.job_queue.add_annotations_from_user.delay(
+            old_userid, tag="RenameUserService.rename", schedule_in=30
         )
 
     def _purge_auth_tickets(self, user):
@@ -89,7 +86,4 @@ class UserRenameService:
 
 def service_factory(_context, request):
     """Return a RenameUserService instance for the passed context and request."""
-    return UserRenameService(
-        session=request.db,
-        queue_service=request.find_service(name="queue_service"),
-    )
+    return UserRenameService(session=request.db)

@@ -166,34 +166,6 @@ class TestQueueService:
         where = add_where.call_args[0][0]
         assert where[0].compare(Annotation.groupid == sentinel.groupid)
 
-    def test_queue_annotations_between_times(self, svc, tasks):
-        svc.queue_annotations_between_times(sentinel.start, sentinel.end, sentinel.tag)
-        tasks.add_annotations_between_times.delay.assert_called_once_with(
-            sentinel.start, sentinel.end, sentinel.tag
-        )
-
-    def test_queue_users_annotations(self, svc, tasks):
-        svc.queue_users_annotations(
-            sentinel.userid, sentinel.tag, sentinel.force, sentinel.schedule_in
-        )
-        tasks.add_users_annotations.delay.assert_called_once_with(
-            sentinel.userid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
-    def test_queue_group_annotations(self, svc, tasks):
-        svc.queue_group_annotations(
-            sentinel.groupid, sentinel.tag, sentinel.force, sentinel.schedule_in
-        )
-        tasks.add_group_annotations.delay.assert_called_once_with(
-            sentinel.groupid,
-            sentinel.tag,
-            force=sentinel.force,
-            schedule_in=sentinel.schedule_in,
-        )
-
     def test_delete_jobs(self, factories, svc, db_session):
         jobs = factories.SyncAnnotationJob.create_batch(size=5)
         db_session.flush()
@@ -215,10 +187,6 @@ class TestQueueService:
     def add_where(self, svc):
         with patch.object(svc, "add_where") as add_where:
             yield add_where
-
-    @pytest.fixture(autouse=True)
-    def tasks(self, patch):
-        return patch("h.services.job_queue.queue.tasks")
 
     @pytest.fixture()
     def svc(self, db_session):
