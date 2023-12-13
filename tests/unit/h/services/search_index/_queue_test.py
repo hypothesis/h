@@ -18,7 +18,7 @@ class TestSync:
     def test_it_does_nothing_if_the_queue_is_empty(
         self, batch_indexer, queue, queue_service
     ):
-        queue_service.get_jobs_from_queue.return_value = []
+        queue_service.get.return_value = []
         counts = queue.sync(1)
 
         assert counts == {}
@@ -28,7 +28,7 @@ class TestSync:
         self, batch_indexer, factories, queue, queue_service
     ):
         job = factories.SyncAnnotationJob(force=True)
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
 
         counts = queue.sync(1)
 
@@ -40,7 +40,7 @@ class TestSync:
             Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        queue_service.delete_jobs.assert_called_once_with([job])
+        queue_service.delete.assert_called_once_with([job])
         batch_indexer.index.assert_called_once_with([self.url_safe_id(job)])
 
     def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
@@ -52,7 +52,7 @@ class TestSync:
         # in the DB in this test.
         annotation = factories.Annotation()
         job = factories.SyncAnnotationJob(annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
         db_session.delete(annotation)
 
         counts = queue.sync(1)
@@ -62,14 +62,14 @@ class TestSync:
             Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        queue_service.delete_jobs.assert_called_once_with([job])
+        queue_service.delete.assert_called_once_with([job])
 
     def test_if_the_annotation_is_marked_as_deleted_in_the_DB_it_deletes_the_job_from_the_queue(
         self, factories, queue, queue_service
     ):
         annotation = factories.Annotation()
         job = factories.SyncAnnotationJob(annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
         annotation.deleted = True
 
         counts = queue.sync(1)
@@ -79,13 +79,13 @@ class TestSync:
             Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        queue_service.delete_jobs.assert_called_once_with([job])
+        queue_service.delete.assert_called_once_with([job])
 
     def test_if_the_annotation_is_missing_from_Elastic_it_indexes_it(
         self, batch_indexer, factories, queue, queue_service
     ):
         job = factories.SyncAnnotationJob()
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
 
         counts = queue.sync(1)
 
@@ -102,7 +102,7 @@ class TestSync:
         annotation = factories.Annotation()
         index(annotation)
         job = factories.SyncAnnotationJob(annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
 
         counts = queue.sync(1)
 
@@ -111,7 +111,7 @@ class TestSync:
             Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
             Queue.Result.COMPLETED_TOTAL: 1,
         }
-        queue_service.delete_jobs.assert_called_once_with([job])
+        queue_service.delete.assert_called_once_with([job])
         batch_indexer.index.assert_not_called()
 
     def test_if_the_annotation_has_a_different_updated_time_in_Elastic_it_indexes_it(
@@ -120,7 +120,7 @@ class TestSync:
         annotation = factories.Annotation()
         index(annotation)
         job = factories.SyncAnnotationJob(annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
         # Simulate the annotation having been updated in the DB after it was
         # indexed.
         annotation.updated = now
@@ -140,7 +140,7 @@ class TestSync:
         annotation = factories.Annotation()
         index(annotation)
         job = factories.SyncAnnotationJob(annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = [job]
+        queue_service.get.return_value = [job]
         # Simulate the user having been renamed in the DB.
         annotation.userid = "new_userid"
 
@@ -158,7 +158,7 @@ class TestSync:
     ):
         annotation = factories.Annotation()
         jobs = factories.SyncAnnotationJob.create_batch(size=2, annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = jobs
+        queue_service.get.return_value = jobs
 
         counts = queue.sync(len(jobs))
 
@@ -177,7 +177,7 @@ class TestSync:
         annotation = factories.Annotation()
         index(annotation)
         jobs = factories.SyncAnnotationJob.create_batch(size=2, annotation=annotation)
-        queue_service.get_jobs_from_queue.return_value = jobs
+        queue_service.get.return_value = jobs
 
         counts = queue.sync(len(jobs))
 
@@ -186,16 +186,16 @@ class TestSync:
             Queue.Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 2,
             Queue.Result.COMPLETED_TOTAL: 2,
         }
-        queue_service.delete_jobs.assert_called_once_with(jobs)
+        queue_service.delete.assert_called_once_with(jobs)
         batch_indexer.index.assert_not_called()
 
     def test_metrics(self, factories, index, now, queue, queue_service):
-        queue_service.get_jobs_from_queue.return_value = []
+        queue_service.get.return_value = []
 
         def add_job(indexed=True, updated=False, deleted=False, **kwargs):
             annotation = factories.Annotation()
             job = factories.SyncAnnotationJob(annotation=annotation, **kwargs)
-            queue_service.get_jobs_from_queue.return_value.append(job)
+            queue_service.get.return_value.append(job)
 
             if indexed:
                 index(annotation)

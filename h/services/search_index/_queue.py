@@ -47,9 +47,7 @@ class Queue:
           job on the queue to be re-checked and removed the next time the
           method runs.
         """
-        jobs = self._queue_service.get_jobs_from_queue(
-            name="sync_annotation", limit=limit
-        )
+        jobs = self._queue_service.get(name="sync_annotation", limit=limit)
 
         if not jobs:
             return {}
@@ -125,7 +123,7 @@ class Queue:
                 counts[Queue.Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
                 counts[Queue.Result.COMPLETED_TOTAL].add(job.id)
 
-        self._queue_service.delete_jobs(job_complete)
+        self._queue_service.delete(job_complete)
 
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
