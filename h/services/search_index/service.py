@@ -2,7 +2,7 @@ from h_pyramid_sentry import report_exception
 
 from h.presenters import AnnotationSearchIndexPresenter
 from h.services.annotation_read import AnnotationReadService
-from h.tasks import indexer as indexer_tasks
+from h import tasks
 
 
 class SearchIndexService:
@@ -104,12 +104,12 @@ class SearchIndexService:
         if event.action in ["create", "update"]:
             sync_handler, async_task = (
                 self.add_annotation_by_id,
-                indexer_tasks.add_annotation,
+                tasks.indexer.add_annotation,
             )
         elif event.action == "delete":
             sync_handler, async_task = (
                 self.delete_annotation_by_id,
-                indexer_tasks.delete_annotation,
+                tasks.indexer.delete_annotation,
             )
         else:
             return False
