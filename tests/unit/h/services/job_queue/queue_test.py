@@ -16,24 +16,24 @@ ONE_WEEK_IN_SECONDS = int(ONE_WEEK.total_seconds())
 
 
 class TestQueueService:
-    def test_get_jobs_from_queue_ignores_jobs_that_are_expired(self, factories, svc):
+    def test_get_ignores_jobs_that_are_expired(self, factories, svc):
         now = datetime.utcnow()
 
         factories.SyncAnnotationJob(expires_at=now - timedelta(hours=1))
 
-        assert not svc.get_jobs_from_queue(limit=100)
+        assert not svc.get(limit=100)
 
     def test_it_ignores_jobs_that_arent_scheduled_yet(self, factories, svc):
         now = datetime.utcnow()
         factories.SyncAnnotationJob(scheduled_at=now + timedelta(hours=1))
 
-        assert not svc.get_jobs_from_queue(limit=100)
+        assert not svc.get(limit=100)
 
     def test_it_ignores_jobs_beyond_limit(self, factories, svc):
         limit = 1
         factories.SyncAnnotationJob.create_batch(size=limit + 1)
 
-        jobs = svc.get_jobs_from_queue(limit=limit)
+        jobs = svc.get(limit=limit)
 
         assert len(jobs) == limit
 
@@ -166,11 +166,11 @@ class TestQueueService:
         where = add_where.call_args[0][0]
         assert where[0].compare(Annotation.groupid == sentinel.groupid)
 
-    def test_delete_jobs(self, factories, svc, db_session):
+    def test_delete(self, factories, svc, db_session):
         jobs = factories.SyncAnnotationJob.create_batch(size=5)
         db_session.flush()
 
-        svc.delete_jobs(jobs)
+        svc.delete(jobs)
 
         assert not db_session.query(Job).all()
 

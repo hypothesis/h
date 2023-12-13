@@ -17,7 +17,7 @@ class QueueService:
     def __init__(self, db):
         self._db = db
 
-    def get_jobs_from_queue(self, limit, name="sync_annotation"):
+    def get(self, limit, name="sync_annotation"):
         now = datetime.utcnow()
 
         query = self._db.query(Job).filter(
@@ -31,7 +31,7 @@ class QueueService:
             .all()
         )
 
-    def delete_jobs(self, jobs):
+    def delete(self, jobs):
         for job in jobs:
             self._db.delete(job)
 
