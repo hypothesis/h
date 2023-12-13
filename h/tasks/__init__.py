@@ -1,3 +1,6 @@
+from h.tasks import indexer
+from h.tasks import job_queue
+
 RETRY_POLICY_QUICK = {
     "max_retries": 2,
     # The delay until the first retry
