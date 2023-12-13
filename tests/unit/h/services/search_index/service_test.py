@@ -211,7 +211,7 @@ class TestHandleAnnotationEvent:
         assert result == async_handler.return_value
 
     @pytest.fixture(autouse=True)
-    def handler_for(self, add_annotation_by_id, delete_annotation_by_id, indexer_tasks):
+    def handler_for(self, add_annotation_by_id, delete_annotation_by_id, tasks):
         handler_map = {
             True: {
                 "create": add_annotation_by_id,
@@ -219,9 +219,9 @@ class TestHandleAnnotationEvent:
                 "delete": delete_annotation_by_id,
             },
             False: {
-                "create": indexer_tasks.add_annotation.delay,
-                "update": indexer_tasks.add_annotation.delay,
-                "delete": indexer_tasks.delete_annotation.delay,
+                "create": tasks.indexer.add_annotation.delay,
+                "update": tasks.indexer.add_annotation.delay,
+                "delete": tasks.indexer.delete_annotation.delay,
             },
         }
 
@@ -296,8 +296,8 @@ def search_index(
 
 
 @pytest.fixture(autouse=True)
-def indexer_tasks(patch):
-    return patch("h.services.search_index.service.indexer_tasks")
+def tasks(patch):
+    return patch("h.services.search_index.service.tasks")
 
 
 @pytest.fixture(autouse=True)
