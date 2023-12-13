@@ -3,12 +3,12 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.tasks import queue
+from h.tasks import job_queue
 
 
 class TestAddAnnotationsBetweenTimes:
     def test_it(self, queue_service):
-        queue.add_annotations_between_times(
+        job_queue.add_annotations_between_times(
             sentinel.start_time, sentinel.end_time, sentinel.tag
         )
 
@@ -19,7 +19,6 @@ class TestAddAnnotationsBetweenTimes:
 
 class TestAddAnnotationsFromUser:
     def test_it(self, queue_service):
-        queue.add_users_annotations(
         job_queue.add_annotations_from_user(
             sentinel.userid,
             sentinel.tag,
@@ -54,7 +53,7 @@ class TestAddAnnotationsFromGroup:
 
 @pytest.fixture(autouse=True)
 def celery(patch, pyramid_request):
-    cel = patch("h.tasks.queue.celery")
+    cel = patch("h.tasks.job_queue.celery")
     cel.request = pyramid_request
     return cel
 

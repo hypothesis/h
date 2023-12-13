@@ -1,13 +1,12 @@
+from h import tasks
 from h.models import User
-from h.services.job_queue.queue import QueueService
 
 
 class NipsaService:
     """A service which provides access to the state of "not-in-public-site-areas" (NIPSA) flags on userids."""
 
-    def __init__(self, session, queue_service: QueueService):
+    def __init__(self, session):
         self.session = session
-        self._queue_service = queue_service
 
         # Cache of all userids which have been flagged.
         self._flagged_userids = None
@@ -74,11 +73,11 @@ class NipsaService:
         self._flagged_userids = None
 
     def _reindex_users_annotations(self, user, tag):
-        self._queue_service.queue_users_annotations(
+        tasks.job_queue.add_annotations_from_user.delay(
             user.userid, tag=tag, force=True, schedule_in=30
         )
 
 
 def nipsa_factory(_context, request):
     """Return a NipsaService instance for the passed context and request."""
-    return NipsaService(request.db, request.find_service(name="queue_service"))
+    return NipsaService(request.db)

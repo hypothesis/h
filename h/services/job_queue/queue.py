@@ -4,7 +4,6 @@ from sqlalchemy import and_, func, literal_column, select
 from zope.sqlalchemy import mark_changed
 
 from h.models import Annotation, Job
-from h.tasks import queue as tasks
 
 
 class Priority:
@@ -129,25 +128,6 @@ class QueueService:
 
         self._db.execute(query)
         mark_changed(self._db)
-
-    @staticmethod
-    def queue_annotations_between_times(start_time, end_time, tag):
-        """Asynchronously add all annotations between two times to the queue."""
-        tasks.add_annotations_between_times.delay(start_time, end_time, tag)
-
-    @staticmethod
-    def queue_users_annotations(userid, tag, force=False, schedule_in=None):
-        """Asynchronously all of a users annotations to the queue."""
-        tasks.add_users_annotations.delay(
-            userid, tag, force=force, schedule_in=schedule_in
-        )
-
-    @staticmethod
-    def queue_group_annotations(groupid, tag, force=False, schedule_in=None):
-        """Asynchronously all annotations in a group to queue."""
-        tasks.add_group_annotations.delay(
-            groupid, tag, force=force, schedule_in=schedule_in
-        )
 
 
 def factory(_context, request):
