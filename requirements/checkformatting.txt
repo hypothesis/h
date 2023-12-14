@@ -28,7 +28,7 @@ idna==3.6
     # via yarl
 importlib-metadata==4.12.0
     # via pip-sync-faster
-isort==5.13.1
+isort==5.13.2
     # via -r requirements/checkformatting.in
 multidict==6.0.4
     # via
