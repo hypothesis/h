@@ -92,7 +92,6 @@ class BulkAnnotationService:
     def _audience_groups_subquery(cls, authority, username):
         return (
             sa.select(Group.id)
-            .distinct()
             .join(GroupMembership, GroupMembership.group_id == Group.id)
             .join(cls._AUDIENCE, GroupMembership.user_id == cls._AUDIENCE.id)
             .where(
