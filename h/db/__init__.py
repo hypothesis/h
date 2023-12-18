@@ -19,8 +19,6 @@ import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from h.util.session_tracker import Tracker
-
 __all__ = ("Base", "Session", "init", "make_engine")
 
 log = logging.getLogger(__name__)
@@ -85,14 +83,6 @@ def _session(request):  # pragma: no cover
     else:
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
-    # Track uncommitted changes so we can verify that everything was either
-    # committed or rolled back when the request finishes.
-    db_session_checks = request.registry.settings.get("h.db_session_checks", True)
-    if db_session_checks:
-        tracker = Tracker(session)
-    else:
-        tracker = None
-
     # pyramid_tm doesn't always close the database session for us.
     #
     # If anything that executes later in the Pyramid request processing cycle
@@ -104,25 +94,9 @@ def _session(request):  # pragma: no cover
     # always closed.
     @request.add_finished_callback
     def close_the_sqlalchemy_session(_request):
-        if (
-            len(session.transaction._connections)  # pylint: disable=protected-access
-            > 1
-        ):
-            # There appear to still be open DB connections belonging to this
-            # request. This shouldn't happen.
-            changes = tracker.uncommitted_changes() if tracker else []
-            if changes:
-                msg = "closing a session with uncommitted changes %s"
-                log.warning(msg, changes, extra={"stack": True, "changes": changes})
-            else:
-                log.warning(
-                    "closing an unclosed DB session (no uncommitted changes)",
-                    extra={"stack": True},
-                )
         # Close any unclosed DB connections.
-        # This is done outside of the `if` statement above just in case: it's
-        # okay to call `session.close()` even if the session does not need to
-        # be closed, so just call it unconditionally so that there's no chance
+        # It's okay to call `session.close()` even if the session does not need to
+        # be closed, so just call it so that there's no chance
         # of leaking any unclosed DB connections.
         session.close()
 
