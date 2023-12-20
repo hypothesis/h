@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from h.services.job_queue.metrics import JobQueueMetrics, factory
+from h.services.job_queue_metrics import JobQueueMetrics, factory
 
 
 class TestJobQueue:
