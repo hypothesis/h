@@ -4,7 +4,7 @@ from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
 from h.services.bulk_api import BulkAnnotationService, BulkGroupService
-from h.services.job_queue.queue import QueueService
+from h.services.job_queue import JobQueueService
 from h.services.subscription import SubscriptionService
 
 
@@ -97,10 +97,10 @@ def includeme(config):  # pragma: no cover
         name="list_organizations",
     )
     config.register_service_factory(
-        "h.services.job_queue.metrics.factory", name="job_queue_metrics"
+        "h.services.job_queue_metrics.factory", name="job_queue_metrics"
     )
     config.register_service_factory(
-        "h.services.job_queue.queue.factory", iface=QueueService, name="queue_service"
+        "h.services.job_queue.factory", iface=JobQueueService, name="queue_service"
     )
 
     config.register_service_factory("h.services.nipsa.nipsa_factory", name="nipsa")
