@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import BinaryExpression
 
 from h.db.types import URLSafeUUID
 from h.models import Annotation, Job
-from h.services.job_queue.queue import Priority, QueueService, factory
+from h.services.job_queue import JobQueueService, Priority, factory
 
 ONE_WEEK = timedelta(weeks=1)
 ONE_WEEK_IN_SECONDS = int(ONE_WEEK.total_seconds())
@@ -190,4 +190,4 @@ class TestQueueService:
 
     @pytest.fixture()
     def svc(self, db_session):
-        return QueueService(db_session)
+        return JobQueueService(db_session)

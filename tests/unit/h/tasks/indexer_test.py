@@ -4,7 +4,7 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.services.job_queue.metrics import JobQueueMetrics
+from h.services.job_queue_metrics import JobQueueMetrics
 from h.tasks import indexer
 
 pytestmark = pytest.mark.usefixtures("search_index")

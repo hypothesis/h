@@ -13,7 +13,7 @@ class Priority:
     BETWEEN_TIMES = 1000
 
 
-class QueueService:
+class JobQueueService:
     def __init__(self, db):
         self._db = db
 
@@ -131,4 +131,4 @@ class QueueService:
 
 
 def factory(_context, request):
-    return QueueService(request.db)
+    return JobQueueService(request.db)

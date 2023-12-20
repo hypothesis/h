@@ -12,7 +12,7 @@ from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
-from h.services.job_queue.queue import QueueService
+from h.services.job_queue import JobQueueService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 
@@ -26,7 +26,7 @@ class AnnotationWriteService:
         self,
         db_session: Session,
         has_permission: Callable,
-        queue_service: QueueService,
+        queue_service: JobQueueService,
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
     ):
