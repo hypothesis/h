@@ -24,7 +24,7 @@ class TestInitCommand:
 
         result = cli.invoke(init, obj=ctx)
 
-        db.make_engine.assert_called_once_with(pyramid_request.registry.settings)
+        db.create_engine.assert_called_once_with(pyramid_request.registry.settings)
         db_engine.execute.assert_called_once_with("select 1 from alembic_version")
         assert (
             "h.cli.commands.init",
@@ -121,4 +121,4 @@ def ctx(pyramid_request):
 
 @pytest.fixture
 def db_engine(db):
-    return db.make_engine.return_value
+    return db.create_engine.return_value

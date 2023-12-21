@@ -1,1 +1,13 @@
-SQLALCHEMY_SILENCE_UBER_WARNING=1
+REPORT_FDW_USERS=lms-fdw report-fdw
+dev,tests,functests: ELASTICSEARCH_URL = {env:ELASTICSEARCH_URL:http://localhost:9200}
+tests: ELASTICSEARCH_INDEX = hypothesis-tests
+functests: ELASTICSEARCH_INDEX = hypothesis-functests
+dev: APP_URL = {env:APP_URL:http://localhost:5000}
+dev: WEBSOCKET_URL = {env:WEBSOCKET_URL:ws://localhost:5001/ws}
+dev: ENABLE_WEBSOCKET = {env:ENABLE_WEBSOCKET:true}
+dev: ENABLE_WORKER = {env:ENABLE_WORKER:true}
+dev: ENABLE_ASSETS = {env:ENABLE_ASSETS:true}
+dev: JWE_SECRET_LMS = {env:JWE_SECRET_LMS:SUPER_SECRET}
+dev: SECRET_KEY = notverysecretafterall
+dev: AUTHORITY = localhost
+SQLALCHEMY_SILENCE_UBER_WARNING = {env:SQLALCHEMY_SILENCE_UBER_WARNING:1}

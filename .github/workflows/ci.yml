@@ -7,12 +7,15 @@ on:
       - '.github/workflows/deploy.yml'
       - '.github/workflows/redeploy.yml'
       - 'bin/logger'
-      - 'conf/development-app.ini'
-      - 'app.ini'
+      - 'bin/make_python'
+      - 'bin/make_template'
+      - 'conf/development.ini'
+      - 'conf/production.ini'
       - 'conf/supervisord*.conf'
       - 'docs/*'
       - 'requirements/*.in'
       - 'requirements/dev.txt'
+      - '.docker.env'
       - '**/.gitignore'
       - 'Dockerfile'
       - 'LICENSE'
@@ -91,7 +94,9 @@ jobs:
           restore-keys: |
             tests-${{ runner.os }}-tox-
       - name: Create test database
-        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE h_tests'
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
       - run: python -m pip install 'tox<4'
       - run: tox -e tests
         env:
@@ -161,10 +166,10 @@ jobs:
           restore-keys: |
             functests-${{ runner.os }}-tox-
       - name: Create test database
-        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE h_functests'
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
       - run: python -m pip install 'tox<4'
-      - run: yarn install --immutable
-      - run: gulp build
       - run: tox -e functests
   Frontend:
     uses: ./.github/workflows/frontend.yml

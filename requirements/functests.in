@@ -1,7 +1,11 @@
 pip-tools
 pip-sync-faster
+-r prod.txt
+httpretty
 pytest
 factory-boy
+pytest-factoryboy
+h-matchers
 webtest
+filelock
 pytest-reverse
--r requirements.txt

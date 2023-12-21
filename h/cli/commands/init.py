@@ -26,7 +26,7 @@ def init(ctx):
 
 
 def _init_db(settings):
-    engine = db.make_engine(settings)
+    engine = db.create_engine(settings)
 
     # If the alembic_version table is present, then the database is managed by
     # alembic, and we shouldn't call `db.init`.

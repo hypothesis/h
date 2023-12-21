@@ -1,0 +1,2 @@
+docs: sphinx-autobuild -qT --open-browser -b dirhtml -d {envdir}/doctrees docs {envdir}/html
+checkdocs: sphinx-build -qTWn -b dirhtml -d {envdir}/doctrees docs {envdir}/html

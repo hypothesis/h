@@ -1,16 +1,11 @@
-# Hypothesis packages
 h-pyramid-sentry
 h-matchers
 h-api
 h-assets
 data_tasks
 pyramid-sanity
-
-# 3rd-party packages
 python-jose[cryptography]
 PyJWT
-SQLAlchemy >= 1.1.4
-alembic
 bcrypt
 bleach
 celery
@@ -21,27 +16,22 @@ deform
 elasticsearch==6.8.2
 elasticsearch-dsl==6.4.0
 gevent >= 1.4.0
-gunicorn >= 19.9.0
 importlib_resources
 itsdangerous
 jsonschema
 kombu
 markdown
-newrelic
 oauthlib
 packaging
 passlib
 psycogreen
-psycopg2
 pycryptodomex
 pyparsing >= 2.1.5
-pyramid
 pyramid-exclog
 pyramid-jinja2
 pyramid-services
 pyramid-mailer
 pyramid-retry
-pyramid-tm
 python-dateutil
 python-slugify < 8.1.0
 pytz
@@ -54,4 +44,3 @@ venusian
 wsaccel
 ws4py >= 0.4.0
 zope.interface
-zope.sqlalchemy >= 1.0

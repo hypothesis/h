@@ -1,0 +1,95 @@
+[tool.pylint.main]
+jobs = 0 # Use one process for CPU.
+
+load-plugins = [
+    "pylint.extensions.bad_builtin",
+    "pylint.extensions.check_elif",
+    "pylint.extensions.docparams",
+    "pylint.extensions.mccabe",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.redefined_variable_type",
+]
+
+# Fail if there are *any* messages from PyLint.
+# The letters refer to PyLint's message categories, see
+# https://pylint.pycqa.org/en/latest/messages/messages_introduction.html
+fail-on = ["C", "E", "F", "I", "R", "W"]
+
+[tool.pylint.messages_control]
+ignore-paths = [
+]
+enable = [
+    "bad-inline-option",
+    "deprecated-pragma",
+    "useless-suppression",
+    "use-symbolic-message-instead",
+    "use-implicit-booleaness-not-comparison-to-zero",
+    "use-implicit-booleaness-not-comparison-to-string",
+]
+disable = [
+    # Docstrings are encouraged but we don't want to enforce that everything
+    # must have a docstring.
+    "missing-docstring",
+
+    # We don't always want to have to put a `:return:` in a docstring.
+    "missing-return-doc",
+
+    # We don't always want to have to put an `:rtype:` in a docstring.
+    "missing-return-type-doc",
+
+    # We don't want to have to document the type of every parameter with a
+    # `:type:` in the docstring.
+    "missing-type-doc",
+
+    # We use isort to sort and group our imports, so we don't need PyLint to
+    # check them for us.
+    "ungrouped-imports",
+
+    # We use Black to format our code automatically, so we don't need PyLint to
+    # check formatting for us.
+    "line-too-long",
+
+    # Because of how pytest fixtures work it's frequently necessary for
+    # parameters to redefine outer names.
+    "redefined-outer-name",
+
+    # Lots of test methods don't use self, but we still want to group our tests
+    # into classes.
+    "too-few-public-methods",
+    "too-many-public-methods",
+
+    "too-many-arguments",
+
+    # not-callable is mis-firing on all pytest.mark.parametrize usages, so
+    # disable it for now. This can be re-enabled once a new pytest version
+    # including https://github.com/pytest-dev/pytest/pull/7565 has been
+    # released.
+    "not-callable",
+
+    # Issues to disable this for false positives, disabling it globally in the meantime https://github.com/PyCQA/pylint/issues/214
+    "duplicate-code",
+
+    # Temporarily ignored during pep8 -> pylint transition. This should be removed later.
+    "fixme",
+]
+
+# Just disable PyLint's name style checking for the tests, because we
+# frequently use lots of argument names that don't conform.
+# For example we frequently create pytest fixtures that aren't named in
+# snake_case, such as a fixture that returns a mock of the FooBar class would
+# be named FooBar in CamelCase.
+argument-naming-style = "any"
+class-naming-style = "any"
+function-naming-style = "any"
+method-naming-style = "any"
+variable-naming-style = "any"
+
+good-names = [
+    "i", "j", "k", "ex", "Run", "_", # PyLint's default good names.
+    "pytestmark",
+    "os", # Name used for mocks of the standard os module.
+]
+
+[tool.pylint.reports]
+output-format = "colorized"
+score = "no"

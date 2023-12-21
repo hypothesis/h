@@ -1,0 +1,6 @@
+"ignore:^pkg_resources is deprecated as an API:DeprecationWarning:chameleon",
+
+# Usage of deprecated method of urllib3 within the elasticsearch library
+"ignore:^HTTPResponse.getheaders\\(\\) is deprecated and will be removed in urllib3 v2.1.0. Instead access HTTPResponse.headers directly.$:DeprecationWarning:elasticsearch",
+"ignore:^The behavior of AcceptLanguageValidHeader\\.__iter__ is currently maintained for backward compatibility, but will change in the future.$:DeprecationWarning:webob.acceptparse",
+"ignore:^Use of \\.\\. or absolute path in a resource path is not allowed and will raise exceptions in a future release\\.$:DeprecationWarning:pyramid",

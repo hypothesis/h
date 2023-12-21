@@ -1,0 +1,19 @@
+{
+  "programs": {
+    "nginx": {
+      "command": "nginx"
+    },
+    "web": {
+      "command": "newrelic-admin run-program gunicorn --paste conf/production.ini --config conf/gunicorn.conf.py"
+    },
+    "websocket-separate": {
+      "command": "newrelic-admin run-program gunicorn --paste conf/websocket-separate.ini --config conf/gunicorn-websocket-separate.conf.py"
+    },
+    "websocket-monolithic": {
+      "command": "newrelic-admin run-program gunicorn --paste conf/websocket-monolithic.ini --config conf/gunicorn-websocket-monolithic.conf.py"
+    },
+    "worker": {
+      "command": "newrelic-admin run-program hypothesis celery worker --loglevel=INFO"
+    }
+  }
+}

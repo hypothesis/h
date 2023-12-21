@@ -5,7 +5,7 @@ from collections import namedtuple
 import slugify
 import sqlalchemy as sa
 
-from h import pubid  # pylint: disable=unused-import
+from h import pubid
 from h.db import Base, mixins
 from h.util.group import split_groupid
 

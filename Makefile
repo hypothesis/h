@@ -1,150 +1,105 @@
+comma := ,
+
 .PHONY: help
-help:
-	@echo "make help              Show this help message"
-	@echo 'make services          Run the services that `make dev` requires'
-	@echo "                       (Postgres, Elasticsearch, etc) in Docker Compose"
-	@echo 'make db                Upgrade the DB schema to the latest version'
-	@echo "make dev               Run the app in the development server"
-	@echo "make devdata           Upsert standard development data into the DB, and set"
-	@echo "                       standard environment variables for a development"
-	@echo "                       environment"
-	@echo "make shell             Launch a Python shell in the dev environment"
-	@echo "make sql               Connect to the dev database with a psql shell"
-	@echo "make lint              Run the code linter(s) and print any warnings"
-	@echo "make format            Correctly format the code"
-	@echo "make checkformatting   Crash if the code isn't correctly formatted"
-	@echo "make test              Run the unit tests"
-	@echo "make backend-tests     Run the backend unit tests"
-	@echo "make frontend-tests    Run the frontend unit tests"
-	@echo "make coverage          Print the unit test coverage report"
-	@echo "make functests         Run the functional tests"
-	@echo "make docs              Build docs website and serve it locally"
-	@echo "make checkdocs         Crash if building the docs website fails"
-	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
-	@echo "make docker            Make the app's Docker image"
-	@echo "make run-docker        Run the app's Docker image locally. "
-	@echo "                       This command exists for conveniently testing "
-	@echo "                       the Docker image locally in production mode. "
-	@echo "                       It assumes the services are being run using "
-	@echo "                       docker compose in the 'h_default' network."
+help = help::; @echo $$$$(tput bold)$(strip $(1)):$$$$(tput sgr0) $(strip $(2))
+$(call help,make help,print this help message)
 
 .PHONY: services
+$(call help,make services,start the services that the app needs)
 services: args?=up -d --wait
 services: python
 	@docker compose $(args)
 
 .PHONY: db
+$(call help,make db,initialize the DB and upgrade it to the latest migration)
 db: args?=upgrade head
 db: python
-	@tox -qqe dev --run-command 'sh bin/hypothesis --dev init'
-	@tox -qe dev --run-command 'sh bin/hypothesis --dev migrate $(args)'
-
-.PHONY: dev
-dev: build/manifest.json python
-	@tox -qe dev
-
-.PHONY: devssl
-devssl: export H_GUNICORN_CERTFILE=.tlscert.pem
-devssl: export H_GUNICORN_KEYFILE=.tlskey.pem
-devssl: export APP_URL=https://localhost:5000
-devssl: export WEBSOCKET_URL=wss://localhost:5001/ws
-devssl: build/manifest.json python
-	@tox -qe dev
+	@tox -qe dev --run-command 'python bin/make_db'
+	@tox -qe dev  --run-command 'alembic $(args)'
 
 .PHONY: devdata
+$(call help,make devdata,load development data and environment variables)
 devdata: python
-	@tox -qe dev -- sh bin/hypothesis --dev devdata
+	@tox -qe dev --run-command 'python bin/make_devdata'
+
+.PHONY: dev
+$(call help,make dev,run the whole app \(all workers\))
+dev: python
+	@pyenv exec tox -qe dev
+
+.PHONY: web
+$(call help,make web,run just a single web worker process)
+web: python
+	@pyenv exec tox -qe dev --run-command 'gunicorn --bind :5000 --workers 1 --reload --timeout 0 --paste conf/development.ini'
 
 .PHONY: shell
+$(call help,make shell,"launch a Python shell in this project's virtualenv")
 shell: python
-	@tox -qe dev -- sh bin/hypothesis --dev shell
+	@pyenv exec tox -qe dev --run-command 'pshell conf/development.ini'
 
 .PHONY: sql
+$(call help,make sql,"Connect to the dev database with a psql shell")
 sql: python
 	@docker compose exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
-lint: frontend-lint backend-lint
-
-.PHONY: backend-lint
-backend-lint: python
-	@tox -qe lint
-
-.PHONY: frontend-lint
-frontend-lint: node_modules/.uptodate
-	@yarn lint
+$(call help,make lint,"lint the code and print any warnings")
+lint: python
+	@pyenv exec tox -qe lint
 
 .PHONY: format
-format: backend-format frontend-format
+$(call help,make format,"format the code")
+format: python
+	@pyenv exec tox -qe format
 
-.PHONY: backend-format
-backend-format: python
-	@tox -qe format
-
-.PHONY: frontend-format
-frontend-format: node_modules/.uptodate
-	@yarn format
-
-PHONY: checkformatting
-checkformatting: backend-checkformatting frontend-checkformatting
-
-.PHONY: backend-checkformatting
-backend-checkformatting: python
-	@tox -qe checkformatting
-
-.PHONY: frontend-checkformatting
-frontend-checkformatting: node_modules/.uptodate
-	@yarn checkformatting
+.PHONY: checkformatting
+$(call help,make checkformatting,"crash if the code isn't correctly formatted")
+checkformatting: python
+	@pyenv exec tox -qe checkformatting
 
 .PHONY: test
-test: backend-tests frontend-tests
-
-.PHONY: backend-tests
-backend-tests: python
-	@tox -q
-
-.PHONY: frontend-tests
-frontend-tests: node_modules/.uptodate
-	@yarn test
+$(call help,make test,"run the unit tests")
+test: python
+	@pyenv exec tox -qe tests
 
 .PHONY: coverage
+$(call help,make coverage,"run the tests and print the coverage report")
 coverage: python
-	@tox -qe coverage
+	@pyenv exec tox -qe 'tests,coverage'
 
 .PHONY: functests
-functests: build/manifest.json python
-	@tox -qe functests
+$(call help,make functests,"run the functional tests")
+functests: python
+	@pyenv exec tox -qe functests
 
-.PHONY: docs
-docs: python
-	@tox -qe docs
-
-.PHONY: checkdocs
-checkdocs: python
-	@tox -qe checkdocs
+.PHONY: sure
+$(call help,make sure,"make sure that the formatting$(comma) linting and tests all pass")
+sure: python
+sure:
+	@pyenv exec tox --parallel -qe 'checkformatting,lint,tests,coverage,functests'
 
 # Tell make how to compile requirements/*.txt files.
 #
 # `touch` is used to pre-create an empty requirements/%.txt file if none
 # exists, otherwise tox crashes.
 #
-# $(subst) is used because in the special case of making requirements.txt we
-# actually need to touch dev.txt not requirements.txt and we need to run
-# `tox -e dev ...` not `tox -e requirements ...`
+# $(subst) is used because in the special case of making prod.txt we actually
+# need to touch dev.txt not prod.txt and we need to run `tox -e dev ...`
+# not `tox -e prod ...`
 #
 # $(basename $(notdir $@))) gets just the environment name from the
 # requirements/%.txt filename, for example requirements/foo.txt -> foo.
-requirements/%.txt: requirements/%.in
-	@touch -a $(subst requirements.txt,dev.txt,$@)
-	@tox -qe $(subst requirements,dev,$(basename $(notdir $@))) --run-command 'pip --quiet --disable-pip-version-check install pip-tools'
-	@tox -qe $(subst requirements,dev,$(basename $(notdir $@))) --run-command 'pip-compile --no-allow-unsafe --quiet $(args) $<'
+requirements/%.txt: requirements/%.in python
+	@touch -a $(subst prod.txt,dev.txt,$@)
+	@tox -qe $(subst prod,dev,$(basename $(notdir $@))) --run-command 'pip --quiet --disable-pip-version-check install pip-tools pip-sync-faster'
+	@tox -qe $(subst prod,dev,$(basename $(notdir $@))) --run-command 'pip-compile --allow-unsafe --quiet $(args) $<'
 
 # Inform make of the dependencies between our requirements files so that it
 # knows what order to re-compile them in and knows to re-compile a file if a
 # file that it depends on has been changed.
-requirements/dev.txt: requirements/requirements.txt
-requirements/tests.txt: requirements/requirements.txt
-requirements/functests.txt: requirements/requirements.txt
+requirements/dev.txt: requirements/prod.txt
+requirements/tests.txt: requirements/prod.txt
+requirements/functests.txt: requirements/prod.txt
 requirements/lint.txt: requirements/tests.txt requirements/functests.txt
 
 # Add a requirements target so you can just run `make requirements` to
@@ -158,55 +113,34 @@ requirements/lint.txt: requirements/tests.txt requirements/functests.txt
 # requirements/*.in files from disk ($(wildcard requirements/*.in)) and replace
 # the .in's with .txt's.
 .PHONY: requirements requirements/
+$(call help,make requirements,"compile the requirements files")
 requirements requirements/: $(foreach file,$(wildcard requirements/*.in),$(basename $(file)).txt)
 
-.PHONY: sure
-sure: checkformatting lint test coverage functests
+.PHONY: template
+$(call help,make template,"update from the latest cookiecutter template")
+template: python
+	@pyenv exec tox -e template -- $$(if [ -n "$${template+x}" ]; then echo "--template $$template"; fi) $$(if [ -n "$${checkout+x}" ]; then echo "--checkout $$checkout"; fi) $$(if [ -n "$${directory+x}" ]; then echo "--directory $$directory"; fi)
 
 .PHONY: docker
+$(call help,make docker,"make the app's docker image")
 docker:
-	@git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
+	@git archive --format=tar HEAD | docker build -t hypothesis/h:dev -
 
-.PHONY: run-docker
-run-docker:
-	# To use the local client with the Docker container, you must run the service,
-	# navigate to /admin/oauthclients and register an "authorization_code" OAuth
-	# client, then restart the service with the `CLIENT_OAUTH_ID` environment
-	# variable set.
-	#
-	# If you don't intend to use the client with the container, you can skip this.
-	@docker run \
-		--rm \
-		--net h_default \
-		-e "APP_URL=http://localhost:5000" \
-		-e "AUTHORITY=localhost" \
-		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
-		-e "CLIENT_OAUTH_ID" \
-		-e "CLIENT_URL=http://localhost:3001/hypothesis" \
-		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
-		-e "ELASTICSEARCH_URL=http://elasticsearch:9200" \
-		-e "NEW_RELIC_APP_NAME=h (dev)" \
-		-e "NEW_RELIC_LICENSE_KEY" \
-		-e "SECRET_KEY=notasecret" \
-		-e "ENABLE_NGINX=true" \
-		-e "ENABLE_WEB=true" \
-		-e "ENABLE_WEBSOCKET=true" \
-		-e "WEBSOCKET_CONFIG=conf/websocket-monolithic.ini" \
-		-e "ENABLE_WORKER=true" \
-		-p 5000:5000 \
-		--name hypothesis \
-		hypothesis/hypothesis:$(DOCKER_TAG)
+.PHONY: docker-run
+$(call help,make docker-run,"run the app's docker image")
+docker-run:
+	@bin/make_docker_run
 
-DOCKER_TAG = dev
-
-build/manifest.json: node_modules/.uptodate
-	@yarn build
-
-node_modules/.uptodate: package.json yarn.lock
-	@echo installing javascript dependencies
-	@yarn install
-	@touch $@
+.PHONY: clean
+$(call help,make clean,"delete temporary files etc")
+clean:
+	@rm -rf build dist .tox .coverage coverage .eslintcache node_modules supervisord.log supervisord.pid yarn-error.log
+	@find . -path '*/__pycache__*' -delete
+	@find . -path '*.egg-info*' -delete
 
 .PHONY: python
 python:
-	@./bin/install-python
+	@bin/make_python
+
+-include h.mk
+-include frontend.mk

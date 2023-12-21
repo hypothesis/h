@@ -21,7 +21,7 @@ from tests.common.fixtures.services import *  # pylint:disable=wildcard-import,u
 
 TEST_AUTHORITY = "example.com"
 TEST_DATABASE_URL = database_url(
-    os.environ.get("TEST_DATABASE_URL", "postgresql://postgres@localhost/htest")
+    os.environ.get("TEST_DATABASE_URL", "postgresql://postgres@localhost/h_tests")
 )
 
 Session = sessionmaker()

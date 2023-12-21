@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#
+# Create the given database in Postgres, if it doesn't exist already.
+#
+# Usage:
+#
+#     create-db <DB_NAME>
+make services args="exec postgres psql -U postgres -c 'CREATE DATABASE $1;'" > /dev/null 2>&1 || true

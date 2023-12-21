@@ -10,33 +10,27 @@ on:
     paths-ignore:
       - '.cookiecutter/*'
       - '.github/*'
-      - 'bin/create-testdb'
-      - 'bin/install-python'
-      - 'conf/development-app.ini'
+      - 'bin/create-db'
+      - 'bin/make_python'
+      - 'bin/make_template'
+      - 'conf/development.ini'
       - 'conf/supervisord-dev.conf'
-      - 'conf/websocket-dev.ini'
       - 'docs/*'
       - 'requirements/*'
-      - '!requirements/requirements.txt'
+      - '!requirements/prod.txt'
       - 'tests/*'
-      - '.coveragerc'
-      - '.eslintrc'
-      - '.gitignore'
-      - '.isort.cfg'
-      - '.pylintrc'
-      - 'HACKING.md'
+      - '**/.gitignore'
+      - '.python-version'
       - 'LICENSE'
-      - 'README.rst'
+      - '*.md'
       - 'docker-compose.yml'
-      - 'pyproject.toml'
-      - 'setup.cfg'
       - 'tox.ini'
 jobs:
   docker_hub:
     name: Docker Hub
     uses: hypothesis/workflows/.github/workflows/dockerhub.yml@main
     with:
-      Application: hypothesis
+      Application: ${{ github.event.repository.name }}
     secrets: inherit
   qa:
     name: QA

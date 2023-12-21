@@ -40,7 +40,7 @@ def bootstrap(app_url, dev=False):
         else:
             raise click.ClickException("the app URL must be set in production mode!")
 
-    config = "conf/development-app.ini" if dev else "conf/app.ini"
+    config = "conf/development.ini" if dev else "conf/production.ini"
 
     paster.setup_logging(config)
     request = Request.blank("/", base_url=app_url)
@@ -69,7 +69,7 @@ def main():
     resolver = path.DottedNameResolver()
     for cmd in SUBCOMMANDS:
         cli.add_command(resolver.resolve(cmd))
-    cli(prog_name="hypothesis", obj={})  # pylint: disable-all
+    cli(prog_name="hypothesis", obj={})  # pylint: skip-file
 
 
 if __name__ == "__main__":

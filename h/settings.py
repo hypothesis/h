@@ -54,7 +54,7 @@ class SettingsManager:
         `envvar`. If there is no such environment variable and `setting[name]`
         is not already set, `setting[name]` is set to `default`.
 
-        Raises `SettingsError` if a required setting is missing and has no default,
+        Raises `SettingError` if a required setting is missing and has no default,
         or coercing the setting using `type_` fails.
 
         :param name: the name of the pyramid config setting
@@ -67,8 +67,8 @@ class SettingsManager:
         :param default: a default value to use if the envvar isn't set
         :param deprecated_msg: a deprecated envvar setting message to display
         :type deprecated_msg: str
-        :raises SettingsError: if required and not set
-        :raises SettingsError: if type casting fails
+        :raises SettingError: if required and not set
+        :raises SettingError: if type casting fails
         """
         val = None
         cast_message = None

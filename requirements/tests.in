@@ -1,10 +1,13 @@
 pip-tools
 pip-sync-faster
-coverage
+-r prod.txt
 pytest
 pytest-cov
 pytest-xdist[psutil]
 filelock
 factory-boy
+pytest-factoryboy
+h-matchers
+httpretty
+freezegun
 hypothesis
--r requirements.txt

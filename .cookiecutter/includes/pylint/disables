@@ -1,0 +1,5 @@
+"missing-param-doc",
+
+# Temporarily ignored during pep8 -> pylint transition. This should be removed later.
+"fixme",
+

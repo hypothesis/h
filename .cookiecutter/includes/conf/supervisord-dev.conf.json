@@ -1,0 +1,16 @@
+{
+  "programs": {
+    "web": {
+      "command": "gunicorn --paste conf/development.ini --config conf/gunicorn.dev.conf.py"
+    },
+    "websocket": {
+      "command": "gunicorn --paste conf/websocket-dev.ini --config conf/gunicorn-websocket.dev.conf.py"
+    },
+    "worker": {
+      "command": "sh bin/hypothesis --dev celery worker --loglevel=INFO"
+    },
+    "assets": {
+      "command": "node_modules/.bin/gulp watch"
+    }
+  }
+}

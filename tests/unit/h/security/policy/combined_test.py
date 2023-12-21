@@ -93,12 +93,12 @@ class TestSecurityPolicy:
                 policy._ui_policy,
             )
 
-        called_policy.remember.assert_called_once_with(
+        called_policy.remember.assert_called_once_with(  # pylint:disable=no-member
             pyramid_request, sentinel.userid, kwarg=True
         )
-        assert result == called_policy.remember.return_value
+        assert result == called_policy.remember.return_value  # pylint:disable=no-member
 
-        uncalled_policy.remember.assert_not_called()
+        uncalled_policy.remember.assert_not_called()  # pylint:disable=no-member
 
     @pytest.mark.parametrize("bearer_returns", (True, False))
     @pytest.mark.parametrize("basic_auth_handles", (True, False))
@@ -114,18 +114,24 @@ class TestSecurityPolicy:
         result = policy.remember(pyramid_request, sentinel.userid, kwarg=True)
 
         if not bearer_returns:
-            policy._http_basic_auth_policy.handles.assert_called_once_with(
+            policy._http_basic_auth_policy.handles.assert_called_once_with(  # pylint:disable=no-member
                 pyramid_request
             )
 
         if basic_auth_handles and not bearer_returns:
-            policy._http_basic_auth_policy.remember.assert_called_once_with(
+            policy._http_basic_auth_policy.remember.assert_called_once_with(  # pylint:disable=no-member
                 pyramid_request, sentinel.userid, kwarg=True
             )
-            assert result == policy._http_basic_auth_policy.remember.return_value
+            assert (
+                result
+                == policy._http_basic_auth_policy.remember.return_value  # pylint:disable=no-member
+            )
         else:
-            policy._http_basic_auth_policy.remember.assert_not_called()
-            assert result == policy._bearer_token_policy.remember.return_value
+            policy._http_basic_auth_policy.remember.assert_not_called()  # pylint:disable=no-member
+            assert (
+                result
+                == policy._bearer_token_policy.remember.return_value  # pylint:disable=no-member
+            )
 
     @pytest.fixture(autouse=True)
     def BearerTokenPolicy(self, patch):

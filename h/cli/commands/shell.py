@@ -1,4 +1,3 @@
-# pylint: disable=redefined-outer-name
 """Command to run an interactive shell with application context."""
 
 import click
@@ -34,7 +33,7 @@ def bpython(**locals_):
 
 
 def ipython(**locals_):
-    # pylint: disable-all
+    # pylint: skip-file
     from IPython import start_ipython
     from traitlets.config import get_config
 

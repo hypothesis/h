@@ -26,7 +26,7 @@ class UserUniqueService:
 
         :param data: dictionary of new-user data. Will check `email`, `username`
                      and any `identities` dictionaries provided
-        :raises ConflictError: if the data violate any uniqueness constraints
+        :raises DuplicateUserError: if the data violate any uniqueness constraints
 
         :param authority: Authority against which to do a duplicate check
         """

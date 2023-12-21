@@ -1,3 +1,150 @@
+[tool.pytest.ini_options]
+addopts = "-q"
+filterwarnings = [
+    "error", # Fail the tests if there are any warnings.
+    "ignore:^find_module\\(\\) is deprecated and slated for removal in Python 3.12; use find_spec\\(\\) instead$:DeprecationWarning:importlib",
+    "ignore:^FileFinder.find_loader\\(\\) is deprecated and slated for removal in Python 3.12; use find_spec\\(\\) instead$:DeprecationWarning:importlib",
+    "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:pkg_resources",
+    "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:pyramid",
+    "ignore:^Deprecated call to .pkg_resources\\.declare_namespace\\('.*'\\).\\.:DeprecationWarning:pkg_resources",
+    "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:chameleon",
+
+    # Usage of deprecated method of urllib3 within the elasticsearch library
+    "ignore:^HTTPResponse.getheaders\\(\\) is deprecated and will be removed in urllib3 v2.1.0. Instead access HTTPResponse.headers directly.$:DeprecationWarning:elasticsearch",
+    "ignore:^The behavior of AcceptLanguageValidHeader\\.__iter__ is currently maintained for backward compatibility, but will change in the future.$:DeprecationWarning:webob.acceptparse",
+    "ignore:^Use of \\.\\. or absolute path in a resource path is not allowed and will raise exceptions in a future release\\.$:DeprecationWarning:pyramid",
+]
+
+[tool.pydocstyle]
+ignore = [
+    # Missing docstrings.
+    "D100","D101","D102","D103","D104","D105","D106","D107",
+
+    # "No blank lines allowed after function docstring" conflicts with the
+    # Black code formatter which insists on inserting blank lines after
+    # function docstrings.
+    "D202",
+
+    # "1 blank line required before class docstring" conflicts with another
+    # pydocstyle rule D211 "No blank lines allowed before class docstring".
+    "D203",
+
+    # "Multi-line docstring summary should start at the first line"
+    # and "Multi-line docstring summary should start at the second line".
+    # These two rules conflict with each other so you have to disable one of them.
+    # How about we disable them both? PEP 257 says either approach is okay:
+    #
+    # > The summary line may be on the same line as the opening quotes or on
+    # > the next line.
+    # >
+    # > https://peps.python.org/pep-0257/#multi-line-docstrings
+    "D212",
+    "D213",
+]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["h", "tests/unit"]
+omit = [
+    "*/h/__main__.py",
+    "h/cli/*",
+]
+
+[tool.coverage.paths]
+source = ["src", ".tox/*tests/lib/python*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+fail_under = 100.00
+skip_covered = true
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+default_section = "THIRDPARTY"
+known_first_party = ["h", "tests"]
+
+[tool.pylint.main]
+jobs = 0 # Use one process for CPU.
+
+load-plugins = [
+    "pylint.extensions.bad_builtin",
+    "pylint.extensions.check_elif",
+    "pylint.extensions.docparams",
+    "pylint.extensions.mccabe",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.redefined_variable_type",
+]
+
+# Fail if there are *any* messages from PyLint.
+# The letters refer to PyLint's message categories, see
+# https://pylint.pycqa.org/en/latest/messages/messages_introduction.html
+fail-on = ["C", "E", "F", "I", "R", "W"]
+
+[tool.pylint.messages_control]
+ignore-paths=[
+]
+enable = [
+    "bad-inline-option",
+    "deprecated-pragma",
+    "useless-suppression",
+    "use-symbolic-message-instead",
+    "use-implicit-booleaness-not-comparison-to-zero",
+    "use-implicit-booleaness-not-comparison-to-string",
+]
+disable = [
+    # Docstrings are encouraged but we don't want to enforce that everything
+    # must have a docstring.
+    "missing-docstring",
+
+    # We don't always want to have to put a `:return:` in a docstring.
+    "missing-return-doc",
+
+    # We don't always want to have to put an `:rtype:` in a docstring.
+    "missing-return-type-doc",
+
+    # We don't want to have to document the type of every parameter with a
+    # `:type:` in the docstring.
+    "missing-type-doc",
+
+    # We use isort to sort and group our imports, so we don't need PyLint to
+    # check them for us.
+    "ungrouped-imports",
+
+    # We use Black to format our code automatically, so we don't need PyLint to
+    # check formatting for us.
+    "line-too-long",
+
+    # We use isort to sort out imports so we don't need PyLint to check import
+    # ordering for us.
+    "wrong-import-order",
+
+    "too-few-public-methods",
+
+    # Issues to disable this for false positives, disabling it globally in the meantime https://github.com/PyCQA/pylint/issues/214
+    "duplicate-code",
+
+    "missing-param-doc",
+
+    # Temporarily ignored during pep8 -> pylint transition. This should be removed later.
+    "fixme",
+
+]
+
+good-names = [
+    "i", "j", "k", "ex", "Run", "_", # PyLint's default good names.
+    "tm", "db", "ai",
+]
+
+[tool.pylint.reports]
+output-format = "colorized"
+score = "no"
+
 [tool.hdev]
 project_name = "h"
 project_type = "application"
