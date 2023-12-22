@@ -76,7 +76,7 @@ jobs:
       Env: ${{ inputs.Environment }}
       Timeout: ${{ inputs.Timeout }}
       Region: ${{ inputs.Region }}
-      Command: 'hypothesis migrate current'
+      Command: 'alembic -c conf/alembic.ini current'
     secrets: inherit
 
   head:
@@ -88,7 +88,7 @@ jobs:
       Env: ${{ inputs.Environment }}
       Timeout: ${{ inputs.Timeout }}
       Region: ${{ inputs.Region }}
-      Command: 'hypothesis migrate upgrade head'
+      Command: 'alembic -c conf/alembic.ini upgrade head'
     secrets: inherit
 
   next:
@@ -100,7 +100,7 @@ jobs:
       Env: ${{ inputs.Environment }}
       Timeout: ${{ inputs.Timeout }}
       Region: ${{ inputs.Region }}
-      Command: 'hypothesis migrate upgrade +1'
+      Command: 'alembic -c conf/alembic.ini migrate upgrade +1'
     secrets: inherit
 
   downgrade:
@@ -112,7 +112,7 @@ jobs:
       Env: ${{ inputs.Environment }}
       Timeout: ${{ inputs.Timeout }}
       Region: ${{ inputs.Region }}
-      Command: 'hypothesis migrate downgrade -1'
+      Command: 'alembic -c conf/alembic.ini migrate downgrade -1'
     secrets: inherit
 
   search:

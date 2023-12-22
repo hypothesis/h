@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+"""Initialize the dev environment's DB."""
 import logging
 import os
 
 import alembic.command
 import alembic.config
-import click
+from pyramid.paster import bootstrap
 from sqlalchemy.exc import ProgrammingError
 
 from h import db, search
@@ -11,21 +13,7 @@ from h import db, search
 log = logging.getLogger(__name__)
 
 
-@click.command()
-@click.pass_context
-def init(ctx):
-    # In production environments a short ES request timeout is typically set.
-    # Commands to initialize the index may take longer than this, so override
-    # any custom timeout with a high value.
-    os.environ["ELASTICSEARCH_CLIENT_TIMEOUT"] = "30"
-
-    request = ctx.obj["bootstrap"]()
-
-    _init_db(request.registry.settings)
-    _init_search(request.registry.settings)
-
-
-def _init_db(settings):
+def init_db(settings):
     engine = db.make_engine(settings)
 
     # If the alembic_version table is present, then the database is managed by
@@ -44,8 +32,24 @@ def _init_db(settings):
         log.info("detected alembic_version table, skipping db initialization")
 
 
-def _init_search(settings):
+def init_search(settings):
+    # In production environments a short Elasticsearch request timeout is
+    # typically set and initializing a new search index can take longer than
+    # the timeout, so override any custom timeout with a high value.
+    os.environ["ELASTICSEARCH_CLIENT_TIMEOUT"] = "30"
+
     client = search.get_client(settings)
 
     log.info("initializing ES6 search index")
     search.init(client, check_icu_plugin=settings.get("es.check_icu_plugin", True))
+
+
+def main():
+    with bootstrap("conf/development-app.ini") as env:
+        settings = env["registry"].settings
+        init_db(settings)
+        init_search(settings)
+
+
+if __name__ == "__main__":
+    main()
