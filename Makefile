@@ -36,8 +36,8 @@ services: python
 .PHONY: db
 db: args?=upgrade head
 db: python
-	@tox -qqe dev --run-command 'sh bin/hypothesis --dev init'
-	@tox -qe dev --run-command 'sh bin/hypothesis --dev migrate $(args)'
+	@tox -qe dev --run-command 'python bin/make_db'
+	@tox -qe dev --run-command 'alembic $(args)'
 
 .PHONY: dev
 dev: build/manifest.json python
