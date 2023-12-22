@@ -1,6 +1,6 @@
 pip-tools
 pip-sync-faster
-ipython
+pyramid-ipython
 ipdb
 factory-boy
 -r prod.txt
