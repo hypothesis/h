@@ -9,6 +9,7 @@ omit =
     h/migrations/*
     h/cli/*
     h/__main__.py
+    h/pshell.py
 
 [report]
 show_missing = True
