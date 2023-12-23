@@ -28,7 +28,6 @@ class BulkAnnotationService:
 
         self._db = db_session
 
-    # pylint: disable=too-many-arguments
     def annotation_search(
         self,
         authority: str,

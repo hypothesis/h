@@ -21,6 +21,7 @@ class GroupUpdateService:
 
         :raise ValidationError: if setting an attribute on the model raises :exc:`ValueError`
         :raise ConflictError: if the ``authority_provided_id`` is already in use
+        :raise SQLAlchemyError: if SQLAlchemy raises an unexpected SQLAlchemyError
 
         :rtype: ~h.models.Group
         """

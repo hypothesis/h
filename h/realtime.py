@@ -90,7 +90,7 @@ class Publisher:
         self._publish("user", payload)
 
     def _publish(self, routing_key, payload):
-        try:  # pylint: disable=too-many-try-statements
+        try:
             with producer_pool[self.connection].acquire(
                 block=True, timeout=1
             ) as producer:

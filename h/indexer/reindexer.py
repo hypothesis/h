@@ -28,7 +28,7 @@ def reindex(session, es, request):
     log.info("configured new index %s", new_index)
     setting_name = "reindex.new_index"
 
-    try:  # pylint:disable=too-many-try-statements
+    try:
         settings.put(setting_name, new_index)
         request.tm.commit()
 

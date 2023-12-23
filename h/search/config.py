@@ -207,9 +207,6 @@ def update_index_settings(client):
 
 def _ensure_icu_plugin(conn):
     """Ensure that the ICU analysis plugin is installed for ES."""
-    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
-    #
-    # pylint: disable=unexpected-keyword-arg
     names = [x.strip() for x in conn.cat.plugins(h="component").split("\n")]
     if "analysis-icu" not in names:
         message = (
@@ -226,7 +223,7 @@ def _update_index_analysis(conn, name, analysis):
     settings = conn.indices.get_settings(index=name)
     existing = settings[name]["settings"]["index"].get("analysis", {})
     if existing != analysis:  # pragma: no cover
-        try:  # pylint: disable=too-many-try-statements
+        try:
             conn.indices.close(index=name)
             conn.indices.put_settings(index=name, body={"analysis": analysis})
         finally:

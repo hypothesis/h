@@ -93,9 +93,7 @@ class GroupUpsertAction(DBAction):
 
     type_flags = PRIVATE_GROUP_TYPE_FLAGS
 
-    def execute(
-        self, batch, effective_user_id=None, **_
-    ):  # pylint: disable=arguments-differ
+    def execute(self, batch, effective_user_id=None, **_):
         if effective_user_id is None:
             raise CommandSequenceError(
                 "Effective user must be configured before upserting groups"
@@ -160,9 +158,7 @@ class GroupMembershipCreateAction(DBAction):
                                   or group that does not exist
     """
 
-    def execute(  # pylint: disable=arguments-differ
-        self, batch, on_duplicate="continue", **_
-    ):
+    def execute(self, batch, on_duplicate="continue", **_):
         """
         Execute GroupMembershipCreateAction.
 
@@ -215,7 +211,7 @@ class UserUpsertAction(DBAction):
     :raise ConflictingDataError: If two users attempt to use the same identity
     """
 
-    def execute(self, batch, **_):  # pylint: disable=arguments-differ
+    def execute(self, batch, **_):
         # Check that we can actually process this batch
         self._check_upsert_queries(batch, expected_keys=["authority", "username"])
 

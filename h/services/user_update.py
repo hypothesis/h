@@ -21,6 +21,8 @@ class UserUpdateService:
 
         :raise ValidationError: if setting an attribute on the model raises :exc:`ValueError`
                                 or if ``authority`` is present in ``kwargs``
+        :raise ConflictError: if the new username is already in use
+        :raise SQLAlchemyError: if SQLAlchemy raises an unexpected SQLAlchemyError
 
         :rtype: ~h.models.User
         """

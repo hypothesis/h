@@ -50,7 +50,7 @@ def add(ctx, username, email, password, authority):
 @click.option("--authority")
 @click.option("--on/--off", default=True)
 @click.pass_context
-def admin(ctx, username, authority, on):  # pylint: disable=invalid-name
+def admin(ctx, username, authority, on):
     """
     Make a user an admin.
 

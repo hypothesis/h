@@ -110,7 +110,7 @@ class GEventWebSocketPool(Pool):
     def clear(self):  # pragma: no cover
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
-            try:  # pylint:disable=too-many-try-statements
+            try:
                 websocket = greenlet._run.__self__  # pylint: disable=protected-access
                 if websocket:
                     websocket.close(1001, "Server is shutting down")

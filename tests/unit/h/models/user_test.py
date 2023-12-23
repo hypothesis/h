@@ -58,7 +58,11 @@ class TestUserModelDataConstraints:
     def test_filtering_by_username_matches_dot_variant_of_user_using_in(
         self, db_session, fred
     ):
-        result = db_session.query(User).filter(User.username.in_(["Fred.bloggs"])).one()
+        result = (
+            db_session.query(User)
+            .filter(User.username.in_(["Fred.bloggs"]))  # pylint:disable=no-member
+            .one()
+        )
 
         assert result == fred
 

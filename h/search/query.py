@@ -134,13 +134,13 @@ class Sorter:
         """
         # Dates like "2017" can also be cast as floats so if a number is less
         # than 9999 it is assumed to be a year and not ms since the epoch.
-        try:  # pylint: disable=too-many-try-statements
+        try:
             epoch = float(str_value)
             if epoch < 9999:
                 raise ValueError("This is not in the form ms since the epoch.")
             return epoch
         except ValueError:
-            try:  # pylint: disable=too-many-try-statements
+            try:
                 date = parse(str_value, default=DEFAULT_DATE)
                 return dt.timestamp(date) * 1000
 
