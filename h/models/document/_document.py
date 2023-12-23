@@ -150,7 +150,7 @@ def merge_documents(session, documents, updated=None):
             meta.document = master
             meta.updated = updated
 
-    try:  # pylint:disable=too-many-try-statements
+    try:
         session.flush()
 
         # This service method was created from code existing here with

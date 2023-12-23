@@ -62,7 +62,7 @@ class SocketFilter:
 
             # Iterate over the filter_rows added by `set_filter()`
             for field, value in socket.filter_rows:
-                try:  # pylint: disable=too-many-try-statements
+                try:
                     if value in values[field]:
                         yield socket
                         break

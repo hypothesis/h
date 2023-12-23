@@ -26,7 +26,7 @@ def get_blacklist():
     # Try to load the blacklist file from disk. If, for whatever reason, we
     # can't load the file, then don't crash out, just log a warning about
     # the problem.
-    try:  # pylint: disable=too-many-try-statements
+    try:
         with codecs.open("h/accounts/blacklist", encoding="utf-8") as handle:
             blacklist = handle.readlines()
     except (IOError, ValueError):  # pragma: no cover

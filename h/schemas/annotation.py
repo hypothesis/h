@@ -470,7 +470,7 @@ class SearchParamsSchema(colander.Schema):
 
         # Dates like "2017" can also be cast as floats so if a number is less
         # than 9999 it is assumed to be a year and not ms since the epoch.
-        try:  # pylint: disable=too-many-try-statements
+        try:
             if float(value) < 9999:
                 raise ValueError("This is not in the form ms since the epoch.")
         except ValueError:
