@@ -17,7 +17,7 @@ on:
       - 'conf/websocket-dev.ini'
       - 'docs/*'
       - 'requirements/*'
-      - '!requirements/requirements.txt'
+      - '!requirements/prod.txt'
       - 'tests/*'
       - '.coveragerc'
       - '.eslintrc'

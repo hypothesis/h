@@ -3,4 +3,4 @@ pip-sync-faster
 ipython
 ipdb
 factory-boy
--r requirements.txt
+-r prod.txt

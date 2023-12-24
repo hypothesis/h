@@ -36,7 +36,7 @@ RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 # Copy minimal data to allow installation of dependencies.
-COPY requirements/requirements.txt ./
+COPY requirements/prod.txt ./
 
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \
@@ -44,7 +44,7 @@ RUN apk add --no-cache --virtual build-deps \
     libffi-dev \
     postgresql-dev \
   && pip install --no-cache-dir -U pip \
-  && pip install --no-cache-dir -r requirements.txt \
+  && pip install --no-cache-dir -r prod.txt \
   && apk del build-deps
 
 # Copy frontend assets.

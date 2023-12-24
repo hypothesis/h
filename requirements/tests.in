@@ -7,4 +7,4 @@ pytest-xdist[psutil]
 filelock
 factory-boy
 hypothesis
--r requirements.txt
+-r prod.txt
