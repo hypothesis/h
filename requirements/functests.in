@@ -4,4 +4,4 @@ pytest
 factory-boy
 webtest
 pytest-reverse
--r requirements.txt
+-r prod.txt
