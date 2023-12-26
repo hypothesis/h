@@ -217,6 +217,13 @@ class AnnotationWriteService:
 
     def upsert_annotation_slim(self, annotation):
         self._db.flush()  # See the last model changes in the transaction
+
+        if not annotation.group:
+            # Due to the design of the old table this is possible for a short while
+            # when a user (and his groups) or a group is deleted.
+            # The AnnotationSlim records will get deleted by a cascade, no need to do anything here.
+            return
+
         moderated = self._db.scalar(
             select(
                 exists(
