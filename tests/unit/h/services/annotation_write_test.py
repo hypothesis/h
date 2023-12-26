@@ -232,6 +232,11 @@ class TestAnnotationWriteService:
 
         assert not annotation.is_hidden
 
+    def test_upsert_annotation_slim_with_deleted_group(self, annotation, svc):
+        annotation.groupid = "deleted group"
+
+        svc.upsert_annotation_slim(annotation)
+
     @pytest.fixture
     def create_data(self, factories):
         user = factories.User()
