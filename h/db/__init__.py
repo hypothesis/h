@@ -19,7 +19,7 @@ import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-__all__ = ("Base", "Session", "init", "make_engine")
+__all__ = ("Base", "Session", "init", "create_engine")
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
     _maybe_create_world_group(engine, authority, default_org)
 
 
-def make_engine(settings):  # pragma: no cover
+def create_engine(settings):  # pragma: no cover
     """Construct a sqlalchemy engine from the passed ``settings``."""
     return sqlalchemy.create_engine(settings["sqlalchemy.url"])
 
@@ -139,7 +139,7 @@ def _maybe_create_world_group(engine, authority, default_org):
 
 def includeme(config):  # pragma: no cover
     # Create the SQLAlchemy engine and save a reference in the app registry.
-    engine = make_engine(config.registry.settings)
+    engine = create_engine(config.registry.settings)
     config.registry["sqlalchemy.engine"] = engine
 
     # Add a property to all requests for easy access to the session. This means

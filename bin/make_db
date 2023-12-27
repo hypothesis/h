@@ -1,54 +1,34 @@
 #!/usr/bin/env python3
 """Initialize the dev environment's DB."""
-import logging
-import os
-
 import alembic.command
 import alembic.config
 from pyramid.paster import bootstrap
+from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 
-from h import db, search
-
-log = logging.getLogger(__name__)
+from h.db import Base, create_engine
 
 
-def init_db(settings):
-    engine = db.make_engine(settings)
+def is_stamped(engine) -> bool:
+    """Return True if the DB is stamped with an Alembic revision ID."""
+    with engine.connect() as connection:
+        try:
+            if connection.execute(text("select * from alembic_version")).first():
+                return True
+        except ProgrammingError:
+            pass
 
-    # If the alembic_version table is present, then the database is managed by
-    # alembic, and we shouldn't call `db.init`.
-    try:
-        engine.execute("select 1 from alembic_version")
-    except ProgrammingError:
-        log.info("initializing database")
-        db.init(engine, should_create=True, authority=settings["h.authority"])
-
-        # Stamp the database with the current schema version so that future
-        # migrations start from the correct point.
-        alembic_cfg = alembic.config.Config("conf/alembic.ini")
-        alembic.command.stamp(alembic_cfg, "head")
-    else:
-        log.info("detected alembic_version table, skipping db initialization")
-
-
-def init_search(settings):
-    # In production environments a short Elasticsearch request timeout is
-    # typically set and initializing a new search index can take longer than
-    # the timeout, so override any custom timeout with a high value.
-    os.environ["ELASTICSEARCH_CLIENT_TIMEOUT"] = "30"
-
-    client = search.get_client(settings)
-
-    log.info("initializing ES6 search index")
-    search.init(client, check_icu_plugin=settings.get("es.check_icu_plugin", True))
+    return False
 
 
 def main():
-    with bootstrap("conf/development-app.ini") as env:
+    with bootstrap("conf/development.ini") as env:
         settings = env["registry"].settings
-        init_db(settings)
-        init_search(settings)
+        engine = create_engine(settings)
+
+        if not is_stamped(engine):
+            Base.metadata.create_all(engine)
+            alembic.command.stamp(alembic.config.Config("conf/alembic.ini"), "head")
 
 
 if __name__ == "__main__":

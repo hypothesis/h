@@ -68,7 +68,7 @@ def with_clean_db(db_engine):
 
 @pytest.fixture(scope="session")
 def db_engine():
-    db_engine = db.make_engine(TEST_SETTINGS)
+    db_engine = db.create_engine(TEST_SETTINGS)
     db.init(db_engine, authority=TEST_SETTINGS["h.authority"], should_create=True)
 
     yield db_engine

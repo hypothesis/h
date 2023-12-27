@@ -8,7 +8,7 @@ LOG = logging.getLogger(__name__)
 
 def get_session(settings):
     """Get a DB session from the provided settings."""
-    return db.Session(bind=db.make_engine(settings))
+    return db.Session(bind=db.create_engine(settings))
 
 
 @contextmanager

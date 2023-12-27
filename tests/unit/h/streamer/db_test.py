@@ -11,8 +11,8 @@ class TestMakeSession:
     def test_it(self, db):
         session = get_session(sentinel.settings)
 
-        db.make_engine.assert_called_once_with(sentinel.settings)
-        db.Session.assert_called_once_with(bind=db.make_engine.return_value)
+        db.create_engine.assert_called_once_with(sentinel.settings)
+        db.Session.assert_called_once_with(bind=db.create_engine.return_value)
         assert session == db.Session.return_value
 
     @pytest.fixture
