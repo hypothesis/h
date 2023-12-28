@@ -258,7 +258,7 @@ pycparser==2.20
     # via
     #   -r requirements/prod.txt
     #   cffi
-pycryptodomex==3.19.0
+pycryptodomex==3.19.1
     # via -r requirements/prod.txt
 pygments==2.15.0
     # via ipython

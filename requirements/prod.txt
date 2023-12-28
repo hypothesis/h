@@ -162,7 +162,7 @@ pyasn1==0.5.0
     #   rsa
 pycparser==2.20
     # via cffi
-pycryptodomex==3.19.0
+pycryptodomex==3.19.1
     # via -r requirements/prod.in
 pyjwt==2.8.0
     # via -r requirements/prod.in
