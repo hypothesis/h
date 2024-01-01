@@ -20,8 +20,8 @@ from tests.common.fixtures.elasticsearch import *  # pylint:disable=wildcard-imp
 from tests.common.fixtures.services import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 TEST_AUTHORITY = "example.com"
-TEST_DATABASE_URL = database_url(
-    os.environ.get("TEST_DATABASE_URL", "postgresql://postgres@localhost/htest")
+DATABASE_URL = database_url(
+    os.environ.get("DATABASE_URL", "postgresql://postgres@localhost/htest")
 )
 
 Session = sessionmaker()
@@ -73,7 +73,7 @@ def cli():
 @pytest.fixture(scope="session")
 def db_engine(tmp_path_factory):
     """Set up the database connection and create tables."""
-    engine = sqlalchemy.create_engine(TEST_DATABASE_URL)
+    engine = sqlalchemy.create_engine(DATABASE_URL)
 
     shared_tmpdir = tmp_path_factory.getbasetemp().parent
     done_file = shared_tmpdir / "db_initialized.done"
@@ -229,4 +229,4 @@ def pyramid_csrf_request(pyramid_request):
 @pytest.fixture
 def pyramid_settings():
     """Return the default app settings."""
-    return {"sqlalchemy.url": TEST_DATABASE_URL}
+    return {"sqlalchemy.url": DATABASE_URL}
