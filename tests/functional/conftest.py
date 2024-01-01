@@ -25,7 +25,7 @@ TEST_SETTINGS = {
     "pyramid.debug_all": False,
     "secret_key": "notasecret",
     "sqlalchemy.url": os.environ.get(
-        "TEST_DATABASE_URL", "postgresql://postgres@localhost/htest"
+        "DATABASE_URL", "postgresql://postgres@localhost/htest"
     ),
 }
 
