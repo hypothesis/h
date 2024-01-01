@@ -423,7 +423,7 @@ pyramid-tm==2.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytest==7.4.3
+pytest==7.4.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
