@@ -22,7 +22,7 @@
     "bootstrap": "^4.6.2",
     "escape-html": "^1.0.3",
     "gulp": "^4.0.0",
-    "gulp-changed": "^5.0.1",
+    "gulp-changed": "^5.0.2",
     "gulp-cli": "^2.3.0",
     "gulp-if": "^3.0.0",
     "gulp-svgmin": "^4.0.1",
