@@ -29,7 +29,7 @@ class TestRunSQLTask:
                     sys.executable,
                     "bin/run_data_task.py",
                     "--config-file",
-                    "conf/development.ini",
+                    "conf/development-app.ini",
                     "--task",
                     task_name,
                 ],
