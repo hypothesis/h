@@ -12,7 +12,7 @@ on:
       - '.github/*'
       - 'bin/create-testdb'
       - 'bin/install-python'
-      - 'conf/development.ini'
+      - 'conf/development-app.ini'
       - 'conf/supervisord-dev.conf'
       - 'conf/websocket-dev.ini'
       - 'docs/*'
