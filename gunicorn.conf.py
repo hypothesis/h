@@ -15,14 +15,6 @@ if 'H_GUNICORN_KEYFILE' in os.environ:
     keyfile = os.environ['H_GUNICORN_KEYFILE']
 
 
-def post_fork(server, worker):
-    # Support back-ported SSL changes on Debian / Ubuntu
-    import _ssl
-    import gevent.hub
-    if hasattr(_ssl, 'SSLContext') and not hasattr(_ssl, '_sslwrap'):
-        gevent.hub.PYGTE279 = True
-
-
 def when_ready(server):
     name = server.proc_name
     if name == 'web' and 'WEB_NUM_WORKERS' in os.environ:
