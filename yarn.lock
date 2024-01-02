@@ -5279,9 +5279,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gulp-changed@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "gulp-changed@npm:5.0.1"
+"gulp-changed@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "gulp-changed@npm:5.0.2"
   dependencies:
     change-file-extension: ^0.1.0
     gulp-plugin-extras: ^0.3.0
@@ -5291,7 +5291,7 @@ __metadata:
   peerDependenciesMeta:
     gulp:
       optional: true
-  checksum: db153d66a1ee8d8534198c42d27e5917a7632bce85e407d64c57e2cc988c029a0bf90061742bb73d9582fad1341a33acb5efe7860347d77cd2901cf3db840c47
+  checksum: 585237dcc556c9ccd0fd312b800e58c70d8f2bda7b282f3f3479fa16e724731a348b5b3ee0e304acdb8ea6251f203fc6b8244a12d2f5f46ce285851a997aa27f
   languageName: node
   linkType: hard
 
@@ -5412,7 +5412,7 @@ __metadata:
     eslint-plugin-react-hooks: ^4.6.0
     fetch-mock: ^9.11.0
     gulp: ^4.0.0
-    gulp-changed: ^5.0.1
+    gulp-changed: ^5.0.2
     gulp-cli: ^2.3.0
     gulp-if: ^3.0.0
     gulp-svgmin: ^4.0.1
