@@ -31,7 +31,7 @@
     "popper.js": "^1.16.1",
     "postcss": "^8.4.32",
     "raven-js": "^3.7.0",
-    "rollup": "^4.6.1",
+    "rollup": "^4.9.2",
     "sass": "^1.69.5",
     "scroll-into-view": "^1.16.2"
   },
