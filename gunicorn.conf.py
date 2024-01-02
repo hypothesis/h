@@ -1,7 +1,5 @@
 import os
 
-if 'GUNICORN_TIMEOUT' in os.environ:
-    timeout = int(os.environ['GUNICORN_TIMEOUT'])
 
 if 'H_GUNICORN_CERTFILE' in os.environ:
     certfile = os.environ['H_GUNICORN_CERTFILE']
