@@ -57,7 +57,7 @@ devdata: python
 
 .PHONY: shell
 shell: python
-	@pyenv exec tox -qe dev --run-command 'pshell conf/development-app.ini'
+	@pyenv exec tox -qe dev --run-command 'pshell conf/development.ini'
 
 .PHONY: sql
 sql: python
