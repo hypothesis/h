@@ -2,14 +2,7 @@ import logging
 
 import pytest
 
-from h.settings import SettingError, SettingsManager, database_url
-
-
-def test_database_url():
-    url = "postgres://postgres:1234/database"
-    expected = "postgresql+psycopg2://postgres:1234/database"
-
-    assert database_url(url) == expected
+from h.settings import SettingError, SettingsManager
 
 
 class TestSettingsManager:

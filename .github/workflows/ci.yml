@@ -91,7 +91,7 @@ jobs:
           restore-keys: |
             tests-${{ runner.os }}-tox-
       - name: Create test database
-        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE h_tests'
       - run: python -m pip install 'tox<4'
       - run: tox -e tests
         env:
@@ -161,7 +161,7 @@ jobs:
           restore-keys: |
             functests-${{ runner.os }}-tox-
       - name: Create test database
-        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE htest'
+        run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE h_functests'
       - run: python -m pip install 'tox<4'
       - run: yarn install --immutable
       - run: gulp build

@@ -65,7 +65,6 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
             "h.app_url": "http://example.com",
             "h.authority": "example.com",
             "secret_key": "notasecret",
-            "sqlalchemy.url": "postgresql://postgres@localhost/htest",
         }
 
         return create_app(None, **settings).registry

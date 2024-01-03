@@ -12,6 +12,7 @@ Most application code should access the database session using the request
 property `request.db` which is provided by this module.
 """
 import logging
+from os import environ
 
 import sqlalchemy
 import zope.sqlalchemy
@@ -19,7 +20,7 @@ import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-__all__ = ("Base", "Session", "init", "make_engine")
+__all__ = ("Base", "Session", "pre_create", "post_create", "create_engine")
 
 log = logging.getLogger(__name__)
 
@@ -44,31 +45,24 @@ Base = declarative_base(metadata=metadata)
 Session = sessionmaker()
 
 
-def init(engine, base=Base, should_create=False, should_drop=False, authority=None):
-    """Initialise the database tables managed by `h.db`."""
-    # Import models package to populate the metadata
-    import h.models  # pylint: disable=unused-import
+def pre_delete(engine):  # pragma: no cover
+    engine.execute("DROP SCHEMA IF EXISTS report CASCADE")
 
-    if should_drop:  # pragma: no cover
-        # SQLAlchemy doesn't know about the report schema, and will end up
-        # trying to drop tables without cascade that have dependent tables
-        # in the report schema and failing. Clear it out first.
-        engine.execute("DROP SCHEMA IF EXISTS report CASCADE")
-        base.metadata.reflect(engine)
-        base.metadata.drop_all(engine)
-    if should_create:  # pragma: no cover
-        # In order to be able to generate UUIDs, we load the uuid-ossp
-        # extension.
-        engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
-        base.metadata.create_all(engine)
+
+def pre_create(engine):  # pragma: no cover
+    engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
+
+
+def post_create(engine):  # pragma: no cover
+    authority = environ["AUTHORITY"]
 
     default_org = _maybe_create_default_organization(engine, authority)
     _maybe_create_world_group(engine, authority, default_org)
 
 
-def make_engine(settings):  # pragma: no cover
+def create_engine(database_url):  # pragma: no cover
     """Construct a sqlalchemy engine from the passed ``settings``."""
-    return sqlalchemy.create_engine(settings["sqlalchemy.url"])
+    return sqlalchemy.create_engine(database_url)
 
 
 def _session(request):  # pragma: no cover
@@ -103,7 +97,7 @@ def _session(request):  # pragma: no cover
     return session
 
 
-def _maybe_create_default_organization(engine, authority):
+def _maybe_create_default_organization(engine, authority):  # pragma: no cover
     from h.services.organization import OrganizationService
 
     session = Session(bind=engine)
@@ -115,7 +109,7 @@ def _maybe_create_default_organization(engine, authority):
     return default_org
 
 
-def _maybe_create_world_group(engine, authority, default_org):
+def _maybe_create_world_group(engine, authority, default_org):  # pragma: no cover
     from h import models
     from h.models.group import ReadableBy, WriteableBy
 
@@ -139,7 +133,7 @@ def _maybe_create_world_group(engine, authority, default_org):
 
 def includeme(config):  # pragma: no cover
     # Create the SQLAlchemy engine and save a reference in the app registry.
-    engine = make_engine(config.registry.settings)
+    engine = create_engine(config.registry.settings["sqlalchemy.url"])
     config.registry["sqlalchemy.engine"] = engine
 
     # Add a property to all requests for easy access to the session. This means

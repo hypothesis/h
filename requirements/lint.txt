@@ -152,8 +152,6 @@ faker==17.4.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
-filelock==3.13.1
-    # via -r requirements/tests.txt
 gevent==23.9.1
     # via
     #   -r requirements/functests.txt
