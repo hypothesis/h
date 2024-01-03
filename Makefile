@@ -36,7 +36,7 @@ services: python
 .PHONY: db
 db: args?=upgrade head
 db: python
-	@tox -qe dev --run-command 'python bin/make_db'
+	@tox -qe dev --run-command 'python3 -m h.scripts.init_db --create --stamp'
 	@tox -qe dev --run-command 'alembic $(args)'
 
 .PHONY: dev
@@ -53,6 +53,7 @@ devssl: build/manifest.json python
 
 .PHONY: devdata
 devdata: python
+	@tox -qe dev --run-command 'python3 -m h.scripts.init_db --create --stamp'
 	@tox -qe dev -- sh bin/hypothesis --dev devdata
 
 .PHONY: shell

@@ -6,7 +6,7 @@ import os
 from pyramid.config import Configurator
 from pyramid.settings import asbool, aslist
 
-from h.settings import SettingsManager, database_url
+from h.settings import SettingsManager
 from h.util.logging_filters import ExceptionFilter
 
 __all__ = ("configure",)
@@ -56,9 +56,7 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
     settings_manager.set("mail.default_sender", "MAIL_DEFAULT_SENDER")
     settings_manager.set("mail.host", "MAIL_HOST")
     settings_manager.set("mail.port", "MAIL_PORT", type_=int)
-    settings_manager.set(
-        "sqlalchemy.url", "DATABASE_URL", type_=database_url, required=True
-    )
+    settings_manager.set("sqlalchemy.url", "DATABASE_URL", required=True)
 
     # Configuration for Pyramid
     settings_manager.set("secret_key", "SECRET_KEY", type_=_to_utf8, required=True)

@@ -4,7 +4,6 @@ coverage
 pytest
 pytest-cov
 pytest-xdist[psutil]
-filelock
 factory-boy
 hypothesis
 -r prod.txt
