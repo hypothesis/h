@@ -12,14 +12,10 @@ FEATURES = {
         "using a cached version?"
     ),
     "client_display_names": "Render display names instead of user names in the client",
-    "html_side_by_side": "Enable side-by-side mode for web pages in the client",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
     "client_user_profile": "Enable client-side user profile and preferences management",
-    "export_annotations": "Allow users to export annotations",
-    "import_annotations": "Allow users to import previously exported annotations",
     "export_formats": "Allow users to select the format for their annotations export file",
-    "page_numbers": "Display page numbers on annotations, if available",
     "search_panel": "Use a sidebar panel to display search form",
 }
 
