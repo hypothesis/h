@@ -11,6 +11,12 @@ on:
       qa_websocket:
         type: boolean
         description: Redeploy QA (WebSocket)
+      staging:
+        type: boolean
+        description: Redeploy Staging
+      staging_websocket:
+        type: boolean
+        description: Redeploy Staging (WebSocket)
       production:
         type: boolean
         description: Redeploy Production
@@ -44,6 +50,30 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: h-websocket
       elasticbeanstalk_environment: qa
+    secrets: inherit
+  staging:
+    name: Staging
+    if: inputs.staging
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: Staging
+      github_environment_url: https://staging.hypothes.is/search
+      aws_region: us-west-1
+      elasticbeanstalk_application: h
+      elasticbeanstalk_environment: staging
+    secrets: inherit
+  staging_websocket:
+    name: Staging (WebSocket)
+    if: inputs.staging_websocket
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: Staging (WebSocket)
+      github_environment_url: https://staging.hypothes.is/docs/help
+      aws_region: us-west-1
+      elasticbeanstalk_application: h-websocket
+      elasticbeanstalk_environment: staging
     secrets: inherit
   production:
     name: Production
