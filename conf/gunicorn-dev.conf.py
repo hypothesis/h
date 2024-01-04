@@ -2,7 +2,8 @@ from os import environ
 
 
 bind = "0.0.0.0:5000"
-graceful_timeout = 0
+reload = True
+reload_extra_files = "h/templates"
 timeout = 0
 
 
