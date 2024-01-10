@@ -71,7 +71,7 @@ class TestCreateOrUpdateDocumentMeta:
 
         create_or_update_document_meta(session=db_session, **meta_attrs)
 
-        document = db_session.query(Document).get(document.id)
+        document = db_session.get(Document, document.id)
         assert document.title == final_title
 
     def test_it_logs_a_warning_with_existing_meta_on_a_different_doc(

@@ -63,7 +63,7 @@ class TestAdminCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(non_admin_user.id)
+        user = db_session.get(User, non_admin_user.id)
         assert user.admin
 
     def test_it_adds_admin_by_default(self, invoke_cli, non_admin_user, db_session):
@@ -71,7 +71,7 @@ class TestAdminCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(non_admin_user.id)
+        user = db_session.get(User, non_admin_user.id)
         assert user.admin
 
     def test_it_adds_admin_with_specific_authority(
@@ -86,7 +86,7 @@ class TestAdminCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(non_admin_user.id)
+        user = db_session.get(User, non_admin_user.id)
         assert user.admin
 
     def test_it_removes_admin(self, invoke_cli, admin_user, db_session):
@@ -94,7 +94,7 @@ class TestAdminCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(admin_user.id)
+        user = db_session.get(User, admin_user.id)
         assert not user.admin
 
     def test_it_removes_admin_with_specific_authority(
@@ -108,7 +108,7 @@ class TestAdminCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(admin_user.id)
+        user = db_session.get(User, admin_user.id)
         assert not user.admin
 
     def test_it_errors_when_user_could_not_be_found(
@@ -117,7 +117,7 @@ class TestAdminCommand:
         result = invoke_cli(user_cli.admin, [f"bogus_{non_admin_user.username}"])
 
         assert result.exit_code == 1
-        user = db_session.query(User).get(non_admin_user.id)
+        user = db_session.get(User, non_admin_user.id)
         assert not user.admin
 
     def test_it_errors_when_user_with_specific_authority_could_not_be_found(
@@ -128,7 +128,7 @@ class TestAdminCommand:
         )
 
         assert result.exit_code == 1
-        user = db_session.query(User).get(non_admin_user.id)
+        user = db_session.get(User, non_admin_user.id)
         assert not user.admin
 
     @pytest.fixture
@@ -148,7 +148,7 @@ class TestPasswordCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(user.id)
+        user = db_session.get(User, user.id)
         user_password_service.update_password.assert_called_once_with(user, "newpass")
 
     def test_it_changes_password_with_specific_authority(
@@ -164,7 +164,7 @@ class TestPasswordCommand:
 
         assert not result.exit_code
 
-        user = db_session.query(User).get(user.id)
+        user = db_session.get(User, user.id)
         user_password_service.update_password.assert_called_once_with(user, "newpass")
 
     def test_it_errors_when_user_could_not_be_found(

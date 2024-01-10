@@ -36,7 +36,7 @@ class SettingsService:
             self.session.delete(setting)
 
     def _fetch(self, key):
-        return self.session.query(Setting).get(key)
+        return self.session.get(Setting, key)
 
 
 def settings_factory(_context, request):

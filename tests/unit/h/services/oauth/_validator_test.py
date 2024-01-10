@@ -244,8 +244,8 @@ class TestInvalidateAuthorizationCode:
         )
         db_session.flush()
 
-        assert db_session.query(models.AuthzCode).get(id_1) is None
-        assert db_session.query(models.AuthzCode).get(id_2) is not None
+        assert db_session.get(models.AuthzCode, id_1) is None
+        assert db_session.get(models.AuthzCode, id_2) is not None
 
     def test_it_skips_deleting_when_authz_code_is_missing(
         self, svc, oauth_request, db_session, factories
@@ -257,7 +257,7 @@ class TestInvalidateAuthorizationCode:
         )
         db_session.flush()
 
-        assert db_session.query(models.AuthzCode).get(keep_code.id) is not None
+        assert db_session.get(models.AuthzCode, keep_code.id) is not None
 
 
 class TestFindToken:
