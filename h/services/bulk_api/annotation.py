@@ -67,11 +67,9 @@ class BulkAnnotationService:
         """Generate a query which can then be executed to find annotations."""
         return (
             sa.select(
-                [
-                    cls._AUTHOR.username,
-                    Group.authority_provided_id,
-                    sa.func.coalesce(AnnotationMetadata.data, "{}").label("metadata"),
-                ]
+                cls._AUTHOR.username,
+                Group.authority_provided_id,
+                sa.func.coalesce(AnnotationMetadata.data, "{}").label("metadata"),
             )
             .select_from(AnnotationSlim)
             .join(cls._AUTHOR, cls._AUTHOR.id == AnnotationSlim.user_id)
