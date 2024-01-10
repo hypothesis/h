@@ -17,8 +17,7 @@ from os import environ
 import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 __all__ = ("Base", "Session", "pre_create", "post_create", "create_engine")
 
