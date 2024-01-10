@@ -85,7 +85,7 @@ def cohorts_add(request):
 )
 def cohorts_edit(_context, request):
     id_ = request.matchdict["id"]
-    cohort = request.db.query(models.FeatureCohort).get(id_)
+    cohort = request.db.get(models.FeatureCohort, id_)
     return {
         "cohort": cohort,
         "members": cohort.members,
@@ -101,7 +101,7 @@ def cohorts_edit(_context, request):
 )
 def cohorts_delete(_context, request):
     id_ = request.matchdict["id"]
-    cohort = request.db.query(models.FeatureCohort).get(id_)
+    cohort = request.db.get(models.FeatureCohort, id_)
     request.db.delete(cohort)
     return httpexceptions.HTTPFound(location=request.route_url("admin.cohorts"))
 
@@ -131,7 +131,7 @@ def cohorts_edit_add(request):
             "error",
         )
     else:
-        cohort = request.db.query(models.FeatureCohort).get(cohort_id)
+        cohort = request.db.get(models.FeatureCohort, cohort_id)
         cohort.members.append(member)
 
     url = request.route_url("admin.cohorts_edit", id=cohort_id)
@@ -150,7 +150,7 @@ def cohorts_edit_remove(request):
     member_userid = request.params["remove"]
     cohort_id = request.matchdict["id"]
 
-    cohort = request.db.query(models.FeatureCohort).get(cohort_id)
+    cohort = request.db.get(models.FeatureCohort, cohort_id)
     member = request.db.query(models.User).filter_by(userid=member_userid).first()
     try:
         cohort.members.remove(member)

@@ -358,7 +358,7 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
             return None
 
         try:
-            return self.session.query(models.AuthClient).get(id_)
+            return self.session.get(models.AuthClient, id_)
         except StatementError:
             return None
 

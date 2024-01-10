@@ -20,7 +20,7 @@ class TestSettingsService:
     def test_put_creates_new_setting(self, db_session, svc):
         svc.put("custom-color", "red")
 
-        setting = db_session.query(Setting).get("custom-color")
+        setting = db_session.get(Setting, "custom-color")
         assert setting.key == "custom-color"
         assert setting.value == "red"
 
@@ -29,7 +29,7 @@ class TestSettingsService:
 
         svc.put(setting.key, "green")
 
-        setting = db_session.query(Setting).get(setting.key)
+        setting = db_session.get(Setting, setting.key)
         assert setting.value == "green"
 
     def test_delete_deletes_existing_setting(self, db_session, svc, factories):
@@ -38,7 +38,7 @@ class TestSettingsService:
         svc.delete(setting.key)
         db_session.flush()
 
-        assert db_session.query(Setting).get(setting.key) is None
+        assert db_session.get(Setting, setting.key) is None
 
     def test_delete_is_noop_when_setting_missing(self, svc, factories):
         # create a random setting

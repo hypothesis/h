@@ -121,7 +121,7 @@ class TestCreateOrUpdateDocumentURI:
 
         create_or_update_document_uri(session=db_session, **doc_uri_attrs)
 
-        document_ = db_session.query(Document).get(document.id)
+        document_ = db_session.get(Document, document.id)
         assert document_.web_uri == "http://example.com/first_uri.html"
 
     def test_it_logs_a_warning_if_document_ids_differ(

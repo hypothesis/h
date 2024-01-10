@@ -20,7 +20,7 @@ class AnnotationReadService:
         :param id_: Annotation ID to retrieve
         """
         try:
-            return self._db.query(Annotation).get(id_)
+            return self._db.get(Annotation, id_)
         except InvalidUUID:
             return None
 

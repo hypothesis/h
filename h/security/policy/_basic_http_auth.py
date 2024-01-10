@@ -90,7 +90,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
         # It is important not to include the secret as part of the SQL query
         # because the resulting code may be subject to a timing attack.
         try:
-            auth_client = request.db.query(AuthClient).get(credentials.username)
+            auth_client = request.db.get(AuthClient, credentials.username)
         except StatementError:
             # The auth client id is malformed
             return None

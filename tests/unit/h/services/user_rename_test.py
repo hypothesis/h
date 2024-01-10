@@ -52,7 +52,7 @@ class TestUserRenameService:
     def test_rename_changes_the_username(self, service, user, db_session):
         service.rename(user, "panda")
 
-        assert db_session.query(models.User).get(user.id).username == "panda"
+        assert db_session.get(models.User, user.id).username == "panda"
 
     def test_rename_deletes_auth_tickets(self, service, user, db_session, factories):
         ids = [factories.AuthTicket(user=user).id for _ in range(3)]
