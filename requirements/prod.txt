@@ -118,7 +118,7 @@ kombu==5.3.4
     #   celery
 mako==1.2.2
     # via alembic
-markdown==3.5.1
+markdown==3.5.2
     # via -r requirements/prod.in
 markupsafe==1.1.1
     # via
