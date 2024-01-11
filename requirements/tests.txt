@@ -172,7 +172,7 @@ mako==1.2.2
     # via
     #   -r requirements/prod.txt
     #   alembic
-markdown==3.5.1
+markdown==3.5.2
     # via -r requirements/prod.txt
 markupsafe==1.1.1
     # via
