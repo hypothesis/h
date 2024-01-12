@@ -45,11 +45,13 @@ Session = sessionmaker()
 
 
 def pre_delete(engine):  # pragma: no cover
-    engine.execute("DROP SCHEMA IF EXISTS report CASCADE")
+    with engine.connect() as connection:
+        connection.execute("DROP SCHEMA IF EXISTS report CASCADE")
 
 
 def pre_create(engine):  # pragma: no cover
-    engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
+    with engine.connect() as connection:
+        connection.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
 
 
 def post_create(engine):  # pragma: no cover
