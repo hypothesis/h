@@ -37,6 +37,7 @@ pycryptodomex
 pyparsing >= 2.1.5
 pyramid
 pyramid-exclog
+markupsafe==1.1.1
 jinja2 < 3
 pyramid-jinja2
 pyramid-services
