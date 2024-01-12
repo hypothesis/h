@@ -17,6 +17,7 @@ from os import environ
 import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
+from sqlalchemy import text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 __all__ = ("Base", "Session", "pre_create", "post_create", "create_engine")
@@ -46,12 +47,12 @@ Session = sessionmaker()
 
 def pre_delete(engine):  # pragma: no cover
     with engine.connect() as connection:
-        connection.execute("DROP SCHEMA IF EXISTS report CASCADE")
+        connection.execute(text("DROP SCHEMA IF EXISTS report CASCADE"))
 
 
 def pre_create(engine):  # pragma: no cover
     with engine.connect() as connection:
-        connection.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
+        connection.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'))
 
 
 def post_create(engine):  # pragma: no cover

@@ -1,6 +1,7 @@
 import re
 
 from pyramid import httpexceptions
+from sqlalchemy import text
 from webob.multidict import MultiDict
 
 from h import search
@@ -16,7 +17,7 @@ def _has_uri_ever_been_annotated(db, uri):
     # instead of `annotation.target_uri_normalized` because there is an existing
     # index on `uri_normalized`.
     query = "SELECT EXISTS(SELECT 1 FROM document_uri WHERE uri_normalized = :uri)"
-    result = db.execute(query, {"uri": normalize(uri)}).first()
+    result = db.execute(text(query), {"uri": normalize(uri)}).first()
     return result[0] is True
 
 
