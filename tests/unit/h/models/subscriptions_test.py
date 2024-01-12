@@ -9,5 +9,5 @@ class TestSubscriptions:
 
         assert (
             repr(subscription)
-            == "<Subscription uri=http://example.com type=reply active=True>"
+            == "<Subscription uri=http://example.com type=Type.REPLY active=True>"
         )
