@@ -123,43 +123,24 @@ class TestUserIdentity:
 
         db_session.flush()
 
-    def test_removing_a_user_identity_from_a_user_deletes_the_user_identity_from_the_db(
-        self, db_session, user
-    ):
-        # Add a couple of noise UserIdentity's. These should not be removed
-        # from the DB.
-        models.UserIdentity(provider="provider", provider_unique_id="1", user=user)
-        models.UserIdentity(provider="provider", provider_unique_id="2", user=user)
-        # The UserIdentity that we are going to remove.
-        user_identity = models.UserIdentity(
-            provider="provider", provider_unique_id="3", user=user
-        )
-
-        user.identities.remove(user_identity)
-
-        assert user_identity not in db_session.query(models.UserIdentity).all()
-
+    @pytest.mark.usefixtures("user_identities")
     def test_deleting_a_user_identity_removes_it_from_its_user(self, db_session, user):
-        # Add a couple of noise UserIdentity's. These should not be removed
-        # from user.identities.
-        models.UserIdentity(provider="provider", provider_unique_id="1", user=user)
-        models.UserIdentity(provider="provider", provider_unique_id="2", user=user)
         # The UserIdentity that we are going to remove.
         user_identity = models.UserIdentity(
             provider="provider", provider_unique_id="3", user=user
         )
+        db_session.add(user_identity)
         db_session.commit()
 
         db_session.delete(user_identity)
 
         db_session.refresh(user)  # Make sure user.identities is up to date.
+
+        assert user_identity not in db_session.query(models.UserIdentity).all()
         assert user_identity not in user.identities
 
+    @pytest.mark.usefixtures("user_identities")
     def test_deleting_a_user_deletes_all_its_user_identities(self, db_session, user):
-        models.UserIdentity(provider="provider", provider_unique_id="1", user=user)
-        models.UserIdentity(provider="provider", provider_unique_id="2", user=user)
-        db_session.commit()
-
         db_session.delete(user)
 
         assert not db_session.query(models.UserIdentity).count()
@@ -176,3 +157,17 @@ class TestUserIdentity:
     @pytest.fixture
     def user(self, factories):
         return factories.User()
+
+    @pytest.fixture
+    def user_identities(self, db_session, user):
+        db_session.add_all(
+            [
+                models.UserIdentity(
+                    provider="provider", provider_unique_id="1", user=user
+                ),
+                models.UserIdentity(
+                    provider="provider", provider_unique_id="2", user=user
+                ),
+            ]
+        )
+        db_session.commit()
