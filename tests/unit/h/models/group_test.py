@@ -156,7 +156,7 @@ def test_type_raises_for_unknown_type_of_group(factories):
 def test_you_cannot_set_type(factories):
     group = factories.Group()
 
-    with pytest.raises(AttributeError, match="can't set attribute"):
+    with pytest.raises(AttributeError, match="object has no setter"):
         group.type = "open"
 
 
