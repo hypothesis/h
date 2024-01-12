@@ -129,7 +129,7 @@ def _eager_loaded_annotations(session):
         ),
         subqueryload(models.Annotation.document).subqueryload(models.Document.meta),
         subqueryload(models.Annotation.moderation),
-        subqueryload(models.Annotation.thread).load_only("id"),
+        subqueryload(models.Annotation.thread).load_only(models.Annotation.id),
     )
 
 
