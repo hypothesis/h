@@ -19,7 +19,6 @@ attrs==23.2.0
 backports-zoneinfo[tzdata]==0.2.1
     # via
     #   -r requirements/prod.txt
-    #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.1.2
@@ -177,7 +176,7 @@ mako==1.3.0
     #   alembic
 markdown==3.5.2
     # via -r requirements/prod.txt
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via
     #   -r requirements/prod.txt
     #   jinja2
@@ -296,9 +295,7 @@ python-dateutil==2.8.2
     #   elasticsearch-dsl
     #   faker
 python-jose[cryptography]==3.3.0
-    # via
-    #   -r requirements/prod.txt
-    #   python-jose
+    # via -r requirements/prod.txt
 python-slugify==8.0.1
     # via -r requirements/prod.txt
 pytz==2023.3.post1

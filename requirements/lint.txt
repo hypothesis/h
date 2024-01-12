@@ -26,7 +26,6 @@ backports-zoneinfo[tzdata]==0.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.1.2
@@ -102,7 +101,6 @@ colander==2.0
 coverage[toml]==7.4.0
     # via
     #   -r requirements/tests.txt
-    #   coverage
     #   pytest-cov
 cryptography==41.0.7
     # via
@@ -258,7 +256,7 @@ markdown==3.5.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -436,9 +434,7 @@ pytest-cov==4.1.0
 pytest-reverse==1.7.0
     # via -r requirements/functests.txt
 pytest-xdist[psutil]==3.5.0
-    # via
-    #   -r requirements/tests.txt
-    #   pytest-xdist
+    # via -r requirements/tests.txt
 python-dateutil==2.8.2
     # via
     #   -r requirements/functests.txt
@@ -450,7 +446,6 @@ python-jose[cryptography]==3.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   python-jose
 python-slugify==8.0.1
     # via
     #   -r requirements/functests.txt
