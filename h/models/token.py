@@ -44,7 +44,7 @@ class Token(Base, mixins.Timestamps):
 
     _authclient_id = sqlalchemy.Column(
         "authclient_id",
-        postgresql.UUID(),
+        postgresql.UUID(as_uuid=False),
         sqlalchemy.ForeignKey("authclient.id", ondelete="cascade"),
         nullable=True,
     )

@@ -84,7 +84,9 @@ class AuthClient(Base, Timestamps):
 
     #: Public client identifier
     id = sa.Column(
-        postgresql.UUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
+        postgresql.UUID(as_uuid=False),
+        server_default=sa.func.uuid_generate_v1mc(),
+        primary_key=True,
     )
 
     #: Human-readable name for reference.

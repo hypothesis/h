@@ -24,7 +24,7 @@ class AuthzCode(Base, mixins.Timestamps):
 
     _authclient_id = sa.Column(
         "authclient_id",
-        postgresql.UUID(),
+        postgresql.UUID(as_uuid=False),
         sa.ForeignKey("authclient.id", ondelete="cascade"),
         nullable=False,
     )
