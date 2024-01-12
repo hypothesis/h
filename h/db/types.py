@@ -29,6 +29,10 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
     impl = postgresql.UUID
     cache_ok = True
 
+    def __init__(self):
+        # We handle the UUID conversion, explicitly not use as_uuid
+        super().__init__(as_uuid=False)
+
     def process_bind_param(self, value, dialect):
         return self.url_safe_to_hex(value)
 
