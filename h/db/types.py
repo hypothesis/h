@@ -140,6 +140,7 @@ class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-m
     """
 
     impl = postgresql.JSONB
+    cache_ok = False
 
     def process_bind_param(self, value, dialect):
         return _transform_quote_selector(value, _escape_null_byte)
