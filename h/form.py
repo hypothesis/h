@@ -5,8 +5,8 @@ Sets up the form handling and rendering library, deform, to use our own custom
 form templates in preference to the defaults.
 """
 import deform
-import jinja2
 import pyramid_jinja2
+from markupsafe import Markup
 from pyramid import httpexceptions
 from pyramid.path import AssetResolver
 
@@ -45,7 +45,7 @@ class Jinja2Renderer:
         context = self._system.copy()
         context.update(kwargs)
 
-        return jinja2.Markup(template.render(context))
+        return Markup(template.render(context))
 
 
 def create_environment(base):

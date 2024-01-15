@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import colander
 import deform
-import jinja2
+from markupsafe import Markup
 from pyramid import httpexceptions, security
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
@@ -285,7 +285,7 @@ class ResetController:
         svc.update_password(user, password)
 
         self.request.session.flash(
-            jinja2.Markup(
+            Markup(
                 _(
                     "Your password has been reset. You can now log in with "
                     "your new password."
@@ -321,7 +321,7 @@ class ActivateController:
         activation = models.Activation.get_by_code(self.request.db, code)
         if activation is None:
             self.request.session.flash(
-                jinja2.Markup(
+                Markup(
                     _(
                         "We didn't recognize that activation link. "
                         "Have you already activated your account? "
@@ -340,7 +340,7 @@ class ActivateController:
         user.activate()
 
         self.request.session.flash(
-            jinja2.Markup(
+            Markup(
                 _(
                     "Your account has been activated! "
                     "You can now log in using the password you provided."
@@ -369,14 +369,12 @@ class ActivateController:
             # The user is already logged in to the account (so the account
             # must already be activated).
             self.request.session.flash(
-                jinja2.Markup(
-                    _("Your account has been activated and you're logged in.")
-                ),
+                Markup(_("Your account has been activated and you're logged in.")),
                 "success",
             )
         else:
             self.request.session.flash(
-                jinja2.Markup(
+                Markup(
                     _(
                         "You're already logged in to a different account. "
                         '<a href="{url}">Log out</a> and open the activation link '

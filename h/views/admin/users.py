@@ -1,4 +1,4 @@
-import jinja2
+from markupsafe import Markup
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
@@ -70,7 +70,7 @@ def users_activate(request):
 
     request.session.flash(
         # pylint:disable=consider-using-f-string
-        jinja2.Markup(_("User {name} has been activated!".format(name=user.username))),
+        Markup(_("User {name} has been activated!".format(name=user.username))),
         "success",
     )
 
@@ -145,7 +145,7 @@ def users_delete(request):
 
 @view_config(context=UserNotFoundError)
 def user_not_found(exc, request):  # pragma: no cover
-    request.session.flash(jinja2.Markup(_(exc.message)), "error")
+    request.session.flash(Markup(_(exc.message)), "error")
     return httpexceptions.HTTPFound(location=request.route_path("admin.users"))
 
 

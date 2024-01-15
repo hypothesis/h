@@ -1,7 +1,7 @@
 import datetime
 
 import pytest
-from jinja2 import Markup
+from markupsafe import Markup
 
 from h.presenters.annotation_html import AnnotationHTMLPresenter
 

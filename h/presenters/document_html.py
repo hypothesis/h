@@ -1,6 +1,6 @@
 from urllib.parse import unquote, urlparse
 
-import jinja2
+import markupsafe
 
 
 class DocumentHTMLPresenter:
@@ -24,7 +24,7 @@ class DocumentHTMLPresenter:
 
         """
         if self.uri.lower().startswith("file:///"):
-            return jinja2.escape(self.uri.split("/")[-1])
+            return markupsafe.escape(self.uri.split("/")[-1])
         return ""
 
     @property
@@ -44,7 +44,7 @@ class DocumentHTMLPresenter:
 
         """
         if self.document.web_uri:
-            return jinja2.escape(self.document.web_uri)
+            return markupsafe.escape(self.document.web_uri)
         return ""
 
     @property
@@ -64,14 +64,14 @@ class DocumentHTMLPresenter:
         object so that it doesn't get double-escaped.
         """
         if self.filename:
-            return jinja2.escape(unquote(self.filename))
+            return markupsafe.escape(unquote(self.filename))
 
         hostname = urlparse(self.uri).hostname
 
         # urlparse()'s .hostname is sometimes None.
         hostname = hostname or ""
 
-        return jinja2.escape(hostname)
+        return markupsafe.escape(hostname)
 
     @property
     def link(self):
@@ -129,7 +129,7 @@ class DocumentHTMLPresenter:
         Markup object so it doesn't get double-escaped.
 
         """
-        title = jinja2.escape(self.title)
+        title = markupsafe.escape(self.title)
 
         # Sometimes self.title is the annotated document's URI (if the document
         # has no title). In those cases we want to remove the http(s):// from
@@ -160,17 +160,17 @@ class DocumentHTMLPresenter:
             # Convert non-string titles into strings.
             # We're assuming that title cannot be a byte string.
             title = str(title)
-            return jinja2.escape(title)
+            return markupsafe.escape(title)
 
         if self.filename:
-            return jinja2.escape(unquote(self.filename))
+            return markupsafe.escape(unquote(self.filename))
 
-        return jinja2.escape(unquote(self.uri))
+        return markupsafe.escape(unquote(self.uri))
 
     @property
     def uri(self):
         if self.document.document_uris:
-            return jinja2.escape(self.document.document_uris[0].uri)
+            return markupsafe.escape(self.document.document_uris[0].uri)
         return ""
 
     @property
@@ -205,7 +205,7 @@ def _format_document_link(href, title, link_text, host_or_filename):  # pragma: 
         if len(content) <= length:
             return content
 
-        return content[:length] + jinja2.Markup("&hellip;")
+        return content[:length] + markupsafe.Markup("&hellip;")
 
     host_or_filename = truncate(host_or_filename)
     link_text = truncate(link_text)
@@ -220,10 +220,10 @@ def _format_document_link(href, title, link_text, host_or_filename):  # pragma: 
             link += "<br>{host_or_filename}"
 
     link = link.format(
-        href=jinja2.escape(href),
-        title=jinja2.escape(title),
-        link_text=jinja2.escape(link_text),
-        host_or_filename=jinja2.escape(host_or_filename),
+        href=markupsafe.escape(href),
+        title=markupsafe.escape(title),
+        link_text=markupsafe.escape(link_text),
+        host_or_filename=markupsafe.escape(host_or_filename),
     )
 
-    return jinja2.Markup(link)
+    return markupsafe.Markup(link)
