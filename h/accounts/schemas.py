@@ -4,7 +4,7 @@ from functools import lru_cache
 
 import colander
 import deform
-from jinja2 import Markup
+from markupsafe import Markup
 
 from h import i18n, models
 from h.models.user import (

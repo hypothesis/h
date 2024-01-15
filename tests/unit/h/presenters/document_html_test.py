@@ -1,7 +1,7 @@
 from unittest import mock
 
-import jinja2
 import pytest
+from markupsafe import Markup, escape
 
 from h.presenters.document_html import DocumentHTMLPresenter
 
@@ -26,7 +26,7 @@ class TestDocumentHTMLPresenter:
             document_uris=[mock.Mock(uri="file:///home/seanh/MyFile.pdf")]
         )
 
-        assert isinstance(presenter.filename, jinja2.Markup)
+        assert isinstance(presenter.filename, Markup)
 
     def test_filename_with_FILE_uri(self):
         presenter = self.presenter(
@@ -65,7 +65,7 @@ class TestDocumentHTMLPresenter:
     def test_href_returns_Markup(self):
         web_uri = "http://www.example.com/example.html"
 
-        assert isinstance(self.presenter(web_uri=web_uri).href, jinja2.Markup)
+        assert isinstance(self.presenter(web_uri=web_uri).href, Markup)
 
     link_text_fixtures = pytest.mark.usefixtures("title")
 
@@ -105,12 +105,12 @@ class TestDocumentHTMLPresenter:
     @link_text_fixtures
     def test_link_text_returns_Markup_if_title_returns_Markup(self, title):
         for title_ in (
-            jinja2.Markup("Example Document"),
-            jinja2.Markup("http://www.example.com/example.html"),
-            jinja2.Markup("https://www.example.com/example.html"),
+            Markup("Example Document"),
+            Markup("http://www.example.com/example.html"),
+            Markup("https://www.example.com/example.html"),
         ):
             title.return_value = title_
-            assert isinstance(self.presenter().link_text, jinja2.Markup)
+            assert isinstance(self.presenter().link_text, Markup)
 
     hostname_or_filename_fixtures = pytest.mark.usefixtures("uri", "filename")
 
@@ -122,9 +122,9 @@ class TestDocumentHTMLPresenter:
 
     @hostname_or_filename_fixtures
     def test_hostname_or_filename_returns_Markup_if_filename_does(self, filename):
-        filename.return_value = jinja2.Markup("MyFile.pdf")
+        filename.return_value = Markup("MyFile.pdf")
 
-        assert isinstance(self.presenter().hostname_or_filename, jinja2.Markup)
+        assert isinstance(self.presenter().hostname_or_filename, Markup)
 
     @hostname_or_filename_fixtures
     def test_hostname_or_filename_unquotes_filenames(self, filename):
@@ -142,9 +142,9 @@ class TestDocumentHTMLPresenter:
     @hostname_or_filename_fixtures
     def test_hostname_or_filename_returns_Markup_when_uri_does(self, uri, filename):
         filename.return_value = ""
-        uri.return_value = jinja2.Markup("http://www.example.com/example.html")
+        uri.return_value = Markup("http://www.example.com/example.html")
 
-        assert isinstance(self.presenter().hostname_or_filename, jinja2.Markup)
+        assert isinstance(self.presenter().hostname_or_filename, Markup)
 
     @hostname_or_filename_fixtures
     def test_hostname_or_filename_with_empty_string_for_uri(self, uri, filename):
@@ -178,10 +178,10 @@ class TestDocumentHTMLPresenter:
 
         title = self.presenter(title=spam_link).title
 
-        assert jinja2.escape(spam_link) in title
+        assert escape(spam_link) in title
         for char in ["<", ">", '"', "'"]:
             assert char not in title
-        assert isinstance(title, jinja2.Markup)
+        assert isinstance(title, Markup)
 
     @title_fixtures
     def test_title_with_file_uri(self, filename):
@@ -193,9 +193,9 @@ class TestDocumentHTMLPresenter:
 
     @title_fixtures
     def test_title_returns_Markup_when_filename_returns_Markup(self, filename):
-        filename.return_value = jinja2.Markup("MyFile.pdf")
+        filename.return_value = Markup("MyFile.pdf")
 
-        assert isinstance(self.presenter(title=None).title, jinja2.Markup)
+        assert isinstance(self.presenter(title=None).title, Markup)
 
     @title_fixtures
     def test_title_unquotes_uris(self, uri, filename):
@@ -207,9 +207,9 @@ class TestDocumentHTMLPresenter:
     @title_fixtures
     def test_title_returns_Markup_when_uri_returns_Markup(self, uri, filename):
         filename.return_value = ""  # This is not a file:// URI.
-        uri.return_value = jinja2.Markup("http://example.com/example.html")
+        uri.return_value = Markup("http://example.com/example.html")
 
-        assert isinstance(self.presenter(title=None).title, jinja2.Markup)
+        assert isinstance(self.presenter(title=None).title, Markup)
 
     @title_fixtures
     def test_title_when_document_has_None_for_title(self, uri, filename):

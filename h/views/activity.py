@@ -2,7 +2,7 @@
 
 from urllib.parse import urlparse
 
-from jinja2 import Markup
+from markupsafe import Markup
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 

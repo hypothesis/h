@@ -1,5 +1,5 @@
-import jinja2
 from dateutil import parser
+from markupsafe import Markup, escape
 
 from h.presenters.document_html import DocumentHTMLPresenter
 
@@ -16,7 +16,7 @@ class AnnotationHTMLPresenter:
 
     @property
     def uri(self):
-        return jinja2.escape(self.annotation.target_uri)
+        return escape(self.annotation.target_uri)
 
     @property
     def text_rendered(self):
@@ -28,15 +28,15 @@ class AnnotationHTMLPresenter:
         care of all necessary escaping.
         """
         if self.annotation.text_rendered:
-            return jinja2.Markup(self.annotation.text_rendered)
-        return jinja2.Markup("")
+            return Markup(self.annotation.text_rendered)
+        return Markup("")
 
     @property
     def quote(self):
         """Get the text in the document which this annotation refers to."""
         selection = self._get_selection()
         if selection:
-            return jinja2.escape(selection)
+            return escape(selection)
 
         return ""
 
@@ -55,12 +55,12 @@ class AnnotationHTMLPresenter:
 
         selection = self._get_selection()
         if selection:
-            selection = jinja2.escape(selection)
+            selection = escape(selection)
             description += f"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;"
 
         text = self.annotation.text
         if text:
-            text = jinja2.escape(text)
+            text = escape(text)
             description += f"{text}"
 
         return description
@@ -74,7 +74,7 @@ class AnnotationHTMLPresenter:
         date.
 
         """
-        created_string = jinja2.escape(self.annotation.created)
+        created_string = escape(self.annotation.created)
         return parser.parse(created_string).strftime("%Y-%m-%d")
 
     @property
