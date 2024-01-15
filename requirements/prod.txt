@@ -93,7 +93,7 @@ iso8601==2.1.0
     #   deform
 itsdangerous==2.1.2
     # via -r requirements/prod.in
-jinja2==2.11.3
+jinja2==3.1.3
     # via
     #   -r requirements/prod.in
     #   data-tasks
@@ -112,7 +112,7 @@ mako==1.3.0
     # via alembic
 markdown==3.5.2
     # via -r requirements/prod.in
-markupsafe==2.0.1
+markupsafe==2.1.3
     # via
     #   -r requirements/prod.in
     #   jinja2

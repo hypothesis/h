@@ -141,7 +141,7 @@ itsdangerous==2.1.2
     # via -r requirements/prod.txt
 jedi==0.19.1
     # via ipython
-jinja2==2.11.3
+jinja2==3.1.3
     # via
     #   -r requirements/prod.txt
     #   data-tasks
@@ -164,7 +164,7 @@ mako==1.3.0
     #   alembic
 markdown==3.5.2
     # via -r requirements/prod.txt
-markupsafe==2.0.1
+markupsafe==2.1.3
     # via
     #   -r requirements/prod.txt
     #   jinja2
