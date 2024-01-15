@@ -5,50 +5,50 @@
 #    pip-compile requirements/tests.in
 #
 alembic==1.13.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 amqp==5.1.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   kombu
 attrs==23.1.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   hypothesis
     #   jsonschema
     #   referencing
 backports-zoneinfo[tzdata]==0.2.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   backports-zoneinfo
     #   celery
     #   kombu
 bcrypt==4.1.2
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 billiard==4.2.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
 bleach==6.1.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 build==0.8.0
     # via pip-tools
 celery==5.3.6
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 certifi==2023.11.17
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   sentry-sdk
 cffi==1.16.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   cryptography
 chameleon==3.8.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   deform
 click==8.1.7
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -56,42 +56,42 @@ click==8.1.7
     #   pip-tools
 click-didyoumean==0.3.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
 click-plugins==1.1.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
 click-repl==0.2.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
 colander==1.8.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   deform
 coverage[toml]==7.4.0
     # via
-    #   -r requirements/tests.in
+    #   -r tests.in
     #   pytest-cov
 cryptography==41.0.6
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   python-jose
 data-tasks==0.0.3
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 deform==2.0.15
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 ecdsa==0.18.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   python-jose
 elasticsearch==6.8.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 exceptiongroup==1.1.0
     # via
     #   hypothesis
@@ -99,35 +99,35 @@ exceptiongroup==1.1.0
 execnet==2.0.2
     # via pytest-xdist
 factory-boy==3.3.0
-    # via -r requirements/tests.in
+    # via -r tests.in
 faker==17.4.0
     # via factory-boy
 gevent==23.9.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 greenlet==2.0.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   gevent
     #   sqlalchemy
 gunicorn==21.2.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 h-api==1.1.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 h-assets==1.0.6
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 h-matchers==1.2.15
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 h-pyramid-sentry==1.2.4
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 hupper==1.10.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid
 hypothesis==6.92.9
-    # via -r requirements/tests.in
+    # via -r tests.in
 importlib-metadata==4.8.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   alembic
     #   data-tasks
     #   h-api
@@ -136,7 +136,7 @@ importlib-metadata==4.8.1
     #   pip-sync-faster
 importlib-resources==6.1.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   alembic
     #   data-tasks
     #   h-api
@@ -146,114 +146,114 @@ iniconfig==1.1.1
     # via pytest
 iso8601==0.1.13
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   colander
     #   deform
 itsdangerous==2.1.2
-    # via -r requirements/prod.txt
-jinja2==2.11.3
+    # via -r prod.txt
+jinja2==3.1.3
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   data-tasks
     #   pyramid-jinja2
 jsonschema==4.20.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   h-api
 jsonschema-specifications==2023.7.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   jsonschema
 kombu==5.3.4
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
 mako==1.2.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   alembic
 markdown==3.5.2
-    # via -r requirements/prod.txt
-markupsafe==1.1.1
+    # via -r prod.txt
+markupsafe==2.1.3
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   jinja2
     #   mako
     #   pyramid-jinja2
 newrelic==9.5.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 oauthlib==3.2.2
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 packaging==23.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   build
     #   gunicorn
     #   pytest
     #   zope-sqlalchemy
 passlib==1.7.4
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pastedeploy==2.1.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   plaster-pastedeploy
 pep517==0.13.0
     # via build
 peppercorn==0.6
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   deform
 pip-sync-faster==0.0.3
-    # via -r requirements/tests.in
+    # via -r tests.in
 pip-tools==7.3.0
     # via
-    #   -r requirements/tests.in
+    #   -r tests.in
     #   pip-sync-faster
 pkgutil-resolve-name==1.3.10
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   jsonschema
 plaster==1.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   plaster-pastedeploy
     #   pyramid
 plaster-pastedeploy==0.7
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid
 pluggy==0.13.1
     # via pytest
 prompt-toolkit==3.0.18
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   click-repl
 psutil==5.9.6
     # via pytest-xdist
 psycogreen==1.0.2
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 psycopg2==2.9.9
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   data-tasks
 pyasn1==0.5.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   python-jose
     #   rsa
 pycparser==2.20
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   cffi
 pycryptodomex==3.20.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyjwt==2.8.0
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyparsing==3.1.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid==2.0.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   h-assets
     #   h-pyramid-sentry
     #   pyramid-exclog
@@ -264,70 +264,70 @@ pyramid==2.0.2
     #   pyramid-services
     #   pyramid-tm
 pyramid-exclog==1.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid-jinja2==2.10
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid-mailer==0.15.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid-retry==2.1.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid-sanity==1.0.3
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid-services==2.2
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pyramid-tm==2.5
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pytest==7.4.4
     # via
-    #   -r requirements/tests.in
+    #   -r tests.in
     #   pytest-cov
     #   pytest-xdist
 pytest-cov==4.1.0
-    # via -r requirements/tests.in
+    # via -r tests.in
 pytest-xdist[psutil]==3.5.0
-    # via -r requirements/tests.in
+    # via -r tests.in
 python-dateutil==2.8.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   celery
     #   elasticsearch-dsl
     #   faker
 python-jose[cryptography]==3.3.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   python-jose
 python-slugify==8.0.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 pytz==2023.3.post1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 referencing==0.30.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   h-api
     #   jsonschema
     #   jsonschema-specifications
 repoze-sendmail==4.3
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid-mailer
 rfc3339-validator==0.1.4
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 rpds-py==0.9.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   jsonschema
     #   referencing
 rsa==4.9
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   python-jose
 sentry-sdk==1.17.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   h-pyramid-sentry
 six==1.15.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   bleach
     #   click-repl
     #   ecdsa
@@ -338,23 +338,23 @@ sortedcontainers==2.3.0
     # via hypothesis
 sqlalchemy==1.4.51
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   alembic
     #   data-tasks
     #   zope-sqlalchemy
 sqlparse==0.4.4
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   data-tasks
 supervisor==4.2.5
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 tabulate==0.9.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   data-tasks
 text-unidecode==1.3
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   python-slugify
 tomli==2.0.0
     # via
@@ -365,82 +365,82 @@ tomli==2.0.0
     #   pytest
 transaction==4.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid-mailer
     #   pyramid-tm
     #   repoze-sendmail
     #   zope-sqlalchemy
 translationstring==1.4
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   colander
     #   deform
     #   pyramid
 typing-extensions==4.5.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   alembic
     #   kombu
 tzdata==2023.3
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   backports-zoneinfo
     #   celery
 urllib3==1.26.18
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   elasticsearch
     #   sentry-sdk
 venusian==3.1.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid
 vine==5.1.0
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   amqp
     #   celery
     #   kombu
 wcwidth==0.2.5
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   prompt-toolkit
 webencodings==0.5.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   bleach
 webob==1.8.7
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid
 wheel==0.38.1
     # via pip-tools
 wired==0.2.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   pyramid-services
 ws4py==0.5.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 wsaccel==0.6.6
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 zipp==3.4.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   importlib-metadata
     #   importlib-resources
 zope-deprecation==4.1.2
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   deform
     #   pyramid
     #   pyramid-jinja2
 zope-event==4.4
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   gevent
 zope-interface==6.1
     # via
-    #   -r requirements/prod.txt
+    #   -r prod.txt
     #   gevent
     #   pyramid
     #   pyramid-retry
@@ -450,7 +450,7 @@ zope-interface==6.1
     #   wired
     #   zope-sqlalchemy
 zope-sqlalchemy==3.1
-    # via -r requirements/prod.txt
+    # via -r prod.txt
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
