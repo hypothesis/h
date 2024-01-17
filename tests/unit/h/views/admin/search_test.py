@@ -16,6 +16,7 @@ class TestSearchAdminViews:
         pyramid_request.params = {
             "start": "2020-09-09",
             "end": "2020-09-11",
+            "name": "sync_annotation",
         }
 
         views.reindex_date()
@@ -35,7 +36,10 @@ class TestSearchAdminViews:
         self, views, pyramid_request, tasks, factories, force
     ):
         user = factories.User(username="johnsmith")
-        pyramid_request.params = {"username": "johnsmith"}
+        pyramid_request.params = {
+            "username": "johnsmith",
+            "name": "sync_annotation",
+        }
         if force:
             pyramid_request.params["reindex_user_force"] = "on"
 
@@ -53,7 +57,7 @@ class TestSearchAdminViews:
         ]
 
     def test_reindex_user_errors_if_user_not_found(self, views, pyramid_request):
-        pyramid_request.params = {"username": "johnsmith"}
+        pyramid_request.params = {"username": "johnsmith", "name": "sync_annotation"}
 
         with pytest.raises(NotFoundError, match="User johnsmith not found"):
             views.reindex_user()
@@ -63,7 +67,7 @@ class TestSearchAdminViews:
         self, views, pyramid_request, tasks, factories, group_service, force
     ):
         group = factories.Group(pubid="abc123")
-        pyramid_request.params = {"groupid": "abc123"}
+        pyramid_request.params = {"groupid": "abc123", "name": "sync_annotation"}
         if force:
             pyramid_request.params["reindex_group_force"] = "on"
         group_service.fetch_by_pubid.return_value = group
@@ -85,7 +89,7 @@ class TestSearchAdminViews:
     def test_reindex_group_errors_if_group_not_found(
         self, views, pyramid_request, group_service
     ):
-        pyramid_request.params = {"groupid": "def456"}
+        pyramid_request.params = {"groupid": "def456", "name": "sync_annotation"}
         group_service.fetch_by_pubid.return_value = None
 
         with pytest.raises(NotFoundError, match="Group def456 not found"):
