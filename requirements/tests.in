@@ -4,6 +4,7 @@ coverage
 pytest
 pytest-cov
 pytest-xdist[psutil]
+freezegun
 factory-boy
 hypothesis
 -r prod.txt
