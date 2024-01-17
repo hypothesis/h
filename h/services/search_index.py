@@ -9,6 +9,7 @@ from h.models import Annotation
 from h.presenters import AnnotationSearchIndexPresenter
 from h.search.index import BatchIndexer
 from h.services.annotation_read import AnnotationReadService
+from h.services.job_queue import JobQueueService
 
 
 class Result:
@@ -163,7 +164,9 @@ class SearchIndexService:
           job on the queue to be re-checked and removed the next time the
           method runs.
         """
-        jobs = self._queue_service.get(name="sync_annotation", limit=limit)
+        jobs = self._queue_service.get(
+            name=JobQueueService.JobName.SYNC_ANNOTATION, limit=limit
+        )
 
         if not jobs:
             return {}

@@ -1,31 +1,37 @@
-from datetime import datetime, timedelta
-from unittest.mock import call
-
 import pytest
 
-from h.tasks.annotations import fill_annotation_slim
+from h.tasks.annotations import sync_annotation_slim
 
 
-class TestFillPKAndUserId:
+class TestSyncAnnotationSlim:
     AUTHORITY_1 = "AUTHORITY_1"
     AUTHORITY_2 = "AUTHORITY_2"
 
     USERNAME_1 = "USERNAME_1"
     USERNAME_2 = "USERNAME_2"
 
-    def test_it(self, factories, annotation_write_service):
-        now = datetime.now()
-        annos = factories.Annotation.create_batch(10, created=now)
+    def test_it(self, factories, annotation_write_service, queue_service):
+        annotation = factories.Annotation()
+        # Some deleted annotations that should not be processed
         factories.Annotation.create_batch(10, deleted=True)
-        factories.Annotation.create_batch(10, created=now + timedelta(days=10))
+        job = factories.SyncAnnotationJob(annotation=annotation, name="annotation_slim")
 
-        fill_annotation_slim(
-            batch_size=10, since=now - timedelta(days=1), until=now + timedelta(days=1)
-        )
+        queue_service.get.return_value = [job]
 
-        annotation_write_service.upsert_annotation_slim.assert_has_calls(
-            [call(anno) for anno in annos], any_order=True
+        sync_annotation_slim(1)
+
+        queue_service.get.assert_called_once_with(name="annotation_slim", limit=1)
+        annotation_write_service.upsert_annotation_slim.assert_called_once_with(
+            annotation
         )
+        queue_service.delete.assert_called_once_with([job])
+
+    def test_it_with_no_pending_jobs(self, queue_service, annotation_write_service):
+        queue_service.get.return_value = []
+
+        sync_annotation_slim(1)
+
+        annotation_write_service.upsert_annotation_slim.assert_not_called()
 
     @pytest.fixture(autouse=True)
     def celery(self, patch, pyramid_request):

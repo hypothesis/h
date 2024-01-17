@@ -17,6 +17,7 @@ class Priority:
 class JobQueueService:
     class JobName(str, Enum):
         SYNC_ANNOTATION = "sync_annotation"
+        ANNOTATION_SLIM = "annotation_slim"
 
     def __init__(self, db):
         self._db = db
