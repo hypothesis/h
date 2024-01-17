@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 
 from h.services.group import GroupService
+from h.services.job_queue import JobQueueService
 from h.views.admin.search import NotFoundError, SearchAdminViews
 
 
@@ -20,6 +21,7 @@ class TestSearchAdminViews:
         views.reindex_date()
 
         tasks.job_queue.add_annotations_between_times.delay.assert_called_once_with(
+            JobQueueService.JobName.SYNC_ANNOTATION,
             datetime.datetime(year=2020, month=9, day=9),
             datetime.datetime(year=2020, month=9, day=11),
             tag="reindex_date",
@@ -40,7 +42,10 @@ class TestSearchAdminViews:
         views.reindex_user()
 
         tasks.job_queue.add_annotations_from_user.delay.assert_called_once_with(
-            user.userid, tag="reindex_user", force=force
+            JobQueueService.JobName.SYNC_ANNOTATION,
+            user.userid,
+            tag="reindex_user",
+            force=force,
         )
 
         assert pyramid_request.session.peek_flash("success") == [
@@ -67,7 +72,10 @@ class TestSearchAdminViews:
 
         group_service.fetch_by_pubid.assert_called_with(group.pubid)
         tasks.job_queue.add_annotations_from_group.delay.assert_called_once_with(
-            group.pubid, tag="reindex_group", force=force
+            JobQueueService.JobName.SYNC_ANNOTATION,
+            group.pubid,
+            tag="reindex_group",
+            force=force,
         )
 
         assert pyramid_request.session.peek_flash("success") == [

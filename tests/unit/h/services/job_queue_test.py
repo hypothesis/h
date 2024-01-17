@@ -21,19 +21,19 @@ class TestQueueService:
 
         factories.SyncAnnotationJob(expires_at=now - timedelta(hours=1))
 
-        assert not svc.get(limit=100)
+        assert not svc.get(JobQueueService.JobName.SYNC_ANNOTATION, limit=100)
 
     def test_it_ignores_jobs_that_arent_scheduled_yet(self, factories, svc):
         now = datetime.utcnow()
         factories.SyncAnnotationJob(scheduled_at=now + timedelta(hours=1))
 
-        assert not svc.get(limit=100)
+        assert not svc.get(JobQueueService.JobName.SYNC_ANNOTATION, limit=100)
 
     def test_it_ignores_jobs_beyond_limit(self, factories, svc):
         limit = 1
         factories.SyncAnnotationJob.create_batch(size=limit + 1)
 
-        jobs = svc.get(limit=limit)
+        jobs = svc.get(JobQueueService.JobName.SYNC_ANNOTATION, limit=limit)
 
         assert len(jobs) == limit
 
@@ -48,6 +48,7 @@ class TestQueueService:
         factories.Annotation(shared=False)
 
         svc.add_where(
+            JobQueueService.JobName.SYNC_ANNOTATION,
             where=[Annotation.shared.is_(True)],
             tag="test_tag",
             priority=1234,
@@ -89,12 +90,19 @@ class TestQueueService:
     ):
         annotation = factories.Annotation()
 
-        svc.add_where([Annotation.id == annotation.id], "test_tag", 1, force=force)
+        svc.add_where(
+            JobQueueService.JobName.SYNC_ANNOTATION,
+            [Annotation.id == annotation.id],
+            "test_tag",
+            1,
+            force=force,
+        )
 
         assert db_session.query(Job).one().kwargs["force"] == expected_force
 
     def test_add_by_id(self, svc, add_where):
         svc.add_by_id(
+            sentinel.name,
             sentinel.annotation_id,
             sentinel.tag,
             schedule_in=sentinel.schedule_in,
@@ -102,6 +110,7 @@ class TestQueueService:
         )
 
         add_where.assert_called_once_with(
+            sentinel.name,
             [Any.instance_of(BinaryExpression)],
             sentinel.tag,
             Priority.SINGLE_ITEM,
@@ -109,27 +118,33 @@ class TestQueueService:
             sentinel.schedule_in,
         )
 
-        where = add_where.call_args[0][0]
+        where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.id == sentinel.annotation_id)
 
     def test_add_annotations_between_times(self, svc, add_where):
         svc.add_between_times(
-            sentinel.start_time, sentinel.end_time, sentinel.tag, force=sentinel.force
+            sentinel.name,
+            sentinel.start_time,
+            sentinel.end_time,
+            sentinel.tag,
+            force=sentinel.force,
         )
 
         add_where.assert_called_once_with(
+            sentinel.name,
             [Any.instance_of(BinaryExpression)] * 2,
             sentinel.tag,
             Priority.BETWEEN_TIMES,
             sentinel.force,
         )
 
-        where = add_where.call_args[0][0]
+        where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.updated >= sentinel.start_time)
         assert where[1].compare(Annotation.updated <= sentinel.end_time)
 
     def test_add_users_annotations(self, svc, add_where):
         svc.add_by_user(
+            sentinel.name,
             sentinel.userid,
             sentinel.tag,
             force=sentinel.force,
@@ -137,6 +152,7 @@ class TestQueueService:
         )
 
         add_where.assert_called_once_with(
+            sentinel.name,
             [Any.instance_of(BinaryExpression)],
             sentinel.tag,
             Priority.SINGLE_USER,
@@ -144,11 +160,12 @@ class TestQueueService:
             sentinel.schedule_in,
         )
 
-        where = add_where.call_args[0][0]
+        where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.userid == sentinel.userid)
 
     def test_add_group_annotations(self, svc, add_where):
         svc.add_by_group(
+            sentinel.name,
             sentinel.groupid,
             sentinel.tag,
             force=sentinel.force,
@@ -156,6 +173,7 @@ class TestQueueService:
         )
 
         add_where.assert_called_once_with(
+            sentinel.name,
             [Any.instance_of(BinaryExpression)],
             sentinel.tag,
             Priority.SINGLE_GROUP,
@@ -163,7 +181,7 @@ class TestQueueService:
             sentinel.schedule_in,
         )
 
-        where = add_where.call_args[0][0]
+        where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.groupid == sentinel.groupid)
 
     def test_delete(self, factories, svc, db_session):
