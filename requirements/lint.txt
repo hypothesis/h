@@ -152,6 +152,8 @@ faker==17.4.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
+freezegun==1.4.0
+    # via -r requirements/tests.txt
 gevent==23.9.1
     # via
     #   -r requirements/functests.txt
@@ -443,6 +445,7 @@ python-dateutil==2.8.2
     #   celery
     #   elasticsearch-dsl
     #   faker
+    #   freezegun
 python-jose[cryptography]==3.3.0
     # via
     #   -r requirements/functests.txt
