@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from enum import Enum
 
 from sqlalchemy import and_, func, literal_column, select
 from zope.sqlalchemy import mark_changed
@@ -14,10 +15,13 @@ class Priority:
 
 
 class JobQueueService:
+    class JobName(str, Enum):
+        SYNC_ANNOTATION = "sync_annotation"
+
     def __init__(self, db):
         self._db = db
 
-    def get(self, limit, name="sync_annotation"):
+    def get(self, name, limit):
         now = datetime.utcnow()
 
         query = self._db.query(Job).filter(
@@ -35,7 +39,8 @@ class JobQueueService:
         for job in jobs:
             self._db.delete(job)
 
-    def add_between_times(self, start_time, end_time, tag, force=False):
+    # pylint: disable=too-many-arguments
+    def add_between_times(self, name, start_time, end_time, tag, force=False):
         """
         Queue all annotations between two times.
 
@@ -45,9 +50,9 @@ class JobQueueService:
         :param end_time: The time to queue annotations until (inclusive)
         """
         where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
-        self.add_where(where, tag, Priority.BETWEEN_TIMES, force)
+        self.add_where(name, where, tag, Priority.BETWEEN_TIMES, force)
 
-    def add_by_id(self, annotation_id, tag, force=False, schedule_in=None):
+    def add_by_id(self, name, annotation_id, tag, force=False, schedule_in=None):
         """
         Queue an annotation.
 
@@ -57,44 +62,43 @@ class JobQueueService:
             application-level URL-safe format
         """
         where = [Annotation.id == annotation_id]
-        self.add_where(where, tag, Priority.SINGLE_ITEM, force, schedule_in)
+        self.add_where(name, where, tag, Priority.SINGLE_ITEM, force, schedule_in)
 
-    def add_by_user(self, userid, tag, force=False, schedule_in=None):
+    def add_by_user(self, name, userid: str, tag, force=False, schedule_in=None):
         """
         Queue all a user's annotations.
 
         See Queue.add() for documentation of the params.
 
         :param userid: The ID of the user in "acct:USERNAME@AUTHORITY" format
-        :type userid: unicode
         """
         where = [Annotation.userid == userid]
-        self.add_where(where, tag, Priority.SINGLE_USER, force, schedule_in)
+        self.add_where(name, where, tag, Priority.SINGLE_USER, force, schedule_in)
 
-    def add_by_group(self, groupid, tag, force=False, schedule_in=None):
+    def add_by_group(self, name, groupid: str, tag, force=False, schedule_in=None):
         """
         Queue all annotations in a group.
 
         See Queue.add() for documentation of the params.
 
         :param groupid: The pubid of the group
-        :type groupid: unicode
         """
         where = [Annotation.groupid == groupid]
-        self.add_where(where, tag, Priority.SINGLE_GROUP, force, schedule_in)
+        self.add_where(name, where, tag, Priority.SINGLE_GROUP, force, schedule_in)
 
-    def add_where(  # pylint: disable=too-many-arguments
+    def add_where(
         self,
+        name,
         where,
         tag,
         priority,
         force=False,
         schedule_in=None,
-        name="sync_annotation",
     ):
         """
         Queue annotations matching a filter .
 
+        :param name : Name of the task in the queue
         :param where: A list of SQLAlchemy BinaryExpression objects to limit
             the annotations to be added
         :param tag: The tag to add to the job on the queue. For documentation
@@ -106,7 +110,6 @@ class JobQueueService:
         :param schedule_in: A number of seconds from now to wait before making
             the job available for processing. The annotation won't be synced
             until at least `schedule_in` seconds from now
-        :param name : Name of the task in the queue
         """
         where_clause = and_(*where) if len(where) > 1 else where[0]
         schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)

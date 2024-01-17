@@ -4,6 +4,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import models, tasks
 from h.security import Permission
+from h.services.job_queue import JobQueueService
 
 
 class NotFoundError(Exception):
@@ -37,7 +38,10 @@ class SearchAdminViews:
         end_time = isoparse(self.request.params["end"].strip())
 
         tasks.job_queue.add_annotations_between_times.delay(
-            start_time, end_time, tag="reindex_date"
+            JobQueueService.JobName.SYNC_ANNOTATION,
+            start_time,
+            end_time,
+            tag="reindex_date",
         )
         return self._notify_reindexing_started(
             f"Began reindexing from {start_time} to {end_time}"
@@ -60,7 +64,10 @@ class SearchAdminViews:
             raise NotFoundError(f"User {username} not found")
 
         tasks.job_queue.add_annotations_from_user.delay(
-            user.userid, tag="reindex_user", force=force
+            JobQueueService.JobName.SYNC_ANNOTATION,
+            user.userid,
+            tag="reindex_user",
+            force=force,
         )
         return self._notify_reindexing_started(
             f"Began reindexing annotations by {user.userid}"
@@ -81,7 +88,10 @@ class SearchAdminViews:
             raise NotFoundError(f"Group {groupid} not found")
 
         tasks.job_queue.add_annotations_from_group.delay(
-            groupid, tag="reindex_group", force=force
+            JobQueueService.JobName.SYNC_ANNOTATION,
+            groupid,
+            tag="reindex_group",
+            force=force,
         )
         return self._notify_reindexing_started(
             f"Began reindexing annotations in group {groupid} ({group.name})"
