@@ -57,7 +57,10 @@ class UserRenameService:
 
         self._change_annotations(old_userid, new_userid)
         tasks.job_queue.add_annotations_from_user.delay(
-            old_userid, tag="RenameUserService.rename", schedule_in=30
+            "sync_annotation",
+            old_userid,
+            tag="RenameUserService.rename",
+            schedule_in=30,
         )
 
     def _purge_auth_tickets(self, user):
