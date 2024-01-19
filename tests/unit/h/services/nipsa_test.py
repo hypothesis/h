@@ -29,6 +29,7 @@ class TestNipsaService:
         svc.flag(users["unflagged_user"])
 
         tasks.job_queue.add_annotations_from_user.delay.assert_called_once_with(
+            "sync_annotation",
             "acct:unflagged_user@example.com",
             tag="NipsaService.flag",
             force=True,
@@ -45,6 +46,7 @@ class TestNipsaService:
         svc.unflag(users["flagged_user"])
 
         tasks.job_queue.add_annotations_from_user.delay.assert_called_once_with(
+            "sync_annotation",
             "acct:flagged_user@example.com",
             tag="NipsaService.unflag",
             force=True,

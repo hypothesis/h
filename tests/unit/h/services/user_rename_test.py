@@ -92,6 +92,7 @@ class TestUserRenameService:
         service.rename(user, "panda")
 
         tasks.job_queue.add_annotations_from_user.delay.assert_called_once_with(
+            "sync_annotation",
             original_userid,
             tag="RenameUserService.rename",
             schedule_in=30,

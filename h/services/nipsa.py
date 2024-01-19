@@ -74,7 +74,7 @@ class NipsaService:
 
     def _reindex_users_annotations(self, user, tag):
         tasks.job_queue.add_annotations_from_user.delay(
-            user.userid, tag=tag, force=True, schedule_in=30
+            "sync_annotation", user.userid, tag=tag, force=True, schedule_in=30
         )
 
 
