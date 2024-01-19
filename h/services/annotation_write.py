@@ -221,7 +221,10 @@ class AnnotationWriteService:
     def upsert_annotation_slim(self, annotation):
         self._db.flush()  # See the last model changes in the transaction
 
-        if not annotation.group:
+        user_id = self._db.scalar(
+            select(User.id).where(User.userid == annotation.userid)
+        )
+        if not annotation.group or not user_id:
             # Due to the design of the old table this is possible for a short while
             # when a user (and his groups) or a group is deleted.
             # The AnnotationSlim records will get deleted by a cascade, no need to do anything here.
@@ -236,10 +239,6 @@ class AnnotationWriteService:
                 )
             )
         )
-        user_id = self._db.scalar(
-            select(User.id).where(User.userid == annotation.userid)
-        )
-
         stmt = insert(AnnotationSlim).values(
             [
                 {

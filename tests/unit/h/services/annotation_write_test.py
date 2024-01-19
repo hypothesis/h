@@ -246,6 +246,11 @@ class TestAnnotationWriteService:
 
         svc.upsert_annotation_slim(annotation)
 
+    def test_upsert_annotation_slim_with_deleted_user(self, annotation, svc):
+        annotation.userid = "deleted user"
+
+        svc.upsert_annotation_slim(annotation)
+
     @pytest.fixture
     def create_data(self, factories):
         user = factories.User()
