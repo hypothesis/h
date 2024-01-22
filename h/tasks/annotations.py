@@ -2,7 +2,6 @@ from h.celery import celery, get_task_logger
 from h.db.types import URLSafeUUID
 from h.models import Annotation
 from h.services.annotation_write import AnnotationWriteService
-from h.services.job_queue import JobQueueService
 
 log = get_task_logger(__name__)
 
@@ -15,7 +14,7 @@ def sync_annotation_slim(limit):
     queue_svc = celery.request.find_service(name="queue_service")
 
     # Get pending jobs, up to `limit`
-    jobs = queue_svc.get(name=JobQueueService.JobName.ANNOTATION_SLIM, limit=limit)
+    jobs = queue_svc.get(name="annotation_slim", limit=limit)
     if not jobs:
         return
 
