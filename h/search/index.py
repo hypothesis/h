@@ -9,7 +9,6 @@ from packaging.version import Version
 from sqlalchemy.orm import subqueryload
 
 from h import models, presenters
-from h.util.query import column_windows
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +16,7 @@ PG_WINDOW_SIZE = 2500
 
 
 class BatchIndexer:
-    """A convenience class for reindexing all annotations from the database to the search index."""
+    """A convenience class for reindexing annotations from the database to the search index."""
 
     def __init__(  # pylint: disable=too-many-arguments
         self, session, es_client, request, target_index=None, op_type="index"
@@ -33,24 +32,17 @@ class BatchIndexer:
         else:
             self._target_index = target_index
 
-    def index(self, annotation_ids=None, windowsize=PG_WINDOW_SIZE):
+    def index(self, annotation_ids: list, windowsize: int = PG_WINDOW_SIZE):
         """
         Reindex annotations.
 
         :param annotation_ids: a list of ids to reindex, reindexes all when `None`.
-        :type annotation_ids: collection
         :param windowsize: the number of annotations to index in between progress log statements
-        :type windowsize: integer
 
         :returns: a set of errored ids
         :rtype: set
         """
-        if annotation_ids is None:
-            annotations = _all_annotations(session=self.session, windowsize=windowsize)
-        else:
-            annotations = _filtered_annotations(
-                session=self.session, ids=annotation_ids
-            )
+        annotations = _filtered_annotations(session=self.session, ids=annotation_ids)
 
         # Report indexing status as we go
         annotations = _log_status(annotations, log_every=windowsize)
@@ -87,23 +79,6 @@ class BatchIndexer:
         ).asdict()
 
         return {self.op_type: operation}, data
-
-
-def _all_annotations(session, windowsize=2000):
-    # This is using a windowed query for loading all annotations in batches.
-    # It is the most performant way of loading a big set of records from
-    # the database while still supporting eagerloading of associated
-    # document data.
-    windows = column_windows(
-        session=session,
-        column=models.Annotation.updated,  # implicit ASC
-        windowsize=windowsize,
-        where=_annotation_filter(),
-    )
-    query = _eager_loaded_annotations(session).filter(_annotation_filter())
-
-    for window in windows:
-        yield from query.filter(window)
 
 
 def _filtered_annotations(session, ids):

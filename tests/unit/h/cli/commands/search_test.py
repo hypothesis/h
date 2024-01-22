@@ -1,4 +1,3 @@
-import os
 from unittest import mock
 
 import pytest
@@ -9,26 +8,6 @@ pytestmark = [
     pytest.mark.xdist_group("elasticsearch"),
     pytest.mark.usefixtures("init_elasticsearch"),
 ]
-
-
-class TestReindexCommand:
-    @pytest.mark.usefixtures("reindex")
-    def test_it_raises_timeout(self, cli, cliconfig):
-        cli.invoke(search.reindex, [], obj=cliconfig)
-        assert os.getenv("ELASTICSEARCH_CLIENT_TIMEOUT") == "30"
-
-    def test_calls_reindex(self, cli, cliconfig, pyramid_request, reindex):
-        result = cli.invoke(search.reindex, [], obj=cliconfig)
-
-        assert not result.exit_code
-        reindex.assert_called_once_with(
-            pyramid_request.db, pyramid_request.es, pyramid_request
-        )
-
-    @pytest.fixture
-    def reindex(self, patch):
-        index = patch("h.cli.commands.search.indexer")
-        return index.reindex
 
 
 class TestUpdateSettingsCommand:
