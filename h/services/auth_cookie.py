@@ -42,6 +42,7 @@ class AuthCookieService:
             .filter(
                 AuthTicket.id == ticket_id,
                 AuthTicket.user_userid == userid,
+                # pylint:disable=not-callable
                 AuthTicket.expires > sa.func.now(),
             )
             .one_or_none()

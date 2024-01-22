@@ -220,7 +220,7 @@ six==1.16.0
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
-sqlalchemy==1.4.51
+sqlalchemy==2.0.25
     # via
     #   -r requirements/prod.in
     #   alembic
@@ -251,7 +251,9 @@ translationstring==1.4
     #   deform
     #   pyramid
 typing-extensions==4.9.0
-    # via alembic
+    # via
+    #   alembic
+    #   sqlalchemy
 tzdata==2023.4
     # via celery
 urllib3==2.1.0

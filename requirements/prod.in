@@ -9,7 +9,7 @@ pyramid-sanity
 # 3rd-party packages
 python-jose[cryptography]
 PyJWT
-SQLAlchemy < 2
+SQLAlchemy
 alembic
 bcrypt
 bleach

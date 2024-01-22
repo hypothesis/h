@@ -43,14 +43,14 @@ class Annotation(Base):
     created = sa.Column(
         sa.DateTime,
         default=datetime.datetime.utcnow,
-        server_default=sa.func.now(),
+        server_default=sa.func.now(),  # pylint:disable=not-callable
         nullable=False,
     )
 
     #: The timestamp when the user edited the annotation last.
     updated = sa.Column(
         sa.DateTime,
-        server_default=sa.func.now(),
+        server_default=sa.func.now(),  # pylint:disable=not-callable
         default=datetime.datetime.utcnow,
         nullable=False,
     )

@@ -321,7 +321,7 @@ six==1.16.0
     #   rfc3339-validator
 sortedcontainers==2.4.0
     # via hypothesis
-sqlalchemy==1.4.51
+sqlalchemy==2.0.25
     # via
     #   -r requirements/prod.txt
     #   alembic
@@ -358,6 +358,7 @@ typing-extensions==4.9.0
     # via
     #   -r requirements/prod.txt
     #   alembic
+    #   sqlalchemy
 tzdata==2023.4
     # via
     #   -r requirements/prod.txt
