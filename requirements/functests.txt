@@ -152,7 +152,7 @@ mako==1.3.0
     #   alembic
 markdown==3.5.2
     # via -r requirements/prod.txt
-markupsafe==2.1.3
+markupsafe==2.1.4
     # via
     #   -r requirements/prod.txt
     #   jinja2
