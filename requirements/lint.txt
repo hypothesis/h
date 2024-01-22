@@ -491,7 +491,7 @@ soupsieve==2.5
     # via
     #   -r requirements/functests.txt
     #   beautifulsoup4
-sqlalchemy==1.4.51
+sqlalchemy==2.0.25
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -539,6 +539,7 @@ typing-extensions==4.9.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   alembic
+    #   sqlalchemy
 tzdata==2023.4
     # via
     #   -r requirements/functests.txt

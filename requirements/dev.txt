@@ -322,7 +322,7 @@ six==1.16.0
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
-sqlalchemy==1.4.51
+sqlalchemy==2.0.25
     # via
     #   -r requirements/prod.txt
     #   alembic
@@ -365,6 +365,7 @@ typing-extensions==4.9.0
     # via
     #   -r requirements/prod.txt
     #   alembic
+    #   sqlalchemy
 tzdata==2023.4
     # via
     #   -r requirements/prod.txt

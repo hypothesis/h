@@ -12,7 +12,9 @@ class InvalidUUID(Exception, DontWrapMixin):
     pass
 
 
-class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
+class URLSafeUUID(
+    types.TypeDecorator
+):  # pylint:disable=abstract-method,too-many-ancestors
     """
     Expose UUIDs as URL-safe base64-encoded strings.
 
@@ -130,7 +132,9 @@ class URLSafeUUID(types.TypeDecorator):  # pylint:disable=abstract-method
         return hex_str[0:12] + hex_str[13:16] + hex_str[17:32]
 
 
-class AnnotationSelectorJSONB(types.TypeDecorator):  # pylint:disable=abstract-method
+class AnnotationSelectorJSONB(
+    types.TypeDecorator
+):  # pylint:disable=abstract-method, too-many-ancestors
     r"""
     Special type for the Annotation selector column.
 

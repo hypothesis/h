@@ -22,7 +22,9 @@ def _normalise_username(username):
     return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
-class UsernameComparator(Comparator):  # pylint: disable=abstract-method
+class UsernameComparator(
+    Comparator
+):  # pylint: disable=abstract-method,too-many-ancestors
     """
     Custom comparator for :py:attr:`~h.models.user.User.username`.
 
@@ -49,7 +51,9 @@ class UsernameComparator(Comparator):  # pylint: disable=abstract-method
         return _normalise_username(self.__clause_element__()).in_(usernames)
 
 
-class UserIDComparator(Comparator):  # pylint: disable=abstract-method
+class UserIDComparator(
+    Comparator
+):  # pylint: disable=abstract-method,too-many-ancestors
     """
     Custom comparator for :py:attr:`~h.models.user.User.userid`.
 
@@ -239,7 +243,7 @@ class User(Base):
     registered_date = sa.Column(
         sa.TIMESTAMP(timezone=False),
         default=datetime.datetime.utcnow,
-        server_default=sa.func.now(),
+        server_default=sa.func.now(),  # pylint:disable=not-callable
         nullable=False,
     )
     activation_date = sa.Column(sa.TIMESTAMP(timezone=False), nullable=True)

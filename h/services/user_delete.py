@@ -29,6 +29,7 @@ class UserDeleteService:
 
         # Delete or remove our link to groups we've created
         for group, annotations_by_other_users in self._db.execute(
+            # pylint:disable=not-callable
             sa.select(Group, sa.func.count(Annotation.id))
             .where(Group.creator == user)
             .outerjoin(
