@@ -21,19 +21,19 @@ class TestQueueService:
 
         factories.SyncAnnotationJob(expires_at=now - timedelta(hours=1))
 
-        assert not svc.get(JobQueueService.JobName.SYNC_ANNOTATION, limit=100)
+        assert not svc.get("sync_annotation", limit=100)
 
     def test_it_ignores_jobs_that_arent_scheduled_yet(self, factories, svc):
         now = datetime.utcnow()
         factories.SyncAnnotationJob(scheduled_at=now + timedelta(hours=1))
 
-        assert not svc.get(JobQueueService.JobName.SYNC_ANNOTATION, limit=100)
+        assert not svc.get("sync_annotation", limit=100)
 
     def test_it_ignores_jobs_beyond_limit(self, factories, svc):
         limit = 1
         factories.SyncAnnotationJob.create_batch(size=limit + 1)
 
-        jobs = svc.get(JobQueueService.JobName.SYNC_ANNOTATION, limit=limit)
+        jobs = svc.get("sync_annotation", limit=limit)
 
         assert len(jobs) == limit
 
@@ -48,7 +48,7 @@ class TestQueueService:
         factories.Annotation(shared=False)
 
         svc.add_where(
-            JobQueueService.JobName.SYNC_ANNOTATION,
+            "sync_annotation",
             where=[Annotation.shared.is_(True)],
             tag="test_tag",
             priority=1234,
@@ -91,7 +91,7 @@ class TestQueueService:
         annotation = factories.Annotation()
 
         svc.add_where(
-            JobQueueService.JobName.SYNC_ANNOTATION,
+            "sync_annotation",
             [Annotation.id == annotation.id],
             "test_tag",
             1,

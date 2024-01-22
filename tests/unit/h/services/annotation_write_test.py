@@ -8,7 +8,6 @@ from h.models import Annotation, AnnotationModeration, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_write import AnnotationWriteService, service_factory
-from h.services.job_queue import JobQueueService
 from h.traversal.group import GroupContext
 
 
@@ -37,7 +36,7 @@ class TestAnnotationWriteService:
         )
         _validate_group.assert_called_once_with(anno)
         queue_service.add_by_id.assert_called_once_with(
-            name=JobQueueService.JobName.SYNC_ANNOTATION,
+            "sync_annotation",
             annotation_id=anno.id,
             tag="storage.create_annotation",
             schedule_in=60,
@@ -129,7 +128,7 @@ class TestAnnotationWriteService:
         )
 
         queue_service.add_by_id.assert_called_once_with(
-            name=JobQueueService.JobName.SYNC_ANNOTATION,
+            "sync_annotation",
             annotation_id=annotation.id,
             tag="storage.update_annotation",
             schedule_in=60,
@@ -151,7 +150,7 @@ class TestAnnotationWriteService:
         )
 
         queue_service.add_by_id.assert_called_once_with(
-            name=JobQueueService.JobName.SYNC_ANNOTATION,
+            "sync_annotation",
             annotation_id=Any(),
             tag="custom_tag",
             schedule_in=Any(),

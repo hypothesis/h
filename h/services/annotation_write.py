@@ -82,7 +82,7 @@ class AnnotationWriteService:
             self._annotation_metadata_service.set(annotation, annotation_metadata)
 
         self._queue_service.add_by_id(
-            name=JobQueueService.JobName.SYNC_ANNOTATION,
+            name="sync_annotation",
             annotation_id=annotation.id,
             tag="storage.create_annotation",
             schedule_in=60,
@@ -145,7 +145,7 @@ class AnnotationWriteService:
         # entry's timestamp matches the DB timestamp. If we're not changing this
         # timestamp, we need to force reindexing.
         self._queue_service.add_by_id(
-            name=JobQueueService.JobName.SYNC_ANNOTATION,
+            name="sync_annotation",
             annotation_id=annotation.id,
             tag=reindex_tag,
             schedule_in=60,
