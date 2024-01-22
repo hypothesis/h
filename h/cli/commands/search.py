@@ -1,35 +1,11 @@
-import os
-
 import click
 
-from h import indexer
 from h.search import config
 
 
 @click.group()
 def search():
     """Manage search index."""
-
-
-@search.command()
-@click.pass_context
-def reindex(ctx):
-    """
-    Reindex all annotations.
-
-    Creates a new search index from the data in PostgreSQL and atomically
-    updates the index alias. This requires that the index is aliased already,
-    and will raise an error if it is not.
-    """
-    os.environ["ELASTICSEARCH_CLIENT_TIMEOUT"] = "30"
-
-    request = ctx.obj["bootstrap"]()
-
-    es_client = request.es
-
-    click.echo(f"reindexing into Elasticsearch {es_client.server_version} cluster")
-
-    indexer.reindex(request.db, es_client, request)
 
 
 @search.command("update-settings")

@@ -15,17 +15,6 @@ pytestmark = [
 
 @pytest.mark.usefixtures("nipsa_service")
 class TestBatchIndexer:
-    def test_it_indexes_all_annotations(
-        self, batch_indexer, factories, get_indexed_ann
-    ):
-        annotations = factories.Annotation.create_batch(3)
-        ids = [a.id for a in annotations]
-
-        batch_indexer.index()
-
-        for _id in ids:
-            assert get_indexed_ann(_id) is not None
-
     @pytest.mark.parametrize("target_index", (None, "custom_index"))
     def test_it_accepts_different_indexes(self, target_index, es_client):
         indexer = BatchIndexer(
@@ -65,7 +54,7 @@ class TestBatchIndexer:
         # create deleted annotations
         ann_del = factories.Annotation(deleted=True)
 
-        batch_indexer.index()
+        batch_indexer.index([ann.id, ann_del.id])
 
         assert get_indexed_ann(ann.id) is not None
 
@@ -93,7 +82,7 @@ class TestBatchIndexer:
     ):
         annotations = factories.Annotation.create_batch(2, groupid="group_a")
 
-        batch_indexer.index()
+        batch_indexer.index([annotation.id for annotation in annotations])
 
         for ann in annotations:
             result = get_indexed_ann(ann.id)
@@ -113,7 +102,7 @@ class TestBatchIndexer:
             (False, {"index": {"error": "some error", "_id": annotations[2].id}}),
         ]
 
-        errored = batch_indexer.index()
+        errored = batch_indexer.index([annotation.id for annotation in annotations])
 
         assert errored == expected_errored_ids
 
@@ -140,7 +129,7 @@ class TestBatchIndexer:
 
         errored = BatchIndexer(
             db_session, es_client, pyramid_request, es_client.index, "create"
-        ).index()
+        ).index([annotation.id for annotation in annotations])
 
         assert errored == expected_errored_ids
 
