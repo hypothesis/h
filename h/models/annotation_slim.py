@@ -77,11 +77,17 @@ class AnnotationSlim(Base):
     document = sa.orm.relationship("Document")
 
     user_id = sa.Column(
-        sa.Integer, sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        sa.Integer,
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     user = sa.orm.relationship("User")
 
     group_id = sa.Column(
-        sa.Integer, sa.ForeignKey("group.id", ondelete="CASCADE"), nullable=False
+        sa.Integer,
+        sa.ForeignKey("group.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     group = sa.orm.relationship("Group")

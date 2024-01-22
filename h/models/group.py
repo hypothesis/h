@@ -41,7 +41,7 @@ class GroupMembership(Base):
     id = sa.Column("id", sa.Integer, autoincrement=True, primary_key=True)
     user_id = sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False)
     group_id = sa.Column(
-        "group_id", sa.Integer, sa.ForeignKey("group.id"), nullable=False
+        "group_id", sa.Integer, sa.ForeignKey("group.id"), nullable=False, index=True
     )
 
 
