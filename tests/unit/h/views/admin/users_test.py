@@ -77,19 +77,6 @@ def test_users_index_strips_spaces(models, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_queries_annotation_count_by_userid(
-    models, factories, pyramid_request, annotation_stats_service
-):
-    user = factories.User.build(username="bob")
-    models.User.get_by_username.return_value = user
-    annotation_stats_service.total_user_annotation_count.return_value = 8
-
-    pyramid_request.params = {"username": "bob", "authority": user.authority}
-    result = users_index(pyramid_request)
-    assert result["user_meta"]["annotations_count"] == 8
-
-
-@users_index_fixtures
 def test_users_index_no_user_found(models, pyramid_request):
     pyramid_request.params = {"username": "bob", "authority": "foo.org"}
     models.User.get_by_username.return_value = None
@@ -108,10 +95,13 @@ def test_users_index_no_user_found(models, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_user_found(models, pyramid_request, factories):
+def test_users_index_user_found(
+    models, pyramid_request, factories, annotation_stats_service
+):
     pyramid_request.params = {"username": "bob", "authority": "foo.org"}
     user = factories.User.build(username="bob", authority="foo.org")
     models.User.get_by_username.return_value = user
+    annotation_stats_service.total_user_annotation_count.return_value = 8
 
     result = users_index(pyramid_request)
 
@@ -120,7 +110,7 @@ def test_users_index_user_found(models, pyramid_request, factories):
         "username": "bob",
         "authority": "foo.org",
         "user": user,
-        "user_meta": {"annotations_count": 0},
+        "user_meta": {"annotations_count": 8},
         "format_date": format_date,
     }
 
@@ -129,12 +119,20 @@ users_activate_fixtures = pytest.mark.usefixtures("user_service", "ActivationEve
 
 
 @users_activate_fixtures
-def test_users_activate_gets_user(user_service, pyramid_request):
+def test_users_activate(user_service, pyramid_request, notify, ActivationEvent):
     pyramid_request.params = {"userid": "acct:bob@example.org"}
 
-    users_activate(pyramid_request)
+    result = users_activate(pyramid_request)
 
     user_service.fetch.assert_called_once_with("acct:bob@example.org")
+    user_service.fetch.return_value.activate.assert_called_once_with()
+    assert pyramid_request.session.peek_flash("success")
+
+    ActivationEvent.assert_called_once_with(
+        pyramid_request, user_service.fetch.return_value
+    )
+    notify.assert_called_with(ActivationEvent.return_value)
+    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 @users_activate_fixtures
@@ -144,56 +142,6 @@ def test_users_activate_user_not_found_error(user_service, pyramid_request):
 
     with pytest.raises(UserNotFoundError):
         users_activate(pyramid_request)
-
-
-@users_activate_fixtures
-def test_users_activate_activates_user(user_service, pyramid_request):
-    pyramid_request.params = {"userid": "acct:bob@example.org"}
-
-    users_activate(pyramid_request)
-
-    user_service.fetch.return_value.activate.assert_called_once_with()
-
-
-@users_activate_fixtures
-def test_users_activate_flashes_success(pyramid_request):
-    pyramid_request.params = {"userid": "acct:bob@example.com"}
-
-    users_activate(pyramid_request)
-    success_flash = pyramid_request.session.peek_flash("success")
-
-    assert success_flash
-
-
-@users_activate_fixtures
-def test_users_activate_inits_ActivationEvent(
-    ActivationEvent, user_service, pyramid_request
-):
-    pyramid_request.params = {"userid": "acct:bob@example.com"}
-
-    users_activate(pyramid_request)
-
-    ActivationEvent.assert_called_once_with(
-        pyramid_request, user_service.fetch.return_value
-    )
-
-
-@users_activate_fixtures
-def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
-    pyramid_request.params = {"userid": "acct:bob@example.com"}
-
-    users_activate(pyramid_request)
-
-    notify.assert_called_with(ActivationEvent.return_value)
-
-
-@users_activate_fixtures
-def test_users_activate_redirects(pyramid_request):
-    pyramid_request.params = {"userid": "acct:bob@example.com"}
-
-    result = users_activate(pyramid_request)
-
-    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 def test_users_delete_user_not_found_error(user_service, pyramid_request):
