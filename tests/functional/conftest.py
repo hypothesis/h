@@ -67,9 +67,9 @@ def with_clean_db(db_engine):
 
 
 @pytest.fixture
-def db_session(db_engine):
+def db_session(db_engine, db_sessionfactory):
     """Get a standalone database session for preparing database state."""
-    session = db.Session(bind=db_engine)
+    session = db_sessionfactory(bind=db_engine)
     yield session
     session.close()
 

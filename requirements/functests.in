@@ -4,4 +4,5 @@ pytest
 factory-boy
 webtest
 pytest-reverse
+h-testkit
 -r prod.txt
