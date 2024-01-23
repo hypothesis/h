@@ -2,6 +2,7 @@ import contextlib
 import os
 
 import pytest
+from sqlalchemy import text
 from webtest import TestApp
 
 from h import db
@@ -56,7 +57,7 @@ def with_clean_db(db_engine):
     with contextlib.closing(db_engine.connect()) as conn:
         tx = conn.begin()
         tnames = ", ".join('"' + t.name + '"' for t in tables)
-        conn.execute(f"TRUNCATE {tnames};")
+        conn.execute(text(f"TRUNCATE {tnames};"))
         tx.commit()
 
     # We need to re-init the DB as it creates the default test group and

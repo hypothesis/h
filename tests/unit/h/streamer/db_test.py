@@ -21,13 +21,14 @@ class TestMakeSession:
 
 
 class TestReadOnlyTransaction:
-    def test_it_starts_a_read_only_transaction(self, session):
+    def test_it_starts_a_read_only_transaction(self, session, text):
         with read_only_transaction(session):
             ...
 
-        assert session.method_calls[0] == mock.call.execute(
+        text.assert_called_once_with(
             "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE READ ONLY DEFERRABLE"
         )
+        assert session.method_calls[0] == mock.call.execute(text.return_value)
 
     def test_it_calls_closes_correctly(self, session):
         with read_only_transaction(session):
@@ -57,3 +58,7 @@ class TestReadOnlyTransaction:
     @pytest.fixture
     def session(self):
         return mock.Mock(spec_set=["close", "commit", "execute", "rollback"])
+
+    @pytest.fixture
+    def text(self, patch):
+        return patch("h.streamer.db.text")
