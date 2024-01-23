@@ -293,6 +293,7 @@ class TestSync:
         job = factories.SyncAnnotationJob(annotation=annotation)
         queue_service.get.return_value = [job]
         db_session.delete(annotation)
+        db_session.commit()
 
         counts = search_index.sync(1)
 
