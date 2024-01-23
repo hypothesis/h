@@ -65,7 +65,14 @@ class UserSignupService:
         user = User(**kwargs)
 
         # Add identity relations to this new user, if provided
-        user.identities = [UserIdentity(user=user, **i_args) for i_args in identities]
+        user.identities = [
+            UserIdentity(
+                user=user,
+                provider=i_args["provider"],
+                provider_unique_id=str(i_args["provider_unique_id"]),
+            )
+            for i_args in identities
+        ]
 
         self.session.add(user)
 
