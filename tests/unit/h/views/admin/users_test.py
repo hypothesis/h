@@ -10,6 +10,7 @@ from h.services.user_delete import UserDeleteService
 from h.views.admin.users import (
     UserNotFoundError,
     format_date,
+    user_not_found,
     users_activate,
     users_delete,
     users_index,
@@ -202,6 +203,13 @@ def test_users_delete_user_not_found_error(user_service, pyramid_request):
 
     with pytest.raises(UserNotFoundError):
         users_delete(pyramid_request)
+
+
+def test_user_not_found_view(pyramid_request):
+    result = user_not_found(UserNotFoundError("error"), pyramid_request)
+
+    assert pyramid_request.session.peek_flash("error")
+    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 def test_users_delete_deletes_user(user_service, user_delete_service, pyramid_request):

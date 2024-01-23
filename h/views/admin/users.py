@@ -144,8 +144,8 @@ def users_delete(request):
 
 
 @view_config(context=UserNotFoundError)
-def user_not_found(exc, request):  # pragma: no cover
-    request.session.flash(Markup(_(exc.message)), "error")
+def user_not_found(exc, request):
+    request.session.flash(Markup(_(str(exc))), "error")
     return httpexceptions.HTTPFound(location=request.route_path("admin.users"))
 
 
