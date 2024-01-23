@@ -171,6 +171,10 @@ h-pyramid-sentry==1.2.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+h-testkit==1.0.0
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 hupper==1.12
     # via
     #   -r requirements/functests.txt

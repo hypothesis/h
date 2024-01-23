@@ -7,4 +7,5 @@ pytest-xdist[psutil]
 freezegun
 factory-boy
 hypothesis
+h-testkit
 -r prod.txt
