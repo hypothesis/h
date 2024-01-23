@@ -33,7 +33,7 @@ class BulkGroupService:
         """
 
         query = (
-            sa.select([Group.authority_provided_id])
+            sa.select(Group.authority_provided_id)
             .join(Annotation, Group.pubid == Annotation.groupid)
             .group_by(Group.authority_provided_id)
             .where(

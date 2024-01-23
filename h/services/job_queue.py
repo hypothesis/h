@@ -118,15 +118,13 @@ class JobQueueService:
         query = Job.__table__.insert().from_select(
             [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],
             select(
-                [
-                    literal_column(f"'{name}'"),
-                    literal_column(f"'{schedule_at}'"),
-                    literal_column(str(priority)),
-                    literal_column(repr(tag)),
-                    func.jsonb_build_object(
-                        "annotation_id", Annotation.id, "force", bool(force)
-                    ),
-                ]
+                literal_column(f"'{name}'"),
+                literal_column(f"'{schedule_at}'"),
+                literal_column(str(priority)),
+                literal_column(repr(tag)),
+                func.jsonb_build_object(
+                    "annotation_id", Annotation.id, "force", bool(force)
+                ),
             ).where(where_clause),
         )
 
