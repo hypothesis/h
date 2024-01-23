@@ -2,6 +2,7 @@ import random
 from unittest import mock
 
 import pytest
+from sqlalchemy.orm import SessionTransaction
 
 from h.util.db import lru_cache_in_transaction, on_transaction_end
 
@@ -47,7 +48,7 @@ class TestLRUCacheInTransaction:
         assert random_float("c", with_keywords=True) == c
 
         type(mock_transaction).parent = mock.PropertyMock(
-            return_value=mock.Mock(spec=db_session.transaction)
+            return_value=mock.Mock(spec=SessionTransaction)
         )
         db_session.dispatch.after_transaction_end(db_session, mock_transaction)
 
@@ -75,7 +76,7 @@ class TestOnTransactionEnd:
     ):
         spy = mock.Mock()
         type(mock_transaction).parent = mock.PropertyMock(
-            return_value=mock.Mock(spec=db_session.transaction)
+            return_value=mock.Mock(spec=SessionTransaction)
         )
 
         @on_transaction_end(db_session)
@@ -88,7 +89,7 @@ class TestOnTransactionEnd:
 
 
 @pytest.fixture
-def mock_transaction(db_session):
-    transaction = mock.Mock(spec=db_session.transaction)
+def mock_transaction():
+    transaction = mock.Mock(spec=SessionTransaction)
     type(transaction).parent = mock.PropertyMock(return_value=None)
     return transaction
