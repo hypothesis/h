@@ -5,12 +5,6 @@ concurrency:
 on:
   workflow_dispatch:
     inputs:
-      qa:
-        type: boolean
-        description: Redeploy QA
-      qa_websocket:
-        type: boolean
-        description: Redeploy QA (WebSocket)
       staging:
         type: boolean
         description: Redeploy Staging
@@ -27,30 +21,6 @@ on:
         type: boolean
         description: Redeploy Production (Canada)
 jobs:
-  qa:
-    name: QA
-    if: inputs.qa
-    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
-    with:
-      operation: redeploy
-      github_environment_name: QA
-      github_environment_url: https://qa.hypothes.is/search
-      aws_region: us-west-1
-      elasticbeanstalk_application: h
-      elasticbeanstalk_environment: qa
-    secrets: inherit
-  qa_websocket:
-    name: QA (WebSocket)
-    if: inputs.qa_websocket
-    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
-    with:
-      operation: redeploy
-      github_environment_name: QA (WebSocket)
-      github_environment_url: https://qa.hypothes.is/docs/help
-      aws_region: us-west-1
-      elasticbeanstalk_application: h-websocket
-      elasticbeanstalk_environment: qa
-    secrets: inherit
   staging:
     name: Staging
     if: inputs.staging
