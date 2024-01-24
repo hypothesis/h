@@ -16,7 +16,6 @@ FEATURES = {
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
     "client_user_profile": "Enable client-side user profile and preferences management",
     "export_formats": "Allow users to select the format for their annotations export file",
-    "search_panel": "Use a sidebar panel to display search form",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
