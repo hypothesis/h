@@ -16,9 +16,9 @@ on:
         type: choice
         description: "The environment to target"
         required: true
-        default: 'qa'
+        default: 'staging'
         options:
-          - 'qa'
+          - 'staging'
           - 'prod'
       Region:
         type: choice
