@@ -18,26 +18,6 @@ FEATURES = {
     "export_formats": "Allow users to select the format for their annotations export file",
 }
 
-# Once a feature has been fully deployed, we remove the flag from the codebase.
-# We can't do this in one step, because removing it entirely will cause stage
-# to remove the flag data from the database on boot, which will in turn disable
-# the feature in prod.
-#
-# Instead, the procedure for removing a feature is as follows:
-#
-# 1. Remove all feature lookups for the named feature throughout the code.
-#
-# 2. Move the feature to FEATURES_PENDING_REMOVAL. This ensures that the
-#    feature won't show up in the admin panel, and any uses of the feature will
-#    provoke UnknownFeatureErrors (server-side) or console warnings
-#    (client-side).
-#
-# 3. Deploy these changes all the way out to production.
-#
-# 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
-#
-FEATURES_PENDING_REMOVAL = {}
-
 
 class Feature(Base):
     """A feature flag for the application."""
@@ -106,9 +86,7 @@ class Feature(Base):
 
         This function removes unknown feature flags from the database.
         """
-        # N.B. We remove only those features we know absolutely nothing about,
-        # which means that FEATURES_PENDING_REMOVAL are left alone.
-        known = set(FEATURES) | set(FEATURES_PENDING_REMOVAL)
+        known = set(FEATURES)
         unknown_flags = session.query(cls).filter(sa.not_(cls.name.in_(known)))
         count = unknown_flags.delete(synchronize_session=False)
         if count > 0:  # pragma: no cover
