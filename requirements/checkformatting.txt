@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/checkformatting.in
 #
-black==23.12.1
+black==24.1.0
     # via -r requirements/checkformatting.in
 build==1.0.3
     # via pip-tools
