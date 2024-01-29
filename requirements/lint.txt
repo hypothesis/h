@@ -92,7 +92,7 @@ colander==2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-coverage[toml]==7.4.0
+coverage[toml]==7.4.1
     # via
     #   -r requirements/tests.txt
     #   coverage
