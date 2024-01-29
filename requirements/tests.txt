@@ -282,7 +282,7 @@ python-jose[cryptography]==3.3.0
     #   python-jose
 python-slugify==8.0.1
     # via -r requirements/prod.txt
-pytz==2023.3.post1
+pytz==2023.4
     # via -r requirements/prod.txt
 referencing==0.32.1
     # via
