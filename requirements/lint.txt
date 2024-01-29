@@ -428,7 +428,7 @@ python-jose[cryptography]==3.3.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   python-jose
-python-slugify==8.0.1
+python-slugify==8.0.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
