@@ -51,14 +51,10 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
     def authenticate_client(self, request, *args, **kwargs):
         """Authenticate a client, returns True if the client exists and its secret matches the request."""
         client = self.find_client(request.client_id)
-
-        if client is None:
-            return False
-
         provided_secret = request.client_secret
-        if request.client_secret is None:
-            # hmac.compare_digest raises when one value is `None`
-            provided_secret = ""
+
+        if client is None or provided_secret is None:
+            return False
 
         if not hmac.compare_digest(client.secret, provided_secret):
             return False
