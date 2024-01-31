@@ -1,4 +1,5 @@
 # Hypothesis packages
+sentry-sdk
 h-pyramid-sentry
 h-matchers
 h-api
