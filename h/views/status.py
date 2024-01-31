@@ -1,6 +1,7 @@
 import logging
 
 from pyramid.httpexceptions import HTTPInternalServerError
+from sentry_sdk import capture_message
 from sqlalchemy import text
 
 from h.util.view import json_view
@@ -15,4 +16,8 @@ def status(request):
     except Exception as err:
         log.exception(err)
         raise HTTPInternalServerError("Database connection failed") from err
+
+    if "sentry" in request.params:
+        capture_message("Test message from h's status view")
+
     return {"status": "okay"}
