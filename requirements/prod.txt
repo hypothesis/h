@@ -212,7 +212,9 @@ rpds-py==0.16.2
 rsa==4.9
     # via python-jose
 sentry-sdk==1.39.2
-    # via h-pyramid-sentry
+    # via
+    #   -r requirements/prod.in
+    #   h-pyramid-sentry
 six==1.16.0
     # via
     #   bleach
