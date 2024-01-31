@@ -5,6 +5,7 @@ Revision ID: 3d71ec81d18c
 Revises: 6964a8237c88
 Create Date: 2016-09-14 16:03:41.490371
 """
+
 import logging
 
 import sqlalchemy as sa

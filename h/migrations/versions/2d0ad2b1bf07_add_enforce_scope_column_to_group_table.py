@@ -1,4 +1,5 @@
 """Add enforce_scope column to group table."""
+
 import sqlalchemy as sa
 from alembic import op
 

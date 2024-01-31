@@ -23,9 +23,9 @@ class TestIndexRedirect:
         assert exc.value.location == "http://example.com/s"
 
     def test_respects_setting(self, pyramid_request):
-        pyramid_request.registry.settings[
-            "h.homepage_redirect_url"
-        ] = "https://web.hypothes.is"
+        pyramid_request.registry.settings["h.homepage_redirect_url"] = (
+            "https://web.hypothes.is"
+        )
         pyramid_request.user = None
 
         with pytest.raises(HTTPFound) as exc:

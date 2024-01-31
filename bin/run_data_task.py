@@ -5,6 +5,7 @@ This is a general mechanism for running tasks defined in SQL, however it's
 currently only used to perform the aggregations and mappings required for
 reporting.
 """
+
 from argparse import ArgumentParser
 
 import data_tasks

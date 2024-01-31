@@ -1,4 +1,5 @@
 """Add user_id to the annotation table."""
+
 import sqlalchemy as sa
 from alembic import op
 

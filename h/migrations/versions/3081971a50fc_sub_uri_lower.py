@@ -1,4 +1,5 @@
 """Replace subscriptions index to be on lower(uri)."""
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql

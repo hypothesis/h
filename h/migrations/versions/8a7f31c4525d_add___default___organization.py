@@ -6,6 +6,7 @@ Revises: 46a22db075d5
 Create Date: 2018-03-27 16:50:20.959215
 
 """
+
 import logging
 
 import sqlalchemy as sa

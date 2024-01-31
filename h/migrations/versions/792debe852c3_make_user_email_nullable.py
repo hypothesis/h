@@ -1,4 +1,5 @@
 """Make user.email nullable."""
+
 from alembic import op
 
 revision = "792debe852c3"

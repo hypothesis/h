@@ -1,4 +1,5 @@
 """Add User.comms_opt_in column."""
+
 import sqlalchemy as sa
 from alembic import op
 

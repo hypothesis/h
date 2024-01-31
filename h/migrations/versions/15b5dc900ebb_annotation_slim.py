@@ -1,4 +1,5 @@
 """Create the annotation_slim table."""
+
 import sqlalchemy as sa
 from alembic import op
 

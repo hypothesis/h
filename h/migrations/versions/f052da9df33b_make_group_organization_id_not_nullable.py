@@ -1,4 +1,5 @@
 """Make group.organization_id not nullable."""
+
 from alembic import op
 
 revision = "f052da9df33b"

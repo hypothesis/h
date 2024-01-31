@@ -5,6 +5,7 @@ Revision ID: afd433075707
 Revises: 504a6a4db06d
 Create Date: 2016-08-19 14:26:08.706027
 """
+
 from alembic import op
 
 revision = "afd433075707"

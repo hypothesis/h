@@ -1,4 +1,5 @@
 """Individual actions for modifying the DB in bulk."""
+
 from copy import deepcopy
 
 from h_api.bulk_api import Report

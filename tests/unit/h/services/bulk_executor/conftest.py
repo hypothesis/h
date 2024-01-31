@@ -1,4 +1,5 @@
 """Re-usable fixtures for the bulk executor tests."""
+
 import pytest
 from h_api.bulk_api import CommandBuilder
 

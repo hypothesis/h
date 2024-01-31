@@ -1,4 +1,5 @@
 """Add feature.first_party column."""
+
 import sqlalchemy as sa
 from alembic import op
 

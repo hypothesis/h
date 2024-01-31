@@ -27,6 +27,7 @@ This home-grown job queue differs from our Celery task queue in a few ways:
    Celery should be the default task queue for almost all tasks, and only jobs
    that really need Postgres transactionality should use this custom job queue.
 """
+
 from sqlalchemy import Column, DateTime, Integer, Sequence, UnicodeText, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 

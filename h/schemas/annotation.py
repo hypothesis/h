@@ -1,4 +1,5 @@
 """Classes for validating data passed to the annotations API."""
+
 import copy
 
 import colander

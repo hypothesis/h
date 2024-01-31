@@ -5,6 +5,7 @@ Usage:
 
     bin/hypothesis --dev devdata
 """
+
 import json
 import os.path
 import pathlib

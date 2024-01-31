@@ -22,8 +22,8 @@ class BearerToken(OAuthlibBearerToken):  # pylint: disable=abstract-method
     def create_token(self, request, refresh_token=False, **kwargs):
         if request.extra_credentials is None:
             request.extra_credentials = {}
-        request.extra_credentials[
-            "refresh_token_expires_in"
-        ] = self.refresh_token_expires_in
+        request.extra_credentials["refresh_token_expires_in"] = (
+            self.refresh_token_expires_in
+        )
 
         return super().create_token(request, refresh_token=refresh_token)

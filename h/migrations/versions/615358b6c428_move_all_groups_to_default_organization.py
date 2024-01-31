@@ -26,6 +26,7 @@ non-nullable) and we can fix up the resulting organization names and logos
 later.
 
 """
+
 import logging
 import random
 
