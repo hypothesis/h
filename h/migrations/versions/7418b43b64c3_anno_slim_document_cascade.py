@@ -1,4 +1,5 @@
 """Add CASCADE on deletion for annotation_slim.document_id."""
+
 from alembic import op
 
 revision = "7418b43b64c3"

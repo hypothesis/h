@@ -22,7 +22,7 @@ class FakeForm:
 
 
 class FakeSerializer:
-    ...
+    pass
 
 
 @pytest.mark.usefixtures("routes")

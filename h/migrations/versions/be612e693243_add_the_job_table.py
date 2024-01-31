@@ -1,4 +1,5 @@
 """Add the job table."""
+
 from alembic import op
 from sqlalchemy import Column, DateTime, Integer, Sequence, UnicodeText, func, text
 from sqlalchemy.dialects.postgresql import JSONB

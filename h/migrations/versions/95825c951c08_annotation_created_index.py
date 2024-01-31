@@ -1,4 +1,5 @@
 """Create index on annotation.created."""
+
 from alembic import op
 
 revision = "95825c951c08"

@@ -60,6 +60,7 @@ This package is responsible for defining URI normalization routines for use
 elsewhere in the Hypothesis application. URI expansion is handled by
 :py:func:`h.storage.expand_uri`.
 """
+
 import re
 from urllib.parse import (
     SplitResult,

@@ -9,6 +9,7 @@ For example a predicate might define "group_created_by_user" which is only
 true when a user is present, a group is present and the user created that
 group.
 """
+
 from itertools import chain
 
 from h.models.group import JoinableBy, ReadableBy, WriteableBy

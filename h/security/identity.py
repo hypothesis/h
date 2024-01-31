@@ -90,7 +90,7 @@ class Identity:
 
         return Identity(
             user=LongLivedUser.from_model(user) if user else None,
-            auth_client=LongLivedAuthClient.from_model(auth_client)
-            if auth_client
-            else None,
+            auth_client=(
+                LongLivedAuthClient.from_model(auth_client) if auth_client else None
+            ),
         )

@@ -1,4 +1,5 @@
 """Functions for generating Atom feeds."""
+
 from pyramid import i18n
 
 import h.feeds.util

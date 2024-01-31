@@ -1,4 +1,5 @@
 """Some shared utility functions for manipulating user data."""
+
 import re
 
 from h.exceptions import InvalidUserId

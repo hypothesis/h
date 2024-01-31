@@ -201,9 +201,9 @@ def handle_whoami_message(message, session=None):  # pylint: disable=unused-argu
     message.reply(
         {
             "type": "whoyouare",
-            "userid": message.socket.identity.user.userid
-            if message.socket.identity
-            else None,
+            "userid": (
+                message.socket.identity.user.userid if message.socket.identity else None
+            ),
         }
     )
 

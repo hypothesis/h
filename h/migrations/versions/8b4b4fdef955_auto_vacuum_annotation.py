@@ -1,4 +1,5 @@
 """Change auto-vacuum settings on big tables."""
+
 from alembic import op
 
 revision = "8b4b4fdef955"

@@ -100,9 +100,9 @@ def security_header_tween_factory(handler, registry):
         # list, thus browsers that don't support
         # strict-origin-when-cross-origin will fall back to
         # origin-when-cross-origin.
-        resp.headers[
-            "Referrer-Policy"
-        ] = "origin-when-cross-origin, strict-origin-when-cross-origin"
+        resp.headers["Referrer-Policy"] = (
+            "origin-when-cross-origin, strict-origin-when-cross-origin"
+        )
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
         resp.headers["X-XSS-Protection"] = "1; mode=block"
         return resp

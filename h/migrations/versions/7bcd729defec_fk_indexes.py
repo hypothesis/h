@@ -1,4 +1,5 @@
 """Create FK indexes for user and groups."""
+
 from alembic import op
 
 revision = "7bcd729defec"

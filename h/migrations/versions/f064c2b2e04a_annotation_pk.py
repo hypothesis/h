@@ -1,4 +1,5 @@
 """Add pk to the annotation table."""
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.schema import CreateSequence, DropSequence, Sequence

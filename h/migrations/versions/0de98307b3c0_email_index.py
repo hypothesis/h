@@ -1,4 +1,5 @@
 """Add "user" index for email."""
+
 import sqlalchemy as sa
 from alembic import op
 

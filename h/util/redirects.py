@@ -21,6 +21,7 @@ The redirect type can be one of the following:
 Lines that contain only whitespace, or which start with a '#' character, will
 be ignored.
 """
+
 from collections import namedtuple
 
 

@@ -18,9 +18,9 @@ class TestOrganizationSchema:
         bound_schema.deserialize(org_data)
 
     def test_it_raises_if_logo_is_too_long(self, org_data, bound_schema):
-        org_data[
-            "logo"
-        ] = f'<svg xmlns="http://svg.com">{"a" * Organization.LOGO_MAX_CHARS}b</svg>'
+        org_data["logo"] = (
+            f'<svg xmlns="http://svg.com">{"a" * Organization.LOGO_MAX_CHARS}b</svg>'
+        )
 
         with pytest.raises(
             colander.Invalid,

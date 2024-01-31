@@ -1,4 +1,5 @@
 """Remove user last login date default values."""
+
 import datetime
 
 import sqlalchemy as sa

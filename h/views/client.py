@@ -94,9 +94,9 @@ def sidebar_app(request, extra=None):
     # math rendering using KaTeX relies on them.
     style_src = f"{client_origin} 'unsafe-inline'"
 
-    request.response.headers[
-        "Content-Security-Policy"
-    ] = f"script-src {client_origin}; style-src {style_src}"
+    request.response.headers["Content-Security-Policy"] = (
+        f"script-src {client_origin}; style-src {style_src}"
+    )
 
     return ctx
 

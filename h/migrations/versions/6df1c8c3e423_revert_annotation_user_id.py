@@ -1,4 +1,5 @@
 """Revert annotation.user_id."""
+
 from alembic import op
 
 revision = "6df1c8c3e423"

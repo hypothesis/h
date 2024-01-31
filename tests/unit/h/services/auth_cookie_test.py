@@ -138,9 +138,9 @@ class TestFactory:
     def test_it(
         self, pyramid_request, SignedCookieProfile, AuthCookieService, user_service
     ):
-        pyramid_request.registry.settings[
-            "h_auth_cookie_secret"
-        ] = sentinel.cookie_secret
+        pyramid_request.registry.settings["h_auth_cookie_secret"] = (
+            sentinel.cookie_secret
+        )
 
         cookie_service = factory(sentinel.context, pyramid_request)
 

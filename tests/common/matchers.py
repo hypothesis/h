@@ -4,6 +4,7 @@ Objects that match other objects for testing.
 Implements some matching objects in the style of h_matchers library for
 comparing with other objects in tests.
 """
+
 from h_matchers.matcher.core import Matcher
 from pyramid.httpexceptions import HTTPFound, HTTPSeeOther
 

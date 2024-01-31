@@ -1,4 +1,5 @@
 """Provides links to different representations of annotations."""
+
 from urllib.parse import unquote, urljoin, urlparse
 
 

@@ -9,7 +9,7 @@ from h.streamer.filter import SocketFilter
 
 
 class FakeSocket:
-    ...
+    pass
 
 
 class TestFilterHandler:

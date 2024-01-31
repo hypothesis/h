@@ -40,9 +40,9 @@ def navbar_data(request):
             {
                 "name": group.name,
                 "pubid": group.pubid,
-                "relationship": "Creator"
-                if group.creator.username == username
-                else None,
+                "relationship": (
+                    "Creator" if group.creator.username == username else None
+                ),
             }
             for group in groups
         ],

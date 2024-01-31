@@ -1,4 +1,5 @@
 """Add index to user.nipsa."""
+
 import sqlalchemy as sa
 from alembic import op
 

@@ -1,4 +1,5 @@
 """Revert annotation_metadatai."""
+
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
