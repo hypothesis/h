@@ -6,6 +6,7 @@ from h import models
 from h.accounts.events import ActivationEvent
 from h.i18n import TranslationString as _
 from h.security import Permission
+from h.services import UserExpungeService
 from h.services.user_rename import UserRenameError
 
 
@@ -131,14 +132,12 @@ def users_rename(request):  # pragma: no cover
     require_csrf=True,
 )
 def users_delete(request):
-    user = _form_request_user(request)
-    svc = request.find_service(name="user_delete")
+    userid = request.params["userid"].strip()
+    svc = request.find_service(UserExpungeService)
 
-    svc.delete_user(user)
-    request.session.flash(
-        f"Successfully deleted user {user.username} with authority {user.authority}"
-        "success",
-    )
+    svc.delete_user(userid)
+
+    request.session.flash(f"Successfully deleted user {userid}", "success")
 
     return httpexceptions.HTTPFound(location=request.route_path("admin.users"))
 

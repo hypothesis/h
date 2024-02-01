@@ -7,6 +7,7 @@ from h.services.auth_cookie import AuthCookieService
 from h.services.bulk_api import BulkAnnotationService, BulkGroupService
 from h.services.job_queue import JobQueueService
 from h.services.subscription import SubscriptionService
+from h.services.user_expunge import UserExpungeService
 
 
 def includeme(config):  # pragma: no cover
@@ -125,6 +126,9 @@ def includeme(config):  # pragma: no cover
     config.register_service_factory("h.services.user.user_service_factory", name="user")
     config.register_service_factory(
         "h.services.user_delete.service_factory", name="user_delete"
+    )
+    config.register_service_factory(
+        "h.services.user_expunge.factory", iface=UserExpungeService
     )
     config.register_service_factory(
         "h.services.user_password.user_password_service_factory", name="user_password"

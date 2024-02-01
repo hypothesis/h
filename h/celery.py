@@ -82,6 +82,7 @@ celery.conf.update(
         "h.tasks.job_queue",
         "h.tasks.mailer",
         "h.tasks.url_migration",
+        "h.tasks.user_expunge",
     ),
     task_routes={
         "h.tasks.indexer.add_annotation": "indexer",
@@ -89,6 +90,7 @@ celery.conf.update(
         "h.tasks.job_queue.add_annotations_between_times": "indexer",
         "h.tasks.job_queue.add_annotations_from_user": "indexer",
         "h.tasks.job_queue.add_annotations_from_group": "indexer",
+        "h.tasks.user_expunge.expunge_deleted_users": "indexer",
     },
     task_queues=[
         Queue(

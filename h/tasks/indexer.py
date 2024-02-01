@@ -43,6 +43,12 @@ def sync_annotations(limit):
 
 
 @celery.task
+def delete_annotations_from_elasticsearch(limit):
+    """Delete annotations that've been deleted from the DB from Elasticsearch."""
+    celery.request.find_service(name="search_index").delete_annotations(limit)
+
+
+@celery.task
 def report_job_queue_metrics():
     metrics = celery.request.find_service(name="job_queue_metrics").metrics()
     newrelic.agent.record_custom_metrics(metrics)

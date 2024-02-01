@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 
 from dateutil.parser import isoparse
@@ -9,6 +10,8 @@ from h.models import Annotation
 from h.presenters import AnnotationSearchIndexPresenter
 from h.search.index import BatchIndexer
 from h.services.annotation_read import AnnotationReadService
+
+log = logging.getLogger(__name__)
 
 
 class Result:
@@ -131,9 +134,13 @@ class SearchIndexService:
             )
         elif event.action == "delete":
             sync_handler, async_task = (
-                self.delete_annotation_by_id,
-                tasks.indexer.delete_annotation,
+                lambda *args, **kwargs: None,
+                lambda *args, **kwargs: None,
             )
+            # sync_handler, async_task = (
+            #     self.delete_annotation_by_id,
+            #     tasks.indexer.delete_annotation,
+            # )
         else:
             return False
 
@@ -231,6 +238,28 @@ class SearchIndexService:
             self._batch_indexer.index(list(annotation_ids_to_sync))
 
         return {key: len(value) for key, value in counts.items()}
+
+    def delete_annotations(self, limit):
+        """Delete annotations that've been deleted from the DB from Elasticsearch."""
+        jobs = self._queue_service.get(name="delete_annotation", limit=limit)
+
+        if not jobs:
+            log.info("There are not 'delete_annotation' jobs")
+            return
+
+        #: Completed jobs that can be removed from the queue.
+        completed_jobs = []
+
+        for job in jobs:
+            try:
+                annotation_id = job.kwargs["annotation_id"]
+                self.delete_annotation_by_id(annotation_id)
+                completed_jobs.append(job)
+                log.info("Deleted annotation %s from Elasticsearch", annotation_id)
+            except Exception:
+                pass
+
+        self._queue_service.delete(completed_jobs)
 
     @staticmethod
     def _equal(annotation_from_es, annotation_from_db):

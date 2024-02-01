@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from h.events import AnnotationEvent
-from h.models import Annotation
+from h.models import Annotation, Job
 from h.services.annotation_write import AnnotationWriteService
 
 
@@ -19,6 +19,14 @@ class AnnotationDeleteService:
         """
         annotation.updated = datetime.utcnow()
         annotation.deleted = True
+        self.request.db.add(
+            Job(
+                name="delete_annotation",
+                priority=0,
+                tag="h.services.annotation_delete.delete",
+                kwargs={"annotation_id": annotation.id},
+            )
+        )
 
         self.annotation_write.upsert_annotation_slim(annotation)
 
