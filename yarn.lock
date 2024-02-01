@@ -3082,16 +3082,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chai@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "chai@npm:5.0.0"
+"chai@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "chai@npm:5.0.3"
   dependencies:
     assertion-error: ^2.0.1
     check-error: ^2.0.0
     deep-eql: ^5.0.1
-    loupe: ^3.0.0
+    loupe: ^3.1.0
     pathval: ^2.0.0
-  checksum: f81ca1830f918a0d377de151c076a8d138929a886cdd4d0a7e3c4ab2f8f0869fc92f43430e6e75460539de9a2abe48cdc4d4fb73fc67e24f53c23a0b01875ca8
+  checksum: a6074408ea982436d0c276a91a88f676065be228b8995cc4960c24bee6f0a279ade47dcfa8e0890a79a9a6b8c3021e14761da0b91160b4a7383bc5ffd7ab4432
   languageName: node
   linkType: hard
 
@@ -5426,7 +5426,7 @@ __metadata:
     autoprefixer: ^10.4.17
     babel-plugin-mockable-imports: ^2.0.1
     bootstrap: ^4.6.2
-    chai: ^5.0.0
+    chai: ^5.0.3
     diff: ^5.0.0
     escape-html: ^1.0.3
     eslint: ^8.56.0
@@ -6786,12 +6786,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loupe@npm:^3.0.0":
-  version: 3.0.2
-  resolution: "loupe@npm:3.0.2"
+"loupe@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "loupe@npm:3.1.0"
   dependencies:
     get-func-name: ^2.0.1
-  checksum: f10e1dfd4bf125356f9c212ae835731c86dacef8b0fb2f3851e999d520f11ce3cda0ad6d6b0334e4b1e475932c7a3bce1cd494bdbdea3a3bd96212c4a02f95e4
+  checksum: e23814854ab2571e3f753b7c198bfe016c708f3a435501624dd6ff79b6a5544e14b0f28cfc0432eb22e9da9177b1533491871aca3f94d56b19fecc0d4a766e58
   languageName: node
   linkType: hard
 
