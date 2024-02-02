@@ -282,7 +282,7 @@ python-jose[cryptography]==3.3.0
     # via
     #   -r requirements/prod.txt
     #   python-jose
-python-slugify==8.0.1
+python-slugify==8.0.3
     # via -r requirements/prod.txt
 pytz==2024.1
     # via -r requirements/prod.txt
