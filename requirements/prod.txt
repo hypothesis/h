@@ -20,7 +20,7 @@ bleach==6.1.0
     # via -r requirements/prod.in
 celery==5.3.6
     # via -r requirements/prod.in
-certifi==2023.11.17
+certifi==2024.2.2
     # via
     #   -r requirements/prod.in
     #   sentry-sdk
