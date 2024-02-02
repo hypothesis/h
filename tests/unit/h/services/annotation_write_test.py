@@ -79,6 +79,22 @@ class TestAnnotationWriteService:
         annotation_read_service.get_annotation_by_id.assert_not_called()
         assert result.groupid == group.pubid
 
+    def test_create_annotation_unicode_surrogates(self, svc, create_data, factories):
+        group = factories.Group()
+        create_data["groupid"] = group.pubid
+        create_data["references"] = None
+        create_data["target_selectors"] = [
+            {
+                "exact": "P",
+                "prefix": "a",
+                "suffix": "Invalid \ud835",
+                "type": "TextQuoteSelector",
+            },
+            {"index": 43, "label": "44", "type": "PageSelector"},
+        ]
+
+        result = svc.create_annotation(create_data)
+
     def test_create_annotation_with_invalid_parent(
         self, svc, create_data, annotation_read_service
     ):
