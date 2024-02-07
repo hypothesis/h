@@ -16,6 +16,7 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route("account_profile", "/account/profile")
     config.add_route("account_notifications", "/account/settings/notifications")
     config.add_route("account_developer", "/account/developer")
+    config.add_route("account_delete", "/account/delete")
     config.add_route("claim_account_legacy", "/claim_account/{token}")
     config.add_route("dismiss_sidebar_tutorial", "/app/dismiss_sidebar_tutorial")
 

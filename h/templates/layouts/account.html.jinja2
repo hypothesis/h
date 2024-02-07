@@ -19,14 +19,16 @@
     <div class="form-container">
       <nav class="tabs">
         <ul>
-          {% for route, title in nav_pages %}
-            <li class="tabs__item">
-                <a href="{{ request.route_url(route) }}"
-                   class="tabs__link{% if route == page_route %} is-active{% endif %}">
-                  {{ title }}
-                </a>
-            </li>
-          {% endfor %}
+          {% block nav_tabs %}
+            {% for route, title in nav_pages %}
+              <li class="tabs__item">
+                  <a href="{{ request.route_url(route) }}"
+                    class="tabs__link{% if route == page_route %} is-active{% endif %}">
+                    {{ title }}
+                  </a>
+              </li>
+            {% endfor %}
+          {% endblock %}
         </ul>
       </nav>
       {% include "h:templates/includes/flash-messages.html.jinja2" %}

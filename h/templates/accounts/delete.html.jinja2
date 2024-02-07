@@ -1,0 +1,43 @@
+{% extends "h:templates/layouts/account.html.jinja2" %}
+
+{% set page_title = 'Delete your account' %}
+
+{% block nav_tabs %}
+  <li class="tabs__item">
+      <a href="{{ request.route_url('account_delete') }}"
+        class="tabs__link is-active">
+        Delete your account
+      </a>
+  </li>
+{% endblock %}
+
+{% block page_content %}
+  <div class="form-vertical">
+    <p style="font-size:17px; line-height:22px;">
+      Are you sure you want to delete your account?
+      This will delete <strong>19,273</strong> annotations
+      spanning <strong>January 1st 2015 to February 7th 2024</strong>.
+      This cannot be undone!
+    </p>
+    <br/><br/>
+    <form method="post" class="js-disable-on-submit">
+      <div class="form-input js-form-input">
+        <label class="form-input__label">
+          <span>Confirm password</span>
+        </label>
+        <input type="password"
+               name="password"
+               class="form-input__input has-label"
+               autocomplete="current-password"
+               required="">
+      </div>
+      <button type="button" class="btn btn--cancel" onClick="window.location.assign('{{ request.route_url('account') }}')">
+        {% trans %}Back to safety{% endtrans %}
+      </button>
+      <button type="submit" class="btn btn--danger" style="float:right;">
+            {% trans %}Delete your account{% endtrans %}
+      </button>
+    </form>
+  </div>
+{% endblock page_content %}
+

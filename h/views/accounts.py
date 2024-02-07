@@ -28,6 +28,7 @@ from h.schemas.forms.accounts import (
 from h.services import SubscriptionService
 from h.tasks import mailer
 from h.util.view import json_view
+from pyramid.httpexceptions import HTTPSeeOther
 
 _ = i18n.TranslationString
 
@@ -110,7 +111,10 @@ class AuthController:
         """Render the login page, including the login form."""
         self._redirect_if_logged_in()
 
-        return {"form": self.form.render(LoginSchema.default_values(self.request))}
+        return {
+            "form": self.form.render(LoginSchema.default_values(self.request)),
+            "form_message": self.request.params.get("form_message"),
+        }
 
     @view_config(request_method="POST")
     @view_config(
@@ -136,7 +140,7 @@ class AuthController:
     @view_config(route_name="logout", renderer=None, request_method="GET")
     def logout(self):
         """Log the user out."""
-        headers = self._logout()
+        headers = _logout(self.request)
         return httpexceptions.HTTPFound(location=self.logout_redirect, headers=headers)
 
     def _redirect_if_logged_in(self):
@@ -150,13 +154,6 @@ class AuthController:
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
         headers = security.remember(self.request, user.userid)
-        return headers
-
-    def _logout(self):
-        if self.request.authenticated_userid is not None:
-            self.request.registry.notify(LogoutEvent(self.request))
-            self.request.session.invalidate()
-        headers = security.forget(self.request)
         return headers
 
 
@@ -608,6 +605,31 @@ class DeveloperController:
         return {"token": token.value}
 
 
+@view_defaults(
+    route_name="account_delete",
+    renderer="h:templates/accounts/delete.html.jinja2",
+    is_authenticated=True,
+)
+class DeleteController:
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method="GET")
+    def get(self):
+        return {}
+
+    @view_config(request_method="POST")
+    def post(self):
+        # TODO: Check the submitted password is correct,
+        # if not show an error page and *don't delete the user*.
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url(
+                "login", _query={"form_message": "Your account has been deleted."}
+            ),
+            headers=_logout(self.request),
+        )
+
+
 # TODO: This can be removed after October 2016, which will be >1 year from the
 #       date that the last account claim emails were sent out. At this point,
 #       if we have not done so already, we should remove all unclaimed
@@ -631,3 +653,11 @@ def dismiss_sidebar_tutorial(request):  # pragma: no cover
 
     request.user.sidebar_tutorial_dismissed = True
     return ajax_payload(request, {"status": "okay"})
+
+
+def _logout(request):
+    if request.authenticated_userid is not None:
+        request.registry.notify(LogoutEvent(request))
+        request.session.invalidate()
+    headers = security.forget(request)
+    return headers
