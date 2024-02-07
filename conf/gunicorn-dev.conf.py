@@ -7,8 +7,12 @@ reload_extra_files = "h/templates"
 timeout = 0
 
 
-if 'H_GUNICORN_CERTFILE' in environ:
-    certfile = environ['H_GUNICORN_CERTFILE']
+max_requests = 100
+max_requests_jitter = 10
 
-if 'H_GUNICORN_KEYFILE' in environ:
-    keyfile = environ['H_GUNICORN_KEYFILE']
+
+if "H_GUNICORN_CERTFILE" in environ:
+    certfile = environ["H_GUNICORN_CERTFILE"]
+
+if "H_GUNICORN_KEYFILE" in environ:
+    keyfile = environ["H_GUNICORN_KEYFILE"]
