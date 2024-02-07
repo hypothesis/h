@@ -305,10 +305,19 @@ def _target_selectors(targets):
     """
     # Any targets other than the first in the list are discarded.
     # Any fields of the target other than 'selector' are discarded.
+    selectors = []
     if targets and "selector" in targets[0]:
-        return targets[0]["selector"]
+        selectors = targets[0]["selector"]
 
-    return []
+    for target_selector in selectors:
+        for field in ["suffix", "prefix"]:
+            if value := target_selector.get(field):
+                if not is_valid_unicode(value):
+                    raise ValidationError(
+                        f"{field}: " + _(f"'{field}' must be valid unicode")
+                    )
+
+    return selectors
 
 
 class SearchParamsSchema(colander.Schema):
@@ -480,3 +489,12 @@ class SearchParamsSchema(colander.Schema):
             except ValueError:
                 return False
         return True
+
+
+def is_valid_unicode(value: str):
+    try:
+        value.encode()
+    except UnicodeEncodeError:
+        return False
+
+    return True
