@@ -28,7 +28,6 @@ from h.schemas.forms.accounts import (
 from h.services import SubscriptionService
 from h.tasks import mailer
 from h.util.view import json_view
-from pyramid.httpexceptions import HTTPSeeOther
 
 _ = i18n.TranslationString
 

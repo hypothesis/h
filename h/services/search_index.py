@@ -134,13 +134,9 @@ class SearchIndexService:
             )
         elif event.action == "delete":
             sync_handler, async_task = (
-                lambda *args, **kwargs: None,
-                lambda *args, **kwargs: None,
+                self.delete_annotation_by_id,
+                tasks.indexer.delete_annotation,
             )
-            # sync_handler, async_task = (
-            #     self.delete_annotation_by_id,
-            #     tasks.indexer.delete_annotation,
-            # )
         else:
             return False
 
@@ -256,7 +252,7 @@ class SearchIndexService:
                 self.delete_annotation_by_id(annotation_id)
                 completed_jobs.append(job)
                 log.info("Deleted annotation %s from Elasticsearch", annotation_id)
-            except Exception:
+            except Exception:  # pylint:disable=broad-exception-caught
                 pass
 
         self._queue_service.delete(completed_jobs)
