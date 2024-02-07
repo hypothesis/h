@@ -28,7 +28,16 @@ This home-grown job queue differs from our Celery task queue in a few ways:
    that really need Postgres transactionality should use this custom job queue.
 """
 
-from sqlalchemy import Column, DateTime, Integer, Sequence, UnicodeText, func, text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Index,
+    Integer,
+    Sequence,
+    UnicodeText,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 
 from h.db import Base
@@ -38,6 +47,8 @@ class Job(Base):
     """A job in the job queue."""
 
     __tablename__ = "job"
+
+    __table_args__ = (Index("ix__job_priority_enqueued_at", "priority", "enqueued_at"),)
 
     id = Column(Integer, Sequence("job_id_seq", cycle=True), primary_key=True)
     name = Column(UnicodeText, nullable=False)
