@@ -100,7 +100,7 @@ jobs:
       Env: ${{ inputs.Environment }}
       Timeout: ${{ inputs.Timeout }}
       Region: ${{ inputs.Region }}
-      Command: 'alembic -c conf/alembic.ini migrate upgrade +1'
+      Command: 'alembic -c conf/alembic.ini upgrade +1'
     secrets: inherit
 
   downgrade:
@@ -112,7 +112,7 @@ jobs:
       Env: ${{ inputs.Environment }}
       Timeout: ${{ inputs.Timeout }}
       Region: ${{ inputs.Region }}
-      Command: 'alembic -c conf/alembic.ini migrate downgrade -1'
+      Command: 'alembic -c conf/alembic.ini downgrade -1'
     secrets: inherit
 
   search:
