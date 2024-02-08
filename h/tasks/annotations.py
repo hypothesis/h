@@ -34,8 +34,8 @@ def sync_annotation_slim(limit):
     for job in jobs:
         # For each job, insert the row in annotation slim
         annotation_id = URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
-        annotation = annotations_from_db.get(annotation_id)
-        anno_write_svc.upsert_annotation_slim(annotation)
+        if annotation := annotations_from_db.get(annotation_id):
+            anno_write_svc.upsert_annotation_slim(annotation)
 
     # Remove all jobs we've processed
     queue_svc.delete(jobs)
