@@ -147,7 +147,7 @@ class UserService:
         :rtype: h.models.User or NoneType
         :raises UserNotActivated: When the user is not activated.
         """
-        filters = [(User.authority == self.default_authority)]
+        filters = [(User.authority == self.default_authority), User.deleted.is_(False)]
         if "@" in username_or_email:
             filters.append(sa.func.lower(User.email) == username_or_email.lower())
         else:

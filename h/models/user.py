@@ -213,6 +213,14 @@ class User(Base):
     # Has the user opted-in for news etc.
     comms_opt_in = sa.Column(sa.Boolean, nullable=True)
 
+    #: Has this user been marked for deletion?
+    deleted = sa.Column(
+        sa.Boolean,
+        default=False,
+        nullable=False,
+        server_default=sa.sql.expression.false(),
+    )
+
     identities = sa.orm.relationship(
         "UserIdentity", backref="user", cascade="all, delete-orphan"
     )

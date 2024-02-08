@@ -33,6 +33,19 @@ class UserDeleteService:
         immediately.  All the user's data will then be deleted in time by a
         background task.
         """
+        # Trying to delete the user before we've deleted all their data could:
+        #
+        # - Crash, if there are rows in other tables with foreign key constraints
+        #   without ON DELETE CASCADE
+        # - Try to do too much work in a single query, if there are rows in
+        #   other tables with foreign key constraints *with* ON DELETE CASCADE
+        # - Leaves data in an inconsistent state, if there are rows in other
+        #   tables that refer to this user but without a foreign key constraint
+        #
+        # So we don't want to actually delete the user just yet. But we'll mark
+        # them as deleted immediately so they can't log in anymore.
+        user.deleted = True
+
         # Add a job to delete the user. This will ensure that in time all the
         # user's data will be deleted by a background task.
         self.db.add(
