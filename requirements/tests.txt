@@ -111,7 +111,7 @@ h-matchers==1.2.15
     # via -r requirements/prod.txt
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.txt
-h-testkit==1.0.0
+h-testkit==1.0.1
     # via -r requirements/tests.in
 hupper==1.12
     # via
