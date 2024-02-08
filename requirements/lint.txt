@@ -243,7 +243,7 @@ markdown==3.5.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-markupsafe==2.1.4
+markupsafe==2.1.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
