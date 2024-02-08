@@ -12,13 +12,6 @@ log = logging.getLogger(__name__)
 
 class DocumentURI(Base, mixins.Timestamps):
     __tablename__ = "document_uri"
-    __table_args__ = (
-        sa.UniqueConstraint(
-            "claimant_normalized", "uri_normalized", "type", "content_type"
-        ),
-        sa.Index("ix__document_uri_document_id", "document_id"),
-        sa.Index("ix__document_uri_updated", "updated"),
-    )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
@@ -38,6 +31,22 @@ class DocumentURI(Base, mixins.Timestamps):
     )
 
     document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
+
+    __table_args__ = (
+        sa.UniqueConstraint(
+            "claimant_normalized", "uri_normalized", "type", "content_type"
+        ),
+        sa.Index(
+            "ix__document_uri_unique",
+            sa.func.md5(_claimant_normalized),
+            sa.func.md5(_uri_normalized),
+            "type",
+            "content_type",
+            unique=True,
+        ),
+        sa.Index("ix__document_uri_document_id", "document_id"),
+        sa.Index("ix__document_uri_updated", "updated"),
+    )
 
     @hybrid_property
     def claimant(self):
