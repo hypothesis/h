@@ -46,6 +46,11 @@ class UserDeleteService:
         # them as deleted immediately so they can't log in anymore.
         user.deleted = True
 
+        # TODO: We should scramble certain fields of the user row immediately,
+        # rather than waiting for it to be deleted by a background task.
+        # For example rows that contain sensitive data like the email address
+        # and password.
+
         # Add a job to delete the user. This will ensure that in time all the
         # user's data will be deleted by a background task.
         self.db.add(
