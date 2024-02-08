@@ -26,6 +26,22 @@ class TestSyncAnnotationSlim:
         )
         queue_service.delete.assert_called_once_with([job])
 
+    def test_job_for_missing_annotation(
+        self, factories, annotation_write_service, queue_service, db_session
+    ):
+        annotation = factories.Annotation()
+        job = factories.SyncAnnotationJob(annotation=annotation, name="annotation_slim")
+        db_session.delete(annotation)
+        db_session.commit()
+
+        queue_service.get.return_value = [job]
+
+        sync_annotation_slim(1)
+
+        queue_service.get.assert_called_once_with(name="annotation_slim", limit=1)
+        annotation_write_service.upsert_annotation_slim.assert_not_called()
+        queue_service.delete.assert_called_once_with([job])
+
     def test_it_with_no_pending_jobs(self, queue_service, annotation_write_service):
         queue_service.get.return_value = []
 
