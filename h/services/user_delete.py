@@ -18,12 +18,13 @@ log = logging.getLogger(__name__)
 
 
 class UserDeleteService:
-    def __init__(self, db, job_queue_svc, user_svc, limit=10000):
+    def __init__(self, db, job_queue_svc, user_svc, limit=1):
         self.db = db
         self.job_queue_svc = job_queue_svc
         self.user_svc = user_svc
         self.limit = limit
         self.num_rows_deleted = 0
+        print("I am UserDeleteService")
 
     def delete_user(self, user):
         """
@@ -150,6 +151,12 @@ class UserDeleteService:
         self.delete_group_memberships(user)
 
         # Delete the user itself.
+        # FIXME: Once we delete the actual `user` row this username and email address
+        # can be reused to register a new account.
+        # So don't actually delete the user here. Instead, add a delete_user
+        # job to the job queue and schedule it to run in 48hrs time or maybe in
+        # a week's time. This is to allow time for data related to this user to
+        # clear itself from the search index, message queue, and caches.
         self.delete_rows(User, select(User.id).where(User.id == user.id))
 
         # Once we've deleted all data related to this user, finally remove the

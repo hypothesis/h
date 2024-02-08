@@ -621,12 +621,24 @@ class DeleteController:
     def post(self):
         # TODO: Check the submitted password is correct,
         # if not show an error page and *don't delete the user*.
+        self.request.find_service(name="user_delete").delete_user(self.request.user)
+
         return httpexceptions.HTTPFound(
-            location=self.request.route_url(
-                "login", _query={"form_message": "Your account has been deleted."}
-            ),
+            location=self.request.route_url("account_deleted"),
             headers=_logout(self.request),
         )
+
+
+@view_defaults(
+    route_name="account_deleted", renderer="h:templates/accounts/deleted.html.jinja2"
+)
+class DeletedController:
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method="GET")
+    def get(self):
+        return {}
 
 
 # TODO: This can be removed after October 2016, which will be >1 year from the
