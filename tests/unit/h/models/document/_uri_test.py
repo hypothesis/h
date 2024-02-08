@@ -43,6 +43,16 @@ class TestDocumentURI:
         with pytest.raises(sa.exc.IntegrityError):
             db_session.flush()
 
+    @pytest.mark.xfail(strict=True)
+    def test_unique_constraint_can_take_long_values(self, db_session):
+        document_uri = DocumentURI(
+            uri="http://example.com/" * 100000,
+            claimant="https://example.com" * 10000,
+            document=Document(),
+        )
+        db_session.add(document_uri)
+        db_session.commit()
+
     def test_you_cannot_add_duplicate_document_uris(self, db_session):
         # You can't add DocumentURI's with the same claimant, uri, type and
         # content_type, even if they have different documents.
