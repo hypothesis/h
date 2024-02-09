@@ -192,7 +192,7 @@ python-dateutil==2.8.2
     #   elasticsearch-dsl
 python-jose[cryptography]==3.3.0
     # via -r requirements/prod.in
-python-slugify==8.0.3
+python-slugify==8.0.4
     # via -r requirements/prod.in
 pytz==2024.1
     # via -r requirements/prod.in
