@@ -49,6 +49,13 @@ class Token(Base, mixins.Timestamps):
         nullable=True,
     )
 
+    user_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("user.id", ondelete="cascade"),
+        index=True,
+        nullable=True,
+    )
+
     #: The authclient which created the token.
     #: A NULL value means it is a developer token.
     authclient = sqlalchemy.orm.relationship("AuthClient")
