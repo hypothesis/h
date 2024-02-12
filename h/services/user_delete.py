@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 
-from h.models import Annotation, Group, User
+from h.models import Annotation, Group, Token, User
 from h.services.annotation_delete import AnnotationDeleteService
 
 
@@ -21,6 +21,7 @@ class UserDeleteService:
         in the group that have been made by other users, the user is unassigned
         as creator but the group persists.
         """
+        self._db.execute(sa.delete(Token).where(Token.userid == user.userid))
 
         # Delete all annotations
         self._annotation_delete_service.delete_annotations(

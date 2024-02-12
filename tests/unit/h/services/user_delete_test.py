@@ -4,11 +4,12 @@ import pytest
 import sqlalchemy
 from h_matchers import Any
 
-from h.models import GroupMembership
+from h.models import GroupMembership, Token
 from h.services.user_delete import UserDeleteService, service_factory
 
 
 class TestDeleteUserService:
+    @pytest.mark.usefixtures("user_developer_token", "user_oauth2_token")
     def test_it(
         self,
         svc,
@@ -18,6 +19,8 @@ class TestDeleteUserService:
         created_group,
         joined_group,
         user_annotations,
+        other_developer_token,
+        other_oauth2_token,
     ):
         svc.delete_user(user)
 
@@ -40,6 +43,10 @@ class TestDeleteUserService:
             not db_session.query(GroupMembership)
             .where(GroupMembership.group_id == created_group.id)
             .all()
+        )
+        assert (
+            db_session.scalars(sqlalchemy.select(Token)).all()
+            == Any.list.containing([other_developer_token, other_oauth2_token]).only()
         )
 
     def test_it_doesnt_delete_groups_others_have_annotated_in(
@@ -80,6 +87,22 @@ class TestDeleteUserService:
             factories.Annotation(userid=user.userid, groupid=group.pubid)
             for group in (created_group, joined_group)
         ]
+
+    @pytest.fixture
+    def user_developer_token(self, user, factories):
+        return factories.DeveloperToken(userid=user.userid)
+
+    @pytest.fixture
+    def user_oauth2_token(self, user, factories):
+        return factories.OAuth2Token(userid=user.userid)
+
+    @pytest.fixture
+    def other_developer_token(self, factories):
+        return factories.DeveloperToken()
+
+    @pytest.fixture
+    def other_oauth2_token(self, factories):
+        return factories.OAuth2Token()
 
     @pytest.fixture
     def svc(self, db_session, annotation_delete_service):
