@@ -53,7 +53,7 @@ class Token(Base, mixins.Timestamps):
         sqlalchemy.Integer,
         sqlalchemy.ForeignKey("user.id", ondelete="cascade"),
         index=True,
-        nullable=True,
+        nullable=False,
     )
 
     #: The authclient which created the token.
