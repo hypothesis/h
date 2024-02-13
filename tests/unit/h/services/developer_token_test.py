@@ -1,4 +1,5 @@
 import pytest
+from h_matchers import Any
 
 from h import models
 from h.services.developer_token import (
@@ -6,33 +7,44 @@ from h.services.developer_token import (
     developer_token_service_factory,
 )
 
+pytestmark = pytest.mark.usefixtures("user_service")
+
 
 class TestDeveloperTokenService:
-    def test_fetch_returns_developer_token_for_userid(
-        self, svc, developer_token, userid
-    ):
-        assert svc.fetch(userid) == developer_token
+    def test_fetch_returns_developer_token_for_userid(self, svc, developer_token, user):
+        assert svc.fetch(user.userid) == developer_token
 
     def test_fetch_returns_none_for_missing_userid(self, svc):
         assert svc.fetch(None) is None
 
-    def test_fetch_returns_none_for_missing_developer_token(self, svc, userid):
-        assert svc.fetch(userid) is None
+    def test_fetch_returns_none_for_missing_developer_token(self, svc, user):
+        assert svc.fetch(user.userid) is None
 
     def test_create_creates_new_developer_token_for_userid(
-        self, svc, db_session, userid
+        self, svc, db_session, user, user_service
     ):
         assert not db_session.query(models.Token).count()
-        svc.create(userid)
-        assert db_session.query(models.Token).count() == 1
+        user_service.fetch.return_value = user
 
-    def test_create_returns_new_developer_token_for_userid(self, svc, userid, patch):
+        svc.create(user.userid)
+
+        user_service.fetch.assert_called_once_with(user.userid)
+        assert db_session.query(models.Token).all() == [
+            Any.instance_of(models.Token).with_attrs(
+                {"userid": user.userid, "user_id": user.id}
+            )
+        ]
+
+    def test_create_returns_new_developer_token_for_userid(
+        self, svc, user, patch, user_service
+    ):
+        user_service.fetch.return_value = user
         token_urlsafe = patch("h.services.developer_token.security.token_urlsafe")
         token_urlsafe.return_value = "secure-token"
 
-        token = svc.create(userid)
+        token = svc.create(user.userid)
 
-        assert token.userid == userid
+        assert token.userid == user.userid
         assert token.value == "6879-secure-token"
         assert token.expires is None
         assert token.authclient is None
@@ -52,12 +64,12 @@ class TestDeveloperTokenService:
         return developer_token_service_factory(None, pyramid_request)
 
     @pytest.fixture
-    def developer_token(self, factories, userid):
-        return factories.DeveloperToken(userid=userid)
+    def developer_token(self, factories, user):
+        return factories.DeveloperToken(userid=user.userid, user_id=user.id)
 
     @pytest.fixture
-    def userid(self):
-        return "acct:john@doe.org"
+    def user(self, factories):
+        return factories.User()
 
 
 class TestDeveloperTokenServiceFactory:

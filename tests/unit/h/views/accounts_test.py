@@ -6,7 +6,6 @@ from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.models import Subscriptions
-from h.services.developer_token import developer_token_service_factory
 from h.services.user_password import UserPasswordService
 from h.views import accounts as views
 
@@ -805,65 +804,75 @@ class TestEditProfileController:
         assert user.location == "Paris"
 
 
-@pytest.mark.usefixtures("authenticated_userid", "token_service")
+@pytest.mark.usefixtures("authenticated_userid", "developer_token_service")
 class TestDeveloperController:
-    def test_get_fetches_token(self, controller, token_service, authenticated_userid):
+    def test_get_fetches_token(
+        self, controller, developer_token_service, authenticated_userid
+    ):
         controller.get()
 
-        token_service.fetch.assert_called_once_with(authenticated_userid)
+        developer_token_service.fetch.assert_called_once_with(authenticated_userid)
 
-    def test_get_returns_token_for_authenticated_user(self, controller, token_service):
-        assert controller.get() == {"token": token_service.fetch.return_value.value}
+    def test_get_returns_token_for_authenticated_user(
+        self, controller, developer_token_service
+    ):
+        assert controller.get() == {
+            "token": developer_token_service.fetch.return_value.value
+        }
 
     def test_get_returns_empty_context_for_missing_token(
-        self, controller, token_service
+        self, controller, developer_token_service
     ):
-        token_service.fetch.return_value = None
+        developer_token_service.fetch.return_value = None
 
         assert controller.get() == {}
 
-    def test_post_fetches_token(self, controller, token_service, authenticated_userid):
+    def test_post_fetches_token(
+        self, controller, developer_token_service, authenticated_userid
+    ):
         controller.post()
 
-        token_service.fetch.assert_called_once_with(authenticated_userid)
+        developer_token_service.fetch.assert_called_once_with(authenticated_userid)
 
-    def test_post_regenerates_token_when_found(self, controller, token_service):
+    def test_post_regenerates_token_when_found(
+        self, controller, developer_token_service
+    ):
         controller.post()
 
-        token_service.regenerate.assert_called_once_with(
-            token_service.fetch.return_value
+        developer_token_service.regenerate.assert_called_once_with(
+            developer_token_service.fetch.return_value
         )
 
-    def test_post_returns_regenerated_token_when_found(self, controller, token_service):
+    def test_post_returns_regenerated_token_when_found(
+        self, controller, developer_token_service
+    ):
         result = controller.post()
 
-        assert result == {"token": token_service.regenerate.return_value.value}
+        assert result == {
+            "token": developer_token_service.regenerate.return_value.value
+        }
 
     def test_post_creates_new_token_when_not_found(
-        self, controller, token_service, authenticated_userid
+        self, controller, developer_token_service, authenticated_userid
     ):
-        token_service.fetch.return_value = None
+        developer_token_service.fetch.return_value = None
 
         controller.post()
 
-        token_service.create.assert_called_once_with(authenticated_userid)
+        developer_token_service.create.assert_called_once_with(authenticated_userid)
 
-    def test_post_returns_new_token_when_not_found(self, controller, token_service):
-        token_service.fetch.return_value = None
+    def test_post_returns_new_token_when_not_found(
+        self, controller, developer_token_service
+    ):
+        developer_token_service.fetch.return_value = None
 
         result = controller.post()
 
-        assert result == {"token": token_service.create.return_value.value}
+        assert result == {"token": developer_token_service.create.return_value.value}
 
     @pytest.fixture
     def controller(self, pyramid_request):
         return views.DeveloperController(pyramid_request)
-
-    @pytest.fixture
-    def token_service(self, pyramid_config, pyramid_request):
-        svc = mock.Mock(spec=developer_token_service_factory(None, pyramid_request))
-        pyramid_config.register_service(svc, name="developer_token")
-        return svc
 
     @pytest.fixture
     def authenticated_userid(self, pyramid_config):
