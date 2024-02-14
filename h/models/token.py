@@ -22,7 +22,7 @@ class Token(Base, mixins.Timestamps):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, autoincrement=True, primary_key=True)
 
-    userid = sqlalchemy.Column(sqlalchemy.UnicodeText(), nullable=False)
+    userid = sqlalchemy.Column(sqlalchemy.UnicodeText(), nullable=True)
 
     value = sqlalchemy.Column(sqlalchemy.UnicodeText(), nullable=False, unique=True)
 
