@@ -33,9 +33,6 @@ class DocumentURI(Base, mixins.Timestamps):
     document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
 
     __table_args__ = (
-        sa.UniqueConstraint(
-            "claimant_normalized", "uri_normalized", "type", "content_type"
-        ),
         sa.Index(
             "ix__document_uri_unique",
             sa.func.md5(_claimant_normalized),
