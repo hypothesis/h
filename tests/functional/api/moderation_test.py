@@ -149,7 +149,7 @@ def private_group_annotation(group, db_session, factories, other_user):
 
 @pytest.fixture
 def user_with_token(user, db_session, factories):
-    token = factories.DeveloperToken(userid=user.userid)
+    token = factories.DeveloperToken(user=user)
     db_session.add(token)
     db_session.commit()
     return (user, token)

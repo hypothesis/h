@@ -114,9 +114,7 @@ class TestOAuthProviderServiceFactory:
     ):
         service = factory(None, pyramid_request)
 
-        OAuthValidator.assert_called_once_with(
-            session=pyramid_request.db, user_svc=user_service
-        )
+        OAuthValidator.assert_called_once_with(session=pyramid_request.db)
         OAuthProviderService.assert_called_once_with(
             oauth_validator=OAuthValidator.return_value,
             user_svc=user_service,

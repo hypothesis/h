@@ -254,7 +254,7 @@ def first_party_group(db_session, factories, first_party_user):
 
 @pytest.fixture
 def user_with_token(db_session, factories, first_party_user):
-    token = factories.DeveloperToken(userid=first_party_user.userid)
+    token = factories.DeveloperToken(user=first_party_user)
     db_session.add(token)
     db_session.commit()
     return (first_party_user, token)

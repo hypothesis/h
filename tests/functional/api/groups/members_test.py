@@ -258,7 +258,7 @@ def group_member(group, db_session, factories):
 
 @pytest.fixture
 def group_member_with_token(group_member, db_session, factories):
-    token = factories.DeveloperToken(userid=group_member.userid)
+    token = factories.DeveloperToken(user=group_member)
     db_session.add(token)
     db_session.commit()
     return (group_member, token)
@@ -267,7 +267,7 @@ def group_member_with_token(group_member, db_session, factories):
 @pytest.fixture
 def user_with_token(db_session, factories):
     user = factories.User()
-    token = factories.DeveloperToken(userid=user.userid)
+    token = factories.DeveloperToken(user=user)
     db_session.add(token)
     db_session.commit()
     return (user, token)

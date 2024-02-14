@@ -11,14 +11,24 @@ pytestmark = pytest.mark.usefixtures("user_service")
 
 
 class TestDeveloperTokenService:
-    def test_fetch_returns_developer_token_for_userid(self, svc, developer_token, user):
+    def test_fetch_returns_developer_token_for_userid(
+        self, svc, developer_token, user, user_service
+    ):
+        user_service.fetch.return_value = user
+
         assert svc.fetch(user.userid) == developer_token
+        user_service.fetch.assert_called_once_with(user.userid)
 
     def test_fetch_returns_none_for_missing_userid(self, svc):
         assert svc.fetch(None) is None
 
-    def test_fetch_returns_none_for_missing_developer_token(self, svc, user):
+    def test_fetch_returns_none_for_missing_developer_token(
+        self, svc, user, user_service
+    ):
+        user_service.fetch.return_value = user
+
         assert svc.fetch(user.userid) is None
+        user_service.fetch.assert_called_once_with(user.userid)
 
     def test_create_creates_new_developer_token_for_userid(
         self, svc, db_session, user, user_service
@@ -31,7 +41,7 @@ class TestDeveloperTokenService:
         user_service.fetch.assert_called_once_with(user.userid)
         assert db_session.query(models.Token).all() == [
             Any.instance_of(models.Token).with_attrs(
-                {"userid": user.userid, "user_id": user.id}
+                {"userid": user.userid, "user": user}
             )
         ]
 
@@ -45,18 +55,19 @@ class TestDeveloperTokenService:
         token = svc.create(user.userid)
 
         assert token.userid == user.userid
+        assert token.user == user
         assert token.value == "6879-secure-token"
         assert token.expires is None
         assert token.authclient is None
         assert token.refresh_token is None
 
     def test_regenerate_sets_a_new_token_value(self, svc, developer_token):
-        old_userid = developer_token.userid
+        old_user = developer_token.user
         old_value = developer_token.value
 
         svc.regenerate(developer_token)
 
-        assert old_userid == developer_token.userid
+        assert old_user == developer_token.user
         assert old_value != developer_token.value
 
     @pytest.fixture
@@ -65,7 +76,7 @@ class TestDeveloperTokenService:
 
     @pytest.fixture
     def developer_token(self, factories, user):
-        return factories.DeveloperToken(userid=user.userid, user_id=user.id)
+        return factories.DeveloperToken(user=user)
 
     @pytest.fixture
     def user(self, factories):

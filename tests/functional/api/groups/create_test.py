@@ -152,7 +152,7 @@ def auth_client_header(auth_client):
 @pytest.fixture
 def user_with_token(db_session, factories):
     user = factories.User()
-    token = factories.DeveloperToken(userid=user.userid)
+    token = factories.DeveloperToken(user=user)
     db_session.add(token)
     db_session.commit()
     return (user, token)

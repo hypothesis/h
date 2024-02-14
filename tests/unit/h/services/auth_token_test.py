@@ -17,7 +17,7 @@ class TestAuthTokenService:
         result = svc.validate(token_model.value)
 
         assert result.expires == token_model.expires
-        assert result.userid == token_model.userid
+        assert result.userid == token_model.user.userid
 
     def test_validate_caches_database_token(self, svc, factories, db_session):
         token_model = factories.DeveloperToken(expires=self.time(1))
@@ -103,9 +103,7 @@ class TestLongLivedToken:
         ),
     )
     def test_it(self, expires, is_valid, factories):
-        token = LongLivedToken(
-            factories.OAuth2Token(userid="acct:foo@example.com", expires=expires)
-        )
+        token = LongLivedToken(factories.OAuth2Token(expires=expires))
 
         assert token.is_valid() == is_valid
 
