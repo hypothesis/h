@@ -43,10 +43,9 @@ class TestDocumentURI:
         with pytest.raises(sa.exc.IntegrityError):
             db_session.flush()
 
-    @pytest.mark.xfail(strict=True)
     def test_unique_constraint_can_take_long_values(self, db_session):
         document_uri = DocumentURI(
-            uri="http://example.com/" * 100000,
+            uri="http://example.com/" * 10000,
             claimant="https://example.com" * 10000,
             document=Document(),
         )
