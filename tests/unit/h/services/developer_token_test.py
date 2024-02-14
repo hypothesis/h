@@ -40,9 +40,7 @@ class TestDeveloperTokenService:
 
         user_service.fetch.assert_called_once_with(user.userid)
         assert db_session.query(models.Token).all() == [
-            Any.instance_of(models.Token).with_attrs(
-                {"userid": user.userid, "user": user}
-            )
+            Any.instance_of(models.Token).with_attrs({"user": user})
         ]
 
     def test_create_returns_new_developer_token_for_userid(
@@ -54,7 +52,6 @@ class TestDeveloperTokenService:
 
         token = svc.create(user.userid)
 
-        assert token.userid == user.userid
         assert token.user == user
         assert token.value == "6879-secure-token"
         assert token.expires is None

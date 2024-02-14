@@ -223,7 +223,6 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
 
         oauth_token = models.Token(
             user=request.user,
-            userid=request.user.userid,
             value=token["access_token"],
             refresh_token=token["refresh_token"],
             expires=expires,

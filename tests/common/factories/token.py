@@ -17,7 +17,6 @@ class DeveloperToken(ModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     user = factory.SubFactory(User)
-    userid = factory.LazyAttribute(lambda developer_token: developer_token.user.userid)
     value = factory.LazyAttribute(
         lambda _: (DEVELOPER_TOKEN_PREFIX + security.token_urlsafe())
     )
@@ -29,7 +28,6 @@ class OAuth2Token(ModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     user = factory.SubFactory(User)
-    userid = factory.LazyAttribute(lambda developer_token: developer_token.user.userid)
     value = factory.LazyAttribute(
         lambda _: (ACCESS_TOKEN_PREFIX + security.token_urlsafe())
     )

@@ -41,9 +41,7 @@ class DeveloperTokenService:
         :rtype: h.models.Token
         """
         user = self.user_svc.fetch(userid)
-        token = models.Token(
-            user=user, userid=user.userid, value=self._generate_token()
-        )
+        token = models.Token(user=user, value=self._generate_token())
         self.session.add(token)
         return token
 
