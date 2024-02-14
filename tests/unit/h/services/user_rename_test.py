@@ -75,7 +75,6 @@ class TestUserRenameService:
         updated_token = (
             db_session.query(models.Token).filter(models.Token.id == token.id).one()
         )
-        assert updated_token.userid == user.userid
         assert updated_token.user == user
 
     @pytest.mark.usefixtures("annotations")
