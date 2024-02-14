@@ -66,8 +66,8 @@ class TestUserRenameService:
         )
         assert not count
 
-    def test_rename_updates_tokens(self, service, user, db_session):
-        token = models.Token(userid=user.userid, value="foo")
+    def test_rename_updates_tokens(self, service, user, db_session, factories):
+        token = factories.DeveloperToken(user=user)
         db_session.add(token)
 
         service.rename(user, "panda")
@@ -76,6 +76,7 @@ class TestUserRenameService:
             db_session.query(models.Token).filter(models.Token.id == token.id).one()
         )
         assert updated_token.userid == user.userid
+        assert updated_token.user == user
 
     @pytest.mark.usefixtures("annotations")
     def test_rename_changes_the_users_annotations_userid(

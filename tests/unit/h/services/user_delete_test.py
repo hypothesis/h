@@ -90,11 +90,11 @@ class TestDeleteUserService:
 
     @pytest.fixture
     def user_developer_token(self, user, factories):
-        return factories.DeveloperToken(userid=user.userid)
+        return factories.DeveloperToken(user=user)
 
     @pytest.fixture
     def user_oauth2_token(self, user, factories):
-        return factories.OAuth2Token(userid=user.userid)
+        return factories.OAuth2Token(user=user)
 
     @pytest.fixture
     def other_developer_token(self, factories):

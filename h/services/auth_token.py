@@ -17,7 +17,7 @@ class LongLivedToken:
 
     def __init__(self, token):
         self.expires = token.expires
-        self.userid = token.userid
+        self.userid = token.user.userid
 
         # Associates the userid with a given transaction/web request.
         newrelic.agent.add_custom_attribute("userid", self.userid)

@@ -21,7 +21,7 @@ class UserDeleteService:
         in the group that have been made by other users, the user is unassigned
         as creator but the group persists.
         """
-        self._db.execute(sa.delete(Token).where(Token.userid == user.userid))
+        self._db.execute(sa.delete(Token).where(Token.user == user))
 
         # Delete all annotations
         self._annotation_delete_service.delete_annotations(

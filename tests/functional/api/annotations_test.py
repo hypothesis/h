@@ -272,7 +272,7 @@ def user_annotation(db_session, user, factories):
 
 @pytest.fixture
 def user_with_token(user, db_session, factories):
-    token = factories.DeveloperToken(userid=user.userid)
+    token = factories.DeveloperToken(user=user)
     db_session.add(token)
     db_session.commit()
     return (user, token)

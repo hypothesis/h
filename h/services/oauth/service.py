@@ -143,7 +143,7 @@ def factory(_context, request):
     user_svc = request.find_service(name="user")
 
     return OAuthProviderService(
-        oauth_validator=OAuthValidator(session=request.db, user_svc=user_svc),
+        oauth_validator=OAuthValidator(session=request.db),
         user_svc=user_svc,
         domain=request.domain,
     )

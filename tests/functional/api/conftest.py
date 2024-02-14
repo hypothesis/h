@@ -37,7 +37,7 @@ def auth_header_for_authority(db_session, factories):
 
 @pytest.fixture
 def token_auth_header(db_session, factories, user):
-    token = factories.DeveloperToken(userid=user.userid)
+    token = factories.DeveloperToken(user=user)
     db_session.add(token)
     db_session.commit()
 

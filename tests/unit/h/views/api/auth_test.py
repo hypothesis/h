@@ -386,7 +386,7 @@ class TestDebugToken:
             "expired": oauth_token.expired,
             "expires_at": "2001-11-30T17:45:50.000000+00:00",
             "issued_at": "2000-10-16T15:51:59.000000+00:00",
-            "userid": oauth_token.userid,
+            "userid": oauth_token.user.userid,
         }
 
     def test_it_without_auth_client(self, pyramid_request, oauth_token):

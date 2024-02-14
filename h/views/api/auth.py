@@ -270,7 +270,7 @@ def api_token_error(context, request):
 
 def _present_debug_token(token):
     data = {
-        "userid": token.userid,
+        "userid": token.user.userid,
         "expires_at": utc_iso8601(token.expires),
         "issued_at": utc_iso8601(token.created),
         "expired": token.expired,

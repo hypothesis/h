@@ -30,9 +30,8 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
     This implements the ``oauthlib.oauth2.RequestValidator`` interface.
     """
 
-    def __init__(self, session, user_svc):
+    def __init__(self, session):
         self.session = session
-        self.user_svc = user_svc
 
         self._cached_find_authz_code = lru_cache_in_transaction(self.session)(
             self._find_authz_code
@@ -223,8 +222,8 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
         ]  # We don't want to render this in the response.
 
         oauth_token = models.Token(
+            user=request.user,
             userid=request.user.userid,
-            user_id=request.user.id,
             value=token["access_token"],
             refresh_token=token["refresh_token"],
             expires=expires,
@@ -321,7 +320,7 @@ class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-metho
         ):
             return False
 
-        request.user = self.user_svc.fetch(token.userid)
+        request.user = token.user
         return True
 
     def validate_response_type(

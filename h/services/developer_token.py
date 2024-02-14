@@ -42,7 +42,7 @@ class DeveloperTokenService:
         """
         user = self.user_svc.fetch(userid)
         token = models.Token(
-            userid=user.userid, user_id=user.id, value=self._generate_token()
+            user=user, userid=user.userid, value=self._generate_token()
         )
         self.session.add(token)
         return token
@@ -68,9 +68,11 @@ class DeveloperTokenService:
         if userid is None:
             return None
 
+        user = self.user_svc.fetch(userid)
+
         return (
             self.session.query(models.Token)
-            .filter_by(userid=userid, authclient=None)
+            .filter_by(user=user, authclient=None)
             .order_by(models.Token.created.desc())
             .one_or_none()
         )

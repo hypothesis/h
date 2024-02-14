@@ -280,6 +280,8 @@ class User(Base):
     #: upgrading their passwords and setting this column to None.
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
+    tokens = sa.orm.relationship("Token", back_populates="user")
+
     @sa.orm.validates("email")
     def validate_email(self, _key, email):
         if email is None:
