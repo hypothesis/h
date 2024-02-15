@@ -87,7 +87,7 @@ class AnnotationSchema(JSONSchema):
                 "required": ["read"],
             },
             "references": {"type": "array", "items": {"type": "string"}},
-            "tags": {"type": "array", "items": {"type": "string"}},
+            "tags": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
             "target": {
                 "type": "array",
                 "items": {

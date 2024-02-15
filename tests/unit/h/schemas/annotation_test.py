@@ -143,6 +143,7 @@ class TestCreateUpdateAnnotationSchema:
             ),
             ({"references": False}, "references: False is not of type 'array'"),
             ({"references": [False]}, "references.0: False is not of type 'string'"),
+            ({"tags": ["tag" * 1000]}, f"tags.0: '{'tag' * 1000}' is too long"),
             ({"tags": False}, "tags: False is not of type 'array'"),
             ({"tags": [False]}, "tags.0: False is not of type 'string'"),
             ({"target": False}, "target: False is not of type 'array'"),
