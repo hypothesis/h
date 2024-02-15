@@ -94,7 +94,7 @@ faker==22.2.0
     # via factory-boy
 freezegun==1.4.0
     # via -r requirements/tests.in
-gevent==23.9.1
+gevent==24.2.1
     # via -r requirements/prod.txt
 greenlet==3.0.3
     # via
