@@ -282,7 +282,67 @@ class TestSync:
         queue_service.delete.assert_called_once_with([job])
         batch_indexer.index.assert_called_once_with([self.url_safe_id(job)])
 
-    def test_if_the_annotation_isnt_in_the_DB_it_deletes_the_job_from_the_queue(
+    def test_if_the_annotation_is_marked_as_deleted_in_the_DB_then_it_deletes_it_from_Elastic(
+        self, factories, search_index, queue_service, index
+    ):
+        annotation = factories.Annotation()
+        index(annotation)
+        job = factories.SyncAnnotationJob(annotation=annotation)
+        queue_service.get.return_value = [job]
+        annotation.deleted = True
+
+        counts = search_index.sync(1)
+
+        assert counts == {
+            Result.SYNCED_DELETED.format(tag="test_tag"): 1,
+            Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
+            Result.SYNCED_TOTAL: 1,
+        }
+        queue_service.delete.assert_not_called()
+
+    def test_if_the_annotation_isnt_in_the_DB_then_it_deletes_it_from_Elastic(
+        self, factories, search_index, queue_service, index, db_session
+    ):
+        # We have to actually create an annotation and save it to the DB in
+        # order to get a valid annotation ID. Then we delete the annotation
+        # from the DB again because we actually don't want the annotation to be
+        # in the DB in this test.
+        annotation = factories.Annotation()
+        index(annotation)
+        job = factories.SyncAnnotationJob(annotation=annotation)
+        queue_service.get.return_value = [job]
+        db_session.delete(annotation)
+        db_session.commit()
+
+        counts = search_index.sync(1)
+
+        assert counts == {
+            Result.SYNCED_DELETED.format(tag="test_tag"): 1,
+            Result.SYNCED_TAG_TOTAL.format(tag="test_tag"): 1,
+            Result.SYNCED_TOTAL: 1,
+        }
+        queue_service.delete.assert_not_called()
+
+    def test_if_the_annotation_is_marked_as_deleted_in_the_DB_and_Elastic_it_deletes_the_job_from_the_queue(
+        self, factories, search_index, queue_service, es_client
+    ):
+        annotation = factories.Annotation(deleted=True)
+        annotation.deleted = True
+        search_index.delete_annotation_by_id(annotation.id)
+        es_client.conn.indices.refresh(index=es_client.index)
+        job = factories.SyncAnnotationJob(annotation=annotation)
+        queue_service.get.return_value = [job]
+
+        counts = search_index.sync(1)
+
+        assert counts == {
+            Result.COMPLETED_DELETED.format(tag="test_tag"): 1,
+            Result.COMPLETED_TAG_TOTAL.format(tag="test_tag"): 1,
+            Result.COMPLETED_TOTAL: 1,
+        }
+        queue_service.delete.assert_called_once_with([job])
+
+    def test_if_the_annotation_isnt_in_the_DB_or_Elastic_it_deletes_the_job_from_the_queue(
         self, db_session, factories, search_index, queue_service
     ):
         # We have to actually create an annotation and save it to the DB in
@@ -455,10 +515,11 @@ class TestSync:
         counts = search_index.sync(5)
 
         assert counts == {
-            "Synced/Total": 3,
-            "Completed/Total": 3,
-            "Synced/test_tag/Total": 2,
-            "Completed/test_tag/Total": 2,
+            "Synced/Total": 4,
+            "Completed/Total": 2,
+            "Synced/test_tag/Total": 3,
+            "Completed/test_tag/Total": 1,
+            "Synced/test_tag/Deleted_from_db": 1,
             "Synced/test_tag/Different_in_Elastic": 1,
             "Synced/test_tag/Missing_from_Elastic": 1,
             "Synced/tag_2/Forced": 1,
@@ -466,7 +527,6 @@ class TestSync:
             "Completed/tag_2/Forced": 1,
             "Completed/tag_2/Total": 1,
             "Completed/test_tag/Up_to_date_in_Elastic": 1,
-            "Completed/test_tag/Deleted_from_db": 1,
         }
 
     def url_safe_id(self, job):

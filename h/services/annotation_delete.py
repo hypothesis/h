@@ -8,9 +8,10 @@ from h.services.annotation_write import AnnotationWriteService
 
 
 class AnnotationDeleteService:
-    def __init__(self, request, annotation_write):
+    def __init__(self, request, annotation_write, job_queue):
         self.request = request
         self.annotation_write = annotation_write
+        self.job_queue = job_queue
 
     def delete(self, annotation):
         """
@@ -21,6 +22,12 @@ class AnnotationDeleteService:
         """
         annotation.updated = datetime.utcnow()
         annotation.deleted = True
+        self.job_queue.add_by_id(
+            name="sync_annotation",
+            annotation_id=annotation.id,
+            tag="AnnotationDeleteService.delete_annotation",
+            schedule_in=60,
+        )
 
         self.annotation_write.upsert_annotation_slim(annotation)
 
@@ -65,5 +72,7 @@ class AnnotationDeleteService:
 
 def annotation_delete_service_factory(_context, request):
     return AnnotationDeleteService(
-        request, request.find_service(AnnotationWriteService)
+        request,
+        request.find_service(AnnotationWriteService),
+        request.find_service(name="queue_service"),
     )

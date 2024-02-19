@@ -16,6 +16,7 @@ class Result:
 
     # These are in the style of New Relic custom metric names.
     SYNCED_MISSING = "Synced/{tag}/Missing_from_Elastic"
+    SYNCED_DELETED = "Synced/{tag}/Deleted_from_db"
     SYNCED_DIFFERENT = "Synced/{tag}/Different_in_Elastic"
     SYNCED_FORCED = "Synced/{tag}/Forced"
     SYNCED_TAG_TOTAL = "Synced/{tag}/Total"
@@ -146,7 +147,9 @@ class SearchIndexService:
         # Either the synchronous method was disabled, or failed...
         return async_task.delay(event.annotation_id)
 
-    def sync(self, limit):
+    def sync(
+        self, limit
+    ):  # pylint:disable=too-many-statements,too-complex,too-many-locals,too-many-branches
         """
         Synchronize a batch of annotations from Postgres to Elasticsearch.
 
@@ -190,10 +193,14 @@ class SearchIndexService:
         # than in the DB.
         annotation_ids_to_sync = set()
 
+        annotation_ids_to_delete = set()
+
         for job in jobs:
             annotation_id = URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
             annotation_from_db = annotations_from_db.get(annotation_id)
             annotation_from_es = annotations_from_es.get(annotation_id)
+            deleted_from_db = (not annotation_from_db) or (annotation_from_db.deleted)
+            deleted_from_es = not annotation_from_es
 
             if job.kwargs.get("force", False):
                 annotation_ids_to_sync.add(annotation_id)
@@ -204,7 +211,12 @@ class SearchIndexService:
                 counts[Result.COMPLETED_FORCED.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TOTAL].add(job.id)
-            elif not annotation_from_db:
+            elif deleted_from_db and not deleted_from_es:
+                annotation_ids_to_delete.add(annotation_id)
+                counts[Result.SYNCED_DELETED.format(tag=job.tag)].add(annotation_id)
+                counts[Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(annotation_id)
+                counts[Result.SYNCED_TOTAL].add(annotation_id)
+            elif deleted_from_db and deleted_from_es:
                 job_complete.append(job)
                 counts[Result.COMPLETED_DELETED.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
@@ -225,10 +237,14 @@ class SearchIndexService:
                 counts[Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TOTAL].add(job.id)
 
-        self._queue_service.delete(job_complete)
+        if job_complete:
+            self._queue_service.delete(job_complete)
 
         if annotation_ids_to_sync:
             self._batch_indexer.index(list(annotation_ids_to_sync))
+
+        if annotation_ids_to_delete:
+            self._batch_indexer.delete(list(annotation_ids_to_delete))
 
         return {key: len(value) for key, value in counts.items()}
 
@@ -236,7 +252,7 @@ class SearchIndexService:
     def _equal(annotation_from_es, annotation_from_db):
         """Test if the annotations are equal."""
         return (
-            annotation_from_es["updated"] == annotation_from_db.updated
+            annotation_from_es.get("updated") == annotation_from_db.updated
             and annotation_from_es["user"] == annotation_from_db.userid
         )
 
@@ -244,10 +260,8 @@ class SearchIndexService:
         return {
             annotation.id: annotation
             for annotation in self._db.query(
-                Annotation.id, Annotation.updated, Annotation.userid
-            )
-            .filter_by(deleted=False)
-            .filter(Annotation.id.in_(annotation_ids))
+                Annotation.id, Annotation.updated, Annotation.userid, Annotation.deleted
+            ).filter(Annotation.id.in_(annotation_ids))
         }
 
     def _get_annotations_from_es(self, annotation_ids):
@@ -262,8 +276,8 @@ class SearchIndexService:
 
         for hit in hits:
             updated = hit["_source"].get("updated")
-            updated = isoparse(updated).replace(tzinfo=None) if updated else None
-            hit["_source"]["updated"] = updated
+            if updated:
+                hit["_source"]["updated"] = isoparse(updated).replace(tzinfo=None)
 
         return {hit["_id"]: hit["_source"] for hit in hits}
 

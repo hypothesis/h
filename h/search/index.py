@@ -66,6 +66,44 @@ class BatchIndexer:
                 errored.add(status["_id"])
         return errored
 
+    def delete(self, annotation_ids: list[str]) -> None:
+        """Delete `annotation_ids` from Elasticsearch."""
+        # Delete the given annotations from Elasticsearch by sending them to
+        # Elasticsearch's bulk API in chunks.
+        #
+        # Use streaming_bulk() rather than bulk() because of this comment in
+        # the Elasticsearch docs:
+        #
+        # > When errors are being collected original document data is included
+        # > in the error dictionary which can lead to an extra high memory
+        # > usage. If you need to process a lot of data and want to
+        # > ignore/collect errors please consider using the streaming_bulk()
+        # > helper which will just return the errors and not store them in
+        # > memory.
+        # >
+        # > https://elasticsearch-py.readthedocs.io/en/6.8.2/helpers.html#elasticsearch.helpers.bulk
+        results = es_helpers.streaming_bulk(
+            client=self.es_client.conn,
+            actions=[
+                {
+                    "_index": self._target_index,
+                    "_type": "annotation",
+                    "_id": annotation_id,
+                    "doc": {"deleted": True},
+                }
+                for annotation_id in annotation_ids
+            ],
+            chunk_size=2500,
+            raise_on_error=False,
+        )
+
+        for _ok, _item in results:
+            # We aren't doing anything with the results yet
+            # (but we still need this loop here to consume the `results`
+            # generator, otherwise the requests don't actually get sent to
+            # Elasticsearch).
+            pass
+
     def _prepare(self, annotation):
         operation = {
             "_index": self._target_index,
