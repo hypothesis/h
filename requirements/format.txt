@@ -26,14 +26,16 @@ pathspec==0.12.1
     # via black
 pip-sync-faster==0.0.3
     # via -r requirements/format.in
-pip-tools==7.3.0
+pip-tools==7.4.0
     # via
     #   -r requirements/format.in
     #   pip-sync-faster
 platformdirs==4.1.0
     # via black
 pyproject-hooks==1.0.0
-    # via build
+    # via
+    #   build
+    #   pip-tools
 wheel==0.42.0
     # via pip-tools
 zipp==3.17.0

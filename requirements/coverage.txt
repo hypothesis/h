@@ -16,12 +16,14 @@ packaging==23.2
     # via build
 pip-sync-faster==0.0.3
     # via -r requirements/coverage.in
-pip-tools==7.3.0
+pip-tools==7.4.0
     # via
     #   -r requirements/coverage.in
     #   pip-sync-faster
 pyproject-hooks==1.0.0
-    # via build
+    # via
+    #   build
+    #   pip-tools
 wheel==0.42.0
     # via pip-tools
 zipp==3.17.0

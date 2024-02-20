@@ -40,14 +40,16 @@ packaging==23.2
     #   sphinx
 pip-sync-faster==0.0.3
     # via -r requirements/docs.in
-pip-tools==7.3.0
+pip-tools==7.4.0
     # via
     #   -r requirements/docs.in
     #   pip-sync-faster
 pygments==2.17.2
     # via sphinx
 pyproject-hooks==1.0.0
-    # via build
+    # via
+    #   build
+    #   pip-tools
 requests==2.31.0
     # via sphinx
 six==1.16.0
