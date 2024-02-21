@@ -45,7 +45,7 @@ click-repl==0.3.0
     # via celery
 colander==2.0
     # via deform
-cryptography==42.0.2
+cryptography==42.0.4
     # via python-jose
 data-tasks==0.0.3
     # via -r prod.in
