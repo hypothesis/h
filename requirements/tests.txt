@@ -309,7 +309,7 @@ rsa==4.9
     # via
     #   -r requirements/prod.txt
     #   python-jose
-sentry-sdk==1.40.4
+sentry-sdk==1.40.5
     # via
     #   -r requirements/prod.txt
     #   h-pyramid-sentry
