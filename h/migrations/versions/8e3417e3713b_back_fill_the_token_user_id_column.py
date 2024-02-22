@@ -4,16 +4,38 @@ import logging
 import re
 
 from alembic import op
-from sqlalchemy import select
+from sqlalchemy import Column, ForeignKey, Integer, UnicodeText, select
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-from h.models import Token, User
 
 revision = "8e3417e3713b"
 down_revision = "8fcdcefd8c6f"
 
 
 log = logging.getLogger(__name__)
+
+
+Base = declarative_base()
+
+
+class Token(Base):
+    __tablename__ = "token"
+
+    id = Column(Integer, primary_key=True)
+
+    # Legacy `userid` column.
+    userid = Column(UnicodeText())
+
+    # Replacement foreign key.
+    user_id = Column(Integer, ForeignKey("user.id"))
+
+
+class User(Base):
+    __tablename__ = "user"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(UnicodeText(), nullable=False)
+    authority = Column(UnicodeText(), nullable=False)
 
 
 def split_userid(userid):
