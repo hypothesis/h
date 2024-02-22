@@ -6,8 +6,15 @@
     "elasticbeanstalk_application": "h",
     "elasticbeanstalk_environment": "staging"
   },
+  "staging_websocket": {
+    "github_environment_name": "Staging (WebSocket)",
+    "github_environment_url": "https://staging.hypothes.is/docs/help",
+    "aws_region": "us-west-1",
+    "elasticbeanstalk_application": "h-websocket",
+    "elasticbeanstalk_environment": "staging"
+  },
   "production": {
-    "needs": ["staging"],
+    "needs": ["staging", "staging_websocket"],
     "github_environment_name": "Production",
     "github_environment_url": "https://hypothes.is/search",
     "aws_region": "us-west-1",
@@ -15,7 +22,7 @@
     "elasticbeanstalk_environment": "prod"
   },
   "production_websocket": {
-    "needs": ["staging"],
+    "needs": ["staging", "staging_websocket"],
     "github_environment_name": "Production (WebSocket)",
     "github_environment_url": "https://hypothes.is/docs/help",
     "aws_region": "us-west-1",
@@ -23,7 +30,7 @@
     "elasticbeanstalk_environment": "prod"
   },
   "production_canada": {
-    "needs": ["staging"],
+    "needs": ["staging", "staging_websocket"],
     "github_environment_name": "Production (Canada)",
     "github_environment_url": "https://ca.hypothes.is/search",
     "aws_region": "ca-central-1",
