@@ -1,9 +1,8 @@
 import logging
-from unittest import mock
 from unittest.mock import sentinel
 
-import elasticsearch
 import pytest
+from elasticsearch.exceptions import NotFoundError
 
 from h.search.index import BatchIndexer
 
@@ -44,7 +43,7 @@ class TestBatchIndexer:
             assert get_indexed_ann(_id) is not None
 
         for _id in ids_not_to_index:
-            with pytest.raises(elasticsearch.exceptions.NotFoundError):
+            with pytest.raises(NotFoundError):
                 get_indexed_ann(_id)
 
     def test_it_does_not_index_deleted_annotations(
@@ -58,7 +57,7 @@ class TestBatchIndexer:
 
         assert get_indexed_ann(ann.id) is not None
 
-        with pytest.raises(elasticsearch.exceptions.NotFoundError):
+        with pytest.raises(NotFoundError):
             get_indexed_ann(ann_del.id)
 
     def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
@@ -91,12 +90,13 @@ class TestBatchIndexer:
             assert result.get("user") == ann.userid
             assert result.get("uri") == ann.target_uri
 
-    def test_it_returns_errored_annotation_ids(self, batch_indexer, factories):
+    def test_it_returns_errored_annotation_ids(
+        self, batch_indexer, factories, es_helpers
+    ):
         annotations = factories.Annotation.create_batch(3)
         expected_errored_ids = {annotations[0].id, annotations[2].id}
 
-        elasticsearch.helpers.streaming_bulk = mock.Mock()
-        elasticsearch.helpers.streaming_bulk.return_value = [
+        es_helpers.streaming_bulk.return_value = [
             (False, {"index": {"error": "some error", "_id": annotations[0].id}}),
             (True, {}),
             (False, {"index": {"error": "some error", "_id": annotations[2].id}}),
@@ -107,13 +107,12 @@ class TestBatchIndexer:
         assert errored == expected_errored_ids
 
     def test_it_does_not_error_if_annotations_already_indexed(
-        self, db_session, es_client, factories, pyramid_request
+        self, db_session, es_client, factories, pyramid_request, es_helpers
     ):
         annotations = factories.Annotation.create_batch(3)
         expected_errored_ids = {annotations[1].id}
 
-        elasticsearch.helpers.streaming_bulk = mock.Mock()
-        elasticsearch.helpers.streaming_bulk.return_value = [
+        es_helpers.streaming_bulk.return_value = [
             (True, {}),
             (False, {"create": {"error": "some error", "_id": annotations[1].id}}),
             (
@@ -154,3 +153,8 @@ def get_indexed_ann(es_client):
         )["_source"]
 
     return _get
+
+
+@pytest.fixture
+def es_helpers(patch):
+    return patch("h.search.index.es_helpers")
