@@ -65,7 +65,7 @@ class Group(Base, mixins.Timestamps):
     # We don't expose the integer PK to the world, so we generate a short
     # random string to use as the publicly visible ID.
     pubid = sa.Column(sa.Text(), default=pubid.generate, unique=True, nullable=False)
-    authority = sa.Column(sa.UnicodeText(), nullable=False)
+    authority = sa.Column(sa.UnicodeText(), nullable=False, index=True)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     creator_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"))
