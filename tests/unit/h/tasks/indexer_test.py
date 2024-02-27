@@ -29,11 +29,11 @@ class TestSearchIndexServicesWrapperTasks:
 
 
 class TestSyncAnnotations:
-    def test_it(self, newrelic, log, search_index):
+    def test_it(self, newrelic, log, annotation_sync_service):
         indexer.sync_annotations("test_queue")
 
-        search_index.sync.assert_called_once_with("test_queue")
-        log.info.assert_called_once_with(search_index.sync.return_value)
+        annotation_sync_service.sync.assert_called_once_with("test_queue")
+        log.info.assert_called_once_with(annotation_sync_service.sync.return_value)
         newrelic.agent.record_custom_metrics.assert_called_once_with(
             [
                 ("Custom/SyncAnnotations/Queue/foo", 2),
@@ -46,9 +46,9 @@ class TestSyncAnnotations:
         return patch("h.tasks.indexer.log")
 
     @pytest.fixture
-    def search_index(self, search_index):
-        search_index.sync.return_value = Counter({"foo": 2, "bar": 3})
-        return search_index
+    def annotation_sync_service(self, annotation_sync_service):
+        annotation_sync_service.sync.return_value = Counter({"foo": 2, "bar": 3})
+        return annotation_sync_service
 
 
 class TestReportJobQueueMetrics:

@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-from h.search.index import BatchIndexer
 from h.services.group import GroupService
 from h.services.search_index import SearchIndexService
 
@@ -51,16 +50,12 @@ def search_index(  # pylint:disable=unused-argument
     pyramid_request,
     moderation_service,
     annotation_read_service,
-    queue_service,
 ):
     return SearchIndexService(
         pyramid_request,
         es=es_client,
-        db=pyramid_request.db,
         settings={},
         annotation_read_service=annotation_read_service,
-        queue_service=queue_service,
-        batch_indexer=mock.create_autospec(BatchIndexer, spec_set=True, instance=True),
     )
 
 
