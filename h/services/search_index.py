@@ -149,7 +149,7 @@ class SearchIndexService:
 
     def sync(
         self, limit
-    ):  # pylint:disable=too-many-statements,too-complex,too-many-locals,too-many-branches
+    ):  # pylint:disable=too-many-statements,too-complex,too-many-branches
         """
         Synchronize a batch of annotations from Postgres to Elasticsearch.
 
@@ -199,8 +199,6 @@ class SearchIndexService:
             annotation_id = URLSafeUUID.hex_to_url_safe(job.kwargs["annotation_id"])
             annotation_from_db = annotations_from_db.get(annotation_id)
             annotation_from_es = annotations_from_es.get(annotation_id)
-            deleted_from_db = (not annotation_from_db) or (annotation_from_db.deleted)
-            deleted_from_es = not annotation_from_es
 
             if job.kwargs.get("force", False):
                 annotation_ids_to_sync.add(annotation_id)
@@ -211,12 +209,12 @@ class SearchIndexService:
                 counts[Result.COMPLETED_FORCED.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TOTAL].add(job.id)
-            elif deleted_from_db and not deleted_from_es:
+            elif (not annotation_from_db) and annotation_from_es:
                 annotation_ids_to_delete.add(annotation_id)
                 counts[Result.SYNCED_DELETED.format(tag=job.tag)].add(annotation_id)
                 counts[Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(annotation_id)
                 counts[Result.SYNCED_TOTAL].add(annotation_id)
-            elif deleted_from_db and deleted_from_es:
+            elif (not annotation_from_db) and (not annotation_from_es):
                 job_complete.append(job)
                 counts[Result.COMPLETED_DELETED.format(tag=job.tag)].add(job.id)
                 counts[Result.COMPLETED_TAG_TOTAL.format(tag=job.tag)].add(job.id)
@@ -261,7 +259,7 @@ class SearchIndexService:
             annotation.id: annotation
             for annotation in self._db.query(
                 Annotation.id, Annotation.updated, Annotation.userid, Annotation.deleted
-            ).filter(Annotation.id.in_(annotation_ids))
+            ).filter(Annotation.id.in_(annotation_ids), Annotation.deleted.is_(False))
         }
 
     def _get_annotations_from_es(self, annotation_ids):
