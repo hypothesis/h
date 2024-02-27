@@ -5,6 +5,7 @@ import newrelic
 from celery import Task
 
 from h.celery import celery, get_task_logger
+from h.services import AnnotationSyncService
 
 log = get_task_logger(__name__)
 
@@ -29,9 +30,9 @@ def delete_annotation(id_):
 
 @celery.task
 def sync_annotations(limit):
-    search_index = celery.request.find_service(name="search_index")
+    annotation_sync_service = celery.request.find_service(AnnotationSyncService)
 
-    counts = search_index.sync(limit)
+    counts = annotation_sync_service.sync(limit)
 
     log.info(dict(counts))
     newrelic.agent.record_custom_metrics(

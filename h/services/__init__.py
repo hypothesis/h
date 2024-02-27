@@ -2,6 +2,7 @@
 
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
+from h.services.annotation_sync import AnnotationSyncService
 from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
 from h.services.bulk_api import BulkAnnotationService, BulkGroupService
@@ -30,6 +31,9 @@ def includeme(config):  # pragma: no cover
     )
     config.register_service_factory(
         "h.services.annotation_stats.annotation_stats_factory", name="annotation_stats"
+    )
+    config.register_service_factory(
+        "h.services.annotation_sync.factory", iface=AnnotationSyncService
     )
     config.register_service_factory(
         "h.services.annotation_write.service_factory", iface=AnnotationWriteService

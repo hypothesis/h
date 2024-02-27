@@ -7,6 +7,7 @@ from h.services.annotation_json import AnnotationJSONService
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_read import AnnotationReadService
+from h.services.annotation_sync import AnnotationSyncService
 from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
 from h.services.auth_token import AuthTokenService
@@ -42,6 +43,7 @@ __all__ = (
     "annotation_json_service",
     "annotation_metadata_service",
     "annotation_read_service",
+    "annotation_sync_service",
     "annotation_write_service",
     "auth_cookie_service",
     "auth_token_service",
@@ -105,6 +107,11 @@ def annotation_json_service(mock_service):
 @pytest.fixture
 def annotation_read_service(mock_service):
     return mock_service(AnnotationReadService)
+
+
+@pytest.fixture
+def annotation_sync_service(mock_service):
+    return mock_service(AnnotationSyncService)
 
 
 @pytest.fixture
