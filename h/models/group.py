@@ -65,7 +65,7 @@ class Group(Base, mixins.Timestamps):
     # We don't expose the integer PK to the world, so we generate a short
     # random string to use as the publicly visible ID.
     pubid = sa.Column(sa.Text(), default=pubid.generate, unique=True, nullable=False)
-    authority = sa.Column(sa.UnicodeText(), nullable=False, index=True)
+    authority = sa.Column(sa.UnicodeText(), nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     creator_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"))
@@ -90,7 +90,7 @@ class Group(Base, mixins.Timestamps):
     #: Allow authorities to define their own unique identifier for a group
     #: (versus the pubid). This identifier is owned by the authority/client
     #: versus ``pubid``, which is owned and controlled by the service.
-    authority_provided_id = sa.Column(sa.UnicodeText(), nullable=True)
+    authority_provided_id = sa.Column(sa.UnicodeText(), nullable=True, index=True)
 
     #: Which type of user is allowed to join this group, possible values are:
     #: authority, None
