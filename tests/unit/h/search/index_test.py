@@ -132,6 +132,15 @@ class TestBatchIndexer:
 
         assert errored == expected_errored_ids
 
+    def test_delete(self, batch_indexer, factories, get_indexed_ann):
+        annotations = factories.Annotation.create_batch(2)
+        batch_indexer.index([annotation.id for annotation in annotations])
+
+        batch_indexer.delete([annotation.id for annotation in annotations])
+
+        for annotation in annotations:
+            assert get_indexed_ann(annotation.id) == {"doc": {"deleted": True}}
+
 
 @pytest.fixture
 def batch_indexer(  # pylint:disable=unused-argument
