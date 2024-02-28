@@ -9,9 +9,15 @@ from h.services.annotation_delete import annotation_delete_service_factory
 
 
 class TestAnnotationDeleteService:
-    def test_it_marks_the_annotation_as_deleted(self, svc, annotation):
+    def test_it_marks_the_annotation_as_deleted(self, svc, annotation, queue_service):
         ann = annotation()
         svc.delete(ann)
+        queue_service.add_by_id.assert_called_once_with(
+            name="sync_annotation",
+            annotation_id=ann.id,
+            tag="AnnotationDeleteService.delete_annotation",
+            schedule_in=60,
+        )
 
         assert ann.deleted
 
@@ -91,7 +97,7 @@ def annotation(factories):
 
 # pylint:disable=unused-argument
 @pytest.fixture
-def svc(db_session, pyramid_request, annotation_write_service):
+def svc(db_session, pyramid_request, annotation_write_service, queue_service):
     pyramid_request.db = db_session
     return annotation_delete_service_factory({}, pyramid_request)
 

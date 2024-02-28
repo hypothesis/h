@@ -53,11 +53,15 @@ class AnnotationSyncService:
                 # annotation is already present and up-to-date in Elasticsearch.
                 counter.annotation_synced(counter.Result.SYNCED_FORCED, job)
                 counter.job_completed(counter.Result.COMPLETED_FORCED, job)
-            elif not annotation_from_db:
+            elif (not annotation_from_db) and annotation_from_es:
                 # The annotation isn't in the DB or is marked as
-                # Annotation.deleted=True in the DB so we can't index it into
-                # Elasticsearch.
-                # (This method doesn't support deleting annotations from Elasticsearch yet.)
+                # Annotation.deleted=True in the DB but it still present in
+                # Elasticsearch. Delete the annotation from Elasticsearch.
+                counter.annotation_deleted(counter.Result.SYNCED_DELETED, job)
+            elif (not annotation_from_db) and (not annotation_from_es):
+                # The annotation isn't in the DB or is marked as
+                # Annotation.deleted=True in the DB and isn't in Elasticsearch
+                # either. Delete the job from the queue, it has been completed.
                 counter.job_completed(counter.Result.COMPLETED_DELETED, job)
             elif not annotation_from_es:
                 # The annotation is present in the DB but missing from
@@ -77,6 +81,9 @@ class AnnotationSyncService:
 
         if counter.annotation_ids_to_sync:
             self._batch_indexer.index(counter.annotation_ids_to_sync)
+
+        if counter.annotation_ids_to_delete:
+            self._batch_indexer.delete(counter.annotation_ids_to_delete)
 
         return counter.counts
 
@@ -167,10 +174,11 @@ class ESHelper:
 
         for hit in hits:
             updated = hit["_source"].get("updated")
-            updated = isoparse(updated).replace(tzinfo=None) if updated else None
-            hit["_source"]["updated"] = updated
+            if updated:
+                updated = isoparse(updated).replace(tzinfo=None)
+                hit["_source"]["updated"] = updated
 
-        return {hit["_id"]: hit["_source"] for hit in hits}
+        return {hit["_id"]: hit["_source"] for hit in hits if hit["_source"]}
 
 
 class Counter:
@@ -181,6 +189,7 @@ class Counter:
 
         # These are in the style of New Relic custom metric names.
         SYNCED_MISSING = "Synced/{tag}/Missing_from_Elastic"
+        SYNCED_DELETED = "Synced/{tag}/Deleted_from_db"
         SYNCED_DIFFERENT = "Synced/{tag}/Different_in_Elastic"
         SYNCED_FORCED = "Synced/{tag}/Forced"
         SYNCED_TAG_TOTAL = "Synced/{tag}/Total"
@@ -194,6 +203,7 @@ class Counter:
     def __init__(self):
         self._counts = defaultdict(set)
         self._annotation_ids_to_sync = set()
+        self._annotation_ids_to_delete = set()
         self._jobs_to_delete = set()
 
     def annotation_synced(self, metric, job: Job):
@@ -201,6 +211,17 @@ class Counter:
         annotation_id = _url_safe_annotation_id(job)
 
         self._annotation_ids_to_sync.add(annotation_id)
+        self._counts[metric.format(tag=job.tag)].add(annotation_id)
+        self._counts[self.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(
+            annotation_id
+        )
+        self._counts[self.Result.SYNCED_TOTAL].add(annotation_id)
+
+    def annotation_deleted(self, metric, job: Job):
+        """Record an annotation that will be deleted from Elasticsearch Elasticsearch."""
+        annotation_id = _url_safe_annotation_id(job)
+
+        self._annotation_ids_to_delete.add(annotation_id)
         self._counts[metric.format(tag=job.tag)].add(annotation_id)
         self._counts[self.Result.SYNCED_TAG_TOTAL.format(tag=job.tag)].add(
             annotation_id
@@ -218,6 +239,11 @@ class Counter:
     def annotation_ids_to_sync(self) -> list:
         """Return a list of the annotation IDs to be synced to Elasticsearch."""
         return list(self._annotation_ids_to_sync)
+
+    @property
+    def annotation_ids_to_delete(self) -> list:
+        """Return a list of the annotation IDs to be deleted from Elasticsearch."""
+        return list(self._annotation_ids_to_delete)
 
     @property
     def jobs_to_delete(self) -> list[Job]:
