@@ -1,14 +1,21 @@
 from datetime import datetime, timedelta
 
+from pyramid.request import Request
 from sqlalchemy import delete, select
 
 from h.events import AnnotationEvent
 from h.models import Annotation
 from h.services.annotation_write import AnnotationWriteService
+from h.services.job_queue import JobQueueService
 
 
 class AnnotationDeleteService:
-    def __init__(self, request, annotation_write, job_queue):
+    def __init__(
+        self,
+        request: Request,
+        annotation_write: AnnotationWriteService,
+        job_queue: JobQueueService,
+    ):
         self.request = request
         self.annotation_write = annotation_write
         self.job_queue = job_queue
