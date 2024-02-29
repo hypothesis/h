@@ -218,7 +218,7 @@ class Counter:
         self._counts[self.Result.SYNCED_TOTAL].add(annotation_id)
 
     def annotation_deleted(self, metric, job: Job):
-        """Record an annotation that will be deleted from Elasticsearch Elasticsearch."""
+        """Record an annotation that will be deleted from Elasticsearch."""
         annotation_id = _url_safe_annotation_id(job)
 
         self._annotation_ids_to_delete.add(annotation_id)
