@@ -420,7 +420,7 @@ pytest-xdist[psutil]==3.5.0
     # via
     #   -r requirements/tests.txt
     #   pytest-xdist
-python-dateutil==2.8.2
+python-dateutil==2.9.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

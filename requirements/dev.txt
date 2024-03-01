@@ -276,7 +276,7 @@ pyramid-services==2.2
     # via -r requirements/prod.txt
 pyramid-tm==2.5
     # via -r requirements/prod.txt
-python-dateutil==2.8.2
+python-dateutil==2.9.0
     # via
     #   -r requirements/prod.txt
     #   celery
