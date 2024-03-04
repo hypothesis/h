@@ -259,7 +259,7 @@ pytest==8.0.2
     #   pytest-reverse
 pytest-reverse==1.7.0
     # via -r requirements/functests.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   -r requirements/prod.txt
     #   celery
