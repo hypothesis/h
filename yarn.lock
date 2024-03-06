@@ -4266,15 +4266,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-mocha@npm:^10.2.0":
-  version: 10.2.0
-  resolution: "eslint-plugin-mocha@npm:10.2.0"
+"eslint-plugin-mocha@npm:^10.3.0":
+  version: 10.3.0
+  resolution: "eslint-plugin-mocha@npm:10.3.0"
   dependencies:
     eslint-utils: ^3.0.0
     rambda: ^7.4.0
   peerDependencies:
     eslint: ">=7.0.0"
-  checksum: d284812141ea18b9dcd1f173477e364bda2b86a621cd2a1c13636065255d32498df33b5d9a6fa1d64b187bd86819a7707ae8b0895228a9f545f12ed153fac1a2
+  checksum: 9d2c552a3e18ba45e3c9a96ab94ae1ba5fad28a0bd9f57ddfc3ecabe609eb1a012803903aa4b544c263091269104e095b4e26e0b4dc5828be886559d103ee891
   languageName: node
   linkType: hard
 
@@ -5439,7 +5439,7 @@ __metadata:
     escape-html: ^1.0.3
     eslint: ^8.57.0
     eslint-config-hypothesis: 2.6
-    eslint-plugin-mocha: ^10.2.0
+    eslint-plugin-mocha: ^10.3.0
     eslint-plugin-react: ^7.33.2
     eslint-plugin-react-hooks: ^4.6.0
     fetch-mock: ^9.11.0
