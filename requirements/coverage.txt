@@ -16,7 +16,7 @@ packaging==23.2
     # via build
 pip-sync-faster==0.0.3
     # via -r requirements/coverage.in
-pip-tools==7.4.0
+pip-tools==7.4.1
     # via
     #   -r requirements/coverage.in
     #   pip-sync-faster

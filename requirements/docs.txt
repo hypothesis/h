@@ -40,7 +40,7 @@ packaging==23.2
     #   sphinx
 pip-sync-faster==0.0.3
     # via -r requirements/docs.in
-pip-tools==7.4.0
+pip-tools==7.4.1
     # via
     #   -r requirements/docs.in
     #   pip-sync-faster
