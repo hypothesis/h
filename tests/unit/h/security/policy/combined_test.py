@@ -114,7 +114,7 @@ class TestSecurityPolicy:
         result = policy.remember(pyramid_request, sentinel.userid, kwarg=True)
 
         if not bearer_returns:
-            policy._http_basic_auth_policy.handles.assert_called_once_with(  # pylint:disable=no-member
+            policy._http_basic_auth_policy.handles.assert_called_once_with(
                 pyramid_request
             )
 
