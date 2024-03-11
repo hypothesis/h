@@ -260,7 +260,7 @@ oauthlib==3.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-packaging==23.2
+packaging==24.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

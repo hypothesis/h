@@ -18,7 +18,7 @@ isort==5.13.2
     # via -r requirements/checkformatting.in
 mypy-extensions==1.0.0
     # via black
-packaging==23.2
+packaging==24.0
     # via
     #   black
     #   build
