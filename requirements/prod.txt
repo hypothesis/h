@@ -122,7 +122,7 @@ newrelic==9.7.0
     # via -r requirements/prod.in
 oauthlib==3.2.2
     # via -r requirements/prod.in
-packaging==23.2
+packaging==24.0
     # via
     #   -r requirements/prod.in
     #   gunicorn

@@ -12,7 +12,7 @@ coverage==7.4.3
     # via -r requirements/coverage.in
 importlib-metadata==7.0.1
     # via pip-sync-faster
-packaging==23.2
+packaging==24.0
     # via build
 pip-sync-faster==0.0.3
     # via -r requirements/coverage.in
