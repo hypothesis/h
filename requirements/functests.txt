@@ -117,7 +117,7 @@ importlib-metadata==7.0.1
     #   h-api
     #   h-assets
     #   pip-sync-faster
-importlib-resources==6.1.3
+importlib-resources==6.3.0
     # via
     #   -r requirements/prod.txt
     #   data-tasks
@@ -266,9 +266,7 @@ python-dateutil==2.9.0.post0
     #   elasticsearch-dsl
     #   faker
 python-jose[cryptography]==3.3.0
-    # via
-    #   -r requirements/prod.txt
-    #   python-jose
+    # via -r requirements/prod.txt
 python-slugify==8.0.4
     # via -r requirements/prod.txt
 pytz==2024.1
