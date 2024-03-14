@@ -123,6 +123,14 @@ class TestCreateUpdateAnnotationSchema:
                 "document.link.0.href: False is not of type 'string'",
             ),
             (
+                {
+                    "document": {
+                        "link": [{"href": f"https://example.com?{'LONG'*3000}"}]
+                    }
+                },
+                f"document.link.0.href: 'https://example.com?{'LONG'*3000}' is too long",
+            ),
+            (
                 {"document": {"link": [{"href": "http://example.com", "type": False}]}},
                 "document.link.0.type: False is not of type 'string'",
             ),
