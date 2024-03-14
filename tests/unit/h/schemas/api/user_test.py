@@ -117,8 +117,9 @@ class TestCreateUserAPISchema:
     def test_it_raises_when_email_missing_and_identities_empty(self, schema, payload):
         del payload["email"]
         payload["identities"] = []
-
-        with pytest.raises(ValidationError, match=".*identities.*too short.*"):
+        with pytest.raises(
+            ValidationError, match="identities: \\[\\] should be non-empty"
+        ):
             schema.validate(payload)
 
     def test_it_raises_when_identities_not_an_array(self, schema, payload):
