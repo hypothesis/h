@@ -46,7 +46,7 @@ DOCUMENT_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "href": {"type": "string"},
+                    "href": {"type": "string", "maxLength": 3000},
                     "type": {"type": "string"},
                 },
                 "required": ["href"],
@@ -86,8 +86,8 @@ class AnnotationSchema(JSONSchema):
                 },
                 "required": ["read"],
             },
-            "references": {"type": "array", "items": {"type": "string"}},
             "tags": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
+            "references": {"type": "array", "items": {"type": "string"}},
             "target": {
                 "type": "array",
                 "items": {
