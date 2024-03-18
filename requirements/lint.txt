@@ -189,7 +189,7 @@ importlib-metadata==7.0.1
     #   h-api
     #   h-assets
     #   pip-sync-faster
-importlib-resources==6.3.0
+importlib-resources==6.3.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
