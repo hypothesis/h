@@ -1,17 +1,15 @@
 version: 2
 updates:
-
 - package-ecosystem: pip
   directory: "/"
   schedule:
-    interval: daily
-    time: "10:00"
+    interval: weekly
   open-pull-requests-limit: 10
 
 - package-ecosystem: docker
   directory: "/"
   schedule:
-    interval: daily
+    interval: monthly
   open-pull-requests-limit: 10
   ignore:
     # Only send PRs for patch versions of Python.
@@ -22,5 +20,4 @@ updates:
   directory: "/"
   schedule:
     interval: monthly
-    time: "10:00"
   open-pull-requests-limit: 10
