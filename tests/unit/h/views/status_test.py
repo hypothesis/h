@@ -28,10 +28,25 @@ class TestStatus:
 
         capture_message.assert_called_once_with("Test message from h's status view")
 
+    def test_it_access_the_replica(self, pyramid_request, db_replica):
+        pyramid_request.params["replica"] = ""
+        db_replica.execute.side_effect = Exception("explode!")
+
+        with pytest.raises(HTTPInternalServerError) as exc:
+            status(pyramid_request)
+
+        assert "Replica database connection failed" in str(exc.value)
+
     @pytest.fixture
     def db(self, pyramid_request):
         db = mock.Mock()
         pyramid_request.db = db
+        return db
+
+    @pytest.fixture
+    def db_replica(self, pyramid_request):
+        db = mock.Mock()
+        pyramid_request.db_replica = db
         return db
 
 
