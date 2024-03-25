@@ -411,7 +411,7 @@ pytest==8.1.1
     #   pytest-cov
     #   pytest-reverse
     #   pytest-xdist
-pytest-cov==4.1.0
+pytest-cov==5.0.0
     # via -r requirements/tests.txt
 pytest-reverse==1.7.0
     # via -r requirements/functests.txt
