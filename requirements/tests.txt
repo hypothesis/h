@@ -269,7 +269,7 @@ pytest==8.1.1
     #   -r requirements/tests.in
     #   pytest-cov
     #   pytest-xdist
-pytest-cov==4.1.0
+pytest-cov==5.0.0
     # via -r requirements/tests.in
 pytest-xdist[psutil]==3.5.0
     # via -r requirements/tests.in
