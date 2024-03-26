@@ -11,7 +11,11 @@ from h.services.annotation_sync import AnnotationSyncService
 from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
 from h.services.auth_token import AuthTokenService
-from h.services.bulk_api import BulkAnnotationService, BulkGroupService
+from h.services.bulk_api import (
+    BulkAnnotationService,
+    BulkGroupService,
+    BulkLMSStatsService,
+)
 from h.services.developer_token import DeveloperTokenService
 from h.services.flag import FlagService
 from h.services.group import GroupService
@@ -49,6 +53,7 @@ __all__ = (
     "auth_token_service",
     "bulk_annotation_service",
     "bulk_group_service",
+    "bulk_stats_service",
     "developer_token_service",
     "links_service",
     "list_organizations_service",
@@ -142,6 +147,11 @@ def bulk_annotation_service(mock_service):
 @pytest.fixture
 def bulk_group_service(mock_service):
     return mock_service(BulkGroupService)
+
+
+@pytest.fixture
+def bulk_stats_service(mock_service):
+    return mock_service(BulkLMSStatsService)
 
 
 @pytest.fixture
