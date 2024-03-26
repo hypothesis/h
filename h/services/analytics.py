@@ -2,13 +2,14 @@ import logging
 
 from h.schemas.analytics import Event
 
-log = logging.getLogger(__name__)
-
 
 class AnalyticsService:
+    def __init__(self):
+        self._log = logging.getLogger(__name__)
+
     def create(self, event: Event):
         # TODO Enhance this
-        log.info(event)
+        self._log.info(event)
 
 
 def analytics_service_factory(_context, _request):

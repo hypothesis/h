@@ -174,6 +174,7 @@ def test_includeme():
         call("token", "/api/token"),
         call("oauth_authorize", "/oauth/authorize"),
         call("oauth_revoke", "/oauth/revoke"),
+        call("api.analytics.events", "/api/analytics/events"),
         call("sidebar_app", "/app.html"),
         call("notebook_app", "/notebook"),
         call("profile_app", "/user-profile"),
