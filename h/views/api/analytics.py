@@ -1,6 +1,7 @@
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.request import Request
 
+from h.schemas.analytics import CreateEventSchema
 from h.services.analytics import AnalyticsService
 from h.views.api.config import api_config
 
@@ -14,8 +15,9 @@ from h.views.api.config import api_config
 )
 def create_event(request: Request):
     """Create a new analytics event."""
+    schema = CreateEventSchema()
     analytics_service: AnalyticsService = request.find_service(name="analytics")
 
-    analytics_service.create(request.json_body)
+    analytics_service.create(schema.validate(request.json_body))
 
     return HTTPNoContent()
