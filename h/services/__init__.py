@@ -5,7 +5,11 @@ from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_sync import AnnotationSyncService
 from h.services.annotation_write import AnnotationWriteService
 from h.services.auth_cookie import AuthCookieService
-from h.services.bulk_api import BulkAnnotationService, BulkGroupService
+from h.services.bulk_api import (
+    BulkAnnotationService,
+    BulkGroupService,
+    BulkLMSStatsService,
+)
 from h.services.job_queue import JobQueueService
 from h.services.subscription import SubscriptionService
 
@@ -52,6 +56,10 @@ def includeme(config):  # pragma: no cover
     config.register_service_factory(
         "h.services.bulk_api.group.service_factory", iface=BulkGroupService
     )
+    config.register_service_factory(
+        "h.services.bulk_api.lms_stats.service_factory", iface=BulkLMSStatsService
+    )
+
     config.register_service_factory(
         "h.services.developer_token.developer_token_service_factory",
         name="developer_token",
