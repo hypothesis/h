@@ -20,6 +20,16 @@ class TestGetNDJSONResponse:
         lines = [json.loads(line) for line in lines if line]
         assert lines == return_values
 
+    def test_it_no_streaming(self):
+        return_values = [{"id": id_} for id_ in range(3)]
+
+        result = get_ndjson_response(return_values, stream=False)
+
+        assert isinstance(result, Response)
+        assert result.status == "200 OK"
+        assert result.content_type == "application/x-ndjson"
+        assert result.json == return_values
+
     def test_it_with_zero_items(self):
         result = get_ndjson_response([])
 
