@@ -125,6 +125,11 @@ def test_includeme():
         call("api.bulk.action", "/api/bulk", request_method="POST"),
         call("api.bulk.annotation", "/api/bulk/annotation", request_method="POST"),
         call("api.bulk.group", "/api/bulk/group", request_method="POST"),
+        call(
+            "api.bulk.stats.assignment",
+            "/api/bulk/stats/assignment",
+            request_method="POST",
+        ),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group_upsert",
