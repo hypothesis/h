@@ -10,6 +10,8 @@ from pyramid.request import apply_request_extensions
 from webob.multidict import MultiDict
 
 from h.models import Organization
+from h.models.auth_client import GrantType
+from h.security import Identity
 from tests.common import factories as common_factories
 from tests.common.fixtures.elasticsearch import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from tests.common.fixtures.services import *  # pylint:disable=wildcard-import,unused-wildcard-import
@@ -163,3 +165,15 @@ def pyramid_csrf_request(pyramid_request):
 def pyramid_settings():
     """Return the default app settings."""
     return {"sqlalchemy.url": os.environ["DATABASE_URL"]}
+
+
+@pytest.fixture
+def auth_client(factories):
+    return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
+
+
+@pytest.fixture
+def with_auth_client(auth_client, pyramid_config):
+    pyramid_config.testing_securitypolicy(
+        identity=Identity.from_models(auth_client=auth_client)
+    )

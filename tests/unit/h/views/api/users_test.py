@@ -3,9 +3,7 @@ from unittest import mock
 import pytest
 from pyramid.httpexceptions import HTTPConflict
 
-from h.models.auth_client import GrantType
 from h.schemas import ValidationError
-from h.security import Identity
 from h.services.user_unique import DuplicateUserError
 from h.traversal import UserContext
 from h.views.api.exceptions import PayloadError
@@ -20,7 +18,9 @@ class TestRead:
         assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
 
 
-@pytest.mark.usefixtures("user_signup_service", "user_unique_service")
+@pytest.mark.usefixtures(
+    "user_signup_service", "user_unique_service", "with_auth_client"
+)
 class TestCreate:
     def test_it(
         self,
@@ -156,20 +156,8 @@ class TestUpdate:
 
 
 @pytest.fixture
-def auth_client(factories):
-    return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
-
-
-@pytest.fixture
 def context(factories, auth_client):
     return UserContext(user=factories.User(authority=auth_client.authority))
-
-
-@pytest.fixture(autouse=True)
-def with_auth_client(auth_client, pyramid_config):
-    pyramid_config.testing_securitypolicy(
-        identity=Identity.from_models(auth_client=auth_client)
-    )
 
 
 @pytest.fixture(autouse=True)
