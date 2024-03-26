@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services.analytics import AnalyticsService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
 from h.services.annotation_metadata import AnnotationMetadataService
@@ -39,6 +40,7 @@ from h.services.user_update import UserUpdateService
 
 __all__ = (
     "mock_service",
+    "analytics_service",
     "annotation_delete_service",
     "annotation_json_service",
     "annotation_metadata_service",
@@ -92,6 +94,11 @@ def mock_service(pyramid_config):
         return service
 
     return mock_service
+
+
+@pytest.fixture
+def analytics_service(mock_service):
+    return mock_service(AnalyticsService, name="analytics")
 
 
 @pytest.fixture
