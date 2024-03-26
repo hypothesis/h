@@ -5,7 +5,7 @@ from typing import Iterable, Optional
 from pyramid.response import Response
 
 
-def get_ndjson_response(results: Optional[Iterable]) -> Response:
+def get_ndjson_response(results: Optional[Iterable], stream=True) -> Response:
     """
     Create a streaming response for an NDJSON based end-point.
 
@@ -13,6 +13,13 @@ def get_ndjson_response(results: Optional[Iterable]) -> Response:
     """
     if results is None:
         return Response(status=204)
+
+    if not stream:
+        return Response(
+            json=results,
+            status=200,
+            content_type="application/x-ndjson",
+        )
 
     # When we get an iterator we must force the first return value to be
     # created to be sure input validation has occurred. Otherwise, we might
