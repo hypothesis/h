@@ -19,13 +19,7 @@ class TestSchema:
 
 @pytest.mark.usefixtures("bulk_stats_service", "with_auth_client")
 class TestBulkGroup:
-    def test_it(
-        self,
-        pyramid_request,
-        valid_request,
-        bulk_stats_service,
-        get_ndjson_response,
-    ):
+    def test_it(self, pyramid_request, valid_request, bulk_stats_service):
         bulk_stats_service.assignment_stats.return_value = [
             AssignmentStats(
                 display_name=f"display_name{i}",
@@ -52,11 +46,9 @@ class TestBulkGroup:
             }
             for row in bulk_stats_service.assignment_stats.return_value
         ]
-        get_ndjson_response.assert_called_once_with(
-            Any.iterable.containing(return_data).only(), stream=False
-        )
-
-        assert response == get_ndjson_response.return_value
+        assert response.json == return_data
+        assert response.status_code == 200
+        assert response.content_type == "application/x-ndjson"
 
     @pytest.fixture
     def valid_request(self, pyramid_request):
@@ -68,7 +60,3 @@ class TestBulkGroup:
         }
 
         return pyramid_request.json
-
-    @pytest.fixture(autouse=True)
-    def get_ndjson_response(self, patch):
-        return patch("h.views.api.bulk.stats.get_ndjson_response")
