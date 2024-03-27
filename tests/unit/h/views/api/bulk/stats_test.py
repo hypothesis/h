@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import pytest
-from h_matchers import Any
 
 from h.services.bulk_api.lms_stats import AssignmentStats
 from h.views.api.bulk.stats import AssignmentStatsSchema, assignment
@@ -23,6 +22,7 @@ class TestBulkGroup:
         bulk_stats_service.assignment_stats.return_value = [
             AssignmentStats(
                 display_name=f"display_name{i}",
+                userid=i,
                 annotations=i,
                 replies=i,
                 last_activity=datetime.now(),
@@ -40,6 +40,7 @@ class TestBulkGroup:
         return_data = [
             {
                 "display_name": row.display_name,
+                "userid": row.userid,
                 "annotations": row.annotations,
                 "replies": row.replies,
                 "last_activity": row.last_activity.isoformat(),

@@ -11,6 +11,7 @@ from h.models import Annotation, AnnotationMetadata, AnnotationSlim, Group, User
 @dataclass
 class AssignmentStats:
     display_name: str
+    userid: str
     annotations: int
     replies: int
     last_activity: datetime
@@ -22,7 +23,7 @@ class BulkLMSStatsService:
         self._authorized_authority = authorized_authority
 
     def _annotation_type_select(self):
-        """Build a select that tags each annotation row witht a type."""
+        """Build a select that tags each annotation row with a type."""
         return select(
             AnnotationSlim,
             case(
@@ -44,13 +45,13 @@ class BulkLMSStatsService:
         self, groups: list[str], assignment_id: dict
     ) -> list[AssignmentStats]:
         """
-        Get a list of groups.
+        Get basic stats per user for an LMS assignment.
 
         :param groups: List of "authority_provided_id" to filter groups by.
         :param assignment_id: ID of the assignment we are generating the stats for.
         """
 
-        annotation_query = (
+        annos_query = (
             self._annotation_type_select()
             .join(Group, Group.id == AnnotationSlim.group_id)
             .join(AnnotationMetadata)
@@ -74,15 +75,19 @@ class BulkLMSStatsService:
         query = (
             select(
                 User.display_name,
-                func.count(annotation_query.c.id)
-                .filter(annotation_query.c.type == "annotation")
+                # Unfortunally all thet magic around User.userid doesn't work in this context
+                func.concat("acct:", User.username, "@", User.authority).label(
+                    "userid"
+                ),
+                func.count(annos_query.c.id)
+                .filter(annos_query.c.type == "annotation")
                 .label("annotations"),
-                func.count(annotation_query.c.id)
-                .filter(annotation_query.c.type == "reply")
+                func.count(annos_query.c.id)
+                .filter(annos_query.c.type == "reply")
                 .label("replies"),
-                func.max(annotation_query.c.created).label("last_activity"),
+                func.max(annos_query.c.created).label("last_activity"),
             )
-            .join(annotation_query, annotation_query.c.user_id == User.id)
+            .join(annos_query, annos_query.c.user_id == User.id)
             .group_by(User.id)
             .where(
                 User.nipsa.is_(False),
@@ -92,6 +97,7 @@ class BulkLMSStatsService:
         results = self._db.execute(query)
         return [
             AssignmentStats(
+                userid=row.userid,
                 display_name=row.display_name,
                 annotations=row.annotations,
                 replies=row.replies,
