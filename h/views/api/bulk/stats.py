@@ -5,8 +5,8 @@ from importlib_resources import files
 from h.schemas.base import JSONSchema
 from h.security import Permission
 from h.services.bulk_api import BulkLMSStatsService
-from h.views.api.bulk._ndjson import get_ndjson_response
 from h.views.api.config import api_config
+from pyramid.response import Response
 
 
 class AssignmentStatsSchema(JSONSchema):
@@ -32,8 +32,9 @@ def assignment(request):
         groups=query_filter["groups"],
         assignment_id=query_filter["assignment_id"],
     )
-    return get_ndjson_response(
-        [
+
+    return Response(
+        json=[
             {
                 "display_name": row.display_name,
                 "annotations": row.annotations,
@@ -42,5 +43,6 @@ def assignment(request):
             }
             for row in stats
         ],
-        stream=False,
+        status=200,
+        content_type="application/x-ndjson",
     )
