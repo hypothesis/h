@@ -1,12 +1,12 @@
 import json
 
 from importlib_resources import files
+from pyramid.response import Response
 
 from h.schemas.base import JSONSchema
 from h.security import Permission
 from h.services.bulk_api import BulkLMSStatsService
 from h.views.api.config import api_config
-from pyramid.response import Response
 
 
 class AssignmentStatsSchema(JSONSchema):
@@ -37,6 +37,7 @@ def assignment(request):
         json=[
             {
                 "display_name": row.display_name,
+                "userid": row.userid,
                 "annotations": row.annotations,
                 "replies": row.replies,
                 "last_activity": row.last_activity.isoformat(),

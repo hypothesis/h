@@ -52,6 +52,7 @@ class TestBulkLMSStatsService:
 
         assert stats == [
             AssignmentStats(
+                userid=user.userid,
                 display_name=user.display_name,
                 annotations=1,
                 replies=1,
