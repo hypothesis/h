@@ -183,6 +183,8 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route("oauth_authorize", "/oauth/authorize")
     config.add_route("oauth_revoke", "/oauth/revoke")
 
+    config.add_route("api.analytics.events", "/api/analytics/events")
+
     # Client
     config.add_route("sidebar_app", "/app.html")
     config.add_route("notebook_app", "/notebook")
