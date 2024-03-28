@@ -101,6 +101,25 @@ def _session(request):  # pragma: no cover
     return session
 
 
+def _replica_session(request):  # pragma: no cover
+    engine = create_engine(request.registry.settings["sqlalchemy.replica.url"])
+    session = Session(bind=engine)
+
+    # While this is superflux when using a real replica it guarantees that usage of request.db_replica
+    # in the codebase never expects to be able to write to the DB, useful on the dev and tests environments.
+    session.execute(text("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY;"))
+
+    @request.add_finished_callback
+    def close_the_sqlalchemy_session(_request):
+        # Close any unclosed DB connections.
+        # It's okay to call `session.close()` even if the session does not need to
+        # be closed, so just call it so that there's no chance
+        # of leaking any unclosed DB connections.
+        session.close()
+
+    return session
+
+
 def _maybe_create_default_organization(engine, authority):  # pragma: no cover
     from h.services.organization import OrganizationService
 
@@ -144,3 +163,4 @@ def includeme(config):  # pragma: no cover
     # that view functions need only refer to `request.db` in order to retrieve
     # the current database session.
     config.add_request_method(_session, name="db", reify=True)
+    config.add_request_method(_replica_session, name="db_replica", reify=True)
