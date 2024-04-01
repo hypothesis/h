@@ -144,7 +144,7 @@ jobs:
         env:
           discovery.type: single-node
       rabbitmq:
-        image: rabbitmq:3.6-management-alpine
+        image: rabbitmq:3.12-management-alpine
         ports:
         - 5672:5672
     steps:
