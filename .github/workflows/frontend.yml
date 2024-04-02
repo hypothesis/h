@@ -18,4 +18,4 @@ jobs:
     - name: Lint
       run: make frontend-lint
     - name: Test
-      run: gulp test
+      run: make frontend-tests
