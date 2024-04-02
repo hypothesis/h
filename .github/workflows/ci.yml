@@ -164,7 +164,7 @@ jobs:
         run: psql -U postgres -h localhost -p 5432 -c 'CREATE DATABASE h_functests'
       - run: python -m pip install 'tox<4'
       - run: yarn install --immutable
-      - run: gulp build
+      - run: yarn build
       - run: tox -e functests
   Frontend:
     uses: ./.github/workflows/frontend.yml
