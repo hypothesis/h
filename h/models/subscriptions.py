@@ -18,9 +18,6 @@ class Subscriptions(Base):
         REPLY = "reply"
 
     __tablename__ = "subscriptions"
-    __table_args__ = (
-        sa.Index("subs_uri_lower_idx_subscriptions", sa.func.lower("uri")),
-    )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
@@ -38,6 +35,8 @@ class Subscriptions(Base):
 
     active = sa.Column(sa.Boolean, default=True, nullable=False)
     """Whether the subscription is active or not."""
+
+    __table_args__ = (sa.Index("subs_uri_lower_idx_subscriptions", sa.func.lower(uri)),)
 
     def __repr__(self):
         return f"<Subscription uri={self.uri} type={self.type} active={self.active}>"
