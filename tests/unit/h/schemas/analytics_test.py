@@ -12,7 +12,7 @@ class TestCreateEventSchema:
             ({"foo": "bar"}, "'event' is a required property"),
             (
                 {"event": "invalid"},
-                "event: 'invalid' is not one of \\['APPLY_PENDING_UPDATES'\\]",
+                "event: 'invalid' is not one of \\['client.realtime.apply_updates'\\]",
             ),
         ],
     )
@@ -23,6 +23,6 @@ class TestCreateEventSchema:
 
     def test_valid_data_is_returned(self):
         schema = CreateEventSchema()
-        result = schema.validate({"event": "APPLY_PENDING_UPDATES"})
+        result = schema.validate({"event": "client.realtime.apply_updates"})
 
-        assert result == {"event": "APPLY_PENDING_UPDATES"}
+        assert result == {"event": "client.realtime.apply_updates"}
