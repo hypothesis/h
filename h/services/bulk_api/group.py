@@ -16,8 +16,8 @@ class BulkGroup:
 class BulkGroupService:
     """A service for retrieving groups in bulk."""
 
-    def __init__(self, db: Session):
-        self._db = db
+    def __init__(self, db_replica: Session):
+        self._db_replica = db_replica
 
     def group_search(
         self, groups: List[str], annotations_created: dict
@@ -43,9 +43,9 @@ class BulkGroupService:
                 )
             ),
         )
-        results = self._db.scalars(query)
+        results = self._db_replica.scalars(query)
         return [BulkGroup(authority_provided_id=row) for row in results.all()]
 
 
 def service_factory(_context, request) -> BulkGroupService:
-    return BulkGroupService(db=request.db)
+    return BulkGroupService(db_replica=request.db_replica)
