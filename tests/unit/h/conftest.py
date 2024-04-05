@@ -139,9 +139,11 @@ def pyramid_config(pyramid_settings, pyramid_request):
 
 
 @pytest.fixture
-def pyramid_request(db_session, fake_feature, pyramid_settings):
+def pyramid_request(db_session, db_session_replica, fake_feature, pyramid_settings):
     """Return pyramid request object."""
-    request = testing.DummyRequest(db=db_session, feature=fake_feature)
+    request = testing.DummyRequest(
+        db=db_session, db_replica=db_session_replica, feature=fake_feature
+    )
     request.default_authority = "example.com"
     request.create_form = mock.Mock()
     request.matched_route = mock.Mock()

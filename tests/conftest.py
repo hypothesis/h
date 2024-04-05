@@ -1,7 +1,7 @@
 from os import environ
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 
@@ -41,3 +41,9 @@ def db_session(db_engine, db_sessionfactory):
         session.close()
         transaction.rollback()
         connection.close()
+
+
+@pytest.fixture
+def db_session_replica(db_session):
+    db_session.execute(text("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY;"))
+    yield db_session
