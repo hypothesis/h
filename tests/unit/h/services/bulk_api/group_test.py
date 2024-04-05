@@ -40,7 +40,7 @@ class TestServiceFactory:
     def test_it(self, pyramid_request, BulkGroupService):
         svc = service_factory(sentinel.context, pyramid_request)
 
-        BulkGroupService.assert_called_once_with(db=pyramid_request.db)
+        BulkGroupService.assert_called_once_with(db_replica=pyramid_request.db_replica)
         assert svc == BulkGroupService.return_value
 
     @pytest.fixture
