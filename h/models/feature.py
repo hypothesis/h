@@ -17,6 +17,7 @@ FEATURES = {
     "client_user_profile": "Enable client-side user profile and preferences management",
     "export_formats": "Allow users to select the format for their annotations export file",
     "pending_updates_notification": "Display an actionable toast-like notification when there are pending updates",
+    "lms_analytics_dashboard": "Display an entry point in the user dropdown for the LMS analytics dashboard",
 }
 
 
