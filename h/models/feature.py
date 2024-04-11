@@ -15,7 +15,6 @@ FEATURES = {
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
     "client_user_profile": "Enable client-side user profile and preferences management",
-    "export_formats": "Allow users to select the format for their annotations export file",
     "pending_updates_notification": "Display an actionable toast-like notification when there are pending updates",
 }
 
