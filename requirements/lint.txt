@@ -495,7 +495,7 @@ sqlalchemy==2.0.25
     #   alembic
     #   data-tasks
     #   zope-sqlalchemy
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
