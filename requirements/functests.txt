@@ -144,7 +144,7 @@ jsonschema-specifications==2023.12.1
     # via
     #   -r requirements/prod.txt
     #   jsonschema
-kombu==5.3.6
+kombu==5.3.7
     # via
     #   -r requirements/prod.txt
     #   celery
