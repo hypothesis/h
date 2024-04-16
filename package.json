@@ -2,11 +2,12 @@
   "name": "h",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "description": "The Internet, peer reviewed.",
   "scripts": {
     "build": "gulp build",
-    "checkformatting": "prettier --check *.mjs h/static/scripts",
-    "format": "prettier --list-different --write *.mjs h/static/scripts",
+    "checkformatting": "prettier --check *.js h/static/scripts",
+    "format": "prettier --list-different --write *.js h/static/scripts",
     "lint": "eslint h/static/scripts",
     "test": "gulp test"
   },

@@ -10,7 +10,7 @@ COPY .yarn ./.yarn
 RUN yarn install --immutable
 
 # Build h js/css.
-COPY .babelrc gulpfile.mjs rollup.config.mjs ./
+COPY .babelrc gulpfile.js rollup.config.js ./
 COPY h/static ./h/static
 RUN yarn build
 

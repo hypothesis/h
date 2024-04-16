@@ -12,8 +12,8 @@ import svgmin from 'gulp-svgmin';
 
 const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
 
-gulp.task('build-js', () => buildJS('./rollup.config.mjs'));
-gulp.task('watch-js', () => watchJS('./rollup.config.mjs'));
+gulp.task('build-js', () => buildJS('./rollup.config.js'));
+gulp.task('watch-js', () => watchJS('./rollup.config.js'));
 
 gulp.task('build-css', () =>
   buildCSS([
@@ -107,8 +107,8 @@ gulp.task(
 gulp.task('test', () =>
   runTests({
     bootstrapFile: './h/static/scripts/tests/bootstrap.js',
-    karmaConfig: './h/static/scripts/karma.config.js',
-    rollupConfig: './rollup-tests.config.mjs',
+    karmaConfig: './h/static/scripts/karma.config.cjs',
+    rollupConfig: './rollup-tests.config.js',
     testsPattern: 'h/static/scripts/**/*-test.js',
   }),
 );
