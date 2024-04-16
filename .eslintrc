@@ -6,9 +6,9 @@
   },
   "overrides": [
     {
-      "files": ["*.mjs"],
+      "files": ["*.js"],
+      "excludedFiles": ["h/**"],
       "env": { "node": true },
-      "parserOptions": { "sourceType": "module" }
     }
   ]
 }
