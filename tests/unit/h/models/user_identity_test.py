@@ -44,8 +44,7 @@ class TestUserIdentity:
         db_session.add(models.UserIdentity(provider_unique_id="1", user=user))
 
         with pytest.raises(
-            sqlalchemy.exc.IntegrityError,
-            match='null value in column "provider" violates not-null constraint',
+            sqlalchemy.exc.IntegrityError, match='null value in column "provider"'
         ):
             db_session.flush()
 
@@ -54,7 +53,7 @@ class TestUserIdentity:
 
         with pytest.raises(
             sqlalchemy.exc.IntegrityError,
-            match='null value in column "provider_unique_id" violates not-null constraint',
+            match='null value in column "provider_unique_id"',
         ):
             db_session.flush()
 
@@ -62,8 +61,7 @@ class TestUserIdentity:
         db_session.add(models.UserIdentity(provider="provider", provider_unique_id="1"))
 
         with pytest.raises(
-            sqlalchemy.exc.IntegrityError,
-            match='null value in column "user_id" violates not-null constraint',
+            sqlalchemy.exc.IntegrityError, match='null value in column "user_id"'
         ):
             db_session.flush()
 
