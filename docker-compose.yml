@@ -1,12 +1,14 @@
 version: '3'
 services:
   postgres:
-    image: postgres:11.5-alpine
+    image: postgres:15.6-alpine
     ports:
       - '127.0.0.1:5432:5432'
     healthcheck:
         test: ["CMD", "pg_isready", "-U", "postgres"]
         interval: 1s
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
     networks:
       - dbs
   elasticsearch:
