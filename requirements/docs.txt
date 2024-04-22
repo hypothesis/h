@@ -7,7 +7,9 @@
 alabaster==0.7.16
     # via sphinx
 anyio==4.3.0
-    # via starlette
+    # via
+    #   starlette
+    #   watchfiles
 babel==2.14.0
     # via sphinx
 build==1.0.3
@@ -73,7 +75,7 @@ sphinx==7.3.7
     #   sphinxcontrib-jquery
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
-sphinx-autobuild==2024.4.13
+sphinx-autobuild==2024.4.16
     # via -r requirements/docs.in
 sphinx-rtd-theme==2.0.0
     # via -r requirements/docs.in
@@ -96,6 +98,8 @@ starlette==0.37.2
 urllib3==2.1.0
     # via requests
 uvicorn==0.29.0
+    # via sphinx-autobuild
+watchfiles==0.21.0
     # via sphinx-autobuild
 websockets==12.0
     # via sphinx-autobuild
