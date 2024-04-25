@@ -91,7 +91,7 @@ iso8601==2.1.0
     # via
     #   colander
     #   deform
-itsdangerous==2.1.2
+itsdangerous==2.2.0
     # via -r requirements/prod.in
 jinja2==3.1.3
     # via
