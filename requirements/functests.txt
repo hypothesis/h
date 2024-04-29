@@ -196,7 +196,7 @@ plaster-pastedeploy==1.0.1
     # via
     #   -r requirements/prod.txt
     #   pyramid
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
 prompt-toolkit==3.0.43
     # via
@@ -253,7 +253,7 @@ pyramid-services==2.2
     # via -r requirements/prod.txt
 pyramid-tm==2.5
     # via -r requirements/prod.txt
-pytest==8.1.1
+pytest==8.2.0
     # via
     #   -r requirements/functests.in
     #   pytest-reverse
