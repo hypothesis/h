@@ -211,7 +211,7 @@ rpds-py==0.16.2
     #   referencing
 rsa==4.9
     # via python-jose
-sentry-sdk==1.45.0
+sentry-sdk==2.0.1
     # via
     #   -r requirements/prod.in
     #   h-pyramid-sentry
