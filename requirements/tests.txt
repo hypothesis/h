@@ -86,7 +86,7 @@ elasticsearch==6.8.2
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
     # via -r requirements/prod.txt
-execnet==2.0.2
+execnet==2.1.1
     # via pytest-xdist
 factory-boy==3.3.0
     # via -r requirements/tests.in
@@ -271,7 +271,7 @@ pytest==8.1.1
     #   pytest-xdist
 pytest-cov==5.0.0
     # via -r requirements/tests.in
-pytest-xdist[psutil]==3.5.0
+pytest-xdist[psutil]==3.6.1
     # via -r requirements/tests.in
 python-dateutil==2.9.0.post0
     # via
