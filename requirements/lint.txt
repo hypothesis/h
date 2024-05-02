@@ -57,7 +57,6 @@ cffi==1.16.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   cryptography
 chameleon==4.4.3
     # via
     #   -r requirements/functests.txt
@@ -96,11 +95,6 @@ coverage[toml]==7.5.0
     # via
     #   -r requirements/tests.txt
     #   pytest-cov
-cryptography==42.0.4
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   python-jose
 data-tasks==0.0.3
     # via
     #   -r requirements/functests.txt
@@ -111,11 +105,6 @@ deform==2.0.15
     #   -r requirements/tests.txt
 dill==0.3.7
     # via pylint
-ecdsa==0.18.0
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   python-jose
 elasticsearch==6.8.2
     # via
     #   -r requirements/functests.txt
@@ -125,7 +114,7 @@ elasticsearch-dsl==6.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-execnet==2.0.2
+execnet==2.1.1
     # via
     #   -r requirements/tests.txt
     #   pytest-xdist
@@ -328,12 +317,6 @@ psycopg2==2.9.9
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   data-tasks
-pyasn1==0.5.1
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   python-jose
-    #   rsa
 pycodestyle==2.11.1
     # via -r requirements/lint.in
 pycparser==2.21
@@ -415,7 +398,7 @@ pytest-cov==5.0.0
     # via -r requirements/tests.txt
 pytest-reverse==1.7.0
     # via -r requirements/functests.txt
-pytest-xdist[psutil]==3.5.0
+pytest-xdist[psutil]==3.6.1
     # via -r requirements/tests.txt
 python-dateutil==2.9.0.post0
     # via
@@ -425,10 +408,6 @@ python-dateutil==2.9.0.post0
     #   elasticsearch-dsl
     #   faker
     #   freezegun
-python-jose[cryptography]==3.3.0
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
 python-slugify==8.0.4
     # via
     #   -r requirements/functests.txt
@@ -459,11 +438,6 @@ rpds-py==0.16.2
     #   -r requirements/tests.txt
     #   jsonschema
     #   referencing
-rsa==4.9
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   python-jose
 sentry-sdk==2.0.1
     # via
     #   -r requirements/functests.txt
@@ -474,7 +448,6 @@ six==1.16.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   bleach
-    #   ecdsa
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator

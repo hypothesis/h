@@ -25,9 +25,7 @@ certifi==2024.2.2
     #   -r requirements/prod.in
     #   sentry-sdk
 cffi==1.16.0
-    # via
-    #   -r requirements/prod.in
-    #   cryptography
+    # via -r requirements/prod.in
 chameleon==4.4.3
     # via deform
 click==8.1.7
@@ -45,14 +43,10 @@ click-repl==0.3.0
     # via celery
 colander==2.0
     # via deform
-cryptography==42.0.4
-    # via python-jose
 data-tasks==0.0.3
     # via -r requirements/prod.in
 deform==2.0.15
     # via -r requirements/prod.in
-ecdsa==0.18.0
-    # via python-jose
 elasticsearch==6.8.2
     # via
     #   -r requirements/prod.in
@@ -147,10 +141,6 @@ psycopg2==2.9.9
     # via
     #   -r requirements/prod.in
     #   data-tasks
-pyasn1==0.5.1
-    # via
-    #   python-jose
-    #   rsa
 pycparser==2.21
     # via cffi
 pycryptodomex==3.20.0
@@ -190,8 +180,6 @@ python-dateutil==2.9.0.post0
     #   -r requirements/prod.in
     #   celery
     #   elasticsearch-dsl
-python-jose[cryptography]==3.3.0
-    # via -r requirements/prod.in
 python-slugify==8.0.4
     # via -r requirements/prod.in
 pytz==2024.1
@@ -209,8 +197,6 @@ rpds-py==0.16.2
     # via
     #   jsonschema
     #   referencing
-rsa==4.9
-    # via python-jose
 sentry-sdk==2.0.1
     # via
     #   -r requirements/prod.in
@@ -218,7 +204,6 @@ sentry-sdk==2.0.1
 six==1.16.0
     # via
     #   bleach
-    #   ecdsa
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator

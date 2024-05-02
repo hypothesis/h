@@ -8,7 +8,6 @@ data_tasks
 pyramid-sanity
 
 # 3rd-party packages
-python-jose[cryptography]
 PyJWT
 SQLAlchemy
 alembic

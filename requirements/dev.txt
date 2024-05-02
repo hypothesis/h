@@ -34,9 +34,7 @@ certifi==2024.2.2
     #   -r requirements/prod.txt
     #   sentry-sdk
 cffi==1.16.0
-    # via
-    #   -r requirements/prod.txt
-    #   cryptography
+    # via -r requirements/prod.txt
 chameleon==4.4.3
     # via
     #   -r requirements/prod.txt
@@ -65,10 +63,6 @@ colander==2.0
     # via
     #   -r requirements/prod.txt
     #   deform
-cryptography==42.0.4
-    # via
-    #   -r requirements/prod.txt
-    #   python-jose
 data-tasks==0.0.3
     # via -r requirements/prod.txt
 decorator==5.1.1
@@ -77,10 +71,6 @@ decorator==5.1.1
     #   ipython
 deform==2.0.15
     # via -r requirements/prod.txt
-ecdsa==0.18.0
-    # via
-    #   -r requirements/prod.txt
-    #   python-jose
 elasticsearch==6.8.2
     # via
     #   -r requirements/prod.txt
@@ -226,11 +216,6 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
-pyasn1==0.5.1
-    # via
-    #   -r requirements/prod.txt
-    #   python-jose
-    #   rsa
 pycparser==2.21
     # via
     #   -r requirements/prod.txt
@@ -282,8 +267,6 @@ python-dateutil==2.9.0.post0
     #   celery
     #   elasticsearch-dsl
     #   faker
-python-jose[cryptography]==3.3.0
-    # via -r requirements/prod.txt
 python-slugify==8.0.4
     # via -r requirements/prod.txt
 pytz==2024.1
@@ -305,10 +288,6 @@ rpds-py==0.16.2
     #   -r requirements/prod.txt
     #   jsonschema
     #   referencing
-rsa==4.9
-    # via
-    #   -r requirements/prod.txt
-    #   python-jose
 sentry-sdk==2.0.1
     # via
     #   -r requirements/prod.txt
@@ -318,7 +297,6 @@ six==1.16.0
     #   -r requirements/prod.txt
     #   asttokens
     #   bleach
-    #   ecdsa
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
