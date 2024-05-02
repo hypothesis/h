@@ -138,7 +138,7 @@ def _configure_csp(config):
     client_host = urlparse(client_url).netloc
     settings["csp"] = {
         "font-src": ["'self'", "fonts.gstatic.com", client_host],
-        "script-src": ["'self'", client_host, "www.google-analytics.com"],
+        "script-src": ["'self'", client_host, "www.googletagmanager.com"],
         # Allow inline styles until https://github.com/hypothesis/client/issues/293
         # is resolved as otherwise our own tool would break on the site,
         # including on /docs/help.
