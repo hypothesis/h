@@ -62,7 +62,7 @@ colander==2.0
     # via
     #   -r requirements/prod.txt
     #   deform
-coverage[toml]==7.5.0
+coverage[toml]==7.5.1
     # via
     #   -r requirements/tests.in
     #   pytest-cov
