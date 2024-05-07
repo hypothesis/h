@@ -7,6 +7,7 @@ from h.db.types import URLSafeUUID
 
 from .annotation import Annotation
 from .base import ModelFactory
+from .user import User
 
 
 class Job(ModelFactory):
@@ -48,3 +49,13 @@ class SyncAnnotationJob(Job):
             "force": o.force,
         }
     )
+
+
+class ExpungeUserJob(Job):
+    class Meta:
+        exclude = "user"
+
+    user = SubFactory(User)
+
+    name = "expunge_user"
+    kwargs = LazyAttribute(lambda o: {"userid": o.user.userid})

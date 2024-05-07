@@ -28,6 +28,8 @@ This home-grown job queue differs from our Celery task queue in a few ways:
    that really need Postgres transactionality should use this custom job queue.
 """
 
+from enum import Enum
+
 from sqlalchemy import (
     Column,
     DateTime,
@@ -46,6 +48,11 @@ from h.models import helpers
 
 class Job(Base):
     """A job in the job queue."""
+
+    class JobName(str, Enum):
+        SYNC_ANNOTATION = "sync_annotation"
+        ANNOTATION_SLIM = "annotation_slim"
+        PURGE_USER = "purge_user"
 
     __tablename__ = "job"
 

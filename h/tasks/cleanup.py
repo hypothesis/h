@@ -38,3 +38,9 @@ def purge_expired_tokens():
 def purge_removed_features():
     """Remove old feature flags from the database."""
     models.Feature.remove_old_flags(celery.request.db)
+
+
+@celery.task
+def purge_deleted_users():
+    """Remove data belonging to deleted users."""
+    celery.request.find_service(name="user_delete").purge_deleted_users()
