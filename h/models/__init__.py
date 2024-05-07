@@ -28,7 +28,7 @@ from h.models.authz_code import AuthzCode
 from h.models.blocklist import Blocklist
 from h.models.document import Document, DocumentMeta, DocumentURI
 from h.models.feature import Feature
-from h.models.feature_cohort import FeatureCohort
+from h.models.feature_cohort import FeatureCohort, FeatureCohortUser
 from h.models.flag import Flag
 from h.models.group import Group, GroupMembership
 from h.models.group_scope import GroupScope

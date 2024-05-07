@@ -22,16 +22,14 @@ class FeatureCohort(Base, mixins.Timestamps):
         self.name = name
 
 
-FEATURECOHORT_USER_TABLE = sa.Table(
-    "featurecohort_user",
-    Base.metadata,
-    sa.Column("id", sa.Integer, nullable=False, autoincrement=True, primary_key=True),
-    sa.Column(
-        "cohort_id", sa.Integer, sa.ForeignKey("featurecohort.id"), nullable=False
-    ),
-    sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False),
-    sa.UniqueConstraint("cohort_id", "user_id"),
-)
+class FeatureCohortUser(Base):
+    __tablename__ = "featurecohort_user"
+    __table_args__ = (sa.UniqueConstraint("cohort_id", "user_id"),)
+
+    id = sa.Column(sa.Integer, nullable=False, autoincrement=True, primary_key=True)
+    cohort_id = sa.Column(sa.Integer, sa.ForeignKey("featurecohort.id"), nullable=False)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"), nullable=False)
+
 
 FEATURECOHORT_FEATURE_TABLE = sa.Table(
     "featurecohort_feature",
