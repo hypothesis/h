@@ -3,7 +3,7 @@ branch = True
 parallel = True
 source =
     h
-    tests/h
+    tests/unit
 omit =
     h/debug.py
     h/migrations/*
