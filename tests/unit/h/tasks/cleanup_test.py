@@ -5,6 +5,7 @@ import pytest
 from h.models import AuthTicket, AuthzCode, Token
 from h.tasks.cleanup import (
     purge_deleted_annotations,
+    purge_deleted_users,
     purge_expired_auth_tickets,
     purge_expired_authz_codes,
     purge_expired_tokens,
@@ -125,6 +126,14 @@ class TestPurgeRemovedFeatures:
         purge_removed_features()
 
         Feature.remove_old_flags.assert_called_once_with(db_session)
+
+
+@pytest.mark.usefixtures("celery")
+class TestPurgeDeletedUsers:
+    def test_it(self, user_delete_service):
+        purge_deleted_users()
+
+        user_delete_service.purge_deleted_users.assert_called_once_with()
 
 
 @pytest.fixture

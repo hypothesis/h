@@ -85,13 +85,6 @@
         <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
         <input type="hidden" name="userid" value="{{user.userid}}">
 
-        {% if user_meta['annotations_count'] > 100 %}
-          <div class="alert alert-warning" role="alert">
-            User has a lot of annotations, it might be safer to delete this user
-            directly in a shell.
-          </div>
-        {% endif %}
-
         <button class="btn btn-danger" type="submit">Delete user</button>
       </form>
 
