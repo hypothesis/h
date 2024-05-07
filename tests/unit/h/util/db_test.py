@@ -81,7 +81,7 @@ class TestOnTransactionEnd:
 
         @on_transaction_end(db_session)
         def transaction_ended():
-            spy()
+            spy()  # pragma: nocover
 
         db_session.dispatch.after_transaction_end(db_session, mock_transaction)
 
