@@ -280,6 +280,14 @@ class User(Base):
     #: upgrading their passwords and setting this column to None.
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
+    #: Has this user been marked for deletion?
+    deleted = sa.Column(
+        sa.Boolean,
+        default=False,
+        nullable=False,
+        server_default=sa.sql.expression.false(),
+    )
+
     tokens = sa.orm.relationship("Token", back_populates="user")
 
     @sa.orm.validates("email")

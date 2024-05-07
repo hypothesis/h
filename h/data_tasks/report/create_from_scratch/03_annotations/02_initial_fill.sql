@@ -25,7 +25,7 @@ SELECT
     -- As we do our partial updates based on updated date, it's good if this
     -- is actually high res timestamp, so we get less overlap
     annotation.updated,
-    deleted,
+    annotation.deleted,
     shared,
     JSONB_ARRAY_LENGTH(target_selectors) <> 0 AS anchored,
     LENGTH(text) AS size,
