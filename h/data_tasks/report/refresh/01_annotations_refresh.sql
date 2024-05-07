@@ -28,7 +28,7 @@ SELECT
     authorities.id as authority_id,
     annotation.created::date,
     annotation.updated::date,
-    deleted,
+    annotation.deleted,
     shared,
     JSONB_ARRAY_LENGTH(target_selectors) <> 0 AS anchored,
     LENGTH(text) AS size,

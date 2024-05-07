@@ -50,3 +50,4 @@ class User(ModelFactory):
     email = factory.LazyAttribute(unique_email)
     display_name = factory.Faker("name")
     registered_date = factory.Faker("date_time_this_decade")
+    deleted = False
