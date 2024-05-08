@@ -65,3 +65,20 @@ class Job(Base):
         server_default=text("'{}'::jsonb"),
         nullable=False,
     )
+
+    def __repr__(self):
+        class_name = type(self).__name__
+        attrs = {
+            attrname: repr(getattr(self, attrname))
+            for attrname in [
+                "id",
+                "name",
+                "enqueued_at",
+                "scheduled_at",
+                "expires_at",
+                "priority",
+                "tag",
+                "kwargs",
+            ]
+        }
+        return f"{class_name}({', '.join(f'{name}={value}' for name, value in attrs.items())})"
