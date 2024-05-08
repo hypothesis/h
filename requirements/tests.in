@@ -4,6 +4,7 @@ coverage
 pytest
 pytest-cov
 pytest-xdist[psutil]
+pytest-mock
 freezegun
 factory-boy
 hypothesis
