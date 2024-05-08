@@ -253,8 +253,11 @@ pytest==8.2.0
     # via
     #   -r requirements/tests.in
     #   pytest-cov
+    #   pytest-mock
     #   pytest-xdist
 pytest-cov==5.0.0
+    # via -r requirements/tests.in
+pytest-mock==3.14.0
     # via -r requirements/tests.in
 pytest-xdist[psutil]==3.6.1
     # via -r requirements/tests.in

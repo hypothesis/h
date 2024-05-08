@@ -392,9 +392,12 @@ pytest==8.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pytest-cov
+    #   pytest-mock
     #   pytest-reverse
     #   pytest-xdist
 pytest-cov==5.0.0
+    # via -r requirements/tests.txt
+pytest-mock==3.14.0
     # via -r requirements/tests.txt
 pytest-reverse==1.7.0
     # via -r requirements/functests.txt
