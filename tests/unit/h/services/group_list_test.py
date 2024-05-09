@@ -63,9 +63,12 @@ class TestAssociatedGroups:
         # the creator of the group. That means that this private group is still associated
         # with this user in some form—but we want to make sure it does not appear
         # in these results.
-        private_group = factories.Group(
-            creator=user, authority=user.authority, members=[]
-        )
+        private_group = factories.Group(creator=user, authority=user.authority)
+        # Remove `private_group.creator` from `private_group.members`.
+        # The creator is still attached to `private_group` as `private_group.creator`.
+        private_group.members = [
+            user for user in private_group.members if user is not private_group.creator
+        ]
 
         groups = svc.associated_groups(user)
 

@@ -20,7 +20,7 @@ class Group(ModelFactory):
     joinable_by = JoinableBy.authority
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
-    members = factory.LazyAttribute(lambda obj: [obj.creator])
+    members = factory.LazyFunction(list)
     authority_provided_id = Faker("hexify", text="^" * 30)
     enforce_scope = True
 
@@ -33,6 +33,17 @@ class Group(ModelFactory):
 
         self.scopes = scopes or []
 
+    @factory.post_generation
+    def add_creator_as_member(  # pylint:disable=no-self-argument
+        obj, _create, _extracted, **_kwargs
+    ):
+        if (
+            obj.creator
+            and obj.creator
+            not in obj.members  # pylint:disable=unsupported-membership-test
+        ):
+            obj.members.insert(0, obj.creator)  # pylint:disable=no-member
+
 
 class OpenGroup(Group):
     name = factory.Sequence(lambda n: f"Open Group {n}")
@@ -41,6 +52,14 @@ class OpenGroup(Group):
     readable_by = ReadableBy.world
     writeable_by = WriteableBy.authority
     members = []
+
+    @factory.post_generation
+    def add_creator_as_member(  # pylint:disable=no-self-argument
+        _obj, _create, _extracted, **_kwargs
+    ):
+        # Open groups don't have members, so don't add group.creator to
+        # group.members for open groups.
+        pass
 
 
 class RestrictedGroup(Group):

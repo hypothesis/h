@@ -1208,8 +1208,7 @@ def group(factories):
 
 @pytest.fixture
 def no_creator_group(factories):
-    group = factories.Group()
-    group.creator = None
+    group = factories.Group(creator=None)
     group.members.extend([factories.User(), factories.User()])
     return group
 
@@ -1236,8 +1235,7 @@ def restricted_group(factories):
 
 @pytest.fixture
 def no_creator_open_group(factories):
-    open_group = factories.OpenGroup()
-    open_group.creator = None
+    open_group = factories.OpenGroup(creator=None)
     return open_group
 
 
