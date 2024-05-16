@@ -15,6 +15,12 @@ class AssignmentStatsSchema(JSONSchema):
     schema = json.loads(_SCHEMA_FILE.read_text(encoding="utf-8"))
 
 
+class CourseStatsSchema(JSONSchema):
+    _SCHEMA_FILE = files("h.views.api.bulk") / "stats_course.json"
+    schema_version = 7
+    schema = json.loads(_SCHEMA_FILE.read_text(encoding="utf-8"))
+
+
 @api_config(
     versions=["v1", "v2"],
     route_name="api.bulk.stats.assignment",
@@ -38,6 +44,38 @@ def assignment(request):
             {
                 "display_name": row.display_name,
                 "userid": row.userid,
+                "annotations": row.annotations,
+                "replies": row.replies,
+                "last_activity": row.last_activity.isoformat(),
+            }
+            for row in stats
+        ],
+        status=200,
+        content_type="application/x-ndjson",
+    )
+
+
+@api_config(
+    versions=["v1", "v2"],
+    route_name="api.bulk.stats.course",
+    request_method="POST",
+    description="Retrieve stats for a single LMS course",
+    link_name="bulk.stats.course",
+    subtype="x-ndjson",
+    permission=Permission.API.BULK_ACTION,
+)
+def course(request):
+    data = CourseStatsSchema().validate(request.json)
+    query_filter = data["filter"]
+
+    stats = request.find_service(BulkLMSStatsService).course_stats(
+        groups=query_filter["groups"],
+    )
+
+    return Response(
+        json=[
+            {
+                "assignment_id": row.assignment_id,
                 "annotations": row.annotations,
                 "replies": row.replies,
                 "last_activity": row.last_activity.isoformat(),
