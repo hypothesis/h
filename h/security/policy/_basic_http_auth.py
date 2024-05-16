@@ -41,6 +41,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
         ("api.bulk.annotation", "POST"),
         ("api.bulk.group", "POST"),
         ("api.bulk.stats.assignment", "POST"),
+        ("api.bulk.stats.course", "POST"),
     ]
 
     @classmethod

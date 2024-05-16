@@ -130,6 +130,11 @@ def test_includeme():
             "/api/bulk/stats/assignment",
             request_method="POST",
         ),
+        call(
+            "api.bulk.stats.course",
+            "/api/bulk/stats/course",
+            request_method="POST",
+        ),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group_upsert",

@@ -7,12 +7,15 @@ from h_matchers import Any
 from h.services.bulk_api.lms_stats import (
     AssignmentStats,
     BulkLMSStatsService,
+    CourseStats,
     service_factory,
 )
 
 
 class TestBulkLMSStatsService:
-    def test_it(self, svc, group, user, annotation, annotation_reply, reply_user):
+    def test_assignment_stats(
+        self, svc, group, user, annotation, annotation_reply, reply_user
+    ):
         stats = svc.assignment_stats(
             groups=[group.authority_provided_id], assignment_id="ASSIGNMENT_ID"
         )
@@ -29,6 +32,19 @@ class TestBulkLMSStatsService:
                 userid=reply_user.userid,
                 display_name=reply_user.display_name,
                 annotations=0,
+                replies=1,
+                last_activity=annotation_reply.created,
+            ),
+        ]
+
+    @pytest.mark.usefixtures("user", "annotation", "reply_user")
+    def test_course_stats(self, svc, group, annotation_reply):
+        stats = svc.course_stats(groups=[group.authority_provided_id])
+
+        assert stats == [
+            CourseStats(
+                assignment_id="ASSIGNMENT_ID",
+                annotations=1,
                 replies=1,
                 last_activity=annotation_reply.created,
             ),
