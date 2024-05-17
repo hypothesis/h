@@ -126,13 +126,13 @@ def test_includeme():
         call("api.bulk.annotation", "/api/bulk/annotation", request_method="POST"),
         call("api.bulk.group", "/api/bulk/group", request_method="POST"),
         call(
-            "api.bulk.stats.assignment",
-            "/api/bulk/stats/assignment",
+            "api.bulk.stats.users",
+            "/api/bulk/stats/users",
             request_method="POST",
         ),
         call(
-            "api.bulk.stats.course",
-            "/api/bulk/stats/course",
+            "api.bulk.stats.assignments",
+            "/api/bulk/stats/assignments",
             request_method="POST",
         ),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
