@@ -23,18 +23,18 @@ class CourseStatsSchema(JSONSchema):
 
 @api_config(
     versions=["v1", "v2"],
-    route_name="api.bulk.stats.assignment",
+    route_name="api.bulk.stats.users",
     request_method="POST",
-    description="Retrieve stats for a single LMS assignment",
+    description="Retrieve stats grouped by user",
     link_name="bulk.stats.assignment",
     subtype="x-ndjson",
     permission=Permission.API.BULK_ACTION,
 )
-def assignment(request):
+def get_counts_by_user(request):
     data = AssignmentStatsSchema().validate(request.json)
     query_filter = data["filter"]
 
-    stats = request.find_service(BulkLMSStatsService).assignment_stats(
+    stats = request.find_service(BulkLMSStatsService).get_counts_by_user(
         groups=query_filter["groups"],
         assignment_id=query_filter["assignment_id"],
     )
@@ -57,18 +57,18 @@ def assignment(request):
 
 @api_config(
     versions=["v1", "v2"],
-    route_name="api.bulk.stats.course",
+    route_name="api.bulk.stats.assignments",
     request_method="POST",
-    description="Retrieve stats for a single LMS course",
+    description="Retrieve stats grouped by assignment",
     link_name="bulk.stats.course",
     subtype="x-ndjson",
     permission=Permission.API.BULK_ACTION,
 )
-def course(request):
+def get_counts_by_assignment(request):
     data = CourseStatsSchema().validate(request.json)
     query_filter = data["filter"]
 
-    stats = request.find_service(BulkLMSStatsService).course_stats(
+    stats = request.find_service(BulkLMSStatsService).get_counts_by_assignment(
         groups=query_filter["groups"],
     )
 

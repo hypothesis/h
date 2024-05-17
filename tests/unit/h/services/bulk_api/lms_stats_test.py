@@ -5,30 +5,30 @@ import pytest
 from h_matchers import Any
 
 from h.services.bulk_api.lms_stats import (
-    AssignmentStats,
     BulkLMSStatsService,
-    CourseStats,
+    CountsByAssignment,
+    CountsByUser,
     service_factory,
 )
 
 
 class TestBulkLMSStatsService:
-    def test_assignment_stats(
+    def test_get_counts_by_user(
         self, svc, group, user, annotation, annotation_reply, reply_user
     ):
-        stats = svc.assignment_stats(
+        stats = svc.get_counts_by_user(
             groups=[group.authority_provided_id], assignment_id="ASSIGNMENT_ID"
         )
 
         assert stats == [
-            AssignmentStats(
+            CountsByUser(
                 userid=user.userid,
                 display_name=user.display_name,
                 annotations=1,
                 replies=0,
                 last_activity=annotation.created,
             ),
-            AssignmentStats(
+            CountsByUser(
                 userid=reply_user.userid,
                 display_name=reply_user.display_name,
                 annotations=0,
@@ -38,11 +38,11 @@ class TestBulkLMSStatsService:
         ]
 
     @pytest.mark.usefixtures("user", "annotation", "reply_user")
-    def test_course_stats(self, svc, group, annotation_reply):
-        stats = svc.course_stats(groups=[group.authority_provided_id])
+    def test_get_counts_by_assignment(self, svc, group, annotation_reply):
+        stats = svc.get_counts_by_assignment(groups=[group.authority_provided_id])
 
         assert stats == [
-            CourseStats(
+            CountsByAssignment(
                 assignment_id="ASSIGNMENT_ID",
                 annotations=1,
                 replies=1,

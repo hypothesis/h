@@ -9,20 +9,21 @@ from h.models import Annotation, AnnotationMetadata, AnnotationSlim, Group, User
 
 
 @dataclass
-class AssignmentStats:
-    display_name: str
-    userid: str
+class _AnnotationCounts:
     annotations: int
     replies: int
     last_activity: datetime
 
 
 @dataclass
-class CourseStats:
+class CountsByUser(_AnnotationCounts):
+    display_name: str
+    userid: str
+
+
+@dataclass
+class CountsByAssignment(_AnnotationCounts):
     assignment_id: str
-    annotations: int
-    replies: int
-    last_activity: datetime
 
 
 class BulkLMSStatsService:
@@ -30,8 +31,8 @@ class BulkLMSStatsService:
         self._db = db
         self._authorized_authority = authorized_authority
 
-    def _annotation_query(self, groups: list[str], assignment_id: str | None = None):
-        query = (
+    def _annotation_query(self, groups: list[str]):
+        return (
             select(
                 AnnotationSlim,
                 AnnotationMetadata.data,
@@ -71,29 +72,28 @@ class BulkLMSStatsService:
             )
         )
 
-        if assignment_id:
-            query = query.where(
-                AnnotationMetadata.data["lms"]["assignment"]["resource_link_id"].astext
-                == assignment_id,
-            )
-
-        return query
-
-    def assignment_stats(
+    def get_counts_by_user(
         self, groups: list[str], assignment_id: str
-    ) -> list[AssignmentStats]:
+    ) -> list[CountsByUser]:
         """
         Get basic stats per user for an LMS assignment.
 
         :param groups: List of "authority_provided_id" to filter groups by.
         :param assignment_id: ID of the assignment we are generating the stats for.
         """
+        annos_query = (
+            self._annotation_query(groups)
+            .where(
+                AnnotationMetadata.data["lms"]["assignment"]["resource_link_id"].astext
+                == assignment_id,
+            )
+            .cte("annotations")
+        )
 
-        annos_query = self._annotation_query(groups, assignment_id).cte("annotations")
         query = (
             select(
                 User.display_name,
-                # Unfortunally all the magic around User.userid doesn't work in this context
+                # Unfortunately all the magic around User.userid doesn't work in this context
                 func.concat("acct:", User.username, "@", User.authority).label(
                     "userid"
                 ),
@@ -111,7 +111,7 @@ class BulkLMSStatsService:
 
         results = self._db.execute(query)
         return [
-            AssignmentStats(
+            CountsByUser(
                 userid=row.userid,
                 display_name=row.display_name,
                 annotations=row.annotations,
@@ -121,7 +121,7 @@ class BulkLMSStatsService:
             for row in results
         ]
 
-    def course_stats(self, groups: list[str]) -> list[CourseStats]:
+    def get_counts_by_assignment(self, groups: list[str]) -> list[CountsByAssignment]:
         """
         Get basic stats per assignment for an LMS course.
 
@@ -143,7 +143,7 @@ class BulkLMSStatsService:
 
         results = self._db.execute(query)
         return [
-            CourseStats(
+            CountsByAssignment(
                 assignment_id=row.assignment_id,
                 annotations=row.annotations,
                 replies=row.replies,
