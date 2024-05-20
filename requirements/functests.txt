@@ -238,7 +238,7 @@ pyramid-services==2.2
     # via -r requirements/prod.txt
 pyramid-tm==2.5
     # via -r requirements/prod.txt
-pytest==8.2.0
+pytest==8.2.1
     # via
     #   -r requirements/functests.in
     #   pytest-reverse

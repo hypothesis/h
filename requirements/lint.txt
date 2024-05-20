@@ -387,7 +387,7 @@ pyramid-tm==2.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytest==8.2.0
+pytest==8.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
