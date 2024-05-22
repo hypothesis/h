@@ -57,7 +57,7 @@ class BearerTokenPolicy(IdentityBasedPolicy):
             return None
 
         user = request.find_service(name="user").fetch(token.userid)
-        if user is None:
+        if user is None or user.deleted:
             return None
 
         return Identity.from_models(user=user)

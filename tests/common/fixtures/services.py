@@ -138,7 +138,9 @@ def annotation_metadata_service(mock_service):
 
 @pytest.fixture
 def auth_cookie_service(mock_service):
-    return mock_service(AuthCookieService)
+    auth_cookie_service = mock_service(AuthCookieService)
+    auth_cookie_service.verify_cookie.return_value.deleted = False
+    return auth_cookie_service
 
 
 @pytest.fixture
@@ -279,7 +281,9 @@ def user_password_service(mock_service):
 
 @pytest.fixture
 def user_service(mock_service):
-    return mock_service(UserService, name="user")
+    user_service = mock_service(UserService, name="user")
+    user_service.fetch.return_value.deleted = False
+    return user_service
 
 
 @pytest.fixture

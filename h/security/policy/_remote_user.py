@@ -16,7 +16,7 @@ class RemoteUserPolicy(IdentityBasedPolicy):
             return None
 
         user = request.find_service(name="user").fetch(user_id)
-        if user is None:
+        if user is None or user.deleted:
             return None
 
         return Identity.from_models(user=user)

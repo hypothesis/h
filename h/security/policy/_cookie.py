@@ -17,7 +17,7 @@ class CookiePolicy(IdentityBasedPolicy):
         self._add_vary_by_cookie(request)
 
         user = request.find_service(AuthCookieService).verify_cookie()
-        if not user:
+        if (not user) or user.deleted:
             return None
 
         return Identity.from_models(user=user)

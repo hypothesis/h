@@ -76,7 +76,7 @@ class AuthClientPolicy(IdentityBasedPolicy):
                 return None
 
             # If you forward a user it must exist and match your authority
-            if not user or user.authority != auth_client.authority:
+            if (not user) or user.deleted or (user.authority != auth_client.authority):
                 return None
 
         return Identity.from_models(auth_client=auth_client, user=user)
