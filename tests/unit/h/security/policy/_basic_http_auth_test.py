@@ -101,6 +101,13 @@ class TestAuthClientPolicy:
 
         assert AuthClientPolicy().identity(pyramid_request) is None
 
+    def test_identify_returns_None_if_forwarded_user_is_marked_as_deleted(
+        self, user_service, pyramid_request
+    ):
+        user_service.fetch.return_value.deleted = True
+
+        assert AuthClientPolicy().identity(pyramid_request) is None
+
     def test_identify_returns_None_if_forwarded_userid_is_invalid(
         self, user_service, pyramid_request
     ):

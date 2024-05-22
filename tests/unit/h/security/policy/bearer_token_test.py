@@ -57,3 +57,10 @@ class TestBearerTokenPolicy:
         user_service.fetch.return_value = None
 
         assert BearerTokenPolicy().identity(pyramid_request) is None
+
+    def test_identity_returns_None_for_user_marked_as_deleted(
+        self, pyramid_request, user_service
+    ):
+        user_service.fetch.return_value.deleted = True
+
+        assert BearerTokenPolicy().identity(pyramid_request) is None

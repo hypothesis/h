@@ -26,3 +26,11 @@ class TestRemoteUserPolicy:
         user_service.fetch.return_value = None
 
         assert RemoteUserPolicy().identity(pyramid_request) is None
+
+    def test_identity_returns_None_for_user_marked_as_deleted(
+        self, pyramid_request, user_service
+    ):
+        pyramid_request.environ["HTTP_X_FORWARDED_USER"] = sentinel.forwarded_user
+        user_service.fetch.return_value.deleted = True
+
+        assert RemoteUserPolicy().identity(pyramid_request) is None

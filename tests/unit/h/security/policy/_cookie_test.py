@@ -17,6 +17,13 @@ class TestCookiePolicy:
             user=auth_cookie_service.verify_cookie.return_value
         )
 
+    def test_identity_when_user_marked_as_deleted(
+        self, pyramid_request, auth_cookie_service
+    ):
+        auth_cookie_service.verify_cookie.return_value.deleted = True
+
+        assert CookiePolicy().identity(pyramid_request) is None
+
     def test_identity_with_no_cookie(self, pyramid_request, auth_cookie_service):
         auth_cookie_service.verify_cookie.return_value = None
 
