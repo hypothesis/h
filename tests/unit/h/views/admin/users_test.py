@@ -168,7 +168,11 @@ def test_users_delete_deletes_user(user_service, user_delete_service, pyramid_re
 
     users_delete(pyramid_request)
 
-    user_delete_service.delete_user.assert_called_once_with(user)
+    user_delete_service.delete_user.assert_called_once_with(
+        user,
+        requested_by=pyramid_request.user,
+        tag=pyramid_request.matched_route.name,
+    )
 
 
 @pytest.fixture(autouse=True)

@@ -195,46 +195,6 @@ class TestPasswordCommand:
         return factories.User()
 
 
-class TestDeleteUserCommand:
-    def test_it_deletes_user(self, invoke_cli, user, user_delete_service):
-        result = invoke_cli(user_cli.delete, [user.username])
-
-        assert not result.exit_code
-        user_delete_service.delete_user.assert_called_once_with(user)
-
-    def test_it_deletes_user_with_specific_authority(
-        self, invoke_cli, user, user_delete_service
-    ):
-        user.authority = "partner.org"
-
-        result = invoke_cli(
-            user_cli.delete, ["--authority", "partner.org", user.username]
-        )
-
-        assert not result.exit_code
-        user_delete_service.delete_user.assert_called_once_with(user)
-
-    def test_it_errors_when_user_could_not_be_found(
-        self, invoke_cli, user_delete_service
-    ):
-        result = invoke_cli(user_cli.delete, ["bogus_username"])
-
-        assert result.exit_code == 1
-        user_delete_service.delete_user.assert_not_called()
-
-    def test_it_errors_when_user_with_specific_authority_could_not_be_found(
-        self, invoke_cli, user, user_delete_service
-    ):
-        result = invoke_cli(user_cli.delete, ["--authority", "foo.com", user.username])
-
-        assert result.exit_code == 1
-        user_delete_service.delete_user.assert_not_called()
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
-
-
 @pytest.fixture
 def invoke_cli(cli, pyramid_request):
     pyramid_request.tm = mock.Mock()

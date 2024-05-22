@@ -20,4 +20,5 @@ from tests.common.factories.setting import Setting
 from tests.common.factories.subscriptions import Subscriptions
 from tests.common.factories.token import DeveloperToken, OAuth2Token
 from tests.common.factories.user import User
+from tests.common.factories.user_deletion import UserDeletion
 from tests.common.factories.user_identity import UserIdentity

@@ -101,30 +101,3 @@ def password(ctx, username, authority, password):
     request.tm.commit()
 
     click.echo(f"Password changed for {username}", err=True)
-
-
-@user.command()
-@click.argument("username")
-@click.option("--authority")
-@click.pass_context
-def delete(ctx, username, authority):
-    """
-    Delete a user with all their group memberships and annotations.
-
-    You must specify the username of a user to delete.
-    """
-    request = ctx.obj["bootstrap"]()
-
-    if not authority:
-        authority = request.default_authority
-
-    user = models.User.get_by_username(request.db, username, authority)
-    if user is None:
-        raise click.ClickException(
-            f'no user with username "{username}" and authority "{authority}"'
-        )
-
-    request.find_service(name="user_delete").delete_user(user)
-    request.tm.commit()
-
-    click.echo(f"User {username} deleted.", err=True)

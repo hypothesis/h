@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 
-from h.models import Annotation, Group, Token, User
+from h.models import Annotation, Group, Token, User, UserDeletion
 from h.services.annotation_delete import AnnotationDeleteService
 
 
@@ -13,7 +13,7 @@ class UserDeleteService:
         self._db = db_session
         self._annotation_delete_service = annotation_delete_service
 
-    def delete_user(self, user: User):
+    def delete_user(self, user: User, requested_by: User, tag: str):
         """
         Delete a user with all their group memberships and annotations.
 
@@ -45,6 +45,20 @@ class UserDeleteService:
                 group.creator = None
             else:
                 self._db.delete(group)
+
+        self._db.add(
+            UserDeletion(
+                userid=user.userid,
+                requested_by=requested_by.userid,
+                tag=tag,
+                registered_date=user.registered_date,
+                num_annotations=self._db.scalar(
+                    sa.select(
+                        sa.func.count(Annotation.id)  # pylint:disable=not-callable
+                    ).where(Annotation.userid == user.userid)
+                ),
+            )
+        )
 
         self._db.delete(user)
 

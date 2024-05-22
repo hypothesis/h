@@ -4,7 +4,7 @@ import pytest
 import sqlalchemy
 from h_matchers import Any
 
-from h.models import GroupMembership, Token
+from h.models import GroupMembership, Token, UserDeletion
 from h.services.user_delete import UserDeleteService, service_factory
 
 
@@ -16,13 +16,14 @@ class TestDeleteUserService:
         db_session,
         annotation_delete_service,
         user,
+        requested_by,
         created_group,
         joined_group,
         user_annotations,
         other_developer_token,
         other_oauth2_token,
     ):
-        svc.delete_user(user)
+        svc.delete_user(user, requested_by, "test_tag")
 
         # Check the user was deleted
         assert user in db_session.deleted
@@ -48,13 +49,29 @@ class TestDeleteUserService:
             db_session.scalars(sqlalchemy.select(Token)).all()
             == Any.list.containing([other_developer_token, other_oauth2_token]).only()
         )
+        assert (
+            db_session.scalars(sqlalchemy.select(UserDeletion)).all()
+            == Any.list.containing(
+                [
+                    Any.instance_of(UserDeletion).with_attrs(
+                        {
+                            "userid": user.userid,
+                            "requested_by": requested_by.userid,
+                            "tag": "test_tag",
+                            "registered_date": user.registered_date,
+                            "num_annotations": len(user_annotations),
+                        }
+                    )
+                ]
+            ).only()
+        )
 
     def test_it_doesnt_delete_groups_others_have_annotated_in(
-        self, svc, factories, user, member, created_group
+        self, svc, factories, user, requested_by, member, created_group
     ):
         factories.Annotation(userid=member.userid, groupid=created_group.pubid)
 
-        svc.delete_user(user)
+        svc.delete_user(user, requested_by, "test_tag")
 
         # Check we don't delete groups which other people have annotated in
         assert not sqlalchemy.inspect(created_group).was_deleted
@@ -63,6 +80,12 @@ class TestDeleteUserService:
 
     @pytest.fixture
     def user(self, factories):
+        """Return the user who will be deleted."""
+        return factories.User()
+
+    @pytest.fixture
+    def requested_by(self, factories):
+        """Return the user who will be requesting the user deletion."""
         return factories.User()
 
     @pytest.fixture
