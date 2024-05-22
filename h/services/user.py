@@ -155,7 +155,7 @@ class UserService:
 
         user = self.session.query(User).filter(*filters).one_or_none()
 
-        if user is None:
+        if user is None or user.deleted:
             return None
 
         if not user.is_activated:

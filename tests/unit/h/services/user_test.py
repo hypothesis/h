@@ -77,6 +77,16 @@ class TestUserService:
         with pytest.raises(UserNotActivated):
             svc.fetch_for_login("mirthe@deboer.com")
 
+    def test_fetch_for_login_by_username_deleted(self, svc, factories):
+        user = factories.User(deleted=True)
+
+        assert svc.fetch_for_login(user.username) is None
+
+    def test_fetch_for_login_by_email_deleted(self, svc, factories):
+        user = factories.User(deleted=True)
+
+        assert svc.fetch_for_login(user.email) is None
+
     def test_update_preferences_tutorial_enable(self, svc, factories):
         user = factories.User.build(sidebar_tutorial_dismissed=True)
 
