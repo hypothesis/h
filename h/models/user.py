@@ -7,7 +7,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 from h.db import Base
 from h.exceptions import InvalidUserId
-from h.util.user import split_user
+from h.util.user import format_userid, split_user
 
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
@@ -231,7 +231,7 @@ class User(Base):
 
     @hybrid_property
     def userid(self):
-        return f"acct:{self.username}@{self.authority}"
+        return format_userid(self.username, self.authority)
 
     @userid.comparator
     def userid(cls):  # pylint: disable=no-self-argument

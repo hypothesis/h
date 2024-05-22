@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 
 import colander
@@ -6,6 +7,7 @@ from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas
 from h.services.user_password import UserPasswordService
+from h.util.user import format_userid
 
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
@@ -72,7 +74,6 @@ class TestUniqueEmail:
         schemas.unique_email(dummy_node, "elliot@bar.com")
 
 
-@pytest.mark.usefixtures("user_model")
 class TestRegisterSchema:
     def test_it_is_invalid_when_password_too_short(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
@@ -81,26 +82,21 @@ class TestRegisterSchema:
             schema.deserialize({"password": "a"})
         assert exc.value.asdict()["password"] == ("Must be 8 characters or more.")
 
-    def test_it_is_invalid_when_username_too_short(self, pyramid_request, user_model):
+    def test_it_is_invalid_when_username_too_short(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
-        user_model.get_by_username.return_value = None
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "a"})
         assert exc.value.asdict()["username"] == ("Must be 3 characters or more.")
 
-    def test_it_is_invalid_when_username_too_long(self, pyramid_request, user_model):
+    def test_it_is_invalid_when_username_too_long(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
-        user_model.get_by_username.return_value = None
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "a" * 500})
         assert exc.value.asdict()["username"] == ("Must be 30 characters or less.")
 
-    def test_it_is_invalid_with_invalid_characters_in_username(
-        self, pyramid_request, user_model
-    ):
-        user_model.get_by_username.return_value = None
+    def test_it_is_invalid_with_invalid_characters_in_username(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
@@ -128,23 +124,50 @@ class TestRegisterSchema:
 
         assert exc.value.asdict()["privacy_accepted"] == "Required"
 
-    def test_it_validates_with_valid_payload(self, pyramid_csrf_request, user_model):
-        user_model.get_by_username.return_value = None
-        user_model.get_by_email.return_value = None
+    def test_it_is_invalid_when_user_recently_deleted(
+        self, factories, pyramid_request, valid_params
+    ):
+        """If an account with the same username was recently deleted it should be invalid."""
+        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        factories.UserDeletion(
+            userid=format_userid(
+                username=valid_params["username"],
+                authority=pyramid_request.default_authority,
+            )
+        )
 
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize(valid_params)
+
+        assert exc.value.asdict() == {"username": "This username is already taken."}
+
+    def test_it_validates_with_valid_payload(
+        self, pyramid_csrf_request, valid_params, factories
+    ):
         schema = schemas.RegisterSchema().bind(request=pyramid_csrf_request)
-        params = {
+        # A user with the same username was deleted over a month ago.
+        # This should not prevent registration.
+        factories.UserDeletion(
+            userid=format_userid(
+                valid_params["username"], pyramid_csrf_request.default_authority
+            ),
+            requested_at=datetime.now() - timedelta(days=32),
+        )
+
+        result = schema.deserialize(valid_params)
+
+        assert result == dict(
+            valid_params, privacy_accepted=True, comms_opt_in=None, csrf_token=None
+        )
+
+    @pytest.fixture
+    def valid_params(self):
+        return {
             "username": "filbert",
             "email": "foo@bar.com",
             "password": "sdlkfjlk3j3iuei",
             "privacy_accepted": "true",
         }
-
-        result = schema.deserialize(params)
-
-        assert result == dict(
-            params, privacy_accepted=True, comms_opt_in=None, csrf_token=None
-        )
 
 
 @pytest.mark.usefixtures("models", "user_password_service")
