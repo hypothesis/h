@@ -2,20 +2,19 @@ import pytest
 
 
 def test___repr__(factories, helpers):
-    job = factories.Job()
-    repr_ = repr(job)
+    user_deletion = factories.UserDeletion()
+    repr_ = repr(user_deletion)
 
     helpers.repr_.assert_called_once_with(
-        job,
+        user_deletion,
         [
             "id",
-            "name",
-            "enqueued_at",
-            "scheduled_at",
-            "expires_at",
-            "priority",
+            "userid",
+            "requested_at",
+            "requested_by",
             "tag",
-            "kwargs",
+            "registered_date",
+            "num_annotations",
         ],
     )
     assert repr_ == helpers.repr_.return_value
@@ -23,7 +22,7 @@ def test___repr__(factories, helpers):
 
 @pytest.fixture(autouse=True)
 def helpers(mocker):
-    helpers = mocker.patch("h.models.job.helpers")
+    helpers = mocker.patch("h.models.user_deletion.helpers")
     # __repr__() needs to return a string or repr() raises.
     helpers.repr_.return_value = "test_string_representation"
     return helpers

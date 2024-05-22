@@ -38,6 +38,7 @@ from h.models.setting import Setting
 from h.models.subscriptions import Subscriptions
 from h.models.token import Token
 from h.models.user import User
+from h.models.user_deletion import UserDeletion
 from h.models.user_identity import UserIdentity
 
 __all__ = (
@@ -64,5 +65,6 @@ __all__ = (
     "Subscriptions",
     "Token",
     "User",
+    "UserDeletion",
     "UserIdentity",
 )

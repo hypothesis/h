@@ -41,6 +41,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 
 from h.db import Base
+from h.models import helpers
 
 
 class Job(Base):
@@ -67,10 +68,9 @@ class Job(Base):
     )
 
     def __repr__(self):
-        class_name = type(self).__name__
-        attrs = {
-            attrname: repr(getattr(self, attrname))
-            for attrname in [
+        return helpers.repr_(
+            self,
+            [
                 "id",
                 "name",
                 "enqueued_at",
@@ -79,6 +79,5 @@ class Job(Base):
                 "priority",
                 "tag",
                 "kwargs",
-            ]
-        }
-        return f"{class_name}({', '.join(f'{name}={value}' for name, value in attrs.items())})"
+            ],
+        )
