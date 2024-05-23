@@ -72,7 +72,10 @@ class AnnotationSlim(Base):
     )
 
     document_id = sa.Column(
-        sa.Integer, sa.ForeignKey("document.id", ondelete="CASCADE"), nullable=False
+        sa.Integer,
+        sa.ForeignKey("document.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     document = sa.orm.relationship("Document")
 
