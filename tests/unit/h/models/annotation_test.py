@@ -250,6 +250,12 @@ def test_uuid(factories):
     assert annotation.uuid == UUID(URLSafeUUID.url_safe_to_hex(annotation.id))
 
 
+def test_repr(factories):
+    annotation = factories.Annotation()
+
+    assert repr(annotation) == f"<Annotation {annotation.id}>"
+
+
 @pytest.fixture
 def markdown_render(patch):
     return patch("h.models.annotation.markdown_render")
