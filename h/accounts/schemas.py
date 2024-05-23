@@ -55,12 +55,18 @@ def unique_username(node, value):
     if user:  # pragma: no cover
         raise exc
 
+    # Don't allow recently-deleted usernames to be re-used.
+    # This is to make sure that there's time for the user's data to be expunged
+    # from all systems (for example: Elasticsearch) before we allow a new
+    # account with the same username to be registered.
+    # Otherwise new accounts could inherit dating belonging to deleted accounts.
     if request.db.scalars(
-        select(models.UserDeletion.id)
-        .where(
+        select(models.UserDeletion.id).where(
             models.UserDeletion.userid
             == format_userid(value, request.default_authority)
         )
+        # 31 days is an arbitrary time delta that should be more than enough
+        # time for all the previous user's data to be expunged.
         .where(models.UserDeletion.requested_at > datetime.now() - timedelta(days=31))
     ).first():
         raise exc
