@@ -593,7 +593,7 @@ zope-event==5.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   gevent
-zope-interface==6.4
+zope-interface==6.4.post2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
