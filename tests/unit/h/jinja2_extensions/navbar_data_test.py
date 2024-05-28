@@ -50,6 +50,25 @@ class TestNavbarData:
             "username_url": f"http://example.com/users/{user.username}",
         }
 
+    def test_it_with_a_group_with_no_creator(
+        self, pyramid_request, user, factories, group_list_service
+    ):
+        user.groups = group_list_service.associated_groups.return_value = [
+            factories.Group(creator=None)
+        ]
+        pyramid_request.user = user
+
+        result = navbar_data(pyramid_request)
+
+        assert result["groups_suggestions"] == [
+            {
+                "name": group.name,
+                "pubid": group.pubid,
+                "relationship": None,
+            }
+            for group in user.groups
+        ]
+
     def test_it_with_no_user(self, pyramid_request, group_list_service):
         pyramid_request.user = None
         group_list_service.associated_groups.return_value = []
