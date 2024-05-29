@@ -9,6 +9,7 @@ from h.tasks.cleanup import (
     purge_expired_authz_codes,
     purge_expired_tokens,
     purge_removed_features,
+    report_num_deleted_annotations,
 )
 
 
@@ -18,6 +19,21 @@ class TestPurgeDeletedAnnotations:
         purge_deleted_annotations()
 
         annotation_delete_service.bulk_delete.assert_called_once()
+
+
+@pytest.mark.usefixtures("celery")
+class TestReportNumDeletedAnnotations:
+    def test_report_num_deleted_annotations(self, factories, newrelic):
+        # Annotations marked as deleted, these should be counted.
+        factories.Annotation.create_batch(2, deleted=True)
+        # An annotation not marked as deleted, this should not be counted.
+        factories.Annotation.create()
+
+        report_num_deleted_annotations()
+
+        newrelic.agent.record_custom_metric.assert_called_once_with(
+            "Custom/Annotations/MarkedAsDeleted", 2
+        )
 
 
 @pytest.mark.usefixtures("celery")
@@ -132,3 +148,8 @@ def celery(patch, pyramid_request):
     cel = patch("h.tasks.cleanup.celery", autospec=False)
     cel.request = pyramid_request
     return cel
+
+
+@pytest.fixture(autouse=True)
+def newrelic(mocker):
+    return mocker.patch("h.tasks.cleanup.newrelic")
