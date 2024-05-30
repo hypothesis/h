@@ -42,6 +42,23 @@ def users_index(request):
         if user is None:
             user = models.User.get_by_email(request.db, username, authority)
 
+    if (user is not None) and user.deleted:
+        # Don't show users that're marked as deleted on admin pages.
+        #
+        # Users that're marked as deleted can't login or authenticate requests
+        # in any way. They're in the process of being purged by a background
+        # task and will soon be really deleted from the DB.
+        #
+        # Showing these users on admin pages is confusing because admins may
+        # have already deleted a user (so the user has been marked as deleted
+        # and is now going to be purged) and then think that the user has not
+        # been deleted successfully because they still show up on the admin
+        # pages.
+        #
+        # Also we don't want admins to be able to do things like rename users
+        # who're marked as deleted and in the process of being purged.
+        user = None
+
     if user is not None:
         svc = request.find_service(name="annotation_stats")
         user_meta["annotations_count"] = svc.total_user_annotation_count(user.userid)
