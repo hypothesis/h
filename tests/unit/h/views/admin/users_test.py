@@ -95,6 +95,24 @@ def test_users_index_no_user_found(models, pyramid_request):
 
 
 @users_index_fixtures
+def test_users_index_user_marked_as_deleted(models, pyramid_request, factories):
+    pyramid_request.params = {"username": "bob", "authority": "foo.org"}
+    user = factories.User.build(username="bob", authority="foo.org", deleted=True)
+    models.User.get_by_username.return_value = user
+
+    result = users_index(pyramid_request)
+
+    assert result == {
+        "default_authority": "example.com",
+        "username": "bob",
+        "authority": "foo.org",
+        "user": None,
+        "user_meta": {},
+        "format_date": format_date,
+    }
+
+
+@users_index_fixtures
 def test_users_index_user_found(
     models, pyramid_request, factories, annotation_stats_service
 ):
