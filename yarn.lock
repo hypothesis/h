@@ -3211,16 +3211,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chai@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "chai@npm:5.1.0"
+"chai@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "chai@npm:5.1.1"
   dependencies:
     assertion-error: ^2.0.1
-    check-error: ^2.0.0
+    check-error: ^2.1.1
     deep-eql: ^5.0.1
     loupe: ^3.1.0
     pathval: ^2.0.0
-  checksum: f45c8c6ca8b35933efa533eba26a3ecf78378c86acf1d5d0ca82ae0be94a8d25f574f098e3f7e0294a3774e43931eb2e299c991516f22ac24c9042dce8a23ce0
+  checksum: 1e0a5e1b5febdfa8ceb97b9aff608286861ecb86533863119b2f39f07c08fb59f3c1791ab554947f009b9d71d509b9e4e734fb12133cb81f231c2c2ee7c1e738
   languageName: node
   linkType: hard
 
@@ -3259,10 +3259,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"check-error@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "check-error@npm:2.0.0"
-  checksum: 120f252c2e1ad82ef82a616662805345c6c361347bfd6203f8a28c53a158811dd0ea21278f29c8136cc9df12fc7f077d1a07124569d98fb396b3072d08f2f092
+"check-error@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "check-error@npm:2.1.1"
+  checksum: d785ed17b1d4a4796b6e75c765a9a290098cf52ff9728ce0756e8ffd4293d2e419dd30c67200aee34202463b474306913f2fcfaf1890641026d9fc6966fea27a
   languageName: node
   linkType: hard
 
@@ -5369,7 +5369,7 @@ __metadata:
     autoprefixer: ^10.4.19
     babel-plugin-mockable-imports: ^2.0.1
     bootstrap: ^4.6.2
-    chai: ^5.1.0
+    chai: ^5.1.1
     diff: ^5.2.0
     escape-html: ^1.0.3
     eslint: ^8.57.0
