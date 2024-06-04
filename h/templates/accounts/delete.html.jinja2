@@ -1,0 +1,48 @@
+{% extends "h:templates/layouts/account.html.jinja2" %}
+
+{% set page_route = 'account_delete' %}
+{% set page_title = 'Delete your account' %}
+
+{% block tabs %}{% endblock tabs %}
+
+{% block page_content %}
+  <h1 class="form-header">{% trans %}Delete your account{% endtrans %}</h1>
+
+  <div class="form-description">
+    <p>{% trans %}Are you sure you want to delete your account?{% endtrans %}</p>
+
+    <p>
+      {% set username = request.user.username %}
+
+      {% if count == 0 %}
+        {% trans %}This will delete user <strong>{{ username }}</strong>.{% endtrans %}
+      {% else %}
+        {% set oldest_str = oldest.strftime("%B %-d %Y") %}
+        {% set newest_str = newest.strftime("%B %-d %Y") %}
+
+        {% if oldest_str == newest_str %}
+          {% trans count=count %}
+            This will delete user <strong>{{ username }}</strong>,
+            including 1 annotation
+            from <strong>{{ oldest_str }}</strong>.
+          {% pluralize count %}
+            This will delete user <strong>{{ username }}</strong>,
+            including <strong>{{ count }}</strong> annotations
+            from <strong>{{ oldest_str }}</strong>.
+          {% endtrans %}
+        {% else %}
+          {% trans %}
+            This will delete user <strong>{{ username }}</strong>,
+            including <strong>{{ count }}</strong> annotations
+            spanning <strong>{{ oldest_str }}</strong>
+            to <strong>{{ newest_str }}</strong>.
+          {% endtrans %}
+        {% endif %}
+      {% endif %}
+   </p>
+
+    <p>{% trans %}This cannot be undone!{% endtrans %}</p>
+  </div>
+
+  {{ form }}
+{% endblock page_content %}

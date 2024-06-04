@@ -31,9 +31,12 @@
           </button>
         {% endif %}
       </form>
-      <footer class="form-footer">
-        You can learn more about the Hypothesis API at
-        <a class="link--footer" href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>
-      </footer>
   </div>
 {% endblock page_content %}
+
+{% block form_footer_left %}
+  <p>
+    You can learn more about the Hypothesis API at
+    <a class="link--footer" href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>
+  </p>
+{% endblock %}

@@ -87,7 +87,7 @@ def configure_environment(config):  # pragma: no cover
     config.registry[ENVIRONMENT_KEY] = create_environment(base)
 
 
-def handle_form_submission(request, form, on_success, on_failure):
+def handle_form_submission(request, form, on_success, on_failure, flash_success=True):
     """
     Handle the submission of the given form in a standard way.
 
@@ -114,6 +114,11 @@ def handle_form_submission(request, form, on_success, on_failure):
         not an XHR request.
     :type on_failure: callable
 
+    :param flash_success:
+        Whether to show a "success" flash message if handling the form succeeds.
+        Applies to non-XHR form submissions only.
+    :type flash_success: bool
+
     """
     try:
         appstruct = form.validate(request.POST.items())
@@ -126,7 +131,7 @@ def handle_form_submission(request, form, on_success, on_failure):
         if result is None:
             result = httpexceptions.HTTPFound(location=request.url)
 
-        if not request.is_xhr:  # pragma: no cover
+        if (not request.is_xhr) and flash_success:
             request.session.flash(_("Success. We've saved your changes."), "success")
 
     return to_xhr_response(request, result, form)

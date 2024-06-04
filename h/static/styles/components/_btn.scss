@@ -10,6 +10,12 @@
 
   min-height: 30px;
 
+  /* Vertically center text within buttons.
+     This works even if the element is not a button,
+     e.g. <a class="btn"> */
+  display: flex;
+  align-items: center;
+
   background-color: color.$grey-6;
   border: none;
   border-radius: 2px;
