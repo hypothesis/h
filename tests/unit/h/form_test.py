@@ -230,6 +230,33 @@ class TestHandleFormSubmission:
 
         assert pyramid_request.session.peek_flash("success")
 
+    def test_it_doesnt_show_a_flash_message_for_XHR_requests(
+        self, form_validating_to, pyramid_request
+    ):
+        pyramid_request.is_xhr = True
+
+        form.handle_form_submission(
+            pyramid_request,
+            form_validating_to("anything"),
+            mock_callable(),
+            mock.sentinel.on_failure,
+        )
+
+        assert not pyramid_request.session.peek_flash("success")
+
+    def test_it_doesnt_show_a_flash_message_if_asked_not_to(
+        self, form_validating_to, pyramid_request
+    ):
+        form.handle_form_submission(
+            pyramid_request,
+            form_validating_to("anything"),
+            mock_callable(),
+            mock.sentinel.on_failure,
+            flash_success=False,
+        )
+
+        assert not pyramid_request.session.peek_flash("success")
+
     def test_if_validation_succeeds_it_calls_to_xhr_response(
         self, form_validating_to, matchers, pyramid_request, to_xhr_response
     ):

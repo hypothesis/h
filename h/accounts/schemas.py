@@ -245,6 +245,21 @@ class PasswordChangeSchema(CSRFSchema):
             raise exc
 
 
+class DeleteAccountSchema(CSRFSchema):
+    password = password_node(title=_("Confirm password"))
+
+    def validator(self, node, value):
+        super().validator(node, value)
+
+        request = node.bindings["request"]
+        svc = request.find_service(name="user_password")
+
+        if not svc.check_password(request.user, value.get("password")):
+            exc = colander.Invalid(node)
+            exc["password"] = _("Wrong password.")
+            raise exc
+
+
 class NotificationsSchema(CSRFSchema):
     types = (("reply", _("Email me when someone replies to one of my annotations.")),)
 

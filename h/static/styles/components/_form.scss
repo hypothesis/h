@@ -126,14 +126,6 @@
   padding-right: 15px;
 }
 
-// A form footer with no top border, useful for additional sections at the
-// bottom of a footer.
-.form-footer--no-border {
-  @include form-footer;
-
-  margin-top: 15px;
-}
-
 .form-help-text {
   color: color.$grey-5;
 }
@@ -146,4 +138,12 @@
 .form-footer__symbol {
   color: color.$brand;
   margin-right: 3px;
+}
+
+.form-footer__left {
+  float: left;
+}
+
+.form-footer__right {
+  float: right;
 }

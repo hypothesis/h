@@ -35,6 +35,10 @@
     <button type="button"
             class="btn btn--cancel js-form-cancel">Cancel</button>
     {% endif %}
+    {% if field.back_link %}
+    <a class="btn btn--cancel"
+       href="{{ field.back_link.href }}">{{ field.back_link.text }}</a>
+    {% endif %}
     <div class="u-stretch"></div>
     <div class="form-actions__buttons">
       {%- for button in field.buttons -%}

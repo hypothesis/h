@@ -27,6 +27,8 @@ def test_includeme():
         call("account_profile", "/account/profile"),
         call("account_notifications", "/account/settings/notifications"),
         call("account_developer", "/account/developer"),
+        call("account_delete", "/account/delete"),
+        call("account_deleted", "/account/deleted"),
         call("claim_account_legacy", "/claim_account/{token}"),
         call("dismiss_sidebar_tutorial", "/app/dismiss_sidebar_tutorial"),
         call("activity.search", "/search"),

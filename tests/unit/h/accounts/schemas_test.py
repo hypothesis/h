@@ -325,6 +325,57 @@ class TestPasswordChangeSchema:
         assert "password" in exc.value.asdict()
 
 
+@pytest.mark.usefixtures("user_password_service")
+class TestDeleteAccountSchema:
+    def test_it(self, schema, user, user_password_service):
+        user_password_service.check_password.return_value = True
+
+        schema.deserialize({"password": "test_password"})
+
+        user_password_service.check_password.assert_called_once_with(
+            user, "test_password"
+        )
+
+    @pytest.mark.parametrize(
+        "password,expected_error_dict",
+        [
+            ("wrong_password", {"password": "Wrong password."}),
+            ("", {"password": "Required"}),
+            (None, {"password": "Required"}),
+        ],
+    )
+    def test_it_when_the_password_is_wrong(
+        self, schema, user_password_service, password, expected_error_dict
+    ):
+        user_password_service.check_password.return_value = False
+
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize({"password": password})
+
+        assert exc_info.value.asdict() == expected_error_dict
+
+    def test_it_when_the_password_is_missing(self, schema, user_password_service):
+        user_password_service.check_password.return_value = False
+
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize({})
+
+        assert exc_info.value.asdict() == {"password": "Required"}
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def pyramid_csrf_request(self, pyramid_csrf_request, user):
+        pyramid_csrf_request.user = user
+        return pyramid_csrf_request
+
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return schemas.DeleteAccountSchema().bind(request=pyramid_csrf_request)
+
+
 @pytest.fixture
 def dummy_node(pyramid_request):
     class DummyNode:

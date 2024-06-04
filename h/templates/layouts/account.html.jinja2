@@ -17,6 +17,7 @@
 {% block content %}
   <div class="content paper">
     <div class="form-container">
+      {% block tabs %}
       <nav class="tabs">
         <ul>
           {% for route, title in nav_pages %}
@@ -29,12 +30,35 @@
           {% endfor %}
         </ul>
       </nav>
+      {% endblock tabs %}
       {% include "h:templates/includes/flash-messages.html.jinja2" %}
       {{ self.page_content() }}
 
-      <footer class="form-footer--no-border">
-        {% include "h:templates/includes/back_link.html.jinja2" %}
-      </footer>
+      {% with %}
+        {% set footer_left %}
+          {% block form_footer_left %}{% endblock form_footer_left %}
+          {% include "h:templates/includes/back_link.html.jinja2" %}
+        {% endset %}
+
+        {% set footer_right %}
+          {% block form_footer_right %}{% endblock form_footer_right %}
+        {% endset %}
+
+        {% if footer_left|trim or footer_right|trim %}
+          <footer class="form-footer">
+            {% if footer_left|trim %}
+            <div class="form-footer__left">
+              {{ footer_left }}
+            </div>
+            {% endif %}
+            {% if footer_right|trim %}
+            <div class="form-footer__right">
+              {{ footer_right }}
+            </div>
+            {% endif %}
+          </footer>
+        {% endif %}
+      {% endwith %}
     </div>
   </div>
 {% endblock content %}
