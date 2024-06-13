@@ -5,10 +5,18 @@
   "properties": {
     "filter": {
       "$ref": "#/$defs/filter"
+    },
+    "group_by": {
+      "type": "string",
+      "enum": [
+        "assignment",
+        "user"
+      ]
     }
   },
   "required": [
-    "filter"
+    "filter",
+    "group_by"
   ],
   "additionalProperties": true,
   "$defs": {
@@ -18,20 +26,27 @@
       "type": "object",
       "properties": {
         "groups": {
-          "$ref": "#/$defs/groupsFilter"
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "h_userids": {
+          "$ref": "#/$defs/nonEmptyStringArray"
         },
         "assignment_id": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
-        "groups",
-        "assignment_id"
+        "groups"
       ],
       "additionalProperties": false
     },
-    "groupsFilter": {
-      "type": "array",
+    "nonEmptyStringArray": {
+      "type": [
+        "array"
+      ],
       "minItems": 1,
       "items": {
         "type": "string"

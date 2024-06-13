@@ -1,6 +1,7 @@
 # pylint:disable=not-callable,use-implicit-booleaness-not-comparison-to-zero,singleton-comparison
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Flag, auto
 
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
@@ -9,21 +10,21 @@ from h.models import Annotation, AnnotationMetadata, AnnotationSlim, Group, User
 
 
 @dataclass
-class _AnnotationCounts:
+class AnnotationCounts:
     annotations: int
     replies: int
     last_activity: datetime
 
-
-@dataclass
-class CountsByUser(_AnnotationCounts):
-    display_name: str
-    userid: str
+    assignment_id: str | None = None
+    display_name: str | None = None
+    userid: str | None = None
 
 
-@dataclass
-class CountsByAssignment(_AnnotationCounts):
-    assignment_id: str
+class CountsGroupBy(Flag):
+    """Allowed values to group the queries by."""
+
+    USER = auto()
+    ASSIGNMENT = auto()
 
 
 class BulkLMSStatsService:
@@ -31,8 +32,13 @@ class BulkLMSStatsService:
         self._db = db
         self._authorized_authority = authorized_authority
 
-    def _annotation_query(self, groups: list[str]):
-        return (
+    def _annotation_query(
+        self,
+        groups: list[str],
+        h_userids: list[str] | None = None,
+        assignment_id: str | None = None,
+    ):
+        query = (
             select(
                 AnnotationSlim,
                 AnnotationMetadata.data,
@@ -71,85 +77,102 @@ class BulkLMSStatsService:
                 Group.authority_provided_id.in_(groups),
             )
         )
+        if assignment_id:
+            query = query.where(
+                AnnotationMetadata.data["lms"]["assignment"]["resource_link_id"].astext
+                == assignment_id,
+            )
 
-    def get_counts_by_user(
-        self, groups: list[str], assignment_id: str
-    ) -> list[CountsByUser]:
+        if h_userids:
+            query = query.where(
+                func.concat("acct:", User.username, "@", User.authority).in_(h_userids)
+            )
+
+        return query
+
+    def _count_columns(self, counts_query) -> tuple:
+        return (
+            func.count(counts_query.c.id)
+            .filter(counts_query.c.type == "annotation")
+            .label("annotations"),
+            func.count(counts_query.c.id)
+            .filter(counts_query.c.type == "reply")
+            .label("replies"),
+            func.max(counts_query.c.created).label("last_activity"),
+        )
+
+    def get_annotation_counts(
+        self,
+        groups: list[str],
+        group_by: CountsGroupBy,
+        h_userids: list[str] | None = None,
+        assignment_id: str | None = None,
+    ) -> list[AnnotationCounts]:
         """
         Get basic stats per user for an LMS assignment.
 
         :param groups: List of "authority_provided_id" to filter groups by.
-        :param assignment_id: ID of the assignment we are generating the stats for.
+        :param group_by: By which column to aggregate the data.
+        :param h_userids: List of User.userid to filter annotations by
+        :param assignment_id: ID of the assignment to filter annotations by
         """
-        annos_query = (
-            self._annotation_query(groups)
-            .where(
-                AnnotationMetadata.data["lms"]["assignment"]["resource_link_id"].astext
-                == assignment_id,
-            )
-            .cte("annotations")
-        )
+        annos_query = self._annotation_query(
+            groups, h_userids=h_userids, assignment_id=assignment_id
+        ).cte("annotations")
 
-        query = (
-            select(
+        # Alias some columns
+        query_assignment_id = annos_query.c.data["lms"]["assignment"][
+            "resource_link_id"
+        ].astext
+        # Unfortunately all the magic around User.userid doesn't work in this context
+        query_userid = func.concat("acct:", User.username, "@", User.authority)
+
+        # What to group_by depending on the selection
+        group_by_clause = {
+            CountsGroupBy.USER: User.id,
+            CountsGroupBy.ASSIGNMENT: query_assignment_id,
+        }
+
+        # What columns to include, depending on the group by
+        group_by_select_columns = {
+            CountsGroupBy.USER: (
+                query_userid.label("userid"),
                 User.display_name,
-                # Unfortunately all the magic around User.userid doesn't work in this context
-                func.concat("acct:", User.username, "@", User.authority).label(
-                    "userid"
-                ),
-                func.count(annos_query.c.id)
-                .filter(annos_query.c.type == "annotation")
-                .label("annotations"),
-                func.count(annos_query.c.id)
-                .filter(annos_query.c.type == "reply")
-                .label("replies"),
-                func.max(annos_query.c.created).label("last_activity"),
-            )
-            .join(annos_query, annos_query.c.user_id == User.id)
-            .group_by(User.id)
+            ),
+            CountsGroupBy.ASSIGNMENT: (query_assignment_id.label("assignment_id"),),
+        }
+
+        # What joins to include, depending on the group by
+        group_by_select_joins = {
+            CountsGroupBy.USER: ((annos_query, annos_query.c.user_id == User.id),),
+            CountsGroupBy.ASSIGNMENT: [],
+        }
+
+        query = select(
+            # Include the relevant columnns based on group_by
+            *group_by_select_columns[group_by],
+            # Always include the counts column
+            *self._count_columns(annos_query)
         )
 
+        # Apply relevant joins
+        for join in group_by_select_joins[group_by]:
+            query = query.join(*join)
+
+        # And finally the group by
+        query = query.group_by(group_by_clause[group_by])
+
         results = self._db.execute(query)
         return [
-            CountsByUser(
-                userid=row.userid,
-                display_name=row.display_name,
+            AnnotationCounts(
+                assignment_id=row.get("assignment_id"),
+                userid=row.get("userid"),
+                display_name=row.get("display_name"),
                 annotations=row.annotations,
                 replies=row.replies,
                 last_activity=row.last_activity,
             )
-            for row in results
-        ]
-
-    def get_counts_by_assignment(self, groups: list[str]) -> list[CountsByAssignment]:
-        """
-        Get basic stats per assignment for an LMS course.
-
-        :param groups: List of "authority_provided_id" to filter groups by.
-        """
-        annos_query = self._annotation_query(groups).cte("annotations")
-        query = select(
-            annos_query.c.data["lms"]["assignment"]["resource_link_id"].astext.label(
-                "assignment_id"
-            ),
-            func.count(annos_query.c.id)
-            .filter(annos_query.c.type == "annotation")
-            .label("annotations"),
-            func.count(annos_query.c.id)
-            .filter(annos_query.c.type == "reply")
-            .label("replies"),
-            func.max(annos_query.c.created).label("last_activity"),
-        ).group_by(annos_query.c.data["lms"]["assignment"]["resource_link_id"].astext)
-
-        results = self._db.execute(query)
-        return [
-            CountsByAssignment(
-                assignment_id=row.assignment_id,
-                annotations=row.annotations,
-                replies=row.replies,
-                last_activity=row.last_activity,
-            )
-            for row in results
+            for row in results.mappings()
         ]
 
 

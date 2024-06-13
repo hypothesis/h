@@ -1,34 +1,35 @@
-from datetime import datetime, timedelta
 from unittest.mock import sentinel
 
 import pytest
-from h_matchers import Any
 
 from h.services.bulk_api.lms_stats import (
+    AnnotationCounts,
     BulkLMSStatsService,
-    CountsByAssignment,
-    CountsByUser,
+    CountsGroupBy,
     service_factory,
 )
 
 
 class TestBulkLMSStatsService:
-    def test_get_counts_by_user(
+    @pytest.mark.usefixtures("annotation_in_another_assignment")
+    def test_get_annotation_counts_by_user(
         self, svc, group, user, annotation, annotation_reply, reply_user
     ):
-        stats = svc.get_counts_by_user(
-            groups=[group.authority_provided_id], assignment_id="ASSIGNMENT_ID"
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_id="ASSIGNMENT_ID",
+            group_by=CountsGroupBy.USER,
         )
 
         assert stats == [
-            CountsByUser(
+            AnnotationCounts(
                 userid=user.userid,
                 display_name=user.display_name,
                 annotations=1,
                 replies=0,
                 last_activity=annotation.created,
             ),
-            CountsByUser(
+            AnnotationCounts(
                 userid=reply_user.userid,
                 display_name=reply_user.display_name,
                 annotations=0,
@@ -37,14 +38,52 @@ class TestBulkLMSStatsService:
             ),
         ]
 
-    @pytest.mark.usefixtures("user", "annotation", "reply_user")
-    def test_get_counts_by_assignment(self, svc, group, annotation_reply):
-        stats = svc.get_counts_by_assignment(groups=[group.authority_provided_id])
+    @pytest.mark.usefixtures("annotation", "user", "reply_user")
+    def test_get_annotation_counts_by_assignment(
+        self,
+        svc,
+        group,
+        annotation_reply,
+        annotation_in_another_assignment,
+    ):
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id], group_by=CountsGroupBy.ASSIGNMENT
+        )
 
         assert stats == [
-            CountsByAssignment(
+            AnnotationCounts(
                 assignment_id="ASSIGNMENT_ID",
                 annotations=1,
+                replies=1,
+                last_activity=annotation_reply.created,
+            ),
+            AnnotationCounts(
+                assignment_id="OTHER_ASSIGNMENT_ID",
+                annotations=1,
+                replies=0,
+                last_activity=annotation_in_another_assignment.created,
+            ),
+        ]
+
+    @pytest.mark.usefixtures("annotation", "user", "reply_user")
+    def test_get_annotation_counts_filter_by_h_userids(
+        self,
+        svc,
+        group,
+        annotation_reply,
+        annotation_in_another_assignment,
+        reply_user,
+    ):
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            group_by=CountsGroupBy.ASSIGNMENT,
+            h_userids=[reply_user.userid],
+        )
+
+        assert stats == [
+            AnnotationCounts(
+                assignment_id="ASSIGNMENT_ID",
+                annotations=0,
                 replies=1,
                 last_activity=annotation_reply.created,
             ),
@@ -81,8 +120,26 @@ class TestBulkLMSStatsService:
         return anno_slim
 
     @pytest.fixture
+    def annotation_in_another_assignment(self, factories, user, group):
+        anno = factories.Annotation(group=group)
+        anno_slim = factories.AnnotationSlim(
+            annotation=anno,
+            user=user,
+            deleted=False,
+            shared=True,
+            moderated=False,
+            group=group,
+        )
+        factories.AnnotationMetadata(
+            annotation_slim=anno_slim,
+            data={"lms": {"assignment": {"resource_link_id": "OTHER_ASSIGNMENT_ID"}}},
+        )
+
+        return anno_slim
+
+    @pytest.fixture
     def annotation_reply(self, factories, reply_user, group, annotation):
-        anno_reply = factories.Annotation(group=group, references=[annotation.id])
+        anno_reply = factories.Annotation(group=group, references=[annotation.pubid])
         anno_slim_reply = factories.AnnotationSlim(
             annotation=anno_reply,
             user=reply_user,
