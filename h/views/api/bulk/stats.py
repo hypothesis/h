@@ -17,10 +17,10 @@ class AssignmentStatsSchema(JSONSchema):
 
 @api_config(
     versions=["v1", "v2"],
-    route_name="api.bulk.stats.users",
+    route_name="api.bulk.lms.annotations",
     request_method="POST",
-    description="Retrieve stats grouped by user",
-    link_name="bulk.stats.assignment",
+    description="Retrieve annotations for LMS metrics",
+    link_name="bulk.lms.annotations",
     subtype="x-ndjson",
     permission=Permission.API.BULK_ACTION,
 )
