@@ -136,12 +136,7 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route("api.bulk.group", "/api/bulk/group", request_method="POST")
 
     config.add_route(
-        "api.bulk.stats.users", "/api/bulk/stats/users", request_method="POST"
-    )
-    config.add_route(
-        "api.bulk.stats.assignments",
-        "/api/bulk/stats/assignments",
-        request_method="POST",
+        "api.bulk.lms.annotations", "/api/bulk/lms/annotations", request_method="POST"
     )
 
     config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
