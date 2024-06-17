@@ -14,7 +14,7 @@ importlib-metadata==7.0.1
     # via pip-sync-faster
 packaging==24.1
     # via build
-pip-sync-faster==0.0.3
+pip-sync-faster==0.0.4
     # via -r requirements/coverage.in
 pip-tools==7.4.1
     # via
