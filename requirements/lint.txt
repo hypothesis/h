@@ -147,7 +147,7 @@ h-api==1.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-assets==1.0.6
+h-assets==1.0.7
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -176,7 +176,6 @@ importlib-metadata==7.0.1
     #   -r requirements/tests.txt
     #   data-tasks
     #   h-api
-    #   h-assets
     #   pip-sync-faster
 importlib-resources==6.4.0
     # via
