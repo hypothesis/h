@@ -185,7 +185,7 @@ peppercorn==0.6
     #   deform
 pexpect==4.9.0
     # via ipython
-pip-sync-faster==0.0.3
+pip-sync-faster==0.0.4
     # via -r requirements/dev.in
 pip-tools==7.4.1
     # via

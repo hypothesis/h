@@ -269,7 +269,7 @@ peppercorn==0.6
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-pip-sync-faster==0.0.3
+pip-sync-faster==0.0.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/lint.in
