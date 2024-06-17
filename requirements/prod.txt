@@ -63,7 +63,7 @@ gunicorn==22.0.0
     # via -r requirements/prod.in
 h-api==1.1.0
     # via -r requirements/prod.in
-h-assets==1.0.6
+h-assets==1.0.7
     # via -r requirements/prod.in
 h-matchers==1.2.15
     # via -r requirements/prod.in
@@ -75,7 +75,6 @@ importlib-metadata==7.0.1
     # via
     #   data-tasks
     #   h-api
-    #   h-assets
 importlib-resources==6.4.0
     # via
     #   -r requirements/prod.in
