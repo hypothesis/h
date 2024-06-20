@@ -95,7 +95,7 @@ coverage[toml]==7.5.3
     # via
     #   -r requirements/tests.txt
     #   pytest-cov
-data-tasks==0.0.3
+data-tasks==0.0.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -174,7 +174,6 @@ importlib-metadata==7.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   data-tasks
     #   h-api
     #   pip-sync-faster
 importlib-resources==6.4.0
