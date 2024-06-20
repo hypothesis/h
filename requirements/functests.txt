@@ -63,7 +63,7 @@ colander==2.0
     # via
     #   -r requirements/prod.txt
     #   deform
-data-tasks==0.0.3
+data-tasks==0.0.4
     # via -r requirements/prod.txt
 deform==2.0.15
     # via -r requirements/prod.txt
@@ -103,7 +103,6 @@ hupper==1.12
 importlib-metadata==7.0.1
     # via
     #   -r requirements/prod.txt
-    #   data-tasks
     #   h-api
     #   pip-sync-faster
 importlib-resources==6.4.0
