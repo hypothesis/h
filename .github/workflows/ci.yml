@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest-32-cores
     services:
       postgres:
-        image: postgres:15.6-alpine
+        image: postgres:15.5-alpine
         ports:
         - 5432:5432
         env:
@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:15.6-alpine
+        image: postgres:15.5-alpine
         ports:
         - 5432:5432
         env:
