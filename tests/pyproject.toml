@@ -71,6 +71,9 @@ disable = [
 
     # Temporarily ignored during pep8 -> pylint transition. This should be removed later.
     "fixme",
+
+    # h-matchers triggers this when called without brackets
+    "no-value-for-parameter",
 ]
 
 # Just disable PyLint's name style checking for the tests, because we

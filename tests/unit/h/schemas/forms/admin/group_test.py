@@ -159,6 +159,8 @@ class TestAdminGroupSchema:
         for child in bound_schema.children:
             if child.name == "organization":
                 org_node = child
+
+        # pylint:disable=possibly-used-before-assignment
         assert org_node.widget.values == [
             (org.pubid, f"{org.name} ({org.authority})"),
             (
