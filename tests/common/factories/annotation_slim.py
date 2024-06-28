@@ -13,7 +13,9 @@ class AnnotationSlim(ModelFactory):
     class Meta:
         model = models.AnnotationSlim
 
-    annotation = factory.SubFactory(Annotation)
+    annotation = factory.SubFactory(
+        Annotation, shared=factory.SelfAttribute("..shared")
+    )
     user = factory.SubFactory(User)
     group = factory.SubFactory(Group)
     document = factory.SubFactory(Document)

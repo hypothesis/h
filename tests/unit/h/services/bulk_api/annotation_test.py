@@ -121,6 +121,58 @@ class TestBulkAnnotationService:
             ).only()
         )
 
+    def test_it_with_reply_to_non_shared_annotation(self, svc, factories, db_session):
+        viewer, author = factories.User.create_batch(2, authority=self.AUTHORITY)
+
+        # Non shared anno
+        hidden_root = factories.AnnotationSlim(
+            user=author,
+            group=factories.Group(members=[viewer, author]),
+            shared=False,
+            deleted=False,
+        )
+        # Reply to non shared anno
+        factories.AnnotationSlim(
+            user=author,
+            group=factories.Group(members=[viewer, author]),
+            shared=True,
+            annotation=factories.Annotation(references=[hidden_root.annotation.id]),
+            deleted=False,
+        )
+
+        # Shared anno
+        visible_root = factories.AnnotationSlim(
+            user=author,
+            group=factories.Group(members=[viewer, author]),
+            shared=True,
+            deleted=False,
+        )
+        # Reply to non shared anno
+        visible_reply = factories.AnnotationSlim(
+            user=author,
+            group=factories.Group(members=[viewer, author]),
+            shared=True,
+            annotation=factories.Annotation(references=[visible_root.annotation.id]),
+            deleted=False,
+        )
+
+        db_session.flush()
+
+        matched_annos = svc.annotation_search(
+            authority=self.AUTHORITY,
+            username=viewer.username,
+            created={"gt": "2020-01-01", "lte": "2099-01-01"},
+        )
+
+        assert matched_annos == [
+            BulkAnnotation(
+                username=author.username,
+                authority_provided_id=annotation.group.authority_provided_id,
+                metadata={},
+            )
+            for annotation in [visible_root, visible_reply]
+        ]
+
     @pytest.fixture
     def svc(self, db_session):
         return BulkAnnotationService(db_session)

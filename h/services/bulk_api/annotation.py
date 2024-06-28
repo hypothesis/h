@@ -2,10 +2,17 @@ from dataclasses import dataclass
 from typing import List
 
 import sqlalchemy as sa
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import Select
+from sqlalchemy.orm import Session, aliased
+from sqlalchemy.sql import Select, or_
 
-from h.models import AnnotationMetadata, AnnotationSlim, Group, GroupMembership, User
+from h.models import (
+    Annotation,
+    AnnotationMetadata,
+    AnnotationSlim,
+    Group,
+    GroupMembership,
+    User,
+)
 from h.services.bulk_api._helpers import date_match
 
 
@@ -20,8 +27,12 @@ class BulkAnnotationService:
     """A service for retrieving annotations in bulk."""
 
     # Aliases to distinguish between different types of user
-    _AUTHOR = sa.orm.aliased(User, name="author")
-    _AUDIENCE = sa.orm.aliased(User, name="audience")
+    _AUTHOR = aliased(User, name="author")
+    _AUDIENCE = aliased(User, name="audience")
+
+    # Aliases to distinguish the current annotation and its parent
+    _ANNOTATION = sa.orm.aliased(Annotation, name="annotation")
+    _ANNOTATION_PARENT = sa.orm.aliased(Annotation, name="parent")
 
     def __init__(self, db_session: Session):
         """Initialise the service."""
@@ -74,6 +85,11 @@ class BulkAnnotationService:
             .select_from(AnnotationSlim)
             .join(cls._AUTHOR, cls._AUTHOR.id == AnnotationSlim.user_id)
             .join(Group, Group.id == AnnotationSlim.group_id)
+            .join(cls._ANNOTATION)
+            .outerjoin(
+                cls._ANNOTATION_PARENT,
+                cls._ANNOTATION.references[0] == cls._ANNOTATION_PARENT.id,
+            )
             .outerjoin(AnnotationMetadata)
             .where(
                 date_match(AnnotationSlim.created, created),
@@ -82,6 +98,10 @@ class BulkAnnotationService:
                 cls._AUTHOR.nipsa.is_(False),
                 AnnotationSlim.moderated.is_(False),
                 Group.id.in_(cls._audience_groups_subquery(authority, username)),
+                or_(
+                    cls._ANNOTATION_PARENT.id.is_(None),
+                    cls._ANNOTATION_PARENT.shared.is_(True),
+                ),
             )
         )
 
