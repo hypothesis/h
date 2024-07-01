@@ -33,7 +33,7 @@
     "postcss": "^8.4.39",
     "raven-js": "^3.7.0",
     "rollup": "^4.18.0",
-    "sass": "^1.77.4",
+    "sass": "^1.77.6",
     "scroll-into-view": "^1.16.2"
   },
   "devDependencies": {
