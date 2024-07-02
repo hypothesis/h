@@ -1,3 +1,27 @@
 {
-  "presets": ["@babel/preset-env"]
+  "presets": [
+    "@babel/preset-typescript",
+    [
+      "@babel/preset-react",
+      {
+        "runtime": "automatic",
+        "importSource": "preact"
+      }
+    ],
+    "@babel/preset-env"
+  ],
+  "env": {
+    "development": {
+      "presets": [
+        [
+          "@babel/preset-react",
+          {
+            "development": true,
+            "runtime": "automatic",
+            "importSource": "preact"
+          }
+        ]
+      ]
+    }
+  }
 }
