@@ -1,5 +1,6 @@
 import deform
 from pyramid import httpexceptions
+from pyramid.config import not_
 from pyramid.view import view_config, view_defaults
 
 from h import form, i18n
@@ -13,6 +14,7 @@ _ = i18n.TranslationString
     route_name="group_create",
     renderer="h:templates/groups/legacy_create.html.jinja2",
     is_authenticated=True,
+    feature=not_("preact_create_group_form"),
 )
 class LegacyGroupCreateController:
     def __init__(self, request):
@@ -62,6 +64,22 @@ class LegacyGroupCreateController:
     def _template_data(self):
         """Return the data needed to render this controller's page."""
         return {"form": self.form.render()}
+
+
+@view_defaults(
+    route_name="group_create",
+    renderer="h:templates/groups/create.html.jinja2",
+    is_authenticated=True,
+    feature="preact_create_group_form",
+)
+class GroupCreateController:
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method="GET")
+    def get(self):
+        """Render the page for creating a new group."""
+        return {}
 
 
 @view_defaults(

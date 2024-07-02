@@ -1,0 +1,5 @@
+/* CSS entry point for the 'new group' app. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

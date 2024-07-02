@@ -15,6 +15,7 @@ FEATURES = {
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
     "client_user_profile": "Enable client-side user profile and preferences management",
+    "preact_create_group_form": "Enable the new Preact version of the create group form",
 }
 
 

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "checkJs": true,
+    "lib": ["es2018", "dom"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "module": "commonjs",
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2020",
+    "useUnknownInCatchVariables": false
+  },
+  "include": ["**/*.js", "**/*.ts", "**/*.tsx"],
+  "exclude": [
+    // Tests and test infrastructure
+    "**/test/*.js",
+    "bootstrap.js",
+    "karma.config.cjs"
+  ]
+}
