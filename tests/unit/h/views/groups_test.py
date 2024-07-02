@@ -114,6 +114,17 @@ class TestLegacyGroupCreateController:
         return patch("h.views.groups.form.handle_form_submission")
 
 
+class TestGroupCreateController:
+    def test_get(self, controller):
+        result = controller.get()
+
+        assert result == {}
+
+    @pytest.fixture
+    def controller(self, pyramid_request):
+        return views.GroupCreateController(pyramid_request)
+
+
 @pytest.mark.usefixtures("routes")
 class TestGroupEditController:
     def test_get_reads_group_properties(self, pyramid_request, group):
