@@ -1,20 +1,18 @@
-{% extends "h:templates/layouts/group.html.jinja2" %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create a new private group</title>
+    {% for url in asset_urls("new_group_css") %}
+    <link rel="stylesheet" href="{{ url }}">
+    {% endfor %}
+  </head>
+  <body>
+    <div id="app"></div>
 
-{% set page_title = 'Create a new private group' %}
-
-{% block page_content %}
-  <h1 class="form-header">Create a new private group</h1>
-  {{ form }}
-
-  <footer class="form-footer">
-    {# This form has at least one required field. If that changes we should update this footer. #}
-    <span class="form-footer__required">
-      <span class="form-footer__symbol">
-      *
-      </span>
-      <span class="form-footer__text">
-        Required
-      </span>
-    </span>
-  </footer>
-{% endblock page_content %}
+    {% for url in asset_urls("new_group_js") %}
+    <script type="module" src="{{ url }}"></script>
+    {% endfor %}
+  </body>
+</html>
