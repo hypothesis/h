@@ -11,10 +11,10 @@ _ = i18n.TranslationString
 
 @view_defaults(
     route_name="group_create",
-    renderer="h:templates/groups/create.html.jinja2",
+    renderer="h:templates/groups/legacy_create.html.jinja2",
     is_authenticated=True,
 )
-class GroupCreateController:
+class LegacyGroupCreateController:
     def __init__(self, request):
         self.request = request
 
