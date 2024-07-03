@@ -9,7 +9,7 @@ from h.views import groups as views
 
 
 @pytest.mark.usefixtures("group_create_service", "handle_form_submission", "routes")
-class TestGroupCreateController:
+class TestLegacyGroupCreateController:
     def test_get_renders_form(self, controller):
         controller.form = form_validating_to({})
 
@@ -107,7 +107,7 @@ class TestGroupCreateController:
 
     @pytest.fixture
     def controller(self, pyramid_request):
-        return views.GroupCreateController(pyramid_request)
+        return views.LegacyGroupCreateController(pyramid_request)
 
     @pytest.fixture
     def handle_form_submission(self, patch):
