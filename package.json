@@ -9,7 +9,8 @@
     "checkformatting": "prettier --check *.{js,ts,tsx} h/static/scripts",
     "format": "prettier --list-different --write *.{js,ts,tsx} h/static/scripts",
     "lint": "eslint h/static/scripts",
-    "test": "gulp test"
+    "test": "gulp test",
+    "typecheck": "tsc --build h/static/scripts/tsconfig.json"
   },
   "dependencies": {
     "@babel/core": "^7.24.7",

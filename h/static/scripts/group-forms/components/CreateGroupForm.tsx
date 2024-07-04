@@ -12,7 +12,7 @@ export default function CreateGroupForm() {
             type="text"
             id="name"
             class="form-input__input group-form__name-input has-label"
-            autofocus=""
+            autofocus
             autocomplete="off"
             required
           />

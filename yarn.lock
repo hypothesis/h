@@ -2547,12 +2547,12 @@ __metadata:
   linkType: hard
 
 "@types/vinyl@npm:^2.0.9":
-  version: 2.0.11
-  resolution: "@types/vinyl@npm:2.0.11"
+  version: 2.0.12
+  resolution: "@types/vinyl@npm:2.0.12"
   dependencies:
     "@types/expect": ^1.20.4
     "@types/node": "*"
-  checksum: e921718775992ada7712a26da9635fb970bcdbcf4c4cc832344092d68710ffaf7dd3cce42b0050b2741b2cf75a30f3e1b87e1032ae26552db1faac17094d2b50
+  checksum: 885b7813676eed755b94d42501a56bf36c8d93d8ef6cc4d495bb5779fc5c81ffbcee7d0defe77515a90bf46209968da84b559471611efa0d2900ec75fa1a84de
   languageName: node
   linkType: hard
 

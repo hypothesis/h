@@ -17,5 +17,7 @@ jobs:
       run: make frontend-checkformatting
     - name: Lint
       run: make frontend-lint
+    - name: Typecheck
+      run: make frontend-typecheck
     - name: Test
       run: make frontend-tests

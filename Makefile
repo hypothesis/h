@@ -75,6 +75,10 @@ backend-lint: python
 frontend-lint: node_modules/.uptodate
 	@yarn lint
 
+.PHONY: frontend-typecheck
+frontend-typecheck: node_modules/.uptodate
+	@yarn typecheck
+
 .PHONY: format
 format: backend-format frontend-format
 
@@ -162,7 +166,7 @@ requirements/lint.txt: requirements/tests.txt requirements/functests.txt
 requirements requirements/: $(foreach file,$(wildcard requirements/*.in),$(basename $(file)).txt)
 
 .PHONY: sure
-sure: checkformatting lint test coverage functests
+sure: checkformatting lint frontend-typecheck test coverage functests
 
 .PHONY: docker
 docker:
