@@ -8,7 +8,12 @@
         "importSource": "preact"
       }
     ],
-    "@babel/preset-env"
+    [
+      "@babel/preset-env",
+      {
+        "bugfixes": true
+      }
+    ]
   ],
   "env": {
     "development": {
