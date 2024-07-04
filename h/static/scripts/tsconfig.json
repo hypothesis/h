@@ -6,7 +6,7 @@
     "lib": ["es2020", "dom"],
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "module": "commonjs",
+    "module": "es2020",
     "noEmit": true,
     "strict": true,
     "target": "ES2020",
