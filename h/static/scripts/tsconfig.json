@@ -12,11 +12,5 @@
     "target": "ES2020",
     "useUnknownInCatchVariables": false
   },
-  "include": ["**/*.js", "**/*.ts", "**/*.tsx"],
-  "exclude": [
-    // Tests and test infrastructure
-    "**/test/*.js",
-    "bootstrap.js",
-    "karma.config.cjs"
-  ]
+  "include": ["**/*.ts", "**/*.tsx"]
 }
