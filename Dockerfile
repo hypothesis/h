@@ -5,7 +5,7 @@ ENV NODE_ENV production
 
 # Install dependencies.
 WORKDIR /tmp/frontend-build
-COPY package.json .yarnrc.yml yarn.lock ./
+COPY package.json .yarnrc.yml yarn.lock tailwind.config.js ./
 COPY .yarn ./.yarn
 RUN yarn install --immutable
 
