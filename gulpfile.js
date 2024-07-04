@@ -17,19 +17,21 @@ const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
 gulp.task('build-js', () => buildJS('./rollup.config.js'));
 gulp.task('watch-js', () => watchJS('./rollup.config.js'));
 
-gulp.task('build-css', () =>
-  buildCSS(
-    [
-      './node_modules/bootstrap/dist/css/bootstrap.css',
-      './h/static/styles/admin.scss',
-      './h/static/styles/help-page.scss',
-      './h/static/styles/site.scss',
-      './h/static/styles/vendor/icomoon.css',
-      './h/static/styles/group-forms.css',
-    ],
-    { tailwindConfig },
-  ),
+gulp.task('build-legacy-css', () =>
+  buildCSS([
+    './node_modules/bootstrap/dist/css/bootstrap.css',
+    './h/static/styles/admin.scss',
+    './h/static/styles/help-page.scss',
+    './h/static/styles/site.scss',
+    './h/static/styles/vendor/icomoon.css',
+  ]),
 );
+
+gulp.task('build-tailwind-css', () =>
+  buildCSS(['./h/static/styles/group-forms.css'], { tailwindConfig }),
+);
+
+gulp.task('build-css', gulp.parallel('build-legacy-css', 'build-tailwind-css'));
 
 gulp.task('watch-css', () => {
   gulp.watch(
