@@ -13,6 +13,7 @@ export default {
   plugins: [
     nodeResolve({
       browser: true,
+      extensions: ['.js', '.ts', '.tsx'],
 
       // Disallow use of browser polyfills for Node builtin modules. We're
       // trying to avoid dependencies which rely on these.
@@ -25,6 +26,7 @@ export default {
     babel({
       babelHelpers: 'bundled',
       exclude: 'node_modules/**',
+      extensions: ['.js', '.ts', '.tsx'],
       plugins: ['mockable-imports'],
     }),
   ],

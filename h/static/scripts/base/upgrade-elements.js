@@ -82,7 +82,7 @@ export function upgradeElements(root, controllers) {
           err.toString(),
         );
 
-        // Re-raise error so that Raven can capture and report it
+        // Re-raise error so that Sentry can capture and report it
         throw err;
       }
     });
