@@ -33,18 +33,18 @@ class TestAddRendererGlobals:
 
         assert event["frontend_settings"] == {}
 
-    def test_adds_frontend_settings_raven(self, event, pyramid_request):
+    def test_adds_frontend_settings_sentry(self, event, pyramid_request):
         settings = pyramid_request.registry.settings
         settings["h.sentry_dsn_frontend"] = "https://sentry.io/flibble"
 
         subscribers.add_renderer_globals(event)
-        result = event["frontend_settings"]["raven"]
+        result = event["frontend_settings"]["sentry"]
 
         assert result["dsn"] == "https://sentry.io/flibble"
         assert result["release"]
         assert result["userid"] is None
 
-    def test_adds_frontend_settings_raven_user(
+    def test_adds_frontend_settings_sentry_user(
         self, event, pyramid_config, pyramid_request
     ):
         pyramid_config.testing_securitypolicy("acct:safet.baljić@example.com")
@@ -52,7 +52,7 @@ class TestAddRendererGlobals:
         settings["h.sentry_dsn_frontend"] = "https://sentry.io/flibble"
 
         subscribers.add_renderer_globals(event)
-        result = event["frontend_settings"]["raven"]["userid"]
+        result = event["frontend_settings"]["sentry"]["userid"]
 
         assert result == "acct:safet.baljić@example.com"
 

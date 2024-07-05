@@ -25,7 +25,7 @@ def add_renderer_globals(event):
     event["frontend_settings"] = {}
 
     if "h.sentry_dsn_frontend" in request.registry.settings:
-        event["frontend_settings"]["raven"] = {
+        event["frontend_settings"]["sentry"] = {
             "dsn": request.registry.settings["h.sentry_dsn_frontend"],
             "release": __version__,
             "userid": request.authenticated_userid,

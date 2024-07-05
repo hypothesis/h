@@ -2056,6 +2056,93 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry-internal/browser-utils@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry-internal/browser-utils@npm:8.15.0"
+  dependencies:
+    "@sentry/core": 8.15.0
+    "@sentry/types": 8.15.0
+    "@sentry/utils": 8.15.0
+  checksum: 6cc42c7eaf40d74a14006595334d865daf7355cf082c670234bcc1ce5a1cb27d26d811144b21e670896acf0901d593bf68030127092b22958e49cc749b80b214
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/feedback@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry-internal/feedback@npm:8.15.0"
+  dependencies:
+    "@sentry/core": 8.15.0
+    "@sentry/types": 8.15.0
+    "@sentry/utils": 8.15.0
+  checksum: 812329ad6e8221ea8b900914cb1d25bbc3be22e6a4b3519f36e5073165794f73ccc8ae02a8a4f4fda4d28a3271ed7772fc8e6d6debd440f8e6a0601b3de232c5
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/replay-canvas@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry-internal/replay-canvas@npm:8.15.0"
+  dependencies:
+    "@sentry-internal/replay": 8.15.0
+    "@sentry/core": 8.15.0
+    "@sentry/types": 8.15.0
+    "@sentry/utils": 8.15.0
+  checksum: adb8210aac4f0e0069af2ac4f8818441253f40763426a092895faa7e8d49abe506ccf0133ffbbc2d9e70058c7a61464e679de44ded913260e297b52329bd8291
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/replay@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry-internal/replay@npm:8.15.0"
+  dependencies:
+    "@sentry-internal/browser-utils": 8.15.0
+    "@sentry/core": 8.15.0
+    "@sentry/types": 8.15.0
+    "@sentry/utils": 8.15.0
+  checksum: 97f897854ea3869c99eb629bed8a4c5a0839969e8030f23b86f6796433a7ff3efd440af2c1ffa4e70513106011c2f9bf8ecfcea29bb1646d35b3bccb3cc4df10
+  languageName: node
+  linkType: hard
+
+"@sentry/browser@npm:^8.15.0":
+  version: 8.15.0
+  resolution: "@sentry/browser@npm:8.15.0"
+  dependencies:
+    "@sentry-internal/browser-utils": 8.15.0
+    "@sentry-internal/feedback": 8.15.0
+    "@sentry-internal/replay": 8.15.0
+    "@sentry-internal/replay-canvas": 8.15.0
+    "@sentry/core": 8.15.0
+    "@sentry/types": 8.15.0
+    "@sentry/utils": 8.15.0
+  checksum: c62a1a0bfffee0e5bb7925f2a8ad9776a4ecd3e3d7e66312db50d88d5e515401c6049192129895c6f6cd8e4da2689d13dc9245c4821b7d2570dc120ed29e71d2
+  languageName: node
+  linkType: hard
+
+"@sentry/core@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry/core@npm:8.15.0"
+  dependencies:
+    "@sentry/types": 8.15.0
+    "@sentry/utils": 8.15.0
+  checksum: 72a98cb4329d384841a079fa7bba49b9d4d4a496abbcb0146f250df7509a31c1a3e6e46009d7c99aa5934ce2610872d781642b3738ff058f56c7e02f515a0222
+  languageName: node
+  linkType: hard
+
+"@sentry/types@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry/types@npm:8.15.0"
+  checksum: 331575628a15fa247cd3e7044ec9831f2da16136ad723c968d478c220d99597290750a6ed034616293e03b10ed918b77a85188d0c1a47e8d34331f3800b25ae4
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:8.15.0":
+  version: 8.15.0
+  resolution: "@sentry/utils@npm:8.15.0"
+  dependencies:
+    "@sentry/types": 8.15.0
+  checksum: aecda8795e2016dd5405568f8cd347f56f8e82358bf604685aea844f7e445580b6d26081903300cbb2309257c110ec6aa2167d667e07bbaf19284785121b1d3c
+  languageName: node
+  linkType: hard
+
 "@sinonjs/commons@npm:^2.0.0":
   version: 2.0.0
   resolution: "@sinonjs/commons@npm:2.0.0"
@@ -5202,6 +5289,7 @@ __metadata:
     "@rollup/plugin-commonjs": ^26.0.1
     "@rollup/plugin-node-resolve": ^15.2.3
     "@rollup/plugin-terser": ^0.4.4
+    "@sentry/browser": ^8.15.0
     autoprefixer: ^10.4.19
     babel-plugin-mockable-imports: ^2.0.1
     bootstrap: ^4.6.2
@@ -5231,7 +5319,6 @@ __metadata:
     postcss: ^8.4.39
     preact: ^10.22.1
     prettier: ^3.3.2
-    raven-js: ^3.7.0
     rollup: ^4.18.0
     sass: ^1.77.6
     scroll-into-view: ^1.16.2
@@ -7558,13 +7645,6 @@ __metadata:
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
   checksum: 0a268d4fea508661cf5743dfe3d5f47ce214fd6b7dec1de0da4d669dd4ef3d2144468ebe4179049eff253d9d27e719c88dae55be64f954e80135a0cada804ec9
-  languageName: node
-  linkType: hard
-
-"raven-js@npm:^3.7.0":
-  version: 3.27.2
-  resolution: "raven-js@npm:3.27.2"
-  checksum: 561291123065f2c68e4e1b13a4e8484bb69240edf92b282f1659cde70ab5da69558778a1f146998a60aabd5b644635d5b5752e4327db54c4b715c6a9c45883f4
   languageName: node
   linkType: hard
 

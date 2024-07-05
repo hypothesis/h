@@ -1,14 +1,14 @@
 import 'bootstrap';
 
-import { init as initRaven } from './base/raven';
+import { init as initSentry } from './base/sentry';
 import { settings } from './base/settings';
 import { upgradeElements } from './base/upgrade-elements';
 import { sharedControllers } from './controllers';
 import { AdminUsersController } from './controllers/admin-users-controller';
 
 const appSettings = settings(document);
-if (appSettings.raven) {
-  initRaven(appSettings.raven);
+if (appSettings.sentry) {
+  initSentry(appSettings.sentry);
 }
 
 const controllers = Object.assign(
