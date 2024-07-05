@@ -1,3 +1,5 @@
+import { Button, Input, Textarea } from '@hypothesis/frontend-shared';
+
 export default function CreateGroupForm() {
   return (
     <>
@@ -5,32 +7,23 @@ export default function CreateGroupForm() {
 
       <form>
         <div>
-          <label for="name">
-            Name <span>*</span>
-          </label>
-          <input type="text" id="name" autofocus autocomplete="off" required />
-          <span>0/25</span>
+          <label for="name">Name*</label>
+          <Input id="name" autofocus autocomplete="off" required />
+          0/25
         </div>
 
         <div>
           <label for="description">Description</label>
-          <textarea id="description"></textarea>
-          <span>0/250</span>
+          <Textarea id="description" />
+          0/250
         </div>
 
         <div>
-          <div>
-            <button>Create group</button>
-          </div>
+          <Button variant="primary">Create group</Button>
         </div>
       </form>
 
-      <footer>
-        <span>
-          <span>*</span>
-          <span>Required</span>
-        </span>
-      </footer>
+      <footer>*Required</footer>
     </>
   );
 }
