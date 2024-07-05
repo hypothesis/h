@@ -31,7 +31,7 @@ def get_annotation_counts(request):
     stats = request.find_service(BulkLMSStatsService).get_annotation_counts(
         group_by=CountsGroupBy[data["group_by"].upper()],
         groups=query_filter["groups"],
-        assignment_id=query_filter.get("assignment_id"),
+        assignment_ids=query_filter.get("assignment_ids"),
         h_userids=query_filter.get("h_userids"),
     )
 
