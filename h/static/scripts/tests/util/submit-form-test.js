@@ -1,18 +1,20 @@
-import fetchMock from 'fetch-mock';
-
 import { submitForm } from '../../util/submit-form';
 import { unroll } from '../util';
 
+function createResponse(status, body) {
+  let statusText;
+  if (status === 500) {
+    statusText = 'Internal Server Error';
+  }
+  return {
+    status,
+    statusText,
+    text: sinon.stub().resolves(body),
+  };
+}
+
 describe('submitForm', () => {
   const FORM_URL = 'http://example.org/things';
-
-  afterEach(() => {
-    fetchMock.restore();
-  });
-
-  function mockResponse(response, url = FORM_URL) {
-    fetchMock.post(url, response);
-  }
 
   function createForm() {
     const form = document.createElement('form');
@@ -32,13 +34,14 @@ describe('submitForm', () => {
       if (typeof testCase.action === 'string') {
         form.setAttribute('action', testCase.action);
       }
-      mockResponse(
-        '<form><!-- updated form !--></form>',
-        testCase.expectedSubmitUrl,
-      );
+      const fetchMock = sinon
+        .stub()
+        .withArgs(testCase.expectedSubmitUrl)
+        .resolves(createResponse(200, '<form><!-- updated form !--></form>'));
 
-      return submitForm(form, fetchMock.fetchMock).then(() => {
-        const [, requestInit] = fetchMock.lastCall(testCase.expectedSubmitUrl);
+      return submitForm(form, fetchMock).then(() => {
+        assert.equal(fetchMock.callCount, 1);
+        const requestInit = fetchMock.getCall(0).args[1];
         assert.instanceOf(requestInit.body, FormData);
       });
     },
@@ -66,18 +69,18 @@ describe('submitForm', () => {
   it('returns the markup for the updated form if validation succeeds', () => {
     const form = createForm();
     const responseBody = '<form><!-- updated form !--></form>';
-    mockResponse(responseBody);
+    const fetchMock = sinon.stub().resolves(createResponse(200, responseBody));
 
-    return submitForm(form, fetchMock.fetchMock).then(response => {
+    return submitForm(form, fetchMock).then(response => {
       assert.equal(response.form, responseBody);
     });
   });
 
   it('rejects with the updated form markup if validation fails', () => {
     const form = createForm();
-    mockResponse({ status: 400, body: 'response' });
+    const fetchMock = sinon.stub().resolves(createResponse(400, 'response'));
 
-    const done = submitForm(form, fetchMock.fetchMock);
+    const done = submitForm(form, fetchMock);
 
     return done.catch(err => {
       assert.match(err, sinon.match({ status: 400, form: 'response' }));
@@ -86,9 +89,9 @@ describe('submitForm', () => {
 
   it('rejects with an error message if submission fails', () => {
     const form = createForm();
-    mockResponse({ status: 500, statusText: 'Internal Server Error' });
+    const fetchMock = sinon.stub().resolves(createResponse(500));
 
-    const done = submitForm(form, fetchMock.fetchMock);
+    const done = submitForm(form, fetchMock);
 
     return done.catch(err => {
       assert.match(

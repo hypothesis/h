@@ -52,7 +52,6 @@
     "eslint-plugin-mocha": "^10.4.3",
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "fetch-mock": "^9.11.0",
     "karma": "^6.4.3",
     "karma-chrome-launcher": "^3.2.0",
     "karma-mocha": "^2.0.1",
