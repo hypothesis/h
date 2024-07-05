@@ -17,7 +17,7 @@ class TestBulkLMSStatsService:
     ):
         stats = svc.get_annotation_counts(
             groups=[group.authority_provided_id],
-            assignment_id="ASSIGNMENT_ID",
+            assignment_ids=["ASSIGNMENT_ID"],
             group_by=CountsGroupBy.USER,
         )
 

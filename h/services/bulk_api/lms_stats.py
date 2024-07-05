@@ -36,7 +36,7 @@ class BulkLMSStatsService:
         self,
         groups: list[str],
         h_userids: list[str] | None = None,
-        assignment_id: str | None = None,
+        assignment_ids: list[str] | None = None,
     ):
         query = (
             select(
@@ -77,10 +77,11 @@ class BulkLMSStatsService:
                 Group.authority_provided_id.in_(groups),
             )
         )
-        if assignment_id:
+        if assignment_ids:
             query = query.where(
-                AnnotationMetadata.data["lms"]["assignment"]["resource_link_id"].astext
-                == assignment_id,
+                AnnotationMetadata.data["lms"]["assignment"][
+                    "resource_link_id"
+                ].astext.in_(assignment_ids)
             )
 
         if h_userids:
@@ -106,7 +107,7 @@ class BulkLMSStatsService:
         groups: list[str],
         group_by: CountsGroupBy,
         h_userids: list[str] | None = None,
-        assignment_id: str | None = None,
+        assignment_ids: list[str] | None = None,
     ) -> list[AnnotationCounts]:
         """
         Get basic stats per user for an LMS assignment.
@@ -114,10 +115,10 @@ class BulkLMSStatsService:
         :param groups: List of "authority_provided_id" to filter groups by.
         :param group_by: By which column to aggregate the data.
         :param h_userids: List of User.userid to filter annotations by
-        :param assignment_id: ID of the assignment to filter annotations by
+        :param assignment_ids: ID of the assignment to filter annotations by
         """
         annos_query = self._annotation_query(
-            groups, h_userids=h_userids, assignment_id=assignment_id
+            groups, h_userids=h_userids, assignment_ids=assignment_ids
         ).cte("annotations")
 
         # Alias some columns

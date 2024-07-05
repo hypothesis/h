@@ -31,10 +31,14 @@
         "h_userids": {
           "$ref": "#/$defs/nonEmptyStringArray"
         },
-        "assignment_id": {
-          "type": [
-            "string",
-            "null"
+        "assignment_ids": {
+          "anyOf": [
+            {
+              "ref": "#/$defs/nonEmptyStringArray"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },

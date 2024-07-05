@@ -38,7 +38,7 @@ class TestBulkGroup:
         bulk_stats_service.get_annotation_counts.assert_called_once_with(
             group_by=CountsGroupBy.USER,
             groups=assignment_request["filter"]["groups"],
-            assignment_id=assignment_request["filter"]["assignment_id"],
+            assignment_ids=assignment_request["filter"]["assignment_ids"],
             h_userids=assignment_request["filter"]["h_userids"],
         )
         return_data = [
@@ -63,7 +63,7 @@ class TestBulkGroup:
             "filter": {
                 "groups": ["3a022b6c146dfd9df4ea8662178eac"],
                 "h_userids": ["acc:user@authority"],
-                "assignment_id": "ASSIGNMENT_ID",
+                "assignment_ids": ["ASSIGNMENT_ID"],
             },
         }
 
