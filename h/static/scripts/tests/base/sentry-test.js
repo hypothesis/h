@@ -23,6 +23,7 @@ describe('sentry', () => {
     it('configures the Sentry client', () => {
       sentry.init({
         dsn: 'dsn',
+        environment: 'prod',
         release: 'release',
         userid: 'acct:foobar@hypothes.is',
       });
@@ -30,6 +31,7 @@ describe('sentry', () => {
         fakeSentry.init,
         sinon.match({
           dsn: 'dsn',
+          environment: 'prod',
           release: 'release',
         }),
       );
