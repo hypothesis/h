@@ -4,7 +4,7 @@ import pytest
 from kombu.exceptions import OperationalError
 from transaction import TransactionManager
 
-from h import subscribers
+from h import __version__, subscribers
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 
@@ -30,26 +30,26 @@ class TestAddRendererGlobals:
 
     def test_adds_frontend_settings(self, event):
         subscribers.add_renderer_globals(event)
-
         assert event["frontend_settings"] == {}
 
-    def test_adds_frontend_settings_sentry(self, event, pyramid_request):
-        settings = pyramid_request.registry.settings
-        settings["h.sentry_dsn_frontend"] = "https://sentry.io/flibble"
-
+    @pytest.mark.usefixtures("sentry_config")
+    def test_adds_frontend_settings_sentry(self, event):
         subscribers.add_renderer_globals(event)
-        result = event["frontend_settings"]["sentry"]
 
-        assert result["dsn"] == "https://sentry.io/flibble"
-        assert result["release"]
-        assert result["userid"] is None
+        assert event["frontend_settings"]["sentry"] == {
+            "dsn": "https://sentry.io/flibble",
+            "environment": "prod",
+            "release": __version__,
+            "userid": None,
+        }
 
-    def test_adds_frontend_settings_sentry_user(
-        self, event, pyramid_config, pyramid_request
+    @pytest.mark.usefixtures("sentry_config")
+    def test_adds_frontend_settings_sentry_userid(
+        self,
+        event,
+        pyramid_config,
     ):
         pyramid_config.testing_securitypolicy("acct:safet.baljić@example.com")
-        settings = pyramid_request.registry.settings
-        settings["h.sentry_dsn_frontend"] = "https://sentry.io/flibble"
 
         subscribers.add_renderer_globals(event)
         result = event["frontend_settings"]["sentry"]["userid"]
@@ -63,6 +63,12 @@ class TestAddRendererGlobals:
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route("index", "/idx")
+
+    @pytest.fixture
+    def sentry_config(self, pyramid_request):
+        settings = pyramid_request.registry.settings
+        settings["h.sentry_dsn_frontend"] = "https://sentry.io/flibble"
+        settings["h.sentry_environment"] = "prod"
 
 
 class TestPublishAnnotationEvent:

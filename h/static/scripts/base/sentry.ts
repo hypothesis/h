@@ -9,6 +9,7 @@ import * as Sentry from '@sentry/browser';
 
 export type SentryConfig = {
   dsn: string;
+  environment: string;
   release: string;
   userid?: string;
 };
@@ -16,6 +17,7 @@ export type SentryConfig = {
 export function init(config: SentryConfig) {
   Sentry.init({
     dsn: config.dsn,
+    environment: config.environment,
     release: config.release,
   });
 
