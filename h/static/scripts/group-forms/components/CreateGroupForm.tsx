@@ -9,7 +9,7 @@ export default function CreateGroupForm() {
 
       <form>
         <div className="mb-[15px]">
-          <label for="name" className="text-[#7a7a7a] text-[13px] leading-[15px]">
+          <label htmlFor="name" className="text-[#7a7a7a] text-[13px] leading-[15px]">
             Name<span className="text-[#d00032]">*</span>
           </label>
           <Input id="name" autofocus autocomplete="off" required />
@@ -21,7 +21,7 @@ export default function CreateGroupForm() {
 
         <div className="mb-[15px]">
           <label
-            for="description"
+            htmlFor="description"
             className="text-[#7a7a7a] text-[13px] leading-[15px]"
           >
             Description
