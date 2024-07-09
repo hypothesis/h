@@ -31,18 +31,14 @@ export default function CreateGroupForm() {
 
         <div className="flex">
           <div className="grow" />
-          <div>
-            <Button variant="primary">Create group</Button>
-          </div>
+          <Button variant="primary">Create group</Button>
         </div>
       </form>
 
       <footer className="text-[#7a7a7a] text-[13px] leading-[15px] mt-[50px] pt-[15px] border-t border-t-[#dbdbdb]">
         <div className="flex">
           <div className="grow" />
-          <div>
-            <span className="text-[#d00032]">*</span> Required
-          </div>
+          <span className="text-[#d00032]">*</span> Required
         </div>
       </footer>
     </>
