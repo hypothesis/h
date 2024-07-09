@@ -1,6 +1,11 @@
+import { useId } from 'preact/hooks';
+
 import { Button, Input, Textarea } from '@hypothesis/frontend-shared';
 
 export default function CreateGroupForm() {
+  const nameId = useId();
+  const descriptionId = useId();
+
   return (
     <>
       <h1 className="mt-[55px] mb-[30px] text-[#3f3f3f] text-[19px] leading-[15px]">
@@ -10,12 +15,12 @@ export default function CreateGroupForm() {
       <form>
         <div className="mb-[15px]">
           <label
-            htmlFor="name"
+            htmlFor={nameId}
             className="text-[#7a7a7a] text-[13px] leading-[15px]"
           >
             Name<span className="text-[#d00032]">*</span>
           </label>
-          <Input id="name" autofocus autocomplete="off" required />
+          <Input id={nameId} autofocus autocomplete="off" required />
           <div className="flex">
             <div className="grow" />
             <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
@@ -26,12 +31,12 @@ export default function CreateGroupForm() {
 
         <div className="mb-[15px]">
           <label
-            htmlFor="description"
+            htmlFor={descriptionId}
             className="text-[#7a7a7a] text-[13px] leading-[15px]"
           >
             Description
           </label>
-          <Textarea id="description" />
+          <Textarea id={descriptionId} />
           <div className="flex">
             <div className="grow" />
             <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
