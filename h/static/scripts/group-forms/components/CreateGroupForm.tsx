@@ -9,13 +9,18 @@ export default function CreateGroupForm() {
 
       <form>
         <div className="mb-[15px]">
-          <label htmlFor="name" className="text-[#7a7a7a] text-[13px] leading-[15px]">
+          <label
+            htmlFor="name"
+            className="text-[#7a7a7a] text-[13px] leading-[15px]"
+          >
             Name<span className="text-[#d00032]">*</span>
           </label>
           <Input id="name" autofocus autocomplete="off" required />
           <div className="flex">
             <div className="grow"></div>
-            <span className="text-[#7a7a7a] text-[13px] leading-[15px]">0/25</span>
+            <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
+              0/25
+            </span>
           </div>
         </div>
 
@@ -29,7 +34,9 @@ export default function CreateGroupForm() {
           <Textarea id="description" />
           <div className="flex">
             <div className="grow"></div>
-            <span className="text-[#7a7a7a] text-[13px] leading-[15px]">0/250</span>
+            <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
+              0/250
+            </span>
           </div>
         </div>
 
