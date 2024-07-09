@@ -8,7 +8,7 @@ export default function CreateGroupForm() {
 
   return (
     <>
-      <h1 className="mt-[55px] mb-[30px] text-[#3f3f3f] text-[19px] leading-[15px]">
+      <h1 className="mt-[55px] mb-[30px] text-grey-7 text-[19px] leading-[15px]">
         Create a new private group
       </h1>
 
@@ -35,10 +35,10 @@ export default function CreateGroupForm() {
         </div>
       </form>
 
-      <footer className="text-[#7a7a7a] text-[13px] leading-[15px] mt-[50px] pt-[15px] border-t border-t-[#dbdbdb]">
+      <footer className="text-grey-6 text-[13px] leading-[15px] mt-[50px] pt-[15px] border-t border-t-text-grey-6">
         <div className="flex">
           <div className="grow" />
-          <span className="text-[#d00032]">*</span> Required
+          <span className="text-brand">*</span> Required
         </div>
       </footer>
     </>
@@ -49,7 +49,7 @@ function CharacterCounter({ value, limit }: { value: number; limit: number }) {
   return (
     <div className="flex">
       <div className="grow" />
-      <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
+      <span className="text-grey-6 text-[13px] leading-[15px]">
         {value}/{limit}
       </span>
     </div>
@@ -68,7 +68,7 @@ function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="text-[#7a7a7a] text-[13px] leading-[15px]"
+      className="text-grey-6 text-[13px] leading-[15px]"
     >
       {text}
       <Required required={required} />
@@ -78,7 +78,7 @@ function Label({
 
 function Required({ required }: { required: boolean }) {
   if (required) {
-    return <span className="text-[#d00032]">*</span>;
+    return <span className="text-brand">*</span>;
   }
 
   return null;
