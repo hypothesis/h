@@ -21,12 +21,7 @@ export default function CreateGroupForm() {
             Name<span className="text-[#d00032]">*</span>
           </label>
           <Input id={nameId} autofocus autocomplete="off" required />
-          <div className="flex">
-            <div className="grow" />
-            <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
-              0/25
-            </span>
-          </div>
+          <CharacterCounter value={0} limit={25} />
         </div>
 
         <div className="mb-[15px]">
@@ -37,12 +32,7 @@ export default function CreateGroupForm() {
             Description
           </label>
           <Textarea id={descriptionId} />
-          <div className="flex">
-            <div className="grow" />
-            <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
-              0/250
-            </span>
-          </div>
+          <CharacterCounter value={0} limit={250} />
         </div>
 
         <div className="flex">
@@ -62,5 +52,16 @@ export default function CreateGroupForm() {
         </div>
       </footer>
     </>
+  );
+}
+
+function CharacterCounter({ value, limit }: { value: number; limit: number }) {
+  return (
+    <div className="flex">
+      <div className="grow" />
+      <span className="text-[#7a7a7a] text-[13px] leading-[15px]">
+        {value}/{limit}
+      </span>
+    </div>
   );
 }
