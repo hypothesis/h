@@ -14,23 +14,17 @@ export default function CreateGroupForm() {
 
       <form>
         <div className="mb-[15px]">
-          <label
-            htmlFor={nameId}
-            className="text-[#7a7a7a] text-[13px] leading-[15px]"
-          >
-            Name<span className="text-[#d00032]">*</span>
-          </label>
+          <Label htmlFor={nameId} text={'Name'} required={true} />
           <Input id={nameId} autofocus autocomplete="off" required />
           <CharacterCounter value={0} limit={25} />
         </div>
 
         <div className="mb-[15px]">
-          <label
+          <Label
             htmlFor={descriptionId}
-            className="text-[#7a7a7a] text-[13px] leading-[15px]"
-          >
-            Description
-          </label>
+            text={'Description'}
+            required={false}
+          />
           <Textarea id={descriptionId} />
           <CharacterCounter value={0} limit={250} />
         </div>
@@ -64,4 +58,32 @@ function CharacterCounter({ value, limit }: { value: number; limit: number }) {
       </span>
     </div>
   );
+}
+
+function Label({
+  htmlFor,
+  text,
+  required,
+}: {
+  htmlFor: string;
+  text: string;
+  required: boolean;
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className="text-[#7a7a7a] text-[13px] leading-[15px]"
+    >
+      {text}
+      <Required required={required} />
+    </label>
+  );
+}
+
+function Required({ required }: { required: boolean }) {
+  if (required) {
+    return <span className="text-[#d00032]">*</span>;
+  }
+
+  return null;
 }
