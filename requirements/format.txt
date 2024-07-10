@@ -5,7 +5,7 @@
 #    pip-compile requirements/format.in
 #
 black==24.4.2
-    # via -r requirements/format.in
+    # via -r format.in
 build==1.0.3
     # via pip-tools
 click==8.1.7
@@ -15,7 +15,7 @@ click==8.1.7
 importlib-metadata==7.0.1
     # via pip-sync-faster
 isort==5.13.2
-    # via -r requirements/format.in
+    # via -r format.in
 mypy-extensions==1.0.0
     # via black
 packaging==24.1
@@ -25,10 +25,10 @@ packaging==24.1
 pathspec==0.12.1
     # via black
 pip-sync-faster==0.0.4
-    # via -r requirements/format.in
+    # via -r format.in
 pip-tools==7.4.1
     # via
-    #   -r requirements/format.in
+    #   -r format.in
     #   pip-sync-faster
 platformdirs==4.1.0
     # via black
@@ -38,7 +38,7 @@ pyproject-hooks==1.0.0
     #   pip-tools
 wheel==0.42.0
     # via pip-tools
-zipp==3.17.0
+zipp==3.19.1
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
