@@ -38,7 +38,8 @@ export default function CreateGroupForm() {
       <footer className="mt-14 pt-4 border-t border-t-text-grey-6">
         <div className="flex">
           <div className="grow" />
-          <span className="text-brand">*</span> Required
+          <Star />
+          &nbsp;Required
         </div>
       </footer>
     </div>
@@ -66,15 +67,11 @@ function Label({
   return (
     <label htmlFor={htmlFor}>
       {text}
-      <Required required={required} />
+      {required ? <Star /> : null}
     </label>
   );
 }
 
-function Required({ required }: { required: boolean }) {
-  if (required) {
-    return <span className="text-brand">*</span>;
-  }
-
-  return null;
+function Star() {
+  return <span className="text-brand">*</span>;
 }
