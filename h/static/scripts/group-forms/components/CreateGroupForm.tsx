@@ -8,7 +8,7 @@ export default function CreateGroupForm() {
 
   return (
     <>
-      <h1 className="mt-[55px] mb-[30px] text-grey-7 text-[19px] leading-[15px]">
+      <h1 className="mt-[55px] mb-[30px] text-grey-7 text-xl/none">
         Create a new private group
       </h1>
 
@@ -35,7 +35,7 @@ export default function CreateGroupForm() {
         </div>
       </form>
 
-      <footer className="text-grey-6 text-[13px] leading-[15px] mt-[50px] pt-[15px] border-t border-t-text-grey-6">
+      <footer className="text-grey-6 text-sm/tight mt-[50px] pt-[15px] border-t border-t-text-grey-6">
         <div className="flex">
           <div className="grow" />
           <span className="text-brand">*</span> Required
@@ -49,7 +49,7 @@ function CharacterCounter({ value, limit }: { value: number; limit: number }) {
   return (
     <div className="flex">
       <div className="grow" />
-      <span className="text-grey-6 text-[13px] leading-[15px]">
+      <span className="text-grey-6 text-sm/tight">
         {value}/{limit}
       </span>
     </div>
@@ -68,7 +68,7 @@ function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="text-grey-6 text-[13px] leading-[15px]"
+      className="text-grey-6 text-sm/tight"
     >
       {text}
       <Required required={required} />
