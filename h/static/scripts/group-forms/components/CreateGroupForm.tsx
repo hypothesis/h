@@ -8,18 +8,18 @@ export default function CreateGroupForm() {
 
   return (
     <div className="text-grey-6 text-sm/tight">
-      <h1 className="mt-[55px] mb-[30px] text-grey-7 text-xl/none">
+      <h1 className="mt-14 mb-8 text-grey-7 text-xl/none">
         Create a new private group
       </h1>
 
       <form>
-        <div className="mb-[15px]">
+        <div className="mb-4">
           <Label htmlFor={nameId} text={'Name'} required={true} />
           <Input id={nameId} autofocus autocomplete="off" required />
           <CharacterCounter value={0} limit={25} />
         </div>
 
-        <div className="mb-[15px]">
+        <div className="mb-4">
           <Label
             htmlFor={descriptionId}
             text={'Description'}
@@ -35,7 +35,7 @@ export default function CreateGroupForm() {
         </div>
       </form>
 
-      <footer className="mt-[50px] pt-[15px] border-t border-t-text-grey-6">
+      <footer className="mt-14 pt-4 border-t border-t-text-grey-6">
         <div className="flex">
           <div className="grow" />
           <span className="text-brand">*</span> Required
