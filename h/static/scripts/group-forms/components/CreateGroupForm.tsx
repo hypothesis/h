@@ -2,6 +2,36 @@ import { useId } from 'preact/hooks';
 
 import { Button, Input, Textarea } from '@hypothesis/frontend-shared';
 
+function Star() {
+  return <span className="text-brand">*</span>;
+}
+
+function CharacterCounter({ value, limit }: { value: number; limit: number }) {
+  return (
+    <div className="flex">
+      <div className="grow" />
+      {value}/{limit}
+    </div>
+  );
+}
+
+function Label({
+  htmlFor,
+  text,
+  required,
+}: {
+  htmlFor: string;
+  text: string;
+  required?: boolean;
+}) {
+  return (
+    <label htmlFor={htmlFor}>
+      {text}
+      {required ? <Star /> : null}
+    </label>
+  );
+}
+
 export default function CreateGroupForm() {
   const nameId = useId();
   const descriptionId = useId();
@@ -40,34 +70,4 @@ export default function CreateGroupForm() {
       </footer>
     </div>
   );
-}
-
-function CharacterCounter({ value, limit }: { value: number; limit: number }) {
-  return (
-    <div className="flex">
-      <div className="grow" />
-      {value}/{limit}
-    </div>
-  );
-}
-
-function Label({
-  htmlFor,
-  text,
-  required,
-}: {
-  htmlFor: string;
-  text: string;
-  required?: boolean;
-}) {
-  return (
-    <label htmlFor={htmlFor}>
-      {text}
-      {required ? <Star /> : null}
-    </label>
-  );
-}
-
-function Star() {
-  return <span className="text-brand">*</span>;
 }
