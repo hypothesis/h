@@ -44,13 +44,13 @@ export default function CreateGroupForm() {
 
       <form>
         <div className="mb-4">
-          <Label htmlFor={nameId} text={'Name'} required />
+          <Label htmlFor={nameId} text="Name" required />
           <Input id={nameId} autofocus autocomplete="off" required />
           <CharacterCounter value={0} limit={25} />
         </div>
 
         <div className="mb-4">
-          <Label htmlFor={descriptionId} text={'Description'} />
+          <Label htmlFor={descriptionId} text="Description" />
           <Textarea id={descriptionId} classes="h-24" />
           <CharacterCounter value={0} limit={250} />
         </div>
