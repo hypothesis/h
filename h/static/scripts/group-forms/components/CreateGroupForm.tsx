@@ -7,7 +7,7 @@ export default function CreateGroupForm() {
   const descriptionId = useId();
 
   return (
-    <>
+    <div className="text-grey-6 text-sm/tight">
       <h1 className="mt-[55px] mb-[30px] text-grey-7 text-xl/none">
         Create a new private group
       </h1>
@@ -35,13 +35,13 @@ export default function CreateGroupForm() {
         </div>
       </form>
 
-      <footer className="text-grey-6 text-sm/tight mt-[50px] pt-[15px] border-t border-t-text-grey-6">
+      <footer className="mt-[50px] pt-[15px] border-t border-t-text-grey-6">
         <div className="flex">
           <div className="grow" />
           <span className="text-brand">*</span> Required
         </div>
       </footer>
-    </>
+    </div>
   );
 }
 
@@ -49,9 +49,7 @@ function CharacterCounter({ value, limit }: { value: number; limit: number }) {
   return (
     <div className="flex">
       <div className="grow" />
-      <span className="text-grey-6 text-sm/tight">
-        {value}/{limit}
-      </span>
+      {value}/{limit}
     </div>
   );
 }
@@ -66,10 +64,7 @@ function Label({
   required: boolean;
 }) {
   return (
-    <label
-      htmlFor={htmlFor}
-      className="text-grey-6 text-sm/tight"
-    >
+    <label htmlFor={htmlFor}>
       {text}
       <Required required={required} />
     </label>
