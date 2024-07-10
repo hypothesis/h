@@ -14,17 +14,13 @@ export default function CreateGroupForm() {
 
       <form>
         <div className="mb-4">
-          <Label htmlFor={nameId} text={'Name'} required={true} />
+          <Label htmlFor={nameId} text={'Name'} required />
           <Input id={nameId} autofocus autocomplete="off" required />
           <CharacterCounter value={0} limit={25} />
         </div>
 
         <div className="mb-4">
-          <Label
-            htmlFor={descriptionId}
-            text={'Description'}
-            required={false}
-          />
+          <Label htmlFor={descriptionId} text={'Description'} />
           <Textarea id={descriptionId} classes="h-24" />
           <CharacterCounter value={0} limit={250} />
         </div>
@@ -62,7 +58,7 @@ function Label({
 }: {
   htmlFor: string;
   text: string;
-  required: boolean;
+  required?: boolean;
 }) {
   return (
     <label htmlFor={htmlFor}>
