@@ -25,7 +25,7 @@ export default function CreateGroupForm() {
             text={'Description'}
             required={false}
           />
-          <Textarea id={descriptionId} />
+          <Textarea id={descriptionId} classes="h-24" />
           <CharacterCounter value={0} limit={250} />
         </div>
 
