@@ -10,6 +10,11 @@ export default {
     sourcemap: true,
   },
   treeshake: false,
+  // Suppress a warning (https://rollupjs.org/guide/en/#error-this-is-undefined)
+  // due to https://github.com/babel/babel/issues/9149.
+  //
+  // Any code string other than "undefined" which evaluates to `undefined` will work here.
+  context: 'void(0)',
   plugins: [
     nodeResolve({
       browser: true,
@@ -22,11 +27,25 @@ export default {
       // configuration for the `virtual` plugin above.
       preferBuiltins: false,
     }),
-    commonjs(),
+    commonjs({
+      include: 'node_modules/**',
+    }),
     babel({
       babelHelpers: 'bundled',
       exclude: 'node_modules/**',
       extensions: ['.js', '.ts', '.tsx'],
+      presets: [
+        [
+          '@babel/preset-react',
+          {
+            // Turn off the `development` setting in tests to prevent warnings
+            // about `this`. See https://github.com/babel/babel/issues/9149.
+            development: false,
+            runtime: 'automatic',
+            importSource: 'preact',
+          },
+        ],
+      ],
       plugins: ['mockable-imports'],
     }),
   ],
