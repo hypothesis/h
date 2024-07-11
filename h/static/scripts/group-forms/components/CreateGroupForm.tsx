@@ -6,11 +6,21 @@ function Star() {
   return <span className="text-brand">*</span>;
 }
 
-function CharacterCounter({ value, limit }: { value: number; limit: number }) {
+function CharacterCounter({
+  value,
+  limit,
+  testid,
+}: {
+  value: number;
+  limit: number;
+  testid: string;
+}) {
   return (
     <div className="flex">
       <div className="grow" />
-      {value}/{limit}
+      <span data-testid={testid}>
+        {value}/{limit}
+      </span>
     </div>
   );
 }
@@ -46,13 +56,21 @@ export default function CreateGroupForm() {
         <div className="mb-4">
           <Label htmlFor={nameId} text="Name" required />
           <Input id={nameId} autofocus autocomplete="off" required />
-          <CharacterCounter value={0} limit={25} />
+          <CharacterCounter
+            value={0}
+            limit={25}
+            testid="character-counter-name"
+          />
         </div>
 
         <div className="mb-4">
           <Label htmlFor={descriptionId} text="Description" />
           <Textarea id={descriptionId} classes="h-24" />
-          <CharacterCounter value={0} limit={250} />
+          <CharacterCounter
+            value={0}
+            limit={250}
+            testid="character-counter-description"
+          />
         </div>
 
         <div className="flex">
