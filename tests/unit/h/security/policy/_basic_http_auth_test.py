@@ -122,6 +122,14 @@ class TestAuthClientPolicy:
 
         assert AuthClientPolicy().identity(pyramid_request) is None
 
+    def test_authenticated_userid(self, pyramid_request, userid_from_identity):
+        auth_client_policy = AuthClientPolicy()
+
+        authenticated_userid = auth_client_policy.authenticated_userid(pyramid_request)
+
+        userid_from_identity.assert_called_once_with(auth_client_policy, pyramid_request)
+        assert authenticated_userid == userid_from_identity.return_value
+
     @pytest.fixture
     def auth_client(self, factories):
         return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
@@ -144,3 +152,11 @@ class TestAuthClientPolicy:
         user = factories.User(authority=auth_client.authority)
         user_service.fetch.return_value = user
         return user
+
+    @pytest.fixture(autouse=True)
+    def userid_from_identity(self, mocker):
+        return mocker.patch(
+            "h.security.policy._basic_http_auth.userid_from_identity",
+            autospec=True,
+            spec_set=True,
+        )

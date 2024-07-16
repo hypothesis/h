@@ -7,10 +7,11 @@ from h.exceptions import InvalidUserId
 from h.models import AuthClient
 from h.models.auth_client import GrantType
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
+from h.security.policy.helpers import userid_from_identity
 
 
-class AuthClientPolicy(IdentityBasedPolicy):
+class AuthClientPolicy:
     """
     An authentication policy for registered AuthClients.
 
@@ -79,6 +80,19 @@ class AuthClientPolicy(IdentityBasedPolicy):
                 return None
 
         return Identity.from_models(auth_client=auth_client, user=user)
+
+    def authenticated_userid(self, request):
+        return userid_from_identity(self, request)
+
+    def forget(self, _request):
+        return []
+
+    def permits(self, request, context, permission) -> bool:
+        return identity_permits(self.identity(request), context, permission)
+
+    def remember(self, _request, _userid, **_kwargs):
+        return []
+
 
     @classmethod
     def _get_auth_client(cls, request):

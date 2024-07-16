@@ -3,11 +3,12 @@ from pyramid.request import RequestLocalCache
 from zope.interface import implementer
 
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
+from h.security.policy.helpers import userid_from_identity
 
 
 @implementer(ISecurityPolicy)
-class BearerTokenPolicy(IdentityBasedPolicy):
+class BearerTokenPolicy:
     """
     A Bearer token authentication policy.
 
@@ -33,6 +34,12 @@ class BearerTokenPolicy(IdentityBasedPolicy):
         """
 
         return self._identity_cache.get_or_create(request)
+
+    def authenticated_userid(self, request):
+        return userid_from_identity(self, request)
+
+    def permits(self, request, context, permission) -> bool:
+        return identity_permits(self.identity(request), context, permission)
 
     def _load_identity(self, request):
         token_svc = request.find_service(name="auth_token")
@@ -61,6 +68,12 @@ class BearerTokenPolicy(IdentityBasedPolicy):
             return None
 
         return Identity.from_models(user=user)
+
+    def remember(self, _request, _userid, **_kwargs):
+        return []
+
+    def forget(self, _request):
+        return []
 
     @staticmethod
     def _is_ws_request(request):

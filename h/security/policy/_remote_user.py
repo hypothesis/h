@@ -1,8 +1,9 @@
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
+from h.security.policy.helpers import userid_from_identity
 
 
-class RemoteUserPolicy(IdentityBasedPolicy):
+class RemoteUserPolicy:
     """
     An authentication policy which blindly trusts a header.
 
@@ -20,3 +21,15 @@ class RemoteUserPolicy(IdentityBasedPolicy):
             return None
 
         return Identity.from_models(user=user)
+
+    def authenticated_userid(self, request):
+        return userid_from_identity(self, request)
+
+    def permits(self, request, context, permission) -> bool:
+        return identity_permits(self.identity(request), context, permission)
+
+    def remember(self, _request, _userid, **_kwargs):
+        return []
+
+    def forget(self, _request):
+        return []

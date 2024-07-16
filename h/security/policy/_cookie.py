@@ -1,11 +1,12 @@
 from functools import lru_cache
 
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
+from h.security.policy.helpers import userid_from_identity
 from h.services.auth_cookie import AuthCookieService
 
 
-class CookiePolicy(IdentityBasedPolicy):
+class CookiePolicy:
     """
     An authentication policy based on cookies.
 
@@ -21,6 +22,12 @@ class CookiePolicy(IdentityBasedPolicy):
             return None
 
         return Identity.from_models(user=user)
+
+    def permits(self, request, context, permission) -> bool:
+        return identity_permits(self.identity(request), context, permission)
+
+    def authenticated_userid(self, request):
+        return userid_from_identity(self, request)
 
     def remember(self, request, userid, **kw):  # pylint:disable=unused-argument
         """Get a list of headers which will remember the user in a cookie."""
