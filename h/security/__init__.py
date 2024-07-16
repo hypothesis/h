@@ -41,4 +41,4 @@ def includeme(config):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-    config.set_security_policy(SecurityPolicy(proxy_auth=proxy_auth))
+    config.set_security_policy(SecurityPolicy())

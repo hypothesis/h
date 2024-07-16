@@ -9,6 +9,26 @@ from h.security.policy._cookie import CookiePolicy
 
 @pytest.mark.usefixtures("auth_cookie_service")
 class TestCookiePolicy:
+    @pytest.mark.parametrize(
+        "route_name,proxy_auth,expected_result",
+        [
+            ("api.anything", True, False),
+            ("api.anything", False, False),
+            ("anything", True, False),
+            ("anything", False, True),
+        ],
+    )
+    def test_handles(self, pyramid_request, route_name, proxy_auth, expected_result):
+        pyramid_request.matched_route.name = route_name
+        pyramid_request.registry.settings["h.proxy_auth"] = proxy_auth
+
+        assert CookiePolicy.handles(pyramid_request) == expected_result
+
+    def test_handles_when_no_proxy_auth_setting(self, pyramid_request):
+        assert "h.proxy_auth" not in pyramid_request.registry.settings
+
+        assert CookiePolicy.handles(pyramid_request) is True
+
     def test_identity(self, pyramid_request, auth_cookie_service):
         identity = CookiePolicy().identity(pyramid_request)
 

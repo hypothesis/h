@@ -2,6 +2,7 @@ from functools import lru_cache
 
 from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.policy.helpers import is_api_request
 from h.services.auth_cookie import AuthCookieService
 
 
@@ -12,6 +13,15 @@ class CookiePolicy(IdentityBasedPolicy):
     This policy kicks in when accessing the UI presented by `h` and also boot
     straps the login for the client (when the popup shows).
     """
+
+    @staticmethod
+    def handles(request) -> bool:
+        """Return True if this policy applies to `request`."""
+
+        if is_api_request(request):
+            return False
+
+        return not request.registry.settings.get("h.proxy_auth")
 
     def identity(self, request):
         self._add_vary_by_cookie(request)
