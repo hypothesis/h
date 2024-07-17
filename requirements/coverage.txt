@@ -8,17 +8,17 @@ build==1.0.3
     # via pip-tools
 click==8.1.7
     # via pip-tools
-coverage==7.5.4
-    # via -r coverage.in
+coverage==7.6.0
+    # via -r requirements/coverage.in
 importlib-metadata==7.0.1
     # via pip-sync-faster
 packaging==24.1
     # via build
 pip-sync-faster==0.0.4
-    # via -r coverage.in
+    # via -r requirements/coverage.in
 pip-tools==7.4.1
     # via
-    #   -r coverage.in
+    #   -r requirements/coverage.in
     #   pip-sync-faster
 pyproject-hooks==1.0.0
     # via
