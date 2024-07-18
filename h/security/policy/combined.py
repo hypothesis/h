@@ -87,7 +87,4 @@ class SecurityPolicy(IdentityBasedPolicy):
 
     @staticmethod
     def _is_api_request(request):
-        return request.path.startswith("/api") and request.path not in [
-            "/api/token",
-            "/api/badge",
-        ]
+        return request.matched_route and request.matched_route.name.startswith("api.")

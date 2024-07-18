@@ -66,16 +66,16 @@ class TestSecurityPolicy:
         assert CookiePolicy.return_value.identity.call_count == 2
 
     @pytest.mark.parametrize(
-        "path,is_ui",
+        "route_name,is_ui",
         (
-            ("/most/things/really", True),
-            ("/api/token", True),
-            ("/api/badge", True),
-            ("/api/anything_else", False),
+            ("anything", True),
+            ("api.anything", False),
         ),
     )
-    def test_calls_are_routed_based_on_api_or_not(self, pyramid_request, path, is_ui):
-        pyramid_request.path = path
+    def test_calls_are_routed_based_on_api_or_not(
+        self, pyramid_request, route_name, is_ui
+    ):
+        pyramid_request.matched_route.name = route_name
         policy = SecurityPolicy()
 
         # Use `remember()` as an example, we've proven above which methods use
@@ -106,7 +106,7 @@ class TestSecurityPolicy:
         self, pyramid_request, bearer_returns, basic_auth_handles
     ):
         # Pick a URL instead of retesting which URLs trigger the API behavior
-        pyramid_request.path = "/api/anything"
+        pyramid_request.matched_route.name = "api.anything"
         policy = SecurityPolicy()
         policy._bearer_token_policy.remember.return_value = bearer_returns
         policy._http_basic_auth_policy.handles.return_value = basic_auth_handles
