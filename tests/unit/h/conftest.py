@@ -146,7 +146,14 @@ def pyramid_request(db_session, db_session_replica, fake_feature, pyramid_settin
     )
     request.default_authority = "example.com"
     request.create_form = mock.Mock()
-    request.matched_route = mock.Mock()
+
+    request.matched_route = mock.Mock(spec=["name"])
+    # `name` is a special argument to the Mock constructor so if you want a
+    # mock to have a `name` attribute you can't just do Mock(name="name"), you
+    # have to use a separate call to configure_mock() instead.
+    # https://docs.python.org/3/library/unittest.mock.html#mock-names-and-the-name-attribute
+    request.matched_route.configure_mock(name="index")
+
     request.registry.settings = pyramid_settings
     request.is_xhr = False
     request.params = MultiDict()
