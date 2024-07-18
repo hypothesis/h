@@ -44,6 +44,7 @@
     "tailwindcss": "^3.4.4"
   },
   "devDependencies": {
+    "@hypothesis/frontend-testing": "^1.2.2",
     "babel-plugin-mockable-imports": "^2.0.1",
     "chai": "^5.1.1",
     "diff": "^5.2.0",
