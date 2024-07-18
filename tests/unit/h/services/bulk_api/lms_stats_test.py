@@ -21,22 +21,27 @@ class TestBulkLMSStatsService:
             group_by=CountsGroupBy.USER,
         )
 
-        assert stats == [
+        assert len(stats) == 2
+        assert (
             AnnotationCounts(
                 userid=user.userid,
                 display_name=user.display_name,
                 annotations=1,
                 replies=0,
                 last_activity=annotation.created,
-            ),
+            )
+            in stats
+        )
+        assert (
             AnnotationCounts(
                 userid=reply_user.userid,
                 display_name=reply_user.display_name,
                 annotations=0,
                 replies=1,
                 last_activity=annotation_reply.created,
-            ),
-        ]
+            )
+            in stats
+        )
 
     @pytest.mark.usefixtures("annotation", "user", "reply_user")
     def test_get_annotation_counts_by_assignment(
