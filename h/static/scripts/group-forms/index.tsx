@@ -1,7 +1,7 @@
 import { render } from 'preact';
 
 import CreateGroupForm from './components/CreateGroupForm';
-import readConfig from './config';
+import { readConfig } from './config';
 
 function init() {
   const shadowHost = document.querySelector('#create-group-form')!;

@@ -1,8 +1,40 @@
 import { mount } from 'enzyme';
+import { waitForElement } from '@hypothesis/frontend-testing';
 
-import CreateGroupForm from '../CreateGroupForm';
+import { $imports, default as CreateGroupForm } from '../CreateGroupForm';
+
+const config = {
+  api: {
+    createGroup: {
+      method: 'POST',
+      url: 'https://example.com/api/groups',
+    },
+  },
+};
 
 describe('CreateGroupForm', () => {
+  let fakeCallAPI;
+  let fakeSetLocation;
+
+  beforeEach(() => {
+    fakeCallAPI = sinon.stub();
+    fakeSetLocation = sinon.stub();
+
+    $imports.$mock({
+      '../config': { readConfig: () => config },
+      '../utils/api': {
+        callAPI: fakeCallAPI,
+      },
+      '../utils/set-location': {
+        setLocation: fakeSetLocation,
+      },
+    });
+  });
+
+  afterEach(() => {
+    $imports.$restore();
+  });
+
   /* Return true if counterEl is in its error state. */
   const counterIsInErrorState = counterEl => {
     return (
@@ -80,5 +112,53 @@ describe('CreateGroupForm', () => {
         assert.isOk(componentIsInErrorState(fieldComponent));
       });
     });
+  });
+
+  it("doesn't show an error message initially", async () => {
+    const { wrapper } = createWrapper();
+
+    assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
+  });
+
+  it('creates the group and redirects the browser', async () => {
+    const { wrapper, elements } = createWrapper();
+    const nameEl = elements.name.fieldEl;
+    const descriptionEl = elements.description.fieldEl;
+    const groupURL = 'https://example.com/group/foo';
+    fakeCallAPI.resolves({ links: { html: groupURL } });
+
+    const name = 'Test Group Name';
+    const description = 'Test description';
+    nameEl.getDOMNode().value = name;
+    nameEl.simulate('input');
+    descriptionEl.getDOMNode().value = description;
+    descriptionEl.simulate('input');
+    await wrapper.find('form[data-testid="form"]').simulate('submit');
+
+    assert.isTrue(
+      fakeCallAPI.calledOnceWithExactly(
+        config.api.createGroup.url,
+        config.api.createGroup.method,
+        {
+          name,
+          description,
+        },
+      ),
+    );
+    assert.isTrue(fakeSetLocation.calledOnceWithExactly(groupURL));
+  });
+
+  it('shows an error message if callAPI() throws an error', async () => {
+    const errorMessageFromCallAPI = 'Bad API call.';
+    fakeCallAPI.rejects({ message: errorMessageFromCallAPI });
+    const { wrapper } = createWrapper();
+
+    wrapper.find('form[data-testid="form"]').simulate('submit');
+
+    const errorMessageEl = await waitForElement(
+      wrapper,
+      '[data-testid="error-message"]',
+    );
+    assert.equal(errorMessageEl.text(), errorMessageFromCallAPI);
   });
 });

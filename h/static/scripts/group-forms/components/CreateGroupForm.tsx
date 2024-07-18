@@ -1,6 +1,9 @@
-import { useId, useState } from 'preact/hooks';
+import { useId, useMemo, useState } from 'preact/hooks';
 
 import { Button, Input, Textarea } from '@hypothesis/frontend-shared';
+import { readConfig } from '../config';
+import { callAPI, CreateGroupAPIResponse } from '../utils/api';
+import { setLocation } from '../utils/set-location';
 
 function Star() {
   return <span className="text-brand">*</span>;
@@ -42,13 +45,15 @@ function Label({
   return (
     <label htmlFor={htmlFor}>
       {text}
-      {required ? <Star /> : null}
+      {required && <Star />}
     </label>
   );
 }
 
 function TextField({
   type,
+  value,
+  onChangeValue,
   limit,
   label,
   testid,
@@ -57,6 +62,8 @@ function TextField({
   classes = '',
 }: {
   type: 'input' | 'textarea';
+  value: string;
+  onChangeValue: (newValue: string) => void;
   limit: number;
   label: string;
   testid: string;
@@ -65,13 +72,12 @@ function TextField({
   classes?: string;
 }) {
   const id = useId();
-  const [value, setValue] = useState('');
 
   const handleInput = (e: InputEvent) => {
-    setValue((e.target as HTMLInputElement).value);
+    onChangeValue((e.target as HTMLInputElement).value);
   };
 
-  const error = value.length > limit;
+  const error = [...value].length > limit;
 
   const InputComponent = type === 'input' ? Input : Textarea;
 
@@ -86,10 +92,11 @@ function TextField({
         classes={classes}
         autofocus={autofocus}
         autocomplete="off"
+        required={required}
         data-testid={testid}
       />
       <CharacterCounter
-        value={value.length}
+        value={[...value].length}
         limit={limit}
         testid={`charcounter-${testid}`}
         error={error}
@@ -99,15 +106,44 @@ function TextField({
 }
 
 export default function CreateGroupForm() {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const config = useMemo(() => readConfig(), []);
+
+  const createGroup = async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    let response: CreateGroupAPIResponse;
+
+    try {
+      response = (await callAPI(
+        config.api.createGroup.url,
+        config.api.createGroup.method,
+        {
+          name,
+          description,
+        },
+      )) as CreateGroupAPIResponse;
+    } catch (apiError) {
+      setErrorMessage(apiError.message);
+      return;
+    }
+
+    setLocation(response.links.html);
+  };
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none">
         Create a new private group
       </h1>
 
-      <form>
+      <form onSubmit={createGroup} data-testid="form">
         <TextField
           type="input"
+          value={name}
+          onChangeValue={setName}
           limit={25}
           label="Name"
           testid="name"
@@ -116,15 +152,27 @@ export default function CreateGroupForm() {
         />
         <TextField
           type="textarea"
+          value={description}
+          onChangeValue={setDescription}
           limit={250}
           label="Description"
           testid="description"
           classes="h-24"
         />
 
-        <div className="flex">
+        <div className="flex items-center">
+          {errorMessage && (
+            <div
+              className="text-red-error font-bold"
+              data-testid="error-message"
+            >
+              {errorMessage}
+            </div>
+          )}
           <div className="grow" />
-          <Button variant="primary">Create group</Button>
+          <Button type="submit" variant="primary">
+            Create group
+          </Button>
         </div>
       </form>
 

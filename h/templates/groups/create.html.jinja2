@@ -6,7 +6,13 @@
   <div id="create-group-form"></div>
   <script type="application/json" class="js-config">
     {
-      "styles": {{ asset_urls("group_forms_css")|tojson }}
+      "styles": {{ asset_urls("group_forms_css")|tojson }},
+      "api": {
+        "createGroup": {
+          "method": "POST",
+          "url": "{{ request.route_url("api.groups") }}"
+        }
+      }
     }
   </script>
 {% endblock %}
