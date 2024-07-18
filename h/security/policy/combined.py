@@ -10,6 +10,7 @@ from h.security.policy._cookie import CookiePolicy
 from h.security.policy._identity_base import IdentityBasedPolicy
 from h.security.policy._remote_user import RemoteUserPolicy
 from h.security.policy.bearer_token import BearerTokenPolicy
+from h.security.policy.helpers import is_api_request
 
 
 @implementer(ISecurityPolicy)
@@ -69,7 +70,7 @@ class SecurityPolicy(IdentityBasedPolicy):
         :return: The response from the correct sub-policy
         """
 
-        if not self._is_api_request(request):
+        if not is_api_request(request):
             # This is usually the cookie policy for UI things
             return getattr(self._ui_policy, method)(request, *args, **kwargs)
 
@@ -84,7 +85,3 @@ class SecurityPolicy(IdentityBasedPolicy):
             )
 
         return result
-
-    @staticmethod
-    def _is_api_request(request):
-        return request.matched_route and request.matched_route.name.startswith("api.")
