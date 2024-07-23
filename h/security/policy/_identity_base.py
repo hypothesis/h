@@ -45,9 +45,3 @@ class IdentityBasedPolicy:
             return identity.user.userid
 
         return None
-
-    def remember(self, _request, _userid, **_kwargs):
-        return []
-
-    def forget(self, _request):
-        return []

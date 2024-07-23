@@ -8,6 +8,24 @@ from h.security.policy.bearer_token import BearerTokenPolicy
 
 @pytest.mark.usefixtures("user_service", "auth_token_service")
 class TestBearerTokenPolicy:
+    @pytest.mark.parametrize(
+        "is_api_request_return_value,expected_result",
+        [
+            (True, True),
+            (False, False),
+        ],
+    )
+    def test_handles(
+        self,
+        is_api_request,
+        is_api_request_return_value,
+        expected_result,
+        pyramid_request,
+    ):
+        is_api_request.return_value = is_api_request_return_value
+
+        assert BearerTokenPolicy.handles(pyramid_request) == expected_result
+
     def test_identity(self, pyramid_request, auth_token_service, user_service):
         identity = BearerTokenPolicy().identity(pyramid_request)
 
@@ -64,3 +82,8 @@ class TestBearerTokenPolicy:
         user_service.fetch.return_value.deleted = True
 
         assert BearerTokenPolicy().identity(pyramid_request) is None
+
+
+@pytest.fixture(autouse=True)
+def is_api_request(mocker):
+    return mocker.patch("h.security.policy.bearer_token.is_api_request", autospec=True)

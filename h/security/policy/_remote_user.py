@@ -10,6 +10,9 @@ class RemoteUserPolicy(IdentityBasedPolicy):
     `h.security`.
     """
 
+    def forget(self, *_args, **_kwargs):
+        return []
+
     def identity(self, request):
         user_id = request.environ.get("HTTP_X_FORWARDED_USER")
         if not user_id:
@@ -20,3 +23,6 @@ class RemoteUserPolicy(IdentityBasedPolicy):
             return None
 
         return Identity.from_models(user=user)
+
+    def remember(self, *_args, **_kwargs):
+        return []
