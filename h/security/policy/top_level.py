@@ -14,7 +14,7 @@ from h.security.policy.helpers import is_api_request
 
 
 @implementer(ISecurityPolicy)
-class SecurityPolicy(IdentityBasedPolicy):
+class TopLevelPolicy(IdentityBasedPolicy):
     """
     The security policy for `h`.
 
