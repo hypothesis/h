@@ -6,7 +6,7 @@ import pytest
 from h.exceptions import InvalidUserId
 from h.models.auth_client import GrantType
 from h.security import Identity
-from h.security.policy._basic_http_auth import AuthClientPolicy
+from h.security.policy._auth_client import AuthClientPolicy
 
 
 @pytest.mark.usefixtures("user_service")

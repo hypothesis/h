@@ -5,7 +5,7 @@ from pyramid.request import RequestLocalCache
 from zope.interface import implementer
 
 from h.security.identity import Identity
-from h.security.policy._basic_http_auth import AuthClientPolicy
+from h.security.policy._auth_client import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy._identity_base import IdentityBasedPolicy
 from h.security.policy._remote_user import RemoteUserPolicy
