@@ -8,6 +8,10 @@ from h.security.policy._remote_user import RemoteUserPolicy
 
 @pytest.mark.usefixtures("user_service")
 class TestRemoteUserPolicy:
+    def test_forget(self, pyramid_request):
+        # pylint:disable=use-implicit-booleaness-not-comparison
+        assert RemoteUserPolicy().forget(pyramid_request, foo="bar") == []
+
     def test_identity(self, pyramid_request, user_service):
         pyramid_request.environ["HTTP_X_FORWARDED_USER"] = sentinel.forwarded_user
 
@@ -34,3 +38,10 @@ class TestRemoteUserPolicy:
         user_service.fetch.return_value.deleted = True
 
         assert RemoteUserPolicy().identity(pyramid_request) is None
+
+    def test_remember(self, pyramid_request):
+        # pylint:disable=use-implicit-booleaness-not-comparison
+        assert (
+            RemoteUserPolicy().remember(pyramid_request, sentinel.userid, foo="bar")
+            == []
+        )

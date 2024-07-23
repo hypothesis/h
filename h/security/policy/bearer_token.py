@@ -1,12 +1,10 @@
-from pyramid.interfaces import ISecurityPolicy
 from pyramid.request import RequestLocalCache
-from zope.interface import implementer
 
 from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.policy.helpers import is_api_request
 
 
-@implementer(ISecurityPolicy)
 class BearerTokenPolicy(IdentityBasedPolicy):
     """
     A Bearer token authentication policy.
@@ -20,6 +18,11 @@ class BearerTokenPolicy(IdentityBasedPolicy):
 
     def __init__(self):
         self._identity_cache = RequestLocalCache(self._load_identity)
+
+    @staticmethod
+    def handles(request) -> bool:
+        """Return True if this policy applies to `request`."""
+        return is_api_request(request)
 
     def identity(self, request):
         """

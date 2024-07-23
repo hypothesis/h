@@ -1,150 +1,110 @@
-from unittest.mock import patch, sentinel
+from unittest.mock import sentinel
 
 import pytest
 
-from h.security.policy import TopLevelPolicy
-
-# pylint: disable=protected-access
+from h.security.policy.top_level import TopLevelPolicy, get_subpolicy
 
 
 class TestTopLevelPolicy:
-    def test_construction(self, BearerTokenPolicy, AuthClientPolicy, CookiePolicy):
-        policy = TopLevelPolicy(proxy_auth=False)
+    def test_forget(self, get_subpolicy, policy, pyramid_request):
+        headers = policy.forget(pyramid_request, foo="bar")
+
+        get_subpolicy.return_value.forget.assert_called_once_with(
+            pyramid_request, foo="bar"
+        )
+        assert headers == get_subpolicy.return_value.forget.return_value
+
+    def test_identity(self, get_subpolicy, policy, pyramid_request):
+        identity = policy.identity(pyramid_request)
+
+        get_subpolicy.return_value.identity.assert_called_once_with(pyramid_request)
+        assert identity == get_subpolicy.return_value.identity.return_value
+
+    def test_remember(self, get_subpolicy, policy, pyramid_request):
+        headers = policy.remember(pyramid_request, sentinel.userid, foo="bar")
+
+        get_subpolicy.return_value.remember.assert_called_once_with(
+            pyramid_request, sentinel.userid, foo="bar"
+        )
+        assert headers == get_subpolicy.return_value.remember.return_value
+
+    @pytest.fixture
+    def policy(self):
+        return TopLevelPolicy()
+
+    @pytest.fixture(autouse=True)
+    def get_subpolicy(self, mocker):
+        return mocker.patch("h.security.policy.top_level.get_subpolicy", autospec=True)
+
+
+class TestGetSubpolicy:
+    def test_api_request(
+        self,
+        is_api_request,
+        pyramid_request,
+        AuthClientPolicy,
+        APIPolicy,
+        BearerTokenPolicy,
+    ):
+        is_api_request.return_value = True
+
+        policy = get_subpolicy(pyramid_request)
 
         BearerTokenPolicy.assert_called_once_with()
-        assert policy._bearer_token_policy == BearerTokenPolicy.return_value
         AuthClientPolicy.assert_called_once_with()
-        assert policy._http_basic_auth_policy == AuthClientPolicy.return_value
-        CookiePolicy.assert_called_once_with()
-        assert policy._ui_policy == CookiePolicy.return_value
+        APIPolicy.assert_called_once_with(
+            [BearerTokenPolicy.return_value, AuthClientPolicy.return_value]
+        )
+        assert policy == APIPolicy.return_value
 
-    def test_construction_for_proxy_auth(self, RemoteUserPolicy):
-        policy = TopLevelPolicy(proxy_auth=True)
+    def test_non_api_request_with_proxy_auth(
+        self, is_api_request, pyramid_request, RemoteUserPolicy
+    ):
+        is_api_request.return_value = False
+        pyramid_request.registry.settings["h.proxy_auth"] = True
+
+        policy = get_subpolicy(pyramid_request)
 
         RemoteUserPolicy.assert_called_once_with()
-        assert policy._ui_policy == RemoteUserPolicy.return_value
+        assert policy == RemoteUserPolicy.return_value
 
-    @pytest.mark.parametrize(
-        "method,args,kwargs",
-        (
-            ("remember", [sentinel.userid], {"kwargs": True}),
-            ("forget", [], {}),
-            ("identity", [], {}),
-        ),
-    )
-    def test_most_methods_delegate(self, pyramid_request, method, args, kwargs):
-        policy = TopLevelPolicy()
-
-        with patch.object(policy, "_call_sub_policies") as _call_sub_policies:
-            auth_method = getattr(policy, method)
-
-            result = auth_method(pyramid_request, *args, **kwargs)
-
-            _call_sub_policies.assert_called_once_with(
-                method, pyramid_request, *args, **kwargs
-            )
-            assert result == _call_sub_policies.return_value
-
-    def test_identity_caches(self, pyramid_request, CookiePolicy):
-        policy = TopLevelPolicy()
-
-        policy.identity(pyramid_request)
-        policy.identity(pyramid_request)
-
-        CookiePolicy.return_value.identity.assert_called_once()
-
-    @pytest.mark.parametrize("method,args", (("remember", ["userid"]), ("forget", [])))
-    def test_remember_and_forget_reset_cache(
-        self, pyramid_request, CookiePolicy, method, args
+    def test_non_api_request_without_proxy_auth(
+        self, is_api_request, pyramid_request, CookiePolicy
     ):
-        policy = TopLevelPolicy()
+        is_api_request.return_value = False
+        pyramid_request.registry.settings["h.proxy_auth"] = False
 
-        policy.identity(pyramid_request)
-        getattr(policy, method)(pyramid_request, *args)
-        policy.identity(pyramid_request)
+        policy = get_subpolicy(pyramid_request)
 
-        assert CookiePolicy.return_value.identity.call_count == 2
+        CookiePolicy.assert_called_once_with()
+        assert policy == CookiePolicy.return_value
 
-    @pytest.mark.parametrize(
-        "route_name,is_ui",
-        (
-            ("anything", True),
-            ("api.anything", False),
-        ),
-    )
-    def test_calls_are_routed_based_on_api_or_not(
-        self, pyramid_request, route_name, is_ui
-    ):
-        pyramid_request.matched_route.name = route_name
-        policy = TopLevelPolicy()
 
-        # Use `remember()` as an example, we've proven above which methods use
-        # this
-        result = policy.remember(pyramid_request, sentinel.userid, kwarg=True)
+@pytest.fixture(autouse=True)
+def is_api_request(mocker):
+    return mocker.patch("h.security.policy.top_level.is_api_request", autospec=True)
 
-        if is_ui:
-            called_policy, uncalled_policy = (
-                policy._ui_policy,
-                policy._bearer_token_policy,
-            )
-        else:
-            called_policy, uncalled_policy = (
-                policy._bearer_token_policy,
-                policy._ui_policy,
-            )
 
-        called_policy.remember.assert_called_once_with(  # pylint:disable=no-member
-            pyramid_request, sentinel.userid, kwarg=True
-        )
-        assert result == called_policy.remember.return_value  # pylint:disable=no-member
+@pytest.fixture(autouse=True)
+def AuthClientPolicy(mocker):
+    return mocker.patch("h.security.policy.top_level.AuthClientPolicy", autospec=True)
 
-        uncalled_policy.remember.assert_not_called()  # pylint:disable=no-member
 
-    @pytest.mark.parametrize("bearer_returns", (True, False))
-    @pytest.mark.parametrize("basic_auth_handles", (True, False))
-    def test_api_calls_are_passed_on(
-        self, pyramid_request, bearer_returns, basic_auth_handles
-    ):
-        # Pick a URL instead of retesting which URLs trigger the API behavior
-        pyramid_request.matched_route.name = "api.anything"
-        policy = TopLevelPolicy()
-        policy._bearer_token_policy.remember.return_value = bearer_returns
-        policy._http_basic_auth_policy.handles.return_value = basic_auth_handles
+@pytest.fixture(autouse=True)
+def APIPolicy(mocker):
+    return mocker.patch("h.security.policy.top_level.APIPolicy", autospec=True)
 
-        result = policy.remember(pyramid_request, sentinel.userid, kwarg=True)
 
-        if not bearer_returns:
-            policy._http_basic_auth_policy.handles.assert_called_once_with(
-                pyramid_request
-            )
+@pytest.fixture(autouse=True)
+def BearerTokenPolicy(mocker):
+    return mocker.patch("h.security.policy.top_level.BearerTokenPolicy", autospec=True)
 
-        if basic_auth_handles and not bearer_returns:
-            policy._http_basic_auth_policy.remember.assert_called_once_with(  # pylint:disable=no-member
-                pyramid_request, sentinel.userid, kwarg=True
-            )
-            assert (
-                result
-                == policy._http_basic_auth_policy.remember.return_value  # pylint:disable=no-member
-            )
-        else:
-            policy._http_basic_auth_policy.remember.assert_not_called()  # pylint:disable=no-member
-            assert (
-                result
-                == policy._bearer_token_policy.remember.return_value  # pylint:disable=no-member
-            )
 
-    @pytest.fixture(autouse=True)
-    def BearerTokenPolicy(self, patch):
-        return patch("h.security.policy.top_level.BearerTokenPolicy")
+@pytest.fixture(autouse=True)
+def CookiePolicy(mocker):
+    return mocker.patch("h.security.policy.top_level.CookiePolicy", autospec=True)
 
-    @pytest.fixture(autouse=True)
-    def AuthClientPolicy(self, patch):
-        return patch("h.security.policy.top_level.AuthClientPolicy")
 
-    @pytest.fixture(autouse=True)
-    def RemoteUserPolicy(self, patch):
-        return patch("h.security.policy.top_level.RemoteUserPolicy")
-
-    @pytest.fixture(autouse=True)
-    def CookiePolicy(self, patch):
-        return patch("h.security.policy.top_level.CookiePolicy")
+@pytest.fixture(autouse=True)
+def RemoteUserPolicy(mocker):
+    return mocker.patch("h.security.policy.top_level.RemoteUserPolicy", autospec=True)

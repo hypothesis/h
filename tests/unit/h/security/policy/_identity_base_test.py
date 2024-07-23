@@ -35,12 +35,6 @@ class TestIdentityBasedPolicy:
 
         assert policy.authenticated_userid(pyramid_request) is None
 
-    def test_remember_does_nothing(self, policy, pyramid_request):
-        assert policy.remember(pyramid_request, "foo") == []
-
-    def test_forget_does_nothing(self, policy, pyramid_request):
-        assert policy.forget(pyramid_request) == []
-
     @pytest.fixture
     def identity(self, factories):
         return Identity.from_models(user=factories.User())
