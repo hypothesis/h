@@ -10,7 +10,7 @@ from h.security.encryption import (  # noqa:F401
 from h.security.identity import Identity  # noqa:F401
 from h.security.permissions import Permission  # noqa:F401
 from h.security.permits import identity_permits
-from h.security.policy import BearerTokenPolicy, SecurityPolicy
+from h.security.policy.top_level import BearerTokenPolicy, TopLevelPolicy
 
 # We export this for the websocket to use as it's main policy
 __all__ = ("BearerTokenPolicy",)
@@ -41,4 +41,4 @@ def includeme(config):  # pragma: no cover
             "being available to ANYONE!"
         )
 
-    config.set_security_policy(SecurityPolicy(proxy_auth=proxy_auth))
+    config.set_security_policy(TopLevelPolicy(proxy_auth=proxy_auth))

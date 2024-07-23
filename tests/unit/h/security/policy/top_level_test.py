@@ -2,14 +2,14 @@ from unittest.mock import patch, sentinel
 
 import pytest
 
-from h.security.policy import SecurityPolicy
+from h.security.policy import TopLevelPolicy
 
 # pylint: disable=protected-access
 
 
-class TestSecurityPolicy:
+class TestTopLevelPolicy:
     def test_construction(self, BearerTokenPolicy, AuthClientPolicy, CookiePolicy):
-        policy = SecurityPolicy(proxy_auth=False)
+        policy = TopLevelPolicy(proxy_auth=False)
 
         BearerTokenPolicy.assert_called_once_with()
         assert policy._bearer_token_policy == BearerTokenPolicy.return_value
@@ -19,7 +19,7 @@ class TestSecurityPolicy:
         assert policy._ui_policy == CookiePolicy.return_value
 
     def test_construction_for_proxy_auth(self, RemoteUserPolicy):
-        policy = SecurityPolicy(proxy_auth=True)
+        policy = TopLevelPolicy(proxy_auth=True)
 
         RemoteUserPolicy.assert_called_once_with()
         assert policy._ui_policy == RemoteUserPolicy.return_value
@@ -33,7 +33,7 @@ class TestSecurityPolicy:
         ),
     )
     def test_most_methods_delegate(self, pyramid_request, method, args, kwargs):
-        policy = SecurityPolicy()
+        policy = TopLevelPolicy()
 
         with patch.object(policy, "_call_sub_policies") as _call_sub_policies:
             auth_method = getattr(policy, method)
@@ -46,7 +46,7 @@ class TestSecurityPolicy:
             assert result == _call_sub_policies.return_value
 
     def test_identity_caches(self, pyramid_request, CookiePolicy):
-        policy = SecurityPolicy()
+        policy = TopLevelPolicy()
 
         policy.identity(pyramid_request)
         policy.identity(pyramid_request)
@@ -57,7 +57,7 @@ class TestSecurityPolicy:
     def test_remember_and_forget_reset_cache(
         self, pyramid_request, CookiePolicy, method, args
     ):
-        policy = SecurityPolicy()
+        policy = TopLevelPolicy()
 
         policy.identity(pyramid_request)
         getattr(policy, method)(pyramid_request, *args)
@@ -76,7 +76,7 @@ class TestSecurityPolicy:
         self, pyramid_request, route_name, is_ui
     ):
         pyramid_request.matched_route.name = route_name
-        policy = SecurityPolicy()
+        policy = TopLevelPolicy()
 
         # Use `remember()` as an example, we've proven above which methods use
         # this
@@ -107,7 +107,7 @@ class TestSecurityPolicy:
     ):
         # Pick a URL instead of retesting which URLs trigger the API behavior
         pyramid_request.matched_route.name = "api.anything"
-        policy = SecurityPolicy()
+        policy = TopLevelPolicy()
         policy._bearer_token_policy.remember.return_value = bearer_returns
         policy._http_basic_auth_policy.handles.return_value = basic_auth_handles
 
@@ -135,16 +135,16 @@ class TestSecurityPolicy:
 
     @pytest.fixture(autouse=True)
     def BearerTokenPolicy(self, patch):
-        return patch("h.security.policy.combined.BearerTokenPolicy")
+        return patch("h.security.policy.top_level.BearerTokenPolicy")
 
     @pytest.fixture(autouse=True)
     def AuthClientPolicy(self, patch):
-        return patch("h.security.policy.combined.AuthClientPolicy")
+        return patch("h.security.policy.top_level.AuthClientPolicy")
 
     @pytest.fixture(autouse=True)
     def RemoteUserPolicy(self, patch):
-        return patch("h.security.policy.combined.RemoteUserPolicy")
+        return patch("h.security.policy.top_level.RemoteUserPolicy")
 
     @pytest.fixture(autouse=True)
     def CookiePolicy(self, patch):
-        return patch("h.security.policy.combined.CookiePolicy")
+        return patch("h.security.policy.top_level.CookiePolicy")
