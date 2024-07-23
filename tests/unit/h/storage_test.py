@@ -74,4 +74,4 @@ class TestExpandURI:
             db_session, "http://alt.example.com/", normalized=normalized
         )
 
-        assert uris == expected_uris
+        assert sorted(uris) == sorted(expected_uris)
