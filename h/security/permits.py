@@ -1,10 +1,14 @@
 from typing import Optional
 
+from pyramid.security import Allowed, Denied
+
 from h.security.identity import Identity
 from h.security.permission_map import PERMISSION_MAP
 
 
-def identity_permits(identity: Optional[Identity], context, permission) -> bool:
+def identity_permits(
+    identity: Optional[Identity], context, permission
+) -> Allowed | Denied:
     """
     Check whether a given identity has permission to operate on a context.
 
@@ -17,13 +21,14 @@ def identity_permits(identity: Optional[Identity], context, permission) -> bool:
     """
     if clauses := PERMISSION_MAP.get(permission):
         # Grant the permissions if for *any* single clause...
-        return any(
+        if any(
             # .. *all* elements in it are true
             all(_predicate_true(predicate, identity, context) for predicate in clause)
             for clause in clauses
-        )
+        ):
+            return Allowed("Allowed")
 
-    return False
+    return Denied("Denied")
 
 
 def _predicate_true(predicate, identity, context):
