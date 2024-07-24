@@ -57,22 +57,8 @@ class TestGetSubpolicy:
         )
         assert policy == APIPolicy.return_value
 
-    def test_non_api_request_with_proxy_auth(
-        self, is_api_request, pyramid_request, RemoteUserPolicy
-    ):
+    def test_non_api_request(self, is_api_request, pyramid_request, CookiePolicy):
         is_api_request.return_value = False
-        pyramid_request.registry.settings["h.proxy_auth"] = True
-
-        policy = get_subpolicy(pyramid_request)
-
-        RemoteUserPolicy.assert_called_once_with()
-        assert policy == RemoteUserPolicy.return_value
-
-    def test_non_api_request_without_proxy_auth(
-        self, is_api_request, pyramid_request, CookiePolicy
-    ):
-        is_api_request.return_value = False
-        pyramid_request.registry.settings["h.proxy_auth"] = False
 
         policy = get_subpolicy(pyramid_request)
 
@@ -103,8 +89,3 @@ def BearerTokenPolicy(mocker):
 @pytest.fixture(autouse=True)
 def CookiePolicy(mocker):
     return mocker.patch("h.security.policy.top_level.CookiePolicy", autospec=True)
-
-
-@pytest.fixture(autouse=True)
-def RemoteUserPolicy(mocker):
-    return mocker.patch("h.security.policy.top_level.RemoteUserPolicy", autospec=True)

@@ -5,7 +5,6 @@ from h.security.policy._api import APIPolicy
 from h.security.policy._auth_client import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy._identity_base import IdentityBasedPolicy
-from h.security.policy._remote_user import RemoteUserPolicy
 from h.security.policy.bearer_token import BearerTokenPolicy
 from h.security.policy.helpers import is_api_request
 
@@ -36,8 +35,5 @@ def get_subpolicy(request):
     """Return the subpolicy for TopLevelSecurityPolicy to delegate to for `request`."""
     if is_api_request(request):
         return APIPolicy([BearerTokenPolicy(), AuthClientPolicy()])
-
-    if request.registry.settings.get("h.proxy_auth"):
-        return RemoteUserPolicy()
 
     return CookiePolicy()

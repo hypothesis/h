@@ -102,7 +102,6 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
     settings_manager.set("h.env", "ENV")
     # Where should logged-out users visiting the homepage be redirected?
     settings_manager.set("h.homepage_redirect_url", "HOMEPAGE_REDIRECT_URL")
-    settings_manager.set("h.proxy_auth", "PROXY_AUTH", type_=asbool)
 
     # Sentry DSNs for frontend code should be of the public kind, lacking the
     # password component in the DSN URI.

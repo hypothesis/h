@@ -30,15 +30,4 @@ def includeme(config):  # pragma: no cover
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
-
-    proxy_auth = config.registry.settings.get("h.proxy_auth")
-    if proxy_auth:
-        log.warning(
-            "Enabling proxy authentication mode: you MUST ensure that "
-            "the X-Forwarded-User request header can ONLY be set by "
-            "trusted downstream reverse proxies! Failure to heed this "
-            "warning will result in ALL DATA stored by this service "
-            "being available to ANYONE!"
-        )
-
     config.set_security_policy(TopLevelPolicy())
