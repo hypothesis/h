@@ -2,6 +2,7 @@ from pyramid.request import RequestLocalCache
 
 from h.security.identity import Identity
 from h.security.policy._api import APIPolicy
+from h.security.policy._api_cookie import APICookiePolicy
 from h.security.policy._auth_client import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy._identity_base import IdentityBasedPolicy
@@ -34,6 +35,8 @@ class TopLevelPolicy(IdentityBasedPolicy):
 def get_subpolicy(request):
     """Return the subpolicy for TopLevelSecurityPolicy to delegate to for `request`."""
     if is_api_request(request):
-        return APIPolicy([BearerTokenPolicy(), AuthClientPolicy()])
+        return APIPolicy(
+            [BearerTokenPolicy(), AuthClientPolicy(), APICookiePolicy(CookiePolicy())]
+        )
 
     return CookiePolicy()
