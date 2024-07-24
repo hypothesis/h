@@ -1,5 +1,7 @@
 from typing import Optional
 
+from pyramid.security import Allowed, Denied
+
 from h.security.identity import Identity
 from h.security.permits import identity_permits
 
@@ -24,7 +26,7 @@ class IdentityBasedPolicy:
         """
         return None
 
-    def permits(self, request, context, permission) -> bool:
+    def permits(self, request, context, permission) -> Allowed | Denied:
         """
         Get whether a given request has the requested permission on the context.
 
