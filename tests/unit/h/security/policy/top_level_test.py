@@ -43,8 +43,10 @@ class TestGetSubpolicy:
         is_api_request,
         pyramid_request,
         AuthClientPolicy,
+        APICookiePolicy,
         APIPolicy,
         BearerTokenPolicy,
+        CookiePolicy,
     ):
         is_api_request.return_value = True
 
@@ -52,8 +54,14 @@ class TestGetSubpolicy:
 
         BearerTokenPolicy.assert_called_once_with()
         AuthClientPolicy.assert_called_once_with()
+        CookiePolicy.assert_called_once_with()
+        APICookiePolicy.assert_called_once_with(CookiePolicy.return_value)
         APIPolicy.assert_called_once_with(
-            [BearerTokenPolicy.return_value, AuthClientPolicy.return_value]
+            [
+                BearerTokenPolicy.return_value,
+                AuthClientPolicy.return_value,
+                APICookiePolicy.return_value,
+            ]
         )
         assert policy == APIPolicy.return_value
 
@@ -74,6 +82,11 @@ def is_api_request(mocker):
 @pytest.fixture(autouse=True)
 def AuthClientPolicy(mocker):
     return mocker.patch("h.security.policy.top_level.AuthClientPolicy", autospec=True)
+
+
+@pytest.fixture(autouse=True)
+def APICookiePolicy(mocker):
+    return mocker.patch("h.security.policy.top_level.APICookiePolicy", autospec=True)
 
 
 @pytest.fixture(autouse=True)
