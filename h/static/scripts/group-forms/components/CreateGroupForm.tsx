@@ -100,7 +100,7 @@ function TextField({
 
 export default function CreateGroupForm() {
   return (
-    <div className="text-grey-6 text-sm/tight">
+    <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none">
         Create a new private group
       </h1>
