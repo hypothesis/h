@@ -54,7 +54,8 @@ function TextField({
   type,
   value,
   onChangeValue,
-  limit,
+  minLength = 0,
+  maxLength,
   label,
   testid,
   required = false,
@@ -64,7 +65,8 @@ function TextField({
   type: 'input' | 'textarea';
   value: string;
   onChangeValue: (newValue: string) => void;
-  limit: number;
+  minLength?: number;
+  maxLength: number;
   label: string;
   testid: string;
   required?: boolean;
@@ -72,12 +74,22 @@ function TextField({
   classes?: string;
 }) {
   const id = useId();
+  const [hasCommitted, setHasCommitted] = useState(false);
 
   const handleInput = (e: InputEvent) => {
     onChangeValue((e.target as HTMLInputElement).value);
   };
 
-  const error = [...value].length > limit;
+  const handleChange = (e: Event) => {
+    setHasCommitted(true);
+  };
+
+  let error = '';
+  if ([...value].length > maxLength) {
+    error = `Must be ${maxLength} characters or less.`;
+  } else if ([...value].length < minLength && hasCommitted) {
+    error = `Must be ${minLength} characters or more.`;
+  }
 
   const InputComponent = type === 'input' ? Input : Textarea;
 
@@ -87,7 +99,8 @@ function TextField({
       <InputComponent
         id={id}
         onInput={handleInput}
-        error={error ? `Must be ${limit} characters or less.` : undefined}
+        onChange={handleChange}
+        error={error}
         value={value}
         classes={classes}
         autofocus={autofocus}
@@ -97,9 +110,9 @@ function TextField({
       />
       <CharacterCounter
         value={[...value].length}
-        limit={limit}
+        limit={maxLength}
         testid={`charcounter-${testid}`}
-        error={error}
+        error={Boolean(error)}
       />
     </div>
   );
@@ -144,7 +157,8 @@ export default function CreateGroupForm() {
           type="input"
           value={name}
           onChangeValue={setName}
-          limit={25}
+          minLength={3}
+          maxLength={25}
           label="Name"
           testid="name"
           autofocus
@@ -154,7 +168,7 @@ export default function CreateGroupForm() {
           type="textarea"
           value={description}
           onChangeValue={setDescription}
-          limit={250}
+          maxLength={250}
           label="Description"
           testid="description"
           classes="h-24"
