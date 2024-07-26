@@ -44,7 +44,7 @@ describe('CreateGroupForm', () => {
 
   /* Return true if component is in its error state. */
   const componentIsInErrorState = component => {
-    return component.prop('error') !== undefined;
+    return Boolean(component.prop('error'));
   };
 
   const getElements = wrapper => {
@@ -71,18 +71,18 @@ describe('CreateGroupForm', () => {
   [
     {
       field: 'name',
-      limit: 25,
+      maxLength: 25,
     },
     {
       field: 'description',
-      limit: 250,
+      maxLength: 250,
     },
-  ].forEach(({ field, limit }) => {
+  ].forEach(({ field, maxLength }) => {
     describe(`${field} character counter`, () => {
       it('renders a character counter', () => {
         const { counterEl, fieldComponent } = createWrapper().elements[field];
 
-        assert.equal(counterEl.text(), `0/${limit}`);
+        assert.equal(counterEl.text(), `0/${maxLength}`);
         assert.isNotOk(counterIsInErrorState(counterEl));
         assert.isNotOk(componentIsInErrorState(fieldComponent));
       });
@@ -95,7 +95,7 @@ describe('CreateGroupForm', () => {
         fieldEl.simulate('input');
 
         const { counterEl, fieldComponent } = getElements(wrapper)[field];
-        assert.equal(counterEl.text(), `8/${limit}`);
+        assert.equal(counterEl.text(), `8/${maxLength}`);
         assert.isNotOk(counterIsInErrorState(counterEl));
         assert.isNotOk(componentIsInErrorState(fieldComponent));
       });
@@ -104,13 +104,51 @@ describe('CreateGroupForm', () => {
         const { wrapper, elements } = createWrapper();
         const fieldEl = elements[field].fieldEl;
 
-        fieldEl.getDOMNode().value = 'a'.repeat(limit + 1);
+        fieldEl.getDOMNode().value = 'a'.repeat(maxLength + 1);
         fieldEl.simulate('input');
 
         const { counterEl, fieldComponent } = getElements(wrapper)[field];
         assert.isOk(counterIsInErrorState(counterEl));
         assert.isOk(componentIsInErrorState(fieldComponent));
       });
+    });
+  });
+
+  describe('name field', () => {
+    it("doesn't go into an error state when too few characters are only input but not committed", () => {
+      const { wrapper, elements } = createWrapper();
+      const fieldEl = elements.name.fieldEl;
+
+      fieldEl.getDOMNode().value = 'aa';
+      fieldEl.simulate('input');
+
+      const { counterEl, fieldComponent } = getElements(wrapper).name;
+      assert.isNotOk(counterIsInErrorState(counterEl));
+      assert.isNotOk(componentIsInErrorState(fieldComponent));
+    });
+
+    it('goes into an error state when too few characters are committed', () => {
+      const { wrapper, elements } = createWrapper();
+      const fieldEl = elements.name.fieldEl;
+
+      // Too few characters are entered into the field and the field is then
+      // "committed" (e.g. the focus leaves the field, or the form is
+      // submitted.)
+      fieldEl.getDOMNode().value = 'aa';
+      fieldEl.simulate('change');
+
+      // The field and its character counter go into their error states.
+      let { counterEl, fieldComponent } = getElements(wrapper).name;
+      assert.isOk(counterIsInErrorState(counterEl));
+      assert.isOk(componentIsInErrorState(fieldComponent));
+
+      // If enough characters are then just input into the field (they don't
+      // have to be committed) then the error state is already cleared.
+      fieldEl.getDOMNode().value = 'aaa';
+      fieldEl.simulate('input');
+      ({ counterEl, fieldComponent } = getElements(wrapper).name);
+      assert.isNotOk(counterIsInErrorState(counterEl));
+      assert.isNotOk(componentIsInErrorState(fieldComponent));
     });
   });
 
