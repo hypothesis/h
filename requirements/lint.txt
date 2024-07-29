@@ -439,7 +439,7 @@ rpds-py==0.16.2
     #   -r requirements/tests.txt
     #   jsonschema
     #   referencing
-sentry-sdk==2.10.0
+sentry-sdk==2.11.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
