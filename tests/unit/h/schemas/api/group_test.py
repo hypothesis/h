@@ -40,6 +40,34 @@ class TestGroupAPISchema:
         with pytest.raises(ValidationError, match="name:.*is too long"):
             schema.validate({"name": "o" * (GROUP_NAME_MAX_LENGTH + 1)})
 
+    def test_it_raises_if_name_isnt_a_string(self, schema):
+        name = 42
+
+        with pytest.raises(
+            ValidationError, match=f"name: {name} is not of type 'string'"
+        ):
+            schema.validate({"name": name})
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            f" {'o' * GROUP_NAME_MIN_LENGTH}",
+            f"{'o' * GROUP_NAME_MIN_LENGTH} ",
+            " " * GROUP_NAME_MIN_LENGTH,
+        ],
+    )
+    def test_it_raises_if_name_has_leading_or_trailing_whitespace(self, schema, name):
+        with pytest.raises(
+            ValidationError,
+            match="Group names can't have leading or trailing whitespace.",
+        ):
+            schema.validate({"name": name})
+
+    def test_it_validates_with_no_data(self, schema):
+        appstruct = schema.validate({})
+
+        assert appstruct == {}
+
     def test_it_validates_with_valid_name(self, schema):
         appstruct = schema.validate({"name": "Perfectly Fine"})
 
