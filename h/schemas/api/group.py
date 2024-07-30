@@ -50,11 +50,21 @@ class GroupAPISchema(JSONSchema):
         :rtype: dict
 
         """
+
         appstruct = super().validate(data)
         appstruct = self._whitelisted_fields_only(appstruct)
+        self._validate_name(appstruct)
         self._validate_groupid(appstruct)
 
         return appstruct
+
+    def _validate_name(self, appstruct):
+        name = appstruct.get("name")
+
+        if name and name.strip() != name:
+            raise ValidationError(
+                "Group names can't have leading or trailing whitespace."
+            )
 
     def _validate_groupid(self, appstruct):
         """
