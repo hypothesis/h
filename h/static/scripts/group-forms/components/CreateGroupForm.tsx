@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'preact/hooks';
 
-import { Button, Input, Textarea } from '@hypothesis/frontend-shared';
+import { Button, Input, Spinner, Textarea } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
 import { callAPI, CreateGroupAPIResponse } from '../utils/api';
 import { setLocation } from '../utils/set-location';
@@ -122,12 +122,15 @@ export default function CreateGroupForm() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [saving, setSaving] = useState(false);
   const config = useMemo(() => readConfig(), []);
 
   const createGroup = async (e: SubmitEvent) => {
     e.preventDefault();
 
     let response: CreateGroupAPIResponse;
+
+    setSaving(true);
 
     try {
       response = (await callAPI(
@@ -140,6 +143,7 @@ export default function CreateGroupForm() {
       )) as CreateGroupAPIResponse;
     } catch (apiError) {
       setErrorMessage(apiError.message);
+      setSaving(false);
       return;
     }
 
@@ -174,7 +178,7 @@ export default function CreateGroupForm() {
           classes="h-24"
         />
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-x-4">
           {errorMessage && (
             <div
               className="text-red-error font-bold"
@@ -184,7 +188,13 @@ export default function CreateGroupForm() {
             </div>
           )}
           <div className="grow" />
-          <Button type="submit" variant="primary">
+          {saving && <Spinner data-testid="spinner" />}
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={saving}
+            data-testid="button"
+          >
             Create group
           </Button>
         </div>

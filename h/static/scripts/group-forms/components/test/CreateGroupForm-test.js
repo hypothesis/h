@@ -158,6 +158,30 @@ describe('CreateGroupForm', () => {
     assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
   });
 
+  it("doesn't show a loading state initially", async () => {
+    const { wrapper } = createWrapper();
+
+    await assertInLoadingState(wrapper, false);
+  });
+
+  it('shows a loading state when the create-group API request is in-flight', async () => {
+    const { wrapper } = createWrapper();
+    fakeCallAPI.resolves(new Promise(() => {}));
+
+    wrapper.find('form[data-testid="form"]').simulate('submit');
+
+    await assertInLoadingState(wrapper, true);
+  });
+
+  it('continues to show the loading state after receiving a successful API response', async () => {
+    const { wrapper } = createWrapper();
+    fakeCallAPI.resolves({ links: { html: 'https://example.com/group/foo' } });
+
+    await wrapper.find('form[data-testid="form"]').simulate('submit');
+
+    await assertInLoadingState(wrapper, true);
+  });
+
   it('creates the group and redirects the browser', async () => {
     const { wrapper, elements } = createWrapper();
     const nameEl = elements.name.fieldEl;
@@ -198,5 +222,15 @@ describe('CreateGroupForm', () => {
       '[data-testid="error-message"]',
     );
     assert.equal(errorMessageEl.text(), errorMessageFromCallAPI);
+    // It exits its loading state after receiving an error response.
+    await assertInLoadingState(wrapper, false);
   });
 });
+
+async function assertInLoadingState(wrapper, inLoadingState) {
+  await waitForElement(
+    wrapper,
+    `button[data-testid="button"][disabled=${inLoadingState}]`,
+  );
+  assert.equal(wrapper.exists('[data-testid="spinner"]'), inLoadingState);
+}
