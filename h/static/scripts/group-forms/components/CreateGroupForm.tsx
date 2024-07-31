@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'preact/hooks';
+import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 
 import { Button, Input, Spinner, Textarea } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
@@ -124,6 +124,18 @@ export default function CreateGroupForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const config = useMemo(() => readConfig(), []);
+
+  useEffect(() => {
+    const listener = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // Disable the "saving" state if the user uses the browser's Back button to navigate
+        // back to the group form.
+        setSaving(false);
+      }
+    };
+    window.addEventListener('pageshow', listener);
+    return () => window.removeEventListener('pageshow', listener);
+  }, []);
 
   const createGroup = async (e: SubmitEvent) => {
     e.preventDefault();
