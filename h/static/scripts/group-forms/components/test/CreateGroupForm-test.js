@@ -62,11 +62,22 @@ describe('CreateGroupForm', () => {
     };
   };
 
+  let wrappers;
+
   const createWrapper = () => {
     const wrapper = mount(<CreateGroupForm />);
+    wrappers.push(wrapper);
     const elements = getElements(wrapper);
     return { wrapper, elements };
   };
+
+  beforeEach(() => {
+    wrappers = [];
+  });
+
+  afterEach(() => {
+    wrappers.forEach(wrapper => wrapper.unmount());
+  });
 
   [
     {
