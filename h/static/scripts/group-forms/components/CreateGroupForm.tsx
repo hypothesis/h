@@ -139,6 +139,7 @@ export default function CreateGroupForm() {
 
   const createGroup = async (e: SubmitEvent) => {
     e.preventDefault();
+    setErrorMessage('');
 
     let response: CreateGroupAPIResponse;
 
