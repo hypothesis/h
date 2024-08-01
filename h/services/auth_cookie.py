@@ -20,7 +20,6 @@ class AuthCookieService:
         self._session = session
         self._user_service = user_service
         self._cookie = cookie
-        self._user = None
 
     def verify_cookie(self):
         """
@@ -28,10 +27,6 @@ class AuthCookieService:
 
         :return: The logged in `User` or None
         """
-
-        if self._user:
-            # We've already vetted the user!
-            return self._user
 
         userid, ticket_id = self._get_cookie_value()
         if not ticket_id:
@@ -57,10 +52,7 @@ class AuthCookieService:
         if (datetime.utcnow() - ticket.updated) > self.TICKET_REFRESH_INTERVAL:
             ticket.expires = datetime.utcnow() + self.TICKET_TTL
 
-        # Update the user cache to allow quick checking if we are called again
-        self._user = ticket.user
-
-        return self._user
+        return ticket.user
 
     def create_cookie(self, userid):
         """
@@ -71,19 +63,19 @@ class AuthCookieService:
         """
 
         # Update the user cache to allow quick checking if we are called again
-        self._user = self._user_service.fetch(userid)
-        if self._user is None:
+        user = self._user_service.fetch(userid)
+        if user is None:
             raise ValueError(f"Cannot find user with userid {userid}")
 
         ticket = AuthTicket(
             id=base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii"),
-            user=self._user,
-            user_userid=self._user.userid,
+            user=user,
+            user_userid=user.userid,
             expires=datetime.utcnow() + self.TICKET_TTL,
         )
         self._session.add(ticket)
 
-        return self._cookie.get_headers([self._user.userid, ticket.id])
+        return self._cookie.get_headers([user.userid, ticket.id])
 
     def revoke_cookie(self):
         """
@@ -95,9 +87,6 @@ class AuthCookieService:
         _, ticket_id = self._get_cookie_value()
         if ticket_id:
             self._session.query(AuthTicket).filter_by(id=ticket_id).delete()
-
-        # Empty the cached user to force revalidation
-        self._user = None
 
         return self._cookie.get_headers(None, max_age=0)
 
