@@ -9,36 +9,36 @@ from h.security.policy import _cookie
 from h.security.policy._cookie import CookiePolicy, base64
 
 
-@pytest.mark.usefixtures("auth_cookie_service")
+@pytest.mark.usefixtures("auth_ticket_service")
 class TestCookiePolicy:
-    def test_identity(self, pyramid_request, auth_cookie_service, cookie_policy, user):
+    def test_identity(self, pyramid_request, auth_ticket_service, cookie_policy, user):
         identity = cookie_policy.identity(pyramid_request)
 
-        auth_cookie_service.verify_ticket.assert_called_once_with(
+        auth_ticket_service.verify_ticket.assert_called_once_with(
             user.userid, sentinel.ticket_id
         )
         assert identity == Identity.from_models(
-            user=auth_cookie_service.verify_ticket.return_value
+            user=auth_ticket_service.verify_ticket.return_value
         )
 
     def test_identity_when_user_marked_as_deleted(
-        self, pyramid_request, auth_cookie_service, cookie_policy
+        self, pyramid_request, auth_ticket_service, cookie_policy
     ):
-        auth_cookie_service.verify_ticket.return_value.deleted = True
+        auth_ticket_service.verify_ticket.return_value.deleted = True
 
         assert cookie_policy.identity(pyramid_request) is None
 
     def test_identity_with_no_auth_ticket(
-        self, pyramid_request, auth_cookie_service, cookie_policy
+        self, pyramid_request, auth_ticket_service, cookie_policy
     ):
-        auth_cookie_service.verify_ticket.return_value = None
+        auth_ticket_service.verify_ticket.return_value = None
 
         assert cookie_policy.identity(pyramid_request) is None
 
     def test_remember(
         self,
         pyramid_request,
-        auth_cookie_service,
+        auth_ticket_service,
         user,
         cookie,
         cookie_policy,
@@ -46,7 +46,7 @@ class TestCookiePolicy:
         urandom,
     ):
         pyramid_request.session["data"] = "old"
-        auth_cookie_service.verify_ticket.return_value = user
+        auth_ticket_service.verify_ticket.return_value = user
 
         result = cookie_policy.remember(pyramid_request, sentinel.userid)
 
@@ -56,26 +56,26 @@ class TestCookiePolicy:
         urandom.assert_called_once_with(32)
         urlsafe_b64encode.assert_called_once_with(urandom.spy_return)
         ticket_id = urlsafe_b64encode.spy_return.rstrip(b"=").decode("ascii")
-        auth_cookie_service.add_ticket.assert_called_once_with(
+        auth_ticket_service.add_ticket.assert_called_once_with(
             sentinel.userid, ticket_id
         )
         cookie.get_headers.assert_called_once_with([sentinel.userid, ticket_id])
         assert result == cookie.get_headers.return_value
 
     def test_remember_with_existing_user(
-        self, pyramid_request, auth_cookie_service, user, cookie_policy
+        self, pyramid_request, auth_ticket_service, user, cookie_policy
     ):
         pyramid_request.session["data"] = "old"
         # This is a secret parameter used by `pyramid.testing.DummySession`
         pyramid_request.session["_csrft_"] = "old_csrf_token"
-        auth_cookie_service.verify_ticket.return_value = user
+        auth_ticket_service.verify_ticket.return_value = user
 
         cookie_policy.remember(pyramid_request, user.userid)
 
         assert pyramid_request.session["data"] == "old"
         assert pyramid_request.session["_csrft_"] != "old_csrf_token"
 
-    def test_forget(self, pyramid_request, auth_cookie_service, cookie_policy, cookie):
+    def test_forget(self, pyramid_request, auth_ticket_service, cookie_policy, cookie):
         pyramid_request.session["data"] = "old"
 
         result = cookie_policy.forget(pyramid_request)
@@ -83,7 +83,7 @@ class TestCookiePolicy:
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
         assert not pyramid_request.session
-        auth_cookie_service.remove_ticket.assert_called_once_with(sentinel.ticket_id)
+        auth_ticket_service.remove_ticket.assert_called_once_with(sentinel.ticket_id)
         cookie.get_headers.assert_called_once_with(None, max_age=0)
         assert result == cookie.get_headers.return_value
 

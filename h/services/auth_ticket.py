@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from h.models import AuthTicket, User
 
 
-class AuthCookieService:
+class AuthTicketService:
     TICKET_TTL = timedelta(days=7)
 
     # We only want to update the `expires` column when the tickets `expires` is
@@ -82,6 +82,6 @@ class AuthCookieService:
 
 
 def factory(_context, request):
-    """Return a AuthCookieService instance for the passed context and request."""
+    """Return a AuthTicketService instance for the passed context and request."""
 
-    return AuthCookieService(request.db, user_service=request.find_service(name="user"))
+    return AuthTicketService(request.db, user_service=request.find_service(name="user"))

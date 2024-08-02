@@ -4,7 +4,7 @@ from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_sync import AnnotationSyncService
 from h.services.annotation_write import AnnotationWriteService
-from h.services.auth_cookie import AuthCookieService
+from h.services.auth_ticket import AuthTicketService
 from h.services.bulk_api import (
     BulkAnnotationService,
     BulkGroupService,
@@ -45,7 +45,7 @@ def includeme(config):  # pragma: no cover
 
     # Other services
     config.register_service_factory(
-        "h.services.auth_cookie.factory", iface=AuthCookieService
+        "h.services.auth_ticket.factory", iface=AuthTicketService
     )
     config.register_service_factory(
         "h.services.auth_token.auth_token_service_factory", name="auth_token"

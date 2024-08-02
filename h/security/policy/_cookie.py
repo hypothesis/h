@@ -6,7 +6,7 @@ import webob
 
 from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
-from h.services.auth_cookie import AuthCookieService
+from h.services.auth_ticket import AuthTicketService
 
 
 class CookiePolicy(IdentityBasedPolicy):
@@ -28,7 +28,7 @@ class CookiePolicy(IdentityBasedPolicy):
         if not ticket_id:
             return None
 
-        user = request.find_service(AuthCookieService).verify_ticket(userid, ticket_id)
+        user = request.find_service(AuthTicketService).verify_ticket(userid, ticket_id)
 
         if (not user) or user.deleted:
             return None
@@ -55,7 +55,7 @@ class CookiePolicy(IdentityBasedPolicy):
             request.session.new_csrf_token()
 
         ticket_id = base64.urlsafe_b64encode(urandom(32)).rstrip(b"=").decode("ascii")
-        request.find_service(AuthCookieService).add_ticket(userid, ticket_id)
+        request.find_service(AuthTicketService).add_ticket(userid, ticket_id)
         return self.cookie.get_headers([userid, ticket_id])
 
     def forget(self, request):
@@ -69,7 +69,7 @@ class CookiePolicy(IdentityBasedPolicy):
         _, ticket_id = self._get_cookie_value()
 
         if ticket_id:
-            request.find_service(AuthCookieService).remove_ticket(ticket_id)
+            request.find_service(AuthTicketService).remove_ticket(ticket_id)
 
         return self.cookie.get_headers(None, max_age=0)
 
