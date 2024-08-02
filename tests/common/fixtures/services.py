@@ -10,7 +10,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_sync import AnnotationSyncService
 from h.services.annotation_write import AnnotationWriteService
-from h.services.auth_cookie import AuthCookieService
+from h.services.auth_ticket import AuthTicketService
 from h.services.auth_token import AuthTokenService
 from h.services.bulk_api import (
     BulkAnnotationService,
@@ -51,7 +51,7 @@ __all__ = (
     "annotation_read_service",
     "annotation_sync_service",
     "annotation_write_service",
-    "auth_cookie_service",
+    "auth_ticket_service",
     "auth_token_service",
     "bulk_annotation_service",
     "bulk_group_service",
@@ -137,10 +137,10 @@ def annotation_metadata_service(mock_service):
 
 
 @pytest.fixture
-def auth_cookie_service(mock_service):
-    auth_cookie_service = mock_service(AuthCookieService)
-    auth_cookie_service.verify_ticket.return_value.deleted = False
-    return auth_cookie_service
+def auth_ticket_service(mock_service):
+    auth_ticket_service = mock_service(AuthTicketService)
+    auth_ticket_service.verify_ticket.return_value.deleted = False
+    return auth_ticket_service
 
 
 @pytest.fixture

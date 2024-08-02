@@ -4,7 +4,7 @@ from unittest.mock import sentinel
 import pytest
 
 from h.models import AuthTicket
-from h.services.auth_cookie import AuthCookieService, factory
+from h.services.auth_ticket import AuthTicketService, factory
 
 
 def assert_nearly_equal(first_date, second_date):
@@ -13,7 +13,7 @@ def assert_nearly_equal(first_date, second_date):
     assert diff < timedelta(seconds=1)
 
 
-class TestAuthCookieService:
+class TestAuthTicketService:
     def test_verify_ticket(self, service, auth_ticket):
         assert (
             service.verify_ticket(auth_ticket.user.userid, auth_ticket.id)
@@ -45,9 +45,9 @@ class TestAuthCookieService:
         "offset,expect_update",
         (
             (timedelta(seconds=0), False),
-            (AuthCookieService.TICKET_REFRESH_INTERVAL + timedelta(seconds=-1), False),
-            (AuthCookieService.TICKET_REFRESH_INTERVAL, True),
-            (AuthCookieService.TICKET_REFRESH_INTERVAL + timedelta(seconds=1), True),
+            (AuthTicketService.TICKET_REFRESH_INTERVAL + timedelta(seconds=-1), False),
+            (AuthTicketService.TICKET_REFRESH_INTERVAL, True),
+            (AuthTicketService.TICKET_REFRESH_INTERVAL + timedelta(seconds=1), True),
         ),
     )
     def test_verify_ticket_updates_the_expiry_time(
@@ -60,7 +60,7 @@ class TestAuthCookieService:
 
         if expect_update:
             assert_nearly_equal(
-                auth_ticket.expires, datetime.utcnow() + AuthCookieService.TICKET_TTL
+                auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL
             )
         else:
             assert auth_ticket.expires == expires
@@ -76,7 +76,7 @@ class TestAuthCookieService:
         assert auth_ticket.user_userid == user.userid
         assert auth_ticket.id == "test_ticket_id"
         assert_nearly_equal(
-            auth_ticket.expires, datetime.utcnow() + AuthCookieService.TICKET_TTL
+            auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL
         )
         assert service._user == user  # pylint: disable=protected-access
 
@@ -104,21 +104,21 @@ class TestAuthCookieService:
 
     @pytest.fixture
     def service(self, db_session, user_service):
-        return AuthCookieService(session=db_session, user_service=user_service)
+        return AuthTicketService(session=db_session, user_service=user_service)
 
 
 class TestFactory:
-    def test_it(self, pyramid_request, AuthCookieService, user_service):
+    def test_it(self, pyramid_request, AuthTicketService, user_service):
         cookie_service = factory(sentinel.context, pyramid_request)
 
-        AuthCookieService.assert_called_once_with(
+        AuthTicketService.assert_called_once_with(
             pyramid_request.db, user_service=user_service
         )
-        assert cookie_service == AuthCookieService.return_value
+        assert cookie_service == AuthTicketService.return_value
 
     @pytest.fixture
-    def AuthCookieService(self, patch):
-        return patch("h.services.auth_cookie.AuthCookieService")
+    def AuthTicketService(self, patch):
+        return patch("h.services.auth_ticket.AuthTicketService")
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
