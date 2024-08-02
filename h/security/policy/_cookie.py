@@ -25,9 +25,6 @@ class CookiePolicy(IdentityBasedPolicy):
 
         userid, ticket_id = self._get_cookie_value()
 
-        if not ticket_id:
-            return None
-
         user = request.find_service(AuthTicketService).verify_ticket(userid, ticket_id)
 
         if (not user) or user.deleted:

@@ -18,13 +18,12 @@ class AuthTicketService:
         self._user_service = user_service
         self._user = None
 
-    def verify_ticket(self, userid: str, ticket_id: str) -> User | None:
+    def verify_ticket(self, userid: str | None, ticket_id: str | None) -> User | None:
         """
         Return the User object matching the given userid and ticket_id, or None.
 
         Verify that there is an unexpired AuthTicket in the DB matching the
-        given `userid` and `ticket_id` and if so return the User corresponding
-        User object.
+        given `userid` and `ticket_id` and if so return the corresponding User.
         """
 
         if self._user:
