@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
-from unittest.mock import create_autospec, sentinel
+from unittest.mock import sentinel
 
 import pytest
-from webob.cookies import SignedCookieProfile
 
 from h.models import AuthTicket
 from h.services.auth_cookie import AuthCookieService, factory
@@ -15,7 +14,6 @@ def assert_nearly_equal(first_date, second_date):
 
 
 class TestAuthCookieService:
-    @pytest.mark.usefixtures("with_valid_cookie")
     def test_verify_ticket(self, service, auth_ticket):
         assert (
             service.verify_ticket(auth_ticket.user.userid, auth_ticket.id)
@@ -36,7 +34,6 @@ class TestAuthCookieService:
     def test_verify_ticket_returns_None_if_there_is_no_ticket(self, service, user):
         assert service.verify_ticket(user.userid, ticket_id="does_not_exist") is None
 
-    @pytest.mark.usefixtures("with_valid_cookie")
     def test_verify_ticket_returns_None_if_the_ticket_has_expired(
         self, service, auth_ticket
     ):
@@ -53,7 +50,6 @@ class TestAuthCookieService:
             (AuthCookieService.TICKET_REFRESH_INTERVAL + timedelta(seconds=1), True),
         ),
     )
-    @pytest.mark.usefixtures("with_valid_cookie")
     def test_verify_ticket_updates_the_expiry_time(
         self, service, auth_ticket, offset, expect_update
     ):
@@ -107,51 +103,18 @@ class TestAuthCookieService:
         return factories.AuthTicket()
 
     @pytest.fixture
-    def cookie(self):
-        cookie = create_autospec(SignedCookieProfile, instance=True, spec_set=True)
-        cookie.get_value.return_value = None
-        return cookie
-
-    @pytest.fixture
-    def with_valid_cookie(self, cookie, auth_ticket):
-        cookie.get_value.return_value = auth_ticket.user_userid, auth_ticket.id
-
-    @pytest.fixture
-    def service(self, db_session, user_service, cookie):
-        return AuthCookieService(
-            session=db_session, user_service=user_service, cookie=cookie
-        )
+    def service(self, db_session, user_service):
+        return AuthCookieService(session=db_session, user_service=user_service)
 
 
 class TestFactory:
-    def test_it(
-        self, pyramid_request, SignedCookieProfile, AuthCookieService, user_service
-    ):
-        pyramid_request.registry.settings["h_auth_cookie_secret"] = (
-            sentinel.cookie_secret
-        )
-
+    def test_it(self, pyramid_request, AuthCookieService, user_service):
         cookie_service = factory(sentinel.context, pyramid_request)
 
-        SignedCookieProfile.assert_called_once_with(
-            secret=pyramid_request.registry.settings["h_auth_cookie_secret"],
-            salt="authsanity",
-            cookie_name="auth",
-            secure=True,
-            max_age=2592000,
-            httponly=True,
-        )
-        SignedCookieProfile.return_value.bind.assert_called_once_with(pyramid_request)
         AuthCookieService.assert_called_once_with(
-            pyramid_request.db,
-            user_service=user_service,
-            cookie=SignedCookieProfile.return_value.bind.return_value,
+            pyramid_request.db, user_service=user_service
         )
         assert cookie_service == AuthCookieService.return_value
-
-    @pytest.fixture
-    def SignedCookieProfile(self, patch):
-        return patch("h.services.auth_cookie.SignedCookieProfile")
 
     @pytest.fixture
     def AuthCookieService(self, patch):

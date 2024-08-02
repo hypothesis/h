@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 import sqlalchemy as sa
-from webob.cookies import SignedCookieProfile
 
 from h.models import AuthTicket, User
 
@@ -14,10 +13,9 @@ class AuthCookieService:
     # that we update the `expires` column on every single request.
     TICKET_REFRESH_INTERVAL = timedelta(minutes=1)
 
-    def __init__(self, session, user_service, cookie):
+    def __init__(self, session, user_service):
         self._session = session
         self._user_service = user_service
-        self._cookie = cookie
         self._user = None
 
     def verify_ticket(self, userid: str, ticket_id: str) -> User | None:
@@ -82,29 +80,8 @@ class AuthCookieService:
         # Empty the cached user to force revalidation.
         self._user = None
 
-    def _get_cookie_value(self):
-        value = self._cookie.get_value()
-        if not value:
-            return None, None
-
-        return value
-
 
 def factory(_context, request):
     """Return a AuthCookieService instance for the passed context and request."""
 
-    cookie = SignedCookieProfile(
-        # This value is set in `h.auth` at the moment
-        secret=request.registry.settings["h_auth_cookie_secret"],
-        salt="authsanity",
-        cookie_name="auth",
-        max_age=30 * 24 * 3600,  # 30 days
-        httponly=True,
-        secure=request.scheme == "https",
-    )
-
-    return AuthCookieService(
-        request.db,
-        user_service=request.find_service(name="user"),
-        cookie=cookie.bind(request),
-    )
+    return AuthCookieService(request.db, user_service=request.find_service(name="user"))
