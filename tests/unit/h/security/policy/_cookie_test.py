@@ -21,6 +21,13 @@ class TestCookiePolicy:
             user=auth_ticket_service.verify_ticket.return_value
         )
 
+    def test_identity_when_no_ticket_in_cookie(
+        self, cookie, cookie_policy, pyramid_request
+    ):
+        cookie.get_value.return_value = None
+
+        assert cookie_policy.identity(pyramid_request) is None
+
     def test_identity_when_user_marked_as_deleted(
         self, pyramid_request, auth_ticket_service, cookie_policy
     ):
@@ -84,6 +91,18 @@ class TestCookiePolicy:
         # we can get to saying it's been invalidated
         assert not pyramid_request.session
         auth_ticket_service.remove_ticket.assert_called_once_with(sentinel.ticket_id)
+        cookie.get_headers.assert_called_once_with(None, max_age=0)
+        assert result == cookie.get_headers.return_value
+
+    def test_forget_when_no_ticket_id_in_cookie(
+        self, auth_ticket_service, cookie, cookie_policy, pyramid_request
+    ):
+        cookie.get_value.return_value = None
+
+        result = cookie_policy.forget(pyramid_request)
+
+        assert not pyramid_request.session
+        auth_ticket_service.remove_ticket.assert_not_called()
         cookie.get_headers.assert_called_once_with(None, max_age=0)
         assert result == cookie.get_headers.return_value
 
