@@ -9,8 +9,8 @@ from h.security.policy._cookie import CookiePolicy
 
 @pytest.mark.usefixtures("auth_cookie_service")
 class TestCookiePolicy:
-    def test_identity(self, pyramid_request, auth_cookie_service):
-        identity = CookiePolicy().identity(pyramid_request)
+    def test_identity(self, pyramid_request, auth_cookie_service, cookie_policy):
+        identity = cookie_policy.identity(pyramid_request)
 
         auth_cookie_service.verify_cookie.assert_called_once()
         assert identity == Identity.from_models(
@@ -18,22 +18,24 @@ class TestCookiePolicy:
         )
 
     def test_identity_when_user_marked_as_deleted(
-        self, pyramid_request, auth_cookie_service
+        self, pyramid_request, auth_cookie_service, cookie_policy
     ):
         auth_cookie_service.verify_cookie.return_value.deleted = True
 
-        assert CookiePolicy().identity(pyramid_request) is None
+        assert cookie_policy.identity(pyramid_request) is None
 
-    def test_identity_with_no_cookie(self, pyramid_request, auth_cookie_service):
+    def test_identity_with_no_cookie(
+        self, pyramid_request, auth_cookie_service, cookie_policy
+    ):
         auth_cookie_service.verify_cookie.return_value = None
 
-        assert CookiePolicy().identity(pyramid_request) is None
+        assert cookie_policy.identity(pyramid_request) is None
 
-    def test_remember(self, pyramid_request, auth_cookie_service, user):
+    def test_remember(self, pyramid_request, auth_cookie_service, user, cookie_policy):
         pyramid_request.session["data"] = "old"
         auth_cookie_service.verify_cookie.return_value = user
 
-        result = CookiePolicy().remember(pyramid_request, sentinel.userid)
+        result = cookie_policy.remember(pyramid_request, sentinel.userid)
 
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
@@ -42,22 +44,22 @@ class TestCookiePolicy:
         assert result == auth_cookie_service.create_cookie.return_value
 
     def test_remember_with_existing_user(
-        self, pyramid_request, auth_cookie_service, user
+        self, pyramid_request, auth_cookie_service, user, cookie_policy
     ):
         pyramid_request.session["data"] = "old"
         # This is a secret parameter used by `pyramid.testing.DummySession`
         pyramid_request.session["_csrft_"] = "old_csrf_token"
         auth_cookie_service.verify_cookie.return_value = user
 
-        CookiePolicy().remember(pyramid_request, user.userid)
+        cookie_policy.remember(pyramid_request, user.userid)
 
         assert pyramid_request.session["data"] == "old"
         assert pyramid_request.session["_csrft_"] != "old_csrf_token"
 
-    def test_forget(self, pyramid_request, auth_cookie_service):
+    def test_forget(self, pyramid_request, auth_cookie_service, cookie_policy):
         pyramid_request.session["data"] = "old"
 
-        result = CookiePolicy().forget(pyramid_request)
+        result = cookie_policy.forget(pyramid_request)
 
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
@@ -78,10 +80,10 @@ class TestCookiePolicy:
         ),
     )
     def test_methods_add_vary_callback(
-        self, pyramid_request, method, args, vary, expected_vary
+        self, pyramid_request, method, args, vary, expected_vary, cookie_policy
     ):
         pyramid_request.response.vary = vary
-        getattr(CookiePolicy(), method)(pyramid_request, *args)
+        getattr(cookie_policy, method)(pyramid_request, *args)
 
         assert len(pyramid_request.response_callbacks) == 1
         callback = pyramid_request.response_callbacks[0]
@@ -92,6 +94,10 @@ class TestCookiePolicy:
             pyramid_request.response.vary
             == Any.iterable.containing(expected_vary).only()
         )
+
+    @pytest.fixture
+    def cookie_policy(self):
+        return CookiePolicy(sentinel.cookie)
 
     @pytest.fixture
     def user(self, factories):

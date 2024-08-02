@@ -1,3 +1,4 @@
+import webob
 from pyramid.request import RequestLocalCache
 
 from h.security.identity import Identity
@@ -35,8 +36,30 @@ class TopLevelPolicy(IdentityBasedPolicy):
 def get_subpolicy(request):
     """Return the subpolicy for TopLevelSecurityPolicy to delegate to for `request`."""
     if is_api_request(request):
+        cookie = webob.cookies.SignedCookieProfile(
+            secret=request.registry.settings["h_auth_cookie_secret"],
+            salt="authsanity",
+            cookie_name="auth",
+            max_age=30 * 24 * 3600,  # 30 days
+            httponly=True,
+            secure=request.scheme == "https",
+        )
+        cookie = cookie.bind(request)
         return APIPolicy(
-            [BearerTokenPolicy(), AuthClientPolicy(), APICookiePolicy(CookiePolicy())]
+            [
+                BearerTokenPolicy(),
+                AuthClientPolicy(),
+                APICookiePolicy(CookiePolicy(cookie)),
+            ]
         )
 
-    return CookiePolicy()
+    cookie = webob.cookies.SignedCookieProfile(
+        secret=request.registry.settings["h_auth_cookie_secret"],
+        salt="authsanity",
+        cookie_name="auth",
+        max_age=30 * 24 * 3600,  # 30 days
+        httponly=True,
+        secure=request.scheme == "https",
+    )
+    cookie = cookie.bind(request)
+    return CookiePolicy(cookie)

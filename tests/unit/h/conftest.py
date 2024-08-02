@@ -160,6 +160,7 @@ def pyramid_request(db_session, db_session_replica, fake_feature, pyramid_settin
     request.GET = request.params
     request.POST = request.params
     request.user = None
+    request.scheme = "https"
     return request
 
 
