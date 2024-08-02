@@ -84,8 +84,4 @@ class CookiePolicy(IdentityBasedPolicy):
         request.add_response_callback(vary_add)
 
     def _get_cookie_value(self):
-        value = self.cookie.get_value()
-        if not value:
-            return None, None
-
-        return value
+        return self.cookie.get_value() or (None, None)
