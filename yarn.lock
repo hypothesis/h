@@ -5656,7 +5656,7 @@ __metadata:
     gulp-if: ^3.0.0
     gulp-svgmin: ^4.1.0
     jquery: ^3.7.1
-    karma: ^6.4.3
+    karma: ^6.4.4
     karma-chrome-launcher: ^3.2.0
     karma-mocha: ^2.0.1
     karma-mocha-reporter: ^2.2.5
@@ -6704,9 +6704,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"karma@npm:^6.4.3":
-  version: 6.4.3
-  resolution: "karma@npm:6.4.3"
+"karma@npm:^6.4.4":
+  version: 6.4.4
+  resolution: "karma@npm:6.4.4"
   dependencies:
     "@colors/colors": 1.5.0
     body-parser: ^1.19.0
@@ -6734,7 +6734,7 @@ __metadata:
     yargs: ^16.1.1
   bin:
     karma: bin/karma
-  checksum: 4eee6f52c7cf54d860bb35600b61eac3631647efa01282671c9f799dbe4ea80ac729946c8c82e53be778905b5920d221b527c86bd9bec73214ca2f84339aebbe
+  checksum: e7f20379b61892bb08d696b57723a1008627bb7746f214ad33c841229c0531e7e8ba8c94e34fb3ae4aeb7afa1df9774004fb4abc9904c55674676921ea2bb72d
   languageName: node
   linkType: hard
 
