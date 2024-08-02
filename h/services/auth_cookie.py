@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import sqlalchemy as sa
 from webob.cookies import SignedCookieProfile
 
-from h.models import AuthTicket
+from h.models import AuthTicket, User
 
 
 class AuthCookieService:
@@ -22,20 +22,18 @@ class AuthCookieService:
         self._cookie = cookie
         self._user = None
 
-    def verify_cookie(self):
+    def verify_ticket(self, userid: str, ticket_id: str) -> User | None:
         """
-        Get the authenticated user by cookie (if any).
+        Return the User object matching the given userid and ticket_id, or None.
 
-        :return: The logged in `User` or None
+        Verify that there is an unexpired AuthTicket in the DB matching the
+        given `userid` and `ticket_id` and if so return the User corresponding
+        User object.
         """
 
         if self._user:
             # We've already vetted the user!
             return self._user
-
-        userid, ticket_id = self._get_cookie_value()
-        if not ticket_id:
-            return None
 
         ticket = (
             self._session.query(AuthTicket)

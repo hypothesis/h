@@ -17,35 +17,33 @@ def assert_nearly_equal(first_date, second_date):
 
 class TestAuthCookieService:
     @pytest.mark.usefixtures("with_valid_cookie")
-    def test_verify_cookie(self, service, auth_ticket):
-        assert service.verify_cookie() == auth_ticket.user
+    def test_verify_ticket(self, service, auth_ticket):
+        assert (
+            service.verify_ticket(auth_ticket.user.userid, auth_ticket.id)
+            == auth_ticket.user
+        )
         # We also set the cache as a side effect
 
         assert service._user == auth_ticket.user  # pylint: disable=protected-access
 
-    def test_verify_cookie_short_circuits_if_user_cache_is_set(self, service):
+    def test_verify_ticket_short_circuits_if_user_cache_is_set(self, service):
         # pylint: disable=protected-access
         service._user = sentinel.user
 
-        assert service.verify_cookie() == service._user
+        assert (
+            service.verify_ticket(sentinel.userid, sentinel.ticket_id) == service._user
+        )
 
-    def test_verify_cookie_returns_None_if_there_is_no_cookie(self, service, cookie):
-        cookie.get_value.return_value = None
-
-        assert service.verify_cookie() is None
-
-    def test_verify_cookie_returns_None_if_there_is_no_ticket(self, service, cookie):
-        cookie.get_value.return_value = "userid", "MISSING"
-
-        assert service.verify_cookie() is None
+    def test_verify_ticket_returns_None_if_there_is_no_ticket(self, service, user):
+        assert service.verify_ticket(user.userid, ticket_id="does_not_exist") is None
 
     @pytest.mark.usefixtures("with_valid_cookie")
-    def test_verify_cookie_returns_None_if_the_ticket_has_expired(
+    def test_verify_ticket_returns_None_if_the_ticket_has_expired(
         self, service, auth_ticket
     ):
         auth_ticket.expires = datetime.utcnow() - timedelta(hours=1)
 
-        assert service.verify_cookie() is None
+        assert service.verify_ticket(auth_ticket.user.userid, auth_ticket.id) is None
 
     @pytest.mark.parametrize(
         "offset,expect_update",
@@ -57,13 +55,13 @@ class TestAuthCookieService:
         ),
     )
     @pytest.mark.usefixtures("with_valid_cookie")
-    def test_verify_cookie_updates_the_expiry_time(
+    def test_verify_ticket_updates_the_expiry_time(
         self, service, auth_ticket, offset, expect_update
     ):
         auth_ticket.updated = datetime.utcnow() - offset
         expires = auth_ticket.expires
 
-        service.verify_cookie()
+        service.verify_ticket(auth_ticket.user.userid, auth_ticket.id)
 
         if expect_update:
             assert_nearly_equal(

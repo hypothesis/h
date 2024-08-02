@@ -1,6 +1,7 @@
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
+import webob
 from h_matchers import Any
 
 from h.security import Identity
@@ -9,31 +10,33 @@ from h.security.policy._cookie import CookiePolicy
 
 @pytest.mark.usefixtures("auth_cookie_service")
 class TestCookiePolicy:
-    def test_identity(self, pyramid_request, auth_cookie_service, cookie_policy):
+    def test_identity(self, pyramid_request, auth_cookie_service, cookie_policy, user):
         identity = cookie_policy.identity(pyramid_request)
 
-        auth_cookie_service.verify_cookie.assert_called_once()
+        auth_cookie_service.verify_ticket.assert_called_once_with(
+            user.userid, sentinel.ticket_id
+        )
         assert identity == Identity.from_models(
-            user=auth_cookie_service.verify_cookie.return_value
+            user=auth_cookie_service.verify_ticket.return_value
         )
 
     def test_identity_when_user_marked_as_deleted(
         self, pyramid_request, auth_cookie_service, cookie_policy
     ):
-        auth_cookie_service.verify_cookie.return_value.deleted = True
+        auth_cookie_service.verify_ticket.return_value.deleted = True
 
         assert cookie_policy.identity(pyramid_request) is None
 
-    def test_identity_with_no_cookie(
+    def test_identity_with_no_auth_ticket(
         self, pyramid_request, auth_cookie_service, cookie_policy
     ):
-        auth_cookie_service.verify_cookie.return_value = None
+        auth_cookie_service.verify_ticket.return_value = None
 
         assert cookie_policy.identity(pyramid_request) is None
 
     def test_remember(self, pyramid_request, auth_cookie_service, user, cookie_policy):
         pyramid_request.session["data"] = "old"
-        auth_cookie_service.verify_cookie.return_value = user
+        auth_cookie_service.verify_ticket.return_value = user
 
         result = cookie_policy.remember(pyramid_request, sentinel.userid)
 
@@ -49,7 +52,7 @@ class TestCookiePolicy:
         pyramid_request.session["data"] = "old"
         # This is a secret parameter used by `pyramid.testing.DummySession`
         pyramid_request.session["_csrft_"] = "old_csrf_token"
-        auth_cookie_service.verify_cookie.return_value = user
+        auth_cookie_service.verify_ticket.return_value = user
 
         cookie_policy.remember(pyramid_request, user.userid)
 
@@ -96,8 +99,16 @@ class TestCookiePolicy:
         )
 
     @pytest.fixture
-    def cookie_policy(self):
-        return CookiePolicy(sentinel.cookie)
+    def cookie(self, user):
+        cookie = create_autospec(
+            webob.cookies.SignedCookieProfile, instance=True, spec_set=True
+        )
+        cookie.get_value.return_value = (user.userid, sentinel.ticket_id)
+        return cookie
+
+    @pytest.fixture
+    def cookie_policy(self, cookie):
+        return CookiePolicy(cookie)
 
     @pytest.fixture
     def user(self, factories):

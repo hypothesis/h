@@ -21,7 +21,13 @@ class CookiePolicy(IdentityBasedPolicy):
     def identity(self, request):
         self._add_vary_by_cookie(request)
 
-        user = request.find_service(AuthCookieService).verify_cookie()
+        userid, ticket_id = self._get_cookie_value()
+
+        if not ticket_id:
+            return None
+
+        user = request.find_service(AuthCookieService).verify_ticket(userid, ticket_id)
+
         if (not user) or user.deleted:
             return None
 
@@ -67,3 +73,10 @@ class CookiePolicy(IdentityBasedPolicy):
             response.vary = list(vary)
 
         request.add_response_callback(vary_add)
+
+    def _get_cookie_value(self):
+        value = self.cookie.get_value()
+        if not value:
+            return None, None
+
+        return value
