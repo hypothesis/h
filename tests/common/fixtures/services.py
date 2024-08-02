@@ -139,7 +139,7 @@ def annotation_metadata_service(mock_service):
 @pytest.fixture
 def auth_cookie_service(mock_service):
     auth_cookie_service = mock_service(AuthCookieService)
-    auth_cookie_service.verify_cookie.return_value.deleted = False
+    auth_cookie_service.verify_ticket.return_value.deleted = False
     return auth_cookie_service
 
 
