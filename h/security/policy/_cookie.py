@@ -1,5 +1,7 @@
 from functools import lru_cache
 
+import webob
+
 from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
 from h.services.auth_cookie import AuthCookieService
@@ -12,6 +14,9 @@ class CookiePolicy(IdentityBasedPolicy):
     This policy kicks in when accessing the UI presented by `h` and also boot
     straps the login for the client (when the popup shows).
     """
+
+    def __init__(self, cookie: webob.cookies.SignedCookieProfile):
+        self.cookie = cookie
 
     def identity(self, request):
         self._add_vary_by_cookie(request)
