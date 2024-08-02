@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from unittest.mock import create_autospec, sentinel
 
 import pytest
-from h_matchers import Any
 from webob.cookies import SignedCookieProfile
 
 from h.models import AuthTicket
@@ -70,30 +69,28 @@ class TestAuthCookieService:
         else:
             assert auth_ticket.expires == expires
 
-    def test_create_cookie(self, service, user, user_service, cookie, db_session):
+    def test_add_ticket(self, service, user, user_service, db_session):
         user_service.fetch.return_value = user
 
-        headers = service.create_cookie(sentinel.userid)
+        service.add_ticket(sentinel.userid, "test_ticket_id")
 
         user_service.fetch.assert_called_once_with(sentinel.userid)
-
-        auth_ticket = db_session.query(AuthTicket).first()
+        auth_ticket = db_session.query(AuthTicket).one()
         assert auth_ticket.user == user
         assert auth_ticket.user_userid == user.userid
-        assert auth_ticket.id == Any.string.matching(".{30,40}")
+        assert auth_ticket.id == "test_ticket_id"
         assert_nearly_equal(
             auth_ticket.expires, datetime.utcnow() + AuthCookieService.TICKET_TTL
         )
-
-        cookie.get_headers.assert_called_once_with([user.userid, auth_ticket.id])
-        assert headers == cookie.get_headers.return_value
         assert service._user == user  # pylint: disable=protected-access
 
-    def test_create_cookie_raises_if_user_is_missing(self, service, user_service):
+    def test_add_ticket_raises_if_user_is_missing(self, service, user_service):
         user_service.fetch.return_value = None
 
-        with pytest.raises(ValueError):
-            service.create_cookie(sentinel.userid)
+        with pytest.raises(
+            ValueError, match=f"Cannot find user with userid {sentinel.userid}"
+        ):
+            service.add_ticket(sentinel.userid, sentinel.ticket_id)
 
     @pytest.mark.usefixtures("with_valid_cookie")
     def test_revoke_cookie(self, service, cookie, db_session):

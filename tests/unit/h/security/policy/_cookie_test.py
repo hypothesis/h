@@ -5,7 +5,8 @@ import webob
 from h_matchers import Any
 
 from h.security import Identity
-from h.security.policy._cookie import CookiePolicy
+from h.security.policy import _cookie
+from h.security.policy._cookie import CookiePolicy, base64
 
 
 @pytest.mark.usefixtures("auth_cookie_service")
@@ -34,7 +35,16 @@ class TestCookiePolicy:
 
         assert cookie_policy.identity(pyramid_request) is None
 
-    def test_remember(self, pyramid_request, auth_cookie_service, user, cookie_policy):
+    def test_remember(
+        self,
+        pyramid_request,
+        auth_cookie_service,
+        user,
+        cookie,
+        cookie_policy,
+        urlsafe_b64encode,
+        urandom,
+    ):
         pyramid_request.session["data"] = "old"
         auth_cookie_service.verify_ticket.return_value = user
 
@@ -43,8 +53,14 @@ class TestCookiePolicy:
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
         assert not pyramid_request.session
-        auth_cookie_service.create_cookie.assert_called_once_with(sentinel.userid)
-        assert result == auth_cookie_service.create_cookie.return_value
+        urandom.assert_called_once_with(32)
+        urlsafe_b64encode.assert_called_once_with(urandom.spy_return)
+        ticket_id = urlsafe_b64encode.spy_return.rstrip(b"=").decode("ascii")
+        auth_cookie_service.add_ticket.assert_called_once_with(
+            sentinel.userid, ticket_id
+        )
+        cookie.get_headers.assert_called_once_with([sentinel.userid, ticket_id])
+        assert result == cookie.get_headers.return_value
 
     def test_remember_with_existing_user(
         self, pyramid_request, auth_cookie_service, user, cookie_policy
@@ -113,3 +129,13 @@ class TestCookiePolicy:
     @pytest.fixture
     def user(self, factories):
         return factories.User()
+
+
+@pytest.fixture(autouse=True)
+def urlsafe_b64encode(mocker):
+    return mocker.spy(base64, "urlsafe_b64encode")
+
+
+@pytest.fixture(autouse=True)
+def urandom(mocker):
+    return mocker.spy(_cookie, "urandom")

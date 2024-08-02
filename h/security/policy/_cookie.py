@@ -1,4 +1,6 @@
+import base64
 from functools import lru_cache
+from os import urandom
 
 import webob
 
@@ -52,7 +54,9 @@ class CookiePolicy(IdentityBasedPolicy):
             request.session.update(data)
             request.session.new_csrf_token()
 
-        return request.find_service(AuthCookieService).create_cookie(userid)
+        ticket_id = base64.urlsafe_b64encode(urandom(32)).rstrip(b"=").decode("ascii")
+        request.find_service(AuthCookieService).add_ticket(userid, ticket_id)
+        return self.cookie.get_headers([userid, ticket_id])
 
     def forget(self, request):
         """Get a list of headers which will delete appropriate cookies."""

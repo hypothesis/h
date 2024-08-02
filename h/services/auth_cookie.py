@@ -1,5 +1,3 @@
-import base64
-import os
 from datetime import datetime, timedelta
 
 import sqlalchemy as sa
@@ -60,13 +58,8 @@ class AuthCookieService:
 
         return self._user
 
-    def create_cookie(self, userid):
-        """
-        Create headers for a persistent cookie to log in the user.
-
-        :param userid: Id of the user to log in
-        :return: An iterable of headers to return to the browser
-        """
+    def add_ticket(self, userid: str, ticket_id: str) -> None:
+        """Add a new auth ticket for the given userid and token_id to the DB."""
 
         # Update the user cache to allow quick checking if we are called again
         self._user = self._user_service.fetch(userid)
@@ -74,14 +67,12 @@ class AuthCookieService:
             raise ValueError(f"Cannot find user with userid {userid}")
 
         ticket = AuthTicket(
-            id=base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii"),
+            id=ticket_id,
             user=self._user,
             user_userid=self._user.userid,
             expires=datetime.utcnow() + self.TICKET_TTL,
         )
         self._session.add(ticket)
-
-        return self._cookie.get_headers([self._user.userid, ticket.id])
 
     def revoke_cookie(self):
         """
