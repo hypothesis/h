@@ -75,7 +75,7 @@ class TestCookiePolicy:
         assert pyramid_request.session["data"] == "old"
         assert pyramid_request.session["_csrft_"] != "old_csrf_token"
 
-    def test_forget(self, pyramid_request, auth_cookie_service, cookie_policy):
+    def test_forget(self, pyramid_request, auth_cookie_service, cookie_policy, cookie):
         pyramid_request.session["data"] = "old"
 
         result = cookie_policy.forget(pyramid_request)
@@ -83,8 +83,9 @@ class TestCookiePolicy:
         # The `pyramid.testing.DummySession` is a dict so this is the closest
         # we can get to saying it's been invalidated
         assert not pyramid_request.session
-        auth_cookie_service.revoke_cookie.assert_called_once_with()
-        assert result == auth_cookie_service.revoke_cookie.return_value
+        auth_cookie_service.remove_ticket.assert_called_once_with(sentinel.ticket_id)
+        cookie.get_headers.assert_called_once_with(None, max_age=0)
+        assert result == cookie.get_headers.return_value
 
     @pytest.mark.parametrize(
         "method,args",

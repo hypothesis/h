@@ -74,21 +74,13 @@ class AuthCookieService:
         )
         self._session.add(ticket)
 
-    def revoke_cookie(self):
-        """
-        Create headers to revoke the cookie used to log in a user.
+    def remove_ticket(self, ticket_id: str) -> None:
+        """Remove any ticket with the given ID from the DB."""
 
-        :return: An iterable of headers to return to the browser
-        """
+        self._session.query(AuthTicket).filter_by(id=ticket_id).delete()
 
-        _, ticket_id = self._get_cookie_value()
-        if ticket_id:
-            self._session.query(AuthTicket).filter_by(id=ticket_id).delete()
-
-        # Empty the cached user to force revalidation
+        # Empty the cached user to force revalidation.
         self._user = None
-
-        return self._cookie.get_headers(None, max_age=0)
 
     def _get_cookie_value(self):
         value = self._cookie.get_value()

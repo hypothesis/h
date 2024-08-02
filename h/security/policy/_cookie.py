@@ -66,7 +66,12 @@ class CookiePolicy(IdentityBasedPolicy):
         # Clear the session by invalidating it
         request.session.invalidate()
 
-        return request.find_service(AuthCookieService).revoke_cookie()
+        _, ticket_id = self._get_cookie_value()
+
+        if ticket_id:
+            request.find_service(AuthCookieService).remove_ticket(ticket_id)
+
+        return self.cookie.get_headers(None, max_age=0)
 
     @staticmethod
     @lru_cache  # Ensure we only add this once per request

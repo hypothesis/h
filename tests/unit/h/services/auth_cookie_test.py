@@ -92,17 +92,11 @@ class TestAuthCookieService:
         ):
             service.add_ticket(sentinel.userid, sentinel.ticket_id)
 
-    @pytest.mark.usefixtures("with_valid_cookie")
-    def test_revoke_cookie(self, service, cookie, db_session):
-        headers = service.revoke_cookie()
+    def test_remove_ticket(self, auth_ticket, service, db_session):
+        service.remove_ticket(auth_ticket.id)
 
-        cookie.get_headers.assert_called_once_with(None, max_age=0)
-        assert headers == cookie.get_headers.return_value
         assert service._user is None  # pylint: disable=protected-access
         assert db_session.query(AuthTicket).first() is None
-
-    def test_revoke_cookie_is_ok_without_a_cookie(self, service):
-        service.revoke_cookie()
 
     @pytest.fixture
     def user(self, factories):
