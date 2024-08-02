@@ -31,8 +31,18 @@ class TestAuthTicketService:
             service.verify_ticket(sentinel.userid, sentinel.ticket_id) == service._user
         )
 
-    def test_verify_ticket_returns_None_if_there_is_no_ticket(self, service, user):
+    @pytest.mark.usefixtures("auth_ticket")
+    def test_verify_ticket_returns_None_if_theres_no_matching_ticket(
+        self, service, user
+    ):
         assert service.verify_ticket(user.userid, ticket_id="does_not_exist") is None
+
+    def test_verify_ticket_when_theres_no_userid(self, service, auth_ticket):
+        assert service.verify_ticket(None, ticket_id=auth_ticket.id) is None
+
+    @pytest.mark.usefixtures("auth_ticket")
+    def test_verify_ticket_when_theres_no_ticket_id(self, service, user):
+        assert service.verify_ticket(user.userid, ticket_id=None) is None
 
     def test_verify_ticket_returns_None_if_the_ticket_has_expired(
         self, service, auth_ticket

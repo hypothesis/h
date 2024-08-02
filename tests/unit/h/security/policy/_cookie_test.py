@@ -21,13 +21,6 @@ class TestCookiePolicy:
             user=auth_ticket_service.verify_ticket.return_value
         )
 
-    def test_identity_when_no_ticket_in_cookie(
-        self, cookie, cookie_policy, pyramid_request
-    ):
-        cookie.get_value.return_value = None
-
-        assert cookie_policy.identity(pyramid_request) is None
-
     def test_identity_when_user_marked_as_deleted(
         self, pyramid_request, auth_ticket_service, cookie_policy
     ):
