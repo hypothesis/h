@@ -93,11 +93,12 @@
       font-weight: bold;
     }
 
-    position: absolute;
-    bottom: 10px;
-    right: $h-padding;
-
-    color: color.$grey-5;
+    & {
+      position: absolute;
+      bottom: 10px;
+      right: $h-padding;
+      color: color.$grey-5;
+    }
   }
 
   .form-input__required {

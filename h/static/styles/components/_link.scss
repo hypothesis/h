@@ -4,15 +4,20 @@
 // ----------
 
 @mixin link {
-  color: inherit;
+  & {
+    color: inherit;
+  }
+
   &:visited {
     color: inherit;
   }
 }
 
 @mixin link-underline($style) {
-  padding-bottom: 1px;
-  border-bottom: 1px #{$style};
+  & {
+    padding-bottom: 1px;
+    border-bottom: 1px #{$style};
+  }
 }
 
 // A standard text link.

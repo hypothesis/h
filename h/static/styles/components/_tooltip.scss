@@ -3,19 +3,21 @@
 @use "../core/typography";
 
 @mixin tooltip-arrow($rotation) {
-  background: color.$grey-7;
-  border-bottom: 1px solid rgba(0,0,0,0.20);
-  border-right: 1px solid rgba(0,0,0,0.20);
-  content: "";
-  display: none;
-  height: 6px;
-  left: 0;
-  margin-left: auto;
-  margin-right: 7px;
-  position: absolute;
-  right: 0;
-  transform: rotate($rotation);
-  width: 6px;
+  & {
+    background: color.$grey-7;
+    border-bottom: 1px solid rgba(0,0,0,0.20);
+    border-right: 1px solid rgba(0,0,0,0.20);
+    content: "";
+    display: none;
+    height: 6px;
+    left: 0;
+    margin-left: auto;
+    margin-right: 7px;
+    position: absolute;
+    right: 0;
+    transform: rotate($rotation);
+    width: 6px;
+  }
 
   .env-js-capable & {
     display: block;
@@ -59,9 +61,12 @@
 // Arrow at the bottom of the tooltip pointing down at the target element.
 .tooltip:before {
   @include tooltip-arrow(45deg);
-  content: "";
-  top: calc(100% - 5px);
-  right: calc(100% - 16.5px);
+
+  & {
+    content: "";
+    top: calc(100% - 5px);
+    right: calc(100% - 16.5px);
+  }
 }
 
 .tooltip-label {

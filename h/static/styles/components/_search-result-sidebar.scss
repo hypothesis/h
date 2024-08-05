@@ -78,16 +78,19 @@
 
 .search-result-sidebar__tag {
   @include reset.reset-button;
-  background-color: color.$grey-2;
-  border-radius: 2px;
-  margin-bottom: 5px;
-  margin-right: 7px;
-  padding-bottom: 1px;
-  padding-top: 1px;
-  padding-left: 3px;
-  padding-right: 3px;
-  border-radius: 3px 3px;
-  font-weight: bold;
+
+  & {
+    background-color: color.$grey-2;
+    border-radius: 2px;
+    margin-bottom: 5px;
+    margin-right: 7px;
+    padding-bottom: 1px;
+    padding-top: 1px;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 3px 3px;
+    font-weight: bold;
+  }
 }
 
 .search-result-sidebar__tag-container {
@@ -104,10 +107,13 @@
 
 .search-result-sidebar__username {
   @include reset.reset-button;
-  font-weight: bold;
-  margin-right: 3px;
-  margin-bottom: 7px;
-  color: color.$grey-6;
+
+  & {
+    font-weight: bold;
+    margin-right: 3px;
+    margin-bottom: 7px;
+    color: color.$grey-6;
+  }
 }
 
 .search-result-sidebar__organization {
