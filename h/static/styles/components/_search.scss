@@ -292,9 +292,12 @@ $stats-icon-column-width: 20px;
 
 .search-bucket-stats__collapse-view {
   @include reset.reset-button;
-  color: color.$grey-6;
-  margin-bottom: 15px;
-  text-align: left;
+
+  & {
+    color: color.$grey-6;
+    margin-bottom: 15px;
+    text-align: left;
+  }
 }
 
 .search-bucket-stats__collapse-view-icon {

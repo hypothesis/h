@@ -29,11 +29,13 @@
 .lozenge__close {
   @include reset.reset-button;
 
-  color: color.$grey-6;
-  font-weight: bold;
-  padding: 0px 5px 0px 5px;
-  cursor: default;
-  border-radius: 0 2px 2px 0;
+  & {
+    color: color.$grey-6;
+    font-weight: bold;
+    padding: 0px 5px 0px 5px;
+    cursor: default;
+    border-radius: 0 2px 2px 0;
+  }
 
   &:hover {
     background-color: color.$grey-4;
