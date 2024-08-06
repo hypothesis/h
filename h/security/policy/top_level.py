@@ -8,7 +8,7 @@ from h.security.policy._api_cookie import APICookiePolicy
 from h.security.policy._auth_client import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy.bearer_token import BearerTokenPolicy
-from h.security.policy.helpers import is_api_request
+from h.security.policy.helpers import AuthTicketCookieHelper, is_api_request
 
 
 class TopLevelPolicy:
@@ -56,8 +56,8 @@ def get_subpolicy(request):
             [
                 BearerTokenPolicy(),
                 AuthClientPolicy(),
-                APICookiePolicy(CookiePolicy(cookie)),
+                APICookiePolicy(cookie, AuthTicketCookieHelper()),
             ]
         )
 
-    return CookiePolicy(cookie)
+    return CookiePolicy(cookie, AuthTicketCookieHelper())
