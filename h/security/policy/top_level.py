@@ -1,17 +1,17 @@
 import webob
 from pyramid.request import RequestLocalCache
+from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity
 from h.security.policy._api import APIPolicy
 from h.security.policy._api_cookie import APICookiePolicy
 from h.security.policy._auth_client import AuthClientPolicy
 from h.security.policy._cookie import CookiePolicy
-from h.security.policy._identity_base import IdentityBasedPolicy
 from h.security.policy.bearer_token import BearerTokenPolicy
 from h.security.policy.helpers import is_api_request
 
 
-class TopLevelPolicy(IdentityBasedPolicy):
+class TopLevelPolicy:
     """The top-level security policy. Delegates to subpolicies."""
 
     def __init__(self):
@@ -24,9 +24,15 @@ class TopLevelPolicy(IdentityBasedPolicy):
     def identity(self, request) -> Identity | None:
         return self._identity_cache.get_or_create(request)
 
+    def authenticated_userid(self, request):
+        return get_subpolicy(request).authenticated_userid(request)
+
     def remember(self, request, userid, **kw):
         self._identity_cache.clear(request)
         return get_subpolicy(request).remember(request, userid, **kw)
+
+    def permits(self, request, context, permission) -> Allowed | Denied:
+        return get_subpolicy(request).permits(request, context, permission)
 
     def _load_identity(self, request):
         return get_subpolicy(request).identity(request)

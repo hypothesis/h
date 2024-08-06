@@ -4,22 +4,24 @@ import pytest
 import webob
 from h_matchers import Any
 
-from h.security import Identity
 from h.security.policy import _cookie
 from h.security.policy._cookie import CookiePolicy, base64
 
 
 @pytest.mark.usefixtures("auth_ticket_service")
 class TestCookiePolicy:
-    def test_identity(self, pyramid_request, auth_ticket_service, cookie_policy, user):
+    def test_identity(
+        self, pyramid_request, auth_ticket_service, cookie_policy, user, Identity
+    ):
         identity = cookie_policy.identity(pyramid_request)
 
         auth_ticket_service.verify_ticket.assert_called_once_with(
             user.userid, sentinel.ticket_id
         )
-        assert identity == Identity.from_models(
+        Identity.from_models.assert_called_once_with(
             user=auth_ticket_service.verify_ticket.return_value
         )
+        assert identity == Identity.from_models.return_value
 
     def test_identity_when_user_marked_as_deleted(
         self, pyramid_request, auth_ticket_service, cookie_policy
@@ -34,6 +36,19 @@ class TestCookiePolicy:
         auth_ticket_service.verify_ticket.return_value = None
 
         assert cookie_policy.identity(pyramid_request) is None
+
+    def test_authenticated_userid(
+        self, pyramid_request, cookie_policy, Identity, mocker
+    ):
+        mocker.spy(cookie_policy, "identity")
+
+        authenticated_userid = cookie_policy.authenticated_userid(pyramid_request)
+
+        cookie_policy.identity.assert_called_once_with(pyramid_request)
+        Identity.authenticated_userid.assert_called_once_with(
+            cookie_policy.identity.spy_return
+        )
+        assert authenticated_userid == Identity.authenticated_userid.return_value
 
     def test_remember(
         self,
@@ -63,12 +78,12 @@ class TestCookiePolicy:
         assert result == cookie.get_headers.return_value
 
     def test_remember_with_existing_user(
-        self, pyramid_request, auth_ticket_service, user, cookie_policy
+        self, pyramid_request, user, cookie_policy, Identity
     ):
         pyramid_request.session["data"] = "old"
         # This is a secret parameter used by `pyramid.testing.DummySession`
         pyramid_request.session["_csrft_"] = "old_csrf_token"
-        auth_ticket_service.verify_ticket.return_value = user
+        Identity.authenticated_userid.return_value = user.userid
 
         cookie_policy.remember(pyramid_request, user.userid)
 
@@ -98,6 +113,19 @@ class TestCookiePolicy:
         auth_ticket_service.remove_ticket.assert_not_called()
         cookie.get_headers.assert_called_once_with(None, max_age=0)
         assert result == cookie.get_headers.return_value
+
+    def test_permits(self, cookie_policy, pyramid_request, mocker, identity_permits):
+        mocker.spy(cookie_policy, "identity")
+
+        result = cookie_policy.permits(
+            pyramid_request, sentinel.context, sentinel.permission
+        )
+
+        cookie_policy.identity.assert_called_once_with(pyramid_request)
+        identity_permits.assert_called_once_with(
+            cookie_policy.identity.spy_return, sentinel.context, sentinel.permission
+        )
+        assert result == identity_permits.return_value
 
     @pytest.mark.parametrize(
         "method,args",
@@ -152,3 +180,17 @@ def urlsafe_b64encode(mocker):
 @pytest.fixture(autouse=True)
 def urandom(mocker):
     return mocker.spy(_cookie, "urandom")
+
+
+@pytest.fixture(autouse=True)
+def Identity(mocker):
+    return mocker.patch(
+        "h.security.policy._cookie.Identity", autospec=True, spec_set=True
+    )
+
+
+@pytest.fixture(autouse=True)
+def identity_permits(mocker):
+    return mocker.patch(
+        "h.security.policy._cookie.identity_permits", autospec=True, spec_set=True
+    )
