@@ -65,8 +65,8 @@ class TestGetSubpolicy:
         APICookiePolicy,
         APIPolicy,
         BearerTokenPolicy,
-        CookiePolicy,
         webob,
+        AuthTicketCookieHelper,
     ):
         is_api_request.return_value = True
 
@@ -85,10 +85,11 @@ class TestGetSubpolicy:
         webob.cookies.SignedCookieProfile.return_value.bind.assert_called_once_with(
             pyramid_request
         )
-        CookiePolicy.assert_called_once_with(
-            webob.cookies.SignedCookieProfile.return_value.bind.return_value
+        AuthTicketCookieHelper.assert_called_once_with()
+        APICookiePolicy.assert_called_once_with(
+            webob.cookies.SignedCookieProfile.return_value.bind.return_value,
+            AuthTicketCookieHelper.return_value,
         )
-        APICookiePolicy.assert_called_once_with(CookiePolicy.return_value)
         APIPolicy.assert_called_once_with(
             [
                 BearerTokenPolicy.return_value,
@@ -99,7 +100,12 @@ class TestGetSubpolicy:
         assert policy == APIPolicy.return_value
 
     def test_non_api_request(
-        self, is_api_request, pyramid_request, CookiePolicy, webob
+        self,
+        is_api_request,
+        pyramid_request,
+        CookiePolicy,
+        webob,
+        AuthTicketCookieHelper,
     ):
         is_api_request.return_value = False
 
@@ -116,8 +122,10 @@ class TestGetSubpolicy:
         webob.cookies.SignedCookieProfile.return_value.bind.assert_called_once_with(
             pyramid_request
         )
+        AuthTicketCookieHelper.assert_called_once_with()
         CookiePolicy.assert_called_once_with(
-            webob.cookies.SignedCookieProfile.return_value.bind.return_value
+            webob.cookies.SignedCookieProfile.return_value.bind.return_value,
+            AuthTicketCookieHelper.return_value,
         )
         assert policy == CookiePolicy.return_value
 
@@ -130,6 +138,13 @@ def is_api_request(mocker):
 @pytest.fixture(autouse=True)
 def AuthClientPolicy(mocker):
     return mocker.patch("h.security.policy.top_level.AuthClientPolicy", autospec=True)
+
+
+@pytest.fixture(autouse=True)
+def AuthTicketCookieHelper(mocker):
+    return mocker.patch(
+        "h.security.policy.top_level.AuthTicketCookieHelper", autospec=True
+    )
 
 
 @pytest.fixture(autouse=True)

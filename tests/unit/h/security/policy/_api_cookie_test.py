@@ -3,7 +3,7 @@ from unittest.mock import create_autospec, sentinel
 import pytest
 
 from h.security.policy._api_cookie import APICookiePolicy
-from h.security.policy._cookie import CookiePolicy
+from h.security.policy.helpers import AuthTicketCookieHelper
 
 
 class TestAPICookiePolicy:
@@ -24,34 +24,57 @@ class TestAPICookiePolicy:
 
         assert APICookiePolicy.handles(pyramid_request) == expected_result
 
-    def test_identity(self, api_cookie_policy, cookie_policy, pyramid_request):
+    def test_identity(self, api_cookie_policy, helper, pyramid_request):
         identity = api_cookie_policy.identity(pyramid_request)
 
-        cookie_policy.identity.assert_called_once_with(pyramid_request)
-        assert identity == cookie_policy.identity.return_value
+        helper.add_vary_by_cookie.assert_called_once_with(pyramid_request)
+        helper.identity.assert_called_once_with(sentinel.cookie, pyramid_request)
+        assert identity == helper.identity.return_value
 
     def test_authenticated_userid(
-        self, api_cookie_policy, cookie_policy, pyramid_request
+        self, api_cookie_policy, helper, pyramid_request, Identity
     ):
         authenticated_userid = api_cookie_policy.authenticated_userid(pyramid_request)
 
-        cookie_policy.authenticated_userid.assert_called_once_with(pyramid_request)
-        assert authenticated_userid == cookie_policy.authenticated_userid.return_value
+        helper.add_vary_by_cookie.assert_called_once_with(pyramid_request)
+        helper.identity.assert_called_once_with(sentinel.cookie, pyramid_request)
+        Identity.authenticated_userid.assert_called_once_with(
+            helper.identity.return_value
+        )
+        assert authenticated_userid == Identity.authenticated_userid.return_value
 
-    def test_permits(self, api_cookie_policy, cookie_policy, pyramid_request):
+    def test_permits(
+        self, api_cookie_policy, helper, pyramid_request, identity_permits
+    ):
         permits = api_cookie_policy.permits(
             pyramid_request, sentinel.context, sentinel.permission
         )
 
-        cookie_policy.permits.assert_called_once_with(
-            pyramid_request, sentinel.context, sentinel.permission
+        helper.add_vary_by_cookie.assert_called_once_with(pyramid_request)
+        helper.identity.assert_called_once_with(sentinel.cookie, pyramid_request)
+        identity_permits.assert_called_once_with(
+            helper.identity.return_value, sentinel.context, sentinel.permission
         )
-        assert permits == cookie_policy.permits.return_value
+        assert permits == identity_permits.return_value
 
     @pytest.fixture
-    def cookie_policy(self):
-        return create_autospec(CookiePolicy, instance=True, spec_set=True)
+    def helper(self):
+        return create_autospec(AuthTicketCookieHelper, instance=True, spec_set=True)
 
     @pytest.fixture
-    def api_cookie_policy(self, cookie_policy):
-        return APICookiePolicy(cookie_policy)
+    def api_cookie_policy(self, helper):
+        return APICookiePolicy(sentinel.cookie, helper)
+
+
+@pytest.fixture(autouse=True)
+def Identity(mocker):
+    return mocker.patch(
+        "h.security.policy._api_cookie.Identity", autospec=True, spec_set=True
+    )
+
+
+@pytest.fixture(autouse=True)
+def identity_permits(mocker):
+    return mocker.patch(
+        "h.security.policy._api_cookie.identity_permits", autospec=True, spec_set=True
+    )
