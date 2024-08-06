@@ -20,6 +20,17 @@ class TestTopLevelPolicy:
         get_subpolicy.return_value.identity.assert_called_once_with(pyramid_request)
         assert identity == get_subpolicy.return_value.identity.return_value
 
+    def test_authenticated_userid(self, get_subpolicy, policy, pyramid_request):
+        authenticated_userid = policy.authenticated_userid(pyramid_request)
+
+        get_subpolicy.return_value.authenticated_userid.assert_called_once_with(
+            pyramid_request
+        )
+        assert (
+            authenticated_userid
+            == get_subpolicy.return_value.authenticated_userid.return_value
+        )
+
     def test_remember(self, get_subpolicy, policy, pyramid_request):
         headers = policy.remember(pyramid_request, sentinel.userid, foo="bar")
 
@@ -27,6 +38,14 @@ class TestTopLevelPolicy:
             pyramid_request, sentinel.userid, foo="bar"
         )
         assert headers == get_subpolicy.return_value.remember.return_value
+
+    def test_permits(self, get_subpolicy, policy, pyramid_request):
+        permits = policy.permits(pyramid_request, sentinel.context, sentinel.permission)
+
+        get_subpolicy.return_value.permits.assert_called_once_with(
+            pyramid_request, sentinel.context, sentinel.permission
+        )
+        assert permits == get_subpolicy.return_value.permits.return_value
 
     @pytest.fixture
     def policy(self):
