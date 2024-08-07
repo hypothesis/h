@@ -82,6 +82,29 @@ class TestIdentity:
             {"user": None, "auth_client": None}
         )
 
+    @pytest.mark.parametrize(
+        "identity,authenticated_userid",
+        [
+            (None, None),
+            (Identity(user=None), None),
+            (
+                Identity(
+                    user=LongLivedUser(
+                        id=sentinel.id,
+                        userid=sentinel.userid,
+                        authority=sentinel.authority,
+                        groups=[],
+                        staff=False,
+                        admin=False,
+                    )
+                ),
+                sentinel.userid,
+            ),
+        ],
+    )
+    def test_authenticated_userid(self, identity, authenticated_userid):
+        assert Identity.authenticated_userid(identity) == authenticated_userid
+
     @pytest.fixture(autouse=True)
     def LongLivedUser(self, patch):
         return patch("h.security.identity.LongLivedUser")

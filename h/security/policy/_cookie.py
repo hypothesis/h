@@ -3,13 +3,14 @@ from functools import lru_cache
 from os import urandom
 
 import webob
+from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
 from h.services.auth_ticket import AuthTicketService
 
 
-class CookiePolicy(IdentityBasedPolicy):
+class CookiePolicy:
     """
     An authentication policy based on cookies.
 
@@ -31,6 +32,9 @@ class CookiePolicy(IdentityBasedPolicy):
             return None
 
         return Identity.from_models(user=user)
+
+    def authenticated_userid(self, request):
+        return Identity.authenticated_userid(self.identity(request))
 
     def remember(self, request, userid, **kw):  # pylint:disable=unused-argument
         """Get a list of headers which will remember the user in a cookie."""
@@ -69,6 +73,9 @@ class CookiePolicy(IdentityBasedPolicy):
             request.find_service(AuthTicketService).remove_ticket(ticket_id)
 
         return self.cookie.get_headers(None, max_age=0)
+
+    def permits(self, request, context, permission) -> Allowed | Denied:
+        return identity_permits(self.identity(request), context, permission)
 
     @staticmethod
     @lru_cache  # Ensure we only add this once per request

@@ -3,7 +3,6 @@ from unittest.mock import create_autospec, sentinel
 import pytest
 from pyramid.request import Request
 
-from h.security.identity import Identity
 from h.security.policy._api import APIPolicy, applicable_policies
 
 
@@ -60,13 +59,37 @@ class TestAPIPolicy:
 
         assert identity is None
 
+    def test_authenticated_userid(self, api_policy, pyramid_request, Identity, mocker):
+        mocker.spy(api_policy, "identity")
+
+        authenticated_userid = api_policy.authenticated_userid(pyramid_request)
+
+        api_policy.identity.assert_called_once_with(pyramid_request)
+        Identity.authenticated_userid.assert_called_once_with(
+            api_policy.identity.spy_return
+        )
+        assert authenticated_userid == Identity.authenticated_userid.return_value
+
     def test_remember(self, api_policy, pyramid_request):
         assert api_policy.remember(pyramid_request, sentinel.userid, foo="bar") == []
+
+    def test_permits(self, api_policy, pyramid_request, identity_permits, mocker):
+        mocker.spy(api_policy, "identity")
+
+        result = api_policy.permits(
+            pyramid_request, sentinel.context, sentinel.permission
+        )
+
+        api_policy.identity.assert_called_once_with(pyramid_request)
+        identity_permits.assert_called_once_with(
+            api_policy.identity.spy_return, sentinel.context, sentinel.permission
+        )
+        assert result == identity_permits.return_value
 
     @pytest.fixture(autouse=True)
     def applicable_policies(self, mocker):
         class SubpolicySpec:
-            def identity(self, request: Request) -> Identity | None:
+            def identity(self, request: Request):
                 """Return the identity of the current user."""
 
         return mocker.patch(
@@ -112,3 +135,15 @@ class TestApplicablePolicies:
         for policy in policies:
             policy.handles.assert_called_once_with(pyramid_request)
         assert returned_policies == [policies[index] for index in expected_policies]
+
+
+@pytest.fixture(autouse=True)
+def Identity(mocker):
+    return mocker.patch("h.security.policy._api.Identity", autospec=True, spec_set=True)
+
+
+@pytest.fixture(autouse=True)
+def identity_permits(mocker):
+    return mocker.patch(
+        "h.security.policy._api.identity_permits", autospec=True, spec_set=True
+    )

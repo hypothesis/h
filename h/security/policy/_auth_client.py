@@ -1,16 +1,17 @@
 import hmac
 
 from pyramid.authentication import extract_http_basic_credentials
+from pyramid.security import Allowed, Denied
 from sqlalchemy.exc import StatementError
 
 from h.exceptions import InvalidUserId
 from h.models import AuthClient
 from h.models.auth_client import GrantType
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
 
 
-class AuthClientPolicy(IdentityBasedPolicy):
+class AuthClientPolicy:
     """
     An authentication policy for registered AuthClients.
 
@@ -79,6 +80,12 @@ class AuthClientPolicy(IdentityBasedPolicy):
                 return None
 
         return Identity.from_models(auth_client=auth_client, user=user)
+
+    def authenticated_userid(self, request):
+        return Identity.authenticated_userid(self.identity(request))
+
+    def permits(self, request, context, permission) -> Allowed | Denied:
+        return identity_permits(self.identity(request), context, permission)
 
     @classmethod
     def _get_auth_client(cls, request):

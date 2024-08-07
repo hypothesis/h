@@ -1,10 +1,11 @@
 from pyramid.request import Request, RequestLocalCache
+from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity
-from h.security.policy._identity_base import IdentityBasedPolicy
+from h.security.permits import identity_permits
 
 
-class APIPolicy(IdentityBasedPolicy):
+class APIPolicy:
     """The security policy for API requests. Delegates to subpolicies."""
 
     def __init__(self, sub_policies):
@@ -18,9 +19,15 @@ class APIPolicy(IdentityBasedPolicy):
     def identity(self, request) -> Identity | None:
         return self._identity_cache.get_or_create(request)
 
+    def authenticated_userid(self, request):
+        return Identity.authenticated_userid(self.identity(request))
+
     def remember(self, *_args, **_kwargs):
         # remember() isn't supported for stateless API requests.
         return []
+
+    def permits(self, request, context, permission) -> Allowed | Denied:
+        return identity_permits(self.identity(request), context, permission)
 
     def _load_identity(self, request: Request) -> Identity | None:
         for policy in applicable_policies(request, self.sub_policies):
