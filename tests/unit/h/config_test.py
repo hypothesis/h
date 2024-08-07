@@ -30,6 +30,8 @@ def test_configure_updates_settings_from_env_vars(
         # Required settings
         "es.url": "https://es6-search-cluster",
         "secret_key": "notasecret",
+        "h_api_auth_cookie_secret_key": b"test_h_api_auth_cookie_secret_key",
+        "h_api_auth_cookie_salt": b"test_h_api_auth_cookie_salt",
         "sqlalchemy.url": "postgres://user@dbhost/dbname",
     }
 

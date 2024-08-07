@@ -1,6 +1,7 @@
-from unittest.mock import sentinel
+from unittest.mock import call, create_autospec, sentinel
 
 import pytest
+from webob.cookies import SignedCookieProfile
 
 from h.security.policy.top_level import TopLevelPolicy, get_subpolicy
 
@@ -69,25 +70,28 @@ class TestGetSubpolicy:
         AuthTicketCookieHelper,
     ):
         is_api_request.return_value = True
+        api_authcookie = create_autospec(
+            SignedCookieProfile, instance=True, spec_set=True
+        )
+        webob.cookies.SignedCookieProfile.return_value = api_authcookie
 
         policy = get_subpolicy(pyramid_request)
 
         BearerTokenPolicy.assert_called_once_with()
         AuthClientPolicy.assert_called_once_with()
         webob.cookies.SignedCookieProfile.assert_called_once_with(
-            secret="test_h_auth_cookie_secret",
-            salt="authsanity",
-            cookie_name="auth",
+            secret="test_h_api_auth_cookie_secret",
+            salt="test_h_api_auth_cookie_salt",
+            cookie_name="h_api_authcookie",
             max_age=2592000,
             httponly=True,
             secure=True,
+            samesite="strict",
         )
-        webob.cookies.SignedCookieProfile.return_value.bind.assert_called_once_with(
-            pyramid_request
-        )
+        api_authcookie.bind.assert_called_once_with(pyramid_request)
         AuthTicketCookieHelper.assert_called_once_with()
         APICookiePolicy.assert_called_once_with(
-            webob.cookies.SignedCookieProfile.return_value.bind.return_value,
+            api_authcookie.bind.return_value,
             AuthTicketCookieHelper.return_value,
         )
         APIPolicy.assert_called_once_with(
@@ -108,23 +112,44 @@ class TestGetSubpolicy:
         AuthTicketCookieHelper,
     ):
         is_api_request.return_value = False
+        html_authcookie = create_autospec(
+            SignedCookieProfile, instance=True, spec_set=True
+        )
+        api_authcookie = create_autospec(
+            SignedCookieProfile, instance=True, spec_set=True
+        )
+        webob.cookies.SignedCookieProfile.side_effect = [
+            api_authcookie,
+            html_authcookie,
+        ]
 
         policy = get_subpolicy(pyramid_request)
 
-        webob.cookies.SignedCookieProfile.assert_called_once_with(
-            secret="test_h_auth_cookie_secret",
-            salt="authsanity",
-            cookie_name="auth",
-            max_age=2592000,
-            httponly=True,
-            secure=True,
-        )
-        webob.cookies.SignedCookieProfile.return_value.bind.assert_called_once_with(
-            pyramid_request
-        )
+        assert webob.cookies.SignedCookieProfile.call_args_list == [
+            call(
+                secret="test_h_api_auth_cookie_secret",
+                salt="test_h_api_auth_cookie_salt",
+                cookie_name="h_api_authcookie",
+                max_age=2592000,
+                httponly=True,
+                secure=True,
+                samesite="strict",
+            ),
+            call(
+                secret="test_h_auth_cookie_secret",
+                salt="authsanity",
+                cookie_name="auth",
+                max_age=2592000,
+                httponly=True,
+                secure=True,
+            ),
+        ]
+        api_authcookie.bind.assert_called_once_with(pyramid_request)
+        html_authcookie.bind.assert_called_once_with(pyramid_request)
         AuthTicketCookieHelper.assert_called_once_with()
         CookiePolicy.assert_called_once_with(
-            webob.cookies.SignedCookieProfile.return_value.bind.return_value,
+            html_authcookie.bind.return_value,
+            api_authcookie.bind.return_value,
             AuthTicketCookieHelper.return_value,
         )
         assert policy == CookiePolicy.return_value
@@ -170,6 +195,8 @@ def CookiePolicy(mocker):
 @pytest.fixture
 def pyramid_settings(pyramid_settings):
     pyramid_settings["h_auth_cookie_secret"] = "test_h_auth_cookie_secret"
+    pyramid_settings["h_api_auth_cookie_secret"] = "test_h_api_auth_cookie_secret"
+    pyramid_settings["h_api_auth_cookie_salt"] = "test_h_api_auth_cookie_salt"
     return pyramid_settings
 
 

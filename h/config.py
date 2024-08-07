@@ -133,6 +133,19 @@ def configure(environ=None, settings=None):  # pylint: disable=too-many-statemen
         settings_manager.set("mail.port", "MANDRILL_PORT", default=587)
         settings_manager.set("mail.tls", "MANDRILL_TLS", default=True)
 
+    settings_manager.set(
+        "h_api_auth_cookie_secret_key",
+        "H_API_AUTH_COOKIE_SECRET_KEY",
+        type_=_to_utf8,
+        required=True,
+    )
+    settings_manager.set(
+        "h_api_auth_cookie_salt",
+        "H_API_AUTH_COOKIE_SALT",
+        type_=_to_utf8,
+        required=True,
+    )
+
     # Get resolved settings.
     settings = settings_manager.settings
 
