@@ -41,7 +41,30 @@ class TopLevelPolicy:
 @RequestLocalCache()
 def get_subpolicy(request):
     """Return the subpolicy for TopLevelSecurityPolicy to delegate to for `request`."""
-    cookie = webob.cookies.SignedCookieProfile(
+
+    # The cookie that's used to authenticate API requests.
+    api_authcookie = webob.cookies.SignedCookieProfile(
+        secret=request.registry.settings["h_api_auth_cookie_secret"],
+        salt=request.registry.settings["h_api_auth_cookie_salt"],
+        cookie_name="h_api_authcookie",
+        max_age=30 * 24 * 3600,  # 30 days
+        httponly=True,
+        secure=request.scheme == "https",
+        samesite="strict",
+    )
+    api_authcookie = api_authcookie.bind(request)
+
+    if is_api_request(request):
+        return APIPolicy(
+            [
+                BearerTokenPolicy(),
+                AuthClientPolicy(),
+                APICookiePolicy(api_authcookie, AuthTicketCookieHelper()),
+            ]
+        )
+
+    # The cookie that's used to authenticate HTML page requests.
+    html_authcookie = webob.cookies.SignedCookieProfile(
         secret=request.registry.settings["h_auth_cookie_secret"],
         salt="authsanity",
         cookie_name="auth",
@@ -49,15 +72,5 @@ def get_subpolicy(request):
         httponly=True,
         secure=request.scheme == "https",
     )
-    cookie = cookie.bind(request)
-
-    if is_api_request(request):
-        return APIPolicy(
-            [
-                BearerTokenPolicy(),
-                AuthClientPolicy(),
-                APICookiePolicy(cookie, AuthTicketCookieHelper()),
-            ]
-        )
-
-    return CookiePolicy(cookie, AuthTicketCookieHelper())
+    html_authcookie = html_authcookie.bind(request)
+    return CookiePolicy(html_authcookie, api_authcookie, AuthTicketCookieHelper())

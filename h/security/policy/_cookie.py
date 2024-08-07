@@ -14,13 +14,46 @@ class CookiePolicy:
     straps the login for the client (when the popup shows).
     """
 
-    def __init__(self, cookie: SignedCookieProfile, helper: AuthTicketCookieHelper):
-        self.cookie = cookie
+    def __init__(
+        self,
+        html_authcookie: SignedCookieProfile,
+        api_authcookie: SignedCookieProfile,
+        helper: AuthTicketCookieHelper,
+    ):
+        self.html_authcookie = html_authcookie
+        self.api_authcookie = api_authcookie
         self.helper = helper
 
     def identity(self, request):
         self.helper.add_vary_by_cookie(request)
-        return self.helper.identity(self.cookie, request)
+        identity = self.helper.identity(self.html_authcookie, request)
+
+        # If a request was successfully authenticated using the HTML auth
+        # cookie and that request did *not* also contain the API auth cookie,
+        # then add the API auth cookie to the user's browser.
+        #
+        # This is a temporary hack that was needed when we first added the
+        # separate API auth cookie: we needed to add the API auth cookie to the
+        # browsers of users who were already logged in with just the HTML auth
+        # cookie, we couldn't just rely on logging in to set the API auth
+        # cookie for users who were *already* logged in.
+        #
+        # This code should be deleted after it has been deployed to production for
+        # at least 30 days (the max_age of the HTML auth cookie).
+        #
+        # When deleting this code we should also change the `path` attribute of
+        # api_authcookie to "/api/" so that the API auth cookie is only sent
+        # with API requests. For already-logged-in users this path change won't
+        # take effect until they delete and re-create their API auth cookie by
+        # logging out and in again, which will take at most 30 days (the
+        # max_age of the cookie).
+        #
+        # When changing the `path` attribute of api_authcookie to "/api/" we
+        # should also remove the api_authcookie from the test requests in
+        # _cookie_test.py (see corresponding comment in _cookie_test.py).
+        self._issue_api_authcookie(identity, request)
+
+        return identity
 
     def authenticated_userid(self, request):
         return Identity.authenticated_userid(self.identity(request))
@@ -41,11 +74,53 @@ class CookiePolicy:
             request.session.update(data)
             request.session.new_csrf_token()
 
-        return self.helper.remember(self.cookie, request, userid)
+        # We're about to add the response headers to set the API auth cookie.
+        # Set this attribute so that _issue_api_authcookie() below won't add
+        # the same headers again. Otherwise responses to login form submissions
+        # would set the same cookie twice.
+        #
+        # This line of code can be deleted, along with _issue_api_authcookie()
+        # itself, at least 30 days after it has been deployed to production.
+        request.h_api_authcookie_headers_added = True
+
+        return [
+            *self.helper.remember(self.html_authcookie, request, userid),
+            *self.helper.remember(self.api_authcookie, request, userid),
+        ]
 
     def forget(self, request):
         self.helper.add_vary_by_cookie(request)
-        return self.helper.forget(self.cookie, request)
+        return [
+            *self.helper.forget(self.html_authcookie, request),
+            *self.helper.forget(self.api_authcookie, request),
+        ]
 
     def permits(self, request, context, permission) -> Allowed | Denied:
         return identity_permits(self.identity(request), context, permission)
+
+    def _issue_api_authcookie(self, identity, request):
+        if not identity:
+            return
+
+        if not identity.user:
+            return
+
+        if self.api_authcookie.cookie_name in request.cookies:
+            return
+
+        if hasattr(request, "h_api_authcookie_headers_added"):
+            return
+
+        headers = self.helper.remember(
+            self.api_authcookie, request, identity.user.userid
+        )
+
+        def add_api_authcookie_headers(
+            request,  # pylint:disable=unused-argument
+            response,
+        ):
+            for key, value in headers:
+                response.headerlist.append((key, value))
+
+        request.add_response_callback(add_api_authcookie_headers)
+        request.h_api_authcookie_headers_added = True
