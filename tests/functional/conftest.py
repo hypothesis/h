@@ -25,6 +25,8 @@ TEST_SETTINGS = {
     "h.sentry_dsn_frontend": "TEST_SENTRY_DSN_FRONTEND",
     "pyramid.debug_all": False,
     "secret_key": "notasecret",
+    "h_api_auth_cookie_secret_key": b"test_h_api_auth_cookie_secret_key",
+    "h_api_auth_cookie_salt": b"test_h_api_auth_cookie_salt",
     "sqlalchemy.url": os.environ["DATABASE_URL"],
 }
 
@@ -35,6 +37,8 @@ TEST_ENVIRONMENT = {
     "AUTH_DOMAIN": TEST_SETTINGS["h.authority"],
     "SENTRY_DSN_FRONTEND": TEST_SETTINGS["h.sentry_dsn_frontend"],
     "SECRET_KEY": TEST_SETTINGS["secret_key"],
+    "H_API_AUTH_COOKIE_SECRET_KEY": TEST_SETTINGS["h_api_auth_cookie_secret_key"],
+    "H_API_AUTH_COOKIE_SALT": TEST_SETTINGS["h_api_auth_cookie_salt"],
     "DATABASE_URL": TEST_SETTINGS["sqlalchemy.url"],
 }
 

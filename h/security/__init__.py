@@ -27,6 +27,11 @@ def includeme(config):  # pragma: no cover
     settings["h_auth_cookie_secret"] = derive_key(
         settings["secret_key"], settings["secret_salt"], b"h.auth.cookie_secret"
     )
+    settings["h_api_auth_cookie_secret"] = derive_key(
+        settings["h_api_auth_cookie_secret_key"],
+        settings["h_api_auth_cookie_salt"],
+        b"h_api_auth_cookie_secret",
+    )
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
