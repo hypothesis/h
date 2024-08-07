@@ -50,7 +50,7 @@ class CookiePolicy:
         #
         # When changing the `path` attribute of api_authcookie to "/api/" we
         # should also remove the api_authcookie from the test requests in
-        # _cookie_test.py (see corresponding comminet in _cookie_test.py).
+        # _cookie_test.py (see corresponding comment in _cookie_test.py).
         self._issue_api_authcookie(identity, request)
 
         return identity
