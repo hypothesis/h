@@ -74,6 +74,13 @@ class CookiePolicy:
             request.session.update(data)
             request.session.new_csrf_token()
 
+        # We're about to add the response headers to set the API auth cookie.
+        # Set this attribute so that _issue_api_authcookie() below won't add
+        # the same headers again. Otherwise responses to login form submissions
+        # would set the same cookie twice.
+        #
+        # This line of code can be deleted, along with _issue_api_authcookie()
+        # itself, at least 30 days after it has been deployed to production.
         request.h_api_authcookie_headers_added = True
 
         return [
