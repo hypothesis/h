@@ -7,6 +7,7 @@ API views.
 
 from h_api.exceptions import JSONAPIError
 from pyramid import httpexceptions
+from pyramid.exceptions import BadCSRFOrigin, BadCSRFToken
 from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 
 from h.i18n import TranslationString as _
@@ -73,3 +74,21 @@ def json_error(context, request):  # pragma: no cover
         " if the problem persists."
     )
     return {"status": "failure", "reason": message}
+
+
+@json_view(context=BadCSRFOrigin, path_info="/api/", decorator=cors_policy)
+def bad_csrf_origin(request):
+    request.response.status_code = 400
+    return {
+        "status": "failure",
+        "reason": "CSRF validation failed: invalid Origin or Referrer.",
+    }
+
+
+@json_view(context=BadCSRFToken, path_info="/api/", decorator=cors_policy)
+def bad_csrf_token(request):
+    request.response.status_code = 400
+    return {
+        "status": "failure",
+        "reason": "CSRF validation failed: invalid or missing CSRF token.",
+    }

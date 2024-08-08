@@ -1,6 +1,7 @@
 export type APIConfig = {
   method: string;
   url: string;
+  headers: object;
 };
 
 export type ConfigObject = {

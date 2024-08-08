@@ -1,3 +1,4 @@
+from pyramid.csrf import check_csrf_origin, check_csrf_token
 from pyramid.request import Request
 from pyramid.security import Allowed, Denied
 from webob.cookies import SignedCookieProfile
@@ -28,8 +29,30 @@ class APICookiePolicy:
         ) in COOKIE_AUTHENTICATABLE_API_REQUESTS
 
     def identity(self, request: Request) -> Identity | None:
+        identity = self.helper.identity(self.cookie, request)
+
+        if identity is None:
+            return identity
+
+        # Require cookie-authenticated API requests to also have a valid CSRF
+        # token.
+        #
+        # This offers defense-in-depth: if our cookie authentication fails
+        # (e.g. because of a security bug in our code) this additional CSRF
+        # check might save us.
+        #
+        # This also secures some situations that even a SameSite=Strict cookie
+        # cannot: browsers send cookies on all requests that the cookie applies
+        # to, not only requests triggered by JavaScript calls. We allow
+        # user-generated content on the site and malicious user content could
+        # include links that, when clicked by a victom user, cause the browser
+        # to make API requests that include auth cookies.
+        check_csrf_origin(request)
+        check_csrf_token(request)
+
         self.helper.add_vary_by_cookie(request)
-        return self.helper.identity(self.cookie, request)
+
+        return identity
 
     def authenticated_userid(self, request: Request) -> str | None:
         return Identity.authenticated_userid(self.identity(request))

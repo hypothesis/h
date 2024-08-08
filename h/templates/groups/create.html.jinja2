@@ -20,7 +20,10 @@
       "api": {
         "createGroup": {
           "method": "POST",
-          "url": "{{ request.route_url("api.groups") }}"
+          "url": "{{ request.route_url("api.groups") }}",
+          "headers": {
+            "X-CSRF-Token": "{{ get_csrf_token() }}"
+          }
         }
       }
     }

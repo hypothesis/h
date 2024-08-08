@@ -45,15 +45,25 @@ export class APIError extends Error {
 /* Make an API call and return the parsed JSON body or throw APIError. */
 export async function callAPI(
   url: string,
-  method: string = 'GET',
-  json: object | undefined,
+  {
+    method = 'GET',
+    json = null,
+    headers = {},
+  }: {
+    method?: string;
+    json?: object | null;
+    headers?: any;
+  } = {},
 ): Promise<object> {
   const options: RequestInit = {
-    method: method,
-    headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+    method,
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
   };
 
-  if (json !== undefined) {
+  if (json) {
     options.body = JSON.stringify(json);
   }
 

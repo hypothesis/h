@@ -8,6 +8,7 @@ const config = {
     createGroup: {
       method: 'POST',
       url: 'https://example.com/api/groups',
+      headers: { foo: 'bar' },
     },
   },
 };
@@ -209,14 +210,14 @@ describe('CreateGroupForm', () => {
     await wrapper.find('form[data-testid="form"]').simulate('submit');
 
     assert.isTrue(
-      fakeCallAPI.calledOnceWithExactly(
-        config.api.createGroup.url,
-        config.api.createGroup.method,
-        {
+      fakeCallAPI.calledOnceWithExactly(config.api.createGroup.url, {
+        method: config.api.createGroup.method,
+        headers: config.api.createGroup.headers,
+        json: {
           name,
           description,
         },
-      ),
+      }),
     );
     assert.isTrue(fakeSetLocation.calledOnceWithExactly(groupURL));
   });

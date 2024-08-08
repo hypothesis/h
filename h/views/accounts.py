@@ -6,6 +6,7 @@ import colander
 import deform
 from markupsafe import Markup
 from pyramid import httpexceptions, security
+from pyramid.config import not_
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 from sqlalchemy import func, select
@@ -50,6 +51,7 @@ def _login_redirect_url(request):
     context=BadCSRFToken,
     accept="text/html",
     renderer="h:templates/accounts/session_invalid.html.jinja2",
+    path_info=not_("/api"),
 )
 def bad_csrf_token_html(_context, request):
     request.response.status_code = 403
