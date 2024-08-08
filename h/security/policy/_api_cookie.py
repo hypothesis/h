@@ -1,3 +1,5 @@
+from pyramid.csrf import check_csrf_origin, check_csrf_token
+from pyramid.exceptions import BadCSRFOrigin, BadCSRFToken
 from pyramid.request import Request
 from pyramid.security import Allowed, Denied
 from webob.cookies import SignedCookieProfile
@@ -28,7 +30,18 @@ class APICookiePolicy:
         ) in COOKIE_AUTHENTICATABLE_API_REQUESTS
 
     def identity(self, request: Request) -> Identity | None:
+        try:
+            check_csrf_origin(request)
+        except BadCSRFOrigin:
+            return None
+
+        try:
+            check_csrf_token(request)
+        except BadCSRFToken:
+            return None
+
         self.helper.add_vary_by_cookie(request)
+
         return self.helper.identity(self.cookie, request)
 
     def authenticated_userid(self, request: Request) -> str | None:
