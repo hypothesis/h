@@ -1,6 +1,6 @@
 import { render } from 'preact';
 
-import CreateGroupForm from './components/CreateGroupForm';
+import CreateEditGroupForm from './components/CreateEditGroupForm';
 import { readConfig } from './config';
 
 function init() {
@@ -13,7 +13,7 @@ function init() {
   render(
     <>
       {stylesheetLinks}
-      <CreateGroupForm />
+      <CreateEditGroupForm />
     </>,
     shadowRoot,
   );

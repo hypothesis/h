@@ -9,6 +9,15 @@ export type ConfigObject = {
   styles: string[];
   api: {
     createGroup: APIConfig;
+    updateGroup: APIConfig | null;
+  };
+  context: {
+    group: {
+      pubid: string;
+      name: string;
+      description: string;
+      link: string;
+    } | null;
   };
 };
 

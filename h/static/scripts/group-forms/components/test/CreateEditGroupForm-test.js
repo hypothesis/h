@@ -1,23 +1,30 @@
 import { mount } from 'enzyme';
 import { waitForElement } from '@hypothesis/frontend-testing';
 
-import { $imports, default as CreateGroupForm } from '../CreateGroupForm';
+import {
+  $imports,
+  default as CreateEditGroupForm,
+} from '../CreateEditGroupForm';
 
-const config = {
-  api: {
-    createGroup: {
-      method: 'POST',
-      url: 'https://example.com/api/groups',
-      headers: { foo: 'bar' },
-    },
-  },
-};
+let config;
 
-describe('CreateGroupForm', () => {
+describe('CreateEditGroupForm', () => {
   let fakeCallAPI;
   let fakeSetLocation;
 
   beforeEach(() => {
+    config = {
+      api: {
+        createGroup: {
+          method: 'POST',
+          url: 'https://example.com/api/groups',
+        },
+      },
+      context: {
+        group: null,
+      },
+    };
+
     fakeCallAPI = sinon.stub();
     fakeSetLocation = sinon.stub();
 
@@ -50,6 +57,9 @@ describe('CreateGroupForm', () => {
 
   const getElements = wrapper => {
     return {
+      header: {
+        element: wrapper.find('[data-testid="header"]'),
+      },
       name: {
         counterEl: wrapper.find('[data-testid="charcounter-name"]'),
         fieldComponent: wrapper.find('Input[data-testid="name"]'),
@@ -60,13 +70,17 @@ describe('CreateGroupForm', () => {
         fieldComponent: wrapper.find('Textarea[data-testid="description"]'),
         fieldEl: wrapper.find('textarea[data-testid="description"]'),
       },
+      submitButton: {
+        component: wrapper.find('Button[data-testid="button"]'),
+        element: wrapper.find('button[data-testid="button"]'),
+      },
     };
   };
 
   let wrappers;
 
   const createWrapper = () => {
-    const wrapper = mount(<CreateGroupForm />);
+    const wrapper = mount(<CreateEditGroupForm />);
     wrappers.push(wrapper);
     const elements = getElements(wrapper);
     return { wrapper, elements };
@@ -164,16 +178,21 @@ describe('CreateGroupForm', () => {
     });
   });
 
-  it("doesn't show an error message initially", async () => {
-    const { wrapper } = createWrapper();
+  it('displays a create-new-group form', async () => {
+    const { wrapper, elements } = createWrapper();
+    const headerEl = elements.header.element;
+    const nameEl = elements.name.fieldEl;
+    const descriptionEl = elements.description.fieldEl;
+    const submitButtonEl = elements.submitButton.element;
 
+    assert.equal(headerEl.text(), 'Create a new private group');
+    assert.equal(nameEl.getDOMNode().value, '');
+    assert.equal(descriptionEl.getDOMNode().value, '');
+    assert.equal(submitButtonEl.text(), 'Create group');
+    assert.isFalse(wrapper.exists('[data-testid="back-link"]'));
     assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
-  });
-
-  it("doesn't show a loading state initially", async () => {
-    const { wrapper } = createWrapper();
-
     await assertInLoadingState(wrapper, false);
+    assert.isFalse(savedConfirmationShowing(wrapper));
   });
 
   it('shows a loading state when the create-group API request is in-flight', async () => {
@@ -183,6 +202,7 @@ describe('CreateGroupForm', () => {
     wrapper.find('form[data-testid="form"]').simulate('submit');
 
     await assertInLoadingState(wrapper, true);
+    assert.isFalse(savedConfirmationShowing(wrapper));
   });
 
   it('continues to show the loading state after receiving a successful API response', async () => {
@@ -192,6 +212,7 @@ describe('CreateGroupForm', () => {
     await wrapper.find('form[data-testid="form"]').simulate('submit');
 
     await assertInLoadingState(wrapper, true);
+    assert.isFalse(savedConfirmationShowing(wrapper));
   });
 
   it('creates the group and redirects the browser', async () => {
@@ -236,6 +257,118 @@ describe('CreateGroupForm', () => {
     assert.equal(errorMessageEl.text(), errorMessageFromCallAPI);
     // It exits its loading state after receiving an error response.
     await assertInLoadingState(wrapper, false);
+    assert.isFalse(savedConfirmationShowing(wrapper));
+  });
+
+  context('when editing an existing group', () => {
+    beforeEach(() => {
+      config.context.group = {
+        pubid: 'testid',
+        name: 'Test Name',
+        description: 'Test group description',
+        link: 'https://example.com/groups/testid',
+      };
+      config.api.updateGroup = {
+        method: 'PATCH',
+        url: 'https://example.com/api/group/foo',
+      };
+    });
+
+    it('displays an edit-group form', async () => {
+      const { wrapper, elements } = createWrapper();
+      const headerEl = elements.header.element;
+      const nameEl = elements.name.fieldEl;
+      const descriptionEl = elements.description.fieldEl;
+      const submitButtonEl = elements.submitButton.element;
+
+      assert.equal(headerEl.text(), 'Edit group');
+      assert.equal(nameEl.getDOMNode().value, config.context.group.name);
+      assert.equal(
+        descriptionEl.getDOMNode().value,
+        config.context.group.description,
+      );
+      assert.equal(submitButtonEl.text(), 'Save changes');
+      assert.isTrue(wrapper.exists('[data-testid="back-link"]'));
+      assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
+      await assertInLoadingState(wrapper, false);
+      assert.isFalse(savedConfirmationShowing(wrapper));
+    });
+
+    it('updates the group', async () => {
+      const { wrapper, elements } = createWrapper();
+      const nameEl = elements.name.fieldEl;
+      const descriptionEl = elements.description.fieldEl;
+
+      const name = 'Edited Group Name';
+      const description = 'Edited group description';
+      nameEl.getDOMNode().value = name;
+      nameEl.simulate('input');
+      descriptionEl.getDOMNode().value = description;
+      descriptionEl.simulate('input');
+      await wrapper.find('form[data-testid="form"]').simulate('submit');
+
+      assert.isTrue(
+        fakeCallAPI.calledOnceWithExactly(config.api.updateGroup.url, {
+          method: config.api.updateGroup.method,
+          headers: config.api.updateGroup.headers,
+          json: {
+            id: config.context.group.pubid,
+            name,
+            description,
+          },
+        }),
+      );
+    });
+
+    it('shows a loading state when the update-group API request is in-flight', async () => {
+      const { wrapper } = createWrapper();
+      fakeCallAPI.resolves(new Promise(() => {}));
+
+      wrapper.find('form[data-testid="form"]').simulate('submit');
+
+      await assertInLoadingState(wrapper, true);
+    });
+
+    it('shows a confirmation after receiving a successful API response', async () => {
+      const { wrapper } = createWrapper();
+      fakeCallAPI.resolves();
+
+      await wrapper.find('form[data-testid="form"]').simulate('submit');
+
+      await assertInLoadingState(wrapper, false);
+      assert.isTrue(savedConfirmationShowing(wrapper));
+    });
+
+    it('shows an error message if callAPI() throws an error', async () => {
+      const errorMessageFromCallAPI = 'Bad API call.';
+      fakeCallAPI.rejects(new Error(errorMessageFromCallAPI));
+      const { wrapper } = createWrapper();
+
+      wrapper.find('form[data-testid="form"]').simulate('submit');
+
+      const errorMessageEl = await waitForElement(
+        wrapper,
+        '[data-testid="error-message"]',
+      );
+      assert.equal(errorMessageEl.text(), errorMessageFromCallAPI);
+      await assertInLoadingState(wrapper, false);
+      assert.isFalse(savedConfirmationShowing(wrapper));
+    });
+
+    ['name', 'description'].forEach(field => {
+      it('clears the confirmation if fields are edited again', async () => {
+        const { wrapper, elements } = createWrapper();
+        const fieldEl = elements[field].fieldEl;
+        fakeCallAPI.resolves();
+        await wrapper.find('form[data-testid="form"]').simulate('submit');
+
+        fieldEl.getDOMNode().value = 'new text';
+        fieldEl.simulate('input');
+
+        await assertInLoadingState(wrapper, false);
+        assert.isFalse(savedConfirmationShowing(wrapper));
+      });
+    });
   });
 });
 
@@ -245,4 +378,8 @@ async function assertInLoadingState(wrapper, inLoadingState) {
     `button[data-testid="button"][disabled=${inLoadingState}]`,
   );
   assert.equal(wrapper.exists('[data-testid="spinner"]'), inLoadingState);
+}
+
+function savedConfirmationShowing(wrapper) {
+  return wrapper.exists('[data-testid="check"]');
 }

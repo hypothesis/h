@@ -1,51 +1,96 @@
+from unittest.mock import create_autospec, sentinel
+
 import pytest
 from pyramid.httpexceptions import HTTPMovedPermanently
 
+from h.assets import Environment
 from h.traversal.group import GroupContext
 from h.views import groups as views
 
 
-class TestGroupCreateController:
-    def test_get(self, controller):
-        result = controller.get()
+class TestGroupCreateEditController:
+    def test_create(self, pyramid_request, assets_env, mocker):
+        mocker.spy(views, "get_csrf_token")
 
-        assert result == {}
+        controller = views.GroupCreateEditController(sentinel.context, pyramid_request)
 
-    @pytest.fixture
-    def controller(self, pyramid_request):
-        return views.GroupCreateController(pyramid_request)
+        result = controller.create()
 
-
-@pytest.mark.usefixtures("routes")
-class TestGroupEditController:
-    def test_get_reads_group_properties(self, pyramid_request, group):
-        pyramid_request.create_form.return_value = FakeForm()
-
-        result = views.GroupEditController(GroupContext(group), pyramid_request).get()
-
+        assets_env.urls.assert_called_once_with("group_forms_css")
+        views.get_csrf_token.assert_called_once_with(  # pylint:disable=no-member
+            pyramid_request
+        )
         assert result == {
-            "form": {
-                "name": group.name,
-                "description": group.description,
+            "page_title": "Create a new private group",
+            "js_config": {
+                "styles": assets_env.urls.return_value,
+                "api": {
+                    "createGroup": {
+                        "method": "POST",
+                        "url": pyramid_request.route_url("api.groups"),
+                        "headers": {
+                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                        },
+                    }
+                },
+                "context": {"group": None},
             },
-            "group_path": f"/g/{group.pubid}/{group.slug}",
         }
 
-    def test_post_sets_group_properties(
-        self, form_validating_to, pyramid_request, group
-    ):
-        controller = views.GroupEditController(GroupContext(group), pyramid_request)
-        controller.form = form_validating_to(
-            {"name": "New name", "description": "New description"}
-        )
-        controller.post()
+    @pytest.mark.usefixtures("routes")
+    def test_edit(self, factories, pyramid_request, assets_env, mocker):
+        mocker.spy(views, "get_csrf_token")
+        group = factories.Group()
+        context = GroupContext(group)
+        controller = views.GroupCreateEditController(context, pyramid_request)
 
-        assert group.name == "New name"
-        assert group.description == "New description"
+        result = controller.edit()
+
+        assets_env.urls.assert_called_once_with("group_forms_css")
+        views.get_csrf_token.assert_called_once_with(  # pylint:disable=no-member
+            pyramid_request
+        )
+        assert result == {
+            "page_title": "Edit group",
+            "js_config": {
+                "styles": assets_env.urls.return_value,
+                "api": {
+                    "createGroup": {
+                        "method": "POST",
+                        "url": pyramid_request.route_url("api.groups"),
+                        "headers": {
+                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                        },
+                    },
+                    "updateGroup": {
+                        "method": "PATCH",
+                        "url": pyramid_request.route_url("api.group", id=group.pubid),
+                        "headers": {
+                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                        },
+                    },
+                },
+                "context": {
+                    "group": {
+                        "pubid": group.pubid,
+                        "name": group.name,
+                        "description": group.description,
+                        "link": pyramid_request.route_url(
+                            "group_read", pubid=group.pubid, slug=group.slug
+                        ),
+                    }
+                },
+            },
+        }
 
     @pytest.fixture
-    def group(self, factories):
-        return factories.Group(description="DESCRIPTION")
+    def assets_env(self):
+        return create_autospec(Environment, instance=True, spec_set=True)
+
+    @pytest.fixture(autouse=True)
+    def pyramid_config(self, pyramid_config, assets_env):
+        pyramid_config.registry["assets_env"] = assets_env
+        return pyramid_config
 
 
 @pytest.mark.usefixtures("routes")
@@ -58,14 +103,8 @@ def test_read_noslug_redirects(pyramid_request, factories):
     assert exc.value.location == f"/g/{group.pubid}/{group.slug}"
 
 
-class FakeForm:
-    def set_appstruct(self, appstruct):
-        self.appstruct = appstruct  # pylint:disable=attribute-defined-outside-init
-
-    def render(self):
-        return self.appstruct
-
-
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def routes(pyramid_config):
     pyramid_config.add_route("group_read", "/g/{pubid}/{slug}")
+    pyramid_config.add_route("api.group", "/api/group/{id}")
+    pyramid_config.add_route("api.groups", "/api/groups")
