@@ -47,6 +47,7 @@ class TestGetSubpolicy:
         APIPolicy,
         BearerTokenPolicy,
         CookiePolicy,
+        webob,
     ):
         is_api_request.return_value = True
 
@@ -54,7 +55,20 @@ class TestGetSubpolicy:
 
         BearerTokenPolicy.assert_called_once_with()
         AuthClientPolicy.assert_called_once_with()
-        CookiePolicy.assert_called_once_with()
+        webob.cookies.SignedCookieProfile.assert_called_once_with(
+            secret="test_h_auth_cookie_secret",
+            salt="authsanity",
+            cookie_name="auth",
+            max_age=2592000,
+            httponly=True,
+            secure=True,
+        )
+        webob.cookies.SignedCookieProfile.return_value.bind.assert_called_once_with(
+            pyramid_request
+        )
+        CookiePolicy.assert_called_once_with(
+            webob.cookies.SignedCookieProfile.return_value.bind.return_value
+        )
         APICookiePolicy.assert_called_once_with(CookiePolicy.return_value)
         APIPolicy.assert_called_once_with(
             [
@@ -65,12 +79,27 @@ class TestGetSubpolicy:
         )
         assert policy == APIPolicy.return_value
 
-    def test_non_api_request(self, is_api_request, pyramid_request, CookiePolicy):
+    def test_non_api_request(
+        self, is_api_request, pyramid_request, CookiePolicy, webob
+    ):
         is_api_request.return_value = False
 
         policy = get_subpolicy(pyramid_request)
 
-        CookiePolicy.assert_called_once_with()
+        webob.cookies.SignedCookieProfile.assert_called_once_with(
+            secret="test_h_auth_cookie_secret",
+            salt="authsanity",
+            cookie_name="auth",
+            max_age=2592000,
+            httponly=True,
+            secure=True,
+        )
+        webob.cookies.SignedCookieProfile.return_value.bind.assert_called_once_with(
+            pyramid_request
+        )
+        CookiePolicy.assert_called_once_with(
+            webob.cookies.SignedCookieProfile.return_value.bind.return_value
+        )
         assert policy == CookiePolicy.return_value
 
 
@@ -102,3 +131,16 @@ def BearerTokenPolicy(mocker):
 @pytest.fixture(autouse=True)
 def CookiePolicy(mocker):
     return mocker.patch("h.security.policy.top_level.CookiePolicy", autospec=True)
+
+
+@pytest.fixture
+def pyramid_settings(pyramid_settings):
+    pyramid_settings["h_auth_cookie_secret"] = "test_h_auth_cookie_secret"
+    return pyramid_settings
+
+
+@pytest.fixture(autouse=True)
+def webob(mocker):
+    return mocker.patch(
+        "h.security.policy.top_level.webob", autospec=True, spec_set=True
+    )

@@ -1,8 +1,12 @@
+import base64
 from functools import lru_cache
+from os import urandom
+
+import webob
 
 from h.security.identity import Identity
 from h.security.policy._identity_base import IdentityBasedPolicy
-from h.services.auth_cookie import AuthCookieService
+from h.services.auth_ticket import AuthTicketService
 
 
 class CookiePolicy(IdentityBasedPolicy):
@@ -13,10 +17,16 @@ class CookiePolicy(IdentityBasedPolicy):
     straps the login for the client (when the popup shows).
     """
 
+    def __init__(self, cookie: webob.cookies.SignedCookieProfile):
+        self.cookie = cookie
+
     def identity(self, request):
         self._add_vary_by_cookie(request)
 
-        user = request.find_service(AuthCookieService).verify_cookie()
+        userid, ticket_id = self._get_cookie_value()
+
+        user = request.find_service(AuthTicketService).verify_ticket(userid, ticket_id)
+
         if (not user) or user.deleted:
             return None
 
@@ -41,7 +51,9 @@ class CookiePolicy(IdentityBasedPolicy):
             request.session.update(data)
             request.session.new_csrf_token()
 
-        return request.find_service(AuthCookieService).create_cookie(userid)
+        ticket_id = base64.urlsafe_b64encode(urandom(32)).rstrip(b"=").decode("ascii")
+        request.find_service(AuthTicketService).add_ticket(userid, ticket_id)
+        return self.cookie.get_headers([userid, ticket_id])
 
     def forget(self, request):
         """Get a list of headers which will delete appropriate cookies."""
@@ -51,7 +63,12 @@ class CookiePolicy(IdentityBasedPolicy):
         # Clear the session by invalidating it
         request.session.invalidate()
 
-        return request.find_service(AuthCookieService).revoke_cookie()
+        _, ticket_id = self._get_cookie_value()
+
+        if ticket_id:
+            request.find_service(AuthTicketService).remove_ticket(ticket_id)
+
+        return self.cookie.get_headers(None, max_age=0)
 
     @staticmethod
     @lru_cache  # Ensure we only add this once per request
@@ -62,3 +79,6 @@ class CookiePolicy(IdentityBasedPolicy):
             response.vary = list(vary)
 
         request.add_response_callback(vary_add)
+
+    def _get_cookie_value(self):
+        return self.cookie.get_value() or (None, None)
