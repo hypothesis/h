@@ -1,8 +1,10 @@
 /**
- * A successful response from h's create-new-group API:
+ * A successful response from either h's create-new-group API or its update-group API:
+ *
  * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups/post
+ * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}/patch
  */
-export type CreateGroupAPIResponse = {
+export type CreateUpdateGroupAPIResponse = {
   links: {
     html: string;
   };

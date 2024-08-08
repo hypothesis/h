@@ -8,6 +8,18 @@ export type ConfigObject = {
   styles: string[];
   api: {
     createGroup: APIConfig;
+    updateGroup: APIConfig;
+  };
+  components: {
+    CreateEditGroupForm: {
+      mode: string;
+      group: {
+        pubid: string;
+        name: string;
+        description: string;
+        link: string;
+      };
+    };
   };
 };
 
