@@ -1,6 +1,4 @@
-import deform
 from pyramid import httpexceptions
-from pyramid.config import not_
 from pyramid.view import view_config, view_defaults
 
 from h import form, i18n
@@ -12,65 +10,8 @@ _ = i18n.TranslationString
 
 @view_defaults(
     route_name="group_create",
-    renderer="h:templates/groups/legacy_create.html.jinja2",
-    is_authenticated=True,
-    feature=not_("preact_create_group_form"),
-)
-class LegacyGroupCreateController:
-    def __init__(self, request):
-        self.request = request
-
-        self.schema = group_schema(autofocus_name=True).bind(request=self.request)
-
-        submit = deform.Button(
-            title=_("Create group"),
-            css_class="primary-action-btn "
-            "group-form__submit-btn "
-            "js-create-group-create-btn",
-        )
-        self.form = request.create_form(
-            self.schema, css_class="group-form__form", buttons=(submit,)
-        )
-
-    @view_config(request_method="GET")
-    def get(self):
-        """Render the form for creating a new group."""
-        return self._template_data()
-
-    @view_config(request_method="POST")
-    def post(self):
-        """Respond to a submission of the create group form."""
-
-        def on_success(appstruct):
-            group_create_service = self.request.find_service(name="group_create")
-            group = group_create_service.create_private_group(
-                name=appstruct["name"],
-                description=appstruct.get("description"),
-                userid=self.request.authenticated_userid,
-            )
-
-            url = self.request.route_path(
-                "group_read", pubid=group.pubid, slug=group.slug
-            )
-            return httpexceptions.HTTPSeeOther(url)
-
-        return form.handle_form_submission(
-            self.request,
-            self.form,
-            on_success=on_success,
-            on_failure=self._template_data,
-        )
-
-    def _template_data(self):
-        """Return the data needed to render this controller's page."""
-        return {"form": self.form.render()}
-
-
-@view_defaults(
-    route_name="group_create",
     renderer="h:templates/groups/create.html.jinja2",
     is_authenticated=True,
-    feature="preact_create_group_form",
 )
 class GroupCreateController:
     def __init__(self, request):
