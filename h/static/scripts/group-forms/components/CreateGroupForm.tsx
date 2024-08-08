@@ -146,14 +146,14 @@ export default function CreateGroupForm() {
     setSaving(true);
 
     try {
-      response = (await callAPI(
-        config.api.createGroup.url,
-        config.api.createGroup.method,
-        {
+      response = (await callAPI(config.api.createGroup.url, {
+        method: config.api.createGroup.method,
+        headers: config.api.createGroup.headers,
+        json: {
           name,
           description,
         },
-      )) as CreateGroupAPIResponse;
+      })) as CreateGroupAPIResponse;
     } catch (apiError) {
       setErrorMessage(apiError.message);
       setSaving(false);

@@ -168,6 +168,8 @@ def pyramid_request(db_session, db_session_replica, fake_feature, pyramid_settin
 def pyramid_csrf_request(pyramid_request):
     """Return a dummy Pyramid request object with a valid CSRF token."""
     pyramid_request.headers["X-CSRF-Token"] = pyramid_request.session.get_csrf_token()
+    pyramid_request.referrer = "https://example.com"
+    pyramid_request.host_port = "80"
     return pyramid_request
 
 
