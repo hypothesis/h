@@ -51,6 +51,7 @@ def get_subpolicy(request):
         httponly=True,
         secure=request.scheme == "https",
         samesite="strict",
+        path="/api/",
     )
     api_authcookie = api_authcookie.bind(request)
 
