@@ -87,6 +87,7 @@ class TestGetSubpolicy:
             httponly=True,
             secure=True,
             samesite="strict",
+            path="/api/",
         )
         api_authcookie.bind.assert_called_once_with(pyramid_request)
         AuthTicketCookieHelper.assert_called_once_with()
@@ -134,6 +135,7 @@ class TestGetSubpolicy:
                 httponly=True,
                 secure=True,
                 samesite="strict",
+                path="/api/",
             ),
             call(
                 secret="test_h_auth_cookie_secret",
