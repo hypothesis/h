@@ -37,7 +37,7 @@ describe('callAPI', () => {
     for (const method of ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']) {
       context(`when the request method is ${method}`, () => {
         it('makes a request using the given method', async () => {
-          await callAPI(url, method);
+          await callAPI(url, { method });
 
           assert.equal(fakeFetch.lastCall.args[1].method, method);
         });
@@ -47,9 +47,18 @@ describe('callAPI', () => {
     it('makes a request with the given JSON body', async () => {
       const json = { foo: 'bar' };
 
-      await callAPI(url, 'POST', json);
+      await callAPI(url, { method: 'POST', json });
 
       assert.equal(fakeFetch.lastCall.args[1].body, JSON.stringify(json));
+    });
+
+    it('makes a request with the given headers', async () => {
+      const headers = { foo: 'bar' };
+
+      await callAPI(url, { method: 'POST', headers });
+
+      headers['Content-Type'] = 'application/json; charset=UTF-8';
+      assert.deepEqual(fakeFetch.lastCall.args[1].headers, headers);
     });
 
     it('returns the parsed JSON object', async () => {

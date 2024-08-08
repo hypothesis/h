@@ -32,3 +32,23 @@ def test_json_error_view(patch, pyramid_request):
     handle_exception.assert_called_once_with(pyramid_request, exception)
     assert result["status"] == "failure"
     assert result["reason"]
+
+
+def test_bad_csrf_origin(pyramid_request):
+    result = views.bad_csrf_origin(pyramid_request)
+
+    assert pyramid_request.response.status_code == 400
+    assert result == {
+        "status": "failure",
+        "reason": "CSRF validation failed: invalid Origin or Referrer.",
+    }
+
+
+def test_bad_csrf_token(pyramid_request):
+    result = views.bad_csrf_token(pyramid_request)
+
+    assert pyramid_request.response.status_code == 400
+    assert result == {
+        "status": "failure",
+        "reason": "CSRF validation failed: invalid or missing CSRF token.",
+    }
