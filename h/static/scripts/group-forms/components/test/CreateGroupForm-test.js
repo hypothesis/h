@@ -9,6 +9,21 @@ const config = {
       method: 'POST',
       url: 'https://example.com/api/groups',
     },
+    updateGroup: {
+      method: 'PATCH',
+      url: 'https://example.com/api/group/foo',
+    },
+  },
+  components: {
+    CreateEditGroupForm: {
+      mode: 'create',
+      group: {
+        pubid: '',
+        name: '',
+        description: '',
+        link: '',
+      },
+    },
   },
 };
 

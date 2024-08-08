@@ -1,7 +1,5 @@
 {% extends "h:templates/layouts/group.html.jinja2" %}
 
-{% set page_title = 'Create a new private group' %}
-
 {% block page_content %}
   <div id="create-group-form"></div>
   <script type="application/json" class="js-config">
@@ -11,6 +9,21 @@
         "createGroup": {
           "method": "POST",
           "url": "{{ request.route_url("api.groups") }}"
+        },
+        "updateGroup": {
+          "method": "PATCH",
+          "url": "{{ request.route_url("api.group", id=group.pubid) }}"
+        }
+      },
+      "components": {
+        "CreateEditGroupForm": {
+          "mode": "{{ mode }}",
+          "group": {
+            "pubid": "{{ group.pubid }}",
+            "name": "{{ group.name }}",
+            "description": "{{ group.description }}",
+            "link": "{{ group.link }}"
+          }
         }
       }
     }

@@ -1,3 +1,5 @@
+from unittest.mock import sentinel
+
 import pytest
 from pyramid.httpexceptions import HTTPMovedPermanently
 
@@ -5,47 +7,43 @@ from h.traversal.group import GroupContext
 from h.views import groups as views
 
 
-class TestGroupCreateController:
-    def test_get(self, controller):
-        result = controller.get()
+class TestGroupCreateEditController:
+    def test_create(self, pyramid_request):
+        controller = views.GroupCreateEditController(sentinel.context, pyramid_request)
 
-        assert result == {}
-
-    @pytest.fixture
-    def controller(self, pyramid_request):
-        return views.GroupCreateController(pyramid_request)
-
-
-@pytest.mark.usefixtures("routes")
-class TestGroupEditController:
-    def test_get_reads_group_properties(self, pyramid_request, group):
-        pyramid_request.create_form.return_value = FakeForm()
-
-        result = views.GroupEditController(GroupContext(group), pyramid_request).get()
+        result = controller.create()
 
         assert result == {
-            "form": {
-                "name": group.name,
-                "description": group.description,
+            "page_title": "Create a new private group",
+            "mode": "create",
+            "group": {
+                "pubid": "",
+                "name": "",
+                "description": "",
+                "link": "",
             },
-            "group_path": f"/g/{group.pubid}/{group.slug}",
         }
 
-    def test_post_sets_group_properties(
-        self, form_validating_to, pyramid_request, group
-    ):
-        controller = views.GroupEditController(GroupContext(group), pyramid_request)
-        controller.form = form_validating_to(
-            {"name": "New name", "description": "New description"}
-        )
-        controller.post()
+    @pytest.mark.usefixtures("routes")
+    def test_edit(self, factories, pyramid_request):
+        group = factories.Group()
+        context = GroupContext(group)
+        controller = views.GroupCreateEditController(context, pyramid_request)
 
-        assert group.name == "New name"
-        assert group.description == "New description"
+        result = controller.edit()
 
-    @pytest.fixture
-    def group(self, factories):
-        return factories.Group(description="DESCRIPTION")
+        assert result == {
+            "page_title": "Edit group details",
+            "mode": "edit",
+            "group": {
+                "pubid": group.pubid,
+                "name": group.name,
+                "description": group.description,
+                "link": pyramid_request.route_url(
+                    "group_read", pubid=group.pubid, slug=group.slug
+                ),
+            },
+        }
 
 
 @pytest.mark.usefixtures("routes")
@@ -56,14 +54,6 @@ def test_read_noslug_redirects(pyramid_request, factories):
         views.read_noslug(GroupContext(group), pyramid_request)
 
     assert exc.value.location == f"/g/{group.pubid}/{group.slug}"
-
-
-class FakeForm:
-    def set_appstruct(self, appstruct):
-        self.appstruct = appstruct  # pylint:disable=attribute-defined-outside-init
-
-    def render(self):
-        return self.appstruct
 
 
 @pytest.fixture

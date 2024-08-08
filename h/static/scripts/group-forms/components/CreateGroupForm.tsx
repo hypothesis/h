@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 
 import { Button, Input, Spinner, Textarea } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
-import { callAPI, CreateGroupAPIResponse } from '../utils/api';
+import { callAPI, CreateUpdateGroupAPIResponse } from '../utils/api';
 import { setLocation } from '../utils/set-location';
 
 function Star() {
@@ -119,11 +119,14 @@ function TextField({
 }
 
 export default function CreateGroupForm() {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const config = useMemo(() => readConfig(), []);
+  const mode = config.components.CreateEditGroupForm.mode;
+  const group = config.components.CreateEditGroupForm.group;
+
+  const [name, setName] = useState(group.name);
+  const [description, setDescription] = useState(group.description);
   const [errorMessage, setErrorMessage] = useState('');
   const [saving, setSaving] = useState(false);
-  const config = useMemo(() => readConfig(), []);
 
   useEffect(() => {
     const listener = (e: PageTransitionEvent) => {
@@ -141,7 +144,7 @@ export default function CreateGroupForm() {
     e.preventDefault();
     setErrorMessage('');
 
-    let response: CreateGroupAPIResponse;
+    let response: CreateUpdateGroupAPIResponse;
 
     setSaving(true);
 
@@ -153,7 +156,7 @@ export default function CreateGroupForm() {
           name,
           description,
         },
-      )) as CreateGroupAPIResponse;
+      )) as CreateUpdateGroupAPIResponse;
     } catch (apiError) {
       setErrorMessage(apiError.message);
       setSaving(false);
@@ -163,13 +166,47 @@ export default function CreateGroupForm() {
     setLocation(response.links.html);
   };
 
+  const updateGroup = async (e: SubmitEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    let response: CreateUpdateGroupAPIResponse;
+
+    setSaving(true);
+
+    try {
+      response = (await callAPI(
+        config.api.updateGroup.url,
+        config.api.updateGroup.method,
+        {
+          id: group.pubid,
+          name,
+          description,
+        },
+      )) as CreateUpdateGroupAPIResponse;
+    } catch (apiError) {
+      setErrorMessage(apiError.message);
+    }
+
+    setSaving(false);
+  };
+
+  let onSubmit;
+  if (mode === 'create') {
+    onSubmit = createGroup;
+  } else {
+    onSubmit = updateGroup;
+  }
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none">
-        Create a new private group
+        {mode === 'create'
+          ? 'Create a new private group'
+          : 'Edit group details'}
       </h1>
 
-      <form onSubmit={createGroup} data-testid="form">
+      <form onSubmit={onSubmit} data-testid="form">
         <TextField
           type="input"
           value={name}
@@ -208,13 +245,16 @@ export default function CreateGroupForm() {
             disabled={saving}
             data-testid="button"
           >
-            Create group
+            {mode === 'create' ? 'Create group' : 'Save changes'}
           </Button>
         </div>
       </form>
 
       <footer className="mt-14 pt-4 border-t border-t-text-grey-6">
         <div className="flex">
+          {mode === 'edit' && (
+            <a href={group.link}>← Back to group overview page</a>
+          )}
           <div className="grow" />
           <Star />
           &nbsp;Required
