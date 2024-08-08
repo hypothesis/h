@@ -1,0 +1,14 @@
+{% extends "h:templates/layouts/group.html.jinja2" %}
+
+{% block page_content %}
+  <div id="create-group-form"></div>
+  <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('group_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
+{% endblock %}

@@ -1,8 +1,14 @@
 import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 
-import { Button, Input, Spinner, Textarea } from '@hypothesis/frontend-shared';
+import {
+  Button,
+  CheckIcon,
+  Input,
+  Spinner,
+  Textarea,
+} from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
-import { callAPI, CreateGroupAPIResponse } from '../utils/api';
+import { callAPI, CreateUpdateGroupAPIResponse } from '../utils/api';
 import { setLocation } from '../utils/set-location';
 
 function Star() {
@@ -118,12 +124,15 @@ function TextField({
   );
 }
 
-export default function CreateGroupForm() {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+export default function CreateEditGroupForm() {
+  const config = useMemo(() => readConfig(), []);
+  const group = config.context.group;
+
+  const [name, setName] = useState(group?.name ?? '');
+  const [description, setDescription] = useState(group?.description ?? '');
   const [errorMessage, setErrorMessage] = useState('');
   const [saving, setSaving] = useState(false);
-  const config = useMemo(() => readConfig(), []);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const listener = (e: PageTransitionEvent) => {
@@ -131,17 +140,28 @@ export default function CreateGroupForm() {
         // Disable the "saving" state if the user uses the browser's Back button to navigate
         // back to the group form.
         setSaving(false);
+        setSaved(false);
       }
     };
     window.addEventListener('pageshow', listener);
     return () => window.removeEventListener('pageshow', listener);
   }, []);
 
+  const handleChangeName = (newName: string) => {
+    setName(newName);
+    setSaved(false);
+  };
+
+  const handleChangeDescription = (newDescription: string) => {
+    setDescription(newDescription);
+    setSaved(false);
+  };
+
   const createGroup = async (e: SubmitEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
-    let response: CreateGroupAPIResponse;
+    let response: CreateUpdateGroupAPIResponse;
 
     setSaving(true);
 
@@ -153,7 +173,7 @@ export default function CreateGroupForm() {
           name,
           description,
         },
-      })) as CreateGroupAPIResponse;
+      })) as CreateUpdateGroupAPIResponse;
     } catch (apiError) {
       setErrorMessage(apiError.message);
       setSaving(false);
@@ -163,17 +183,48 @@ export default function CreateGroupForm() {
     setLocation(response.links.html);
   };
 
+  const updateGroup = async (e: SubmitEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSaved(false);
+    setSaving(true);
+
+    let response: CreateUpdateGroupAPIResponse;
+
+    try {
+      response = (await callAPI(config.api.updateGroup!.url, {
+        method: config.api.updateGroup!.method,
+        headers: config.api.updateGroup!.headers,
+        json: { id: group!.pubid, name, description },
+      })) as CreateUpdateGroupAPIResponse;
+    } catch (apiError) {
+      setErrorMessage(apiError.message);
+      return;
+    } finally {
+      setSaving(false);
+    }
+
+    setSaved(true);
+  };
+
+  let onSubmit;
+  if (group) {
+    onSubmit = updateGroup;
+  } else {
+    onSubmit = createGroup;
+  }
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
-      <h1 className="mt-14 mb-8 text-grey-7 text-xl/none">
-        Create a new private group
+      <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
+        {group ? 'Edit group' : 'Create a new private group'}
       </h1>
 
-      <form onSubmit={createGroup} data-testid="form">
+      <form onSubmit={onSubmit} data-testid="form">
         <TextField
           type="input"
           value={name}
-          onChangeValue={setName}
+          onChangeValue={handleChangeName}
           minLength={3}
           maxLength={25}
           label="Name"
@@ -184,7 +235,7 @@ export default function CreateGroupForm() {
         <TextField
           type="textarea"
           value={description}
-          onChangeValue={setDescription}
+          onChangeValue={handleChangeDescription}
           maxLength={250}
           label="Description"
           testid="description"
@@ -202,19 +253,25 @@ export default function CreateGroupForm() {
           )}
           <div className="grow" />
           {saving && <Spinner data-testid="spinner" />}
+          {saved && <CheckIcon data-testid="check" />}
           <Button
             type="submit"
             variant="primary"
             disabled={saving}
             data-testid="button"
           >
-            Create group
+            {group ? 'Save changes' : 'Create group'}
           </Button>
         </div>
       </form>
 
       <footer className="mt-14 pt-4 border-t border-t-text-grey-6">
         <div className="flex">
+          {group && (
+            <a href={group.link} data-testid="back-link">
+              ← Back to group overview page
+            </a>
+          )}
           <div className="grow" />
           <Star />
           &nbsp;Required
