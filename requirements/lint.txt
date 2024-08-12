@@ -139,7 +139,7 @@ greenlet==3.0.3
     #   -r requirements/tests.txt
     #   gevent
     #   sqlalchemy
-gunicorn==22.0.0
+gunicorn==23.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

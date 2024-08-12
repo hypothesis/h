@@ -59,7 +59,7 @@ greenlet==3.0.3
     # via
     #   gevent
     #   sqlalchemy
-gunicorn==22.0.0
+gunicorn==23.0.0
     # via -r requirements/prod.in
 h-api==1.1.0
     # via -r requirements/prod.in
