@@ -13,6 +13,7 @@ from h.models import Annotation, AnnotationMetadata, AnnotationSlim, Group, User
 class AnnotationCounts:
     annotations: int
     replies: int
+    page_notes: int
     last_activity: datetime
 
     assignment_id: str | None = None
@@ -99,6 +100,9 @@ class BulkLMSStatsService:
             func.count(counts_query.c.id)
             .filter(counts_query.c.type == "reply")
             .label("replies"),
+            func.count(counts_query.c.id)
+            .filter(counts_query.c.type == "page_note")
+            .label("page_notes"),
             func.max(counts_query.c.created).label("last_activity"),
         )
 
@@ -171,6 +175,7 @@ class BulkLMSStatsService:
                 display_name=row.get("display_name"),
                 annotations=row.annotations,
                 replies=row.replies,
+                page_notes=row.page_notes,
                 last_activity=row.last_activity,
             )
             for row in results.mappings()

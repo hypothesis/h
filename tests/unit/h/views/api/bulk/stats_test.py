@@ -28,6 +28,7 @@ class TestBulkGroup:
                 userid=i,
                 annotations=i,
                 replies=i,
+                page_notes=i,
                 last_activity=datetime.now(),
             )
             for i in range(3)
@@ -48,6 +49,7 @@ class TestBulkGroup:
                 "userid": row.userid,
                 "annotations": row.annotations,
                 "replies": row.replies,
+                "page_notes": row.page_notes,
                 "last_activity": row.last_activity.isoformat(),
             }
             for row in bulk_stats_service.get_annotation_counts.return_value
