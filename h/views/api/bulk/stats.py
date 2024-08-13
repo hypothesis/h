@@ -43,6 +43,7 @@ def get_annotation_counts(request):
                 "display_name": row.display_name,
                 "annotations": row.annotations,
                 "replies": row.replies,
+                "page_notes": row.page_notes,
                 "last_activity": row.last_activity.isoformat(),
             }
             for row in stats

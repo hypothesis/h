@@ -28,6 +28,7 @@ class TestBulkLMSStatsService:
                 display_name=user.display_name,
                 annotations=1,
                 replies=0,
+                page_notes=0,
                 last_activity=annotation.created,
             )
             in stats
@@ -38,12 +39,13 @@ class TestBulkLMSStatsService:
                 display_name=reply_user.display_name,
                 annotations=0,
                 replies=1,
+                page_notes=0,
                 last_activity=annotation_reply.created,
             )
             in stats
         )
 
-    @pytest.mark.usefixtures("annotation", "user", "reply_user")
+    @pytest.mark.usefixtures("annotation", "user", "reply_user", "page_note")
     def test_get_annotation_counts_by_assignment(
         self,
         svc,
@@ -61,6 +63,7 @@ class TestBulkLMSStatsService:
                 assignment_id="ASSIGNMENT_ID",
                 annotations=1,
                 replies=1,
+                page_notes=1,
                 last_activity=annotation_reply.created,
             )
             in stats
@@ -70,6 +73,7 @@ class TestBulkLMSStatsService:
                 assignment_id="OTHER_ASSIGNMENT_ID",
                 annotations=1,
                 replies=0,
+                page_notes=0,
                 last_activity=annotation_in_another_assignment.created,
             )
             in stats
@@ -95,6 +99,7 @@ class TestBulkLMSStatsService:
                 assignment_id="ASSIGNMENT_ID",
                 annotations=0,
                 replies=1,
+                page_notes=0,
                 last_activity=annotation_reply.created,
             ),
         ]
@@ -114,6 +119,24 @@ class TestBulkLMSStatsService:
     @pytest.fixture
     def annotation(self, factories, user, group):
         anno = factories.Annotation(group=group)
+        anno_slim = factories.AnnotationSlim(
+            annotation=anno,
+            user=user,
+            deleted=False,
+            shared=True,
+            moderated=False,
+            group=group,
+        )
+        factories.AnnotationMetadata(
+            annotation_slim=anno_slim,
+            data={"lms": {"assignment": {"resource_link_id": "ASSIGNMENT_ID"}}},
+        )
+
+        return anno_slim
+
+    @pytest.fixture
+    def page_note(self, factories, user, group):
+        anno = factories.Annotation(group=group, target_selectors=[])
         anno_slim = factories.AnnotationSlim(
             annotation=anno,
             user=user,
