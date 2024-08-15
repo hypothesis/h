@@ -3,7 +3,6 @@ from unittest.mock import create_autospec, sentinel
 import pytest
 from webob.cookies import SignedCookieProfile
 
-from h.security.policy import helpers
 from h.security.policy.helpers import AuthTicketCookieHelper, is_api_request
 
 
@@ -55,16 +54,12 @@ class TestAuthTicketCookieHelper:
         assert helper.identity(cookie, pyramid_request) is None
 
     def test_remember(
-        self, auth_ticket_service, cookie, helper, pyramid_request, mocker
+        self, auth_ticket_service, cookie, helper, pyramid_request, AuthTicket
     ):
-        urandom = mocker.spy(helpers, "urandom")
-        urlsafe_b64encode = mocker.spy(helpers, "urlsafe_b64encode")
-
         headers = helper.remember(cookie, pyramid_request, "test_userid")
 
-        urandom.assert_called_once_with(32)
-        urlsafe_b64encode.assert_called_once_with(urandom.spy_return)
-        ticket_id = urlsafe_b64encode.spy_return.rstrip(b"=").decode("ascii")
+        AuthTicket.generate_ticket_id.assert_called_once_with()
+        ticket_id = AuthTicket.generate_ticket_id.return_value
         auth_ticket_service.add_ticket.assert_called_once_with("test_userid", ticket_id)
         cookie.get_headers.assert_called_once_with(["test_userid", ticket_id])
         assert headers == cookie.get_headers.return_value
@@ -135,4 +130,11 @@ class TestAuthTicketCookieHelper:
 def Identity(mocker):
     return mocker.patch(
         "h.security.policy.helpers.Identity", autospec=True, spec_set=True
+    )
+
+
+@pytest.fixture(autouse=True)
+def AuthTicket(mocker):
+    return mocker.patch(
+        "h.security.policy.helpers.AuthTicket", autospec=True, spec_set=True
     )

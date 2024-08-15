@@ -1,10 +1,9 @@
-from base64 import urlsafe_b64encode
 from functools import lru_cache
-from os import urandom
 
 from pyramid.request import Request
 from webob.cookies import SignedCookieProfile
 
+from h.models import AuthTicket
 from h.security.identity import Identity
 from h.services.auth_ticket import AuthTicketService
 
@@ -28,7 +27,7 @@ class AuthTicketCookieHelper:
         return Identity.from_models(user=user)
 
     def remember(self, cookie: SignedCookieProfile, request: Request, userid: str):
-        ticket_id = urlsafe_b64encode(urandom(32)).rstrip(b"=").decode("ascii")
+        ticket_id = AuthTicket.generate_ticket_id()
         request.find_service(AuthTicketService).add_ticket(userid, ticket_id)
         return cookie.get_headers([userid, ticket_id])
 

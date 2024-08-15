@@ -1,3 +1,6 @@
+from base64 import urlsafe_b64encode
+from os import urandom
+
 import sqlalchemy as sa
 
 from h.db import Base
@@ -33,3 +36,15 @@ class AuthTicket(Base, Timestamps):
     #: a SELECT against the user table just to find the authenticated_userid
     #: associated with the request.
     user_userid = sa.Column("user_userid", sa.UnicodeText(), nullable=False)
+
+    @staticmethod
+    def generate_ticket_id() -> str:
+        """
+        Return a new, unique, cryptographically secure id for use with an AuthTicket.
+
+        Users don't have to use this method to generate AuthTicket ids: if you
+        have your own requirements you can pass your own id into
+        AuthTicket.__init__() instead. But this method is a good default way to
+        generate ids for most cases.
+        """
+        return urlsafe_b64encode(urandom(32)).rstrip(b"=").decode("ascii")
