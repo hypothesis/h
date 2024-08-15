@@ -1,8 +1,6 @@
 from pyramid.request import RequestLocalCache
-from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity
-from h.security.permits import identity_permits
 from h.security.policy.helpers import is_api_request
 
 
@@ -37,12 +35,6 @@ class BearerTokenPolicy:
         """
 
         return self._identity_cache.get_or_create(request)
-
-    def authenticated_userid(self, request):
-        return Identity.authenticated_userid(self.identity(request))
-
-    def permits(self, request, context, permission) -> Allowed | Denied:
-        return identity_permits(self.identity(request), context, permission)
 
     def _load_identity(self, request):
         token_svc = request.find_service(name="auth_token")

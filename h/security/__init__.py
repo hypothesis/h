@@ -10,11 +10,7 @@ from h.security.encryption import (  # noqa:F401
 from h.security.identity import Identity  # noqa:F401
 from h.security.permissions import Permission  # noqa:F401
 from h.security.permits import identity_permits
-from h.security.policy.top_level import BearerTokenPolicy, TopLevelPolicy
-
-# We export this for the websocket to use as it's main policy
-__all__ = ("BearerTokenPolicy",)
-
+from h.security.policy import StreamerPolicy, TopLevelPolicy
 
 log = logging.getLogger(__name__)
 
