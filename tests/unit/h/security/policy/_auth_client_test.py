@@ -125,33 +125,6 @@ class TestAuthClientPolicy:
 
         assert AuthClientPolicy().identity(pyramid_request) is None
 
-    def test_authenticated_userid(self, pyramid_request, Identity):
-        pyramid_request.headers["X-Forwarded-User"] = sentinel.forwarded_user
-
-        authenticated_userid = AuthClientPolicy().authenticated_userid(pyramid_request)
-
-        Identity.authenticated_userid.assert_called_once_with(
-            Identity.from_models.return_value
-        )
-        assert authenticated_userid == Identity.authenticated_userid.return_value
-
-    def test_permits(self, pyramid_request, mocker, identity_permits):
-        auth_client_policy = AuthClientPolicy()
-        # pylint:disable=no-member
-        mocker.spy(auth_client_policy, "identity")
-
-        result = auth_client_policy.permits(
-            pyramid_request, sentinel.context, sentinel.permission
-        )
-
-        auth_client_policy.identity.assert_called_once_with(pyramid_request)
-        identity_permits.assert_called_once_with(
-            auth_client_policy.identity.spy_return,
-            sentinel.context,
-            sentinel.permission,
-        )
-        assert result == identity_permits.return_value
-
     @pytest.fixture
     def auth_client(self, factories):
         return factories.ConfidentialAuthClient(grant_type=GrantType.client_credentials)
@@ -180,11 +153,4 @@ class TestAuthClientPolicy:
 def Identity(mocker):
     return mocker.patch(
         "h.security.policy._auth_client.Identity", autospec=True, spec_set=True
-    )
-
-
-@pytest.fixture(autouse=True)
-def identity_permits(mocker):
-    return mocker.patch(
-        "h.security.policy._auth_client.identity_permits", autospec=True, spec_set=True
     )
