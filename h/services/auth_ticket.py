@@ -30,6 +30,9 @@ class AuthTicketService:
             # We've already vetted the user!
             return self._user
 
+        if not userid or not ticket_id:
+            return None
+
         ticket = (
             self._session.query(AuthTicket)
             .filter(
