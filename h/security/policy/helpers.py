@@ -52,5 +52,10 @@ class AuthTicketCookieHelper:
         request.add_response_callback(vary_add)
 
     @staticmethod
-    def get_cookie_value(cookie: SignedCookieProfile):
+    def get_cookie_value(cookie: SignedCookieProfile) -> tuple[str | None, str | None]:
+        """
+        Return the user ID and auth ticket ID from the given auth ticket cookie.
+
+        Returns a `(user_id, auth_ticket_id)` 2-tuple or `(None, None)`.
+        """
         return cookie.get_value() or (None, None)
