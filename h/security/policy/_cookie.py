@@ -32,25 +32,17 @@ class CookiePolicy:
         # cookie and that request did *not* also contain the API auth cookie,
         # then add the API auth cookie to the user's browser.
         #
-        # This is a temporary hack that was needed when we first added the
-        # separate API auth cookie: we needed to add the API auth cookie to the
-        # browsers of users who were already logged in with just the HTML auth
-        # cookie, we couldn't just rely on logging in to set the API auth
-        # cookie for users who were *already* logged in.
+        # This was necessary when first adding the API auth cookie:
+        # we needed to add the API auth cookie to the browsers of users who
+        # were already logged in with just the HTML auth cookie, we couldn't
+        # just rely on logging in to set the API auth cookie for users who were
+        # *already* logged in.
         #
-        # This code should be deleted after it has been deployed to production for
-        # at least 30 days (the max_age of the HTML auth cookie).
-        #
-        # When deleting this code we should also change the `path` attribute of
-        # api_authcookie to "/api/" so that the API auth cookie is only sent
-        # with API requests. For already-logged-in users this path change won't
-        # take effect until they delete and re-create their API auth cookie by
-        # logging out and in again, which will take at most 30 days (the
-        # max_age of the cookie).
-        #
-        # When changing the `path` attribute of api_authcookie to "/api/" we
-        # should also remove the api_authcookie from the test requests in
-        # _cookie_test.py (see corresponding comment in _cookie_test.py).
+        # This also gets around other situations where a browser somehow has
+        # our HTML auth cookie but does not have our API auth cookie. Normally
+        # this won't happen but it could happen if the API auth cookie (but not
+        # the HTML one) was deleted somehow, for example by the user manually
+        # deleting the cookie in the browser's developer tools, or another way.
         self._issue_api_authcookie(identity, request)
 
         return identity
@@ -78,9 +70,6 @@ class CookiePolicy:
         # Set this attribute so that _issue_api_authcookie() below won't add
         # the same headers again. Otherwise responses to login form submissions
         # would set the same cookie twice.
-        #
-        # This line of code can be deleted, along with _issue_api_authcookie()
-        # itself, at least 30 days after it has been deployed to production.
         request.h_api_authcookie_headers_added = True
 
         return [
