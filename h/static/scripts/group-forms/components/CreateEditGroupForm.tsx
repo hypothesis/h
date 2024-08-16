@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 import {
   Button,
   CheckIcon,
+  CancelIcon,
   Input,
   Spinner,
   Textarea,
@@ -245,9 +246,10 @@ export default function CreateEditGroupForm() {
         <div className="flex items-center gap-x-4">
           {errorMessage && (
             <div
-              className="text-red-error font-bold"
+              className="text-red-error font-bold flex items-center gap-x-2"
               data-testid="error-message"
             >
+              <CancelIcon />
               {errorMessage}
             </div>
           )}
