@@ -1,5 +1,15 @@
 {% extends "h:templates/layouts/group.html.jinja2" %}
 
+{% block styles %}
+  {{ super() }}
+
+  {# Avoid a "flash of unstyled content" by preloading the stylesheets that
+     will be used by the Preact app within its Shadow DOM. #}
+  {% for url in asset_urls('group_forms_css') %}
+    <link rel="preload" href={{ url }} as="style" />
+  {% endfor %}
+{% endblock %}
+
 {% block page_content %}
   <div id="create-group-form"></div>
   <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
