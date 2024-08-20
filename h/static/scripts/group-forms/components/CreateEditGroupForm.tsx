@@ -31,6 +31,7 @@ function CharacterCounter({
     <div className="flex">
       <div className="grow" />
       <span
+        aria-description={`${value} of ${limit} characters used`}
         data-testid={testid}
         className={error ? 'text-red-error font-bold' : undefined}
       >
@@ -246,6 +247,7 @@ export default function CreateEditGroupForm() {
         <div className="flex items-center gap-x-4">
           {errorMessage && (
             <div
+              aria-live="polite"
               className="text-red-error font-bold flex items-center gap-x-2"
               data-testid="error-message"
             >
