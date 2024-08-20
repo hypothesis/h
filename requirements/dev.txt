@@ -79,7 +79,7 @@ elasticsearch-dsl==6.4.0
     # via -r requirements/prod.txt
 executing==2.0.1
     # via stack-data
-factory-boy==3.3.0
+factory-boy==3.3.1
     # via -r requirements/dev.in
 faker==22.2.0
     # via factory-boy
