@@ -1,9 +1,13 @@
+import logging
+
 from pyramid.security import Allowed, Denied
 from webob.cookies import SignedCookieProfile
 
 from h.security.identity import Identity
 from h.security.permits import identity_permits
 from h.security.policy.helpers import AuthTicketCookieHelper
+
+log = logging.getLogger(__name__)
 
 
 class CookiePolicy:
@@ -108,6 +112,7 @@ class CookiePolicy:
             request,  # pylint:disable=unused-argument
             response,
         ):
+            log.info("Fixing missing API auth cookie")
             for key, value in headers:
                 response.headerlist.append((key, value))
 
