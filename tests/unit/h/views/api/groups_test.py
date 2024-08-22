@@ -92,7 +92,11 @@ class TestCreate:
         "appstruct,group_create_service_method_call",
         [
             (
-                {"name": sentinel.name, "description": sentinel.description},
+                {
+                    "name": sentinel.name,
+                    "description": sentinel.description,
+                    "type": "private",
+                },
                 call.create_private_group(
                     name=sentinel.name,
                     userid=sentinel.userid,
@@ -128,6 +132,100 @@ class TestCreate:
         assert_it_returns_group_as_json(
             response,
             group=group_create_service.create_private_group.return_value,
+        )
+
+    @pytest.mark.parametrize(
+        "appstruct,group_create_service_method_call",
+        [
+            (
+                {
+                    "name": sentinel.name,
+                    "description": sentinel.description,
+                    "type": "restricted",
+                },
+                call.create_restricted_group(
+                    name=sentinel.name,
+                    userid=sentinel.userid,
+                    scopes=[],
+                    description=sentinel.description,
+                    groupid=None,
+                ),
+            ),
+            (
+                {"name": sentinel.name, "type": "restricted"},
+                call.create_restricted_group(
+                    name=sentinel.name,
+                    userid=sentinel.userid,
+                    scopes=[],
+                    description=None,
+                    groupid=None,
+                ),
+            ),
+        ],
+    )
+    def test_create_restricted_group(
+        self,
+        pyramid_request,
+        CreateGroupAPISchema,
+        group_create_service,
+        assert_it_returns_group_as_json,
+        appstruct,
+        group_create_service_method_call,
+    ):
+        CreateGroupAPISchema.return_value.validate.return_value = appstruct
+
+        response = views.create(pyramid_request)
+
+        assert group_create_service.method_calls == [group_create_service_method_call]
+        assert_it_returns_group_as_json(
+            response, group=group_create_service.create_restricted_group.return_value
+        )
+
+    @pytest.mark.parametrize(
+        "appstruct,group_create_service_method_call",
+        [
+            (
+                {
+                    "name": sentinel.name,
+                    "description": sentinel.description,
+                    "type": "open",
+                },
+                call.create_open_group(
+                    name=sentinel.name,
+                    userid=sentinel.userid,
+                    scopes=[],
+                    description=sentinel.description,
+                    groupid=None,
+                ),
+            ),
+            (
+                {"name": sentinel.name, "type": "open"},
+                call.create_open_group(
+                    name=sentinel.name,
+                    userid=sentinel.userid,
+                    scopes=[],
+                    description=None,
+                    groupid=None,
+                ),
+            ),
+        ],
+    )
+    def test_create_open_group(
+        self,
+        pyramid_request,
+        CreateGroupAPISchema,
+        group_create_service,
+        assert_it_returns_group_as_json,
+        appstruct,
+        group_create_service_method_call,
+    ):
+        CreateGroupAPISchema.return_value.validate.return_value = appstruct
+
+        response = views.create(pyramid_request)
+
+        assert group_create_service.method_calls == [group_create_service_method_call]
+        assert_it_returns_group_as_json(
+            response, group=group_create_service.create_open_group.return_value
         )
 
     def test_it_with_groupid_request_param(
@@ -231,15 +329,23 @@ class TestUpdate:
                 {"description": sentinel.description},
                 call.update(sentinel.group, description=sentinel.description),
             ),
+            ({"type": "private"}, call.update(sentinel.group, type="private")),
             (
-                {"name": sentinel.name, "description": sentinel.description},
+                {
+                    "name": sentinel.name,
+                    "description": sentinel.description,
+                    "type": "private",
+                },
                 call.update(
-                    sentinel.group, name=sentinel.name, description=sentinel.description
+                    sentinel.group,
+                    name=sentinel.name,
+                    description=sentinel.description,
+                    type="private",
                 ),
             ),
         ],
     )
-    def test_update_private_group(
+    def test_update(
         self,
         context,
         pyramid_request,
@@ -361,6 +467,7 @@ class TestUpsert:
                     name=sentinel.name,
                     description="",
                     groupid=None,
+                    type="private",
                 ),
             ),
             (
@@ -370,11 +477,32 @@ class TestUpsert:
                     name=sentinel.name,
                     description=sentinel.description,
                     groupid=None,
+                    type="private",
+                ),
+            ),
+            (
+                {"name": sentinel.name, "type": "restricted"},
+                call.update(
+                    sentinel.group,
+                    name=sentinel.name,
+                    description="",
+                    groupid=None,
+                    type="restricted",
+                ),
+            ),
+            (
+                {"name": sentinel.name, "type": "open"},
+                call.update(
+                    sentinel.group,
+                    name=sentinel.name,
+                    description="",
+                    groupid=None,
+                    type="open",
                 ),
             ),
         ],
     )
-    def test_update_private_group(
+    def test_it_updates_an_existing_group(
         self,
         context,
         pyramid_request,
@@ -587,10 +715,7 @@ def CreateGroupAPISchema(mocker):
     CreateGroupAPISchema = mocker.patch(
         "h.views.api.groups.CreateGroupAPISchema", autospec=True, spec_set=True
     )
-    CreateGroupAPISchema.return_value.validate.return_value = {
-        "name": sentinel.name,
-        "description": sentinel.description,
-    }
+    CreateGroupAPISchema.return_value.validate.return_value = {"name": sentinel.name}
     return CreateGroupAPISchema
 
 
@@ -599,10 +724,7 @@ def UpdateGroupAPISchema(mocker):
     UpdateGroupAPISchema = mocker.patch(
         "h.views.api.groups.UpdateGroupAPISchema", autospec=True, spec_set=True
     )
-    UpdateGroupAPISchema.return_value.validate.return_value = {
-        "name": sentinel.name,
-        "description": sentinel.description,
-    }
+    UpdateGroupAPISchema.return_value.validate.return_value = {}
     return UpdateGroupAPISchema
 
 

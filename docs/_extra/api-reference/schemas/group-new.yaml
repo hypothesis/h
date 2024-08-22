@@ -10,6 +10,10 @@ Group:
       type: string
       description: group description
       maxLength: 250
+    type:
+      type: string
+      enum: [private, restricted, open]
+      default: private
     groupid:
       type: string
       pattern: "group:[a-zA-Z0-9._\\-+!~*()']{1,1024}@.*$"

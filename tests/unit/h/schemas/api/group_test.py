@@ -40,6 +40,21 @@ class TestGroupAPISchema:
                 {"groupid": "group:1234abcd!~*()@thirdparty.com"},
                 {"groupid": "group:1234abcd!~*()@thirdparty.com"},
             ),
+            (  # Valid type.
+                DEFAULT_AUTHORITY,
+                {"type": "private"},
+                {"type": "private"},
+            ),
+            (  # Valid type.
+                DEFAULT_AUTHORITY,
+                {"type": "restricted"},
+                {"type": "restricted"},
+            ),
+            (  # Valid type.
+                DEFAULT_AUTHORITY,
+                {"type": "open"},
+                {"type": "open"},
+            ),
             (  # All valid fields at once.
                 "thirdparty.com",
                 {
@@ -146,6 +161,18 @@ class TestGroupAPISchema:
                 "thirdparty.com",
                 {"groupid": 42},
                 "groupid: 42 is not of type 'string'",
+            ),
+            (
+                # type not a string.
+                DEFAULT_AUTHORITY,
+                {"type": 42},
+                r"type: 42 is not one of \['private', 'restricted', 'open'\]",
+            ),
+            (
+                # Invalid type.
+                DEFAULT_AUTHORITY,
+                {"type": "invalid"},
+                r"type: 'invalid' is not one of \['private', 'restricted', 'open'\]",
             ),
         ],
     )

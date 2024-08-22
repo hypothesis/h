@@ -13,6 +13,8 @@ from h.traversal import GroupContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
+DEFAULT_GROUP_TYPE = "private"
+
 
 @api_config(
     versions=["v1", "v2"],
@@ -64,12 +66,29 @@ def create(request):
                 _("group with groupid '{}' already exists").format(groupid)
             )
 
-    group = group_create_service.create_private_group(
-        name=appstruct["name"],
-        userid=request.user.userid,
-        description=appstruct.get("description", None),
-        groupid=groupid,
-    )
+    group_type = appstruct.get("type", DEFAULT_GROUP_TYPE)
+
+    kwargs = {
+        "name": appstruct["name"],
+        "userid": request.user.userid,
+        "description": appstruct.get("description", None),
+        "groupid": groupid,
+    }
+
+    if group_type == "private":
+        method = group_create_service.create_private_group
+    else:
+        assert group_type in ("restricted", "open")
+        kwargs["scopes"] = []
+
+        if group_type == "restricted":
+            method = group_create_service.create_restricted_group
+        else:
+            assert group_type == "open"
+            method = group_create_service.create_open_group
+
+    group = method(**kwargs)
+
     return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
 
 
@@ -171,6 +190,7 @@ def upsert(context: GroupContext, request):
         "name": appstruct["name"],
         "description": appstruct.get("description", ""),
         "groupid": appstruct.get("groupid", None),
+        "type": appstruct.get("type", DEFAULT_GROUP_TYPE),
     }
 
     group = group_update_service.update(group, **update_properties)
