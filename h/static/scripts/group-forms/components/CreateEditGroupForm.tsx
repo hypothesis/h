@@ -242,15 +242,17 @@ export default function CreateEditGroupForm() {
         />
 
         <div className="flex items-center gap-x-4">
-          {errorMessage && (
-            <div
-              className="text-red-error font-bold flex items-center gap-x-2"
-              data-testid="error-message"
-            >
-              <CancelIcon />
-              {errorMessage}
-            </div>
-          )}
+          <div data-testid="error-container" role="alert">
+            {errorMessage && (
+              <div
+                className="text-red-error font-bold flex items-center gap-x-2"
+                data-testid="error-message"
+              >
+                <CancelIcon />
+                {errorMessage}
+              </div>
+            )}
+          </div>
           <div className="grow" />
           <SaveStateIcon
             state={saveState === 'unmodified' ? 'unsaved' : saveState}
