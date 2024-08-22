@@ -17,6 +17,7 @@ GROUP_SCHEMA_PROPERTIES = {
     },
     "description": {"type": "string", "maxLength": GROUP_DESCRIPTION_MAX_LENGTH},
     "groupid": {"type": "string", "pattern": GROUPID_PATTERN},
+    "type": {"enum": ["private", "restricted", "open"]},
 }
 
 
