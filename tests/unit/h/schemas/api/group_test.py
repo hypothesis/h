@@ -13,167 +13,168 @@ from h.schemas.api.group import (
     UpdateGroupAPISchema,
 )
 
+DEFAULT_AUTHORITY = "hypothes.is"
+
 
 class TestGroupAPISchema:
-    def test_it_sets_authority_properties(self, third_party_schema):
-        assert third_party_schema.group_authority == "thirdparty.com"
-        assert third_party_schema.default_authority == "hypothes.is"
-
-    def test_it_ignores_non_whitelisted_properties(self, schema):
-        appstruct = schema.validate(
-            {
-                "name": "A proper name",
-                "organization": "foobar",
-                "joinable_by": "whoever",
-            }
-        )
-
-        assert "name" in appstruct
-        assert "organization" not in appstruct
-        assert "joinable_by" not in appstruct
-
-    def test_it_raises_if_name_too_short(self, schema):
-        with pytest.raises(ValidationError, match="name:.*is too short"):
-            schema.validate({"name": "o" * (GROUP_NAME_MIN_LENGTH - 1)})
-
-    def test_it_raises_if_name_too_long(self, schema):
-        with pytest.raises(ValidationError, match="name:.*is too long"):
-            schema.validate({"name": "o" * (GROUP_NAME_MAX_LENGTH + 1)})
-
-    def test_it_raises_if_name_isnt_a_string(self, schema):
-        name = 42
-
-        with pytest.raises(
-            ValidationError, match=f"name: {name} is not of type 'string'"
-        ):
-            schema.validate({"name": name})
-
     @pytest.mark.parametrize(
-        "name",
+        "group_authority,data,expected_appstruct",
         [
-            f" {'o' * GROUP_NAME_MIN_LENGTH}",
-            f"{'o' * GROUP_NAME_MIN_LENGTH} ",
-            " " * GROUP_NAME_MIN_LENGTH,
+            (  # An empty dict is valid input data.
+                DEFAULT_AUTHORITY,
+                {},
+                {},
+            ),
+            (  # Valid group name.
+                DEFAULT_AUTHORITY,
+                {"name": "Valid Group Name"},
+                {"name": "Valid Group Name"},
+            ),
+            (  # Valid group description.
+                DEFAULT_AUTHORITY,
+                {"description": "Valid group description."},
+                {"description": "Valid group description."},
+            ),
+            (  # Valid groupid (requires matching third-party authority).
+                "thirdparty.com",
+                {"groupid": "group:1234abcd!~*()@thirdparty.com"},
+                {"groupid": "group:1234abcd!~*()@thirdparty.com"},
+            ),
+            (  # All valid fields at once.
+                "thirdparty.com",
+                {
+                    "name": "Valid Group Name",
+                    "description": "Valid group description.",
+                    "groupid": "group:1234abcd!~*()@thirdparty.com",
+                },
+                {
+                    "name": "Valid Group Name",
+                    "description": "Valid group description.",
+                    "groupid": "group:1234abcd!~*()@thirdparty.com",
+                },
+            ),
+            (  # It ignores non-whitelisted properties.
+                DEFAULT_AUTHORITY,
+                {
+                    "organization": "foobar",
+                    "joinable_by": "whoever",
+                },
+                {},
+            ),
         ],
     )
-    def test_it_raises_if_name_has_leading_or_trailing_whitespace(self, schema, name):
-        with pytest.raises(
-            ValidationError,
-            match="Group names can't have leading or trailing whitespace.",
-        ):
-            schema.validate({"name": name})
-
-    def test_it_validates_with_no_data(self, schema):
-        appstruct = schema.validate({})
-
-        assert appstruct == {}
-
-    def test_it_validates_with_valid_name(self, schema):
-        appstruct = schema.validate({"name": "Perfectly Fine"})
-
-        assert "name" in appstruct
-
-    def test_it_validates_with_valid_description(self, schema):
-        appstruct = schema.validate(
-            {
-                "name": "This Seems Fine",
-                "description": "This description seems adequate",
-            }
-        )
-
-        assert "description" in appstruct
-
-    def test_it_raises_if_description_too_long(self, schema):
-        with pytest.raises(ValidationError, match="description:.*is too long"):
-            schema.validate(
-                {
-                    "name": "Name not the Problem",
-                    "description": "o" * (GROUP_DESCRIPTION_MAX_LENGTH + 1),
-                }
-            )
-
-    def test_it_validates_with_valid_groupid_and_third_party_authority(
-        self, third_party_schema
-    ):
-        appstruct = third_party_schema.validate(
-            {"name": "This Seems Fine", "groupid": "group:1234abcd!~*()@thirdparty.com"}
-        )
-
-        assert "groupid" in appstruct
-
-    def test_it_raises_if_groupid_too_long(self, schema):
-        # Because of the complexity of ``groupid`` formatting, the length of the
-        # ``authority_provided_id`` segment of it is defined in the pattern for
-        # valid ``groupid``s — not as a length constraint
-        # Note also that the groupid does not have a valid authority but validation
-        # will raise on the formatting error before that becomes a problem.
-        with pytest.raises(ValidationError, match="groupid:.*does not match"):
-            schema.validate(
-                {
-                    "name": "Name not the Problem",
-                    "groupid": "group:"
-                    + ("o" * (AUTHORITY_PROVIDED_ID_MAX_LENGTH + 1))
-                    + "@foobar.com",
-                }
-            )
-
-    def test_it_raises_if_groupid_has_invalid_chars(self, schema):
-        with pytest.raises(ValidationError, match="groupid:.*does not match"):
-            schema.validate(
-                {"name": "Name not the Problem", "groupid": "group:&&?@thirdparty.com"}
-            )
-
-    def test_validate_raises_ValidationError_on_groupid_if_first_party(self, schema):
-        with pytest.raises(
-            ValidationError,
-            match="groupid may only be set on groups oustide of the default authority",
-        ):
-            schema.validate(
-                {"name": "Less Good", "groupid": "group:delicacy@hypothes.is"}
-            )
-
-    def test_validate_raises_ValidationError_if_no_group_authority(self):
-        schema = CreateGroupAPISchema(default_authority="hypothes.is")
-        with pytest.raises(
-            ValidationError,
-            match="groupid may only be set on groups oustide of the default authority",
-        ):
-            schema.validate(
-                {"name": "Blustery", "groupid": "group:delicacy@hypothes.is"}
-            )
-
-    def test_validate_raises_ValidationError_groupid_authority_mismatch(
-        self, third_party_schema
-    ):
-        with pytest.raises(ValidationError, match="Invalid authority.*in groupid"):
-            third_party_schema.validate(
-                {"name": "Shambles", "groupid": "group:valid_id@invalidauthority.com"}
-            )
-
-    @pytest.fixture
-    def schema(self):
+    def test_valid(self, group_authority, data, expected_appstruct):
         schema = GroupAPISchema(
-            group_authority="hypothes.is", default_authority="hypothes.is"
+            group_authority=group_authority, default_authority=DEFAULT_AUTHORITY
         )
-        return schema
 
-    @pytest.fixture
-    def third_party_schema(self):
+        assert schema.validate(data) == expected_appstruct
+
+    @pytest.mark.parametrize(
+        "group_authority,data,error_message",
+        [
+            (
+                # Name too short.
+                DEFAULT_AUTHORITY,
+                {"name": "o" * (GROUP_NAME_MIN_LENGTH - 1)},
+                "name:.*is too short",
+            ),
+            (
+                # Name too long.
+                DEFAULT_AUTHORITY,
+                {"name": "o" * (GROUP_NAME_MAX_LENGTH + 1)},
+                "name:.*is too long",
+            ),
+            (
+                # Name isn't a string.
+                DEFAULT_AUTHORITY,
+                {"name": 42},
+                "name: 42 is not of type 'string'",
+            ),
+            (
+                # Name has leading whitespace.
+                DEFAULT_AUTHORITY,
+                {"name": f" {'o' * GROUP_NAME_MIN_LENGTH}"},
+                "Group names can't have leading or trailing whitespace.",
+            ),
+            (
+                # Name has trailing whitespace.
+                DEFAULT_AUTHORITY,
+                {"name": f"{'o' * GROUP_NAME_MIN_LENGTH} "},
+                "Group names can't have leading or trailing whitespace.",
+            ),
+            (
+                # Whitespace-only name.
+                DEFAULT_AUTHORITY,
+                {"name": " " * GROUP_NAME_MIN_LENGTH},
+                "Group names can't have leading or trailing whitespace.",
+            ),
+            (
+                # Description too long.
+                DEFAULT_AUTHORITY,
+                {"description": "o" * (GROUP_DESCRIPTION_MAX_LENGTH + 1)},
+                "description:.*is too long",
+            ),
+            (
+                # groupid too long.
+                "thirdparty.com",
+                {
+                    "groupid": f"group:{'o' * (AUTHORITY_PROVIDED_ID_MAX_LENGTH + 1)}@thirdparty.com",
+                },
+                "groupid:.*does not match",
+            ),
+            (
+                # groupid has invalid chars.
+                "thirdparty.com",
+                {"groupid": "group:&&?@thirdparty.com"},
+                "groupid:.*does not match",
+            ),
+            (
+                # Custom groupid's aren't allowed for first-party groups.
+                DEFAULT_AUTHORITY,
+                {"groupid": f"group:delicacy@{DEFAULT_AUTHORITY}"},
+                "groupid may only be set on groups outside of the default authority",
+            ),
+            (
+                # groupid authority mismatch.
+                "thirdparty.com",
+                {"groupid": "group:delicacy@invalidauthority.com"},
+                "Invalid authority.*in groupid",
+            ),
+            (
+                # groupid not a string.
+                "thirdparty.com",
+                {"groupid": 42},
+                "groupid: 42 is not of type 'string'",
+            ),
+        ],
+    )
+    def test_invalid(self, group_authority, data, error_message):
         schema = GroupAPISchema(
-            group_authority="thirdparty.com", default_authority="hypothes.is"
+            group_authority=group_authority, default_authority=DEFAULT_AUTHORITY
         )
-        return schema
+
+        with pytest.raises(ValidationError, match=error_message):
+            schema.validate(data)
+
+    def test_it_sets_authority_properties(self):
+        schema = GroupAPISchema(
+            group_authority="thirdparty.com", default_authority=DEFAULT_AUTHORITY
+        )
+
+        assert schema.group_authority == "thirdparty.com"
+        assert schema.default_authority == DEFAULT_AUTHORITY
 
 
 class TestCreateGroupAPISchema:
     def test_it_raises_if_name_missing(self, schema):
-        with pytest.raises(ValidationError, match=".*is a required property.*"):
+        with pytest.raises(ValidationError, match="'name' is a required property.*"):
             schema.validate({})
 
     @pytest.fixture
     def schema(self):
         schema = CreateGroupAPISchema(
-            group_authority="hypothes.is", default_authority="hypothes.is"
+            group_authority=DEFAULT_AUTHORITY, default_authority=DEFAULT_AUTHORITY
         )
         return schema
 
@@ -187,6 +188,6 @@ class TestUpdateGroupAPISchema:
     @pytest.fixture
     def schema(self):
         schema = UpdateGroupAPISchema(
-            group_authority="hypothes.is", default_authority="hypothes.is"
+            group_authority=DEFAULT_AUTHORITY, default_authority=DEFAULT_AUTHORITY
         )
         return schema
