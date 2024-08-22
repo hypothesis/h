@@ -377,9 +377,14 @@ async function assertInLoadingState(wrapper, inLoadingState) {
     wrapper,
     `button[data-testid="button"][disabled=${inLoadingState}]`,
   );
-  assert.equal(wrapper.exists('[data-testid="spinner"]'), inLoadingState);
+  const state = wrapper.find('SaveStateIcon').prop('state');
+  if (inLoadingState) {
+    assert.equal(state, 'saving');
+  } else {
+    assert.notEqual(state, 'saving');
+  }
 }
 
 function savedConfirmationShowing(wrapper) {
-  return wrapper.exists('[data-testid="check"]');
+  return wrapper.find('SaveStateIcon').prop('state') === 'saved';
 }
