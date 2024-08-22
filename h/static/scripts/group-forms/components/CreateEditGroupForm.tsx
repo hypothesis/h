@@ -253,13 +253,7 @@ export default function CreateEditGroupForm() {
           )}
           <div className="grow" />
           <SaveStateIcon
-            state={
-              saveState === 'saving'
-                ? 'saving'
-                : saveState === 'saved'
-                  ? 'saved'
-                  : 'unsaved'
-            }
+            state={saveState === 'unmodified' ? 'unsaved' : saveState}
           />
           <Button
             type="submit"
