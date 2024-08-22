@@ -2,15 +2,14 @@ import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 
 import {
   Button,
-  CheckIcon,
   CancelIcon,
   Input,
-  Spinner,
   Textarea,
 } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
 import { callAPI, CreateUpdateGroupAPIResponse } from '../utils/api';
 import { setLocation } from '../utils/set-location';
+import SaveStateIcon from './SaveStateIcon';
 
 function Star() {
   return <span className="text-brand">*</span>;
@@ -254,8 +253,9 @@ export default function CreateEditGroupForm() {
             </div>
           )}
           <div className="grow" />
-          {saving && <Spinner data-testid="spinner" />}
-          {saved && <CheckIcon data-testid="check" />}
+          <SaveStateIcon
+            state={saving ? 'saving' : saved ? 'saved' : 'unsaved'}
+          />
           <Button
             type="submit"
             variant="primary"
