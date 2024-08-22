@@ -14,7 +14,7 @@ describe('CreateEditGroupForm', () => {
   let fakeUseWarnOnPageUnload;
 
   function pageUnloadWarningActive() {
-    return fakeUseWarnOnPageUnload.getCall(-1).args[0] === true;
+    return fakeUseWarnOnPageUnload.lastCall.args[0] === true;
   }
 
   beforeEach(() => {
