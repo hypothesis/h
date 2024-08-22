@@ -1,5 +1,5 @@
 import { mount } from 'enzyme';
-import { waitForElement } from '@hypothesis/frontend-testing';
+import { delay, waitForElement } from '@hypothesis/frontend-testing';
 
 import {
   $imports,
@@ -11,6 +11,11 @@ let config;
 describe('CreateEditGroupForm', () => {
   let fakeCallAPI;
   let fakeSetLocation;
+  let fakeUseWarnOnPageUnload;
+
+  function pageUnloadWarningActive() {
+    return fakeUseWarnOnPageUnload.getCall(-1).args[0] === true;
+  }
 
   beforeEach(() => {
     config = {
@@ -27,8 +32,12 @@ describe('CreateEditGroupForm', () => {
 
     fakeCallAPI = sinon.stub();
     fakeSetLocation = sinon.stub();
+    fakeUseWarnOnPageUnload = sinon.stub();
 
     $imports.$mock({
+      '@hypothesis/frontend-shared': {
+        useWarnOnPageUnload: fakeUseWarnOnPageUnload,
+      },
       '../config': { readConfig: () => config },
       '../utils/api': {
         callAPI: fakeCallAPI,
@@ -292,6 +301,32 @@ describe('CreateEditGroupForm', () => {
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
       await assertInLoadingState(wrapper, false);
       assert.isFalse(savedConfirmationShowing(wrapper));
+    });
+
+    it('warns when closing tab if there are unsaved changes', async () => {
+      const { wrapper, elements } = createWrapper();
+      assert.isFalse(pageUnloadWarningActive());
+
+      elements.name.fieldEl.simulate('input');
+      assert.isTrue(pageUnloadWarningActive());
+
+      wrapper.find('form[data-testid="form"]').simulate('submit');
+      // Warning should still be active in saving state.
+      assert.isTrue(pageUnloadWarningActive());
+      await waitForElement(wrapper, 'SaveStateIcon[state="saved"]');
+
+      // Warning should be disabled once saved.
+      assert.isFalse(pageUnloadWarningActive());
+
+      // Warning should be re-enabled if we then edit the form again.
+      elements.description.fieldEl.simulate('input');
+      assert.isTrue(pageUnloadWarningActive());
+
+      // Warning should remain active if form is edited while being saved.
+      wrapper.find('form[data-testid="form"]').simulate('submit');
+      elements.name.fieldEl.simulate('input');
+      await delay(0);
+      assert.isTrue(pageUnloadWarningActive());
     });
 
     it('updates the group', async () => {
