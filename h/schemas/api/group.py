@@ -90,7 +90,7 @@ class GroupAPISchema(JSONSchema):
                 # pylint:disable=consider-using-f-string
                 "{err_msg} '{authority}'".format(
                     err_msg=_(
-                        "groupid may only be set on groups oustide of the default authority"
+                        "groupid may only be set on groups outside of the default authority"
                     ),
                     authority=self.default_authority,
                 )
