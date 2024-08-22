@@ -5,6 +5,7 @@ import {
   CancelIcon,
   Input,
   Textarea,
+  useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
 import { callAPI, CreateUpdateGroupAPIResponse } from '../utils/api';
@@ -131,16 +132,16 @@ export default function CreateEditGroupForm() {
   const [name, setName] = useState(group?.name ?? '');
   const [description, setDescription] = useState(group?.description ?? '');
   const [errorMessage, setErrorMessage] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saveState, setSaveState] = useState<
+    'unmodified' | 'unsaved' | 'saving' | 'saved'
+  >('unmodified');
+
+  useWarnOnPageUnload(['unsaved', 'saving'].includes(saveState));
 
   useEffect(() => {
     const listener = (e: PageTransitionEvent) => {
       if (e.persisted) {
-        // Disable the "saving" state if the user uses the browser's Back button to navigate
-        // back to the group form.
-        setSaving(false);
-        setSaved(false);
+        setSaveState('unmodified');
       }
     };
     window.addEventListener('pageshow', listener);
@@ -149,12 +150,12 @@ export default function CreateEditGroupForm() {
 
   const handleChangeName = (newName: string) => {
     setName(newName);
-    setSaved(false);
+    setSaveState('unsaved');
   };
 
   const handleChangeDescription = (newDescription: string) => {
     setDescription(newDescription);
-    setSaved(false);
+    setSaveState('unsaved');
   };
 
   const createGroup = async (e: SubmitEvent) => {
@@ -163,7 +164,7 @@ export default function CreateEditGroupForm() {
 
     let response: CreateUpdateGroupAPIResponse;
 
-    setSaving(true);
+    setSaveState('saving');
 
     try {
       response = (await callAPI(config.api.createGroup.url, {
@@ -176,7 +177,7 @@ export default function CreateEditGroupForm() {
       })) as CreateUpdateGroupAPIResponse;
     } catch (apiError) {
       setErrorMessage(apiError.message);
-      setSaving(false);
+      setSaveState('unsaved');
       return;
     }
 
@@ -186,8 +187,7 @@ export default function CreateEditGroupForm() {
   const updateGroup = async (e: SubmitEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    setSaved(false);
-    setSaving(true);
+    setSaveState('saving');
 
     let response: CreateUpdateGroupAPIResponse;
 
@@ -197,14 +197,13 @@ export default function CreateEditGroupForm() {
         headers: config.api.updateGroup!.headers,
         json: { id: group!.pubid, name, description },
       })) as CreateUpdateGroupAPIResponse;
-    } catch (apiError) {
-      setErrorMessage(apiError.message);
-      return;
-    } finally {
-      setSaving(false);
-    }
 
-    setSaved(true);
+      // Mark form as saved, unless user edited it while saving.
+      setSaveState(state => (state === 'saving' ? 'saved' : state));
+    } catch (apiError) {
+      setSaveState('unsaved');
+      setErrorMessage(apiError.message);
+    }
   };
 
   let onSubmit;
@@ -254,12 +253,18 @@ export default function CreateEditGroupForm() {
           )}
           <div className="grow" />
           <SaveStateIcon
-            state={saving ? 'saving' : saved ? 'saved' : 'unsaved'}
+            state={
+              saveState === 'saving'
+                ? 'saving'
+                : saveState === 'saved'
+                  ? 'saved'
+                  : 'unsaved'
+            }
           />
           <Button
             type="submit"
             variant="primary"
-            disabled={saving}
+            disabled={saveState === 'saving'}
             data-testid="button"
           >
             {group ? 'Save changes' : 'Create group'}
