@@ -50,7 +50,7 @@ function Label({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={htmlFor}>
+    <label className="font-semibold" htmlFor={htmlFor}>
       {text}
       {required && <Star />}
     </label>
@@ -216,7 +216,7 @@ export default function CreateEditGroupForm() {
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
-        {group ? 'Edit group' : 'Create a new private group'}
+        {group ? 'Edit group' : 'Create a new group'}
       </h1>
 
       <form onSubmit={onSubmit} data-testid="form">
@@ -240,6 +240,35 @@ export default function CreateEditGroupForm() {
           testid="description"
           classes="h-24"
         />
+
+        <fieldset style="margin-bottom: 4em;">
+          <legend className="font-semibold" style="margin-bottom:.5em;">Group type</legend>
+
+          <div style="background-color:#fafafa; border-radius:3px; padding:.5em;">
+           <input type="radio" id="huey" name="drone" value="huey" checked style="accent-color:black;" />
+           <label for="huey">
+             <span style="margin-left:.5em;" className="text-base text-slate-950">Private</span> <br/>
+             <span style="margin-left: 20.5px;" className="text-xs">Only members can create and read annotations.</span>
+           </label>
+          </div>
+
+          <div style="border-radius:3px; padding:.5em;">
+           <input type="radio" id="huey" name="drone" value="huey" style="accent-color:black;" />
+           <label for="huey">
+             <span style="margin-left:.5em;" className="text-base text-slate-950">Restricted</span> <br/>
+             <span style="margin-left: 20.5px;" className="text-xs">Only members can create annotations, anyone can read them.</span>
+           </label>
+          </div>
+
+          <div style="border-radius:3px; padding:.5em;">
+           <input type="radio" id="huey" name="drone" value="huey" style="accent-color:black;" />
+           <label for="huey">
+             <span style="margin-left:.5em;" className="text-base text-slate-950">Open</span> <br/>
+             <span style="margin-left: 20.5px;" className="text-xs">Anyone can create and read annotations.</span>
+           </label>
+          </div>
+
+        </fieldset>
 
         <div className="flex items-center gap-x-4">
           <div data-testid="error-container" role="alert">
