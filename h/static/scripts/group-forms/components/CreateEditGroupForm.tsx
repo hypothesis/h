@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 
 import {
+  ArrowLeftIcon,
   Button,
   CancelIcon,
   Input,
@@ -275,7 +276,8 @@ export default function CreateEditGroupForm() {
         <div className="flex">
           {group && (
             <a href={group.link} data-testid="back-link">
-              ← Back to group overview page
+              <ArrowLeftIcon className="inline scale-75" />
+              Back to group overview page
             </a>
           )}
           <div className="grow" />
