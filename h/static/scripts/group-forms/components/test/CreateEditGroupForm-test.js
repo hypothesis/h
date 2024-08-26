@@ -204,6 +204,18 @@ describe('CreateEditGroupForm', () => {
     assert.isFalse(savedConfirmationShowing(wrapper));
   });
 
+  it('does not warn when leaving page if there are unsaved changes', () => {
+    const { elements } = createWrapper();
+    const nameEl = elements.name.fieldEl;
+
+    nameEl.getDOMNode().value = 'modified';
+    nameEl.simulate('input');
+
+    // Warnings about unsaved changes are only enabled when editing a group.
+    // See notes in the implementation.
+    assert.isFalse(pageUnloadWarningActive());
+  });
+
   it('shows a loading state when the create-group API request is in-flight', async () => {
     const { wrapper } = createWrapper();
     fakeCallAPI.resolves(new Promise(() => {}));

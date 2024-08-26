@@ -136,7 +136,10 @@ export default function CreateEditGroupForm() {
     'unmodified' | 'unsaved' | 'saving' | 'saved'
   >('unmodified');
 
-  useWarnOnPageUnload(['unsaved', 'saving'].includes(saveState));
+  // Warn when leaving page if there are unsaved changes. We only do this when
+  // editing a group because this hook lacks a way to disable the handler before
+  // calling `setLocation` after a successful group creation.
+  useWarnOnPageUnload(!!group && ['unsaved', 'saving'].includes(saveState));
 
   useEffect(() => {
     const listener = (e: PageTransitionEvent) => {
