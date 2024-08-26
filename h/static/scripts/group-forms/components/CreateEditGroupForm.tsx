@@ -136,7 +136,18 @@ export default function CreateEditGroupForm() {
     'unmodified' | 'unsaved' | 'saving' | 'saved'
   >('unmodified');
 
+  // Location is set after creating a group, but not after editing it.
+  // We can't redirect as part of `onSubmit`, because other pieces of state have
+  // not been applied yet, causing useWarnOnPageUnload to display its warning
+  const [windowLocation, setWindowLocation] = useState<string>();
+  useEffect(() => {
+    if (windowLocation) {
+      setLocation(windowLocation);
+    }
+  }, [windowLocation]);
+
   useWarnOnPageUnload(['unsaved', 'saving'].includes(saveState));
+  console.log({ saveState });
 
   useEffect(() => {
     const listener = (e: PageTransitionEvent) => {
@@ -175,13 +186,15 @@ export default function CreateEditGroupForm() {
           description,
         },
       })) as CreateUpdateGroupAPIResponse;
+
+      // Mark form as saved, unless user edited it while saving.
+      setSaveState(state => (state === 'saving' ? 'saved' : state));
+      setWindowLocation(response.links.html);
     } catch (apiError) {
+      console.log({ apiError });
       setErrorMessage(apiError.message);
       setSaveState('unsaved');
-      return;
     }
-
-    setLocation(response.links.html);
   };
 
   const updateGroup = async (e: SubmitEvent) => {
@@ -189,14 +202,12 @@ export default function CreateEditGroupForm() {
     setErrorMessage('');
     setSaveState('saving');
 
-    let response: CreateUpdateGroupAPIResponse;
-
     try {
-      response = (await callAPI(config.api.updateGroup!.url, {
+      await callAPI(config.api.updateGroup!.url, {
         method: config.api.updateGroup!.method,
         headers: config.api.updateGroup!.headers,
         json: { id: group!.pubid, name, description },
-      })) as CreateUpdateGroupAPIResponse;
+      });
 
       // Mark form as saved, unless user edited it while saving.
       setSaveState(state => (state === 'saving' ? 'saved' : state));
@@ -206,20 +217,13 @@ export default function CreateEditGroupForm() {
     }
   };
 
-  let onSubmit;
-  if (group) {
-    onSubmit = updateGroup;
-  } else {
-    onSubmit = createGroup;
-  }
-
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
         {group ? 'Edit group' : 'Create a new private group'}
       </h1>
 
-      <form onSubmit={onSubmit} data-testid="form">
+      <form onSubmit={group ? updateGroup : createGroup} data-testid="form">
         <TextField
           type="input"
           value={name}
