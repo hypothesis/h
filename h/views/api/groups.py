@@ -9,6 +9,7 @@ from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.security import Permission
+from h.traversal import GroupContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -80,7 +81,7 @@ def create(request):
     link_name="group.read",
     description="Fetch a group",
 )
-def read(context, request):
+def read(context: GroupContext, request):
     """Fetch a group."""
 
     expand = request.GET.getall("expand") or []
@@ -96,7 +97,7 @@ def read(context, request):
     link_name="group.update",
     description="Update a group",
 )
-def update(context, request):
+def update(context: GroupContext, request):
     """Update a group from a PATCH payload."""
     appstruct = UpdateGroupAPISchema(
         default_authority=request.default_authority,
@@ -128,7 +129,7 @@ def update(context, request):
     link_name="group.create_or_update",
     description="Create or update a group",
 )
-def upsert(context, request):
+def upsert(context: GroupContext, request):
     """
     Create or update a group from a PUT payload.
 
@@ -137,9 +138,6 @@ def upsert(context, request):
 
     Otherwise, replace the existing group's resource properties entirely and update
     the object.
-
-    :arg context:
-    :type context: h.traversal.GroupUpsertContext
     """
     if context.group is None:
         return create(request)
@@ -177,7 +175,6 @@ def upsert(context, request):
 
     group = group_update_service.update(group, **update_properties)
 
-    # Note that this view takes a ``GroupUpsertContext`` but uses a ``GroupContext`` here
     return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
 
 
@@ -189,7 +186,7 @@ def upsert(context, request):
     description="Fetch all members of a group",
     permission=Permission.Group.READ,
 )
-def read_members(context, _request):
+def read_members(context: GroupContext, _request):
     """Fetch the members of a group."""
     return [UserJSONPresenter(user).asdict() for user in context.group.members]
 
@@ -202,7 +199,7 @@ def read_members(context, _request):
     description="Remove the current user from a group",
     is_authenticated=True,
 )
-def remove_member(context, request):
+def remove_member(context: GroupContext, request):
     """Remove a member from the given group."""
     # Currently, we only support removing the requesting user
     if request.matchdict.get("userid") == "me":
@@ -224,7 +221,7 @@ def remove_member(context, request):
     permission=Permission.Group.MEMBER_ADD,
     description="Add the user in the request params to a group.",
 )
-def add_member(context, request):
+def add_member(context: GroupContext, request):
     """
     Add a member to a given group.
 
