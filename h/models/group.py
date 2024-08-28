@@ -201,11 +201,7 @@ class Group(Base, mixins.Timestamps):
             writeable_by=self.writeable_by,
         )
 
-        for type_, type_flags in (
-            ("open", OPEN_GROUP_TYPE_FLAGS),
-            ("private", PRIVATE_GROUP_TYPE_FLAGS),
-            ("restricted", RESTRICTED_GROUP_TYPE_FLAGS),
-        ):
+        for type_, type_flags in GROUP_TYPE_FLAGS.items():
             if self_type_flags == type_flags:
                 return type_
 
@@ -213,6 +209,16 @@ class Group(Base, mixins.Timestamps):
             "This group doesn't seem to match any known type of group. "
             "This shouldn't be in the database!"
         )
+
+    @type.setter
+    def type(self, value):
+        try:
+            new_type_flags = GROUP_TYPE_FLAGS[value]
+        except KeyError as err:
+            raise ValueError() from err
+
+        for index, flag in enumerate(new_type_flags._fields):
+            setattr(self, flag, new_type_flags[index])
 
     @property
     def is_public(self):
@@ -229,16 +235,18 @@ class Group(Base, mixins.Timestamps):
 
 TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")
 
-OPEN_GROUP_TYPE_FLAGS = TypeFlags(
-    joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.authority
-)
-
-PRIVATE_GROUP_TYPE_FLAGS = TypeFlags(
-    joinable_by=JoinableBy.authority,
-    readable_by=ReadableBy.members,
-    writeable_by=WriteableBy.members,
-)
-
-RESTRICTED_GROUP_TYPE_FLAGS = TypeFlags(
-    joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.members
-)
+GROUP_TYPE_FLAGS = {
+    "open": TypeFlags(
+        joinable_by=None,
+        readable_by=ReadableBy.world,
+        writeable_by=WriteableBy.authority,
+    ),
+    "private": TypeFlags(
+        joinable_by=JoinableBy.authority,
+        readable_by=ReadableBy.members,
+        writeable_by=WriteableBy.members,
+    ),
+    "restricted": TypeFlags(
+        joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.members
+    ),
+}

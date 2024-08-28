@@ -1,7 +1,12 @@
 import pytest
 
 from h import models
-from h.models.group import AUTHORITY_PROVIDED_ID_MAX_LENGTH, ReadableBy, WriteableBy
+from h.models.group import (
+    AUTHORITY_PROVIDED_ID_MAX_LENGTH,
+    GROUP_TYPE_FLAGS,
+    ReadableBy,
+    WriteableBy,
+)
 
 
 def test_init_sets_given_attributes():
@@ -153,11 +158,21 @@ def test_type_raises_for_unknown_type_of_group(factories):
         _ = group.type
 
 
-def test_you_cannot_set_type(factories):
-    group = factories.Group()
+@pytest.mark.parametrize("original_type", ["private", "restricted", "open"])
+@pytest.mark.parametrize("new_type", ["private", "restricted", "open"])
+def test_you_can_set_type(factories, original_type, new_type):
+    group = factories.Group(**GROUP_TYPE_FLAGS[original_type]._asdict())
 
-    with pytest.raises(AttributeError, match="object has no setter"):
-        group.type = "open"
+    group.type = new_type
+
+    assert group.type == new_type
+    for index, flag in enumerate(GROUP_TYPE_FLAGS[new_type]._fields):
+        assert getattr(group, flag) == GROUP_TYPE_FLAGS[new_type][index]
+
+
+def test_you_cant_set_type_to_an_invalid_value(factories):
+    with pytest.raises(ValueError):
+        factories.Group().type = "invalid"
 
 
 def test_repr(db_session, factories, organization):

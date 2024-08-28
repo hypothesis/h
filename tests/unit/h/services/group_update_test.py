@@ -43,6 +43,14 @@ class TestGroupUpdate:
 
         assert updated_group.scopes == updated_scopes
 
+    @pytest.mark.parametrize("new_group_type", ["restricted", "open"])
+    def test_it_updates_the_type_of_a_group(self, factories, svc, new_group_type):
+        group = factories.Group()
+
+        updated_group = svc.update(group, type=new_group_type)
+
+        assert updated_group.type == new_group_type
+
     def test_it_does_not_protect_against_undefined_properties(self, factories, svc):
         group = factories.Group()
         data = {"some_random_field": "whatever"}

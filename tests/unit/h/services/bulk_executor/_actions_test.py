@@ -14,7 +14,7 @@ from h_matchers.matcher.object import AnyObject
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from h.models import Group, GroupMembership, User, UserIdentity
-from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
+from h.models.group import GROUP_TYPE_FLAGS
 from h.services.bulk_executor._actions import (
     GroupMembershipCreateAction,
     GroupUpsertAction,
@@ -211,9 +211,9 @@ class TestBulkGroupUpsert:
 
         for group in groups:
             # Check the groups are private
-            assert group.joinable_by == PRIVATE_GROUP_TYPE_FLAGS.joinable_by
-            assert group.readable_by == PRIVATE_GROUP_TYPE_FLAGS.readable_by
-            assert group.writeable_by == PRIVATE_GROUP_TYPE_FLAGS.writeable_by
+            assert group.joinable_by == GROUP_TYPE_FLAGS["private"].joinable_by
+            assert group.readable_by == GROUP_TYPE_FLAGS["private"].readable_by
+            assert group.writeable_by == GROUP_TYPE_FLAGS["private"].writeable_by
 
             # Check they are owned by
             assert group.creator_id == user.id
