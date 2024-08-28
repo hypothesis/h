@@ -2,11 +2,7 @@ from functools import partial
 
 from h import session
 from h.models import Group, GroupScope
-from h.models.group import (
-    OPEN_GROUP_TYPE_FLAGS,
-    PRIVATE_GROUP_TYPE_FLAGS,
-    RESTRICTED_GROUP_TYPE_FLAGS,
-)
+from h.models.group import GROUP_TYPE_FLAGS
 
 
 class GroupCreateService:
@@ -38,7 +34,7 @@ class GroupCreateService:
         return self._create(
             name=name,
             userid=userid,
-            type_flags=PRIVATE_GROUP_TYPE_FLAGS,
+            type_flags=GROUP_TYPE_FLAGS["private"],
             scopes=[],
             add_creator_as_member=True,
             **kwargs,
@@ -62,7 +58,7 @@ class GroupCreateService:
         return self._create(
             name=name,
             userid=userid,
-            type_flags=OPEN_GROUP_TYPE_FLAGS,
+            type_flags=GROUP_TYPE_FLAGS["open"],
             scopes=scopes,
             add_creator_as_member=False,
             **kwargs,
@@ -87,7 +83,7 @@ class GroupCreateService:
         return self._create(
             name=name,
             userid=userid,
-            type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
+            type_flags=GROUP_TYPE_FLAGS["restricted"],
             scopes=scopes,
             add_creator_as_member=True,
             **kwargs,

@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from zope.sqlalchemy import mark_changed
 
 from h.models import Group, GroupMembership, User, UserIdentity
-from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
+from h.models.group import GROUP_TYPE_FLAGS
 
 
 class DBAction:
@@ -92,7 +92,7 @@ class DBAction:
 class GroupUpsertAction(DBAction):
     """Perform a bulk group upsert."""
 
-    type_flags = PRIVATE_GROUP_TYPE_FLAGS
+    type_flags = GROUP_TYPE_FLAGS["private"]
 
     def execute(self, batch, effective_user_id=None, **_):
         if effective_user_id is None:
