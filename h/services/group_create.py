@@ -128,11 +128,12 @@ class GroupCreateService:
         )
         self.db.add(group)
 
+        # Flush the DB to generate `group.pubid` before passing `group` to
+        # self.publish() or `return group`.
+        self.db.flush()
+
         if add_creator_as_member:
             group.members.append(group.creator)
-
-            # Flush the DB to generate group.pubid before publish()ing it.
-            self.db.flush()
 
             self.publish("group-join", group.pubid, group.creator.userid)
 
