@@ -75,6 +75,7 @@ class TestGroupCreateEditController:
                         "pubid": group.pubid,
                         "name": group.name,
                         "description": group.description,
+                        "type": group.type,
                         "link": pyramid_request.route_url(
                             "group_read", pubid=group.pubid, slug=group.slug
                         ),
