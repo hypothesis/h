@@ -14,6 +14,7 @@ class TestCreatePrivateGroup:
         group = svc.create_private_group("Anteater fans", creator.userid)
 
         assert isinstance(group, Group)
+        assert group.pubid
 
     def test_it_sets_group_name(self, creator, svc):
         group = svc.create_private_group("Anteater fans", creator.userid)
@@ -118,6 +119,7 @@ class TestCreateOpenGroup:
         group = svc.create_open_group("Anteater fans", creator.userid, scopes=origins)
 
         assert isinstance(group, Group)
+        assert group.pubid
 
     @pytest.mark.parametrize(
         "group_attr,expected_value",
@@ -258,6 +260,7 @@ class TestCreateRestrictedGroup:
         )
 
         assert isinstance(group, Group)
+        assert group.pubid
 
     @pytest.mark.parametrize(
         "group_attr,expected_value",
