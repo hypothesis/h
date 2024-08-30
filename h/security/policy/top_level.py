@@ -59,15 +59,6 @@ def get_subpolicy(request):
     )
     api_authcookie = api_authcookie.bind(request)
 
-    if is_api_request(request):
-        return APIPolicy(
-            [
-                BearerTokenPolicy(),
-                AuthClientPolicy(),
-                APICookiePolicy(api_authcookie, AuthTicketCookieHelper()),
-            ]
-        )
-
     # The cookie that's used to authenticate HTML page requests.
     html_authcookie = webob.cookies.SignedCookieProfile(
         secret=request.registry.settings["h_auth_cookie_secret"],
@@ -78,4 +69,22 @@ def get_subpolicy(request):
         secure=request.scheme == "https",
     )
     html_authcookie = html_authcookie.bind(request)
+
+    if is_api_request(request):
+        return APIPolicy(
+            [
+                BearerTokenPolicy(),
+                AuthClientPolicy(),
+                APICookiePolicy(
+                    # Use html_authcookie rather than api_authcookie to
+                    # authenticate API requests, at least for now. This is a
+                    # hopefully temporary workaround for an undiagnosed issue
+                    # we've been seeing in production, see:
+                    # https://hypothes-is.slack.com/archives/C2BLQDKHA/p1725041696040459
+                    html_authcookie,
+                    AuthTicketCookieHelper(),
+                ),
+            ]
+        )
+
     return CookiePolicy(html_authcookie, api_authcookie, AuthTicketCookieHelper())
