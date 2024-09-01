@@ -23,7 +23,7 @@
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "@sentry/browser": "^8.15.0",
+    "@sentry/browser": "^8.27.0",
     "autoprefixer": "^10.4.19",
     "bootstrap": "^4.6.2",
     "classnames": "^2.5.1",
