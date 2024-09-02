@@ -97,7 +97,7 @@ jobs:
         env:
           COVERAGE_FILE: .coverage.${{ matrix.python-version }}
       - name: Upload coverage file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: coverage
           path: .coverage.*
