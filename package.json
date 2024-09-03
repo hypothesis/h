@@ -64,7 +64,7 @@
     "prettier": "^3.3.3",
     "sinon": "^18.0.0",
     "syn": "^0.2.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   },
   "engines": {
     "node": ">=6"
