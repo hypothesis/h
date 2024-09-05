@@ -1,160 +1,114 @@
-from unittest import mock
+from unittest.mock import call, sentinel
 
 import pytest
 
-from h.search import (
-    DeletedFilter,
-    Limiter,
-    Search,
-    TopLevelAnnotationsFilter,
-    UserFilter,
-)
 from h.services.annotation_stats import AnnotationStatsService, annotation_stats_factory
 
 
 class TestAnnotationStatsService:
-    def test_total_user_annotation_count_calls_search_with_request(
-        self, svc, search, pyramid_request
+    def test_user_annotation_count(
+        self, pyramid_request, svc, Search, TopLevelAnnotationsFilter
     ):
-        svc.total_user_annotation_count("userid")
+        num_annotations = svc.user_annotation_count(sentinel.userid)
 
-        search.assert_called_with(pyramid_request)
-
-    def test_total_user_annotation_count_calls_run_with_userid_and_limit(
-        self, svc, search
-    ):
-        svc.total_user_annotation_count("userid")
-
-        search.return_value.run.assert_called_with({"limit": 0, "user": "userid"})
-
-    def test_toal_user_annotation_count_attaches_correct_modifiers(
-        self, svc, search, limiter, deleted_filter, user_filter
-    ):
-        svc.total_user_annotation_count("userid")
-
-        assert search.return_value.clear.called
-
-        assert search.return_value.append_modifier.call_count == 3
-        search.return_value.append_modifier.assert_has_calls(
-            [
-                mock.call(limiter.return_value),
-                mock.call(deleted_filter.return_value),
-                mock.call(user_filter.return_value),
-            ]
+        Search.assert_called_with(pyramid_request)
+        TopLevelAnnotationsFilter.assert_called_once_with()
+        Search.return_value.append_modifier.assert_called_with(
+            TopLevelAnnotationsFilter.return_value
         )
-
-    def test_total_user_annotation_count_returns_total(self, svc, search):
-        search.return_value.run.return_value.total = 3
-
-        anns = svc.total_user_annotation_count("userid")
-
-        assert anns == 3
-
-    def test_user_annotation_count_calls_search_with_request(
-        self, svc, search, pyramid_request
-    ):
-        svc.user_annotation_count("userid")
-
-        search.assert_called_with(pyramid_request)
-
-    def test_user_annotation_count_calls_run_with_userid_and_limit(self, svc, search):
-        svc.user_annotation_count("userid")
-
-        search.return_value.run.assert_called_with({"limit": 0, "user": "userid"})
-
-    def test_user_annotation_count_excludes_replies(
-        self, svc, search, top_level_annotation_filter
-    ):
-        svc.user_annotation_count("userid")
-
-        search.return_value.append_modifier.assert_called_with(
-            top_level_annotation_filter.return_value
+        Search.return_value.run.assert_called_with(
+            {"limit": 0, "user": sentinel.userid}
         )
+        assert num_annotations == Search.return_value.run.return_value.total
 
-    def test_user_annotation_count_returns_total(self, svc, search):
-        search.return_value.run.return_value.total = 3
-
-        anns = svc.user_annotation_count("userid")
-
-        assert anns == 3
-
-    def test_group_annotation_count_calls_search_with_request(
-        self, svc, search, pyramid_request
+    def test_total_user_annotation_count(
+        self, pyramid_request, svc, DeletedFilter, Limiter, Search, UserFilter
     ):
-        svc.group_annotation_count("groupid")
+        num_annotations = svc.total_user_annotation_count(sentinel.userid)
 
-        search.assert_called_with(pyramid_request)
-
-    def test_group_annotation_count_calls_run_with_groupid_and_limit(self, svc, search):
-        svc.group_annotation_count("groupid")
-
-        search.return_value.run.assert_called_with({"limit": 0, "group": "groupid"})
-
-    def test_group_annotation_count_excludes_replies(
-        self, svc, search, top_level_annotation_filter
-    ):
-        svc.group_annotation_count("groupid")
-
-        search.return_value.append_modifier.assert_called_with(
-            top_level_annotation_filter.return_value
+        Search.assert_called_with(pyramid_request)
+        Search.return_value.clear.assert_called_once_with()
+        Limiter.assert_called_once_with()
+        DeletedFilter.assert_called_once_with()
+        UserFilter.assert_called_once_with()
+        assert Search.return_value.append_modifier.call_args_list == [
+            call(Limiter.return_value),
+            call(DeletedFilter.return_value),
+            call(UserFilter.return_value),
+        ]
+        Search.return_value.run.assert_called_with(
+            {"limit": 0, "user": sentinel.userid}
         )
+        assert num_annotations == Search.return_value.run.return_value.total
 
-    def test_group_annotation_count_returns_total(self, svc, search):
-        search.return_value.run.return_value.total = 3
+    def test_group_annotation_count(
+        self, pyramid_request, svc, Search, TopLevelAnnotationsFilter
+    ):
+        num_annotations = svc.group_annotation_count(sentinel.pubid)
 
-        anns = svc.group_annotation_count("groupid")
+        Search.assert_called_with(pyramid_request)
+        TopLevelAnnotationsFilter.assert_called_once_with()
+        Search.return_value.append_modifier.assert_called_once_with(
+            TopLevelAnnotationsFilter.return_value
+        )
+        Search.return_value.run.assert_called_with(
+            {"limit": 0, "group": sentinel.pubid}
+        )
+        assert num_annotations == Search.return_value.run.return_value.total
 
-        assert anns == 3
+    @pytest.fixture
+    def svc(self, pyramid_request):
+        return AnnotationStatsService(request=pyramid_request)
 
 
 class TestAnnotationStatsFactory:
-    def test_returns_service(self):
-        svc = annotation_stats_factory(mock.Mock(), mock.Mock())
+    def test_it(self, AnnotationStatsService):
+        svc = annotation_stats_factory(sentinel.context, sentinel.request)
 
-        assert isinstance(svc, AnnotationStatsService)
+        AnnotationStatsService.assert_called_once_with(sentinel.request)
+        assert svc == AnnotationStatsService.return_value
 
-    def test_sets_request(self):
-        request = mock.Mock()
-        svc = annotation_stats_factory(mock.Mock(), request)
-
-        assert svc.request == request
-
-
-@pytest.fixture
-def svc(pyramid_request):
-    return AnnotationStatsService(request=pyramid_request)
+    @pytest.fixture(autouse=True)
+    def AnnotationStatsService(self, mocker):
+        return mocker.patch(
+            "h.services.annotation_stats.AnnotationStatsService",
+            autospec=True,
+            spec_set=True,
+        )
 
 
-@pytest.fixture
-def search(patch):
-    return patch("h.services.annotation_stats.Search", autospec=Search, spec_set=True)
+@pytest.fixture(autouse=True)
+def DeletedFilter(mocker):
+    return mocker.patch(
+        "h.services.annotation_stats.DeletedFilter", autospec=True, spec_set=True
+    )
 
 
-@pytest.fixture
-def top_level_annotation_filter(patch):
-    return patch(
+@pytest.fixture(autouse=True)
+def Limiter(mocker):
+    return mocker.patch(
+        "h.services.annotation_stats.Limiter", autospec=True, spec_set=True
+    )
+
+
+@pytest.fixture(autouse=True)
+def Search(mocker):
+    return mocker.patch(
+        "h.services.annotation_stats.Search", autospec=True, spec_set=True
+    )
+
+
+@pytest.fixture(autouse=True)
+def TopLevelAnnotationsFilter(mocker):
+    return mocker.patch(
         "h.services.annotation_stats.TopLevelAnnotationsFilter",
-        autospec=TopLevelAnnotationsFilter,
+        autospec=True,
         spec_set=True,
     )
 
 
-@pytest.fixture
-def limiter(patch):
-    return patch("h.services.annotation_stats.Limiter", autospec=Limiter, spec_set=True)
-
-
-@pytest.fixture
-def deleted_filter(patch):
-    return patch(
-        "h.services.annotation_stats.DeletedFilter",
-        autospec=DeletedFilter,
-        spec_set=True,
-    )
-
-
-@pytest.fixture
-def user_filter(patch):
-    return patch(
-        "h.services.annotation_stats.UserFilter", autospec=UserFilter, spec_set=True
+@pytest.fixture(autouse=True)
+def UserFilter(mocker):
+    return mocker.patch(
+        "h.services.annotation_stats.UserFilter", autospec=True, spec_set=True
     )
