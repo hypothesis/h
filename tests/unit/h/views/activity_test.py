@@ -9,7 +9,6 @@ from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
 from h.security import Permission
-from h.services.annotation_stats import AnnotationStatsService
 from h.traversal import UserContext
 from h.traversal.group import GroupContext
 from h.views import activity
@@ -1279,17 +1278,10 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def annotation_stats_service(pyramid_config):
-    ann_stat_svc = mock.create_autospec(
-        AnnotationStatsService, instance=True, spec_set=True
-    )
-
-    ann_stat_svc.user_annotation_count.return_value = 6
-    ann_stat_svc.group_annotation_count.return_value = 5
-
-    pyramid_config.register_service(ann_stat_svc, name="annotation_stats")
-
-    return ann_stat_svc
+def annotation_stats_service(annotation_stats_service):
+    annotation_stats_service.user_annotation_count.return_value = 6
+    annotation_stats_service.group_annotation_count.return_value = 5
+    return annotation_stats_service
 
 
 @pytest.fixture
