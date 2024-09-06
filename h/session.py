@@ -4,6 +4,7 @@ from pyramid.csrf import SessionCSRFStoragePolicy
 from pyramid.session import JSONSerializer, SignedCookieSessionFactory
 
 from h.security import derive_key
+from h.security.policy.top_level import HTML_AUTHCOOKIE_MAX_AGE
 
 
 def model(request):
@@ -110,7 +111,22 @@ def includeme(config):  # pragma: no cover
         httponly=True,
         secure=secure,
         serializer=JSONSerializer(),
-        timeout=3600,
+        # One thing h uses the session for is to store CSRF tokens (see
+        # SessionCSRFStoragePolicy() below).
+        #
+        # The auth cookies that keep users logged in to h web pages have a
+        # lifetime of HTML_AUTHCOOKIE_MAX_AGE so in theory a user can leave a
+        # tab open (say a page containing a form) for up to
+        # HTML_AUTHCOOKIE_MAX_AGE and then return to the tab and expect to be
+        # able to submit the form.
+        #
+        # However, even if the user's auth cookie is still valid their form
+        # submission will still fail if the form's CSRF token has expired and
+        # the user will see a BadCSRFToken error.
+        #
+        # To avoid this we make sure that the lifetime of CSRF tokens is always
+        # longer than the lifetimes of auth cookies.
+        timeout=HTML_AUTHCOOKIE_MAX_AGE + 3600,
     )
     config.set_session_factory(factory)
     config.set_csrf_storage_policy(SessionCSRFStoragePolicy())

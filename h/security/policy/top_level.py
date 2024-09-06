@@ -10,6 +10,8 @@ from h.security.policy._bearer_token import BearerTokenPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy.helpers import AuthTicketCookieHelper, is_api_request
 
+HTML_AUTHCOOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days.
+
 
 class TopLevelPolicy:
     """The top-level security policy. Delegates to subpolicies."""
@@ -42,8 +44,6 @@ class TopLevelPolicy:
 def get_subpolicy(request):
     """Return the subpolicy for TopLevelSecurityPolicy to delegate to for `request`."""
 
-    html_authcookie_max_age = 30 * 24 * 3600  # 30 days.
-
     # The cookie that's used to authenticate API requests.
     api_authcookie = webob.cookies.SignedCookieProfile(
         secret=request.registry.settings["h_api_auth_cookie_secret"],
@@ -55,7 +55,7 @@ def get_subpolicy(request):
         # Make the API authcookie stay fresh for longer than the HTML one.
         # This is to make it less likely that a browser will have an unexpired HTML
         # authcookie but an expired API one, which can lead to confusing results.
-        max_age=2 * html_authcookie_max_age,
+        max_age=HTML_AUTHCOOKIE_MAX_AGE + 3600,
     )
     api_authcookie = api_authcookie.bind(request)
 
@@ -64,7 +64,7 @@ def get_subpolicy(request):
         secret=request.registry.settings["h_auth_cookie_secret"],
         salt="authsanity",
         cookie_name="auth",
-        max_age=html_authcookie_max_age,
+        max_age=HTML_AUTHCOOKIE_MAX_AGE,
         httponly=True,
         secure=request.scheme == "https",
     )
