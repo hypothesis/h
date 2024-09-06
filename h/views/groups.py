@@ -15,6 +15,7 @@ class GroupCreateEditController:
     def __init__(self, context, request):
         self.context = context
         self.request = request
+        self.annotation_stats_service = request.find_service(name="annotation_stats")
 
     @view_config(route_name="group_create", request_method="GET")
     def create(self):
@@ -57,6 +58,9 @@ class GroupCreateEditController:
                 "type": group.type,
                 "link": self.request.route_url(
                     "group_read", pubid=group.pubid, slug=group.slug
+                ),
+                "num_annotations": self.annotation_stats_service.total_group_annotation_count(
+                    group.pubid, unshared=False
                 ),
             }
             js_config["api"]["updateGroup"] = {

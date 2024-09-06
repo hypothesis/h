@@ -193,6 +193,20 @@ class AuthFilter:
         )
 
 
+class SharedAnnotationsFilter:
+    """
+    A filter that selects only "shared" annotations and replies.
+
+    Only annotations and replies that have been shared
+    (`Annotation.shared=True`) will pass through this filter. "Only Me"
+    annotations (`Annotation.shared=False`) will be filtered out even if they
+    belong to the authenticated user.
+    """
+
+    def __call__(self, search, params):
+        return search.filter("term", shared=True)
+
+
 class GroupFilter:
     """
     Filter that limits which groups annotations are returned from.
