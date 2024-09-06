@@ -5,6 +5,7 @@ from h.search.query import (
     AuthorityFilter,
     DeletedFilter,
     Limiter,
+    SharedAnnotationsFilter,
     TagsAggregation,
     TopLevelAnnotationsFilter,
     UserFilter,
@@ -22,6 +23,7 @@ __all__ = (
     "UsersAggregation",
     "get_client",
     "init",
+    "SharedAnnotationsFilter",
 )
 
 

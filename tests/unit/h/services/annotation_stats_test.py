@@ -56,6 +56,27 @@ class TestAnnotationStatsService:
         )
         assert num_annotations == Search.return_value.run.return_value.total
 
+    @pytest.mark.parametrize("unshared", [True, False])
+    def test_total_group_annotation_count(
+        self, pyramid_request, svc, Search, SharedAnnotationsFilter, unshared
+    ):
+        num_annotations = svc.total_group_annotation_count(
+            sentinel.pubid, unshared=unshared
+        )
+
+        Search.assert_called_once_with(pyramid_request)
+        if unshared:
+            Search.return_value.append_modifier.assert_not_called()
+        else:
+            SharedAnnotationsFilter.assert_called_once_with()
+            Search.return_value.append_modifier.assert_called_once_with(
+                SharedAnnotationsFilter.return_value
+            )
+        Search.return_value.run.assert_called_once_with(
+            {"limit": 0, "group": sentinel.pubid}
+        )
+        assert num_annotations == Search.return_value.run.return_value.total
+
     @pytest.fixture
     def svc(self, pyramid_request):
         return AnnotationStatsService(request=pyramid_request)
@@ -95,6 +116,15 @@ def Limiter(mocker):
 def Search(mocker):
     return mocker.patch(
         "h.services.annotation_stats.Search", autospec=True, spec_set=True
+    )
+
+
+@pytest.fixture(autouse=True)
+def SharedAnnotationsFilter(mocker):
+    return mocker.patch(
+        "h.services.annotation_stats.SharedAnnotationsFilter",
+        autospec=True,
+        spec_set=True,
     )
 
 

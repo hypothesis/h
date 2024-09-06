@@ -8,6 +8,7 @@ from h.traversal.group import GroupContext
 from h.views import groups as views
 
 
+@pytest.mark.usefixtures("annotation_stats_service")
 class TestGroupCreateEditController:
     def test_create(self, pyramid_request, assets_env, mocker):
         mocker.spy(views, "get_csrf_token")
@@ -38,7 +39,9 @@ class TestGroupCreateEditController:
         }
 
     @pytest.mark.usefixtures("routes")
-    def test_edit(self, factories, pyramid_request, assets_env, mocker):
+    def test_edit(
+        self, factories, pyramid_request, assets_env, mocker, annotation_stats_service
+    ):
         mocker.spy(views, "get_csrf_token")
         group = factories.Group()
         context = GroupContext(group)
@@ -49,6 +52,9 @@ class TestGroupCreateEditController:
         assets_env.urls.assert_called_once_with("group_forms_css")
         views.get_csrf_token.assert_called_once_with(  # pylint:disable=no-member
             pyramid_request
+        )
+        annotation_stats_service.total_group_annotation_count.assert_called_once_with(
+            group.pubid, unshared=False
         )
         assert result == {
             "page_title": "Edit group",
@@ -79,6 +85,7 @@ class TestGroupCreateEditController:
                         "link": pyramid_request.route_url(
                             "group_read", pubid=group.pubid, slug=group.slug
                         ),
+                        "num_annotations": annotation_stats_service.total_group_annotation_count.return_value,
                     }
                 },
             },

@@ -4,6 +4,7 @@ from h.search import (
     DeletedFilter,
     Limiter,
     Search,
+    SharedAnnotationsFilter,
     TopLevelAnnotationsFilter,
     UserFilter,
 )
@@ -47,6 +48,24 @@ class AnnotationStatsService:
         """Return the count of searchable top level annotations for this group."""
         params = MultiDict({"limit": 0, "group": pubid})
         return self._search(params)
+
+    def total_group_annotation_count(self, pubid, unshared=True):
+        """
+        Return the count of all annotations for a group.
+
+        This counts all of the group's annotations and replies from all users.
+
+        If `unshared=True` then "Only Me" annotations and replies in the group
+        (`Annotation.shared=False`) from *all* users (not just the
+        authenticated user) will be counted.
+
+        If `unshared=False` then no unshared annotations or replies will be
+        counted, not even ones from the authenticated user.
+        """
+        search = Search(self.request)
+        if not unshared:
+            search.append_modifier(SharedAnnotationsFilter())
+        return search.run(MultiDict({"limit": 0, "group": pubid})).total
 
     def _search(self, params):
         search = Search(self.request)

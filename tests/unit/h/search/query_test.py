@@ -1,3 +1,4 @@
+# pylint:disable=too-many-lines
 import datetime
 
 import elasticsearch_dsl
@@ -342,6 +343,29 @@ class TestAuthFilter:
     @pytest.fixture
     def search(self, search, pyramid_request):
         search.append_modifier(query.AuthFilter(pyramid_request))
+        return search
+
+
+class TestSharedAnnotationsFilter:
+    def test_it(self, pyramid_config, search, Annotation):
+        userid = "acct:test_user@example.com"
+        pyramid_config.testing_securitypolicy(userid)
+        # Create two shared annotations, these should be counted.
+        shared_annotations = [Annotation(shared=True), Annotation(shared=True)]
+        # Create some "Only Me" annotations, these should not be counted even
+        # if they belong to the authenticated user.
+        Annotation(shared=False)
+        Annotation(shared=False, userid=userid)
+
+        result = search.run(webob.multidict.MultiDict({}))
+
+        assert sorted(result.annotation_ids) == sorted(
+            [annotation.id for annotation in shared_annotations]
+        )
+
+    @pytest.fixture
+    def search(self, search):
+        search.append_modifier(query.SharedAnnotationsFilter())
         return search
 
 
