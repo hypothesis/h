@@ -30,7 +30,7 @@ class CookiePolicy:
 
     def identity(self, request):
         self.helper.add_vary_by_cookie(request)
-        identity = self.helper.identity(self.html_authcookie, request)
+        identity, ticket_id = self.helper.identity(self.html_authcookie, request)
 
         # If a request was successfully authenticated using the HTML auth
         # cookie and that request did *not* also contain the API auth cookie,
@@ -47,7 +47,7 @@ class CookiePolicy:
         # this won't happen but it could happen if the API auth cookie (but not
         # the HTML one) was deleted somehow, for example by the user manually
         # deleting the cookie in the browser's developer tools, or another way.
-        self._issue_api_authcookie(identity, request)
+        self._issue_api_authcookie(identity, request, ticket_id)
 
         return identity
 
@@ -76,9 +76,11 @@ class CookiePolicy:
         # would set the same cookie twice.
         request.h_api_authcookie_headers_added = True
 
+        ticket_id = self.helper.add_ticket(request, userid)
+
         return [
-            *self.helper.remember(self.html_authcookie, request, userid),
-            *self.helper.remember(self.api_authcookie, request, userid),
+            *self.helper.remember(self.html_authcookie, userid, ticket_id),
+            *self.helper.remember(self.api_authcookie, userid, ticket_id),
         ]
 
     def forget(self, request):
@@ -91,7 +93,7 @@ class CookiePolicy:
     def permits(self, request, context, permission) -> Allowed | Denied:
         return identity_permits(self.identity(request), context, permission)
 
-    def _issue_api_authcookie(self, identity, request):
+    def _issue_api_authcookie(self, identity, request, ticket_id):
         if not identity:
             return
 
@@ -105,7 +107,7 @@ class CookiePolicy:
             return
 
         headers = self.helper.remember(
-            self.api_authcookie, request, identity.user.userid
+            self.api_authcookie, identity.user.userid, ticket_id
         )
 
         def add_api_authcookie_headers(
