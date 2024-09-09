@@ -33,7 +33,7 @@ certifi==2024.8.30
     # via
     #   -r requirements/prod.txt
     #   sentry-sdk
-cffi==1.17.0
+cffi==1.17.1
     # via -r requirements/prod.txt
 chameleon==4.4.3
     # via
