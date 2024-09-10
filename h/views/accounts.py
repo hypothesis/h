@@ -43,8 +43,8 @@ def ajax_payload(request, data):  # pragma: no cover
     return payload
 
 
-def _login_redirect_url(request):
-    return request.route_url("activity.user_search", username=request.user.username)
+def _login_redirect_url(request, user):
+    return request.route_url("activity.user_search", username=user.username)
 
 
 @view_config(
@@ -134,7 +134,7 @@ class AuthController:
         user = appstruct["user"]
         headers = self._login(user)
         return httpexceptions.HTTPFound(
-            location=self._login_redirect(), headers=headers
+            location=self._login_redirect(user), headers=headers
         )
 
     @view_config(route_name="logout", renderer=None, request_method="GET")
@@ -144,11 +144,13 @@ class AuthController:
         return httpexceptions.HTTPFound(location=self.logout_redirect, headers=headers)
 
     def _redirect_if_logged_in(self):
-        if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(location=self._login_redirect())
+        if self.request.user is not None:
+            raise httpexceptions.HTTPFound(
+                location=self._login_redirect(self.request.user)
+            )
 
-    def _login_redirect(self):
-        return self.request.params.get("next", _login_redirect_url(self.request))
+    def _login_redirect(self, user):
+        return self.request.params.get("next", _login_redirect_url(self.request, user))
 
     def _login(self, user):
         user.last_login_date = datetime.datetime.utcnow()

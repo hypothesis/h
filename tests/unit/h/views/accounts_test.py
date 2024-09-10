@@ -143,7 +143,6 @@ class TestAuthController:
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
         user = factories.User(username="cara")
-        pyramid_request.user = user
         controller.form = form_validating_to({"user": user})
 
         result = controller.post()
@@ -156,9 +155,7 @@ class TestAuthController:
         pyramid_request.params = {"next": "/foo/bar"}
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        user = factories.User(username="cara")
-        pyramid_request.user = user
-        controller.form = form_validating_to({"user": user})
+        controller.form = form_validating_to({"user": factories.User()})
 
         result = controller.post()
 
@@ -178,7 +175,6 @@ class TestAuthController:
         pyramid_config.testing_securitypolicy(None)  # Logged out
         elephant = factories.User(username="avocado")
         controller = views.AuthController(pyramid_request)
-        pyramid_request.user = elephant
         controller.form = form_validating_to({"user": elephant})
 
         controller.post()
