@@ -267,7 +267,7 @@ python-dateutil==2.9.0.post0
     #   faker
 python-slugify==8.0.4
     # via -r requirements/prod.txt
-pytz==2024.1
+pytz==2024.2
     # via -r requirements/prod.txt
 referencing==0.32.1
     # via

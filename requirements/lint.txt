@@ -413,7 +413,7 @@ python-slugify==8.0.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytz==2024.1
+pytz==2024.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
