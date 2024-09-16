@@ -109,7 +109,7 @@ importlib-metadata==7.0.1
     #   -r requirements/prod.txt
     #   h-api
     #   pip-sync-faster
-importlib-resources==6.4.4
+importlib-resources==6.4.5
     # via
     #   -r requirements/prod.txt
     #   data-tasks

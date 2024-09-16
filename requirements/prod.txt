@@ -73,7 +73,7 @@ hupper==1.12
     # via pyramid
 importlib-metadata==7.0.1
     # via h-api
-importlib-resources==6.4.4
+importlib-resources==6.4.5
     # via
     #   -r requirements/prod.in
     #   data-tasks
