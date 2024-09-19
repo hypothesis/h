@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import webob
 from pyramid.request import RequestLocalCache
 from pyramid.security import Allowed, Denied
@@ -10,7 +12,7 @@ from h.security.policy._bearer_token import BearerTokenPolicy
 from h.security.policy._cookie import CookiePolicy
 from h.security.policy.helpers import AuthTicketCookieHelper, is_api_request
 
-HTML_AUTHCOOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days.
+HTML_AUTHCOOKIE_MAX_AGE = int(timedelta(days=365).total_seconds())
 
 
 class TopLevelPolicy:
@@ -55,7 +57,7 @@ def get_subpolicy(request):
         # Make the API authcookie stay fresh for longer than the HTML one.
         # This is to make it less likely that a browser will have an unexpired HTML
         # authcookie but an expired API one, which can lead to confusing results.
-        max_age=HTML_AUTHCOOKIE_MAX_AGE + 3600,
+        max_age=HTML_AUTHCOOKIE_MAX_AGE + int(timedelta(hours=1).total_seconds()),
     )
     api_authcookie = api_authcookie.bind(request)
 

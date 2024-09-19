@@ -1,3 +1,4 @@
+from datetime import timedelta
 from urllib.parse import urlparse
 
 from pyramid.csrf import SessionCSRFStoragePolicy
@@ -126,7 +127,7 @@ def includeme(config):  # pragma: no cover
         #
         # To avoid this we make sure that the lifetime of CSRF tokens is always
         # longer than the lifetimes of auth cookies.
-        timeout=HTML_AUTHCOOKIE_MAX_AGE + 3600,
+        timeout=HTML_AUTHCOOKIE_MAX_AGE + int(timedelta(hours=1).total_seconds()),
     )
     config.set_session_factory(factory)
     config.set_csrf_storage_policy(SessionCSRFStoragePolicy())
