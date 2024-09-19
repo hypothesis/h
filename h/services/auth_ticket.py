@@ -6,7 +6,7 @@ from h.models import AuthTicket, User
 
 
 class AuthTicketService:
-    TICKET_TTL = timedelta(days=7)
+    TICKET_TTL = timedelta(days=90)
 
     # We only want to update the `expires` column when the tickets `expires` is
     # at least one minute smaller than the potential new value. This prevents
