@@ -20,6 +20,13 @@ function bundleConfig(name, entryFile) {
       chunkFileNames: '[name].bundle.js',
       entryFileNames: '[name].bundle.js',
     },
+
+    // Suppress a warning (https://rollupjs.org/guide/en/#error-this-is-undefined)
+    // due to https://github.com/babel/babel/issues/9149.
+    //
+    // Any code string other than "undefined" which evaluates to `undefined` will work here.
+    context: 'void(0)',
+
     plugins: [
       babel({
         babelHelpers: 'bundled',
