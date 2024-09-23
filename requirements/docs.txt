@@ -75,7 +75,7 @@ sphinx==7.4.7
     #   sphinxcontrib-jquery
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
-sphinx-autobuild==2024.9.3
+sphinx-autobuild==2024.9.19
     # via -r requirements/docs.in
 sphinx-rtd-theme==2.0.0
     # via -r requirements/docs.in
