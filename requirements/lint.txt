@@ -490,7 +490,7 @@ text-unidecode==1.3
     #   python-slugify
 tomlkit==0.12.3
     # via pylint
-transaction==4.0
+transaction==5.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
