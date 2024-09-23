@@ -95,7 +95,7 @@ jsonschema==4.23.0
     #   h-api
 jsonschema-specifications==2023.12.1
     # via jsonschema
-kombu==5.4.1
+kombu==5.4.2
     # via
     #   -r requirements/prod.in
     #   celery
@@ -239,7 +239,9 @@ typing-extensions==4.9.0
     #   alembic
     #   sqlalchemy
 tzdata==2023.4
-    # via celery
+    # via
+    #   celery
+    #   kombu
 urllib3==2.2.2
     # via
     #   elasticsearch

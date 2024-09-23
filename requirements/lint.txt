@@ -215,7 +215,7 @@ jsonschema-specifications==2023.12.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-kombu==5.4.1
+kombu==5.4.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -516,6 +516,7 @@ tzdata==2023.4
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   celery
+    #   kombu
 urllib3==2.2.2
     # via
     #   -r requirements/functests.txt
