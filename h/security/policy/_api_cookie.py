@@ -29,7 +29,7 @@ class APICookiePolicy:
         ) in COOKIE_AUTHENTICATABLE_API_REQUESTS
 
     def identity(self, request: Request) -> Identity | None:
-        identity, _ = self.helper.identity(self.cookie, request)
+        identity = self.helper.identity(self.cookie, request)
 
         if identity is None:
             return identity
