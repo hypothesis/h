@@ -29,47 +29,39 @@ class TestAuthTicketCookieHelper:
     def test_identity(
         self, auth_ticket_service, cookie, helper, pyramid_request, Identity
     ):
-        ticket = auth_ticket_service.verify_ticket.return_value
-        user = ticket.user
-        user.deleted = False
-
-        result = helper.identity(cookie, pyramid_request)
+        identity = helper.identity(cookie, pyramid_request)
 
         auth_ticket_service.verify_ticket.assert_called_once_with(
             sentinel.userid, sentinel.ticket_id
         )
-        Identity.from_models.assert_called_once_with(user=user)
-        assert result == (Identity.from_models.return_value, ticket)
+        Identity.from_models.assert_called_once_with(
+            user=auth_ticket_service.verify_ticket.return_value
+        )
+        assert identity == Identity.from_models.return_value
 
     def test_identity_when_no_user(
         self, auth_ticket_service, cookie, helper, pyramid_request
     ):
         auth_ticket_service.verify_ticket.return_value = None
 
-        assert helper.identity(cookie, pyramid_request) == (None, None)
+        assert helper.identity(cookie, pyramid_request) is None
 
     def test_identity_when_user_deleted(
         self, auth_ticket_service, cookie, helper, pyramid_request
     ):
-        auth_ticket_service.verify_ticket.return_value.user.deleted = True
+        auth_ticket_service.verify_ticket.return_value.deleted = True
 
-        assert helper.identity(cookie, pyramid_request) == (None, None)
+        assert helper.identity(cookie, pyramid_request) is None
 
-    def test_add_ticket(self, helper, auth_ticket_service, pyramid_request, AuthTicket):
-        ticket_id = helper.add_ticket(pyramid_request, sentinel.userid)
+    def test_remember(
+        self, auth_ticket_service, cookie, helper, pyramid_request, AuthTicket
+    ):
+        headers = helper.remember(cookie, pyramid_request, "test_userid")
 
         AuthTicket.generate_ticket_id.assert_called_once_with()
-        auth_ticket_service.add_ticket.assert_called_once_with(
-            sentinel.userid, AuthTicket.generate_ticket_id.return_value
-        )
-        assert ticket_id == AuthTicket.generate_ticket_id.return_value
-
-    def test_remember(self, cookie, helper):
-        headers = helper.remember(cookie, sentinel.userid, sentinel.ticket_id)
-
-        cookie.get_headers.assert_called_once_with(
-            [sentinel.userid, sentinel.ticket_id]
-        )
+        ticket_id = AuthTicket.generate_ticket_id.return_value
+        auth_ticket_service.add_ticket.assert_called_once_with("test_userid", ticket_id)
+        cookie.get_headers.assert_called_once_with(["test_userid", ticket_id])
         assert headers == cookie.get_headers.return_value
 
     def test_forget(self, auth_ticket_service, cookie, helper, pyramid_request):
