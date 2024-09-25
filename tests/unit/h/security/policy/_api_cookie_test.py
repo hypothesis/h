@@ -4,6 +4,7 @@ import pytest
 from pyramid.csrf import SessionCSRFStoragePolicy
 from pyramid.exceptions import BadCSRFOrigin, BadCSRFToken
 
+from h.security.identity import Identity as Identity_
 from h.security.policy._api_cookie import APICookiePolicy
 from h.security.policy.helpers import AuthTicketCookieHelper
 
@@ -31,12 +32,12 @@ class TestAPICookiePolicy:
 
         helper.add_vary_by_cookie.assert_called_once_with(pyramid_csrf_request)
         helper.identity.assert_called_once_with(sentinel.cookie, pyramid_csrf_request)
-        assert identity == helper.identity.return_value
+        assert identity == helper.identity.return_value[0]
 
     def test_identity_with_no_auth_cookie(
         self, api_cookie_policy, helper, pyramid_request
     ):
-        helper.identity.return_value = None
+        helper.identity.return_value = (None, None)
 
         assert api_cookie_policy.identity(pyramid_request) is None
 
@@ -64,7 +65,7 @@ class TestAPICookiePolicy:
         helper.add_vary_by_cookie.assert_called_once_with(pyramid_csrf_request)
         helper.identity.assert_called_once_with(sentinel.cookie, pyramid_csrf_request)
         Identity.authenticated_userid.assert_called_once_with(
-            helper.identity.return_value
+            helper.identity.return_value[0]
         )
         assert authenticated_userid == Identity.authenticated_userid.return_value
 
@@ -78,13 +79,18 @@ class TestAPICookiePolicy:
         helper.add_vary_by_cookie.assert_called_once_with(pyramid_csrf_request)
         helper.identity.assert_called_once_with(sentinel.cookie, pyramid_csrf_request)
         identity_permits.assert_called_once_with(
-            helper.identity.return_value, sentinel.context, sentinel.permission
+            helper.identity.return_value[0], sentinel.context, sentinel.permission
         )
         assert permits == identity_permits.return_value
 
     @pytest.fixture
-    def helper(self):
-        return create_autospec(AuthTicketCookieHelper, instance=True, spec_set=True)
+    def helper(self, factories):
+        helper = create_autospec(AuthTicketCookieHelper, instance=True, spec_set=True)
+        helper.identity.return_value = (
+            create_autospec(Identity_, instance=True, spec_set=True),
+            factories.AuthTicket(),
+        )
+        return helper
 
     @pytest.fixture
     def api_cookie_policy(self, helper):
