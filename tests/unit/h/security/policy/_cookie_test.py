@@ -14,7 +14,7 @@ class TestCookiePolicy:
 
         helper.add_vary_by_cookie.assert_called_once_with(pyramid_request)
         helper.identity.assert_called_once_with(html_authcookie, pyramid_request)
-        assert identity == helper.identity.return_value
+        assert identity == helper.identity.return_value[0]
 
     def test_identity_issues_api_authcookie(
         self, cookie_policy, helper, pyramid_request, api_authcookie
@@ -31,7 +31,9 @@ class TestCookiePolicy:
             pyramid_request.response
         )
         helper.remember.assert_called_once_with(
-            api_authcookie, pyramid_request, helper.identity.return_value.user.userid
+            api_authcookie,
+            helper.identity.return_value[0].user.userid,
+            helper.identity.return_value[1],
         )
         for header in helper.remember.return_value:
             assert header in pyramid_request.response.headerlist
@@ -39,8 +41,8 @@ class TestCookiePolicy:
     @pytest.mark.parametrize(
         "identity",
         [
-            None,
-            Identity_(user=None, auth_client=None),
+            (None, None),
+            (Identity_(user=None, auth_client=None), sentinel.auth_ticket),
         ],
     )
     def test_identity_doesnt_issue_api_authcookie_if_user_not_authenticated(
@@ -94,7 +96,7 @@ class TestCookiePolicy:
         helper.add_vary_by_cookie.assert_called_once_with(pyramid_request)
         helper.identity.assert_called_once_with(html_authcookie, pyramid_request)
         Identity.authenticated_userid.assert_called_once_with(
-            helper.identity.return_value
+            helper.identity.return_value[0]
         )
         assert authenticated_userid == Identity.authenticated_userid.return_value
 
@@ -122,9 +124,10 @@ class TestCookiePolicy:
         headers = cookie_policy.remember(pyramid_request, sentinel.userid, foo="bar")
 
         assert not pyramid_request.session
+        helper.add_ticket.assert_called_once_with(pyramid_request, sentinel.userid)
         assert helper.remember.call_args_list == [
-            call(html_authcookie, pyramid_request, sentinel.userid),
-            call(api_authcookie, pyramid_request, sentinel.userid),
+            call(html_authcookie, sentinel.userid, helper.add_ticket.return_value),
+            call(api_authcookie, sentinel.userid, helper.add_ticket.return_value),
         ]
         assert headers == [
             sentinel.html_authcookie_header_1,
@@ -190,7 +193,7 @@ class TestCookiePolicy:
         helper.add_vary_by_cookie.assert_called_once_with(pyramid_request)
         helper.identity.assert_called_once_with(html_authcookie, pyramid_request)
         identity_permits.assert_called_once_with(
-            helper.identity.return_value, sentinel.context, sentinel.permission
+            helper.identity.return_value[0], sentinel.context, sentinel.permission
         )
         assert permits == identity_permits.return_value
 
@@ -203,7 +206,7 @@ class TestCookiePolicy:
     @pytest.fixture
     def api_authcookie(self, pyramid_request):
         api_authcookie = SignedCookieProfile(
-            "secret", "salt", cookie_name="h_api_authcookie"
+            "secret", "salt", cookie_name="h_api_authcookie.v2"
         )
 
         # Add the API auth cookie to the request.
@@ -215,8 +218,13 @@ class TestCookiePolicy:
         return api_authcookie.bind(pyramid_request)
 
     @pytest.fixture
-    def helper(self):
-        return create_autospec(AuthTicketCookieHelper, instance=True, spec_set=True)
+    def helper(self, factories):
+        helper = create_autospec(AuthTicketCookieHelper, instance=True, spec_set=True)
+        helper.identity.return_value = (
+            create_autospec(Identity_, instance=True, spec_set=True),
+            factories.AuthTicket(),
+        )
+        return helper
 
     @pytest.fixture
     def cookie_policy(self, html_authcookie, api_authcookie, helper):
