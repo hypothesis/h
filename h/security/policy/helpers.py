@@ -28,18 +28,20 @@ class AuthTicketCookieHelper:
 
         return (Identity.from_models(user=ticket.user), ticket)
 
-    def add_ticket(self, request: Request, userid):
+    def add_ticket(self, request: Request, userid) -> AuthTicket:
         """
         Add a new auth ticket for the given user to the DB.
 
-        Returns the ID of the newly-created auth ticket.
+        Returns the the newly-created auth ticket.
         """
-        ticket_id = AuthTicket.generate_ticket_id()
-        request.find_service(AuthTicketService).add_ticket(userid, ticket_id)
-        return ticket_id
+        return request.find_service(AuthTicketService).add_ticket(
+            userid, AuthTicket.generate_ticket_id()
+        )
 
-    def remember(self, cookie: SignedCookieProfile, userid: str, ticket_id):
-        return cookie.get_headers([userid, ticket_id])
+    def remember(
+        self, cookie: SignedCookieProfile, userid: str, auth_ticket: AuthTicket
+    ):
+        return cookie.get_headers([userid, auth_ticket.id])
 
     def forget(self, cookie: SignedCookieProfile, request: Request):
         request.session.invalidate()

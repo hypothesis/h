@@ -56,20 +56,20 @@ class TestAuthTicketCookieHelper:
         assert helper.identity(cookie, pyramid_request) == (None, None)
 
     def test_add_ticket(self, helper, auth_ticket_service, pyramid_request, AuthTicket):
-        ticket_id = helper.add_ticket(pyramid_request, sentinel.userid)
+        auth_ticket = helper.add_ticket(pyramid_request, sentinel.userid)
 
         AuthTicket.generate_ticket_id.assert_called_once_with()
         auth_ticket_service.add_ticket.assert_called_once_with(
             sentinel.userid, AuthTicket.generate_ticket_id.return_value
         )
-        assert ticket_id == AuthTicket.generate_ticket_id.return_value
+        assert auth_ticket == auth_ticket_service.add_ticket.return_value
 
-    def test_remember(self, cookie, helper):
-        headers = helper.remember(cookie, sentinel.userid, sentinel.ticket_id)
+    def test_remember(self, cookie, helper, factories):
+        auth_ticket = factories.AuthTicket()
 
-        cookie.get_headers.assert_called_once_with(
-            [sentinel.userid, sentinel.ticket_id]
-        )
+        headers = helper.remember(cookie, sentinel.userid, auth_ticket)
+
+        cookie.get_headers.assert_called_once_with([sentinel.userid, auth_ticket.id])
         assert headers == cookie.get_headers.return_value
 
     def test_forget(self, auth_ticket_service, cookie, helper, pyramid_request):
