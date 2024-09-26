@@ -227,11 +227,6 @@ class Group(Base, mixins.Timestamps):
     def __repr__(self):
         return f"<Group: {self.slug}>"
 
-    @classmethod
-    def created_by(cls, session, user):
-        """Return a query object filtering groups by creator."""
-        return session.query(cls).filter(Group.creator == user)
-
 
 TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")
 
