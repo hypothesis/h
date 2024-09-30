@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/functests.in
 #
-alembic==1.13.2
+alembic==1.13.3
     # via -r requirements/prod.txt
 amqp==5.2.0
     # via
