@@ -55,34 +55,6 @@ class TestAPICookiePolicy:
         with pytest.raises(BadCSRFToken):
             api_cookie_policy.identity(pyramid_csrf_request)
 
-    def test_authenticated_userid(
-        self, api_cookie_policy, helper, pyramid_csrf_request, Identity
-    ):
-        authenticated_userid = api_cookie_policy.authenticated_userid(
-            pyramid_csrf_request
-        )
-
-        helper.add_vary_by_cookie.assert_called_once_with(pyramid_csrf_request)
-        helper.identity.assert_called_once_with(sentinel.cookie, pyramid_csrf_request)
-        Identity.authenticated_userid.assert_called_once_with(
-            helper.identity.return_value[0]
-        )
-        assert authenticated_userid == Identity.authenticated_userid.return_value
-
-    def test_permits(
-        self, api_cookie_policy, helper, pyramid_csrf_request, identity_permits
-    ):
-        permits = api_cookie_policy.permits(
-            pyramid_csrf_request, sentinel.context, sentinel.permission
-        )
-
-        helper.add_vary_by_cookie.assert_called_once_with(pyramid_csrf_request)
-        helper.identity.assert_called_once_with(sentinel.cookie, pyramid_csrf_request)
-        identity_permits.assert_called_once_with(
-            helper.identity.return_value[0], sentinel.context, sentinel.permission
-        )
-        assert permits == identity_permits.return_value
-
     @pytest.fixture
     def helper(self, factories):
         helper = create_autospec(AuthTicketCookieHelper, instance=True, spec_set=True)
@@ -101,13 +73,6 @@ class TestAPICookiePolicy:
 def Identity(mocker):
     return mocker.patch(
         "h.security.policy._api_cookie.Identity", autospec=True, spec_set=True
-    )
-
-
-@pytest.fixture(autouse=True)
-def identity_permits(mocker):
-    return mocker.patch(
-        "h.security.policy._api_cookie.identity_permits", autospec=True, spec_set=True
     )
 
 

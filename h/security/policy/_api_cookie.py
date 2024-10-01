@@ -1,10 +1,8 @@
 from pyramid.csrf import check_csrf_origin, check_csrf_token
 from pyramid.request import Request
-from pyramid.security import Allowed, Denied
 from webob.cookies import SignedCookieProfile
 
 from h.security.identity import Identity
-from h.security.permits import identity_permits
 from h.security.policy.helpers import AuthTicketCookieHelper
 
 COOKIE_AUTHENTICATABLE_API_REQUESTS = [
@@ -53,9 +51,3 @@ class APICookiePolicy:
         self.helper.add_vary_by_cookie(request)
 
         return identity
-
-    def authenticated_userid(self, request: Request) -> str | None:
-        return Identity.authenticated_userid(self.identity(request))
-
-    def permits(self, request: Request, context, permission: str) -> Allowed | Denied:
-        return identity_permits(self.identity(request), context, permission)
