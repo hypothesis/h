@@ -28,9 +28,6 @@ class Permission:
         EDIT = "group:edit"
         """Update the details of a group."""
 
-        UPSERT = "group:upsert"
-        """Update the details of a group or create a new one."""
-
         FLAG = "group:flag"
         """Mark annotations in this group as inappropriate for moderators."""
 
