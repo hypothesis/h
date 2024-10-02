@@ -5893,7 +5893,7 @@ __metadata:
     normalize.css: ^8.0.0
     popper.js: ^1.16.1
     postcss: ^8.4.47
-    preact: ^10.23.2
+    preact: ^10.24.1
     prettier: ^3.3.3
     rollup: ^4.22.4
     sass: ^1.79.4
@@ -8252,10 +8252,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.23.2":
-  version: 10.23.2
-  resolution: "preact@npm:10.23.2"
-  checksum: 1df6a9d72480c42b4985c1344941184422374c48af0f1e9df0de8d1c3f1f85c996d3a9e2850c8256abe39352d8fd174dd95e2f4177433022661baabfb6547f2c
+"preact@npm:^10.24.1":
+  version: 10.24.1
+  resolution: "preact@npm:10.24.1"
+  checksum: c20fe8dee3b1e6329c3b28252350cfc2873bb5ca6d29909fd1b3f15825c686f9dd636ea2aafb9b0c9dcf2a94597aa814a4ec15fc37d0536d4ef58c200ac290b6
   languageName: node
   linkType: hard
 
