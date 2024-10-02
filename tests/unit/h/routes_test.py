@@ -134,13 +134,6 @@ def test_includeme():
         ),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
-            "api.group_upsert",
-            "/api/groups/{id}",
-            request_method="PUT",
-            factory="h.traversal.GroupRoot",
-            traverse="/{id}",
-        ),
-        call(
             "api.group",
             "/api/groups/{id}",
             request_method=("GET", "PATCH"),

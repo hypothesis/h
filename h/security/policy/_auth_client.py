@@ -32,7 +32,6 @@ class AuthClientPolicy:
         ("api.group", "GET"),
         ("api.group_member", "POST"),
         ("api.group_members", "GET"),
-        ("api.group_upsert", "PUT"),
         ("api.users", "POST"),
         ("api.user_read", "GET"),
         ("api.user", "PATCH"),

@@ -844,34 +844,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Group'
 
-    # ---------------------------------------------------------------------
-    # PUT groups/{id} - Replace (Create or Update) a Group, a.k.a. "upsert"
-    # ---------------------------------------------------------------------
-    put:
-      tags:
-        - groups
-      summary: Create or Update a Group
-      description: |
-        Update the group with the indicated `id` or create one if it does
-        not exist.
-      security:
-        - ApiKey: []
-        - AuthClientForwardedUser: []
-      requestBody:
-        description: Full representation of Group resource
-        required: true
-        content:
-          application/*json:
-            schema:
-              $ref: '#/components/schemas/GroupCreate'
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Group'
-
   # ---------------------------------------------------------------------------
   # Operations on Group Membership
   # ---------------------------------------------------------------------------

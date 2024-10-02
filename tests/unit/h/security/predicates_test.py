@@ -114,13 +114,6 @@ class TestGroupPredicates:
         assert predicates.group_found(sentinel.identity, annotation_context)
         assert predicates.group_found(sentinel.identity, group_context)
 
-    def test_group_not_found(self, annotation_context, group_context, user_context):
-        assert predicates.group_not_found(sentinel.identity, user_context)
-        assert predicates.group_not_found(sentinel.identity, GroupContext(group=None))
-        # Annotations have a group
-        assert not predicates.group_not_found(sentinel.identity, annotation_context)
-        assert not predicates.group_not_found(sentinel.identity, group_context)
-
     @pytest.mark.parametrize("writable_by", WriteableBy)
     def test_group_writable_by_members(self, group_context, writable_by):
         group_context.group.writeable_by = writable_by

@@ -141,13 +141,6 @@ def includeme(config):  # pylint: disable=too-many-statements
 
     config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
     config.add_route(
-        "api.group_upsert",
-        "/api/groups/{id}",
-        request_method="PUT",
-        factory="h.traversal.GroupRoot",
-        traverse="/{id}",
-    )
-    config.add_route(
         "api.group",
         "/api/groups/{id}",
         request_method=("GET", "PATCH"),

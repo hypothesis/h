@@ -142,64 +142,6 @@ def update(context: GroupContext, request):
 
 @api_config(
     versions=["v1", "v2"],
-    route_name="api.group_upsert",
-    request_method="PUT",
-    permission=Permission.Group.UPSERT,
-    link_name="group.create_or_update",
-    description="Create or update a group",
-)
-def upsert(context: GroupContext, request):
-    """
-    Create or update a group from a PUT payload.
-
-    If no group model is present in the passed ``context`` (on ``context.group``),
-    treat this as a create action and delegate to ``create``.
-
-    Otherwise, replace the existing group's resource properties entirely and update
-    the object.
-    """
-    if context.group is None:
-        return create(request)
-
-    group = context.group
-
-    # Because this is a PUT endpoint and not a PATCH, a full replacement of the
-    # entire resource is expected. Thus, we're validating against the Create schema
-    # here as we want to make sure properties required for a fresh object are present
-    appstruct = CreateGroupAPISchema(
-        default_authority=request.default_authority,
-        group_authority=request.effective_authority,
-    ).validate(_json_payload(request))
-
-    group_update_service = request.find_service(name="group_update")
-    group_service = request.find_service(name="group")
-
-    # Check for duplicate group
-    groupid = appstruct.get("groupid", None)
-    if groupid is not None:
-        duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
-        if duplicate_group and (duplicate_group != group):
-            raise HTTPConflict(
-                _("group with groupid '{}' already exists").format(groupid)
-            )
-
-    # Need to make sure every resource-defined property is present, as this
-    # is meant as a full-resource-replace operation.
-    # TODO: This may be better handled in the schema at some point
-    update_properties = {
-        "name": appstruct["name"],
-        "description": appstruct.get("description", ""),
-        "groupid": appstruct.get("groupid", None),
-        "type": appstruct.get("type", DEFAULT_GROUP_TYPE),
-    }
-
-    group = group_update_service.update(group, **update_properties)
-
-    return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
-
-
-@api_config(
-    versions=["v1", "v2"],
     route_name="api.group_members",
     request_method="GET",
     link_name="group.members.read",

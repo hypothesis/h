@@ -112,10 +112,6 @@ def group_found(_identity, context):
     return hasattr(context, "group") and context.group
 
 
-def group_not_found(_identity, context):
-    return not hasattr(context, "group") or not context.group
-
-
 @requires(group_found)
 def group_writable_by_members(_identity, context):
     return context.group.writeable_by == WriteableBy.members
