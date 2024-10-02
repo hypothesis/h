@@ -10,7 +10,6 @@ from h import util
 from h.activity import query
 from h.i18n import TranslationString as _
 from h.links import pretty_link
-from h.models.group import ReadableBy
 from h.paginator import paginate
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
@@ -106,13 +105,6 @@ class GroupSearchController(SearchController):
         result = super().search()
 
         result["opts"] = {"search_groupname": self.group.name}
-
-        # If the group has read access only for members  and the user is not in that list
-        # return without extra info.
-        if self.group.readable_by == ReadableBy.members and (
-            self.request.user not in self.group.members
-        ):
-            return result
 
         def user_annotation_count(aggregation, userid):
             for user in aggregation:
