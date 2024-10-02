@@ -120,41 +120,31 @@ class GroupSearchController(SearchController):
                     return user["count"]
             return 0
 
-        members = []
-        moderators = []
         users_aggregation = result["search_results"].aggregations.get("users", [])
-        # If the group has members provide a list of member info,
-        # otherwise provide a list of moderator info instead.
-        if self.group.members:
-            members = [
-                {
-                    "username": u.username,
-                    "userid": u.userid,
-                    "count": user_annotation_count(users_aggregation, u.userid),
-                    "faceted_by": _faceted_by_user(
-                        self.request, u.username, self.parsed_query_params
-                    ),
-                }
-                for u in self.group.members
-            ]
-            members = sorted(members, key=lambda k: k["username"].lower())
-        else:
-            moderators = []
+
+        if self.group.type == "open":
+            # For open groups show the group's creator (if any) as its only member.
             if self.group.creator:
-                # Pass a list of moderators, anticipating that [self.group.creator]
-                # will change to an actual list of moderators at some point.
-                moderators = [
-                    {
-                        "username": u.username,
-                        "userid": u.userid,
-                        "count": user_annotation_count(users_aggregation, u.userid),
-                        "faceted_by": _faceted_by_user(
-                            self.request, u.username, self.parsed_query_params
-                        ),
-                    }
-                    for u in [self.group.creator]
-                ]
-                moderators = sorted(moderators, key=lambda k: k["username"].lower())
+                members = [self.group.creator]
+            else:
+                members = []
+        else:
+            # For other types of groups show the list of members.
+            members = self.group.members
+
+        members = [
+            {
+                "username": u.username,
+                "userid": u.userid,
+                "count": user_annotation_count(users_aggregation, u.userid),
+                "faceted_by": _faceted_by_user(
+                    self.request, u.username, self.parsed_query_params
+                ),
+            }
+            for u in members
+        ]
+
+        members = sorted(members, key=lambda k: k["username"].lower())
 
         group_annotation_count = self._get_total_annotations_in_group(
             result, self.request
@@ -187,7 +177,7 @@ class GroupSearchController(SearchController):
 
         result["group_users_args"] = [
             _("Members"),
-            moderators if self.group.type == "open" else members,
+            members,
             self.group.creator.userid if self.group.creator else None,
         ]
 
