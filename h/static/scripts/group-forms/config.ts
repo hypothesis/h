@@ -19,6 +19,9 @@ export type ConfigObject = {
       link: string;
     } | null;
   };
+  features: {
+    group_type: boolean;
+  };
 };
 
 /** Return the frontend config from the page's <script class="js-config">. */

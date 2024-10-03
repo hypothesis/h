@@ -20,8 +20,14 @@ class GroupCreateEditController:
     @view_config(route_name="group_create", request_method="GET")
     def create(self):
         """Render the page for creating a new group."""
+
+        if self.request.feature("group_type"):
+            page_title = "Create a new group"
+        else:
+            page_title = "Create a new private group"
+
         return {
-            "page_title": "Create a new private group",
+            "page_title": page_title,
             "js_config": self._js_config(),
         }
 
@@ -48,6 +54,9 @@ class GroupCreateEditController:
                 },
             },
             "context": {"group": None},
+            "features": {
+                "group_type": self.request.feature("group_type"),
+            },
         }
 
         if group := getattr(self.context, "group", None):

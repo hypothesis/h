@@ -216,10 +216,19 @@ export default function CreateEditGroupForm() {
     onSubmit = createGroup;
   }
 
+  let heading;
+  if (group) {
+    heading = 'Edit group';
+  } else if (config.features.group_type) {
+    heading = 'Create a new group';
+  } else {
+    heading = 'Create a new private group';
+  }
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
-        {group ? 'Edit group' : 'Create a new private group'}
+        {heading}
       </h1>
 
       <form onSubmit={onSubmit} data-testid="form">
