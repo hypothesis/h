@@ -20,6 +20,7 @@ export type ConfigObject = {
       description: string;
       link: string;
       type: GroupType;
+      num_annotations: number;
     } | null;
   };
   features: {

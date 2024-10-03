@@ -477,6 +477,136 @@ describe('CreateEditGroupForm', () => {
       });
     });
   });
+
+  [
+    // Do not warn when changing from the default type of "private" to a public
+    // type, when creating a new group.
+    {
+      oldType: null,
+      newType: 'open',
+      expectedWarning: null,
+      annotationCount: 0,
+    },
+    {
+      // Warn when making annotations public (open group)
+      oldType: 'private',
+      newType: 'open',
+      annotationCount: 2,
+      expectedWarning: {
+        title: 'Make 2 annotations public?',
+        message:
+          'Are you sure you want to make "Test Name" an open group? 2 annotations that are visible only to members of "Test Name" will become publicly visible.',
+        confirmAction: 'Make annotations public',
+      },
+    },
+    {
+      // Warn when making annotations public (restricted group)
+      oldType: 'private',
+      newType: 'restricted',
+      annotationCount: 5,
+      expectedWarning: {
+        title: 'Make 5 annotations public?',
+        message:
+          'Are you sure you want to make "Test Name" a restricted group? 5 annotations that are visible only to members of "Test Name" will become publicly visible.',
+        confirmAction: 'Make annotations public',
+      },
+    },
+    {
+      // Warn when making annotations private
+      oldType: 'open',
+      newType: 'private',
+      annotationCount: 3,
+      expectedWarning: {
+        title: 'Make 3 annotations private?',
+        message:
+          'Are you sure you want to make "Test Name" a private group? 3 annotations that are publicly visible will become visible only to members of "Test Name".',
+        confirmAction: 'Make annotations private',
+      },
+    },
+    {
+      // Don't warn if there are no annotations
+      oldType: 'open',
+      newType: 'private',
+      annotationCount: 0,
+      expectedWarning: null,
+    },
+    {
+      // Don't warn if the old and new types are both public
+      oldType: 'open',
+      newType: 'restricted',
+      annotationCount: 3,
+      expectedWarning: null,
+    },
+  ].forEach(({ oldType, newType, annotationCount, expectedWarning }) => {
+    it('shows warning when changing group type between private and public', () => {
+      if (oldType !== null) {
+        config.context.group = {
+          pubid: 'testid',
+          name: 'Test Name',
+          description: 'Test group description',
+          link: 'https://example.com/groups/testid',
+          type: oldType,
+          num_annotations: annotationCount,
+        };
+      }
+
+      const { wrapper } = createWrapper();
+      setSelectedGroupType(wrapper, newType);
+
+      if (expectedWarning) {
+        const warning = wrapper.find('WarningDialog');
+        assert.isTrue(warning.exists());
+        assert.equal(warning.prop('title'), expectedWarning.title);
+        assert.equal(warning.prop('message'), expectedWarning.message);
+        assert.equal(
+          warning.prop('confirmAction'),
+          expectedWarning.confirmAction,
+        );
+      } else {
+        assert.isFalse(wrapper.exists('WarningDialog'));
+      }
+    });
+  });
+
+  it('updates group type if change is confirmed', async () => {
+    config.context.group = {
+      pubid: 'testid',
+      name: 'Test Name',
+      description: 'Test group description',
+      link: 'https://example.com/groups/testid',
+      type: 'private',
+      num_annotations: 3,
+    };
+
+    const { wrapper } = createWrapper();
+    setSelectedGroupType(wrapper, 'open');
+
+    const warning = wrapper.find('WarningDialog');
+    act(() => warning.prop('onConfirm')());
+    wrapper.update();
+
+    assert.equal(getSelectedGroupType(wrapper), 'open');
+  });
+
+  it('does not update group type if change is canceled', async () => {
+    config.context.group = {
+      pubid: 'testid',
+      name: 'Test Name',
+      description: 'Test group description',
+      link: 'https://example.com/groups/testid',
+      type: 'private',
+      num_annotations: 3,
+    };
+
+    const { wrapper } = createWrapper();
+    setSelectedGroupType(wrapper, 'open');
+
+    const warning = wrapper.find('WarningDialog');
+    act(() => warning.prop('onCancel')());
+    wrapper.update();
+
+    assert.equal(getSelectedGroupType(wrapper), 'private');
+  });
 });
 
 async function assertInLoadingState(wrapper, inLoadingState) {

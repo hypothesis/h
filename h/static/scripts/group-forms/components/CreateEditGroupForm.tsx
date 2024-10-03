@@ -6,6 +6,7 @@ import {
   Input,
   RadioGroup,
   Textarea,
+  ModalDialog,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
@@ -17,6 +18,7 @@ import type {
 } from '../utils/api';
 import { setLocation } from '../utils/set-location';
 import SaveStateIcon from './SaveStateIcon';
+import WarningDialog from './WarningDialog';
 
 function Star() {
   return <span className="text-brand">*</span>;
@@ -133,6 +135,68 @@ function TextField({
   );
 }
 
+/**
+ * Dialog that warns users about existing annotations in a group being exposed
+ * or hidden from public view when the group type is changed.
+ */
+function GroupTypeChangeWarning({
+  name,
+  newType,
+  annotationCount: count,
+  onConfirm,
+  onCancel,
+}: {
+  /** Name of the group. */
+  name: string;
+
+  /**
+   * The new type for the group. If this is private, the old type is inferred
+   * to be public and vice-versa.
+   */
+  newType: GroupType;
+
+  /** Number of annotations in the group. */
+  annotationCount: number;
+
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const newTypeIsPrivate = newType === 'private';
+
+  let title;
+  let confirmAction;
+  let message;
+  if (newTypeIsPrivate) {
+    title = `Make ${count} annotations private?`;
+    confirmAction = 'Make annotations private';
+    message = `Are you sure you want to make "${name}" a private group? ${count} annotations that are publicly visible will become visible only to members of "${name}".`;
+  } else {
+    let groupDescription = 'a public group';
+    switch (newType) {
+      case 'open':
+        groupDescription = 'an open group';
+        break;
+      case 'restricted':
+        groupDescription = 'a restricted group';
+        break;
+    }
+
+    title = `Make ${count} annotations public?`;
+    confirmAction = 'Make annotations public';
+    message = `Are you sure you want to make "${name}" ${groupDescription}? ${count} annotations that are visible only to members of "${name}" will become publicly visible.`;
+  }
+
+  return (
+    <WarningDialog
+      title={title}
+      message={message}
+      confirmAction={confirmAction}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />
+  );
+}
+
 export default function CreateEditGroupForm() {
   const config = useMemo(() => readConfig(), []);
   const group = config.context.group;
@@ -141,6 +205,12 @@ export default function CreateEditGroupForm() {
   const [description, setDescription] = useState(group?.description ?? '');
   const [groupType, setGroupType] = useState<GroupType>(
     group?.type ?? 'private',
+  );
+
+  // Set when the user selects a new group type if confirmation is required.
+  // Cleared after confirmation.
+  const [pendingGroupType, setPendingGroupType] = useState<GroupType | null>(
+    null,
   );
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -249,6 +319,18 @@ export default function CreateEditGroupForm() {
 
   const groupTypeLabel = useId();
 
+  const changeGroupType = (newType: GroupType) => {
+    const count = group?.num_annotations ?? 0;
+    const oldTypeIsPrivate = groupType === 'private';
+    const newTypeIsPrivate = newType === 'private';
+
+    if (count === 0 || oldTypeIsPrivate === newTypeIsPrivate) {
+      setGroupType(newType);
+    } else {
+      setPendingGroupType(newType);
+    }
+  };
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
@@ -280,12 +362,12 @@ export default function CreateEditGroupForm() {
         {config.features.group_type && (
           <>
             <Label id={groupTypeLabel} text="Group type" />
-            <RadioGroup<GroupType>
+            <RadioGroup
               aria-labelledby={groupTypeLabel}
               data-testid="group-type"
               direction="vertical"
               selected={groupType}
-              onChange={setGroupType}
+              onChange={changeGroupType}
             >
               <RadioGroup.Radio
                 value="private"
@@ -335,6 +417,19 @@ export default function CreateEditGroupForm() {
           </Button>
         </div>
       </form>
+
+      {group && pendingGroupType && (
+        <GroupTypeChangeWarning
+          name={name}
+          newType={pendingGroupType}
+          annotationCount={group.num_annotations}
+          onCancel={() => setPendingGroupType(null)}
+          onConfirm={() => {
+            setGroupType(pendingGroupType);
+            setPendingGroupType(null);
+          }}
+        />
+      )}
 
       <footer className="mt-14 pt-4 border-t border-t-text-grey-6">
         <div className="flex">
