@@ -44,3 +44,6 @@ tests/py3-actual-failures.txt
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# TypeScript cache
+*.tsbuildinfo
