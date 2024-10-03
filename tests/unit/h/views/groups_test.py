@@ -10,7 +10,9 @@ from h.views import groups as views
 
 @pytest.mark.usefixtures("annotation_stats_service")
 class TestGroupCreateEditController:
-    def test_create(self, pyramid_request, assets_env, mocker):
+    @pytest.mark.parametrize("group_type_flag", [True, False])
+    def test_create(self, pyramid_request, assets_env, mocker, group_type_flag):
+        pyramid_request.feature.flags["group_type"] = group_type_flag
         mocker.spy(views, "get_csrf_token")
 
         controller = views.GroupCreateEditController(sentinel.context, pyramid_request)
@@ -22,7 +24,11 @@ class TestGroupCreateEditController:
             pyramid_request
         )
         assert result == {
-            "page_title": "Create a new private group",
+            "page_title": (
+                "Create a new group"
+                if group_type_flag
+                else "Create a new private group"
+            ),
             "js_config": {
                 "styles": assets_env.urls.return_value,
                 "api": {
@@ -35,6 +41,9 @@ class TestGroupCreateEditController:
                     }
                 },
                 "context": {"group": None},
+                "features": {
+                    "group_type": group_type_flag,
+                },
             },
         }
 
@@ -88,6 +97,9 @@ class TestGroupCreateEditController:
                         "num_annotations": annotation_stats_service.total_group_annotation_count.return_value,
                     }
                 },
+                "features": {
+                    "group_type": pyramid_request.feature.flags["group_type"],
+                },
             },
         }
 
@@ -99,6 +111,11 @@ class TestGroupCreateEditController:
     def pyramid_config(self, pyramid_config, assets_env):
         pyramid_config.registry["assets_env"] = assets_env
         return pyramid_config
+
+    @pytest.fixture(autouse=True)
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.feature.flags["group_type"] = True
+        return pyramid_request
 
 
 @pytest.mark.usefixtures("routes")

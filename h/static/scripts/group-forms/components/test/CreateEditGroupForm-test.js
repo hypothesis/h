@@ -28,6 +28,9 @@ describe('CreateEditGroupForm', () => {
       context: {
         group: null,
       },
+      features: {
+        group_type: false,
+      },
     };
 
     fakeCallAPI = sinon.stub();
@@ -187,21 +190,34 @@ describe('CreateEditGroupForm', () => {
     });
   });
 
-  it('displays a create-new-group form', async () => {
-    const { wrapper, elements } = createWrapper();
-    const headerEl = elements.header.element;
-    const nameEl = elements.name.fieldEl;
-    const descriptionEl = elements.description.fieldEl;
-    const submitButtonEl = elements.submitButton.element;
+  [
+    {
+      groupTypeFlag: true,
+      heading: 'Create a new group',
+    },
+    {
+      groupTypeFlag: false,
+      heading: 'Create a new private group',
+    },
+  ].forEach(({ groupTypeFlag, heading }) => {
+    it('displays a create-new-group form', async () => {
+      config.features.group_type = groupTypeFlag;
 
-    assert.equal(headerEl.text(), 'Create a new private group');
-    assert.equal(nameEl.getDOMNode().value, '');
-    assert.equal(descriptionEl.getDOMNode().value, '');
-    assert.equal(submitButtonEl.text(), 'Create group');
-    assert.isFalse(wrapper.exists('[data-testid="back-link"]'));
-    assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
-    await assertInLoadingState(wrapper, false);
-    assert.isFalse(savedConfirmationShowing(wrapper));
+      const { wrapper, elements } = createWrapper();
+      const headerEl = elements.header.element;
+      const nameEl = elements.name.fieldEl;
+      const descriptionEl = elements.description.fieldEl;
+      const submitButtonEl = elements.submitButton.element;
+
+      assert.equal(headerEl.text(), heading);
+      assert.equal(nameEl.getDOMNode().value, '');
+      assert.equal(descriptionEl.getDOMNode().value, '');
+      assert.equal(submitButtonEl.text(), 'Create group');
+      assert.isFalse(wrapper.exists('[data-testid="back-link"]'));
+      assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
+      await assertInLoadingState(wrapper, false);
+      assert.isFalse(savedConfirmationShowing(wrapper));
+    });
   });
 
   it('does not warn when leaving page if there are unsaved changes', () => {
