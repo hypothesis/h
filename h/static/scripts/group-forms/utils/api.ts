@@ -1,4 +1,21 @@
 /**
+ * Values for `type` field when creating or updating groups.
+ */
+export type GroupType = 'private' | 'restricted' | 'open';
+
+/**
+ * Request to create or update a group.
+ *
+ * See https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups/post
+ */
+export type CreateUpdateGroupAPIRequest = {
+  id?: string;
+  name: string;
+  description?: string;
+  type?: GroupType;
+};
+
+/**
  * A successful response from either h's create-new-group API or its update-group API:
  *
  * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups/post

@@ -4,11 +4,17 @@ import {
   Button,
   CancelIcon,
   Input,
+  RadioGroup,
   Textarea,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
-import { callAPI, CreateUpdateGroupAPIResponse } from '../utils/api';
+import { callAPI } from '../utils/api';
+import type {
+  CreateUpdateGroupAPIRequest,
+  CreateUpdateGroupAPIResponse,
+  GroupType,
+} from '../utils/api';
 import { setLocation } from '../utils/set-location';
 import SaveStateIcon from './SaveStateIcon';
 
@@ -41,16 +47,18 @@ function CharacterCounter({
 }
 
 function Label({
+  id,
   htmlFor,
   text,
   required,
 }: {
-  htmlFor: string;
+  id?: string;
+  htmlFor?: string;
   text: string;
   required?: boolean;
 }) {
   return (
-    <label htmlFor={htmlFor}>
+    <label className="font-bold" id={id} htmlFor={htmlFor}>
       {text}
       {required && <Star />}
     </label>
@@ -131,6 +139,10 @@ export default function CreateEditGroupForm() {
 
   const [name, setName] = useState(group?.name ?? '');
   const [description, setDescription] = useState(group?.description ?? '');
+  const [groupType, setGroupType] = useState<GroupType>(
+    group?.type ?? 'private',
+  );
+
   const [errorMessage, setErrorMessage] = useState('');
   const [saveState, setSaveState] = useState<
     'unmodified' | 'unsaved' | 'saving' | 'saved'
@@ -170,13 +182,16 @@ export default function CreateEditGroupForm() {
     setSaveState('saving');
 
     try {
+      const body: CreateUpdateGroupAPIRequest = {
+        name,
+        description,
+        type: groupType,
+      };
+
       response = (await callAPI(config.api.createGroup.url, {
         method: config.api.createGroup.method,
         headers: config.api.createGroup.headers,
-        json: {
-          name,
-          description,
-        },
+        json: body,
       })) as CreateUpdateGroupAPIResponse;
     } catch (apiError) {
       setErrorMessage(apiError.message);
@@ -195,10 +210,17 @@ export default function CreateEditGroupForm() {
     let response: CreateUpdateGroupAPIResponse;
 
     try {
+      const body: CreateUpdateGroupAPIRequest = {
+        id: group!.pubid,
+        name,
+        description,
+        type: groupType,
+      };
+
       response = (await callAPI(config.api.updateGroup!.url, {
         method: config.api.updateGroup!.method,
         headers: config.api.updateGroup!.headers,
-        json: { id: group!.pubid, name, description },
+        json: body,
       })) as CreateUpdateGroupAPIResponse;
 
       // Mark form as saved, unless user edited it while saving.
@@ -224,6 +246,8 @@ export default function CreateEditGroupForm() {
   } else {
     heading = 'Create a new private group';
   }
+
+  const groupTypeLabel = useId();
 
   return (
     <div className="text-grey-6 text-sm/relaxed">
@@ -253,7 +277,39 @@ export default function CreateEditGroupForm() {
           classes="h-24"
         />
 
-        <div className="flex items-center gap-x-4">
+        {config.features.group_type && (
+          <>
+            <Label id={groupTypeLabel} text="Group type" />
+            <RadioGroup<GroupType>
+              aria-labelledby={groupTypeLabel}
+              data-testid="group-type"
+              direction="vertical"
+              selected={groupType}
+              onChange={setGroupType}
+            >
+              <RadioGroup.Radio
+                value="private"
+                subtitle="Only members can create and read annotations."
+              >
+                Private
+              </RadioGroup.Radio>
+              <RadioGroup.Radio
+                value="restricted"
+                subtitle="Only members can create annotations, anyone can read them."
+              >
+                Restricted
+              </RadioGroup.Radio>
+              <RadioGroup.Radio
+                value="open"
+                subtitle="Anyone can create and read annotations."
+              >
+                Open
+              </RadioGroup.Radio>
+            </RadioGroup>
+          </>
+        )}
+
+        <div className="flex items-center gap-x-4 mt-2">
           <div data-testid="error-container" role="alert">
             {errorMessage && (
               <div

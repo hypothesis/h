@@ -1,4 +1,5 @@
 import { mount } from 'enzyme';
+import { act } from 'preact/test-utils';
 import { delay, waitForElement } from '@hypothesis/frontend-testing';
 
 import {
@@ -29,7 +30,7 @@ describe('CreateEditGroupForm', () => {
         group: null,
       },
       features: {
-        group_type: false,
+        group_type: true,
       },
     };
 
@@ -65,6 +66,18 @@ describe('CreateEditGroupForm', () => {
   /* Return true if component is in its error state. */
   const componentIsInErrorState = component => {
     return Boolean(component.prop('error'));
+  };
+
+  const getSelectedGroupType = wrapper => {
+    return wrapper.find('[data-testid="group-type"]').prop('selected');
+  };
+
+  const setSelectedGroupType = (wrapper, newType) => {
+    const radioGroup = wrapper.find('[data-testid="group-type"]');
+    act(() => {
+      radioGroup.prop('onChange')(newType);
+    });
+    wrapper.update();
   };
 
   const getElements = wrapper => {
@@ -215,6 +228,11 @@ describe('CreateEditGroupForm', () => {
       assert.equal(submitButtonEl.text(), 'Create group');
       assert.isFalse(wrapper.exists('[data-testid="back-link"]'));
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
+
+      if (groupTypeFlag) {
+        assert.equal(getSelectedGroupType(wrapper), 'private');
+      }
+
       await assertInLoadingState(wrapper, false);
       assert.isFalse(savedConfirmationShowing(wrapper));
     });
@@ -252,32 +270,49 @@ describe('CreateEditGroupForm', () => {
     assert.isFalse(savedConfirmationShowing(wrapper));
   });
 
-  it('creates the group and redirects the browser', async () => {
-    const { wrapper, elements } = createWrapper();
-    const nameEl = elements.name.fieldEl;
-    const descriptionEl = elements.description.fieldEl;
-    const groupURL = 'https://example.com/group/foo';
-    fakeCallAPI.resolves({ links: { html: groupURL } });
+  [
+    {
+      name: 'Test group name',
+      description: 'Test description',
+      type: 'private',
+    },
+    {
+      name: 'Test group name',
+      description: 'Test description',
+      type: 'restricted',
+    },
+    {
+      name: 'Test group name',
+      description: 'Test description',
+      type: 'open',
+    },
+  ].forEach(({ name, description, type }) => {
+    it('creates the group and redirects the browser', async () => {
+      const { wrapper, elements } = createWrapper();
+      const nameEl = elements.name.fieldEl;
+      const descriptionEl = elements.description.fieldEl;
+      const groupURL = 'https://example.com/group/foo';
+      fakeCallAPI.resolves({ links: { html: groupURL } });
 
-    const name = 'Test Group Name';
-    const description = 'Test description';
-    nameEl.getDOMNode().value = name;
-    nameEl.simulate('input');
-    descriptionEl.getDOMNode().value = description;
-    descriptionEl.simulate('input');
-    await wrapper.find('form[data-testid="form"]').simulate('submit');
+      nameEl.getDOMNode().value = name;
+      nameEl.simulate('input');
+      descriptionEl.getDOMNode().value = description;
+      descriptionEl.simulate('input');
+      setSelectedGroupType(wrapper, type);
 
-    assert.isTrue(
-      fakeCallAPI.calledOnceWithExactly(config.api.createGroup.url, {
+      await wrapper.find('form[data-testid="form"]').simulate('submit');
+
+      assert.calledOnceWithExactly(fakeCallAPI, config.api.createGroup.url, {
         method: config.api.createGroup.method,
         headers: config.api.createGroup.headers,
         json: {
           name,
           description,
+          type,
         },
-      }),
-    );
-    assert.isTrue(fakeSetLocation.calledOnceWithExactly(groupURL));
+      });
+      assert.calledOnceWithExactly(fakeSetLocation, groupURL);
+    });
   });
 
   it('shows an error message if callAPI() throws an error', async () => {
@@ -304,6 +339,9 @@ describe('CreateEditGroupForm', () => {
         name: 'Test Name',
         description: 'Test group description',
         link: 'https://example.com/groups/testid',
+
+        // Set this to a non-default value.
+        type: 'open',
       };
       config.api.updateGroup = {
         method: 'PATCH',
@@ -324,6 +362,7 @@ describe('CreateEditGroupForm', () => {
         descriptionEl.getDOMNode().value,
         config.context.group.description,
       );
+      assert.equal(getSelectedGroupType(wrapper), config.context.group.type);
       assert.equal(submitButtonEl.text(), 'Save changes');
       assert.isTrue(wrapper.exists('[data-testid="back-link"]'));
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
@@ -364,10 +403,14 @@ describe('CreateEditGroupForm', () => {
 
       const name = 'Edited Group Name';
       const description = 'Edited group description';
+      const newGroupType = 'restricted';
+
       nameEl.getDOMNode().value = name;
       nameEl.simulate('input');
       descriptionEl.getDOMNode().value = description;
       descriptionEl.simulate('input');
+      wrapper.find(`[data-value="${newGroupType}"]`).simulate('click');
+
       await wrapper.find('form[data-testid="form"]').simulate('submit');
 
       assert.isTrue(
@@ -378,6 +421,7 @@ describe('CreateEditGroupForm', () => {
             id: config.context.group.pubid,
             name,
             description,
+            type: newGroupType,
           },
         }),
       );
