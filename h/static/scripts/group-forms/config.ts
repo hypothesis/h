@@ -1,3 +1,5 @@
+import type { GroupType } from './utils/api';
+
 export type APIConfig = {
   method: string;
   url: string;
@@ -17,6 +19,7 @@ export type ConfigObject = {
       name: string;
       description: string;
       link: string;
+      type: GroupType;
     } | null;
   };
   features: {
