@@ -200,7 +200,7 @@ pycparser==2.21
     # via
     #   -r requirements/prod.txt
     #   cffi
-pycryptodomex==3.20.0
+pycryptodomex==3.21.0
     # via -r requirements/prod.txt
 pyjwt==2.9.0
     # via -r requirements/prod.txt
