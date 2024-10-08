@@ -324,7 +324,7 @@ traitlets==5.14.1
     # via
     #   ipython
     #   matplotlib-inline
-transaction==4.0
+transaction==5.0
     # via
     #   -r requirements/prod.txt
     #   pyramid-mailer
