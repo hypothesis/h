@@ -73,7 +73,3 @@ good-names = [
 [tool.pylint.reports]
 output-format = "colorized"
 score = "no"
-
-[tool.hdev]
-project_name = "h"
-project_type = "application"
