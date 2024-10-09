@@ -80,6 +80,15 @@ describe('CreateEditGroupForm', () => {
     wrapper.update();
   };
 
+  /** Save the form and wait until the request completes. */
+  async function saveChanges(wrapper) {
+    wrapper.find('form[data-testid="form"]').simulate('submit');
+    await waitForElement(
+      wrapper,
+      `button[data-testid="button"][disabled=false]`,
+    );
+  }
+
   const getElements = wrapper => {
     return {
       header: {
@@ -469,6 +478,8 @@ describe('CreateEditGroupForm', () => {
         await wrapper.find('form[data-testid="form"]').simulate('submit');
 
         if (field === 'type') {
+          // nb. Since the group has no annotations, the type will change
+          // immediately.
           setSelectedGroupType(wrapper, 'open');
         } else {
           const fieldEl = elements[field].fieldEl;
@@ -479,6 +490,31 @@ describe('CreateEditGroupForm', () => {
         await assertInLoadingState(wrapper, false);
         assert.isFalse(savedConfirmationShowing(wrapper));
       });
+    });
+
+    it('clears confirmation when type is changed with a warning', async () => {
+      // Trigger warning when changing group type
+      config.context.group = {
+        ...config.context.group,
+        num_annotations: 2,
+        type: 'private',
+      };
+      const { wrapper } = createWrapper();
+
+      fakeCallAPI.resolves();
+      await saveChanges(wrapper);
+      assert.isTrue(savedConfirmationShowing(wrapper));
+
+      // Change group type. The save state is not cleared immediately as a
+      // warning is shown.
+      setSelectedGroupType(wrapper, 'open');
+      assert.isTrue(savedConfirmationShowing(wrapper));
+
+      // When the change is confirmed, the form is marked as unsaved.
+      const warning = wrapper.find('WarningDialog');
+      act(() => warning.prop('onConfirm')());
+      wrapper.update();
+      assert.isFalse(savedConfirmationShowing(wrapper));
     });
   });
 
