@@ -327,11 +327,10 @@ export default function CreateEditGroupForm() {
 
     if (count === 0 || oldTypeIsPrivate === newTypeIsPrivate) {
       setGroupType(newType);
+      setSaveState('unsaved');
     } else {
       setPendingGroupType(newType);
     }
-
-    setSaveState('unsaved');
   };
 
   return (
@@ -429,6 +428,7 @@ export default function CreateEditGroupForm() {
           onCancel={() => setPendingGroupType(null)}
           onConfirm={() => {
             setGroupType(pendingGroupType);
+            setSaveState('unsaved');
             setPendingGroupType(null);
           }}
         />
