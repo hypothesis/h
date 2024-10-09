@@ -16,6 +16,7 @@ import type {
   CreateUpdateGroupAPIResponse,
   GroupType,
 } from '../utils/api';
+import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
 import SaveStateIcon from './SaveStateIcon';
 import WarningDialog from './WarningDialog';
@@ -167,9 +168,9 @@ function GroupTypeChangeWarning({
   let confirmAction;
   let message;
   if (newTypeIsPrivate) {
-    title = `Make ${count} annotations private?`;
+    title = `Make ${count} ${pluralize(count, 'annotation', 'annotations')} private?`;
     confirmAction = 'Make annotations private';
-    message = `Are you sure you want to make "${name}" a private group? ${count} annotations that are publicly visible will become visible only to members of "${name}".`;
+    message = `Are you sure you want to make "${name}" a private group? ${count} ${pluralize(count, 'annotation that is', 'annotations that are')} publicly visible will become visible only to members of "${name}".`;
   } else {
     let groupDescription = 'a public group';
     switch (newType) {
@@ -181,9 +182,9 @@ function GroupTypeChangeWarning({
         break;
     }
 
-    title = `Make ${count} annotations public?`;
+    title = `Make ${count} ${pluralize(count, 'annotation', 'annotations')} public?`;
     confirmAction = 'Make annotations public';
-    message = `Are you sure you want to make "${name}" ${groupDescription}? ${count} annotations that are visible only to members of "${name}" will become publicly visible.`;
+    message = `Are you sure you want to make "${name}" ${groupDescription}? ${count} ${pluralize(count, 'annotation that is', 'annotations that are')} visible only to members of "${name}" will become publicly visible.`;
   }
 
   return (
