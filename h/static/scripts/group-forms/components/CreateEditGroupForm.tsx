@@ -329,6 +329,8 @@ export default function CreateEditGroupForm() {
     } else {
       setPendingGroupType(newType);
     }
+
+    setSaveState('unsaved');
   };
 
   return (
