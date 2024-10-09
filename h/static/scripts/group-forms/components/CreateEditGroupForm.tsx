@@ -3,9 +3,7 @@ import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 import {
   Button,
   CancelIcon,
-  Input,
   RadioGroup,
-  Textarea,
   ModalDialog,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
@@ -18,123 +16,11 @@ import type {
 } from '../utils/api';
 import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
+import Star from './forms/Star';
+import Label from './forms/Label';
+import TextField from './forms/TextField';
 import SaveStateIcon from './SaveStateIcon';
 import WarningDialog from './WarningDialog';
-
-function Star() {
-  return <span className="text-brand">*</span>;
-}
-
-function CharacterCounter({
-  value,
-  limit,
-  testid,
-  error = false,
-}: {
-  value: number;
-  limit: number;
-  testid: string;
-  error?: boolean;
-}) {
-  return (
-    <div className="flex">
-      <div className="grow" />
-      <span
-        data-testid={testid}
-        className={error ? 'text-red-error font-bold' : undefined}
-      >
-        {value}/{limit}
-      </span>
-    </div>
-  );
-}
-
-function Label({
-  id,
-  htmlFor,
-  text,
-  required,
-}: {
-  id?: string;
-  htmlFor?: string;
-  text: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="font-bold" id={id} htmlFor={htmlFor}>
-      {text}
-      {required && <Star />}
-    </label>
-  );
-}
-
-function TextField({
-  type,
-  value,
-  onChangeValue,
-  minLength = 0,
-  maxLength,
-  label,
-  testid,
-  required = false,
-  autofocus = false,
-  classes = '',
-}: {
-  type: 'input' | 'textarea';
-  value: string;
-  onChangeValue: (newValue: string) => void;
-  minLength?: number;
-  maxLength: number;
-  label: string;
-  testid: string;
-  required?: boolean;
-  autofocus?: boolean;
-  classes?: string;
-}) {
-  const id = useId();
-  const [hasCommitted, setHasCommitted] = useState(false);
-
-  const handleInput = (e: InputEvent) => {
-    onChangeValue((e.target as HTMLInputElement).value);
-  };
-
-  const handleChange = (e: Event) => {
-    setHasCommitted(true);
-  };
-
-  let error = '';
-  if ([...value].length > maxLength) {
-    error = `Must be ${maxLength} characters or less.`;
-  } else if ([...value].length < minLength && hasCommitted) {
-    error = `Must be ${minLength} characters or more.`;
-  }
-
-  const InputComponent = type === 'input' ? Input : Textarea;
-
-  return (
-    <div className="mb-4">
-      <Label htmlFor={id} text={label} required={required} />
-      <InputComponent
-        id={id}
-        onInput={handleInput}
-        onChange={handleChange}
-        error={error}
-        value={value}
-        classes={classes}
-        autofocus={autofocus}
-        autocomplete="off"
-        required={required}
-        data-testid={testid}
-      />
-      <CharacterCounter
-        value={[...value].length}
-        limit={maxLength}
-        testid={`charcounter-${testid}`}
-        error={Boolean(error)}
-      />
-    </div>
-  );
-}
 
 /**
  * Dialog that warns users about existing annotations in a group being exposed
@@ -347,7 +233,6 @@ export default function CreateEditGroupForm() {
           minLength={3}
           maxLength={25}
           label="Name"
-          testid="name"
           autofocus
           required
         />
@@ -357,7 +242,6 @@ export default function CreateEditGroupForm() {
           onChangeValue={handleChangeDescription}
           maxLength={250}
           label="Description"
-          testid="description"
           classes="h-24"
         />
 
