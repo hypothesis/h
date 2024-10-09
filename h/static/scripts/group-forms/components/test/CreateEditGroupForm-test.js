@@ -273,7 +273,7 @@ describe('CreateEditGroupForm', () => {
     const { wrapper } = createWrapper();
     fakeCallAPI.resolves({ links: { html: 'https://example.com/group/foo' } });
 
-    await wrapper.find('form[data-testid="form"]').simulate('submit');
+    wrapper.find('form[data-testid="form"]').simulate('submit');
 
     await assertInLoadingState(wrapper, true);
     assert.isFalse(savedConfirmationShowing(wrapper));
@@ -309,7 +309,8 @@ describe('CreateEditGroupForm', () => {
       descriptionEl.simulate('input');
       setSelectedGroupType(wrapper, type);
 
-      await wrapper.find('form[data-testid="form"]').simulate('submit');
+      wrapper.find('form[data-testid="form"]').simulate('submit');
+      await delay(0);
 
       assert.calledOnceWithExactly(fakeCallAPI, config.api.createGroup.url, {
         method: config.api.createGroup.method,
@@ -420,7 +421,7 @@ describe('CreateEditGroupForm', () => {
       descriptionEl.simulate('input');
       wrapper.find(`[data-value="${newGroupType}"]`).simulate('click');
 
-      await wrapper.find('form[data-testid="form"]').simulate('submit');
+      wrapper.find('form[data-testid="form"]').simulate('submit');
 
       assert.isTrue(
         fakeCallAPI.calledOnceWithExactly(config.api.updateGroup.url, {
@@ -449,7 +450,7 @@ describe('CreateEditGroupForm', () => {
       const { wrapper } = createWrapper();
       fakeCallAPI.resolves();
 
-      await wrapper.find('form[data-testid="form"]').simulate('submit');
+      wrapper.find('form[data-testid="form"]').simulate('submit');
 
       await assertInLoadingState(wrapper, false);
       assert.isTrue(savedConfirmationShowing(wrapper));
@@ -475,7 +476,7 @@ describe('CreateEditGroupForm', () => {
       it('clears the confirmation if fields are edited again', async () => {
         const { wrapper, elements } = createWrapper();
         fakeCallAPI.resolves();
-        await wrapper.find('form[data-testid="form"]').simulate('submit');
+        wrapper.find('form[data-testid="form"]').simulate('submit');
 
         if (field === 'type') {
           // nb. Since the group has no annotations, the type will change
