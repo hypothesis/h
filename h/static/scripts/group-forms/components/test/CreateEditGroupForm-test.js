@@ -56,18 +56,6 @@ describe('CreateEditGroupForm', () => {
     $imports.$restore();
   });
 
-  /* Return true if counterEl is in its error state. */
-  const counterIsInErrorState = counterEl => {
-    return (
-      counterEl.hasClass('text-red-error') && counterEl.hasClass('font-bold')
-    );
-  };
-
-  /* Return true if component is in its error state. */
-  const componentIsInErrorState = component => {
-    return Boolean(component.prop('error'));
-  };
-
   const getSelectedGroupType = wrapper => {
     return wrapper.find('[data-testid="group-type"]').prop('selected');
   };
@@ -91,23 +79,10 @@ describe('CreateEditGroupForm', () => {
 
   const getElements = wrapper => {
     return {
-      header: {
-        element: wrapper.find('[data-testid="header"]'),
-      },
-      name: {
-        counterEl: wrapper.find('[data-testid="charcounter-name"]'),
-        fieldComponent: wrapper.find('Input[data-testid="name"]'),
-        fieldEl: wrapper.find('input[data-testid="name"]'),
-      },
-      description: {
-        counterEl: wrapper.find('[data-testid="charcounter-description"]'),
-        fieldComponent: wrapper.find('Textarea[data-testid="description"]'),
-        fieldEl: wrapper.find('textarea[data-testid="description"]'),
-      },
-      submitButton: {
-        component: wrapper.find('Button[data-testid="button"]'),
-        element: wrapper.find('button[data-testid="button"]'),
-      },
+      header: wrapper.find('[data-testid="header"]'),
+      nameField: wrapper.find('TextField[label="Name"]'),
+      descriptionField: wrapper.find('TextField[label="Description"]'),
+      submitButton: wrapper.find('button[data-testid="button"]'),
     };
   };
 
@@ -130,90 +105,6 @@ describe('CreateEditGroupForm', () => {
 
   [
     {
-      field: 'name',
-      maxLength: 25,
-    },
-    {
-      field: 'description',
-      maxLength: 250,
-    },
-  ].forEach(({ field, maxLength }) => {
-    describe(`${field} character counter`, () => {
-      it('renders a character counter', () => {
-        const { counterEl, fieldComponent } = createWrapper().elements[field];
-
-        assert.equal(counterEl.text(), `0/${maxLength}`);
-        assert.isNotOk(counterIsInErrorState(counterEl));
-        assert.isNotOk(componentIsInErrorState(fieldComponent));
-      });
-
-      it("changes the count when the field's text changes", () => {
-        const { wrapper, elements } = createWrapper();
-        const fieldEl = elements[field].fieldEl;
-
-        fieldEl.getDOMNode().value = 'new text';
-        fieldEl.simulate('input');
-
-        const { counterEl, fieldComponent } = getElements(wrapper)[field];
-        assert.equal(counterEl.text(), `8/${maxLength}`);
-        assert.isNotOk(counterIsInErrorState(counterEl));
-        assert.isNotOk(componentIsInErrorState(fieldComponent));
-      });
-
-      it('goes into an error state when too many characters are entered', () => {
-        const { wrapper, elements } = createWrapper();
-        const fieldEl = elements[field].fieldEl;
-
-        fieldEl.getDOMNode().value = 'a'.repeat(maxLength + 1);
-        fieldEl.simulate('input');
-
-        const { counterEl, fieldComponent } = getElements(wrapper)[field];
-        assert.isOk(counterIsInErrorState(counterEl));
-        assert.isOk(componentIsInErrorState(fieldComponent));
-      });
-    });
-  });
-
-  describe('name field', () => {
-    it("doesn't go into an error state when too few characters are only input but not committed", () => {
-      const { wrapper, elements } = createWrapper();
-      const fieldEl = elements.name.fieldEl;
-
-      fieldEl.getDOMNode().value = 'aa';
-      fieldEl.simulate('input');
-
-      const { counterEl, fieldComponent } = getElements(wrapper).name;
-      assert.isNotOk(counterIsInErrorState(counterEl));
-      assert.isNotOk(componentIsInErrorState(fieldComponent));
-    });
-
-    it('goes into an error state when too few characters are committed', () => {
-      const { wrapper, elements } = createWrapper();
-      const fieldEl = elements.name.fieldEl;
-
-      // Too few characters are entered into the field and the field is then
-      // "committed" (e.g. the focus leaves the field, or the form is
-      // submitted.)
-      fieldEl.getDOMNode().value = 'aa';
-      fieldEl.simulate('change');
-
-      // The field and its character counter go into their error states.
-      let { counterEl, fieldComponent } = getElements(wrapper).name;
-      assert.isOk(counterIsInErrorState(counterEl));
-      assert.isOk(componentIsInErrorState(fieldComponent));
-
-      // If enough characters are then just input into the field (they don't
-      // have to be committed) then the error state is already cleared.
-      fieldEl.getDOMNode().value = 'aaa';
-      fieldEl.simulate('input');
-      ({ counterEl, fieldComponent } = getElements(wrapper).name);
-      assert.isNotOk(counterIsInErrorState(counterEl));
-      assert.isNotOk(componentIsInErrorState(fieldComponent));
-    });
-  });
-
-  [
-    {
       groupTypeFlag: true,
       heading: 'Create a new group',
     },
@@ -226,15 +117,12 @@ describe('CreateEditGroupForm', () => {
       config.features.group_type = groupTypeFlag;
 
       const { wrapper, elements } = createWrapper();
-      const headerEl = elements.header.element;
-      const nameEl = elements.name.fieldEl;
-      const descriptionEl = elements.description.fieldEl;
-      const submitButtonEl = elements.submitButton.element;
+      const { header, nameField, descriptionField, submitButton } = elements;
 
-      assert.equal(headerEl.text(), heading);
-      assert.equal(nameEl.getDOMNode().value, '');
-      assert.equal(descriptionEl.getDOMNode().value, '');
-      assert.equal(submitButtonEl.text(), 'Create group');
+      assert.equal(header.text(), heading);
+      assert.equal(nameField.prop('value'), '');
+      assert.equal(descriptionField.prop('value'), '');
+      assert.equal(submitButton.text(), 'Create group');
       assert.isFalse(wrapper.exists('[data-testid="back-link"]'));
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
 
@@ -249,10 +137,10 @@ describe('CreateEditGroupForm', () => {
 
   it('does not warn when leaving page if there are unsaved changes', () => {
     const { elements } = createWrapper();
-    const nameEl = elements.name.fieldEl;
 
-    nameEl.getDOMNode().value = 'modified';
-    nameEl.simulate('input');
+    act(() => {
+      elements.nameField.prop('onChangeValue')('modified');
+    });
 
     // Warnings about unsaved changes are only enabled when editing a group.
     // See notes in the implementation.
@@ -298,15 +186,12 @@ describe('CreateEditGroupForm', () => {
   ].forEach(({ name, description, type }) => {
     it('creates the group and redirects the browser', async () => {
       const { wrapper, elements } = createWrapper();
-      const nameEl = elements.name.fieldEl;
-      const descriptionEl = elements.description.fieldEl;
+      const { nameField, descriptionField } = elements;
       const groupURL = 'https://example.com/group/foo';
       fakeCallAPI.resolves({ links: { html: groupURL } });
 
-      nameEl.getDOMNode().value = name;
-      nameEl.simulate('input');
-      descriptionEl.getDOMNode().value = description;
-      descriptionEl.simulate('input');
+      nameField.prop('onChangeValue')(name);
+      descriptionField.prop('onChangeValue')(description);
       setSelectedGroupType(wrapper, type);
 
       wrapper.find('form[data-testid="form"]').simulate('submit');
@@ -361,19 +246,16 @@ describe('CreateEditGroupForm', () => {
 
     it('displays an edit-group form', async () => {
       const { wrapper, elements } = createWrapper();
-      const headerEl = elements.header.element;
-      const nameEl = elements.name.fieldEl;
-      const descriptionEl = elements.description.fieldEl;
-      const submitButtonEl = elements.submitButton.element;
+      const { header, nameField, descriptionField, submitButton } = elements;
 
-      assert.equal(headerEl.text(), 'Edit group');
-      assert.equal(nameEl.getDOMNode().value, config.context.group.name);
+      assert.equal(header.text(), 'Edit group');
+      assert.equal(nameField.prop('value'), config.context.group.name);
       assert.equal(
-        descriptionEl.getDOMNode().value,
+        descriptionField.prop('value'),
         config.context.group.description,
       );
       assert.equal(getSelectedGroupType(wrapper), config.context.group.type);
-      assert.equal(submitButtonEl.text(), 'Save changes');
+      assert.equal(submitButton.text(), 'Save changes');
       assert.isTrue(wrapper.exists('[data-testid="back-link"]'));
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
       await assertInLoadingState(wrapper, false);
@@ -382,9 +264,12 @@ describe('CreateEditGroupForm', () => {
 
     it('warns when closing tab if there are unsaved changes', async () => {
       const { wrapper, elements } = createWrapper();
+      const { nameField, descriptionField } = elements;
       assert.isFalse(pageUnloadWarningActive());
 
-      elements.name.fieldEl.simulate('input');
+      act(() => {
+        nameField.prop('onChangeValue')('foo');
+      });
       assert.isTrue(pageUnloadWarningActive());
 
       wrapper.find('form[data-testid="form"]').simulate('submit');
@@ -396,29 +281,32 @@ describe('CreateEditGroupForm', () => {
       assert.isFalse(pageUnloadWarningActive());
 
       // Warning should be re-enabled if we then edit the form again.
-      elements.description.fieldEl.simulate('input');
+      act(() => {
+        descriptionField.prop('onChangeValue')('bar');
+      });
       assert.isTrue(pageUnloadWarningActive());
 
       // Warning should remain active if form is edited while being saved.
       wrapper.find('form[data-testid="form"]').simulate('submit');
-      elements.name.fieldEl.simulate('input');
+      act(() => {
+        nameField.prop('onChangeValue')('bar');
+      });
       await delay(0);
       assert.isTrue(pageUnloadWarningActive());
     });
 
     it('updates the group', async () => {
       const { wrapper, elements } = createWrapper();
-      const nameEl = elements.name.fieldEl;
-      const descriptionEl = elements.description.fieldEl;
+      const { nameField, descriptionField } = elements;
 
       const name = 'Edited Group Name';
       const description = 'Edited group description';
       const newGroupType = 'restricted';
 
-      nameEl.getDOMNode().value = name;
-      nameEl.simulate('input');
-      descriptionEl.getDOMNode().value = description;
-      descriptionEl.simulate('input');
+      act(() => {
+        nameField.prop('onChangeValue')(name);
+        descriptionField.prop('onChangeValue')(description);
+      });
       wrapper.find(`[data-value="${newGroupType}"]`).simulate('click');
 
       wrapper.find('form[data-testid="form"]').simulate('submit');
@@ -482,10 +370,10 @@ describe('CreateEditGroupForm', () => {
           // nb. Since the group has no annotations, the type will change
           // immediately.
           setSelectedGroupType(wrapper, 'open');
-        } else {
-          const fieldEl = elements[field].fieldEl;
-          fieldEl.getDOMNode().value = 'new text';
-          fieldEl.simulate('input');
+        } else if (field === 'name') {
+          elements.nameField.prop('onChangeValue')('new text');
+        } else if (field === 'description') {
+          elements.descriptionField.prop('onChangeValue')('new text');
         }
 
         await assertInLoadingState(wrapper, false);
