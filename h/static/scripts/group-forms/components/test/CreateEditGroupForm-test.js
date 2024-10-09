@@ -462,15 +462,19 @@ describe('CreateEditGroupForm', () => {
       assert.isFalse(savedConfirmationShowing(wrapper));
     });
 
-    ['name', 'description'].forEach(field => {
+    ['name', 'description', 'type'].forEach(field => {
       it('clears the confirmation if fields are edited again', async () => {
         const { wrapper, elements } = createWrapper();
-        const fieldEl = elements[field].fieldEl;
         fakeCallAPI.resolves();
         await wrapper.find('form[data-testid="form"]').simulate('submit');
 
-        fieldEl.getDOMNode().value = 'new text';
-        fieldEl.simulate('input');
+        if (field === 'type') {
+          setSelectedGroupType(wrapper, 'open');
+        } else {
+          const fieldEl = elements[field].fieldEl;
+          fieldEl.getDOMNode().value = 'new text';
+          fieldEl.simulate('input');
+        }
 
         await assertInLoadingState(wrapper, false);
         assert.isFalse(savedConfirmationShowing(wrapper));
