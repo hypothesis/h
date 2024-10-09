@@ -504,6 +504,18 @@ describe('CreateEditGroupForm', () => {
       },
     },
     {
+      // Warn when making annotations public (singular)
+      oldType: 'private',
+      newType: 'open',
+      annotationCount: 1,
+      expectedWarning: {
+        title: 'Make 1 annotation public?',
+        message:
+          'Are you sure you want to make "Test Name" an open group? 1 annotation that is visible only to members of "Test Name" will become publicly visible.',
+        confirmAction: 'Make annotations public',
+      },
+    },
+    {
       // Warn when making annotations public (restricted group)
       oldType: 'private',
       newType: 'restricted',
@@ -524,6 +536,18 @@ describe('CreateEditGroupForm', () => {
         title: 'Make 3 annotations private?',
         message:
           'Are you sure you want to make "Test Name" a private group? 3 annotations that are publicly visible will become visible only to members of "Test Name".',
+        confirmAction: 'Make annotations private',
+      },
+    },
+    {
+      // Warn when making annotations private (singular)
+      oldType: 'open',
+      newType: 'private',
+      annotationCount: 1,
+      expectedWarning: {
+        title: 'Make 1 annotation private?',
+        message:
+          'Are you sure you want to make "Test Name" a private group? 1 annotation that is publicly visible will become visible only to members of "Test Name".',
         confirmAction: 'Make annotations private',
       },
     },
