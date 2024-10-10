@@ -152,10 +152,10 @@ class TestCreateOpenGroup:
 
         assert group.creator == creator
 
-    def test_it_does_not_add_group_creator_to_members(self, svc, creator, origins):
+    def test_it_adds_group_creator_to_members(self, svc, creator, origins):
         group = svc.create_open_group("Anteater fans", creator.userid, scopes=origins)
 
-        assert creator not in group.members
+        assert creator in group.members
 
     @pytest.mark.parametrize(
         "flag,expected_value",
@@ -213,12 +213,12 @@ class TestCreateOpenGroup:
 
         assert group in db_session
 
-    def test_it_does_not_publish_join_event(self, svc, creator, publish, origins):
-        svc.create_open_group(
+    def test_it_publishes_join_event(self, svc, creator, publish, origins):
+        group = svc.create_open_group(
             "Dishwasher disassemblers", creator.userid, scopes=origins
         )
 
-        publish.assert_not_called()
+        publish.assert_called_once_with("group-join", group.pubid, creator.userid)
 
     @pytest.mark.parametrize(
         "origins",
