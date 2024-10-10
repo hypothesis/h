@@ -421,7 +421,7 @@ class TestGroupSearchController:
         result = controller.search()
 
         actual = {m["username"] for m in result["group_users_args"][1]}
-        expected = {test_group.creator.username}
+        expected = {member.username for member in test_group.members}
         assert actual == expected
 
     @pytest.mark.parametrize(
@@ -435,7 +435,7 @@ class TestGroupSearchController:
         result = controller.search()
 
         actual = {m["userid"] for m in result["group_users_args"][1]}
-        expected = {test_group.creator.userid}
+        expected = {member.userid for member in test_group.members}
         assert actual == expected
 
     @pytest.mark.parametrize(
@@ -675,18 +675,6 @@ class TestGroupSearchController:
         userids = [i["userid"] for i in info[1]]
         for member in test_group.members:
             assert member.userid in userids
-
-        search.reset_mock()
-
-    @pytest.mark.parametrize("test_group", [("open_group")], indirect=["test_group"])
-    def test_search_sets_display_members_for_open_group(
-        self, controller, test_group, search
-    ):
-        info = controller.search()["group_users_args"]
-        userids = [i["userid"] for i in info[1]]
-
-        # At the moment, for an open group we return the group creator as the moderator
-        assert userids == [test_group.creator.userid]
 
         search.reset_mock()
 

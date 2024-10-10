@@ -51,15 +51,6 @@ class OpenGroup(Group):
     joinable_by = None
     readable_by = ReadableBy.world
     writeable_by = WriteableBy.authority
-    members = []
-
-    @factory.post_generation
-    def add_creator_as_member(  # pylint:disable=no-self-argument
-        _obj, _create, _extracted, **_kwargs
-    ):
-        # Open groups don't have members, so don't add group.creator to
-        # group.members for open groups.
-        pass
 
 
 class RestrictedGroup(Group):

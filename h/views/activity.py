@@ -95,7 +95,7 @@ class GroupSearchController(SearchController):
         self.group = context.group
 
     @view_config(request_method="GET")
-    def search(self):  # pylint: disable=too-complex
+    def search(self):
         result = self._check_access_permissions()
         if result is not None:
             return result
@@ -114,29 +114,19 @@ class GroupSearchController(SearchController):
 
         users_aggregation = result["search_results"].aggregations.get("users", [])
 
-        if self.group.type == "open":
-            # For open groups show the group's creator (if any) as its only member.
-            if self.group.creator:
-                members = [self.group.creator]
-            else:
-                members = []
-        else:
-            # For other types of groups show the list of members.
-            members = self.group.members
-
         members = [
             {
-                "username": u.username,
-                "userid": u.userid,
-                "count": user_annotation_count(users_aggregation, u.userid),
+                "username": user.username,
+                "userid": user.userid,
+                "count": user_annotation_count(users_aggregation, user.userid),
                 "faceted_by": _faceted_by_user(
-                    self.request, u.username, self.parsed_query_params
+                    self.request, user.username, self.parsed_query_params
                 ),
             }
-            for u in members
+            for user in sorted(
+                self.group.members, key=lambda user: user.username.lower()
+            )
         ]
-
-        members = sorted(members, key=lambda k: k["username"].lower())
 
         group_annotation_count = self._get_total_annotations_in_group(
             result, self.request
