@@ -150,7 +150,10 @@ def update(context: GroupContext, request):
 )
 def read_members(context: GroupContext, _request):
     """Fetch the members of a group."""
-    return [UserJSONPresenter(user).asdict() for user in context.group.members]
+    return [
+        dict(role=membership.role, **UserJSONPresenter(membership.user).asdict())
+        for membership in context.group.memberships
+    ]
 
 
 @api_config(

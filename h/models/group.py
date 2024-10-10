@@ -47,6 +47,10 @@ class GroupMembership(Base):
         nullable=False,
         index=True,
     )
+    role = sa.Column(sa.UnicodeText(), nullable=False, server_default="member")
+
+    user = sa.orm.relationship("User")
+    group = sa.orm.relationship("Group")
 
 
 class Group(Base, mixins.Timestamps):
@@ -138,12 +142,34 @@ class Group(Base, mixins.Timestamps):
             self.authority_provided_id = groupid_parts["authority_provided_id"]
             self.authority = groupid_parts["authority"]
 
-    # Group membership
+    # List of all users who're members of this group (regardless of role).
     members = sa.orm.relationship(
         "User",
         secondary="user_group",
         backref=sa.orm.backref("groups", order_by="Group.name"),
     )
+
+    # List of GroupMembership's for all memberships of this group.
+    memberships = sa.orm.relationship(GroupMembership)
+
+    @property
+    def owners(self):
+        return self._members_with_role("owner")
+
+    @property
+    def admins(self):
+        return self._members_with_role("admin")
+
+    @property
+    def moderators(self):
+        return self._members_with_role("moderator")
+
+    def _members_with_role(self, role):
+        return [
+            membership.user
+            for membership in self.memberships
+            if membership.role == role
+        ]
 
     scopes = sa.orm.relationship(
         "GroupScope", backref="group", cascade="all, delete-orphan"

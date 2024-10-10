@@ -50,10 +50,14 @@ PERMISSION_MAP = {
     ],
     Permission.Group.EDIT: [
         [p.group_matches_authenticated_client_authority],
-        [p.group_created_by_user],
+        [p.group_has_user_as_owner],
     ],
     Permission.Group.MEMBER_ADD: [[p.group_matches_authenticated_client_authority]],
-    Permission.Group.MODERATE: [[p.group_created_by_user]],
+    Permission.Group.MODERATE: [
+        [p.group_has_user_as_owner],
+        [p.group_has_user_as_admin],
+        [p.group_has_user_as_moderator],
+    ],
     # --------------------------------------------------------------------- #
     # Annotations
     Permission.Annotation.CREATE: [[p.authenticated]],

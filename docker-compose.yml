@@ -8,8 +8,6 @@ services:
         interval: 1s
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
-    networks:
-      - dbs
   elasticsearch:
     image: hypothesis/elasticsearch:latest
     ports:
@@ -25,10 +23,3 @@ services:
     ports:
       - '127.0.0.1:5672:5672'
       - '127.0.0.1:15672:15672'
-
-networks:
-  # This external network allows FDW connections between H, LMS and report DBs.
-  # To avoid having unnecessary dependencies between the projects
-  # the network is created with `docker network create dbs` in each project's Makefile (make services)
-  dbs:
-    external: true

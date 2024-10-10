@@ -158,16 +158,6 @@ class TestGroupPredicates:
 
         assert result == (joinable_by == JoinableBy.authority)
 
-    def test_group_created_by_user(self, identity, group_context, factories):
-        group_context.group.creator = None
-        assert not predicates.group_created_by_user(identity, group_context)
-
-        group_context.group.creator = factories.User.build(id="different_user")
-        assert not predicates.group_created_by_user(identity, group_context)
-
-        group_context.group.creator.id = identity.user.id
-        assert predicates.group_created_by_user(identity, group_context)
-
     @pytest.mark.parametrize("matching", (True, False))
     def test_group_has_user_as_member(
         self, group_context, identity, factories, matching

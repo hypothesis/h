@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from h.models import Group
+from h.models import Group, User
 
 
 @dataclass
@@ -32,3 +32,33 @@ class GroupRequiredRoot(GroupRoot):
             raise KeyError()
 
         return group_context
+
+
+class RemoveMemberRoot:
+    def __init__(self, request):
+        self.request = request
+        self.group_service = request.find_service(name="group")
+        self.user_service = request.find_service(name="user")
+
+    def __getitem__(self, group_id, user_id):
+        return RemoveMemberContext(
+            self.group_service.fetch(group_id),
+            self.user_service.fetch(user_id),
+        )
+
+
+class RemoveMemberContext:
+    """The context class for the remove-group-member API."""
+
+    def __init__(self, group: Group, user: User):
+        self.group = group
+        self.user = user
+
+
+class EditMemberContext:
+    """The context class for the edit-group-member API."""
+
+    def __init__(self, group: Group, user: User, new_role: str):
+        self.group = group
+        self.user = user
+        self.new_role = new_role
