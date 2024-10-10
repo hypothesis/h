@@ -71,7 +71,7 @@ class TestAddMembers:
 
         group_members_service.add_members(group, userids)
 
-        assert group.members == users
+        assert all(user in group.members for user in users)
 
     def test_it_does_not_remove_existing_members(
         self, factories, group_members_service
@@ -132,7 +132,7 @@ class TestUpdateMembers:
         group_members_service.member_join = mock.Mock()
         group_members_service.member_leave = mock.Mock()
 
-        group = factories.OpenGroup()  # no members at outset
+        group = factories.OpenGroup()
         new_members = [factories.User(), factories.User()]
         group.members.append(new_members[0])
 
@@ -141,8 +141,11 @@ class TestUpdateMembers:
         group_members_service.member_join.assert_called_once_with(
             group, new_members[1].userid
         )
-        group_members_service.member_leave.assert_called_once_with(
-            group, new_members[0].userid
+        assert sorted(group_members_service.member_leave.call_args_list) == sorted(
+            [
+                mock.call(group, group.creator.userid),
+                mock.call(group, new_members[0].userid),
+            ]
         )
 
     def test_it_does_not_add_duplicate_members(self, factories, group_members_service):
