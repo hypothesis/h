@@ -27,7 +27,7 @@ class ReadableBy(enum.Enum):
 
 
 class WriteableBy(enum.Enum):
-    members = "members"
+    authority = "authority"
 
 
 class User(Base):
@@ -60,7 +60,7 @@ def upgrade():
         select(Group)
         .where(Group.joinable_by == None)
         .where(Group.readable_by == ReadableBy.world)
-        .where(Group.writeable_by == WriteableBy.members)
+        .where(Group.writeable_by == WriteableBy.authority)
     )
 
     results = defaultdict(lambda: 0)
