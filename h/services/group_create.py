@@ -36,7 +36,6 @@ class GroupCreateService:
             userid=userid,
             type_flags=GROUP_TYPE_FLAGS["private"],
             scopes=[],
-            add_creator_as_member=True,
             **kwargs,
         )
 
@@ -60,7 +59,6 @@ class GroupCreateService:
             userid=userid,
             type_flags=GROUP_TYPE_FLAGS["open"],
             scopes=scopes,
-            add_creator_as_member=False,
             **kwargs,
         )
 
@@ -85,13 +83,10 @@ class GroupCreateService:
             userid=userid,
             type_flags=GROUP_TYPE_FLAGS["restricted"],
             scopes=scopes,
-            add_creator_as_member=True,
             **kwargs,
         )
 
-    def _create(  # pylint: disable=too-many-arguments
-        self, name, userid, type_flags, scopes, add_creator_as_member, **kwargs
-    ):
+    def _create(self, name, userid, type_flags, scopes, **kwargs):
         """
         Create a group and save it to the DB.
 
@@ -100,7 +95,6 @@ class GroupCreateService:
         :param type_flags: the type of this group
         :param scopes: the list of scopes (URIs) that the group will be scoped to
         :type scopes: list(str)
-        :param add_creator_as_member: if the group creator should be added as a member
         :param kwargs: optional attributes to set on the group, as keyword
             arguments
         """
@@ -132,10 +126,8 @@ class GroupCreateService:
         # self.publish() or `return group`.
         self.db.flush()
 
-        if add_creator_as_member:
-            group.members.append(group.creator)
-
-            self.publish("group-join", group.pubid, group.creator.userid)
+        group.members.append(group.creator)
+        self.publish("group-join", group.pubid, group.creator.userid)
 
         return group
 
