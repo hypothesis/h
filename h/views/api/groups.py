@@ -4,7 +4,7 @@ from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.security import Permission
-from h.traversal import GroupContext, GroupMembershipContext
+from h.traversal import EditGroupMembershipContext, GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -165,6 +165,26 @@ def remove_member(context: GroupMembershipContext, request):
     group_members_service.member_leave(context.group, context.user.userid)
 
     return HTTPNoContent()
+
+
+@api_config(
+    versions=["v1", "v2"],
+    route_name="api.group_member",
+    request_method="PATCH",
+    link_name="group.member.edit",
+    description="Change the role of a group member.",
+)
+def edit_member(request):
+    appstruct = EditGroupAPISchema().validate(_json_payload(request))
+
+    context = EditGroupMembershipContext(
+        request.context.group, request.context.user, appstruct["role"]
+    )
+
+    if not request.has_permission(Permission.Group.MEMBER_EDIT, context):
+        raise HTTPNotFound()
+
+    # Now go ahead and edit the membership...
 
 
 @api_config(

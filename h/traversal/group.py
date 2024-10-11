@@ -63,3 +63,10 @@ class GroupMembershipContext:
     def __init__(self, group: Group | None, user: User | None):
         self.group = group
         self.user = user
+
+
+class EditGroupMembershipContext:
+    def __init__(self, group: Group | None, user: User | None, role: str):
+        self.group = group
+        self.user = user
+        self.role = role

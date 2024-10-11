@@ -43,6 +43,9 @@ class Permission:
         MEMBER_REMOVE = "group:member:remove"
         """Remove a member from a group."""
 
+        MEMBER_EDIT = "group:member:edit"
+        """Change the role of a group member."""
+
     class Annotation(Enum):
         """Permissions relating to annotations."""
 
