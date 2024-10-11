@@ -159,8 +159,7 @@ def includeme(config):  # pylint: disable=too-many-statements
     config.add_route(
         "api.group_member",
         "/api/groups/{pubid}/members/{userid}",
-        factory="h.traversal.GroupRequiredRoot",
-        traverse="/{pubid}",
+        factory="h.traversal.group_membership_api_factory",
     )
     config.add_route("api.search", "/api/search")
     config.add_route("api.users", "/api/users", factory="h.traversal.UserRoot")

@@ -1,15 +1,10 @@
-from pyramid.httpexceptions import (
-    HTTPBadRequest,
-    HTTPConflict,
-    HTTPNoContent,
-    HTTPNotFound,
-)
+from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.security import Permission
-from h.traversal import GroupContext
+from h.traversal import GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -151,7 +146,7 @@ def update(context: GroupContext, request):
 def read_members(context: GroupContext, _request):
     """Fetch the members of a group."""
     return [
-        dict(role=membership.role, **UserJSONPresenter(membership.user).asdict())
+        {"role": membership.role, **UserJSONPresenter(membership.user).asdict()}
         for membership in context.group.memberships
     ]
 
@@ -161,19 +156,13 @@ def read_members(context: GroupContext, _request):
     route_name="api.group_member",
     request_method="DELETE",
     link_name="group.member.delete",
-    description="Remove the current user from a group",
-    is_authenticated=True,
+    description="Remove a member from a group",
+    permission=Permission.Group.MEMBER_REMOVE,
 )
-def remove_member(context: GroupContext, request):
+def remove_member(context: GroupMembershipContext, request):
     """Remove a member from the given group."""
-    # Currently, we only support removing the requesting user
-    if request.matchdict.get("userid") == "me":
-        userid = request.authenticated_userid
-    else:
-        raise HTTPBadRequest('Only the "me" user value is currently supported')
-
     group_members_service = request.find_service(name="group_members")
-    group_members_service.member_leave(context.group, userid)
+    group_members_service.member_leave(context.group, context.user.userid)
 
     return HTTPNoContent()
 

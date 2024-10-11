@@ -13,6 +13,7 @@ group.
 from itertools import chain
 
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
+from h.traversal import GroupMembershipContext
 
 
 def requires(*parent_predicates):
@@ -171,6 +172,24 @@ def group_matches_user_authority(identity, context):
 @requires(authenticated_client, group_found)
 def group_matches_authenticated_client_authority(identity, context):
     return context.group.authority == identity.auth_client.authority
+
+
+@requires(authenticated_user, group_found, user_found)
+def group_member_remove(identity, context: GroupMembershipContext):
+    # Anyone can remove themselves from a group.
+    if context.user.userid == identity.user.userid:
+        return True
+
+    owner_userids = [user.userid for user in context.group.owners]
+
+    # Only other owners can remove owners from groups.
+    if context.user.userid in owner_userids:
+        return identity.user in context.group.owners
+
+    admin_userids = [user.userid for user in context.group.admins]
+
+    # Owners and admins can remove non-owners from groups.
+    return identity.user.userid in [*owner_userids, *admin_userids]
 
 
 def resolve_predicates(mapping):

@@ -34,31 +34,32 @@ class GroupRequiredRoot(GroupRoot):
         return group_context
 
 
-class RemoveMemberRoot:
-    def __init__(self, request):
-        self.request = request
-        self.group_service = request.find_service(name="group")
-        self.user_service = request.find_service(name="user")
+def group_membership_api_factory(request):
+    """Route feactory for the "api.group_member" route."""
 
-    def __getitem__(self, group_id, user_id):
-        return RemoveMemberContext(
-            self.group_service.fetch(group_id),
-            self.user_service.fetch(user_id),
-        )
+    def get_group():
+        group_service = request.find_service(name="group")
+        pubid_or_groupid = request.matchdict["pubid"]
+        return group_service.fetch(pubid_or_groupid)
+
+    def get_user():
+        userid = request.matchdict["userid"]
+
+        if userid == "me":
+            if not request.identity:
+                return None
+
+            userid = request.identity.user.userid
+
+        user_service = request.find_service(name="user")
+        return user_service.fetch(userid)
+
+    return GroupMembershipContext(get_group(), get_user())
 
 
-class RemoveMemberContext:
-    """The context class for the remove-group-member API."""
+class GroupMembershipContext:
+    """Context for group membership-related views."""
 
-    def __init__(self, group: Group, user: User):
+    def __init__(self, group: Group | None, user: User | None):
         self.group = group
         self.user = user
-
-
-class EditMemberContext:
-    """The context class for the edit-group-member API."""
-
-    def __init__(self, group: Group, user: User, new_role: str):
-        self.group = group
-        self.user = user
-        self.new_role = new_role
