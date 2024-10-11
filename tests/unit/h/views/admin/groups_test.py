@@ -185,6 +185,33 @@ class TestGroupCreateView:
             group_create_service.create_restricted_group.return_value, [user.userid]
         )
 
+    def test_post_with_no_organization(
+        self,
+        base_appstruct,
+        handle_form_submission,
+        pyramid_request,
+        user_service,
+        group_create_service,
+    ):
+        """Test creating a new group with no organization."""
+        base_appstruct["organization"] = None
+
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
+            return on_success(base_appstruct)
+
+        handle_form_submission.side_effect = call_on_success
+        view = GroupCreateViews(pyramid_request)
+
+        view.post()
+
+        assert user_service.fetch.call_args[0][1] == pyramid_request.default_authority
+        assert (
+            group_create_service.create_restricted_group.call_args[1]["organization"]
+            is None
+        )
+
     @pytest.fixture
     def base_appstruct(self, pyramid_request, organization):
         return {
@@ -248,6 +275,16 @@ class TestGroupEditViews:
         response = view.read()
 
         assert response["form"] == self._expected_form(group)
+
+    def test_read_renders_form_if_group_has_no_organization(
+        self, pyramid_request, group
+    ):
+        group.organization = None
+        view = GroupEditViews(GroupContext(group), pyramid_request)
+
+        response = view.read()
+
+        assert response["form"]["organization"] is None
 
     def test_read_lists_organizations_in_groups_authority(
         self,
@@ -315,6 +352,36 @@ class TestGroupEditViews:
             enforce_scope=False,
         )
         assert response["form"] == self._expected_form(group)
+
+    def test_update_when_group_has_no_organization(
+        self, pyramid_request, handle_form_submission, group_update_service, group
+    ):
+        group.organization = None
+
+        def call_on_success(  # pylint:disable=unused-argument
+            request, form, on_success, on_failure
+        ):
+            return on_success(
+                {
+                    "creator": "creator",
+                    "description": "description",
+                    "group_type": "open",
+                    "name": "name",
+                    # If the user selects no organization when updating a group
+                    # then on_success() is called with organization=None.
+                    "organization": None,
+                    "scopes": [],
+                    "members": [],
+                    "enforce_scope": False,
+                }
+            )
+
+        handle_form_submission.side_effect = call_on_success
+        view = GroupEditViews(GroupContext(group), pyramid_request)
+
+        view.update()
+
+        assert group_update_service.update.call_args[1]["organization"] is None
 
     def test_update_updates_group_members_on_success(
         self,

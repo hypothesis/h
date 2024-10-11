@@ -69,8 +69,23 @@ class TestCreatePrivateGroup:
 
         assert getattr(group, flag) == expected_value
 
-    def test_it_creates_group_with_no_organization_by_default(self, creator, svc):
-        group = svc.create_private_group("Anteater fans", creator.userid)
+    @pytest.mark.parametrize("pass_kwarg", [True, False])
+    def test_it_creates_group_with_no_organization_by_default(
+        self, creator, svc, pass_kwarg
+    ):
+        """
+        If the caller passes no organization it creates a group with no organization.
+
+        This works both if the caller omits the `organization` kwarg entirely
+        and if the caller passes `organization=None`. It's convenient for the
+        caller to be able to do it either way.
+        """
+        if pass_kwarg:
+            kwargs = {"organization": None}
+        else:
+            kwargs = {}
+
+        group = svc.create_private_group("Anteater fans", creator.userid, **kwargs)
 
         assert group.organization is None
 
@@ -170,10 +185,25 @@ class TestCreateOpenGroup:
 
         assert getattr(group, flag) == expected_value
 
+    @pytest.mark.parametrize("pass_kwarg", [True, False])
     def test_it_creates_group_with_no_organization_by_default(
-        self, creator, svc, origins
+        self, creator, svc, origins, pass_kwarg
     ):
-        group = svc.create_open_group("Anteater fans", creator.userid, scopes=origins)
+        """
+        If the caller passes no organization it creates a group with no organization.
+
+        This works both if the caller omits the `organization` kwarg entirely
+        and if the caller passes `organization=None`. It's convenient for the
+        caller to be able to do it either way.
+        """
+        if pass_kwarg:
+            kwargs = {"organization": None}
+        else:
+            kwargs = {}
+
+        group = svc.create_open_group(
+            "Anteater fans", creator.userid, scopes=origins, **kwargs
+        )
 
         assert group.organization is None
 
@@ -319,11 +349,24 @@ class TestCreateRestrictedGroup:
 
         assert getattr(group, flag) == expected_value
 
+    @pytest.mark.parametrize("pass_kwarg", [True, False])
     def test_it_creates_group_with_no_organization_by_default(
-        self, creator, svc, origins
+        self, creator, svc, origins, pass_kwarg
     ):
+        """
+        If the caller passes no organization it creates a group with no organization.
+
+        This works both if the caller omits the `organization` kwarg entirely
+        and if the caller passes `organization=None`. It's convenient for the
+        caller to be able to do it either way.
+        """
+        if pass_kwarg:
+            kwargs = {"organization": None}
+        else:
+            kwargs = {}
+
         group = svc.create_restricted_group(
-            "Anteater fans", creator.userid, scopes=origins
+            "Anteater fans", creator.userid, scopes=origins, **kwargs
         )
 
         assert group.organization is None

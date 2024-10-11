@@ -71,10 +71,16 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
         def on_success(appstruct):
             """Create a group on successful validation of POSTed form data."""
 
-            organization = self.organizations[appstruct["organization"]]
+            organization = self.organizations.get(appstruct["organization"])
+
             # We know this user exists because it is checked during schema validation
             creator_userid = self.user_svc.fetch(
-                appstruct["creator"], organization.authority
+                appstruct["creator"],
+                (
+                    organization.authority
+                    if organization
+                    else self.request.default_authority
+                ),
             ).userid
 
             create_fns = {
@@ -175,7 +181,7 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
         def on_success(appstruct):
             """Update the group resource on successful form validation."""
 
-            organization = self.organizations[appstruct["organization"]]
+            organization = self.organizations.get(appstruct["organization"])
             scopes = [GroupScope(scope=o) for o in appstruct["scopes"]]
 
             self.group_update_svc.update(
@@ -217,7 +223,9 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
                 "group_type": group.type,
                 "name": group.name,
                 "members": [m.username for m in group.members],
-                "organization": group.organization.pubid,
+                "organization": (
+                    group.organization.pubid if group.organization else None
+                ),
                 "scopes": [s.scope for s in group.scopes],
                 "enforce_scope": group.enforce_scope,
             }

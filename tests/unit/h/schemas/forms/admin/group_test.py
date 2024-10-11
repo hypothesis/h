@@ -53,7 +53,7 @@ class TestAdminGroupSchema:
         with pytest.raises(colander.Invalid, match=f".*{required_field}.*"):
             bound_schema.deserialize(group_data)
 
-    @pytest.mark.parametrize("optional_field", ("description",))
+    @pytest.mark.parametrize("optional_field", ("description", "organization"))
     def test_it_allows_when_optional_field_missing(
         self, group_data, bound_schema, optional_field
     ):
@@ -162,6 +162,7 @@ class TestAdminGroupSchema:
 
         # pylint:disable=possibly-used-before-assignment
         assert org_node.widget.values == [
+            ("", "-- None --"),
             (org.pubid, f"{org.name} ({org.authority})"),
             (
                 third_party_org.pubid,
