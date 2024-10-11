@@ -30,15 +30,24 @@ def username_validator(form, value):
     group and the group's organization.
     """
     # Unlike other validators, this one is applied at the root level of the
-    # form. This us because we need to read the value from the organisation
+    # form. This is because we need to read the value from the organization
     # to get the right authority to check the users. This isn't possible in
     # a specific validator, as it has no access to the global form data.
 
     user_svc = form.bindings["user_svc"]
 
-    # Get the authority from the list of organisations based on the one
-    # actually picked in the form
-    authority = form.bindings["organizations"][value["organization"]].authority
+    if group := form.bindings.get("group"):
+        authority = group.authority
+    elif organization := value.get("organization"):
+        # If there's no group then fall back on the organization's authority
+        # (this happens when creating a new group as opposed to editing an
+        # existing one).
+        authority = form.bindings.get("organizations")[organization].authority
+    else:
+        # If there's no group or organization then fall back on the default authority
+        # (this happens when creating a new group and selecting no organization
+        # for the group to belong to).
+        authority = form.bindings["request"].default_authority
 
     exc = colander.Invalid(form, None)
 
@@ -117,8 +126,8 @@ def group_type_validator(_node, kwargs):
 @colander.deferred
 def group_organization_select_widget(_node, kwargs):
     orgs = kwargs["organizations"]
-    org_labels = []
-    org_pubids = []
+    org_labels = ["-- None --"]
+    org_pubids = [""]
     for org in orgs.values():
         org_labels.append(f"{org.name} ({org.authority})")
         org_pubids.append(org.pubid)
@@ -153,6 +162,7 @@ class AdminGroupSchema(CSRFSchema):
         title=_("Organization"),
         description=_("Organization which this group belongs to"),
         widget=group_organization_select_widget,
+        missing=None,
     )
 
     creator = colander.SchemaNode(

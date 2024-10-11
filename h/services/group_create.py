@@ -105,7 +105,7 @@ class GroupCreateService:
 
         group_scopes = [GroupScope(scope=s) for s in scopes]
 
-        if "organization" in kwargs:
+        if kwargs.get("organization"):
             self._validate_authorities_match(
                 creator.authority, kwargs["organization"].authority
             )
