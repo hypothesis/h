@@ -184,7 +184,7 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
     # Only other owners can remove owners from groups.
     if context.user.userid in owner_userids:
-        return identity.user in context.group.owners
+        return identity.user.userid in owner_userids
 
     admin_userids = [user.userid for user in context.group.admins]
 

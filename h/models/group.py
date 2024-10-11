@@ -49,8 +49,8 @@ class GroupMembership(Base):
     )
     role = sa.Column(sa.UnicodeText(), nullable=False, server_default="member")
 
-    user = sa.orm.relationship("User")
-    group = sa.orm.relationship("Group")
+    user = sa.orm.relationship("User", viewonly=True)
+    group = sa.orm.relationship("Group", viewonly=True)
 
 
 class Group(Base, mixins.Timestamps):
@@ -150,7 +150,7 @@ class Group(Base, mixins.Timestamps):
     )
 
     # List of GroupMembership's for all memberships of this group.
-    memberships = sa.orm.relationship(GroupMembership)
+    memberships = sa.orm.relationship(GroupMembership, viewonly=True)
 
     @property
     def owners(self):
