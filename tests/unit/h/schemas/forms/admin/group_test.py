@@ -69,10 +69,10 @@ class TestAdminGroupSchema:
         with pytest.raises(colander.Invalid, match="scope.*must be a complete URL"):
             bound_schema.deserialize(group_data)
 
-    def test_it_raises_if_no_origins(self, group_data, bound_schema):
+    def test_it_allows_no_scopes(self, group_data, bound_schema):
         group_data["scopes"] = []
-        with pytest.raises(colander.Invalid, match="At least one scope"):
-            bound_schema.deserialize(group_data)
+
+        bound_schema.deserialize(group_data)
 
     def test_it_raises_if_group_type_changed(
         self, group_data, pyramid_csrf_request, org, user_service
