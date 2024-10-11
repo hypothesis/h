@@ -206,10 +206,7 @@ class AdminGroupSchema(CSRFSchema):
             "Define where this group appears. A document's URL must start with one or more"
             " of the entered scope strings (e.g. 'http://www.example.com')"
         ),
-        widget=SequenceWidget(add_subitem_text_template=_("Add scope"), min_len=1),
-        validator=colander.Length(
-            min=1, min_err=_("At least one scope must be specified")
-        ),
+        widget=SequenceWidget(add_subitem_text_template=_("Add scope")),
     )
 
     members = colander.SequenceSchema(
