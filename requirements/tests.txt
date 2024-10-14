@@ -378,7 +378,7 @@ wired==0.3
     #   pyramid-services
 ws4py==0.5.1
     # via -r requirements/prod.txt
-wsaccel==0.6.6
+wsaccel==0.6.7
     # via -r requirements/prod.txt
 zipp==3.19.1
     # via

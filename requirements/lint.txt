@@ -571,7 +571,7 @@ ws4py==0.5.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-wsaccel==0.6.6
+wsaccel==0.6.7
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
