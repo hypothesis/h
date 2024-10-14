@@ -17,8 +17,9 @@ def add_renderer_globals(event):
     event["base_url"] = request.route_url("index")
     event["feature"] = request.feature
 
-    # Add Google Tag Manager
-    event["gtm_container_id"] = request.registry.settings.get("gtm_container_id")
+    event["google_analytics_measurement_id"] = request.registry.settings.get(
+        "google_analytics_measurement_id"
+    )
 
     # Add a frontend settings object which will be rendered as JSON into the
     # page.

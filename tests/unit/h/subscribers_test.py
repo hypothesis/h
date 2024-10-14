@@ -22,11 +22,13 @@ class TestAddRendererGlobals:
         assert event["feature"] == pyramid_request.feature
 
     def test_adds_analytics_tracking_id(self, event, pyramid_request):
-        pyramid_request.registry.settings["gtm_container_id"] = "abcd1234"
+        pyramid_request.registry.settings["google_analytics_measurement_id"] = (
+            "abcd1234"
+        )
 
         subscribers.add_renderer_globals(event)
 
-        assert event["gtm_container_id"] == "abcd1234"
+        assert event["google_analytics_measurement_id"] == "abcd1234"
 
     def test_adds_frontend_settings(self, event):
         subscribers.add_renderer_globals(event)
