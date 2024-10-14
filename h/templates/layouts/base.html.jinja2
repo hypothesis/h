@@ -48,9 +48,9 @@
     <link rel="shortcut icon"
           href="{{ asset_url('images/favicons/favicon.ico') }}">
 
-    {% if gtm_container_id %}
-    <meta name="google-tag-manager-container-id" content="{{ gtm_container_id }}">
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ gtm_container_id}}"></script>
+    {% if google_analytics_measurement_id %}
+    <meta name="google-analytics-measurement-id" content="{{ google_analytics_measurement_id }}">
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_measurement_id}}"></script>
     {# N.B. gtag is configured in header.js. The meta tag must be
             in the DOM before header.js is included. #}
     {% endif %}

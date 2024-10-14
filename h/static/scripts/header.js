@@ -9,16 +9,16 @@ window.envFlags = new EnvironmentFlags(document.documentElement);
 window.envFlags.init();
 
 // See https://developers.google.com/analytics/devguides/migration/ua/analyticsjs-to-gtagjs
-const gtmId = document.querySelector(
-  'meta[name="google-tag-manager-container-id"]',
+const gaMeasurementId = document.querySelector(
+  'meta[name="google-analytics-measurement-id"]',
 );
-if (gtmId) {
+if (gaMeasurementId) {
   /* eslint-disable */
   window.dataLayer = window.dataLayer || [];
   function gtag() {
     dataLayer.push(arguments);
   }
   gtag('js', new Date());
-  gtag('config', gtmId);
+  gtag('config', gaMeasurementId);
   /* eslint-enable */
 }
