@@ -77,7 +77,7 @@ sphinx==7.4.7
     #   sphinxcontrib-serializinghtml
 sphinx-autobuild==2024.10.3
     # via -r requirements/checkdocs.in
-sphinx-rtd-theme==2.0.0
+sphinx-rtd-theme==3.0.1
     # via -r requirements/checkdocs.in
 sphinxcontrib-applehelp==1.0.7
     # via sphinx
