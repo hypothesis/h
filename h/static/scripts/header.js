@@ -11,7 +11,7 @@ window.envFlags.init();
 // See https://developers.google.com/analytics/devguides/migration/ua/analyticsjs-to-gtagjs
 const gaMeasurementId = document.querySelector(
   'meta[name="google-analytics-measurement-id"]',
-);
+)?.content;
 if (gaMeasurementId) {
   /* eslint-disable */
   window.dataLayer = window.dataLayer || [];
