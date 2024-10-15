@@ -12,6 +12,7 @@ export type ConfigObject = {
   api: {
     createGroup: APIConfig;
     updateGroup: APIConfig | null;
+    getGroupMembers: APIConfig | null;
   };
   context: {
     group: {

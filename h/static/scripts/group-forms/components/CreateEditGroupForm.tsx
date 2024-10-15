@@ -3,9 +3,16 @@ import { useEffect, useId, useMemo, useState } from 'preact/hooks';
 import {
   Button,
   CancelIcon,
+  TrashIcon,
   Input,
   RadioGroup,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
   Textarea,
+  Select,
   ModalDialog,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
@@ -219,6 +226,8 @@ export default function CreateEditGroupForm() {
     'unmodified' | 'unsaved' | 'saving' | 'saved'
   >('unmodified');
 
+  const [members, setMembers] = useState([]);
+
   // Warn when leaving page if there are unsaved changes. We only do this when
   // editing a group because this hook lacks a way to disable the handler before
   // calling `setLocation` after a successful group creation.
@@ -333,6 +342,20 @@ export default function CreateEditGroupForm() {
     }
   };
 
+  const getMembers = async () => {
+    let newMembers = (await callAPI(config.api.getGroupMembers!.url, {
+      method: config.api.getGroupMembers!.method,
+      headers: config.api.getGroupMembers!.headers,
+    }));
+    setMembers(newMembers);
+  };
+
+  useEffect(()=> {
+    if (config.api.getGroupMembers !== null) {
+      getMembers();
+    }
+  } ,[])
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
@@ -392,6 +415,40 @@ export default function CreateEditGroupForm() {
             </RadioGroup>
           </>
         )}
+
+        <Table title="Members">
+          <TableHead>
+            <TableRow>
+              <TableCell>Username</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell classes="w-[50px]"></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+              {members.map((member) => (
+                <TableRow>
+                  <TableCell>{member.username}</TableCell>
+                  <TableCell>
+                    <Select value={member.role} buttonContent={member.role[0].toUpperCase() + member.role.slice(1)}>
+                      <Select.Option value="owner" key="owner">
+                          Owner
+                      </Select.Option>
+                      <Select.Option value="admin" key="admin">
+                          Admin
+                      </Select.Option>
+                      <Select.Option value="moderator" key="moderator">
+                          Moderator
+                      </Select.Option>
+                      <Select.Option value="member" key="member">
+                          Member
+                      </Select.Option>
+                    </Select>
+                  </TableCell>
+                  <TableCell><TrashIcon /></TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
 
         <div className="flex items-center gap-x-4 mt-2">
           <div data-testid="error-container" role="alert">

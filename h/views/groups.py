@@ -77,6 +77,11 @@ class GroupCreateEditController:
                 "url": self.request.route_url("api.group", id=group.pubid),
                 "headers": {"X-CSRF-Token": csrf_token},
             }
+            js_config["api"]["getGroupMembers"] = {
+                "method": "GET",
+                "url": self.request.route_url("api.group_members", pubid=group.pubid),
+                "headers": {"X-CSRF-Token": csrf_token},
+            }
 
         return js_config
 

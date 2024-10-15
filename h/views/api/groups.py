@@ -1,6 +1,9 @@
 from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from h.i18n import TranslationString as _
+from h.models import GroupMembership
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import (
     CreateGroupAPISchema,
@@ -11,11 +14,6 @@ from h.security import Permission
 from h.traversal import EditGroupMembershipContext, GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
-from h.models import GroupMembership
-
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-
 
 DEFAULT_GROUP_TYPE = "private"
 
@@ -245,11 +243,7 @@ def edit_member(request):
     )
 
     context = EditGroupMembershipContext(
-        request.db,
-        request.context.group,
-        request.context.user,
-        membership,
-        appstruct["role"],
+        request.context.group, request.context.user, membership, appstruct["role"]
     )
 
     if not request.has_permission(Permission.Group.MEMBER_EDIT, context):
