@@ -11,6 +11,11 @@ from h.security import Permission
 from h.traversal import EditGroupMembershipContext, GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
+from h.models import GroupMembership
+
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 
 DEFAULT_GROUP_TYPE = "private"
 
@@ -147,12 +152,64 @@ def update(context: GroupContext, request):
     description="Fetch all members of a group",
     permission=Permission.Group.READ,
 )
-def read_members(context: GroupContext, _request):
-    """Fetch the members of a group."""
-    return [
-        {"role": membership.role, **UserJSONPresenter(membership.user).asdict()}
-        for membership in context.group.memberships
-    ]
+def read_members(context: GroupContext, request):
+    membership_dicts = []
+
+    memberships = request.db.scalars(
+        select(GroupMembership)
+        .options(selectinload(GroupMembership.user))
+        .where(GroupMembership.group == context.group)
+    )
+
+    for membership in memberships:
+        membership_dict = {
+            "role": membership.role,
+            **UserJSONPresenter(membership.user).asdict(),
+            "api": {},
+        }
+
+        # If the authenticated user has permission to remove this member from
+        # the group, then add information about the remove-member API call to
+        # the response.
+        membership_remove_context = GroupMembershipContext(
+            context.group, membership.user, membership
+        )
+        if request.has_permission(
+            Permission.Group.MEMBER_REMOVE, membership_remove_context
+        ):
+            membership_dict["api"]["delete"] = {
+                "method": "DELETE",
+                "url": request.route_url(
+                    "api.group_member",
+                    pubid=context.group.pubid,
+                    userid=membership.user.userid,
+                ),
+            }
+
+        # For each possible role if the authenticated user has permission to
+        # change this member to that role then add information about the
+        # necessary API call to the response.
+        for role in ["member", "moderator", "admin", "owner"]:
+            edit_membership_context = EditGroupMembershipContext(
+                context.group, membership.user, membership, role
+            )
+
+            if membership.role != role and request.has_permission(
+                Permission.Group.MEMBER_EDIT, edit_membership_context
+            ):
+                membership_dict["api"][f"make_{role}"] = {
+                    "method": "PATCH",
+                    "url": request.route_url(
+                        "api.group_member",
+                        pubid=context.group.pubid,
+                        userid=membership.user.userid,
+                    ),
+                    "body": {"role": role},
+                }
+
+        membership_dicts.append(membership_dict)
+
+    return membership_dicts
 
 
 @api_config(
@@ -181,8 +238,18 @@ def remove_member(context: GroupMembershipContext, request):
 def edit_member(request):
     appstruct = EditGroupMembershipAPISchema().validate(_json_payload(request))
 
+    membership = request.db.scalar(
+        select(GroupMembership)
+        .where(GroupMembership.group == request.context.group)
+        .where(GroupMembership.user == request.context.user)
+    )
+
     context = EditGroupMembershipContext(
-        request.db, request.context.group, request.context.user, appstruct["role"]
+        request.db,
+        request.context.group,
+        request.context.user,
+        membership,
+        appstruct["role"],
     )
 
     if not request.has_permission(Permission.Group.MEMBER_EDIT, context):

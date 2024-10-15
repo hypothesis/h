@@ -56,39 +56,39 @@ def group_membership_api_factory(request):
         user_service = request.find_service(name="user")
         return user_service.fetch(userid)
 
-    return GroupMembershipContext(request.db, get_group(), get_user())
+    def get_membership(group, user):
+        return request.db.scalar(
+            select(GroupMembership)
+            .where(GroupMembership.group == group)
+            .where(GroupMembership.user == user)
+        )
+
+    group = get_group()
+    user = get_user()
+
+    return GroupMembershipContext(group, user, get_membership(group, user))
 
 
 class GroupMembershipContext:
     """Context for group membership-related views."""
 
-    def __init__(self, db, group: Group | None, user: User | None):
-        self._db = db
+    def __init__(
+        self, group: Group | None, user: User | None, membership: GroupMembership | None
+    ):
         self.group = group
         self.user = user
-
-    @property
-    def membership(self):
-        return self._db.scalar(
-            select(GroupMembership)
-            .where(GroupMembership.user == self.user)
-            .where(GroupMembership.group == self.group)
-        )
+        self.membership = membership
 
 
 class EditGroupMembershipContext:
-    def __init__(self, db, group: Group | None, user: User | None, new_role: str):
-        self._group_membership_context = GroupMembershipContext(db, group, user)
+    def __init__(
+        self,
+        group: Group | None,
+        user: User | None,
+        membership: GroupMembership | None,
+        new_role: str,
+    ):
+        self.group = group
+        self.user = user
+        self.membership = membership
         self.new_role = new_role
-
-    @property
-    def group(self):
-        return self._group_membership_context.group
-
-    @property
-    def user(self):
-        return self._group_membership_context.user
-
-    @property
-    def membership(self):
-        return self._group_membership_context.membership

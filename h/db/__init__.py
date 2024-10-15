@@ -66,7 +66,7 @@ def post_create(engine):  # pragma: no cover
 
 def create_engine(database_url):  # pragma: no cover
     """Construct a sqlalchemy engine from the passed ``settings``."""
-    return sqlalchemy.create_engine(database_url)
+    return sqlalchemy.create_engine(database_url, echo=True)
 
 
 def _session(request):  # pragma: no cover
