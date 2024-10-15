@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from h.models import Group, User
+from sqlalchemy import select
+
+from h.models import Group, GroupMembership, User
 
 
 @dataclass
@@ -54,19 +56,39 @@ def group_membership_api_factory(request):
         user_service = request.find_service(name="user")
         return user_service.fetch(userid)
 
-    return GroupMembershipContext(get_group(), get_user())
+    return GroupMembershipContext(request.db, get_group(), get_user())
 
 
 class GroupMembershipContext:
     """Context for group membership-related views."""
 
-    def __init__(self, group: Group | None, user: User | None):
+    def __init__(self, db, group: Group | None, user: User | None):
+        self._db = db
         self.group = group
         self.user = user
+
+    @property
+    def membership(self):
+        return self._db.scalar(
+            select(GroupMembership)
+            .where(GroupMembership.user == self.user)
+            .where(GroupMembership.group == self.group)
+        )
 
 
 class EditGroupMembershipContext:
-    def __init__(self, group: Group | None, user: User | None, role: str):
-        self.group = group
-        self.user = user
-        self.role = role
+    def __init__(self, db, group: Group | None, user: User | None, new_role: str):
+        self._group_membership_context = GroupMembershipContext(db, group, user)
+        self.new_role = new_role
+
+    @property
+    def group(self):
+        return self._group_membership_context.group
+
+    @property
+    def user(self):
+        return self._group_membership_context.user
+
+    @property
+    def membership(self):
+        return self._group_membership_context.membership

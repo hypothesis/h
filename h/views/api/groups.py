@@ -2,7 +2,11 @@ from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
-from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
+from h.schemas.api.group import (
+    CreateGroupAPISchema,
+    EditGroupMembershipAPISchema,
+    UpdateGroupAPISchema,
+)
 from h.security import Permission
 from h.traversal import EditGroupMembershipContext, GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
@@ -175,16 +179,16 @@ def remove_member(context: GroupMembershipContext, request):
     description="Change the role of a group member.",
 )
 def edit_member(request):
-    appstruct = EditGroupAPISchema().validate(_json_payload(request))
+    appstruct = EditGroupMembershipAPISchema().validate(_json_payload(request))
 
     context = EditGroupMembershipContext(
-        request.context.group, request.context.user, appstruct["role"]
+        request.db, request.context.group, request.context.user, appstruct["role"]
     )
 
     if not request.has_permission(Permission.Group.MEMBER_EDIT, context):
         raise HTTPNotFound()
 
-    # Now go ahead and edit the membership...
+    context.membership.role = context.new_role
 
 
 @api_config(

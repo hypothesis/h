@@ -138,3 +138,11 @@ class UpdateGroupAPISchema(GroupAPISchema):
 
     Currently identical to base schema
     """
+
+
+class EditGroupMembershipAPISchema(JSONSchema):
+    schema = {
+        "type": "object",
+        "properties": {"role": {"enum": ["member", "moderator", "admin", "owner"]}},
+        "required": ["role"],
+    }

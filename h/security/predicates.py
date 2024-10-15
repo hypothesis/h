@@ -194,20 +194,18 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
 @requires(authenticated_user, group_found, user_found)
 def group_member_edit(identity, context: EditGroupMembershipContext):
-    moderator_userids = [user.userid for user in context.group.moderators]
-
     # Moderators can demote themselves to members.
     if (
-        context.user.userid in moderator_userids
+        context.membership.role == "moderator"
         and context.user.userid == identity.user.userid
-        and context.role == "member"
+        and context.new_role == "member"
     ):
         return True
 
     owner_userids = [user.userid for user in context.group.owners]
 
     # Only owners can promote or demote owners.
-    if context.user.userid in owner_userids or context.role == "owner":
+    if context.membership.role == "owner" or context.new_role == "owner":
         return identity.user.userid in owner_userids
 
     # Owners or admins can promote or demote anyone else.
