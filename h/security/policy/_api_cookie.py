@@ -9,6 +9,8 @@ COOKIE_AUTHENTICATABLE_API_REQUESTS = [
     ("api.groups", "POST"),  # Create a new group.
     ("api.group", "PATCH"),  # Edit an existing group.
     ("api.group_members", "GET"),  # Get a list of a group's members.
+    ("api.group_member", "DELETE"),  # Remove a user from a group.
+    ("api.group_member", "PATCH"),  # Change a user's role in a group.
 ]
 
 

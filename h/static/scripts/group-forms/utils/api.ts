@@ -68,10 +68,12 @@ export async function callAPI(
     method = 'GET',
     json = null,
     headers = {},
+    parseResponseBody = true,
   }: {
     method?: string;
     json?: object | null;
     headers?: any;
+    parseResponseBody?: boolean;
   } = {},
 ): Promise<object> {
   const options: RequestInit = {
@@ -99,10 +101,12 @@ export async function callAPI(
   let responseJSON;
   let responseJSONError;
 
-  try {
-    responseJSON = await response.json();
-  } catch (jsonError) {
-    responseJSONError = jsonError;
+  if (parseResponseBody) {
+    try {
+        responseJSON = await response.json();
+    } catch (jsonError) {
+        responseJSONError = jsonError;
+    }
   }
 
   if (!response.ok) {

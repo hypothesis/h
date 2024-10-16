@@ -4,6 +4,7 @@ import {
   Button,
   CancelIcon,
   TrashIcon,
+  IconButton,
   Input,
   RadioGroup,
   Table,
@@ -356,6 +357,80 @@ export default function CreateEditGroupForm() {
     }
   } ,[])
 
+  function uppercaseFirstLetter(str) {
+    return str[0].toUpperCase() + str.slice(1);
+  }
+
+  function selectOptions(member) {
+    const options = []
+    Object.keys(member.api.role).forEach((role) => {
+      options.push(
+        <Select.Option value={role} key={role}>
+          {uppercaseFirstLetter(role)}
+        </Select.Option>
+      );
+    });
+    return options;
+  }
+
+  async function onClickDelete(api) {
+    await callAPI(api.url, {
+      method: api.method,
+      headers: api.headers,
+      parseResponseBody: false,
+    });
+    getMembers();
+  }
+
+  async function onChangeRole(api, newRole) {
+    await callAPI(api[newRole].url, {
+        method: api[newRole].method,
+        headers: api[newRole].headers,
+        json: api[newRole].body
+    });
+    getMembers();
+  }
+
+  function tableRows(members: Array<Object>) {
+    const rows = []
+
+    if (members.length > 0) {
+        Object.keys(members[0].api.role).forEach((key) => {
+            const value = members[0].api.role[key];
+            console.log(`${key}: ${value}`);
+        });
+    }
+    members.forEach((member) => {
+        rows.push(
+          <TableRow>
+            <TableCell>{member.username}</TableCell>
+            <TableCell>
+              {Object.keys(member.api.role).length > 0
+                ? <Select value={member.role} buttonContent={uppercaseFirstLetter(member.role)} onChange={newRole => onChangeRole(member.api.role, newRole)}>
+                    {selectOptions(member)}
+                  </Select>
+                : <Select value={member.role} buttonContent={uppercaseFirstLetter(member.role)} disabled>
+                    {selectOptions(member)}
+                  </Select>
+              }
+            </TableCell>
+              <TableCell>
+                {member.api.delete
+                  ? <IconButton title="Delete" onClick={() => onClickDelete(member.api.delete)}>
+                      <TrashIcon />
+                    </IconButton>
+                  : <IconButton title="Delete" disabled>
+                      <TrashIcon />
+                    </IconButton>
+                }
+              </TableCell>
+          </ TableRow>
+        );
+    });
+
+    return rows;
+  }
+
   return (
     <div className="text-grey-6 text-sm/relaxed">
       <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
@@ -425,28 +500,7 @@ export default function CreateEditGroupForm() {
             </TableRow>
           </TableHead>
           <TableBody>
-              {members.map((member) => (
-                <TableRow>
-                  <TableCell>{member.username}</TableCell>
-                  <TableCell>
-                    <Select value={member.role} buttonContent={member.role[0].toUpperCase() + member.role.slice(1)}>
-                      <Select.Option value="owner" key="owner">
-                          Owner
-                      </Select.Option>
-                      <Select.Option value="admin" key="admin">
-                          Admin
-                      </Select.Option>
-                      <Select.Option value="moderator" key="moderator">
-                          Moderator
-                      </Select.Option>
-                      <Select.Option value="member" key="member">
-                          Member
-                      </Select.Option>
-                    </Select>
-                  </TableCell>
-                  <TableCell><TrashIcon /></TableCell>
-                </TableRow>
-              ))}
+            {tableRows(members)}
           </TableBody>
         </Table>
 

@@ -1,4 +1,5 @@
 from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
+from pyramid.csrf import get_csrf_token
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -159,11 +160,13 @@ def read_members(context: GroupContext, request):
         .where(GroupMembership.group == context.group)
     )
 
+    csrf_token = get_csrf_token(request)
+
     for membership in memberships:
         membership_dict = {
             "role": membership.role,
             **UserJSONPresenter(membership.user).asdict(),
-            "api": {},
+            "api": {"role": {}},
         }
 
         # If the authenticated user has permission to remove this member from
@@ -175,13 +178,14 @@ def read_members(context: GroupContext, request):
         if request.has_permission(
             Permission.Group.MEMBER_REMOVE, membership_remove_context
         ):
-            membership_dict["api"]["delete"] = {
+            membership_dict.setdefault("api", {})["delete"] = {
                 "method": "DELETE",
                 "url": request.route_url(
                     "api.group_member",
                     pubid=context.group.pubid,
                     userid=membership.user.userid,
                 ),
+                "headers": {"X-CSRF-Token": csrf_token},
             }
 
         # For each possible role if the authenticated user has permission to
@@ -195,7 +199,7 @@ def read_members(context: GroupContext, request):
             if membership.role != role and request.has_permission(
                 Permission.Group.MEMBER_EDIT, edit_membership_context
             ):
-                membership_dict["api"][f"make_{role}"] = {
+                membership_dict.setdefault("api", {}).setdefault("role", {})[role] = {
                     "method": "PATCH",
                     "url": request.route_url(
                         "api.group_member",
@@ -203,6 +207,7 @@ def read_members(context: GroupContext, request):
                         userid=membership.user.userid,
                     ),
                     "body": {"role": role},
+                    "headers": {"X-CSRF-Token": csrf_token},
                 }
 
         membership_dicts.append(membership_dict)
