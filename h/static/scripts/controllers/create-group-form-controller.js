@@ -1,5 +1,6 @@
 export function CreateGroupFormController(element) {
   // Create Group form handling
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const self = this;
   this._submitBtn = element.querySelector('.js-create-group-create-btn');
   this._groupNameInput = element.querySelector('.js-group-name-input');

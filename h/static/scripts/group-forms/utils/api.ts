@@ -40,7 +40,7 @@ export class APIError extends Error {
   /* The response that was received, if any. */
   response: Response | null;
   /* The parsed JSON body of the response, if there was a valid JSON response. */
-  json: object | Array<any> | null;
+  json: object | Array<unknown> | null;
 
   constructor(
     message: string,
@@ -71,7 +71,7 @@ export async function callAPI(
   }: {
     method?: string;
     json?: object | null;
-    headers?: any;
+    headers?: Record<PropertyKey, unknown>;
   } = {},
 ): Promise<object> {
   const options: RequestInit = {
