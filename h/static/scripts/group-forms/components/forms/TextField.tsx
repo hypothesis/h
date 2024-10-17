@@ -2,7 +2,6 @@ import { useId, useState } from 'preact/hooks';
 import { Input, Textarea } from '@hypothesis/frontend-shared';
 
 import Label from './Label';
-import Star from './Star';
 
 function CharacterCounter({
   value,
@@ -85,7 +84,7 @@ export default function TextField({
     onChangeValue((e.target as HTMLInputElement).value);
   };
 
-  const handleChange = (e: Event) => {
+  const handleChange = () => {
     setHasCommitted(true);
   };
 

@@ -15,7 +15,7 @@ export function extractIDFromURL(url) {
     } else {
       return null;
     }
-  } catch (err) {
+  } catch {
     return null;
   }
 }

@@ -4,7 +4,6 @@ import {
   Button,
   CancelIcon,
   RadioGroup,
-  ModalDialog,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
 import { readConfig } from '../config';
@@ -164,8 +163,6 @@ export default function CreateEditGroupForm() {
     setErrorMessage('');
     setSaveState('saving');
 
-    let response: CreateUpdateGroupAPIResponse;
-
     try {
       const body: CreateUpdateGroupAPIRequest = {
         id: group!.pubid,
@@ -174,7 +171,7 @@ export default function CreateEditGroupForm() {
         type: groupType,
       };
 
-      response = (await callAPI(config.api.updateGroup!.url, {
+      (await callAPI(config.api.updateGroup!.url, {
         method: config.api.updateGroup!.method,
         headers: config.api.updateGroup!.headers,
         json: body,

@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-exports */
 /**
  * Helper for writing parameterized tests.
  *

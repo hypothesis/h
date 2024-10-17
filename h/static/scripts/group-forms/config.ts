@@ -3,7 +3,7 @@ import type { GroupType } from './utils/api';
 export type APIConfig = {
   method: string;
   url: string;
-  headers: object;
+  headers: Record<PropertyKey, unknown>;
 };
 
 export type ConfigObject = {
