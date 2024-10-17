@@ -31,6 +31,7 @@ help:
 .PHONY: services
 services: args?=up -d --wait
 services: python
+	@docker network create dbs 2>/dev/null || true
 	@docker compose $(args)
 
 .PHONY: db
