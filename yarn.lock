@@ -4314,6 +4314,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "diff@npm:7.0.0"
+  checksum: 5db0d339476b18dfbc8a08a7504fbcc74789eec626c8d20cf2cdd1871f1448962888128f4447c8f50a1e41a80decfe5e8489c375843b8cf1d42b7c2b611da4e1
+  languageName: node
+  linkType: hard
+
 "discontinuous-range@npm:1.0.0":
   version: 1.0.0
   resolution: "discontinuous-range@npm:1.0.0"
@@ -6155,7 +6162,7 @@ __metadata:
     bootstrap: ^4.6.2
     chai: ^5.1.1
     classnames: ^2.5.1
-    diff: ^5.2.0
+    diff: ^7.0.0
     enzyme: ^3.11.0
     enzyme-adapter-preact-pure: ^4.1.0
     escape-html: ^1.0.3
