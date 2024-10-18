@@ -4,6 +4,7 @@ from collections import namedtuple
 
 import slugify
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
 
 from h import pubid
 from h.db import Base, mixins
@@ -33,6 +34,15 @@ class WriteableBy(enum.Enum):
     members = "members"
 
 
+class GroupMembershipRoles(enum.StrEnum):
+    """The valid role strings that're allowed in the GroupMembership.roles column."""
+
+    MEMBER = "member"
+    MODERATOR = "moderator"
+    ADMIN = "admin"
+    OWNER = "owner"
+
+
 class GroupMembership(Base):
     __tablename__ = "user_group"
 
@@ -46,6 +56,18 @@ class GroupMembership(Base):
         sa.ForeignKey("group.id", ondelete="cascade"),
         nullable=False,
         index=True,
+    )
+    roles = sa.Column(
+        JSONB,
+        sa.CheckConstraint(
+            " OR ".join(
+                f"""(roles = '["{role}"]'::jsonb)"""
+                for role in ["member", "moderator", "admin", "owner"]
+            ),
+            name="validate_role_strings",
+        ),
+        server_default=sa.text("""'["member"]'::jsonb"""),
+        nullable=False,
     )
 
 
