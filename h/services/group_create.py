@@ -1,7 +1,7 @@
 from functools import partial
 
 from h import session
-from h.models import Group, GroupScope
+from h.models import Group, GroupMembership, GroupScope
 from h.models.group import GROUP_TYPE_FLAGS
 
 
@@ -126,7 +126,9 @@ class GroupCreateService:
         # self.publish() or `return group`.
         self.db.flush()
 
-        group.members.append(group.creator)
+        self.db.add(
+            GroupMembership(user_id=creator.id, group_id=group.id, roles=["owner"])
+        )
         self.publish("group-join", group.pubid, group.creator.userid)
 
         return group
