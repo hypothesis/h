@@ -2,8 +2,9 @@ from unittest import mock
 
 import pytest
 from h_matchers import Any
+from sqlalchemy import select
 
-from h.models import Group, GroupScope, User
+from h.models import Group, GroupMembership, GroupScope, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.services.group_create import GroupCreateService, group_create_factory
 from tests.common.matchers import Matcher
@@ -51,10 +52,12 @@ class TestCreatePrivateGroup:
 
         assert group.description is None
 
-    def test_it_adds_group_creator_to_members(self, svc, creator):
+    def test_it_adds_group_creator_to_members_as_owner(self, svc, creator, db_session):
         group = svc.create_private_group("Anteater fans", creator.userid)
 
-        assert creator in group.members
+        assert db_session.scalar(
+            select(GroupMembership).where(GroupMembership.group_id == group.id)
+        ).roles == ["owner"]
 
     @pytest.mark.parametrize(
         "flag,expected_value",
@@ -167,10 +170,14 @@ class TestCreateOpenGroup:
 
         assert group.creator == creator
 
-    def test_it_adds_group_creator_to_members(self, svc, creator, origins):
+    def test_it_adds_group_creator_to_members_as_owner(
+        self, svc, creator, origins, db_session
+    ):
         group = svc.create_open_group("Anteater fans", creator.userid, scopes=origins)
 
-        assert creator in group.members
+        assert db_session.scalar(
+            select(GroupMembership).where(GroupMembership.group_id == group.id)
+        ).roles == ["owner"]
 
     @pytest.mark.parametrize(
         "flag,expected_value",
@@ -327,12 +334,16 @@ class TestCreateRestrictedGroup:
 
         assert group.creator == creator
 
-    def test_it_adds_group_creator_to_members(self, svc, creator, origins):
+    def test_it_adds_group_creator_to_members_as_owner(
+        self, svc, creator, origins, db_session
+    ):
         group = svc.create_restricted_group(
             "Anteater fans", creator.userid, scopes=origins
         )
 
-        assert creator in group.members
+        assert db_session.scalar(
+            select(GroupMembership).where(GroupMembership.group_id == group.id)
+        ).roles == ["owner"]
 
     @pytest.mark.parametrize(
         "flag,expected_value",
