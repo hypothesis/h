@@ -30,7 +30,7 @@ from h.models.document import Document, DocumentMeta, DocumentURI
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort, FeatureCohortUser
 from h.models.flag import Flag
-from h.models.group import Group, GroupMembership
+from h.models.group import Group, GroupMembership, GroupMembershipRoles
 from h.models.group_scope import GroupScope
 from h.models.job import Job
 from h.models.organization import Organization

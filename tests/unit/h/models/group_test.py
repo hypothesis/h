@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from h import models
 from h.models.group import (
@@ -216,6 +217,64 @@ def test_non_public_group():
     group = models.Group(readable_by=ReadableBy.members)
 
     assert not group.is_public
+
+
+class TestGroupMembership:
+    def test_defaults(self, db_session, user, group):
+        membership = models.GroupMembership(user_id=user.id, group_id=group.id)
+        db_session.add(membership)
+
+        db_session.flush()
+        assert membership.id
+        assert membership.user_id == user.id
+        assert membership.group_id == group.id
+        assert membership.roles == ["member"]
+
+    @pytest.mark.parametrize(
+        "roles",
+        (
+            ["member"],
+            ["moderator"],
+            ["admin"],
+            ["owner"],
+        ),
+    )
+    def test_custom_roles(self, db_session, user, group, roles):
+        membership = models.GroupMembership(
+            user_id=user.id, group_id=group.id, roles=roles
+        )
+        db_session.add(membership)
+
+        db_session.flush()
+        assert membership.roles == roles
+
+    @pytest.mark.parametrize(
+        "roles",
+        (
+            ["unknown_role"],
+            ["moderator", "admin"],  # Two valid roles, only one role is allowed.
+            [],  # Every membership must have at least one role.
+        ),
+    )
+    def test_invalid_roles(self, db_session, user, group, roles):
+        membership = models.GroupMembership(
+            user_id=user.id, group_id=group.id, roles=roles
+        )
+        db_session.add(membership)
+
+        with pytest.raises(
+            IntegrityError,
+            match='new row for relation "user_group" violates check constraint "ck__user_group__validate_role_strings"',
+        ):
+            db_session.flush()
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
 
 
 @pytest.fixture()
