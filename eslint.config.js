@@ -1,9 +1,9 @@
-import hypothesis from 'eslint-config-hypothesis';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
+import hypothesisBase from 'eslint-config-hypothesis/base';
+import hypothesisJSX from 'eslint-config-hypothesis/jsx';
+import hypothesisTS from 'eslint-config-hypothesis/ts';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default [
   {
     ignores: [
       '.tox/**/*',
@@ -15,15 +15,10 @@ export default tseslint.config(
       'docs/_build/*',
     ],
   },
-  ...hypothesis,
-  ...tseslint.configs.recommended,
-  jsxA11y.flatConfigs.recommended,
-  {
-    rules: {
-      'prefer-arrow-callback': 'error',
-      'prefer-const': ['error', { destructuring: 'all' }],
-    },
-  },
+
+  ...hypothesisBase,
+  ...hypothesisJSX,
+  ...hypothesisTS,
 
   {
     files: ['*.js'],
@@ -34,4 +29,4 @@ export default tseslint.config(
       },
     },
   },
-);
+];
