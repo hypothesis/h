@@ -44,7 +44,7 @@ def policy(
     return cors_decorator
 
 
-def set_cors_headers(  # pylint: disable=too-many-arguments
+def set_cors_headers(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     request,
     response,
     allow_credentials=False,

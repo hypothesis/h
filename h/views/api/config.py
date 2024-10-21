@@ -27,7 +27,7 @@ cors_policy = cors.policy(
 )
 
 
-def add_api_view(  # pylint: disable=too-many-arguments
+def add_api_view(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     config,
     view,
     versions,
@@ -35,7 +35,7 @@ def add_api_view(  # pylint: disable=too-many-arguments
     description=None,
     enable_preflight=True,
     subtype="json",
-    **settings
+    **settings,
 ):
     """
     Add a view configuration for an API view.
@@ -114,7 +114,7 @@ def api_config(versions, link_name=None, description=None, **settings):
             versions=versions,
             link_name=link_name,
             description=description,
-            **settings
+            **settings,
         )
 
     def wrapper(wrapped):  # pragma: no cover

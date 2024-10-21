@@ -75,7 +75,7 @@ class DocumentURI(Base, mixins.Timestamps):
         return f"<DocumentURI {self.id}>"
 
 
-def create_or_update_document_uri(  # pylint: disable=redefined-builtin,too-many-arguments
+def create_or_update_document_uri(  # pylint: disable=redefined-builtin,too-many-arguments, too-many-positional-arguments
     session, claimant, uri, type, content_type, document, created, updated
 ):
     """

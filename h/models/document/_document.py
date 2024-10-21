@@ -87,7 +87,7 @@ class Document(Base, mixins.Timestamps):
         return session.query(Document).join(matching_claims)
 
     @classmethod
-    def find_or_create_by_uris(  # pylint: disable=too-many-arguments
+    def find_or_create_by_uris(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         cls, session, claimant_uri, uris, created=None, updated=None
     ):
         """
@@ -171,7 +171,7 @@ def merge_documents(session, documents, updated=None):
     return master
 
 
-def update_document_metadata(  # pylint: disable=too-many-arguments
+def update_document_metadata(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     session,
     target_uri,
     document_meta_dicts,

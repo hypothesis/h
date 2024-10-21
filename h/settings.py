@@ -38,7 +38,7 @@ class SettingsManager:
 
         self._environ = environ
 
-    def set(  # pylint: disable=too-many-arguments
+    def set(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         name,
         envvar,
