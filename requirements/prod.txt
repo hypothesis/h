@@ -53,7 +53,7 @@ elasticsearch==6.8.2
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
     # via -r requirements/prod.in
-gevent==24.10.2
+gevent==24.10.3
     # via -r requirements/prod.in
 greenlet==3.1.1
     # via
