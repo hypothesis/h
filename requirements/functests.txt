@@ -192,7 +192,7 @@ prompt-toolkit==3.0.43
     #   click-repl
 psycogreen==1.0.2
     # via -r requirements/prod.txt
-psycopg2==2.9.9
+psycopg2==2.9.10
     # via
     #   -r requirements/prod.txt
     #   data-tasks
