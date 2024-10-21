@@ -35,7 +35,7 @@ class JobQueueService:
         for job in jobs:
             self._db.delete(job)
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def add_between_times(self, name, start_time, end_time, tag, force=False):
         """
         Queue all annotations between two times.

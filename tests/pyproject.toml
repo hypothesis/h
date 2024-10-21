@@ -59,6 +59,7 @@ disable = [
     "too-many-public-methods",
 
     "too-many-arguments",
+    "too-many-positional-arguments",
 
     # not-callable is mis-firing on all pytest.mark.parametrize usages, so
     # disable it for now. This can be re-enabled once a new pytest version

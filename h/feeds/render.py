@@ -3,7 +3,7 @@ from pyramid import renderers
 from h.feeds import atom, rss
 
 
-def render_atom(  # pylint:disable=too-many-arguments
+def render_atom(  # pylint:disable=too-many-arguments,too-many-positional-arguments
     request, annotations, atom_url, html_url, title, subtitle
 ):
     """
@@ -53,7 +53,7 @@ def render_atom(  # pylint:disable=too-many-arguments
     return response
 
 
-def render_rss(  # pylint:disable=too-many-arguments
+def render_rss(  # pylint:disable=too-many-arguments,too-many-positional-arguments
     request, annotations, rss_url, html_url, title, description
 ):
     """
