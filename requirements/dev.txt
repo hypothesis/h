@@ -160,7 +160,7 @@ markupsafe==2.1.5
     #   pyramid-jinja2
 matplotlib-inline==0.1.6
     # via ipython
-newrelic==10.1.0
+newrelic==10.2.0
     # via -r requirements/prod.txt
 oauthlib==3.2.2
     # via -r requirements/prod.txt
