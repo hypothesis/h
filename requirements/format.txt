@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/format.in
 #
-black==24.8.0
+black==24.10.0
     # via -r requirements/format.in
 build==1.0.3
     # via pip-tools
