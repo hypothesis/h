@@ -195,15 +195,15 @@ class UserPurger:
 
     def delete_groups(self, user):
         """
-        Delete groups created by `user` that have no annotations.
+        Delete groups owned by `user` that have no annotations.
 
-        Delete groups that were created by `user` and that don't contain any
-        non-deleted annotations.
+        Delete groups that that `user` is the *only* owner of and that don't
+        contain any non-deleted annotations.
 
         If delete_annotations() (above) is called first then all of `user`'s
         own annotations will already have been deleted, so ultimately any
-        groups created by `user` that don't contain any annotations by *other*
-        users will get deleted.
+        groups that `user` is the only owner of and that don't contain any
+        annotations by *other* users will get deleted.
 
         Known issue: if this method does not delete a group because it contains
         annotations by other users, and those annotations other users are later
@@ -215,21 +215,39 @@ class UserPurger:
         really large number of members this could take too long and cause a
         timeout.
         """
-        # pylint:disable=not-callable,use-implicit-booleaness-not-comparison-to-zero
-        self.worker.delete(
-            Group,
+        # pylint:disable=not-callable
+        # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
+
+        # The IDs of all groups that have only one owner.
+        groups_with_only_one_owner = (
+            select(GroupMembership.group_id)
+            .where(GroupMembership.roles.contains(["owner"]))
+            .group_by(GroupMembership.group_id)
+            .having(func.count(GroupMembership.group_id) == 1)
+        )
+
+        # The IDs of all groups where `user` is the only owner.
+        groups_where_user_is_only_owner = (
+            select(GroupMembership.group_id)
+            .where(GroupMembership.group_id.in_(groups_with_only_one_owner))
+            .where(GroupMembership.roles.contains(["owner"]))
+            .where(GroupMembership.user_id == user.id)
+        )
+
+        # The IDs of all groups where `user` is the only owner *and* the group
+        # doesn't contain any annotations by other users.
+        groups_to_be_deleted = (
             select(Group.id)
-            .where(Group.creator_id == user.id)
+            .where(Group.id.in_(groups_where_user_is_only_owner))
             .outerjoin(
                 Annotation,
-                and_(
-                    Annotation.groupid == Group.pubid,
-                    Annotation.deleted.is_(False),
-                ),
+                and_(Annotation.groupid == Group.pubid, Annotation.deleted.is_(False)),
             )
             .group_by(Group.id)
-            .having(func.count(Annotation.id) == 0),
+            .having(func.count(Annotation.id) == 0)
         )
+
+        self.worker.delete(Group, groups_to_be_deleted)
 
     def delete_group_memberships(self, user):
         """

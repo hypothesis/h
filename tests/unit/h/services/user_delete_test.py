@@ -4,7 +4,7 @@ from unittest.mock import call, sentinel
 
 import pytest
 from h_matchers import Any
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, func, inspect, select
 
 from h.models import (
     Annotation,
@@ -13,6 +13,7 @@ from h.models import (
     Flag,
     Group,
     GroupMembership,
+    GroupMembershipRoles,
     Job,
     Token,
     User,
@@ -302,51 +303,74 @@ class TestUserPurger:
             ).only()
         )
 
-    def test_delete_groups(self, user, db_session, worker, factories, purger):
-        factories.Group(creator=user)
+    def test_delete_groups(self, user, worker, factories, purger):
+        def make_group(name, owner=user):
+            """Create and return a group that `owner` is the only owner of."""
+            return factories.Group(
+                name=name,
+                memberships=[
+                    GroupMembership(user=owner, roles=[GroupMembershipRoles.OWNER])
+                ],
+            )
+
+        # A list of groups that should be deleted when `user` is deleted.
+        should_be_deleted = []
+
+        # A group that `user` is the only owner of, this group should be
+        # deleted when `user` is deleted.
+        should_be_deleted.append(make_group("only_owner"))
+
+        # A group that `user` is the only owner of but that has other non-owner
+        # members. This group should still be deleted.
+        group = make_group("other_members")
+        for role in GroupMembershipRoles:
+            if role == GroupMembershipRoles.OWNER:
+                continue
+            group.memberships.append(
+                GroupMembership(user=factories.User(), roles=[role])
+            )
+        should_be_deleted.append(group)
+
+        # A group that `user` is the only owner of but that contains a
+        # deleted annotation by another user. This group should still be
+        # deleted.
+        group = make_group("deleted_annotation")
+        factories.Annotation(group=group, deleted=True)
+        should_be_deleted.append(group)
+
+        # A list of groups that should *not* be deleted when `user` is deleted.
+        should_not_be_deleted = []
+
+        # A group that has one owner, but `user` isn't a member of this group.
+        should_not_be_deleted.append(make_group("other_owner", owner=factories.User()))
+
+        # Some groups that have one owner but `user` is a non-owner member.
+        for role in GroupMembershipRoles:
+            if role == GroupMembershipRoles.OWNER:
+                continue
+            group = make_group(role, owner=factories.User())
+            group.memberships.append(GroupMembership(user=user, roles=[role]))
+            should_not_be_deleted.append(group)
+
+        # A group that `user` is an owner of but that also has another owner.
+        group = make_group("another_owner")
+        group.memberships.append(
+            GroupMembership(user=factories.User(), roles=[GroupMembershipRoles.OWNER])
+        )
+        should_not_be_deleted.append(group)
+
+        # A group that `user` is the only owner of but that contains an annotation from another user.
+        group = make_group("annotation")
+        factories.Annotation(group=group, deleted=False)
+        should_not_be_deleted.append(group)
 
         purger.delete_groups(user)
 
         worker.delete.assert_called_once_with(Group, Any.instance_of(Select))
-        assert (
-            db_session.scalars(select(Group).where(Group.creator == user)).all() == []
-        )
-
-    def test_delete_groups_still_deletes_groups_if_they_have_deleted_annotations(
-        self, user, db_session, factories, purger
-    ):
-        group = factories.Group(creator=user)
-        # An annotation in the group, but the annotation has already been
-        # marked as deleted (meaning it'll soon be purged from the DB) so this
-        # shouldn't prevent the group from being deleted.
-        factories.Annotation(group=group, deleted=True)
-
-        purger.delete_groups(user)
-
-        assert (
-            db_session.scalars(select(Group).where(Group.creator == user)).all() == []
-        )
-
-    def test_delete_groups_doesnt_delete_groups_created_by_other_users(
-        self, user, db_session, factories, purger
-    ):
-        group = factories.Group()
-
-        purger.delete_groups(user)
-
-        assert group in db_session.scalars(select(Group)).all()
-
-    def test_delete_groups_doesnt_delete_groups_with_annotations(
-        self, user, db_session, factories, purger
-    ):
-        group = factories.Group(creator=user)
-        # The group contains an annotation by another user.
-        # This should prevent the group from being deleted.
-        factories.Annotation(group=group)
-
-        purger.delete_groups(user)
-
-        assert group in db_session.scalars(select(Group)).all()
+        for group in should_not_be_deleted:
+            assert not inspect(group).deleted
+        for group in should_be_deleted:
+            assert inspect(group).deleted
 
     def test_delete_group_memberships(
         self, user, factories, purger, worker, db_session
