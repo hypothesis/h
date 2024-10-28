@@ -276,7 +276,7 @@ zope-deprecation==5.0
     #   pyramid-jinja2
 zope-event==5.0
     # via gevent
-zope-interface==7.1.0
+zope-interface==7.1.1
     # via
     #   -r requirements/prod.in
     #   gevent
