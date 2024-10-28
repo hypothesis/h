@@ -240,7 +240,7 @@ pytest==8.3.3
     # via
     #   -r requirements/functests.in
     #   pytest-reverse
-pytest-reverse==1.7.0
+pytest-reverse==1.8.0
     # via -r requirements/functests.in
 python-dateutil==2.9.0.post0
     # via
