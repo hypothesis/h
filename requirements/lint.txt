@@ -397,7 +397,7 @@ pytest-cov==5.0.0
     # via -r requirements/tests.txt
 pytest-mock==3.14.0
     # via -r requirements/tests.txt
-pytest-reverse==1.7.0
+pytest-reverse==1.8.0
     # via -r requirements/functests.txt
 pytest-xdist[psutil]==3.6.1
     # via -r requirements/tests.txt
