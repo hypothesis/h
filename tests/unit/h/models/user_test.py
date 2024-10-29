@@ -5,6 +5,7 @@ from sqlalchemy import exc
 from sqlalchemy.sql.elements import BinaryExpression
 
 from h.models import Activation
+from h.models.group import GroupMembership
 from h.models.user import User, UserIDComparator
 
 
@@ -317,6 +318,37 @@ class TestUserGetByUsername:
         }
         db_session.flush()
         return users
+
+
+class TestUserMembers:
+    def test_it(self, factories):
+        groups = factories.Group.build_batch(size=2)
+        user = factories.User.build(
+            memberships=[
+                GroupMembership(group=groups[0]),
+                GroupMembership(group=groups[1]),
+            ]
+        )
+
+        assert user.groups == tuple(groups)
+
+    def test_it_is_readonly(self, factories):
+        user = factories.User.build()
+        new_groups = (factories.Group.build(),)
+
+        with pytest.raises(
+            AttributeError, match="^property 'groups' of 'User' object has no setter$"
+        ):
+            user.groups = new_groups
+
+    def test_it_is_immutable(self, factories):
+        user = factories.User.build()
+        new_group = factories.Group.build()
+
+        with pytest.raises(
+            AttributeError, match="^'tuple' object has no attribute 'append'$"
+        ):
+            user.groups.append(new_group)
 
 
 @pytest.fixture

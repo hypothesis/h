@@ -8,6 +8,7 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
+from h.models import GroupMembership
 from h.security import Permission
 from h.traversal import UserContext
 from h.traversal.group import GroupContext
@@ -390,7 +391,7 @@ class TestGroupSearchController:
     ):
         user_1 = factories.User()
         user_2 = factories.User()
-        group.members = [user_1, user_2]
+        group.memberships = [GroupMembership(user=user_1), GroupMembership(user=user_2)]
 
         pyramid_request.user = group.members[-1]
 
@@ -1189,36 +1190,51 @@ class TestGroupAndUserSearchController:
 @pytest.fixture
 def group(factories):
     group = factories.Group()
-    group.members.extend([group.creator, factories.User(), factories.User()])
+    group.memberships.extend(
+        [
+            GroupMembership(user=user)
+            for user in [group.creator, factories.User(), factories.User()]
+        ]
+    )
     return group
 
 
 @pytest.fixture
 def no_creator_group(factories):
     group = factories.Group(creator=None)
-    group.members.extend([factories.User(), factories.User()])
+    group.memberships.extend(
+        [GroupMembership(user=factories.User()), GroupMembership(user=factories.User())]
+    )
     return group
 
 
 @pytest.fixture
 def no_organization_group(factories):
     group = factories.Group(organization=None)
-    group.members.extend([group.creator, factories.User(), factories.User()])
+    group.memberships.extend(
+        [
+            GroupMembership(user=user)
+            for user in [group.creator, factories.User(), factories.User()]
+        ]
+    )
     return group
 
 
 @pytest.fixture
 def open_group(factories):
     open_group = factories.OpenGroup()
-    open_group.members.append(open_group.creator)
+    open_group.memberships.append(GroupMembership(user=open_group.creator))
     return open_group
 
 
 @pytest.fixture
 def restricted_group(factories):
     restricted_group = factories.RestrictedGroup()
-    restricted_group.members.extend(
-        [restricted_group.creator, factories.User(), factories.User()]
+    restricted_group.memberships.extend(
+        [
+            GroupMembership(user=user)
+            for user in [restricted_group.creator, factories.User(), factories.User()]
+        ]
     )
     return restricted_group
 

@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from h.models import User
+from h.models import GroupMembership, User
 from h.services.group_members import GroupMembersService, group_members_factory
 
 
@@ -36,8 +36,7 @@ class TestMemberLeave:
         self, group_members_service, factories, creator
     ):
         group = factories.Group(creator=creator)
-        new_member = factories.User()
-        group.members.append(new_member)
+        new_member = factories.User(memberships=[GroupMembership(group=group)])
 
         group_members_service.member_leave(group, new_member.userid)
 
@@ -45,8 +44,7 @@ class TestMemberLeave:
 
     def test_it_is_idempotent(self, group_members_service, factories, creator):
         group = factories.Group(creator=creator)
-        new_member = factories.User()
-        group.members.append(new_member)
+        new_member = factories.User(memberships=[GroupMembership(group=group)])
 
         group_members_service.member_leave(group, new_member.userid)
         group_members_service.member_leave(group, new_member.userid)
@@ -55,8 +53,7 @@ class TestMemberLeave:
 
     def test_it_publishes_leave_event(self, group_members_service, factories, publish):
         group = factories.Group()
-        new_member = factories.User()
-        group.members.append(new_member)
+        new_member = factories.User(memberships=[GroupMembership(group=group)])
 
         group_members_service.member_leave(group, new_member.userid)
 
@@ -78,7 +75,7 @@ class TestAddMembers:
     ):
         group = factories.Group()
         existing_member = factories.User()
-        group.members.append(existing_member)
+        group.memberships.append(GroupMembership(user=existing_member))
 
         group_members_service.add_members(group, [factories.User().userid])
 
@@ -88,7 +85,7 @@ class TestAddMembers:
 class TestUpdateMembers:
     def test_it_adds_users_in_userids(self, factories, group_members_service):
         group = factories.OpenGroup()  # no members at outset
-        new_members = [factories.User(), factories.User()]
+        new_members = (factories.User(), factories.User())
 
         group_members_service.update_members(
             group, [user.userid for user in new_members]
@@ -99,22 +96,25 @@ class TestUpdateMembers:
     def test_it_removes_members_not_present_in_userids(
         self, factories, group_members_service, creator
     ):
-        group = factories.Group(creator=creator)  # creator will be a member
-        new_members = [factories.User(), factories.User()]
-        group.members.append(new_members[0])
-        group.members.append(new_members[1])
+        group = factories.Group(
+            creator=creator,
+            memberships=[
+                GroupMembership(user=factories.User()),
+                GroupMembership(user=factories.User()),
+            ],
+        )
 
         group_members_service.update_members(group, [])
 
-        assert not group.members  # including the creator
+        assert not group.members
 
     def test_it_does_not_remove_members_present_in_userids(
         self, factories, group_members_service, publish
     ):
         group = factories.OpenGroup()  # no members at outset
         new_members = [factories.User(), factories.User()]
-        group.members.append(new_members[0])
-        group.members.append(new_members[1])
+        group.memberships.append(GroupMembership(user=new_members[0]))
+        group.memberships.append(GroupMembership(user=new_members[1]))
 
         group_members_service.update_members(
             group, [user.userid for user in group.members]
@@ -132,7 +132,7 @@ class TestUpdateMembers:
 
         group = factories.OpenGroup()
         new_members = [factories.User(), factories.User()]
-        group.members.append(new_members[0])
+        group.memberships.append(GroupMembership(user=new_members[0]))
 
         group_members_service.update_members(group, [new_members[1].userid])
 
@@ -154,8 +154,7 @@ class TestUpdateMembers:
             group, [new_member.userid, new_member.userid]
         )
 
-        assert group.members == [new_member]
-        assert len(group.members) == 1
+        assert group.members == (new_member,)
 
 
 @pytest.mark.usefixtures("user_service")

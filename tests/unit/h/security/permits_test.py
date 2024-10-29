@@ -3,6 +3,7 @@ from unittest.mock import patch, sentinel
 import pytest
 from pyramid.security import Allowed, Denied
 
+from h.models import GroupMembership
 from h.security import Identity, Permission
 from h.security.permits import PERMISSION_MAP, identity_permits
 from h.traversal import AnnotationContext
@@ -92,7 +93,7 @@ class TestIdentityPermitsIntegrated:
 
     @pytest.fixture
     def user(self, factories, group):
-        return factories.User(groups=[group])
+        return factories.User(memberships=[GroupMembership(group=group)])
 
     @pytest.fixture
     def group(self, factories):

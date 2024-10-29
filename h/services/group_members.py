@@ -1,6 +1,7 @@
 from functools import partial
 
 from h import session
+from h.models import GroupMembership
 
 
 class GroupMembersService:
@@ -60,7 +61,7 @@ class GroupMembersService:
         if user in group.members:
             return
 
-        group.members.append(user)
+        group.memberships.append(GroupMembership(user=user))
 
         self.publish("group-join", group.pubid, userid)
 
@@ -68,10 +69,17 @@ class GroupMembersService:
         """Remove `userid` from the member list of `group`."""
         user = self.user_fetcher(userid)
 
-        if user not in group.members:
+        matching_memberships = [
+            membership for membership in group.memberships if membership.user == user
+        ]
+
+        if not matching_memberships:
             return
 
-        group.members.remove(user)
+        for membership in matching_memberships:
+            self.db.delete(membership)
+            group.memberships.remove(membership)
+            user.memberships.remove(membership)
 
         self.publish("group-leave", group.pubid, userid)
 

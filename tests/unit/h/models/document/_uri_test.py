@@ -14,6 +14,7 @@ class TestDocumentURI:
     def test_it_normalizes_the_uri(self):
         document_uri = DocumentURI(uri="http://example.com/")
 
+        # pylint:disable=comparison-with-callable
         assert document_uri.uri_normalized == "httpx://example.com"
 
     def test_type_defaults_to_empty_string(self, db_session, document_uri, factories):

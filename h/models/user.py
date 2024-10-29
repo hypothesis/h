@@ -1,5 +1,6 @@
 import datetime
 import re
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
@@ -8,6 +9,10 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from h.db import Base
 from h.exceptions import InvalidUserId
 from h.util.user import format_userid, split_user
+
+if TYPE_CHECKING:
+    from models.group import Group  # pragma: nocover
+
 
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
@@ -289,6 +294,32 @@ class User(Base):
     )
 
     tokens = sa.orm.relationship("Token", back_populates="user")
+
+    memberships = sa.orm.relationship("GroupMembership", back_populates="user")
+
+    @property
+    def groups(self) -> tuple["Group", ...]:
+        """
+        Return a tuple of this user's groups.
+
+        This is a convenience property for when you want to access a user's
+        groups (Group objects) rather than its memberships (GroupMembership
+        objects).
+
+        This is not an SQLAlchemy relationship! SQLAlchemy emits a warning if
+        you try to have both User.memberships and a User.groups relationships
+        at the same time because it can result in reads returning conflicting
+        data and in writes causing integrity errors or unexpected inserts or
+        deletes. See:
+
+        https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html#combining-association-object-with-many-to-many-access-patterns
+
+        Since this is just a normal Python property setting or mutating it
+        (e.g. `user.groups = [...]` or `user.groups.append(...)`) wouldn't
+        be registered with SQLAlchemy and the changes wouldn't be saved to the
+        DB. So this is a read-only property that returns an immutable tuple.
+        """
+        return tuple(membership.group for membership in self.memberships)
 
     @sa.orm.validates("email")
     def validate_email(self, _key, email):
