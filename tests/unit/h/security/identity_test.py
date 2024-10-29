@@ -3,6 +3,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
+from h.models import GroupMembership
 from h.security.identity import (
     Identity,
     LongLivedAuthClient,
@@ -25,7 +26,7 @@ class TestLongLivedGroup:
 class TestLongLivedUser:
     def test_from_models(self, factories, LongLivedGroup):
         group = factories.Group.build()
-        user = factories.User.build(groups=[group])
+        user = factories.User.build(memberships=[GroupMembership(group=group)])
 
         model = LongLivedUser.from_model(user)
 

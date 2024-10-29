@@ -21,10 +21,8 @@ class TestReadGroups:
         self, app, factories, db_session, user_with_token, token_auth_header
     ):
         user, _ = user_with_token
-        group1 = factories.Group()
-        db_session.add(GroupMembership(group_id=group1.id, user_id=user.id))
-        group2 = factories.Group()
-        db_session.add(GroupMembership(group_id=group2.id, user_id=user.id))
+        group1 = factories.Group(memberships=[GroupMembership(user=user)])
+        group2 = factories.Group(memberships=[GroupMembership(user=user)])
         db_session.commit()
 
         res = app.get("/api/groups", headers=token_auth_header)
@@ -38,8 +36,9 @@ class TestReadGroups:
         self, app, factories, db_session, user_with_token, token_auth_header
     ):
         user, _ = user_with_token
-        group1 = factories.Group(authority=user.authority)
-        db_session.add(GroupMembership(group_id=group1.id, user_id=user.id))
+        group1 = factories.Group(
+            authority=user.authority, memberships=[GroupMembership(user=user)]
+        )
         db_session.commit()
 
         res = app.get("/api/groups?authority=whatever.com", headers=token_auth_header)
@@ -94,8 +93,7 @@ class TestReadGroup:
         self, app, user_with_token, token_auth_header, factories, db_session
     ):
         user, _ = user_with_token
-        group = factories.Group(creator=user)
-        db_session.add(GroupMembership(group_id=group.id, user_id=user.id))
+        group = factories.Group(creator=user, memberships=[GroupMembership(user=user)])
         db_session.commit()
 
         res = app.get(
@@ -109,7 +107,7 @@ class TestReadGroup:
     ):
         user, _ = user_with_token
         group = factories.Group()
-        group.members.append(user)
+        group.memberships.append(GroupMembership(user=user))
         db_session.commit()
 
         res = app.get(

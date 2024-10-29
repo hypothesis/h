@@ -4,6 +4,7 @@ import pytest
 from h_matchers import Any
 
 from h.jinja_extensions.navbar_data import navbar_data
+from h.models import GroupMembership
 
 
 class TestNavbarData:
@@ -53,9 +54,9 @@ class TestNavbarData:
     def test_it_with_a_group_with_no_creator(
         self, pyramid_request, user, factories, group_list_service
     ):
-        user.groups = group_list_service.associated_groups.return_value = [
-            factories.Group(creator=None)
-        ]
+        group = factories.Group(creator=None)
+        group_list_service.associated_groups.return_value = [group]
+        user.memberships = [GroupMembership(group=group, user=user)]
         pyramid_request.user = user
 
         result = navbar_data(pyramid_request)
@@ -111,9 +112,15 @@ class TestNavbarData:
         assert result["search_url"] == search_url
 
     @pytest.fixture
-    def user(self, factories):
+    def user(self, db_session, factories):
         user = factories.User()
-        user.groups = [factories.Group(creator=user), factories.Group()]
+
+        with db_session.no_autoflush:
+            user.memberships = [
+                GroupMembership(group=group)
+                for group in [factories.Group(creator=user), factories.Group()]
+            ]
+
         return user
 
     @pytest.fixture(autouse=True)

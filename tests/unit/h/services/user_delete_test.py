@@ -354,11 +354,18 @@ class TestUserPurger:
         other_user = factories.User()
         groups = [
             # A group that `user` created.
-            factories.Group(creator=user, members=[other_user]),
+            factories.Group(
+                creator=user, memberships=[GroupMembership(user=other_user)]
+            ),
             # A group that `user` is a member of but didn't create.
-            factories.Group(members=[user, other_user]),
+            factories.Group(
+                memberships=[
+                    GroupMembership(user=user),
+                    GroupMembership(user=other_user),
+                ]
+            ),
             # A group that `user` is neither a creator or member of.
-            factories.Group(members=[other_user]),
+            factories.Group(memberships=[GroupMembership(user=other_user)]),
         ]
 
         purger.delete_group_memberships(user)

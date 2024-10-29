@@ -3,6 +3,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
+from h.models import GroupMembership
 from h.services.bulk_api.annotation import (
     BulkAnnotation,
     BulkAnnotationService,
@@ -48,7 +49,9 @@ class TestBulkAnnotationService:
         author = factories.User(
             authority=self.AUTHORITY, nipsa=values["nipsad"], username=username
         )
-        group = factories.Group(members=[author, viewer])
+        group = factories.Group(
+            memberships=[GroupMembership(user=author), GroupMembership(user=viewer)]
+        )
         anno_slim = factories.AnnotationSlim(
             user=author,
             group=group,
@@ -86,7 +89,9 @@ class TestBulkAnnotationService:
         annotations = [
             factories.AnnotationSlim(
                 user=author,
-                group=factories.Group(members=group_members),
+                group=factories.Group(
+                    memberships=[GroupMembership(user=user) for user in group_members]
+                ),
                 shared=True,
                 deleted=False,
             )

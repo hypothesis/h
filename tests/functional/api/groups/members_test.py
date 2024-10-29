@@ -10,9 +10,14 @@ class TestReadMembers:
     def test_it_returns_list_of_members_for_restricted_group_without_authn(
         self, app, factories, db_session
     ):
-        group = factories.RestrictedGroup()
-        group.members = [factories.User(), factories.User(), factories.User()]
+        group = factories.RestrictedGroup(
+            memberships=[
+                GroupMembership(user=user)
+                for user in factories.User.create_batch(size=3)
+            ]
+        )
         db_session.commit()
+
         res = app.get("/api/groups/{pubid}/members".format(pubid=group.pubid))
 
         assert res.status_code == 200
@@ -22,7 +27,9 @@ class TestReadMembers:
         self, app, factories, db_session, group, user_with_token, token_auth_header
     ):
         user, _ = user_with_token
-        group.members.extend([user, factories.User()])
+        group.memberships.extend(
+            [GroupMembership(user=user), GroupMembership(user=factories.User())]
+        )
         db_session.commit()
 
         res = app.get(
@@ -251,7 +258,7 @@ def third_party_group(db_session, factories):
 @pytest.fixture
 def group_member(group, db_session, factories):
     user = factories.User()
-    group.members.append(user)
+    group.memberships.append(GroupMembership(user=user))
     db_session.commit()
     return user
 

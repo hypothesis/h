@@ -219,6 +219,38 @@ def test_non_public_group():
     assert not group.is_public
 
 
+def test_members(factories):
+    users = factories.User.build_batch(size=2)
+    group = factories.Group.build(
+        memberships=[
+            models.GroupMembership(user=users[0]),
+            models.GroupMembership(user=users[1]),
+        ]
+    )
+
+    assert group.members == tuple(users)
+
+
+def test_members_is_readonly(factories):
+    group = factories.Group.build()
+    new_members = (factories.User.build(),)
+
+    with pytest.raises(
+        AttributeError, match="^property 'members' of 'Group' object has no setter$"
+    ):
+        group.members = new_members
+
+
+def test_members_is_immutable(factories):
+    group = factories.Group.build()
+    new_member = factories.User.build()
+
+    with pytest.raises(
+        AttributeError, match="^'tuple' object has no attribute 'append'$"
+    ):
+        group.members.append(new_member)
+
+
 class TestGroupMembership:
     def test_defaults(self, db_session, user, group):
         membership = models.GroupMembership(user_id=user.id, group_id=group.id)

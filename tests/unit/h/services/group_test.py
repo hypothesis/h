@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from h_matchers import Any
 
-from h.models import Group
+from h.models import Group, GroupMembership
 from h.models.group import ReadableBy
 from h.services.group import GroupService, groups_factory
 
@@ -140,7 +140,7 @@ class TestGroupServiceGroupIds:
         user = factories.User()
 
         group = factories.Group(readable_by=ReadableBy.members)
-        group.members.append(user)
+        group.memberships.append(GroupMembership(user=user))
 
         db_session.flush()
 
@@ -168,7 +168,7 @@ class TestGroupServiceGroupIds:
     def test_created_by_excludes_other_groups(self, svc, db_session, factories):
         user = factories.User()
         private_group = factories.Group()
-        private_group.members.append(user)
+        private_group.memberships.append(GroupMembership(user=user))
         factories.Group(readable_by=ReadableBy.world)
         db_session.flush()
 

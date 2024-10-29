@@ -2,6 +2,8 @@ import json
 
 import pytest
 
+from h.models import GroupMembership
+
 
 @pytest.mark.usefixtures("with_clean_db")
 class TestBulkAnnotation:
@@ -23,7 +25,7 @@ class TestBulkAnnotation:
         group = factories.Group(
             authority="lms.hypothes.is",
             authority_provided_id="1234567890",
-            members=[user],
+            memberships=[GroupMembership(user=user)],
         )
         annotation_slim = factories.AnnotationSlim(
             user=user,

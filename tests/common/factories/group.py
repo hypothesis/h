@@ -20,7 +20,6 @@ class Group(ModelFactory):
     joinable_by = JoinableBy.authority
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
-    members = factory.LazyFunction(list)
     authority_provided_id = Faker("hexify", text="^" * 30)
     enforce_scope = True
 
