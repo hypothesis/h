@@ -76,15 +76,13 @@ class TestAddMembers:
     def test_it_does_not_remove_existing_members(
         self, factories, group_members_service
     ):
-        creator = factories.User()
-        group = factories.Group(creator=creator)
-        users = [factories.User(), factories.User()]
-        userids = [user.userid for user in users]
+        group = factories.Group()
+        existing_member = factories.User()
+        group.members.append(existing_member)
 
-        group_members_service.add_members(group, userids)
+        group_members_service.add_members(group, [factories.User().userid])
 
-        assert len(group.members) == len(users) + 1  # account for creator user
-        assert creator in group.members
+        assert existing_member in group.members
 
 
 class TestUpdateMembers:
@@ -143,7 +141,6 @@ class TestUpdateMembers:
         )
         assert sorted(group_members_service.member_leave.call_args_list) == sorted(
             [
-                mock.call(group, group.creator.userid),
                 mock.call(group, new_members[0].userid),
             ]
         )

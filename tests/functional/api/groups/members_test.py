@@ -2,6 +2,7 @@ import base64
 
 import pytest
 
+from h.models import GroupMembership
 from h.models.auth_client import GrantType
 
 
@@ -21,17 +22,16 @@ class TestReadMembers:
         self, app, factories, db_session, group, user_with_token, token_auth_header
     ):
         user, _ = user_with_token
-        group.members.append(user)
+        group.members.extend([user, factories.User()])
         db_session.commit()
+
         res = app.get(
             "/api/groups/{pubid}/members".format(pubid=group.pubid),
             headers=token_auth_header,
         )
 
         returned_usernames = [member["username"] for member in res.json]
-        assert user.username in returned_usernames
-        assert group.creator.username in returned_usernames
-
+        assert returned_usernames == [member.username for member in group.members]
         assert res.status_code == 200
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(

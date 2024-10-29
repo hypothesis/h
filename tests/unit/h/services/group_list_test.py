@@ -4,7 +4,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from h.models.group import Group
+from h.models.group import Group, GroupMembership
 from h.services.group_list import GroupListService, group_list_factory
 from h.services.group_scope import GroupScopeService
 
@@ -331,8 +331,10 @@ def document_uri():
 
 
 @pytest.fixture
-def sample_groups(factories, other_authority, document_uri, default_authority, user):
-    return {
+def sample_groups(
+    factories, other_authority, document_uri, default_authority, user, db_session
+):
+    sample_groups = {
         "open": factories.OpenGroup(
             name="sample open",
             authority=default_authority,
@@ -353,6 +355,13 @@ def sample_groups(factories, other_authority, document_uri, default_authority, u
         ),
         "private": factories.Group(creator=user),
     }
+
+    # Make `user` a member of the sample_groups["private"].
+    db_session.add(
+        GroupMembership(user_id=user.id, group_id=sample_groups["private"].id)
+    )
+
+    return sample_groups
 
 
 @pytest.fixture

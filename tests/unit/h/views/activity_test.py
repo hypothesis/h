@@ -1189,7 +1189,7 @@ class TestGroupAndUserSearchController:
 @pytest.fixture
 def group(factories):
     group = factories.Group()
-    group.members.extend([factories.User(), factories.User()])
+    group.members.extend([group.creator, factories.User(), factories.User()])
     return group
 
 
@@ -1203,20 +1203,23 @@ def no_creator_group(factories):
 @pytest.fixture
 def no_organization_group(factories):
     group = factories.Group(organization=None)
-    group.members.extend([factories.User(), factories.User()])
+    group.members.extend([group.creator, factories.User(), factories.User()])
     return group
 
 
 @pytest.fixture
 def open_group(factories):
     open_group = factories.OpenGroup()
+    open_group.members.append(open_group.creator)
     return open_group
 
 
 @pytest.fixture
 def restricted_group(factories):
     restricted_group = factories.RestrictedGroup()
-    restricted_group.members.extend([factories.User(), factories.User()])
+    restricted_group.members.extend(
+        [restricted_group.creator, factories.User(), factories.User()]
+    )
     return restricted_group
 
 
