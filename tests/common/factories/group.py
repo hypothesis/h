@@ -33,17 +33,6 @@ class Group(ModelFactory):
 
         self.scopes = scopes or []
 
-    @factory.post_generation
-    def add_creator_as_member(  # pylint:disable=no-self-argument
-        obj, _create, _extracted, **_kwargs
-    ):
-        if (
-            obj.creator
-            and obj.creator
-            not in obj.members  # pylint:disable=unsupported-membership-test
-        ):
-            obj.members.insert(0, obj.creator)  # pylint:disable=no-member
-
 
 class OpenGroup(Group):
     name = factory.Sequence(lambda n: f"Open Group {n}")
