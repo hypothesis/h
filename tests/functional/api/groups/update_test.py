@@ -103,6 +103,10 @@ class TestUpdateGroup:
         )
 
         assert res.status_code == 400
+        assert res.json == {
+            "reason": "name: 'Oooopoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo' is too long",
+            "status": "failure",
+        }
 
     def test_it_returns_http_400_if_groupid_set_on_default_authority_and_user_token(
         self, app, token_auth_header, first_party_group, first_party_user, db_session
@@ -121,6 +125,10 @@ class TestUpdateGroup:
         )
 
         assert res.status_code == 400
+        assert res.json == {
+            "reason": "groupid: '3434kjkjk' does not match \"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\"",
+            "status": "failure",
+        }
 
     def test_it_returns_http_404_if_no_authenticated_user(self, app, first_party_group):
         group = {"name": "My Group"}
