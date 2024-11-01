@@ -37,7 +37,7 @@
     "normalize.css": "^8.0.0",
     "popper.js": "^1.16.1",
     "postcss": "^8.4.47",
-    "preact": "^10.24.1",
+    "preact": "^10.24.3",
     "rollup": "^4.22.4",
     "sass": "^1.79.4",
     "scroll-into-view": "^1.16.2",
