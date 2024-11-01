@@ -13,7 +13,8 @@ FEATURES = {
         "Cache-bust client entry point URL to prevent browser/CDN from "
         "using a cached version?"
     ),
-    "group_type": "Allow users to choose group type in group creation form",
+    "group_members": "Allow users to manage group members in new group forms",
+    "group_type": "Allow users to choose group type in new group forms",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
 }
