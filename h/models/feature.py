@@ -7,15 +7,15 @@ from h.db import Base
 log = logging.getLogger(__name__)
 
 FEATURES = {
+    "client_display_names": "Render display names instead of user names in the client",
+    "client_user_profile": "Enable client-side user profile and preferences management",
     "embed_cachebuster": (
         "Cache-bust client entry point URL to prevent browser/CDN from "
         "using a cached version?"
     ),
-    "client_display_names": "Render display names instead of user names in the client",
+    "group_type": "Allow users to choose group type in group creation form",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
-    "client_user_profile": "Enable client-side user profile and preferences management",
-    "group_type": "Allow users to choose group type in group creation form",
 }
 
 
