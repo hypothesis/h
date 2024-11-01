@@ -468,6 +468,35 @@ class TestUserPurger:
 
 
 class TestLimitedWorker:
+    def test_update(self, caplog, db_session, factories):
+        annotations = factories.Annotation.create_batch(size=2, text="ORIGINAL")
+        worker = LimitedWorker(db_session, limit=3)
+
+        updated_annotation_ids = worker.update(
+            Annotation, select(Annotation.id), {"text": "UPDATED"}
+        )
+
+        assert sorted(updated_annotation_ids) == sorted(
+            [annotation.id for annotation in annotations]
+        )
+        assert worker.limit == 1
+        for annotation in annotations:
+            assert annotation.text == "UPDATED"
+        assert caplog.record_tuples == [
+            ("h.services.user_delete", logging.INFO, "Updated 2 rows from annotation")
+        ]
+
+    def test_update_when_no_matching_rows(self, caplog, db_session):
+        worker = LimitedWorker(db_session, limit=3)
+
+        updated_annotation_ids = worker.update(
+            Annotation, select(Annotation.id), {"text": "UPDATED"}
+        )
+
+        assert updated_annotation_ids == []
+        assert worker.limit == 3
+        assert caplog.record_tuples == []
+
     def test_update_when_limit_exceeded(self, db_session, factories):
         annotation = factories.Annotation()
         original_text = annotation.text
@@ -524,6 +553,30 @@ class TestLimitedWorker:
         assert caplog.record_tuples == [
             ("h.services.user_delete", logging.INFO, "Updated 1 rows from annotation")
         ]
+
+    def test_delete(self, caplog, db_session, factories):
+        annotations = factories.Annotation.create_batch(size=2)
+        worker = LimitedWorker(db_session, limit=3)
+
+        deleted_annotation_ids = worker.delete(Annotation, select(Annotation.id))
+
+        assert worker.limit == 1
+        assert sorted(deleted_annotation_ids) == sorted(
+            [annotation.id for annotation in annotations]
+        )
+        assert caplog.record_tuples == [
+            ("h.services.user_delete", logging.INFO, "Deleted 2 rows from annotation")
+        ]
+        assert db_session.scalars(select(Annotation)).all() == []
+
+    def test_delete_when_no_matching_rows(self, caplog, db_session):
+        worker = LimitedWorker(db_session, limit=3)
+
+        deleted_annotation_ids = worker.delete(Annotation, select(Annotation.id))
+
+        assert worker.limit == 3
+        assert deleted_annotation_ids == []
+        assert caplog.record_tuples == []
 
     def test_delete_when_limit_exceeded(self, db_session, factories):
         annotation = factories.Annotation()
