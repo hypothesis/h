@@ -2,7 +2,13 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.models.group import JoinableBy, ReadableBy, WriteableBy
+from h.models.group import (
+    GroupMembership,
+    GroupMembershipRoles,
+    JoinableBy,
+    ReadableBy,
+    WriteableBy,
+)
 from h.security import Identity, predicates
 from h.traversal import AnnotationContext, UserContext
 from h.traversal.group import GroupContext
@@ -168,17 +174,156 @@ class TestGroupPredicates:
         group_context.group.creator.id = identity.user.id
         assert predicates.group_created_by_user(identity, group_context)
 
-    @pytest.mark.parametrize("matching", (True, False))
-    def test_group_has_user_as_member(
-        self, group_context, identity, factories, matching
+    @pytest.mark.parametrize(
+        "role,expected_result",
+        [
+            (GroupMembershipRoles.MEMBER, False),
+            (GroupMembershipRoles.MODERATOR, False),
+            (GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.OWNER, True),
+        ],
+    )
+    def test_group_has_user_as_owner_when_user_is_member(
+        self,
+        authenticated_user,
+        identity,
+        group_context,
+        role,
+        expected_result,
+        factories,
     ):
-        # Note we don't use the same literal objects here. It's important
-        # that we test based on the values not Python equality as the objects
-        # are detached in the WS and don't evaluate as equal
-        identity.user.groups = [factories.Group.build(id=i) for i in range(3)]
-        group_context.group = factories.Group.build(id=1 if matching else 100)
+        group_context.group.memberships.append(
+            GroupMembership(
+                # Rather than passing `user=user` we create another user object
+                # with the same id. This is to ensure that the predicate tests
+                # based on id rather than on object equality because in some
+                # contexts (e.g. the WebSocket) there can be detached objects
+                # that won't compare equal to other objects with the same id.
+                user=factories.User.build(id=authenticated_user.id),
+                roles=[role],
+            )
+        )
 
-        assert predicates.group_has_user_as_member(identity, group_context) == matching
+        assert (
+            predicates.group_has_user_as_owner(identity, group_context)
+            == expected_result
+        )
+
+    def test_group_has_user_as_owner_when_user_isnt_member(
+        self, identity, group_context
+    ):
+        assert predicates.group_has_user_as_owner(identity, group_context) is False
+
+    @pytest.mark.parametrize(
+        "role,expected_result",
+        [
+            (GroupMembershipRoles.MEMBER, False),
+            (GroupMembershipRoles.MODERATOR, False),
+            (GroupMembershipRoles.ADMIN, True),
+            (GroupMembershipRoles.OWNER, False),
+        ],
+    )
+    def test_group_has_user_as_admin_when_user_is_member(
+        self,
+        authenticated_user,
+        identity,
+        group_context,
+        role,
+        expected_result,
+        factories,
+    ):
+        group_context.group.memberships.append(
+            GroupMembership(
+                # Rather than passing `user=user` we create another user object
+                # with the same id. This is to ensure that the predicate tests
+                # based on id rather than on object equality because in some
+                # contexts (e.g. the WebSocket) there can be detached objects
+                # that won't compare equal to other objects with the same id.
+                user=factories.User.build(id=authenticated_user.id),
+                roles=[role],
+            )
+        )
+
+        assert (
+            predicates.group_has_user_as_admin(identity, group_context)
+            == expected_result
+        )
+
+    def test_group_has_user_as_admin_when_user_isnt_member(
+        self, identity, group_context
+    ):
+        assert predicates.group_has_user_as_admin(identity, group_context) is False
+
+    @pytest.mark.parametrize(
+        "role,expected_result",
+        [
+            (GroupMembershipRoles.MEMBER, False),
+            (GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.OWNER, False),
+        ],
+    )
+    def test_group_has_user_as_moderator_when_user_is_member(
+        self,
+        authenticated_user,
+        identity,
+        group_context,
+        role,
+        expected_result,
+        factories,
+    ):
+        group_context.group.memberships.append(
+            GroupMembership(
+                # Rather than passing `user=user` we create another user object
+                # with the same id. This is to ensure that the predicate tests
+                # based on id rather than on object equality because in some
+                # contexts (e.g. the WebSocket) there can be detached objects
+                # that won't compare equal to other objects with the same id.
+                user=factories.User.build(id=authenticated_user.id),
+                roles=[role],
+            )
+        )
+
+        assert (
+            predicates.group_has_user_as_moderator(identity, group_context)
+            == expected_result
+        )
+
+    def test_group_has_user_as_moderator_when_user_isnt_member(
+        self, identity, group_context
+    ):
+        assert predicates.group_has_user_as_moderator(identity, group_context) is False
+
+    @pytest.mark.parametrize(
+        "role",
+        [
+            GroupMembershipRoles.MEMBER,
+            GroupMembershipRoles.MODERATOR,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.OWNER,
+        ],
+    )
+    def test_group_has_user_as_member_when_user_is_member(
+        self, authenticated_user, identity, group_context, role, factories
+    ):
+        group_context.group.memberships.append(
+            GroupMembership(
+                # Rather than passing `user=user` we create another user object
+                # with the same id. This is to ensure that the predicate tests
+                # based on id rather than on object equality because in some
+                # contexts (e.g. the WebSocket) there can be detached objects
+                # that won't compare equal to other objects with the same id.
+                user=factories.User.build(id=authenticated_user.id),
+                roles=[role],
+            )
+        )
+
+        assert predicates.group_has_user_as_member(identity, group_context) is True
+
+    def test_group_has_user_as_member_when_user_isnt_member(
+        self, identity, group_context
+    ):
+        assert predicates.group_has_user_as_member(identity, group_context) is False
 
     @pytest.mark.parametrize("context_authority", ("user_authority", "other"))
     def test_group_matches_user_authority(
@@ -264,7 +409,12 @@ def user_context(factories):
 
 
 @pytest.fixture
-def identity(factories):
+def authenticated_user(factories):
+    return factories.User.build()
+
+
+@pytest.fixture
+def identity(authenticated_user, factories):
     return Identity.from_models(
-        user=factories.User.build(), auth_client=factories.AuthClient.build()
+        user=authenticated_user, auth_client=factories.AuthClient.build()
     )

@@ -191,7 +191,20 @@ class Group(Base, mixins.Timestamps):
         be registered with SQLAlchemy and the changes wouldn't be saved to the
         DB. So this is a read-only property that returns an immutable tuple.
         """
-        return tuple(membership.user for membership in self.memberships)
+        return self.get_members()
+
+    def get_members(self, role: GroupMembershipRoles | None = None) -> tuple[User, ...]:
+        """Return a tuple of this group's members."""
+        if role:
+            memberships = [
+                membership
+                for membership in self.memberships
+                if role in membership.roles
+            ]
+        else:
+            memberships = self.memberships
+
+        return tuple(membership.user for membership in memberships)
 
     scopes = sa.orm.relationship(
         "GroupScope", backref="group", cascade="all, delete-orphan"

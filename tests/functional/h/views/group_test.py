@@ -1,5 +1,6 @@
 import pytest
-from pytest import param
+
+from h.models import GroupMembership, GroupMembershipRoles
 
 pytestmark = pytest.mark.usefixtures("init_elasticsearch")
 
@@ -9,24 +10,40 @@ class TestGroupEditController:
     # the group edit controller as they all need the same permission. We will
     # just test GET as it's the simplest.
     @pytest.mark.usefixtures("with_logged_in_user")
-    def test_a_logged_in_user_can_edit_their_own_groups(self, app, user_owned_group):
-        app.get(f"/groups/{user_owned_group.pubid}/edit")
-
     @pytest.mark.parametrize(
-        "is_staff,is_admin",
-        (
-            # Doesn't matter if you are staff or an admin, you can't edit
-            # peoples groups using the user facing form
-            param(True, False, id="staff"),
-            param(False, True, id="admin"),
-            param(False, False, id="regular_user"),
-        ),
+        "role",
+        [
+            GroupMembershipRoles.OWNER,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.MODERATOR,
+        ],
     )
-    def test_you_cannot_edit_other_peoples_groups(
-        self, app, group, login_user, is_staff, is_admin
+    def test_authorized_members_can_edit_groups(
+        self, app, group, role, db_session, user
     ):
-        login_user(staff=is_staff, admin=is_admin)
+        group.memberships.append(GroupMembership(user=user, roles=[role]))
+        db_session.commit()
 
+        app.get(f"/groups/{group.pubid}/edit")
+
+    @pytest.mark.usefixtures("with_logged_in_user")
+    @pytest.mark.parametrize(
+        "role",
+        [GroupMembershipRoles.MEMBER],
+    )
+    def test_unauthorized_members_cant_edit_groups(
+        self, app, group, role, db_session, user
+    ):
+        group.memberships.append(GroupMembership(user=user, roles=[role]))
+        db_session.commit()
+
+        app.get(f"/groups/{group.pubid}/edit", status=404)
+
+    @pytest.mark.usefixtures("with_logged_in_user")
+    def test_non_members_cant_edit_groups(self, app, group):
+        app.get(f"/groups/{group.pubid}/edit", status=404)
+
+    def test_unauthenticated_users_cant_edit_groups(self, app, group):
         app.get(f"/groups/{group.pubid}/edit", status=404)
 
     @pytest.fixture
