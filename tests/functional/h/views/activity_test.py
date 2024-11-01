@@ -1,5 +1,7 @@
 import pytest
 
+from h.models import GroupMembership, GroupMembershipRoles
+
 pytestmark = pytest.mark.usefixtures("init_elasticsearch")
 
 
@@ -55,25 +57,53 @@ class TestGroupSearchController:
         )
 
     @pytest.mark.usefixtures("with_logged_in_user")
-    def test_users_can_edit_their_own_groups(self, app, open_group_owned_by_user):
-        response = app.get(
-            f"/groups/{open_group_owned_by_user.pubid}/{open_group_owned_by_user.slug}"
+    @pytest.mark.parametrize(
+        "role",
+        [
+            GroupMembershipRoles.OWNER,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.MODERATOR,
+        ],
+    )
+    def test_authorized_members_can_edit_groups(
+        self, app, db_session, factories, user, role
+    ):
+        group = factories.OpenGroup(
+            memberships=[GroupMembership(user=user, roles=[role])]
         )
-
-        assert f"http://localhost/groups/{open_group_owned_by_user.pubid}/edit" in str(
-            response.html
-        )
-
-    @pytest.mark.usefixtures("with_logged_in_admin")
-    def test_admins_cannot_edit_groups_they_dont_own(self, app, open_group):
-        response = app.get(f"/groups/{open_group.pubid}/{open_group.slug}")
-
-        assert f"http://localhost/groups/{open_group.pubid}/edit" not in str(
-            response.html
-        )
-
-    @pytest.fixture
-    def open_group_owned_by_user(self, factories, user, db_session):
-        open_group_owned_by_user = factories.OpenGroup(creator=user)
         db_session.commit()
-        return open_group_owned_by_user
+
+        response = app.get(f"/groups/{group.pubid}/{group.slug}")
+
+        assert f"http://localhost/groups/{group.pubid}/edit" in str(response.html)
+
+    @pytest.mark.usefixtures("with_logged_in_user")
+    @pytest.mark.parametrize("role", [GroupMembershipRoles.MEMBER])
+    def test_unauthorized_members_cant_edit_groups(
+        self, app, db_session, factories, user, role
+    ):
+        group = factories.OpenGroup(
+            memberships=[GroupMembership(user=user, roles=[role])]
+        )
+        db_session.commit()
+
+        response = app.get(f"/groups/{group.pubid}/{group.slug}")
+
+        assert f"http://localhost/groups/{group.pubid}/edit" not in str(response.html)
+
+    @pytest.mark.usefixtures("with_logged_in_user")
+    def test_non_members_cant_edit_groups(self, app, db_session, factories):
+        group = factories.OpenGroup()
+        db_session.commit()
+
+        response = app.get(f"/groups/{group.pubid}/{group.slug}")
+
+        assert f"http://localhost/groups/{group.pubid}/edit" not in str(response.html)
+
+    def test_unauthenticated_users_cant_edit_groups(self, app, db_session, factories):
+        group = factories.OpenGroup()
+        db_session.commit()
+
+        response = app.get(f"/groups/{group.pubid}/{group.slug}")
+
+        assert f"http://localhost/groups/{group.pubid}/edit" not in str(response.html)

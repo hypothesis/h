@@ -2,17 +2,37 @@ import base64
 
 import pytest
 
+from h.models import GroupMembership, GroupMembershipRoles
 from h.models.auth_client import GrantType
 
 
 class TestUpdateGroup:
+    @pytest.mark.parametrize(
+        "role",
+        [
+            GroupMembershipRoles.MODERATOR,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.OWNER,
+        ],
+    )
     def test_it_returns_http_200_with_valid_payload_and_user_token(
-        self, app, token_auth_header, first_party_group
+        self,
+        app,
+        token_auth_header,
+        first_party_group,
+        first_party_user,
+        db_session,
+        role,
     ):
-        group = {"name": "Rename My Group"}
+        # The user must be an authorized member of the group to edit it.
+        first_party_group.memberships.append(
+            GroupMembership(user=first_party_user, roles=[role])
+        )
+        db_session.commit()
+
         res = app.patch_json(
             "/api/groups/{id}".format(id=first_party_group.pubid),
-            group,
+            {"name": "Rename My Group"},
             headers=token_auth_header,
         )
 
@@ -21,12 +41,17 @@ class TestUpdateGroup:
         assert res.json_body["groupid"] is None
 
     def test_it_does_not_update_group_if_empty_payload_and_user_token(
-        self, app, token_auth_header, first_party_group
+        self, app, token_auth_header, first_party_group, first_party_user, db_session
     ):
-        payload = {}
+        # The user must be an authorized member of the group to edit it.
+        first_party_group.memberships.append(
+            GroupMembership(user=first_party_user, roles=[GroupMembershipRoles.OWNER])
+        )
+        db_session.commit()
+
         res = app.patch_json(
             "/api/groups/{id}".format(id=first_party_group.pubid),
-            payload,
+            {},
             headers=token_auth_header,
         )
 
@@ -35,8 +60,14 @@ class TestUpdateGroup:
         assert res.json_body["groupid"] is None
 
     def test_it_ignores_non_whitelisted_fields_in_payload_and_user_token(
-        self, app, token_auth_header, first_party_group
+        self, app, token_auth_header, first_party_group, first_party_user, db_session
     ):
+        # The user must be an authorized member of the group to edit it.
+        first_party_group.memberships.append(
+            GroupMembership(user=first_party_user, roles=[GroupMembershipRoles.OWNER])
+        )
+        db_session.commit()
+
         group = {
             "id": "fbdzzz",
             "name": "My Group",
@@ -54,15 +85,19 @@ class TestUpdateGroup:
         assert res.json_body["organization"] is None
 
     def test_it_returns_http_400_with_invalid_payload_and_user_token(
-        self, app, token_auth_header, first_party_group
+        self, app, token_auth_header, first_party_group, first_party_user, db_session
     ):
-        group = {
-            "name": "Oooopoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-        }
+        # The user must be an authorized member of the group to edit it.
+        first_party_group.memberships.append(
+            GroupMembership(user=first_party_user, roles=[GroupMembershipRoles.OWNER])
+        )
+        db_session.commit()
 
         res = app.patch_json(
             "/api/groups/{id}".format(id=first_party_group.pubid),
-            group,
+            {
+                "name": "Oooopoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            },
             headers=token_auth_header,
             expect_errors=True,
         )
@@ -70,12 +105,17 @@ class TestUpdateGroup:
         assert res.status_code == 400
 
     def test_it_returns_http_400_if_groupid_set_on_default_authority_and_user_token(
-        self, app, token_auth_header, first_party_group
+        self, app, token_auth_header, first_party_group, first_party_user, db_session
     ):
-        group = {"groupid": "3434kjkjk"}
+        # The user must be an authorized member of the group to edit it.
+        first_party_group.memberships.append(
+            GroupMembership(user=first_party_user, roles=[GroupMembershipRoles.OWNER])
+        )
+        db_session.commit()
+
         res = app.patch_json(
             "/api/groups/{id}".format(id=first_party_group.pubid),
-            group,
+            {"groupid": "3434kjkjk"},
             headers=token_auth_header,
             expect_errors=True,
         )
