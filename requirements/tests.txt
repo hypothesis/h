@@ -22,7 +22,7 @@ billiard==4.2.0
     # via
     #   -r requirements/prod.txt
     #   celery
-bleach==6.1.0
+bleach==6.2.0
     # via -r requirements/prod.txt
 build==1.0.3
     # via pip-tools
@@ -294,7 +294,6 @@ sentry-sdk==2.17.0
 six==1.16.0
     # via
     #   -r requirements/prod.txt
-    #   bleach
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
