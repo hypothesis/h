@@ -35,7 +35,7 @@ billiard==4.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   celery
-bleach==6.1.0
+bleach==6.2.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -448,7 +448,6 @@ six==1.16.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   bleach
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
