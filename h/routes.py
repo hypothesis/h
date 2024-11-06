@@ -212,6 +212,12 @@ def includeme(config):  # pylint: disable=too-many-statements
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
+    config.add_route(
+        "group_edit_members",
+        "/groups/{pubid}/edit/members",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route(
         "group_read",
