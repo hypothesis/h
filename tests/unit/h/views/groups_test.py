@@ -13,6 +13,7 @@ class TestGroupCreateEditController:
     @pytest.mark.parametrize("group_type_flag", [True, False])
     def test_create(self, pyramid_request, assets_env, mocker, group_type_flag):
         pyramid_request.feature.flags["group_type"] = group_type_flag
+
         mocker.spy(views, "get_csrf_token")
 
         controller = views.GroupCreateEditController(sentinel.context, pyramid_request)
@@ -43,6 +44,7 @@ class TestGroupCreateEditController:
                 "context": {"group": None},
                 "features": {
                     "group_type": group_type_flag,
+                    "group_members": pyramid_request.feature.flags["group_members"],
                 },
             },
         }
@@ -99,6 +101,7 @@ class TestGroupCreateEditController:
                 },
                 "features": {
                     "group_type": pyramid_request.feature.flags["group_type"],
+                    "group_members": pyramid_request.feature.flags["group_members"],
                 },
             },
         }
@@ -115,6 +118,7 @@ class TestGroupCreateEditController:
     @pytest.fixture(autouse=True)
     def pyramid_request(self, pyramid_request):
         pyramid_request.feature.flags["group_type"] = True
+        pyramid_request.feature.flags["group_members"] = True
         return pyramid_request
 
 

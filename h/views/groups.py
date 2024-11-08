@@ -60,6 +60,7 @@ class GroupCreateEditController:
             },
             "context": {"group": None},
             "features": {
+                "group_members": self.request.feature("group_members"),
                 "group_type": self.request.feature("group_type"),
             },
         }
