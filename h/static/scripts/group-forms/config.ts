@@ -1,9 +1,19 @@
+import { createContext } from 'preact';
 import type { GroupType } from './utils/api';
 
 export type APIConfig = {
   method: string;
   url: string;
   headers: Record<PropertyKey, unknown>;
+};
+
+export type Group = {
+  pubid: string;
+  name: string;
+  description: string;
+  link: string;
+  type: GroupType;
+  num_annotations: number;
 };
 
 export type ConfigObject = {
@@ -14,16 +24,10 @@ export type ConfigObject = {
     updateGroup: APIConfig | null;
   };
   context: {
-    group: {
-      pubid: string;
-      name: string;
-      description: string;
-      link: string;
-      type: GroupType;
-      num_annotations: number;
-    } | null;
+    group: Group | null;
   };
   features: {
+    group_members: boolean;
     group_type: boolean;
   };
 };
@@ -36,3 +40,5 @@ export function readConfig(): ConfigObject {
     throw new Error('Failed to parse frontend configuration');
   }
 }
+
+export const Config = createContext<ConfigObject | null>(null);

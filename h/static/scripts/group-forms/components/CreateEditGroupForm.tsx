@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'preact/hooks';
+import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
 import {
   Button,
@@ -6,7 +6,7 @@ import {
   RadioGroup,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
-import { readConfig } from '../config';
+import { Config } from '../config';
 import { callAPI } from '../utils/api';
 import type {
   CreateUpdateGroupAPIRequest,
@@ -15,9 +15,11 @@ import type {
 } from '../utils/api';
 import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
+import FormContainer from './forms/FormContainer';
 import Star from './forms/Star';
 import Label from './forms/Label';
 import TextField from './forms/TextField';
+import GroupFormHeader from './GroupFormHeader';
 import SaveStateIcon from './SaveStateIcon';
 import WarningDialog from './WarningDialog';
 
@@ -84,7 +86,7 @@ function GroupTypeChangeWarning({
 }
 
 export default function CreateEditGroupForm() {
-  const config = useMemo(() => readConfig(), []);
+  const config = useContext(Config)!;
   const group = config.context.group;
 
   const [name, setName] = useState(group?.name ?? '');
@@ -217,11 +219,10 @@ export default function CreateEditGroupForm() {
   };
 
   return (
-    <div className="text-grey-6 text-sm/relaxed">
-      <h1 className="mt-14 mb-8 text-grey-7 text-xl/none" data-testid="header">
-        {heading}
-      </h1>
-
+    <FormContainer title={heading}>
+      {group && config.features.group_members && (
+        <GroupFormHeader group={group} />
+      )}
       <form onSubmit={onSubmit} data-testid="form">
         <TextField
           type="input"
@@ -327,6 +328,6 @@ export default function CreateEditGroupForm() {
           &nbsp;Required
         </div>
       </footer>
-    </div>
+    </FormContainer>
   );
 }
