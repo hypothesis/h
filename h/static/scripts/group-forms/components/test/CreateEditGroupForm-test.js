@@ -7,9 +7,10 @@ import {
   default as CreateEditGroupForm,
 } from '../CreateEditGroupForm';
 
-let config;
+import { Config } from '../../config';
 
 describe('CreateEditGroupForm', () => {
+  let config;
   let fakeCallAPI;
   let fakeSetLocation;
   let fakeUseWarnOnPageUnload;
@@ -42,7 +43,6 @@ describe('CreateEditGroupForm', () => {
       '@hypothesis/frontend-shared': {
         useWarnOnPageUnload: fakeUseWarnOnPageUnload,
       },
-      '../config': { readConfig: () => config },
       '../utils/api': {
         callAPI: fakeCallAPI,
       },
@@ -89,7 +89,11 @@ describe('CreateEditGroupForm', () => {
   let wrappers;
 
   const createWrapper = () => {
-    const wrapper = mount(<CreateEditGroupForm />);
+    const wrapper = mount(
+      <Config.Provider value={config}>
+        <CreateEditGroupForm />
+      </Config.Provider>,
+    );
     wrappers.push(wrapper);
     const elements = getElements(wrapper);
     return { wrapper, elements };
