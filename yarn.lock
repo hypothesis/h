@@ -6166,6 +6166,7 @@ __metadata:
     tailwindcss: ^3.4.13
     typescript: ^5.6.3
     typescript-eslint: ^8.12.2
+    wouter-preact: ^3.3.5
   languageName: unknown
   linkType: soft
 
@@ -10958,6 +10959,18 @@ __metadata:
   peerDependencies:
     preact: ^10.0.0
   checksum: e23804152a953b89bdda3f04f31f60d2d5a3934e951da3a50a81fdd3aa2fd1de338778e99b249c2f80cd951c2cc9eb278afa5b650678f4a87a9f02a0310e2dc2
+  languageName: node
+  linkType: hard
+
+"wouter-preact@npm:^3.3.5":
+  version: 3.3.5
+  resolution: "wouter-preact@npm:3.3.5"
+  dependencies:
+    mitt: ^3.0.1
+    regexparam: ^3.0.0
+  peerDependencies:
+    preact: ^10.0.0
+  checksum: a3f201b0b21dbd939a19530d99095955e13195976c7a650ed16d9e9e65b23cc952fa2e3158310211c22a2cc40aea0815ada8b43a36ba2bf58427e87317d46063
   languageName: node
   linkType: hard
 
