@@ -11,7 +11,7 @@ services:
     networks:
       - dbs
   elasticsearch:
-    image: hypothesis/elasticsearch:latest
+    image: hypothesis/elasticsearch:elasticsearch7.10
     ports:
       - '127.0.0.1:9200:9200'
     healthcheck:
