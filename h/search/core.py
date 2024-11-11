@@ -156,7 +156,7 @@ class Search:
     @staticmethod
     def _get_total_hits(response):
         total = response["hits"]["total"]
-        if isinstance(total, int):
+        if isinstance(total, int):  # pragma: nocover
             # ES 6.x
             return total
 
