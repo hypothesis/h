@@ -68,6 +68,7 @@ class BatchIndexer:
 
     def delete(self, annotation_ids: list[str]) -> None:
         """Delete `annotation_ids` from Elasticsearch."""
+
         # Delete the given annotations from Elasticsearch by sending them to
         # Elasticsearch's bulk API in chunks.
         #
@@ -82,17 +83,22 @@ class BatchIndexer:
         # > memory.
         # >
         # > https://elasticsearch-py.readthedocs.io/en/6.8.2/helpers.html#elasticsearch.helpers.bulk
+
+        include_type = self._include_mapping_type()
+
+        def delete_action(annotation_id):
+            action = {
+                "_index": self._target_index,
+                "_id": annotation_id,
+                "doc": {"deleted": True},
+            }
+            if include_type:  # pragma: no cover
+                action["_type"] = self.es_client.mapping_type
+            return action
+
         results = es_helpers.streaming_bulk(
             client=self.es_client.conn,
-            actions=[
-                {
-                    "_index": self._target_index,
-                    "_type": "annotation",
-                    "_id": annotation_id,
-                    "doc": {"deleted": True},
-                }
-                for annotation_id in annotation_ids
-            ],
+            actions=[delete_action(annotation_id) for annotation_id in annotation_ids],
             chunk_size=2500,
             raise_on_error=False,
         )
@@ -109,7 +115,7 @@ class BatchIndexer:
             "_index": self._target_index,
             "_id": annotation.id,
         }
-        if self.es_client.server_version < Version("7.0.0"):  # pragma: no cover
+        if self._include_mapping_type():  # pragma: no cover
             operation["_type"] = self.es_client.mapping_type
 
         data = presenters.AnnotationSearchIndexPresenter(
@@ -117,6 +123,10 @@ class BatchIndexer:
         ).asdict()
 
         return {self.op_type: operation}, data
+
+    def _include_mapping_type(self):
+        """Return True if the `_type` field should be included in request payloads."""
+        return self.es_client.server_version < Version("7.0.0")
 
 
 def _filtered_annotations(session, ids):
