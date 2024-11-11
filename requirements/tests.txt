@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/tests.in
 #
-alembic==1.13.3
+alembic==1.14.0
     # via -r requirements/prod.txt
 amqp==5.2.0
     # via
