@@ -107,7 +107,7 @@ hupper==1.12
     # via
     #   -r requirements/prod.txt
     #   pyramid
-hypothesis==6.116.0
+hypothesis==6.118.7
     # via -r requirements/tests.in
 importlib-metadata==7.0.1
     # via
