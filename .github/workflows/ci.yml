@@ -72,7 +72,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       elasticsearch:
-        image: hypothesis/elasticsearch:latest
+        image: hypothesis/elasticsearch:elasticsearch7.10
         ports:
         - 9200:9200
         env:
@@ -139,7 +139,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       elasticsearch:
-        image: hypothesis/elasticsearch:latest
+        image: hypothesis/elasticsearch:elasticsearch7.10
         ports:
         - 9200:9200
         env:
