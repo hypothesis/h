@@ -11,7 +11,7 @@ from h.exceptions import InvalidUserId
 from h.util.user import format_userid, split_user
 
 if TYPE_CHECKING:
-    from models.group import Group  # pragma: nocover
+    from models.group import Group
 
 
 USERNAME_MIN_LENGTH = 3
