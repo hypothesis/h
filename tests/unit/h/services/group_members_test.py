@@ -94,7 +94,7 @@ class TestUpdateMembers:
         assert group.members == new_members
 
     def test_it_removes_members_not_present_in_userids(
-        self, factories, group_members_service, creator
+        self, db_session, factories, group_members_service, creator
     ):
         group = factories.Group(
             creator=creator,
