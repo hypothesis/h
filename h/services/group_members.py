@@ -1,5 +1,7 @@
 from functools import partial
 
+from sqlalchemy import select
+
 from h import session
 from h.models import GroupMembership
 
@@ -58,10 +60,17 @@ class GroupMembersService:
         """Add `userid` to the member list of `group`."""
         user = self.user_fetcher(userid)
 
-        if user in group.members:
+        existing_membership = self.db.scalar(
+            select(GroupMembership)
+            .where(GroupMembership.user == user)
+            .where(GroupMembership.group == group)
+        )
+
+        if existing_membership:
+            # The user is already a member of the group.
             return
 
-        group.memberships.append(GroupMembership(user=user))
+        self.db.add(GroupMembership(group=group, user=user))
 
         self.publish("group-join", group.pubid, userid)
 
