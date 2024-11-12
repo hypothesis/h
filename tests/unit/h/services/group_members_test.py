@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from sqlalchemy import select
 
 from h.models import GroupMembership, User
 from h.services.group_members import GroupMembersService, group_members_factory
@@ -42,14 +43,15 @@ class TestMemberLeave:
 
         assert new_member not in group.members
 
-    def test_it_is_idempotent(self, group_members_service, factories, creator):
-        group = factories.Group(creator=creator)
-        new_member = factories.User(memberships=[GroupMembership(group=group)])
+    def test_it_does_nothing_if_the_user_isnt_a_member(
+        self, group_members_service, factories, publish
+    ):
+        group = factories.Group()
+        user = factories.User()
 
-        group_members_service.member_leave(group, new_member.userid)
-        group_members_service.member_leave(group, new_member.userid)
+        group_members_service.member_leave(group, user.userid)
 
-        assert new_member not in group.members
+        publish.assert_not_called()
 
     def test_it_publishes_leave_event(self, group_members_service, factories, publish):
         group = factories.Group()
@@ -106,7 +108,9 @@ class TestUpdateMembers:
 
         group_members_service.update_members(group, [])
 
-        assert not group.members
+        assert not db_session.scalars(
+            select(GroupMembership).where(GroupMembership.group == group)
+        ).all()
 
     def test_it_does_not_remove_members_present_in_userids(
         self, factories, group_members_service, publish

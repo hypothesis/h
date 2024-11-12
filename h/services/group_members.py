@@ -78,17 +78,15 @@ class GroupMembersService:
         """Remove `userid` from the member list of `group`."""
         user = self.user_fetcher(userid)
 
-        matching_memberships = [
-            membership for membership in group.memberships if membership.user == user
-        ]
+        matching_memberships = self.db.scalars(
+            select(GroupMembership).where(GroupMembership.user == user)
+        ).all()
 
         if not matching_memberships:
             return
 
         for membership in matching_memberships:
             self.db.delete(membership)
-            group.memberships.remove(membership)
-            user.memberships.remove(membership)
 
         self.publish("group-leave", group.pubid, userid)
 
