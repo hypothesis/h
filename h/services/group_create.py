@@ -126,7 +126,7 @@ class GroupCreateService:
         # self.publish() or `return group`.
         self.db.flush()
 
-        group.memberships.append(GroupMembership(user=group.creator, roles=["owner"]))
+        self.db.add(GroupMembership(group=group, user=group.creator, roles=["owner"]))
         self.publish("group-join", group.pubid, group.creator.userid)
 
         return group
