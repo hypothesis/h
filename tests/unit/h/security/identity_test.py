@@ -1,13 +1,14 @@
-from unittest.mock import sentinel
+from unittest.mock import call, sentinel
 
 import pytest
 from h_matchers import Any
 
-from h.models import GroupMembership
+from h.models import GroupMembership, GroupMembershipRoles
 from h.security.identity import (
     Identity,
     LongLivedAuthClient,
     LongLivedGroup,
+    LongLivedMembership,
     LongLivedUser,
 )
 
@@ -24,22 +25,45 @@ class TestLongLivedGroup:
 
 
 class TestLongLivedUser:
-    def test_from_models(self, factories, LongLivedGroup):
-        group = factories.Group.build()
-        user = factories.User.build(memberships=[GroupMembership(group=group)])
+    def test_from_model(self, db_session, factories, LongLivedGroup):
+        groups = factories.Group.create_batch(size=2)
+        user = factories.User(
+            memberships=[
+                GroupMembership(group=groups[0], roles=[GroupMembershipRoles.MEMBER]),
+                GroupMembership(group=groups[1], roles=[GroupMembershipRoles.ADMIN]),
+            ]
+        )
+        LongLivedGroup.from_model.side_effect = [
+            sentinel.long_lived_group_1,
+            sentinel.long_lived_group_2,
+        ]
+        db_session.flush()
 
         model = LongLivedUser.from_model(user)
 
-        LongLivedGroup.from_model.assert_called_once_with(group)
-        assert model == Any.instance_of(LongLivedUser).with_attrs(
-            {
-                "id": user.id,
-                "userid": user.userid,
-                "authority": user.authority,
-                "admin": user.admin,
-                "staff": user.staff,
-                "groups": [LongLivedGroup.from_model.return_value],
-            }
+        assert LongLivedGroup.from_model.call_args_list == [
+            call(groups[0]),
+            call(groups[1]),
+        ]
+
+        assert model == LongLivedUser(
+            id=user.id,
+            userid=user.userid,
+            authority=user.authority,
+            admin=user.admin,
+            staff=user.staff,
+            memberships=[
+                LongLivedMembership(
+                    group=sentinel.long_lived_group_1,
+                    user=model,
+                    roles=[GroupMembershipRoles.MEMBER],
+                ),
+                LongLivedMembership(
+                    group=sentinel.long_lived_group_2,
+                    user=model,
+                    roles=[GroupMembershipRoles.ADMIN],
+                ),
+            ],
         )
 
     @pytest.fixture(autouse=True)
@@ -94,7 +118,6 @@ class TestIdentity:
                         id=sentinel.id,
                         userid=sentinel.userid,
                         authority=sentinel.authority,
-                        groups=[],
                         staff=False,
                         admin=False,
                     )

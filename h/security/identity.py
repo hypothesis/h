@@ -1,9 +1,18 @@
 """Data classes used to represent authenticated users."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Self
 
 from h.models import AuthClient, Group, User
+
+
+@dataclass
+class LongLivedMembership:
+    """A membership object that isn't connected to SQLAlchemy."""
+
+    group: "LongLivedGroup"
+    user: "LongLivedUser"
+    roles: List[str]
 
 
 @dataclass
@@ -35,22 +44,37 @@ class LongLivedUser:
     id: int
     userid: str
     authority: str
-    groups: List[LongLivedGroup]
     staff: bool
     admin: bool
+    memberships: List[LongLivedMembership] = field(default_factory=list)
 
     @classmethod
     def from_model(cls, user: User):
         """Create a long lived model from a DB model object."""
 
-        return LongLivedUser(
+        long_lived_user = LongLivedUser(
             id=user.id,
             userid=user.userid,
             authority=user.authority,
             admin=user.admin,
             staff=user.staff,
-            groups=[LongLivedGroup.from_model(group) for group in user.groups],
         )
+
+        groups = {}
+
+        for membership in user.memberships:
+            groups.setdefault(
+                membership.group.id, LongLivedGroup.from_model(membership.group)
+            )
+            long_lived_user.memberships.append(
+                LongLivedMembership(
+                    group=groups[membership.group.id],
+                    user=long_lived_user,
+                    roles=membership.roles,
+                )
+            )
+
+        return long_lived_user
 
 
 @dataclass

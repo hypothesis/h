@@ -251,33 +251,6 @@ def test_members_is_immutable(factories):
         group.members.append(new_member)
 
 
-def test_get_members(factories):
-    group = factories.Group()
-    owners = factories.User.create_batch(2)
-    admins = factories.User.create_batch(2)
-    moderators = factories.User.create_batch(2)
-    members = factories.User.create_batch(2)
-    group.memberships.extend(
-        models.GroupMembership(user=owner, roles=["owner"]) for owner in owners
-    )
-    group.memberships.extend(
-        models.GroupMembership(user=admin, roles=["admin"]) for admin in admins
-    )
-    group.memberships.extend(
-        models.GroupMembership(user=moderator, roles=["moderator"])
-        for moderator in moderators
-    )
-    group.memberships.extend(
-        models.GroupMembership(user=member, roles=["member"]) for member in members
-    )
-
-    assert group.get_members(role="owner") == (*owners,)
-    assert group.get_members(role="admin") == (*admins,)
-    assert group.get_members(role="moderator") == (*moderators,)
-    assert group.get_members(role="member") == (*members,)
-    assert group.get_members() == (*owners, *admins, *moderators, *members)
-
-
 class TestGroupMembership:
     def test_defaults(self, db_session, user, group):
         membership = models.GroupMembership(user_id=user.id, group_id=group.id)

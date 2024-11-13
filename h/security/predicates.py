@@ -144,31 +144,32 @@ def group_created_by_user(identity, context):
 
 @requires(authenticated_user, group_found)
 def group_has_user_as_owner(identity, context):
-    return any(
-        owner.id == identity.user.id
-        for owner in context.group.get_members(GroupMembershipRoles.OWNER)
-    )
+    return _group_has_user_as_role(identity, context, GroupMembershipRoles.OWNER)
 
 
 @requires(authenticated_user, group_found)
 def group_has_user_as_admin(identity, context):
-    return any(
-        admin.id == identity.user.id
-        for admin in context.group.get_members(GroupMembershipRoles.ADMIN)
-    )
+    return _group_has_user_as_role(identity, context, GroupMembershipRoles.ADMIN)
 
 
 @requires(authenticated_user, group_found)
 def group_has_user_as_moderator(identity, context):
+    return _group_has_user_as_role(identity, context, GroupMembershipRoles.MODERATOR)
+
+
+def _group_has_user_as_role(identity, context, role):
     return any(
-        moderator.id == identity.user.id
-        for moderator in context.group.get_members(GroupMembershipRoles.MODERATOR)
+        membership.group.id == context.group.id and role in membership.roles
+        for membership in identity.user.memberships
     )
 
 
 @requires(authenticated_user, group_found)
 def group_has_user_as_member(identity, context):
-    return any(member.id == identity.user.id for member in context.group.members)
+    return any(
+        membership.group.id == context.group.id
+        for membership in identity.user.memberships
+    )
 
 
 @requires(authenticated_user, group_found)
