@@ -177,153 +177,220 @@ class TestGroupPredicates:
     @pytest.mark.parametrize(
         "role,expected_result",
         [
-            (GroupMembershipRoles.MEMBER, False),
-            (GroupMembershipRoles.MODERATOR, False),
-            (GroupMembershipRoles.ADMIN, False),
             (GroupMembershipRoles.OWNER, True),
-        ],
-    )
-    def test_group_has_user_as_owner_when_user_is_member(
-        self,
-        authenticated_user,
-        identity,
-        group_context,
-        role,
-        expected_result,
-        factories,
-    ):
-        group_context.group.memberships.append(
-            GroupMembership(
-                # Rather than passing `user=user` we create another user object
-                # with the same id. This is to ensure that the predicate tests
-                # based on id rather than on object equality because in some
-                # contexts (e.g. the WebSocket) there can be detached objects
-                # that won't compare equal to other objects with the same id.
-                user=factories.User.build(id=authenticated_user.id),
-                roles=[role],
-            )
-        )
-
-        assert (
-            predicates.group_has_user_as_owner(identity, group_context)
-            == expected_result
-        )
-
-    def test_group_has_user_as_owner_when_user_isnt_member(
-        self, identity, group_context
-    ):
-        assert predicates.group_has_user_as_owner(identity, group_context) is False
-
-    @pytest.mark.parametrize(
-        "role,expected_result",
-        [
-            (GroupMembershipRoles.MEMBER, False),
-            (GroupMembershipRoles.MODERATOR, False),
-            (GroupMembershipRoles.ADMIN, True),
-            (GroupMembershipRoles.OWNER, False),
-        ],
-    )
-    def test_group_has_user_as_admin_when_user_is_member(
-        self,
-        authenticated_user,
-        identity,
-        group_context,
-        role,
-        expected_result,
-        factories,
-    ):
-        group_context.group.memberships.append(
-            GroupMembership(
-                # Rather than passing `user=user` we create another user object
-                # with the same id. This is to ensure that the predicate tests
-                # based on id rather than on object equality because in some
-                # contexts (e.g. the WebSocket) there can be detached objects
-                # that won't compare equal to other objects with the same id.
-                user=factories.User.build(id=authenticated_user.id),
-                roles=[role],
-            )
-        )
-
-        assert (
-            predicates.group_has_user_as_admin(identity, group_context)
-            == expected_result
-        )
-
-    def test_group_has_user_as_admin_when_user_isnt_member(
-        self, identity, group_context
-    ):
-        assert predicates.group_has_user_as_admin(identity, group_context) is False
-
-    @pytest.mark.parametrize(
-        "role,expected_result",
-        [
-            (GroupMembershipRoles.MEMBER, False),
-            (GroupMembershipRoles.MODERATOR, True),
             (GroupMembershipRoles.ADMIN, False),
-            (GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.MODERATOR, False),
+            (GroupMembershipRoles.MEMBER, False),
+            (None, False),
         ],
     )
-    def test_group_has_user_as_moderator_when_user_is_member(
-        self,
-        authenticated_user,
-        identity,
-        group_context,
-        role,
-        expected_result,
-        factories,
-    ):
-        group_context.group.memberships.append(
-            GroupMembership(
-                # Rather than passing `user=user` we create another user object
-                # with the same id. This is to ensure that the predicate tests
-                # based on id rather than on object equality because in some
-                # contexts (e.g. the WebSocket) there can be detached objects
-                # that won't compare equal to other objects with the same id.
-                user=factories.User.build(id=authenticated_user.id),
-                roles=[role],
-            )
+    def test_group_has_user_as_owner(self, role, expected_result, factories):
+        user = factories.User(
+            # Make the test user a member of some other groups to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(),
+                    roles=[GroupMembershipRoles.MODERATOR],
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
         )
-
-        assert (
-            predicates.group_has_user_as_moderator(identity, group_context)
-            == expected_result
+        group = factories.Group(
+            # Add some other members to the test group to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MODERATOR]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
         )
+        if role:
+            # Make the test user a member of the test group with `role`.
+            group.memberships.append(GroupMembership(user=user, roles=[role]))
+        identity = Identity.from_models(user)
+        context = GroupContext(group)
 
-    def test_group_has_user_as_moderator_when_user_isnt_member(
-        self, identity, group_context
-    ):
-        assert predicates.group_has_user_as_moderator(identity, group_context) is False
+        assert predicates.group_has_user_as_owner(identity, context) == expected_result
 
     @pytest.mark.parametrize(
-        "role",
+        "role,expected_result",
         [
-            GroupMembershipRoles.MEMBER,
-            GroupMembershipRoles.MODERATOR,
-            GroupMembershipRoles.ADMIN,
-            GroupMembershipRoles.OWNER,
+            (GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.ADMIN, True),
+            (GroupMembershipRoles.MODERATOR, False),
+            (GroupMembershipRoles.MEMBER, False),
+            (None, False),
         ],
     )
-    def test_group_has_user_as_member_when_user_is_member(
-        self, authenticated_user, identity, group_context, role, factories
-    ):
-        group_context.group.memberships.append(
-            GroupMembership(
-                # Rather than passing `user=user` we create another user object
-                # with the same id. This is to ensure that the predicate tests
-                # based on id rather than on object equality because in some
-                # contexts (e.g. the WebSocket) there can be detached objects
-                # that won't compare equal to other objects with the same id.
-                user=factories.User.build(id=authenticated_user.id),
-                roles=[role],
-            )
+    def test_group_has_user_as_admin(self, role, expected_result, factories):
+        user = factories.User(
+            # Make the test user a member of some other groups to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(),
+                    roles=[GroupMembershipRoles.MODERATOR],
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+        group = factories.Group(
+            # Add some other members to the test group to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MODERATOR]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+        if role:
+            # Make the test user a member of the test group with `role`.
+            group.memberships.append(GroupMembership(user=user, roles=[role]))
+        identity = Identity.from_models(user)
+        context = GroupContext(group)
+
+        assert predicates.group_has_user_as_admin(identity, context) == expected_result
+
+    @pytest.mark.parametrize(
+        "role,expected_result",
+        [
+            (GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.MEMBER, False),
+            (None, False),
+        ],
+    )
+    def test_group_has_user_as_moderator(self, role, expected_result, factories):
+        user = factories.User(
+            # Make the test user a member of some other groups to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(),
+                    roles=[GroupMembershipRoles.MODERATOR],
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+        group = factories.Group(
+            # Add some other members to the test group to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MODERATOR]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+        if role:
+            # Make the test user a member of the test group with `role`.
+            group.memberships.append(GroupMembership(user=user, roles=[role]))
+        identity = Identity.from_models(user)
+        context = GroupContext(group)
+
+        assert (
+            predicates.group_has_user_as_moderator(identity, context) == expected_result
         )
 
-        assert predicates.group_has_user_as_member(identity, group_context) is True
+    @pytest.mark.parametrize(
+        "role,expected_result",
+        [
+            (GroupMembershipRoles.OWNER, True),
+            (GroupMembershipRoles.ADMIN, True),
+            (GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.MEMBER, True),
+            (None, False),
+        ],
+    )
+    def test_group_has_user_as_member(self, role, expected_result, factories):
+        user = factories.User(
+            # Make the test user a member of some other groups to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    group=factories.Group.build(),
+                    roles=[GroupMembershipRoles.MODERATOR],
+                ),
+                GroupMembership(
+                    group=factories.Group.build(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+        group = factories.Group(
+            # Add some other members to the test group to make sure these don't confuse the code.
+            memberships=[
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.ADMIN]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MODERATOR]
+                ),
+                GroupMembership(
+                    user=factories.User(), roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+        if role:
+            # Make the test user a member of the test group with `role`.
+            group.memberships.append(GroupMembership(user=user, roles=[role]))
+        identity = Identity.from_models(user)
+        context = GroupContext(group)
 
-    def test_group_has_user_as_member_when_user_isnt_member(
-        self, identity, group_context
-    ):
-        assert predicates.group_has_user_as_member(identity, group_context) is False
+        assert predicates.group_has_user_as_member(identity, context) == expected_result
 
     @pytest.mark.parametrize("context_authority", ("user_authority", "other"))
     def test_group_matches_user_authority(
