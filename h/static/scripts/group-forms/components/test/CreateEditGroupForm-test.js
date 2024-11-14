@@ -295,6 +295,21 @@ describe('CreateEditGroupForm', () => {
       assert.isTrue(pageUnloadWarningActive());
     });
 
+    it('clears modified state when page is loaded from cache', () => {
+      const { elements } = createWrapper();
+      act(() => {
+        elements.nameField.prop('onChangeValue')('modified');
+      });
+      assert.isTrue(pageUnloadWarningActive());
+
+      act(() => {
+        window.dispatchEvent(
+          new PageTransitionEvent('pageshow', { persisted: true }),
+        );
+      });
+      assert.isFalse(pageUnloadWarningActive());
+    });
+
     it('updates the group', async () => {
       const { wrapper, elements } = createWrapper();
       const { nameField, descriptionField } = elements;
