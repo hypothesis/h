@@ -38,6 +38,11 @@ module.exports = function (config) {
       'report-config': {
         json: { subdir: './' },
       },
+      thresholds: {
+        global: {
+          statements: 100,
+        },
+      },
     },
 
     // Use https://www.npmjs.com/package/karma-mocha-reporter
