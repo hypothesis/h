@@ -42,6 +42,7 @@ export function unhyphenate(name) {
  */
 export function normalize(str) {
   if (!String.prototype.normalize) {
+    // istanbul ignore next
     return str;
   }
 

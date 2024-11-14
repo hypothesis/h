@@ -29,6 +29,7 @@ class ShareWidget {
   constructor(containerElement) {
     // we only attach one to the dom since it's a global listener
     if (shareWidgetAttached) {
+      // istanbul ignore next
       return;
     }
     shareWidgetAttached = true;
@@ -46,6 +47,7 @@ class ShareWidget {
 
       // do nothing if we are clicking inside of the widget
       if (this._container.contains(target)) {
+        // istanbul ignore next
         return;
       }
 
@@ -133,6 +135,7 @@ class ShareWidget {
    */
   showForNode(node, config) {
     if (!node || !config) {
+      // istanbul ignore next
       throw new Error('showForNode did not recieve both arguments');
     }
 

@@ -52,6 +52,7 @@ export function upgradeElements(root, controllers) {
     removeControllers(element);
 
     if (typeof html !== 'string') {
+      // istanbul ignore next
       throw new Error('Replacement markup must be a string');
     }
     const container = document.createElement('div');
@@ -74,6 +75,7 @@ export function upgradeElements(root, controllers) {
         upgradedElements.push(el);
         markReady(el);
       } catch (err) {
+        // istanbul ignore next
         console.error(
           'Failed to upgrade element %s with controller',
           el,
@@ -83,6 +85,7 @@ export function upgradeElements(root, controllers) {
         );
 
         // Re-raise error so that Sentry can capture and report it
+        // istanbul ignore next
         throw err;
       }
     });

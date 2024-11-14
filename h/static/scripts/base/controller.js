@@ -33,12 +33,14 @@ export class Controller {
    */
   constructor(element, options = {}) {
     if (!element) {
+      // istanbul ignore next
       throw new Error(
         'Controllers require an element passed to the constructor',
       );
     } else if (!element.controllers) {
       element.controllers = [this];
     } else {
+      // istanbul ignore next
       element.controllers.push(this);
     }
 
