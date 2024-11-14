@@ -30,5 +30,9 @@ export type ConfigObject = {
 
 /** Return the frontend config from the page's <script class="js-config">. */
 export function readConfig(): ConfigObject {
-  return JSON.parse(document.querySelector('.js-config')!.textContent!);
+  try {
+    return JSON.parse(document.querySelector('.js-config')!.textContent!);
+  } catch {
+    throw new Error('Failed to parse frontend configuration');
+  }
 }
