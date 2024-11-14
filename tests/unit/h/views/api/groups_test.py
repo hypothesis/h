@@ -1,19 +1,13 @@
 from unittest.mock import PropertyMock, call, create_autospec, sentinel
 
 import pytest
-from pyramid.httpexceptions import (
-    HTTPBadRequest,
-    HTTPConflict,
-    HTTPNoContent,
-    HTTPNotFound,
-)
+from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 import h.views.api.groups as views
 from h import presenters
-from h.exceptions import InvalidUserId
-from h.models import User
+from h.models import GroupMembership, User
 from h.schemas.base import ValidationError
-from h.traversal.group import GroupContext
+from h.traversal import GroupContext, GroupMembershipContext
 from h.views.api.exceptions import PayloadError
 
 
@@ -433,59 +427,33 @@ class TestReadMembers:
 
 class TestRemoveMember:
     def test_it(self, context, pyramid_request, group_members_service):
-        pyramid_request.matchdict = {"userid": "me"}
-
         response = views.remove_member(context, pyramid_request)
 
         group_members_service.member_leave.assert_called_once_with(
-            context.group, pyramid_request.authenticated_userid
+            context.group, context.user.userid
         )
         assert isinstance(response, HTTPNoContent)
 
-    def test_it_doesnt_let_you_remove_another_member(self, context, pyramid_request):
-        pyramid_request.matchdict = {"userid": "other"}
+    @pytest.fixture
+    def context(self, factories):
+        group = factories.Group.build()
+        user = factories.User.build()
+        membership = GroupMembership(group=group, user=user)
+        return GroupMembershipContext(group=group, user=user, membership=membership)
 
-        with pytest.raises(
-            HTTPBadRequest, match='Only the "me" user value is currently supported'
-        ):
-            views.remove_member(context, pyramid_request)
 
-
-@pytest.mark.usefixtures("user_service", "group_members_service")
+@pytest.mark.usefixtures("group_members_service")
 class TestAddMember:
-    def test_it(
-        self, context, pyramid_request, user_service, group_members_service, factories
-    ):
-        user = user_service.fetch.return_value = factories.User(
-            authority=context.group.authority
-        )
-
+    def test_it(self, pyramid_request, group_members_service, context):
         response = views.add_member(context, pyramid_request)
 
-        user_service.fetch.assert_called_once_with(sentinel.userid)
         group_members_service.member_join.assert_called_once_with(
-            context.group, user.userid
+            context.group, context.user.userid
         )
         assert isinstance(response, HTTPNoContent)
 
-    def test_it_with_malformed_userid(self, context, pyramid_request, user_service):
-        user_service.fetch.side_effect = InvalidUserId("invalid_userid")
-
-        with pytest.raises(HTTPNotFound) as exc_info:
-            views.add_member(context, pyramid_request)
-
-        assert exc_info.value.__cause__ == user_service.fetch.side_effect
-
-    def test_it_with_unknown_userid(self, context, pyramid_request, user_service):
-        user_service.fetch.return_value = None
-
-        with pytest.raises(HTTPNotFound):
-            views.add_member(context, pyramid_request)
-
-    def test_it_with_authority_mismatch(
-        self, context, pyramid_request, user_service, factories
-    ):
-        user_service.fetch.return_value = factories.User(authority="other")
+    def test_it_with_authority_mismatch(self, pyramid_request, context):
+        context.group.authority = "other"
 
         with pytest.raises(HTTPNotFound):
             views.add_member(context, pyramid_request)
@@ -496,9 +464,10 @@ class TestAddMember:
         return pyramid_request
 
     @pytest.fixture
-    def context(self, context, factories):
-        context.group = factories.Group()
-        return context
+    def context(self, factories):
+        group = factories.Group.build()
+        user = factories.User.build(authority=group.authority)
+        return GroupMembershipContext(group=group, user=user, membership=None)
 
 
 @pytest.fixture

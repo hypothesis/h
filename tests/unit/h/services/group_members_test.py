@@ -8,6 +8,28 @@ from h.models import GroupMembership, User
 from h.services.group_members import GroupMembersService, group_members_factory
 
 
+class TestGet:
+    def test_it(self, group_members_service, factories, db_session):
+        group = factories.Group.build()
+        user = factories.User.build()
+        membership = GroupMembership(group=group, user=user)
+        db_session.add(membership)
+
+        result = group_members_service.get(group, user)
+
+        assert result == membership
+
+    def test_it_when_theres_no_matching_membership(
+        self, group_members_service, factories
+    ):
+        group = factories.Group()
+        user = factories.User()
+
+        result = group_members_service.get(group, user)
+
+        assert result is None
+
+
 class TestMemberJoin:
     def test_it_adds_user_to_group(
         self, group_members_service, factories, caplog, db_session
