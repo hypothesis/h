@@ -1,16 +1,10 @@
-from pyramid.httpexceptions import (
-    HTTPBadRequest,
-    HTTPConflict,
-    HTTPNoContent,
-    HTTPNotFound,
-)
+from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
-from h.exceptions import InvalidUserId
 from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.security import Permission
-from h.traversal import GroupContext
+from h.traversal import GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
 from h.views.api.exceptions import PayloadError
 
@@ -161,17 +155,13 @@ def read_members(context: GroupContext, _request):
     link_name="group.member.delete",
     description="Remove the current user from a group",
     is_authenticated=True,
+    permission=Permission.Group.MEMBER_REMOVE,
 )
-def remove_member(context: GroupContext, request):
+def remove_member(context: GroupMembershipContext, request):
     """Remove a member from the given group."""
-    # Currently, we only support removing the requesting user
-    if request.matchdict.get("userid") == "me":
-        userid = request.authenticated_userid
-    else:
-        raise HTTPBadRequest('Only the "me" user value is currently supported')
 
     group_members_service = request.find_service(name="group_members")
-    group_members_service.member_leave(context.group, userid)
+    group_members_service.member_leave(context.group, context.user.userid)
 
     return HTTPNoContent()
 
@@ -184,28 +174,19 @@ def remove_member(context: GroupContext, request):
     permission=Permission.Group.MEMBER_ADD,
     description="Add the user in the request params to a group.",
 )
-def add_member(context: GroupContext, request):
+def add_member(context: GroupMembershipContext, request):
     """
     Add a member to a given group.
 
     :raise HTTPNotFound: if the user is not found or if the use and group
       authorities don't match.
     """
-    user_svc = request.find_service(name="user")
     group_members_svc = request.find_service(name="group_members")
 
-    try:
-        user = user_svc.fetch(request.matchdict["userid"])
-    except InvalidUserId as err:
-        raise HTTPNotFound() from err
-
-    if user is None:
+    if context.user.authority != context.group.authority:
         raise HTTPNotFound()
 
-    if user.authority != context.group.authority:
-        raise HTTPNotFound()
-
-    group_members_svc.member_join(context.group, user.userid)
+    group_members_svc.member_join(context.group, context.user.userid)
 
     return HTTPNoContent()
 

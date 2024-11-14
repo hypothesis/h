@@ -2,7 +2,7 @@ import base64
 
 import pytest
 
-from h.models import GroupMembership, Token
+from h.models import GroupMembership, GroupMembershipRoles, Token
 from h.models.auth_client import AuthClient, GrantType
 
 
@@ -135,7 +135,6 @@ class TestAddMember:
         # It has *not* added the user from the X-Forwarded-User header to the group.
         assert forwarded_user not in group.members
 
-    @pytest.mark.xfail
     def test_me_alias_with_forwarded_user(
         self, do_request, factories, authclient, headers, group
     ):
@@ -193,26 +192,229 @@ class TestAddMember:
 
 
 class TestRemoveMember:
-    def test_it(self, app, db_session, factories):
-        user, other_user = factories.User.create_batch(size=2)
+    @pytest.mark.parametrize(
+        "authenticated_users_role,target_users_role,expect_success",
+        [
+            # Only owners can remove other owners.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.OWNER, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.OWNER, False),
+            # Only owners can remove admins.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.ADMIN, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.ADMIN, False),
+            # Owners and admins can remove moderators.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.MODERATOR, False),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.MODERATOR, False),
+            # Owners, admins and moderators can remove members.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.MEMBER, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.MEMBER, True),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.MEMBER, True),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.MEMBER, False),
+            # Non-members can't remove anyone.
+            (None, GroupMembershipRoles.OWNER, False),
+            (None, GroupMembershipRoles.ADMIN, False),
+            (None, GroupMembershipRoles.MEMBER, False),
+            (None, GroupMembershipRoles.MODERATOR, False),
+        ],
+    )
+    def test_it(
+        self,
+        app,
+        db_session,
+        factories,
+        authenticated_users_role,
+        target_users_role,
+        expect_success,
+    ):
         group, other_group = factories.Group.create_batch(size=2)
+        # The target user who we will remove from the group.
+        target_user = factories.User()
+        db_session.add(
+            GroupMembership(group=group, user=target_user, roles=[target_users_role])
+        )
+        # Another user who is a member of the group.
+        # This user should *not* be removed from the group.
+        other_user = factories.User()
+        db_session.add(GroupMembership(user=other_user, group=group))
+        # Make the target user a member of another group as well.
+        # The target user should *not* be removed from this group.
+        db_session.add(GroupMembership(user=target_user, group=other_group))
+        # The authenticated user who will make the request.
+        authenticated_user = factories.User()
+        if authenticated_users_role:
+            db_session.add(
+                GroupMembership(
+                    group=group,
+                    user=authenticated_user,
+                    roles=[authenticated_users_role],
+                )
+            )
+        token = factories.DeveloperToken(user=authenticated_user)
+        db_session.commit()
+
+        app.delete(
+            f"/api/groups/{group.pubid}/members/{target_user.userid}",
+            headers=token_authorization_header(token),
+            status=204 if expect_success else 404,
+        )
+
+        if expect_success:
+            assert target_user not in group.members
+        else:
+            assert target_user in group.members
+        assert target_user in other_group.members
+        assert other_user in group.members
+
+    @pytest.mark.parametrize(
+        "role",
+        [
+            GroupMembershipRoles.OWNER,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.MODERATOR,
+            GroupMembershipRoles.MEMBER,
+        ],
+    )
+    def test_any_member_can_remove_themselves_from_a_group(
+        self, app, db_session, factories, role
+    ):
+        group, other_group = factories.Group.create_batch(size=2)
+        user, other_user = factories.User.create_batch(size=2)
         db_session.add_all(
             [
-                GroupMembership(user=user, group=group),
-                GroupMembership(user=user, group=other_group),
-                GroupMembership(user=other_user, group=group),
+                GroupMembership(group=group, user=user, roles=[role]),
+                GroupMembership(group=other_group, user=user),
+                GroupMembership(group=group, user=other_user),
             ]
         )
         token = factories.DeveloperToken(user=user)
-        db_session.add(token)
-        headers = {"Authorization": "Bearer {}".format(token.value)}
         db_session.commit()
 
-        app.delete("/api/groups/{}/members/me".format(group.pubid), headers=headers)
+        app.delete(
+            f"/api/groups/{group.pubid}/members/{user.userid}",
+            headers=token_authorization_header(token),
+        )
 
         assert user not in group.members
         assert user in other_group.members
         assert other_user in group.members
+
+    @pytest.mark.parametrize(
+        "role",
+        [
+            GroupMembershipRoles.OWNER,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.MODERATOR,
+            GroupMembershipRoles.MEMBER,
+        ],
+    )
+    def test_unauthenticated_requests_cant_remove_anyone_from_groups(
+        self, app, db_session, factories, role
+    ):
+        group = factories.Group()
+        user = factories.User()
+        db_session.add(GroupMembership(group=group, user=user, roles=[role]))
+        db_session.commit()
+
+        app.delete(f"/api/groups/{group.pubid}/members/{user.userid}", status=404)
+
+        assert user in group.members
+
+    def test_me_alias(self, app, db_session, factories):
+        group, other_group = factories.Group.create_batch(size=2)
+        user, other_user = factories.User.create_batch(size=2)
+        db_session.add_all(
+            [
+                GroupMembership(group=group, user=user),
+                GroupMembership(group=other_group, user=user),
+                GroupMembership(group=group, user=other_user),
+            ]
+        )
+        token = factories.DeveloperToken(user=user)
+        db_session.commit()
+
+        app.delete(
+            f"/api/groups/{group.pubid}/members/me",
+            headers=token_authorization_header(token),
+        )
+
+        assert user not in group.members
+        assert user in other_group.members
+        assert other_user in group.members
+
+    def test_me_alias_when_not_authenticated(self, app, factories, db_session):
+        group = factories.Group()
+        db_session.commit()
+
+        app.delete(f"/api/groups/{group.pubid}/members/me", status=404)
+
+    def test_when_group_not_found(self, app, db_session, factories):
+        user = factories.User()
+        token = factories.DeveloperToken(user=user)
+        db_session.commit()
+
+        app.delete(
+            f"/api/groups/DOESNT_EXIST/members/{user.userid}",
+            headers=token_authorization_header(token),
+            status=404,
+        )
+
+    def test_when_user_not_found(self, app, db_session, factories):
+        user = factories.User.build()  # `user` has a valid userid but isn't in the DB.
+        group = factories.Group()
+        authenticated_user = factories.User()
+        db_session.add(
+            GroupMembership(
+                group=group, user=authenticated_user, roles=[GroupMembershipRoles.OWNER]
+            )
+        )
+        token = factories.DeveloperToken(user=authenticated_user)
+        db_session.commit()
+
+        app.delete(
+            f"/api/groups/{group.pubid}/members/{user.userid}",
+            headers=token_authorization_header(token),
+            status=404,
+        )
+
+    def test_when_userid_invalid(self, app, db_session, factories):
+        group = factories.Group()
+        authenticated_user = factories.User()
+        db_session.add(
+            GroupMembership(
+                group=group, user=authenticated_user, roles=[GroupMembershipRoles.OWNER]
+            )
+        )
+        token = factories.DeveloperToken(user=authenticated_user)
+        db_session.commit()
+
+        app.delete(
+            f"/api/groups/{group.pubid}/members/INVALID_USERID",
+            headers=token_authorization_header(token),
+            status=404,
+        )
+
+    def test_when_no_membership(self, app, db_session, factories):
+        group = factories.Group()
+        target_user = factories.User()  # The target user isn't a member of the group.
+        authenticated_user = factories.User()
+        db_session.add(
+            GroupMembership(
+                group=group, user=authenticated_user, roles=[GroupMembershipRoles.OWNER]
+            )
+        )
+        token = factories.DeveloperToken(user=authenticated_user)
+        db_session.commit()
+
+        app.delete(
+            f"/api/groups/{group.pubid}/members/{target_user.userid}",
+            headers=token_authorization_header(token),
+            status=404,
+        )
 
 
 def token_authorization_header(token) -> dict:

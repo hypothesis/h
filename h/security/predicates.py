@@ -13,6 +13,7 @@ group.
 from itertools import chain
 
 from h.models.group import GroupMembershipRoles, JoinableBy, ReadableBy, WriteableBy
+from h.traversal import GroupMembershipContext
 
 
 def requires(*parent_predicates):
@@ -180,6 +181,42 @@ def group_matches_user_authority(identity, context):
 @requires(authenticated_client, group_found)
 def group_matches_authenticated_client_authority(identity, context):
     return context.group.authority == identity.auth_client.authority
+
+
+@requires(authenticated_user, group_found)
+def group_member_remove(identity, context: GroupMembershipContext):
+    def get_authenticated_users_membership():
+        """Return the authenticated users membership in the target group."""
+        for membership in identity.user.memberships:
+            if membership.group.id == context.group.id:
+                return membership
+
+        return None
+
+    membership = get_authenticated_users_membership()
+
+    if not membership:
+        # You can't remove anyone from a group you're not a member of.
+        return False
+
+    if identity.user.userid == context.user.userid:
+        # Any member can remove themselves from a group.
+        return True
+
+    if "owner" in context.membership.roles or "admin" in context.membership.roles:
+        # Only owners can remove other owners.
+        return "owner" in membership.roles
+
+    if "moderator" in context.membership.roles:
+        # Owners and admins can remove moderators.
+        return "owner" in membership.roles or "admin" in membership.roles
+
+    # Owners, admins and moderators can remove plain members.
+    return (
+        "owner" in membership.roles
+        or "admin" in membership.roles
+        or "moderator" in membership.roles
+    )
 
 
 def resolve_predicates(mapping):

@@ -40,6 +40,9 @@ class Permission:
         MEMBER_ADD = "group:member:add"
         """Add a user other than yourself (that's JOIN) to a group."""
 
+        MEMBER_REMOVE = "group:member:remove"
+        """Remove a member from the group."""
+
     class Annotation(Enum):
         """Permissions relating to annotations."""
 

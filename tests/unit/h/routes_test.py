@@ -152,8 +152,7 @@ def test_includeme():
         call(
             "api.group_member",
             "/api/groups/{pubid}/members/{userid}",
-            factory="h.traversal.GroupRequiredRoot",
-            traverse="/{pubid}",
+            factory="h.traversal.group_membership_api_factory",
         ),
         call("api.search", "/api/search"),
         call("api.users", "/api/users", factory="h.traversal.UserRoot"),

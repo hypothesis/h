@@ -10,7 +10,8 @@ from h.models.group import (
     WriteableBy,
 )
 from h.security import Identity, predicates
-from h.traversal import AnnotationContext, UserContext
+from h.security.identity import LongLivedGroup, LongLivedMembership
+from h.traversal import AnnotationContext, GroupMembershipContext, UserContext
 from h.traversal.group import GroupContext
 
 
@@ -419,6 +420,123 @@ class TestGroupPredicates:
     @pytest.fixture
     def group_context(self, factories):
         return GroupContext(group=factories.Group.build())
+
+
+class TestGroupMemberRemove:
+    @pytest.mark.parametrize(
+        "authenticated_users_role,target_users_role,expected_result",
+        [
+            # Only owners can remove other owners.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.OWNER, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.OWNER, False),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.OWNER, False),
+            # Only owners can remove admins.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.ADMIN, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.ADMIN, False),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.ADMIN, False),
+            # Owners and admins can remove moderators.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.MODERATOR, True),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.MODERATOR, False),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.MODERATOR, False),
+            # Owners, admins and moderators can remove members.
+            (GroupMembershipRoles.OWNER, GroupMembershipRoles.MEMBER, True),
+            (GroupMembershipRoles.ADMIN, GroupMembershipRoles.MEMBER, True),
+            (GroupMembershipRoles.MODERATOR, GroupMembershipRoles.MEMBER, True),
+            (GroupMembershipRoles.MEMBER, GroupMembershipRoles.MEMBER, False),
+            # Non-members can't remove anyone.
+            (None, GroupMembershipRoles.OWNER, False),
+            (None, GroupMembershipRoles.ADMIN, False),
+            (None, GroupMembershipRoles.MEMBER, False),
+            (None, GroupMembershipRoles.MODERATOR, False),
+        ],
+    )
+    def test_it(
+        self,
+        identity,
+        context,
+        group,
+        target_users_role,
+        authenticated_users_role,
+        expected_result,
+    ):
+        if authenticated_users_role:
+            identity.user.memberships.append(
+                LongLivedMembership(
+                    group=LongLivedGroup.from_model(group),
+                    user=identity.user,
+                    roles=[authenticated_users_role],
+                )
+            )
+        context.membership.roles = [target_users_role]
+
+        assert predicates.group_member_remove(identity, context) == expected_result
+
+    @pytest.mark.parametrize(
+        "role",
+        [
+            GroupMembershipRoles.OWNER,
+            GroupMembershipRoles.ADMIN,
+            GroupMembershipRoles.MODERATOR,
+            GroupMembershipRoles.MEMBER,
+        ],
+    )
+    def test_any_member_can_remove_themselves_from_a_group(
+        self, identity, context, role, group
+    ):
+        identity.user.userid = context.user.userid
+        identity.user.memberships.append(
+            LongLivedMembership(
+                group=LongLivedGroup.from_model(group),
+                user=identity.user,
+                roles=[role],
+            )
+        )
+        context.membership.roles = [role]
+
+        assert predicates.group_member_remove(identity, context) is True
+
+    @pytest.fixture
+    def authenticated_user(self, db_session, authenticated_user, factories):
+        # Make the authenticated user a member of a *different* group,
+        # to make sure that unrelated memberships don't accidentally allow or
+        # deny permissions.
+        db_session.add(
+            GroupMembership(
+                user=authenticated_user,
+                group=factories.Group(),
+                roles=[GroupMembershipRoles.OWNER],
+            )
+        )
+
+        return authenticated_user
+
+    @pytest.fixture
+    def group(self, db_session, factories):
+        group = factories.Group()
+
+        # Make a *different* user a member of the target group
+        # to make sure that unrelated memberships don't accidentally allow or
+        # deny permissions.
+        db_session.add(
+            GroupMembership(
+                group=group, user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+            )
+        )
+
+        return group
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def context(self, group, user):
+        return GroupMembershipContext(
+            group=group, user=user, membership=GroupMembership(group=group, user=user)
+        )
 
 
 class TestResolvePredicates:
