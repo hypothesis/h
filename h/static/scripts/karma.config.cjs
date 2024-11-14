@@ -1,4 +1,7 @@
-/* global module */
+/* global __dirname module require */
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const path = require('path');
 
 module.exports = function (config) {
   config.set({
@@ -29,9 +32,17 @@ module.exports = function (config) {
       output: 'minimal',
     },
 
+    coverageIstanbulReporter: {
+      dir: path.join(__dirname, '../../../coverage'),
+      reports: ['json', 'html'],
+      'report-config': {
+        json: { subdir: './' },
+      },
+    },
+
     // Use https://www.npmjs.com/package/karma-mocha-reporter
     // for more helpful rendering of test failures
-    reporters: ['mocha'],
+    reporters: ['progress', 'mocha', 'coverage-istanbul'],
 
     // web server port
     port: 9876,
