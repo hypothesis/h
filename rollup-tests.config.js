@@ -46,7 +46,15 @@ export default {
           },
         ],
       ],
-      plugins: ['mockable-imports'],
+      plugins: [
+        'mockable-imports',
+        [
+          'babel-plugin-istanbul',
+          {
+            exclude: ['**/test/**/*.js', '**/test-util/**'],
+          },
+        ],
+      ],
     }),
   ],
 };

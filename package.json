@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@hypothesis/frontend-testing": "^1.2.2",
+    "babel-plugin-istanbul": "^7.0.0",
     "babel-plugin-mockable-imports": "^2.0.1",
     "chai": "^5.1.2",
     "diff": "^7.0.0",
@@ -59,6 +60,7 @@
     "globals": "^15.11.0",
     "karma": "^6.4.4",
     "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage-istanbul-reporter": "^3.0.3",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
     "karma-source-map-support": "^1.4.0",
