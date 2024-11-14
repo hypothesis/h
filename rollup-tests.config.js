@@ -51,7 +51,7 @@ export default {
         [
           'babel-plugin-istanbul',
           {
-            exclude: ['**/test/**/*.js', '**/test-util/**'],
+            exclude: ['**/test/**/*.js', '**/tests/**/*.js', '**/test-util/**'],
           },
         ],
       ],
