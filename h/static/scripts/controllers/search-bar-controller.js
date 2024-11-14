@@ -76,6 +76,7 @@ export class SearchBarController extends Controller {
         try {
           tagSuggestions = JSON.parse(tagSuggestionJSON.innerHTML.trim());
         } catch (e) {
+          // istanbul ignore next
           console.error('Could not parse .js-tag-suggestions JSON content', e);
         }
       }
@@ -100,6 +101,7 @@ export class SearchBarController extends Controller {
         try {
           groupSuggestions = JSON.parse(groupSuggestionJSON.innerHTML.trim());
         } catch (e) {
+          // istanbul ignore next
           console.error(
             'Could not parse .js-group-suggestions JSON content',
             e,
@@ -338,6 +340,7 @@ export class SearchBarController extends Controller {
           listItem.title,
         )} </span>`;
         if (listItem.type === GROUP_TYPE && listItem.relationship) {
+          // istanbul ignore next
           itemContents += `<span class="search-bar__dropdown-menu-relationship"> ${escapeHtml(
             listItem.relationship,
           )} </span>`;

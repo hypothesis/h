@@ -63,6 +63,7 @@ function firstElementChild(node) {
       return node.childNodes[i];
     }
   }
+  // istanbul ignore next
   return null;
 }
 

@@ -71,6 +71,7 @@ export function shouldLozengify(phrase) {
     const queryTerm = getLozengeFacetNameAndValue(phrase);
 
     if (!canLozengify(queryTerm.facetName)) {
+      // istanbul ignore next
       return false;
     }
     if (

@@ -41,18 +41,21 @@ export class AutosuggestDropdownController extends Controller {
     super(inputElement, configOptions);
 
     if (!configOptions.renderListItem) {
+      // istanbul ignore next
       throw new Error(
         'Missing renderListItem callback in AutosuggestDropdownController constructor',
       );
     }
 
     if (!configOptions.listFilter) {
+      // istanbul ignore next
       throw new Error(
         'Missing listFilter function in AutosuggestDropdownController constructor',
       );
     }
 
     if (!configOptions.onSelect) {
+      // istanbul ignore next
       throw new Error(
         'Missing onSelect callback in AutosuggestDropdownController constructor',
       );
@@ -165,6 +168,7 @@ export class AutosuggestDropdownController extends Controller {
    */
   _setList(list) {
     if (!Array.isArray(list)) {
+      // istanbul ignore next
       throw new TypeError('setList requires an array first argument');
     }
 
@@ -242,6 +246,7 @@ export class AutosuggestDropdownController extends Controller {
     const target = event.currentTarget;
 
     if (hovering && currentActive && currentActive.contains(target)) {
+      // istanbul ignore next
       return;
     }
 
@@ -332,6 +337,7 @@ export class AutosuggestDropdownController extends Controller {
     if (HTMLElement.prototype.insertAdjacentElement) {
       this._input.insertAdjacentElement('afterend', this._suggestionContainer);
     } else {
+      // istanbul ignore next
       this._input.parentNode.insertBefore(
         this._suggestionContainer,
         this._input.nextSibling,

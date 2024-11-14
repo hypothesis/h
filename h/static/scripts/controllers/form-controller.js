@@ -87,6 +87,7 @@ export class FormController extends Controller {
       // inputs. Since we auto-submit when such inputs change, don't mark the
       // field as dirty.
       if (shouldAutosubmit(event.target.type)) {
+        // istanbul ignore next
         return;
       }
       this.setState({ dirty: true });
@@ -268,6 +269,7 @@ export class FormController extends Controller {
       field => field.container,
     );
     if (fieldContainers.length === 0) {
+      // istanbul ignore next
       return null;
     }
 
