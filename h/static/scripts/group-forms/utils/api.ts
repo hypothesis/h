@@ -27,6 +27,17 @@ export type CreateUpdateGroupAPIResponse = {
   };
 };
 
+export type GroupMember = {
+  username: string;
+};
+
+/**
+ * Response to group members API.
+ *
+ * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}~1members/get
+ */
+export type GroupMembersResponse = GroupMember[];
+
 /** An error response from the h API:
  * https://h.readthedocs.io/en/latest/api-reference/v2/#section/Hypothesis-API/Errors
  */

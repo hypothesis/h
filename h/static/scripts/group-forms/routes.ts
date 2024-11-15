@@ -5,6 +5,11 @@
  * These must be synchronized with h/routes.py.
  */
 export const routes = {
+  api: {
+    group: {
+      members: '/api/groups/:pubid/members',
+    },
+  },
   groups: {
     new: '/groups/new',
     edit: '/groups/:pubid/edit',
