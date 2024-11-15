@@ -2,7 +2,6 @@ import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
 import {
   Button,
-  CancelIcon,
   RadioGroup,
   useWarnOnPageUnload,
 } from '@hypothesis/frontend-shared';
@@ -15,6 +14,7 @@ import type {
 } from '../utils/api';
 import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
+import ErrorNotice from './ErrorNotice';
 import FormContainer from './forms/FormContainer';
 import Star from './forms/Star';
 import Label from './forms/Label';
@@ -276,17 +276,7 @@ export default function CreateEditGroupForm() {
         )}
 
         <div className="flex items-center gap-x-4 mt-2">
-          <div data-testid="error-container" role="alert">
-            {errorMessage && (
-              <div
-                className="text-red-error font-bold flex items-center gap-x-2"
-                data-testid="error-message"
-              >
-                <CancelIcon />
-                {errorMessage}
-              </div>
-            )}
-          </div>
+          <ErrorNotice message={errorMessage} />
           <div className="grow" />
           <SaveStateIcon
             state={saveState === 'unmodified' ? 'unsaved' : saveState}
