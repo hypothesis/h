@@ -237,18 +237,23 @@ class TestAddMember:
 
 
 class TestRemoveMember:
-    def test_it_removes_authed_user_from_group(self, app, db_session, factories):
-        group = factories.Group()
-        group_member = factories.User()
-        group.memberships.append(GroupMembership(user=group_member))
-        token = factories.DeveloperToken(user=group_member)
+    def test_it(self, app, db_session, factories):
+        user, other_user = factories.User.create_batch(size=2)
+        group, other_group = factories.Group.create_batch(size=2)
+        db_session.add_all(
+            [
+                GroupMembership(user=user, group=group),
+                GroupMembership(user=user, group=other_group),
+                GroupMembership(user=other_user, group=group),
+            ]
+        )
+        token = factories.DeveloperToken(user=user)
         db_session.add(token)
         headers = {"Authorization": "Bearer {}".format(token.value)}
         db_session.commit()
 
         app.delete("/api/groups/{}/members/me".format(group.pubid), headers=headers)
 
-        # We currently have no elegant way to check this via the API, but in a
-        # future version we should be able to make a GET request here for the
-        # group information and check it 404s
-        assert group_member not in group.members
+        assert user not in group.members
+        assert user in other_group.members
+        assert other_user in group.members
