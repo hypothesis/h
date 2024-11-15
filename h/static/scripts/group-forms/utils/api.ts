@@ -62,24 +62,27 @@ export class APIError extends Error {
 }
 
 /* Make an API call and return the parsed JSON body or throw APIError. */
-export async function callAPI(
+export async function callAPI<R = unknown>(
   url: string,
   {
     method = 'GET',
     json = null,
     headers = {},
+    signal,
   }: {
     method?: string;
     json?: object | null;
     headers?: Record<PropertyKey, unknown>;
+    signal?: AbortSignal;
   } = {},
-): Promise<object> {
+): Promise<R> {
   const options: RequestInit = {
     method,
     headers: {
       ...headers,
       'Content-Type': 'application/json; charset=UTF-8',
     },
+    signal,
   };
 
   if (json) {
