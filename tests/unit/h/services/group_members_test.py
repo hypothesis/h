@@ -34,14 +34,23 @@ class TestMemberJoin:
 
 class TestMemberLeave:
     def test_it_removes_user_from_group(
-        self, group_members_service, factories, creator
+        self, group_members_service, factories, db_session
     ):
-        group = factories.Group(creator=creator)
-        new_member = factories.User(memberships=[GroupMembership(group=group)])
+        group, other_group = factories.Group.create_batch(size=2)
+        user, other_user = factories.User.create_batch(size=2)
+        db_session.add_all(
+            [
+                GroupMembership(group=group, user=user),
+                GroupMembership(group=other_group, user=user),
+                GroupMembership(group=group, user=other_user),
+            ]
+        )
 
-        group_members_service.member_leave(group, new_member.userid)
+        group_members_service.member_leave(group, user.userid)
 
-        assert new_member not in group.members
+        assert user not in group.members
+        assert user in other_group.members
+        assert other_user in group.members
 
     def test_it_does_nothing_if_the_user_isnt_a_member(
         self, group_members_service, factories, publish
