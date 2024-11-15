@@ -79,7 +79,9 @@ class GroupMembersService:
         user = self.user_fetcher(userid)
 
         matching_memberships = self.db.scalars(
-            select(GroupMembership).where(GroupMembership.user == user)
+            select(GroupMembership)
+            .where(GroupMembership.group == group)
+            .where(GroupMembership.user == user)
         ).all()
 
         if not matching_memberships:
