@@ -25,12 +25,15 @@ describe('callAPI', () => {
       await callAPI(url);
 
       assert.ok(
-        fakeFetch.calledOnceWith(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-        }),
+        fakeFetch.calledOnceWith(
+          url,
+          sinon.match({
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+          }),
+        ),
       );
     });
 
