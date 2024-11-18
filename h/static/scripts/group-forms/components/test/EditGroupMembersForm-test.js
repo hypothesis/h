@@ -13,6 +13,13 @@ describe('EditGroupMembersForm', () => {
 
   beforeEach(() => {
     config = {
+      api: {
+        readGroupMembers: {
+          url: '/api/groups/1234/members',
+          method: 'GET',
+          headers: { 'Misc-Header': 'Some-Value' },
+        },
+      },
       context: {
         group: {
           pubid: '1234',
@@ -67,7 +74,14 @@ describe('EditGroupMembersForm', () => {
 
   it('fetches and displays members', async () => {
     const wrapper = createForm();
-    assert.calledWith(fakeCallAPI, '/api/groups/1234/members');
+    assert.calledWith(
+      fakeCallAPI,
+      '/api/groups/1234/members',
+      sinon.match({
+        method: config.api.readGroupMembers.method,
+        headers: config.api.readGroupMembers.headers,
+      }),
+    );
 
     await waitForTable(wrapper);
 

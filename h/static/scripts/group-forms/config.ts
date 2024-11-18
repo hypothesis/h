@@ -21,7 +21,8 @@ export type ConfigObject = {
   styles: string[];
   api: {
     createGroup: APIConfig;
-    updateGroup: APIConfig | null;
+    updateGroup?: APIConfig;
+    readGroupMembers?: APIConfig;
   };
   context: {
     group: Group | null;
