@@ -1,8 +1,8 @@
 import { DataTable, Input, Scroll } from '@hypothesis/frontend-shared';
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useContext, useEffect, useMemo, useState } from 'preact/hooks';
 
-import { routes } from '../routes';
-import type { Group } from '../config';
+import { Config } from '../config';
+import type { APIConfig, Group } from '../config';
 import ErrorNotice from './ErrorNotice';
 import FormContainer from './forms/FormContainer';
 import type { GroupMembersResponse } from '../utils/api';
@@ -15,11 +15,15 @@ type MemberRow = {
 };
 
 async function fetchMembers(
-  groupid: string,
+  api: APIConfig,
   signal: AbortSignal,
 ): Promise<MemberRow[]> {
-  const membersURL = routes.api.group.members.replace(':pubid', groupid);
-  const members: GroupMembersResponse = await callAPI(membersURL, { signal });
+  const { url, method, headers } = api;
+  const members: GroupMembersResponse = await callAPI(url, {
+    method,
+    headers,
+    signal,
+  });
   return members.map(member => ({
     username: member.username,
   }));
@@ -33,13 +37,19 @@ export type EditGroupMembersFormProps = {
 export default function EditGroupMembersForm({
   group,
 }: EditGroupMembersFormProps) {
+  const config = useContext(Config)!;
+
   // Fetch group members when the form loads.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [members, setMembers] = useState<MemberRow[] | null>(null);
   useEffect(() => {
+    // istanbul ignore next
+    if (!config.api.readGroupMembers) {
+      throw new Error('readGroupMembers API config missing');
+    }
     const abort = new AbortController();
     setErrorMessage(null);
-    fetchMembers(group.pubid, abort.signal)
+    fetchMembers(config.api.readGroupMembers, abort.signal)
       .then(setMembers)
       .catch(err => {
         setErrorMessage(`Failed to fetch group members: ${err.message}`);
@@ -47,7 +57,7 @@ export default function EditGroupMembersForm({
     return () => {
       abort.abort();
     };
-  }, [group.pubid]);
+  }, [config.api.readGroupMembers]);
 
   const columns = [
     {
