@@ -170,7 +170,7 @@ pyramid-sanity==1.0.4
     # via -r requirements/prod.in
 pyramid-services==2.2
     # via -r requirements/prod.in
-pyramid-tm==2.5
+pyramid-tm==2.6
     # via -r requirements/prod.in
 python-dateutil==2.9.0.post0
     # via
