@@ -38,7 +38,7 @@ describe('EditGroupMembersForm', () => {
   const createForm = (props = {}) => {
     return mount(
       <Config.Provider value={config}>
-        <EditGroupMembersForm {...props} />
+        <EditGroupMembersForm group={config.context.group} {...props} />
       </Config.Provider>,
     );
   };

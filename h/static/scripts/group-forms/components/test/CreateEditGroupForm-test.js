@@ -88,10 +88,10 @@ describe('CreateEditGroupForm', () => {
 
   let wrappers;
 
-  const createWrapper = () => {
+  const createWrapper = (props = {}) => {
     const wrapper = mount(
       <Config.Provider value={config}>
-        <CreateEditGroupForm />
+        <CreateEditGroupForm group={config.context.group} {...props} />
       </Config.Provider>,
     );
     wrappers.push(wrapper);
@@ -249,16 +249,18 @@ describe('CreateEditGroupForm', () => {
     });
 
     it('displays an edit-group form', async () => {
-      const { wrapper, elements } = createWrapper();
+      const group = {
+        name: 'Original name',
+        description: 'Original description',
+        type: 'restricted', // Non-default value
+      };
+      const { wrapper, elements } = createWrapper({ group });
       const { header, nameField, descriptionField, submitButton } = elements;
 
       assert.equal(header.text(), 'Edit group');
-      assert.equal(nameField.prop('value'), config.context.group.name);
-      assert.equal(
-        descriptionField.prop('value'),
-        config.context.group.description,
-      );
-      assert.equal(getSelectedGroupType(wrapper), config.context.group.type);
+      assert.equal(nameField.prop('value'), group.name);
+      assert.equal(descriptionField.prop('value'), group.description);
+      assert.equal(getSelectedGroupType(wrapper), group.type);
       assert.equal(submitButton.text(), 'Save changes');
       assert.isTrue(wrapper.exists('[data-testid="back-link"]'));
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
@@ -315,7 +317,8 @@ describe('CreateEditGroupForm', () => {
     });
 
     it('updates the group', async () => {
-      const { wrapper, elements } = createWrapper();
+      const onUpdateGroup = sinon.stub();
+      const { wrapper, elements } = createWrapper({ onUpdateGroup });
       const { nameField, descriptionField } = elements;
 
       const name = 'Edited Group Name';
@@ -340,6 +343,18 @@ describe('CreateEditGroupForm', () => {
             description,
             type: newGroupType,
           },
+        }),
+      );
+
+      // Once changes are saved, the edited group details should be persisted.
+      await assertInLoadingState(wrapper, false);
+      assert.calledWith(
+        onUpdateGroup,
+        sinon.match({
+          ...config.context.group,
+          name,
+          description,
+          type: newGroupType,
         }),
       );
     });

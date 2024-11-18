@@ -1,5 +1,5 @@
 import { Route, Switch } from 'wouter-preact';
-import { useMemo } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 
 import CreateEditGroupForm from './CreateEditGroupForm';
 import EditGroupMembersForm from './EditGroupMembersForm';
@@ -25,6 +25,10 @@ export default function AppRoot({ config }: AppRootProps) {
     [config],
   );
 
+  // Saved group details. Extracted out of `config` so we can update them after
+  // saving changes to the backend.
+  const [group, setGroup] = useState(config.context.group);
+
   return (
     <>
       {stylesheetLinks}
@@ -32,13 +36,13 @@ export default function AppRoot({ config }: AppRootProps) {
         <Router>
           <Switch>
             <Route path={routes.groups.new}>
-              <CreateEditGroupForm />
+              <CreateEditGroupForm group={group} onUpdateGroup={setGroup} />
             </Route>
             <Route path={routes.groups.edit}>
-              <CreateEditGroupForm />
+              <CreateEditGroupForm group={group} onUpdateGroup={setGroup} />
             </Route>
             <Route path={routes.groups.editMembers}>
-              <EditGroupMembersForm />
+              <EditGroupMembersForm group={group!} />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>

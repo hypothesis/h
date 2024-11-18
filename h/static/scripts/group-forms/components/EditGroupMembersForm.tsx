@@ -1,8 +1,8 @@
 import { DataTable, Scroll } from '@hypothesis/frontend-shared';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
-import { Config } from '../config';
 import { routes } from '../routes';
+import type { Group } from '../config';
 import ErrorNotice from './ErrorNotice';
 import FormContainer from './forms/FormContainer';
 import type { GroupMembersResponse } from '../utils/api';
@@ -25,10 +25,14 @@ async function fetchMembers(
   }));
 }
 
-export default function EditGroupMembersForm() {
-  const config = useContext(Config)!;
-  const group = config.context.group!;
+export type EditGroupMembersFormProps = {
+  /** The saved group details. */
+  group: Group;
+};
 
+export default function EditGroupMembersForm({
+  group,
+}: EditGroupMembersFormProps) {
   // Fetch group members when the form loads.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [members, setMembers] = useState<MemberRow[] | null>(null);

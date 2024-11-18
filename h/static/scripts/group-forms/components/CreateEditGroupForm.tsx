@@ -2,6 +2,7 @@ import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
 import { Button, RadioGroup } from '@hypothesis/frontend-shared';
 import { Config } from '../config';
+import type { Group } from '../config';
 import { callAPI } from '../utils/api';
 import type {
   CreateUpdateGroupAPIRequest,
@@ -82,9 +83,19 @@ function GroupTypeChangeWarning({
   );
 }
 
-export default function CreateEditGroupForm() {
+export type CreateEditGroupFormProps = {
+  /** The saved group details, or `null` if the group has not been saved yet. */
+  group: Group | null;
+
+  /** Update the saved group details in the frontend's local state. */
+  onUpdateGroup?: (g: Group) => void;
+};
+
+export default function CreateEditGroupForm({
+  group,
+  onUpdateGroup,
+}: CreateEditGroupFormProps) {
   const config = useContext(Config)!;
-  const group = config.context.group;
 
   const [name, setName] = useState(group?.name ?? '');
   const [description, setDescription] = useState(group?.description ?? '');
@@ -178,6 +189,8 @@ export default function CreateEditGroupForm() {
 
       // Mark form as saved, unless user edited it while saving.
       setSaveState(state => (state === 'saving' ? 'saved' : state));
+
+      onUpdateGroup?.({ ...group!, name, description, type: groupType });
     } catch (apiError) {
       setSaveState('unsaved');
       setErrorMessage(apiError.message);
