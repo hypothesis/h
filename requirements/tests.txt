@@ -245,7 +245,7 @@ pyramid-sanity==1.0.4
     # via -r requirements/prod.txt
 pyramid-services==2.2
     # via -r requirements/prod.txt
-pyramid-tm==2.5
+pyramid-tm==2.6
     # via -r requirements/prod.txt
 pytest==8.3.3
     # via
