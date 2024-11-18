@@ -49,14 +49,17 @@ class GroupCreateEditController:
     def _js_config(self):
         csrf_token = get_csrf_token(self.request)
 
+        def api_config(route_name: str, method: str, **params):
+            return {
+                "method": method,
+                "url": self.request.route_url(route_name, **params),
+                "headers": {"X-CSRF-Token": csrf_token},
+            }
+
         js_config = {
             "styles": self.request.registry["assets_env"].urls("group_forms_css"),
             "api": {
-                "createGroup": {
-                    "method": "POST",
-                    "url": self.request.route_url("api.groups"),
-                    "headers": {"X-CSRF-Token": csrf_token},
-                },
+                "createGroup": api_config("api.groups", "POST"),
             },
             "context": {"group": None},
             "features": {
@@ -78,11 +81,14 @@ class GroupCreateEditController:
                     group.pubid, unshared=False
                 ),
             }
-            js_config["api"]["updateGroup"] = {
-                "method": "PATCH",
-                "url": self.request.route_url("api.group", id=group.pubid),
-                "headers": {"X-CSRF-Token": csrf_token},
-            }
+            js_config["api"].update(
+                {
+                    "updateGroup": api_config("api.group", "PATCH", id=group.pubid),
+                    "readGroupMembers": api_config(
+                        "api.group_members", "GET", pubid=group.pubid
+                    ),
+                }
+            )
 
         return js_config
 

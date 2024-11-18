@@ -79,6 +79,15 @@ class TestGroupCreateEditController:
                             "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
                         },
                     },
+                    "readGroupMembers": {
+                        "method": "GET",
+                        "url": pyramid_request.route_url(
+                            "api.group_members", pubid=group.pubid
+                        ),
+                        "headers": {
+                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                        },
+                    },
                     "updateGroup": {
                         "method": "PATCH",
                         "url": pyramid_request.route_url("api.group", id=group.pubid),
@@ -136,4 +145,5 @@ def test_read_noslug_redirects(pyramid_request, factories):
 def routes(pyramid_config):
     pyramid_config.add_route("group_read", "/g/{pubid}/{slug}")
     pyramid_config.add_route("api.group", "/api/group/{id}")
+    pyramid_config.add_route("api.group_members", "/api/groups/{pubid}/members")
     pyramid_config.add_route("api.groups", "/api/groups")
