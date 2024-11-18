@@ -6,7 +6,8 @@ import { Config } from '../../config';
 
 describe('AppRoot', () => {
   let configContext;
-  const config = { styles: [] };
+
+  const config = { context: { group: { pubid: '1234' } }, styles: [] };
 
   beforeEach(() => {
     const mockComponent = name => {
@@ -38,14 +39,44 @@ describe('AppRoot', () => {
     assert.equal(links.at(0).prop('href'), '/static/styles/foo.css');
   });
 
-  it('passes config to route', () => {
-    history.pushState({}, null, '/groups/new');
+  /** Navigate to `path`, run `callback` and then reset the location. */
+  function navigate(path, callback) {
+    history.pushState({}, null, path);
     try {
-      mount(<AppRoot config={config} />);
-      assert.strictEqual(configContext, config);
+      callback();
     } finally {
       history.back();
     }
+  }
+
+  it('passes config to route', () => {
+    navigate('/groups/new', () => {
+      mount(<AppRoot config={config} />);
+      assert.strictEqual(configContext, config);
+    });
+  });
+
+  it('passes saved group to group settings route', () => {
+    navigate('/groups/1234/edit', () => {
+      const wrapper = mount(<AppRoot config={config} />);
+      assert.equal(
+        wrapper.find('CreateEditGroupForm').prop('group'),
+        config.context.group,
+      );
+    });
+  });
+
+  it('passes updated group to group settings route', () => {
+    navigate('/groups/1234/edit', () => {
+      const wrapper = mount(<AppRoot config={config} />);
+      const updatedGroup = { name: 'foobar' };
+      wrapper.find('CreateEditGroupForm').prop('onUpdateGroup')(updatedGroup);
+      wrapper.update();
+      assert.equal(
+        wrapper.find('CreateEditGroupForm').prop('group'),
+        updatedGroup,
+      );
+    });
   });
 
   [
@@ -67,13 +98,11 @@ describe('AppRoot', () => {
     },
   ].forEach(({ path, selector }) => {
     it(`renders expected component for URL (${path})`, () => {
-      history.pushState({}, '', path);
-      try {
+      navigate(path, () => {
         const wrapper = mount(<AppRoot config={config} />);
-        assert.isTrue(wrapper.exists(selector));
-      } finally {
-        history.back();
-      }
+        const component = wrapper.find(selector);
+        assert.isTrue(component.exists());
+      });
     });
   });
 });
