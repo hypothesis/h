@@ -24,12 +24,53 @@ from h.services.user_delete import (
     LimitReached,
     UserDeleteService,
     UserPurger,
+    log_deleted_rows,
+    log_updated_rows,
     service_factory,
 )
 
 
+@pytest.mark.parametrize(
+    "updated_ids,expected_log_messages",
+    [
+        ([1], [f"Purging {sentinel.user!r} - test log message: 1"]),
+        ([1, 2, 3], [f"Purging {sentinel.user!r} - test log message: 1, 2, 3"]),
+        ([], []),
+    ],
+)
+def test_log_updated_rows(caplog, updated_ids, expected_log_messages):
+    log_updated_rows(sentinel.user, "test log message", updated_ids)
+
+    assert caplog.messages == expected_log_messages
+
+
+@pytest.mark.parametrize(
+    "deleted_ids,log_ids,expected_log_messages",
+    [
+        ([1], True, [f"Purging {sentinel.user!r} - deleted 1 rows from annotation: 1"]),
+        (
+            [1, 2, 3],
+            True,
+            [f"Purging {sentinel.user!r} - deleted 3 rows from annotation: 1, 2, 3"],
+        ),
+        ([], True, []),
+        ([1], False, [f"Purging {sentinel.user!r} - deleted 1 rows from annotation"]),
+        (
+            [1, 2, 3],
+            False,
+            [f"Purging {sentinel.user!r} - deleted 3 rows from annotation"],
+        ),
+        ([], False, []),
+    ],
+)
+def test_log_deleted_rows(caplog, deleted_ids, expected_log_messages, log_ids):
+    log_deleted_rows(sentinel.user, Annotation, deleted_ids, log_ids=log_ids)
+
+    assert caplog.messages == expected_log_messages
+
+
 class TestUserDeleteService:
-    def test_delete_user(self, db_session, factories, svc):
+    def test_delete_user(self, db_session, factories, svc, caplog):
         user, other_user, requested_by = factories.User.create_batch(3)
         user_annotations = factories.Annotation.create_batch(2, userid=user.userid)
 
@@ -37,32 +78,25 @@ class TestUserDeleteService:
 
         assert user.deleted is True
         assert other_user.deleted is False
-        assert db_session.scalars(select(Job)).all() == [
-            Any.instance_of(Job).with_attrs(
-                {
-                    "name": "purge_user",
-                    "priority": 0,
-                    "tag": "UserDeleteService.delete_user",
-                    "kwargs": {"userid": user.userid},
-                }
-            )
-        ]
+        job = db_session.scalars(select(Job)).one()
+        assert job.name == "purge_user"
         assert (
-            db_session.scalars(select(UserDeletion)).all()
-            == Any.list.containing(
-                [
-                    Any.instance_of(UserDeletion).with_attrs(
-                        {
-                            "userid": user.userid,
-                            "requested_by": requested_by.userid,
-                            "tag": "test_tag",
-                            "registered_date": user.registered_date,
-                            "num_annotations": len(user_annotations),
-                        }
-                    )
-                ]
-            ).only()
+            job.priority  # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
+            == 0
         )
+        assert job.tag == "UserDeleteService.delete_user"
+        assert job.kwargs == {"userid": user.userid}
+        deletion = db_session.scalars(select(UserDeletion)).one()
+        assert deletion.userid == user.userid
+        assert deletion.requested_by == requested_by.userid
+        assert deletion.tag == "test_tag"
+        assert deletion.registered_date == user.registered_date
+        assert deletion.num_annotations == len(user_annotations)
+        assert caplog.messages == [
+            f"Purging {user!r} - marked user as deleted",
+            f"Purging {user!r} - added purge_user job: {job!r}",
+            f"Purging {user!r} - added record of user deletion: {deletion!r}",
+        ]
 
     def test_purge_deleted_users(
         self,
@@ -97,9 +131,9 @@ class TestUserDeleteService:
             (
                 "h.services.user_delete",
                 logging.INFO,
-                f"Purging user: {user.userid}",
+                f"Purging {user!r} - completed job: {job!r}",
             )
-            for user in users
+            for user, job in zip(users[:2], jobs[:2])
         ]
         assert purger.delete_authtickets.call_args_list == [
             call(user) for user in users
@@ -147,7 +181,7 @@ class TestUserDeleteService:
             (
                 "h.services.user_delete",
                 logging.INFO,
-                f"Invalid 'JobName.PURGE_USER' job: {invalid_job!r}",
+                f"Invalid job: {invalid_job!r}",
             )
         ]
         queue_service.delete.assert_called_once_with([invalid_job])
@@ -188,8 +222,10 @@ class TestUserDeleteService:
 
 
 class TestUserPurger:
-    def test_delete_authtickets(self, worker, purger, factories, user, db_session):
-        factories.AuthTicket.create_batch(2, user=user)
+    def test_delete_authtickets(
+        self, worker, purger, factories, user, db_session, log_deleted_rows
+    ):
+        authtickets = factories.AuthTicket.create_batch(2, user=user)
         # An AuthTicket belonging to another user. This shouldn't get deleted.
         other_ticket = factories.AuthTicket()
 
@@ -197,10 +233,17 @@ class TestUserPurger:
 
         worker.delete.assert_called_once_with(AuthTicket, Any.instance_of(Select))
         assert db_session.scalars(select(AuthTicket)).all() == [other_ticket]
+        log_deleted_rows.assert_called_once_with(
+            user,
+            AuthTicket,
+            sorted(authticket.id for authticket in authtickets),
+            log_ids=False,
+        )
 
-    def test_delete_tokens(self, worker, purger, factories, user, db_session):
-        factories.DeveloperToken(user=user)
-        factories.OAuth2Token(user=user)
+    def test_delete_tokens(
+        self, worker, purger, factories, user, db_session, log_deleted_rows
+    ):
+        tokens = [factories.DeveloperToken(user=user), factories.OAuth2Token(user=user)]
         # Tokens belonging to other users. These shouldn't get deleted.
         other_tokens = [factories.DeveloperToken(), factories.OAuth2Token()]
 
@@ -211,9 +254,14 @@ class TestUserPurger:
             db_session.scalars(select(Token)).all()
             == Any.list.containing(other_tokens).only()
         )
+        log_deleted_rows.assert_called_once_with(
+            user, Token, sorted(token.id for token in tokens)
+        )
 
-    def test_delete_flags(self, worker, purger, factories, user, db_session):
-        factories.Flag.create_batch(2, user=user)
+    def test_delete_flags(
+        self, worker, purger, factories, user, db_session, log_deleted_rows
+    ):
+        flags = factories.Flag.create_batch(2, user=user)
         # A flag created by another user. This shouldn't get deleted.
         other_flag = factories.Flag()
 
@@ -221,11 +269,20 @@ class TestUserPurger:
 
         worker.delete.assert_called_once_with(Flag, Any.instance_of(Select))
         assert db_session.scalars(select(Flag)).all() == [other_flag]
+        log_deleted_rows.assert_called_once_with(
+            user, Flag, sorted(flag.id for flag in flags)
+        )
 
     def test_delete_featurecohort_memberships(
-        self, worker, purger, user, factories, db_session
+        self, worker, purger, user, factories, db_session, log_deleted_rows
     ):
-        cohorts = factories.FeatureCohort.create_batch(2, members=[user])
+        cohorts = factories.FeatureCohort.create_batch(2)
+        db_session.flush()
+        memberships = [
+            FeatureCohortUser(cohort_id=cohort.id, user_id=user.id)
+            for cohort in cohorts
+        ]
+        db_session.add_all(memberships)
         # A FeatureCohortUser belonging to a different user.
         # This shouldn't get deleted.
         other_user = factories.User()
@@ -241,9 +298,12 @@ class TestUserPurger:
                 {"cohort_id": cohorts[0].id, "user_id": other_user.id}
             )
         ]
+        log_deleted_rows.assert_called_once_with(
+            user, FeatureCohortUser, sorted(membership.id for membership in memberships)
+        )
 
     def test_delete_annotations(
-        self, caplog, worker, purger, user, factories, queue_service
+        self, worker, purger, user, factories, queue_service, log_updated_rows
     ):
         annotations = factories.Annotation.create_batch(2, userid=user.userid)
         annotation_slims = [
@@ -263,6 +323,11 @@ class TestUserPurger:
         )
         for annotation in annotations:
             assert annotation.deleted is True
+        log_updated_rows.assert_called_once_with(
+            user,
+            "marked annotations as deleted",
+            sorted([annotation.id for annotation in annotations]),
+        )
         for annotation_slim in annotation_slims:
             assert annotation_slim.deleted is True
         assert other_users_annotation.deleted is False
@@ -280,30 +345,16 @@ class TestUserPurger:
                 ]
             ).only()
         )
-        assert (
-            caplog.record_tuples
-            == Any.list.containing(
-                [
-                    (
-                        "h.services.user_delete",
-                        logging.INFO,
-                        "Updated 2 rows from annotation",
-                    ),
-                    (
-                        "h.services.user_delete",
-                        logging.INFO,
-                        "Updated 2 rows from annotation_slim",
-                    ),
-                    (
-                        "h.services.user_delete",
-                        logging.INFO,
-                        f"Enqueued jobs to delete {len(annotations)} annotations from Elasticsearch",
-                    ),
-                ]
-            ).only()
-        )
 
-    def test_delete_groups(self, user, worker, factories, purger):
+    def test_delete_annotations_when_there_are_no_annotations_to_delete(
+        self, purger, user, queue_service, caplog
+    ):
+        purger.delete_annotations(user)
+
+        queue_service.add_by_id.assert_not_called()
+        assert caplog.messages == []
+
+    def test_delete_groups(self, user, worker, factories, purger, log_deleted_rows):
         def make_group(name, owner=user):
             """Create and return a group that `owner` is the only owner of."""
             return factories.Group(
@@ -371,9 +422,12 @@ class TestUserPurger:
             assert not inspect(group).deleted
         for group in should_be_deleted:
             assert inspect(group).deleted
+        log_deleted_rows.assert_called_once_with(
+            user, Group, sorted(group.id for group in should_be_deleted)
+        )
 
     def test_delete_group_memberships(
-        self, user, factories, purger, worker, db_session
+        self, user, factories, purger, worker, db_session, log_deleted_rows
     ):
         other_user = factories.User()
         groups = [
@@ -391,6 +445,11 @@ class TestUserPurger:
             # A group that `user` is neither a creator or member of.
             factories.Group(memberships=[GroupMembership(user=other_user)]),
         ]
+        membership_ids = sorted(
+            db_session.scalars(
+                select(GroupMembership.id).where(GroupMembership.user == user)
+            )
+        )
 
         purger.delete_group_memberships(user)
 
@@ -416,8 +475,11 @@ class TestUserPurger:
                 ]
             ).only()
         )
+        log_deleted_rows.assert_called_once_with(user, GroupMembership, membership_ids)
 
-    def test_delete_group_creators(self, user, factories, purger, worker):
+    def test_delete_group_creators(
+        self, user, factories, purger, worker, log_updated_rows
+    ):
         groups = factories.Group.create_batch(2, creator=user)
         other_group = factories.Group()
 
@@ -428,6 +490,9 @@ class TestUserPurger:
         )
         for group in groups:
             assert group.creator_id is None
+        log_updated_rows.assert_called_once_with(
+            user, "removed user as creator of groups", [group.id for group in groups]
+        )
         assert other_group.creator_id
 
     def test_delete_group_creators_doesnt_delete_other_group_creators(
@@ -440,12 +505,13 @@ class TestUserPurger:
 
         assert group.creator_id == other_group_creator.id
 
-    def test_delete_user(self, db_session, purger, factories, user):
+    def test_delete_user(self, db_session, purger, factories, user, log_deleted_rows):
         other_user = factories.User()
 
         purger.delete_user(user)
 
         assert db_session.scalars(select(User)).all() == [other_user]
+        log_deleted_rows.assert_called_once_with(user, User, [user.id])
 
     @pytest.mark.parametrize(
         "method",
@@ -490,9 +556,17 @@ class TestUserPurger:
         db_session.flush()
         return user
 
+    @pytest.fixture(autouse=True)
+    def log_updated_rows(self, mocker):
+        return mocker.patch("h.services.user_delete.log_updated_rows", autospec=True)
+
+    @pytest.fixture(autouse=True)
+    def log_deleted_rows(self, mocker):
+        return mocker.patch("h.services.user_delete.log_deleted_rows", autospec=True)
+
 
 class TestLimitedWorker:
-    def test_update(self, caplog, db_session, factories):
+    def test_update(self, db_session, factories):
         annotations = factories.Annotation.create_batch(size=2, text="ORIGINAL")
         worker = LimitedWorker(db_session, limit=3)
 
@@ -506,11 +580,8 @@ class TestLimitedWorker:
         assert worker.limit == 1
         for annotation in annotations:
             assert annotation.text == "UPDATED"
-        assert caplog.record_tuples == [
-            ("h.services.user_delete", logging.INFO, "Updated 2 rows from annotation")
-        ]
 
-    def test_update_when_no_matching_rows(self, caplog, db_session):
+    def test_update_when_no_matching_rows(self, db_session):
         worker = LimitedWorker(db_session, limit=3)
 
         updated_annotation_ids = worker.update(
@@ -519,7 +590,6 @@ class TestLimitedWorker:
 
         assert updated_annotation_ids == []
         assert worker.limit == 3
-        assert caplog.record_tuples == []
 
     def test_update_when_limit_exceeded(self, db_session, factories):
         annotation = factories.Annotation()
@@ -533,7 +603,7 @@ class TestLimitedWorker:
         assert worker.limit == 0
         assert annotation.text == original_text
 
-    def test_update_with_limit_remaining(self, caplog, db_session, factories):
+    def test_update_with_limit_remaining(self, db_session, factories):
         annotations = factories.Annotation.create_batch(2)
         original_limit = len(annotations) + 1
         worker = LimitedWorker(db_session, original_limit)
@@ -548,11 +618,8 @@ class TestLimitedWorker:
         assert worker.limit == original_limit - len(updated_annotation_ids)
         for annotation in annotations:
             assert annotation.text == "UPDATED"
-        assert caplog.record_tuples == [
-            ("h.services.user_delete", logging.INFO, "Updated 2 rows from annotation")
-        ]
 
-    def test_update_when_limit_reached(self, caplog, db_session, factories):
+    def test_update_when_limit_reached(self, db_session, factories):
         annotations = factories.Annotation.create_batch(2)
         original_limit = len(annotations) - 1
         worker = LimitedWorker(db_session, original_limit)
@@ -574,11 +641,8 @@ class TestLimitedWorker:
                 assert annotation.text == "UPDATED"
             else:
                 assert annotation.text != "UPDATED"
-        assert caplog.record_tuples == [
-            ("h.services.user_delete", logging.INFO, "Updated 1 rows from annotation")
-        ]
 
-    def test_delete(self, caplog, db_session, factories):
+    def test_delete(self, db_session, factories):
         annotations = factories.Annotation.create_batch(size=2)
         worker = LimitedWorker(db_session, limit=3)
 
@@ -588,19 +652,15 @@ class TestLimitedWorker:
         assert sorted(deleted_annotation_ids) == sorted(
             [annotation.id for annotation in annotations]
         )
-        assert caplog.record_tuples == [
-            ("h.services.user_delete", logging.INFO, "Deleted 2 rows from annotation")
-        ]
         assert db_session.scalars(select(Annotation)).all() == []
 
-    def test_delete_when_no_matching_rows(self, caplog, db_session):
+    def test_delete_when_no_matching_rows(self, db_session):
         worker = LimitedWorker(db_session, limit=3)
 
         deleted_annotation_ids = worker.delete(Annotation, select(Annotation.id))
 
         assert worker.limit == 3
         assert deleted_annotation_ids == []
-        assert caplog.record_tuples == []
 
     def test_delete_when_limit_exceeded(self, db_session, factories):
         annotation = factories.Annotation()
@@ -613,7 +673,7 @@ class TestLimitedWorker:
         assert worker.limit == 0
         assert db_session.scalars(select(Annotation)).all() == [annotation]
 
-    def test_delete_with_limit_remaining(self, caplog, db_session, factories):
+    def test_delete_with_limit_remaining(self, db_session, factories):
         annotations = factories.Annotation.create_batch(2)
         original_limit = len(annotations) + 1
         worker = LimitedWorker(db_session, original_limit)
@@ -625,18 +685,14 @@ class TestLimitedWorker:
         )
         assert worker.limit == original_limit - len(deleted_annotation_ids)
         assert db_session.scalars(select(Annotation)).all() == []
-        assert caplog.record_tuples == [
-            ("h.services.user_delete", logging.INFO, "Deleted 2 rows from annotation")
-        ]
 
-    def test_delete_when_limit_reached(self, caplog, db_session, factories):
+    def test_delete_when_limit_reached(self, db_session, factories):
         annotations = factories.Annotation.create_batch(2)
-        original_limit = len(annotations) - 1
-        worker = LimitedWorker(db_session, original_limit)
+        worker = LimitedWorker(db_session, 1)
 
         deleted_annotation_ids = worker.delete(Annotation, select(Annotation.id))
 
-        assert len(deleted_annotation_ids) == original_limit
+        assert len(deleted_annotation_ids) == 1
         assert len(set(deleted_annotation_ids)) == len(deleted_annotation_ids)
         for deleted_annotation_id in deleted_annotation_ids:
             assert deleted_annotation_id in [
@@ -645,12 +701,8 @@ class TestLimitedWorker:
         # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
         assert worker.limit == 0
         assert (
-            db_session.scalar(select(func.count(Annotation.id)))
-            == len(annotations) - original_limit
+            db_session.scalar(select(func.count(Annotation.id))) == len(annotations) - 1
         )
-        assert caplog.record_tuples == [
-            ("h.services.user_delete", logging.INFO, "Deleted 1 rows from annotation")
-        ]
 
 
 class TestServiceFactory:

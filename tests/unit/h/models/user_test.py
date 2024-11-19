@@ -213,7 +213,7 @@ class TestUserModel:
         assert getattr(User(), "privacy_accepted") is None
 
     def test_repr(self, user):
-        assert repr(user) == "<User: kiki>"
+        assert repr(user) == f"User(id={user.id})"
 
     @pytest.fixture
     def user(self, db_session):

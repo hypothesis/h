@@ -2,6 +2,7 @@ import sqlalchemy as sa
 
 from h.db import Base, types
 from h.db.mixins import Timestamps
+from h.models import helpers
 
 
 class Flag(Base, Timestamps):
@@ -37,4 +38,4 @@ class Flag(Base, Timestamps):
     user = sa.orm.relationship("User")
 
     def __repr__(self):
-        return f"<Flag annotation_id={self.annotation_id} user_id={self.user_id}>"
+        return helpers.repr_(self, ["id", "annotation_id", "user_id"])

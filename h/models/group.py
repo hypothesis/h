@@ -280,7 +280,7 @@ class Group(Base, mixins.Timestamps):
         return self.readable_by == ReadableBy.world
 
     def __repr__(self):
-        return f"<Group: {self.slug}>"
+        return helpers.repr_(self, ["id"])
 
 
 TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")
