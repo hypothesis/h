@@ -1,10 +1,6 @@
 import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
-import {
-  Button,
-  RadioGroup,
-  useWarnOnPageUnload,
-} from '@hypothesis/frontend-shared';
+import { Button, RadioGroup } from '@hypothesis/frontend-shared';
 import { Config } from '../config';
 import { callAPI } from '../utils/api';
 import type {
@@ -14,6 +10,7 @@ import type {
 } from '../utils/api';
 import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
+import { useUnsavedChanges } from '../utils/unsaved-changes';
 import ErrorNotice from './ErrorNotice';
 import FormContainer from './forms/FormContainer';
 import Star from './forms/Star';
@@ -109,7 +106,7 @@ export default function CreateEditGroupForm() {
   // Warn when leaving page if there are unsaved changes. We only do this when
   // editing a group because this hook lacks a way to disable the handler before
   // calling `setLocation` after a successful group creation.
-  useWarnOnPageUnload(!!group && ['unsaved', 'saving'].includes(saveState));
+  useUnsavedChanges(!!group && ['unsaved', 'saving'].includes(saveState));
 
   useEffect(() => {
     const listener = (e: PageTransitionEvent) => {
