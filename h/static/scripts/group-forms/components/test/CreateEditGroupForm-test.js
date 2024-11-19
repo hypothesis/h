@@ -13,10 +13,10 @@ describe('CreateEditGroupForm', () => {
   let config;
   let fakeCallAPI;
   let fakeSetLocation;
-  let fakeUseWarnOnPageUnload;
+  let fakeUseUnsavedChanges;
 
-  function pageUnloadWarningActive() {
-    return fakeUseWarnOnPageUnload.lastCall.args[0] === true;
+  function navigateWarningActive() {
+    return fakeUseUnsavedChanges.lastCall.args[0] === true;
   }
 
   beforeEach(() => {
@@ -37,14 +37,14 @@ describe('CreateEditGroupForm', () => {
 
     fakeCallAPI = sinon.stub();
     fakeSetLocation = sinon.stub();
-    fakeUseWarnOnPageUnload = sinon.stub();
+    fakeUseUnsavedChanges = sinon.stub();
 
     $imports.$mock({
-      '@hypothesis/frontend-shared': {
-        useWarnOnPageUnload: fakeUseWarnOnPageUnload,
-      },
       '../utils/api': {
         callAPI: fakeCallAPI,
+      },
+      '../utils/unsaved-changes': {
+        useUnsavedChanges: fakeUseUnsavedChanges,
       },
       '../utils/set-location': {
         setLocation: fakeSetLocation,
@@ -148,7 +148,7 @@ describe('CreateEditGroupForm', () => {
 
     // Warnings about unsaved changes are only enabled when editing a group.
     // See notes in the implementation.
-    assert.isFalse(pageUnloadWarningActive());
+    assert.isFalse(navigateWarningActive());
   });
 
   it('shows a loading state when the create-group API request is in-flight', async () => {
@@ -269,26 +269,26 @@ describe('CreateEditGroupForm', () => {
     it('warns when closing tab if there are unsaved changes', async () => {
       const { wrapper, elements } = createWrapper();
       const { nameField, descriptionField } = elements;
-      assert.isFalse(pageUnloadWarningActive());
+      assert.isFalse(navigateWarningActive());
 
       act(() => {
         nameField.prop('onChangeValue')('foo');
       });
-      assert.isTrue(pageUnloadWarningActive());
+      assert.isTrue(navigateWarningActive());
 
       wrapper.find('form[data-testid="form"]').simulate('submit');
       // Warning should still be active in saving state.
-      assert.isTrue(pageUnloadWarningActive());
+      assert.isTrue(navigateWarningActive());
       await waitForElement(wrapper, 'SaveStateIcon[state="saved"]');
 
       // Warning should be disabled once saved.
-      assert.isFalse(pageUnloadWarningActive());
+      assert.isFalse(navigateWarningActive());
 
       // Warning should be re-enabled if we then edit the form again.
       act(() => {
         descriptionField.prop('onChangeValue')('bar');
       });
-      assert.isTrue(pageUnloadWarningActive());
+      assert.isTrue(navigateWarningActive());
 
       // Warning should remain active if form is edited while being saved.
       wrapper.find('form[data-testid="form"]').simulate('submit');
@@ -296,7 +296,7 @@ describe('CreateEditGroupForm', () => {
         nameField.prop('onChangeValue')('bar');
       });
       await delay(0);
-      assert.isTrue(pageUnloadWarningActive());
+      assert.isTrue(navigateWarningActive());
     });
 
     it('clears modified state when page is loaded from cache', () => {
@@ -304,14 +304,14 @@ describe('CreateEditGroupForm', () => {
       act(() => {
         elements.nameField.prop('onChangeValue')('modified');
       });
-      assert.isTrue(pageUnloadWarningActive());
+      assert.isTrue(navigateWarningActive());
 
       act(() => {
         window.dispatchEvent(
           new PageTransitionEvent('pageshow', { persisted: true }),
         );
       });
-      assert.isFalse(pageUnloadWarningActive());
+      assert.isFalse(navigateWarningActive());
     });
 
     it('updates the group', async () => {
