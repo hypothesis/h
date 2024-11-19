@@ -5,6 +5,7 @@ import sqlalchemy as sa
 
 from h.db import Base
 from h.db.mixins import Timestamps
+from h.models import helpers
 
 
 class AuthTicket(Base, Timestamps):
@@ -48,3 +49,6 @@ class AuthTicket(Base, Timestamps):
         generate ids for most cases.
         """
         return urlsafe_b64encode(urandom(32)).rstrip(b"=").decode("ascii")
+
+    def __repr__(self):
+        return helpers.repr_(self, ["user_id", "expires"])

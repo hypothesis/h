@@ -5,6 +5,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped
 
 from h.db import Base, mixins
+from h.models import helpers
 
 
 class Token(Base, mixins.Timestamps):
@@ -89,3 +90,6 @@ class Token(Base, mixins.Timestamps):
         # For example 2.3 beccomes 2, but 2.9 also becomes 2.
         ttl_in_seconds_truncated = int(ttl_in_seconds)
         return ttl_in_seconds_truncated
+
+    def __repr__(self):
+        return helpers.repr_(self, ["id", "user_id", "_authclient_id"])

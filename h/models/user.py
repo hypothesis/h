@@ -8,6 +8,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 from h.db import Base
 from h.exceptions import InvalidUserId
+from h.models import helpers
 from h.util.user import format_userid, split_user
 
 if TYPE_CHECKING:
@@ -378,4 +379,4 @@ class User(Base):
         )
 
     def __repr__(self):
-        return f"<User: {self.username}>"
+        return helpers.repr_(self, ["id"])

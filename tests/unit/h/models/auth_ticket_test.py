@@ -12,3 +12,12 @@ class TestAuthTicket:
         urandom.assert_called_once_with(32)
         urlsafe_b64encode.assert_called_once_with(urandom.spy_return)
         assert ticket_id == urlsafe_b64encode.spy_return.rstrip(b"=").decode("ascii")
+
+    def test_repr(self, db_session, factories):
+        authticket = factories.AuthTicket()
+        db_session.flush()
+
+        assert (
+            repr(authticket)
+            == f"AuthTicket(user_id={authticket.user_id!r}, expires={authticket.expires!r})"
+        )

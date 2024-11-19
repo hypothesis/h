@@ -3,6 +3,7 @@ import datetime
 import sqlalchemy as sa
 
 from h.db import Base, types
+from h.models import helpers
 
 
 class AnnotationSlim(Base):
@@ -94,3 +95,6 @@ class AnnotationSlim(Base):
         index=True,
     )
     group = sa.orm.relationship("Group")
+
+    def __repr__(self):
+        return helpers.repr_(self, ["id"])

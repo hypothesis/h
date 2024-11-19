@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 
 from h.db import Base, mixins
+from h.models import helpers
 
 
 class FeatureCohort(Base, mixins.Timestamps):
@@ -29,6 +30,9 @@ class FeatureCohortUser(Base):
     id = sa.Column(sa.Integer, nullable=False, autoincrement=True, primary_key=True)
     cohort_id = sa.Column(sa.Integer, sa.ForeignKey("featurecohort.id"), nullable=False)
     user_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"), nullable=False)
+
+    def __repr__(self):
+        return helpers.repr_(self, ["id", "cohort_id", "user_id"])
 
 
 FEATURECOHORT_FEATURE_TABLE = sa.Table(

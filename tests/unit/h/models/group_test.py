@@ -189,7 +189,7 @@ def test_repr(db_session, factories, organization):
     db_session.add(group)
     db_session.flush()
 
-    assert repr(group) == "<Group: my-hypothesis-group>"
+    assert repr(group) == f"Group(id={group.id!r})"
 
 
 def test_group_organization(db_session):

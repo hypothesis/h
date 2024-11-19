@@ -20,6 +20,39 @@ from h.models import (
 log = logging.getLogger(__name__)
 
 
+def make_log_message(user, message):
+    # It's important to include the user in all log messages about deleting
+    # that user and purging their data: it makes it possible to locate all log
+    # messages about a particular user's deletion (for example to see every row
+    # that was deleted and potentially extract those rows from a DB backup).
+    return f"Purging {user!r} - {message}"
+
+
+def log_updated_rows(user, log_message, updated_ids):
+    if updated_ids:
+        log.info(
+            f"{make_log_message(user, log_message)}: %s",
+            ", ".join(str(id_) for id_ in updated_ids),
+        )
+
+
+def log_deleted_rows(user, model_class, deleted_ids, log_ids=True):
+    if deleted_ids:
+        if log_ids:
+            log.info(
+                make_log_message(user, "deleted %d rows from %s: %s"),
+                len(deleted_ids),
+                model_class.__tablename__,
+                ", ".join(str(id_) for id_ in deleted_ids),
+            )
+        else:
+            log.info(
+                make_log_message(user, "deleted %d rows from %s"),
+                len(deleted_ids),
+                model_class.__tablename__,
+            )
+
+
 class UserDeleteService:
 
     def __init__(self, db, job_queue, user_svc):
@@ -32,35 +65,38 @@ class UserDeleteService:
 
         # Mark the user as deleted so they can't login anymore.
         user.deleted = True
+        log.info(make_log_message(user, "marked user as deleted"))
 
         # We can't just purge all the user's data right now because for users
         # with a lot of data this takes too long for an HTTP request and the
         # request times out.
         #
         # So add a job to purge the user's data in the background.
-        self.db.add(
-            Job(
-                name=Job.JobName.PURGE_USER,
-                priority=0,
-                tag="UserDeleteService.delete_user",
-                kwargs={"userid": user.userid},
-            )
+        job = Job(
+            name=Job.JobName.PURGE_USER,
+            priority=0,
+            tag="UserDeleteService.delete_user",
+            kwargs={"userid": user.userid},
         )
+        self.db.add(job)
+        self.db.flush()  # Flush DB to generate SQL defaults for log message.
+        log.info(make_log_message(user, "added purge_user job: %r"), job)
 
         # Record the deletion for record-keeping purposes.
-        self.db.add(
-            UserDeletion(
-                userid=user.userid,
-                requested_by=requested_by.userid,
-                tag=tag,
-                registered_date=user.registered_date,
-                num_annotations=self.db.scalar(
-                    select(
-                        func.count(Annotation.id)  # pylint:disable=not-callable
-                    ).where(Annotation.userid == user.userid)
-                ),
-            )
+        deletion = UserDeletion(
+            userid=user.userid,
+            requested_by=requested_by.userid,
+            tag=tag,
+            registered_date=user.registered_date,
+            num_annotations=self.db.scalar(
+                select(func.count(Annotation.id)).where(  # pylint:disable=not-callable
+                    Annotation.userid == user.userid
+                )
+            ),
         )
+        self.db.add(deletion)
+        self.db.flush()  # Flush DB to generate SQL defaults for log message.
+        log.info(make_log_message(user, "added record of user deletion: %r"), deletion)
 
     def purge_deleted_users(self, limit=1000):
         """Incrementally purge data of users who've been marked as deleted."""
@@ -76,7 +112,7 @@ class UserDeleteService:
             userid = job.kwargs.get("userid")
 
             if not userid:
-                log.info("Invalid '%s' job: %s", job.JobName.PURGE_USER, job)
+                log.info("Invalid job: %r", job)
                 completed_jobs.append(job)
                 continue
 
@@ -86,8 +122,6 @@ class UserDeleteService:
                 log.info("Couldn't fetch user: %s", userid)
                 completed_jobs.append(job)
                 continue
-
-            log.info("Purging user: %s", user.userid)
 
             try:
                 purger.delete_authtickets(user)
@@ -103,6 +137,7 @@ class UserDeleteService:
                 break
             else:
                 completed_jobs.append(job)
+                log.info(make_log_message(user, "completed job: %r"), job)
 
         self.job_queue.delete(completed_jobs)
 
@@ -117,24 +152,32 @@ class UserPurger:
 
     def delete_authtickets(self, user):
         """Delete all AuthTicket's belonging to `user`."""
-        self.worker.delete(
+        deleted_ids = self.worker.delete(
             AuthTicket, select(AuthTicket.id).where(AuthTicket.user == user)
         )
+        log_deleted_rows(user, AuthTicket, deleted_ids, log_ids=False)
 
     def delete_tokens(self, user):
         """Delete all tokens belonging to `user`."""
-        self.worker.delete(Token, select(Token.id).where(Token.user == user))
+        deleted_ids = self.worker.delete(
+            Token, select(Token.id).where(Token.user == user)
+        )
+        log_deleted_rows(user, Token, deleted_ids)
 
     def delete_flags(self, user):
         """Delete all flags created by `user`."""
-        self.worker.delete(Flag, select(Flag.id).where(Flag.user_id == user.id))
+        deleted_ids = self.worker.delete(
+            Flag, select(Flag.id).where(Flag.user_id == user.id)
+        )
+        log_deleted_rows(user, Flag, deleted_ids)
 
     def delete_featurecohort_memberships(self, user):
         """Remove `user` from all feature cohorts."""
-        self.worker.delete(
+        deleted_ids = self.worker.delete(
             FeatureCohortUser,
             select(FeatureCohortUser.id).where(FeatureCohortUser.user_id == user.id),
         )
+        log_deleted_rows(user, FeatureCohortUser, deleted_ids)
 
     def delete_annotations(self, user):
         """Delete all of `user`'s annotations from both Postgres and Elasticsearch."""
@@ -167,31 +210,38 @@ class UserPurger:
             },
         )
 
-        # Whenever we update annotations we also need to update the corresponding annotation_slims.
-        num_deleted_annotation_slims = self.db.execute(
-            update(AnnotationSlim)
-            .where(AnnotationSlim.pubid.in_(deleted_annotation_ids))
-            .values({"deleted": True, "updated": now})
-        ).rowcount
-        if num_deleted_annotation_slims:
-            log.info(
-                "Updated %d rows from annotation_slim", num_deleted_annotation_slims
-            )
-        else:  # pragma: nocover
-            pass
+        log_updated_rows(user, "marked annotations as deleted", deleted_annotation_ids)
 
-        # Add jobs to the queue so the annotations will eventually be deleted from Elasticsearch.
-        for annotation_id in deleted_annotation_ids:
-            self.job_queue.add_by_id(
-                name="sync_annotation",
-                annotation_id=annotation_id,
-                tag="UserDeleteService.delete_annotations",
-                schedule_in=60,
-            )
-        log.info(
-            "Enqueued jobs to delete %i annotations from Elasticsearch",
-            len(deleted_annotation_ids),
+        # Whenever we update annotations we also need to update the corresponding annotation_slims.
+        deleted_annotation_slim_ids = sorted(
+            self.db.scalars(
+                update(AnnotationSlim)
+                .where(AnnotationSlim.pubid.in_(deleted_annotation_ids))
+                .values({"deleted": True, "updated": now})
+                .returning(AnnotationSlim.id)
+            ).all()
         )
+        if deleted_annotation_slim_ids:
+            log.info(
+                make_log_message(user, "marked annotation_slims as deleted: %s"),
+                ", ".join(str(id_) for id_ in deleted_annotation_slim_ids),
+            )
+
+        if deleted_annotation_ids:
+            # Add jobs to the queue so the annotations will eventually be deleted from Elasticsearch.
+            for annotation_id in deleted_annotation_ids:
+                self.job_queue.add_by_id(
+                    name="sync_annotation",
+                    annotation_id=annotation_id,
+                    tag="UserDeleteService.delete_annotations",
+                    schedule_in=60,
+                )
+            log.info(
+                make_log_message(
+                    user, "enqueued jobs to delete annotations from Elasticsearch: %s"
+                ),
+                ", ".join(deleted_annotation_ids),
+            )
 
     def delete_groups(self, user):
         """
@@ -247,7 +297,8 @@ class UserPurger:
             .having(func.count(Annotation.id) == 0)
         )
 
-        self.worker.delete(Group, groups_to_be_deleted)
+        deleted_ids = self.worker.delete(Group, groups_to_be_deleted)
+        log_deleted_rows(user, Group, deleted_ids)
 
     def delete_group_memberships(self, user):
         """
@@ -263,12 +314,13 @@ class UserPurger:
         the situation will be only temporary: `user` will soon be removed as
         the group's creator as well.
         """
-        self.worker.delete(
+        deleted_ids = self.worker.delete(
             GroupMembership,
             select(GroupMembership.id)
             .where(GroupMembership.user_id == user.id)
             .join(Group, GroupMembership.group_id == Group.id),
         )
+        log_deleted_rows(user, GroupMembership, deleted_ids)
 
     def delete_group_creators(self, user):
         """
@@ -277,13 +329,17 @@ class UserPurger:
         Known issue: this will leave groups in an odd state - with no creator
         (group.creator = None).
         """
-        self.worker.update(
+        updated_group_ids = self.worker.update(
             Group, select(Group.id).where(Group.creator == user), {"creator_id": None}
         )
+        log_updated_rows(user, "removed user as creator of groups", updated_group_ids)
 
     def delete_user(self, user):
         """Delete `user`."""
-        self.worker.delete(User, select(User.id).where(User.id == user.id))
+        deleted_ids = self.worker.delete(
+            User, select(User.id).where(User.id == user.id)
+        )
+        log_deleted_rows(user, User, deleted_ids)
 
 
 class LimitReached(Exception):
@@ -332,17 +388,14 @@ class LimitedWorker:
 
         :return: the IDs of the rows that were updated
         """
-        updated_ids = self._execute(
-            update(model_class)
-            .where(model_class.id.in_(select(select_stmnt.limit(self.limit).cte())))
-            .values(values)
-            .returning(model_class.id)
-        )
-        if updated_ids:
-            log.info(
-                "Updated %d rows from %s", len(updated_ids), model_class.__tablename__
+        return sorted(
+            self._execute(
+                update(model_class)
+                .where(model_class.id.in_(select(select_stmnt.limit(self.limit).cte())))
+                .values(values)
+                .returning(model_class.id)
             )
-        return updated_ids
+        )
 
     def delete(self, model_class, select_stmnt) -> list:
         """
@@ -350,16 +403,13 @@ class LimitedWorker:
 
         :return: the IDs of the rows that were deleted
         """
-        deleted_ids = self._execute(
-            delete(model_class)
-            .where(model_class.id.in_(select(select_stmnt.limit(self.limit).cte())))
-            .returning(model_class.id)
-        )
-        if deleted_ids:
-            log.info(
-                "Deleted %d rows from %s", len(deleted_ids), model_class.__tablename__
+        return sorted(
+            self._execute(
+                delete(model_class)
+                .where(model_class.id.in_(select(select_stmnt.limit(self.limit).cte())))
+                .returning(model_class.id)
             )
-        return deleted_ids
+        )
 
     def _execute(self, stmnt):
         if self.limit < 1:
