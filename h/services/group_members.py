@@ -1,9 +1,12 @@
+import logging
 from functools import partial
 
 from sqlalchemy import select
 
 from h import session
 from h.models import GroupMembership
+
+log = logging.getLogger(__name__)
 
 
 class GroupMembersService:
@@ -70,8 +73,10 @@ class GroupMembersService:
             # The user is already a member of the group.
             return
 
-        self.db.add(GroupMembership(group=group, user=user))
+        membership = GroupMembership(group=group, user=user)
+        self.db.add(membership)
 
+        log.info("Added group membership: %r", membership)
         self.publish("group-join", group.pubid, userid)
 
     def member_leave(self, group, userid):
@@ -89,6 +94,7 @@ class GroupMembersService:
 
         self.db.delete(membership)
 
+        log.info("Deleted group membership: %r", membership)
         self.publish("group-leave", group.pubid, userid)
 
 

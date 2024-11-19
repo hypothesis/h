@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 
 import pytest
@@ -8,12 +9,21 @@ from h.services.group_members import GroupMembersService, group_members_factory
 
 
 class TestMemberJoin:
-    def test_it_adds_user_to_group(self, group_members_service, factories):
+    def test_it_adds_user_to_group(
+        self, group_members_service, factories, caplog, db_session
+    ):
+        caplog.set_level(logging.INFO)
         user = factories.User()
         group = factories.Group()
         group_members_service.member_join(group, user.userid)
 
-        assert user in group.members
+        membership = db_session.scalars(
+            select(GroupMembership)
+            .where(GroupMembership.user == user)
+            .where(GroupMembership.group == group)
+        ).one_or_none()
+        assert membership
+        assert caplog.messages == [f"Added group membership: {membership!r}"]
 
     def test_it_is_idempotent(self, group_members_service, factories):
         user = factories.User()
@@ -34,13 +44,15 @@ class TestMemberJoin:
 
 class TestMemberLeave:
     def test_it_removes_user_from_group(
-        self, group_members_service, factories, db_session
+        self, group_members_service, factories, db_session, caplog
     ):
+        caplog.set_level(logging.INFO)
         group, other_group = factories.Group.create_batch(size=2)
         user, other_user = factories.User.create_batch(size=2)
+        membership = GroupMembership(group=group, user=user)
         db_session.add_all(
             [
-                GroupMembership(group=group, user=user),
+                membership,
                 GroupMembership(group=other_group, user=user),
                 GroupMembership(group=group, user=other_user),
             ]
@@ -51,6 +63,7 @@ class TestMemberLeave:
         assert user not in group.members
         assert user in other_group.members
         assert other_user in group.members
+        assert caplog.messages == [f"Deleted group membership: {membership!r}"]
 
     def test_it_does_nothing_if_the_user_isnt_a_member(
         self, group_members_service, factories, publish

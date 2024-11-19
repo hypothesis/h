@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 
 from h import pubid
 from h.db import Base, mixins
+from h.models import helpers
 from h.models.user import User
 from h.util.group import split_groupid
 
@@ -76,6 +77,12 @@ class GroupMembership(Base):
         server_default=sa.text("""'["member"]'::jsonb"""),
         nullable=False,
     )
+
+    def __repr__(self):
+        return helpers.repr_(
+            self,
+            ["id", "user_id", "group_id", "roles"],
+        )
 
 
 class Group(Base, mixins.Timestamps):
