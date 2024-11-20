@@ -23,21 +23,24 @@ export function hasUnsavedChanges() {
  * @param hasUnsavedChanges - True if current component has unsaved changes
  * @param window_ - Test seam
  */
-export function useUnsavedChanges(hasUnsavedData: boolean, window_ = window) {
+export function useUnsavedChanges(
+  hasUnsavedChanges: boolean,
+  window_ = window,
+) {
   useEffect(() => {
-    if (hasUnsavedData) {
-      unsavedCount += 1;
-      if (unsavedCount === 1) {
-        window_.addEventListener('beforeunload', preventUnload);
-      }
+    if (!hasUnsavedChanges) {
+      return () => {};
+    }
+
+    unsavedCount += 1;
+    if (unsavedCount === 1) {
+      window_.addEventListener('beforeunload', preventUnload);
     }
     return () => {
-      if (hasUnsavedData) {
-        unsavedCount -= 1;
-        if (unsavedCount === 0) {
-          window_.removeEventListener('beforeunload', preventUnload);
-        }
+      unsavedCount -= 1;
+      if (unsavedCount === 0) {
+        window_.removeEventListener('beforeunload', preventUnload);
       }
     };
-  }, [hasUnsavedData, window_]);
+  }, [hasUnsavedChanges, window_]);
 }
