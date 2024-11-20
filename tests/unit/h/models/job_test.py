@@ -15,7 +15,6 @@ def test___repr__(factories, helpers):
             "expires_at",
             "priority",
             "tag",
-            "kwargs",
         ],
     )
     assert repr_ == helpers.repr_.return_value
