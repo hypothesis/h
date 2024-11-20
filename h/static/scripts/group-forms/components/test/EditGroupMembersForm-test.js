@@ -26,6 +26,9 @@ describe('EditGroupMembersForm', () => {
       {
         username: 'bob',
       },
+      {
+        username: 'johnsmith',
+      },
     ]);
 
     $imports.$mock({
@@ -52,24 +55,37 @@ describe('EditGroupMembersForm', () => {
       return wrapper.find('ErrorNotice').prop('message') !== null;
     });
 
+  const getRenderedUsers = wrapper => {
+    return wrapper.find('[data-testid="username"]').map(node => node.text());
+  };
+
+  const enterFilterValue = (wrapper, value) => {
+    const filter = wrapper.find('input[data-testid="search-input"]');
+    filter.getDOMNode().value = value;
+    filter.simulate('input');
+  };
+
   it('fetches and displays members', async () => {
     const wrapper = createForm();
     assert.calledWith(fakeCallAPI, '/api/groups/1234/members');
 
     await waitForTable(wrapper);
 
-    const users = wrapper.find('[data-testid="username"]');
-    assert.equal(users.length, 1);
-    assert.equal(users.at(0).text(), 'bob');
+    const users = getRenderedUsers(wrapper);
+    assert.deepEqual(users, ['bob', 'johnsmith']);
   });
 
   it('displays member count', async () => {
+    fakeCallAPI.withArgs('/api/groups/1234/members').resolves([
+      {
+        username: 'bob',
+      },
+    ]);
     const wrapper = createForm();
     const memberCount = wrapper.find('[data-testid="member-count"]');
     assert.equal(memberCount.text(), '... members');
 
     await waitForTable(wrapper);
-
     assert.equal(memberCount.text(), '1 member');
   });
 
@@ -93,5 +109,32 @@ describe('EditGroupMembersForm', () => {
     assert.calledWith(fakeCallAPI, '/api/groups/1234/members');
     // Unmount while fetching. This should abort the request.
     wrapper.unmount();
+  });
+
+  it('filters members', async () => {
+    const wrapper = createForm();
+    await waitForTable(wrapper);
+
+    // Filter should remove non-matching users
+    enterFilterValue(wrapper, 'john');
+    const users = getRenderedUsers(wrapper);
+    assert.deepEqual(users, ['johnsmith']);
+
+    // Filter should match anywhere in username
+    enterFilterValue(wrapper, 'smith');
+    const users2 = getRenderedUsers(wrapper);
+    assert.deepEqual(users2, ['johnsmith']);
+
+    // Filter should be case-insensitive
+    enterFilterValue(wrapper, 'BOB');
+    const users3 = getRenderedUsers(wrapper);
+    assert.deepEqual(users3, ['bob']);
+  });
+
+  it('displays message if filter does not match any members', async () => {
+    const wrapper = createForm();
+    await waitForTable(wrapper);
+    enterFilterValue(wrapper, 'no-match');
+    assert.isTrue(wrapper.exists('[data-testid="no-filter-match"]'));
   });
 });
