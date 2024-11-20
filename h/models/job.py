@@ -85,6 +85,5 @@ class Job(Base):
                 "expires_at",
                 "priority",
                 "tag",
-                "kwargs",
             ],
         )
