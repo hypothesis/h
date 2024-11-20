@@ -77,19 +77,21 @@ export default function EditGroupMembersForm({
   };
 
   const memberText = pluralize(members?.length ?? 0, 'member', 'members');
-  const normalizedFilter = filter.toLowerCase();
 
   const filteredMembers = useMemo(() => {
-    if (!normalizedFilter || !members) {
+    if (!filter || !members) {
       return members;
     }
+
+    const normalizedFilter = filter.toLowerCase();
+
     // nb. We can get away with lower-casing name and filter to do
     // case-insensitive search because of the character set restrictions on
     // usernames. This would be incorrect for Unicode text.
     return members.filter(m =>
       m.username.toLowerCase().includes(normalizedFilter),
     );
-  }, [normalizedFilter, members]);
+  }, [filter, members]);
 
   let emptyMessage;
   if (members !== null && members.length > 0 && filter) {
