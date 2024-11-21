@@ -76,6 +76,9 @@ class GroupMembersService:
         membership = GroupMembership(group=group, user=user)
         self.db.add(membership)
 
+        # Flush the DB to generate SQL defaults for `membership` before logging it.
+        self.db.flush()
+
         log.info("Added group membership: %r", membership)
         self.publish("group-join", group.pubid, userid)
 
