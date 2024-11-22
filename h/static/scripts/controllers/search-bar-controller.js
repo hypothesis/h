@@ -3,7 +3,7 @@ import escapeHtml from 'escape-html';
 import { Controller } from '../base/controller';
 import { cloneTemplate } from '../util/dom';
 import { getLozengeValues, shouldLozengify } from '../util/search-text-parser';
-import * as stringUtil from '../util/string';
+import { stripMarks } from '../util/string';
 
 import { AutosuggestDropdownController } from './autosuggest-dropdown-controller';
 import { LozengeController } from './lozenge-controller';
@@ -12,14 +12,6 @@ const FACET_TYPE = 'FACET';
 const TAG_TYPE = 'TAG';
 const GROUP_TYPE = 'GROUP';
 const MAX_SUGGESTIONS = 5;
-
-/**
- * Normalize a string for use in comparisons of user input with a suggestion.
- * This causes differences in unicode composition and combining characters/accents to be ignored.
- */
-const normalizeStr = function (str) {
-  return stringUtil.fold(stringUtil.normalize(str));
-};
 
 /**
  * Controller for the search bar.
@@ -85,7 +77,7 @@ export class SearchBarController extends Controller {
         return Object.assign(item, {
           type: TAG_TYPE,
           title: item.tag, // make safe
-          matchOn: normalizeStr(item.tag),
+          matchOn: stripMarks(item.tag),
           usageCount: item.count || 0,
         });
       });
@@ -113,7 +105,7 @@ export class SearchBarController extends Controller {
         return Object.assign(item, {
           type: GROUP_TYPE,
           title: item.name, // make safe
-          matchOn: normalizeStr(item.name),
+          matchOn: stripMarks(item.name),
           pubid: item.pubid,
           name: item.name,
           relationship: item.relationship,
@@ -161,7 +153,7 @@ export class SearchBarController extends Controller {
         groupVal = groupVal.slice(0, -1);
       }
 
-      const matchVal = normalizeStr(groupVal).toLowerCase();
+      const matchVal = stripMarks(groupVal).toLowerCase();
 
       // NOTE: We are pushing a pubid to lowercase here. These ids are created by us
       // in a random generation case-sensistive style. Theoretically, that means
@@ -364,7 +356,7 @@ export class SearchBarController extends Controller {
           typeFilter = GROUP_TYPE;
         }
 
-        let inputFilter = normalizeStr(currentInput);
+        let inputFilter = stripMarks(currentInput);
 
         if (typeFilter === TAG_TYPE || typeFilter === GROUP_TYPE) {
           inputFilter = inputFilter.substr(inputFilter.indexOf(':') + 1);
