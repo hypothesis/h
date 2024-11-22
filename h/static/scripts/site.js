@@ -3,7 +3,6 @@ import { settings } from './base/settings';
 import { upgradeElements } from './base/upgrade-elements';
 import { sharedControllers } from './controllers';
 import { AuthorizeFormController } from './controllers/authorize-form-controller';
-import { CreateGroupFormController } from './controllers/create-group-form-controller';
 import { SearchBarController } from './controllers/search-bar-controller';
 import { SearchBucketController } from './controllers/search-bucket-controller';
 import { ShareWidgetController } from './controllers/share-widget-controller';
@@ -16,7 +15,6 @@ if (appSettings.sentry) {
 const controllers = Object.assign(
   {
     '.js-authorize-form': AuthorizeFormController,
-    '.js-create-group-form': CreateGroupFormController,
     '.js-search-bar': SearchBarController,
     '.js-search-bucket': SearchBucketController,
     '.js-share-widget': ShareWidgetController,
