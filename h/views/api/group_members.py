@@ -14,8 +14,8 @@ from h.views.api.config import api_config
     description="Fetch all members of a group",
     permission=Permission.Group.READ,
 )
-def read_members(context: GroupContext, _request):
-    """Fetch the members of a group."""
+def list_members(context: GroupContext, _request):
+    """Return a list of a group's members."""
     return [UserJSONPresenter(user).asdict() for user in context.group.members]
 
 
