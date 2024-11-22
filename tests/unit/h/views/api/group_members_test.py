@@ -71,11 +71,6 @@ class TestAddMember:
             views.add_member(context, pyramid_request)
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.matchdict = {"userid": sentinel.userid}
-        return pyramid_request
-
-    @pytest.fixture
     def context(self, factories):
         group = factories.Group.build()
         user = factories.User.build(authority=group.authority)
