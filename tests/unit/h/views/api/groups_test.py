@@ -10,6 +10,7 @@ from pyramid.httpexceptions import (
 
 import h.views.api.groups as views
 from h import presenters
+from h.exceptions import InvalidUserId
 from h.models import User
 from h.schemas.base import ValidationError
 from h.traversal.group import GroupContext
@@ -468,7 +469,7 @@ class TestAddMember:
         assert isinstance(response, HTTPNoContent)
 
     def test_it_with_malformed_userid(self, context, pyramid_request, user_service):
-        user_service.fetch.side_effect = ValueError()
+        user_service.fetch.side_effect = InvalidUserId("invalid_userid")
 
         with pytest.raises(HTTPNotFound) as exc_info:
             views.add_member(context, pyramid_request)

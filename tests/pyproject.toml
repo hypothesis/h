@@ -82,6 +82,10 @@ disable = [
     # tests/unit/h/models/document/_uri_test.py:17:0: I0021: Useless suppression of 'comparison-with-callable' (useless-suppression)
     # Just disable the whole rule globally.
     "comparison-with-callable",
+
+    # This is intermittently causing false-positives with SQLAlchemy's Mapped, for example:
+    # h/models/token.py:57:10: E1136: Value 'Mapped' is unsubscriptable (unsubscriptable-object)
+    "unsubscriptable-object",
 ]
 
 # Just disable PyLint's name style checking for the tests, because we

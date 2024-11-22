@@ -5,6 +5,7 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
 )
 
+from h.exceptions import InvalidUserId
 from h.i18n import TranslationString as _
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
@@ -195,7 +196,7 @@ def add_member(context: GroupContext, request):
 
     try:
         user = user_svc.fetch(request.matchdict["userid"])
-    except ValueError as err:
+    except InvalidUserId as err:
         raise HTTPNotFound() from err
 
     if user is None:
