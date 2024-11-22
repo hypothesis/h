@@ -9,7 +9,7 @@ from h.models import GroupMembership
 from h.traversal import GroupContext, GroupMembershipContext
 
 
-class TestReadMembers:
+class TestListMembers:
     def test_it(self, context, pyramid_request, UserJSONPresenter):
         context.group.members = [sentinel.member_1, sentinel.member_2]
         presenter_instances = UserJSONPresenter.side_effect = [
