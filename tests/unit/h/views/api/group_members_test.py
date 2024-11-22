@@ -17,7 +17,7 @@ class TestReadMembers:
             create_autospec(presenters.UserJSONPresenter, instance=True, spec_set=True),
         ]
 
-        response = views.read_members(context, pyramid_request)
+        response = views.list_members(context, pyramid_request)
 
         assert UserJSONPresenter.call_args_list == [
             call(sentinel.member_1),
