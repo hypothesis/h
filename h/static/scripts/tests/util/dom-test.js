@@ -55,17 +55,9 @@ describe('util/dom', () => {
   });
 
   describe('cloneTemplate', () => {
-    it('clones the first child of the template when <template> is supported', () => {
+    it('clones the first child of the template', () => {
       const template = document.createElement('template');
       template.innerHTML = '<div id="child"></div>';
-      const clone = domUtil.cloneTemplate(template);
-      assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
-    });
-
-    it('clones the first child of the template when <template> is not supported', () => {
-      const template = createDOM(
-        '<fake-template><div id="child"></div></fake-template>',
-      );
       const clone = domUtil.cloneTemplate(template);
       assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
     });
