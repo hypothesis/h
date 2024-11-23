@@ -68,6 +68,7 @@ PERMISSION_MAP = {
     ],
     Permission.Group.MEMBER_ADD: [[p.group_matches_authenticated_client_authority]],
     Permission.Group.MEMBER_REMOVE: [[p.group_member_remove]],
+    Permission.Group.MEMBER_EDIT: [[p.group_member_edit]],
     Permission.Group.MODERATE: GROUP_MODERATE_PREDICATES.values(),
     # --------------------------------------------------------------------- #
     # Annotations

@@ -1,3 +1,4 @@
+# pylint:disable=too-many-lines
 from unittest.mock import sentinel
 
 import pytest
@@ -11,7 +12,12 @@ from h.models.group import (
 )
 from h.security import Identity, predicates
 from h.security.identity import LongLivedGroup, LongLivedMembership
-from h.traversal import AnnotationContext, GroupMembershipContext, UserContext
+from h.traversal import (
+    AnnotationContext,
+    EditGroupMembershipContext,
+    GroupMembershipContext,
+    UserContext,
+)
 from h.traversal.group import GroupContext
 
 
@@ -527,6 +533,529 @@ class TestGroupMemberRemove:
         return GroupMembershipContext(
             group=group, user=user, membership=GroupMembership(group=group, user=user)
         )
+
+
+class TestGroupMemberEdit:
+    @pytest.mark.parametrize(
+        "authenticated_users_roles,old_roles,new_roles,expected_result",
+        [
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                True,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                None,
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                None,
+                [GroupMembershipRoles.MODERATOR],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+            (
+                None,
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.OWNER],
+                False,
+            ),
+            (
+                None,
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.ADMIN],
+                False,
+            ),
+            (
+                None,
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MODERATOR],
+                False,
+            ),
+            (
+                None,
+                [GroupMembershipRoles.MEMBER],
+                [GroupMembershipRoles.MEMBER],
+                False,
+            ),
+        ],
+    )
+    def test_changing_someone_elses_role(
+        self,
+        factories,
+        identity,
+        group,
+        authenticated_users_roles,
+        old_roles,
+        new_roles,
+        expected_result,
+    ):
+        user = factories.User()
+        membership = GroupMembership(group=group, user=user, roles=old_roles)
+        context = EditGroupMembershipContext(
+            group=group, user=user, membership=membership, new_roles=new_roles
+        )
+        if authenticated_users_roles:
+            identity.user.memberships.append(
+                LongLivedMembership(
+                    group=LongLivedGroup.from_model(group),
+                    user=identity.user,
+                    roles=authenticated_users_roles,
+                )
+            )
+
+        assert predicates.group_member_edit(identity, context) == expected_result
+
+    @pytest.mark.parametrize(
+        "old_roles,new_roles,expected_result",
+        [
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.OWNER], True),
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.ADMIN], True),
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.MODERATOR], True),
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.MEMBER], True),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.OWNER], False),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.ADMIN], True),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.MODERATOR], True),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.MEMBER], True),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.OWNER], False),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.ADMIN], False),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.MODERATOR], True),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.MEMBER], True),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.OWNER], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.ADMIN], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.MODERATOR], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.MEMBER], False),
+        ],
+    )
+    def test_changing_own_role(
+        self, factories, identity, group, old_roles, new_roles, expected_result
+    ):
+        user = factories.User()
+        membership = GroupMembership(group=group, user=user, roles=old_roles)
+        context = EditGroupMembershipContext(
+            group=group, user=user, membership=membership, new_roles=new_roles
+        )
+        identity.user.memberships.append(
+            LongLivedMembership(
+                group=LongLivedGroup.from_model(group),
+                user=identity.user,
+                roles=old_roles,
+            )
+        )
+        identity.user.userid = context.user.userid
+
+        assert predicates.group_member_edit(identity, context) == expected_result
+
+    @pytest.fixture
+    def authenticated_user(self, db_session, authenticated_user, factories):
+        # Make the authenticated user a member of a *different* group,
+        # to make sure that unrelated memberships don't accidentally allow or
+        # deny permissions.
+        db_session.add(
+            GroupMembership(
+                user=authenticated_user,
+                group=factories.Group(),
+                roles=[GroupMembershipRoles.OWNER],
+            )
+        )
+
+        return authenticated_user
+
+    @pytest.fixture
+    def group(self, db_session, factories):
+        group = factories.Group()
+
+        # Make a *different* user a member of the target group
+        # to make sure that unrelated memberships don't accidentally allow or
+        # deny permissions.
+        db_session.add(
+            GroupMembership(
+                group=group, user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+            )
+        )
+
+        return group
 
 
 class TestResolvePredicates:

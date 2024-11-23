@@ -13,7 +13,7 @@ group.
 from itertools import chain
 
 from h.models.group import GroupMembershipRoles, JoinableBy, ReadableBy, WriteableBy
-from h.traversal import GroupMembershipContext
+from h.traversal import EditGroupMembershipContext, GroupMembershipContext
 
 
 def requires(*parent_predicates):
@@ -215,6 +215,62 @@ def group_member_remove(identity, context: GroupMembershipContext):
         or "admin" in authenticated_users_membership.roles
         or "moderator" in authenticated_users_membership.roles
     )
+
+
+@requires(authenticated_user, group_found)
+def group_member_edit(
+    identity, context: EditGroupMembershipContext
+):  # pylint:disable=too-many-return-statements,too-complex
+    old_roles = context.membership.roles
+    new_roles = context.new_roles
+
+    def get_authenticated_users_roles():
+        """Return the authenticated users roles in the target group."""
+        for membership in identity.user.memberships:
+            if membership.group.id == context.group.id:
+                return membership.roles
+
+        return None
+
+    authenticated_users_roles = get_authenticated_users_roles()
+
+    if not authenticated_users_roles:
+        return False
+
+    if identity.user.userid == context.user.userid:
+        if GroupMembershipRoles.OWNER in authenticated_users_roles:
+            # Owners can change their own role to anything.
+            return True
+
+        if GroupMembershipRoles.ADMIN in authenticated_users_roles:
+            # Admins can change their own role to anything but admin.
+            return GroupMembershipRoles.OWNER not in new_roles
+
+        if GroupMembershipRoles.MODERATOR in authenticated_users_roles:
+            # Moderators can change their own role to anything but owner or admin.
+            return (
+                GroupMembershipRoles.OWNER not in new_roles
+                and GroupMembershipRoles.ADMIN not in new_roles
+            )
+
+        return False
+
+    if GroupMembershipRoles.OWNER in authenticated_users_roles:
+        # Owners can change any other member's role to any role.
+        return True
+
+    if GroupMembershipRoles.ADMIN in authenticated_users_roles:
+        # Admins can change the role of anyone but owners or admins to anything
+        # but owner or admin.
+        if (
+            GroupMembershipRoles.OWNER in old_roles + new_roles
+            or GroupMembershipRoles.ADMIN in old_roles + new_roles
+        ):
+            return False
+
+        return True
+
+    return False
 
 
 def resolve_predicates(mapping):

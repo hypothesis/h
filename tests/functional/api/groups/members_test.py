@@ -1,6 +1,7 @@
 import base64
 
 import pytest
+from sqlalchemy import select
 
 from h.models import GroupMembership, GroupMembershipRoles, Token
 from h.models.auth_client import AuthClient, GrantType
@@ -21,7 +22,16 @@ class TestReadMembers:
         res = app.get("/api/groups/{pubid}/members".format(pubid=group.pubid))
 
         assert res.status_code == 200
-        assert len(res.json) == 3
+        assert res.json == [
+            {
+                "authority": membership.group.authority,
+                "userid": membership.user.userid,
+                "username": membership.user.username,
+                "display_name": membership.user.display_name,
+                "roles": membership.roles,
+            }
+            for membership in group.memberships
+        ]
 
     def test_it_returns_list_of_members_if_user_has_access_to_private_group(
         self, app, factories, db_session
@@ -39,9 +49,17 @@ class TestReadMembers:
             headers=token_authorization_header(token),
         )
 
-        returned_usernames = [member["username"] for member in res.json]
-        assert returned_usernames == [member.username for member in group.members]
         assert res.status_code == 200
+        assert res.json == [
+            {
+                "authority": membership.group.authority,
+                "userid": membership.user.userid,
+                "username": membership.user.username,
+                "display_name": membership.user.display_name,
+                "roles": membership.roles,
+            }
+            for membership in group.memberships
+        ]
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(
         self, app, db_session, factories
@@ -415,6 +433,111 @@ class TestRemoveMember:
             headers=token_authorization_header(token),
             status=404,
         )
+
+
+class TestEditMembership:
+    def test_it(self, do_request, group, target_user, db_session):
+        response = do_request()
+
+        assert response.json["userid"] == target_user.userid
+        assert response.json["roles"] == ["member"]
+        membership = db_session.scalars(
+            select(GroupMembership)
+            .where(GroupMembership.group == group)
+            .where(GroupMembership.user == target_user)
+        ).one()
+        assert membership.roles == ["member"]
+
+    def test_when_not_authenticated(self, do_request, headers):
+        del headers["Authorization"]
+
+        do_request(status=404)
+
+    def test_when_not_authorized(self, do_request):
+        do_request(json={"roles": [GroupMembershipRoles.OWNER]}, status=404)
+
+    def test_with_unknown_pubid(self, do_request):
+        do_request(pubid="UNKNOWN", status=404)
+
+    def test_with_unknown_userid(self, do_request, group):
+        do_request(userid=f"acct:UNKNOWN@{group.authority}", status=404)
+
+    def test_with_invalid_userid(self, do_request):
+        do_request(userid=f"INVALID_USERID", status=404)
+
+    def test_when_membership_doesnt_exist(self, do_request, factories):
+        do_request(userid=factories.User().userid, status=404)
+
+    def test_me_alias(self, do_request, db_session, group, authenticated_user):
+        response = do_request(userid="me")
+
+        assert response.json["userid"] == authenticated_user.userid
+        assert response.json["roles"] == ["member"]
+        membership = db_session.scalars(
+            select(GroupMembership)
+            .where(GroupMembership.group == group)
+            .where(GroupMembership.user == authenticated_user)
+        ).one()
+        assert membership.roles == ["member"]
+
+    def test_me_alias_when_not_authorized(self, do_request):
+        do_request(
+            userid="me", json={"roles": [GroupMembershipRoles.OWNER]}, status=404
+        )
+
+    def test_with_unknown_role(self, do_request):
+        response = do_request(json={"roles": ["UNKNOWN"]}, status=400)
+
+        assert response.json["reason"].startswith("roles.0: 'UNKNOWN' is not one of [")
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture
+    def target_user(self, db_session, factories, group):
+        target_user = factories.User()
+        db_session.add(
+            GroupMembership(
+                group=group, user=target_user, roles=[GroupMembershipRoles.MODERATOR]
+            )
+        )
+        return target_user
+
+    @pytest.fixture
+    def authenticated_user(self, db_session, factories, group):
+        authenticated_user = factories.User()
+        db_session.add(
+            GroupMembership(
+                group=group, user=authenticated_user, roles=[GroupMembershipRoles.ADMIN]
+            )
+        )
+        return authenticated_user
+
+    @pytest.fixture
+    def headers(self, factories, authenticated_user):
+        return token_authorization_header(
+            factories.DeveloperToken(user=authenticated_user)
+        )
+
+    @pytest.fixture
+    def do_request(self, app, db_session, group, target_user, headers):
+        def do_request(
+            pubid=group.pubid,
+            userid=target_user.userid,
+            json={"roles": ["member"]},
+            headers=headers,
+            status=200,
+        ):
+            db_session.commit()
+            return app.patch_json(
+                f"/api/groups/{pubid}/members/{userid}",
+                json,
+                headers=headers,
+                status=status,
+            )
+
+        return do_request
 
 
 def token_authorization_header(token) -> dict:
