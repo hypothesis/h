@@ -3,7 +3,7 @@ from unittest.mock import patch, sentinel
 import pytest
 from pyramid.security import Allowed, Denied
 
-from h.models import GroupMembership
+from h.models import GroupMembership, GroupMembershipRoles
 from h.security import Identity, Permission
 from h.security.permits import PERMISSION_MAP, identity_permits
 from h.traversal import AnnotationContext
@@ -67,7 +67,7 @@ class TestIdentityPermits:
 
 
 class TestIdentityPermitsIntegrated:
-    def test_it(self, user, group, annotation):
+    def test_it(self, user, annotation):
         # We aren't going to go bonkers here, but a couple of tests to show
         # this actually holds together. This isn't really to inform us of any
         # particular failure, but just give us sensitivity if this doesn't work
@@ -79,11 +79,11 @@ class TestIdentityPermitsIntegrated:
         # A user can delete their own annotation
         assert identity_permits(identity, anno_context, Permission.Annotation.DELETE)
 
-        # Once a user is the creator of a group they can moderate
+        # Once a user is an owner of a group they can moderate
         assert not identity_permits(
             identity, anno_context, Permission.Annotation.MODERATE
         )
-        group.creator = user
+        identity.user.memberships[0].roles = [GroupMembershipRoles.OWNER]
         assert identity_permits(identity, anno_context, Permission.Annotation.MODERATE)
 
         # Once a user is an admin they can do admin things

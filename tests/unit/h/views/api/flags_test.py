@@ -1,86 +1,113 @@
-from unittest import mock
+from unittest.mock import ANY, call, sentinel
 
 import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
+from h.models import GroupMembership, GroupMembershipRoles
 from h.traversal import AnnotationContext
-from h.views.api import flags as views
+from h.views.api import flags
 
 
-@pytest.mark.usefixtures("flag_service")
+@pytest.mark.usefixtures("flag_service", "group_members_service")
 class TestCreate:
-    def test_it(self, annotation_context, pyramid_request, flag_service):
-        response = views.create(annotation_context, pyramid_request)
-
-        assert isinstance(response, HTTPNoContent)
-        flag_service.create.assert_called_once_with(
-            pyramid_request.user, annotation_context.annotation
-        )
-
-    @pytest.mark.parametrize("incontext_returns", (True, False))
-    def test_it_sends_notification_email(
+    def test_it(
         self,
-        annotation_context,
+        annotation,
+        context,
         pyramid_request,
-        flag_notification,
+        flag_service,
+        links,
+        group_members_service,
         mailer,
-        incontext_link,
-        incontext_returns,
+        flag_notification,
+        moderators,
     ):
-        if not incontext_returns:
-            incontext_link.return_value = None
+        response = flags.create(context, pyramid_request)
 
-        views.create(annotation_context, pyramid_request)
-
-        flag_notification.generate.assert_called_once_with(
-            request=pyramid_request,
-            email=annotation_context.annotation.group.creator.email,
-            incontext_link=(
-                incontext_link.return_value
-                if incontext_returns
-                else annotation_context.annotation.target_uri
-            ),
+        flag_service.create.assert_called_once_with(pyramid_request.user, annotation)
+        links.incontext_link.assert_called_once_with(pyramid_request, annotation)
+        group_members_service.get_memberships.assert_called_once_with(
+            annotation.group,
+            roles=[
+                GroupMembershipRoles.OWNER,
+                GroupMembershipRoles.ADMIN,
+                GroupMembershipRoles.MODERATOR,
+            ],
         )
+        assert flag_notification.generate.call_args_list == [
+            call(pyramid_request, user.email, links.incontext_link.return_value)
+            for user in moderators
+        ]
+        assert mailer.send.delay.call_args_list == [
+            call(sentinel.email1, sentinel.subject1, sentinel.text1, sentinel.html1),
+            call(sentinel.email2, sentinel.subject2, sentinel.text2, sentinel.html2),
+        ]
+        assert isinstance(response, HTTPNoContent)
 
-        mailer.send.delay.assert_called_once_with(
-            *flag_notification.generate.return_value
-        )
-
-    @pytest.mark.parametrize("blank_field", ("creator", "creator_email"))
-    def test_doesnt_send_email_if_group_has_no_creator_or_email(
-        self, annotation_context, pyramid_request, mailer, blank_field
+    def test_when_the_annotation_has_no_incontext_link(
+        self, context, pyramid_request, links, annotation, flag_notification
     ):
-        if blank_field == "creator":
-            annotation_context.annotation.group.creator = None
-        else:
-            annotation_context.annotation.group.creator.email = None
+        links.incontext_link.return_value = None
 
-        views.create(annotation_context, pyramid_request)
+        flags.create(context, pyramid_request)
 
-        assert not mailer.send.delay.called
+        assert flag_notification.generate.call_args[0][2] == annotation.target_uri
+
+    def test_when_a_moderator_has_no_email(
+        self, context, pyramid_request, moderators, flag_notification
+    ):
+        moderators[0].email = None
+
+        flags.create(context, pyramid_request)
+
+        assert flag_notification.generate.call_args_list == [
+            call(ANY, moderators[1].email, ANY)
+        ]
+
+    def test_when_there_are_no_moderators(
+        self, context, pyramid_request, group_members_service, flag_notification, mailer
+    ):
+        group_members_service.get_memberships.return_value = []
+
+        flags.create(context, pyramid_request)
+
+        flag_notification.generate.assert_not_called()
+        mailer.send.delay.assert_not_called()
+
+    @pytest.fixture(autouse=True)
+    def moderators(self, factories, group_members_service):
+        moderators = factories.User.build_batch(2)
+        group_members_service.get_memberships.return_value = [
+            GroupMembership(user=user) for user in moderators
+        ]
+        return moderators
 
     @pytest.fixture
-    def annotation_context(self, factories):
-        return mock.create_autospec(
-            AnnotationContext,
-            instance=True,
-            annotation=factories.Annotation(group=factories.Group()),
-        )
+    def annotation(self, factories):
+        return factories.Annotation.build()
 
     @pytest.fixture
-    def pyramid_request(self, factories, pyramid_request, annotation_context):
-        pyramid_request.user = factories.User()
-        pyramid_request.json_body = {"annotation": annotation_context.annotation.id}
-        return pyramid_request
+    def context(self, annotation):
+        return AnnotationContext(annotation)
 
-    @pytest.fixture(autouse=True)
-    def flag_notification(self, patch):
-        return patch("h.views.api.flags.flag_notification")
 
-    @pytest.fixture(autouse=True)
-    def mailer(self, patch):
-        return patch("h.views.api.flags.mailer")
+@pytest.fixture(autouse=True)
+def links(mocker):
+    return mocker.patch("h.views.api.flags.links", autospec=True)
 
-    @pytest.fixture(autouse=True)
-    def incontext_link(self, patch):
-        return patch("h.views.api.flags.links.incontext_link")
+
+@pytest.fixture(autouse=True)
+def flag_notification(mocker):
+    flag_notification = mocker.patch(
+        "h.views.api.flags.flag_notification", autospec=True
+    )
+    flag_notification.generate.side_effect = [
+        (sentinel.email1, sentinel.subject1, sentinel.text1, sentinel.html1),
+        (sentinel.email2, sentinel.subject2, sentinel.text2, sentinel.html2),
+    ]
+    return flag_notification
+
+
+@pytest.fixture(autouse=True)
+def mailer(mocker):
+    return mocker.patch("h.views.api.flags.mailer", autospec=True)

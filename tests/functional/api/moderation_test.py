@@ -1,8 +1,10 @@
 import pytest
 
+from h.models import GroupMembership, GroupMembershipRoles
+
 
 class TestPutHide:
-    def test_it_returns_http_204_for_group_creator(
+    def test_it_returns_http_204_for_group_moderator(
         self, app, group_annotation, user_with_token
     ):
         _, token = user_with_token
@@ -10,7 +12,6 @@ class TestPutHide:
 
         res = app.put(f"/api/annotations/{group_annotation.id}/hide", headers=headers)
 
-        # The creator of a group has moderation rights over the annotations in that group
         assert res.status_code == 204
 
     def test_it_returns_http_404_if_annotation_is_in_world_group(
@@ -51,7 +52,7 @@ class TestPutHide:
 
 
 class TestDeleteHide:
-    def test_it_returns_http_204_for_group_creator(
+    def test_it_returns_http_204_for_group_moderator(
         self, app, group_annotation, user_with_token
     ):
         _, token = user_with_token
@@ -61,7 +62,6 @@ class TestDeleteHide:
             f"/api/annotations/{group_annotation.id}/hide", headers=headers
         )
 
-        # The creator of a group has moderation rights over the annotations in that group
         assert res.status_code == 204
 
     def test_it_returns_http_404_if_annotation_is_in_world_group(
@@ -117,7 +117,9 @@ def other_user(db_session, factories):
 
 @pytest.fixture
 def group(user, db_session, factories):
-    group = factories.Group(creator=user)
+    group = factories.Group(
+        memberships=[GroupMembership(user=user, roles=[GroupMembershipRoles.MODERATOR])]
+    )
     db_session.commit()
     return group
 

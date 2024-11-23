@@ -139,11 +139,6 @@ def group_joinable_by_authority(_identity, context):
 
 
 @requires(authenticated_user, group_found)
-def group_created_by_user(identity, context):
-    return context.group.creator and context.group.creator.id == identity.user.id
-
-
-@requires(authenticated_user, group_found)
 def group_has_user_as_owner(identity, context):
     return _group_has_user_as_role(identity, context, GroupMembershipRoles.OWNER)
 
