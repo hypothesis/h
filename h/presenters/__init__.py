@@ -5,6 +5,7 @@ from h.presenters.document_html import DocumentHTMLPresenter
 from h.presenters.document_json import DocumentJSONPresenter
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
+from h.presenters.group_membership_json import GroupMembershipJSONPresenter
 from h.presenters.user_json import TrustedUserJSONPresenter, UserJSONPresenter
 
 __all__ = (
@@ -17,5 +18,6 @@ __all__ = (
     "GroupJSONPresenter",
     "GroupsJSONPresenter",
     "UserJSONPresenter",
+    "GroupMembershipJSONPresenter",
     "TrustedUserJSONPresenter",
 )

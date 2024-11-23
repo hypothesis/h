@@ -6,7 +6,7 @@ from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.security import Permission
 from h.services.user_unique import DuplicateUserError
 from h.views.api.config import api_config
-from h.views.api.exceptions import PayloadError
+from h.views.api.helpers.json_payload import json_payload
 
 
 @api_config(
@@ -53,7 +53,7 @@ def create(request):
                              authority
     :raises HTTPConflict:    if user already exists
     """
-    appstruct = CreateUserAPISchema().validate(_json_payload(request))
+    appstruct = CreateUserAPISchema().validate(json_payload(request))
 
     # Enforce authority match
     client_authority = request.identity.auth_client.authority
@@ -90,15 +90,8 @@ def update(context, request):
     This API endpoint allows authorised clients (those able to provide a valid
     Client ID and Client Secret) to update users in their authority.
     """
-    appstruct = UpdateUserAPISchema().validate(_json_payload(request))
+    appstruct = UpdateUserAPISchema().validate(json_payload(request))
 
     user = request.find_service(name="user_update").update(context.user, **appstruct)
 
     return TrustedUserJSONPresenter(user).asdict()
-
-
-def _json_payload(request):
-    try:
-        return request.json_body
-    except ValueError as err:
-        raise PayloadError() from err

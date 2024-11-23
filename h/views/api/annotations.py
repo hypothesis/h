@@ -29,7 +29,7 @@ from h.schemas.util import validate_query_params
 from h.security import Permission
 from h.services import AnnotationWriteService
 from h.views.api.config import api_config
-from h.views.api.exceptions import PayloadError
+from h.views.api.helpers.json_payload import json_payload
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -77,7 +77,7 @@ def search(request):
 def create(request):
     """Create an annotation from the POST payload."""
     schema = CreateAnnotationSchema(request)
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_payload(request))
 
     annotation = request.find_service(AnnotationWriteService).create_annotation(
         data=appstruct
@@ -136,7 +136,7 @@ def update(context, request):
     schema = UpdateAnnotationSchema(
         request, context.annotation.target_uri, context.annotation.groupid
     )
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_payload(request))
 
     annotation = request.find_service(AnnotationWriteService).update_annotation(
         context.annotation, data=appstruct
@@ -164,18 +164,6 @@ def delete(context, request):
 
     # TODO: Track down why we don't return an HTTP 204 like other DELETEs
     return {"id": context.annotation.id, "deleted": True}
-
-
-def _json_payload(request):
-    """
-    Return a parsed JSON payload for the request.
-
-    :raises PayloadError: if the body has no valid JSON body
-    """
-    try:
-        return request.json_body
-    except ValueError as err:
-        raise PayloadError() from err
 
 
 def _publish_annotation_event(request, annotation, action):

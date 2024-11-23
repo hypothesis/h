@@ -6,7 +6,7 @@ from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.security import Permission
 from h.traversal import GroupContext
 from h.views.api.config import api_config
-from h.views.api.exceptions import PayloadError
+from h.views.api.helpers.json_payload import json_payload
 
 DEFAULT_GROUP_TYPE = "private"
 
@@ -47,7 +47,7 @@ def create(request):
     appstruct = CreateGroupAPISchema(
         default_authority=request.default_authority,
         group_authority=request.effective_authority,
-    ).validate(_json_payload(request))
+    ).validate(json_payload(request))
 
     group_service = request.find_service(name="group")
     group_create_service = request.find_service(name="group_create")
@@ -116,7 +116,7 @@ def update(context: GroupContext, request):
     appstruct = UpdateGroupAPISchema(
         default_authority=request.default_authority,
         group_authority=request.effective_authority,
-    ).validate(_json_payload(request))
+    ).validate(json_payload(request))
 
     group_update_service = request.find_service(name="group_update")
     group_service = request.find_service(name="group")
@@ -133,16 +133,3 @@ def update(context: GroupContext, request):
     group = group_update_service.update(context.group, **appstruct)
 
     return GroupJSONPresenter(group, request).asdict(expand=["organization", "scopes"])
-
-
-# @TODO This is a duplication of code in h.views.api — move to a util module
-def _json_payload(request):
-    """
-    Return a parsed JSON payload for the request.
-
-    :raises PayloadError: if the body has no valid JSON body
-    """
-    try:
-        return request.json_body
-    except ValueError as err:
-        raise PayloadError() from err

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pyramid.httpexceptions import HTTPNotFound
 
 from h.exceptions import InvalidUserId
-from h.models import Group, GroupMembership, User
+from h.models import Group, GroupMembership, GroupMembershipRoles, User
 
 
 @dataclass
@@ -11,6 +11,14 @@ class GroupMembershipContext:
     group: Group
     user: User
     membership: GroupMembership | None
+
+
+@dataclass
+class EditGroupMembershipContext:
+    group: Group
+    user: User
+    membership: GroupMembership
+    new_roles: list[GroupMembershipRoles]
 
 
 def group_membership_api_factory(request) -> GroupMembershipContext:
