@@ -29,6 +29,7 @@ class TestReadMembers:
                 "username": membership.user.username,
                 "display_name": membership.user.display_name,
                 "roles": membership.roles,
+                "actions": [],
             }
             for membership in group.memberships
         ]
@@ -37,10 +38,10 @@ class TestReadMembers:
         self, app, factories, db_session
     ):
         group = factories.Group()
-        user = factories.User()
+        user, other_user = factories.User.create_batch(size=2)
         token = factories.DeveloperToken(user=user)
         group.memberships.extend(
-            [GroupMembership(user=user), GroupMembership(user=factories.User())]
+            [GroupMembership(user=user), GroupMembership(user=other_user)]
         )
         db_session.commit()
 
@@ -52,13 +53,21 @@ class TestReadMembers:
         assert res.status_code == 200
         assert res.json == [
             {
-                "authority": membership.group.authority,
-                "userid": membership.user.userid,
-                "username": membership.user.username,
-                "display_name": membership.user.display_name,
-                "roles": membership.roles,
-            }
-            for membership in group.memberships
+                "authority": group.authority,
+                "userid": user.userid,
+                "username": user.username,
+                "display_name": user.display_name,
+                "roles": [GroupMembershipRoles.MEMBER],
+                "actions": ["delete"],
+            },
+            {
+                "authority": group.authority,
+                "userid": other_user.userid,
+                "username": other_user.username,
+                "display_name": other_user.display_name,
+                "roles": [GroupMembershipRoles.MEMBER],
+                "actions": [],
+            },
         ]
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(
@@ -441,6 +450,11 @@ class TestEditMembership:
 
         assert response.json["userid"] == target_user.userid
         assert response.json["roles"] == ["member"]
+        assert response.json["actions"] == [
+            "delete",
+            "updates.roles.member",
+            "updates.roles.moderator",
+        ]
         membership = db_session.scalars(
             select(GroupMembership)
             .where(GroupMembership.group == group)
@@ -473,6 +487,7 @@ class TestEditMembership:
 
         assert response.json["userid"] == authenticated_user.userid
         assert response.json["roles"] == ["member"]
+        assert response.json["actions"] == ["delete"]
         membership = db_session.scalars(
             select(GroupMembership)
             .where(GroupMembership.group == group)
