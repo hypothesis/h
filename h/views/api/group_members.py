@@ -20,9 +20,9 @@ log = logging.getLogger(__name__)
     description="Fetch a list of all members of a group",
     permission=Permission.Group.READ,
 )
-def list_members(context: GroupContext, _request):
+def list_members(context: GroupContext, request):
     return [
-        GroupMembershipJSONPresenter(membership).asdict()
+        GroupMembershipJSONPresenter(request, membership).asdict()
         for membership in context.group.memberships
     ]
 
@@ -90,4 +90,12 @@ def edit_member(context: GroupMembershipContext, request):
             old_roles,
         )
 
-    return GroupMembershipJSONPresenter(context.membership).asdict()
+    if context.user == request.user:
+        # Update request.identity.user.memberships so permissions checks done
+        # by GroupMembershipJSONPresenter below return the right results.
+        # Otherwise permissions checks will be based on the old roles.
+        for membership in request.identity.user.memberships:
+            if membership.group.id == context.group.id:
+                membership.roles = new_roles
+
+    return GroupMembershipJSONPresenter(request, context.membership).asdict()

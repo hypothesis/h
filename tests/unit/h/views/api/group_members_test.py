@@ -8,6 +8,7 @@ import h.views.api.group_members as views
 from h import presenters
 from h.models import GroupMembership
 from h.schemas.base import ValidationError
+from h.security.identity import Identity, LongLivedGroup, LongLivedMembership
 from h.traversal import GroupContext, GroupMembershipContext
 from h.views.api.exceptions import PayloadError
 
@@ -27,8 +28,8 @@ class TestListMembers:
         response = views.list_members(context, pyramid_request)
 
         assert GroupMembershipJSONPresenter.call_args_list == [
-            call(sentinel.membership_1),
-            call(sentinel.membership_2),
+            call(pyramid_request, sentinel.membership_1),
+            call(pyramid_request, sentinel.membership_2),
         ]
         presenter_instances[0].asdict.assert_called_once_with()
         presenter_instances[1].asdict.assert_called_once_with()
@@ -99,7 +100,9 @@ class TestEditMember:
             sentinel.json_body
         )
         assert context.membership.roles == sentinel.new_roles
-        GroupMembershipJSONPresenter.assert_called_once_with(context.membership)
+        GroupMembershipJSONPresenter.assert_called_once_with(
+            pyramid_request, context.membership
+        )
         assert response == GroupMembershipJSONPresenter.return_value.asdict.return_value
         assert caplog.messages == [
             f"Changed group membership roles: {context.membership!r} (previous roles were: {sentinel.old_roles!r})",
@@ -113,6 +116,29 @@ class TestEditMember:
         views.edit_member(context, pyramid_request)
 
         assert not caplog.messages
+
+    def test_user_changing_own_role(self, context, pyramid_request, pyramid_config):
+        context.user = pyramid_request.user
+        identity = create_autospec(Identity, instance=True, spec_set=True)
+        identity.user.memberships = [
+            create_autospec(
+                LongLivedMembership,
+                instance=True,
+                group=create_autospec(LongLivedGroup, instance=True, id="other"),
+            ),
+            create_autospec(
+                LongLivedMembership,
+                instance=True,
+                group=create_autospec(
+                    LongLivedGroup, instance=True, id=context.group.id
+                ),
+            ),
+        ]
+        pyramid_config.testing_securitypolicy(permissive=True, identity=identity)
+
+        views.edit_member(context, pyramid_request)
+
+        assert identity.user.memberships[1].roles == sentinel.new_roles
 
     def test_it_errors_if_the_user_doesnt_have_permission(
         self, context, pyramid_request, pyramid_config
