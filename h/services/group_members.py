@@ -1,10 +1,10 @@
 import logging
 from functools import partial
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from h import session
-from h.models import GroupMembership
+from h.models import Group, GroupMembership, GroupMembershipRoles
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +31,28 @@ class GroupMembersService:
             .where(GroupMembership.group == group)
             .where(GroupMembership.user == user)
         )
+
+    def get_memberships(
+        self, group: Group, roles: list[GroupMembershipRoles] | None = None
+    ):
+        """
+        Return `group`'s memberships.
+
+        If `roles` is None return all of `group`'s memberships.
+
+        If `roles` is not None return only those memberships matching the given role(s).
+
+        If multiple roles are given return all memberships matching *any* of
+        the given roles.
+        """
+        query = select(GroupMembership).where(GroupMembership.group == group)
+
+        if roles:
+            query = query.where(
+                or_(GroupMembership.roles.contains(role) for role in roles)
+            )
+
+        return self.db.scalars(query)
 
     def add_members(self, group, userids):
         """

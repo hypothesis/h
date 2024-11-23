@@ -13,8 +13,20 @@ at least one sub-list:
 """
 
 import h.security.predicates as p
+from h.models import GroupMembershipRoles
 from h.security.permissions import Permission
 from h.security.predicates import resolve_predicates
+
+# The logic for who is allowed to moderate annotations in a group unfortunately
+# has to be duplicated in the PERMISSION_MAP below and elsewhere when sending
+# email notifications to moderators.  To help keep the two implementations in
+# sync both are derived from this constant.
+GROUP_MODERATE_PREDICATES = {
+    GroupMembershipRoles.OWNER: [p.group_has_user_as_owner],
+    GroupMembershipRoles.ADMIN: [p.group_has_user_as_admin],
+    GroupMembershipRoles.MODERATOR: [p.group_has_user_as_moderator],
+}
+
 
 PERMISSION_MAP = {
     # Admin pages
@@ -56,7 +68,7 @@ PERMISSION_MAP = {
     ],
     Permission.Group.MEMBER_ADD: [[p.group_matches_authenticated_client_authority]],
     Permission.Group.MEMBER_REMOVE: [[p.group_member_remove]],
-    Permission.Group.MODERATE: [[p.group_created_by_user]],
+    Permission.Group.MODERATE: GROUP_MODERATE_PREDICATES.values(),
     # --------------------------------------------------------------------- #
     # Annotations
     Permission.Annotation.CREATE: [[p.authenticated]],

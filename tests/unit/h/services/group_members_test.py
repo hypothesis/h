@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from sqlalchemy import select
 
-from h.models import GroupMembership, User
+from h.models import GroupMembership, GroupMembershipRoles, User
 from h.services.group_members import GroupMembersService, group_members_factory
 
 
@@ -28,6 +28,76 @@ class TestGetMembership:
         result = group_members_service.get_membership(group, user)
 
         assert result is None
+
+
+class TestGetMemberships:
+    def test_it(self, group_members_service, db_session, factories):
+        group, other_group = factories.Group.build_batch(size=2)
+        users = factories.User.build_batch(size=2)
+        memberships = [GroupMembership(group=group, user=user) for user in users]
+        db_session.add_all(
+            [*memberships, GroupMembership(group=other_group, user=users[0])]
+        )
+
+        assert list(group_members_service.get_memberships(group)) == memberships
+
+    def test_roles(self, group_members_service, db_session, factories):
+        group = factories.Group.build()
+        admins = factories.User.build_batch(size=2)
+        moderator = factories.User.build()
+        memberships = [
+            GroupMembership(group=group, user=user, roles=[GroupMembershipRoles.ADMIN])
+            for user in admins
+        ]
+        db_session.add_all(
+            [
+                *memberships,
+                GroupMembership(
+                    group=group, user=moderator, roles=[GroupMembershipRoles.MODERATOR]
+                ),
+            ]
+        )
+
+        assert (
+            list(
+                group_members_service.get_memberships(
+                    group, roles=[GroupMembershipRoles.ADMIN]
+                )
+            )
+            == memberships
+        )
+
+    def test_multiple_roles(self, group_members_service, db_session, factories):
+        group = factories.Group.build()
+        admin = factories.User.build()
+        moderator = factories.User.build()
+        member = factories.User.build()
+        memberships = [
+            GroupMembership(
+                group=group, user=admin, roles=[GroupMembershipRoles.ADMIN]
+            ),
+            GroupMembership(
+                group=group, user=moderator, roles=[GroupMembershipRoles.MODERATOR]
+            ),
+        ]
+        db_session.add_all(
+            [
+                *memberships,
+                GroupMembership(
+                    group=group, user=member, roles=[GroupMembershipRoles.MEMBER]
+                ),
+            ]
+        )
+
+        assert (
+            list(
+                group_members_service.get_memberships(
+                    group,
+                    roles=[GroupMembershipRoles.ADMIN, GroupMembershipRoles.MODERATOR],
+                )
+            )
+            == memberships
+        )
 
 
 class TestMemberJoin:

@@ -3,6 +3,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from h import links
 from h.emails import flag_notification
 from h.security import Permission
+from h.security.permission_map import GROUP_MODERATE_PREDICATES
 from h.tasks import mailer
 from h.views.api.config import api_config
 
@@ -18,19 +19,23 @@ from h.views.api.config import api_config
 def create(context, request):
     request.find_service(name="flag").create(request.user, context.annotation)
 
-    _email_group_admin(request, context.annotation)
+    _email_group_moderators(request, context.annotation)
 
     return HTTPNoContent()
 
 
-def _email_group_admin(request, annotation):
+def _email_group_moderators(request, annotation):
     incontext_link = links.incontext_link(request, annotation)
     if incontext_link is None:
         incontext_link = annotation.target_uri
 
-    group = annotation.group
-    if group.creator and group.creator.email:
-        send_params = flag_notification.generate(
-            request, group.creator.email, incontext_link
-        )
-        mailer.send.delay(*send_params)
+    group_members_service = request.find_service(name="group_members")
+
+    memberships = group_members_service.get_memberships(
+        annotation.group, roles=list(GROUP_MODERATE_PREDICATES.keys())
+    )
+
+    for membership in memberships:
+        if email := membership.user.email:
+            send_params = flag_notification.generate(request, email, incontext_link)
+            mailer.send.delay(*send_params)
