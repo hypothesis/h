@@ -1,3 +1,4 @@
+import { log } from '@hypothesis/frontend-build';
 import { babel } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -57,4 +58,12 @@ export default {
       ],
     }),
   ],
+  onwarn: warning => {
+    // Suppress security warning about `eval` usage in syn, a test-only
+    // dependency.
+    if (warning.id.includes('node_modules/syn/') && warning.code === 'EVAL') {
+      return;
+    }
+    log.warn(`Rollup warning: ${warning} (${warning.url})`);
+  },
 };
