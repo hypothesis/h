@@ -23,9 +23,14 @@ export type ConfigObject = {
     createGroup: APIConfig;
     updateGroup?: APIConfig;
     readGroupMembers?: APIConfig;
+    editGroupMember?: APIConfig;
+    removeGroupMember?: APIConfig;
   };
   context: {
     group: Group | null;
+    user: {
+      userid: string;
+    };
   };
   features: {
     group_members: boolean;
