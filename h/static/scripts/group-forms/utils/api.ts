@@ -3,6 +3,9 @@
  */
 export type GroupType = 'private' | 'restricted' | 'open';
 
+/** Member role within a group. */
+export type Role = 'owner' | 'admin' | 'member';
+
 /**
  * Request to create or update a group.
  *
@@ -28,7 +31,10 @@ export type CreateUpdateGroupAPIResponse = {
 };
 
 export type GroupMember = {
+  userid: string;
   username: string;
+  actions: string[];
+  roles: Role[];
 };
 
 /**
@@ -108,6 +114,10 @@ export async function callAPI<R = unknown>(
     throw new APIError('Network request failed.', {
       cause: err as Error,
     });
+  }
+
+  if (response.status === 204) {
+    return {} as R;
   }
 
   let responseJSON;

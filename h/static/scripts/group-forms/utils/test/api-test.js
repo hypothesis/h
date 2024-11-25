@@ -70,6 +70,15 @@ describe('callAPI', () => {
       assert.deepEqual(result, responseBody);
     });
 
+    it('supports 204 (empty) responses', async () => {
+      const response = new Response(null, { status: 204 });
+      fakeFetch.withArgs(url).resolves(response);
+
+      const result = await callAPI(url);
+
+      assert.deepEqual(result, {});
+    });
+
     it("throws an error when the response body isn't valid json", async () => {
       const response = new Response('not valid JSON', { status: 200 });
       sinon.spy(response, 'json');
