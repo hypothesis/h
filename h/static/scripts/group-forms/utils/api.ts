@@ -4,7 +4,7 @@
 export type GroupType = 'private' | 'restricted' | 'open';
 
 /** Member role within a group. */
-export type Role = 'owner' | 'admin' | 'member';
+export type Role = 'owner' | 'admin' | 'moderator' | 'member';
 
 /**
  * Request to create or update a group.
