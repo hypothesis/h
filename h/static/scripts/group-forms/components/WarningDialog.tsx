@@ -1,11 +1,12 @@
 import { ModalDialog, Button } from '@hypothesis/frontend-shared';
+import type { ComponentChildren } from 'preact';
 
 export type WarningDialogProps = {
   /** Title of the dialog. */
   title: string;
 
   /** Message displayed in the dialog. */
-  message: string;
+  message: ComponentChildren;
 
   /** Label for the confirmation button. */
   confirmAction: string;
