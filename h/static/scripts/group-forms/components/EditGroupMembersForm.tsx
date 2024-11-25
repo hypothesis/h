@@ -3,15 +3,16 @@ import {
   Scroll,
   TrashIcon,
   IconButton,
+  Select,
 } from '@hypothesis/frontend-shared';
 import { useContext, useEffect, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
-import ErrorNotice from './ErrorNotice';
-import FormContainer from './forms/FormContainer';
-import type { GroupMembersResponse } from '../utils/api';
+import type { GroupMember, GroupMembersResponse, Role } from '../utils/api';
 import { callAPI } from '../utils/api';
+import FormContainer from './forms/FormContainer';
+import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
 import WarningDialog from './WarningDialog';
 
@@ -25,7 +26,39 @@ type MemberRow = {
   username: string;
   userid: string;
   showDeleteAction: boolean;
+  role: Role;
+  availableRoles: Role[];
 };
+
+/**
+ * Mappings between roles and labels. The keys are sorted in descending order
+ * of permissions.
+ */
+const roleStrings: Record<Role, string> = {
+  owner: 'Owner',
+  admin: 'Admin',
+  moderator: 'Moderator',
+  member: 'Member',
+};
+const possibleRoles: Role[] = Object.keys(roleStrings) as Role[];
+
+function memberToRow(member: GroupMember, currentUserid: string): MemberRow {
+  const role = member.roles[0] ?? 'member';
+  const availableRoles =
+    member.userid !== currentUserid
+      ? possibleRoles.filter(role =>
+          member.actions.includes(`updates.roles.${role}`),
+        )
+      : [role];
+  return {
+    userid: member.userid,
+    username: member.username,
+    showDeleteAction:
+      member.actions.includes('delete') && member.userid !== currentUserid,
+    role,
+    availableRoles,
+  };
+}
 
 async function fetchMembers(
   api: APIConfig,
@@ -38,12 +71,7 @@ async function fetchMembers(
     headers,
     signal,
   });
-  return members.map(member => ({
-    userid: member.userid,
-    username: member.username,
-    showDeleteAction:
-      member.actions.includes('delete') && member.userid !== currentUserid,
-  }));
+  return members.map(m => memberToRow(m, currentUserid));
 }
 
 async function removeMember(api: APIConfig, userid: string) {
@@ -55,6 +83,57 @@ async function removeMember(api: APIConfig, userid: string) {
   });
 }
 
+async function setMemberRoles(
+  api: APIConfig,
+  userid: string,
+  roles: Role[],
+): Promise<GroupMember> {
+  const { url: urlTemplate, method, headers } = api;
+  const url = urlTemplate.replace(':userid', encodeURIComponent(userid));
+  return callAPI(url, {
+    method,
+    headers,
+    json: {
+      roles,
+    },
+  });
+}
+
+type RoleSelectProps = {
+  username: string;
+
+  /** The current role of the member. */
+  current: Role;
+
+  /** Ordered list of possible roles that the current user can assign to the member. */
+  available: Role[];
+
+  /** Callback for when the user requests to change the role of the member. */
+  onChange: (r: Role) => void;
+};
+
+function RoleSelect({
+  username,
+  current,
+  available,
+  onChange,
+}: RoleSelectProps) {
+  return (
+    <Select
+      value={current}
+      onChange={onChange}
+      buttonContent={roleStrings[current]}
+      data-testid={`role-${username}`}
+    >
+      {available.map(role => (
+        <Select.Option key={role} value={role}>
+          {roleStrings[role]}
+        </Select.Option>
+      ))}
+    </Select>
+  );
+}
+
 export type EditGroupMembersFormProps = {
   /** The saved group details. */
   group: Group;
@@ -64,7 +143,7 @@ export default function EditGroupMembersForm({
   group,
 }: EditGroupMembersFormProps) {
   const config = useContext(Config)!;
-  const userid = config.context.user.userid;
+  const currentUserid = config.context.user.userid;
 
   // Fetch group members when the form loads.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -76,7 +155,7 @@ export default function EditGroupMembersForm({
     }
     const abort = new AbortController();
     setErrorMessage(null);
-    fetchMembers(config.api.readGroupMembers, userid, abort.signal)
+    fetchMembers(config.api.readGroupMembers, currentUserid, abort.signal)
       .then(setMembers)
       .catch(err => {
         setErrorMessage(`Failed to fetch group members: ${err.message}`);
@@ -84,12 +163,16 @@ export default function EditGroupMembersForm({
     return () => {
       abort.abort();
     };
-  }, [config.api.readGroupMembers, userid]);
+  }, [config.api.readGroupMembers, currentUserid]);
 
   const columns: TableColumn<MemberRow>[] = [
     {
       field: 'username',
       label: 'Username',
+    },
+    {
+      field: 'role',
+      label: 'Role',
     },
     {
       field: 'showDeleteAction',
@@ -122,6 +205,33 @@ export default function EditGroupMembersForm({
     }
   };
 
+  const updateMember = (userid: string, update: Partial<MemberRow>) => {
+    setMembers(
+      members =>
+        members?.map(m => {
+          return m.userid === userid ? { ...m, ...update } : m;
+        }) ?? null,
+    );
+  };
+
+  const changeRole = async (member: MemberRow, role: Role) => {
+    updateMember(member.userid, { role });
+    try {
+      const updatedMember = await setMemberRoles(
+        config.api.editGroupMember!,
+        member.userid,
+        [role],
+      );
+      // Update the member row in case the role change affected other columns
+      // (eg. whether we have permission to delete the user).
+      updateMember(member.userid, memberToRow(updatedMember, currentUserid));
+    } catch (err) {
+      const prevRole = member.role;
+      updateMember(member.userid, { role: prevRole });
+      setErrorMessage(err.message);
+    }
+  };
+
   const renderRow = (user: MemberRow, field: keyof MemberRow) => {
     switch (field) {
       case 'username':
@@ -133,6 +243,22 @@ export default function EditGroupMembersForm({
           >
             {user.username}
           </div>
+        );
+      case 'role':
+        if (user.availableRoles.length <= 1) {
+          return (
+            <span data-testid={`role-${user.username}`}>
+              {roleStrings[user.role]}
+            </span>
+          );
+        }
+        return (
+          <RoleSelect
+            username={user.username}
+            current={user.role}
+            available={user.availableRoles}
+            onChange={role => changeRole(user, role)}
+          />
         );
       case 'showDeleteAction':
         return user.showDeleteAction ? (
