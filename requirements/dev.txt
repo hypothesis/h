@@ -17,7 +17,7 @@ attrs==23.2.0
     #   -r requirements/prod.txt
     #   jsonschema
     #   referencing
-bcrypt==4.2.0
+bcrypt==4.2.1
     # via -r requirements/prod.txt
 billiard==4.2.0
     # via
