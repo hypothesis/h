@@ -204,7 +204,7 @@ def group_member_remove(identity, context: GroupMembershipContext):
         return True
 
     if "owner" in context.membership.roles or "admin" in context.membership.roles:
-        # Only owners can remove other owners.
+        # Only owners can remove admins or other owners.
         return "owner" in authenticated_users_membership.roles
 
     if "moderator" in context.membership.roles:
