@@ -31,7 +31,9 @@ class TestReadMembers:
                 "roles": membership.roles,
                 "actions": [],
             }
-            for membership in group.memberships
+            for membership in sorted(
+                group.memberships, key=lambda membership: membership.user.username
+            )
         ]
 
     def test_it_returns_list_of_members_if_user_has_access_to_private_group(

@@ -14,8 +14,18 @@ from h.views.api.exceptions import PayloadError
 
 
 class TestListMembers:
-    def test_it(self, context, pyramid_request, GroupMembershipJSONPresenter):
-        context.group.memberships = [sentinel.membership_1, sentinel.membership_2]
+    def test_it(
+        self,
+        context,
+        pyramid_request,
+        GroupMembershipJSONPresenter,
+        group_members_service,
+    ):
+        group_members_service.get_memberships.return_value = [
+            sentinel.membership_1,
+            sentinel.membership_2,
+        ]
+
         presenter_instances = GroupMembershipJSONPresenter.side_effect = [
             create_autospec(
                 presenters.GroupMembershipJSONPresenter, instance=True, spec_set=True
@@ -27,6 +37,7 @@ class TestListMembers:
 
         response = views.list_members(context, pyramid_request)
 
+        group_members_service.get_memberships.assert_called_once_with(context.group)
         assert GroupMembershipJSONPresenter.call_args_list == [
             call(pyramid_request, sentinel.membership_1),
             call(pyramid_request, sentinel.membership_2),

@@ -4,7 +4,7 @@ from functools import partial
 from sqlalchemy import or_, select
 
 from h import session
-from h.models import Group, GroupMembership, GroupMembershipRoles
+from h.models import Group, GroupMembership, GroupMembershipRoles, User
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +45,12 @@ class GroupMembersService:
         If multiple roles are given return all memberships matching *any* of
         the given roles.
         """
-        query = select(GroupMembership).where(GroupMembership.group == group)
+        query = (
+            select(GroupMembership)
+            .join(User)
+            .where(GroupMembership.group == group)
+            .order_by(User.username)
+        )
 
         if roles:
             query = query.where(
