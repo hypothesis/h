@@ -1,5 +1,5 @@
+import { mount } from '@hypothesis/frontend-testing';
 import { Link } from 'wouter-preact';
-import { mount } from 'enzyme';
 import { act } from 'preact/test-utils';
 
 import { $imports, default as Router } from '../Router';

@@ -1,4 +1,4 @@
-import { mount } from 'enzyme';
+import { mount } from '@hypothesis/frontend-testing';
 import { useUnsavedChanges, hasUnsavedChanges } from '../unsaved-changes';
 
 function TestUseUnsavedChanges({ unsaved, fakeWindow }) {
@@ -28,16 +28,14 @@ describe('useUnsavedChanges', () => {
   });
 
   it('does not increment unsaved-changes count if argument is false', () => {
-    const wrapper = createWidget(false);
+    createWidget(false);
     assert.isFalse(hasUnsavedChanges());
-    wrapper.unmount();
   });
 
   it('does not register "beforeunload" handler if argument is false', () => {
-    const wrapper = createWidget(false);
+    createWidget(false);
     const event = dispatchBeforeUnload();
     assert.isFalse(event.defaultPrevented);
-    wrapper.unmount();
   });
 
   it('increments unsaved-changes count if argument is true', () => {

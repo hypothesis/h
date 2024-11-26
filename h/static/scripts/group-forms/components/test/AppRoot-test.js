@@ -1,4 +1,4 @@
-import { mount } from 'enzyme';
+import { mount } from '@hypothesis/frontend-testing';
 import { useContext } from 'preact/hooks';
 
 import { $imports, default as AppRoot } from '../AppRoot';
