@@ -8,14 +8,14 @@ from h.models import GroupMembership, User
 from h.services.group_members import GroupMembersService, group_members_factory
 
 
-class TestGet:
+class TestGetMembership:
     def test_it(self, group_members_service, factories, db_session):
         group = factories.Group.build()
         user = factories.User.build()
         membership = GroupMembership(group=group, user=user)
         db_session.add(membership)
 
-        result = group_members_service.get(group, user)
+        result = group_members_service.get_membership(group, user)
 
         assert result == membership
 
@@ -25,7 +25,7 @@ class TestGet:
         group = factories.Group()
         user = factories.User()
 
-        result = group_members_service.get(group, user)
+        result = group_members_service.get_membership(group, user)
 
         assert result is None
 

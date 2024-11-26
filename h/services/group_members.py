@@ -24,7 +24,7 @@ class GroupMembersService:
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def get(self, group, user) -> GroupMembership | None:
+    def get_membership(self, group, user) -> GroupMembership | None:
         """Return `user`'s existing membership in `group`, if any."""
         return self.db.scalar(
             select(GroupMembership)
@@ -71,7 +71,7 @@ class GroupMembersService:
         """Add `userid` to the member list of `group`."""
         user = self.user_fetcher(userid)
 
-        existing_membership = self.get(group, user)
+        existing_membership = self.get_membership(group, user)
 
         if existing_membership:
             # The user is already a member of the group.
@@ -90,7 +90,7 @@ class GroupMembersService:
         """Remove `userid` from the member list of `group`."""
         user = self.user_fetcher(userid)
 
-        membership = self.get(group, user)
+        membership = self.get_membership(group, user)
 
         if not membership:
             return
