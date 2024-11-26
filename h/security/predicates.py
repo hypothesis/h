@@ -193,9 +193,9 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
         return None
 
-    membership = get_authenticated_users_membership()
+    authenticated_users_membership = get_authenticated_users_membership()
 
-    if not membership:
+    if not authenticated_users_membership:
         # You can't remove anyone from a group you're not a member of.
         return False
 
@@ -205,17 +205,20 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
     if "owner" in context.membership.roles or "admin" in context.membership.roles:
         # Only owners can remove other owners.
-        return "owner" in membership.roles
+        return "owner" in authenticated_users_membership.roles
 
     if "moderator" in context.membership.roles:
         # Owners and admins can remove moderators.
-        return "owner" in membership.roles or "admin" in membership.roles
+        return (
+            "owner" in authenticated_users_membership.roles
+            or "admin" in authenticated_users_membership.roles
+        )
 
     # Owners, admins and moderators can remove plain members.
     return (
-        "owner" in membership.roles
-        or "admin" in membership.roles
-        or "moderator" in membership.roles
+        "owner" in authenticated_users_membership.roles
+        or "admin" in authenticated_users_membership.roles
+        or "moderator" in authenticated_users_membership.roles
     )
 
 
