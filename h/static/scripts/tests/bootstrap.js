@@ -1,3 +1,4 @@
+import { unmountAll } from '@hypothesis/frontend-testing';
 import { assert } from 'chai';
 import { configure } from 'enzyme';
 import { Adapter } from 'enzyme-adapter-preact-pure';
@@ -13,3 +14,6 @@ globalThis.sinon = sinon;
 
 // Configure Enzyme for UI tests.
 configure({ adapter: new Adapter() });
+afterEach(() => {
+  unmountAll();
+});

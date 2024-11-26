@@ -1,6 +1,5 @@
-import { mount } from 'enzyme';
 import { act } from 'preact/test-utils';
-import { delay, waitForElement } from '@hypothesis/frontend-testing';
+import { delay, mount, waitForElement } from '@hypothesis/frontend-testing';
 
 import {
   $imports,
@@ -86,26 +85,15 @@ describe('CreateEditGroupForm', () => {
     };
   };
 
-  let wrappers;
-
   const createWrapper = (props = {}) => {
     const wrapper = mount(
       <Config.Provider value={config}>
         <CreateEditGroupForm group={config.context.group} {...props} />
       </Config.Provider>,
     );
-    wrappers.push(wrapper);
     const elements = getElements(wrapper);
     return { wrapper, elements };
   };
-
-  beforeEach(() => {
-    wrappers = [];
-  });
-
-  afterEach(() => {
-    wrappers.forEach(wrapper => wrapper.unmount());
-  });
 
   [
     {

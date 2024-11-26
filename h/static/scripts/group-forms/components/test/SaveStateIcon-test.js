@@ -1,4 +1,4 @@
-import { mount } from 'enzyme';
+import { mount } from '@hypothesis/frontend-testing';
 import SaveStateIcon from '../SaveStateIcon';
 
 describe('SaveStateIcon', () => {
