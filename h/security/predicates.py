@@ -186,7 +186,7 @@ def group_matches_authenticated_client_authority(identity, context):
 @requires(authenticated_user, group_found)
 def group_member_remove(identity, context: GroupMembershipContext):
     def get_authenticated_users_membership():
-        """Return the authenticated users membership in the target group."""
+        """Return the authenticated user's membership of the target group."""
         for membership in identity.user.memberships:
             if membership.group.id == context.group.id:
                 return membership
