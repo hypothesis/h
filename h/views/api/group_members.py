@@ -21,9 +21,17 @@ log = logging.getLogger(__name__)
     permission=Permission.Group.READ,
 )
 def list_members(context: GroupContext, request):
+
+    # Get the list of memberships from GroupMembersService instead of just
+    # accessing `context.memberships` because GroupMembersService returns the
+    # memberships explictly sorted by username whereas `context.memberships` is
+    # unsorted.
+    group_members_service = request.find_service(name="group_members")
+    memberships = group_members_service.get_memberships(context.group)
+
     return [
         GroupMembershipJSONPresenter(request, membership).asdict()
-        for membership in context.group.memberships
+        for membership in memberships
     ]
 
 

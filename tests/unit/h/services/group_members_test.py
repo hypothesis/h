@@ -39,7 +39,9 @@ class TestGetMemberships:
             [*memberships, GroupMembership(group=other_group, user=users[0])]
         )
 
-        assert list(group_members_service.get_memberships(group)) == memberships
+        assert list(group_members_service.get_memberships(group)) == sorted(
+            memberships, key=lambda membership: membership.user.username
+        )
 
     def test_roles(self, group_members_service, db_session, factories):
         group = factories.Group.build()
@@ -58,14 +60,11 @@ class TestGetMemberships:
             ]
         )
 
-        assert (
-            list(
-                group_members_service.get_memberships(
-                    group, roles=[GroupMembershipRoles.ADMIN]
-                )
+        assert list(
+            group_members_service.get_memberships(
+                group, roles=[GroupMembershipRoles.ADMIN]
             )
-            == memberships
-        )
+        ) == sorted(memberships, key=lambda membership: membership.user.username)
 
     def test_multiple_roles(self, group_members_service, db_session, factories):
         group = factories.Group.build()
@@ -89,15 +88,12 @@ class TestGetMemberships:
             ]
         )
 
-        assert (
-            list(
-                group_members_service.get_memberships(
-                    group,
-                    roles=[GroupMembershipRoles.ADMIN, GroupMembershipRoles.MODERATOR],
-                )
+        assert list(
+            group_members_service.get_memberships(
+                group,
+                roles=[GroupMembershipRoles.ADMIN, GroupMembershipRoles.MODERATOR],
             )
-            == memberships
-        )
+        ) == sorted(memberships, key=lambda membership: membership.user.username)
 
 
 class TestMemberJoin:
