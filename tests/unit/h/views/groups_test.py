@@ -41,7 +41,10 @@ class TestGroupCreateEditController:
                         },
                     }
                 },
-                "context": {"group": None},
+                "context": {
+                    "group": None,
+                    "user": {"userid": sentinel.authenticated_userid},
+                },
                 "features": {
                     "group_type": group_type_flag,
                     "group_members": pyramid_request.feature.flags["group_members"],
@@ -88,6 +91,24 @@ class TestGroupCreateEditController:
                             "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
                         },
                     },
+                    "editGroupMember": {
+                        "method": "PATCH",
+                        "url": pyramid_request.route_url(
+                            "api.group_member", pubid=group.pubid, userid=":userid"
+                        ),
+                        "headers": {
+                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                        },
+                    },
+                    "removeGroupMember": {
+                        "method": "DELETE",
+                        "url": pyramid_request.route_url(
+                            "api.group_member", pubid=group.pubid, userid=":userid"
+                        ),
+                        "headers": {
+                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                        },
+                    },
                     "updateGroup": {
                         "method": "PATCH",
                         "url": pyramid_request.route_url("api.group", id=group.pubid),
@@ -106,7 +127,8 @@ class TestGroupCreateEditController:
                             "group_read", pubid=group.pubid, slug=group.slug
                         ),
                         "num_annotations": annotation_stats_service.total_group_annotation_count.return_value,
-                    }
+                    },
+                    "user": {"userid": sentinel.authenticated_userid},
                 },
                 "features": {
                     "group_type": pyramid_request.feature.flags["group_type"],
@@ -122,6 +144,7 @@ class TestGroupCreateEditController:
     @pytest.fixture(autouse=True)
     def pyramid_config(self, pyramid_config, assets_env):
         pyramid_config.registry["assets_env"] = assets_env
+        pyramid_config.testing_securitypolicy(sentinel.authenticated_userid)
         return pyramid_config
 
     @pytest.fixture(autouse=True)
@@ -146,4 +169,5 @@ def routes(pyramid_config):
     pyramid_config.add_route("group_read", "/g/{pubid}/{slug}")
     pyramid_config.add_route("api.group", "/api/group/{id}")
     pyramid_config.add_route("api.group_members", "/api/groups/{pubid}/members")
+    pyramid_config.add_route("api.group_member", "/api/groups/{pubid}/members/{userid}")
     pyramid_config.add_route("api.groups", "/api/groups")

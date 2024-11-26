@@ -49,10 +49,10 @@ class GroupCreateEditController:
     def _js_config(self):
         csrf_token = get_csrf_token(self.request)
 
-        def api_config(route_name: str, method: str, **params):
+        def api_config(route_name: str, method: str, **kw):
             return {
                 "method": method,
-                "url": self.request.route_url(route_name, **params),
+                "url": self.request.route_url(route_name, **kw),
                 "headers": {"X-CSRF-Token": csrf_token},
             }
 
@@ -61,7 +61,12 @@ class GroupCreateEditController:
             "api": {
                 "createGroup": api_config("api.groups", "POST"),
             },
-            "context": {"group": None},
+            "context": {
+                "group": None,
+                "user": {
+                    "userid": self.request.authenticated_userid,
+                },
+            },
             "features": {
                 "group_members": self.request.feature("group_members"),
                 "group_type": self.request.feature("group_type"),
@@ -86,6 +91,15 @@ class GroupCreateEditController:
                     "updateGroup": api_config("api.group", "PATCH", id=group.pubid),
                     "readGroupMembers": api_config(
                         "api.group_members", "GET", pubid=group.pubid
+                    ),
+                    "editGroupMember": api_config(
+                        "api.group_member", "PATCH", pubid=group.pubid, userid=":userid"
+                    ),
+                    "removeGroupMember": api_config(
+                        "api.group_member",
+                        "DELETE",
+                        pubid=group.pubid,
+                        userid=":userid",
                     ),
                 }
             )
