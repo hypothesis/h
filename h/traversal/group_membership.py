@@ -43,7 +43,7 @@ def group_membership_api_factory(request) -> GroupMembershipContext:
     if not group:
         raise HTTPNotFound(f"Group not found: {pubid}")
 
-    membership = group_members_service.get(group, user)
+    membership = group_members_service.get_membership(group, user)
 
     if not membership and request.method != "POST":
         raise HTTPNotFound(f"Membership not found: ({pubid}, {userid})")

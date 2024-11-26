@@ -20,13 +20,13 @@ class TestGroupMembershipAPIFactory:
 
         group_service.fetch.assert_called_once_with(sentinel.pubid)
         user_service.fetch.assert_called_once_with(sentinel.userid)
-        group_members_service.get.assert_called_once_with(
+        group_members_service.get_membership.assert_called_once_with(
             group_service.fetch.return_value, user_service.fetch.return_value
         )
         assert isinstance(context, GroupMembershipContext)
         assert context.group == group_service.fetch.return_value
         assert context.user == user_service.fetch.return_value
-        assert context.membership == group_members_service.get.return_value
+        assert context.membership == group_members_service.get_membership.return_value
 
     def test_when_no_matching_group(self, group_service, pyramid_request):
         group_service.fetch.return_value = None
@@ -47,7 +47,7 @@ class TestGroupMembershipAPIFactory:
             group_membership_api_factory(pyramid_request)
 
     def test_when_no_matching_membership(self, group_members_service, pyramid_request):
-        group_members_service.get.return_value = None
+        group_members_service.get_membership.return_value = None
 
         with pytest.raises(
             HTTPNotFound,
