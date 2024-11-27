@@ -53,24 +53,27 @@ class TestReadMembers:
         )
 
         assert res.status_code == 200
-        assert res.json == [
-            {
-                "authority": group.authority,
-                "userid": user.userid,
-                "username": user.username,
-                "display_name": user.display_name,
-                "roles": [GroupMembershipRoles.MEMBER],
-                "actions": ["delete"],
-            },
-            {
-                "authority": group.authority,
-                "userid": other_user.userid,
-                "username": other_user.username,
-                "display_name": other_user.display_name,
-                "roles": [GroupMembershipRoles.MEMBER],
-                "actions": [],
-            },
-        ]
+        assert res.json == sorted(
+            [
+                {
+                    "authority": group.authority,
+                    "userid": user.userid,
+                    "username": user.username,
+                    "display_name": user.display_name,
+                    "roles": [GroupMembershipRoles.MEMBER],
+                    "actions": ["delete"],
+                },
+                {
+                    "authority": group.authority,
+                    "userid": other_user.userid,
+                    "username": other_user.username,
+                    "display_name": other_user.display_name,
+                    "roles": [GroupMembershipRoles.MEMBER],
+                    "actions": [],
+                },
+            ],
+            key=lambda membership: membership["username"],
+        )
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(
         self, app, db_session, factories
