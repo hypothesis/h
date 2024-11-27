@@ -243,7 +243,7 @@ def group_member_edit(
             return True
 
         if GroupMembershipRoles.ADMIN in authenticated_users_roles:
-            # Admins can change their own role to anything but admin.
+            # Admins can change their own role to anything but owner.
             return GroupMembershipRoles.OWNER not in new_roles
 
         if GroupMembershipRoles.MODERATOR in authenticated_users_roles:
