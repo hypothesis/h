@@ -8,7 +8,9 @@ from h.security.policy.helpers import AuthTicketCookieHelper
 COOKIE_AUTHENTICATABLE_API_REQUESTS = [
     ("api.groups", "POST"),  # Create a new group.
     ("api.group", "PATCH"),  # Edit an existing group.
-    ("api.group_members", "GET"),  # List group members
+    ("api.group_members", "GET"),  # List group members.
+    ("api.group_member", "PATCH"),  # Edit group membership.
+    ("api.group_member", "DELETE"),  # Remove group member.
 ]
 
 
