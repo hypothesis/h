@@ -25,9 +25,18 @@ type TableColumn<Row> = {
 type MemberRow = {
   username: string;
   userid: string;
+
+  /** Whether to show the button to remove this member from the group? */
   showDeleteAction: boolean;
+
+  /** Current role for this user. */
   role: Role;
+
+  /** Roles that can be assigned to this member. */
   availableRoles: Role[];
+
+  /** True if an operation is currently being performed against this member. */
+  busy: boolean;
 };
 
 /**
@@ -57,6 +66,7 @@ function memberToRow(member: GroupMember, currentUserid: string): MemberRow {
       member.actions.includes('delete') && member.userid !== currentUserid,
     role,
     availableRoles,
+    busy: false,
   };
 }
 
@@ -102,6 +112,8 @@ async function setMemberRoles(
 type RoleSelectProps = {
   username: string;
 
+  disabled?: boolean;
+
   /** The current role of the member. */
   current: Role;
 
@@ -114,6 +126,7 @@ type RoleSelectProps = {
 
 function RoleSelect({
   username,
+  disabled = false,
   current,
   available,
   onChange,
@@ -124,6 +137,7 @@ function RoleSelect({
       onChange={onChange}
       buttonContent={roleStrings[current]}
       data-testid={`role-${username}`}
+      disabled={disabled}
     >
       {available.map(role => (
         <Select.Option key={role} value={role}>
@@ -183,6 +197,15 @@ export default function EditGroupMembersForm({
 
   const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
 
+  const updateMember = (userid: string, update: Partial<MemberRow>) => {
+    setMembers(
+      members =>
+        members?.map(m => {
+          return m.userid === userid ? { ...m, ...update } : m;
+        }) ?? null,
+    );
+  };
+
   const removeUserFromGroup = async (username: string) => {
     // istanbul ignore next
     if (!members || !config.api.removeGroupMember) {
@@ -195,27 +218,21 @@ export default function EditGroupMembersForm({
     }
     setPendingRemoval(null);
 
+    updateMember(member.userid, { busy: true });
+
     try {
       await removeMember(config.api.removeGroupMember, member.userid);
       setMembers(members =>
         members ? members.filter(m => m.userid !== member.userid) : null,
       );
     } catch (err) {
+      updateMember(member.userid, { busy: false });
       setErrorMessage(err.message);
     }
   };
 
-  const updateMember = (userid: string, update: Partial<MemberRow>) => {
-    setMembers(
-      members =>
-        members?.map(m => {
-          return m.userid === userid ? { ...m, ...update } : m;
-        }) ?? null,
-    );
-  };
-
   const changeRole = async (member: MemberRow, role: Role) => {
-    updateMember(member.userid, { role });
+    updateMember(member.userid, { role, busy: true });
     try {
       const updatedMember = await setMemberRoles(
         config.api.editGroupMember!,
@@ -227,7 +244,7 @@ export default function EditGroupMembersForm({
       updateMember(member.userid, memberToRow(updatedMember, currentUserid));
     } catch (err) {
       const prevRole = member.role;
-      updateMember(member.userid, { role: prevRole });
+      updateMember(member.userid, { role: prevRole, busy: false });
       setErrorMessage(err.message);
     }
   };
@@ -258,11 +275,14 @@ export default function EditGroupMembersForm({
             current={user.role}
             available={user.availableRoles}
             onChange={role => changeRole(user, role)}
+            disabled={user.busy}
           />
         );
       case 'showDeleteAction':
         return user.showDeleteAction ? (
           <IconButton
+            classes={user.busy ? 'opacity-50' : ''}
+            disabled={user.busy}
             icon={TrashIcon}
             title="Remove member"
             data-testid={`remove-${user.username}`}
