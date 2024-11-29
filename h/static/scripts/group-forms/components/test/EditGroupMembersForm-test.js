@@ -146,6 +146,18 @@ describe('EditGroupMembersForm', () => {
     return wrapper.find(`span[data-testid="role-${username}"]`);
   };
 
+  /**
+   * Return true if controls to edit a given member are all disabled, or there
+   * are no controls for the member.
+   */
+  const controlsDisabled = (wrapper, username) => {
+    const removeButton = getRemoveUserButton(wrapper, username);
+    const roleSelect = getRoleSelect(wrapper, username);
+    return [removeButton, roleSelect].every(
+      control => !control.exists() || control.prop('disabled'),
+    );
+  };
+
   it('fetches and displays members', async () => {
     const wrapper = createForm();
     assert.calledWith(
@@ -226,6 +238,9 @@ describe('EditGroupMembersForm', () => {
     wrapper.update();
     assert.isFalse(wrapper.exists('WarningDialog'));
 
+    // Controls should be disabled while API call is in flight.
+    assert.isTrue(controlsDisabled(wrapper, 'bob'));
+
     // Once the user is removed, their row should disappear.
     await waitFor(() => {
       wrapper.update();
@@ -254,6 +269,10 @@ describe('EditGroupMembersForm', () => {
     await waitForError(wrapper);
     const error = wrapper.find('ErrorNotice');
     assert.equal(error.prop('message'), 'User not found');
+
+    // Controls should be re-enabled after saving fails.
+    assert.include(getRenderedUsers(wrapper), 'bob');
+    assert.isFalse(controlsDisabled(wrapper, 'bob'));
   });
 
   it('displays current and available user roles', async () => {
@@ -308,6 +327,18 @@ describe('EditGroupMembersForm', () => {
         },
       }),
     );
+
+    // Controls should be disabled while saving.
+    assert.isTrue(controlsDisabled(wrapper, 'bob'));
+
+    await waitFor(() => {
+      wrapper.update();
+      return !controlsDisabled(wrapper, 'bob');
+    });
+
+    // New role should be preserved once save completes.
+    bobRole = getRoleSelect(wrapper, 'bob');
+    assert.equal(bobRole.prop('value'), 'moderator');
   });
 
   it('displays error if changing role fails', async () => {
@@ -340,5 +371,6 @@ describe('EditGroupMembersForm', () => {
     wrapper.update();
     bobRole = getRoleSelect(wrapper, 'bob');
     assert.equal(bobRole.prop('value'), originalRole);
+    assert.isFalse(controlsDisabled(wrapper, 'bob'));
   });
 });
