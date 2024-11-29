@@ -168,9 +168,11 @@ describe('EditGroupMembersForm', () => {
         headers: config.api.readGroupMembers.headers,
       }),
     );
+    assert.isTrue(wrapper.find('DataTable').prop('loading'));
 
     await waitForTable(wrapper);
 
+    assert.isFalse(wrapper.find('DataTable').prop('loading'));
     const users = getRenderedUsers(wrapper);
     assert.deepEqual(users, ['bob', 'johnsmith', 'jane']);
   });
