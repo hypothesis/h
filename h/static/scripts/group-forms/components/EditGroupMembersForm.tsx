@@ -307,6 +307,7 @@ export default function EditGroupMembersForm({
               rows={members ?? []}
               columns={columns}
               renderItem={renderRow}
+              loading={!members}
             />
           </Scroll>
         </div>
