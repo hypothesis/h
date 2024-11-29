@@ -112,6 +112,7 @@ describe('EditGroupMembersForm', () => {
       <Config.Provider value={config}>
         <EditGroupMembersForm group={config.context.group} {...props} />
       </Config.Provider>,
+      { connected: true },
     );
   };
 
@@ -136,6 +137,14 @@ describe('EditGroupMembersForm', () => {
     return wrapper.find(`Select[data-testid="role-${username}"]`);
   };
 
+  const openRoleSelect = (wrapper, username) => {
+    getRoleSelect(wrapper, username).find('button').simulate('click');
+  };
+
+  /**
+   * Return the roles listed in a given select. Note that the select must be
+   * open for the options to be rendered.
+   */
   const getOptionValues = selectWrapper => {
     return selectWrapper
       .find(Select.Option)
@@ -280,6 +289,8 @@ describe('EditGroupMembersForm', () => {
   it('displays current and available user roles', async () => {
     const wrapper = createForm();
     await waitForTable(wrapper);
+
+    openRoleSelect(wrapper, 'bob');
 
     // If the user's role can be changed, the current role and available options
     // should be displayed in a Select.
