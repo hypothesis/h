@@ -13,14 +13,17 @@ from h.traversal import GroupContext, GroupMembershipContext
 from h.views.api.exceptions import PayloadError
 
 
-class TestListMembers:
+class TestListMembersLegacyLegacy:
     def test_it(
         self,
         context,
         pyramid_request,
         GroupMembershipJSONPresenter,
         group_members_service,
+        caplog,
     ):
+        pyramid_request.headers["User-Agent"] = sentinel.user_agent
+        pyramid_request.headers["Referer"] = sentinel.referer
         group_members_service.get_memberships.return_value = [
             sentinel.membership_1,
             sentinel.membership_2,
@@ -35,8 +38,11 @@ class TestListMembers:
             ),
         ]
 
-        response = views.list_members(context, pyramid_request)
+        response = views.list_members_legacy(context, pyramid_request)
 
+        assert caplog.messages == [
+            f"list_members_legacy() was called. User-Agent: {sentinel.user_agent}, Referer: {sentinel.referer}, pubid: {context.group.pubid}"
+        ]
         group_members_service.get_memberships.assert_called_once_with(context.group)
         assert GroupMembershipJSONPresenter.call_args_list == [
             call(pyramid_request, sentinel.membership_1),
@@ -50,9 +56,69 @@ class TestListMembers:
         ]
 
     @pytest.fixture
-    def context(self):
+    def context(self, factories):
         return create_autospec(
-            GroupContext, instance=True, spec_set=True, group=sentinel.group
+            GroupContext, instance=True, spec_set=True, group=factories.Group()
+        )
+
+
+class TestListMembers:
+    def test_it(
+        self,
+        context,
+        pyramid_request,
+        GroupMembershipJSONPresenter,
+        group_members_service,
+        PaginationQueryParamsSchema,
+        validate_query_params,
+    ):
+        pyramid_request.params = validate_query_params.return_value = {
+            "page[offset]": sentinel.offset,
+            "page[limit]": sentinel.limit,
+        }
+        group_members_service.get_memberships.return_value = [
+            sentinel.membership_1,
+            sentinel.membership_2,
+        ]
+        presenter_instances = GroupMembershipJSONPresenter.side_effect = [
+            create_autospec(
+                presenters.GroupMembershipJSONPresenter, instance=True, spec_set=True
+            ),
+            create_autospec(
+                presenters.GroupMembershipJSONPresenter, instance=True, spec_set=True
+            ),
+        ]
+
+        response = views.list_members(context, pyramid_request)
+
+        PaginationQueryParamsSchema.assert_called_once_with()
+        validate_query_params.assert_called_once_with(
+            PaginationQueryParamsSchema.return_value, pyramid_request.params
+        )
+        group_members_service.count_memberships.assert_called_once_with(context.group)
+        group_members_service.get_memberships.assert_called_once_with(
+            context.group, offset=sentinel.offset, limit=sentinel.limit
+        )
+        assert GroupMembershipJSONPresenter.call_args_list == [
+            call(pyramid_request, sentinel.membership_1),
+            call(pyramid_request, sentinel.membership_2),
+        ]
+        presenter_instances[0].asdict.assert_called_once_with()
+        presenter_instances[1].asdict.assert_called_once_with()
+        assert response == {
+            "meta": {
+                "page": {"total": group_members_service.count_memberships.return_value}
+            },
+            "data": [
+                presenter_instances[0].asdict.return_value,
+                presenter_instances[1].asdict.return_value,
+            ],
+        }
+
+    @pytest.fixture
+    def context(self, factories):
+        return create_autospec(
+            GroupContext, instance=True, spec_set=True, group=factories.Group()
         )
 
 
@@ -208,10 +274,11 @@ class TestEditMember:
         pyramid_config.testing_securitypolicy(permissive=True)
         return pyramid_config
 
-    @pytest.fixture
-    def caplog(self, caplog):
-        caplog.set_level(logging.INFO)
-        return caplog
+
+@pytest.fixture
+def caplog(caplog):
+    caplog.set_level(logging.INFO)
+    return caplog
 
 
 @pytest.fixture(autouse=True)
@@ -220,6 +287,22 @@ def EditGroupMembershipAPISchema(mocker):
         "h.views.api.group_members.EditGroupMembershipAPISchema",
         autospec=True,
         spec_set=True,
+    )
+
+
+@pytest.fixture(autouse=True)
+def PaginationQueryParamsSchema(mocker):
+    return mocker.patch(
+        "h.views.api.group_members.PaginationQueryParamsSchema",
+        autospec=True,
+        spec_set=True,
+    )
+
+
+@pytest.fixture(autouse=True)
+def validate_query_params(mocker):
+    return mocker.patch(
+        "h.views.api.group_members.validate_query_params", autospec=True, spec_set=True
     )
 
 

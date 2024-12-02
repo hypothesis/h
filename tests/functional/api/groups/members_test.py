@@ -1,4 +1,5 @@
 import base64
+import logging
 
 import pytest
 from sqlalchemy import select
@@ -7,9 +8,9 @@ from h.models import GroupMembership, GroupMembershipRoles, Token
 from h.models.auth_client import AuthClient, GrantType
 
 
-class TestReadMembers:
+class TestListMembersLegacy:
     def test_it_returns_list_of_members_for_restricted_group_without_authn(
-        self, app, factories, db_session
+        self, app, factories, db_session, caplog
     ):
         group = factories.RestrictedGroup(
             memberships=[
@@ -19,8 +20,14 @@ class TestReadMembers:
         )
         db_session.commit()
 
-        res = app.get("/api/groups/{pubid}/members".format(pubid=group.pubid))
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
+        )
 
+        assert caplog.messages == [
+            f"list_members_legacy() was called. User-Agent: test_user_agent, Referer: test_referer, pubid: {group.pubid}"
+        ]
         assert res.status_code == 200
         assert res.json == [
             {
@@ -93,6 +100,131 @@ class TestReadMembers:
         res = app.get("/api/groups/__world__/members")
 
         assert res.json == []
+
+
+class TestListMembers:
+    def test_it_returns_list_of_members_for_restricted_group_without_auth(
+        self, app, factories, db_session
+    ):
+        group = factories.RestrictedGroup(
+            memberships=[
+                GroupMembership(user=user)
+                for user in factories.User.create_batch(size=4)
+            ]
+        )
+        db_session.commit()
+
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            params={"page[offset]": 1, "page[limit]": 2},
+            headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
+        )
+
+        assert res.status_code == 200
+        assert res.json == {
+            "meta": {"page": {"total": 4}},
+            "data": [
+                {
+                    "authority": membership.group.authority,
+                    "userid": membership.user.userid,
+                    "username": membership.user.username,
+                    "display_name": membership.user.display_name,
+                    "roles": membership.roles,
+                    "actions": [],
+                }
+                for membership in sorted(
+                    group.memberships, key=lambda membership: membership.user.username
+                )[1:3]
+            ],
+        }
+
+    def test_it_returns_list_of_members_if_user_has_access_to_private_group(
+        self, app, factories, db_session
+    ):
+        group = factories.Group()
+        user, other_user = factories.User.create_batch(size=2)
+        token = factories.DeveloperToken(user=user)
+        group.memberships.extend(
+            [GroupMembership(user=user), GroupMembership(user=other_user)]
+        )
+        db_session.commit()
+
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            params={"page[offset]": 0},
+            headers=token_authorization_header(token),
+        )
+
+        assert res.status_code == 200
+        assert res.json == {
+            "meta": {"page": {"total": 2}},
+            "data": sorted(
+                [
+                    {
+                        "authority": group.authority,
+                        "userid": user.userid,
+                        "username": user.username,
+                        "display_name": user.display_name,
+                        "roles": [GroupMembershipRoles.MEMBER],
+                        "actions": ["delete"],
+                    },
+                    {
+                        "authority": group.authority,
+                        "userid": other_user.userid,
+                        "username": other_user.username,
+                        "display_name": other_user.display_name,
+                        "roles": [GroupMembershipRoles.MEMBER],
+                        "actions": [],
+                    },
+                ],
+                key=lambda membership: membership["username"],
+            ),
+        }
+
+    def test_it_returns_404_if_user_does_not_have_read_access_to_group(
+        self, app, db_session, factories
+    ):
+        group = factories.Group()
+        db_session.commit()
+
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            params={"page[offset]": 0},
+            headers=token_authorization_header(factories.DeveloperToken()),
+            expect_errors=True,
+        )
+
+        assert res.status_code == 404
+
+    def test_it_returns_empty_list_if_no_members_in_group(self, app):
+        res = app.get(
+            "/api/groups/__world__/members",
+            params={"page[offset]": 0},
+        )
+
+        assert res.json == {"meta": {"page": {"total": 0}}, "data": []}
+
+    def test_it_returns_an_error_if_offset_and_limit_are_invalid(
+        self, app, db_session, factories
+    ):
+        group = factories.Group()
+        user = factories.User()
+        token = factories.DeveloperToken(user=user)
+        group.memberships.extend([GroupMembership(user=user)])
+        db_session.commit()
+
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            params={"page[offset]": -1, "page[limit]": 0},
+            headers=token_authorization_header(token),
+            expect_errors=True,
+        )
+
+        assert res.status_code == 400
+        assert res.json == {
+            "reason": "page[offset]: -1 is less than minimum value 0\npage[limit]: 0 is less than minimum value 1",
+            "status": "failure",
+        }
 
 
 class TestAddMember:
@@ -563,3 +695,9 @@ class TestEditMembership:
 def token_authorization_header(token) -> dict:
     """Return an Authorization header for the given developer token."""
     return {"Authorization": "Bearer {}".format(token.value)}
+
+
+@pytest.fixture
+def caplog(caplog):
+    caplog.set_level(logging.INFO)
+    return caplog

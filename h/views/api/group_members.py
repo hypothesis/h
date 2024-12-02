@@ -1,9 +1,12 @@
 import logging
 
+from pyramid.config import not_
 from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
 
 from h.presenters import GroupMembershipJSONPresenter
 from h.schemas.api.group_membership import EditGroupMembershipAPISchema
+from h.schemas.pagination import PaginationQueryParamsSchema
+from h.schemas.util import validate_query_params
 from h.security import Permission
 from h.traversal import EditGroupMembershipContext, GroupContext, GroupMembershipContext
 from h.views.api.config import api_config
@@ -12,15 +15,26 @@ from h.views.api.helpers.json_payload import json_payload
 log = logging.getLogger(__name__)
 
 
-@api_config(
-    versions=["v1", "v2"],
-    route_name="api.group_members",
-    request_method="GET",
-    link_name="group.members.read",
-    description="Fetch a list of all members of a group",
-    permission=Permission.Group.READ,
-)
-def list_members(context: GroupContext, request):
+LIST_MEMBERS_API_CONFIG = {
+    "versions": ["v1", "v2"],
+    "route_name": "api.group_members",
+    "request_method": "GET",
+    "link_name": "group.members.read",
+    "description": "Fetch a list of all members of a group",
+    "permission": Permission.Group.READ,
+}
+
+
+@api_config(request_param=not_("page[offset]"), **LIST_MEMBERS_API_CONFIG)
+def list_members_legacy(context: GroupContext, request):
+    """Legacy version of the list-members API, maintained for backwards-compatibility."""
+
+    log.info(
+        "list_members_legacy() was called. User-Agent: %s, Referer: %s, pubid: %s",
+        request.headers.get("User-Agent"),
+        request.headers.get("Referer"),
+        context.group.pubid,
+    )
 
     # Get the list of memberships from GroupMembersService instead of just
     # accessing `context.memberships` because GroupMembersService returns the
@@ -33,6 +47,28 @@ def list_members(context: GroupContext, request):
         GroupMembershipJSONPresenter(request, membership).asdict()
         for membership in memberships
     ]
+
+
+@api_config(request_param="page[offset]", **LIST_MEMBERS_API_CONFIG)
+def list_members(context: GroupContext, request):
+    group = context.group
+    group_members_service = request.find_service(name="group_members")
+
+    params = validate_query_params(PaginationQueryParamsSchema(), request.params)
+    offset = params["page[offset]"]
+    limit = params["page[limit]"]
+
+    total = group_members_service.count_memberships(group)
+    memberships = group_members_service.get_memberships(
+        group, offset=offset, limit=limit
+    )
+
+    membership_dicts = [
+        GroupMembershipJSONPresenter(request, membership).asdict()
+        for membership in memberships
+    ]
+
+    return {"meta": {"page": {"total": total}}, "data": membership_dicts}
 
 
 @api_config(
