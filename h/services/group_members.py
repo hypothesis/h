@@ -1,7 +1,7 @@
 import logging
 from functools import partial
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 
 from h import session
 from h.models import Group, GroupMembership, GroupMembershipRoles, User
@@ -33,7 +33,11 @@ class GroupMembersService:
         )
 
     def get_memberships(
-        self, group: Group, roles: list[GroupMembershipRoles] | None = None
+        self,
+        group: Group,
+        roles: list[GroupMembershipRoles] | None = None,
+        offset=None,
+        limit=None,
     ):
         """
         Return `group`'s memberships.
@@ -57,7 +61,20 @@ class GroupMembersService:
                 or_(GroupMembership.roles.contains(role) for role in roles)
             )
 
+        if offset is not None:
+            query = query.offset(offset)
+
+        if limit is not None:
+            query = query.limit(limit)
+
         return self.db.scalars(query)
+
+    def count_memberships(self, group: Group):
+        """Return the number of memberships of `group`."""
+        # pylint:disable=not-callable
+        return self.db.scalar(
+            select(func.count(GroupMembership.id)).where(GroupMembership.group == group)
+        )
 
     def add_members(self, group, userids):
         """

@@ -95,6 +95,33 @@ class TestGetMemberships:
             )
         ) == sorted(memberships, key=lambda membership: membership.user.username)
 
+    def test_offset_and_limit(self, group_members_service, db_session, factories):
+        group = factories.Group()
+        users = factories.User.build_batch(size=4)
+        memberships = [GroupMembership(group=group, user=user) for user in users]
+        db_session.add_all(memberships)
+
+        returned_memberships = group_members_service.get_memberships(
+            group, offset=1, limit=2
+        )
+
+        assert (
+            list(returned_memberships)
+            == sorted(memberships, key=lambda membership: membership.user.username)[1:3]
+        )
+
+
+class TestCountMemberships:
+    def test_it(self, group_members_service, factories):
+        group = factories.Group(
+            memberships=[
+                GroupMembership(user=user)
+                for user in factories.User.create_batch(size=2)
+            ]
+        )
+
+        assert group_members_service.count_memberships(group) == 2
+
 
 class TestMemberJoin:
     def test_it_adds_user_to_group(
