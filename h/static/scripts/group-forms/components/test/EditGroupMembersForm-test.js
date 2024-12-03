@@ -15,6 +15,7 @@ describe('EditGroupMembersForm', () => {
     {
       userid: 'acct:bob@localhost',
       username: 'bob',
+      display_name: 'Bob Jones',
       actions: [
         'delete',
         'updates.roles.admin',
@@ -26,6 +27,7 @@ describe('EditGroupMembersForm', () => {
     {
       userid: 'acct:johnsmith@localhost',
       username: 'johnsmith',
+      display_name: 'John Smith',
       actions: [],
       roles: ['owner'],
     },
@@ -125,8 +127,14 @@ describe('EditGroupMembersForm', () => {
       return wrapper.find('ErrorNotice').prop('message') !== null;
     });
 
-  const getRenderedUsers = wrapper => {
+  const getRenderedUsernames = wrapper => {
     return wrapper.find('[data-testid="username"]').map(node => node.text());
+  };
+
+  const getRenderedDisplayNames = wrapper => {
+    return wrapper
+      .find('[data-testid="display-name"]')
+      .map(node => node.text());
   };
 
   const getRemoveUserButton = (wrapper, username) => {
@@ -182,8 +190,11 @@ describe('EditGroupMembersForm', () => {
     await waitForTable(wrapper);
 
     assert.isFalse(wrapper.find('DataTable').prop('loading'));
-    const users = getRenderedUsers(wrapper);
-    assert.deepEqual(users, ['bob', 'johnsmith', 'jane']);
+    const usernames = getRenderedUsernames(wrapper);
+    assert.deepEqual(usernames, ['@bob', '@johnsmith', '@jane']);
+
+    const displayNames = getRenderedDisplayNames(wrapper);
+    assert.deepEqual(displayNames, ['Bob Jones', 'John Smith']);
   });
 
   it('displays error if member fetch fails', async () => {
@@ -282,7 +293,7 @@ describe('EditGroupMembersForm', () => {
     assert.equal(error.prop('message'), 'User not found');
 
     // Controls should be re-enabled after saving fails.
-    assert.include(getRenderedUsers(wrapper), 'bob');
+    assert.include(getRenderedUsernames(wrapper), '@bob');
     assert.isFalse(controlsDisabled(wrapper, 'bob'));
   });
 
