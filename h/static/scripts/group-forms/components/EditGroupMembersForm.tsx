@@ -23,8 +23,10 @@ type TableColumn<Row> = {
 };
 
 type MemberRow = {
-  username: string;
   userid: string;
+
+  username: string;
+  displayName?: string;
 
   /** Whether to show the button to remove this member from the group? */
   showDeleteAction: boolean;
@@ -61,6 +63,7 @@ function memberToRow(member: GroupMember, currentUserid: string): MemberRow {
       : [role];
   return {
     userid: member.userid,
+    displayName: member.display_name,
     username: member.username,
     showDeleteAction:
       member.actions.includes('delete') && member.userid !== currentUserid,
@@ -253,18 +256,30 @@ export default function EditGroupMembersForm({
     switch (field) {
       case 'username':
         return (
-          <div
-            data-testid="username"
-            className="truncate"
-            title={user.username}
-          >
-            {user.username}
+          <div className="truncate" title={user.username}>
+            <span data-testid="username" className="font-bold text-grey-7">
+              @{user.username}
+            </span>
+            {user.displayName && (
+              <span data-testid="display-name">
+                {
+                  // Create space using a separate element, rather than eg.
+                  // `inline-block ml-3` on the display name container because
+                  // that would cause the entire display name to be hidden if
+                  // truncated.
+                  <span className="inline-block w-3" />
+                }
+                {user.displayName}
+              </span>
+            )}
           </div>
         );
       case 'role':
         if (user.availableRoles.length <= 1) {
           return (
-            <span data-testid={`role-${user.username}`}>
+            // Left padding here aligns the static role label in this row with
+            // the current role in dropdowns in other rows.
+            <span className="pl-2" data-testid={`role-${user.username}`}>
               {roleStrings[user.role]}
             </span>
           );
@@ -303,6 +318,8 @@ export default function EditGroupMembersForm({
         <div className="w-full">
           <Scroll>
             <DataTable
+              grid
+              striped={false}
               title="Group members"
               rows={members ?? []}
               columns={columns}

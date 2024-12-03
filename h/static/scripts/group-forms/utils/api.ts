@@ -32,6 +32,7 @@ export type CreateUpdateGroupAPIResponse = {
 
 export type GroupMember = {
   userid: string;
+  display_name?: string;
   username: string;
   actions: string[];
   roles: Role[];
