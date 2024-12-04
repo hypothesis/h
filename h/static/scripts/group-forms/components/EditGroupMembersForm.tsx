@@ -3,6 +3,7 @@ import {
   Scroll,
   TrashIcon,
   IconButton,
+  Pagination,
   Select,
 } from '@hypothesis/frontend-shared';
 import { useContext, useEffect, useState } from 'preact/hooks';
@@ -76,15 +77,26 @@ function memberToRow(member: GroupMember, currentUserid: string): MemberRow {
 async function fetchMembers(
   api: APIConfig,
   currentUserid: string,
-  signal: AbortSignal,
-): Promise<MemberRow[]> {
+  options: {
+    signal: AbortSignal;
+    offset: number;
+    limit: number;
+  },
+): Promise<{ total: number; members: MemberRow[] }> {
+  const { offset, limit, signal } = options;
   const { url, method, headers } = api;
-  const members: GroupMembersResponse = await callAPI(url, {
-    method,
+  const { meta, data }: GroupMembersResponse = await callAPI(url, {
     headers,
+    limit,
+    method,
+    offset,
     signal,
   });
-  return members.map(m => memberToRow(m, currentUserid));
+
+  return {
+    total: meta.page.total,
+    members: data.map(m => memberToRow(m, currentUserid)),
+  };
 }
 
 async function removeMember(api: APIConfig, userid: string) {
@@ -151,6 +163,8 @@ function RoleSelect({
   );
 }
 
+export const pageSize = 20;
+
 export type EditGroupMembersFormProps = {
   /** The saved group details. */
   group: Group;
@@ -162,6 +176,11 @@ export default function EditGroupMembersForm({
   const config = useContext(Config)!;
   const currentUserid = config.context.user.userid;
 
+  const [pageIndex, setPageIndex] = useState(0);
+  const [totalMembers, setTotalMembers] = useState<number | null>(null);
+  const totalPages =
+    totalMembers !== null ? Math.ceil(totalMembers / pageSize) : null;
+
   // Fetch group members when the form loads.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [members, setMembers] = useState<MemberRow[] | null>(null);
@@ -172,15 +191,22 @@ export default function EditGroupMembersForm({
     }
     const abort = new AbortController();
     setErrorMessage(null);
-    fetchMembers(config.api.readGroupMembers, currentUserid, abort.signal)
-      .then(setMembers)
+    fetchMembers(config.api.readGroupMembers, currentUserid, {
+      offset: pageIndex * pageSize,
+      limit: pageSize,
+      signal: abort.signal,
+    })
+      .then(({ total, members }) => {
+        setMembers(members);
+        setTotalMembers(total);
+      })
       .catch(err => {
         setErrorMessage(`Failed to fetch group members: ${err.message}`);
       });
     return () => {
       abort.abort();
     };
-  }, [config.api.readGroupMembers, currentUserid]);
+  }, [config.api.readGroupMembers, currentUserid, pageIndex]);
 
   const columns: TableColumn<MemberRow>[] = [
     {
@@ -328,6 +354,15 @@ export default function EditGroupMembersForm({
             />
           </Scroll>
         </div>
+        {typeof totalPages === 'number' && totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination
+              currentPage={pageIndex + 1}
+              onChangePage={page => setPageIndex(page - 1)}
+              totalPages={totalPages}
+            />
+          </div>
+        )}
       </FormContainer>
       {pendingRemoval && (
         <WarningDialog
