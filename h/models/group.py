@@ -1,3 +1,4 @@
+import datetime
 import enum
 import re
 from collections import namedtuple
@@ -76,6 +77,15 @@ class GroupMembership(Base):
         ),
         server_default=sa.text("""'["member"]'::jsonb"""),
         nullable=False,
+    )
+
+    created = sa.Column(sa.DateTime, default=datetime.datetime.utcnow, index=True)
+
+    updated = sa.Column(
+        sa.DateTime,
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow,
+        index=True,
     )
 
     def __repr__(self):
