@@ -124,6 +124,20 @@ describe('callAPI', () => {
     assert.equal(error.json, null);
   });
 
+  it('adds pagination params to URL', async () => {
+    const paginatedURL = new URL(url);
+    const offset = 5;
+    const limit = 10;
+    paginatedURL.searchParams.set('page[offset]', offset);
+    paginatedURL.searchParams.set('page[limit]', limit);
+    const response = new Response(JSON.stringify({}), { status: 200 });
+    fakeFetch.resolves(response);
+
+    await callAPI(url, { offset, limit });
+
+    assert.calledWith(fakeFetch, paginatedURL.toString());
+  });
+
   [
     {
       response: new Response(

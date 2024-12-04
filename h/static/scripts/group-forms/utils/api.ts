@@ -38,12 +38,21 @@ export type GroupMember = {
   roles: Role[];
 };
 
+export type PaginatedResponse<T> = {
+  meta: {
+    page: {
+      total: number;
+    };
+  };
+  data: T[];
+};
+
 /**
  * Response to group members API.
  *
  * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}~1members/get
  */
-export type GroupMembersResponse = GroupMember[];
+export type GroupMembersResponse = PaginatedResponse<GroupMember>;
 
 /** An error response from the h API:
  * https://h.readthedocs.io/en/latest/api-reference/v2/#section/Hypothesis-API/Errors
@@ -79,20 +88,30 @@ export class APIError extends Error {
   }
 }
 
-/* Make an API call and return the parsed JSON body or throw APIError. */
+export type APIOptions = {
+  method?: string;
+  json?: object | null;
+  headers?: Record<PropertyKey, unknown>;
+  signal?: AbortSignal;
+
+  /** Index of first item to return in paginated APIs. */
+  offset?: number;
+
+  /** Maximum number of items to return in response for a paginated API. */
+  limit?: number;
+};
+
+/** Make an API call and return the parsed JSON body or throw APIError. */
 export async function callAPI<R = unknown>(
   url: string,
   {
-    method = 'GET',
-    json = null,
     headers = {},
+    json = null,
+    limit,
+    method = 'GET',
+    offset,
     signal,
-  }: {
-    method?: string;
-    json?: object | null;
-    headers?: Record<PropertyKey, unknown>;
-    signal?: AbortSignal;
-  } = {},
+  }: APIOptions = {},
 ): Promise<R> {
   const options: RequestInit = {
     method,
@@ -107,10 +126,24 @@ export async function callAPI<R = unknown>(
     options.body = JSON.stringify(json);
   }
 
-  let response;
+  const queryParams: Record<string, string | number> = {};
+  if (typeof offset === 'number') {
+    queryParams['page[offset]'] = offset;
+  }
+  if (typeof limit === 'number') {
+    queryParams['page[limit]'] = limit;
+  }
 
+  const requestURL = new URL(url);
+  for (const [param, value] of Object.entries(queryParams)) {
+    requestURL.searchParams.set(param, value.toString());
+  }
+
+  let response;
   try {
-    response = await fetch(url, options);
+    // Converting `requestURL` to a string is not necessary, but it makes
+    // writing tests easier.
+    response = await fetch(requestURL.toString(), options);
   } catch (err) {
     throw new APIError('Network request failed.', {
       cause: err as Error,
