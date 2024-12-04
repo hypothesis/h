@@ -1,10 +1,12 @@
 import { mount, waitFor, waitForElement } from '@hypothesis/frontend-testing';
 import { Select } from '@hypothesis/frontend-shared';
+import { act } from 'preact/test-utils';
 
 import { Config } from '../../config';
 import {
   $imports,
   default as EditGroupMembersForm,
+  pageSize,
 } from '../EditGroupMembersForm';
 
 describe('EditGroupMembersForm', () => {
@@ -44,6 +46,17 @@ describe('EditGroupMembersForm', () => {
     },
   ];
 
+  const listMembersResponse = (members, total = members.length) => {
+    return {
+      meta: {
+        page: {
+          total,
+        },
+      },
+      data: members,
+    };
+  };
+
   beforeEach(() => {
     const headers = { 'Misc-Header': 'Some-Value' };
     config = {
@@ -77,7 +90,9 @@ describe('EditGroupMembersForm', () => {
 
     fakeCallAPI = sinon.stub();
     fakeCallAPI.rejects(new Error('Unknown API call'));
-    fakeCallAPI.withArgs('/api/groups/1234/members').resolves(defaultMembers);
+    fakeCallAPI
+      .withArgs('/api/groups/1234/members')
+      .resolves(listMembersResponse(defaultMembers));
     fakeCallAPI
       .withArgs(
         `/api/groups/1234/members/${encodeURIComponent('acct:bob@localhost')}`,
@@ -149,6 +164,17 @@ describe('EditGroupMembersForm', () => {
     getRoleSelect(wrapper, username).find('button').simulate('click');
   };
 
+  const getPaginationState = wrapper => {
+    const pagination = wrapper.find('Pagination');
+    if (!pagination.exists()) {
+      return null;
+    }
+    return {
+      current: pagination.prop('currentPage'),
+      total: pagination.prop('totalPages'),
+    };
+  };
+
   /**
    * Return the roles listed in a given select. Note that the select must be
    * open for the options to be rendered.
@@ -195,6 +221,61 @@ describe('EditGroupMembersForm', () => {
 
     const displayNames = getRenderedDisplayNames(wrapper);
     assert.deepEqual(displayNames, ['Bob Jones', 'John Smith']);
+  });
+
+  [
+    {
+      total: 5,
+      pagination: null,
+    },
+    {
+      total: pageSize + 5,
+      pagination: {
+        current: 1,
+        total: 2,
+      },
+    },
+  ].forEach(({ total, pagination: expectedPagination }) => {
+    it('displays pagination controls', async () => {
+      fakeCallAPI
+        .withArgs('/api/groups/1234/members')
+        .resolves(listMembersResponse(defaultMembers, total));
+      const wrapper = createForm();
+      await waitForTable(wrapper);
+      const pagination = getPaginationState(wrapper);
+      assert.deepEqual(pagination, expectedPagination);
+    });
+  });
+
+  it('navigates when page is changed', async () => {
+    fakeCallAPI
+      .withArgs('/api/groups/1234/members')
+      .resolves(listMembersResponse(defaultMembers, pageSize + 5));
+    const wrapper = createForm();
+    await waitForTable(wrapper);
+
+    assert.deepEqual(getPaginationState(wrapper), {
+      current: 1,
+      total: 2,
+    });
+
+    act(() => {
+      wrapper.find('Pagination').prop('onChangePage')(2);
+    });
+    wrapper.update();
+    assert.calledWith(
+      fakeCallAPI,
+      '/api/groups/1234/members',
+      sinon.match({
+        offset: pageSize,
+        limit: pageSize,
+      }),
+    );
+
+    assert.deepEqual(getPaginationState(wrapper), {
+      current: 2,
+      total: 2,
+    });
   });
 
   it('displays error if member fetch fails', async () => {

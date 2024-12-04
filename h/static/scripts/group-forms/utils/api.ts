@@ -38,13 +38,14 @@ export type GroupMember = {
   roles: Role[];
 };
 
-export type PaginatedResponse<T> = {
+export type PaginatedResponse<Item> = {
   meta: {
     page: {
+      /** Total number of items in the collection. */
       total: number;
     };
   };
-  data: T[];
+  data: Item[];
 };
 
 /**
