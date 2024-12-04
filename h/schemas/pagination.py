@@ -11,6 +11,6 @@ class PaginationQueryParamsSchema(Schema):
     limit = SchemaNode(
         Integer(),
         name="page[limit]",
-        validator=Range(min=1, max=500),
-        missing=200,
+        validator=Range(min=1, max=100),
+        missing=20,
     )

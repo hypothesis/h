@@ -10,7 +10,7 @@ class TestPaginationQueryParamsSchema:
     @pytest.mark.parametrize(
         "input_,output",
         [
-            ({}, {"page[offset]": 0, "page[limit]": 200}),
+            ({}, {"page[offset]": 0, "page[limit]": 20}),
             (
                 {"page[offset]": 150, "page[limit]": 50},
                 {"page[offset]": 150, "page[limit]": 50},
@@ -31,8 +31,8 @@ class TestPaginationQueryParamsSchema:
             ),
             ({"page[limit]": 0}, r"^page\[limit\]: 0 is less than minimum value 1$"),
             (
-                {"page[limit]": 501},
-                r"^page\[limit\]: 501 is greater than maximum value 500$",
+                {"page[limit]": 101},
+                r"^page\[limit\]: 101 is greater than maximum value 100$",
             ),
             (
                 {"page[offset]": "foo", "page[limit]": "bar"},
