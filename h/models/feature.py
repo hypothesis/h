@@ -17,6 +17,7 @@ FEATURES = {
     "group_type": "Allow users to choose group type in new group forms",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
+    "at_mentions": "Allow mentioning other users in annotations",
 }
 
 
