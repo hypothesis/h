@@ -1,6 +1,5 @@
 import logging
 
-from pyramid.config import not_
 from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 from h.presenters import GroupMembershipJSONPresenter
@@ -21,41 +20,14 @@ from h.views.api.helpers.json_payload import json_payload
 log = logging.getLogger(__name__)
 
 
-LIST_MEMBERS_API_CONFIG = {
-    "versions": ["v1", "v2"],
-    "route_name": "api.group_members",
-    "request_method": "GET",
-    "link_name": "group.members.read",
-    "description": "Fetch a list of all members of a group",
-    "permission": Permission.Group.READ,
-}
-
-
-@api_config(request_param=not_("page[number]"), **LIST_MEMBERS_API_CONFIG)
-def list_members_legacy(context: GroupContext, request):
-    """Legacy version of the list-members API, maintained for backwards-compatibility."""
-
-    log.info(
-        "list_members_legacy() was called. User-Agent: %s, Referer: %s, pubid: %s",
-        request.headers.get("User-Agent"),
-        request.headers.get("Referer"),
-        context.group.pubid,
-    )
-
-    # Get the list of memberships from GroupMembersService instead of just
-    # accessing `context.memberships` because GroupMembersService returns the
-    # memberships explictly sorted by creation date then username whereas
-    # `context.memberships` is unsorted.
-    group_members_service = request.find_service(name="group_members")
-    memberships = group_members_service.get_memberships(context.group)
-
-    return [
-        GroupMembershipJSONPresenter(request, membership).asdict()
-        for membership in memberships
-    ]
-
-
-@api_config(request_param="page[number]", **LIST_MEMBERS_API_CONFIG)
+@api_config(
+    versions=["v1", "v2"],
+    route_name="api.group_members",
+    request_method="GET",
+    link_name="group.members.read",
+    description="Fetch a list of all members of a group",
+    permission=Permission.Group.READ,
+)
 def list_members(context: GroupContext, request):
     group = context.group
     group_members_service = request.find_service(name="group_members")

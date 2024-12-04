@@ -20,55 +20,6 @@ from h.traversal import (
 from h.views.api.exceptions import PayloadError
 
 
-class TestListMembersLegacy:
-    def test_it(
-        self,
-        context,
-        pyramid_request,
-        GroupMembershipJSONPresenter,
-        group_members_service,
-        caplog,
-    ):
-        pyramid_request.headers["User-Agent"] = sentinel.user_agent
-        pyramid_request.headers["Referer"] = sentinel.referer
-        group_members_service.get_memberships.return_value = [
-            sentinel.membership_1,
-            sentinel.membership_2,
-        ]
-
-        presenter_instances = GroupMembershipJSONPresenter.side_effect = [
-            create_autospec(
-                presenters.GroupMembershipJSONPresenter, instance=True, spec_set=True
-            ),
-            create_autospec(
-                presenters.GroupMembershipJSONPresenter, instance=True, spec_set=True
-            ),
-        ]
-
-        response = views.list_members_legacy(context, pyramid_request)
-
-        assert caplog.messages == [
-            f"list_members_legacy() was called. User-Agent: {sentinel.user_agent}, Referer: {sentinel.referer}, pubid: {context.group.pubid}"
-        ]
-        group_members_service.get_memberships.assert_called_once_with(context.group)
-        assert GroupMembershipJSONPresenter.call_args_list == [
-            call(pyramid_request, sentinel.membership_1),
-            call(pyramid_request, sentinel.membership_2),
-        ]
-        presenter_instances[0].asdict.assert_called_once_with()
-        presenter_instances[1].asdict.assert_called_once_with()
-        assert response == [
-            presenter_instances[0].asdict.return_value,
-            presenter_instances[1].asdict.return_value,
-        ]
-
-    @pytest.fixture
-    def context(self, factories):
-        return create_autospec(
-            GroupContext, instance=True, spec_set=True, group=factories.Group()
-        )
-
-
 class TestListMembers:
     def test_it(
         self,
