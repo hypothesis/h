@@ -68,7 +68,48 @@ def list_members(context: GroupContext, request):
         for membership in memberships
     ]
 
-    return {"meta": {"page": {"total": total}}, "data": membership_dicts}
+    offsets = range(0, total, limit)
+    first = request.route_url(
+        "api.group_members",
+        pubid=group.pubid,
+        _query={"page[offset]": 0, "page[limit]": limit},
+    )
+    last = request.route_url(
+        "api.group_members",
+        pubid=group.pubid,
+        _query={"page[offset]": offsets[-1], "page[limit]": limit},
+    )
+    if total > offset + limit:
+        next_ = request.route_url(
+            "api.group_members",
+            pubid=group.pubid,
+            _query={"page[offset]": offset + limit, "page[limit]": limit},
+        )
+    else:
+        next_ = None
+    if offset > 0:
+        prev = request.route_url(
+            "api.group_members",
+            pubid=group.pubid,
+            _query={"page[offset]": max(offset - limit, 0), "page[limit]": limit},
+        )
+    else:
+        prev = None
+
+    return {
+        "meta": {
+            "page": {
+                "total": total,
+            },
+        },
+        "links": {
+            "first": first,
+            "last": last,
+            "next": next_,
+            "prev": prev,
+        },
+        "data": membership_dicts,
+    }
 
 
 @api_config(

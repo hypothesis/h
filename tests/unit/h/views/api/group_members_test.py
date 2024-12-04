@@ -73,9 +73,10 @@ class TestListMembers:
         validate_query_params,
     ):
         pyramid_request.params = validate_query_params.return_value = {
-            "page[offset]": sentinel.offset,
-            "page[limit]": sentinel.limit,
+            "page[offset]": 42,
+            "page[limit]": 24,
         }
+        group_members_service.count_memberships.return_value = 75
         group_members_service.get_memberships.return_value = [
             sentinel.membership_1,
             sentinel.membership_2,
@@ -97,7 +98,7 @@ class TestListMembers:
         )
         group_members_service.count_memberships.assert_called_once_with(context.group)
         group_members_service.get_memberships.assert_called_once_with(
-            context.group, offset=sentinel.offset, limit=sentinel.limit
+            context.group, offset=42, limit=24
         )
         assert GroupMembershipJSONPresenter.call_args_list == [
             call(pyramid_request, sentinel.membership_1),
@@ -109,17 +110,87 @@ class TestListMembers:
             "meta": {
                 "page": {"total": group_members_service.count_memberships.return_value}
             },
+            "links": {
+                "first": pyramid_request.route_url(
+                    "api.group_members",
+                    pubid=context.group.pubid,
+                    _query={"page[offset]": 0, "page[limit]": 24},
+                ),
+                "last": pyramid_request.route_url(
+                    "api.group_members",
+                    pubid=context.group.pubid,
+                    _query={"page[offset]": 72, "page[limit]": 24},
+                ),
+                "next": pyramid_request.route_url(
+                    "api.group_members",
+                    pubid=context.group.pubid,
+                    _query={"page[offset]": 66, "page[limit]": 24},
+                ),
+                "prev": pyramid_request.route_url(
+                    "api.group_members",
+                    pubid=context.group.pubid,
+                    _query={"page[offset]": 18, "page[limit]": 24},
+                ),
+            },
             "data": [
                 presenter_instances[0].asdict.return_value,
                 presenter_instances[1].asdict.return_value,
             ],
         }
 
+    @pytest.mark.parametrize(
+        "num_members,offset,limit,expected_links",
+        [
+            # We're on the first page, so there's no previous page.
+            (100, 0, 10, {"first": 0, "last": 90, "next": 10, "prev": None}),
+            # We're on a middle page, so there are both next and previous pages.
+            (100, 40, 10, {"first": 0, "last": 90, "next": 50, "prev": 30}),
+            # We're on the last page, so there's no next page.
+            (100, 90, 10, {"first": 0, "last": 90, "next": None, "prev": 80}),
+            # Things get weird of the given offset isn't a multiple of the given limit.
+            (100, 2, 10, {"first": 0, "last": 90, "next": 12, "prev": 0}),
+            (100, 12, 10, {"first": 0, "last": 90, "next": 22, "prev": 2}),
+            (100, 92, 10, {"first": 0, "last": 90, "next": None, "prev": 82}),
+        ],
+    )
+    def test_links(
+        self,
+        context,
+        pyramid_request,
+        group_members_service,
+        validate_query_params,
+        num_members,
+        offset,
+        limit,
+        expected_links,
+    ):
+        group_members_service.count_memberships.return_value = num_members
+        validate_query_params.return_value = {
+            "page[offset]": offset,
+            "page[limit]": limit,
+        }
+
+        response = views.list_members(context, pyramid_request)
+
+        for link, expected_offset in expected_links.items():
+            if expected_offset is None:
+                assert response["links"][link] is None
+            else:
+                assert response["links"][link] == pyramid_request.route_url(
+                    "api.group_members",
+                    pubid=context.group.pubid,
+                    _query={"page[offset]": expected_offset, "page[limit]": limit},
+                )
+
     @pytest.fixture
     def context(self, factories):
         return create_autospec(
             GroupContext, instance=True, spec_set=True, group=factories.Group()
         )
+
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("api.group_members", "/api/groups/{pubid}/members")
 
 
 class TestRemoveMember:
