@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from h.models import GroupMembership
@@ -17,6 +19,8 @@ class TestGroupMembershipJSONPresenter:
             "display_name": user.display_name,
             "roles": membership.roles,
             "actions": [],
+            "created": "1970-01-01T00:00:00.000000+00:00",
+            "updated": "1970-01-01T00:00:01.000000+00:00",
         }
 
     def test_it_with_permissive_securitypolicy(
@@ -39,7 +43,18 @@ class TestGroupMembershipJSONPresenter:
                 "updates.roles.admin",
                 "updates.roles.owner",
             ],
+            "created": "1970-01-01T00:00:00.000000+00:00",
+            "updated": "1970-01-01T00:00:01.000000+00:00",
         }
+
+    def test_it_with_no_created_or_updated_times(self, membership, pyramid_request):
+        membership.created = None
+        membership.updated = None
+
+        json = GroupMembershipJSONPresenter(pyramid_request, membership).asdict()
+
+        assert json["created"] is None
+        assert json["updated"] is None
 
     @pytest.fixture
     def user(self, factories):
@@ -51,4 +66,9 @@ class TestGroupMembershipJSONPresenter:
 
     @pytest.fixture
     def membership(self, user, group):
-        return GroupMembership(user=user, group=group)
+        return GroupMembership(
+            user=user,
+            group=group,
+            created=datetime(1970, 1, 1, 0, 0, 0),
+            updated=datetime(1970, 1, 1, 0, 0, 1),
+        )

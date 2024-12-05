@@ -1,5 +1,6 @@
 import base64
 import logging
+from datetime import datetime
 
 import pytest
 from sqlalchemy import select
@@ -14,7 +15,11 @@ class TestListMembersLegacy:
     ):
         group = factories.RestrictedGroup(
             memberships=[
-                GroupMembership(user=user)
+                GroupMembership(
+                    user=user,
+                    created=datetime(1970, 1, 1, 0, 0, 0),
+                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                )
                 for user in factories.User.create_batch(size=3)
             ]
         )
@@ -37,6 +42,8 @@ class TestListMembersLegacy:
                 "display_name": membership.user.display_name,
                 "roles": membership.roles,
                 "actions": [],
+                "created": "1970-01-01T00:00:00.000000+00:00",
+                "updated": "1970-01-01T00:00:01.000000+00:00",
             }
             for membership in sorted(
                 group.memberships, key=lambda membership: membership.user.username
@@ -50,7 +57,18 @@ class TestListMembersLegacy:
         user, other_user = factories.User.create_batch(size=2)
         token = factories.DeveloperToken(user=user)
         group.memberships.extend(
-            [GroupMembership(user=user), GroupMembership(user=other_user)]
+            [
+                GroupMembership(
+                    user=user,
+                    created=datetime(1970, 1, 1, 0, 0, 0),
+                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                ),
+                GroupMembership(
+                    user=other_user,
+                    created=datetime(1971, 1, 1, 0, 0, 0),
+                    updated=datetime(1971, 1, 1, 0, 0, 1),
+                ),
+            ]
         )
         db_session.commit()
 
@@ -69,6 +87,8 @@ class TestListMembersLegacy:
                     "display_name": user.display_name,
                     "roles": [GroupMembershipRoles.MEMBER],
                     "actions": ["delete"],
+                    "created": "1970-01-01T00:00:00.000000+00:00",
+                    "updated": "1970-01-01T00:00:01.000000+00:00",
                 },
                 {
                     "authority": group.authority,
@@ -77,6 +97,8 @@ class TestListMembersLegacy:
                     "display_name": other_user.display_name,
                     "roles": [GroupMembershipRoles.MEMBER],
                     "actions": [],
+                    "created": "1971-01-01T00:00:00.000000+00:00",
+                    "updated": "1971-01-01T00:00:01.000000+00:00",
                 },
             ],
             key=lambda membership: membership["username"],
@@ -108,7 +130,11 @@ class TestListMembers:
     ):
         group = factories.RestrictedGroup(
             memberships=[
-                GroupMembership(user=user)
+                GroupMembership(
+                    user=user,
+                    created=datetime(1970, 1, 1, 0, 0, 0),
+                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                )
                 for user in factories.User.create_batch(size=4)
             ]
         )
@@ -131,6 +157,8 @@ class TestListMembers:
                     "display_name": membership.user.display_name,
                     "roles": membership.roles,
                     "actions": [],
+                    "created": "1970-01-01T00:00:00.000000+00:00",
+                    "updated": "1970-01-01T00:00:01.000000+00:00",
                 }
                 for membership in sorted(
                     group.memberships, key=lambda membership: membership.user.username
@@ -145,7 +173,18 @@ class TestListMembers:
         user, other_user = factories.User.create_batch(size=2)
         token = factories.DeveloperToken(user=user)
         group.memberships.extend(
-            [GroupMembership(user=user), GroupMembership(user=other_user)]
+            [
+                GroupMembership(
+                    user=user,
+                    created=datetime(1970, 1, 1, 0, 0, 0),
+                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                ),
+                GroupMembership(
+                    user=other_user,
+                    created=datetime(1971, 1, 1, 0, 0, 0),
+                    updated=datetime(1971, 1, 1, 0, 0, 1),
+                ),
+            ]
         )
         db_session.commit()
 
@@ -167,6 +206,8 @@ class TestListMembers:
                         "display_name": user.display_name,
                         "roles": [GroupMembershipRoles.MEMBER],
                         "actions": ["delete"],
+                        "created": "1970-01-01T00:00:00.000000+00:00",
+                        "updated": "1970-01-01T00:00:01.000000+00:00",
                     },
                     {
                         "authority": group.authority,
@@ -175,6 +216,8 @@ class TestListMembers:
                         "display_name": other_user.display_name,
                         "roles": [GroupMembershipRoles.MEMBER],
                         "actions": [],
+                        "created": "1971-01-01T00:00:00.000000+00:00",
+                        "updated": "1971-01-01T00:00:01.000000+00:00",
                     },
                 ],
                 key=lambda membership: membership["username"],
