@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime
+from operator import attrgetter
 from unittest import mock
 
 import pytest
@@ -39,9 +41,9 @@ class TestGetMemberships:
             [*memberships, GroupMembership(group=other_group, user=users[0])]
         )
 
-        assert list(group_members_service.get_memberships(group)) == sorted(
-            memberships, key=lambda membership: membership.user.username
-        )
+        assert sorted(
+            group_members_service.get_memberships(group), key=attrgetter("id")
+        ) == sorted(memberships, key=attrgetter("id"))
 
     def test_roles(self, group_members_service, db_session, factories):
         group = factories.Group.build()
@@ -60,11 +62,12 @@ class TestGetMemberships:
             ]
         )
 
-        assert list(
+        assert sorted(
             group_members_service.get_memberships(
                 group, roles=[GroupMembershipRoles.ADMIN]
-            )
-        ) == sorted(memberships, key=lambda membership: membership.user.username)
+            ),
+            key=attrgetter("id"),
+        ) == sorted(memberships, key=attrgetter("id"))
 
     def test_multiple_roles(self, group_members_service, db_session, factories):
         group = factories.Group.build()
@@ -88,12 +91,13 @@ class TestGetMemberships:
             ]
         )
 
-        assert list(
+        assert sorted(
             group_members_service.get_memberships(
                 group,
                 roles=[GroupMembershipRoles.ADMIN, GroupMembershipRoles.MODERATOR],
-            )
-        ) == sorted(memberships, key=lambda membership: membership.user.username)
+            ),
+            key=attrgetter("id"),
+        ) == sorted(memberships, key=attrgetter("id"))
 
     def test_offset_and_limit(self, group_members_service, db_session, factories):
         group = factories.Group()
@@ -106,9 +110,58 @@ class TestGetMemberships:
         )
 
         assert (
-            list(returned_memberships)
-            == sorted(memberships, key=lambda membership: membership.user.username)[1:3]
+            sorted(returned_memberships, key=attrgetter("id"))
+            == sorted(memberships, key=attrgetter("id"))[1:3]
         )
+
+    def test_order(self, group_members_service, db_session, factories):
+        group = factories.Group.build()
+        users = [
+            factories.User.build(username="user_0"),
+            factories.User.build(username="user_1"),
+            factories.User.build(username="user_2"),
+            factories.User.build(username="user_3"),
+        ]
+
+        def membership_with_no_created_time(**kwargs):
+            # The `default` in GroupMembership makes it hard to create a
+            # membership with created=None: it gets overridden with the current
+            # time when the DB session is flushed. So we have to do this...
+            membership = GroupMembership(**kwargs)
+            db_session.add(membership)
+            db_session.flush()
+            membership.created = None
+            return membership
+
+        memberships = [
+            GroupMembership(
+                group=group,
+                user=users[0],
+                created=datetime(1970, 1, 1, 0, 0, 1),
+            ),
+            GroupMembership(
+                group=group,
+                user=users[1],
+                created=datetime(1970, 1, 1, 0, 0, 0),
+            ),
+            membership_with_no_created_time(group=group, user=users[3]),
+            membership_with_no_created_time(group=group, user=users[2]),
+        ]
+        db_session.add_all(memberships)
+
+        returned_memberships = group_members_service.get_memberships(group)
+
+        assert [
+            (membership.created, membership.user.username)
+            for membership in returned_memberships
+        ] == [
+            # NULLs are first, ordered by username.
+            (None, "user_2"),
+            (None, "user_3"),
+            # Non-NULLs are ordered by created time, oldest first.
+            (datetime(1970, 1, 1, 0, 0, 0), "user_1"),
+            (datetime(1970, 1, 1, 0, 0, 1), "user_0"),
+        ]
 
 
 class TestCountMemberships:

@@ -17,10 +17,10 @@ class TestListMembersLegacy:
             memberships=[
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, 0),
-                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                    created=datetime(1970, 1, 1, 0, 0, second),
+                    updated=datetime(1970, 1, 2, 0, 0, second),
                 )
-                for user in factories.User.create_batch(size=3)
+                for second, user in enumerate(factories.User.create_batch(size=3))
             ]
         )
         db_session.commit()
@@ -42,12 +42,10 @@ class TestListMembersLegacy:
                 "display_name": membership.user.display_name,
                 "roles": membership.roles,
                 "actions": [],
-                "created": "1970-01-01T00:00:00.000000+00:00",
-                "updated": "1970-01-01T00:00:01.000000+00:00",
+                "created": f"1970-01-01T00:00:{second:02}.000000+00:00",
+                "updated": f"1970-01-02T00:00:{second:02}.000000+00:00",
             }
-            for membership in sorted(
-                group.memberships, key=lambda membership: membership.user.username
-            )
+            for second, membership in enumerate(group.memberships)
         ]
 
     def test_it_returns_list_of_members_if_user_has_access_to_private_group(
@@ -65,8 +63,8 @@ class TestListMembersLegacy:
                 ),
                 GroupMembership(
                     user=other_user,
-                    created=datetime(1971, 1, 1, 0, 0, 0),
-                    updated=datetime(1971, 1, 1, 0, 0, 1),
+                    created=datetime(1971, 1, 2, 0, 0, 0),
+                    updated=datetime(1971, 1, 2, 0, 0, 1),
                 ),
             ]
         )
@@ -78,31 +76,28 @@ class TestListMembersLegacy:
         )
 
         assert res.status_code == 200
-        assert res.json == sorted(
-            [
-                {
-                    "authority": group.authority,
-                    "userid": user.userid,
-                    "username": user.username,
-                    "display_name": user.display_name,
-                    "roles": [GroupMembershipRoles.MEMBER],
-                    "actions": ["delete"],
-                    "created": "1970-01-01T00:00:00.000000+00:00",
-                    "updated": "1970-01-01T00:00:01.000000+00:00",
-                },
-                {
-                    "authority": group.authority,
-                    "userid": other_user.userid,
-                    "username": other_user.username,
-                    "display_name": other_user.display_name,
-                    "roles": [GroupMembershipRoles.MEMBER],
-                    "actions": [],
-                    "created": "1971-01-01T00:00:00.000000+00:00",
-                    "updated": "1971-01-01T00:00:01.000000+00:00",
-                },
-            ],
-            key=lambda membership: membership["username"],
-        )
+        assert res.json == [
+            {
+                "authority": group.authority,
+                "userid": user.userid,
+                "username": user.username,
+                "display_name": user.display_name,
+                "roles": [GroupMembershipRoles.MEMBER],
+                "actions": ["delete"],
+                "created": "1970-01-01T00:00:00.000000+00:00",
+                "updated": "1970-01-01T00:00:01.000000+00:00",
+            },
+            {
+                "authority": group.authority,
+                "userid": other_user.userid,
+                "username": other_user.username,
+                "display_name": other_user.display_name,
+                "roles": [GroupMembershipRoles.MEMBER],
+                "actions": [],
+                "created": "1971-01-02T00:00:00.000000+00:00",
+                "updated": "1971-01-02T00:00:01.000000+00:00",
+            },
+        ]
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(
         self, app, db_session, factories
@@ -132,10 +127,10 @@ class TestListMembers:
             memberships=[
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, 0),
-                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                    created=datetime(1970, 1, 1, 0, 0, second),
+                    updated=datetime(1970, 1, 2, 0, 0, second),
                 )
-                for user in factories.User.create_batch(size=4)
+                for second, user in enumerate(factories.User.create_batch(size=4))
             ]
         )
         db_session.commit()
@@ -157,12 +152,10 @@ class TestListMembers:
                     "display_name": membership.user.display_name,
                     "roles": membership.roles,
                     "actions": [],
-                    "created": "1970-01-01T00:00:00.000000+00:00",
-                    "updated": "1970-01-01T00:00:01.000000+00:00",
+                    "created": f"1970-01-01T00:00:{second:02}.000000+00:00",
+                    "updated": f"1970-01-02T00:00:{second:02}.000000+00:00",
                 }
-                for membership in sorted(
-                    group.memberships, key=lambda membership: membership.user.username
-                )[1:3]
+                for second, membership in list(enumerate(group.memberships))[1:3]
             ],
         }
 
@@ -181,8 +174,8 @@ class TestListMembers:
                 ),
                 GroupMembership(
                     user=other_user,
-                    created=datetime(1971, 1, 1, 0, 0, 0),
-                    updated=datetime(1971, 1, 1, 0, 0, 1),
+                    created=datetime(1971, 1, 2, 0, 0, 0),
+                    updated=datetime(1971, 1, 2, 0, 0, 1),
                 ),
             ]
         )
@@ -197,31 +190,28 @@ class TestListMembers:
         assert res.status_code == 200
         assert res.json == {
             "meta": {"page": {"total": 2}},
-            "data": sorted(
-                [
-                    {
-                        "authority": group.authority,
-                        "userid": user.userid,
-                        "username": user.username,
-                        "display_name": user.display_name,
-                        "roles": [GroupMembershipRoles.MEMBER],
-                        "actions": ["delete"],
-                        "created": "1970-01-01T00:00:00.000000+00:00",
-                        "updated": "1970-01-01T00:00:01.000000+00:00",
-                    },
-                    {
-                        "authority": group.authority,
-                        "userid": other_user.userid,
-                        "username": other_user.username,
-                        "display_name": other_user.display_name,
-                        "roles": [GroupMembershipRoles.MEMBER],
-                        "actions": [],
-                        "created": "1971-01-01T00:00:00.000000+00:00",
-                        "updated": "1971-01-01T00:00:01.000000+00:00",
-                    },
-                ],
-                key=lambda membership: membership["username"],
-            ),
+            "data": [
+                {
+                    "authority": group.authority,
+                    "userid": user.userid,
+                    "username": user.username,
+                    "display_name": user.display_name,
+                    "roles": [GroupMembershipRoles.MEMBER],
+                    "actions": ["delete"],
+                    "created": "1970-01-01T00:00:00.000000+00:00",
+                    "updated": "1970-01-01T00:00:01.000000+00:00",
+                },
+                {
+                    "authority": group.authority,
+                    "userid": other_user.userid,
+                    "username": other_user.username,
+                    "display_name": other_user.display_name,
+                    "roles": [GroupMembershipRoles.MEMBER],
+                    "actions": [],
+                    "created": "1971-01-02T00:00:00.000000+00:00",
+                    "updated": "1971-01-02T00:00:01.000000+00:00",
+                },
+            ],
         }
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(

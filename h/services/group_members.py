@@ -1,7 +1,7 @@
 import logging
 from functools import partial
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, nulls_first, or_, select
 
 from h import session
 from h.models import Group, GroupMembership, GroupMembershipRoles, User
@@ -53,7 +53,7 @@ class GroupMembersService:
             select(GroupMembership)
             .join(User)
             .where(GroupMembership.group == group)
-            .order_by(User.username)
+            .order_by(nulls_first(GroupMembership.created), User.username)
         )
 
         if roles:
