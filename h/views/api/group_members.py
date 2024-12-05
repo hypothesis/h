@@ -38,8 +38,8 @@ def list_members_legacy(context: GroupContext, request):
 
     # Get the list of memberships from GroupMembersService instead of just
     # accessing `context.memberships` because GroupMembersService returns the
-    # memberships explictly sorted by username whereas `context.memberships` is
-    # unsorted.
+    # memberships explictly sorted by creation date then username whereas
+    # `context.memberships` is unsorted.
     group_members_service = request.find_service(name="group_members")
     memberships = group_members_service.get_memberships(context.group)
 
