@@ -4,6 +4,7 @@ from h.traversal.group_membership import (
     EditGroupMembershipContext,
     GroupMembershipContext,
 )
+from h.util.datetime import utc_iso8601
 
 
 class GroupMembershipJSONPresenter:
@@ -19,6 +20,8 @@ class GroupMembershipJSONPresenter:
             "display_name": self.membership.user.display_name,
             "roles": self.membership.roles,
             "actions": [],
+            "created": utc_iso8601(self.membership.created),
+            "updated": utc_iso8601(self.membership.updated),
         }
 
         if self.request.has_permission(
