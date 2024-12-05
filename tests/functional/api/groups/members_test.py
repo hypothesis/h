@@ -357,7 +357,7 @@ class TestAddMember:
 
     @pytest.fixture
     def do_request(self, db_session, app, group, user, headers):
-        def do_request(pubid=group.pubid, userid=user.userid, status=204):
+        def do_request(pubid=group.pubid, userid=user.userid, status=200):
             db_session.commit()
             return app.post_json(
                 f"/api/groups/{pubid}/members/{userid}", headers=headers, status=status

@@ -141,13 +141,23 @@ class TestRemoveMember:
 
 @pytest.mark.usefixtures("group_members_service")
 class TestAddMember:
-    def test_it(self, pyramid_request, group_members_service, context):
+    def test_it(
+        self,
+        pyramid_request,
+        group_members_service,
+        context,
+        GroupMembershipJSONPresenter,
+    ):
         response = views.add_member(context, pyramid_request)
 
         group_members_service.member_join.assert_called_once_with(
             context.group, context.user.userid
         )
-        assert isinstance(response, HTTPNoContent)
+        GroupMembershipJSONPresenter.assert_called_once_with(
+            pyramid_request, group_members_service.member_join.return_value
+        )
+        GroupMembershipJSONPresenter.return_value.asdict.assert_called_once_with()
+        assert response == GroupMembershipJSONPresenter.return_value.asdict.return_value
 
     def test_it_with_authority_mismatch(self, pyramid_request, context):
         context.group.authority = "other"
