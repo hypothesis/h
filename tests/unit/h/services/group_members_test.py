@@ -183,16 +183,32 @@ class TestMemberJoin:
         caplog.set_level(logging.INFO)
         user = factories.User()
         group = factories.Group()
-        returned = group_members_service.member_join(group, user.userid)
+
+        returned = group_members_service.member_join(
+            group, user.userid, roles=[GroupMembershipRoles.OWNER]
+        )
 
         membership = db_session.scalars(
             select(GroupMembership)
             .where(GroupMembership.user == user)
             .where(GroupMembership.group == group)
         ).one_or_none()
-        assert membership
+        assert membership.roles == [GroupMembershipRoles.OWNER]
         assert returned == membership
         assert caplog.messages == [f"Added group membership: {membership!r}"]
+
+    def test_it_with_no_role(self, group_members_service, factories, db_session):
+        user = factories.User()
+        group = factories.Group()
+
+        group_members_service.member_join(group, user.userid)
+
+        membership = db_session.scalars(
+            select(GroupMembership)
+            .where(GroupMembership.user == user)
+            .where(GroupMembership.group == group)
+        ).one_or_none()
+        assert membership.roles == [GroupMembershipRoles.MEMBER]
 
     def test_it_is_idempotent(self, group_members_service, factories):
         user = factories.User()

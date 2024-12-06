@@ -261,10 +261,22 @@ class TestListMembers:
 
 
 class TestAddMember:
-    def test_it(self, do_request, group, user):
-        do_request()
+    @pytest.mark.parametrize(
+        "json,expected_roles",
+        [
+            ({"roles": ["owner"]}, ["owner"]),
+            (None, ["member"]),
+        ],
+    )
+    def test_it(self, do_request, group, user, json, expected_roles):
+        do_request(json=json)
 
-        assert user in group.members
+        for membership in group.memberships:
+            if membership.user == user:
+                assert membership.roles == expected_roles
+                break
+        else:
+            assert False, "No membership was created"
 
     def test_it_does_nothing_if_the_user_is_already_a_member_of_the_group(
         self, do_request, group, user
@@ -357,11 +369,14 @@ class TestAddMember:
 
     @pytest.fixture
     def do_request(self, db_session, app, group, user, headers):
-        def do_request(pubid=group.pubid, userid=user.userid, status=200):
+        def do_request(pubid=group.pubid, userid=user.userid, status=200, json=None):
             db_session.commit()
-            return app.post_json(
-                f"/api/groups/{pubid}/members/{userid}", headers=headers, status=status
-            )
+            path = f"/api/groups/{pubid}/members/{userid}"
+
+            if json is None:
+                return app.post(path, headers=headers, status=status)
+            else:
+                return app.post_json(path, json, headers=headers, status=status)
 
         return do_request
 

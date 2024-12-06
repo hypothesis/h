@@ -99,9 +99,19 @@ def add_member(context: GroupMembershipContext, request):
     if context.user.authority != context.group.authority:
         raise HTTPNotFound()
 
+    if request.body:
+        appstruct = EditGroupMembershipAPISchema().validate(json_payload(request))
+        roles = appstruct["roles"]
+    else:
+        # This doesn't mean the membership will be created with no roles:
+        # there's a server_default in the DB schema that will be applied.
+        roles = None
+
     group_members_service = request.find_service(name="group_members")
 
-    membership = group_members_service.member_join(context.group, context.user.userid)
+    membership = group_members_service.member_join(
+        context.group, context.user.userid, roles
+    )
 
     return GroupMembershipJSONPresenter(request, membership).asdict()
 

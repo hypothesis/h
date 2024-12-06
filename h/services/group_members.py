@@ -111,8 +111,9 @@ class GroupMembersService:
         for userid in userids_for_removal:
             self.member_leave(group, userid)
 
-    def member_join(self, group, userid) -> GroupMembership:
+    def member_join(self, group, userid, roles=None) -> GroupMembership:
         """Add `userid` to the member list of `group`."""
+
         user = self.user_fetcher(userid)
 
         existing_membership = self.get_membership(group, user)
@@ -121,7 +122,12 @@ class GroupMembersService:
             # The user is already a member of the group.
             return existing_membership
 
-        membership = GroupMembership(group=group, user=user)
+        kwargs = {"group": group, "user": user}
+
+        if roles is not None:
+            kwargs["roles"] = roles
+
+        membership = GroupMembership(**kwargs)
         self.db.add(membership)
 
         # Flush the DB to generate SQL defaults for `membership` before logging it.
