@@ -6,12 +6,13 @@ import {
   Pagination,
   Select,
 } from '@hypothesis/frontend-shared';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
 import type { GroupMember, GroupMembersResponse, Role } from '../utils/api';
 import { callAPI } from '../utils/api';
+import type { APIError } from '../utils/api';
 import FormContainer from './forms/FormContainer';
 import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
@@ -180,9 +181,18 @@ export default function EditGroupMembersForm({
   const [totalMembers, setTotalMembers] = useState<number | null>(null);
   const totalPages =
     totalMembers !== null ? Math.ceil(totalMembers / pageSize) : null;
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const setError = useCallback((context: string, err: Error) => {
+    const apiErr = err as APIError;
+    if (apiErr.aborted) {
+      return;
+    }
+    const message = `${context}: ${err.message}`;
+    setErrorMessage(message);
+  }, []);
 
   // Fetch group members when the form loads.
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [members, setMembers] = useState<MemberRow[] | null>(null);
   useEffect(() => {
     // istanbul ignore next
@@ -201,12 +211,12 @@ export default function EditGroupMembersForm({
         setTotalMembers(total);
       })
       .catch(err => {
-        setErrorMessage(`Failed to fetch group members: ${err.message}`);
+        setError('Failed to fetch group members', err);
       });
     return () => {
       abort.abort();
     };
-  }, [config.api.readGroupMembers, currentUserid, pageIndex]);
+  }, [config.api.readGroupMembers, currentUserid, pageIndex, setError]);
 
   const columns: TableColumn<MemberRow>[] = [
     {
@@ -256,7 +266,7 @@ export default function EditGroupMembersForm({
       );
     } catch (err) {
       updateMember(member.userid, { busy: false });
-      setErrorMessage(err.message);
+      setError('Failed to remove member', err);
     }
   };
 
@@ -274,7 +284,7 @@ export default function EditGroupMembersForm({
     } catch (err) {
       const prevRole = member.role;
       updateMember(member.userid, { role: prevRole, busy: false });
-      setErrorMessage(err.message);
+      setError('Failed to change member role', err);
     }
   };
 
