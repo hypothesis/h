@@ -1,7 +1,13 @@
-import { mount, waitFor, waitForElement } from '@hypothesis/frontend-testing';
+import {
+  delay,
+  mount,
+  waitFor,
+  waitForElement,
+} from '@hypothesis/frontend-testing';
 import { Select } from '@hypothesis/frontend-shared';
 import { act } from 'preact/test-utils';
 
+import { APIError } from '../../utils/api';
 import { Config } from '../../config';
 import {
   $imports,
@@ -201,6 +207,15 @@ describe('EditGroupMembersForm', () => {
     );
   };
 
+  /** Construct an APIError corresponding to an aborted request. */
+  const abortError = () => {
+    const abortError = new Error('Aborted');
+    abortError.name = 'AbortError';
+    return new APIError('Something went wrong', {
+      cause: abortError,
+    });
+  };
+
   it('fetches and displays members', async () => {
     const wrapper = createForm();
     assert.calledWith(
@@ -293,6 +308,19 @@ describe('EditGroupMembersForm', () => {
     );
   });
 
+  // Don't show an error if fetching members is canceled due to a navigation
+  // (eg. page change) happening during the fetch.
+  it('does not display error if member fetch is aborted', async () => {
+    fakeCallAPI.withArgs('/api/groups/1234/members').rejects(abortError());
+    const wrapper = createForm();
+
+    await delay(0);
+
+    wrapper.update();
+    assert.equal(wrapper.find('ErrorNotice').prop('message'), null);
+    assert.deepEqual(getRenderedUsernames(wrapper), []);
+  });
+
   it('handles member fetch being canceled', () => {
     const wrapper = createForm();
     assert.calledWith(fakeCallAPI, '/api/groups/1234/members');
@@ -371,7 +399,10 @@ describe('EditGroupMembersForm', () => {
 
     await waitForError(wrapper);
     const error = wrapper.find('ErrorNotice');
-    assert.equal(error.prop('message'), 'User not found');
+    assert.equal(
+      error.prop('message'),
+      'Failed to remove member: User not found',
+    );
 
     // Controls should be re-enabled after saving fails.
     assert.include(getRenderedUsernames(wrapper), '@bob');
@@ -470,7 +501,10 @@ describe('EditGroupMembersForm', () => {
     // Wait for the role change to fail. An error should be displayed.
     await waitForError(wrapper);
     const error = wrapper.find('ErrorNotice');
-    assert.equal(error.prop('message'), 'Invalid role');
+    assert.equal(
+      error.prop('message'),
+      'Failed to change member role: Invalid role',
+    );
 
     // The displayed role should revert to the original value.
     wrapper.update();

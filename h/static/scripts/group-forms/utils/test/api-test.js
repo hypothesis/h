@@ -9,7 +9,7 @@ describe('callAPI', () => {
   });
 
   afterEach(() => {
-    window.fetch.restore();
+    window.fetch.restore?.();
   });
 
   context('when the API responds successfully', () => {
@@ -136,6 +136,23 @@ describe('callAPI', () => {
     await callAPI(url, { offset, limit });
 
     assert.calledWith(fakeFetch, paginatedURL.toString());
+  });
+
+  it('rejects with aborted APIError if request is aborted', async () => {
+    window.fetch.restore();
+
+    const ac = new AbortController();
+    ac.abort();
+
+    let error;
+    try {
+      await callAPI(url, { signal: ac.signal });
+    } catch (e) {
+      error = e;
+    }
+
+    assert.instanceOf(error, APIError);
+    assert.isTrue(error.aborted);
   });
 
   [

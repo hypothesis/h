@@ -87,6 +87,14 @@ export class APIError extends Error {
     this.response = response;
     this.json = json;
   }
+
+  /**
+   * Property that is true if the API call failed because the operation was
+   * aborted.
+   */
+  get aborted() {
+    return this.cause?.name === 'AbortError';
+  }
 }
 
 export type APIOptions = {
