@@ -96,14 +96,14 @@ def remove_member(context: GroupMembershipContext, request):
     permission=Permission.Group.MEMBER_ADD,
 )
 def add_member(context: GroupMembershipContext, request):
-    group_members_service = request.find_service(name="group_members")
-
     if context.user.authority != context.group.authority:
         raise HTTPNotFound()
 
-    group_members_service.member_join(context.group, context.user.userid)
+    group_members_service = request.find_service(name="group_members")
 
-    return HTTPNoContent()
+    membership = group_members_service.member_join(context.group, context.user.userid)
+
+    return GroupMembershipJSONPresenter(request, membership).asdict()
 
 
 @api_config(
