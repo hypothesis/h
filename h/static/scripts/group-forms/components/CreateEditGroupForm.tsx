@@ -229,7 +229,7 @@ export default function CreateEditGroupForm({
   };
 
   return (
-    <FormContainer title={heading}>
+    <FormContainer title={heading} classes="max-w-[530px] mx-auto">
       {group && config.features.group_members && (
         <GroupFormHeader group={group} />
       )}
