@@ -8,9 +8,7 @@
 
 {% block content %}
   <div class="content paper">
-    <div class="form-container">
-      {% include "h:templates/includes/flash-messages.html.jinja2" %}
-      {{ self.page_content() }}
-    </div>
+    {% include "h:templates/includes/flash-messages.html.jinja2" %}
+    {{ self.page_content() }}
   </div>
 {% endblock content %}
