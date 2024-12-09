@@ -41,6 +41,9 @@ type MemberRow = {
 
   /** True if an operation is currently being performed against this member. */
   busy: boolean;
+
+  /** Date when user joined group, if known. */
+  joined?: Date;
 };
 
 /**
@@ -72,6 +75,7 @@ function memberToRow(member: GroupMember, currentUserid: string): MemberRow {
     role,
     availableRoles,
     busy: false,
+    joined: member.created ? new Date(member.created) : undefined,
   };
 }
 
@@ -164,15 +168,25 @@ function RoleSelect({
   );
 }
 
+const defaultDateFormatter = new Intl.DateTimeFormat(undefined, {
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit',
+});
+
 export const pageSize = 20;
 
 export type EditGroupMembersFormProps = {
   /** The saved group details. */
   group: Group;
+
+  /** Test seam. Formatter used to format the "Joined" date. */
+  dateFormatter?: Intl.DateTimeFormat;
 };
 
 export default function EditGroupMembersForm({
   group,
+  dateFormatter = defaultDateFormatter,
 }: EditGroupMembersFormProps) {
   const config = useContext(Config)!;
   const currentUserid = config.context.user.userid;
@@ -226,6 +240,12 @@ export default function EditGroupMembersForm({
     {
       field: 'role',
       label: 'Role',
+      classes: 'w-40',
+    },
+    {
+      field: 'joined',
+      label: 'Joined',
+      classes: 'w-36',
     },
     {
       field: 'showDeleteAction',
@@ -270,81 +290,93 @@ export default function EditGroupMembersForm({
     }
   };
 
-  const changeRole = async (member: MemberRow, role: Role) => {
-    updateMember(member.userid, { role, busy: true });
-    try {
-      const updatedMember = await setMemberRoles(
-        config.api.editGroupMember!,
-        member.userid,
-        [role],
-      );
-      // Update the member row in case the role change affected other columns
-      // (eg. whether we have permission to delete the user).
-      updateMember(member.userid, memberToRow(updatedMember, currentUserid));
-    } catch (err) {
-      const prevRole = member.role;
-      updateMember(member.userid, { role: prevRole, busy: false });
-      setError('Failed to change member role', err);
-    }
-  };
-
-  const renderRow = (user: MemberRow, field: keyof MemberRow) => {
-    switch (field) {
-      case 'username':
-        return (
-          <div className="truncate" title={user.username}>
-            <span data-testid="username" className="font-bold text-grey-7">
-              @{user.username}
-            </span>
-            {user.displayName && (
-              <span data-testid="display-name">
-                {
-                  // Create space using a separate element, rather than eg.
-                  // `inline-block ml-3` on the display name container because
-                  // that would cause the entire display name to be hidden if
-                  // truncated.
-                  <span className="inline-block w-3" />
-                }
-                {user.displayName}
-              </span>
-            )}
-          </div>
+  const changeRole = useCallback(
+    async (member: MemberRow, role: Role) => {
+      updateMember(member.userid, { role, busy: true });
+      try {
+        const updatedMember = await setMemberRoles(
+          config.api.editGroupMember!,
+          member.userid,
+          [role],
         );
-      case 'role':
-        if (user.availableRoles.length <= 1) {
+        // Update the member row in case the role change affected other columns
+        // (eg. whether we have permission to delete the user).
+        updateMember(member.userid, memberToRow(updatedMember, currentUserid));
+      } catch (err) {
+        const prevRole = member.role;
+        updateMember(member.userid, { role: prevRole, busy: false });
+        setError('Failed to change member role', err);
+      }
+    },
+    [currentUserid, config.api.editGroupMember, setError],
+  );
+
+  const renderRow = useCallback(
+    (user: MemberRow, field: keyof MemberRow) => {
+      switch (field) {
+        case 'username':
           return (
-            // Left padding here aligns the static role label in this row with
-            // the current role in dropdowns in other rows.
-            <span className="pl-2" data-testid={`role-${user.username}`}>
-              {roleStrings[user.role]}
+            <div className="truncate" title={user.username}>
+              <span data-testid="username" className="font-bold text-grey-7">
+                @{user.username}
+              </span>
+              {user.displayName && (
+                <span data-testid="display-name">
+                  {
+                    // Create space using a separate element, rather than eg.
+                    // `inline-block ml-3` on the display name container because
+                    // that would cause the entire display name to be hidden if
+                    // truncated.
+                    <span className="inline-block w-3" />
+                  }
+                  {user.displayName}
+                </span>
+              )}
+            </div>
+          );
+        case 'role':
+          if (user.availableRoles.length <= 1) {
+            return (
+              // Left padding here aligns the static role label in this row with
+              // the current role in dropdowns in other rows.
+              <span className="pl-2" data-testid={`role-${user.username}`}>
+                {roleStrings[user.role]}
+              </span>
+            );
+          }
+          return (
+            <RoleSelect
+              username={user.username}
+              current={user.role}
+              available={user.availableRoles}
+              onChange={role => changeRole(user, role)}
+              disabled={user.busy}
+            />
+          );
+        case 'joined':
+          return (
+            <span data-testid={`joined-${user.username}`}>
+              {user.joined && dateFormatter.format(user.joined)}
             </span>
           );
-        }
-        return (
-          <RoleSelect
-            username={user.username}
-            current={user.role}
-            available={user.availableRoles}
-            onChange={role => changeRole(user, role)}
-            disabled={user.busy}
-          />
-        );
-      case 'showDeleteAction':
-        return user.showDeleteAction ? (
-          <IconButton
-            classes={user.busy ? 'opacity-50' : ''}
-            disabled={user.busy}
-            icon={TrashIcon}
-            title="Remove member"
-            data-testid={`remove-${user.username}`}
-            onClick={() => setPendingRemoval(user.username)}
-          />
-        ) : null;
-      // istanbul ignore next
-      default:
-        return null;
-    }
-  };
+        case 'showDeleteAction':
+          return user.showDeleteAction ? (
+            <IconButton
+              classes={user.busy ? 'opacity-50' : ''}
+              disabled={user.busy}
+              icon={TrashIcon}
+              title="Remove member"
+              data-testid={`remove-${user.username}`}
+              onClick={() => setPendingRemoval(user.username)}
+            />
+          ) : null;
+        // istanbul ignore next
+        default:
+          return null;
+      }
+    },
+    [changeRole, dateFormatter],
+  );
 
   return (
     <>
