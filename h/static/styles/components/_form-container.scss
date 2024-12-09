@@ -18,6 +18,10 @@
     padding-right: $h-padding;
   }
 
+  .form-container--wide {
+    max-width: 700px;
+  }
+
   .form-container--popup {
     max-width: #{340px + ($h-padding * 2)};
   }
