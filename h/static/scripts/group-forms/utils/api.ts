@@ -6,6 +6,9 @@ export type GroupType = 'private' | 'restricted' | 'open';
 /** Member role within a group. */
 export type Role = 'owner' | 'admin' | 'moderator' | 'member';
 
+/** A date and time in ISO format (eg. "2024-12-09T07:17:52+00:00") */
+export type ISODateTime = string;
+
 /**
  * Request to create or update a group.
  *
@@ -36,6 +39,12 @@ export type GroupMember = {
   username: string;
   actions: string[];
   roles: Role[];
+
+  /** Timestamp when user joined group. `null` if before Dec 2024. */
+  created: ISODateTime | null;
+
+  /** Timestamp when membership was last updated. `null` if before Dec 2024. */
+  updated: ISODateTime | null;
 };
 
 export type PaginatedResponse<Item> = {

@@ -11,6 +11,7 @@ import {
 
 describe('EditGroupMembersForm', () => {
   let config;
+  let dateFormatter;
   let fakeCallAPI;
 
   const defaultMembers = [
@@ -25,6 +26,9 @@ describe('EditGroupMembersForm', () => {
         'updates.roles.member',
       ],
       roles: ['admin'],
+
+      // User who joined before Dec 2024
+      created: null,
     },
     {
       userid: 'acct:johnsmith@localhost',
@@ -32,6 +36,7 @@ describe('EditGroupMembersForm', () => {
       display_name: 'John Smith',
       actions: [],
       roles: ['owner'],
+      created: '2024-01-01T01:02:03+00:00',
     },
     {
       userid: 'acct:jane@localhost',
@@ -43,6 +48,7 @@ describe('EditGroupMembersForm', () => {
         'updates.roles.member',
       ],
       roles: ['admin'],
+      created: '2024-01-02T01:02:03+00:00',
     },
   ];
 
@@ -88,6 +94,13 @@ describe('EditGroupMembersForm', () => {
       },
     };
 
+    dateFormatter = {
+      format(date) {
+        // Return date in YYYY-MM-DD format.
+        return date.toISOString().match(/[0-9-]+/)[0];
+      },
+    };
+
     fakeCallAPI = sinon.stub();
     fakeCallAPI.rejects(new Error('Unknown API call'));
     fakeCallAPI
@@ -127,7 +140,11 @@ describe('EditGroupMembersForm', () => {
   const createForm = (props = {}) => {
     return mount(
       <Config.Provider value={config}>
-        <EditGroupMembersForm group={config.context.group} {...props} />
+        <EditGroupMembersForm
+          group={config.context.group}
+          dateFormatter={dateFormatter}
+          {...props}
+        />
       </Config.Provider>,
       { connected: true },
     );
@@ -150,6 +167,10 @@ describe('EditGroupMembersForm', () => {
     return wrapper
       .find('[data-testid="display-name"]')
       .map(node => node.text());
+  };
+
+  const getRenderedJoinDate = (wrapper, username) => {
+    return wrapper.find(`[data-testid="joined-${username}"]`).text();
   };
 
   const getRemoveUserButton = (wrapper, username) => {
@@ -221,6 +242,10 @@ describe('EditGroupMembersForm', () => {
 
     const displayNames = getRenderedDisplayNames(wrapper);
     assert.deepEqual(displayNames, ['Bob Jones', 'John Smith']);
+
+    assert.equal(getRenderedJoinDate(wrapper, 'bob'), 'Before Dec 2024');
+    assert.equal(getRenderedJoinDate(wrapper, 'johnsmith'), '2024-01-01');
+    assert.equal(getRenderedJoinDate(wrapper, 'jane'), '2024-01-02');
   });
 
   [
