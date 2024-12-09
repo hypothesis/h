@@ -91,7 +91,7 @@ colander==2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-coverage[toml]==7.6.8
+coverage[toml]==7.6.9
     # via
     #   -r requirements/tests.txt
     #   pytest-cov
