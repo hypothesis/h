@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 import h.views.api.group_members as views
 from h import presenters
-from h.models import GroupMembership
+from h.models import GroupMembership, GroupMembershipRoles
 from h.schemas.base import ValidationError
 from h.security import Permission
 from h.security.identity import Identity, LongLivedGroup, LongLivedMembership
@@ -155,21 +155,34 @@ class TestAddMember:
         context,
         GroupMembershipJSONPresenter,
         EditGroupMembershipAPISchema,
+        mocker,
     ):
+        has_permission = mocker.spy(pyramid_request, "has_permission")
+
         response = views.add_member(context, pyramid_request)
 
         EditGroupMembershipAPISchema.assert_called_once_with()
         EditGroupMembershipAPISchema.return_value.validate.assert_called_once_with(
             sentinel.json_body
         )
+        assert context.new_roles == sentinel.new_roles
+        has_permission.assert_called_once_with(Permission.Group.MEMBER_ADD, context)
         group_members_service.member_join.assert_called_once_with(
-            context.group, context.user.userid, roles=sentinel.roles
+            context.group, context.user.userid, roles=sentinel.new_roles
         )
         GroupMembershipJSONPresenter.assert_called_once_with(
             pyramid_request, group_members_service.member_join.return_value
         )
         GroupMembershipJSONPresenter.return_value.asdict.assert_called_once_with()
         assert response == GroupMembershipJSONPresenter.return_value.asdict.return_value
+
+    def test_it_errors_if_the_user_doesnt_have_permission(
+        self, context, pyramid_request, pyramid_config
+    ):
+        pyramid_config.testing_securitypolicy(permissive=False)
+
+        with pytest.raises(HTTPNotFound):
+            views.add_member(context, pyramid_request)
 
     def test_it_with_no_request_body(
         self,
@@ -184,7 +197,7 @@ class TestAddMember:
 
         EditGroupMembershipAPISchema.assert_not_called()
         group_members_service.member_join.assert_called_once_with(
-            context.group, context.user.userid, roles=None
+            context.group, context.user.userid, roles=[GroupMembershipRoles.MEMBER]
         )
 
     def test_it_when_a_conflicting_membership_already_exists(
@@ -234,7 +247,7 @@ class TestAddMember:
     @pytest.fixture
     def EditGroupMembershipAPISchema(self, EditGroupMembershipAPISchema):
         EditGroupMembershipAPISchema.return_value.validate.return_value = {
-            "roles": sentinel.roles
+            "roles": sentinel.new_roles
         }
         return EditGroupMembershipAPISchema
 

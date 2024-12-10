@@ -47,6 +47,10 @@ class GroupMembershipRoles(enum.StrEnum):
     OWNER = "owner"
 
 
+DEFAULT_ROLES = [GroupMembershipRoles.MEMBER]
+"""The default roles to be used when creating new memberships."""
+
+
 class GroupMembership(Base):
     __tablename__ = "user_group"
 

@@ -13,6 +13,7 @@ from h.models.group import (
 from h.security import Identity, predicates
 from h.security.identity import LongLivedGroup, LongLivedMembership
 from h.traversal import (
+    AddGroupMembershipContext,
     AnnotationContext,
     EditGroupMembershipContext,
     GroupMembershipContext,
@@ -533,6 +534,100 @@ class TestGroupMemberRemove:
         return GroupMembershipContext(
             group=group, user=user, membership=GroupMembership(group=group, user=user)
         )
+
+
+class TestGroupMemberAdd:
+    @pytest.mark.parametrize(
+        "authenticated_users_roles,target_users_roles,expected_result",
+        [
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.OWNER], True),
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.ADMIN], True),
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.MODERATOR], True),
+            ([GroupMembershipRoles.OWNER], [GroupMembershipRoles.MEMBER], True),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.OWNER], False),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.ADMIN], False),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.MODERATOR], True),
+            ([GroupMembershipRoles.ADMIN], [GroupMembershipRoles.MEMBER], True),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.OWNER], False),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.ADMIN], False),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.MODERATOR], False),
+            ([GroupMembershipRoles.MODERATOR], [GroupMembershipRoles.MEMBER], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.OWNER], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.ADMIN], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.MODERATOR], False),
+            ([GroupMembershipRoles.MEMBER], [GroupMembershipRoles.MEMBER], False),
+            (None, [GroupMembershipRoles.OWNER], False),
+            (None, [GroupMembershipRoles.ADMIN], False),
+            (None, [GroupMembershipRoles.MODERATOR], False),
+            (None, [GroupMembershipRoles.MEMBER], False),
+        ],
+    )
+    def test_it(
+        self,
+        db_session,
+        factories,
+        identity,
+        group,
+        authenticated_users_roles,
+        target_users_roles,
+        expected_result,
+    ):
+        target_user = factories.User()
+        if authenticated_users_roles:
+            identity.user.memberships.append(
+                LongLivedMembership(
+                    group=LongLivedGroup.from_model(group),
+                    user=identity.user,
+                    roles=authenticated_users_roles,
+                )
+            )
+        context = AddGroupMembershipContext(
+            group=group, user=target_user, new_roles=target_users_roles
+        )
+        db_session.commit()
+
+        assert predicates.group_member_add(identity, context) == expected_result
+
+    def test_it_crashes_if_new_roles_is_not_set(self, identity):
+        context = AddGroupMembershipContext(
+            group=sentinel.group, user=sentinel.user, new_roles=None
+        )
+
+        with pytest.raises(
+            AssertionError,
+            match="^new_roles must be set before checking permissions$",
+        ):
+            predicates.group_member_add(identity, context)
+
+    @pytest.fixture
+    def authenticated_user(self, db_session, authenticated_user, factories):
+        # Make the authenticated user a member of a *different* group,
+        # to make sure that unrelated memberships don't accidentally allow or
+        # deny permissions.
+        db_session.add(
+            GroupMembership(
+                user=authenticated_user,
+                group=factories.Group(),
+                roles=[GroupMembershipRoles.OWNER],
+            )
+        )
+
+        return authenticated_user
+
+    @pytest.fixture
+    def group(self, db_session, factories):
+        group = factories.Group()
+
+        # Make a *different* user a member of the target group
+        # to make sure that unrelated memberships don't accidentally allow or
+        # deny permissions.
+        db_session.add(
+            GroupMembership(
+                group=group, user=factories.User(), roles=[GroupMembershipRoles.OWNER]
+            )
+        )
+
+        return group
 
 
 class TestGroupMemberEdit:

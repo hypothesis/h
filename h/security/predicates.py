@@ -13,7 +13,11 @@ group.
 from itertools import chain
 
 from h.models.group import GroupMembershipRoles, JoinableBy, ReadableBy, WriteableBy
-from h.traversal import EditGroupMembershipContext, GroupMembershipContext
+from h.traversal import (
+    AddGroupMembershipContext,
+    EditGroupMembershipContext,
+    GroupMembershipContext,
+)
 
 
 def requires(*parent_predicates):
@@ -215,6 +219,36 @@ def group_member_remove(identity, context: GroupMembershipContext):
         or "admin" in authenticated_users_membership.roles
         or "moderator" in authenticated_users_membership.roles
     )
+
+
+@requires(authenticated_user, group_found)
+def group_member_add(identity, context: AddGroupMembershipContext):
+    assert (
+        context.new_roles is not None
+    ), "new_roles must be set before checking permissions"
+
+    def get_authenticated_users_roles():
+        """Return the authenticated users roles in the target group."""
+        for membership in identity.user.memberships:
+            if membership.group.id == context.group.id:
+                return membership.roles
+
+        return []
+
+    authenticated_users_roles = get_authenticated_users_roles()
+
+    if GroupMembershipRoles.OWNER in authenticated_users_roles:
+        # Owners can add members with any roles.
+        return True
+
+    if GroupMembershipRoles.ADMIN in authenticated_users_roles:
+        # Admins can add members with any role below admin.
+        return (
+            GroupMembershipRoles.OWNER not in context.new_roles
+            and GroupMembershipRoles.ADMIN not in context.new_roles
+        )
+
+    return False
 
 
 @requires(authenticated_user, group_found)
