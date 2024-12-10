@@ -63,6 +63,7 @@ shouldn't return model objects directly).
 from h.traversal.annotation import AnnotationContext, AnnotationRoot
 from h.traversal.group import GroupContext, GroupRequiredRoot, GroupRoot
 from h.traversal.group_membership import (
+    AddGroupMembershipContext,
     EditGroupMembershipContext,
     GroupMembershipContext,
     group_membership_api_factory,
@@ -82,6 +83,7 @@ __all__ = (
     "UserByIDRoot",
     "UserRoot",
     "GroupContext",
+    "AddGroupMembershipContext",
     "EditGroupMembershipContext",
     "GroupMembershipContext",
     "group_membership_api_factory",
