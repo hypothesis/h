@@ -265,6 +265,8 @@ components:
       $ref: './schemas/user-new.yaml#/User'
     UserUpdate:
       $ref: './schemas/user-update.yaml#/User'
+    Membership:
+      $ref: './schemas/membership.yaml#/Membership'
 
 # -----------------------------------------------------------------------------
 # API OPERATIONS
@@ -895,8 +897,12 @@ paths:
         - $ref: '#/components/parameters/GroupID'
         - $ref: '#/components/parameters/UserID'
       responses:
-        '204':
-          $ref: '#/components/responses/NoContent'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
 
     # ----------------------------------------------------------
     # DELETE groups/{id}/members/{user} - Remove user from group

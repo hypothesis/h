@@ -111,7 +111,7 @@ class GroupMembersService:
         for userid in userids_for_removal:
             self.member_leave(group, userid)
 
-    def member_join(self, group, userid):
+    def member_join(self, group, userid) -> GroupMembership:
         """Add `userid` to the member list of `group`."""
         user = self.user_fetcher(userid)
 
@@ -119,7 +119,7 @@ class GroupMembersService:
 
         if existing_membership:
             # The user is already a member of the group.
-            return
+            return existing_membership
 
         membership = GroupMembership(group=group, user=user)
         self.db.add(membership)
@@ -129,6 +129,8 @@ class GroupMembersService:
 
         log.info("Added group membership: %r", membership)
         self.publish("group-join", group.pubid, userid)
+
+        return membership
 
     def member_leave(self, group, userid):
         """Remove `userid` from the member list of `group`."""
