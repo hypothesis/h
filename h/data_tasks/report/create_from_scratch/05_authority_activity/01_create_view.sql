@@ -49,7 +49,7 @@ CREATE MATERIALIZED VIEW report.authority_activity AS (
             SELECT
                 users.id AS user_id,
                 authorities.id AS authority_id,
-                DATE_TRUNC('week', users.registered_date)::DATE AS registered_week
+                report.multi_truncate('week', users.registered_date::date) AS registered_week
             FROM "user" AS users
             JOIN report.authorities ON
                 authorities.authority = users.authority
