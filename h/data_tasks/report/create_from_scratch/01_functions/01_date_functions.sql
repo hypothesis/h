@@ -18,6 +18,9 @@ AS $$
                 ELSE INTERVAL '6 months'
             END
         ))::DATE
+        WHEN resolution = 'week' THEN 
+             -- -1 day to start weeks on Sunday
+             (DATE_TRUNC('week', date) - '1 day'::interval)::date
         ELSE DATE_TRUNC(resolution, date)::date
     END
 $$

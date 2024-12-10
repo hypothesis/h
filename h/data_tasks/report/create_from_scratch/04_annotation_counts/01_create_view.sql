@@ -47,7 +47,7 @@ CREATE MATERIALIZED VIEW report.annotation_counts AS (
         group_id,
         user_id,
         -- Cast to a date as it's 4 bytes instead of 8
-        DATE_TRUNC('week', created)::DATE AS created_week,
+        report.multi_truncate('week', created) AS created_week,
         CASE
             WHEN ARRAY_LENGTH(parent_uuids, 1) IS NOT NULL
                 THEN 'reply'::report.annotation_sub_type
