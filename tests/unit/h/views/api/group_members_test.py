@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 import h.views.api.group_members as views
 from h import presenters
-from h.models import GroupMembership
+from h.models import GroupMembership, GroupMembershipRoles
 from h.schemas.base import ValidationError
 from h.security.identity import Identity, LongLivedGroup, LongLivedMembership
 from h.services.group_members import ConflictError
@@ -165,6 +165,14 @@ class TestAddMember:
         GroupMembershipJSONPresenter.return_value.asdict.assert_called_once_with()
         assert response == GroupMembershipJSONPresenter.return_value.asdict.return_value
 
+    def test_it_errors_if_the_user_doesnt_have_permission(
+        self, context, pyramid_request, pyramid_config
+    ):
+        pyramid_config.testing_securitypolicy(permissive=False)
+
+        with pytest.raises(HTTPNotFound):
+            views.add_member(context, pyramid_request)
+
     def test_it_with_no_request_body(
         self,
         pyramid_request,
@@ -178,7 +186,7 @@ class TestAddMember:
 
         EditGroupMembershipAPISchema.assert_not_called()
         group_members_service.member_join.assert_called_once_with(
-            context.group, context.user.userid, roles=None
+            context.group, context.user.userid, roles=[GroupMembershipRoles.MEMBER]
         )
 
     def test_it_when_a_conflicting_membership_already_exists(

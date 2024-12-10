@@ -14,6 +14,13 @@ class GroupMembershipContext:
 
 
 @dataclass
+class AddGroupMembershipContext:
+    group: Group
+    user: User
+    roles: list[GroupMembershipRoles]
+
+
+@dataclass
 class EditGroupMembershipContext:
     group: Group
     user: User
