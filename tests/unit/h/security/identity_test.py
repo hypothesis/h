@@ -136,3 +136,46 @@ class TestIdentity:
     @pytest.fixture(autouse=True)
     def LongLivedAuthClient(self, patch):
         return patch("h.security.identity.LongLivedAuthClient")
+
+
+class TestGetRoles:
+    def test_it(self, identity, group):
+        identity.user.memberships.append(
+            LongLivedMembership(
+                user=identity.user, group=group, roles=[GroupMembershipRoles.MODERATOR]
+            ),
+        )
+
+        assert identity.get_roles(group) == [GroupMembershipRoles.MODERATOR]
+
+    def test_when_no_membership(self, identity, group):
+        assert identity.get_roles(group) == []
+
+    def test_when_no_user(self, identity, group):
+        identity.user = None
+
+        assert identity.get_roles(group) == []
+
+    @pytest.fixture
+    def identity(self):
+        identity = Identity(
+            user=LongLivedUser(
+                id=sentinel.id,
+                userid=sentinel.userid,
+                authority=sentinel.authority,
+                staff=sentinel.staff,
+                admin=sentinel.admin,
+            )
+        )
+        identity.user.memberships = [
+            LongLivedMembership(
+                user=identity.user,
+                group=LongLivedGroup(id=24, pubid="other"),
+                roles=[GroupMembershipRoles.MEMBER],
+            )
+        ]
+        return identity
+
+    @pytest.fixture
+    def group(self):
+        return LongLivedGroup(id=42, pubid="pubid")

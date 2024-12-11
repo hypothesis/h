@@ -180,17 +180,9 @@ def group_matches_authenticated_client_authority(identity, context):
 
 @requires(authenticated_user, group_found)
 def group_member_remove(identity, context: GroupMembershipContext):
-    def get_authenticated_users_membership():
-        """Return the authenticated user's membership of the target group."""
-        for membership in identity.user.memberships:
-            if membership.group.id == context.group.id:
-                return membership
+    authenticated_users_roles = identity.get_roles(context.group)
 
-        return None
-
-    authenticated_users_membership = get_authenticated_users_membership()
-
-    if not authenticated_users_membership:
+    if not authenticated_users_roles:
         # You can't remove anyone from a group you're not a member of.
         return False
 
@@ -200,27 +192,26 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
     if "owner" in context.membership.roles or "admin" in context.membership.roles:
         # Only owners can remove admins or other owners.
-        return "owner" in authenticated_users_membership.roles
+        return "owner" in authenticated_users_roles
 
     if "moderator" in context.membership.roles:
         # Owners and admins can remove moderators.
         return (
-            "owner" in authenticated_users_membership.roles
-            or "admin" in authenticated_users_membership.roles
+            "owner" in authenticated_users_roles or "admin" in authenticated_users_roles
         )
 
     # Owners, admins and moderators can remove plain members.
     return (
-        "owner" in authenticated_users_membership.roles
-        or "admin" in authenticated_users_membership.roles
-        or "moderator" in authenticated_users_membership.roles
+        "owner" in authenticated_users_roles
+        or "admin" in authenticated_users_roles
+        or "moderator" in authenticated_users_roles
     )
 
 
 @requires(authenticated_user, group_found)
 def group_member_edit(
     identity, context: EditGroupMembershipContext
-):  # pylint:disable=too-many-return-statements,too-complex
+):  # pylint:disable=too-many-return-statements
     assert (
         context.new_roles is not None
     ), "new_roles must be set before checking permissions"
@@ -228,15 +219,7 @@ def group_member_edit(
     old_roles = context.membership.roles
     new_roles = context.new_roles
 
-    def get_authenticated_users_roles():
-        """Return the authenticated users roles in the target group."""
-        for membership in identity.user.memberships:
-            if membership.group.id == context.group.id:
-                return membership.roles
-
-        return None
-
-    authenticated_users_roles = get_authenticated_users_roles()
+    authenticated_users_roles = identity.get_roles(context.group)
 
     if not authenticated_users_roles:
         return False
