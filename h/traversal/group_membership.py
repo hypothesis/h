@@ -21,37 +21,44 @@ class EditGroupMembershipContext:
     new_roles: list[GroupMembershipRoles]
 
 
-def group_membership_api_factory(request) -> GroupMembershipContext:
+def _get_user(request, userid) -> User | None:
     user_service = request.find_service(name="user")
-    group_service = request.find_service(name="group")
-    group_members_service = request.find_service(name="group_members")
 
+    if userid == "me":
+        if request.authenticated_userid:
+            return user_service.fetch(request.authenticated_userid)
+
+        return None
+
+    try:
+        return user_service.fetch(userid)
+    except InvalidUserId:
+        return None
+
+
+def _get_group(request, pubid) -> Group | None:
+    group_service = request.find_service(name="group")
+    return group_service.fetch(pubid)
+
+
+def _get_membership(request, group, user) -> GroupMembership | None:
+    group_members_service = request.find_service(name="group_members")
+    return group_members_service.get_membership(group, user)
+
+
+def group_membership_api_factory(request) -> GroupMembershipContext:
     userid = request.matchdict["userid"]
     pubid = request.matchdict["pubid"]
 
-    def get_user() -> User | None:
-        if userid == "me":
-            if request.authenticated_userid:
-                return user_service.fetch(request.authenticated_userid)
-
-            return None
-
-        try:
-            return user_service.fetch(userid)
-        except InvalidUserId:
-            return None
-
-    user = get_user()
+    user = _get_user(request, userid)
+    group = _get_group(request, pubid)
+    membership = _get_membership(request, group, user)
 
     if not user:
         raise HTTPNotFound(f"User not found: {userid}")
 
-    group = group_service.fetch(pubid)
-
     if not group:
         raise HTTPNotFound(f"Group not found: {pubid}")
-
-    membership = group_members_service.get_membership(group, user)
 
     if not membership and request.method != "POST":
         raise HTTPNotFound(f"Membership not found: ({pubid}, {userid})")
