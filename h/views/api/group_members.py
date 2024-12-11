@@ -9,7 +9,12 @@ from h.schemas.pagination import PaginationQueryParamsSchema
 from h.schemas.util import validate_query_params
 from h.security import Permission
 from h.services.group_members import ConflictError
-from h.traversal import EditGroupMembershipContext, GroupContext, GroupMembershipContext
+from h.traversal import (
+    AddGroupMembershipContext,
+    EditGroupMembershipContext,
+    GroupContext,
+    GroupMembershipContext,
+)
 from h.views.api.config import api_config
 from h.views.api.helpers.json_payload import json_payload
 
@@ -96,7 +101,7 @@ def remove_member(context: GroupMembershipContext, request):
     description="Add a user to a group",
     permission=Permission.Group.MEMBER_ADD,
 )
-def add_member(context: GroupMembershipContext, request):
+def add_member(context: AddGroupMembershipContext, request):
     if context.user.authority != context.group.authority:
         raise HTTPNotFound()
 
@@ -127,21 +132,16 @@ def add_member(context: GroupMembershipContext, request):
     link_name="group.member.edit",
     description="Change a user's role in a group",
 )
-def edit_member(context: GroupMembershipContext, request):
+def edit_member(context: EditGroupMembershipContext, request):
     appstruct = EditGroupMembershipAPISchema().validate(json_payload(request))
-    new_roles = appstruct["roles"]
+    context.new_roles = appstruct["roles"]
 
-    if not request.has_permission(
-        Permission.Group.MEMBER_EDIT,
-        EditGroupMembershipContext(
-            context.group, context.user, context.membership, new_roles
-        ),
-    ):
+    if not request.has_permission(Permission.Group.MEMBER_EDIT, context):
         raise HTTPNotFound()
 
-    if context.membership.roles != new_roles:
+    if context.membership.roles != context.new_roles:
         old_roles = context.membership.roles
-        context.membership.roles = new_roles
+        context.membership.roles = context.new_roles
         log.info(
             "Changed group membership roles: %r (previous roles were: %r)",
             context.membership,
@@ -154,6 +154,6 @@ def edit_member(context: GroupMembershipContext, request):
         # Otherwise permissions checks will be based on the old roles.
         for membership in request.identity.user.memberships:
             if membership.group.id == context.group.id:
-                membership.roles = new_roles
+                membership.roles = context.new_roles
 
     return GroupMembershipJSONPresenter(request, context.membership).asdict()

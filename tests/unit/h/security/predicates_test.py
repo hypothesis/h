@@ -1027,6 +1027,20 @@ class TestGroupMemberEdit:
 
         assert predicates.group_member_edit(identity, context) == expected_result
 
+    def test_it_crashes_if_new_roles_is_not_set(self, identity):
+        context = EditGroupMembershipContext(
+            group=sentinel.group,
+            user=sentinel.user,
+            membership=sentinel.membership,
+            new_roles=None,
+        )
+
+        with pytest.raises(
+            AssertionError,
+            match="^new_roles must be set before checking permissions$",
+        ):
+            predicates.group_member_edit(identity, context)
+
     @pytest.fixture
     def authenticated_user(self, db_session, authenticated_user, factories):
         # Make the authenticated user a member of a *different* group,

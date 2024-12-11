@@ -10,7 +10,14 @@ from h.models import Group, GroupMembership, GroupMembershipRoles, User
 class GroupMembershipContext:
     group: Group
     user: User
-    membership: GroupMembership | None
+    membership: GroupMembership
+
+
+@dataclass
+class AddGroupMembershipContext:
+    group: Group
+    user: User
+    new_roles: list[GroupMembershipRoles] | None
 
 
 @dataclass
@@ -18,7 +25,7 @@ class EditGroupMembershipContext:
     group: Group
     user: User
     membership: GroupMembership
-    new_roles: list[GroupMembershipRoles]
+    new_roles: list[GroupMembershipRoles] | None
 
 
 def _get_user(request, userid) -> User | None:
@@ -46,13 +53,14 @@ def _get_membership(request, group, user) -> GroupMembership | None:
     return group_members_service.get_membership(group, user)
 
 
-def group_membership_api_factory(request) -> GroupMembershipContext:
+def group_membership_api_factory(
+    request,
+) -> GroupMembershipContext | AddGroupMembershipContext | EditGroupMembershipContext:
     userid = request.matchdict["userid"]
     pubid = request.matchdict["pubid"]
 
     user = _get_user(request, userid)
     group = _get_group(request, pubid)
-    membership = _get_membership(request, group, user)
 
     if not user:
         raise HTTPNotFound(f"User not found: {userid}")
@@ -60,7 +68,16 @@ def group_membership_api_factory(request) -> GroupMembershipContext:
     if not group:
         raise HTTPNotFound(f"Group not found: {pubid}")
 
-    if not membership and request.method != "POST":
+    if request.method == "POST":
+        return AddGroupMembershipContext(group, user, new_roles=None)
+
+    membership = _get_membership(request, group, user)
+
+    if not membership:
         raise HTTPNotFound(f"Membership not found: ({pubid}, {userid})")
 
-    return GroupMembershipContext(group=group, user=user, membership=membership)
+    if request.method in ("GET", "DELETE"):
+        return GroupMembershipContext(group=group, user=user, membership=membership)
+
+    assert request.method == "PATCH"
+    return EditGroupMembershipContext(group, user, membership, new_roles=None)
