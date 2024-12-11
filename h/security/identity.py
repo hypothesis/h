@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Self
 
-from h.models import AuthClient, Group, User
+from h.models import AuthClient, Group, GroupMembershipRoles, User
 
 
 @dataclass
@@ -126,3 +126,14 @@ class Identity:
             return identity.user.userid
 
         return None
+
+    def get_roles(self, group) -> list[GroupMembershipRoles]:
+        """Return this identity's roles in `group`."""
+        if self.user is None:
+            return []
+
+        for membership in self.user.memberships:
+            if membership.group.id == group.id:
+                return membership.roles
+
+        return []
