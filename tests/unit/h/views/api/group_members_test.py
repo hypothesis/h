@@ -8,9 +8,15 @@ import h.views.api.group_members as views
 from h import presenters
 from h.models import GroupMembership
 from h.schemas.base import ValidationError
+from h.security import Permission
 from h.security.identity import Identity, LongLivedGroup, LongLivedMembership
 from h.services.group_members import ConflictError
-from h.traversal import GroupContext, GroupMembershipContext
+from h.traversal import (
+    AddGroupMembershipContext,
+    EditGroupMembershipContext,
+    GroupContext,
+    GroupMembershipContext,
+)
 from h.views.api.exceptions import PayloadError
 
 
@@ -234,7 +240,7 @@ class TestAddMember:
     def context(self, factories):
         group = factories.Group.build()
         user = factories.User.build(authority=group.authority)
-        return GroupMembershipContext(group=group, user=user, membership=None)
+        return AddGroupMembershipContext(group=group, user=user, new_roles=None)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
@@ -258,12 +264,17 @@ class TestEditMember:
         EditGroupMembershipAPISchema,
         GroupMembershipJSONPresenter,
         caplog,
+        mocker,
     ):
+        has_permission = mocker.spy(pyramid_request, "has_permission")
+
         response = views.edit_member(context, pyramid_request)
 
         EditGroupMembershipAPISchema.return_value.validate.assert_called_once_with(
             sentinel.json_body
         )
+        assert context.new_roles == sentinel.new_roles
+        has_permission.assert_called_once_with(Permission.Group.MEMBER_EDIT, context)
         assert context.membership.roles == sentinel.new_roles
         GroupMembershipJSONPresenter.assert_called_once_with(
             pyramid_request, context.membership
@@ -342,8 +353,9 @@ class TestEditMember:
         group = factories.Group.build()
         user = factories.User.build(authority=group.authority)
         membership = GroupMembership(group=group, user=user, roles=sentinel.old_roles)
-
-        return GroupMembershipContext(group=group, user=user, membership=membership)
+        return EditGroupMembershipContext(
+            group=group, user=user, membership=membership, new_roles=None
+        )
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
