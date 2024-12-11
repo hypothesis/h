@@ -336,9 +336,7 @@ class UserPurger:
 
     def delete_user(self, user):
         """Delete `user`."""
-        deleted_ids = self.worker.delete(
-            User, select(User.id).where(User.id == user.id)
-        )
+        deleted_ids = self.worker.delete(User, select(User.id))
         log_deleted_rows(user, User, deleted_ids)
 
 

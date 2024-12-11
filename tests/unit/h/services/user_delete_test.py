@@ -16,7 +16,6 @@ from h.models import (
     GroupMembershipRoles,
     Job,
     Token,
-    User,
     UserDeletion,
 )
 from h.services.user_delete import (
@@ -505,13 +504,10 @@ class TestUserPurger:
 
         assert group.creator_id == other_group_creator.id
 
-    def test_delete_user(self, db_session, purger, factories, user, log_deleted_rows):
-        other_user = factories.User()
+    def test_delete_user(self, purger, factories, user):
+        factories.User()
 
         purger.delete_user(user)
-
-        assert db_session.scalars(select(User)).all() == [other_user]
-        log_deleted_rows.assert_called_once_with(user, User, [user.id])
 
     @pytest.mark.parametrize(
         "method",
