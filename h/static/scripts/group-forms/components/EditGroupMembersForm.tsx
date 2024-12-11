@@ -397,7 +397,7 @@ export default function EditGroupMembersForm({
           </Scroll>
         </div>
         {typeof totalPages === 'number' && totalPages > 1 && (
-          <div className="mt-4">
+          <div className="mt-4 flex justify-center">
             <Pagination
               currentPage={pageIndex + 1}
               onChangePage={page => setPageIndex(page - 1)}
