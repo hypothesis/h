@@ -2,13 +2,14 @@ import logging
 from unittest.mock import PropertyMock, call, create_autospec, sentinel
 
 import pytest
-from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
+from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 import h.views.api.group_members as views
 from h import presenters
 from h.models import GroupMembership
 from h.schemas.base import ValidationError
 from h.security.identity import Identity, LongLivedGroup, LongLivedMembership
+from h.services.group_members import ConflictError
 from h.traversal import GroupContext, GroupMembershipContext
 from h.views.api.exceptions import PayloadError
 
@@ -147,17 +148,64 @@ class TestAddMember:
         group_members_service,
         context,
         GroupMembershipJSONPresenter,
+        EditGroupMembershipAPISchema,
     ):
         response = views.add_member(context, pyramid_request)
 
+        EditGroupMembershipAPISchema.assert_called_once_with()
+        EditGroupMembershipAPISchema.return_value.validate.assert_called_once_with(
+            sentinel.json_body
+        )
         group_members_service.member_join.assert_called_once_with(
-            context.group, context.user.userid
+            context.group, context.user.userid, roles=sentinel.roles
         )
         GroupMembershipJSONPresenter.assert_called_once_with(
             pyramid_request, group_members_service.member_join.return_value
         )
         GroupMembershipJSONPresenter.return_value.asdict.assert_called_once_with()
         assert response == GroupMembershipJSONPresenter.return_value.asdict.return_value
+
+    def test_it_with_no_request_body(
+        self,
+        pyramid_request,
+        group_members_service,
+        context,
+        EditGroupMembershipAPISchema,
+    ):
+        pyramid_request.body = b""
+
+        views.add_member(context, pyramid_request)
+
+        EditGroupMembershipAPISchema.assert_not_called()
+        group_members_service.member_join.assert_called_once_with(
+            context.group, context.user.userid, roles=None
+        )
+
+    def test_it_when_a_conflicting_membership_already_exists(
+        self, pyramid_request, group_members_service, context
+    ):
+        group_members_service.member_join.side_effect = ConflictError(
+            "test_error_message"
+        )
+
+        with pytest.raises(HTTPConflict, match="^test_error_message$"):
+            views.add_member(context, pyramid_request)
+
+    def test_it_errors_if_the_request_isnt_valid_JSON(
+        self, context, pyramid_request, mocker
+    ):
+        value_error = ValueError()
+        mocker.patch.object(
+            type(pyramid_request),
+            "json_body",
+            PropertyMock(side_effect=value_error),
+            create=True,
+        )
+
+        with pytest.raises(PayloadError) as exc_info:
+            views.add_member(context, pyramid_request)
+
+        assert exc_info.value.__cause__ == value_error
 
     def test_it_with_authority_mismatch(self, pyramid_request, context):
         context.group.authority = "other"
@@ -170,6 +218,19 @@ class TestAddMember:
         group = factories.Group.build()
         user = factories.User.build(authority=group.authority)
         return GroupMembershipContext(group=group, user=user, membership=None)
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.body = sentinel.body
+        pyramid_request.json_body = sentinel.json_body
+        return pyramid_request
+
+    @pytest.fixture
+    def EditGroupMembershipAPISchema(self, EditGroupMembershipAPISchema):
+        EditGroupMembershipAPISchema.return_value.validate.return_value = {
+            "roles": sentinel.roles
+        }
+        return EditGroupMembershipAPISchema
 
 
 class TestEditMember:
