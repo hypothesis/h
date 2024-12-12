@@ -1,3 +1,4 @@
+import { Link } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import type { ComponentChildren } from 'preact';
 import { Link as RouterLink, useRoute } from 'wouter-preact';
@@ -8,9 +9,10 @@ import { routes } from '../routes';
 type TabLinkProps = {
   href: string;
   children: ComponentChildren;
+  testId?: string;
 };
 
-function TabLink({ children, href }: TabLinkProps) {
+function TabLink({ children, href, testId }: TabLinkProps) {
   const [selected] = useRoute(href);
   return (
     <RouterLink
@@ -20,6 +22,7 @@ function TabLink({ children, href }: TabLinkProps) {
           true,
         'text-grey-1 bg-grey-7': selected,
       })}
+      data-testid={testId}
     >
       {children}
     </RouterLink>
@@ -27,22 +30,55 @@ function TabLink({ children, href }: TabLinkProps) {
 }
 
 export type GroupFormHeaderProps = {
-  group: Group;
+  group: Group | null;
+  title: string;
+  enableMembers?: boolean;
 };
 
-export default function GroupFormHeader({ group }: GroupFormHeaderProps) {
+export default function GroupFormHeader({
+  enableMembers = true,
+  group,
+  title,
+}: GroupFormHeaderProps) {
   // This should be replaced with a proper URL generation function that handles
   // escaping etc.
-  const editLink = routes.groups.edit.replace(':pubid', group.pubid);
-  const editMembersLinks = routes.groups.editMembers.replace(
-    ':pubid',
-    group.pubid,
-  );
+  const editLink = group
+    ? routes.groups.edit.replace(':pubid', group.pubid)
+    : null;
+  const editMembersLinks = group
+    ? routes.groups.editMembers.replace(':pubid', group.pubid)
+    : null;
 
   return (
-    <div className="flex gap-x-2 justify-end py-2">
-      <TabLink href={editLink}>Settings</TabLink>
-      <TabLink href={editMembersLinks}>Members</TabLink>
+    <div className="mb-4 pb-1 border-b border-b-text-grey-6">
+      {group && (
+        <div className="mb-4">
+          <Link
+            classes="text-grey-7"
+            href={group.link}
+            underline="always"
+            data-testid="activity-link"
+          >
+            View group activity
+          </Link>
+        </div>
+      )}
+      <div className="flex gap-x-2 py-2 items-center">
+        <h1 className="text-grey-7 text-xl/none" data-testid="header">
+          {title}
+        </h1>
+        <div className="grow" />
+        {enableMembers && editLink && (
+          <TabLink testId="settings-link" href={editLink}>
+            Settings
+          </TabLink>
+        )}
+        {enableMembers && editMembersLinks && (
+          <TabLink testId="members-link" href={editMembersLinks}>
+            Members
+          </TabLink>
+        )}
+      </div>
     </div>
   );
 }

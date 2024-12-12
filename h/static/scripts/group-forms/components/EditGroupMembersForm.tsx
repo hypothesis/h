@@ -380,8 +380,8 @@ export default function EditGroupMembersForm({
 
   return (
     <>
-      <FormContainer title="Edit group members">
-        <GroupFormHeader group={group} />
+      <FormContainer>
+        <GroupFormHeader title="Edit group members" group={group} />
         <ErrorNotice message={errorMessage} />
         <div className="w-full">
           <Scroll>

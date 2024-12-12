@@ -235,10 +235,12 @@ export default function CreateEditGroupForm({
   };
 
   return (
-    <FormContainer title={heading} classes="max-w-[530px] mx-auto">
-      {group && config.features.group_members && (
-        <GroupFormHeader group={group} />
-      )}
+    <FormContainer classes="max-w-[530px] mx-auto">
+      <GroupFormHeader
+        group={group}
+        title={heading}
+        enableMembers={config.features.group_members}
+      />
       <form onSubmit={onSubmit} data-testid="form">
         <TextField
           type="input"
@@ -291,7 +293,12 @@ export default function CreateEditGroupForm({
           </>
         )}
 
-        <div className="flex items-center gap-x-4 mt-2">
+        <div className="mt-2 pt-2 border-t border-t-text-grey-6 flex items-center gap-x-4">
+          <span>
+            {/* These are in a child span to avoid a gap between them. */}
+            <Star />
+            &nbsp;Required
+          </span>
           <ErrorNotice message={errorMessage} />
           <div className="grow" />
           <SaveStateIcon
@@ -321,19 +328,6 @@ export default function CreateEditGroupForm({
           }}
         />
       )}
-
-      <footer className="mt-14 pt-4 border-t border-t-text-grey-6">
-        <div className="flex">
-          {group && (
-            <a href={group.link} data-testid="back-link">
-              ← Back to group overview page
-            </a>
-          )}
-          <div className="grow" />
-          <Star />
-          &nbsp;Required
-        </div>
-      </footer>
     </FormContainer>
   );
 }
