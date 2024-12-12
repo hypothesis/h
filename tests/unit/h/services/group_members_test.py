@@ -183,7 +183,7 @@ class TestMemberJoin:
         caplog.set_level(logging.INFO)
         user = factories.User()
         group = factories.Group()
-        group_members_service.member_join(group, user.userid)
+        returned = group_members_service.member_join(group, user.userid)
 
         membership = db_session.scalars(
             select(GroupMembership)
@@ -191,14 +191,17 @@ class TestMemberJoin:
             .where(GroupMembership.group == group)
         ).one_or_none()
         assert membership
+        assert returned == membership
         assert caplog.messages == [f"Added group membership: {membership!r}"]
 
     def test_it_is_idempotent(self, group_members_service, factories):
         user = factories.User()
         group = factories.Group()
-        group_members_service.member_join(group, user.userid)
-        group_members_service.member_join(group, user.userid)
+        existing_membership = group_members_service.member_join(group, user.userid)
 
+        returned = group_members_service.member_join(group, user.userid)
+
+        assert returned == existing_membership
         assert group.members.count(user) == 1
 
     def test_it_publishes_join_event(self, group_members_service, factories, publish):
