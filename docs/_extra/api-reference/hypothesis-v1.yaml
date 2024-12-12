@@ -102,7 +102,7 @@ info:
     | 500         | Server Error  | An error occurred with our API |
 
 servers:
-  - url: https://api.hypothes.is/api
+  - url: https://hypothes.is/api
 
 # -----------------------------------------------------------------------------
 # Reusable tags for grouping operations
@@ -111,6 +111,7 @@ tags:
   - name: general
   - name: annotations
   - name: groups
+  - name: memberships
   - name: profile
   - name: users
 
@@ -122,6 +123,25 @@ components:
   # Reusable parameters
   # -------------------------
   parameters:
+    PageNumber:
+      name: "page[number]"
+      in: query
+      required: false
+      description: Which page of results to get
+      schema:
+        type: int
+        default: 1
+        minimum: 1
+    PageSize:
+      name: "page[size]"
+      in: query
+      required: false
+      description: How many items to get per page
+      schema:
+        type: int
+        default: 20
+        minimum: 1
+        maximum: 100
     AnnotationID:
       name: id
       in: path
@@ -265,6 +285,12 @@ components:
       $ref: './schemas/user-new.yaml#/User'
     UserUpdate:
       $ref: './schemas/user-update.yaml#/User'
+    Membership:
+      $ref: './schemas/membership.yaml#/Membership'
+    MembershipCreate:
+      $ref: './schemas/membership-create.yaml#/Membership'
+    PaginationMeta:
+      $ref: './schemas/pagination-meta.yaml#/PaginationMeta'
 
 # -----------------------------------------------------------------------------
 # API OPERATIONS
@@ -851,31 +877,57 @@ paths:
   # ---------------------------------------------------------------------------
 
   # ---------------------------------------------------------------------------
-  # GET groups/{id}/members - Get group members
+  # GET groups/{id}/members - Get group memberships
   # ---------------------------------------------------------------------------
   /groups/{id}/members:
     get:
       tags:
-        - groups
-      summary: Get group members
+        - memberships
+      summary: Get group memberships
       description: |
-        Fetch a list of all members (users) in a group. Returned user resource only
-        contains public-facing user data. Authenticated user must have read access
-        to the group. Does not require authentication for reading members of
-        public groups. Returned members are unsorted.
+        Get a paginated list of all user memberships in a group.
+        To get the memberships of a private group the authenticated user must be a member of the group.
+        Getting the memberships of an open or restricted group does not require authentication.
+        The returned memberships are sorted by joining date, oldest first.
+
+        If the `page[number]` query param is included in the request then the response will be paginated.
+        If there's no `page[number]` query param in the request then a legacy,
+        un-paginated response format will be used. In the future this legacy
+        un-paginated response format will be removed and the paginated response
+        format will be used even when the `page[number]` query param is not
+        present.
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
       security:
         - AuthClient: []
         - ApiKey: []
-        - {} # Unauthenticated OK for public groups
+        - {}
       responses:
         '200':
           description: Success
           content:
             application/*json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+                oneOf:
+                  - title: "Paginated"
+                    type: object
+                    properties:
+                      meta:
+                        description: "Metadata about this response."
+                        type: object
+                        properties:
+                          page:
+                            $ref: '#/components/schemas/PaginationMeta'
+                      data:
+                        description: "The list of memberships for the requested page."
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Membership'
+                  - title: "Unpaginated (deprecated)"
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Membership'
 
   /groups/{id}/members/{user}:
     # ----------------------------------------------------------
@@ -883,44 +935,77 @@ paths:
     # ----------------------------------------------------------
     post:
       tags:
-        - groups
+        - memberships
       summary: Add member to group
       description: |
-        Add a user as a member to a group. This endpoint is only accessible to
-        requests authenticated with `AuthClient` credentials and is restricted
-        to users and groups within the associated authority.
+        Add a user as a member to a group.
       security:
         - AuthClient: []
       parameters:
         - $ref: '#/components/parameters/GroupID'
         - $ref: '#/components/parameters/UserID'
+      requestBody:
+        required: false
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/MembershipCreate'
       responses:
-        '204':
-          $ref: '#/components/responses/NoContent'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+
+    # ------------------------------------------------------------------------
+    # PATCH groups/{id}/members/{user} - Change a user's membership in a group
+    # ------------------------------------------------------------------------
+    patch:
+      tags:
+        - memberships
+      summary: Update membership
+      description: |
+        Update a user's membership in a group.
+
+        To update *your own* membership you can use the alias `me` in place of `{user}`.
+        This is equivalent to using your own user ID.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/GroupID'
+        - $ref: '#/components/parameters/UserID'
+      requestBody:
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/MembershipCreate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
 
     # ----------------------------------------------------------
     # DELETE groups/{id}/members/{user} - Remove user from group
     # ----------------------------------------------------------
     delete:
       tags:
-        - groups
+        - memberships
       summary: Remove member from group
       description: |
-        Remove a user from a group. At present, this endpoint only allows
-        the removal as one's self (authenticated with API Key) from the
-        indicated group.
+        Remove a user from a group.
+
+        To remove *yourself* from a group you can use the alias `me` in place of `{user}`.
+        This is equivalent to using your own user ID.
       security:
         - ApiKey: []
       parameters:
         - $ref: '#/components/parameters/GroupID'
-        - name: user
-          in: path
-          description: Currently, only the literal value `me` is accepted
-          required: true
-          schema:
-            type: string
-            enum:
-              - me
+        - $ref: '#/components/parameters/UserID'
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
