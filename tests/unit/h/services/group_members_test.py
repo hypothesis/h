@@ -7,7 +7,11 @@ import pytest
 from sqlalchemy import select
 
 from h.models import GroupMembership, GroupMembershipRoles, User
-from h.services.group_members import GroupMembersService, group_members_factory
+from h.services.group_members import (
+    ConflictError,
+    GroupMembersService,
+    group_members_factory,
+)
 
 
 class TestGetMembership:
@@ -183,18 +187,36 @@ class TestMemberJoin:
         caplog.set_level(logging.INFO)
         user = factories.User()
         group = factories.Group()
-        returned = group_members_service.member_join(group, user.userid)
+
+        returned = group_members_service.member_join(
+            group, user.userid, roles=[GroupMembershipRoles.OWNER]
+        )
 
         membership = db_session.scalars(
             select(GroupMembership)
             .where(GroupMembership.user == user)
             .where(GroupMembership.group == group)
         ).one_or_none()
-        assert membership
+        assert membership.roles == [GroupMembershipRoles.OWNER]
         assert returned == membership
         assert caplog.messages == [f"Added group membership: {membership!r}"]
 
-    def test_it_is_idempotent(self, group_members_service, factories):
+    def test_it_with_no_role(self, group_members_service, factories, db_session):
+        user = factories.User()
+        group = factories.Group()
+
+        group_members_service.member_join(group, user.userid)
+
+        membership = db_session.scalars(
+            select(GroupMembership)
+            .where(GroupMembership.user == user)
+            .where(GroupMembership.group == group)
+        ).one_or_none()
+        assert membership.roles == [GroupMembershipRoles.MEMBER]
+
+    def test_it_when_a_matching_membership_already_exists(
+        self, group_members_service, factories
+    ):
         user = factories.User()
         group = factories.Group()
         existing_membership = group_members_service.member_join(group, user.userid)
@@ -203,6 +225,20 @@ class TestMemberJoin:
 
         assert returned == existing_membership
         assert group.members.count(user) == 1
+
+    def test_it_when_a_conflicting_membership_already_exists(
+        self, group_members_service, factories
+    ):
+        user = factories.User()
+        group = factories.Group()
+        group_members_service.member_join(
+            group, user.userid, roles=[GroupMembershipRoles.MEMBER]
+        )
+
+        with pytest.raises(ConflictError):
+            group_members_service.member_join(
+                group, user.userid, roles=[GroupMembershipRoles.MODERATOR]
+            )
 
     def test_it_publishes_join_event(self, group_members_service, factories, publish):
         group = factories.Group()
