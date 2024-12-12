@@ -44,9 +44,14 @@ gulp.task('watch-css', () => {
 const fontFiles = 'h/static/styles/vendor/fonts/h.woff';
 
 gulp.task('build-fonts', () => {
+  const cwd = 'h/';
   const fontsDir = 'build/fonts';
   return gulp
-    .src(fontFiles, { encoding: false })
+    .src(fontFiles.slice(cwd.length), {
+      encoding: false,
+      // Prevent `gulp.src` from attempting to stat files outside of `cwd`
+      cwd,
+    })
     .pipe(changed(fontsDir))
     .pipe(gulp.dest(fontsDir));
 });
@@ -76,12 +81,15 @@ gulp.task('build-images', () => {
     ],
   };
 
+  const cwd = 'h/';
   const imagesDir = 'build/images';
   return gulp
-    .src(imageFiles, {
+    .src(imageFiles.slice(cwd.length), {
       // Treat all files as binary. Some of the images are SVGs which are text,
       // but `svgmin` is still able to process the files if passed as binary.
       encoding: false,
+      // Prevent `gulp.src` from attempting to stat files outside of `cwd`
+      cwd,
     })
     .pipe(changed(imagesDir))
     .pipe(gulpIf(shouldMinifySVG, svgmin(svgminConfig)))
