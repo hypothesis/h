@@ -221,6 +221,10 @@ def group_member_remove(identity, context: GroupMembershipContext):
 def group_member_edit(
     identity, context: EditGroupMembershipContext
 ):  # pylint:disable=too-many-return-statements,too-complex
+    assert (
+        context.new_roles is not None
+    ), "new_roles must be set before checking permissions"
+
     old_roles = context.membership.roles
     new_roles = context.new_roles
 
