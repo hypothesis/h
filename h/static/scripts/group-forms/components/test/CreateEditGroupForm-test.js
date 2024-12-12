@@ -78,7 +78,7 @@ describe('CreateEditGroupForm', () => {
 
   const getElements = wrapper => {
     return {
-      header: wrapper.find('[data-testid="header"]'),
+      header: wrapper.find('GroupFormHeader'),
       nameField: wrapper.find('TextField[label="Name"]'),
       descriptionField: wrapper.find('TextField[label="Description"]'),
       submitButton: wrapper.find('button[data-testid="button"]'),
@@ -111,7 +111,7 @@ describe('CreateEditGroupForm', () => {
       const { wrapper, elements } = createWrapper();
       const { header, nameField, descriptionField, submitButton } = elements;
 
-      assert.equal(header.text(), heading);
+      assert.equal(header.prop('title'), heading);
       assert.equal(nameField.prop('value'), '');
       assert.equal(descriptionField.prop('value'), '');
       assert.equal(submitButton.text(), 'Create group');
@@ -245,12 +245,11 @@ describe('CreateEditGroupForm', () => {
       const { wrapper, elements } = createWrapper({ group });
       const { header, nameField, descriptionField, submitButton } = elements;
 
-      assert.equal(header.text(), 'Edit group');
+      assert.equal(header.prop('title'), 'Edit group');
       assert.equal(nameField.prop('value'), group.name);
       assert.equal(descriptionField.prop('value'), group.description);
       assert.equal(getSelectedGroupType(wrapper), group.type);
       assert.equal(submitButton.text(), 'Save changes');
-      assert.isTrue(wrapper.exists('[data-testid="back-link"]'));
       assert.isFalse(wrapper.exists('[data-testid="error-message"]'));
       await assertInLoadingState(wrapper, false);
       assert.isFalse(savedConfirmationShowing(wrapper));
