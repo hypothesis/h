@@ -130,20 +130,20 @@ class TestListMembers:
                     created=datetime(1970, 1, 1, 0, 0, second),
                     updated=datetime(1970, 1, 2, 0, 0, second),
                 )
-                for second, user in enumerate(factories.User.create_batch(size=4))
+                for second, user in enumerate(factories.User.create_batch(size=9))
             ]
         )
         db_session.commit()
 
         res = app.get(
             "/api/groups/{pubid}/members".format(pubid=group.pubid),
-            params={"page[offset]": 1, "page[limit]": 2},
+            params={"page[number]": 2, "page[size]": 3},
             headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
         )
 
         assert res.status_code == 200
         assert res.json == {
-            "meta": {"page": {"total": 4}},
+            "meta": {"page": {"total": 9}},
             "data": [
                 {
                     "authority": membership.group.authority,
@@ -155,7 +155,7 @@ class TestListMembers:
                     "created": f"1970-01-01T00:00:{second:02}.000000+00:00",
                     "updated": f"1970-01-02T00:00:{second:02}.000000+00:00",
                 }
-                for second, membership in list(enumerate(group.memberships))[1:3]
+                for second, membership in list(enumerate(group.memberships))[3:6]
             ],
         }
 
@@ -183,7 +183,7 @@ class TestListMembers:
 
         res = app.get(
             "/api/groups/{pubid}/members".format(pubid=group.pubid),
-            params={"page[offset]": 0},
+            params={"page[number]": 1},
             headers=token_authorization_header(token),
         )
 
@@ -214,6 +214,30 @@ class TestListMembers:
             ],
         }
 
+    def test_it_returns_empty_list_if_page_number_beyond_last_page(
+        self, app, factories, db_session
+    ):
+        group = factories.RestrictedGroup(
+            memberships=[
+                GroupMembership(
+                    user=user,
+                    created=datetime(1970, 1, 1, 0, 0, second),
+                    updated=datetime(1970, 1, 2, 0, 0, second),
+                )
+                for second, user in enumerate(factories.User.create_batch(size=2))
+            ]
+        )
+        db_session.commit()
+
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            params={"page[number]": 2, "page[size]": 10},
+            headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
+        )
+
+        assert res.json["meta"]["page"]["total"] == 2
+        assert res.json["data"] == []
+
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(
         self, app, db_session, factories
     ):
@@ -222,7 +246,7 @@ class TestListMembers:
 
         res = app.get(
             "/api/groups/{pubid}/members".format(pubid=group.pubid),
-            params={"page[offset]": 0},
+            params={"page[number]": 1},
             headers=token_authorization_header(factories.DeveloperToken()),
             expect_errors=True,
         )
@@ -232,12 +256,12 @@ class TestListMembers:
     def test_it_returns_empty_list_if_no_members_in_group(self, app):
         res = app.get(
             "/api/groups/__world__/members",
-            params={"page[offset]": 0},
+            params={"page[number]": 1},
         )
 
         assert res.json == {"meta": {"page": {"total": 0}}, "data": []}
 
-    def test_it_returns_an_error_if_offset_and_limit_are_invalid(
+    def test_it_returns_an_error_if_number_and_size_are_invalid(
         self, app, db_session, factories
     ):
         group = factories.Group()
@@ -248,14 +272,14 @@ class TestListMembers:
 
         res = app.get(
             "/api/groups/{pubid}/members".format(pubid=group.pubid),
-            params={"page[offset]": -1, "page[limit]": 0},
+            params={"page[number]": 0, "page[size]": 0},
             headers=token_authorization_header(token),
             expect_errors=True,
         )
 
         assert res.status_code == 400
         assert res.json == {
-            "reason": "page[offset]: -1 is less than minimum value 0\npage[limit]: 0 is less than minimum value 1",
+            "reason": "page[number]: 0 is less than minimum value 1\npage[size]: 0 is less than minimum value 1",
             "status": "failure",
         }
 
