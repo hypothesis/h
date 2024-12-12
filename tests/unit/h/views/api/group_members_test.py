@@ -123,6 +123,23 @@ class TestListMembers:
         )
 
 
+class TestGetMember:
+    def test_it(self, context, pyramid_request, GroupMembershipJSONPresenter):
+        response = views.get_member(context, pyramid_request)
+
+        GroupMembershipJSONPresenter.assert_called_once_with(
+            pyramid_request, sentinel.membership
+        )
+        GroupMembershipJSONPresenter.return_value.asdict.assert_called_once_with()
+        assert response == GroupMembershipJSONPresenter.return_value.asdict.return_value
+
+    @pytest.fixture
+    def context(self):
+        return GroupMembershipContext(
+            group=sentinel.group, user=sentinel.user, membership=sentinel.membership
+        )
+
+
 class TestRemoveMember:
     def test_it(self, context, pyramid_request, group_members_service):
         response = views.remove_member(context, pyramid_request)
