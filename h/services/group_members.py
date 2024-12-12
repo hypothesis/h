@@ -9,6 +9,10 @@ from h.models import Group, GroupMembership, GroupMembershipRoles, User
 log = logging.getLogger(__name__)
 
 
+class ConflictError(Exception):
+    """A conflicting group membership already exists in the DB."""
+
+
 class GroupMembersService:
     """A service for manipulating group membership."""
 
@@ -111,17 +115,34 @@ class GroupMembersService:
         for userid in userids_for_removal:
             self.member_leave(group, userid)
 
-    def member_join(self, group, userid) -> GroupMembership:
-        """Add `userid` to the member list of `group`."""
+    def member_join(self, group, userid, roles=None) -> GroupMembership:
+        """
+        Add `userid` to `group` with `roles` and return the resulting membership.
+
+        If `roles=None` it will default to `[GroupMembershipRoles.MEMBER]`.
+
+        If a membership matching `group`, `userid` and `roles` already exists
+        in the DB it will just be returned.
+
+        :raise ConflictError: if a membership already exists with the given
+            group and userid but different roles
+        """
+        roles = roles or [GroupMembershipRoles.MEMBER]
+
         user = self.user_fetcher(userid)
 
-        existing_membership = self.get_membership(group, user)
+        kwargs = {"roles": roles}
 
-        if existing_membership:
-            # The user is already a member of the group.
+        if existing_membership := self.get_membership(group, user):
+            for key, value in kwargs.items():
+                if getattr(existing_membership, key) != value:
+                    raise ConflictError(
+                        "The user is already a member of the group, with conflicting membership attributes"
+                    )
+
             return existing_membership
 
-        membership = GroupMembership(group=group, user=user)
+        membership = GroupMembership(group=group, user=user, **kwargs)
         self.db.add(membership)
 
         # Flush the DB to generate SQL defaults for `membership` before logging it.
