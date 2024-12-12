@@ -10,10 +10,10 @@ class TestPaginationQueryParamsSchema:
     @pytest.mark.parametrize(
         "input_,output",
         [
-            ({}, {"page[offset]": 0, "page[limit]": 20}),
+            ({}, {"page[number]": 1, "page[size]": 20}),
             (
-                {"page[offset]": 150, "page[limit]": 50},
-                {"page[offset]": 150, "page[limit]": 50},
+                {"page[number]": 150, "page[size]": 50},
+                {"page[number]": 150, "page[size]": 50},
             ),
         ],
     )
@@ -26,17 +26,17 @@ class TestPaginationQueryParamsSchema:
         "input_,message",
         [
             (
-                {"page[offset]": -1},
-                r"^page\[offset\]: -1 is less than minimum value 0$",
+                {"page[number]": 0},
+                r"^page\[number\]: 0 is less than minimum value 1$",
             ),
-            ({"page[limit]": 0}, r"^page\[limit\]: 0 is less than minimum value 1$"),
+            ({"page[size]": 0}, r"^page\[size\]: 0 is less than minimum value 1$"),
             (
-                {"page[limit]": 101},
-                r"^page\[limit\]: 101 is greater than maximum value 100$",
+                {"page[size]": 101},
+                r"^page\[size\]: 101 is greater than maximum value 100$",
             ),
             (
-                {"page[offset]": "foo", "page[limit]": "bar"},
-                r'^page\[offset\]: "foo" is not a number\npage\[limit\]: "bar" is not a number$',
+                {"page[number]": "foo", "page[size]": "bar"},
+                r'^page\[number\]: "foo" is not a number\npage\[size\]: "bar" is not a number$',
             ),
         ],
     )

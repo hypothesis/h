@@ -20,7 +20,7 @@ from h.traversal import (
 from h.views.api.exceptions import PayloadError
 
 
-class TestListMembersLegacyLegacy:
+class TestListMembersLegacy:
     def test_it(
         self,
         context,
@@ -80,8 +80,8 @@ class TestListMembers:
         validate_query_params,
     ):
         pyramid_request.params = validate_query_params.return_value = {
-            "page[offset]": sentinel.offset,
-            "page[limit]": sentinel.limit,
+            "page[number]": 3,
+            "page[size]": 2,
         }
         group_members_service.get_memberships.return_value = [
             sentinel.membership_1,
@@ -104,7 +104,7 @@ class TestListMembers:
         )
         group_members_service.count_memberships.assert_called_once_with(context.group)
         group_members_service.get_memberships.assert_called_once_with(
-            context.group, offset=sentinel.offset, limit=sentinel.limit
+            context.group, offset=4, limit=2
         )
         assert GroupMembershipJSONPresenter.call_args_list == [
             call(pyramid_request, sentinel.membership_1),
