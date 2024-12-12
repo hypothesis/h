@@ -31,7 +31,7 @@ LIST_MEMBERS_API_CONFIG = {
 }
 
 
-@api_config(request_param=not_("page[offset]"), **LIST_MEMBERS_API_CONFIG)
+@api_config(request_param=not_("page[number]"), **LIST_MEMBERS_API_CONFIG)
 def list_members_legacy(context: GroupContext, request):
     """Legacy version of the list-members API, maintained for backwards-compatibility."""
 
@@ -55,14 +55,16 @@ def list_members_legacy(context: GroupContext, request):
     ]
 
 
-@api_config(request_param="page[offset]", **LIST_MEMBERS_API_CONFIG)
+@api_config(request_param="page[number]", **LIST_MEMBERS_API_CONFIG)
 def list_members(context: GroupContext, request):
     group = context.group
     group_members_service = request.find_service(name="group_members")
 
     params = validate_query_params(PaginationQueryParamsSchema(), request.params)
-    offset = params["page[offset]"]
-    limit = params["page[limit]"]
+    page_number = params["page[number]"]
+    page_size = params["page[size]"]
+    offset = page_size * (page_number - 1)
+    limit = page_size
 
     total = group_members_service.count_memberships(group)
     memberships = group_members_service.get_memberships(

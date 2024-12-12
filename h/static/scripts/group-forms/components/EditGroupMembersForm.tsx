@@ -84,17 +84,17 @@ async function fetchMembers(
   currentUserid: string,
   options: {
     signal: AbortSignal;
-    offset: number;
-    limit: number;
+    pageNumber: number;
+    pageSize: number;
   },
 ): Promise<{ total: number; members: MemberRow[] }> {
-  const { offset, limit, signal } = options;
+  const { pageNumber, pageSize, signal } = options;
   const { url, method, headers } = api;
   const { meta, data }: GroupMembersResponse = await callAPI(url, {
     headers,
-    limit,
+    pageSize,
     method,
-    offset,
+    pageNumber,
     signal,
   });
 
@@ -191,7 +191,7 @@ export default function EditGroupMembersForm({
   const config = useContext(Config)!;
   const currentUserid = config.context.user.userid;
 
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageNumber, setPageNumber] = useState(1);
   const [totalMembers, setTotalMembers] = useState<number | null>(null);
   const totalPages =
     totalMembers !== null ? Math.ceil(totalMembers / pageSize) : null;
@@ -216,8 +216,8 @@ export default function EditGroupMembersForm({
     const abort = new AbortController();
     setErrorMessage(null);
     fetchMembers(config.api.readGroupMembers, currentUserid, {
-      offset: pageIndex * pageSize,
-      limit: pageSize,
+      pageNumber,
+      pageSize,
       signal: abort.signal,
     })
       .then(({ total, members }) => {
@@ -230,7 +230,7 @@ export default function EditGroupMembersForm({
     return () => {
       abort.abort();
     };
-  }, [config.api.readGroupMembers, currentUserid, pageIndex, setError]);
+  }, [config.api.readGroupMembers, currentUserid, pageNumber, setError]);
 
   const columns: TableColumn<MemberRow>[] = [
     {
@@ -399,8 +399,8 @@ export default function EditGroupMembersForm({
         {typeof totalPages === 'number' && totalPages > 1 && (
           <div className="mt-4 flex justify-center">
             <Pagination
-              currentPage={pageIndex + 1}
-              onChangePage={page => setPageIndex(page - 1)}
+              currentPage={pageNumber}
+              onChangePage={setPageNumber}
               totalPages={totalPages}
             />
           </div>

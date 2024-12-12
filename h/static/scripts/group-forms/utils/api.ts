@@ -112,11 +112,11 @@ export type APIOptions = {
   headers?: Record<PropertyKey, unknown>;
   signal?: AbortSignal;
 
-  /** Index of first item to return in paginated APIs. */
-  offset?: number;
+  /** 1-based number of first page to return in paginated APIs. */
+  pageNumber?: number;
 
   /** Maximum number of items to return in response for a paginated API. */
-  limit?: number;
+  pageSize?: number;
 };
 
 /** Make an API call and return the parsed JSON body or throw APIError. */
@@ -125,9 +125,9 @@ export async function callAPI<R = unknown>(
   {
     headers = {},
     json = null,
-    limit,
+    pageSize,
     method = 'GET',
-    offset,
+    pageNumber,
     signal,
   }: APIOptions = {},
 ): Promise<R> {
@@ -145,11 +145,11 @@ export async function callAPI<R = unknown>(
   }
 
   const queryParams: Record<string, string | number> = {};
-  if (typeof offset === 'number') {
-    queryParams['page[offset]'] = offset;
+  if (typeof pageNumber === 'number') {
+    queryParams['page[number]'] = pageNumber;
   }
-  if (typeof limit === 'number') {
-    queryParams['page[limit]'] = limit;
+  if (typeof pageSize === 'number') {
+    queryParams['page[size]'] = pageSize;
   }
 
   const requestURL = new URL(url);
