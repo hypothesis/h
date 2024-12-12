@@ -3,6 +3,7 @@ import logging
 from pyramid.config import not_
 from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
+from h.models import DEFAULT_ROLES
 from h.presenters import GroupMembershipJSONPresenter
 from h.schemas.api.group_membership import EditGroupMembershipAPISchema
 from h.schemas.pagination import PaginationQueryParamsSchema
@@ -99,7 +100,6 @@ def remove_member(context: GroupMembershipContext, request):
     request_method="POST",
     link_name="group.member.add",
     description="Add a user to a group",
-    permission=Permission.Group.MEMBER_ADD,
 )
 def add_member(context: AddGroupMembershipContext, request):
     if context.user.authority != context.group.authority:
@@ -107,17 +107,18 @@ def add_member(context: AddGroupMembershipContext, request):
 
     if request.body:
         appstruct = EditGroupMembershipAPISchema().validate(json_payload(request))
-        roles = appstruct["roles"]
+        context.new_roles = appstruct["roles"]
     else:
-        # This doesn't mean the membership will be created with no roles:
-        # default roles will be applied by the service.
-        roles = None
+        context.new_roles = DEFAULT_ROLES
+
+    if not request.has_permission(Permission.Group.MEMBER_ADD, context):
+        raise HTTPNotFound()
 
     group_members_service = request.find_service(name="group_members")
 
     try:
         membership = group_members_service.member_join(
-            context.group, context.user.userid, roles
+            context.group, context.user.userid, context.new_roles
         )
     except ConflictError as err:
         raise HTTPConflict(str(err)) from err

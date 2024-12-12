@@ -4,7 +4,7 @@ from functools import partial
 from sqlalchemy import func, nulls_first, or_, select
 
 from h import session
-from h.models import Group, GroupMembership, GroupMembershipRoles, User
+from h.models import DEFAULT_ROLES, Group, GroupMembership, GroupMembershipRoles, User
 
 log = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class GroupMembersService:
         :raise ConflictError: if a membership already exists with the given
             group and userid but different roles
         """
-        roles = roles or [GroupMembershipRoles.MEMBER]
+        roles = roles or DEFAULT_ROLES
 
         user = self.user_fetcher(userid)
 

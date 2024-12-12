@@ -262,6 +262,242 @@ class TestListMembers:
 
 class TestAddMember:
     @pytest.mark.parametrize(
+        "authenticated_users_roles,json,expected_roles",
+        [
+            (
+                [GroupMembershipRoles.OWNER],
+                {"roles": [GroupMembershipRoles.OWNER]},
+                [GroupMembershipRoles.OWNER],
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                {"roles": [GroupMembershipRoles.ADMIN]},
+                [GroupMembershipRoles.ADMIN],
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                {"roles": [GroupMembershipRoles.MODERATOR]},
+                [GroupMembershipRoles.MODERATOR],
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                {"roles": [GroupMembershipRoles.MEMBER]},
+                [GroupMembershipRoles.MEMBER],
+            ),
+            (
+                [GroupMembershipRoles.OWNER],
+                None,
+                [GroupMembershipRoles.MEMBER],
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                {"roles": [GroupMembershipRoles.OWNER]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                {"roles": [GroupMembershipRoles.ADMIN]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                {"roles": [GroupMembershipRoles.MODERATOR]},
+                [GroupMembershipRoles.MODERATOR],
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                {"roles": [GroupMembershipRoles.MEMBER]},
+                [GroupMembershipRoles.MEMBER],
+            ),
+            (
+                [GroupMembershipRoles.ADMIN],
+                None,
+                [GroupMembershipRoles.MEMBER],
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                {"roles": [GroupMembershipRoles.OWNER]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                {"roles": [GroupMembershipRoles.ADMIN]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                {"roles": [GroupMembershipRoles.MODERATOR]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                {"roles": [GroupMembershipRoles.MEMBER]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MODERATOR],
+                None,
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                {"roles": [GroupMembershipRoles.OWNER]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                {"roles": [GroupMembershipRoles.ADMIN]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                {"roles": [GroupMembershipRoles.MODERATOR]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                {"roles": [GroupMembershipRoles.MEMBER]},
+                None,
+            ),
+            (
+                [GroupMembershipRoles.MEMBER],
+                None,
+                None,
+            ),
+        ],
+    )
+    def test_it(
+        self,
+        do_request,
+        group,
+        user,
+        authenticated_users_membership,
+        authenticated_users_roles,
+        json,
+        expected_roles,
+    ):
+        authenticated_users_membership.roles = authenticated_users_roles
+
+        do_request(json=json, status=200 if expected_roles else 404)
+
+        roles = None
+        for membership in group.memberships:
+            if membership.user == user:
+                roles = membership.roles
+                break
+        assert roles == expected_roles
+
+    @pytest.mark.parametrize(
+        "roles,status",
+        [
+            ([GroupMembershipRoles.OWNER], 200),
+            ([GroupMembershipRoles.MODERATOR], 409),
+        ],
+    )
+    def test_me_alias(self, roles, status, do_request, group, authenticated_user):
+        do_request(userid="me", json={"roles": roles}, status=status)
+
+        roles = None
+        for membership in group.memberships:
+            if membership.user == authenticated_user:
+                roles = membership.roles
+        assert roles == [GroupMembershipRoles.OWNER]
+
+    def test_it_does_nothing_if_the_user_is_already_a_member_of_the_group(
+        self, do_request, group, user
+    ):
+        group.memberships.append(GroupMembership(user=user))
+
+        do_request()
+
+        assert user in group.members
+
+    def test_it_when_a_conflicting_membership_already_exists(
+        self, do_request, group, user
+    ):
+        group.memberships.append(
+            GroupMembership(user=user, roles=[GroupMembershipRoles.MEMBER])
+        )
+
+        response = do_request(
+            json={"roles": [GroupMembershipRoles.MODERATOR]}, status=409
+        )
+
+        assert (
+            response.json["reason"]
+            == "The user is already a member of the group, with conflicting membership attributes"
+        )
+
+    def test_it_errors_if_the_pubid_is_unknown(self, do_request):
+        do_request(pubid="UNKNOWN_PUBID", status=404)
+
+    def test_it_errors_if_the_userid_is_unknown(self, do_request, group):
+        do_request(userid="acct:UNKOWN_USERNAME@{group.authority}", status=404)
+
+    def test_it_errors_if_the_userid_is_invalid(self, do_request):
+        do_request(userid="INVALID_USERID", status=404)
+
+    def test_it_errors_if_the_request_isnt_authenticated(self, do_request, headers):
+        del headers["Authorization"]
+
+        do_request(status=404)
+
+    def test_it_errors_if_the_authenticated_user_isnt_a_member_of_the_group(
+        self, do_request, factories, headers
+    ):
+        headers.update(
+            token_authorization_header(factories.DeveloperToken(user=factories.User()))
+        )
+
+        do_request(status=404)
+
+    @pytest.fixture(autouse=True)
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture(autouse=True)
+    def user(self, factories, group):
+        return factories.User(authority=group.authority)
+
+    @pytest.fixture(autouse=True)
+    def authenticated_user(self, db_session, factories, group):
+        return factories.User(authority=group.authority)
+
+    @pytest.fixture(autouse=True)
+    def authenticated_users_membership(self, db_session, authenticated_user, group):
+        membership = GroupMembership(
+            group=group, user=authenticated_user, roles=[GroupMembershipRoles.OWNER]
+        )
+        db_session.add(membership)
+        return membership
+
+    @pytest.fixture
+    def headers(self, factories, authenticated_user):
+        return token_authorization_header(
+            factories.DeveloperToken(user=authenticated_user)
+        )
+
+    @pytest.fixture
+    def do_request(self, app, db_session, group, user, headers):
+        def do_request(
+            pubid=group.pubid,
+            userid=user.userid,
+            json={"roles": ["member"]},
+            headers=headers,
+            status=200,
+        ):
+            db_session.commit()
+            path = f"/api/groups/{pubid}/members/{userid}"
+            if json is None:
+                return app.post(path, headers=headers, status=status)
+
+            return app.post_json(path, json, headers=headers, status=status)
+
+        return do_request
+
+
+class TestAddMemberWithAuthclientAuthentication:
+    @pytest.mark.parametrize(
         "json,expected_roles",
         [
             ({"roles": ["owner"]}, ["owner"]),
@@ -311,19 +547,6 @@ class TestAddMember:
 
     def test_it_errors_if_the_userid_is_invalid(self, do_request):
         do_request(userid="INVALID_USERID", status=404)
-
-    def test_it_errors_if_the_request_isnt_authenticated(self, do_request, headers):
-        del headers["Authorization"]
-
-        do_request(status=404)
-
-    def test_it_errors_if_the_request_has_token_authentication(
-        self, do_request, factories, user, headers
-    ):
-        token = factories.DeveloperToken(user=user)
-        headers.update(token_authorization_header(token))
-
-        do_request(status=404)
 
     def test_it_errors_if_the_groups_authority_doesnt_match(
         self, do_request, factories
