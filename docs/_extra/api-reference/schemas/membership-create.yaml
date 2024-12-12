@@ -1,0 +1,17 @@
+Membership:
+  type: object
+  properties:
+    roles:
+      type: array
+      minItems: 1
+      maxItems: 1
+      items:
+        type: string
+        enum: [
+          "member",
+          "moderator",
+          "admin",
+          "owner",
+        ]
+      description: "The user's roles in the group."
+      example: ["moderator"]
