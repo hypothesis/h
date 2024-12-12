@@ -75,6 +75,18 @@ def list_members(context: GroupContext, request):
 @api_config(
     versions=["v1", "v2"],
     route_name="api.group_member",
+    request_method="GET",
+    link_name="group.member.read",
+    description="Fetch a group membership",
+    permission=Permission.Group.READ,
+)
+def get_member(context: GroupMembershipContext, request):
+    return GroupMembershipJSONPresenter(request, context.membership).asdict()
+
+
+@api_config(
+    versions=["v1", "v2"],
+    route_name="api.group_member",
     request_method="DELETE",
     link_name="group.member.delete",
     description="Remove a user from a group",

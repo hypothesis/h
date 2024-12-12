@@ -260,6 +260,119 @@ class TestListMembers:
         }
 
 
+class TestGetMember:
+    def test_it(self, app, db_session, do_request, group, target_user):
+        response = do_request()
+
+        assert response.json == {
+            "authority": group.authority,
+            "userid": target_user.userid,
+            "username": target_user.username,
+            "display_name": target_user.display_name,
+            "roles": [GroupMembershipRoles.MEMBER],
+            "actions": [
+                "delete",
+                "updates.roles.member",
+                "updates.roles.moderator",
+                "updates.roles.admin",
+                "updates.roles.owner",
+            ],
+            "created": f"1970-01-01T00:00:00.000000+00:00",
+            "updated": f"1970-01-01T00:00:01.000000+00:00",
+        }
+
+    def test_it_when_group_doesnt_exist(self, do_request):
+        response = do_request(pubid="doesnt_exist", status=404)
+
+    def test_it_when_target_user_doesnt_exist(self, do_request):
+        response = do_request(userid="doesnt_exist", status=404)
+
+    def test_it_when_authenticated_user_isnt_a_member_of_the_group(
+        self, do_request, factories, headers
+    ):
+        headers.update(
+            **token_authorization_header(
+                factories.DeveloperToken(user=factories.User())
+            )
+        )
+
+        do_request(status=404)
+
+    def test_it_when_not_authenticated(self, do_request, headers):
+        del headers["Authorization"]
+
+        do_request(status=404)
+
+    def test_it_with_an_open_group(self, do_request, factories, headers, target_user):
+        group = factories.OpenGroup(memberships=[GroupMembership(user=target_user)])
+        # Non-group members and unauthenticated requests can read the
+        # memberships of open groups.
+        del headers["Authorization"]
+
+        do_request(pubid=group.pubid)
+
+    def test_it_with_a_restricted_group(
+        self, do_request, factories, headers, target_user
+    ):
+        group = factories.RestrictedGroup(
+            memberships=[GroupMembership(user=target_user)]
+        )
+        # Non-group members and unauthenticated requests can read the
+        # memberships of restricted groups.
+        del headers["Authorization"]
+
+        do_request(pubid=group.pubid)
+
+    @pytest.fixture(autouse=True)
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture(autouse=True)
+    def target_user(self, factories, group):
+        target_user = factories.User()
+        group.memberships.append(
+            GroupMembership(
+                user=target_user,
+                created=datetime(1970, 1, 1, 0, 0, 0),
+                updated=datetime(1970, 1, 1, 0, 0, 1),
+            )
+        )
+        return target_user
+
+    @pytest.fixture(autouse=True)
+    def authenticated_user(self, factories, group):
+        authenticated_user = factories.User()
+        group.memberships.append(
+            GroupMembership(
+                user=authenticated_user,
+                roles=[GroupMembershipRoles.OWNER],
+                created=datetime(1971, 1, 1, 0, 0, 0),
+                updated=datetime(1971, 1, 1, 0, 0, 1),
+            )
+        )
+        return authenticated_user
+
+    @pytest.fixture(autouse=True)
+    def token(self, factories, authenticated_user):
+        return factories.DeveloperToken(user=authenticated_user)
+
+    @pytest.fixture
+    def headers(self, factories, token):
+        return token_authorization_header(token)
+
+    @pytest.fixture
+    def do_request(self, app, db_session, group, target_user, headers):
+        def do_request(
+            pubid=group.pubid, userid=target_user.userid, headers=headers, status=200
+        ):
+            db_session.commit()
+            return app.get(
+                f"/api/groups/{pubid}/members/{userid}", headers=headers, status=status
+            )
+
+        return do_request
+
+
 class TestAddMember:
     @pytest.mark.parametrize(
         "json,expected_roles",
