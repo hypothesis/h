@@ -1,0 +1,37 @@
+Membership:
+  type: object
+  properties:
+    authority:
+      type: string
+      example: "hypothes.is"
+    userid:
+      type: string
+      example: "acct:felicity_nunsun@hypothes.is"
+    username:
+      type: string
+      example: "felicity_nunsun"
+    display_name:
+      type: string
+      example: "Felicity Nunsun"
+    roles:
+      type: array
+      items:
+        type: string
+      description: "The user's roles in the group."
+      example: ["moderator"]
+    actions:
+      type: array
+      items:
+        type: string
+      description: "An array of strings representing actions that the authenticated user is authorized to take against this membership. For example 'delete' is present in the array if the authenticated user has permission to delete the membership (remove the user from the group)."
+      example: ["delete", "updates.roles.member"]
+    created:
+      type: string
+      format: date-time
+      description: "When this user joined the group."
+      example: "1970-01-01T00:00:00.000000+00:00"
+    updated:
+      type: string
+      format: date-time
+      description: "When this membership was last updated (for example to change the role)."
+      example: "1970-01-01T00:00:00.000000+00:00"
