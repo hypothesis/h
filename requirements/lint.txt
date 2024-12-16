@@ -48,7 +48,7 @@ celery==5.4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-certifi==2024.8.30
+certifi==2024.12.14
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
