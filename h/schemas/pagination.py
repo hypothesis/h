@@ -2,15 +2,15 @@ from colander import Integer, Range, Schema, SchemaNode
 
 
 class PaginationQueryParamsSchema(Schema):
-    offset = SchemaNode(
+    page = SchemaNode(
         Integer(),
-        name="page[offset]",
-        validator=Range(min=0),
-        missing=0,
+        name="page[number]",
+        validator=Range(min=1),
+        missing=1,
     )
-    limit = SchemaNode(
+    size = SchemaNode(
         Integer(),
-        name="page[limit]",
+        name="page[size]",
         validator=Range(min=1, max=100),
         missing=20,
     )
