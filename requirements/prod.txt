@@ -84,7 +84,7 @@ iso8601==2.1.0
     #   deform
 itsdangerous==2.2.0
     # via -r requirements/prod.in
-jinja2==3.1.4
+jinja2==3.1.5
     # via
     #   -r requirements/prod.in
     #   data-tasks
