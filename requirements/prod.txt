@@ -262,7 +262,7 @@ webob==1.8.8
     # via pyramid
 wired==0.3
     # via pyramid-services
-ws4py==0.5.1
+ws4py==0.6.0
     # via -r requirements/prod.in
 wsaccel==0.6.7
     # via -r requirements/prod.in

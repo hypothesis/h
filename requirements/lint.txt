@@ -566,7 +566,7 @@ wired==0.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid-services
-ws4py==0.5.1
+ws4py==0.6.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
