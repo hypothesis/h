@@ -6338,7 +6338,7 @@ __metadata:
     mocha: ^11.0.1
     normalize.css: ^8.0.0
     popper.js: ^1.16.1
-    postcss: ^8.4.47
+    postcss: ^8.4.49
     preact: ^10.25.1
     prettier: ^3.4.1
     rollup: ^4.28.0
@@ -9127,6 +9127,17 @@ __metadata:
     picocolors: ^1.1.0
     source-map-js: ^1.2.1
   checksum: f78440a9d8f97431dd2ab1ab8e1de64f12f3eff38a3d8d4a33919b96c381046a314658d2de213a5fa5eb296b656de76a3ec269fdea27f16d5ab465b916a0f52c
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.4.49":
+  version: 8.4.49
+  resolution: "postcss@npm:8.4.49"
+  dependencies:
+    nanoid: ^3.3.7
+    picocolors: ^1.1.1
+    source-map-js: ^1.2.1
+  checksum: eb5d6cbdca24f50399aafa5d2bea489e4caee4c563ea1edd5a2485bc5f84e9ceef3febf170272bc83a99c31d23a316ad179213e853f34c2a7a8ffa534559d63a
   languageName: node
   linkType: hard
 
