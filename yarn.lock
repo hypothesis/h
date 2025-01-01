@@ -6346,7 +6346,7 @@ __metadata:
     scroll-into-view: ^1.16.2
     sinon: ^18.0.0
     syn: ^0.2.2
-    tailwindcss: ^3.4.15
+    tailwindcss: ^3.4.17
     typescript: ^5.7.2
     typescript-eslint: ^8.16.0
     wouter-preact: ^3.3.5
@@ -7741,17 +7741,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lilconfig@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "lilconfig@npm:2.1.0"
-  checksum: 8549bb352b8192375fed4a74694cd61ad293904eee33f9d4866c2192865c44c4eb35d10782966242634e0cbc1e91fe62b1247f148dc5514918e3a966da7ea117
-  languageName: node
-  linkType: hard
-
 "lilconfig@npm:^3.0.0":
   version: 3.1.2
   resolution: "lilconfig@npm:3.1.2"
   checksum: 4e8b83ddd1d0ad722600994e6ba5d858ddca14f0587aa6b9c8185e17548149b5e13d4d583d811e9e9323157fa8c6a527e827739794c7502b59243c58e210b8c3
+  languageName: node
+  linkType: hard
+
+"lilconfig@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "lilconfig@npm:3.1.3"
+  checksum: 644eb10830350f9cdc88610f71a921f510574ed02424b57b0b3abb66ea725d7a082559552524a842f4e0272c196b88dfe1ff7d35ffcc6f45736777185cd67c9a
   languageName: node
   linkType: hard
 
@@ -10696,9 +10696,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:^3.4.15":
-  version: 3.4.15
-  resolution: "tailwindcss@npm:3.4.15"
+"tailwindcss@npm:^3.4.17":
+  version: 3.4.17
+  resolution: "tailwindcss@npm:3.4.17"
   dependencies:
     "@alloc/quick-lru": ^5.2.0
     arg: ^5.0.2
@@ -10709,7 +10709,7 @@ __metadata:
     glob-parent: ^6.0.2
     is-glob: ^4.0.3
     jiti: ^1.21.6
-    lilconfig: ^2.1.0
+    lilconfig: ^3.1.3
     micromatch: ^4.0.8
     normalize-path: ^3.0.0
     object-hash: ^3.0.0
@@ -10725,7 +10725,7 @@ __metadata:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 189a2a4747ab75446af8ead1b0b437030718040a33b010de1113c3f338f05d1eb2ead97d29028058f5007d82e1383ca053f01242c82ffd543e72460fea4aa1dd
+  checksum: bda962f30e9a2f0567e2ee936ec863d5178958078e577ced13da60b3af779062a53a7e95f2f32b5c558f12a7477dea3ce071441a7362c6d7bf50bc9e166728a4
   languageName: node
   linkType: hard
 
