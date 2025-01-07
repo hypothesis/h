@@ -929,6 +929,30 @@ paths:
 
   /groups/{id}/members/{user}:
     # ----------------------------------------------------------
+    # GET groups/{id}/members/{user} - Get group membership
+    # ----------------------------------------------------------
+    get:
+      tags:
+        - memberships
+      summary: Get group membership
+      description: Fetch a user's membership of a group.
+        Authenticated user must have read access to the group.
+        Does not require authentication for reading members of public groups.
+      security:
+        - ApiKey: []
+        - {}
+      parameters:
+        - $ref: '#/components/parameters/GroupID'
+        - $ref: '#/components/parameters/UserID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+
+    # ----------------------------------------------------------
     # POST groups/{id}/members/{user} - Add user to group
     # ----------------------------------------------------------
     post:
