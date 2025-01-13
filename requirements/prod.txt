@@ -65,7 +65,7 @@ h-api==1.1.0
     # via -r requirements/prod.in
 h-assets==1.0.7
     # via -r requirements/prod.in
-h-matchers==1.2.16
+h-matchers==1.2.17
     # via -r requirements/prod.in
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.in
