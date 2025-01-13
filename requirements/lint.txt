@@ -334,7 +334,7 @@ pyjwt==2.10.1
     #   -r requirements/tests.txt
 pylint==3.3.3
     # via -r requirements/lint.in
-pyparsing==3.2.0
+pyparsing==3.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

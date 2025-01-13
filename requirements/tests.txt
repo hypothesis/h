@@ -215,7 +215,7 @@ pycryptodomex==3.21.0
     # via -r requirements/prod.txt
 pyjwt==2.10.1
     # via -r requirements/prod.txt
-pyparsing==3.2.0
+pyparsing==3.2.1
     # via -r requirements/prod.txt
 pyproject-hooks==1.0.0
     # via
