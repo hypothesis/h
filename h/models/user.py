@@ -1,5 +1,6 @@
 import datetime
 import re
+from functools import partial
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
@@ -9,6 +10,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from h.db import Base
 from h.exceptions import InvalidUserId
 from h.models import helpers
+from h.pubid import generate
 from h.util.user import format_userid, split_user
 
 if TYPE_CHECKING:
@@ -20,6 +22,7 @@ USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = "(?i)^[A-Z0-9._]+$"
 EMAIL_MAX_LENGTH = 100
 DISPLAY_NAME_MAX_LENGTH = 30
+USER_PUBID_LENGTH = 12
 
 
 def _normalise_username(username):
@@ -157,6 +160,14 @@ class User(Base):
         )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+
+    #: A publicly visible unique identifier for the user
+    pubid = sa.Column(
+        sa.Text(),
+        default=partial(generate, USER_PUBID_LENGTH),
+        unique=True,
+        nullable=True,
+    )
 
     #: Username as chosen by the user on registration
     _username = sa.Column("username", sa.UnicodeText(), nullable=False)
