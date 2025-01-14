@@ -166,7 +166,7 @@ class User(Base):
         sa.Text(),
         default=partial(generate, USER_PUBID_LENGTH),
         unique=True,
-        nullable=True,
+        nullable=False,
     )
 
     #: Username as chosen by the user on registration
