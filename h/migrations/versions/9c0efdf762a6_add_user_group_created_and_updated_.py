@@ -13,5 +13,7 @@ def upgrade():
 
 
 def downgrade():
+    op.drop_index(op.f("ix__user_group_updated"), table_name="user_group")
+    op.drop_index(op.f("ix__user_group_created"), table_name="user_group")
     op.drop_column("user_group", "updated")
     op.drop_column("user_group", "created")
