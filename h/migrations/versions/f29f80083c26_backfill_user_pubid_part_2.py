@@ -1,6 +1,7 @@
 """Backfill user.pubid with unique values part 2."""
 
 from alembic import op
+from sqlalchemy.orm import sessionmaker
 
 from h.migrations.versions.f32200e2e496_backfill_user_pubid import backfill_users
 
@@ -14,7 +15,7 @@ USER_PUBID_RETRIES = 5
 
 
 def upgrade():
-    session = op.get_bind()
+    session = sessionmaker()(bind=op.get_bind())
 
     backfill_users(
         session,
