@@ -50,7 +50,7 @@ def backfill_users(
 
     count = 0
     while users := user_query.all():
-        if count >= USER_MAX_COUNT:
+        if count >= user_max_count:
             logger.info("Reached maximum user count of %d", user_max_count)
             break
         batch_count = len(users)
