@@ -33,6 +33,7 @@ from h.models.flag import Flag
 from h.models.group import Group, GroupMembership, GroupMembershipRoles
 from h.models.group_scope import GroupScope
 from h.models.job import Job
+from h.models.mention import Mention
 from h.models.organization import Organization
 from h.models.setting import Setting
 from h.models.subscriptions import Subscriptions
@@ -60,6 +61,7 @@ __all__ = (
     "GroupMembership",
     "GroupScope",
     "Job",
+    "Mention",
     "Organization",
     "Setting",
     "Subscriptions",
