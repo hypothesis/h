@@ -143,7 +143,7 @@ gunicorn==23.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-api==1.1.0
+h-api==1.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -174,7 +174,6 @@ importlib-metadata==7.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   h-api
     #   pip-sync-faster
 importlib-resources==6.5.2
     # via

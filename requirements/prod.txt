@@ -61,7 +61,7 @@ greenlet==3.1.1
     #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.in
-h-api==1.1.0
+h-api==1.1.1
     # via -r requirements/prod.in
 h-assets==1.0.7
     # via -r requirements/prod.in
@@ -71,8 +71,6 @@ h-pyramid-sentry==1.2.4
     # via -r requirements/prod.in
 hupper==1.12
     # via pyramid
-importlib-metadata==7.0.1
-    # via h-api
 importlib-resources==6.5.2
     # via
     #   -r requirements/prod.in
@@ -266,8 +264,6 @@ ws4py==0.6.0
     # via -r requirements/prod.in
 wsaccel==0.6.7
     # via -r requirements/prod.in
-zipp==3.19.1
-    # via importlib-metadata
 zope-deprecation==5.0
     # via
     #   deform

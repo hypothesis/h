@@ -92,7 +92,7 @@ greenlet==3.1.1
     #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
-h-api==1.1.0
+h-api==1.1.1
     # via -r requirements/prod.txt
 h-assets==1.0.7
     # via -r requirements/prod.txt
@@ -105,10 +105,7 @@ hupper==1.12
     #   -r requirements/prod.txt
     #   pyramid
 importlib-metadata==7.0.1
-    # via
-    #   -r requirements/prod.txt
-    #   h-api
-    #   pip-sync-faster
+    # via pip-sync-faster
 importlib-resources==6.5.2
     # via
     #   -r requirements/prod.txt
@@ -384,9 +381,7 @@ ws4py==0.6.0
 wsaccel==0.6.7
     # via -r requirements/prod.txt
 zipp==3.19.1
-    # via
-    #   -r requirements/prod.txt
-    #   importlib-metadata
+    # via importlib-metadata
 zope-deprecation==5.0
     # via
     #   -r requirements/prod.txt
