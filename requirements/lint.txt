@@ -95,7 +95,7 @@ coverage[toml]==7.6.10
     # via
     #   -r requirements/tests.txt
     #   pytest-cov
-data-tasks==0.0.4
+data-tasks==0.0.5
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

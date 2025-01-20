@@ -63,7 +63,7 @@ colander==2.0
     # via
     #   -r requirements/prod.txt
     #   deform
-data-tasks==0.0.4
+data-tasks==0.0.5
     # via -r requirements/prod.txt
 deform==2.0.15
     # via -r requirements/prod.txt
