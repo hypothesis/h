@@ -1,0 +1,48 @@
+sentry-sdk
+h-pyramid-sentry
+h-matchers
+h-api
+h-assets
+data_tasks
+pyramid-sanity
+PyJWT
+bcrypt
+bleach
+celery
+certifi  # Required to connect to Elasticsearch over SSL.
+cffi
+click
+deform
+elasticsearch==6.8.2
+elasticsearch-dsl==6.4.0
+gevent >= 1.4.0
+importlib_resources
+itsdangerous
+jsonschema
+kombu
+markdown
+oauthlib
+packaging
+passlib
+psycogreen
+pycryptodomex
+pyparsing >= 2.1.5
+pyramid-exclog
+markupsafe
+jinja2
+pyramid-jinja2
+pyramid-services
+pyramid-mailer
+pyramid-retry
+python-dateutil
+python-slugify < 8.1.0
+pytz
+rfc3339-validator  # Required for date-time format checking in jsonschema
+supervisor >= 4.0.0
+sqlparse
+tabulate
+transaction
+venusian
+wsaccel
+ws4py >= 0.4.0
+zope.interface

@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+import subprocess
+
+subprocess.run(["bin/hypothesis", "--dev", "devdata"], check=True)

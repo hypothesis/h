@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from cookiecutter.main import cookiecutter
+
+with open(".cookiecutter/cookiecutter.json", "r", encoding="utf-8") as cookiecutter_json_file:
+    config = json.loads(cookiecutter_json_file.read())
+
+extra_context = config.get("extra_context", {})
+extra_context["__ignore__"] = config.get("ignore", [])
+extra_context["__target_dir__"] = str(Path(os.getcwd()))
+
+parser = argparse.ArgumentParser(description="Update the project from the cookiecutter template")
+parser.add_argument("--template", help="the cookiecutter template to use (default: what's in cookiecutter.json)")
+parser.add_argument("--checkout", help="the branch, tag or commit of the cookiecutter template to use (default: what's in cookiecutter.json)")
+parser.add_argument("--directory", help="the directory within the cookiecutter repo to use to use (default: what's in cookiecutter.json)")
+args = parser.parse_args()
+
+with TemporaryDirectory() as tmpdirname:
+    cookiecutter(
+        template=args.template or config.get("template"),
+        checkout=args.checkout or config.get("checkout"),
+        directory=args.directory or config.get("directory"),
+        extra_context=extra_context,
+        no_input=True,
+        overwrite_if_exists=True,
+        output_dir=tmpdirname,
+    )

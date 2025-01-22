@@ -1,0 +1,12 @@
+"fixme",
+"too-many-positional-arguments",
+
+# h-matchers triggers this when called without brackets
+"no-value-for-parameter",
+
+# This is intermittently causing a false-positive:
+# tests/unit/h/models/document/_uri_test.py:17:15: W0143: Comparing against a callable, did you omit the parenthesis? (comparison-with-callable)
+# ...if we add a # pylint:disable comment for it then it starts intermittently causing:
+# tests/unit/h/models/document/_uri_test.py:17:0: I0021: Useless suppression of 'comparison-with-callable' (useless-suppression)
+# Just disable the whole rule globally.
+"comparison-with-callable",

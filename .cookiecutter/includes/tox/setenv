@@ -1,1 +1,15 @@
-SQLALCHEMY_SILENCE_UBER_WARNING=1
+REPORT_FDW_USERS=lms-fdw report-fdw
+dev: AUTHORITY = {env:AUTHORITY:localhost}
+dev: HTTP_HOST = {env:HTTP_HOST:localhost:5000}
+dev: APP_URL = {env:APP_URL:http://localhost:5000}
+dev: WEBSOCKET_URL = {env:WEBSOCKET_URL:ws://localhost:5001/ws}
+dev: ENABLE_WEB = {env:ENABLE_WEB:true}
+dev: ENABLE_WEBSOCKET = {env:ENABLE_WEBSOCKET:true}
+dev: ENABLE_WORKER = {env:ENABLE_WORKER:true}
+dev: JWE_SECRET_LMS = {env:JWE_SECRET_LMS:SUPER_SECRET}
+dev: H_API_AUTH_COOKIE_SECRET_KEY = {env:H_API_AUTH_COOKIE_SECRET_KEY:"dev_h_api_auth_cookie_secret_key"}
+dev: H_API_AUTH_COOKIE_SALT = {env:H_API_AUTH_COOKIE_SALT:"dev_h_api_auth_cookie_salt"}
+dev: REPLICA_DATABASE_URL = {env:DATABASE_URL:postgresql://postgres@localhost/postgres}
+tests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-tests}
+functests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-functests}
+{tests,functests}: AUTHORITY = {env:AUTHORITY:example.com}

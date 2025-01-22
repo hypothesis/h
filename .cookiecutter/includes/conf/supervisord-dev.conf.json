@@ -1,0 +1,27 @@
+{
+  "programs": {
+    "init_db": {
+        "command": "python3 -m h.scripts.init_db --create --stamp",
+        "startsecs": 0
+    },
+    "init_elasticsearch": {
+        "command": "python3 -m h.scripts.init_elasticsearch conf/development.ini",
+        "startsecs": 0
+    },
+    "web": {
+      "command": "newrelic-admin run-program gunicorn --paste conf/development.ini --config conf/gunicorn-dev.conf.py",
+      "autostart": "%(ENV_ENABLE_WEB)s"
+    },
+    "websocket": {
+      "command": "gunicorn --paste conf/websocket-dev.ini --config conf/gunicorn-websocket-dev.conf.py",
+      "autostart": "%(ENV_ENABLE_WEBSOCKET)s"
+    },
+    "worker": {
+      "command": "newrelic-admin run-program bin/hypothesis --dev celery worker --loglevel=INFO",
+      "autostart": "%(ENV_ENABLE_WORKER)s"
+    },
+    "assets": {
+      "command": "node_modules/.bin/gulp watch"
+    }
+  }
+}

@@ -140,7 +140,7 @@ def _parse_header(data):
 
 # Patterns in log lines that identify them as not being errors, even if the
 # log line was written to stderr.
-NON_ERROR_MARKERS = ["[gunicorn.error:INFO]", "Starting monitor"]
+NON_ERROR_MARKERS = ["[INFO]"]
 
 
 def _log_payload(payload, err=False):

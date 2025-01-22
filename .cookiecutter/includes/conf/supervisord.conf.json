@@ -1,0 +1,26 @@
+{
+  "programs": {
+    "nginx": {
+      "command": "nginx",
+      "autostart": "%(ENV_ENABLE_NGINX)s"
+
+    },
+    "web": {
+      "command": "newrelic-admin run-program gunicorn --paste conf/production.ini --config conf/gunicorn.conf.py",
+      "autostart": "%(ENV_ENABLE_WEB)s"
+    },
+    "websocket": {
+      "command": "gunicorn --paste conf/websocket.ini --config conf/gunicorn-websocket.conf.py",
+      "autostart": "%(ENV_ENABLE_WEBSOCKET)s"
+    },
+    "websocket-monolithic": {
+      "command": "gunicorn --paste conf/websocket-monolithic.ini --config conf/gunicorn-websocket-monolithic.conf.py",
+      "autostart": "%(ENV_ENABLE_WEBSOCKET_MONOLITHIC)s",
+      "process_name": "websocket"
+    },
+    "worker": {
+      "command": "newrelic-admin run-program hypothesis celery worker --loglevel=INFO",
+      "autostart": "%(ENV_ENABLE_WORKER)s"
+    }
+  }
+}

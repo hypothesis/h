@@ -7,7 +7,7 @@ from packaging.version import Version
 
 from h import search
 
-ELASTICSEARCH_INDEX = "hypothesis-test"
+ELASTICSEARCH_INDEX = os.environ["ELASTICSEARCH_INDEX"]
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
 
 __all__ = ("es_client", "mock_es_client", "init_elasticsearch")

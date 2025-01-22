@@ -1,0 +1,6 @@
+"missing-param-doc",
+"fixme",
+
+# This is intermittently causing false-positives with SQLAlchemy's Mapped, for example:
+# h/models/token.py:57:10: E1136: Value 'Mapped' is unsubscriptable (unsubscriptable-object)
+"unsubscriptable-object",

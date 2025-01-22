@@ -1,40 +1,26 @@
-MANIFEST
-build/
-dist/
-docs/_build/
-node_modules/
+/build
+coverage
+node_modules
+yarn-error.log
+.coverage*
+.tox
+*.egg-info
+*.pyc
+supervisord.log
+supervisord.pid
+.DS_Store
+.devdata*
+.eslintcache
+*.tsbuildinfo
+.hypothesis/
 
 # Pyramid debug mailer
 mail/
-
-# py.test state cache
-.cache/
-.coverage
-.coverage.*
-coverage/*
-.hypothesis/
-.tox/
-
-.eggs/
-*.egg
-*.egg-info
-.pytest_cache
 
 # development TLS cert/key
 .tlscert.pem
 .tlscsr.pem
 .tlskey.pem
-
-*.pyc
-*.pyo
-
-*.pid
-*.log
-
-# Temp file for `make test-py3` target
-tests/py3-actual-failures.txt
-
-.devdata.env
 
 # See https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored.
 # This is the "If you're not using Zero-Installs" list.
@@ -45,6 +31,3 @@ tests/py3-actual-failures.txt
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-
-# TypeScript cache
-*.tsbuildinfo

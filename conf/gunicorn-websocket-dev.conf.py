@@ -8,8 +8,8 @@ workers = 2
 worker_connections = 8
 
 
-if 'H_GUNICORN_CERTFILE' in environ:
-    certfile = environ['H_GUNICORN_CERTFILE']
+if 'GUNICORN_CERTFILE' in environ:
+    certfile = environ['GUNICORN_CERTFILE']
 
-if 'H_GUNICORN_KEYFILE' in environ:
-    keyfile = environ['H_GUNICORN_KEYFILE']
+if 'GUNICORN_KEYFILE' in environ:
+    keyfile = environ['GUNICORN_KEYFILE']

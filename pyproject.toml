@@ -1,3 +1,87 @@
+[tool.pytest.ini_options]
+addopts = "-q"
+filterwarnings = [
+    "error", # Fail the tests if there are any warnings.
+    "ignore:^find_module\\(\\) is deprecated and slated for removal in Python 3.12; use find_spec\\(\\) instead$:DeprecationWarning:importlib",
+    "ignore:^FileFinder.find_loader\\(\\) is deprecated and slated for removal in Python 3.12; use find_spec\\(\\) instead$:DeprecationWarning:importlib",
+    "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:pkg_resources",
+    "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:pyramid",
+    "ignore:^Deprecated call to .pkg_resources\\.declare_namespace\\('.*'\\).\\.:DeprecationWarning:pkg_resources",
+    "ignore:^'cgi' is deprecated and slated for removal in Python 3\\.13$:DeprecationWarning:webob",
+    "ignore:^datetime\\.datetime\\.utcnow\\(\\) is deprecated and scheduled for removal in a future version\\.:DeprecationWarning",
+    "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:deform",
+    "ignore:^The behavior of AcceptLanguageValidHeader\\.__iter__ is currently maintained for backward compatibility, but will change in the future.$:DeprecationWarning:webob.acceptparse",
+    "ignore:^Use of \\.\\. or absolute path in a resource path is not allowed and will raise exceptions in a future release\\.$:DeprecationWarning:pkg_resources",
+    "ignore:^Use of \\.\\. or absolute path in a resource path is not allowed and will raise exceptions in a future release\\.$:DeprecationWarning:pyramid",
+
+    # https://foss.heptapod.net/python-libs/passlib/-/issues/148
+    "ignore:^'crypt' is deprecated and slated for removal in Python 3.13:DeprecationWarning:passlib",
+
+    # Usage of deprecated method of urllib3 within the elasticsearch library
+    "ignore:^HTTPResponse.getheaders\\(\\) is deprecated and will be removed in urllib3 v2.1.0. Instead access HTTPResponse.headers directly.$:DeprecationWarning:elasticsearch",
+]
+
+[tool.pydocstyle]
+ignore = [
+    # Missing docstrings.
+    "D100","D101","D102","D103","D104","D105","D106","D107",
+
+    # "No blank lines allowed after function docstring" conflicts with the
+    # Black code formatter which insists on inserting blank lines after
+    # function docstrings.
+    "D202",
+
+    # "1 blank line required before class docstring" conflicts with another
+    # pydocstyle rule D211 "No blank lines allowed before class docstring".
+    "D203",
+
+    # "Multi-line docstring summary should start at the first line"
+    # and "Multi-line docstring summary should start at the second line".
+    # These two rules conflict with each other so you have to disable one of them.
+    # How about we disable them both? PEP 257 says either approach is okay:
+    #
+    # > The summary line may be on the same line as the opening quotes or on
+    # > the next line.
+    # >
+    # > https://peps.python.org/pep-0257/#multi-line-docstrings
+    "D212",
+    "D213",
+]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["h", "tests/unit"]
+omit = [
+    "*/h/__main__.py",
+    "*/h/scripts/init_db.py",
+    "h/cli/*",
+    "h/pshell.py",
+    "h/scripts/init_elasticsearch.py",
+]
+
+[tool.coverage.paths]
+source = ["src", ".tox/*tests/lib/python*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+fail_under = 100.00
+skip_covered = true
+exclude_also = [
+    # `if TYPE_CHECKING:` blocks are only executed while running mypy.
+    "if TYPE_CHECKING:",
+]
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+default_section = "THIRDPARTY"
+known_first_party = ["h", "tests"]
+
 [tool.pylint.main]
 jobs = 0 # Use one process for CPU.
 
@@ -59,10 +143,11 @@ disable = [
     "duplicate-code",
 
     "missing-param-doc",
-
-    # Temporarily ignored during pep8 -> pylint transition. This should be removed later.
     "fixme",
 
+    # This is intermittently causing false-positives with SQLAlchemy's Mapped, for example:
+    # h/models/token.py:57:10: E1136: Value 'Mapped' is unsubscriptable (unsubscriptable-object)
+    "unsubscriptable-object",
 ]
 
 good-names = [
@@ -73,3 +158,27 @@ good-names = [
 [tool.pylint.reports]
 output-format = "colorized"
 score = "no"
+
+[tool.mypy]
+allow_untyped_globals = true
+error_summary = false
+pretty = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+disable_error_code = [
+    # https://mypy.readthedocs.io/en/stable/error_code_list.html#code-import-untyped
+    "import-untyped",
+]
+
+[[tool.mypy.overrides]]
+module = [
+  # Don't try to typecheck the tests for now.
+  "tests.*",
+  # Disable type-checking in h (by ignoring all files) for now.
+  # This is just to get `make typecheck` passing.
+  # In future we should remove this and fix h's type-checking errors.
+  "h.*",
+]
+ignore_errors = true
