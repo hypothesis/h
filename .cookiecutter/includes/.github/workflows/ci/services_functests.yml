@@ -1,0 +1,4 @@
+rabbitmq:
+  image: rabbitmq:3.12-management-alpine
+  ports:
+  - 5672:5672

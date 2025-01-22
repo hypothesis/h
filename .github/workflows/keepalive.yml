@@ -1,0 +1,23 @@
+# Prevent scheduled workflows from being disabled due to inactivity.
+#
+# GitHub disables scheduled workflows after 60 days of repo inactivity:
+#
+# > Warning: To prevent unnecessary workflow runs, scheduled workflows may be
+# > disabled automatically.
+# > ... In a public repository, scheduled workflows are automatically disabled
+# > when no repository activity has occurred in 60 days.
+#
+# https://docs.github.com/en/actions/using-workflows/disabling-and-enabling-a-workflow
+#
+# This keep-alive workflow triggers whenever one of the scheduled workflows
+# listed below completes and prevents that scheduled workflow from being
+# disabled.
+name: Keepalive
+on:
+  workflow_run:
+    workflows: [CI,Report refresh]
+    types: [completed]
+    branches: [main]
+jobs:
+  Keepalive:
+    uses: hypothesis/workflows/.github/workflows/keepalive.yml@main

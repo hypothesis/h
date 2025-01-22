@@ -1,12 +1,14 @@
 pip-tools
 pip-sync-faster
-coverage
+-r prod.txt
 pytest
 pytest-cov
 pytest-xdist[psutil]
-pytest-mock
-freezegun
 factory-boy
-hypothesis
+pytest-factoryboy
+h-matchers
 h-testkit
--r prod.txt
+httpretty
+freezegun
+hypothesis
+pytest-mock

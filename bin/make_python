@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Ensure that each version of Python in the .python_version file is installed
+# in pyenv and that tox is installed within each version of Python.
+set -euo pipefail
+
+if [ -n "${CI+x}" ]; then exit; fi
+
+pyenv_root=$(pyenv root)
+
+for python_version in 3.11.7; do
+    bin_dir=$pyenv_root/versions/$python_version/bin
+    if [ ! -f "$bin_dir"/tox ]; then
+        pyenv install --skip-existing "$python_version"
+        "$bin_dir"/pip install --disable-pip-version-check 'tox<4'
+        pyenv rehash
+    fi
+done

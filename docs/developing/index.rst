@@ -8,7 +8,6 @@ and how to contribute code or documentation to the project.
    :maxdepth: 1
 
    cla
-   install
    administration
    feature-flags
    introduction
