@@ -1,4 +1,3 @@
 pip-tools
 pip-sync-faster
-black
-isort
+ruff

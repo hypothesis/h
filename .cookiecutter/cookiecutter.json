@@ -30,7 +30,7 @@
     "__frontend_typechecking": "yes",
     "postgres": "yes",
     "docker": "yes",
-    "linter": "pylint",
+    "linter": "ruff",
     "__postgres_version": "15.6-alpine",
     "__postgres_port": "5432",
     "__docker_namespace": "hypothesis",

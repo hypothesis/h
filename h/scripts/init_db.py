@@ -8,7 +8,8 @@ Usage:
     python3 -m h.scripts.init_db --help
 
 """
-# pylint:disable=import-outside-toplevel,unused-import
+
+# ruff: noqa: PLC0415, F401
 import argparse
 import logging
 from os import environ
@@ -117,7 +118,7 @@ def main():
         stamped = is_stamped(engine)
 
     if args.create:
-        if stamped:  # pylint:disable=possibly-used-before-assignment
+        if stamped:
             log.warning("Not creating tables because the DB is stamped by Alembic")
         else:
             create(engine)
