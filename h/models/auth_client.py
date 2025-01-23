@@ -8,7 +8,6 @@ from h.db.mixins import Timestamps
 
 
 class GrantType(enum.Enum):
-    # pylint: disable=invalid-name
     """
     Allowable grant types for an :class:`AuthClient`.
 
@@ -45,7 +44,6 @@ class GrantType(enum.Enum):
 
 
 class ResponseType(enum.Enum):
-    # pylint: disable=invalid-name
     """
     Allowable authorization response types for an :class:`AuthClient`.
 

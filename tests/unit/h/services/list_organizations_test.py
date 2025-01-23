@@ -55,4 +55,4 @@ class TestListOrganizationsFactory:
     def test_provides_request_db_as_session(self, pyramid_request):
         svc = list_organizations_factory(None, pyramid_request)
 
-        assert svc._session == pyramid_request.db  # pylint:disable=protected-access  # noqa: SLF001
+        assert svc._session == pyramid_request.db  # noqa: SLF001

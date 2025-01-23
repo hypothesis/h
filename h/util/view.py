@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 
 
-def handle_exception(request, exception):  # pylint: disable=unused-argument
+def handle_exception(request, exception):
     """
     Handle an uncaught exception for the passed request.
 

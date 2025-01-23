@@ -31,7 +31,7 @@ def _normalise_username(username):
     return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
-class UsernameComparator(Comparator):  # pylint: disable=abstract-method,too-many-ancestors
+class UsernameComparator(Comparator):
     """
     Custom comparator for :py:attr:`~h.models.user.User.username`.
 
@@ -44,7 +44,7 @@ class UsernameComparator(Comparator):  # pylint: disable=abstract-method,too-man
     correctly find a user with a username of "Juan.Wood", for example.
     """
 
-    def operate(self, op, other, **kwargs):  # pylint: disable=arguments-differ
+    def operate(self, op, other, **kwargs):
         return op(
             _normalise_username(self.__clause_element__()),
             _normalise_username(other),
@@ -58,7 +58,7 @@ class UsernameComparator(Comparator):  # pylint: disable=abstract-method,too-man
         return _normalise_username(self.__clause_element__()).in_(usernames)
 
 
-class UserIDComparator(Comparator):  # pylint: disable=abstract-method,too-many-ancestors
+class UserIDComparator(Comparator):
     """
     Custom comparator for :py:attr:`~h.models.user.User.userid`.
 
@@ -115,7 +115,7 @@ class UserIDComparator(Comparator):  # pylint: disable=abstract-method,too-many-
 
         return self.expression == other
 
-    def in_(self, userids):  # pylint: disable=arguments-renamed
+    def in_(self, userids):
         others = []
         for userid in userids:
             try:
@@ -136,7 +136,7 @@ class User(Base):
     __tablename__ = "user"
 
     @declared_attr
-    def __table_args__(cls):  # pylint:disable=no-self-argument  # noqa: N805
+    def __table_args__(cls):  # noqa: N805
         return (
             # (email, authority) must be unique
             sa.UniqueConstraint("email", "authority"),
@@ -239,7 +239,7 @@ class User(Base):
         self._username = value
 
     @username.comparator
-    def username(cls):  # pylint:disable=no-self-argument  # noqa: N805
+    def username(cls):  # noqa: N805
         return UsernameComparator(cls._username)
 
     @hybrid_property
@@ -247,7 +247,7 @@ class User(Base):
         return format_userid(self.username, self.authority)
 
     @userid.comparator
-    def userid(cls):  # pylint: disable=no-self-argument  # noqa: N805
+    def userid(cls):  # noqa: N805
         return UserIDComparator(cls.username, cls.authority)
 
     email = sa.Column(sa.UnicodeText())
@@ -256,7 +256,7 @@ class User(Base):
     registered_date = sa.Column(
         sa.TIMESTAMP(timezone=False),
         default=datetime.datetime.utcnow,
-        server_default=sa.func.now(),  # pylint:disable=not-callable
+        server_default=sa.func.now(),
         nullable=False,
     )
     activation_date = sa.Column(sa.TIMESTAMP(timezone=False), nullable=True)

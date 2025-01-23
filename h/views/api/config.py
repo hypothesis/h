@@ -27,7 +27,7 @@ cors_policy = cors.policy(
 )
 
 
-def add_api_view(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def add_api_view(
     config,
     view,
     versions,
@@ -122,7 +122,7 @@ def api_config(versions, link_name=None, description=None, **settings):
 
         # Support use as a class method decorator.
         # Taken from Pyramid's `view_config` decorator implementation.
-        if info.scope == "class":  # pylint: disable=no-member
+        if info.scope == "class":
             if settings.get("attr") is None:
                 settings["attr"] = wrapped.__name__
 

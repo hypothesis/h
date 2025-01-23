@@ -12,5 +12,5 @@ class Setting(ModelFactory):
 
     key = factory.Sequence(lambda n: f"setting_{n}")
     value = factory.LazyAttribute(
-        lambda _: FAKER.catch_phrase()  # pylint: disable=no-member
+        lambda _: FAKER.catch_phrase()
     )

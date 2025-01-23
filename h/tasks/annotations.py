@@ -9,7 +9,6 @@ log = get_task_logger(__name__)
 @celery.task
 def sync_annotation_slim(limit):
     """Process jobs to fill the new AnnotationSlim table in batches."""
-    # pylint:disable=no-member
     anno_write_svc = celery.request.find_service(AnnotationWriteService)
     queue_svc = celery.request.find_service(name="queue_service")
 

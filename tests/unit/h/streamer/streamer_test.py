@@ -12,7 +12,7 @@ class TestProcessWorkQueue:
     ):
         process_work_queue(queue=[message])
 
-        messages.handle_message.assert_called_once_with(  # pylint:disable=no-member
+        messages.handle_message.assert_called_once_with(
             message,
             registry,
             session,
@@ -24,7 +24,7 @@ class TestProcessWorkQueue:
     ):
         process_work_queue(queue=[ws_message])
 
-        websocket.handle_message.assert_called_once_with(  # pylint:disable=no-member
+        websocket.handle_message.assert_called_once_with(
             ws_message, session
         )
 

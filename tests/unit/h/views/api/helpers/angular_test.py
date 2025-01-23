@@ -3,7 +3,7 @@ from h.views.api.helpers.angular import AngularRouteTemplater
 
 class TestAngularRouteTemplater:
     def test_static_route(self):
-        def route_url(route_name, **kwargs):  # pylint:disable=unused-argument
+        def route_url(route_name, **kwargs):
             return "/" + route_name
 
         templater = AngularRouteTemplater(route_url, params=[])

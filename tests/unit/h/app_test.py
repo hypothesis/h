@@ -25,7 +25,7 @@ class TestIncludeMe:
         # Mock out jinja2 related stuff
         pyramid_config.get_jinja2_environment = mock.create_autospec(
             # pragma: nocover
-            spec=lambda: JinjaEnvironment()  # pylint: disable=unnecessary-lambda
+            spec=lambda: JinjaEnvironment()
         )
 
         pyramid_config.registry["assets_env"] = Environment(

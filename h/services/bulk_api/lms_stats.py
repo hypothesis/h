@@ -1,4 +1,3 @@
-# pylint:disable=not-callable,use-implicit-booleaness-not-comparison-to-zero,singleton-comparison
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Flag, auto

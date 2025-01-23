@@ -18,7 +18,7 @@ class TestFlagServiceFlagged:
     def test_it_uses_the_cache_if_possible(self, svc, user, annotation):
         assert not svc.flagged(user, annotation)
 
-        svc._flagged_cache[  # pylint:disable=protected-access  # noqa: SLF001
+        svc._flagged_cache[  # noqa: SLF001
             (user.id, annotation.id)
         ] = True
 
@@ -31,7 +31,7 @@ class TestFlagServiceFlagged:
         all_flagged = svc.all_flagged(user, annotation_ids)
 
         assert all_flagged == {flag.annotation_id}
-        assert svc._flagged_cache == {  # pylint:disable=protected-access  # noqa: SLF001
+        assert svc._flagged_cache == {  # noqa: SLF001
             (user.id, noise[0].annotation_id): False,
             (user.id, noise[1].annotation_id): False,
             (user.id, flag.annotation_id): True,
@@ -101,7 +101,7 @@ class TestFlagServiceCount:
         assert svc.flag_count(flagged) == 2
 
     def test_flag_count_uses_the_cache(self, svc, flagged):
-        svc._flag_count_cache[flagged.id] = 99999  # pylint:disable=protected-access  # noqa: SLF001
+        svc._flag_count_cache[flagged.id] = 99999  # noqa: SLF001
 
         assert svc.flag_count(flagged) == 99999
 
@@ -110,7 +110,7 @@ class TestFlagServiceCount:
 
         flag_counts = svc.flag_counts(ann_ids)
 
-        assert (  # pylint:disable=protected-access
+        assert (
             flag_counts == svc._flag_count_cache == {flagged.id: 2, unflagged.id: 0}  # noqa: SLF001
         )
 

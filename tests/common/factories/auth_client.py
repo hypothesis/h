@@ -21,6 +21,6 @@ class ConfidentialAuthClient(ModelFactory):
 
     authority = "example.com"
     secret = factory.LazyAttribute(
-        lambda _: FAKER.sha256()  # pylint: disable=no-member
+        lambda _: FAKER.sha256()
     )
     redirect_uri = "{current_scheme}://{current_host}/auth/callback"

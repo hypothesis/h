@@ -24,7 +24,7 @@ class Group(ModelFactory):
     enforce_scope = True
 
     @factory.post_generation
-    def scopes(  # pylint: disable=method-hidden,unused-argument
+    def scopes(
         self, create, scopes=0, **kwargs
     ):
         if isinstance(scopes, int):

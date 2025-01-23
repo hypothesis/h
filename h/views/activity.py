@@ -458,7 +458,6 @@ def _redirect_to_user_or_group_search(request, params):
             username=request.matchdict["username"],
             _query=params,
         )
-    # pylint:disable=possibly-used-before-assignment
     return httpexceptions.HTTPSeeOther(location=location)
 
 

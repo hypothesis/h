@@ -80,13 +80,13 @@ class TestGroupCreateView:
             view.request,
             view.form,
             Any.function(),
-            view._template_context,  # pylint:disable=protected-access  # noqa: SLF001
+            view._template_context,  # noqa: SLF001
         )
 
     def test_post_redirects_to_list_view_on_success(
         self, pyramid_request, matchers, handle_form_submission, base_appstruct
     ):
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             return on_success(base_appstruct)
@@ -108,7 +108,7 @@ class TestGroupCreateView:
         user_service,
         base_appstruct,
     ):
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             base_appstruct["group_type"] = "open"
@@ -137,7 +137,7 @@ class TestGroupCreateView:
         user_service,
         base_appstruct,
     ):
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             base_appstruct["group_type"] = "restricted"
@@ -170,7 +170,7 @@ class TestGroupCreateView:
         user = factories.User()
         user_service.fetch.return_value = user
 
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             base_appstruct["members"] = ["someusername"]
@@ -196,7 +196,7 @@ class TestGroupCreateView:
         """Test creating a new group with no organization."""
         base_appstruct["organization"] = None
 
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             return on_success(base_appstruct)
@@ -318,7 +318,7 @@ class TestGroupEditViews:
 
         list_organizations_service.organizations.return_value.append(updated_org)
 
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             return on_success(
@@ -358,7 +358,7 @@ class TestGroupEditViews:
     ):
         group.organization = None
 
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             return on_success(
@@ -400,7 +400,7 @@ class TestGroupEditViews:
         fetched_user = factories.User()
         user_service.fetch.return_value = fetched_user
 
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             return on_success(

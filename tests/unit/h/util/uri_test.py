@@ -188,7 +188,6 @@ class TestURINormalise:
                 "httpx://example.com?-._~:@!$'()*,=-._~:@!$='()*,",
             ),
             (
-                # pylint:disable=line-too-long
                 "http://example.com?%2D%2E%5F%7E%3A%40%21%24%27%28%29%2A%2C=%2D%2E%5F%7E%3A%40%21%24%3D%27%28%29%2A%2C",
                 "httpx://example.com?-._~:@!$'()*,=-._~:@!$='()*,",
             ),
@@ -211,7 +210,6 @@ class TestURINormalise:
             ("http://example.com?foo=[bar]baz", "httpx://example.com?foo=%5Bbar%5Dbaz"),
             # Query: ensure OTHER characters are encoded
             (
-                # pylint:disable=line-too-long
                 "http://example.com?你好世界=γειά σου κόσμος",
                 "httpx://example.com?%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C=%CE%B3%CE%B5%CE%B9%CE%AC+%CF%83%CE%BF%CF%85+%CE%BA%CF%8C%CF%83%CE%BC%CE%BF%CF%82",
             ),

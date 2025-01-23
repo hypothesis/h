@@ -75,7 +75,6 @@ class GroupMembersService:
 
     def count_memberships(self, group: Group):
         """Return the number of memberships of `group`."""
-        # pylint:disable=not-callable
         return self.db.scalar(
             select(func.count(GroupMembership.id)).where(GroupMembership.group == group)
         )

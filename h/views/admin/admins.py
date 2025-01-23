@@ -36,7 +36,6 @@ def admins_add(request):
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
         request.session.flash(
-            # pylint:disable=consider-using-f-string
             _("User {username} doesn't exist.".format(username=username)),  # noqa: INT002
             "error",
         )

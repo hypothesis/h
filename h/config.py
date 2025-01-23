@@ -23,7 +23,7 @@ DEFAULT_SALT = (
 )
 
 
-def configure(environ=None, settings=None):  # pylint: disable=too-many-statements
+def configure(environ=None, settings=None):
     if environ is None:  # pragma: no cover
         environ = os.environ
     if settings is None:  # pragma: no cover

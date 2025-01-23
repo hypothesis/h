@@ -54,7 +54,7 @@ class CookiePolicy:
     def authenticated_userid(self, request):
         return Identity.authenticated_userid(self.identity(request))
 
-    def remember(self, request, userid, **kw):  # pylint:disable=unused-argument
+    def remember(self, request, userid, **kw):
         self.helper.add_vary_by_cookie(request)
 
         previous_userid = self.authenticated_userid(request)
@@ -111,7 +111,7 @@ class CookiePolicy:
         )
 
         def add_api_authcookie_headers(
-            request,  # pylint:disable=unused-argument
+            request,
             response,
         ):
             log.info("Fixing missing API auth cookie")

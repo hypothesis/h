@@ -11,7 +11,7 @@ from h.tasks import mailer
 def test_send_creates_email_message(pyramid_mailer, celery, pyramid_request):
     celery.request = pyramid_request
 
-    mailer.send(  # pylint:disable=no-value-for-parameter #: (bound celery task)
+    mailer.send(
         recipients=["foo@example.com"],
         subject="My email subject",
         body="Some text body",
@@ -32,7 +32,7 @@ def test_send_creates_email_message_with_html_body(
 ):
     celery.request = pyramid_request
 
-    mailer.send(  # pylint:disable=no-value-for-parameter #: (bound celery task)
+    mailer.send(
         recipients=["foo@example.com"],
         subject="My email subject",
         body="Some text body",
@@ -56,7 +56,7 @@ def test_send_dispatches_email_using_request_mailer(
     request_mailer = pyramid_mailer.get_mailer.return_value
     message = pyramid_mailer.message.Message.return_value
 
-    mailer.send(  # pylint:disable=no-value-for-parameter #: (bound celery task)
+    mailer.send(
         recipients=["foo@example.com"],
         subject="My email subject",
         body="Some text body",
@@ -74,7 +74,7 @@ def test_send_retries_if_mailing_fails(pyramid_mailer, celery, pyramid_request):
     request_mailer.send_immediately.side_effect = SMTPServerDisconnected()
 
     mailer.send.retry = mock.Mock(spec_set=[])
-    mailer.send(  # pylint:disable=no-value-for-parameter #: bound celery task
+    mailer.send(
         recipients=["foo@example.com"],
         subject="My email subject",
         body="Some text body",

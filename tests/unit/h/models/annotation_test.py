@@ -91,7 +91,7 @@ def test_text_setter_renders_markdown(markdown_render):
 
     markdown_render.render.assert_called_once_with("foobar")
 
-    assert (  # pylint: disable=comparison-with-callable
+    assert (
         annotation.text_rendered == markdown_render.render.return_value
     )
 

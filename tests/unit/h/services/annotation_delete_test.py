@@ -95,7 +95,6 @@ def annotation(factories):
     return lambda factories=factories: factories.Annotation()
 
 
-# pylint:disable=unused-argument
 @pytest.fixture
 def svc(db_session, pyramid_request, annotation_write_service, queue_service):
     pyramid_request.db = db_session

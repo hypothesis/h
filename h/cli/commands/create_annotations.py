@@ -8,7 +8,7 @@ import click
 @click.pass_context
 @click.option("--number", default=100)
 def create_annotations(ctx, number):
-    from tests.common import factories  # pylint: disable=import-outside-toplevel
+    from tests.common import factories
 
     request = ctx.obj["bootstrap"]()
     db = request.db

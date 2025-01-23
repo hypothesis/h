@@ -54,7 +54,7 @@ class TestIndex:
 @pytest.mark.usefixtures("routes")
 class TestOrganizationCreateController:
     @staticmethod
-    def call_on_success(  # pylint: disable=unused-argument
+    def call_on_success(
         request, form, on_success, on_failure
     ):
         return on_success(
@@ -130,7 +130,7 @@ class TestOrganizationEditController:
     def test_update_saves_org(
         self, get_controller, organization, handle_form_submission
     ):
-        def call_on_success(  # pylint:disable=unused-argument
+        def call_on_success(
             request, form, on_success, on_failure
         ):
             return on_success(

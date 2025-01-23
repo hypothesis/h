@@ -63,7 +63,7 @@ class TestAnnotationHTMLPresenter:
         [(None, Markup("")), ("", Markup("")), ("text", Markup("text"))],
     )
     def test_text_rendered(self, annotation, presenter, value, expected):
-        annotation._text_rendered = value  # pylint:disable=protected-access  # noqa: SLF001
+        annotation._text_rendered = value  # noqa: SLF001
 
         assert presenter.text_rendered == expected
 

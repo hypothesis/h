@@ -61,7 +61,7 @@ class TestUserModelDataConstraints:
     ):
         result = (
             db_session.query(User)
-            .filter(User.username.in_(["Fred.bloggs"]))  # pylint:disable=no-member
+            .filter(User.username.in_(["Fred.bloggs"]))
             .one()
         )
 
@@ -146,7 +146,7 @@ class TestUserModelUserId:
         result = (
             db_session.query(User)
             .filter(
-                User.userid.in_(  # pylint:disable=no-member
+                User.userid.in_(
                     [
                         "acct:fredbloggs@example.com",
                         "acct:alicewrites@foobar.com",
@@ -167,7 +167,6 @@ class TestUserModelUserId:
         result = (
             db_session.query(User)
             .filter(
-                # pylint:disable=no-member
                 User.userid.in_(["acct:fredbloggs@example.com", "invalid"])
             )
             .all()
@@ -183,7 +182,7 @@ class TestUserModelUserId:
         result = (
             db_session.query(User)
             .filter(
-                User.userid.in_(["fredbloggsexample.net"])  # pylint:disable=no-member
+                User.userid.in_(["fredbloggsexample.net"])
             )
             .all()
         )

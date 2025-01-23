@@ -22,7 +22,7 @@ _ = i18n.TranslationStringFactory(__package__)
 class AnnotationWriteService:
     """A service for storing and retrieving annotations."""
 
-    def __init__(  # pylint:disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
         self,
         db_session: Session,
         has_permission: Callable,
@@ -91,7 +91,6 @@ class AnnotationWriteService:
         return annotation
 
     def update_annotation(
-        # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         annotation: Annotation,
         data: dict,

@@ -88,7 +88,7 @@ class UserDeleteService:
             tag=tag,
             registered_date=user.registered_date,
             num_annotations=self.db.scalar(
-                select(func.count(Annotation.id)).where(  # pylint:disable=not-callable
+                select(func.count(Annotation.id)).where(
                     Annotation.userid == user.userid
                 )
             ),
@@ -264,9 +264,6 @@ class UserPurger:
         really large number of members this could take too long and cause a
         timeout.
         """
-        # pylint:disable=not-callable
-        # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
-
         # The IDs of all groups that have only one owner.
         groups_with_only_one_owner = (
             select(GroupMembership.group_id)

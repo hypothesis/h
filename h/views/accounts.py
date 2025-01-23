@@ -87,7 +87,7 @@ def error_validation(error, request):  # pragma: no cover
 @view_defaults(route_name="login", renderer="h:templates/accounts/login.html.jinja2")
 class AuthController:
     def __init__(self, request):
-        form_footer = '<a class="link" href="{href}">{text}</a>'.format(  # pylint: disable=consider-using-f-string
+        form_footer = '<a class="link" href="{href}">{text}</a>'.format(
             href=request.route_path("forgot_password"), text=_("Forgot your password?")
         )
 
@@ -667,7 +667,7 @@ class DeleteController:
             )
 
         count = self.request.db.scalar(
-            query(func.count(Annotation.id))  # pylint:disable=not-callable
+            query(func.count(Annotation.id))
         )
 
         oldest = self.request.db.scalar(

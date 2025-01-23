@@ -107,7 +107,7 @@ class SearchIndexService:
         try:
             return sync_handler(event.annotation_id)
 
-        except Exception as err:  # pylint: disable=broad-except  # noqa: BLE001
+        except Exception as err:  # noqa: BLE001
             report_exception(err)
 
         # Either the synchronous method was disabled, or failed...

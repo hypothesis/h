@@ -64,7 +64,7 @@ def _filter_link_attributes(_tag, name, value):
     return False
 
 
-def _linkify_target_blank(attrs, new=False):  # pylint: disable=unused-argument
+def _linkify_target_blank(attrs, new=False):
     # FIXME: when bleach>2.0.0 is released we can use
     # bleach.callbacks.target_blank instead of this function. We have our own
     # copy to work around a bug in 2.0.0:
@@ -83,7 +83,7 @@ def _linkify_target_blank(attrs, new=False):  # pylint: disable=unused-argument
     return attrs
 
 
-def _linkify_rel(attrs, new=False):  # pylint: disable=unused-argument
+def _linkify_rel(attrs, new=False):
     href_key = (None, "href")
 
     if href_key not in attrs:

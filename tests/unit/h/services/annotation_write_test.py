@@ -176,13 +176,13 @@ class TestAnnotationWriteService:
         annotation.group = None
 
         with pytest.raises(ValidationError):
-            svc._validate_group(annotation)  # pylint: disable=protected-access  # noqa: SLF001
+            svc._validate_group(annotation)  # noqa: SLF001
 
     def test__validate_group_with_no_permission(self, svc, annotation, has_permission):
         has_permission.return_value = False
 
         with pytest.raises(ValidationError):
-            svc._validate_group(annotation)  # pylint: disable=protected-access  # noqa: SLF001
+            svc._validate_group(annotation)  # noqa: SLF001
 
         has_permission.assert_called_once_with(
             Permission.Group.WRITE, context=GroupContext(annotation.group)
@@ -193,7 +193,6 @@ class TestAnnotationWriteService:
     ):
         has_permission.return_value = False
 
-        # pylint: disable=protected-access
         svc._validate_group(annotation, enforce_write_permission=False)  # noqa: SLF001
 
         has_permission.assert_not_called()
@@ -211,9 +210,9 @@ class TestAnnotationWriteService:
 
         if enforce_scope and has_scopes and not matching_scope:
             with pytest.raises(ValidationError):
-                svc._validate_group(annotation)  # pylint: disable=protected-access  # noqa: SLF001
+                svc._validate_group(annotation)  # noqa: SLF001
         else:
-            svc._validate_group(annotation)  # pylint: disable=protected-access  # noqa: SLF001
+            svc._validate_group(annotation)  # noqa: SLF001
 
     def test_hide_hides_the_annotation(self, annotation, svc):
         annotation.moderation = None

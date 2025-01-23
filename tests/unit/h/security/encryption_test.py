@@ -94,7 +94,6 @@ class TestDeriveKey:
     @pytest.mark.parametrize(
         "info,key,salt,expected",
         [
-            # pylint: disable=line-too-long
             (
                 "f0f1f2f3f4f5f6f7f8f9",
                 "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",

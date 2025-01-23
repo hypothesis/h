@@ -160,7 +160,6 @@ class TestAdminGroupSchema:
             if child.name == "organization":
                 org_node = child
 
-        # pylint:disable=possibly-used-before-assignment
         assert org_node.widget.values == [
             ("", "-- None --"),
             (org.pubid, f"{org.name} ({org.authority})"),
@@ -193,7 +192,7 @@ def group_data(org):
 
 @pytest.fixture
 def user_service(user_service, factories):
-    def fetch(username, authority):  # pylint: disable=unused-argument
+    def fetch(username, authority):
         if "invalid" in username:
             return False
 

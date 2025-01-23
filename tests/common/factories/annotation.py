@@ -21,12 +21,12 @@ class Annotation(ModelFactory):
         )
 
     tags = factory.LazyFunction(
-        lambda: list(FAKER.words(nb=random.randint(0, 5)))  # pylint:disable=no-member
+        lambda: list(FAKER.words(nb=random.randint(0, 5)))
     )
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(
-        lambda: f"acct:{FAKER.user_name()}@localhost"  # pylint:disable=no-member
+        lambda: f"acct:{FAKER.user_name()}@localhost"
     )
     document = factory.SubFactory(Document)
     groupid = "__world__"
@@ -43,7 +43,6 @@ class Annotation(ModelFactory):
             },
             {"end": 362, "start": 286, "type": "TextPositionSelector"},
             {
-                # pylint: disable=line-too-long
                 "exact": "If you wish to install Hypothesis on your own site then head over to GitHub.",
                 "prefix": " browser extension.\n            ",
                 "suffix": "\n          \n        \n      \n    ",
@@ -52,7 +51,7 @@ class Annotation(ModelFactory):
         ]
 
     @factory.post_generation
-    def make_metadata(  # pylint:disable=unused-argument
+    def make_metadata(
         self, create, extracted, **kwargs
     ):
         """Create associated document metadata for the annotation."""
@@ -117,7 +116,7 @@ class Annotation(ModelFactory):
         )
 
     @factory.post_generation
-    def make_id(self, create, extracted, **kwargs):  # pylint:disable=unused-argument
+    def make_id(self, create, extracted, **kwargs):
         """Add a randomly ID if the annotation doesn't have one yet."""
         # If using the create strategy don't generate an id.
         # models.Annotation.id's server_default function will generate one
@@ -130,12 +129,12 @@ class Annotation(ModelFactory):
             return
 
         # Ids in the DB are in hex, but in the code they should be URL safe
-        self.id = URLSafeUUID().process_result_value(  # pylint:disable=attribute-defined-outside-init
+        self.id = URLSafeUUID().process_result_value(
             uuid.uuid4().hex, None
         )
 
     @factory.post_generation
-    def timestamps(self, create, extracted, **kwargs):  # pylint:disable=unused-argument
+    def timestamps(self, create, extracted, **kwargs):
         # If using the create strategy let sqlalchemy set the created and
         # updated times when saving to the DB.
         if create:
@@ -148,6 +147,5 @@ class Annotation(ModelFactory):
         # instead of just once) so created and updated won't be exactly the
         # same. This is consistent with how models.Annotation does it when
         # saving to the DB.
-        # pylint:disable=attribute-defined-outside-init
         self.created = self.created or datetime.datetime.now()
         self.updated = self.updated or datetime.datetime.now()

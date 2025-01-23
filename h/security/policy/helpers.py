@@ -55,7 +55,7 @@ class AuthTicketCookieHelper:
     @staticmethod
     @lru_cache  # Ensure we only add this once per request
     def add_vary_by_cookie(request: Request):
-        def vary_add(request, response):  # pylint:disable=unused-argument
+        def vary_add(request, response):
             vary = set(response.vary if response.vary is not None else [])
             vary.add("Cookie")
             response.vary = list(vary)

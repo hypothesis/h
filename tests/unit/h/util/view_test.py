@@ -14,7 +14,6 @@ class TestHandleException:
 
 @pytest.mark.usefixtures("view_config")
 class TestJsonView:
-    # pylint: disable=unsubscriptable-object
     def test_sets_accept(self):
         result = json_view()
 

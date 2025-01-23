@@ -1,5 +1,3 @@
-# pylint: disable=invalid-name
-#
 # The h documentation build configuration file, created by
 # sphinx-quickstart on Fri Oct 12 19:21:42 2012.
 #

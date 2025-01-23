@@ -60,7 +60,6 @@ class Job(Base):
 
     id = Column(Integer, Sequence("job_id_seq", cycle=True), primary_key=True)
     name = Column(UnicodeText, nullable=False)
-    # pylint:disable=not-callable
     enqueued_at = Column(DateTime, nullable=False, server_default=func.now())
     scheduled_at = Column(DateTime, nullable=False, server_default=func.now())
     expires_at = Column(

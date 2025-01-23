@@ -88,7 +88,6 @@ class GroupAPISchema(JSONSchema):
         ):
             # This is a first-party group
             raise ValidationError(
-                # pylint:disable=consider-using-f-string
                 "{err_msg} '{authority}'".format(
                     err_msg=_(
                         "groupid may only be set on groups outside of the default authority"
@@ -103,7 +102,6 @@ class GroupAPISchema(JSONSchema):
             # The authority part of the ``groupid`` doesn't match the
             # group's authority
             raise ValidationError(
-                # pylint:disable=consider-using-f-string
                 "{err_msg} '{groupid}'".format(
                     err_msg=_("Invalid authority specified in groupid"), groupid=groupid
                 )

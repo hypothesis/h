@@ -8,7 +8,7 @@ from h import models, services, tasks
 
 
 def setup(env):
-    from tests.common import factories  # pylint:disable=import-outside-toplevel
+    from tests.common import factories
 
     request = env["request"]
 

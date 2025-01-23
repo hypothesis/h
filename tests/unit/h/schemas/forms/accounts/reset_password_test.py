@@ -101,7 +101,7 @@ class TestResetPasswordSchemaDeserialize:
         return ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
     @pytest.fixture(autouse=True)
-    def serializer(self, pyramid_csrf_request, pyramid_config):  # pylint:disable=unused-argument
+    def serializer(self, pyramid_csrf_request, pyramid_config):
         # We must be after `pyramid_config` in the queue, as it replaces the
         # registry object with another one which undoes our changes here
 
