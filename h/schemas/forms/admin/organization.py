@@ -23,7 +23,7 @@ def validate_logo(node, value):
             node,
             _(
                 # pylint:disable=consider-using-f-string
-                "Logo is larger than {:,d} characters".format(
+                "Logo is larger than {:,d} characters".format(  # noqa: INT002
                     Organization.LOGO_MAX_CHARS
                 )
             ),

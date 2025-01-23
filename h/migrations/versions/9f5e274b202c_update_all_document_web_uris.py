@@ -24,7 +24,7 @@ Session = sessionmaker()
 log = logging.getLogger(__name__)
 
 
-class Window(namedtuple("Window", ["start", "end"])):
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
     pass
 
 

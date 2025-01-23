@@ -6,9 +6,9 @@ Revises: a2295c2bbe29
 Create Date: 2017-07-26 10:47:38.895306
 """
 
-import enum
+import enum  # noqa: F401
 
-import sqlalchemy as sa
+import sqlalchemy as sa  # noqa: F401
 from alembic import op
 
 revision = "52a0b2e5a9c2"

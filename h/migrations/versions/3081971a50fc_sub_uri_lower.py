@@ -2,7 +2,7 @@
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgresql  # noqa: F401
 
 revision = "3081971a50fc"
 down_revision = "0d101aa6b9a5"

@@ -172,7 +172,7 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
 
         self.request.session.flash(
             # pylint:disable=consider-using-f-string
-            _("Successfully deleted group %s" % (self.group.name), "success"),
+            _("Successfully deleted group %s" % (self.group.name), "success"),  # noqa: INT003
             queue="success",
         )
 

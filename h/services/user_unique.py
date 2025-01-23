@@ -39,7 +39,7 @@ class UserUniqueService:
             is not None
         ):
             errors.append(
-                _("user with email address '{}' already exists".format(data["email"]))
+                _("user with email address '{}' already exists".format(data["email"]))  # noqa: INT002
             )
 
         # check for duplicate username
@@ -48,7 +48,7 @@ class UserUniqueService:
             is not None
         ):
             errors.append(
-                _("user with username '{}' already exists".format(data["username"]))
+                _("user with username '{}' already exists".format(data["username"]))  # noqa: INT002
             )
 
         # check for duplicate identities
@@ -60,7 +60,7 @@ class UserUniqueService:
             ):
                 errors.append(
                     _(
-                        "user with provider '{}' and unique id '{}' already exists".format(
+                        "user with provider '{}' and unique id '{}' already exists".format(  # noqa: INT002
                             identity["provider"], identity["provider_unique_id"]
                         )
                     )

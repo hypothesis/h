@@ -27,7 +27,7 @@ class TestCookiePolicy:
 
         cookie_policy.identity(pyramid_request)
 
-        pyramid_request._process_response_callbacks(  # pylint:disable=protected-access
+        pyramid_request._process_response_callbacks(  # pylint:disable=protected-access  # noqa: SLF001
             pyramid_request.response
         )
         helper.remember.assert_called_once_with(
@@ -79,7 +79,7 @@ class TestCookiePolicy:
         helper.remember.return_value = [("header_name_1", "header_value_1")]
         del pyramid_request.cookies[api_authcookie.cookie_name]
         cookie_policy.identity(pyramid_request)
-        pyramid_request._process_response_callbacks(  # pylint:disable=protected-access
+        pyramid_request._process_response_callbacks(  # pylint:disable=protected-access  # noqa: SLF001
             pyramid_request.response
         )
 
@@ -234,7 +234,7 @@ class TestCookiePolicy:
     def assert_api_authcookie_not_issued(self, helper, pyramid_request):
         def assert_api_authcookie_not_issued():
             headerlist_before = list(pyramid_request.response.headerlist)
-            pyramid_request._process_response_callbacks(  # pylint:disable=protected-access
+            pyramid_request._process_response_callbacks(  # pylint:disable=protected-access  # noqa: SLF001
                 pyramid_request.response
             )
             helper.remember.assert_not_called()

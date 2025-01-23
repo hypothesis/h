@@ -3,7 +3,7 @@ from functools import lru_cache
 import sqlalchemy
 
 
-class lru_cache_in_transaction:  # pylint:disable=invalid-name
+class lru_cache_in_transaction:  # pylint:disable=invalid-name  # noqa: N801
     """
     Adds memoizing decorator.
 

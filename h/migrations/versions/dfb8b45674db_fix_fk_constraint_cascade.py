@@ -7,7 +7,7 @@ Create Date: 2017-07-18 13:32:04.515830
 """
 
 from alembic import op
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgresql  # noqa: F401
 
 revision = "dfb8b45674db"
 down_revision = "dba81a22ea75"

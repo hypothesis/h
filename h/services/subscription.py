@@ -8,7 +8,7 @@ from h.models import Subscriptions
 from h.security import derive_key
 
 
-class InvalidUnsubscribeToken(Exception):
+class InvalidUnsubscribeToken(Exception):  # noqa: N818
     """When an unsubscribe token has an invalid format."""
 
 

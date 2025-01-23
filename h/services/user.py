@@ -7,7 +7,7 @@ from h.util.user import split_user
 UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial"}
 
 
-class UserNotActivated(Exception):
+class UserNotActivated(Exception):  # noqa: N818
     """Tried to log in to an unactivated user account."""
 
 

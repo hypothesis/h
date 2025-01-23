@@ -194,7 +194,7 @@ class AnnotationWriteService:
         group = annotation.group
         if not group:
             raise ValidationError(
-                "group: " + _(f"Invalid group id {annotation.groupid}")
+                "group: " + _(f"Invalid group id {annotation.groupid}")  # noqa: INT001
             )
 
         # The user must have permission to write to the group

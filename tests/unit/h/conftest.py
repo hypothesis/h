@@ -13,8 +13,8 @@ from h.models import Organization
 from h.models.auth_client import GrantType
 from h.security import Identity
 from tests.common import factories as common_factories
-from tests.common.fixtures.elasticsearch import *  # pylint:disable=wildcard-import,unused-wildcard-import
-from tests.common.fixtures.services import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from tests.common.fixtures.elasticsearch import *  # pylint:disable=wildcard-import,unused-wildcard-import  # noqa: F403
+from tests.common.fixtures.services import *  # pylint:disable=wildcard-import,unused-wildcard-import  # noqa: F403
 
 
 class DummyFeature:

@@ -306,10 +306,10 @@ class TestGetMember:
         }
 
     def test_it_when_group_doesnt_exist(self, do_request):
-        response = do_request(pubid="doesnt_exist", status=404)
+        response = do_request(pubid="doesnt_exist", status=404)  # noqa: F841
 
     def test_it_when_target_user_doesnt_exist(self, do_request):
-        response = do_request(userid="doesnt_exist", status=404)
+        response = do_request(userid="doesnt_exist", status=404)  # noqa: F841
 
     def test_it_when_authenticated_user_isnt_a_member_of_the_group(
         self, do_request, factories, headers

@@ -12,7 +12,7 @@ from collections import namedtuple
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, subqueryload
+from sqlalchemy.orm import sessionmaker, subqueryload  # noqa: F401
 
 from h.db import types
 from h.util.uri import normalize as uri_normalize
@@ -26,7 +26,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
     pass
 
 
@@ -99,7 +99,7 @@ def upgrade():
                 uri_normalized = uri_normalize(uri)
 
                 doc = Document(created=ann.created, updated=ann.updated)
-                docuri = DocumentURI(
+                docuri = DocumentURI(  # noqa: F841
                     created=ann.created,
                     updated=ann.updated,
                     claimant=uri,

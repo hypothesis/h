@@ -14,7 +14,7 @@ from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from h.util import markdown_render
+from h.util import markdown_render  # noqa: F401
 
 revision = "d536d9a342f3"
 down_revision = "39b1935d9e7b"
@@ -23,7 +23,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
     pass
 
 
@@ -67,7 +67,7 @@ def _fill_annotation_window_text_rendered(session, window):
     )
 
     for a in query:
-        a.text_rendered = markdown.render(a.text)
+        a.text_rendered = markdown.render(a.text)  # noqa: F821
 
 
 def _fetch_windows(session, chunksize=100):

@@ -1,7 +1,7 @@
 """Revert creation of annotation.pk."""
 
 from alembic import op
-from sqlalchemy.schema import CreateSequence, DropSequence, Sequence
+from sqlalchemy.schema import CreateSequence, DropSequence, Sequence  # noqa: F401
 
 revision = "77bc5b4f2205"
 down_revision = "5d1abac3c1a1"

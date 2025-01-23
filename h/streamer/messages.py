@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 # An incoming message from a subscribed realtime consumer
-Message = namedtuple("Message", ["topic", "payload"])
+Message = namedtuple("Message", ["topic", "payload"])  # noqa: PYI024
 
 
 def process_messages(settings, routing_key, work_queue, raise_error=True):

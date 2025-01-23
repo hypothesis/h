@@ -9,7 +9,7 @@ from h.util import metrics
 
 log = logging.getLogger(__name__)
 
-SearchResult = namedtuple(
+SearchResult = namedtuple(  # noqa: PYI024
     "SearchResult", ["total", "annotation_ids", "reply_ids", "aggregations"]
 )
 

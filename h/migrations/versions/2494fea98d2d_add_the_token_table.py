@@ -16,7 +16,7 @@ down_revision = "4886d7a14074"
 
 
 def upgrade():
-    token_table = op.create_table(
+    token_table = op.create_table(  # noqa: F841
         "token",
         sa.Column("created", sa.DateTime, server_default=sa.func.now(), nullable=False),
         sa.Column("updated", sa.DateTime, server_default=sa.func.now(), nullable=False),

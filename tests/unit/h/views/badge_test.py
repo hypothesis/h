@@ -38,7 +38,7 @@ class TestBlocklist:
         # It just states that the regex is what it last was, this allows you
         # to change how it's generated and test if you have changed what is
         # generated
-        assert Blocklist._PATTERN.pattern == (  # pylint:disable=protected-access
+        assert Blocklist._PATTERN.pattern == (  # pylint:disable=protected-access  # noqa: SLF001
             r"^(?:(?:chrome)://)|(?:(?:http[sx]?:)?//"
             r"(?:(?:facebook\.com)|(?:www\.facebook\.com)|(?:mail\.google\.com))"
             r"(?:/|$))"
