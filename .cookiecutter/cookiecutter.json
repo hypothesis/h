@@ -39,7 +39,7 @@
     "__copyright_year": "2022",
     "__parallel_unit_tests": true,
     "__format_runner_type": "ubuntu-latest",
-    "__lint_runner_type": "ubuntu-latest-32-cores",
+    "__lint_runner_type": "ubuntu-latest",
     "__typecheck_runner_type": "ubuntu-latest",
     "__tests_runner_type": "ubuntu-latest-32-cores",
     "__coverage_runner_type": "ubuntu-latest",
