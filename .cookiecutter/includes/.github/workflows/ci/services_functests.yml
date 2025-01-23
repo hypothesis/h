@@ -1,3 +1,9 @@
+elasticsearch:
+  image: hypothesis/elasticsearch:elasticsearch7.10
+  ports:
+  - 9201:9200
+  env:
+    discovery.type: single-node
 rabbitmq:
   image: rabbitmq:3.12-management-alpine
   ports:

@@ -164,7 +164,7 @@ jobs:
       elasticsearch:
         image: hypothesis/elasticsearch:elasticsearch7.10
         ports:
-        - 9200:9200
+        - 9201:9200
         env:
           discovery.type: single-node
       rabbitmq:
