@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from unittest.mock import sentinel
 
 import pytest
-from h_matchers import Any
 
 from h.services.bulk_api.group import BulkGroup, BulkGroupService, service_factory
 
