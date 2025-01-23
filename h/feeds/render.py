@@ -3,9 +3,7 @@ from pyramid import renderers
 from h.feeds import atom, rss
 
 
-def render_atom(
-    request, annotations, atom_url, html_url, title, subtitle
-):
+def render_atom(request, annotations, atom_url, html_url, title, subtitle):
     """
     Return a rendered Atom feed of the given annotations.
 
@@ -53,9 +51,7 @@ def render_atom(
     return response
 
 
-def render_rss(
-    request, annotations, rss_url, html_url, title, description
-):
+def render_rss(request, annotations, rss_url, html_url, title, description):
     """
     Return a rendered RSS feed of the given annotations.
 

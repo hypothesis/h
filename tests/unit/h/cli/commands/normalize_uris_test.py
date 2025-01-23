@@ -52,14 +52,8 @@ def test_it_normalizes_document_uris_claimant(req):
 
     normalize_uris.normalize_document_uris(req)
 
-    assert (
-        docuri_1.claimant_normalized
-        == "httpx://example.org"
-    )
-    assert (
-        docuri_2.claimant_normalized
-        == "httpx://example.org"
-    )
+    assert docuri_1.claimant_normalized == "httpx://example.org"
+    assert docuri_2.claimant_normalized == "httpx://example.org"
 
 
 def test_it_deletes_duplicate_document_uri_objects(req):
@@ -128,14 +122,8 @@ def test_it_normalizes_document_meta_claimant(req):
 
     normalize_uris.normalize_document_meta(req)
 
-    assert (
-        docmeta_1.claimant_normalized
-        == "httpx://example.org"
-    )
-    assert (
-        docmeta_2.claimant_normalized
-        == "httpx://example.net"
-    )
+    assert docmeta_1.claimant_normalized == "httpx://example.org"
+    assert docmeta_2.claimant_normalized == "httpx://example.net"
 
 
 def test_it_deletes_duplicate_document_meta_objects(req):

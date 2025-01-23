@@ -121,9 +121,7 @@ class TestFilterHandler:
 
     def test_it_does_not_crash_with_unexpected_fields(self, annotation, db_session):
         socket = FakeSocket()
-        socket.filter_rows = (
-            ("/not_a_thing", "value"),
-        )
+        socket.filter_rows = (("/not_a_thing", "value"),)
 
         result = tuple(SocketFilter.matching([socket], annotation, db_session))
         assert not result

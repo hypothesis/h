@@ -117,9 +117,7 @@ def handle_annotation_event(message, sockets, request, session):
         return
 
     # Create a generator which has the first socket back again
-    matching_sockets = chain(
-        (first_socket,), matching_sockets
-    )
+    matching_sockets = chain((first_socket,), matching_sockets)
 
     reply = _generate_annotation_event(request, message, annotation)
 

@@ -333,9 +333,7 @@ class TestGroupSearchController:
         [("group", "member"), ("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_creator(
-        self, controller, test_user, test_group
-    ):
+    def test_search_returns_group_creator(self, controller, test_user, test_group):
         result = controller.search()
 
         assert result["group_users_args"][2] == test_group.creator.userid
@@ -821,9 +819,7 @@ class TestGroupSearchController:
         return {None: None, "creator": group.creator, "user": factories.User()}
 
     @pytest.fixture
-    def controller(
-        self, request, group, pyramid_request, query
-    ):
+    def controller(self, request, group, pyramid_request, query):
         test_group = group
         if "test_group" in request.fixturenames:
             test_group = request.getfixturevalue("test_group")

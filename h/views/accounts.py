@@ -666,9 +666,7 @@ class DeleteController:
                 .where(Annotation.userid == self.request.authenticated_userid)
             )
 
-        count = self.request.db.scalar(
-            query(func.count(Annotation.id))
-        )
+        count = self.request.db.scalar(query(func.count(Annotation.id)))
 
         oldest = self.request.db.scalar(
             query(Annotation.created).order_by(Annotation.created)

@@ -24,9 +24,7 @@ class TestProcessWorkQueue:
     ):
         process_work_queue(queue=[ws_message])
 
-        websocket.handle_message.assert_called_once_with(
-            ws_message, session
-        )
+        websocket.handle_message.assert_called_once_with(ws_message, session)
 
     def test_it_raises_UnknownMessageType_for_strange_messages(
         self, process_work_queue
