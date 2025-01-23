@@ -1,6 +1,6 @@
 """Remove user last login date default values."""
 
-import datetime
+import datetime  # noqa: F401
 
 import sqlalchemy as sa
 from alembic import op

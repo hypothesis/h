@@ -144,11 +144,11 @@ def test_it_deletes_duplicate_document_meta_objects(req):
     docmeta_1 = models.DocumentMeta(
         _claimant="http://example.org/", type="title", value=["Test Title"]
     )
-    docmeta_1._claimant_normalized = "http://example.org"
+    docmeta_1._claimant_normalized = "http://example.org"  # noqa: SLF001
     docmeta_2 = models.DocumentMeta(
         _claimant="https://example.org/", type="title", value=["Test Title"]
     )
-    docmeta_2._claimant_normalized = "https://example.org"
+    docmeta_2._claimant_normalized = "https://example.org"  # noqa: SLF001
 
     req.db.add_all(
         [models.Document(meta=[docmeta_1]), models.Document(meta=[docmeta_2])]
@@ -163,9 +163,9 @@ def test_it_deletes_duplicate_document_meta_objects(req):
 @pytest.mark.usefixtures("index")
 def test_it_normalizes_annotation_target_uri(req, factories, db_session):
     annotation_1 = factories.Annotation(userid="luke", target_uri="http://example.org/")
-    annotation_1._target_uri_normalized = "http://example.org"
+    annotation_1._target_uri_normalized = "http://example.org"  # noqa: SLF001
     annotation_2 = factories.Annotation(userid="luke", target_uri="http://example.net/")
-    annotation_2._target_uri_normalized = "http://example.net"
+    annotation_2._target_uri_normalized = "http://example.net"  # noqa: SLF001
     db_session.flush()
 
     normalize_uris.normalize_annotations(req)
@@ -176,9 +176,9 @@ def test_it_normalizes_annotation_target_uri(req, factories, db_session):
 
 def test_it_reindexes_changed_annotations(req, index, factories, db_session):
     annotation_1 = factories.Annotation(userid="luke", target_uri="http://example.org/")
-    annotation_1._target_uri_normalized = "http://example.org"
+    annotation_1._target_uri_normalized = "http://example.org"  # noqa: SLF001
     annotation_2 = factories.Annotation(userid="luke", target_uri="http://example.net/")
-    annotation_2._target_uri_normalized = "http://example.net"
+    annotation_2._target_uri_normalized = "http://example.net"  # noqa: SLF001
     db_session.flush()
 
     indexer = index.BatchIndexer.return_value
@@ -192,7 +192,7 @@ def test_it_reindexes_changed_annotations(req, index, factories, db_session):
 def test_it_skips_reindexing_unaltered_annotations(req, index, factories, db_session):
     factories.Annotation(userid="luke", target_uri="http://example.org/")
     annotation_2 = factories.Annotation(userid="luke", target_uri="http://example.net/")
-    annotation_2._target_uri_normalized = "http://example.net"
+    annotation_2._target_uri_normalized = "http://example.net"  # noqa: SLF001
     db_session.flush()
 
     indexer = index.BatchIndexer.return_value

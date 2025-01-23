@@ -53,7 +53,7 @@ def generate():
     This is the generate() function from h/pubid.py.
 
     """
-    ALPHABET = "123456789ABDEGJKLMNPQRVWXYZabdegijkmnopqrvwxyz"
+    ALPHABET = "123456789ABDEGJKLMNPQRVWXYZabdegijkmnopqrvwxyz"  # noqa: N806
     return "".join(random.SystemRandom().choice(ALPHABET) for _ in range(8))
 
 

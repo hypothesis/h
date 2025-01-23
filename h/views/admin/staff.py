@@ -37,7 +37,7 @@ def staff_add(request):
     if user is None:
         request.session.flash(
             # pylint:disable=consider-using-f-string
-            _("User {username} doesn't exist.".format(username=username)),
+            _("User {username} doesn't exist.".format(username=username)),  # noqa: INT002
             "error",
         )
     else:

@@ -1,7 +1,7 @@
 """Revert annotation_metadatai."""
 
 from alembic import op
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgresql  # noqa: F401
 
 revision = "5d1abac3c1a1"
 down_revision = "6df1c8c3e423"

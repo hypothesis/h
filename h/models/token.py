@@ -55,7 +55,7 @@ class Token(Base, mixins.Timestamps):
         index=True,
         nullable=False,
     )
-    user: Mapped["User"] = sqlalchemy.orm.relationship(back_populates="tokens")
+    user: Mapped["User"] = sqlalchemy.orm.relationship(back_populates="tokens")  # noqa: F821
 
     #: The authclient which created the token.
     #: A NULL value means it is a developer token.

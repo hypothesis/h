@@ -80,7 +80,7 @@ class TestGroupCreateView:
             view.request,
             view.form,
             Any.function(),
-            view._template_context,  # pylint:disable=protected-access
+            view._template_context,  # pylint:disable=protected-access  # noqa: SLF001
         )
 
     def test_post_redirects_to_list_view_on_success(

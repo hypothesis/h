@@ -36,7 +36,7 @@ class TestGenerate:
         assert text == "Text output"
 
     def test_jinja_templates_render(self, pyramid_config, pyramid_request):
-        """Ensure that the jinja templates don't contain syntax errors"""
+        """Ensure that the jinja templates don't contain syntax errors"""  # noqa: D400, D415
         pyramid_config.include("pyramid_jinja2")
 
         generate(pyramid_request, "meerkat@example.com")

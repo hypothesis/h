@@ -20,7 +20,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
     pass
 
 

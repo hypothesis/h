@@ -24,7 +24,7 @@ user = sa.table("user", sa.column("sidebar_tutorial_dismissed", sa.Boolean))
 
 def upgrade():
     bind = op.get_bind()
-    session = Session(bind=bind)
+    session = Session(bind=bind)  # noqa: F841
     op.execute(user.update().values(sidebar_tutorial_dismissed=True))
 
 

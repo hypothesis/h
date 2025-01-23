@@ -28,7 +28,7 @@ TOPIC_HANDLERS = {
 }
 
 
-class UnknownMessageType(Exception):
+class UnknownMessageType(Exception):  # noqa: N818
     """Raised if a message in the work queue if of an unknown type."""
 
 
@@ -89,7 +89,7 @@ def supervise(greenlets):  # pragma: no cover
         gevent.joinall(greenlets, raise_error=True)
     except (KeyboardInterrupt, SystemExit):
         raise
-    except:  # pylint:disable=bare-except
+    except:  # pylint:disable=bare-except  # noqa: E722
         log.critical("Unexpected exception in streamer greenlet:", exc_info=True)
     else:
         log.critical("Unexpected early exit of streamer greenlets. Aborting!")

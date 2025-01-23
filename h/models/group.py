@@ -293,7 +293,7 @@ class Group(Base, mixins.Timestamps):
         return helpers.repr_(self, ["id"])
 
 
-TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")
+TypeFlags = namedtuple("TypeFlags", "joinable_by readable_by writeable_by")  # noqa: PYI024
 
 GROUP_TYPE_FLAGS = {
     "open": TypeFlags(

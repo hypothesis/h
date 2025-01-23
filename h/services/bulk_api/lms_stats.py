@@ -45,7 +45,7 @@ class BulkLMSStatsService:
                 AnnotationMetadata.data,
                 case(
                     # It has parents, it's a reply
-                    (func.array_length(Annotation.references, 1) != None, "reply"),
+                    (func.array_length(Annotation.references, 1) != None, "reply"),  # noqa: E711
                     # Not anchored, page note
                     (
                         func.jsonb_array_length(Annotation.target_selectors) == 0,
@@ -66,9 +66,9 @@ class BulkLMSStatsService:
             )
             .where(
                 # Visible annotations
-                AnnotationSlim.deleted == False,
-                AnnotationSlim.moderated == False,
-                AnnotationSlim.shared == True,
+                AnnotationSlim.deleted == False,  # noqa: E712
+                AnnotationSlim.moderated == False,  # noqa: E712
+                AnnotationSlim.shared == True,  # noqa: E712
                 User.nipsa.is_(False),
                 # Limit search to the groups from the current authority
                 Group.authority == self._authorized_authority,

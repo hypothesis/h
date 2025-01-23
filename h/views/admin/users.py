@@ -87,7 +87,7 @@ def users_activate(request):
 
     request.session.flash(
         # pylint:disable=consider-using-f-string
-        Markup(_("User {name} has been activated!".format(name=user.username))),
+        Markup(_("User {name} has been activated!".format(name=user.username))),  # noqa: INT002
         "success",
     )
 

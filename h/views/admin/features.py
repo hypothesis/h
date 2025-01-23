@@ -124,7 +124,7 @@ def cohorts_edit_add(request):
         request.session.flash(
             _(
                 # pylint:disable=consider-using-f-string
-                "User {member_name} with authority {authority} doesn't exist.".format(
+                "User {member_name} with authority {authority} doesn't exist.".format(  # noqa: INT002
                     member_name=member_name, authority=member_authority
                 )
             ),
@@ -158,7 +158,7 @@ def cohorts_edit_remove(request):
         request.session.flash(
             _(
                 # pylint:disable=consider-using-f-string
-                "User {member_userid} doesn't exist.".format(
+                "User {member_userid} doesn't exist.".format(  # noqa: INT002
                     member_userid=member_userid
                 )
             ),

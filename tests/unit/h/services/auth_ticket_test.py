@@ -21,11 +21,11 @@ class TestAuthTicketService:
             == auth_ticket
         )
         # We also set the cache as a side effect.
-        assert service._ticket == auth_ticket  # pylint:disable=protected-access
+        assert service._ticket == auth_ticket  # pylint:disable=protected-access  # noqa: SLF001
 
     def test_verify_ticket_short_circuits_if_ticket_cache_is_set(self, service):
         # pylint: disable=protected-access
-        service._ticket = sentinel.ticket
+        service._ticket = sentinel.ticket  # noqa: SLF001
 
         assert (
             service.verify_ticket(sentinel.userid, sentinel.ticket_id)
@@ -88,7 +88,7 @@ class TestAuthTicketService:
         assert_nearly_equal(
             auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL
         )
-        assert service._ticket == auth_ticket  # pylint: disable=protected-access
+        assert service._ticket == auth_ticket  # pylint: disable=protected-access  # noqa: SLF001
         assert inspect(auth_ticket).pending is True
 
     def test_add_ticket_raises_if_user_is_missing(self, service, user_service):
@@ -102,7 +102,7 @@ class TestAuthTicketService:
     def test_remove_ticket(self, auth_ticket, service, db_session):
         service.remove_ticket(auth_ticket.id)
 
-        assert service._ticket is None  # pylint: disable=protected-access
+        assert service._ticket is None  # pylint: disable=protected-access  # noqa: SLF001
         assert db_session.query(AuthTicket).first() is None
 
     @pytest.fixture

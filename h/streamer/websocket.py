@@ -18,7 +18,7 @@ MESSAGE_HANDLERS = {}
 
 
 # An incoming message from a WebSocket client.
-class Message(namedtuple("Message", ["socket", "payload"])):
+class Message(namedtuple("Message", ["socket", "payload"])):  # noqa: PYI024
     def reply(self, payload, ok=True):
         """
         Send a response to this message.

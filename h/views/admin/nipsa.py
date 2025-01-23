@@ -40,7 +40,7 @@ def nipsa_add(request):
         raise UserNotFoundError(
             # pylint:disable=consider-using-f-string
             _(
-                "Could not find user with username %s and authority %s"
+                "Could not find user with username %s and authority %s"  # noqa: INT003
                 % (username, authority)
             )
         )
@@ -64,7 +64,7 @@ def nipsa_remove(request):
     user = request.db.query(models.User).filter_by(userid=userid).first()
     if user is None:
         # pylint:disable=consider-using-f-string
-        raise UserNotFoundError(_("Could not find user with userid %s" % userid))
+        raise UserNotFoundError(_("Could not find user with userid %s" % userid))  # noqa: INT003
 
     nipsa_service = request.find_service(name="nipsa")
     nipsa_service.unflag(user)

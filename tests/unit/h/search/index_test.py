@@ -24,7 +24,7 @@ class TestBatchIndexer:
         )
 
         assert (
-            indexer._target_index == target_index  # pylint:disable=protected-access
+            indexer._target_index == target_index  # pylint:disable=protected-access  # noqa: SLF001
             if target_index
             else es_client.index
         )

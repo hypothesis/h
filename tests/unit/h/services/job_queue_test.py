@@ -195,7 +195,7 @@ class TestQueueService:
     def test_factory(self, pyramid_request, db_session):
         svc = factory(sentinel.context, pyramid_request)
 
-        assert svc._db == db_session  # pylint:disable=protected-access
+        assert svc._db == db_session  # pylint:disable=protected-access  # noqa: SLF001
 
     def database_id(self, annotation):
         """Return `annotation.id` in the internal format used within the database."""

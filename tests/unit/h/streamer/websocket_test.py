@@ -10,7 +10,7 @@ from jsonschema import ValidationError
 from h.security import Identity
 from h.streamer import websocket
 
-FakeMessage = namedtuple("FakeMessage", ["data"])
+FakeMessage = namedtuple("FakeMessage", ["data"])  # noqa: PYI024
 
 
 class TestMessage:

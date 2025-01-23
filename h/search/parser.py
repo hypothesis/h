@@ -45,7 +45,7 @@ whitespace = {
     "\u3000",  # ideographic space
 }
 
-Match = namedtuple("Match", ["key", "value"])
+Match = namedtuple("Match", ["key", "value"])  # noqa: PYI024
 
 
 def parse(query):

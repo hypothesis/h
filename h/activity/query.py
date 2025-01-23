@@ -18,7 +18,7 @@ from h.services.annotation_read import AnnotationReadService
 
 
 class ActivityResults(
-    namedtuple("ActivityResults", ["total", "aggregations", "timeframes"])
+    namedtuple("ActivityResults", ["total", "aggregations", "timeframes"])  # noqa: PYI024
 ):
     pass
 

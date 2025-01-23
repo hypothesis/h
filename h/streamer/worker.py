@@ -76,7 +76,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
             # Build and start the HTTP response
             self.environ["ws4py.socket"] = (
                 self.socket
-                or self.environ[  # pylint: disable=protected-access
+                or self.environ[  # pylint: disable=protected-access  # noqa: SLF001
                     "wsgi.input"
                 ].rfile._sock
             )
@@ -111,10 +111,10 @@ class GEventWebSocketPool(Pool):
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
             try:
-                websocket = greenlet._run.__self__  # pylint: disable=protected-access
+                websocket = greenlet._run.__self__  # pylint: disable=protected-access  # noqa: SLF001
                 if websocket:
                     websocket.close(1001, "Server is shutting down")
-            except:  # pylint: disable=bare-except
+            except:  # pylint: disable=bare-except  # noqa: E722
                 pass
             finally:
                 self.discard(greenlet)

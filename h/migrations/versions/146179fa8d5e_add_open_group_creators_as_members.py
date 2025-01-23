@@ -58,7 +58,7 @@ def upgrade():
 
     open_groups = db.scalars(
         select(Group)
-        .where(Group.joinable_by == None)
+        .where(Group.joinable_by == None)  # noqa: E711
         .where(Group.readable_by == ReadableBy.world)
         .where(Group.writeable_by == WriteableBy.authority)
     )

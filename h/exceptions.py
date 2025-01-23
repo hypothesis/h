@@ -1,4 +1,4 @@
-class InvalidUserId(Exception):
+class InvalidUserId(Exception):  # noqa: N818
     """The userid does not meet the expected pattern."""
 
     def __init__(self, user_id):

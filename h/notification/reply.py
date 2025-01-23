@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class Notification(
-    namedtuple(
+    namedtuple(  # noqa: PYI024
         "Notification", ["reply", "reply_user", "parent", "parent_user", "document"]
     )
 ):
@@ -29,7 +29,7 @@ class Notification(
     """
 
 
-def get_notification(
+def get_notification(  # noqa: C901
     request, annotation, action
 ):  # pylint: disable=too-many-return-statements,too-complex
     """

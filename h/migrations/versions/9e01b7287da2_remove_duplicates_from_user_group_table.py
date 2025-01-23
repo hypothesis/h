@@ -8,7 +8,7 @@ Create Date: 2016-07-08 17:54:57.399139
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base  # noqa: F401
 from sqlalchemy.orm import sessionmaker
 
 revision = "9e01b7287da2"

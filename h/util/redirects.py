@@ -26,7 +26,7 @@ from collections import namedtuple
 
 
 class Redirect(
-    namedtuple(
+    namedtuple(  # noqa: PYI024
         "Redirect",
         [
             "src",  # matching prefix (if prefix redirect) or path (if exact)

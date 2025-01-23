@@ -314,7 +314,7 @@ def _target_selectors(targets):
             if value := target_selector.get(field):
                 if not is_valid_unicode(value):
                     raise ValidationError(
-                        f"{field}: " + _(f"'{field}' must be valid unicode")
+                        f"{field}: " + _(f"'{field}' must be valid unicode")  # noqa: INT001
                     )
 
     return selectors

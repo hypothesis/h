@@ -9,7 +9,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import DontWrapMixin
 
 
-class InvalidUUID(Exception, DontWrapMixin):
+class InvalidUUID(Exception, DontWrapMixin):  # noqa: N818
     pass
 
 

@@ -11,11 +11,11 @@ from tests.common import factories as factories_common
 from tests.common.fixtures.elasticsearch import (  # pylint: disable=unused-import
     ELASTICSEARCH_INDEX,
     ELASTICSEARCH_URL,
-    es_client,
-    init_elasticsearch,
+    es_client,  # noqa: F401
+    init_elasticsearch,  # noqa: F401
 )
-from tests.functional.fixtures.authentication import *  # pylint:disable=wildcard-import,unused-wildcard-import
-from tests.functional.fixtures.groups import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from tests.functional.fixtures.authentication import *  # pylint:disable=wildcard-import,unused-wildcard-import  # noqa: F403
+from tests.functional.fixtures.groups import *  # pylint:disable=wildcard-import,unused-wildcard-import  # noqa: F403
 
 TEST_SETTINGS = {
     "es.url": ELASTICSEARCH_URL,

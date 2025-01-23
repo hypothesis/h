@@ -342,7 +342,7 @@ class UserPurger:
         log_deleted_rows(user, User, deleted_ids)
 
 
-class LimitReached(Exception):
+class LimitReached(Exception):  # noqa: N818
     """A LimitedWorker has reached its limit and won't do any more work."""
 
 
