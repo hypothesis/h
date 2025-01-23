@@ -4,38 +4,26 @@
 #
 #    pip-compile --allow-unsafe requirements/format.in
 #
-black==24.10.0
-    # via -r requirements/format.in
 build==1.0.3
     # via pip-tools
 click==8.1.8
-    # via
-    #   black
-    #   pip-tools
+    # via pip-tools
 importlib-metadata==7.0.1
     # via pip-sync-faster
-isort==5.13.2
-    # via -r requirements/format.in
-mypy-extensions==1.0.0
-    # via black
 packaging==24.2
-    # via
-    #   black
-    #   build
-pathspec==0.12.1
-    # via black
+    # via build
 pip-sync-faster==0.0.4
     # via -r requirements/format.in
 pip-tools==7.4.1
     # via
     #   -r requirements/format.in
     #   pip-sync-faster
-platformdirs==4.1.0
-    # via black
 pyproject-hooks==1.0.0
     # via
     #   build
     #   pip-tools
+ruff==0.9.2
+    # via -r requirements/format.in
 wheel==0.42.0
     # via pip-tools
 zipp==3.19.1
