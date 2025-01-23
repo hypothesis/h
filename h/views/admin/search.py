@@ -3,6 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
 from h import models, tasks
+from h.db.types import URLSafeUUID
 from h.security import Permission
 
 
@@ -95,6 +96,41 @@ class SearchAdminViews:
         return self._notify_reindexing_started(
             f"Began reindexing annotations in group {groupid} ({group.name})"
         )
+
+    @view_config(
+        request_method="POST",
+        request_param="reindex_ids",
+        require_csrf=True,
+        renderer="h:templates/admin/search.html.jinja2",
+    )
+    def queue_annotations_by_id(self):
+        annotation_ids = self._annotation_ids_from_text_area(
+            self.request.params["annotation_ids"]
+        )
+        force = bool(self.request.params.get("reindex_ids_force"))
+
+        tasks.job_queue.add_annotations_by_ids.delay(
+            self.request.params["name"], annotation_ids, tag="reindex_ids", force=force
+        )
+        return self._notify_reindexing_started("Began reindexing annotations by ID.")
+
+    def _annotation_ids_from_text_area(self, textarea: str) -> list[str]:
+        ids = [
+            annotation_id.strip()
+            for annotation_id in textarea.split("\n")
+            if annotation_id.strip()
+        ]
+        annotation_ids = []
+        for annotation_id in ids:
+            # If the ID looks like an hex UUID, convert it to URL-safe
+            if len(annotation_id) == 36:
+                annotation_ids.append(URLSafeUUID.hex_to_url_safe(annotation_id))
+                continue
+
+            # Otherwise assume it's already URL-safe
+            annotation_ids.append(annotation_id)
+
+        return annotation_ids
 
     def _notify_reindexing_started(self, message):
         self.request.session.flash(message, "success")

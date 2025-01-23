@@ -55,6 +55,25 @@ class TestAddAnnotationsFromGroup:
         )
 
 
+class TestAddAnnotationsByIDs:
+    def test_it(self, queue_service):
+        job_queue.add_annotations_by_ids(
+            sentinel.name,
+            sentinel.annotation_ids,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+        queue_service.add_by_ids.assert_called_once_with(
+            sentinel.name,
+            sentinel.annotation_ids,
+            sentinel.tag,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+
 @pytest.fixture(autouse=True)
 def celery(patch, pyramid_request):
     cel = patch("h.tasks.job_queue.celery")
