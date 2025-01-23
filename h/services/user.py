@@ -108,7 +108,7 @@ class UserService:
 
         if missing_ids:
             users = self.session.query(User).filter(
-                User.userid.in_(missing_ids)  # pylint:disable=no-member
+                User.userid.in_(missing_ids)
             )
             for user in users:
                 cache_key = (user.username, user.authority)

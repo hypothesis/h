@@ -37,7 +37,7 @@ def groups_index(_context, request):
     renderer="h:templates/admin/groups_create.html.jinja2",
     permission=Permission.AdminPage.LOW_RISK,
 )
-class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
+class GroupCreateViews:
     """Views for admin create-group forms."""
 
     def __init__(self, request):
@@ -139,7 +139,7 @@ class GroupCreateViews:  # pylint: disable=too-many-instance-attributes
     permission=Permission.AdminPage.LOW_RISK,
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
-class GroupEditViews:  # pylint: disable=too-many-instance-attributes
+class GroupEditViews:
     def __init__(self, context, request):
         self.group = context.group
         self.request = request
@@ -171,7 +171,6 @@ class GroupEditViews:  # pylint: disable=too-many-instance-attributes
         self.request.find_service(name="group_delete").delete(self.group)
 
         self.request.session.flash(
-            # pylint:disable=consider-using-f-string
             _("Successfully deleted group %s" % (self.group.name), "success"),  # noqa: INT003
             queue="success",
         )

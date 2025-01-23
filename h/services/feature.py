@@ -75,7 +75,7 @@ class FeatureService:
         """Load the feature flags from the database."""
         return models.Feature.all(self.session)
 
-    def _state(self, feature, user=None):  # pylint:disable=too-many-return-statements
+    def _state(self, feature, user=None):
         # Features that are explicitly overridden are on.
         if self.overrides is not None and feature.name in self.overrides:
             return True

@@ -100,7 +100,6 @@ class FlagService:
             return self._flag_count_cache[annotation.id]
 
         self._flag_count_cache[annotation.id] = flag_count = (
-            # pylint:disable=not-callable
             self._session.query(sa.func.count(Flag.id))
             .filter(Flag.annotation_id == annotation.id)
             .scalar()
@@ -120,7 +119,6 @@ class FlagService:
 
         query = (
             self._session.query(
-                # pylint:disable=not-callable
                 sa.func.count(Flag.id).label("flag_count"),
                 Flag.annotation_id,
             )

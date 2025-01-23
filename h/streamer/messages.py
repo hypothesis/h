@@ -117,7 +117,7 @@ def handle_annotation_event(message, sockets, request, session):
         return
 
     # Create a generator which has the first socket back again
-    matching_sockets = chain(  # pylint: disable=redefined-variable-type
+    matching_sockets = chain(
         (first_socket,), matching_sockets
     )
 

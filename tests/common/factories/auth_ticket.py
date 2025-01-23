@@ -25,4 +25,4 @@ class AuthTicket(ModelFactory):
 
     @factory.lazy_attribute
     def user_userid(self):
-        return self.user.userid  # pylint:disable=no-member
+        return self.user.userid

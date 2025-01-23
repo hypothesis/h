@@ -1,4 +1,3 @@
-# pylint: disable=no-member # Instance of 'Celery' has no 'request' member
 from h.celery import celery
 
 

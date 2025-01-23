@@ -1,4 +1,3 @@
-# pylint:disable=protected-access
 from unittest import mock
 
 import pytest
@@ -28,7 +27,6 @@ def test_it_normalizes_document_uris_uri(req):
 
     normalize_uris.normalize_document_uris(req)
 
-    # pylint:disable=comparison-with-callable,useless-suppression
     assert docuri_1.uri_normalized == "httpx://example.org"
     assert docuri_2.uri_normalized == "httpx://example.org"
 
@@ -55,11 +53,11 @@ def test_it_normalizes_document_uris_claimant(req):
     normalize_uris.normalize_document_uris(req)
 
     assert (
-        docuri_1.claimant_normalized  # pylint:disable=comparison-with-callable
+        docuri_1.claimant_normalized
         == "httpx://example.org"
     )
     assert (
-        docuri_2.claimant_normalized  # pylint:disable=comparison-with-callable
+        docuri_2.claimant_normalized
         == "httpx://example.org"
     )
 
@@ -131,11 +129,11 @@ def test_it_normalizes_document_meta_claimant(req):
     normalize_uris.normalize_document_meta(req)
 
     assert (
-        docmeta_1.claimant_normalized  # pylint:disable=comparison-with-callable
+        docmeta_1.claimant_normalized
         == "httpx://example.org"
     )
     assert (
-        docmeta_2.claimant_normalized  # pylint:disable=comparison-with-callable
+        docmeta_2.claimant_normalized
         == "httpx://example.net"
     )
 

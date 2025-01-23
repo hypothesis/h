@@ -24,7 +24,7 @@ class TestBatchIndexer:
         )
 
         assert (
-            indexer._target_index == target_index  # pylint:disable=protected-access  # noqa: SLF001
+            indexer._target_index == target_index  # noqa: SLF001
             if target_index
             else es_client.index
         )
@@ -143,7 +143,7 @@ class TestBatchIndexer:
 
 
 @pytest.fixture
-def batch_indexer(  # pylint:disable=unused-argument
+def batch_indexer(
     db_session, es_client, pyramid_request, moderation_service
 ):
     return BatchIndexer(db_session, es_client, pyramid_request)

@@ -81,7 +81,7 @@ class TestUserDeleteService:
         job = db_session.scalars(select(Job)).one()
         assert job.name == "purge_user"
         assert (
-            job.priority  # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
+            job.priority
             == 0
         )
         assert job.tag == "UserDeleteService.delete_user"
@@ -599,7 +599,6 @@ class TestLimitedWorker:
         with pytest.raises(LimitReached):
             worker.update(Annotation, select(Annotation.id), {"text": "UPDATED"})
 
-        # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
         assert worker.limit == 0
         assert annotation.text == original_text
 
@@ -634,7 +633,6 @@ class TestLimitedWorker:
             assert updated_annotation_id in [
                 annotation.id for annotation in annotations
             ]
-        # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
         assert worker.limit == 0
         for annotation in annotations:
             if annotation.id in updated_annotation_ids:
@@ -669,7 +667,6 @@ class TestLimitedWorker:
         with pytest.raises(LimitReached):
             worker.delete(Annotation, select(Annotation.id))
 
-        # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
         assert worker.limit == 0
         assert db_session.scalars(select(Annotation)).all() == [annotation]
 
@@ -698,7 +695,6 @@ class TestLimitedWorker:
             assert deleted_annotation_id in [
                 annotation.id for annotation in annotations
             ]
-        # pylint:disable=use-implicit-booleaness-not-comparison-to-zero
         assert worker.limit == 0
         assert (
             db_session.scalar(select(func.count(Annotation.id))) == len(annotations) - 1

@@ -21,7 +21,7 @@ class TestGroupCreateEditController:
         result = controller.create()
 
         assets_env.urls.assert_called_once_with("group_forms_css")
-        views.get_csrf_token.assert_called_once_with(  # pylint:disable=no-member
+        views.get_csrf_token.assert_called_once_with(
             pyramid_request
         )
         assert result == {
@@ -37,7 +37,7 @@ class TestGroupCreateEditController:
                         "method": "POST",
                         "url": pyramid_request.route_url("api.groups"),
                         "headers": {
-                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                            "X-CSRF-Token": views.get_csrf_token.spy_return
                         },
                     }
                 },
@@ -64,7 +64,7 @@ class TestGroupCreateEditController:
         result = controller.edit()
 
         assets_env.urls.assert_called_once_with("group_forms_css")
-        views.get_csrf_token.assert_called_once_with(  # pylint:disable=no-member
+        views.get_csrf_token.assert_called_once_with(
             pyramid_request
         )
         annotation_stats_service.total_group_annotation_count.assert_called_once_with(
@@ -79,7 +79,7 @@ class TestGroupCreateEditController:
                         "method": "POST",
                         "url": pyramid_request.route_url("api.groups"),
                         "headers": {
-                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                            "X-CSRF-Token": views.get_csrf_token.spy_return
                         },
                     },
                     "readGroupMembers": {
@@ -88,7 +88,7 @@ class TestGroupCreateEditController:
                             "api.group_members", pubid=group.pubid
                         ),
                         "headers": {
-                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                            "X-CSRF-Token": views.get_csrf_token.spy_return
                         },
                     },
                     "editGroupMember": {
@@ -97,7 +97,7 @@ class TestGroupCreateEditController:
                             "api.group_member", pubid=group.pubid, userid=":userid"
                         ),
                         "headers": {
-                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                            "X-CSRF-Token": views.get_csrf_token.spy_return
                         },
                     },
                     "removeGroupMember": {
@@ -106,14 +106,14 @@ class TestGroupCreateEditController:
                             "api.group_member", pubid=group.pubid, userid=":userid"
                         ),
                         "headers": {
-                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                            "X-CSRF-Token": views.get_csrf_token.spy_return
                         },
                     },
                     "updateGroup": {
                         "method": "PATCH",
                         "url": pyramid_request.route_url("api.group", id=group.pubid),
                         "headers": {
-                            "X-CSRF-Token": views.get_csrf_token.spy_return  # pylint:disable=no-member
+                            "X-CSRF-Token": views.get_csrf_token.spy_return
                         },
                     },
                 },

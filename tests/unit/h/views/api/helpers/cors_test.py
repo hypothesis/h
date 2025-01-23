@@ -213,7 +213,7 @@ class TestAddPreflightView:
         add_preflight_view(pyramid_config, "api.read_thing", cors_policy)
 
         (_, kwargs) = pyramid_config.add_view.call_args
-        assert (  # pylint: disable=comparison-with-callable
+        assert (
             kwargs["decorator"] == cors_policy
         )
 
@@ -229,7 +229,7 @@ class TestAddPreflightView:
 
 
 # A tiny WSGI application used for testing the middleware
-def wsgi_testapp(environ, start_response):  # pylint:disable=unused-argument
+def wsgi_testapp(environ, start_response):
     start_response("200 OK", [("Content-Type", "text/plain")])
     return ["OK"]
 

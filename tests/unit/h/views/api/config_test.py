@@ -74,7 +74,7 @@ class TestAddApiView:
         ([_, route_name, policy], _) = cors.add_preflight_view.call_args
         assert route_name == "thing.read"
         assert (
-            policy == api_config.cors_policy  # pylint: disable=comparison-with-callable
+            policy == api_config.cors_policy
         )
 
     def test_it_does_not_add_cors_preflight_view_if_disabled(

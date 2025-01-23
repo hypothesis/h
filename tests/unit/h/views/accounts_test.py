@@ -1,4 +1,3 @@
-# pylint:disable=too-many-lines
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -998,7 +997,6 @@ class TestDeleteController:
 
 
 def test_account_deleted(pyramid_request):
-    # pylint:disable=use-implicit-booleaness-not-comparison
     assert views.account_deleted(pyramid_request) == {}
 
 

@@ -21,7 +21,7 @@ class Client:
         self.client_id = authclient.id
 
 
-class OAuthValidator(  # pylint: disable=too-many-public-methods, abstract-method
+class OAuthValidator(
     RequestValidator
 ):
     """

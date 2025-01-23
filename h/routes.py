@@ -1,4 +1,4 @@
-def includeme(config):  # pylint: disable=too-many-statements
+def includeme(config):
     # Core
     config.add_route("index", "/")
     config.add_route("robots", "/robots.txt")

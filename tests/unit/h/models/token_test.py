@@ -50,7 +50,6 @@ class TestToken:
     def test_repr(self, factories):
         token = factories.DeveloperToken()
 
-        # pylint:disable=protected-access
         assert (
             repr(token)
             == f"Token(id={token.id!r}, user_id={token.user_id!r}, _authclient_id={token._authclient_id!r})"  # noqa: SLF001

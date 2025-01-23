@@ -22,7 +22,7 @@ def get_ndjson_response(results: Optional[Iterable]) -> Response:
     try:
         results = chain([next(results)], results)
     except StopIteration:
-        results = []  # pylint: disable=redefined-variable-type
+        results = []
 
     # An NDJSON response is required
     return Response(

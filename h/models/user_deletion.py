@@ -18,7 +18,7 @@ class UserDeletion(Base):
     """The userid of the user who was deleted."""
 
     requested_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),  # pylint:disable=not-callable
+        server_default=func.now(),
     )
     """The time at which the user deletion was requested."""
 

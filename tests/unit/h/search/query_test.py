@@ -1,4 +1,3 @@
-# pylint:disable=too-many-lines
 import datetime
 
 import elasticsearch_dsl
@@ -1004,7 +1003,7 @@ class TestUsersAggregation:
 
 
 @pytest.fixture
-def search(pyramid_request, group_service):  # pylint:disable=unused-argument
+def search(pyramid_request, group_service):
     search = Search(pyramid_request)
     # Remove all default modifiers and aggregators except Sorter.
     search.clear()

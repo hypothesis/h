@@ -29,7 +29,6 @@ class JobQueueMetrics:
 
         # Unexpired jobs by tag and name.
         name_tags = (
-            # pylint:disable=not-callable
             self._db.query(Job.name, Job.tag, func.count())
             .filter(Job.expires_at >= now)
             .group_by(Job.name)
@@ -42,7 +41,6 @@ class JobQueueMetrics:
 
         # Unexpired jobs by priority.
         priority_counts = (
-            # pylint:disable=not-callable
             self._db.query(Job.priority, func.count())
             .filter(Job.expires_at >= now)
             .group_by(Job.priority)

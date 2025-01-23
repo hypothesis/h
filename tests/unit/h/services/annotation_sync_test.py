@@ -660,8 +660,8 @@ class TestFactory:
 def search_index_service(
     pyramid_request,
     es_client,
-    moderation_service,  # pylint:disable=unused-argument
-    nipsa_service,  # pylint:disable=unused-argument
+    moderation_service,
+    nipsa_service,
 ):
     # Construct a real (not mock) SearchIndexService so we can call its
     # methods to index annotations.

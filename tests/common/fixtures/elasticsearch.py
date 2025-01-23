@@ -20,8 +20,6 @@ def es_client():
     # Push all changes to segments to make sure all annotations that were added get removed.
     elasticsearch_dsl.Index(client.index, using=client.conn).refresh()
 
-    # Pylint can't understand the ES library
-    # pylint: disable=unexpected-keyword-arg
     client.conn.delete_by_query(
         index=client.index,
         body={"query": {"match_all": {}}},

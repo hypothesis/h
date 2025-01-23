@@ -1,4 +1,3 @@
-# pylint: disable=no-member # Instance of 'Celery' has no 'request' member
 from datetime import datetime
 
 import newrelic
@@ -36,7 +35,7 @@ def report_num_deleted_annotations():
         "Custom/Annotations/MarkedAsDeleted",
         celery.request.db.scalar(
             select(
-                func.count(models.Annotation.id)  # pylint:disable=not-callable
+                func.count(models.Annotation.id)
             ).where(models.Annotation.deleted.is_(True))
         ),
     )

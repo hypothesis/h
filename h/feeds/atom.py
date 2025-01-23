@@ -54,7 +54,7 @@ def _feed_entry_from_annotation(annotation, annotation_url, annotation_api_url=N
     return entry
 
 
-def feed_from_annotations(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def feed_from_annotations(
     annotations,
     atom_url,
     annotation_url,

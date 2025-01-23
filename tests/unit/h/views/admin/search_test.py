@@ -95,7 +95,7 @@ class TestSearchAdminViews:
             views.reindex_group()
 
     @pytest.fixture
-    def views(self, pyramid_request, queue_service):  # pylint:disable=unused-argument
+    def views(self, pyramid_request, queue_service):
         return SearchAdminViews(pyramid_request)
 
     @pytest.fixture(autouse=True)

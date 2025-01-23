@@ -88,7 +88,7 @@ class TestRegisterLink:
 #     return mock.create_autospec(AngularRouteTemplater, spec_set=True, instance=True)
 
 
-def _service_link(name="api.example_service"):  # pylint:disable=unused-argument
+def _service_link(name="api.example_service"):
     return links.ServiceLink(
         name="name",
         route_name="api.example_service",

@@ -27,11 +27,11 @@ def annotation_page(context, request):
     annotation = context.annotation
     document = annotation.document
     if document and document.title:
-        title = "Annotation by {user} on {title}".format(  # pylint:disable=consider-using-f-string
+        title = "Annotation by {user} on {title}".format(
             user=annotation.userid.replace("acct:", ""), title=document.title
         )
     else:
-        title = "Annotation by {user}".format(  # pylint:disable=consider-using-f-string
+        title = "Annotation by {user}".format(
             user=annotation.userid.replace("acct:", "")
         )
 

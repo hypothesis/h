@@ -11,7 +11,7 @@ class Subscriptions(ModelFactory):
 
     uri = factory.LazyAttribute(
         lambda _: (
-            "acct:" + FAKER.user_name() + "@example.com"  # pylint:disable=no-member
+            "acct:" + FAKER.user_name() + "@example.com"
         )
     )
     type = models.Subscriptions.Type.REPLY.value

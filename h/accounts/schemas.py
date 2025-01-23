@@ -130,7 +130,6 @@ def new_password_node(**kwargs):
 
 def _privacy_accepted_message():
     terms_links = {
-        # pylint:disable=consider-using-f-string
         "privacy_policy": '<a class="link" href="{href}">{text}</a>'.format(
             href="https://web.hypothes.is/privacy/", text=_("privacy policy")
         ),

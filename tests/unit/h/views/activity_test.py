@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 import datetime
 from unittest import mock
 
@@ -115,7 +114,7 @@ class TestGroupSearchController:
     """Tests unique to GroupSearchController."""
 
     @staticmethod
-    def fake_has_permission(permission, context=None):  # pylint:disable=unused-argument
+    def fake_has_permission(permission, context=None):
         return False
 
     def test_renders_join_template_when_no_read_permission(
@@ -149,7 +148,7 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     @pytest.mark.usefixtures("toggle_user_facet_request")
-    def test_raises_not_found_when_no_read_or_join_permissions(  # pylint:disable=unused-argument
+    def test_raises_not_found_when_no_read_or_join_permissions(
         self, controller, pyramid_request, test_group, test_user
     ):
         pyramid_request.has_permission = mock.Mock(side_effect=self.fake_has_permission)
@@ -182,7 +181,7 @@ class TestGroupSearchController:
         [("group", None), ("open_group", "creator"), ("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_calls_search_with_the_request(  # pylint:disable=unused-argument
+    def test_search_calls_search_with_the_request(
         self, controller, test_group, test_user, search
     ):
         controller.search()
@@ -196,7 +195,7 @@ class TestGroupSearchController:
         [("group", None), ("open_group", "creator"), ("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_just_returns_search_result_if_group_does_not_exist(  # pylint:disable=unused-argument
+    def test_search_just_returns_search_result_if_group_does_not_exist(
         self, controller, test_group, test_user, pyramid_request, search
     ):
         pyramid_request.matchdict["pubid"] = "does_not_exist"
@@ -204,7 +203,7 @@ class TestGroupSearchController:
         assert controller.search() == search.return_value
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
-    def test_search_just_returns_search_result_if_user_not_logged_in(  # pylint:disable=unused-argument
+    def test_search_just_returns_search_result_if_user_not_logged_in(
         self, controller, test_group, search
     ):
         assert controller.search() == search.return_value
@@ -214,7 +213,7 @@ class TestGroupSearchController:
         [("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_just_returns_search_result_if_user_not_a_member_of_group(  # pylint:disable=unused-argument
+    def test_search_just_returns_search_result_if_user_not_a_member_of_group(
         self, controller, test_group, test_user, search
     ):
         assert controller.search() == search.return_value
@@ -224,7 +223,7 @@ class TestGroupSearchController:
         [("no_creator_group", "member"), ("no_creator_open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_creator_is_none_if_group_creator_is_empty(  # pylint:disable=unused-argument
+    def test_search_returns_group_creator_is_none_if_group_creator_is_empty(
         self, controller, test_group, test_user
     ):
         group_info = controller.search()["group_users_args"]
@@ -236,7 +235,7 @@ class TestGroupSearchController:
         [("no_creator_group", "member"), ("no_creator_open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_info_if_user_has_read_permissions(  # pylint:disable=unused-argument
+    def test_search_returns_group_info_if_user_has_read_permissions(
         self, controller, test_group, test_user
     ):
         group_info = controller.search()["group"]
@@ -254,7 +253,7 @@ class TestGroupSearchController:
         [("no_organization_group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_does_not_return_organization_info_if_missing(  # pylint:disable=unused-argument
+    def test_search_does_not_return_organization_info_if_missing(
         self,
         controller,
         test_group,
@@ -275,7 +274,7 @@ class TestGroupSearchController:
         [("no_creator_group", "member"), ("no_creator_open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_does_not_show_the_edit_link_to_non_admin_users(  # pylint:disable=unused-argument
+    def test_search_does_not_show_the_edit_link_to_non_admin_users(
         self, controller, test_group, test_user, pyramid_request
     ):
         def fake_has_permission(permission, context=None):
@@ -292,7 +291,7 @@ class TestGroupSearchController:
         [("open_group", "creator"), ("group", "creator")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_does_show_the_group_edit_link_to_group_creators(  # pylint:disable=unused-argument
+    def test_search_does_show_the_group_edit_link_to_group_creators(
         self, controller, test_group, test_user, pyramid_request
     ):
         pyramid_request.has_permission = mock.Mock(return_value=True)
@@ -306,7 +305,7 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(  # pylint:disable=unused-argument
+    def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
         self, controller, test_group, test_user, pyramid_request
     ):
         pyramid_request.params["more_info"] = ""
@@ -318,7 +317,7 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(  # pylint:disable=unused-argument
+    def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
         self, controller, test_group, test_user
     ):
         assert not controller.search()["more_info"]
@@ -334,7 +333,7 @@ class TestGroupSearchController:
         [("group", "member"), ("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_creator(  # pylint:disable=unused-argument
+    def test_search_returns_group_creator(
         self, controller, test_user, test_group
     ):
         result = controller.search()
@@ -346,7 +345,7 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_members_usernames(  # pylint:disable=unused-argument
+    def test_search_returns_group_members_usernames(
         self, controller, test_user, test_group
     ):
         result = controller.search()
@@ -360,7 +359,7 @@ class TestGroupSearchController:
         [("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_members_userid(  # pylint:disable=unused-argument
+    def test_search_returns_group_members_userid(
         self, controller, test_user, test_group
     ):
         result = controller.search()
@@ -375,7 +374,7 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     @pytest.mark.usefixtures("query")
-    def test_search_returns_group_members_faceted_by(  # pylint:disable=unused-argument
+    def test_search_returns_group_members_faceted_by(
         self, controller, test_user, test_group
     ):
         faceted_user = test_group.members[0]
@@ -416,7 +415,7 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_moderators_usernames(  # pylint:disable=unused-argument
+    def test_search_returns_group_moderators_usernames(
         self, controller, test_user, test_group
     ):
         result = controller.search()
@@ -430,7 +429,7 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_moderators_userid(  # pylint:disable=unused-argument
+    def test_search_returns_group_moderators_userid(
         self, controller, test_user, test_group
     ):
         result = controller.search()
@@ -444,7 +443,7 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_group_moderators_faceted_by(  # pylint:disable=unused-argument
+    def test_search_returns_group_moderators_faceted_by(
         self, controller, pyramid_request, test_user, test_group
     ):
         pyramid_request.params = {"q": "user:does_not_matter"}
@@ -458,7 +457,7 @@ class TestGroupSearchController:
         [("open_group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_annotation_count_for_group_moderators(  # pylint:disable=unused-argument
+    def test_search_returns_annotation_count_for_group_moderators(
         self, controller, test_group, test_user, search, factories
     ):
         user_1 = test_group.creator
@@ -484,7 +483,7 @@ class TestGroupSearchController:
         [("open_group", "user"), ("group", "user")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_the_default_zero_message_to_the_template(  # pylint:disable=unused-argument
+    def test_search_returns_the_default_zero_message_to_the_template(
         self, controller, test_group, test_user, search
     ):
         """If there's a non-empty query it uses the default zero message."""
@@ -499,7 +498,7 @@ class TestGroupSearchController:
         [("open_group", "user"), ("group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_returns_the_group_zero_message_to_the_template(  # pylint:disable=unused-argument
+    def test_search_returns_the_group_zero_message_to_the_template(
         self, controller, test_group, test_user, search
     ):
         """If the query is empty it overrides the default zero message."""
@@ -583,7 +582,7 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     @pytest.mark.usefixtures("query")
-    def test_search_passes_the_group_annotation_count_to_the_template(  # pylint:disable=unused-argument
+    def test_search_passes_the_group_annotation_count_to_the_template(
         self,
         controller,
         test_group,
@@ -602,7 +601,7 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     @pytest.mark.usefixtures("query")
-    def test_search_reuses_group_annotation_count_if_able(  # pylint:disable=unused-argument
+    def test_search_reuses_group_annotation_count_if_able(
         self,
         controller,
         test_group,
@@ -645,7 +644,7 @@ class TestGroupSearchController:
         ],
         indirect=["test_group", "test_user"],
     )
-    def test_search_sets_display_strings_for_group(  # pylint:disable=unused-argument
+    def test_search_sets_display_strings_for_group(
         self,
         controller,
         test_group,
@@ -669,7 +668,7 @@ class TestGroupSearchController:
         [("group", "member"), ("restricted_group", "member")],
         indirect=["test_group", "test_user"],
     )
-    def test_search_sets_display_members_for_group(  # pylint:disable=unused-argument
+    def test_search_sets_display_members_for_group(
         self, controller, test_group, test_user, search
     ):
         info = controller.search()["group_users_args"]
@@ -817,12 +816,12 @@ class TestGroupSearchController:
         return users[request.param]
 
     @pytest.fixture
-    def users(self, request, user, factories):  # pylint:disable=unused-argument
+    def users(self, request, user, factories):
         group = request.getfixturevalue("test_group")
         return {None: None, "creator": group.creator, "user": factories.User()}
 
     @pytest.fixture
-    def controller(  # pylint:disable=unused-argument
+    def controller(
         self, request, group, pyramid_request, query
     ):
         test_group = group
@@ -1031,7 +1030,7 @@ class TestUserSearchController:
         self,
         user,
         pyramid_request,
-        query,  # pylint:disable=unused-argument
+        query,
     ):
         return activity.UserSearchController(UserContext(user), pyramid_request)
 

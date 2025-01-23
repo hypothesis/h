@@ -60,7 +60,6 @@ class OrganizationCreateController:
 
             self.request.db.add(organization)
             self.request.session.flash(
-                # pylint:disable=consider-using-f-string
                 Markup(_("Created new organization {}".format(name))),  # noqa: INT002
                 "success",
             )
@@ -107,7 +106,6 @@ class OrganizationEditController:
             self.request.response.status_int = 400
             self.request.session.flash(
                 _(
-                    # pylint:disable=consider-using-f-string
                     "Cannot delete organization because it is associated with {} groups".format(  # noqa: INT002
                         group_count
                     )
@@ -120,7 +118,6 @@ class OrganizationEditController:
         self.request.db.delete(self.organization)
         self.request.session.flash(
             _(
-                # pylint:disable=consider-using-f-string
                 "Successfully deleted organization %s" % (self.organization.name),  # noqa: INT003
                 "success",
             )
