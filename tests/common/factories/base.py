@@ -26,8 +26,6 @@ class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
             raise RuntimeError("no session: did you use the factories fixture?")
         obj = model_class(*args, **kwargs)
         SESSION.add(obj)
-        if (
-            cls._meta.sqlalchemy_session_persistence == "flush"
-        ):
+        if cls._meta.sqlalchemy_session_persistence == "flush":
             SESSION.flush()
         return obj

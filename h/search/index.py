@@ -18,9 +18,7 @@ PG_WINDOW_SIZE = 2500
 class BatchIndexer:
     """A convenience class for reindexing annotations from the database to the search index."""
 
-    def __init__(
-        self, session, es_client, request, target_index=None, op_type="index"
-    ):
+    def __init__(self, session, es_client, request, target_index=None, op_type="index"):
         self.session = session
         self.es_client = es_client
         self.request = request

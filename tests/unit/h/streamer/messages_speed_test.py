@@ -19,9 +19,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
 
     @pytest.mark.parametrize("reps", (1, 16, 256, 4096))
     @pytest.mark.parametrize("action", ("create", "delete"))
-    def test_speed(
-        self, db_session, pyramid_request, socket, message, action, reps
-    ):
+    def test_speed(self, db_session, pyramid_request, socket, message, action, reps):
         sockets = list(socket for _ in range(reps))
         message["action"] = action
 

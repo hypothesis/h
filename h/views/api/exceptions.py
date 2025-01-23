@@ -5,9 +5,7 @@ from pyramid import httpexceptions
 from h.i18n import TranslationString as _
 
 
-class OAuthAuthorizeError(
-    httpexceptions.HTTPBadRequest
-):
+class OAuthAuthorizeError(httpexceptions.HTTPBadRequest):
     """An OAuth authorization request failure."""
 
 

@@ -10,9 +10,7 @@ class Subscriptions(ModelFactory):
         model = models.Subscriptions
 
     uri = factory.LazyAttribute(
-        lambda _: (
-            "acct:" + FAKER.user_name() + "@example.com"
-        )
+        lambda _: ("acct:" + FAKER.user_name() + "@example.com")
     )
     type = models.Subscriptions.Type.REPLY.value
     active = Faker("random_element", elements=[True, False])

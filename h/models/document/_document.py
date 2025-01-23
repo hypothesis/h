@@ -77,9 +77,7 @@ class Document(Base, mixins.Timestamps):
 
         matching_claims = (
             session.query(DocumentURI)
-            .filter(
-                DocumentURI.uri_normalized.in_(query_uris)
-            )
+            .filter(DocumentURI.uri_normalized.in_(query_uris))
             .distinct(DocumentURI.document_id)
             .subquery()
         )

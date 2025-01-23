@@ -20,7 +20,5 @@ class ConfidentialAuthClient(ModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     authority = "example.com"
-    secret = factory.LazyAttribute(
-        lambda _: FAKER.sha256()
-    )
+    secret = factory.LazyAttribute(lambda _: FAKER.sha256())
     redirect_uri = "{current_scheme}://{current_host}/auth/callback"

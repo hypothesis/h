@@ -80,10 +80,7 @@ class TestUserDeleteService:
         assert other_user.deleted is False
         job = db_session.scalars(select(Job)).one()
         assert job.name == "purge_user"
-        assert (
-            job.priority
-            == 0
-        )
+        assert job.priority == 0
         assert job.tag == "UserDeleteService.delete_user"
         assert job.kwargs == {"userid": user.userid}
         deletion = db_session.scalars(select(UserDeletion)).one()

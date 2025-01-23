@@ -21,9 +21,7 @@ class Client:
         self.client_id = authclient.id
 
 
-class OAuthValidator(
-    RequestValidator
-):
+class OAuthValidator(RequestValidator):
     """
     Validates OAuth requests.
 

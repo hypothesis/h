@@ -34,9 +34,9 @@ def report_num_deleted_annotations():
     newrelic.agent.record_custom_metric(
         "Custom/Annotations/MarkedAsDeleted",
         celery.request.db.scalar(
-            select(
-                func.count(models.Annotation.id)
-            ).where(models.Annotation.deleted.is_(True))
+            select(func.count(models.Annotation.id)).where(
+                models.Annotation.deleted.is_(True)
+            )
         ),
     )
 

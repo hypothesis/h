@@ -20,14 +20,10 @@ class Annotation(ModelFactory):
             "flush"  # Always flush the db to generate annotation.id.
         )
 
-    tags = factory.LazyFunction(
-        lambda: list(FAKER.words(nb=random.randint(0, 5)))
-    )
+    tags = factory.LazyFunction(lambda: list(FAKER.words(nb=random.randint(0, 5))))
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
-    userid = factory.LazyFunction(
-        lambda: f"acct:{FAKER.user_name()}@localhost"
-    )
+    userid = factory.LazyFunction(lambda: f"acct:{FAKER.user_name()}@localhost")
     document = factory.SubFactory(Document)
     groupid = "__world__"
 
@@ -51,9 +47,7 @@ class Annotation(ModelFactory):
         ]
 
     @factory.post_generation
-    def make_metadata(
-        self, create, extracted, **kwargs
-    ):
+    def make_metadata(self, create, extracted, **kwargs):
         """Create associated document metadata for the annotation."""
         # The metadata objects are going to be added to the db, so if we're not
         # using the create strategy then simply don't make any.
@@ -129,9 +123,7 @@ class Annotation(ModelFactory):
             return
 
         # Ids in the DB are in hex, but in the code they should be URL safe
-        self.id = URLSafeUUID().process_result_value(
-            uuid.uuid4().hex, None
-        )
+        self.id = URLSafeUUID().process_result_value(uuid.uuid4().hex, None)
 
     @factory.post_generation
     def timestamps(self, create, extracted, **kwargs):

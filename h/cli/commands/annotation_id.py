@@ -19,6 +19,6 @@ def from_urlsafe(urlsafe_id):
 
 @annotation_id.command("to-urlsafe")
 @click.argument("annotation_id")
-def to_urlsafe(annotation_id):  
+def to_urlsafe(annotation_id):
     """Convert an annotation ID into its URL-safe representation."""
     click.echo(URLSafeUUID.hex_to_url_safe(UUID(annotation_id).hex))
