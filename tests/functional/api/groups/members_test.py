@@ -5,8 +5,8 @@ from datetime import datetime
 import pytest
 from sqlalchemy import select
 
-from h.models import GroupMembership, GroupMembershipRoles, Token
-from h.models.auth_client import AuthClient, GrantType
+from h.models import GroupMembership, GroupMembershipRoles
+from h.models.auth_client import GrantType
 
 
 class TestListMembersLegacy:
@@ -301,8 +301,8 @@ class TestGetMember:
                 "updates.roles.admin",
                 "updates.roles.owner",
             ],
-            "created": f"1970-01-01T00:00:00.000000+00:00",
-            "updated": f"1970-01-01T00:00:01.000000+00:00",
+            "created": "1970-01-01T00:00:00.000000+00:00",
+            "updated": "1970-01-01T00:00:01.000000+00:00",
         }
 
     def test_it_when_group_doesnt_exist(self, do_request):
@@ -815,7 +815,7 @@ class TestEditMembership:
         do_request(userid=f"acct:UNKNOWN@{group.authority}", status=404)
 
     def test_with_invalid_userid(self, do_request):
-        do_request(userid=f"INVALID_USERID", status=404)
+        do_request(userid="INVALID_USERID", status=404)
 
     def test_when_membership_doesnt_exist(self, do_request, factories):
         do_request(userid=factories.User().userid, status=404)

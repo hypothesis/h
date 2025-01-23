@@ -1,5 +1,6 @@
-import pytest
 from _datetime import datetime
+
+import pytest
 from pyramid import security
 
 from h.security import Identity
