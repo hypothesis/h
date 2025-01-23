@@ -54,7 +54,6 @@ def log_deleted_rows(user, model_class, deleted_ids, log_ids=True):
 
 
 class UserDeleteService:
-
     def __init__(self, db, job_queue, user_svc):
         self.db = db
         self.job_queue = job_queue

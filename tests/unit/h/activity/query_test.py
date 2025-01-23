@@ -409,9 +409,9 @@ class TestExecute:
 
     def test_it_returns_each_annotations_incontext_link(self, links, pyramid_request):
         def incontext_link(request, annotation):
-            assert (
-                request == pyramid_request
-            ), "It should always pass the request to incontext_link"
+            assert request == pyramid_request, (
+                "It should always pass the request to incontext_link"
+            )
             # Return a predictable per-annotation value for the incontext link.
             return f"incontext_link_for_annotation_{annotation.id}"
 
@@ -431,9 +431,9 @@ class TestExecute:
 
     def test_it_returns_each_annotations_html_link(self, links, pyramid_request):
         def html_link(request, annotation):
-            assert (
-                request == pyramid_request
-            ), "It should always pass the request to html_link"
+            assert request == pyramid_request, (
+                "It should always pass the request to html_link"
+            )
             # Return a predictable per-annotation value for the html link.
             return f"html_link_for_annotation_{annotation.id}"
 

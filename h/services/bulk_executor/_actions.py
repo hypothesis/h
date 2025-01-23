@@ -246,7 +246,9 @@ class UserUpsertAction(DBAction):
             ],
             upsert=["display_name"],
         ).returning(
-            User.id, User.authority, User._username  # pylint: disable=protected-access  # noqa: SLF001
+            User.id,
+            User.authority,
+            User._username,  # pylint: disable=protected-access  # noqa: SLF001
         )
 
         return self._execute_statement(stmt).fetchall()

@@ -61,7 +61,8 @@ def unique_username(node, value):
     # account with the same username to be registered.
     # Otherwise new accounts could inherit dating belonging to deleted accounts.
     if request.db.scalars(
-        select(models.UserDeletion.id).where(
+        select(models.UserDeletion.id)
+        .where(
             models.UserDeletion.userid
             == format_userid(value, request.default_authority)
         )
@@ -82,7 +83,7 @@ def email_node(**kwargs):
         widget=deform.widget.TextInputWidget(
             template="emailinput", autocomplete="username"
         ),
-        **kwargs
+        **kwargs,
     )
 
 
@@ -123,7 +124,7 @@ def new_password_node(**kwargs):
     return colander.SchemaNode(
         colander.String(),
         validator=validators.Length(min=PASSWORD_MIN_LENGTH),
-        **kwargs
+        **kwargs,
     )
 
 

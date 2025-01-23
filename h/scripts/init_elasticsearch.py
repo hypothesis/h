@@ -7,6 +7,7 @@ Usage:
     python3 -m h.scripts.init_elasticsearch conf/development.ini
 
 """
+
 import argparse
 import os
 

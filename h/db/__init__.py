@@ -11,6 +11,7 @@ application startup.
 Most application code should access the database session using the request
 property `request.db` which is provided by this module.
 """
+
 import logging
 from os import environ
 

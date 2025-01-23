@@ -19,36 +19,36 @@ class TestExceptionFilter:
             raise read_timeout_exception
         except ReadTimeoutError:
             logger.warning("warning", exc_info=True)
-        assert not logger.handlers[
-            0
-        ].handler_called, "Didn't filter out log message when it should have!!"
+        assert not logger.handlers[0].handler_called, (
+            "Didn't filter out log message when it should have!!"
+        )
 
     def test_does_log_if_log_level_mismatch(self, logger, read_timeout_exception):
         try:
             raise read_timeout_exception
         except ReadTimeoutError:
             logger.critical("critical", exc_info=True)
-        assert logger.handlers[
-            0
-        ].handler_called, "Filtered out log message when it shouldn't have!!"
+        assert logger.handlers[0].handler_called, (
+            "Filtered out log message when it shouldn't have!!"
+        )
 
     def test_does_log_if_exception_mismatch(self, logger):
         try:
             raise ValueError("Not a read timeout")
         except ValueError:
             logger.warning("warning", exc_info=True)
-        assert logger.handlers[
-            0
-        ].handler_called, "Filtered out log message when it shouldn't have!!"
+        assert logger.handlers[0].handler_called, (
+            "Filtered out log message when it shouldn't have!!"
+        )
 
     def test_does_log_if_no_exc_info_is_recorded(self, logger, read_timeout_exception):
         try:
             raise read_timeout_exception
         except ReadTimeoutError:
             logger.warning("warning")
-        assert logger.handlers[
-            0
-        ].handler_called, "Filtered out log message when it shouldn't have!!"
+        assert logger.handlers[0].handler_called, (
+            "Filtered out log message when it shouldn't have!!"
+        )
 
     @pytest.fixture
     def read_timeout_exception(self):

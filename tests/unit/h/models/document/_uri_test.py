@@ -96,9 +96,9 @@ class TestCreateOrUpdateDocumentURI:
 
         assert document_uri.created == original_attrs["created"]
         assert document_uri.updated == updated_attrs["updated"]
-        assert (
-            len(db_session.query(DocumentURI).all()) == 1
-        ), "It shouldn't have added any new objects to the db"
+        assert len(db_session.query(DocumentURI).all()) == 1, (
+            "It shouldn't have added any new objects to the db"
+        )
 
     def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(
         self, db_session, doc_uri_attrs

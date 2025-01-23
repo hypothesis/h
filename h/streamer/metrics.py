@@ -25,7 +25,10 @@ def websocket_metrics(queue):
     yield f"{PREFIX}/Alive", 1
 
     yield f"{PREFIX}/Connections/Active", connections_active
-    yield f"{PREFIX}/Connections/Authenticated", connections_active - connections_anonymous
+    yield (
+        f"{PREFIX}/Connections/Authenticated",
+        connections_active - connections_anonymous,
+    )
     yield f"{PREFIX}/Connections/Anonymous", connections_anonymous
 
     yield f"{PREFIX}/WorkQueueSize", queue.qsize()

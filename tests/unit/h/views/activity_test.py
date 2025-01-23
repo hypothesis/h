@@ -1028,7 +1028,10 @@ class TestUserSearchController:
 
     @pytest.fixture
     def controller(
-        self, user, pyramid_request, query  # pylint:disable=unused-argument
+        self,
+        user,
+        pyramid_request,
+        query,  # pylint:disable=unused-argument
     ):
         return activity.UserSearchController(UserContext(user), pyramid_request)
 

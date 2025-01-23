@@ -31,9 +31,7 @@ def _normalise_username(username):
     return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
-class UsernameComparator(
-    Comparator
-):  # pylint: disable=abstract-method,too-many-ancestors
+class UsernameComparator(Comparator):  # pylint: disable=abstract-method,too-many-ancestors
     """
     Custom comparator for :py:attr:`~h.models.user.User.username`.
 
@@ -60,9 +58,7 @@ class UsernameComparator(
         return _normalise_username(self.__clause_element__()).in_(usernames)
 
 
-class UserIDComparator(
-    Comparator
-):  # pylint: disable=abstract-method,too-many-ancestors
+class UserIDComparator(Comparator):  # pylint: disable=abstract-method,too-many-ancestors
     """
     Custom comparator for :py:attr:`~h.models.user.User.userid`.
 

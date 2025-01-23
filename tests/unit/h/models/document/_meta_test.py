@@ -53,9 +53,9 @@ class TestCreateOrUpdateDocumentMeta:
         assert document_meta.updated == updated_attrs["updated"]
         assert document_meta.created == original_attrs["created"]
         assert document_meta.document == original_attrs["document"]
-        assert (
-            len(db_session.query(DocumentMeta).all()) == 1
-        ), "It shouldn't have added any new objects to the db"
+        assert len(db_session.query(DocumentMeta).all()) == 1, (
+            "It shouldn't have added any new objects to the db"
+        )
 
     @pytest.mark.parametrize(
         "doc_title,final_title",
@@ -80,9 +80,7 @@ class TestCreateOrUpdateDocumentMeta:
         document_one = factories.Document()
         document_two = factories.Document()
         existing_document_meta = factories.DocumentMeta(document=document_one)
-        mock_db_session.query.return_value.filter.return_value.one_or_none.return_value = (
-            existing_document_meta
-        )
+        mock_db_session.query.return_value.filter.return_value.one_or_none.return_value = existing_document_meta
 
         create_or_update_document_meta(
             session=mock_db_session, **dict(meta_attrs, document=document_two)
