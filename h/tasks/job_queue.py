@@ -22,3 +22,12 @@ def add_annotations_from_group(name, groupid, tag, force=False, schedule_in=None
     celery.request.find_service(name="queue_service").add_by_group(
         name, groupid, tag, force=force, schedule_in=schedule_in
     )
+
+
+@celery.task
+def add_annotations_by_ids(
+    name, annotation_ids: list[str], tag, force=False, schedule_in=None
+):
+    celery.request.find_service(name="queue_service").add_by_ids(
+        name, annotation_ids, tag, force=force, schedule_in=schedule_in
+    )

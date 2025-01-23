@@ -64,5 +64,13 @@
 
     {{ force_checkbox("reindex_group_force") }}
   {% endcall %}
+
+  {% call reindex_form(heading="Process all by ID", action="reindex_ids") %}
+    <div class="form-group">
+      <label for="annotation_ids">Annotation IDs (one per line)</label>
+      <textarea required class="form-control" name="annotation_ids" id="annotation_ids"></textarea>
+    </div>
+    {{ force_checkbox("reindex_ids_force") }}
+  {% endcall %}
 {% endblock %}
 

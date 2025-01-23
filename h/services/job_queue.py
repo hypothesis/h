@@ -10,7 +10,8 @@ class Priority:
     SINGLE_ITEM = 1
     SINGLE_USER = 100
     SINGLE_GROUP = 100
-    BETWEEN_TIMES = 1000
+    BETWEEN_TIMES = 1_000
+    BY_IDS = 1_000
 
 
 class JobQueueService:
@@ -58,6 +59,20 @@ class JobQueueService:
         """
         where = [Annotation.id == annotation_id]
         self.add_where(name, where, tag, Priority.SINGLE_ITEM, force, schedule_in)
+
+    def add_by_ids(
+        self, name, annotation_ids: list[str], tag, force=False, schedule_in=None
+    ):
+        """
+        Queue annotations by ID.
+
+        :param annotation_ids: List of annotation IDs to be queued, in the
+            application-level URL-safe format
+        """
+        where = [Annotation.id.in_(annotation_ids)]
+        self.add_where(
+            name, where, tag, Priority.BY_IDS, force=force, schedule_in=schedule_in
+        )
 
     def add_by_user(self, name, userid: str, tag, force=False, schedule_in=None):
         """

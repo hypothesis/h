@@ -94,6 +94,28 @@ class TestSearchAdminViews:
         with pytest.raises(NotFoundError, match="Group def456 not found"):
             views.reindex_group()
 
+    def test_queue_annotaions_by_id(self, views, tasks, pyramid_request):
+        pyramid_request.params = {
+            "annotation_ids": """
+            cdff42be-2fc0-11ef-ae06-37653ab647c1
+            zf9Cvi_AEe-uBjdlOrZHwQ
+
+            """,
+            "name": "jobname",
+        }
+
+        views.queue_annotations_by_id()
+
+        tasks.job_queue.add_annotations_by_ids.delay.assert_called_once_with(
+            "jobname",
+            ["zf9Cvi_AEe-uBjdlOrZHwQ", "zf9Cvi_AEe-uBjdlOrZHwQ"],
+            tag="reindex_ids",
+            force=False,
+        )
+        assert pyramid_request.session.peek_flash("success") == [
+            "Began reindexing annotations by ID."
+        ]
+
     @pytest.fixture
     def views(self, pyramid_request, queue_service):
         return SearchAdminViews(pyramid_request)

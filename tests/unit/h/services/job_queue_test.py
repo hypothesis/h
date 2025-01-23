@@ -121,6 +121,27 @@ class TestQueueService:
         where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.id == sentinel.annotation_id)
 
+    def test_add_annotations_by_ids(self, svc, add_where):
+        svc.add_by_ids(
+            sentinel.name,
+            [sentinel.id_1, sentinel.id_2],
+            sentinel.tag,
+            schedule_in=sentinel.schedule_in,
+            force=sentinel.force,
+        )
+
+        add_where.assert_called_once_with(
+            sentinel.name,
+            [Any.instance_of(BinaryExpression)],
+            sentinel.tag,
+            Priority.BY_IDS,
+            force=sentinel.force,
+            schedule_in=sentinel.schedule_in,
+        )
+
+        where = add_where.call_args[0][1]
+        assert where[0].compare(Annotation.id.in_([sentinel.id_1, sentinel.id_2]))
+
     def test_add_annotations_between_times(self, svc, add_where):
         svc.add_between_times(
             sentinel.name,
