@@ -36,9 +36,7 @@ def authclient():
     help="An allowable grant type",
 )
 @click.pass_context
-def add(
-    ctx, name, authority, type_, redirect_uri, grant_type
-):  # pylint:disable=too-many-arguments, too-many-positional-arguments
+def add(ctx, name, authority, type_, redirect_uri, grant_type):  # pylint:disable=too-many-arguments, too-many-positional-arguments
     """Create a new OAuth client."""
     request = ctx.obj["bootstrap"]()
 

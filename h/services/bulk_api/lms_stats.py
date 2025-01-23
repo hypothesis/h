@@ -157,7 +157,7 @@ class BulkLMSStatsService:
             # Include the relevant columnns based on group_by
             *group_by_select_columns[group_by],
             # Always include the counts column
-            *self._count_columns(annos_query)
+            *self._count_columns(annos_query),
         )
 
         # Apply relevant joins

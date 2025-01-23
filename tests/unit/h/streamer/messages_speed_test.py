@@ -38,7 +38,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
 
         millis = diff.seconds * 1000 + diff.microseconds / 1000
         print(
-            f"{action} x {reps}: {millis} ms, {millis/reps} ms/item, {reps/millis*1000} items/sec"
+            f"{action} x {reps}: {millis} ms, {millis / reps} ms/item, {reps / millis * 1000} items/sec"
         )
 
     @pytest.fixture

@@ -158,7 +158,6 @@ class TestUserGroups:
     def test_it_returns_all_user_groups_sorted_by_group_name(
         self, db_session, svc, user, user_groups
     ):
-
         with db_session.no_autoflush:
             user.memberships = [GroupMembership(group=group) for group in user_groups]
 

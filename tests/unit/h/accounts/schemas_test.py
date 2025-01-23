@@ -102,7 +102,7 @@ class TestRegisterSchema:
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "Fred Flintstone"})
         assert exc.value.asdict()["username"] == (
-            "Must have only letters, " "numbers, periods, and " "underscores."
+            "Must have only letters, numbers, periods, and underscores."
         )
 
     def test_it_is_invalid_with_false_privacy_accepted(self, pyramid_request):
@@ -259,7 +259,7 @@ class TestEmailChangeSchema:
             schema.deserialize({"email": "foo@bar.com", "password": "flibble"})
 
         assert exc.value.asdict() == {
-            "email": "Sorry, an account with this " "email address already exists."
+            "email": "Sorry, an account with this email address already exists."
         }
 
     @pytest.fixture

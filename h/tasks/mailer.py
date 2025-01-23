@@ -4,6 +4,7 @@ A module for sending email.
 
 This module defines a Celery task for sending emails in a worker process.
 """
+
 import smtplib
 
 import pyramid_mailer

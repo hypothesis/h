@@ -125,10 +125,10 @@ class TestCreateUpdateAnnotationSchema:
             (
                 {
                     "document": {
-                        "link": [{"href": f"https://example.com?{'LONG'*3000}"}]
+                        "link": [{"href": f"https://example.com?{'LONG' * 3000}"}]
                     }
                 },
-                f"document.link.0.href: 'https://example.com?{'LONG'*3000}' is too long",
+                f"document.link.0.href: 'https://example.com?{'LONG' * 3000}' is too long",
             ),
             (
                 {"document": {"link": [{"href": "http://example.com", "type": False}]}},
@@ -341,7 +341,8 @@ class TestCreateUpdateAnnotationSchema:
         }
 
         def document_uris_from_data(
-            document, claimant  # pylint:disable=unused-argument
+            document,
+            claimant,  # pylint:disable=unused-argument
         ):
             document["new_key"] = "new_value"
             document["top_level_key"] = "new_value"
@@ -371,7 +372,8 @@ class TestCreateUpdateAnnotationSchema:
 
         """
         appstruct = validate(
-            pyramid_request, {"document": {"foo": "bar"}}  # This should be deleted.
+            pyramid_request,
+            {"document": {"foo": "bar"}},  # This should be deleted.
         )
 
         assert "foo" not in appstruct["document"]

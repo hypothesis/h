@@ -11,9 +11,7 @@ class OAuthAuthorizeError(  # pylint: disable=too-many-ancestors
     """An OAuth authorization request failure."""
 
 
-class OAuthTokenError(
-    httpexceptions.HTTPUnauthorized
-):  # pylint: disable=too-many-ancestors
+class OAuthTokenError(httpexceptions.HTTPUnauthorized):  # pylint: disable=too-many-ancestors
     """
     An OAuth token request failure.
 

@@ -67,9 +67,9 @@ class TestNipsaService:
     def test_flag_updates_cache(self, svc, users):
         svc.fetch_all_flagged_userids()
         svc.flag(users["unflagged_user"])
-        users["unflagged_user"].nipsa = (
-            False  # Make sure result below comes from cache.
-        )
+        users[
+            "unflagged_user"
+        ].nipsa = False  # Make sure result below comes from cache.
 
         assert svc.is_flagged(users["unflagged_user"].userid)
 
