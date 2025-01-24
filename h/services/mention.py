@@ -1,8 +1,9 @@
+import logging
 import re
 
-from sqlalchemy.orm import Session
 import sqlalchemy as sa
-import logging
+from sqlalchemy.orm import Session
+
 from h.models import Annotation, Mention
 from h.services.user import UserService
 
@@ -27,7 +28,11 @@ class MentionService:
             sa.delete(Mention).where(Mention.annotation_id == annotation.slim.id)
         )
         for user in users:
-            mention = Mention(annotation_id=annotation.slim.id, user_id=user.id)
+            mention = Mention(
+                annotation_id=annotation.slim.id,
+                user_id=user.id,
+                username=user.username,
+            )
             self._session.add(mention)
 
     @staticmethod

@@ -11,8 +11,8 @@ from h.services.bulk_api import (
     BulkLMSStatsService,
 )
 from h.services.job_queue import JobQueueService
-from h.services.subscription import SubscriptionService
 from h.services.mention import MentionService
+from h.services.subscription import SubscriptionService
 
 
 def includeme(config):  # pragma: no cover
