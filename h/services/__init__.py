@@ -12,6 +12,7 @@ from h.services.bulk_api import (
 )
 from h.services.job_queue import JobQueueService
 from h.services.subscription import SubscriptionService
+from h.services.mention import MentionService
 
 
 def includeme(config):  # pragma: no cover
@@ -43,7 +44,7 @@ def includeme(config):  # pragma: no cover
         "h.services.annotation_write.service_factory", iface=AnnotationWriteService
     )
     config.register_service_factory(
-        "h.services.mention.service_factory", name="mention"
+        "h.services.mention.service_factory", iface=MentionService
     )
 
     # Other services

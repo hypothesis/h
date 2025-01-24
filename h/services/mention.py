@@ -2,11 +2,13 @@ import re
 
 from sqlalchemy.orm import Session
 import sqlalchemy as sa
-
+import logging
 from h.models import Annotation, Mention
 from h.services.user import UserService
 
 USERID_PAT = re.compile(r"data-userid=\"([^\"]+)\"")
+
+logger = logging.getLogger(__name__)
 
 
 class MentionService:
@@ -22,10 +24,10 @@ class MentionService:
         userids = set(self._parse_userids(annotation.text))
         users = self._user_service.fetch_all(userids)
         self._session.execute(
-            sa.delete(Mention).where(Mention.annotation_id == annotation.id)
+            sa.delete(Mention).where(Mention.annotation_id == annotation.slim.id)
         )
         for user in users:
-            mention = Mention(annotation_id=annotation.id, user_id=user.id)
+            mention = Mention(annotation_id=annotation.slim.id, user_id=user.id)
             self._session.add(mention)
 
     @staticmethod

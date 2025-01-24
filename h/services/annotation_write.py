@@ -156,6 +156,8 @@ class AnnotationWriteService:
             force=not update_timestamp,
         )
 
+        self._mention_service.update_mentions(annotation)
+
         return annotation
 
     def hide(self, annotation):
