@@ -42,6 +42,9 @@ def includeme(config):  # pragma: no cover
     config.register_service_factory(
         "h.services.annotation_write.service_factory", iface=AnnotationWriteService
     )
+    config.register_service_factory(
+        "h.services.mention.service_factory", name="mention"
+    )
 
     # Other services
     config.register_service_factory(

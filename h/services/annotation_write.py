@@ -13,6 +13,7 @@ from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
 from h.services.job_queue import JobQueueService
+from h.services.mention import MentionService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 
@@ -29,12 +30,14 @@ class AnnotationWriteService:
         queue_service: JobQueueService,
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
+        mention_service: MentionService,
     ):
         self._db = db_session
         self._has_permission = has_permission
         self._queue_service = queue_service
         self._annotation_read_service = annotation_read_service
         self._annotation_metadata_service = annotation_metadata_service
+        self._mention_service = mention_service
 
     def create_annotation(self, data: dict) -> Annotation:
         """
@@ -87,6 +90,8 @@ class AnnotationWriteService:
             tag="storage.create_annotation",
             schedule_in=60,
         )
+
+        self._mention_service.update_mentions(annotation)
 
         return annotation
 
@@ -281,4 +286,5 @@ def service_factory(_context, request) -> AnnotationWriteService:
         queue_service=request.find_service(name="queue_service"),
         annotation_read_service=request.find_service(AnnotationReadService),
         annotation_metadata_service=request.find_service(AnnotationMetadataService),
+        mention_service=request.find_service(MentionService),
     )
