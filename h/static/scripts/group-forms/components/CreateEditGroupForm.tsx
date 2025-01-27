@@ -3,9 +3,9 @@ import { useContext, useEffect, useId, useState } from 'preact/hooks';
 import {
   Button,
   RadioGroup,
-  LockIcon,
-  GlobeAltIcon,
-  GlobeAltLockIcon,
+  LockFilledIcon,
+  GlobeIcon,
+  GlobeLockIcon,
 } from '@hypothesis/frontend-shared';
 import { Config } from '../config';
 import type { Group } from '../config';
@@ -275,19 +275,19 @@ export default function CreateEditGroupForm({
                 value="private"
                 subtitle="Only members can create and read annotations."
               >
-                <LockIcon /> Private
+                <LockFilledIcon /> Private
               </RadioGroup.Radio>
               <RadioGroup.Radio
                 value="restricted"
                 subtitle="Only members can create annotations, anyone can read them."
               >
-                <GlobeAltLockIcon /> Restricted
+                <GlobeLockIcon /> Restricted
               </RadioGroup.Radio>
               <RadioGroup.Radio
                 value="open"
                 subtitle="Anyone can create and read annotations."
               >
-                <GlobeAltIcon /> Open
+                <GlobeIcon /> Open
               </RadioGroup.Radio>
             </RadioGroup>
           </>
