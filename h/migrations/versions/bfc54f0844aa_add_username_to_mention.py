@@ -16,8 +16,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_constraint(
-        op.f("uq__annotation_metadata__annotation_id"),
-        "annotation_metadata",
-        type_="unique",
-    )
+    op.drop_column("mention", "username")
