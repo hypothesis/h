@@ -1,7 +1,7 @@
 from typing import Iterable, List, Optional
 
 from sqlalchemy import select
-from sqlalchemy.orm import Query, Session, subqueryload
+from sqlalchemy.orm import Query, Session, subqueryload, selectinload
 
 from h.db.types import InvalidUUID
 from h.models import Annotation
@@ -54,7 +54,12 @@ class AnnotationReadService:
         query = query.where(Annotation.id.in_(ids))
 
         if eager_load:
-            query = query.options(*(subqueryload(prop) for prop in eager_load))
+            for prop in eager_load:
+                if isinstance(prop, tuple) and len(prop) == 2:
+                    parent, child = prop
+                    query = query.options(subqueryload(parent).subqueryload(child))
+                else:
+                    query = query.options(subqueryload(prop))
 
         return query
 

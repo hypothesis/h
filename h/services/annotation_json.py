@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from h.models import Annotation, User
+from h.models import Annotation, User, AnnotationSlim
 from h.presenters import DocumentJSONPresenter
 from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits
@@ -146,6 +146,9 @@ class AnnotationJSONService:
         self._flag_service.all_flagged(user, annotation_ids)
         self._flag_service.flag_counts(annotation_ids)
 
+        import logging
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
         annotations = self._annotation_read_service.get_annotations_by_id(
             ids=annotation_ids,
             eager_load=[
@@ -157,14 +160,13 @@ class AnnotationJSONService:
                 # which ultimately depends on group permissions, causing a
                 # group lookup for every annotation without this
                 Annotation.group,
+                # Optimise access to the mentions
+                (Annotation.slim, AnnotationSlim.mentions),
             ],
         )
 
         # Optimise the user service `fetch()` call
         self._user_service.fetch_all([annotation.userid for annotation in annotations])
-
-        # Optimise access to mentions
-        self._mention_service.fetch_all(annotations)
 
         return [self.present_for_user(annotation, user) for annotation in annotations]
 
