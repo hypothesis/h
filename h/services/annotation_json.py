@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from h.models import Annotation, User
 from h.presenters import DocumentJSONPresenter
+from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
 from h.services import MentionService
@@ -75,7 +76,7 @@ class AnnotationJSONService:
                 "target": annotation.target,
                 "document": DocumentJSONPresenter(annotation.document).asdict(),
                 "links": self._links_service.get_all(annotation),
-                # ...
+                "mentions": [MentionJSONPresenter(mention).asdict() for mention in annotation.slim.mentions],
             }
         )
 
