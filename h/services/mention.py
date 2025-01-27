@@ -1,6 +1,7 @@
 import logging
 import re
-from typing import Sequence, Iterable
+from typing import Iterable, Sequence
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
 

@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from h.models import Annotation, User, AnnotationSlim
+from h.models import Annotation, AnnotationSlim, User
 from h.presenters import DocumentJSONPresenter
 from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits
@@ -76,7 +76,10 @@ class AnnotationJSONService:
                 "target": annotation.target,
                 "document": DocumentJSONPresenter(annotation.document).asdict(),
                 "links": self._links_service.get_all(annotation),
-                "mentions": [MentionJSONPresenter(mention).asdict() for mention in annotation.slim.mentions],
+                "mentions": [
+                    MentionJSONPresenter(mention).asdict()
+                    for mention in annotation.slim.mentions
+                ],
             }
         )
 
@@ -147,7 +150,8 @@ class AnnotationJSONService:
         self._flag_service.flag_counts(annotation_ids)
 
         import logging
-        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+        logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
         annotations = self._annotation_read_service.get_annotations_by_id(
             ids=annotation_ids,

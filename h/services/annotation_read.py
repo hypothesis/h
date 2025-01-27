@@ -1,7 +1,7 @@
 from typing import Iterable, List, Optional
 
 from sqlalchemy import select
-from sqlalchemy.orm import Query, Session, subqueryload, selectinload
+from sqlalchemy.orm import Query, Session, selectinload, subqueryload
 
 from h.db.types import InvalidUUID
 from h.models import Annotation

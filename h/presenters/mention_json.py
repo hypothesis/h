@@ -5,6 +5,7 @@ from h.models import Mention
 
 class MentionJSONPresenter:
     """Present a mention in the JSON format returned by API requests."""
+
     def __init__(self, mention: Mention):
         self._mention = mention
 
