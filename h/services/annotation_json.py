@@ -149,10 +149,6 @@ class AnnotationJSONService:
         self._flag_service.all_flagged(user, annotation_ids)
         self._flag_service.flag_counts(annotation_ids)
 
-        import logging
-
-        logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
-
         annotations = self._annotation_read_service.get_annotations_by_id(
             ids=annotation_ids,
             eager_load=[
