@@ -17,7 +17,7 @@ class Mention(Base, Timestamps):  # pragma: nocover
         nullable=False,
     )
     """FK to annotation_slim.id"""
-    annotation = sa.orm.relationship("AnnotationSlim")
+    annotation = sa.orm.relationship("AnnotationSlim", back_populates="mentions")
 
     user_id: Mapped[int] = mapped_column(
         sa.Integer,
