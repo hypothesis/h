@@ -52,7 +52,7 @@
     "diff": "^7.0.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-preact-pure": "^4.1.0",
-    "eslint": "^9.13.0",
+    "eslint": "^9.18.0",
     "eslint-config-hypothesis": "^3.1.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-mocha": "^10.5.0",
