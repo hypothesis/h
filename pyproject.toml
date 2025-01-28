@@ -82,6 +82,7 @@ ignore = [
     # >
     # > https://peps.python.org/pep-0257/#multi-line-docstrings
     "D212", "D213",
+    "D203", # incorrect-blank-line-before-class. Incompatible with `no-blank-line-before-class` (D211)
     "E501", # line-too-long (we use the code formatter so we don't need the linter to check line lengths for us).
     "PLR2004", # "Magic value used in comparison", this mostly triggers false-positives related to HTTP status codes.
     "PLR6301", # Method could be a function/classmethod/static method (doesn't use self)
