@@ -227,7 +227,7 @@ class TestAddPreflightView:
 
 
 # A tiny WSGI application used for testing the middleware
-def wsgi_testapp(environ, start_response):
+def wsgi_testapp(environ, start_response):  # noqa: ARG001
     start_response("200 OK", [("Content-Type", "text/plain")])
     return ["OK"]
 

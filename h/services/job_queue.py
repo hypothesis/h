@@ -19,7 +19,7 @@ class JobQueueService:
         self._db = db
 
     def get(self, name, limit):
-        now = datetime.utcnow()
+        now = datetime.utcnow()  # noqa: DTZ003
 
         query = self._db.query(Job).filter(
             Job.name == name, Job.expires_at >= now, Job.scheduled_at < now
@@ -36,7 +36,7 @@ class JobQueueService:
         for job in jobs:
             self._db.delete(job)
 
-    def add_between_times(self, name, start_time, end_time, tag, force=False):
+    def add_between_times(self, name, start_time, end_time, tag, force=False):  # noqa: FBT002
         """
         Queue all annotations between two times.
 
@@ -48,7 +48,7 @@ class JobQueueService:
         where = [Annotation.updated >= start_time, Annotation.updated <= end_time]
         self.add_where(name, where, tag, Priority.BETWEEN_TIMES, force)
 
-    def add_by_id(self, name, annotation_id, tag, force=False, schedule_in=None):
+    def add_by_id(self, name, annotation_id, tag, force=False, schedule_in=None):  # noqa: FBT002
         """
         Queue an annotation.
 
@@ -61,7 +61,12 @@ class JobQueueService:
         self.add_where(name, where, tag, Priority.SINGLE_ITEM, force, schedule_in)
 
     def add_by_ids(
-        self, name, annotation_ids: list[str], tag, force=False, schedule_in=None
+        self,
+        name,
+        annotation_ids: list[str],
+        tag,
+        force=False,  # noqa: FBT002
+        schedule_in=None,
     ):
         """
         Queue annotations by ID.
@@ -74,7 +79,7 @@ class JobQueueService:
             name, where, tag, Priority.BY_IDS, force=force, schedule_in=schedule_in
         )
 
-    def add_by_user(self, name, userid: str, tag, force=False, schedule_in=None):
+    def add_by_user(self, name, userid: str, tag, force=False, schedule_in=None):  # noqa: FBT002
         """
         Queue all a user's annotations.
 
@@ -85,7 +90,7 @@ class JobQueueService:
         where = [Annotation.userid == userid]
         self.add_where(name, where, tag, Priority.SINGLE_USER, force, schedule_in)
 
-    def add_by_group(self, name, groupid: str, tag, force=False, schedule_in=None):
+    def add_by_group(self, name, groupid: str, tag, force=False, schedule_in=None):  # noqa: FBT002
         """
         Queue all annotations in a group.
 
@@ -96,13 +101,13 @@ class JobQueueService:
         where = [Annotation.groupid == groupid]
         self.add_where(name, where, tag, Priority.SINGLE_GROUP, force, schedule_in)
 
-    def add_where(
+    def add_where(  # noqa: PLR0913
         self,
         name,
         where,
         tag,
         priority,
-        force=False,
+        force=False,  # noqa: FBT002
         schedule_in=None,
     ):
         """
@@ -122,7 +127,7 @@ class JobQueueService:
             until at least `schedule_in` seconds from now
         """
         where_clause = and_(*where) if len(where) > 1 else where[0]
-        schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)
+        schedule_at = datetime.utcnow() + timedelta(seconds=schedule_in or 0)  # noqa: DTZ003
 
         query = Job.__table__.insert().from_select(
             [Job.name, Job.scheduled_at, Job.priority, Job.tag, Job.kwargs],

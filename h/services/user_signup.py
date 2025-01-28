@@ -37,7 +37,7 @@ class UserSignupService:
         self.password_service = password_service
         self.subscription_service = subscription_service
 
-    def signup(self, require_activation: bool = True, **kwargs) -> User:
+    def signup(self, require_activation: bool = True, **kwargs) -> User:  # noqa: FBT001, FBT002
         """
         Create a new user.
 
@@ -97,13 +97,13 @@ class UserSignupService:
                         "concurrent account signup conflict error occurred during user signup %s",
                         err.args[0],
                     )
-                    raise ConflictError(
-                        f"The email address {user.email} has already been registered."
+                    raise ConflictError(  # noqa: TRY003
+                        f"The email address {user.email} has already been registered."  # noqa: EM102
                     ) from err
                 # If the exception is not related to the email or username, re-raise it.
                 raise
 
-        # FIXME: this is horrible, but is needed until the
+        # FIXME: this is horrible, but is needed until the  # noqa: FIX001, TD001, TD002, TD003
         # notification/subscription system is made opt-out rather than opt-in
         # (at least from the perspective of the database).
         for subscription in self.subscription_service.get_all_subscriptions(

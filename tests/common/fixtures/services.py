@@ -44,7 +44,6 @@ from h.services.user_unique import UserUniqueService
 from h.services.user_update import UserUpdateService
 
 __all__ = (
-    "mock_service",
     "analytics_service",
     "annotation_delete_service",
     "annotation_json_service",
@@ -59,8 +58,6 @@ __all__ = (
     "bulk_group_service",
     "bulk_stats_service",
     "developer_token_service",
-    "links_service",
-    "list_organizations_service",
     "flag_service",
     "group_create_service",
     "group_delete_service",
@@ -69,18 +66,21 @@ __all__ = (
     "group_members_service",
     "group_service",
     "group_update_service",
-    "nipsa_service",
+    "links_service",
+    "list_organizations_service",
+    "mock_service",
     "moderation_service",
+    "nipsa_service",
     "oauth_provider_service",
     "organization_service",
-    "search_index",
     "queue_service",
+    "search_index",
     "subscription_service",
     "url_migration_service",
     "user_delete_service",
     "user_password_service",
-    "user_service",
     "user_password_service",
+    "user_service",
     "user_signup_service",
     "user_unique_service",
     "user_update_service",
@@ -89,7 +89,7 @@ __all__ = (
 
 @pytest.fixture
 def mock_service(pyramid_config):
-    def mock_service(service_class, name=None, iface=None, spec_set=True, **kwargs):
+    def mock_service(service_class, name=None, iface=None, spec_set=True, **kwargs):  # noqa: FBT002
         service = create_autospec(
             service_class, instance=True, spec_set=spec_set, **kwargs
         )

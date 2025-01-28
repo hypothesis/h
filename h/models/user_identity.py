@@ -15,6 +15,4 @@ class UserIdentity(Base):
     )
 
     def __repr__(self):
-        return "{}(provider={!r}, provider_unique_id={!r})".format(
-            self.__class__.__name__, self.provider, self.provider_unique_id
-        )
+        return f"{self.__class__.__name__}(provider={self.provider!r}, provider_unique_id={self.provider_unique_id!r})"

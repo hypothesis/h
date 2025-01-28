@@ -49,7 +49,7 @@ class AnnotationStatsService:
         params = MultiDict({"limit": 0, "group": pubid})
         return self._search(params)
 
-    def total_group_annotation_count(self, pubid, unshared=True):
+    def total_group_annotation_count(self, pubid, unshared=True):  # noqa: FBT002
         """
         Return the count of all annotations for a group.
 

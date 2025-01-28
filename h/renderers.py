@@ -32,7 +32,7 @@ class SVGRenderer:
         # file to user agents that don't support compression, or vice-versa.
         if response.vary:
             if "Accept-Encoding" not in response.vary:
-                response.vary = response.vary + ("Accept-Encoding",)
+                response.vary = response.vary + ("Accept-Encoding",)  # noqa: RUF005
         else:
             response.vary = ("Accept-Encoding",)
 

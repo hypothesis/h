@@ -108,7 +108,7 @@ class TestPatchProfile:
         assert res.status_code == 200
 
     def test_it_raises_http_404_if_unauthenticated(self, app):
-        # FIXME: This should return a 403
+        # FIXME: This should return a 403  # noqa: FIX001, TD001, TD002, TD003
         profile = {"preferences": {"show_sidebar_tutorial": False}}
 
         res = app.patch_json("/api/profile", profile, expect_errors=True)

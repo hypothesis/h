@@ -24,7 +24,7 @@ class TestIncludeMe:
     def pyramid_config(self, pyramid_config):
         # Mock out jinja2 related stuff
         pyramid_config.get_jinja2_environment = mock.create_autospec(
-            # pragma: nocover
+            # pragma: nocover  # noqa: ERA001
             spec=lambda: JinjaEnvironment()
         )
 
@@ -36,12 +36,12 @@ class TestIncludeMe:
         )
 
         pyramid_config.add_jinja2_extension = mock.create_autospec(
-            lambda name: True
+            lambda name: True  # noqa: ARG005
         )  # pragma: nocover
 
         # Prevent us from really loading the includes
         pyramid_config.include = mock.create_autospec(
-            lambda name: True
+            lambda name: True  # noqa: ARG005
         )  # pragma: nocover
 
         return pyramid_config

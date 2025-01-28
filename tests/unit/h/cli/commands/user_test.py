@@ -25,7 +25,7 @@ class TestAddCommand:
         user_signup_service.signup.assert_called_with(
             username="admin",
             email="admin@localhost",
-            password="admin",
+            password="admin",  # noqa: S106
             require_activation=False,
         )
 
@@ -51,7 +51,7 @@ class TestAddCommand:
         user_signup_service.signup.assert_called_with(
             username="admin",
             email="admin@localhost",
-            password="admin",
+            password="admin",  # noqa: S106
             authority="publisher.org",
             require_activation=False,
         )

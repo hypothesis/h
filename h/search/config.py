@@ -105,7 +105,7 @@ ANALYSIS_SETTINGS = {
 }
 
 
-def init(client, check_icu_plugin=True):
+def init(client, check_icu_plugin=True):  # noqa: FBT002
     """Initialise Elasticsearch, creating necessary indices and aliases."""
     # Ensure the ICU analysis plugin is installed
     if check_icu_plugin:
@@ -151,11 +151,11 @@ def get_aliased_index(client):
     except elasticsearch.exceptions.NotFoundError:  # no alias with that name
         return None
     if len(result) > 1:
-        raise RuntimeError(
-            "We don't support managing aliases that "
+        raise RuntimeError(  # noqa: TRY003
+            "We don't support managing aliases that "  # noqa: EM101
             "point to multiple indices at the moment!"
         )
-    return list(result.keys())[0]
+    return list(result.keys())[0]  # noqa: RUF015
 
 
 def update_aliased_index(client, new_target):
@@ -167,8 +167,8 @@ def update_aliased_index(client, new_target):
     """
     old_target = get_aliased_index(client)
     if old_target is None:
-        raise RuntimeError(
-            "Cannot update aliased index for index that is not already aliased."
+        raise RuntimeError(  # noqa: TRY003
+            "Cannot update aliased index for index that is not already aliased."  # noqa: EM101
         )
 
     client.conn.indices.update_aliases(

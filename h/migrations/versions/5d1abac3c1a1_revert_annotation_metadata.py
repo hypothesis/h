@@ -13,4 +13,3 @@ def upgrade():
 
 def downgrade():
     """No downgrade, see orignal migration 5d1abac3c1a1."""
-    pass

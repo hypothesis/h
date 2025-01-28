@@ -11,7 +11,7 @@ TIMEZONE = datetime.timezone(offset=datetime.timedelta(hours=1), name="Berlin")
     "date,expected",
     (
         (
-            datetime.datetime(2016, 2, 24, 18, 3, 25, 7685),
+            datetime.datetime(2016, 2, 24, 18, 3, 25, 7685),  # noqa: DTZ001
             "2016-02-24T18:03:25.007685+00:00",
         ),
         # We ignore timezones
@@ -27,5 +27,5 @@ def test_utc_iso8601(date, expected):
 
 
 def test_utc_us_style_date():
-    t = datetime.datetime(2016, 2, 4)
+    t = datetime.datetime(2016, 2, 4)  # noqa: DTZ001
     assert utc_us_style_date(t) == "February 4, 2016"

@@ -48,8 +48,14 @@ class DocumentMeta(Base, mixins.Timestamps):
         return f"<DocumentMeta {self.id}>"
 
 
-def create_or_update_document_meta(
-    session, claimant, type, value, document, created, updated
+def create_or_update_document_meta(  # noqa: PLR0913
+    session,
+    claimant,
+    type,  # noqa: A002
+    value,
+    document,
+    created,
+    updated,
 ):
     """
     Create or update a DocumentMeta with the given parameters.
@@ -103,7 +109,7 @@ def create_or_update_document_meta(
     else:
         existing_dm.value = value
         existing_dm.updated = updated
-        if not existing_dm.document == document:
+        if not existing_dm.document == document:  # noqa: SIM201
             log.warning(
                 "Found DocumentMeta (id: %s)'s document_id (%s) doesn't "
                 "match given Document's id (%s)",
@@ -118,4 +124,4 @@ def create_or_update_document_meta(
     try:
         session.flush()
     except sa.exc.IntegrityError as err:
-        raise ConcurrentUpdateError("concurrent document meta updates") from err
+        raise ConcurrentUpdateError("concurrent document meta updates") from err  # noqa: EM101, TRY003

@@ -32,7 +32,7 @@ class TestOAuthAuthorizeController:
             InvalidRequestFatalError("boom!")
         )
 
-        with pytest.raises(OAuthAuthorizeError) as exc:
+        with pytest.raises(OAuthAuthorizeError) as exc:  # noqa: PT012
             view = getattr(controller, view_name)
             view()
 
@@ -42,7 +42,7 @@ class TestOAuthAuthorizeController:
     def test_get_redirects_to_login_when_not_authenticated(
         self, controller, pyramid_request, view_name
     ):
-        with pytest.raises(httpexceptions.HTTPFound) as exc:
+        with pytest.raises(httpexceptions.HTTPFound) as exc:  # noqa: PT012
             view = getattr(controller, view_name)
             view()
 
@@ -147,7 +147,7 @@ class TestOAuthAuthorizeController:
         self, controller, pyramid_request, authenticated_user, view_name
     ):
         pyramid_request.url = (
-            "http://example.com/auth?client_id=the-client-id"
+            "http://example.com/auth?client_id=the-client-id"  # noqa: ISC003
             + "&response_type=code"
             + "&state=foobar"
             + "&scope=exploit"
@@ -169,7 +169,7 @@ class TestOAuthAuthorizeController:
             InvalidRequestFatalError("boom!")
         )
 
-        with pytest.raises(OAuthAuthorizeError) as exc:
+        with pytest.raises(OAuthAuthorizeError) as exc:  # noqa: PT012
             view = getattr(controller, view_name)
             view()
 
@@ -355,7 +355,7 @@ class TestOAuthRevocationController:
     @pytest.fixture
     def controller(self, pyramid_request):
         pyramid_request.method = "POST"
-        pyramid_request.POST["token"] = "the-token"
+        pyramid_request.POST["token"] = "the-token"  # noqa: S105
         pyramid_request.headers = {"X-Test-ID": "1234"}
         return views.OAuthRevocationController(pyramid_request)
 
@@ -411,8 +411,8 @@ class TestDebugToken:
     def oauth_token(self, factories, auth_token_service):
         oauth_token = factories.DeveloperToken(
             authclient=factories.AuthClient(),
-            expires=datetime.datetime(2001, 11, 30, 17, 45, 50),
-            created=datetime.datetime(2000, 10, 16, 15, 51, 59),
+            expires=datetime.datetime(2001, 11, 30, 17, 45, 50),  # noqa: DTZ001
+            created=datetime.datetime(2000, 10, 16, 15, 51, 59),  # noqa: DTZ001
         )
 
         auth_token_service.fetch.return_value = oauth_token

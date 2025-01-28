@@ -19,7 +19,7 @@ def upgrade():
     op.execute(
         annotation.update()
         .where(annotation.c.deleted == None)  # noqa: E711
-        .values(deleted=False)  # noqa: E711
+        .values(deleted=False)
     )
 
 

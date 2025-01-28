@@ -49,7 +49,7 @@ def upgrade():
     ).all()
 
     op.execute(delete(Token).where(Token.userid.in_(userids)))
-    log.info(f"Deleted %d orphaned tokens", len(userids))  # noqa: F541
+    log.info(f"Deleted %d orphaned tokens", len(userids))  # noqa: F541, G004
 
 
 def downgrade():

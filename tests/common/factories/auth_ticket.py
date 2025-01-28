@@ -20,7 +20,7 @@ class AuthTicket(ModelFactory):
     )
     user = factory.SubFactory(User)
     expires = factory.LazyAttribute(
-        lambda _: (datetime.utcnow() + timedelta(minutes=10))
+        lambda _: (datetime.utcnow() + timedelta(minutes=10))  # noqa: DTZ003
     )
 
     @factory.lazy_attribute

@@ -40,7 +40,7 @@ class TestSignupController:
         user_signup_service.signup.assert_called_with(
             username="bob",
             email="bob@example.com",
-            password="s3crets",
+            password="s3crets",  # noqa: S106
             privacy_accepted=datetime.datetime.utcnow.return_value,
             comms_opt_in=True,
         )

@@ -127,7 +127,7 @@ class TestBulk:
         ]
 
         for i in range(group_count):
-            commands.append(
+            commands.append(  # noqa: PERF401
                 CommandBuilder.group.upsert(
                     {
                         "authority": self.AUTHORITY,
@@ -139,7 +139,7 @@ class TestBulk:
             )
 
         for i in range(group_count):
-            commands.append(
+            commands.append(  # noqa: PERF401
                 CommandBuilder.group_membership.create("user_ref", f"group_ref_{i}")
             )
 
@@ -158,7 +158,7 @@ class TestBulk:
 
     @pytest.fixture(params=[None, "token", "non_lms_auth"])
     def bad_header(self, request, token_auth_header, auth_header):
-        yield {"token": token_auth_header, "non_lms_auth": auth_header}.get(
+        yield {"token": token_auth_header, "non_lms_auth": auth_header}.get(  # noqa: PT022
             request.param, request.param
         )
 

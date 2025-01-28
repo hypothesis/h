@@ -98,7 +98,7 @@ class JWTAuthorizationGrant(GrantTypeBase):
         try:
             assertion = request.assertion
         except AttributeError as err:
-            raise errors.InvalidRequestFatalError("Missing assertion.") from err
+            raise errors.InvalidRequestFatalError("Missing assertion.") from err  # noqa: EM101, TRY003
 
         token = JWTGrantToken(assertion)
 
@@ -119,13 +119,13 @@ class JWTAuthorizationGrant(GrantTypeBase):
 
         user = self.user_svc.fetch(verified_token.subject)
         if user is None:
-            raise errors.InvalidGrantError(
-                "Grant token subject (sub) could not be found."
+            raise errors.InvalidGrantError(  # noqa: TRY003
+                "Grant token subject (sub) could not be found."  # noqa: EM101
             )
 
         if user.authority != authclient.authority:
-            raise errors.InvalidGrantError(
-                "Grant token subject (sub) does not match issuer (iss)."
+            raise errors.InvalidGrantError(  # noqa: TRY003
+                "Grant token subject (sub) does not match issuer (iss)."  # noqa: EM101
             )
 
         request.user = user

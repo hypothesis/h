@@ -36,7 +36,7 @@ def authclient():
     help="An allowable grant type",
 )
 @click.pass_context
-def add(ctx, name, authority, type_, redirect_uri, grant_type):
+def add(ctx, name, authority, type_, redirect_uri, grant_type):  # noqa: PLR0913
     """Create a new OAuth client."""
     request = ctx.obj["bootstrap"]()
 

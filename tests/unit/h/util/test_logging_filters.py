@@ -8,7 +8,7 @@ from h.util.logging_filters import ExceptionFilter
 
 class TestExceptionFilter:
     def test_raises_if_invalid_level_name(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             ExceptionFilter((("ReadTimeoutError", "WARNI"),))
 
     def test_specify_level_as_int(self):
@@ -34,7 +34,7 @@ class TestExceptionFilter:
 
     def test_does_log_if_exception_mismatch(self, logger):
         try:
-            raise ValueError("Not a read timeout")
+            raise ValueError("Not a read timeout")  # noqa: EM101, TRY003, TRY301
         except ValueError:
             logger.warning("warning", exc_info=True)
         assert logger.handlers[0].handler_called, (
@@ -62,10 +62,10 @@ def logger():
     class TestHandler(logging.Handler):
         handler_called = False
 
-        def emit(self, record):
+        def emit(self, record):  # noqa: ARG002
             self.handler_called = True
 
-    log = logging.Logger("test_logger")
+    log = logging.Logger("test_logger")  # noqa: LOG001
     log.addHandler(TestHandler())
     log.addFilter(ExceptionFilter((("ReadTimeoutError", "WARNING"),)))
     return log

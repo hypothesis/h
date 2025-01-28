@@ -31,8 +31,8 @@ class UserRenameService:
             self.session, new_username, user.authority
         )
         if existing_user and existing_user != user:
-            raise UserRenameError(
-                f'Another user already has the username "{new_username}"'
+            raise UserRenameError(  # noqa: TRY003
+                f'Another user already has the username "{new_username}"'  # noqa: EM102
             )
 
         return True

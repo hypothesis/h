@@ -1,4 +1,4 @@
-import datetime
+import datetime  # noqa: A005
 
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
@@ -65,7 +65,7 @@ class Token(Base, mixins.Timestamps):
     def expired(self):
         """Return True if this access token has expired, False otherwise."""
         if self.expires:
-            return datetime.datetime.utcnow() > self.expires
+            return datetime.datetime.utcnow() > self.expires  # noqa: DTZ003
 
         return False
 
@@ -73,7 +73,7 @@ class Token(Base, mixins.Timestamps):
     def refresh_token_expired(self):
         """Return True if this refresh token has expired, False otherwise."""
         if self.refresh_token_expires:
-            return datetime.datetime.utcnow() > self.refresh_token_expires
+            return datetime.datetime.utcnow() > self.refresh_token_expires  # noqa: DTZ003
 
         return False
 
@@ -83,7 +83,7 @@ class Token(Base, mixins.Timestamps):
         if not self.expires:
             return None
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()  # noqa: DTZ003
         ttl = self.expires - now
         ttl_in_seconds = ttl.total_seconds()
         # We truncate (rather than round) ttl_in_seconds to get an int.

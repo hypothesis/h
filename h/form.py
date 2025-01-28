@@ -87,7 +87,7 @@ def configure_environment(config):  # pragma: no cover
     config.registry[ENVIRONMENT_KEY] = create_environment(base)
 
 
-def handle_form_submission(request, form, on_success, on_failure, flash_success=True):
+def handle_form_submission(request, form, on_success, on_failure, flash_success=True):  # noqa: FBT002
     """
     Handle the submission of the given form in a standard way.
 

@@ -8,7 +8,7 @@ from h.search import index
 from h.util import uri
 
 
-class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024, SLOT002
     pass
 
 

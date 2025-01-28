@@ -16,8 +16,8 @@ __all__ = (
     "DocumentJSONPresenter",
     "DocumentSearchIndexPresenter",
     "GroupJSONPresenter",
-    "GroupsJSONPresenter",
-    "UserJSONPresenter",
     "GroupMembershipJSONPresenter",
+    "GroupsJSONPresenter",
     "TrustedUserJSONPresenter",
+    "UserJSONPresenter",
 )

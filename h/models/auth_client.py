@@ -40,7 +40,7 @@ class GrantType(enum.Enum):
 
     #: Resource owner credentials grant. Can be used by trusted clients that
     #: are allowed to ask users for their login credentials directly.
-    password = "password"
+    password = "password"  # noqa: S105
 
 
 class ResponseType(enum.Enum):
@@ -56,7 +56,7 @@ class ResponseType(enum.Enum):
 
     #: "Implicit" grant, in which an authorization request receives an access
     #: token directly.
-    token = "token"
+    token = "token"  # noqa: S105
 
 
 class AuthClient(Base, Timestamps):

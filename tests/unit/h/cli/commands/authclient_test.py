@@ -28,7 +28,7 @@ class TestAddCommand:
 
         assert authclient.authority == "publisher.org"
         assert authclient.name == "Publisher"
-        assert authclient.secret == "fixed-secret-token"
+        assert authclient.secret == "fixed-secret-token"  # noqa: S105
 
     def test_it_prints_the_id_for_public_client(self, cli, cliconfig, db_session):
         (authclient, output) = self._add_authclient(

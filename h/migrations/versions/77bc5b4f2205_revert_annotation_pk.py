@@ -15,4 +15,3 @@ def upgrade():
 
 def downgrade():
     """No downgrade, check version f064c2b2e04a."""
-    pass

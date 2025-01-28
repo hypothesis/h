@@ -28,7 +28,7 @@ def auth_header_for_authority(db_session, factories):
         )
         db_session.commit()
 
-        user_pass = f"{auth_client.id}:{auth_client.secret}".encode("utf-8")
+        user_pass = f"{auth_client.id}:{auth_client.secret}".encode()
         encoded = base64.standard_b64encode(user_pass).decode("ascii")
         return {"Authorization": f"Basic {encoded}"}
 

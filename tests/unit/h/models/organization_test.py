@@ -24,12 +24,12 @@ def test_null_logo():
 
 
 def test_too_short_name_raises_value_error():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         models.Organization(name="")
 
 
 def test_too_long_name_raises_value_error():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         models.Organization(name="abcdefghijklmnopqrstuvwxyz")
 
 

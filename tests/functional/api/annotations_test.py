@@ -83,7 +83,7 @@ class TestGetAnnotationJSONLD:
 
 class TestPostAnnotation:
     def test_it_returns_http_404_if_unauthorized(self, app):
-        # FIXME: This should return a 403
+        # FIXME: This should return a 403  # noqa: FIX001, TD001, TD002, TD003
 
         # This isn't a valid payload, but it won't get validated because the
         # authorization will fail first
@@ -131,7 +131,7 @@ class TestPostAnnotation:
         assert res.status_code == 400
         assert res.json["reason"].startswith("group:")
 
-    # TODO: This endpoint should return a 201
+    # TODO: This endpoint should return a 201  # noqa: FIX002, TD002, TD003
     def test_it_returns_http_200_when_annotation_created(self, app, user_with_token):
         _, token = user_with_token
 

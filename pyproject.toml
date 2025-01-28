@@ -27,49 +27,9 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "UP",    # pyupgrade
-    "YTT",   # flake8-2020 (checks for misuse of sys.version or sys.version_info
     "ANN",   # flake8-annotations (checks for absence of type annotations on functions)
-    "ASYNC", # flake8-async (checks for asyncio-related problems)
-    "S",     # flake8-bandit (checks for security issues)
-    "FBT",   # flake8-boolean-trap (checks for the "boolean trap" anti-pattern)
-    "B",     # flake8-bugbear (checks for bugs and design problems)
-    "A",     # flake8-builtins (checks for builtins being overridden)
     "CPY",   # flake8-copyright (checks for missing copyright notices)
-    "C4",    # flake8-comprehensions (helps write better list/set/dict comprehensions)
-    "DTZ",   # flake8-datetimez (checks for usages of unsafe naive datetime class)
-    "T10",   # flake8-debugger (checks for set traces etc)
-    "EM",    # flake8-errmsg (checks for error message formatting issues)
-    "EXE",   # flake8-executable (checks for incorrect executable permissions and shebangs)
-    "FA",    # flake8-future-annotations (checks for missing from __future__ import annotations)
-    "ISC",   # flake8-implicit-str-concat (checks for style problems with string literal concatenation)
-    "ICN",   # flake8-import-conventions (checks for unconventional imports and aliases)
-    "LOG",   # flake8-logging (checks for issues with using the logging module)
-    "G",     # flake8-logging-format (enforce usage of `extra` in logging calls)
-    "INP",   # flake8-no-pep420 (checks for missing __init__.py files)
-    "PIE",   # flake8-pie (miscellaneous)
-    "T20",   # flake8-print (checks for print and pprint statements)
-    "PT",    # flake8-pytest-style (checks for common pytest style and consistency issues)
-    "RSE",   # flake8-raise (checks for issues with raising exceptions)
-    "RET",   # flake8-return (checks for issues with return values)
-    "SLOT",  # flake8-slots (requires __slots__ in subclasses of immutable types)
-    "SIM",   # flake8-simplify (lots of code simplification checks)
-    "TID",   # flake8-tidy-imports (checks for issues with imports)
-    "TC",    # flake8-type-checking (checks for type checking imports that aren't in TYPE_CHECKING blocks)
-    "ARG",   # flake8-unused-arguments (checks for unused arguments)
-    "PTH",   # flake8-use-pathlib (checks for cases with pathlib could be used but isn't)
-    "TD",    # flake8-todos (enforces good style for "# TODO" comments)
-    "FIX",   # flake8-fixme (checks for FIXMEs, TODOs, HACKs, etc)
-    "ERA",   # eradicate (checks for commented-out code)
-    "PGH",   # pygrep-hooks (miscellaneous)
-    "PL",    # pylint (miscellaneous rules from pylint)
-    "TRY",   # tryceratops (various try/except-related checks)
-    "FLY",   # flynt (checks for old-style %-formatted strings)
-    "PERF",  # perflint (checks for performance anti-patterns)
-    "FURB",  # refurb (various "refurbishing and modernizing" checks)
-    "DOC",   # pydoclint (docstring checks)
-    "RUF",   # Ruff-specific rules
-    "COM",   # flake8-commas (we used a code formatter so we don't need a linter to check this)
+    "COM",   # flake8-commas (we use a code formatter so we don't need a linter to check this)
     "D100","D101","D102","D103","D104","D105","D106","D107", # Missing docstrings.
     "D202", # "No blank lines allowed after function docstring" conflicts with the Ruff code formatter.
     # "Multi-line docstring summary should start at the first line" (D212)
@@ -101,9 +61,22 @@ ignore = [
     "PLR0913", # Too many arguments. Tests often have lots of arguments.
     "PLR0917", # Too many positional arguments. Tests often have lots of arguments.
     "PLR0904", # Too many public methods. Test classes often have lots of test methods.
+    "S101", # Use of `assert` detected.
+    "PT006", # Enforces a consistent style for the type of the `argnames` parameter to
+             # pytest.mark.parametrize. We have too many pre-existing violations of
+             # this.
+    "PT007", # Enforces a consistent style for the type of the `argvalues` parameter to
+             # pytest.mark.parametrize. We have too many pre-existing violations of
+             # this.
 ]
 "__init__.py" = [
     "F401", # Ignore unused import errors on __init__ files to avoid having to add either a noqa stament or an __all__ declaration.
+]
+"h/migrations/*" = [
+    "INP001",
+]
+"bin/*" = [
+    "INP001",
 ]
 
 [tool.coverage.run]

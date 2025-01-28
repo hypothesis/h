@@ -8,7 +8,7 @@ from h.services.job_queue_metrics import JobQueueMetrics, factory
 
 class TestJobQueue:
     def test_metrics_queue_length(self, factories, job_queue_metrics):
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()  # noqa: DTZ003
         one_minute = datetime.timedelta(minutes=1)
 
         class JobFactory(factories.Job):

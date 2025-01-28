@@ -57,7 +57,7 @@ class UserUniqueService:
             if self.user_service.fetch_by_identity(
                 identity["provider"], identity["provider_unique_id"]
             ):
-                errors.append(
+                errors.append(  # noqa: PERF401
                     _(
                         "user with provider '{}' and unique id '{}' already exists".format(  # noqa: INT002
                             identity["provider"], identity["provider_unique_id"]
