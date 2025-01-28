@@ -267,7 +267,7 @@ class User(Base):
 
     @property
     def is_activated(self):
-        if self.activation_id is None:
+        if self.activation_id is None:  # noqa: SIM103
             return True
 
         return False
@@ -276,7 +276,7 @@ class User(Base):
         """Activate the user by deleting any activation they have."""
         session = sa.orm.object_session(self)
 
-        self.activation_date = datetime.datetime.utcnow()
+        self.activation_date = datetime.datetime.utcnow()  # noqa: DTZ003
         session.delete(self.activation)
 
     #: Hashed password
@@ -335,22 +335,22 @@ class User(Base):
             return email
 
         if len(email) > EMAIL_MAX_LENGTH:
-            raise ValueError(
-                f"email must be less than {EMAIL_MAX_LENGTH} characters long"
+            raise ValueError(  # noqa: TRY003
+                f"email must be less than {EMAIL_MAX_LENGTH} characters long"  # noqa: EM102
             )
         return email
 
     @sa.orm.validates("_username")
     def validate_username(self, _key, username):
         if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
-            raise ValueError(
-                f"username must be between {USERNAME_MIN_LENGTH} and {USERNAME_MAX_LENGTH} "
+            raise ValueError(  # noqa: TRY003
+                f"username must be between {USERNAME_MIN_LENGTH} and {USERNAME_MAX_LENGTH} "  # noqa: EM102
                 "characters long"
             )
 
         if not re.match(USERNAME_PATTERN, username):
-            raise ValueError(
-                "username must have only letters, numbers, periods, and underscores."
+            raise ValueError(  # noqa: TRY003
+                "username must have only letters, numbers, periods, and underscores."  # noqa: EM101
             )
 
         return username

@@ -103,7 +103,7 @@ def stream_user_redirect(request):
 
     # The client generates /u/ links which include the full account ID
     if user.startswith("acct:"):
-        try:
+        try:  # noqa: SIM105
             user = split_user(user)["username"]
         except InvalidUserId:
             # If it's not a valid userid, catch the exception and just treat

@@ -192,7 +192,7 @@ def group_data(org):
 
 @pytest.fixture
 def user_service(user_service, factories):
-    def fetch(username, authority):
+    def fetch(username, authority):  # noqa: ARG001
         if "invalid" in username:
             return False
 

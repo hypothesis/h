@@ -49,7 +49,7 @@ def _feed_item_from_annotation(annotation, annotation_url):
     }
 
 
-def feed_from_annotations(
+def feed_from_annotations(  # noqa: PLR0913
     annotations, annotation_url, rss_url, html_url, title, description
 ):
     """

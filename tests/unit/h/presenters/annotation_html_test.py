@@ -76,7 +76,7 @@ class TestAnnotationHTMLPresenter:
         )
 
     def test_created_day_string_from_annotation(self, annotation, presenter):
-        annotation.created = datetime.datetime(2015, 9, 4, 17, 37, 49, 517852)
+        annotation.created = datetime.datetime(2015, 9, 4, 17, 37, 49, 517852)  # noqa: DTZ001
 
         assert presenter.created_day_string == "2015-09-04"
 

@@ -6,11 +6,11 @@ import pytest
 from h.activity import bucketing
 from tests.common import factories
 
-UTCNOW = datetime.datetime(year=1970, month=2, day=21, hour=19, minute=30)
+UTCNOW = datetime.datetime(year=1970, month=2, day=21, hour=19, minute=30)  # noqa: DTZ001
 FIVE_MINS_AGO = UTCNOW - datetime.timedelta(minutes=5)
 YESTERDAY = UTCNOW - datetime.timedelta(days=1)
-THIRD_MARCH_1968 = datetime.datetime(year=1968, month=3, day=3)
-FIFTH_NOVEMBER_1969 = datetime.datetime(year=1969, month=11, day=5)
+THIRD_MARCH_1968 = datetime.datetime(year=1968, month=3, day=3)  # noqa: DTZ001
+FIFTH_NOVEMBER_1969 = datetime.datetime(year=1969, month=11, day=5)  # noqa: DTZ001
 
 
 class timeframe_with:
@@ -24,7 +24,7 @@ class timeframe_with:
             and self.document_buckets == timeframe.document_buckets
         )
 
-    # pragma: nocover
+    # pragma: nocover  # noqa: ERA001
     def __repr__(self):  # pragma: nocover
         return f'{self.__class__} "{self.label}" with {len(self.document_buckets)} document buckets'  # pragma: nocover
 

@@ -29,8 +29,8 @@ class Organization(Base, mixins.Timestamps):
         if not (
             Organization.NAME_MIN_CHARS <= len(name) <= Organization.NAME_MAX_CHARS
         ):
-            raise ValueError(
-                f"name must be between {Organization.NAME_MIN_CHARS} and {Organization.NAME_MAX_CHARS} characters long"
+            raise ValueError(  # noqa: TRY003
+                f"name must be between {Organization.NAME_MIN_CHARS} and {Organization.NAME_MAX_CHARS} characters long"  # noqa: EM102
             )
         return name
 

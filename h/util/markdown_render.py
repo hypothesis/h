@@ -1,4 +1,4 @@
-from functools import lru_cache, partial
+from functools import cache, partial
 
 import bleach
 from bleach.linkifier import LinkifyFilter
@@ -48,7 +48,7 @@ def render(text):
     # them we'll double escape them.
     text = text.replace("\\(", "\\\\(").replace("\\)", "\\\\)")
 
-    return _get_cleaner().clean((RENDER_MARKDOWN(text)))
+    return _get_cleaner().clean(RENDER_MARKDOWN(text))
 
 
 def _filter_link_attributes(_tag, name, value):
@@ -58,14 +58,14 @@ def _filter_link_attributes(_tag, name, value):
     if name == "target" and value == "_blank":
         return True
 
-    if name == "rel" and value == LINK_REL:
+    if name == "rel" and value == LINK_REL:  # noqa: SIM103
         return True
 
     return False
 
 
-def _linkify_target_blank(attrs, new=False):
-    # FIXME: when bleach>2.0.0 is released we can use
+def _linkify_target_blank(attrs, new=False):  # noqa: FBT002, ARG001
+    # FIXME: when bleach>2.0.0 is released we can use  # noqa: FIX001, TD001, TD002
     # bleach.callbacks.target_blank instead of this function. We have our own
     # copy to work around a bug in 2.0.0:
     #
@@ -83,7 +83,7 @@ def _linkify_target_blank(attrs, new=False):
     return attrs
 
 
-def _linkify_rel(attrs, new=False):
+def _linkify_rel(attrs, new=False):  # noqa: FBT002, ARG001
     href_key = (None, "href")
 
     if href_key not in attrs:
@@ -103,7 +103,7 @@ ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
 ALLOWED_ATTRIBUTES.update(MARKDOWN_ATTRIBUTES)
 
 
-@lru_cache(maxsize=None)
+@cache
 def _get_cleaner():
     linkify_filter = partial(
         LinkifyFilter, callbacks=[_linkify_target_blank, _linkify_rel]

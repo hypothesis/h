@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity
@@ -7,7 +5,7 @@ from h.security.permission_map import PERMISSION_MAP
 
 
 def identity_permits(
-    identity: Optional[Identity], context, permission
+    identity: Identity | None, context, permission
 ) -> Allowed | Denied:
     """
     Check whether a given identity has permission to operate on a context.
@@ -19,7 +17,7 @@ def identity_permits(
     :param context: Context object representing the objects acted upon
     :param permission: Permission requested
     """
-    if clauses := PERMISSION_MAP.get(permission):
+    if clauses := PERMISSION_MAP.get(permission):  # noqa: SIM102
         # Grant the permissions if for *any* single clause...
         if any(
             # .. *all* elements in it are true

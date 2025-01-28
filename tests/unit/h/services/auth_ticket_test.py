@@ -47,7 +47,7 @@ class TestAuthTicketService:
     def test_verify_ticket_returns_None_if_the_ticket_has_expired(
         self, service, auth_ticket
     ):
-        auth_ticket.expires = datetime.utcnow() - timedelta(hours=1)
+        auth_ticket.expires = datetime.utcnow() - timedelta(hours=1)  # noqa: DTZ003
 
         assert service.verify_ticket(auth_ticket.user.userid, auth_ticket.id) is None
 
@@ -63,14 +63,15 @@ class TestAuthTicketService:
     def test_verify_ticket_updates_the_expiry_time(
         self, service, auth_ticket, offset, expect_update
     ):
-        auth_ticket.updated = datetime.utcnow() - offset
+        auth_ticket.updated = datetime.utcnow() - offset  # noqa: DTZ003
         expires = auth_ticket.expires
 
         service.verify_ticket(auth_ticket.user.userid, auth_ticket.id)
 
         if expect_update:
             assert_nearly_equal(
-                auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL
+                auth_ticket.expires,
+                datetime.utcnow() + AuthTicketService.TICKET_TTL,  # noqa: DTZ003
             )
         else:
             assert auth_ticket.expires == expires
@@ -85,7 +86,8 @@ class TestAuthTicketService:
         assert auth_ticket.user_userid == user.userid
         assert auth_ticket.id == "test_ticket_id"
         assert_nearly_equal(
-            auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL
+            auth_ticket.expires,
+            datetime.utcnow() + AuthTicketService.TICKET_TTL,  # noqa: DTZ003
         )
         assert service._ticket == auth_ticket  # noqa: SLF001
         assert inspect(auth_ticket).pending is True

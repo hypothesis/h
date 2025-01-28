@@ -18,8 +18,8 @@ MESSAGE_HANDLERS = {}
 
 
 # An incoming message from a WebSocket client.
-class Message(namedtuple("Message", ["socket", "payload"])):  # noqa: PYI024
-    def reply(self, payload, ok=True):
+class Message(namedtuple("Message", ["socket", "payload"])):  # noqa: PYI024, SLOT002
+    def reply(self, payload, ok=True):  # noqa: FBT002
         """
         Send a response to this message.
 
@@ -28,7 +28,7 @@ class Message(namedtuple("Message", ["socket", "payload"])):  # noqa: PYI024
         """
         reply_to = self.payload.get("id")
         # Short-circuit if message is missing an ID or has a non-numeric ID.
-        if not isinstance(reply_to, (int, float)):
+        if not isinstance(reply_to, (int, float)):  # noqa: UP038
             return
         data = copy.deepcopy(payload)
         data["ok"] = ok
@@ -64,7 +64,7 @@ class WebSocket(_WebSocket):
         self._work_queue = environ["h.ws.streamer_work_queue"]
 
     def __new__(cls, *_args, **_kwargs):
-        instance = super(WebSocket, cls).__new__(cls)
+        instance = super(WebSocket, cls).__new__(cls)  # noqa: UP008
         cls.instances.add(instance)
         return instance
 
@@ -91,7 +91,7 @@ class WebSocket(_WebSocket):
     def closed(self, code, reason=None):
         if self.debug:
             log.info("Closed connection code=%s reason=%s", code, reason)
-        try:
+        try:  # noqa: SIM105
             self.instances.remove(self)
         except KeyError:
             pass
@@ -123,7 +123,7 @@ def handle_message(message, session=None):
     payload = message.payload
     type_ = payload.get("type")
 
-    # FIXME: This code is here to tolerate old and deprecated message formats.
+    # FIXME: This code is here to tolerate old and deprecated message formats.  # noqa: FIX001, TD001, TD002, TD003
     if type_ is None:  # pragma: no cover
         if "messageType" in payload and payload["messageType"] == "client_id":
             type_ = "client_id"
@@ -136,7 +136,7 @@ def handle_message(message, session=None):
     handler(message, session=session)
 
 
-def handle_client_id_message(message, session=None):
+def handle_client_id_message(message, session=None):  # noqa: ARG001
     """Answer to a client telling us its client ID."""
     if "value" not in message.payload:
         message.reply(
@@ -153,7 +153,7 @@ def handle_client_id_message(message, session=None):
 MESSAGE_HANDLERS["client_id"] = handle_client_id_message
 
 
-def handle_filter_message(message, session=None):
+def handle_filter_message(message, session=None):  # noqa: ARG001
     """Answer to a client updating its streamer filter."""
     if "filter" not in message.payload:
         message.reply(
@@ -187,7 +187,7 @@ def handle_filter_message(message, session=None):
 MESSAGE_HANDLERS["filter"] = handle_filter_message
 
 
-def handle_ping_message(message, session=None):
+def handle_ping_message(message, session=None):  # noqa: ARG001
     """Reply to a client requesting a pong."""
     message.reply({"type": "pong"})
 
@@ -195,7 +195,7 @@ def handle_ping_message(message, session=None):
 MESSAGE_HANDLERS["ping"] = handle_ping_message
 
 
-def handle_whoami_message(message, session=None):
+def handle_whoami_message(message, session=None):  # noqa: ARG001
     """Reply to a client requesting information on its auth state."""
 
     message.reply(
@@ -211,7 +211,7 @@ def handle_whoami_message(message, session=None):
 MESSAGE_HANDLERS["whoami"] = handle_whoami_message
 
 
-def handle_unknown_message(message, session=None):
+def handle_unknown_message(message, session=None):  # noqa: ARG001
     """Handle the message type being missing or not recognised."""
     type_ = json.dumps(message.payload.get("type"))
     message.reply(

@@ -10,4 +10,4 @@ def json_payload(request):
     try:
         return request.json_body
     except ValueError as err:
-        raise PayloadError() from err
+        raise PayloadError() from err  # noqa: RSE102

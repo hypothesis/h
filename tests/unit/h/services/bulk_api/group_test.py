@@ -8,7 +8,7 @@ from h.services.bulk_api.group import BulkGroup, BulkGroupService, service_facto
 
 class TestBulkGroupService:
     def test_it(self, svc, factories):
-        since = datetime(2023, 1, 1)
+        since = datetime(2023, 1, 1)  # noqa: DTZ001
         group = factories.Group()
         group_without_annos = factories.Group()
         group_with_annos_in_other_dates = factories.Group()

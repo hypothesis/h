@@ -68,7 +68,7 @@ class TestAnnotationDeleteService:
         ],
     )
     def test_bulk_delete(self, db_session, svc, factories, deleted, mins_ago, purged):
-        updated = datetime.utcnow() - timedelta(minutes=mins_ago)
+        updated = datetime.utcnow() - timedelta(minutes=mins_ago)  # noqa: DTZ003
         annotation = factories.Annotation(deleted=deleted, updated=updated)
         annotation_slim = factories.AnnotationSlim(
             deleted=deleted, updated=updated, annotation=annotation
@@ -96,7 +96,7 @@ def annotation(factories):
 
 
 @pytest.fixture
-def svc(db_session, pyramid_request, annotation_write_service, queue_service):
+def svc(db_session, pyramid_request, annotation_write_service, queue_service):  # noqa: ARG001
     pyramid_request.db = db_session
     return annotation_delete_service_factory({}, pyramid_request)
 

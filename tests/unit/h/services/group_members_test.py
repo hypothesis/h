@@ -141,12 +141,12 @@ class TestGetMemberships:
             GroupMembership(
                 group=group,
                 user=users[0],
-                created=datetime(1970, 1, 1, 0, 0, 1),
+                created=datetime(1970, 1, 1, 0, 0, 1),  # noqa: DTZ001
             ),
             GroupMembership(
                 group=group,
                 user=users[1],
-                created=datetime(1970, 1, 1, 0, 0, 0),
+                created=datetime(1970, 1, 1, 0, 0, 0),  # noqa: DTZ001
             ),
             membership_with_no_created_time(group=group, user=users[3]),
             membership_with_no_created_time(group=group, user=users[2]),
@@ -163,8 +163,8 @@ class TestGetMemberships:
             (None, "user_2"),
             (None, "user_3"),
             # Non-NULLs are ordered by created time, oldest first.
-            (datetime(1970, 1, 1, 0, 0, 0), "user_1"),
-            (datetime(1970, 1, 1, 0, 0, 1), "user_0"),
+            (datetime(1970, 1, 1, 0, 0, 0), "user_1"),  # noqa: DTZ001
+            (datetime(1970, 1, 1, 0, 0, 1), "user_0"),  # noqa: DTZ001
         ]
 
 

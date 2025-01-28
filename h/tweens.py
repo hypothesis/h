@@ -12,7 +12,10 @@ log = logging.getLogger(__name__)
 resolver = DottedNameResolver(None)
 
 
-def conditional_http_tween_factory(handler, registry):  # pragma: no cover
+def conditional_http_tween_factory(
+    handler,
+    registry,  # noqa: ARG001
+):  # pragma: no cover
     """Set up conditional response handling for some requests."""
 
     def conditional_http_tween(request):
@@ -46,7 +49,7 @@ def conditional_http_tween_factory(handler, registry):  # pragma: no cover
     return conditional_http_tween
 
 
-def invalid_path_tween_factory(handler, registry):  # pragma: no cover
+def invalid_path_tween_factory(handler, registry):  # pragma: no cover  # noqa: ARG001
     def invalid_path_tween(request):
         # Due to a bug in WebOb accessing request.path (or request.path_info
         # etc) will raise UnicodeDecodeError if the requested path doesn't
@@ -59,7 +62,7 @@ def invalid_path_tween_factory(handler, registry):  # pragma: no cover
         # https://github.com/Pylons/webob/issues/115
         # https://github.com/hypothesis/h/issues/4915
         try:
-            request.path
+            request.path  # noqa: B018
         except UnicodeDecodeError:
             return httpexceptions.HTTPBadRequest()
 
@@ -68,7 +71,7 @@ def invalid_path_tween_factory(handler, registry):  # pragma: no cover
     return invalid_path_tween
 
 
-def redirect_tween_factory(handler, registry, redirects=None):
+def redirect_tween_factory(handler, registry, redirects=None):  # noqa: ARG001
     if redirects is None:
         # N.B. If we fail to load or parse the redirects file, the application
         # will fail to boot. This is deliberate: a missing/corrupt redirects
@@ -88,7 +91,7 @@ def redirect_tween_factory(handler, registry, redirects=None):
     return redirect_tween
 
 
-def security_header_tween_factory(handler, registry):
+def security_header_tween_factory(handler, registry):  # noqa: ARG001
     """Add security-related headers to every response."""
 
     def security_header_tween(request):
@@ -109,7 +112,7 @@ def security_header_tween_factory(handler, registry):
     return security_header_tween
 
 
-def cache_header_tween_factory(handler, registry):
+def cache_header_tween_factory(handler, registry):  # noqa: ARG001
     """Set default caching headers on responses depending on the content type."""
 
     def cache_header_tween(request):
@@ -124,7 +127,7 @@ def cache_header_tween_factory(handler, registry):
     return cache_header_tween
 
 
-def rollback_db_session_on_exception_factory(handler, registry):
+def rollback_db_session_on_exception_factory(handler, registry):  # noqa: ARG001
     """
     Catch exceptions and rolls the database back.
 

@@ -26,6 +26,6 @@ class AnnotationRoot:
     def __getitem__(self, annotation_id):
         annotation = self._annotation_read_service.get_annotation_by_id(annotation_id)
         if annotation is None:
-            raise KeyError()
+            raise KeyError
 
         return AnnotationContext(annotation)

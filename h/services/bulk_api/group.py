@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
@@ -20,8 +19,8 @@ class BulkGroupService:
         self._db_replica = db_replica
 
     def group_search(
-        self, groups: List[str], annotations_created: dict
-    ) -> List[BulkGroup]:
+        self, groups: list[str], annotations_created: dict
+    ) -> list[BulkGroup]:
         """
         Get a list of groups.
 

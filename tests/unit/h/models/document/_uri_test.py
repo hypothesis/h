@@ -87,7 +87,9 @@ class TestCreateOrUpdateDocumentURI:
     ):
         original_attrs = doc_uri_attrs
         updated_attrs = dict(
-            original_attrs, created=datetime.now(), updated=datetime.now()
+            original_attrs,
+            created=datetime.now(),  # noqa: DTZ005
+            updated=datetime.now(),  # noqa: DTZ005
         )
         document_uri = DocumentURI(**original_attrs)
         db_session.add(document_uri)
@@ -105,7 +107,9 @@ class TestCreateOrUpdateDocumentURI:
     ):
         original_attrs = doc_uri_attrs
         updated_attrs = dict(
-            original_attrs, created=datetime.now(), updated=datetime.now()
+            original_attrs,
+            created=datetime.now(),  # noqa: DTZ005
+            updated=datetime.now(),  # noqa: DTZ005
         )
         # Add one non-matching DocumentURI to the database.
         db_session.add(DocumentURI(**dict(original_attrs, content_type="different")))
@@ -154,7 +158,7 @@ class TestCreateOrUpdateDocumentURI:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(ConcurrentUpdateError):
+        with pytest.raises(ConcurrentUpdateError):  # noqa: SIM117
             with db_session.no_autoflush:  # prevent premature IntegrityError
                 create_or_update_document_uri(session=db_session, **doc_uri_attrs)
 
@@ -166,11 +170,11 @@ class TestCreateOrUpdateDocumentURI:
             "type": "self-claim",
             "content_type": "",
             "document": Document(),
-            "created": datetime.now() - timedelta(days=1),
-            "updated": datetime.now() - timedelta(days=1),
+            "created": datetime.now() - timedelta(days=1),  # noqa: DTZ005
+            "updated": datetime.now() - timedelta(days=1),  # noqa: DTZ005
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_db_session(self, db_session):
         return Mock(spec=db_session)
 

@@ -5,7 +5,7 @@ class OrganizationJSONPresenter:
         self.request = request
         self.organization = organization
 
-    def asdict(self, summary=False):
+    def asdict(self, summary=False):  # noqa: FBT002
         """
         Create a dict of the organization.
 

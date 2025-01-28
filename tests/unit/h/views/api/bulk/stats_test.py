@@ -29,7 +29,7 @@ class TestBulkGroup:
                 annotations=i,
                 replies=i,
                 page_notes=i,
-                last_activity=datetime.now(),
+                last_activity=datetime.now(),  # noqa: DTZ005
             )
             for i in range(3)
         ]

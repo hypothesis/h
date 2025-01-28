@@ -209,8 +209,8 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
 
 @requires(authenticated_user, group_found)
-def group_member_edit(identity, context: EditGroupMembershipContext):
-    assert context.new_roles is not None, (
+def group_member_edit(identity, context: EditGroupMembershipContext):  # noqa: PLR0911
+    assert context.new_roles is not None, (  # noqa: S101
         "new_roles must be set before checking permissions"
     )
 
@@ -247,7 +247,7 @@ def group_member_edit(identity, context: EditGroupMembershipContext):
     if GroupMembershipRoles.ADMIN in authenticated_users_roles:
         # Admins can change the role of anyone but owners or admins to anything
         # but owner or admin.
-        if (
+        if (  # noqa: SIM103
             GroupMembershipRoles.OWNER in old_roles + new_roles
             or GroupMembershipRoles.ADMIN in old_roles + new_roles
         ):

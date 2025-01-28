@@ -14,7 +14,7 @@ from h.util.uri import normalize as normalize_uri
 _ = i18n.TranslationStringFactory(__package__)
 
 
-def expand_uri(session, uri, normalized=False):
+def expand_uri(session, uri, normalized=False):  # noqa: FBT002
     """
     Return all URIs which refer to the same underlying document as `uri`.
 

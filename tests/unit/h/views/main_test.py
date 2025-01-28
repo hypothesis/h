@@ -7,7 +7,7 @@ from h.traversal import AnnotationContext
 from h.views import main
 
 
-def _fake_sidebar_app(request, extra):
+def _fake_sidebar_app(request, extra):  # noqa: ARG001
     return extra
 
 

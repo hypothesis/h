@@ -74,7 +74,7 @@ def links_factory(_context, request):
     return LinksService(base_url=base_url, registry=request.registry)
 
 
-def add_annotation_link_generator(config, name, generator, hidden=False):
+def add_annotation_link_generator(config, name, generator, hidden=False):  # noqa: FBT002
     """
     Register a function which generates a named link for an annotation.
 

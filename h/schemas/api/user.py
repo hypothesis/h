@@ -10,7 +10,7 @@ from h.schemas.base import JSONSchema
 class CreateUserAPISchema(JSONSchema):
     """Validate a user JSON object."""
 
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         "properties": {
             "authority": {"type": "string", "format": "hostname"},
@@ -53,7 +53,7 @@ class CreateUserAPISchema(JSONSchema):
 class UpdateUserAPISchema(JSONSchema):
     """Validate a user JSON object."""
 
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         "properties": {
             "email": {

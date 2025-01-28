@@ -69,6 +69,6 @@ class TestGroupMembershipJSONPresenter:
         return GroupMembership(
             user=user,
             group=group,
-            created=datetime(1970, 1, 1, 0, 0, 0),
-            updated=datetime(1970, 1, 1, 0, 0, 1),
+            created=datetime(1970, 1, 1, 0, 0, 0),  # noqa: DTZ001
+            updated=datetime(1970, 1, 1, 0, 0, 1),  # noqa: DTZ001
         )

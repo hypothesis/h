@@ -51,7 +51,7 @@ def bulk_annotation(request):
         raise ValidationError(str(err)) from err
 
     return get_ndjson_response(
-        (_present_annotation(annotation) for annotation in annotations)
+        _present_annotation(annotation) for annotation in annotations
     )
 
 

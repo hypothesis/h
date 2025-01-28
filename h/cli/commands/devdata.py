@@ -55,7 +55,7 @@ class DevDataFactory:
             elif type_ == "restricted_group":
                 self.upsert_restricted_group(data_dict)
             else:
-                raise RuntimeError(f"Unrecognized type: {type_}")
+                raise RuntimeError(f"Unrecognized type: {type_}")  # noqa: EM102, TRY003
 
         self.tm.commit()
 
@@ -113,7 +113,7 @@ class DevDataFactory:
         creator = models.User.get_by_username(
             self.db, group_data.pop("creator_username"), group_data["authority"]
         )
-        assert creator
+        assert creator  # noqa: S101
 
         organization = (
             self.db.query(models.Organization)
@@ -145,23 +145,24 @@ class DevDataFactory:
 def devdata(ctx):
     with tempfile.TemporaryDirectory() as tmpdirname:
         # The directory that we'll clone the devdata git repo into.
-        git_dir = os.path.join(tmpdirname, "devdata")
+        git_dir = os.path.join(tmpdirname, "devdata")  # noqa: PTH118
 
         # Clone the private devdata repo from GitHub.
         # This will fail if Git->GitHub HTTPS authentication isn't set up or if
         # your GitHub account doesn't have access to the private repo.
-        subprocess.check_call(
-            ["git", "clone", "https://github.com/hypothesis/devdata.git", git_dir]
+        subprocess.check_call(  # noqa: S603
+            ["git", "clone", "https://github.com/hypothesis/devdata.git", git_dir]  # noqa: S607
         )
 
         # Copy environment variables file into place.
         shutil.copyfile(
-            os.path.join(git_dir, "h", "devdata.env"),
-            os.path.join(pathlib.Path(h.__file__).parent.parent, ".devdata.env"),
+            os.path.join(git_dir, "h", "devdata.env"),  # noqa: PTH118
+            os.path.join(pathlib.Path(h.__file__).parent.parent, ".devdata.env"),  # noqa: PTH118
         )
 
-        with open(
-            os.path.join(git_dir, "h", "devdata.json"), "r", encoding="utf8"
+        with open(  # noqa: PTH123
+            os.path.join(git_dir, "h", "devdata.json"),  # noqa: PTH118
+            encoding="utf8",
         ) as handle:
             DevDataFactory(
                 ctx.obj["bootstrap"](),

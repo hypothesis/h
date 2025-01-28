@@ -55,14 +55,12 @@ class SignupController:
                 username=appstruct["username"],
                 email=appstruct["email"],
                 password=appstruct["password"],
-                privacy_accepted=datetime.datetime.utcnow(),
+                privacy_accepted=datetime.datetime.utcnow(),  # noqa: DTZ003
                 comms_opt_in=appstruct["comms_opt_in"],
             )
         except ConflictError as exc:
             template_context["heading"] = _("Account already registered")
-            template_context["message"] = _(
-                "{failure_reason}".format(failure_reason=exc.args[0])  # noqa: INT002
-            )
+            template_context["message"] = _(f"{exc.args[0]}")  # noqa: INT001
 
         return template_context
 

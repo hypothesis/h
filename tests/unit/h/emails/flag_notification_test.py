@@ -14,8 +14,8 @@ class TestGenerate:
         )
 
         expected_context = {"incontext_link": "http://hyp.is/a/ann1"}
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_appropriate_return_values(
         self, pyramid_request, html_renderer, text_renderer

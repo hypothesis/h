@@ -117,7 +117,7 @@ def remove_member(context: GroupMembershipContext, request):
 )
 def add_member(context: AddGroupMembershipContext, request):
     if context.user.authority != context.group.authority:
-        raise HTTPNotFound()
+        raise HTTPNotFound()  # noqa: RSE102
 
     if request.body:
         appstruct = EditGroupMembershipAPISchema().validate(json_payload(request))
@@ -151,7 +151,7 @@ def edit_member(context: EditGroupMembershipContext, request):
     context.new_roles = appstruct["roles"]
 
     if not request.has_permission(Permission.Group.MEMBER_EDIT, context):
-        raise HTTPNotFound()
+        raise HTTPNotFound()  # noqa: RSE102
 
     if context.membership.roles != context.new_roles:
         old_roles = context.membership.roles

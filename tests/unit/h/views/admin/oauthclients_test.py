@@ -26,9 +26,9 @@ class FakeForm:
         self.appstruct = {}
         for name, value in items:
             if name == "grant_type":
-                value = GrantType[value]
+                value = GrantType[value]  # noqa: PLW2901
             elif name == "response_type":
-                value = ResponseType[value]
+                value = ResponseType[value]  # noqa: PLW2901
             self.appstruct[name] = value
         return self.appstruct
 
@@ -95,7 +95,7 @@ class TestAuthClientCreateController:
         ctrl.post()
 
         client = pyramid_request.db.query(AuthClient).one()
-        assert client.secret == "keep-me-secret"
+        assert client.secret == "keep-me-secret"  # noqa: S105
 
     def test_post_generates_secret_for_client_credentials_clients(
         self, form_post, pyramid_request
@@ -108,7 +108,7 @@ class TestAuthClientCreateController:
         ctrl.post()
 
         client = pyramid_request.db.query(AuthClient).one()
-        assert client.secret == "keep-me-secret"
+        assert client.secret == "keep-me-secret"  # noqa: S105
 
     def test_post_does_not_generate_secret_for_authcode_clients(
         self, form_post, pyramid_request
@@ -196,7 +196,7 @@ class TestAuthClientEditController:
         old_id = auth_client.id
         old_secret = auth_client.secret
         form_post["client_id"] = "new-id"
-        form_post["client_secret"] = "new-secret"
+        form_post["client_secret"] = "new-secret"  # noqa: S105
         pyramid_request.POST = form_post
         controller = AuthClientEditController(sentinel.context, pyramid_request)
 
@@ -249,7 +249,7 @@ class TestAuthClientEditController:
         return factories.AuthClient(
             name="testclient",
             authority="annotator.org",
-            secret="not_a_secret",
+            secret="not_a_secret",  # noqa: S106
             trusted=False,
             grant_type=GrantType.authorization_code,
             response_type=ResponseType.code,

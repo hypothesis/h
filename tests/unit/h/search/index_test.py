@@ -143,7 +143,7 @@ class TestBatchIndexer:
 
 
 @pytest.fixture
-def batch_indexer(db_session, es_client, pyramid_request, moderation_service):
+def batch_indexer(db_session, es_client, pyramid_request, moderation_service):  # noqa: ARG001
     return BatchIndexer(db_session, es_client, pyramid_request)
 
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta  # noqa: A005
 
 import factory
 
@@ -34,8 +34,8 @@ class OAuth2Token(ModelFactory):
     refresh_token = factory.LazyAttribute(
         lambda _: (REFRESH_TOKEN_PREFIX + security.token_urlsafe())
     )
-    expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(hours=1)))
+    expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(hours=1)))  # noqa: DTZ003
     refresh_token_expires = factory.LazyAttribute(
-        lambda _: (datetime.utcnow() + timedelta(days=7))
+        lambda _: (datetime.utcnow() + timedelta(days=7))  # noqa: DTZ003
     )
     authclient = factory.SubFactory(AuthClient)

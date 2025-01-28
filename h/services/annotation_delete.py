@@ -27,7 +27,7 @@ class AnnotationDeleteService:
         :param annotation: the annotation to be deleted
         :type annotation: h.models.Annotation
         """
-        annotation.updated = datetime.utcnow()
+        annotation.updated = datetime.utcnow()  # noqa: DTZ003
         annotation.deleted = True
         self.job_queue.add_by_id(
             name="sync_annotation",
@@ -63,7 +63,7 @@ class AnnotationDeleteService:
                         # give the streamer time to process the deletion.
                         .where(
                             Annotation.updated
-                            < datetime.utcnow() - timedelta(minutes=10)
+                            < datetime.utcnow() - timedelta(minutes=10)  # noqa: DTZ003
                         )
                         # Only expunge up to 1000 annotations at a time to
                         # avoid long-running DB queries. This method is called

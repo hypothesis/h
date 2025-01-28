@@ -219,8 +219,8 @@ class Group(Base, mixins.Timestamps):
     @sa.orm.validates("name")
     def validate_name(self, _key, name):
         if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:
-            raise ValueError(
-                f"name must be between {GROUP_NAME_MIN_LENGTH} and {GROUP_NAME_MAX_LENGTH} characters long"
+            raise ValueError(  # noqa: TRY003
+                f"name must be between {GROUP_NAME_MIN_LENGTH} and {GROUP_NAME_MAX_LENGTH} characters long"  # noqa: EM102
             )
         return name
 
@@ -230,14 +230,14 @@ class Group(Base, mixins.Timestamps):
             return None
 
         if not re.match(AUTHORITY_PROVIDED_ID_PATTERN, authority_provided_id):
-            raise ValueError(
-                "authority_provided_id must only contain characters allowed"
+            raise ValueError(  # noqa: TRY003
+                "authority_provided_id must only contain characters allowed"  # noqa: EM101
                 r" in encoded URIs: [a-zA-Z0-9._\-+!~*()']"
             )
 
         if len(authority_provided_id) > AUTHORITY_PROVIDED_ID_MAX_LENGTH:
-            raise ValueError(
-                f"authority_provided_id must be {AUTHORITY_PROVIDED_ID_MAX_LENGTH} characters or fewer"
+            raise ValueError(  # noqa: TRY003
+                f"authority_provided_id must be {AUTHORITY_PROVIDED_ID_MAX_LENGTH} characters or fewer"  # noqa: EM102
                 " characters long"
             )
 
@@ -267,8 +267,8 @@ class Group(Base, mixins.Timestamps):
             if self_type_flags == type_flags:
                 return type_
 
-        raise ValueError(
-            "This group doesn't seem to match any known type of group. "
+        raise ValueError(  # noqa: TRY003
+            "This group doesn't seem to match any known type of group. "  # noqa: EM101
             "This shouldn't be in the database!"
         )
 
@@ -277,7 +277,7 @@ class Group(Base, mixins.Timestamps):
         try:
             new_type_flags = GROUP_TYPE_FLAGS[value]
         except KeyError as err:
-            raise ValueError() from err
+            raise ValueError from err
 
         for index, flag in enumerate(new_type_flags._fields):
             setattr(self, flag, new_type_flags[index])

@@ -26,7 +26,7 @@ class AuthClientPolicy:
 
     #: List of route name-method combinations that should
     #: allow AuthClient authentication
-    API_WHITELIST = [
+    API_WHITELIST = [  # noqa: RUF012
         ("api.groups", "POST"),
         ("api.group", "PATCH"),
         ("api.group", "GET"),

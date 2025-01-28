@@ -34,7 +34,9 @@ class TestCloseTheDBSessionTweenFactory:
 
     @pytest.fixture
     def handler(self):
-        handler = mock.create_autospec(lambda request: None)  # pragma: nocover
+        handler = mock.create_autospec(
+            lambda request: None  # noqa: ARG005
+        )  # pragma: nocover
         return handler
 
     @pytest.fixture

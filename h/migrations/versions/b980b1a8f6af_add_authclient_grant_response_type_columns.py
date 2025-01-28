@@ -28,7 +28,7 @@ class GrantType(enum.Enum):
     authorization_code = "authorization_code"
     client_credentials = "client_credentials"
     jwt_bearer = "urn:ietf:params:oauth:grant-type:jwt-bearer"
-    password = "password"
+    password = "password"  # noqa: S105
 
 
 grant_type = sa.Enum(GrantType, name="authclient_grant_type")
@@ -36,7 +36,7 @@ grant_type = sa.Enum(GrantType, name="authclient_grant_type")
 
 class ResponseType(enum.Enum):
     code = "code"
-    token = "token"
+    token = "token"  # noqa: S105
 
 
 response_type = sa.Enum(ResponseType, name="authclient_response_type")

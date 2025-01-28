@@ -17,7 +17,7 @@ class ExampleCSRFSchema(CSRFSchema):
 
 
 class ExampleJSONSchema(JSONSchema):
-    schema = {
+    schema = {  # noqa: RUF012
         "$schema": "http://json-schema.org/draft-04/schema#",
         "type": "object",
         "properties": {"foo": {"type": "string"}, "bar": {"type": "integer"}},
@@ -52,7 +52,7 @@ class TestJSONSchema:
         class BadSchema(JSONSchema):
             schema_version = 95
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             BadSchema()
 
     def test_it_returns_data_when_valid(self):

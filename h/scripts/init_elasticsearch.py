@@ -35,7 +35,7 @@ def main():
         settings = env["registry"].settings
         client = search.get_client(settings)
 
-        print("Initializing Elasticsearch index")
+        print("Initializing Elasticsearch index")  # noqa: T201
         search.init(client, check_icu_plugin=settings.get("es.check_icu_plugin", True))
 
 

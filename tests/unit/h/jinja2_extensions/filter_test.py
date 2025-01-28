@@ -27,14 +27,14 @@ def test_to_json(value_in, json_out):
     "timestamp_in,string_out",
     [
         # Basic format for recent timestamps
-        (datetime(2016, 4, 14, 16, 45, 36, 529730), "14 April at 16:45"),
+        (datetime(2016, 4, 14, 16, 45, 36, 529730), "14 April at 16:45"),  # noqa: DTZ001
         # For times more than a year ago, add the year
-        (datetime(2012, 4, 14, 16, 45, 36, 529730), "14 April 2012 at 16:45"),
+        (datetime(2012, 4, 14, 16, 45, 36, 529730), "14 April 2012 at 16:45"),  # noqa: DTZ001
     ],
 )
 def test_human_timestamp(timestamp_in, string_out):
     assert (
-        human_timestamp(timestamp_in, now=lambda: datetime(2016, 4, 14)) == string_out
+        human_timestamp(timestamp_in, now=lambda: datetime(2016, 4, 14)) == string_out  # noqa: DTZ001
     )
 
 

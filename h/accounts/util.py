@@ -23,10 +23,10 @@ def validate_url(url):
         parsed_url = urlparse("http://" + url)
 
     if not re.match("https?", parsed_url.scheme):
-        raise ValueError('Links must have an "http" or "https" prefix')
+        raise ValueError('Links must have an "http" or "https" prefix')  # noqa: EM101, TRY003
 
     if not parsed_url.netloc:
-        raise ValueError("Links must include a domain name")
+        raise ValueError("Links must include a domain name")  # noqa: EM101, TRY003
 
     return parsed_url.geturl()
 
@@ -44,10 +44,10 @@ def validate_orcid(orcid):
     orcid_regex = r"\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z"
 
     if not re.match(orcid_regex, orcid):
-        raise ValueError(f"The format of this ORCID is incorrect: {orcid}")
+        raise ValueError(f"The format of this ORCID is incorrect: {orcid}")  # noqa: EM102, TRY003
 
     if _orcid_checksum_digit(orcid[:-1]) != orcid[-1:]:
-        raise ValueError(f"{orcid} is not a valid ORCID")
+        raise ValueError(f"{orcid} is not a valid ORCID")  # noqa: EM102, TRY003
 
     return True
 

@@ -63,7 +63,7 @@ def includeme(config):  # pragma: no cover
 
     config.add_settings(
         {
-            "tm.manager_hook": lambda request: transaction.TransactionManager(),
+            "tm.manager_hook": lambda request: transaction.TransactionManager(),  # noqa: ARG005
             "tm.annotate_user": False,
         }
     )

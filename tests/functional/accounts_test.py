@@ -9,7 +9,7 @@ class TestAccountSettings:
 
         email_form = res.forms["email"]
         email_form["email"] = "new_email1@example.com"
-        email_form["password"] = "pass"
+        email_form["password"] = "pass"  # noqa: S105
 
         res = email_form.submit().follow()
 
@@ -20,7 +20,7 @@ class TestAccountSettings:
 
         email_form = res.forms["email"]
         email_form["email"] = "new_email2@example.com"
-        email_form["password"] = "pass"
+        email_form["password"] = "pass"  # noqa: S105
 
         res = email_form.submit(xhr=True, status=200)
 
@@ -31,7 +31,7 @@ class TestAccountSettings:
 
         email_form = res.forms["email"]
         email_form["email"] = "new_email3@example.com"
-        email_form["password"] = "pass"
+        email_form["password"] = "pass"  # noqa: S105
 
         res = email_form.submit(xhr=True)
 
@@ -41,9 +41,9 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         password_form = res.forms["password"]
-        password_form["password"] = "pass"
-        password_form["new_password"] = "new_password"
-        password_form["new_password_confirm"] = "new_password"
+        password_form["password"] = "pass"  # noqa: S105
+        password_form["new_password"] = "new_password"  # noqa: S105
+        password_form["new_password_confirm"] = "new_password"  # noqa: S105
 
         res = password_form.submit().follow()
 
@@ -53,9 +53,9 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         password_form = res.forms["password"]
-        password_form["password"] = "pass"
-        password_form["new_password"] = "new_password"
-        password_form["new_password_confirm"] = "new_password"
+        password_form["password"] = "pass"  # noqa: S105
+        password_form["new_password"] = "new_password"  # noqa: S105
+        password_form["new_password_confirm"] = "new_password"  # noqa: S105
 
         res = password_form.submit(xhr=True)
 
@@ -65,9 +65,9 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         password_form = res.forms["password"]
-        password_form["password"] = "pass"
-        password_form["new_password"] = "new_password"
-        password_form["new_password_confirm"] = "new_password"
+        password_form["password"] = "pass"  # noqa: S105
+        password_form["new_password"] = "new_password"  # noqa: S105
+        password_form["new_password_confirm"] = "new_password"  # noqa: S105
 
         res = password_form.submit(xhr=True)
 
@@ -77,9 +77,9 @@ class TestAccountSettings:
         res = app.get("/account/settings")
 
         password_form = res.forms["password"]
-        password_form["password"] = "pass"
-        password_form["new_password"] = "new_password"
-        password_form["new_password_confirm"] = "WRONG"
+        password_form["password"] = "pass"  # noqa: S105
+        password_form["new_password"] = "new_password"  # noqa: S105
+        password_form["new_password_confirm"] = "WRONG"  # noqa: S105
 
         password_form.submit(xhr=True, status=400)
 
@@ -87,7 +87,7 @@ class TestAccountSettings:
     def user(self, db_session, factories):
         # Password is 'pass'
         user = factories.User(
-            password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"
+            password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"  # noqa: S106
         )
         db_session.commit()
         return user
@@ -96,6 +96,6 @@ class TestAccountSettings:
     def app(self, app, user):
         res = app.get("/login")
         res.form["username"] = user.username
-        res.form["password"] = "pass"
+        res.form["password"] = "pass"  # noqa: S105
         res.form.submit()
         return app

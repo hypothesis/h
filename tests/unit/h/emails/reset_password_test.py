@@ -19,8 +19,8 @@ class TestGenerate:
             "reset_code": "s3cr3t-r3s3t-c0d3",
             "reset_link": "http://example.com/reset/s3cr3t-r3s3t-c0d3",
         }
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     @pytest.mark.usefixtures("html_renderer", "text_renderer")
     def test_generates_token_using_username(self, pyramid_request, serializer, user):

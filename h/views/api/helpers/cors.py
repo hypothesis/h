@@ -3,7 +3,7 @@ from pyramid.response import Response
 
 
 def policy(
-    allow_credentials=False,
+    allow_credentials=False,  # noqa: FBT002
     allow_headers=None,
     allow_methods=None,
     expose_headers=None,
@@ -44,10 +44,10 @@ def policy(
     return cors_decorator
 
 
-def set_cors_headers(
+def set_cors_headers(  # noqa: PLR0913
     request,
     response,
-    allow_credentials=False,
+    allow_credentials=False,  # noqa: FBT002
     allow_headers=None,
     allow_methods=None,
     expose_headers=None,
@@ -64,7 +64,7 @@ def set_cors_headers(
             # Don't raise an exception if Pyramid is already processing an
             # exception view, because that will cause Pyramid to crash.
             return response
-        raise HTTPBadRequest(f"CORS preflight request lacks {missing_header} header.")
+        raise HTTPBadRequest(f"CORS preflight request lacks {missing_header} header.")  # noqa: EM102, TRY003
 
     # Otherwise, we're dealing with a CORS preflight request, which,
     # according to the spec:

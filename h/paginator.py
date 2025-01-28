@@ -23,7 +23,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
     # last pages are always shown. There should be at most 3 pages
     # to the left and 3 to the right of the current page. Any more
     # pages than that are represented by ellipses on either side.
-    # Ex: [1, '...',27, 28, 29, 30, 31, 32, 33, '...', 60]
+    # Ex: [1, '...',27, 28, 29, 30, 31, 32, 33, '...', 60]  # noqa: ERA001
 
     page_numbers = []
     buffer = 3

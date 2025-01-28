@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 import newrelic.agent
 
@@ -27,7 +26,7 @@ class LongLivedToken:
         if self.expires is None:
             return True
 
-        return datetime.utcnow() < self.expires
+        return datetime.utcnow() < self.expires  # noqa: DTZ003
 
 
 class AuthTokenService:
@@ -35,7 +34,7 @@ class AuthTokenService:
         self._session = session
         self._validate_cache = {}
 
-    def validate(self, token_str) -> Optional[LongLivedToken]:
+    def validate(self, token_str) -> LongLivedToken | None:
         """
         Get a validated token from the token string or None.
 

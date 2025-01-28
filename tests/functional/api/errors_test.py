@@ -29,7 +29,7 @@ class Test400Errors:
         headers = append_token_auth()
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
         reason = res.json["reason"]
-        # FIXME: The `reason` is double-escaped
+        # FIXME: The `reason` is double-escaped  # noqa: FIX001, TD001, TD002, TD003
         expected = (
             "groupid: '3434kjkjk'"
             ' does not match "^group:([a-zA-Z0-9._\\\\-+!~*()\']{1,1024})@(.*)$"'
@@ -40,7 +40,7 @@ class Test400Errors:
 
 
 class Test404Errors:
-    # TODO: Some of these 404s should really be 403s
+    # TODO: Some of these 404s should really be 403s  # noqa: FIX002, TD002, TD003
     reason_message = (
         "Either the resource you requested doesn't exist,"
         " or you are not currently authorized to see it."

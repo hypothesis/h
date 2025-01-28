@@ -41,8 +41,8 @@ class TestReportNumDeletedAnnotations:
 class TestPurgeExpiredAuthTickets:
     def test_it_removes_expired_tickets(self, db_session, factories):
         tickets = [
-            factories.AuthTicket(expires=datetime(2014, 5, 6, 7, 8, 9)),
-            factories.AuthTicket(expires=(datetime.utcnow() - timedelta(seconds=1))),
+            factories.AuthTicket(expires=datetime(2014, 5, 6, 7, 8, 9)),  # noqa: DTZ001
+            factories.AuthTicket(expires=(datetime.utcnow() - timedelta(seconds=1))),  # noqa: DTZ003
         ]
         db_session.add_all(tickets)
 
@@ -52,8 +52,8 @@ class TestPurgeExpiredAuthTickets:
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
         tickets = [
-            factories.AuthTicket(expires=datetime(2014, 5, 6, 7, 8, 9)),
-            factories.AuthTicket(expires=(datetime.utcnow() + timedelta(hours=1))),
+            factories.AuthTicket(expires=datetime(2014, 5, 6, 7, 8, 9)),  # noqa: DTZ001
+            factories.AuthTicket(expires=(datetime.utcnow() + timedelta(hours=1))),  # noqa: DTZ003
         ]
         db_session.add_all(tickets)
 
@@ -66,8 +66,8 @@ class TestPurgeExpiredAuthTickets:
 class TestPurgeExpiredAuthzCodes:
     def test_it_removes_expired_authz_codes(self, db_session, factories):
         authz_codes = [
-            factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),
-            factories.AuthzCode(expires=(datetime.utcnow() - timedelta(seconds=1))),
+            factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),  # noqa: DTZ001
+            factories.AuthzCode(expires=(datetime.utcnow() - timedelta(seconds=1))),  # noqa: DTZ003
         ]
         db_session.add_all(authz_codes)
 
@@ -77,8 +77,8 @@ class TestPurgeExpiredAuthzCodes:
 
     def test_it_leaves_valid_authz_codes(self, db_session, factories):
         authz_codes = [
-            factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),
-            factories.AuthzCode(expires=(datetime.utcnow() + timedelta(hours=1))),
+            factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),  # noqa: DTZ001
+            factories.AuthzCode(expires=(datetime.utcnow() + timedelta(hours=1))),  # noqa: DTZ003
         ]
         db_session.add_all(authz_codes)
 
@@ -91,12 +91,12 @@ class TestPurgeExpiredAuthzCodes:
 class TestPurgeExpiredTokens:
     def test_it_removes_expired_tokens(self, db_session, factories):
         factories.DeveloperToken(
-            expires=datetime(2014, 5, 6, 7, 8, 9),
-            refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9),
+            expires=datetime(2014, 5, 6, 7, 8, 9),  # noqa: DTZ001
+            refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9),  # noqa: DTZ001
         )
         factories.DeveloperToken(
-            expires=(datetime.utcnow() - timedelta(hours=2)),
-            refresh_token_expires=(datetime.utcnow() - timedelta(seconds=1)),
+            expires=(datetime.utcnow() - timedelta(hours=2)),  # noqa: DTZ003
+            refresh_token_expires=(datetime.utcnow() - timedelta(seconds=1)),  # noqa: DTZ003
         )
 
         assert db_session.query(Token).count() == 2
@@ -105,20 +105,20 @@ class TestPurgeExpiredTokens:
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
         factories.DeveloperToken(
-            expires=datetime(2014, 5, 6, 7, 8, 9),
-            refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9),
+            expires=datetime(2014, 5, 6, 7, 8, 9),  # noqa: DTZ001
+            refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9),  # noqa: DTZ001
         )
         factories.DeveloperToken(
-            expires=(datetime.utcnow() + timedelta(hours=1)),
-            refresh_token_expires=datetime.utcnow() + timedelta(days=7),
+            expires=(datetime.utcnow() + timedelta(hours=1)),  # noqa: DTZ003
+            refresh_token_expires=datetime.utcnow() + timedelta(days=7),  # noqa: DTZ003
         )
         factories.DeveloperToken(
-            expires=(datetime.utcnow() - timedelta(hours=1)),
-            refresh_token_expires=datetime.utcnow() + timedelta(days=7),
+            expires=(datetime.utcnow() - timedelta(hours=1)),  # noqa: DTZ003
+            refresh_token_expires=datetime.utcnow() + timedelta(days=7),  # noqa: DTZ003
         )
         factories.DeveloperToken(
-            expires=(datetime.utcnow() + timedelta(hours=1)),
-            refresh_token_expires=datetime.utcnow() - timedelta(days=7),
+            expires=(datetime.utcnow() + timedelta(hours=1)),  # noqa: DTZ003
+            refresh_token_expires=datetime.utcnow() - timedelta(days=7),  # noqa: DTZ003
         )
 
         assert db_session.query(Token).count() == 4

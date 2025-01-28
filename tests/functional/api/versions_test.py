@@ -26,7 +26,7 @@ class TestIndexEndpointVersions:
         # Send ``application/json`` and we should get a 200 response from the
         # default version.
 
-        headers = {"Accept": str("application/json")}
+        headers = {"Accept": "application/json"}
 
         res = app.get("/api/", headers=headers)
 
@@ -36,7 +36,7 @@ class TestIndexEndpointVersions:
     def test_index_200s_with_v1_header(self, app):
         # Set a v1 Accept header and we should get a 200 response.
 
-        headers = {"Accept": str("application/vnd.hypothesis.v1+json")}
+        headers = {"Accept": "application/vnd.hypothesis.v1+json"}
 
         res = app.get("/api/", headers=headers)
 
@@ -46,7 +46,7 @@ class TestIndexEndpointVersions:
     def test_index_200s_with_v2_header(self, app):
         # Set a v2 Accept header and we should get a 200 response.
 
-        headers = {"Accept": str("application/vnd.hypothesis.v2+json")}
+        headers = {"Accept": "application/vnd.hypothesis.v2+json"}
 
         res = app.get("/api/", headers=headers)
 
@@ -57,7 +57,7 @@ class TestIndexEndpointVersions:
         # Set a v3 Accept header and we should get a 406 response.
         # (For now because the version doesn't exist yet)
 
-        headers = {"Accept": str("application/vnd.hypothesis.v3+json")}
+        headers = {"Accept": "application/vnd.hypothesis.v3+json"}
 
         res = app.get("/api/", headers=headers, expect_errors=True)
 
@@ -66,7 +66,7 @@ class TestIndexEndpointVersions:
     def test_index_200s_with_invalid_accept_header_value(self, app):
         # Set a generally-invalid Accept header and we should get a 200.
 
-        headers = {"Accept": str("nonsensical")}
+        headers = {"Accept": "nonsensical"}
 
         res = app.get("/api/", headers=headers, expect_errors=True)
 
@@ -90,7 +90,7 @@ class TestIndexEndpointVersions:
         # Set a v2 Accept header and we should get a version media type
         # response header.
 
-        headers = {"Accept": str("application/vnd.hypothesis.v2+json")}
+        headers = {"Accept": "application/vnd.hypothesis.v2+json"}
 
         res = app.get("/api/", headers=headers)
 

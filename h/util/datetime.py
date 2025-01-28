@@ -1,4 +1,4 @@
-"""Shared utility functions for manipulating dates and times."""
+"""Shared utility functions for manipulating dates and times."""  # noqa: A005
 
 
 def utc_iso8601(datetime):
@@ -12,4 +12,4 @@ def utc_iso8601(datetime):
 
 def utc_us_style_date(datetime):
     """Convert a UTC datetime into a Month day, year (August 1, 1990)."""
-    return "{d:%B} {d.day}, {d:%Y}".format(d=datetime)
+    return f"{datetime:%B} {datetime.day}, {datetime:%Y}"

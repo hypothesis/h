@@ -259,7 +259,7 @@ class TestAnnotationSyncService:
     def test_metrics(self, factories, index, now, svc, queue_service):
         queue_service.get.return_value = []
 
-        def add_job(indexed=True, updated=False, deleted=False, **kwargs):
+        def add_job(indexed=True, updated=False, deleted=False, **kwargs):  # noqa: FBT002
             annotation = factories.Annotation()
             job = factories.SyncAnnotationJob(annotation=annotation, **kwargs)
             queue_service.get.return_value.append(job)
@@ -299,7 +299,7 @@ class TestAnnotationSyncService:
     @pytest.fixture
     def now(self):
         """Return the current UTC time."""
-        return datetime.datetime.utcnow()
+        return datetime.datetime.utcnow()  # noqa: DTZ003
 
     @pytest.fixture(autouse=True)
     def noise_annotations(self, factories, index):
@@ -387,7 +387,7 @@ class TestDBHelper:
             ),
         }
 
-    # TODO: Annotations that don't exist in the DB.
+    # TODO: Annotations that don't exist in the DB.  # noqa: FIX002, TD002, TD003
 
     @pytest.fixture
     def db_helper(self, db_session):
@@ -660,8 +660,8 @@ class TestFactory:
 def search_index_service(
     pyramid_request,
     es_client,
-    moderation_service,
-    nipsa_service,
+    moderation_service,  # noqa: ARG001
+    nipsa_service,  # noqa: ARG001
 ):
     # Construct a real (not mock) SearchIndexService so we can call its
     # methods to index annotations.

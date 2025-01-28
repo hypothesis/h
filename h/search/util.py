@@ -20,7 +20,7 @@ def wildcard_uri_is_valid(wildcard_uri):
     # Note: according to the URL spec _'s are allowed in the domain so this may be
     # something that needs to be supported at a later date.
     normalized_uri = urlparse(wildcard_uri)
-    if (
+    if (  # noqa: SIM103
         not normalized_uri.scheme
         or "*" in normalized_uri.netloc
         or "_" in normalized_uri.netloc

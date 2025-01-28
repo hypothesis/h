@@ -7,7 +7,7 @@ from h.models.auth_client import GrantType
 
 
 class TestReadGroups:
-    # TODO: In subsequent versions of the API, this should really be a group
+    # TODO: In subsequent versions of the API, this should really be a group  # noqa: FIX002, TD002, TD003
     # search endpoint and should have its own functional test module
 
     def test_it_returns_world_group(self, app):
@@ -61,7 +61,7 @@ class TestReadGroup:
         group = factories.OpenGroup()
         db_session.commit()
 
-        res = app.get("/api/groups/{pubid}".format(pubid=group.pubid))
+        res = app.get(f"/api/groups/{group.pubid}")
 
         assert res.status_code == 200
 
@@ -83,9 +83,7 @@ class TestReadGroup:
         group = factories.Group()
         db_session.commit()
 
-        res = app.get(
-            "/api/groups/{pubid}".format(pubid=group.pubid), expect_errors=True
-        )
+        res = app.get(f"/api/groups/{group.pubid}", expect_errors=True)
 
         assert res.status_code == 404
 
@@ -96,9 +94,7 @@ class TestReadGroup:
         group = factories.Group(creator=user, memberships=[GroupMembership(user=user)])
         db_session.commit()
 
-        res = app.get(
-            "/api/groups/{pubid}".format(pubid=group.pubid), headers=token_auth_header
-        )
+        res = app.get(f"/api/groups/{group.pubid}", headers=token_auth_header)
 
         assert res.status_code == 200
 
@@ -110,9 +106,7 @@ class TestReadGroup:
         group.memberships.append(GroupMembership(user=user))
         db_session.commit()
 
-        res = app.get(
-            "/api/groups/{pubid}".format(pubid=group.pubid), headers=token_auth_header
-        )
+        res = app.get(f"/api/groups/{group.pubid}", headers=token_auth_header)
 
         assert res.status_code == 200
 
@@ -123,7 +117,7 @@ class TestReadGroup:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}",
             headers=token_auth_header,
             expect_errors=True,
         )
@@ -136,9 +130,7 @@ class TestReadGroup:
         group = factories.Group(authority="thirdparty.com")
         db_session.commit()
 
-        res = app.get(
-            "/api/groups/{pubid}".format(pubid=group.pubid), headers=auth_client_header
-        )
+        res = app.get(f"/api/groups/{group.pubid}", headers=auth_client_header)
 
         assert res.status_code == 200
 
@@ -149,7 +141,7 @@ class TestReadGroup:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}",
             headers=auth_client_header,
             expect_errors=True,
         )
@@ -168,9 +160,7 @@ def auth_client(db_session, factories):
 
 @pytest.fixture
 def auth_client_header(auth_client):
-    user_pass = "{client_id}:{secret}".format(
-        client_id=auth_client.id, secret=auth_client.secret
-    )
+    user_pass = f"{auth_client.id}:{auth_client.secret}"
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
     return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
 
@@ -187,4 +177,4 @@ def user_with_token(db_session, factories):
 @pytest.fixture
 def token_auth_header(user_with_token):
     user, token = user_with_token
-    return {"Authorization": "Bearer {}".format(token.value)}
+    return {"Authorization": f"Bearer {token.value}"}

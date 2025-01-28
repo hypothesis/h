@@ -16,7 +16,7 @@ class TestNipsaIndex:
         }
 
     def test_lists_flagged_usernames_no_results(self, nipsa_service, pyramid_request):
-        nipsa_service.flagged = set([])
+        nipsa_service.flagged = set([])  # noqa: C405
 
         result = nipsa_index(pyramid_request)
 

@@ -95,4 +95,4 @@ class Feature(Base):
             log.info("removed %d old/unknown feature flags from database", count)
 
     def __repr__(self):  # pragma: no cover
-        return "<Feature {f.name} everyone={f.everyone}>".format(f=self)
+        return f"<Feature {self.name} everyone={self.everyone}>"

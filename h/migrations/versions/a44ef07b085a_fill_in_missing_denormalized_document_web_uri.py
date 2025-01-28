@@ -21,7 +21,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024, SLOT002
     pass
 
 
@@ -68,7 +68,7 @@ def downgrade():
 
 
 def _document_web_uri(document):
-    for docuri in document.document_uris:
+    for docuri in document.document_uris:  # noqa: RET503
         uri = urlparse(docuri.uri)
         if uri.scheme in ["http", "https"]:
             return docuri.uri

@@ -1,7 +1,7 @@
 """Data classes used to represent authenticated users."""
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Self
+from typing import Self
 
 from h.models import AuthClient, Group, GroupMembershipRoles, User
 
@@ -12,7 +12,7 @@ class LongLivedMembership:
 
     group: "LongLivedGroup"
     user: "LongLivedUser"
-    roles: List[str]
+    roles: list[str]
 
 
 @dataclass
@@ -46,7 +46,7 @@ class LongLivedUser:
     authority: str
     staff: bool
     admin: bool
-    memberships: List[LongLivedMembership] = field(default_factory=list)
+    memberships: list[LongLivedMembership] = field(default_factory=list)
 
     @classmethod
     def from_model(cls, user: User):
@@ -105,8 +105,8 @@ class Identity:
     pre-shared key, or both.
     """
 
-    user: Optional[LongLivedUser] = None
-    auth_client: Optional[LongLivedAuthClient] = None
+    user: LongLivedUser | None = None
+    auth_client: LongLivedAuthClient | None = None
 
     @classmethod
     def from_models(cls, user: User = None, auth_client: AuthClient = None):

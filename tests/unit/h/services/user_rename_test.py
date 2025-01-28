@@ -111,7 +111,7 @@ class TestUserRenameService:
     def annotations(self, user, factories, db_session):
         anns = []
         for _ in range(8):
-            anns.append(factories.Annotation(userid=user.userid))
+            anns.append(factories.Annotation(userid=user.userid))  # noqa: PERF401
         db_session.add_all(anns)
         db_session.flush()
 

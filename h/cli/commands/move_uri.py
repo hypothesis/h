@@ -40,7 +40,7 @@ def move_uri(ctx, old, new):
     )
     answer = click.prompt(prompt, default="n", show_default=False)
     if answer != "y":
-        print("Aborted")
+        print("Aborted")  # noqa: T201
         return
 
     for annotation in annotations:
