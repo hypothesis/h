@@ -1,9 +1,11 @@
 from copy import deepcopy
 
-from h.models import Annotation, User
+from h.models import Annotation, AnnotationSlim, User
 from h.presenters import DocumentJSONPresenter
+from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
+from h.services import MentionService
 from h.services.annotation_read import AnnotationReadService
 from h.services.flag import FlagService
 from h.services.links import LinksService
@@ -22,6 +24,7 @@ class AnnotationJSONService:
         links_service: LinksService,
         flag_service: FlagService,
         user_service: UserService,
+        mention_service: MentionService,
     ):
         """
         Instantiate the service.
@@ -30,11 +33,13 @@ class AnnotationJSONService:
         :param links_service: LinksService instance
         :param flag_service: FlagService instance
         :param user_service: UserService instance
+        :param mention_service: MentionService instance
         """
         self._annotation_read_service = annotation_read_service
         self._links_service = links_service
         self._flag_service = flag_service
         self._user_service = user_service
+        self._mention_service = mention_service
 
     def present(self, annotation: Annotation):
         """
@@ -71,6 +76,10 @@ class AnnotationJSONService:
                 "target": annotation.target,
                 "document": DocumentJSONPresenter(annotation.document).asdict(),
                 "links": self._links_service.get_all(annotation),
+                "mentions": [
+                    MentionJSONPresenter(mention).asdict()
+                    for mention in annotation.slim.mentions
+                ],
             }
         )
 
@@ -151,6 +160,8 @@ class AnnotationJSONService:
                 # which ultimately depends on group permissions, causing a
                 # group lookup for every annotation without this
                 Annotation.group,
+                # Optimise access to the mentions
+                (Annotation.slim, AnnotationSlim.mentions),
             ],
         )
 
@@ -184,4 +195,5 @@ def factory(_context, request):
         links_service=request.find_service(name="links"),
         flag_service=request.find_service(name="flag"),
         user_service=request.find_service(name="user"),
+        mention_service=request.find_service(MentionService),
     )

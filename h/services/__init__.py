@@ -11,6 +11,7 @@ from h.services.bulk_api import (
     BulkLMSStatsService,
 )
 from h.services.job_queue import JobQueueService
+from h.services.mention import MentionService
 from h.services.subscription import SubscriptionService
 
 
@@ -41,6 +42,9 @@ def includeme(config):  # pragma: no cover
     )
     config.register_service_factory(
         "h.services.annotation_write.service_factory", iface=AnnotationWriteService
+    )
+    config.register_service_factory(
+        "h.services.mention.service_factory", iface=MentionService
     )
 
     # Other services

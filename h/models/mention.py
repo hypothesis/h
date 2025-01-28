@@ -17,7 +17,7 @@ class Mention(Base, Timestamps):  # pragma: nocover
         nullable=False,
     )
     """FK to annotation_slim.id"""
-    annotation = sa.orm.relationship("AnnotationSlim")
+    annotation = sa.orm.relationship("AnnotationSlim", back_populates="mentions")
 
     user_id: Mapped[int] = mapped_column(
         sa.Integer,
@@ -27,6 +27,9 @@ class Mention(Base, Timestamps):  # pragma: nocover
     )
     """FK to user.id"""
     user = sa.orm.relationship("User")
+
+    username = sa.Column("username", sa.UnicodeText(), nullable=False)
+    """Current username of the user mentioned"""
 
     def __repr__(self) -> str:
         return helpers.repr_(self, ["id", "annotation_id", "user_id"])
