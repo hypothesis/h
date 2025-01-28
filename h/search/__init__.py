@@ -13,17 +13,17 @@ from h.search.query import (
 )
 
 __all__ = (
-    "Search",
-    "TopLevelAnnotationsFilter",
+    "AuthorityFilter",
     "DeletedFilter",
     "Limiter",
-    "UserFilter",
-    "AuthorityFilter",
+    "Search",
+    "SharedAnnotationsFilter",
     "TagsAggregation",
+    "TopLevelAnnotationsFilter",
+    "UserFilter",
     "UsersAggregation",
     "get_client",
     "init",
-    "SharedAnnotationsFilter",
 )
 
 

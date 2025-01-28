@@ -20,7 +20,7 @@ class TestAnnotationWriteService:
         update_document_metadata,
         queue_service,
         annotation_read_service,
-        _validate_group,
+        _validate_group,  # noqa: PT019
         db_session,
     ):
         root_annotation = factories.Annotation()
@@ -95,9 +95,9 @@ class TestAnnotationWriteService:
         annotation,
         update_document_metadata,
         queue_service,
-        _validate_group,
+        _validate_group,  # noqa: PT019
     ):
-        then = datetime.now() - timedelta(days=1)
+        then = datetime.now() - timedelta(days=1)  # noqa: DTZ005
         annotation.extra = {"key": "value"}
         annotation.updated = then
 
@@ -142,7 +142,7 @@ class TestAnnotationWriteService:
         self.assert_annotation_slim(db_session, anno)
 
     def test_update_annotation_with_non_defaults(self, svc, annotation, queue_service):
-        then = datetime.now() - timedelta(days=1)
+        then = datetime.now() - timedelta(days=1)  # noqa: DTZ005
         annotation.updated = then
 
         result = svc.update_annotation(

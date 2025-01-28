@@ -127,7 +127,7 @@ class TestApplicablePolicies:
             create_autospec(Spec, spec_set=True),
             create_autospec(Spec, spec_set=True),
         ]
-        for policy, return_value in zip(policies, return_values):
+        for policy, return_value in zip(policies, return_values, strict=False):
             policy.handles.return_value = return_value
 
         returned_policies = applicable_policies(pyramid_request, policies)

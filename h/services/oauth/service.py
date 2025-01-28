@@ -100,7 +100,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
 
         # Mark this request as a revocation request so we can know _not_
         # to trigger full client validation later on in
-        # OAuthValidatorService.client_authentication_required()
+        # OAuthValidatorService.client_authentication_required()  # noqa: ERA001
         request.h_revoke_request = True
 
         return super().validate_revocation_request(request)
@@ -128,10 +128,10 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         if token:
             request.client_id = token.authclient.id
         else:
-            raise InvalidRefreshTokenError()
+            raise InvalidRefreshTokenError()  # noqa: RSE102
 
     @staticmethod
-    def _generate_access_token(oauth_request):
+    def _generate_access_token(oauth_request):  # noqa: ARG004
         return ACCESS_TOKEN_PREFIX + token_urlsafe()
 
     @staticmethod

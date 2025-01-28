@@ -50,8 +50,8 @@ def upgrade():
     # Pre-parse the timestamps to reduce the amount of time spent in the DB
     # transaction.
     for timestamp in TIMESTAMPS:
-        timestamp["created"] = datetime.strptime(timestamp["created"], FORMAT)
-        timestamp["updated"] = datetime.strptime(timestamp["updated"], FORMAT)
+        timestamp["created"] = datetime.strptime(timestamp["created"], FORMAT)  # noqa: DTZ007
+        timestamp["updated"] = datetime.strptime(timestamp["updated"], FORMAT)  # noqa: DTZ007
 
     # Now make the DB changes.
     corrected = 0

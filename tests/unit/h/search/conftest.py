@@ -48,7 +48,7 @@ def index_annotations(es_client, search_index):
 def search_index(
     es_client,
     pyramid_request,
-    moderation_service,
+    moderation_service,  # noqa: ARG001
     annotation_read_service,
 ):
     return SearchIndexService(

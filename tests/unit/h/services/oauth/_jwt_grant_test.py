@@ -115,7 +115,7 @@ class TestJWTAuthorizationGrantValidateTokenRequest:
             grant.validate_token_request(oauth_request)
 
     def test_verifies_grant_token(self, grant, oauth_request):
-        oauth_request.client.authclient.secret = "bogus"
+        oauth_request.client.authclient.secret = "bogus"  # noqa: S105
 
         with pytest.raises(errors.InvalidGrantError) as exc:
             grant.validate_token_request(oauth_request)
@@ -162,8 +162,8 @@ def grant(pyramid_request, request_validator):
 
 
 def _oauth_request(authclient, user):
-    exp = datetime.utcnow() + timedelta(minutes=5)
-    nbf = datetime.utcnow() - timedelta(seconds=2)
+    exp = datetime.utcnow() + timedelta(minutes=5)  # noqa: DTZ003
+    nbf = datetime.utcnow() - timedelta(seconds=2)  # noqa: DTZ003
     claims = {
         "aud": "domain.test",
         "exp": timegm(exp.utctimetuple()),

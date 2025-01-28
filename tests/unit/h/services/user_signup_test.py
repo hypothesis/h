@@ -55,7 +55,7 @@ class TestUserSignupService:
         assert user.identities == []
 
     def test_signup_passes_through_privacy_acceptance(self, svc):
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()  # noqa: DTZ003
         user = svc.signup(username="foo", email="foo@bar.com", privacy_accepted=now)
 
         assert user.privacy_accepted == now
@@ -89,7 +89,7 @@ class TestUserSignupService:
     def test_signup_sets_password_using_password_service(
         self, svc, user_password_service
     ):
-        user = svc.signup(username="foo", email="foo@bar.com", password="wibble")
+        user = svc.signup(username="foo", email="foo@bar.com", password="wibble")  # noqa: S106
 
         user_password_service.update_password.assert_called_once_with(user, "wibble")
 
@@ -130,7 +130,7 @@ class TestUserSignupService:
     ):
         log = patch("h.services.user_signup.log")
 
-        with pytest.raises(ConflictError):
+        with pytest.raises(ConflictError):  # noqa: PT012
             svc.signup(username="foo", email="foo@bar.com")
             svc.signup(username="foo", email="foo@bar.com")
 
@@ -157,7 +157,7 @@ class TestUserSignupService:
     ):
         # This happens when two or more identical
         # concurrent signup requests race each other to the db.
-        with pytest.raises(
+        with pytest.raises(  # noqa: PT012
             ConflictError,
             match=f"The email address {email} has already been registered.",
         ):

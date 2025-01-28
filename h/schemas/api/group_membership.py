@@ -2,7 +2,7 @@ from h.schemas.base import JSONSchema
 
 
 class EditGroupMembershipAPISchema(JSONSchema):
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         "properties": {
             "roles": {

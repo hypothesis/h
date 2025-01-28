@@ -130,7 +130,7 @@ class TestUserDeleteService:
                 logging.INFO,
                 f"Purging {user!r} - completed job: {job!r}",
             )
-            for user, job in zip(users[:2], jobs[:2])
+            for user, job in zip(users[:2], jobs[:2], strict=False)
         ]
         assert purger.delete_authtickets.call_args_list == [
             call(user) for user in users

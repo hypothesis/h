@@ -81,7 +81,7 @@ class TestGetSubpolicy:
         AuthClientPolicy.assert_called_once_with()
         assert webob.cookies.SignedCookieProfile.call_args_list == [
             call(
-                secret="test_h_api_auth_cookie_secret",
+                secret="test_h_api_auth_cookie_secret",  # noqa: S106
                 salt="test_h_api_auth_cookie_salt",
                 cookie_name="h_api_authcookie.v2",
                 max_age=31539600,
@@ -129,7 +129,7 @@ class TestGetSubpolicy:
 
         assert webob.cookies.SignedCookieProfile.call_args_list == [
             call(
-                secret="test_h_api_auth_cookie_secret",
+                secret="test_h_api_auth_cookie_secret",  # noqa: S106
                 salt="test_h_api_auth_cookie_salt",
                 cookie_name="h_api_authcookie.v2",
                 max_age=31539600,
@@ -138,7 +138,7 @@ class TestGetSubpolicy:
                 samesite="strict",
             ),
             call(
-                secret="test_h_auth_cookie_secret",
+                secret="test_h_auth_cookie_secret",  # noqa: S106
                 salt="authsanity",
                 cookie_name="auth",
                 max_age=31536000,
@@ -196,8 +196,8 @@ def CookiePolicy(mocker):
 
 @pytest.fixture
 def pyramid_settings(pyramid_settings):
-    pyramid_settings["h_auth_cookie_secret"] = "test_h_auth_cookie_secret"
-    pyramid_settings["h_api_auth_cookie_secret"] = "test_h_api_auth_cookie_secret"
+    pyramid_settings["h_auth_cookie_secret"] = "test_h_auth_cookie_secret"  # noqa: S105
+    pyramid_settings["h_api_auth_cookie_secret"] = "test_h_api_auth_cookie_secret"  # noqa: S105
     pyramid_settings["h_api_auth_cookie_salt"] = "test_h_api_auth_cookie_salt"
     return pyramid_settings
 

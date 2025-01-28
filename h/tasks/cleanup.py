@@ -44,20 +44,20 @@ def report_num_deleted_annotations():
 @celery.task
 def purge_expired_auth_tickets():
     celery.request.db.query(models.AuthTicket).filter(
-        models.AuthTicket.expires < datetime.utcnow()
+        models.AuthTicket.expires < datetime.utcnow()  # noqa: DTZ003
     ).delete()
 
 
 @celery.task
 def purge_expired_authz_codes():
     celery.request.db.query(models.AuthzCode).filter(
-        models.AuthzCode.expires < datetime.utcnow()
+        models.AuthzCode.expires < datetime.utcnow()  # noqa: DTZ003
     ).delete()
 
 
 @celery.task
 def purge_expired_tokens():
-    now = datetime.utcnow()
+    now = datetime.utcnow()  # noqa: DTZ003
     celery.request.db.query(models.Token).filter(
         models.Token.expires < now, models.Token.refresh_token_expires < now
     ).delete()

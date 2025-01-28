@@ -159,7 +159,7 @@ def _log_status(stream, log_every=1000):
     then = time.time()
     for item in stream:
         yield item
-        i += 1
+        i += 1  # noqa: SIM113
         if not i % log_every:
             now = time.time()
             delta = now - then

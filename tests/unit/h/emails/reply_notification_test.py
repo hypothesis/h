@@ -41,8 +41,8 @@ class TestGenerate:
             "reply_user_url": "http://example.com/stream/user/ron",
             "unsubscribe_url": "http://example.com/unsub/FAKETOKEN",
         }
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_falls_back_to_target_uri_for_document_title(
         self, notification, pyramid_request, html_renderer, text_renderer
@@ -51,8 +51,8 @@ class TestGenerate:
 
         generate(pyramid_request, notification)
 
-        html_renderer.assert_(document_title="http://example.org/")
-        text_renderer.assert_(document_title="http://example.org/")
+        html_renderer.assert_(document_title="http://example.org/")  # noqa: PT009
+        text_renderer.assert_(document_title="http://example.org/")  # noqa: PT009
 
     def test_falls_back_to_individual_page_if_no_bouncer(
         self,
@@ -86,8 +86,8 @@ class TestGenerate:
             "reply_user_url": "http://example.com/stream/user/ron",
             "unsubscribe_url": "http://example.com/unsub/FAKETOKEN",
         }
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_supports_non_ascii_display_names(
         self,
@@ -121,8 +121,8 @@ class TestGenerate:
             "parent_user_display_name": parent_user.username,
             "reply_user_display_name": reply_user.username,
         }
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_returns_text_and_body_results_from_renderers(
         self, notification, pyramid_request, html_renderer, text_renderer
@@ -172,8 +172,8 @@ class TestGenerate:
 
         generate(pyramid_request, notification)
 
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_urls_set_for_first_party_users(
         self, notification, pyramid_request, html_renderer, text_renderer
@@ -185,8 +185,8 @@ class TestGenerate:
 
         generate(pyramid_request, notification)
 
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     @pytest.fixture
     def document(self, db_session):
@@ -213,8 +213,8 @@ class TestGenerate:
     def parent(self):
         common = {
             "id": "foo123",
-            "created": datetime.datetime.utcnow(),
-            "updated": datetime.datetime.utcnow(),
+            "created": datetime.datetime.utcnow(),  # noqa: DTZ003
+            "updated": datetime.datetime.utcnow(),  # noqa: DTZ003
             "text": "Foo is true",
         }
         return Annotation(target_uri="http://example.org/", **common)
@@ -229,8 +229,8 @@ class TestGenerate:
     def reply(self):
         common = {
             "id": "bar456",
-            "created": datetime.datetime.utcnow(),
-            "updated": datetime.datetime.utcnow(),
+            "created": datetime.datetime.utcnow(),  # noqa: DTZ003
+            "updated": datetime.datetime.utcnow(),  # noqa: DTZ003
             "text": "No it is not!",
         }
         return Annotation(target_uri="http://example.org/", **common)

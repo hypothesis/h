@@ -151,7 +151,7 @@ class AuthController:
         return self.request.params.get("next", _login_redirect_url(self.request))
 
     def _login(self, user):
-        user.last_login_date = datetime.datetime.utcnow()
+        user.last_login_date = datetime.datetime.utcnow()  # noqa: DTZ003
         self.request.registry.notify(LoginEvent(self.request, user))
         headers = security.remember(self.request, user.userid)
         return headers
@@ -244,7 +244,7 @@ class ResetController:
         try:
             user = ResetCode().deserialize(self.schema, code)
         except colander.Invalid as err:
-            raise httpexceptions.HTTPNotFound() from err
+            raise httpexceptions.HTTPNotFound() from err  # noqa: RSE102
 
         # N.B. the form field for the reset code is called 'user'. See the
         # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
@@ -320,7 +320,7 @@ class ActivateController:
         try:
             id_ = int(id_)
         except ValueError as err:
-            raise httpexceptions.HTTPNotFound() from err
+            raise httpexceptions.HTTPNotFound() from err  # noqa: RSE102
 
         activation = models.Activation.get_by_code(self.request.db, code)
         if activation is None:
@@ -339,7 +339,7 @@ class ActivateController:
 
         user = models.User.get_by_activation(self.request.db, activation)
         if user is None or user.id != id_:
-            raise httpexceptions.HTTPNotFound()
+            raise httpexceptions.HTTPNotFound()  # noqa: RSE102
 
         user.activate()
 
@@ -367,7 +367,7 @@ class ActivateController:
         try:
             id_ = int(id_)
         except ValueError as err:
-            raise httpexceptions.HTTPNotFound() from err
+            raise httpexceptions.HTTPNotFound() from err  # noqa: RSE102
 
         if id_ == self.request.user.id:
             # The user is already logged in to the account (so the account
@@ -602,7 +602,7 @@ class DeveloperController:
         """(Re-)generate the user's API token."""
         token = self.svc.fetch(self.userid)
 
-        if token:
+        if token:  # noqa: SIM108
             # The user already has an API token, regenerate it.
             token = self.svc.regenerate(token)
         else:
@@ -684,7 +684,7 @@ class DeleteController:
         }
 
 
-# TODO: This can be removed after October 2016, which will be >1 year from the
+# TODO: This can be removed after October 2016, which will be >1 year from the  # noqa: FIX002, TD002, TD003
 #       date that the last account claim emails were sent out. At this point,
 #       if we have not done so already, we should remove all unclaimed
 #       usernames from the accounts tables.
@@ -703,7 +703,7 @@ def claim_account_legacy(_request):  # pragma: no cover
 )
 def dismiss_sidebar_tutorial(request):  # pragma: no cover
     if request.authenticated_userid is None:
-        raise accounts.JSONError()
+        raise accounts.JSONError()  # noqa: RSE102
 
     request.user.sidebar_tutorial_dismissed = True
     return ajax_payload(request, {"status": "okay"})

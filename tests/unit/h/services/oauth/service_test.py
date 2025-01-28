@@ -42,7 +42,7 @@ class TestOAuthProviderService:
         self, svc, oauth_request, oauth_validator
     ):
         oauth_validator.find_refresh_token.return_value = None
-        oauth_request.refresh_token = "missing"
+        oauth_request.refresh_token = "missing"  # noqa: S105
 
         with pytest.raises(InvalidRefreshTokenError):
             svc._load_client_id_from_refresh_token(oauth_request)  # noqa: SLF001

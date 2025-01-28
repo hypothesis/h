@@ -135,8 +135,8 @@ class GroupMembersService:
         if existing_membership := self.get_membership(group, user):
             for key, value in kwargs.items():
                 if getattr(existing_membership, key) != value:
-                    raise ConflictError(
-                        "The user is already a member of the group, with conflicting membership attributes"
+                    raise ConflictError(  # noqa: TRY003
+                        "The user is already a member of the group, with conflicting membership attributes"  # noqa: EM101
                     )
 
             return existing_membership

@@ -63,7 +63,7 @@ class FeatureService:
         features = self.all(user=user)
 
         if name not in features:
-            raise UnknownFeatureError(f"{name} is not a valid feature name")
+            raise UnknownFeatureError(f"{name} is not a valid feature name")  # noqa: EM102, TRY003
 
         return features[name]
 
@@ -75,7 +75,7 @@ class FeatureService:
         """Load the feature flags from the database."""
         return models.Feature.all(self.session)
 
-    def _state(self, feature, user=None):
+    def _state(self, feature, user=None):  # noqa: PLR0911
         # Features that are explicitly overridden are on.
         if self.overrides is not None and feature.name in self.overrides:
             return True

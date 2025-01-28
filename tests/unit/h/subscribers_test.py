@@ -97,7 +97,7 @@ class TestPublishAnnotationEvent:
     def test_it_raises_for_other_errors(self, event):
         event.request.realtime.publish_annotation.side_effect = EnvironmentError
 
-        with pytest.raises(EnvironmentError):
+        with pytest.raises(EnvironmentError):  # noqa: PT011
             subscribers.publish_annotation_event(event)
 
     @pytest.fixture

@@ -88,17 +88,26 @@ def registry(pyramid_config):
     pyramid_config.add_route("param.route", "/annotations/{id}")
 
     add_annotation_link_generator(
-        pyramid_config, "giraffe", lambda r, a: "http://giraffes.com"
+        pyramid_config,
+        "giraffe",
+        lambda r, a: "http://giraffes.com",  # noqa: ARG005
     )
     add_annotation_link_generator(
-        pyramid_config, "elephant", lambda r, a: "https://elephant.org"
+        pyramid_config,
+        "elephant",
+        lambda r, a: "https://elephant.org",  # noqa: ARG005
     )
     add_annotation_link_generator(
-        pyramid_config, "kiwi", lambda r, a: "http://kiwi.net", hidden=True
+        pyramid_config,
+        "kiwi",
+        lambda r, a: "http://kiwi.net",  # noqa: ARG005
+        hidden=True,
     )
-    add_annotation_link_generator(pyramid_config, "returnsnone", lambda r, a: None)
+    add_annotation_link_generator(pyramid_config, "returnsnone", lambda r, a: None)  # noqa: ARG005
     add_annotation_link_generator(
-        pyramid_config, "namedroute", lambda r, a: r.route_url("some.named.route")
+        pyramid_config,
+        "namedroute",
+        lambda r, a: r.route_url("some.named.route"),  # noqa: ARG005
     )
     add_annotation_link_generator(
         pyramid_config,

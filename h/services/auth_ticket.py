@@ -51,8 +51,8 @@ class AuthTicketService:
         # We don't want to update the `expires` column of an auth ticket on
         # every single request, but only when the ticket hasn't been touched
         # within a the defined `TICKET_REFRESH_INTERVAL`.
-        if (datetime.utcnow() - ticket.updated) > self.TICKET_REFRESH_INTERVAL:
-            ticket.expires = datetime.utcnow() + self.TICKET_TTL
+        if (datetime.utcnow() - ticket.updated) > self.TICKET_REFRESH_INTERVAL:  # noqa: DTZ003
+            ticket.expires = datetime.utcnow() + self.TICKET_TTL  # noqa: DTZ003
 
         # Update the cache to allow quick checking if we are called again
         self._ticket = ticket
@@ -65,13 +65,13 @@ class AuthTicketService:
         user = self._user_service.fetch(userid)
 
         if user is None:
-            raise ValueError(f"Cannot find user with userid {userid}")
+            raise ValueError(f"Cannot find user with userid {userid}")  # noqa: EM102, TRY003
 
         ticket = AuthTicket(
             id=ticket_id,
             user=user,
             user_userid=user.userid,
-            expires=datetime.utcnow() + self.TICKET_TTL,
+            expires=datetime.utcnow() + self.TICKET_TTL,  # noqa: DTZ003
         )
 
         self._session.add(ticket)

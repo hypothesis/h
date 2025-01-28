@@ -23,4 +23,4 @@ def update_settings(ctx):
     try:
         config.update_index_settings(request.es)
     except RuntimeError as exc:
-        raise click.ClickException(str(exc))
+        raise click.ClickException(str(exc))  # noqa: B904

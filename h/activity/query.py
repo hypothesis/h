@@ -17,7 +17,7 @@ from h.search import (
 from h.services.annotation_read import AnnotationReadService
 
 
-class ActivityResults(
+class ActivityResults(  # noqa: SLOT002
     namedtuple("ActivityResults", ["total", "aggregations", "timeframes"])  # noqa: PYI024
 ):
     pass

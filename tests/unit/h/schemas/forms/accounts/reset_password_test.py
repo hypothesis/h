@@ -64,7 +64,7 @@ class TestResetPasswordSchemaDeserialize:
         (
             # This situation triggers if the users password has not been used since
             # the token was issued. Note our DB dates are not timezone aware.
-            datetime.now() - timedelta(days=1),
+            datetime.now() - timedelta(days=1),  # noqa: DTZ005
             # ... or if it's never been reset
             None,
         ),
@@ -88,7 +88,7 @@ class TestResetPasswordSchemaDeserialize:
     def test_it_is_invalid_if_user_has_already_reset_their_password(self, schema, user):
         # This situation triggers if the users password has been used since
         # the token was issued. Note our DB dates are not timezone aware.
-        user.password_updated = datetime.now() + timedelta(days=1)
+        user.password_updated = datetime.now() + timedelta(days=1)  # noqa: DTZ005
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"user": "EXPIRED_TOKEN", "password": "new-password"})
@@ -101,7 +101,7 @@ class TestResetPasswordSchemaDeserialize:
         return ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
     @pytest.fixture(autouse=True)
-    def serializer(self, pyramid_csrf_request, pyramid_config):
+    def serializer(self, pyramid_csrf_request, pyramid_config):  # noqa: ARG002
         # We must be after `pyramid_config` in the queue, as it replaces the
         # registry object with another one which undoes our changes here
 

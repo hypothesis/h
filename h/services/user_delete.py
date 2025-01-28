@@ -31,12 +31,12 @@ def make_log_message(user, message):
 def log_updated_rows(user, log_message, updated_ids):
     if updated_ids:
         log.info(
-            f"{make_log_message(user, log_message)}: %s",
+            f"{make_log_message(user, log_message)}: %s",  # noqa: G004
             ", ".join(str(id_) for id_ in updated_ids),
         )
 
 
-def log_deleted_rows(user, model_class, deleted_ids, log_ids=True):
+def log_deleted_rows(user, model_class, deleted_ids, log_ids=True):  # noqa: FBT002
     if deleted_ids:
         if log_ids:
             log.info(
@@ -180,7 +180,7 @@ class UserPurger:
 
     def delete_annotations(self, user):
         """Delete all of `user`'s annotations from both Postgres and Elasticsearch."""
-        now = datetime.utcnow()
+        now = datetime.utcnow()  # noqa: DTZ003
 
         deleted_annotation_ids = self.worker.update(
             Annotation,
@@ -409,7 +409,7 @@ class LimitedWorker:
 
     def _execute(self, stmnt):
         if self.limit < 1:
-            raise LimitReached()
+            raise LimitReached
 
         affected_ids = self.db.scalars(stmnt).all()
         self.limit -= len(affected_ids)

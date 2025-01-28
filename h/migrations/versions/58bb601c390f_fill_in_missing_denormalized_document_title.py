@@ -20,7 +20,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024, SLOT002
     pass
 
 
@@ -71,7 +71,7 @@ def downgrade():
 
 
 def _document_title(document):
-    for meta in document.meta_titles:
+    for meta in document.meta_titles:  # noqa: RET503
         if meta.value:
             return meta.value[0]
 

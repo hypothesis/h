@@ -69,7 +69,7 @@ SELECTOR_SCHEMA = {
 class AnnotationSchema(JSONSchema):
     """Validate an annotation object."""
 
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         "properties": {
             "document": copy.deepcopy(DOCUMENT_SCHEMA),
@@ -107,7 +107,7 @@ class URLMigrationSchema(JSONSchema):
 
     schema_version = 7  # Required for `propertyNames`
 
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         # The restriction to HTTP(S) URLs is just to help catch mistakes
         # in the input. We could relax this constraint if needed.
@@ -311,7 +311,7 @@ def _target_selectors(targets):
 
     for target_selector in selectors:
         for field in ["suffix", "prefix"]:
-            if value := target_selector.get(field):
+            if value := target_selector.get(field):  # noqa: SIM102
                 if not is_valid_unicode(value):
                     raise ValidationError(
                         f"{field}: " + _(f"'{field}' must be valid unicode")  # noqa: INT001
@@ -482,7 +482,7 @@ class SearchParamsSchema(colander.Schema):
         # than 9999 it is assumed to be a year and not ms since the epoch.
         try:
             if float(value) < 9999:
-                raise ValueError("This is not in the form ms since the epoch.")
+                raise ValueError("This is not in the form ms since the epoch.")  # noqa: EM101, TRY003, TRY301
         except ValueError:
             try:
                 parse(value)

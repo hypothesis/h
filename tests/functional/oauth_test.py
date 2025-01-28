@@ -19,11 +19,11 @@ class TestOAuth:
         self.assert_is_authorized(app, userid, access_token)
 
     def test_request_fails_if_access_token_wrong(self, app):
-        self.assert_is_not_authorised(app, access_token="wrong")
+        self.assert_is_not_authorised(app, access_token="wrong")  # noqa: S106
 
     def test_request_fails_if_access_token_expired(self, app, db_session, factories):
         token = factories.DeveloperToken(
-            expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+            expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1)  # noqa: DTZ003
         )
         token = token.value
         db_session.commit()
@@ -61,7 +61,7 @@ class TestOAuth:
         self, app, db_session, factories
     ):
         token = factories.DeveloperToken(
-            expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+            expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1)  # noqa: DTZ003
         )
         refresh_token = token.refresh_token
         db_session.commit()
@@ -145,7 +145,7 @@ class TestOAuth:
 
     def epoch(self, delta=None):
         """Get a Unix timestamp for the current time, with optional offset."""
-        timestamp = datetime.datetime.utcnow()
+        timestamp = datetime.datetime.utcnow()  # noqa: DTZ003
 
         if delta is not None:
             timestamp = timestamp + delta

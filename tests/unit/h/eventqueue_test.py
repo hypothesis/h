@@ -72,7 +72,7 @@ class TestEventQueue:
         pyramid_request.debug = True
         subscriber.side_effect = ValueError("boom!")
 
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError) as excinfo:  # noqa: PT011, PT012
             queue(DummyEvent(pyramid_request))
             queue.publish_all()
         assert str(excinfo.value) == "boom!"

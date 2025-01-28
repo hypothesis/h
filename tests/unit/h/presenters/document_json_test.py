@@ -46,4 +46,4 @@ class TestDocumentJSONPresenter:
         db_session.flush()
 
         presenter = DocumentJSONPresenter(document)
-        assert {"title": ["Foo"]} == presenter.asdict()
+        assert {"title": ["Foo"]} == presenter.asdict()  # noqa: SIM300

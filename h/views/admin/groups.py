@@ -3,7 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
 from h import (
-    form,  # noqa F401
+    form,
     i18n,
     models,
     paginator,
@@ -94,7 +94,7 @@ class GroupCreateViews:
 
             type_ = appstruct["group_type"]
             if type_ not in ["open", "restricted"]:  # pragma: no cover
-                raise ValueError(f"Unsupported group type {type_}")
+                raise ValueError(f"Unsupported group type {type_}")  # noqa: EM102, TRY003
 
             group = create_fns[type_](
                 name=appstruct["name"],
@@ -109,7 +109,7 @@ class GroupCreateViews:
             # because that check is part of form schema validation.
             member_userids = []
             for username in appstruct["members"]:
-                member_userids.append(
+                member_userids.append(  # noqa: PERF401
                     self.user_svc.fetch(username, organization.authority).userid
                 )
 
@@ -171,7 +171,7 @@ class GroupEditViews:
         self.request.find_service(name="group_delete").delete(self.group)
 
         self.request.session.flash(
-            _("Successfully deleted group %s" % (self.group.name), "success"),  # noqa: INT003
+            _("Successfully deleted group %s" % (self.group.name), "success"),  # noqa: INT003, UP031
             queue="success",
         )
 
@@ -199,7 +199,7 @@ class GroupEditViews:
 
             memberids = []
             for username in appstruct["members"]:
-                memberids.append(self.user_svc.fetch(username, group.authority).userid)
+                memberids.append(self.user_svc.fetch(username, group.authority).userid)  # noqa: PERF401
 
             self.group_members_svc.update_members(group, memberids)
 

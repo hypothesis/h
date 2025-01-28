@@ -38,12 +38,12 @@ class SettingsManager:
 
         self._environ = environ
 
-    def set(
+    def set(  # noqa: PLR0913
         self,
         name,
         envvar,
         type_=str,
-        required=False,
+        required=False,  # noqa: FBT002
         default=None,
         deprecated_msg=None,
     ):
@@ -83,11 +83,11 @@ class SettingsManager:
             val = default
             cast_message = f"{name}'s default {val!r}"
         elif required and name not in self.settings:
-            raise SettingError(f"error parsing environment variable {envvar} not found")
+            raise SettingError(f"error parsing environment variable {envvar} not found")  # noqa: EM102, TRY003
         if val:
             try:
                 self.settings[name] = type_(val)
             except ValueError as err:
-                raise SettingError(
-                    f"error casting {cast_message} as {type_.__name__}"
+                raise SettingError(  # noqa: TRY003
+                    f"error casting {cast_message} as {type_.__name__}"  # noqa: EM102
                 ) from err

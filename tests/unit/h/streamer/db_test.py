@@ -45,7 +45,7 @@ class TestReadOnlyTransaction:
 
     @pytest.mark.parametrize("exception", (KeyboardInterrupt, SystemExit))
     def test_it_reraises_certain_exceptions(self, session, exception):
-        with pytest.raises(exception):
+        with pytest.raises(exception):  # noqa: SIM117
             with read_only_transaction(session):
                 raise exception
 

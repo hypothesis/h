@@ -1,4 +1,4 @@
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import HTTPBadRequest  # noqa: A005
 
 from h import session as h_session
 from h.presenters import GroupsJSONPresenter
@@ -53,7 +53,7 @@ def update_preferences(request):
     preferences = request.json_body.get("preferences", {})
 
     svc = request.find_service(name="user")
-    # TODO: The following exception doesn't match convention for validation
+    # TODO: The following exception doesn't match convention for validation  # noqa: FIX002, TD002, TD003
     # used in other endpoints
     try:
         svc.update_preferences(request.user, **preferences)

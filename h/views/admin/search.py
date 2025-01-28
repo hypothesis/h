@@ -61,7 +61,7 @@ class SearchAdminViews:
             self.request.db, username, self.request.default_authority
         )
         if not user:
-            raise NotFoundError(f"User {username} not found")
+            raise NotFoundError(f"User {username} not found")  # noqa: EM102, TRY003
 
         tasks.job_queue.add_annotations_from_user.delay(
             self.request.params["name"],
@@ -85,7 +85,7 @@ class SearchAdminViews:
 
         group = self.request.find_service(name="group").fetch_by_pubid(groupid)
         if not group:
-            raise NotFoundError(f"Group {groupid} not found")
+            raise NotFoundError(f"Group {groupid} not found")  # noqa: EM102, TRY003
 
         tasks.job_queue.add_annotations_from_group.delay(
             self.request.params["name"],
