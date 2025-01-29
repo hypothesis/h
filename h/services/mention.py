@@ -26,20 +26,15 @@ class MentionService:
         userids = set(self._parse_userids(annotation.text))
         users = self._user_service.fetch_all(userids)
         self._session.execute(
-            delete(Mention).where(Mention.annotation_id == annotation.slim.id)
+            delete(Mention).where(Mention.annotation_id == annotation.id)
         )
         for user in users:
-            mention = Mention(annotation_id=annotation.slim.id, user_id=user.id)
+            mention = Mention(annotation_id=annotation.id, user_id=user.id)
             self._session.add(mention)
 
     @staticmethod
     def _parse_userids(text: str) -> list[str]:
         return USERID_PAT.findall(text)
-
-    def fetch_all(self, annotations: Iterable[Annotation]) -> Sequence[Mention]:
-        annotation_slim_ids = [annotation.slim.id for annotation in annotations]
-        stmt = select(Mention).where(Mention.annotation_id.in_(annotation_slim_ids))
-        return self._session.execute(stmt).scalars().all()
 
 
 def service_factory(_context, request) -> MentionService:

@@ -96,7 +96,5 @@ class AnnotationSlim(Base):
     )
     group = sa.orm.relationship("Group")
 
-    mentions = sa.orm.relationship("Mention", back_populates="annotation")
-
     def __repr__(self):
         return helpers.repr_(self, ["id"])
