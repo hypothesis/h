@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Notification:
-    """A data structure representing a notification of a mention in an annotation."""
+    """A data structure representing a mention notification in an annotation."""
 
     mentioning_user: User
     mentioned_user: User
