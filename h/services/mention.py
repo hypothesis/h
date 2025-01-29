@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Iterable, Sequence
 
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from h.models import Annotation, Mention
@@ -29,10 +29,7 @@ class MentionService:
             delete(Mention).where(Mention.annotation_id == annotation.slim.id)
         )
         for user in users:
-            mention = Mention(
-                annotation_id=annotation.slim.id,
-                user_id=user.id
-            )
+            mention = Mention(annotation_id=annotation.slim.id, user_id=user.id)
             self._session.add(mention)
 
     @staticmethod
