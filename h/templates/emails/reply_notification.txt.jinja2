@@ -2,11 +2,11 @@
 
 On {{ parent.created | human_timestamp }} {{ parent_user_display_name }} commented:
 
-> {{ parent.text or "" }}
+> {{ parent.text|striptags or "" }}
 
 On {{ reply.created | human_timestamp }} {{ reply_user_display_name }} replied:
 
-> {{ reply.text or "" }}
+> {{ reply.text|striptags or "" }}
 
 View the thread and respond: {{ reply_url }}
 
