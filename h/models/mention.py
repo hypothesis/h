@@ -28,8 +28,5 @@ class Mention(Base, Timestamps):  # pragma: nocover
     """FK to user.id"""
     user = sa.orm.relationship("User")
 
-    username = sa.Column("username", sa.UnicodeText(), nullable=False)
-    """Current username of the user mentioned"""
-
     def __repr__(self) -> str:
         return helpers.repr_(self, ["id", "annotation_id", "user_id"])
