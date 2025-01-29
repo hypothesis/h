@@ -78,7 +78,7 @@ class AnnotationJSONService:
                 "links": self._links_service.get_all(annotation),
                 "mentions": [
                     MentionJSONPresenter(mention).asdict()
-                    for mention in annotation.slim.mentions
+                    for mention in annotation.mentions
                 ],
             }
         )
@@ -161,7 +161,7 @@ class AnnotationJSONService:
                 # group lookup for every annotation without this
                 Annotation.group,
                 # Optimise access to the mentions
-                (Annotation.slim, AnnotationSlim.mentions),
+                Annotation.mentions,
             ],
         )
 

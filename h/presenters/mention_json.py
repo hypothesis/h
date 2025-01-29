@@ -11,7 +11,7 @@ class MentionJSONPresenter:
 
     def asdict(self) -> dict[str, Any]:
         return {
-            "userid": self._mention.annotation.user.userid,
+            "userid": self._mention.annotation.userid,
             "display_name": self._mention.user.display_name,
             "link": self._mention.user.uri,
         }
