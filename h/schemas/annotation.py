@@ -65,17 +65,6 @@ SELECTOR_SCHEMA = {
     },
 }
 
-MENTION_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "userid": {"type": "string"},
-        "username": {"type": "string"},
-        "display_name": {"type": "string"},
-        "link": {"type": "string"},
-    },
-    "required": ["userid", "username"],
-}
-
 
 class AnnotationSchema(JSONSchema):
     """Validate an annotation object."""
@@ -109,10 +98,6 @@ class AnnotationSchema(JSONSchema):
             "text": {"type": "string"},
             "uri": {"type": "string"},
             "metadata": {"type": "object"},
-            "mentions": {
-                "type": "array",
-                "items": copy.deepcopy(MENTION_SCHEMA),
-            },
         },
     }
 
