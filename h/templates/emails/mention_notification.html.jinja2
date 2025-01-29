@@ -1,0 +1,26 @@
+<p>
+  {% if user_url %}
+    <a href="{{ user_url }}">{{ user_display_name }}</a>
+  {% else %}
+    {{ user_display_name }}
+  {% endif %}
+  has
+  <a href="{{ annotation_url }}">mentioned you</a>
+  on
+  <a href="{{ document_url }}">&ldquo;{{ document_title }}&rdquo;</a>:
+</p>
+
+<p>
+  On
+  {{ annotation.updated | human_timestamp }}
+  {% if user_url %}
+    <a href="{{ user_url }}">{{ user_display_name }}</a>
+  {% else %}
+    {{ user_display_name }}
+  {% endif %}
+  commented:
+</p>
+
+<blockquote>{{ annotation.text or "" }}</blockquote>
+
+<p><a href="{{ annotation_url }}">View the thread and respond</a>.</p>

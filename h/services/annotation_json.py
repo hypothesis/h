@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from h.models import Annotation, AnnotationSlim, User
+from h.models import Annotation, User
 from h.presenters import DocumentJSONPresenter
 from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits

@@ -1,0 +1,7 @@
+{{ user_display_name }} has replied to your annotation on "{{ document_title }}":
+
+On {{ annotation.updated | human_timestamp }} {{ user_display_name }} replied:
+
+> {{ annotation.text or "" }}
+
+View the thread and respond: {{ annotation_url }}

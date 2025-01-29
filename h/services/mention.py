@@ -1,8 +1,7 @@
 import logging
 import re
-from typing import Iterable, Sequence
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from h.models import Annotation, Mention
