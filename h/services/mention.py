@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Iterable, Sequence
 
-import sqlalchemy as sa
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from h.models import Annotation, Mention
@@ -26,13 +26,12 @@ class MentionService:
         userids = set(self._parse_userids(annotation.text))
         users = self._user_service.fetch_all(userids)
         self._session.execute(
-            sa.delete(Mention).where(Mention.annotation_id == annotation.slim.id)
+            delete(Mention).where(Mention.annotation_id == annotation.slim.id)
         )
         for user in users:
             mention = Mention(
                 annotation_id=annotation.slim.id,
-                user_id=user.id,
-                username=user.username,
+                user_id=user.id
             )
             self._session.add(mention)
 
@@ -42,7 +41,7 @@ class MentionService:
 
     def fetch_all(self, annotations: Iterable[Annotation]) -> Sequence[Mention]:
         annotation_slim_ids = [annotation.slim.id for annotation in annotations]
-        stmt = sa.select(Mention).where(Mention.annotation_id.in_(annotation_slim_ids))
+        stmt = select(Mention).where(Mention.annotation_id.in_(annotation_slim_ids))
         return self._session.execute(stmt).scalars().all()
 
 
