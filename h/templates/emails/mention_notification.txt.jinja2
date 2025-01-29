@@ -2,6 +2,6 @@
 
 On {{ annotation.updated | human_timestamp }} {{ user_display_name }} replied:
 
-> {{ annotation.text or "" }}
+> {{ annotation.text|striptags or "" }}
 
 View the thread and respond: {{ annotation_url }}
