@@ -1,4 +1,4 @@
-from h.celery import celery
+from h.tasks.celery import celery
 
 
 @celery.task(rate_limit="10/m")

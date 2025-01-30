@@ -1,4 +1,4 @@
-from h.celery import celery, get_task_logger
+from h.tasks.celery import celery, get_task_logger
 
 log = get_task_logger(__name__)
 

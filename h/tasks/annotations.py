@@ -1,7 +1,7 @@
-from h.celery import celery, get_task_logger
 from h.db.types import URLSafeUUID
 from h.models import Annotation
 from h.services.annotation_write import AnnotationWriteService
+from h.tasks.celery import celery, get_task_logger
 
 log = get_task_logger(__name__)
 

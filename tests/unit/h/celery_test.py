@@ -2,7 +2,7 @@ from unittest import mock
 
 from billiard.einfo import ExceptionInfo
 
-from h import celery
+from h.tasks import celery
 
 
 class TestCelery:
@@ -45,7 +45,7 @@ class TestCelery:
         sender.app.request.tm.abort.assert_called_once_with()
 
     def test_report_failure_reports_failure_in_debug_mode(self, patch):
-        log = patch("h.celery.log")
+        log = patch("h.tasks.celery.log")
         sender = mock.Mock(spec=["app"])
         sender.name = "wibble"
         sender.app.request.debug = True
@@ -62,7 +62,7 @@ class TestCelery:
         assert log.error.called
 
     def test_report_failure_skipped_when_not_in_debug_mode(self, patch):
-        log = patch("h.celery.log")
+        log = patch("h.tasks.celery.log")
         sender = mock.Mock(spec=["app"])
         sender.name = "wibble"
         sender.app.request.debug = False
