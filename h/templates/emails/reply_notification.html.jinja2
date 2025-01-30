@@ -21,7 +21,7 @@
   commented:
 </p>
 
-<blockquote>{{ parent.text|striptags or "" }}</blockquote>
+<blockquote>{{ (parent.text or "")|striptags }}</blockquote>
 
 <p>
   On
@@ -34,7 +34,7 @@
   replied:
 </p>
 
-<blockquote>{{ reply.text|striptags or "" }}</blockquote>
+<blockquote>{{ (reply.text or "")|striptags }}</blockquote>
 
 <p><a href="{{ reply_url }}">View the thread and respond</a>.</p>
 

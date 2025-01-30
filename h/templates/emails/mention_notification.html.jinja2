@@ -21,6 +21,6 @@
   commented:
 </p>
 
-<blockquote>{{ annotation.text|striptags or "" }}</blockquote>
+<blockquote>{{ (annotation.text or "")|striptags }}</blockquote>
 
 <p><a href="{{ annotation_url }}">View the thread and respond</a>.</p>
