@@ -20,7 +20,7 @@ class Annotation(ModelFactory):
             "flush"  # Always flush the db to generate annotation.id.
         )
 
-    tags = factory.LazyFunction(lambda: list(FAKER.words(nb=random.randint(0, 5))))
+    tags = factory.LazyFunction(lambda: list(FAKER.words(nb=random.randint(0, 5))))  # noqa: S311
     target_uri = factory.Faker("uri")
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(lambda: f"acct:{FAKER.user_name()}@localhost")
@@ -47,7 +47,7 @@ class Annotation(ModelFactory):
         ]
 
     @factory.post_generation
-    def make_metadata(self, create, extracted, **kwargs):
+    def make_metadata(self, create, extracted, **kwargs):  # noqa: ARG002
         """Create associated document metadata for the annotation."""
         # The metadata objects are going to be added to the db, so if we're not
         # using the create strategy then simply don't make any.
@@ -70,7 +70,7 @@ class Annotation(ModelFactory):
                 "content_type": document_uri.content_type,
             }
 
-        document_uri_dicts = [document_uri_dict() for _ in range(random.randint(1, 3))]
+        document_uri_dicts = [document_uri_dict() for _ in range(random.randint(1, 3))]  # noqa: S311
 
         def document_meta_dict(type_=None):
             """
@@ -92,7 +92,8 @@ class Annotation(ModelFactory):
             }
 
         document_meta_dicts = [
-            document_meta_dict() for _ in range(random.randint(1, 3))
+            document_meta_dict()
+            for _ in range(random.randint(1, 3))  # noqa: S311
         ]
 
         # Make sure that there's always at least one DocumentMeta with
@@ -110,7 +111,7 @@ class Annotation(ModelFactory):
         )
 
     @factory.post_generation
-    def make_id(self, create, extracted, **kwargs):
+    def make_id(self, create, extracted, **kwargs):  # noqa: ARG002
         """Add a randomly ID if the annotation doesn't have one yet."""
         # If using the create strategy don't generate an id.
         # models.Annotation.id's server_default function will generate one
@@ -126,7 +127,7 @@ class Annotation(ModelFactory):
         self.id = URLSafeUUID().process_result_value(uuid.uuid4().hex, None)
 
     @factory.post_generation
-    def timestamps(self, create, extracted, **kwargs):
+    def timestamps(self, create, extracted, **kwargs):  # noqa: ARG002
         # If using the create strategy let sqlalchemy set the created and
         # updated times when saving to the DB.
         if create:
@@ -139,5 +140,5 @@ class Annotation(ModelFactory):
         # instead of just once) so created and updated won't be exactly the
         # same. This is consistent with how models.Annotation does it when
         # saving to the DB.
-        self.created = self.created or datetime.datetime.now()
-        self.updated = self.updated or datetime.datetime.now()
+        self.created = self.created or datetime.datetime.now()  # noqa: DTZ005
+        self.updated = self.updated or datetime.datetime.now()  # noqa: DTZ005

@@ -111,7 +111,7 @@ def merge_duplicate_document_uris(session):
         )
         n += batch_delete(document_uris, session)
 
-    log.info("deleted %d duplicate rows from document_uri (NULL)" % n)
+    log.info("deleted %d duplicate rows from document_uri (NULL)" % n)  # noqa: G002, UP031
 
 
 def delete_conflicting_document_uris(session):
@@ -169,7 +169,7 @@ def delete_conflicting_document_uris(session):
 
         n += batch_delete(conflicting_doc_uris, session)
 
-    log.info("deleted %d duplicate rows from document_uri (empty string/NULL)" % n)
+    log.info("deleted %d duplicate rows from document_uri (empty string/NULL)" % n)  # noqa: G002, UP031
 
 
 def change_nulls_to_empty_strings(session):
@@ -204,7 +204,7 @@ def change_nulls_to_empty_strings(session):
 
         session.commit()
 
-    log.info("replaced NULL with '' in %d rows" % n)
+    log.info("replaced NULL with '' in %d rows" % n)  # noqa: G002, UP031
 
 
 def upgrade():

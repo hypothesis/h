@@ -9,4 +9,4 @@ def organization_logo(context, _request):
     if logo := context.organization.logo:
         return logo
 
-    raise NotFound()
+    raise NotFound()  # noqa: RSE102

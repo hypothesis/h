@@ -75,8 +75,15 @@ class DocumentURI(Base, mixins.Timestamps):
         return f"<DocumentURI {self.id}>"
 
 
-def create_or_update_document_uri(
-    session, claimant, uri, type, content_type, document, created, updated
+def create_or_update_document_uri(  # noqa: PLR0913
+    session,
+    claimant,
+    uri,
+    type,  # noqa: A002
+    content_type,
+    document,
+    created,
+    updated,
 ):
     """
     Create or update a DocumentURI with the given parameters.
@@ -129,7 +136,7 @@ def create_or_update_document_uri(
             updated=updated,
         )
         session.add(docuri)
-    elif not docuri.document == document:
+    elif not docuri.document == document:  # noqa: SIM201
         log.warning(
             "Found DocumentURI (id: %s)'s document_id (%s) doesn't match "
             "given Document's id (%s)",
@@ -143,4 +150,4 @@ def create_or_update_document_uri(
     try:
         session.flush()
     except sa.exc.IntegrityError as err:
-        raise ConcurrentUpdateError("concurrent document uri updates") from err
+        raise ConcurrentUpdateError("concurrent document uri updates") from err  # noqa: EM101, TRY003

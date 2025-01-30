@@ -23,7 +23,7 @@ class UserPasswordService:
 
         # Old-style separate salt.
         #
-        # TODO: remove this deprecated code path when a suitable proportion of
+        # TODO: remove this deprecated code path when a suitable proportion of  # noqa: FIX002, TD002, TD003
         # users have updated their password by logging-in. (Check how many
         # users still have a non-null salt in the database.)
         if user.salt is not None:
@@ -51,7 +51,7 @@ class UserPasswordService:
         # password automatically).
         user.salt = None
         user.password = self.hasher.hash(new_password)
-        user.password_updated = datetime.datetime.utcnow()
+        user.password_updated = datetime.datetime.utcnow()  # noqa: DTZ003
 
 
 def user_password_service_factory(_context, _request):

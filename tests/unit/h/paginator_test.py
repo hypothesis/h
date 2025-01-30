@@ -227,8 +227,8 @@ class TestPaginateQuery:
         """Return a mock SQLAlchemy Query object."""
         mock_query = mock.Mock(spec_set=["count", "offset", "limit", "all"])
         mock_query.count.side_effect = lambda: mock.sentinel.total
-        mock_query.offset.side_effect = lambda n: mock_query
-        mock_query.limit.side_effect = lambda n: mock_query
+        mock_query.offset.side_effect = lambda n: mock_query  # noqa: ARG005
+        mock_query.limit.side_effect = lambda n: mock_query  # noqa: ARG005
         mock_query.all.side_effect = lambda: mock.sentinel.all
         return mock_query
 

@@ -65,7 +65,7 @@ class SearchIndexService:
 
         self._index_annotation_body(annotation.id, body, refresh=False)
 
-    def delete_annotation_by_id(self, annotation_id, refresh=False):
+    def delete_annotation_by_id(self, annotation_id, refresh=False):  # noqa: FBT002
         """
         Mark an annotation as deleted in the search index.
 

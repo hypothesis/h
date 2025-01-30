@@ -24,7 +24,7 @@ Session = sessionmaker()
 log = logging.getLogger(__name__)
 
 
-class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024, SLOT002
     pass
 
 
@@ -39,7 +39,7 @@ class Document(Base):
 
     def updated_web_uri(self):
         def first_http_url(type_=None):
-            for document_uri in self.document_uris:
+            for document_uri in self.document_uris:  # noqa: RET503
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
@@ -89,8 +89,8 @@ def upgrade():
 
         session.commit()
 
-    log.info("Updated {updated} web_uris".format(updated=updated))
-    log.info("Left {not_changed} web_uris unchanged".format(not_changed=not_changed))
+    log.info(f"Updated {updated} web_uris")  # noqa: G004
+    log.info(f"Left {not_changed} web_uris unchanged")  # noqa: G004
 
 
 def downgrade():

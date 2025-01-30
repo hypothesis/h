@@ -26,7 +26,7 @@ FILTER_SCHEMA = {
 
 
 class SocketFilter:
-    KNOWN_FIELDS = {"/id", "/group", "/uri", "/references"}
+    KNOWN_FIELDS = {"/id", "/group", "/uri", "/references"}  # noqa: RUF012
 
     @classmethod
     def matching(cls, sockets, annotation, session):
@@ -94,6 +94,6 @@ class SocketFilter:
 
             for value in values:
                 if field == "/uri":
-                    value = normalize_uri(value)
+                    value = normalize_uri(value)  # noqa: PLW2901
 
                 yield field, value

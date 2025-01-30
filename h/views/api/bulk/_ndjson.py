@@ -1,11 +1,11 @@
 import json
+from collections.abc import Iterable
 from itertools import chain
-from typing import Iterable, Optional
 
 from pyramid.response import Response
 
 
-def get_ndjson_response(results: Optional[Iterable]) -> Response:
+def get_ndjson_response(results: Iterable | None) -> Response:
     """
     Create a streaming response for an NDJSON based end-point.
 

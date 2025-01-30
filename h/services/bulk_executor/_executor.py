@@ -47,8 +47,8 @@ class BulkExecutor(Executor):
             )
 
         except NoResultFound as err:
-            raise InvalidDeclarationError(
-                f"No user found for effective user: '{config.effective_user}'"
+            raise InvalidDeclarationError(  # noqa: TRY003
+                f"No user found for effective user: '{config.effective_user}'"  # noqa: EM102
             ) from err
 
         self.effective_user_id = user.id
@@ -70,8 +70,8 @@ class BulkExecutor(Executor):
         handler = self.handlers.get((command_type, data_type), None)
 
         if handler is None:
-            raise UnsupportedOperationError(
-                f"No implementation for {command_type.value} {data_type.value}"
+            raise UnsupportedOperationError(  # noqa: TRY003
+                f"No implementation for {command_type.value} {data_type.value}"  # noqa: EM102
             )
 
         # Do it
@@ -79,13 +79,13 @@ class BulkExecutor(Executor):
             batch, effective_user_id=self.effective_user_id, **default_config
         )
 
-    def _assert_authority(self, field, value, embedded=False):
+    def _assert_authority(self, field, value, embedded=False):  # noqa: FBT002
         if embedded and value.endswith(f"@{self.authority}"):
             return
 
         if value == self.authority:
             return
 
-        raise InvalidDeclarationError(
-            f"The {field} '{value}' does not match the expected authority"
+        raise InvalidDeclarationError(  # noqa: TRY003
+            f"The {field} '{value}' does not match the expected authority"  # noqa: EM102
         )

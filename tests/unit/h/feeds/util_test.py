@@ -7,7 +7,7 @@ from h.feeds import util
 def test_tag_uri_for_annotation(factories):
     """Entry IDs should be tag URIs based on domain, day and annotation ID."""
     annotation = factories.Annotation(
-        created=datetime.datetime(year=2015, month=3, day=19)
+        created=datetime.datetime(year=2015, month=3, day=19)  # noqa: DTZ001
     )
 
     tag_uri = util.tag_uri_for_annotation(

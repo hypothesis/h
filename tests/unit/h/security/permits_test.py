@@ -18,7 +18,7 @@ def always_false(_identity, _context):
 
 
 def explode(_identity, _context):
-    assert False, "This should not be reached"  # pragma: no cover
+    assert False, "This should not be reached"  # pragma: no cover  # noqa: B011, PT015
 
 
 class TestIdentityPermits:

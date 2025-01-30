@@ -21,7 +21,7 @@ class TestUserIDComparator:
         ("not_a_valid_user_id", "acct:DIFFERENT@authority", "acct:username@DIFFERENT"),
     )
     def test__eq___returns_False(self, comparator, non_matching):
-        assert not comparator == non_matching
+        assert not comparator == non_matching  # noqa: SIM201
 
     @pytest.fixture
     def comparator(self):
@@ -72,19 +72,19 @@ class TestUserModelDataConstraints:
         assert fred.userid == "acct:fredbloggs@example.com"
 
     def test_cannot_create_user_with_too_short_username(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             User(username="aa")
 
     def test_cannot_create_user_with_too_long_username(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             User(username="1234567890123456789012345678901")
 
     def test_cannot_create_user_with_invalid_chars(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             User(username="foo-bar")
 
     def test_cannot_create_user_with_too_long_email(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             User(email="bob@b" + "o" * 100 + "b.com")
 
     def test_can_create_user_with_null_email(self):
@@ -197,11 +197,11 @@ class TestUserModel:
         assert isinstance(user.activation_date, datetime)
 
         # We can't test for the exact time, but this should be close
-        assert user.activation_date - datetime.utcnow() < timedelta(seconds=1)
+        assert user.activation_date - datetime.utcnow() < timedelta(seconds=1)  # noqa: DTZ003
 
     def test_privacy_accepted_defaults_to_None(self):
         # nullable
-        assert getattr(User(), "privacy_accepted") is None
+        assert getattr(User(), "privacy_accepted") is None  # noqa: B009
 
     def test_repr(self, user):
         assert repr(user) == f"User(id={user.id})"

@@ -22,8 +22,8 @@ class TestSearchAdminViews:
 
         tasks.job_queue.add_annotations_between_times.delay.assert_called_once_with(
             "sync_annotation",
-            datetime.datetime(year=2020, month=9, day=9),
-            datetime.datetime(year=2020, month=9, day=11),
+            datetime.datetime(year=2020, month=9, day=9),  # noqa: DTZ001
+            datetime.datetime(year=2020, month=9, day=11),  # noqa: DTZ001
             tag="reindex_date",
         )
         assert pyramid_request.session.peek_flash("success") == [
@@ -117,7 +117,7 @@ class TestSearchAdminViews:
         ]
 
     @pytest.fixture
-    def views(self, pyramid_request, queue_service):
+    def views(self, pyramid_request, queue_service):  # noqa: ARG002
         return SearchAdminViews(pyramid_request)
 
     @pytest.fixture(autouse=True)

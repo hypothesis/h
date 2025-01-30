@@ -13,8 +13,8 @@ class TestLRUCacheInTransaction:
         # cleared when the transaction ends.
 
         @lru_cache_in_transaction(db_session)
-        def random_float(*args, **kwargs):
-            return random.random()
+        def random_float(*args, **kwargs):  # noqa: ARG001
+            return random.random()  # noqa: S311
 
         a = random_float("a")
         b = random_float("b")
@@ -36,8 +36,8 @@ class TestLRUCacheInTransaction:
         """The cache should not be cleared when a nested transaction ends."""
 
         @lru_cache_in_transaction(db_session)
-        def random_float(*args, **kwargs):
-            return random.random()
+        def random_float(*args, **kwargs):  # noqa: ARG001
+            return random.random()  # noqa: S311
 
         a = random_float("a")
         b = random_float("b")

@@ -1,7 +1,7 @@
 import datetime
 
 import pytest
-from pytest import param
+from pytest import param  # noqa: PT013
 
 from h.services.auth_token import (
     AuthTokenService,
@@ -86,11 +86,11 @@ class TestAuthTokenService:
         return factories.DeveloperToken()
 
     def time(self, days_delta=0):
-        return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)
+        return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)  # noqa: DTZ003
 
 
 def _seconds_from_now(seconds):
-    return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
+    return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)  # noqa: DTZ003
 
 
 class TestLongLivedToken:

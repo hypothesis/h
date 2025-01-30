@@ -15,8 +15,8 @@ class TestAnnotationJSONService:
     def test_present(
         self, service, annotation, links_service, user_service, DocumentJSONPresenter
     ):
-        annotation.created = datetime(2016, 2, 24, 18, 3, 25, 768)
-        annotation.updated = datetime(2016, 2, 29, 10, 24, 5, 564)
+        annotation.created = datetime(2016, 2, 24, 18, 3, 25, 768)  # noqa: DTZ001
+        annotation.updated = datetime(2016, 2, 29, 10, 24, 5, 564)  # noqa: DTZ001
         annotation.references = ["referenced-id-1", "referenced-id-2"]
         annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
 

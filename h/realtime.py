@@ -31,7 +31,7 @@ class Consumer(ConsumerMixin):
         self.handler = handler
         self.exchange = get_exchange()
 
-    def get_consumers(self, consumer_factory, channel):
+    def get_consumers(self, consumer_factory, channel):  # noqa: ARG002
         name = self.generate_queue_name()
         queue = kombu.Queue(
             name,
@@ -106,7 +106,7 @@ class Publisher:
         except (OperationalError, LimitExceeded) as err:
             # If we fail to connect (OperationalError), or we don't get a
             # producer from the pool in time (LimitExceeded) raise
-            raise RealtimeMessageQueueError() from err
+            raise RealtimeMessageQueueError() from err  # noqa: RSE102
 
 
 def get_exchange():
@@ -117,7 +117,7 @@ def get_exchange():
     )
 
 
-def get_connection(settings, fail_fast=False):
+def get_connection(settings, fail_fast=False):  # noqa: FBT002
     """
     Return a `kombu.Connection` based on the application's settings.
 

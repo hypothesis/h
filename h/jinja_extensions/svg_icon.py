@@ -1,4 +1,4 @@
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # noqa: ICN001
 
 from markupsafe import Markup
 
@@ -30,12 +30,12 @@ def svg_icon(name, css_class=""):
     # See http://stackoverflow.com/questions/8983041
     ElementTree.register_namespace("", SVG_NAMESPACE_URI)
 
-    with open(f"build/images/icons/{name}.svg", encoding="utf8") as handle:
+    with open(f"build/images/icons/{name}.svg", encoding="utf8") as handle:  # noqa: PTH123
         svg_data = handle.read()
 
-    root = ElementTree.fromstring(svg_data)
+    root = ElementTree.fromstring(svg_data)  # noqa: S314
 
-    if css_class:
+    if css_class:  # noqa: SIM108
         css_class = "svg-icon " + css_class
     else:
         css_class = "svg-icon"

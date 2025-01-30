@@ -39,7 +39,7 @@ class AnnotationJSONLDPresenter:
         ]
         if self.annotation.tags:  # pragma: no cover
             for tag in self.annotation.tags:
-                bodies.append(
+                bodies.append(  # noqa: PERF401
                     {"type": "TextualBody", "value": tag, "purpose": "tagging"}
                 )
 
@@ -65,7 +65,7 @@ class AnnotationJSONLDPresenter:
             except KeyError:
                 continue
             if type_ == "RangeSelector":
-                selector = _convert_range_selector(selector)
+                selector = _convert_range_selector(selector)  # noqa: PLW2901
                 if selector is None:
                     continue
             selectors.append(selector)

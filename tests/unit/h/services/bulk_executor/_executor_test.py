@@ -2,7 +2,7 @@ import pytest
 from h_api.bulk_api.model.config_body import Configuration
 from h_api.enums import CommandType, DataType
 from h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
-from pytest import param
+from pytest import param  # noqa: PT013
 
 from h.services.bulk_executor._executor import BulkExecutor
 from tests.unit.h.services.bulk_executor.conftest import (

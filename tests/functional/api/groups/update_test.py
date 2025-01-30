@@ -31,7 +31,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         res = app.patch_json(
-            "/api/groups/{id}".format(id=first_party_group.pubid),
+            f"/api/groups/{first_party_group.pubid}",
             {"name": "Rename My Group"},
             headers=token_auth_header,
         )
@@ -50,7 +50,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         res = app.patch_json(
-            "/api/groups/{id}".format(id=first_party_group.pubid),
+            f"/api/groups/{first_party_group.pubid}",
             {},
             headers=token_auth_header,
         )
@@ -75,7 +75,7 @@ class TestUpdateGroup:
             "joinable_by": "whoever",
         }
         res = app.patch_json(
-            "/api/groups/{id}".format(id=first_party_group.pubid),
+            f"/api/groups/{first_party_group.pubid}",
             group,
             headers=token_auth_header,
         )
@@ -94,7 +94,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         res = app.patch_json(
-            "/api/groups/{id}".format(id=first_party_group.pubid),
+            f"/api/groups/{first_party_group.pubid}",
             {
                 "name": "Oooopoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             },
@@ -118,7 +118,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         res = app.patch_json(
-            "/api/groups/{id}".format(id=first_party_group.pubid),
+            f"/api/groups/{first_party_group.pubid}",
             {"groupid": "3434kjkjk"},
             headers=token_auth_header,
             expect_errors=True,
@@ -133,7 +133,7 @@ class TestUpdateGroup:
     def test_it_returns_http_404_if_no_authenticated_user(self, app, first_party_group):
         group = {"name": "My Group"}
         res = app.patch_json(
-            "/api/groups/{id}".format(id=first_party_group.pubid),
+            f"/api/groups/{first_party_group.pubid}",
             group,
             expect_errors=True,
         )
@@ -149,7 +149,7 @@ class TestUpdateGroup:
 
         group_payload = {"name": "My Group"}
         res = app.patch_json(
-            "/api/groups/{id}".format(id=group.pubid),
+            f"/api/groups/{group.pubid}",
             group_payload,
             headers=token_auth_header,
             expect_errors=True,
@@ -169,7 +169,7 @@ class TestUpdateGroup:
         headers["X-Forwarded-User"] = third_party_user.userid
         group_payload = {"name": "My Group"}
 
-        path = "/api/groups/{id}".format(id=group.pubid)
+        path = f"/api/groups/{group.pubid}"
         res = app.patch_json(path, group_payload, headers=headers)
 
         assert res.status_code == 200
@@ -185,7 +185,7 @@ class TestUpdateGroup:
 
         group_payload = {"name": "My Group"}
 
-        path = "/api/groups/{id}".format(id=group.pubid)
+        path = f"/api/groups/{group.pubid}"
         res = app.patch_json(path, group_payload, headers=auth_client_header)
 
         assert res.status_code == 200
@@ -199,7 +199,7 @@ class TestUpdateGroup:
 
         group_payload = {"name": "My Group"}
 
-        path = "/api/groups/{id}".format(id=group.pubid)
+        path = f"/api/groups/{group.pubid}"
         res = app.patch_json(
             path, group_payload, headers=auth_client_header, expect_errors=True
         )
@@ -221,7 +221,7 @@ class TestUpdateGroup:
             "groupid": "group:98762557@thirdparty.com",
         }
 
-        path = "/api/groups/{id}".format(id=group.pubid)
+        path = f"/api/groups/{group.pubid}"
         res = app.patch_json(path, group_payload, headers=headers)
 
         assert res.status_code == 200
@@ -248,7 +248,7 @@ class TestUpdateGroup:
         group_payload = {"groupid": "group:update_one@thirdparty.com"}
 
         # Attempting to set group2's `groupid` to one already taken by group1
-        path = "/api/groups/{id}".format(id=group2.pubid)
+        path = f"/api/groups/{group2.pubid}"
         res = app.patch_json(path, group_payload, headers=headers, expect_errors=True)
 
         assert group1.groupid in res.json_body["reason"]
@@ -286,7 +286,7 @@ def user_with_token(db_session, factories, first_party_user):
 @pytest.fixture
 def token_auth_header(user_with_token):
     user, token = user_with_token
-    return {"Authorization": "Bearer {}".format(token.value)}
+    return {"Authorization": f"Bearer {token.value}"}
 
 
 @pytest.fixture
@@ -307,8 +307,6 @@ def auth_client(db_session, factories):
 
 @pytest.fixture
 def auth_client_header(auth_client):
-    user_pass = "{client_id}:{secret}".format(
-        client_id=auth_client.id, secret=auth_client.secret
-    )
+    user_pass = f"{auth_client.id}:{auth_client.secret}"
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
     return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}

@@ -88,7 +88,7 @@ class TestLoginFlow:
     def login(cls, app, user):
         res = app.get("/login")
         res.form["username"] = user.username
-        res.form["password"] = "pass"
+        res.form["password"] = "pass"  # noqa: S105
         res.form.submit()
 
     @pytest.fixture
@@ -117,7 +117,7 @@ class TestLoginFlow:
     def user(self, db_session, factories):
         # Password is 'pass'
         user = factories.User(
-            password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"
+            password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"  # noqa: S106
         )
         db_session.commit()
         return user

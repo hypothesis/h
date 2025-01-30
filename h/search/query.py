@@ -13,7 +13,7 @@ LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
 LIMIT_MAX = 200
 OFFSET_MAX = 9800
-DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())
+DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())  # noqa: DTZ001
 
 
 def popall(multidict, key):
@@ -100,7 +100,7 @@ class Sorter:
         # Since search_after depends on the field that the annotations are
         # being sorted by, it is set here rather than in a separate class.
         search_after = params.pop("search_after", None)
-        if search_after:
+        if search_after:  # noqa: SIM102
             if sort_by in ["updated", "created"]:
                 search_after = self._parse_date(search_after)
 
@@ -137,8 +137,8 @@ class Sorter:
         try:
             epoch = float(str_value)
             if epoch < 9999:
-                raise ValueError("This is not in the form ms since the epoch.")
-            return epoch
+                raise ValueError("This is not in the form ms since the epoch.")  # noqa: EM101, TRY003, TRY301
+            return epoch  # noqa: TRY300
         except ValueError:
             try:
                 date = parse(str_value, default=DEFAULT_DATE)
@@ -163,7 +163,7 @@ class AuthorityFilter:
     def __init__(self, authority):
         self.authority = authority
 
-    def __call__(self, search, params):
+    def __call__(self, search, params):  # noqa: ARG002
         return search.filter("term", authority=self.authority)
 
 
@@ -183,7 +183,7 @@ class AuthFilter:
         """
         self.request = request
 
-    def __call__(self, search, params):
+    def __call__(self, search, params):  # noqa: ARG002
         userid = self.request.authenticated_userid
         if userid is None:
             return search.filter("term", shared=True)
@@ -203,7 +203,7 @@ class SharedAnnotationsFilter:
     belong to the authenticated user.
     """
 
-    def __call__(self, search, params):
+    def __call__(self, search, params):  # noqa: ARG002
         return search.filter("term", shared=True)
 
 
@@ -242,7 +242,7 @@ class UriCombinedWildcardFilter:
     any single character.
     """
 
-    def __init__(self, request, separate_keys=False):
+    def __init__(self, request, separate_keys=False):  # noqa: FBT002
         """
         Initialize a new UriFilter.
 

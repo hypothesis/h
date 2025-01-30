@@ -23,7 +23,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024, SLOT002
     pass
 
 
@@ -55,7 +55,7 @@ def fill_annotations_text_rendered(session):
         _fill_annotation_window_text_rendered(session, window)
         session.commit()
 
-        print(".", end="")
+        print(".", end="")  # noqa: T201
         sys.stdout.flush()
 
 

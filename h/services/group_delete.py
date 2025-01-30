@@ -22,7 +22,7 @@ class GroupDeleteService:
 
     def _delete_annotations(self, group):
         if group.pubid == "__world__":
-            raise DeletePublicGroupError("Public group can not be deleted")
+            raise DeletePublicGroupError("Public group can not be deleted")  # noqa: EM101, TRY003
 
         annotations = self.request.db.query(Annotation).filter_by(groupid=group.pubid)
         self._annotation_delete_service.delete_annotations(annotations)

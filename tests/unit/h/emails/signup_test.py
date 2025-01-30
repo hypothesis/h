@@ -18,8 +18,8 @@ class TestGenerate:
         expected_context = {
             "activate_link": "http://example.com/activate/1234/abcd4567"
         }
-        html_renderer.assert_(**expected_context)
-        text_renderer.assert_(**expected_context)
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_appropriate_return_values(
         self, pyramid_request, html_renderer, text_renderer

@@ -1,6 +1,6 @@
 import pytest
 
-__all__ = ("group", "other_authority_group", "open_group", "user_owned_group")
+__all__ = ("group", "open_group", "other_authority_group", "user_owned_group")
 
 
 @pytest.fixture

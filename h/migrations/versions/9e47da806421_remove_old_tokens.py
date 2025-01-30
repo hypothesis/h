@@ -56,7 +56,7 @@ def upgrade():
 
         for deleted_token_id in deleted_token_ids:
             count += 1
-            log.info(f"Deleted token (%d): %s", count, deleted_token_id)  # noqa: F541
+            log.info(f"Deleted token (%d): %s", count, deleted_token_id)  # noqa: F541, G004
 
 
 def downgrade():

@@ -35,7 +35,7 @@ def test_strip_scheme_char_filter():
     assert re.sub(p, r, "uri:x-pdf:1234") == "x-pdf:1234"
     assert re.sub(p, r, "example.com") == "example.com"
     # This is ambiguous, and possibly cannot be expected to work.
-    # assert(re.sub(p, r, 'localhost:5000') == 'localhost:5000')
+    # assert(re.sub(p, r, 'localhost:5000') == 'localhost:5000')  # noqa: ERA001
 
 
 def test_path_url_filter():
@@ -137,7 +137,7 @@ class TestInit:
         # Simulate the ICU Analysis plugin, and get around some funky stuff
         # the ES client library does which confuses autospeccing
         mock_es_client.conn.cat.plugins = MagicMock()
-        mock_es_client.conn.cat.plugins.return_value = "\n".join(
+        mock_es_client.conn.cat.plugins.return_value = "\n".join(  # noqa: FLY002
             ["foo", "analysis-icu"]
         )
         return mock_es_client

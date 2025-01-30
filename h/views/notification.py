@@ -21,6 +21,6 @@ def unsubscribe(request):
             token=request.matchdict["token"]
         )
     except InvalidUnsubscribeToken as err:
-        raise HTTPNotFound() from err
+        raise HTTPNotFound() from err  # noqa: RSE102
 
     return {}

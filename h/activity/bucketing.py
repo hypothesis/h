@@ -146,7 +146,7 @@ class TimeframeGenerator:
             if timeframe.within_cutoff(annotation):
                 return timeframe
 
-        cutoff_time = datetime.datetime(
+        cutoff_time = datetime.datetime(  # noqa: DTZ001
             year=annotation.updated.year, month=annotation.updated.month, day=1
         )
         timeframe = Timeframe(annotation.updated.strftime("%b %Y"), cutoff_time)
@@ -179,4 +179,4 @@ def bucket(annotations):
 
 
 def utcnow():  # pragma: no cover
-    return datetime.datetime.utcnow()
+    return datetime.datetime.utcnow()  # noqa: DTZ003

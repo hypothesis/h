@@ -71,7 +71,7 @@ class TestBulkAnnotation:
 
     @pytest.fixture
     def make_request(self, app, auth_header_for_authority):
-        def make_request(json_body=None, expect_errors=False, headers=None):
+        def make_request(json_body=None, expect_errors=False, headers=None):  # noqa: FBT002
             return app.post(
                 "/api/bulk/annotation",
                 json.dumps(json_body or {}),

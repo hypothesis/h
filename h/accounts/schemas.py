@@ -1,7 +1,7 @@
 import codecs
 import logging
 from datetime import datetime, timedelta
-from functools import lru_cache
+from functools import cache
 
 import colander
 import deform
@@ -24,7 +24,7 @@ _ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_blacklist():
     # Try to load the blacklist file from disk. If, for whatever reason, we
     # can't load the file, then don't crash out, just log a warning about
@@ -32,10 +32,10 @@ def get_blacklist():
     try:
         with codecs.open("h/accounts/blacklist", encoding="utf-8") as handle:
             blacklist = handle.readlines()
-    except (IOError, ValueError):  # pragma: no cover
+    except (IOError, ValueError):  # pragma: no cover  # noqa: UP024
         log.exception("unable to load blacklist")
         blacklist = []
-    return set(line.strip().lower() for line in blacklist)
+    return set(line.strip().lower() for line in blacklist)  # noqa: C401
 
 
 def unique_email(node, value):
@@ -68,7 +68,7 @@ def unique_username(node, value):
         )
         # 31 days is an arbitrary time delta that should be more than enough
         # time for all the previous user's data to be expunged.
-        .where(models.UserDeletion.requested_at > datetime.now() - timedelta(days=31))
+        .where(models.UserDeletion.requested_at > datetime.now() - timedelta(days=31))  # noqa: DTZ005
     ).first():
         raise exc
 

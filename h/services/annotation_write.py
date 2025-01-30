@@ -65,7 +65,7 @@ class AnnotationWriteService:
         self._db.enable_relationship_loading(annotation)
         self._validate_group(annotation)
 
-        annotation.created = annotation.updated = datetime.utcnow()
+        annotation.created = annotation.updated = datetime.utcnow()  # noqa: DTZ003
         annotation.document = update_document_metadata(
             self._db,
             annotation.target_uri,
@@ -94,9 +94,9 @@ class AnnotationWriteService:
         self,
         annotation: Annotation,
         data: dict,
-        update_timestamp: bool = True,
+        update_timestamp: bool = True,  # noqa: FBT001, FBT002
         reindex_tag: str = "storage.update_annotation",
-        enforce_write_permission: bool = True,
+        enforce_write_permission: bool = True,  # noqa: FBT001, FBT002
     ) -> Annotation:
         """
         Update an annotation and its associated document metadata.
@@ -115,7 +115,7 @@ class AnnotationWriteService:
         annotation_metadata = data.pop("metadata", None)
         self._update_annotation_values(annotation, data)
         if update_timestamp:
-            annotation.updated = datetime.utcnow()
+            annotation.updated = datetime.utcnow()  # noqa: DTZ003
 
         # Expire the group relationship, so we get the most up-to-date value
         # instead of the one which was present when we loaded the model
@@ -189,7 +189,7 @@ class AnnotationWriteService:
         extra = data.get("extra", {})
         annotation.extra.update(extra)
 
-    def _validate_group(self, annotation: Annotation, enforce_write_permission=True):
+    def _validate_group(self, annotation: Annotation, enforce_write_permission=True):  # noqa: FBT002
         group = annotation.group
         if not group:
             raise ValidationError(

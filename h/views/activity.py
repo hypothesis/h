@@ -53,7 +53,7 @@ class SearchController:
 
         if self.request.user:
             for group in self.request.user.groups:
-                groups_suggestions.append({"name": group.name, "pubid": group.pubid})
+                groups_suggestions.append({"name": group.name, "pubid": group.pubid})  # noqa: PERF401
 
         def tag_link(tag):
             tag = parser.unparse({"tag": tag})
@@ -203,7 +203,7 @@ class GroupSearchController(SearchController):
         browser to the search page.
         """
         if not self.request.has_permission(Permission.Group.JOIN, context=self.context):
-            raise httpexceptions.HTTPNotFound()
+            raise httpexceptions.HTTPNotFound()  # noqa: RSE102
 
         group_members_service = self.request.find_service(name="group_members")
         group_members_service.member_join(self.group, self.request.authenticated_userid)
@@ -308,7 +308,7 @@ class GroupSearchController(SearchController):
                 self.request.override_renderer = "h:templates/groups/join.html.jinja2"
                 return {"group": self.group}
 
-            raise httpexceptions.HTTPNotFound()
+            raise httpexceptions.HTTPNotFound()  # noqa: RSE102
 
         return None
 

@@ -53,7 +53,7 @@ class TestCelery:
         einfo = None
         # Make a fake ExceptionInfo object
         try:
-            raise RuntimeError("asplode!")
+            raise RuntimeError("asplode!")  # noqa: EM101, TRY301
         except RuntimeError:
             einfo = ExceptionInfo()
 
@@ -70,7 +70,7 @@ class TestCelery:
         einfo = None
         # Make a fake ExceptionInfo object
         try:
-            raise RuntimeError("asplode!")
+            raise RuntimeError("asplode!")  # noqa: EM101, TRY301
         except RuntimeError:
             einfo = ExceptionInfo()
 

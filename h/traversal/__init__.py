@@ -72,19 +72,19 @@ from h.traversal.organization import OrganizationContext, OrganizationRoot
 from h.traversal.user import UserByIDRoot, UserByNameRoot, UserContext, UserRoot
 
 __all__ = (
+    "AddGroupMembershipContext",
     "AnnotationContext",
     "AnnotationRoot",
+    "EditGroupMembershipContext",
+    "GroupContext",
+    "GroupMembershipContext",
     "GroupRequiredRoot",
     "GroupRoot",
     "OrganizationContext",
     "OrganizationRoot",
-    "UserContext",
-    "UserByNameRoot",
     "UserByIDRoot",
+    "UserByNameRoot",
+    "UserContext",
     "UserRoot",
-    "GroupContext",
-    "AddGroupMembershipContext",
-    "EditGroupMembershipContext",
-    "GroupMembershipContext",
     "group_membership_api_factory",
 )

@@ -169,8 +169,8 @@ def test_parse_with_any_nonwhitespace_text(kw, value):
         # Items which used escape sequences rather than using alternate quotes,
         # e.g. original queries such as:
         #
-        #     group:"foo \"hello\" bar"
-        #     tag:'wibble \'giraffe\' bang'
+        #     group:"foo \"hello\" bar"  # noqa: ERA001
+        #     tag:'wibble \'giraffe\' bang'  # noqa: ERA001
         {"group": 'foo \\"hello\\" bar'},
         {"tag": "wibble \\'giraffe\\' bang"},
         # Items which contain both single and double quotes

@@ -121,7 +121,7 @@ class TestSearch:
         Things are returned in updated order so normally a reply would appear
         before the annotation that it is a reply to in the search results.
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now()  # noqa: DTZ005
         five_mins = datetime.timedelta(minutes=5)
         annotation = Annotation(updated=now, shared=True)
         reply = Annotation(
@@ -141,7 +141,7 @@ class TestSearch:
         updated the top-level annotation since the reply was created, then the
         annotation would come before the reply in the search results.
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now()  # noqa: DTZ005
         five_mins = datetime.timedelta(minutes=5)
         annotation = Annotation(updated=now + five_mins, shared=True)
         reply = Annotation(updated=now, references=[annotation.id], shared=True)
@@ -194,7 +194,7 @@ class TestSearchWithSeparateReplies:
         self, Annotation, pyramid_request
     ):
         annotation = Annotation(shared=True)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now()  # noqa: DTZ005
         five_mins = datetime.timedelta(minutes=5)
         reply_1 = Annotation(
             updated=now + (five_mins * 2), references=[annotation.id], shared=True
@@ -212,7 +212,7 @@ class TestSearchWithSeparateReplies:
 
     def test_replies_ignore_the_sort_param(self, Annotation, pyramid_request):
         annotation = Annotation(shared=True)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now()  # noqa: DTZ005
         five_mins = datetime.timedelta(minutes=5)
         reply_1 = Annotation(
             id="3", updated=now, references=[annotation.id], shared=True
@@ -263,7 +263,7 @@ class TestSearchWithSeparateReplies:
     ):
         """Replies that would not be on the same page are included."""
         # First create an annotation and a reply.
-        now = datetime.datetime.now()
+        now = datetime.datetime.now()  # noqa: DTZ005
         five_mins = datetime.timedelta(minutes=5)
         annotation = Annotation(updated=now + five_mins, shared=True)
         reply = Annotation(updated=now, references=[annotation.id], shared=True)

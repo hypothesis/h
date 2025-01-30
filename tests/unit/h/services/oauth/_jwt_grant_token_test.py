@@ -179,7 +179,7 @@ class TestVerifiedJWTGrantToken:
         assert exc.value.description == "Grant token is not yet valid."
 
     def test_expiry_returns_exp_claim(self, claims):
-        now = datetime.utcnow().replace(microsecond=0)
+        now = datetime.utcnow().replace(microsecond=0)  # noqa: DTZ003
         delta = timedelta(minutes=2)
 
         claims["exp"] = epoch(timestamp=now, delta=delta)
@@ -190,7 +190,7 @@ class TestVerifiedJWTGrantToken:
         assert grant_token.expiry == (now + delta)
 
     def test_not_before_returns_nbf_claim(self, claims):
-        now = datetime.utcnow().replace(microsecond=0)
+        now = datetime.utcnow().replace(microsecond=0)  # noqa: DTZ003
         delta = timedelta(minutes=-2)
 
         claims["nbf"] = epoch(timestamp=now, delta=delta)
@@ -246,7 +246,7 @@ class TestVerifiedJWTGrantToken:
 
 def epoch(timestamp=None, delta=None):
     if timestamp is None:
-        timestamp = datetime.utcnow()
+        timestamp = datetime.utcnow()  # noqa: DTZ003
 
     if delta is not None:
         timestamp = timestamp + delta

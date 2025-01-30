@@ -14,15 +14,15 @@ def status(request):
     try:
         request.db.execute(text("SELECT 1"))
     except Exception as err:
-        log.exception(err)
-        raise HTTPInternalServerError("Database connection failed") from err
+        log.exception(err)  # noqa: TRY401
+        raise HTTPInternalServerError("Database connection failed") from err  # noqa: EM101, TRY003
 
     if "replica" in request.params:
         try:
             request.db_replica.execute(text("SELECT 1"))
         except Exception as err:
-            log.exception(err)
-            raise HTTPInternalServerError("Replica database connection failed") from err
+            log.exception(err)  # noqa: TRY401
+            raise HTTPInternalServerError("Replica database connection failed") from err  # noqa: EM101, TRY003
 
     if "sentry" in request.params:
         capture_message("Test message from h's status view")

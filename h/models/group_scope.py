@@ -67,7 +67,7 @@ class GroupScope(Base):
         """
         parsed_origin, parsed_path = parse_scope_from_url(value)
         if parsed_origin is None:
-            raise ValueError("Invalid URL for scope: missing origin component")
+            raise ValueError("Invalid URL for scope: missing origin component")  # noqa: EM101, TRY003
         self._origin = parsed_origin
         self._path = parsed_path
 

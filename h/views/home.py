@@ -9,7 +9,7 @@ def via_redirect(_context, request):  # pragma: no cover
     url = request.params.get("url")
 
     if url is None:
-        raise httpexceptions.HTTPBadRequest('"url" parameter missing')
+        raise httpexceptions.HTTPBadRequest('"url" parameter missing')  # noqa: EM101, TRY003
 
     via_link = f"https://via.hypothes.is/{url}"
     raise httpexceptions.HTTPFound(location=via_link)

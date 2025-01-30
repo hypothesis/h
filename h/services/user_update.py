@@ -31,7 +31,7 @@ class UserUpdateService:
         # May wish to re-evaluate later if users need to be moved between
         # authorities.
         if "authority" in kwargs:
-            raise ValidationError("A user's authority may not be changed")
+            raise ValidationError("A user's authority may not be changed")  # noqa: EM101, TRY003
 
         for key, value in kwargs.items():
             try:
@@ -51,8 +51,8 @@ class UserUpdateService:
                 # This conflict can arise from changes to either username or authority.
                 # We know this isn't authority, because the presence of authority
                 # would have already raised.
-                raise ConflictError(
-                    f"""username '{kwargs["username"]}' is already in use"""
+                raise ConflictError(  # noqa: TRY003
+                    f"""username '{kwargs["username"]}' is already in use"""  # noqa: EM102
                 ) from err
 
             # Re-raise as this is an unexpected problem

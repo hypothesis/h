@@ -46,8 +46,8 @@ def upgrade():
 
     session.commit()
 
-    log.info("Removed whitespace from {n} document_uris".format(n=len(changed)))
-    log.info("Deleted {n} document_uris with empty uris".format(n=len(to_delete)))
+    log.info(f"Removed whitespace from {len(changed)} document_uris")  # noqa: G004
+    log.info(f"Deleted {len(to_delete)} document_uris with empty uris")  # noqa: G004
 
 
 def downgrade():

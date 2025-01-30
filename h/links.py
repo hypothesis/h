@@ -14,8 +14,7 @@ def pretty_link(url):
     if parsed.scheme not in ["http", "https"]:
         return url
     netloc = parsed.netloc
-    if netloc.startswith("www."):
-        netloc = netloc[4:]
+    netloc = netloc.removeprefix("www.")
     return unquote(netloc + parsed.path)
 
 

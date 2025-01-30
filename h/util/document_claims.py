@@ -110,7 +110,7 @@ def document_metas_from_data(document_data, claimant):
                 transform_meta_(document_meta_dicts, value, path_prefix=keypath)
             else:
                 if not isinstance(value, list):
-                    value = [value]
+                    value = [value]  # noqa: PLW2901
 
                 type_ = ".".join(keypath)
 
@@ -118,7 +118,7 @@ def document_metas_from_data(document_data, claimant):
                     # We don't allow None, empty strings, whitespace-only
                     # strings, leading or trailing whitespaces, or empty arrays
                     # in document title values.
-                    value = [v.strip() for v in value if v and v.strip()]
+                    value = [v.strip() for v in value if v and v.strip()]  # noqa: PLW2901
                     if not value:
                         continue
 
@@ -158,14 +158,14 @@ def document_uris_from_links(link_dicts, claimant):
 
         # Disregard Highwire PDF links as these are being added separately from
         # the highwire metadata later on.
-        if set(link_keys) == {"href", "type"}:
+        if set(link_keys) == {"href", "type"}:  # noqa: SIM102
             if link["type"] == "application/pdf":
                 continue
 
         uri_ = link["href"]
 
         # Handle rel="..." links.
-        if "rel" in link:
+        if "rel" in link:  # noqa: SIM108
             type_ = f"rel-{link['rel']}"
         else:
             type_ = ""
@@ -197,7 +197,7 @@ def document_uris_from_highwire_pdf(highwire_dict, claimant):
     document_uris = []
     hwpdfvalues = highwire_dict.get("pdf_url", [])
     for pdf in hwpdfvalues:
-        document_uris.append(
+        document_uris.append(  # noqa: PERF401
             {
                 "claimant": claimant,
                 "uri": pdf,
@@ -220,7 +220,7 @@ def document_uris_from_highwire_doi(highwire_dict, claimant):
     document_uris = []
     hwdoivalues = highwire_dict.get("doi", [])
     for doi in hwdoivalues:
-        doi = doi_uri_from_string(doi)
+        doi = doi_uri_from_string(doi)  # noqa: PLW2901
         if doi is not None:
             document_uris.append(
                 {
@@ -245,7 +245,7 @@ def document_uris_from_dc(dc_dict, claimant):
     document_uris = []
     dcdoivalues = dc_dict.get("identifier", [])
     for doi in dcdoivalues:
-        doi = doi_uri_from_string(doi)
+        doi = doi_uri_from_string(doi)  # noqa: PLW2901
         if doi is not None:
             document_uris.append(
                 {"claimant": claimant, "uri": doi, "type": "dc-doi", "content_type": ""}
@@ -278,8 +278,7 @@ def doi_uri_from_string(string):
     """
     string = string.strip()
 
-    if string.startswith("doi:"):
-        string = string[len("doi:") :]
+    string = string.removeprefix("doi:")
 
     string = string.strip()
 

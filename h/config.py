@@ -23,7 +23,7 @@ DEFAULT_SALT = (
 )
 
 
-def configure(environ=None, settings=None):
+def configure(environ=None, settings=None):  # noqa: PLR0915
     if environ is None:  # pragma: no cover
         environ = os.environ
     if settings is None:  # pragma: no cover

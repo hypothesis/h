@@ -13,7 +13,7 @@ def url_in_scope(url, scope_urls):
     :type scope_urls: list(str)
     :rtype: bool
     """
-    return any((url.startswith(scope_url) for scope_url in scope_urls))
+    return any(url.startswith(scope_url) for scope_url in scope_urls)
 
 
 def parse_scope_from_url(url):

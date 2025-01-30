@@ -10,7 +10,7 @@ from h import search
 ELASTICSEARCH_INDEX = os.environ["ELASTICSEARCH_INDEX"]
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
 
-__all__ = ("es_client", "mock_es_client", "init_elasticsearch")
+__all__ = ("es_client", "init_elasticsearch", "mock_es_client")
 
 
 @pytest.fixture
@@ -68,7 +68,7 @@ def init_elasticsearch(request):
                 es_client.conn.indices.delete(index=index)
 
     # Delete the test search index at the end of the test run.
-    request.addfinalizer(maybe_delete_index)
+    request.addfinalizer(maybe_delete_index)  # noqa: PT021
 
     # Delete the test search index at the start of the run, just in case it
     # was somehow left behind by a previous test run.

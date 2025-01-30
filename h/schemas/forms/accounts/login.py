@@ -83,7 +83,7 @@ class LoginSchema(CSRFSchema):
 
 def _should_autofocus_username(kwargs):  # pragma: no cover
     """Return True if the username widget should be autofocused."""
-    if LoginSchema.default_values(kwargs["request"]).get("username"):
+    if LoginSchema.default_values(kwargs["request"]).get("username"):  # noqa: SIM103
         # The username widget is going to be pre-filled, so don't autofocus it.
         # (This allows the password widget, which the user still has to type
         # into, to be autofocused instead.)

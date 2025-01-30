@@ -1,4 +1,4 @@
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # noqa: ICN001
 
 import colander
 from deform.widget import TextAreaWidget, TextInputWidget
@@ -22,13 +22,13 @@ def validate_logo(node, value):
         raise colander.Invalid(
             node,
             _(
-                "Logo is larger than {:,d} characters".format(  # noqa: INT002
+                "Logo is larger than {:,d} characters".format(  # noqa: INT002, UP032
                     Organization.LOGO_MAX_CHARS
                 )
             ),
         )
     try:
-        root = ElementTree.fromstring(value)
+        root = ElementTree.fromstring(value)  # noqa: S314
     except ElementTree.ParseError as err:
         raise colander.Invalid(node, _("Logo is not parsable XML")) from err
 

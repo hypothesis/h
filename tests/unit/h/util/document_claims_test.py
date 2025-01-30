@@ -264,7 +264,7 @@ class TestDocumentMetasFromData:
 
             if not isinstance(value, list):
                 # We expect it to turn non-lists into length-1 lists.
-                value = [value]
+                value = [value]  # noqa: PLW2901
 
             assert document_metas == [
                 {"type": "foo", "value": value, "claimant": "http://example/claimant"}
@@ -292,7 +292,7 @@ class TestDocumentMetasFromData:
 
             if not isinstance(value, list):
                 # We expect it to turn non-lists into length-1 lists.
-                value = [value]
+                value = [value]  # noqa: PLW2901
 
             assert document_metas == [
                 {"type": "foo", "value": value, "claimant": "http://example/claimant"}
@@ -320,7 +320,7 @@ class TestDocumentMetasFromData:
 
             if not isinstance(value, list):
                 # We expect it to turn non-lists into length-1 lists.
-                value = [value]
+                value = [value]  # noqa: PLW2901
 
             assert document_metas == [
                 {"type": "foo", "value": value, "claimant": "http://example/claimant"}
