@@ -1,6 +1,6 @@
 import click
 
-from h.celery import start
+from h.tasks.celery import start
 
 
 @click.command(

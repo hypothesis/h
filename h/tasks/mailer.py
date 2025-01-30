@@ -9,7 +9,7 @@ import smtplib
 import pyramid_mailer
 import pyramid_mailer.message
 
-from h.celery import celery, get_task_logger
+from h.tasks.celery import celery, get_task_logger
 
 __all__ = ("send",)
 
