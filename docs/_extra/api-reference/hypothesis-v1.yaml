@@ -889,13 +889,6 @@ paths:
         To get the memberships of a private group the authenticated user must be a member of the group.
         Getting the memberships of an open or restricted group does not require authentication.
         The returned memberships are sorted by joining date, oldest first.
-
-        If the `page[number]` query param is included in the request then the response will be paginated.
-        If there's no `page[number]` query param in the request then a legacy,
-        un-paginated response format will be used. In the future this legacy
-        un-paginated response format will be removed and the paginated response
-        format will be used even when the `page[number]` query param is not
-        present.
       parameters:
         - $ref: '#/components/parameters/PageNumber'
         - $ref: '#/components/parameters/PageSize'
@@ -909,22 +902,16 @@ paths:
           content:
             application/*json:
               schema:
-                oneOf:
-                  - title: "Paginated"
+                type: object
+                properties:
+                  meta:
+                    description: "Metadata about this response."
                     type: object
                     properties:
-                      meta:
-                        description: "Metadata about this response."
-                        type: object
-                        properties:
-                          page:
-                            $ref: '#/components/schemas/PaginationMeta'
-                      data:
-                        description: "The list of memberships for the requested page."
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Membership'
-                  - title: "Unpaginated (deprecated)"
+                      page:
+                        $ref: '#/components/schemas/PaginationMeta'
+                  data:
+                    description: "The list of memberships for the requested page."
                     type: array
                     items:
                       $ref: '#/components/schemas/Membership'
