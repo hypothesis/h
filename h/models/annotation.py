@@ -138,6 +138,8 @@ class Annotation(Base):
         uselist=True,
     )
 
+    mentions = sa.orm.relationship("Mention", back_populates="annotation")
+
     @property
     def uuid(self):
         """
