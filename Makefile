@@ -36,7 +36,7 @@ web: python
 .PHONY: shell
 $(call help,make shell,"launch a Python shell in this project's virtualenv")
 shell: python
-	@pyenv exec tox -qe dev --run-command 'pshell conf/development.ini'
+	@PYTHONPATH=$(CURDIR) TOX_TESTENV_PASSENV=PYTHONPATH pyenv exec tox -qe dev --run-command 'pshell conf/development.ini'
 
 .PHONY: sql
 $(call help,make sql,"Connect to the dev database with a psql shell")
