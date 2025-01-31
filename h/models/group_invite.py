@@ -14,7 +14,7 @@ from h.pubid import generate
 class GroupInvite(Base, AutoincrementingIntegerID, Timestamps, MappedAsDataclass):
     __tablename__ = "group_invite"
 
-    pubid: Mapped[str] = mapped_column(unique=True, default=partial(generate, 12), init=False)  # fmt: skip
+    pubid: Mapped[str] = mapped_column(unique=True, default_factory=partial(generate, 12), init=False)  # fmt: skip
     roles: Mapped[list] = mapped_column(JSONB, GROUP_MEMBERSHIP_ROLES_CHECK_CONSTRAINT)
     expires: Mapped[datetime]
 
