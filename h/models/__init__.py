@@ -31,6 +31,7 @@ from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort, FeatureCohortUser
 from h.models.flag import Flag
 from h.models.group import Group, GroupMembership, GroupMembershipRoles
+from h.models.group_invite import GroupInvite
 from h.models.group_scope import GroupScope
 from h.models.job import Job
 from h.models.mention import Mention
@@ -58,6 +59,7 @@ __all__ = (
     "FeatureCohort",
     "Flag",
     "Group",
+    "GroupInvite",
     "GroupMembership",
     "GroupScope",
     "Job",
