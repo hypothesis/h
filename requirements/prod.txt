@@ -177,7 +177,7 @@ python-dateutil==2.9.0.post0
     #   elasticsearch-dsl
 python-slugify==8.0.4
     # via -r requirements/prod.in
-pytz==2024.2
+pytz==2025.1
     # via -r requirements/prod.in
 referencing==0.36.1
     # via
