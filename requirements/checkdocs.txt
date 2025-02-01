@@ -14,7 +14,7 @@ babel==2.14.0
     # via sphinx
 build==1.0.3
     # via pip-tools
-certifi==2024.12.14
+certifi==2025.1.31
     # via requests
 charset-normalizer==3.3.2
     # via requests
