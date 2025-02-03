@@ -41,6 +41,7 @@ from h.models.token import Token
 from h.models.user import User
 from h.models.user_deletion import UserDeletion
 from h.models.user_identity import UserIdentity
+from h.models.user_rename import UserRename
 
 __all__ = (
     "Activation",
