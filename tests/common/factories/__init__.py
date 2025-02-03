@@ -16,6 +16,7 @@ from tests.common.factories.flag import Flag
 from tests.common.factories.group import Group, OpenGroup, RestrictedGroup
 from tests.common.factories.group_scope import GroupScope
 from tests.common.factories.job import ExpungeUserJob, Job, SyncAnnotationJob
+from tests.common.factories.mention import Mention
 from tests.common.factories.organization import Organization
 from tests.common.factories.setting import Setting
 from tests.common.factories.subscriptions import Subscriptions
