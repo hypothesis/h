@@ -6,7 +6,7 @@ from h import models
 from h.accounts.events import ActivationEvent
 from h.i18n import TranslationString as _
 from h.security import Permission
-from h.services.user_rename import UserRenameError
+from h.services.user_rename import UserRenameError, UserRenameService
 
 
 class UserNotFoundError(Exception):
@@ -112,9 +112,9 @@ def users_rename(request):  # pragma: no cover
     old_username = user.username
     new_username = request.params.get("new_username").strip()
 
-    svc = request.find_service(name="user_rename")
+    svc: UserRenameService = request.find_service(name="user_rename")
     try:
-        svc.rename(user, new_username)
+        svc.rename(user, new_username, request.user, tag=request.matched_route.name)
 
     except (UserRenameError, ValueError) as exc:
         request.session.flash(str(exc), "error")
