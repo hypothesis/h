@@ -44,52 +44,47 @@ class TestUserRenameService:
 
         assert service.check(user, "panda") is True
 
-    def test_rename_checks_first(self, service, check, user):
-        service.rename(user, "panda")
+    def test_rename(self, service, check, user, factories, db_session):
+        ids = [factories.AuthTicket(user=user).id for _ in range(3)]
+        token = factories.DeveloperToken(user=user)
+        requested_by = factories.User()
+        old_userid = user.userid
+
+        service.rename(user, "panda", requested_by, "tag")
 
         check.assert_called_once_with(service, user, "panda")
-
-    def test_rename_changes_the_username(self, service, user, db_session):
-        service.rename(user, "panda")
-
         assert db_session.get(models.User, user.id).username == "panda"
-
-    def test_rename_deletes_auth_tickets(self, service, user, db_session, factories):
-        ids = [factories.AuthTicket(user=user).id for _ in range(3)]
-
-        service.rename(user, "panda")
-
-        count = (
+        assert not (
             db_session.query(models.AuthTicket)
             .filter(models.AuthTicket.id.in_(ids))
             .count()
         )
-        assert not count
-
-    def test_rename_updates_tokens(self, service, user, db_session, factories):
-        token = factories.DeveloperToken(user=user)
-        db_session.add(token)
-
-        service.rename(user, "panda")
-
-        updated_token = (
-            db_session.query(models.Token).filter(models.Token.id == token.id).one()
+        assert (
+            db_session.query(models.Token)
+            .filter(models.Token.id == token.id)
+            .one()
+            .user
+            == user
         )
-        assert updated_token.user == user
+        user_rename = db_session.query(models.UserRename).first()
+        assert user_rename.old_userid == old_userid
+        assert user_rename.new_userid == user.userid
 
     @pytest.mark.usefixtures("annotations")
     def test_rename_changes_the_users_annotations_userid(
-        self, service, user, db_session
+        self, service, user, db_session, factories
     ):
-        service.rename(user, "panda")
+        service.rename(user, "panda", factories.User(), "tag")
 
         userids = [ann.userid for ann in db_session.query(models.Annotation)]
         assert {user.userid} == set(userids)
 
-    def test_rename_reindexes_the_users_annotations(self, service, user, tasks):
+    def test_rename_reindexes_the_users_annotations(
+        self, service, user, tasks, factories
+    ):
         original_userid = user.userid
 
-        service.rename(user, "panda")
+        service.rename(user, "panda", factories.User(), "tag")
 
         tasks.job_queue.add_annotations_from_user.delay.assert_called_once_with(
             "sync_annotation",
@@ -100,7 +95,7 @@ class TestUserRenameService:
 
     @pytest.fixture
     def service(self, pyramid_request):
-        return UserRenameService(session=pyramid_request.db)
+        return UserRenameService(db=pyramid_request.db)
 
     @pytest.fixture
     def check(self, patch):
@@ -131,7 +126,7 @@ class TestServiceFactory:
     def test_it(self, pyramid_request, UserRenameService):
         svc = service_factory(sentinel.context, pyramid_request)
 
-        UserRenameService.assert_called_once_with(session=pyramid_request.db)
+        UserRenameService.assert_called_once_with(db=pyramid_request.db)
         assert svc == UserRenameService.return_value
 
     @pytest.fixture

@@ -1,4 +1,5 @@
-from h import models, tasks
+from h import tasks
+from h.models import Annotation, AuthTicket, User, UserRename
 
 
 class UserRenameError(Exception):
@@ -23,13 +24,11 @@ class UserRenameService:
     UserRenameError if the new username is already taken by another account.
     """
 
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, db):
+        self.db = db
 
     def check(self, user, new_username):
-        existing_user = models.User.get_by_username(
-            self.session, new_username, user.authority
-        )
+        existing_user = User.get_by_username(self.db, new_username, user.authority)
         if existing_user and existing_user != user:
             raise UserRenameError(
                 f'Another user already has the username "{new_username}"'
@@ -37,12 +36,23 @@ class UserRenameService:
 
         return True
 
-    def rename(self, user, new_username):
+    def rename(self, user, new_username, requested_by: User, tag: str):
         self.check(user, new_username)
 
         old_userid = user.userid
         user.username = new_username
         new_userid = user.userid
+
+        # Record the rename for record-keeping purposes.
+        self.db.add(
+            UserRename(
+                user_id=user.id,
+                old_userid=old_userid,
+                new_userid=user.userid,
+                requested_by=requested_by.userid,
+                tag=tag,
+            )
+        )
 
         # Remove auth tickets when renaming the user. We cannot just update the
         # denormalized `user_userid` of these because the previous userid values
@@ -60,9 +70,7 @@ class UserRenameService:
         )
 
     def _purge_auth_tickets(self, user):
-        self.session.query(models.AuthTicket).filter(
-            models.AuthTicket.user_id == user.id
-        ).delete()
+        self.db.query(AuthTicket).filter(AuthTicket.user_id == user.id).delete()
 
     def _change_annotations(self, old_userid, new_userid):
         annotations = self._fetch_annotations(old_userid)
@@ -72,12 +80,10 @@ class UserRenameService:
 
     def _fetch_annotations(self, userid):
         return (
-            self.session.query(models.Annotation)
-            .filter(models.Annotation.userid == userid)
-            .yield_per(100)
+            self.db.query(Annotation).filter(Annotation.userid == userid).yield_per(100)
         )
 
 
 def service_factory(_context, request):
     """Return a RenameUserService instance for the passed context and request."""
-    return UserRenameService(session=request.db)
+    return UserRenameService(db=request.db)
