@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from h.services import MentionService
 from h.services.analytics import AnalyticsService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
@@ -20,6 +21,7 @@ from h.services.bulk_api import (
 )
 from h.services.developer_token import DeveloperTokenService
 from h.services.email import EmailService
+from h.services.feature import FeatureService
 from h.services.flag import FlagService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
@@ -60,6 +62,7 @@ __all__ = (
     "bulk_stats_service",
     "developer_token_service",
     "email_service",
+    "feature_service",
     "flag_service",
     "group_create_service",
     "group_delete_service",
@@ -70,6 +73,7 @@ __all__ = (
     "group_update_service",
     "links_service",
     "list_organizations_service",
+    "mention_service",
     "mock_service",
     "moderation_service",
     "nipsa_service",
@@ -308,6 +312,16 @@ def user_unique_service(mock_service):
 @pytest.fixture
 def user_update_service(mock_service):
     return mock_service(UserUpdateService, name="user_update")
+
+
+@pytest.fixture
+def mention_service(mock_service):
+    return mock_service(MentionService)
+
+
+@pytest.fixture
+def feature_service(mock_service):
+    return mock_service(FeatureService, name="feature")
 
 
 @pytest.fixture

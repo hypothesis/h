@@ -6,7 +6,7 @@ from h.db.mixins import Timestamps
 from h.models import helpers
 
 
-class Mention(Base, Timestamps):  # pragma: nocover
+class Mention(Base, Timestamps):
     __tablename__ = "mention"
 
     id: Mapped[int] = mapped_column(sa.Integer, autoincrement=True, primary_key=True)
@@ -17,7 +17,9 @@ class Mention(Base, Timestamps):  # pragma: nocover
         nullable=False,
     )
     """FK to annotation.id"""
-    annotation = sa.orm.relationship("Annotation", back_populates="mentions")
+    annotation = sa.orm.relationship(
+        "Annotation", back_populates="mentions", uselist=False
+    )
 
     user_id: Mapped[int] = mapped_column(
         sa.Integer,

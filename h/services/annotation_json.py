@@ -2,9 +2,12 @@ from copy import deepcopy
 
 from h.models import Annotation, User
 from h.presenters import DocumentJSONPresenter
+from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits
 from h.security.permissions import Permission
+from h.services import MentionService
 from h.services.annotation_read import AnnotationReadService
+from h.services.feature import FeatureService
 from h.services.flag import FlagService
 from h.services.links import LinksService
 from h.services.user import UserService
@@ -16,12 +19,14 @@ from h.util.datetime import utc_iso8601
 class AnnotationJSONService:
     """A service for generating API compatible JSON for annotations."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         annotation_read_service: AnnotationReadService,
         links_service: LinksService,
         flag_service: FlagService,
         user_service: UserService,
+        mention_service: MentionService,
+        feature_service: FeatureService,
     ):
         """
         Instantiate the service.
@@ -30,11 +35,14 @@ class AnnotationJSONService:
         :param links_service: LinksService instance
         :param flag_service: FlagService instance
         :param user_service: UserService instance
+        :param mention_service: MentionService instance
         """
         self._annotation_read_service = annotation_read_service
         self._links_service = links_service
         self._flag_service = flag_service
         self._user_service = user_service
+        self._mention_service = mention_service
+        self._feature_service = feature_service
 
     def present(self, annotation: Annotation):
         """
@@ -73,6 +81,11 @@ class AnnotationJSONService:
                 "links": self._links_service.get_all(annotation),
             }
         )
+        if self._feature_service.enabled("at_mentions"):  # pragma: no cover
+            model["mentions"] = [
+                MentionJSONPresenter(mention).asdict()
+                for mention in annotation.mentions
+            ]
 
         model.update(user_info(self._user_service.fetch(annotation.userid)))
 
@@ -151,6 +164,8 @@ class AnnotationJSONService:
                 # which ultimately depends on group permissions, causing a
                 # group lookup for every annotation without this
                 Annotation.group,
+                # Optimise access to the mentions
+                Annotation.mentions,
             ],
         )
 
@@ -184,4 +199,6 @@ def factory(_context, request):
         links_service=request.find_service(name="links"),
         flag_service=request.find_service(name="flag"),
         user_service=request.find_service(name="user"),
+        mention_service=request.find_service(MentionService),
+        feature_service=request.find_service(name="feature"),
     )
