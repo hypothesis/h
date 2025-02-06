@@ -10,6 +10,7 @@ from h.services.bulk_api import (
     BulkGroupService,
     BulkLMSStatsService,
 )
+from h.services.email import EmailService
 from h.services.job_queue import JobQueueService
 from h.services.subscription import SubscriptionService
 
@@ -161,3 +162,4 @@ def includeme(config):  # pragma: no cover
     config.register_service_factory(
         "h.services.analytics.analytics_service_factory", name="analytics"
     )
+    config.register_service_factory("h.services.email.factory", iface=EmailService)

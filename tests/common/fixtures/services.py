@@ -19,6 +19,7 @@ from h.services.bulk_api import (
     BulkLMSStatsService,
 )
 from h.services.developer_token import DeveloperTokenService
+from h.services.email import EmailService
 from h.services.flag import FlagService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
@@ -58,6 +59,7 @@ __all__ = (
     "bulk_group_service",
     "bulk_stats_service",
     "developer_token_service",
+    "email_service",
     "flag_service",
     "group_create_service",
     "group_delete_service",
@@ -306,3 +308,8 @@ def user_unique_service(mock_service):
 @pytest.fixture
 def user_update_service(mock_service):
     return mock_service(UserUpdateService, name="user_update")
+
+
+@pytest.fixture
+def email_service(mock_service):
+    return mock_service(EmailService)
