@@ -49,7 +49,13 @@ class DocumentMeta(Base, mixins.Timestamps):
 
 
 def create_or_update_document_meta(  # noqa: PLR0913
-    session, claimant, type, value, document, created, updated  # noqa: A002
+    session,
+    claimant,
+    type,
+    value,
+    document,
+    created,
+    updated,  # noqa: A002
 ):
     """
     Create or update a DocumentMeta with the given parameters.

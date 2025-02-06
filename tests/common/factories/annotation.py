@@ -92,7 +92,8 @@ class Annotation(ModelFactory):
             }
 
         document_meta_dicts = [
-            document_meta_dict() for _ in range(random.randint(1, 3))  # noqa: S311
+            document_meta_dict()
+            for _ in range(random.randint(1, 3))  # noqa: S311
         ]
 
         # Make sure that there's always at least one DocumentMeta with

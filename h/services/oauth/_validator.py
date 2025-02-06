@@ -99,7 +99,13 @@ class OAuthValidator(RequestValidator):
         return client.secret is not None
 
     def confirm_redirect_uri(
-        self, client_id, code, redirect_uri, client, *args, **kwargs  # noqa: ARG002
+        self,
+        client_id,
+        code,
+        redirect_uri,
+        client,
+        *args,
+        **kwargs,  # noqa: ARG002
     ):
         """
         Validate that the redirect_uri didn't get tampered with.
@@ -271,7 +277,13 @@ class OAuthValidator(RequestValidator):
         return True
 
     def validate_grant_type(
-        self, client_id, grant_type, client, request, *args, **kwargs  # noqa: ARG002
+        self,
+        client_id,
+        grant_type,
+        client,
+        request,
+        *args,
+        **kwargs,  # noqa: ARG002
     ):
         """Validate that the given client is allowed to use the give grant type."""
         if client.authclient.grant_type is None:
@@ -321,7 +333,12 @@ class OAuthValidator(RequestValidator):
         return True
 
     def validate_response_type(
-        self, client_id, response_type, request, *args, **kwargs  # noqa: ARG002
+        self,
+        client_id,
+        response_type,
+        request,
+        *args,
+        **kwargs,  # noqa: ARG002
     ):
         """Validate that the provided ``response_type`` matches the one stored on the client."""
 

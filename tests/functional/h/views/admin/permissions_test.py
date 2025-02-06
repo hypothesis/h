@@ -61,7 +61,12 @@ class TestAdminPermissions:
     @pytest.mark.usefixtures("with_logged_in_user")
     @pytest.mark.parametrize("method,url_template,_", GROUP_PAGES)
     def test_group_end_points_not_accessible_by_regular_user(
-        self, app, group, method, url_template, _  # noqa: PT019
+        self,
+        app,
+        group,
+        method,
+        url_template,
+        _,  # noqa: PT019
     ):
         url = url_template.format(pubid=group.pubid)
 
