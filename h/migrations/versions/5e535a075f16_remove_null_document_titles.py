@@ -40,9 +40,7 @@ def upgrade():
         for original_title in document_meta.value:
             if original_title is None:
                 n += 1
-                log.info(
-                    f"removing null title from document_meta {document_meta.id}"
-                )
+                log.info(f"removing null title from document_meta {document_meta.id}")
             else:
                 new_titles.append(original_title)
         if len(new_titles) != len(document_meta.value):

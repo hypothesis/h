@@ -83,9 +83,7 @@ class TestReadGroup:
         group = factories.Group()
         db_session.commit()
 
-        res = app.get(
-            f"/api/groups/{group.pubid}", expect_errors=True
-        )
+        res = app.get(f"/api/groups/{group.pubid}", expect_errors=True)
 
         assert res.status_code == 404
 
@@ -96,9 +94,7 @@ class TestReadGroup:
         group = factories.Group(creator=user, memberships=[GroupMembership(user=user)])
         db_session.commit()
 
-        res = app.get(
-            f"/api/groups/{group.pubid}", headers=token_auth_header
-        )
+        res = app.get(f"/api/groups/{group.pubid}", headers=token_auth_header)
 
         assert res.status_code == 200
 
@@ -110,9 +106,7 @@ class TestReadGroup:
         group.memberships.append(GroupMembership(user=user))
         db_session.commit()
 
-        res = app.get(
-            f"/api/groups/{group.pubid}", headers=token_auth_header
-        )
+        res = app.get(f"/api/groups/{group.pubid}", headers=token_auth_header)
 
         assert res.status_code == 200
 
@@ -136,9 +130,7 @@ class TestReadGroup:
         group = factories.Group(authority="thirdparty.com")
         db_session.commit()
 
-        res = app.get(
-            f"/api/groups/{group.pubid}", headers=auth_client_header
-        )
+        res = app.get(f"/api/groups/{group.pubid}", headers=auth_client_header)
 
         assert res.status_code == 200
 

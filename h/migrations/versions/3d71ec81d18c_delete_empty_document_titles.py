@@ -40,9 +40,7 @@ def upgrade():
         for original_title in document_meta.value:
             if original_title == "":
                 n += 1
-                log.info(
-                    f"removing empty title from document_meta {document_meta.id}"
-                )
+                log.info(f"removing empty title from document_meta {document_meta.id}")
             else:
                 new_titles.append(original_title)
         if len(new_titles) != len(document_meta.value):

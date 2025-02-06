@@ -1,4 +1,3 @@
-
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from webob.cookies import SignedSerializer

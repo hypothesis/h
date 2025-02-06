@@ -123,9 +123,7 @@ def upgrade():
     log.info(
         f"Assigned {assigned_to_default_org} groups to the __default__ organization"
     )
-    log.info(
-        f"Assigned {assigned_to_authority_org} groups to authority organizations"
-    )
+    log.info(f"Assigned {assigned_to_authority_org} groups to authority organizations")
 
 
 def downgrade():
