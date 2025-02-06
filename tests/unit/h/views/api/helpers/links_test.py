@@ -52,42 +52,6 @@ class TestRegisterLink:
         assert second_service not in pyramid_config.registry.api_links["v2"]
 
 
-# TODO: Fix these tests  # noqa: FIX002, TD002, TD003
-# class TestFormatNestedLinks:
-#     def test_it_formats_link_objects_as_dicts(self, templater):
-#         link = _service_link(name="flat")  # noqa: ERA001
-#
-#         formatted = links.format_nested_links([link], "v1", templater)  # noqa: ERA001
-#
-#         assert "flat" in formatted
-#         assert formatted["flat"] == {
-#             "method": link.primary_method(),  # noqa: ERA001
-#             "url": templater.route_template(link.route_name),  # noqa: ERA001
-#             "desc": link.description,  # noqa: ERA001
-#         }  # noqa: ERA001
-#
-#     def test_it_nests_links_based_on_service_name_split_on_periods(self, templater):
-#         api_links = [  # noqa: ERA001
-#             _service_link(name="1"),  # noqa: ERA001
-#             _service_link(name="1.2"),  # noqa: ERA001
-#             _service_link(name="1.2.3"),  # noqa: ERA001
-#             _service_link(name="1.2.A"),  # noqa: ERA001
-#             _service_link(name="1.B"),  # noqa: ERA001
-#         ]  # noqa: ERA001
-#
-#         formatted = links.format_nested_links([api_links], "v1", templater)  # noqa: ERA001
-#
-#         assert "1" in formatted
-#         assert "2" in formatted["1"]  # noqa: ERA001
-#         assert "B" in formatted["1"]  # noqa: ERA001
-#         assert "3" in formatted["1"]["2"]  # noqa: ERA001
-#         assert "A" in formatted["1"]["2"]  # noqa: ERA001
-
-# @pytest.fixture
-# def templater():
-#     return mock.create_autospec(AngularRouteTemplater, spec_set=True, instance=True)  # noqa: ERA001
-
-
 def _service_link(name="api.example_service"):  # noqa: ARG001
     return links.ServiceLink(
         name="name",
