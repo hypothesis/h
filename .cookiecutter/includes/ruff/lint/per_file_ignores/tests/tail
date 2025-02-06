@@ -1,0 +1,6 @@
+"PT006", # Enforces a consistent style for the type of the `argnames` parameter to
+         # pytest.mark.parametrize. We have too many pre-existing violations of
+         # this.
+"PT007", # Enforces a consistent style for the type of the `argvalues` parameter to
+         # pytest.mark.parametrize. We have too many pre-existing violations of
+         # this.
