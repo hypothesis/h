@@ -1,4 +1,4 @@
-"""Shared utility functions for manipulating dates and times."""
+"""Shared utility functions for manipulating dates and times."""  # noqa: A005
 
 
 def utc_iso8601(datetime):

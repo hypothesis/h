@@ -20,7 +20,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
     @pytest.mark.parametrize("reps", (1, 16, 256, 4096))
     @pytest.mark.parametrize("action", ("create", "delete"))
     def test_speed(self, db_session, pyramid_request, socket, message, action, reps):
-        sockets = list(socket for _ in range(reps))
+        sockets = list(socket for _ in range(reps))  # noqa: C400
         message["action"] = action
 
         start = datetime.utcnow()
@@ -35,7 +35,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
         assert socket.send_json.count == reps
 
         millis = diff.seconds * 1000 + diff.microseconds / 1000
-        print(
+        print(  # noqa: T201
             f"{action} x {reps}: {millis} ms, {millis / reps} ms/item, {reps / millis * 1000} items/sec"
         )
 
@@ -73,7 +73,7 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
         # We aren't interested in the speed of the socket filter, as that has
         # it's own speed tests
         SocketFilter = patch("h.streamer.messages.SocketFilter")
-        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)
+        SocketFilter.matching.side_effect = lambda sockets, annotation: iter(sockets)  # noqa: ARG005
         return SocketFilter
 
     @pytest.fixture

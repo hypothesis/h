@@ -20,7 +20,7 @@ users_index_fixtures = pytest.mark.usefixtures("models", "annotation_stats_servi
 
 @pytest.mark.parametrize(
     "input_date,expected",
-    ((datetime(2001, 11, 29, 21, 50, 59, 999999), "2001-11-29 21:50"), (None, "")),
+    ((datetime(2001, 11, 29, 21, 50, 59, 999999), "2001-11-29 21:50"), (None, "")),  # noqa: DTZ001
 )
 def test_format_date(input_date, expected):
     assert format_date(input_date) == expected

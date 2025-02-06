@@ -8,7 +8,7 @@ class AnalyticsService:
         self._log = logging.getLogger(__name__)
 
     def create(self, event: Event):
-        # TODO Enhance this
+        # TODO Enhance this  # noqa: FIX002, TD002, TD003, TD004
         self._log.info(event)
 
 

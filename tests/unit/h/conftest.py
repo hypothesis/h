@@ -30,7 +30,7 @@ class DummyFeature:
         self.flags = {}
         self.loaded = False
 
-    def __call__(self, name, *args, **kwargs):
+    def __call__(self, name, *args, **kwargs):  # noqa: ARG002
         return self.flags.get(name, True)
 
     def all(self):
@@ -114,7 +114,7 @@ def matchers():
 @pytest.fixture
 def notify(pyramid_config, request):
     patcher = mock.patch.object(pyramid_config.registry, "notify", autospec=True)
-    request.addfinalizer(patcher.stop)
+    request.addfinalizer(patcher.stop)  # noqa: PT021
     return patcher.start()
 
 

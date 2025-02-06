@@ -41,8 +41,8 @@ class TestCreateOrUpdateDocumentMeta:
             value="new value",
             # This should be ignored either way.
             document=meta_attrs["document"] if correct_document else Document(),
-            created=datetime.now(),  # This should be ignored.
-            updated=datetime.now(),
+            created=datetime.now(),  # This should be ignored.  # noqa: DTZ005
+            updated=datetime.now(),  # noqa: DTZ005
         )
         document_meta = DocumentMeta(**original_attrs)
         db_session.add(document_meta)
@@ -96,7 +96,7 @@ class TestCreateOrUpdateDocumentMeta:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(ConcurrentUpdateError):
+        with pytest.raises(ConcurrentUpdateError):  # noqa: SIM117
             with db_session.no_autoflush:  # prevent premature IntegrityError
                 create_or_update_document_meta(session=db_session, **meta_attrs)
 
@@ -107,8 +107,8 @@ class TestCreateOrUpdateDocumentMeta:
             "type": "title",
             "value": "the title",
             "document": Document(),
-            "created": datetime.now() - timedelta(days=1),
-            "updated": datetime.now(),
+            "created": datetime.now() - timedelta(days=1),  # noqa: DTZ005
+            "updated": datetime.now(),  # noqa: DTZ005
         }
 
     @pytest.fixture

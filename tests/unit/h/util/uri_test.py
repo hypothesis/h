@@ -210,7 +210,7 @@ class TestURINormalise:
             ("http://example.com?foo=[bar]baz", "httpx://example.com?foo=%5Bbar%5Dbaz"),
             # Query: ensure OTHER characters are encoded
             (
-                "http://example.com?你好世界=γειά σου κόσμος",
+                "http://example.com?你好世界=γειά σου κόσμος",  # noqa: RUF001
                 "httpx://example.com?%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C=%CE%B3%CE%B5%CE%B9%CE%AC+%CF%83%CE%BF%CF%85+%CE%BA%CF%8C%CF%83%CE%BC%CE%BF%CF%82",
             ),
             ("http://example.com?love=♥", "httpx://example.com?love=%E2%99%A5"),

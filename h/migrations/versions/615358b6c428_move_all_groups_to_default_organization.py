@@ -79,7 +79,7 @@ class Organization(Base):
 def new_org(authority, session):
     organization = Organization(authority=authority, name=authority)
     session.add(organization)
-    log.info(f"Created new organization {organization.name}")
+    log.info(f"Created new organization {organization.name}")  # noqa: G004
     return organization
 
 
@@ -119,11 +119,11 @@ def upgrade():
 
     session.commit()
 
-    log.info(f"Skipped {skipped} groups that already had an organization")
+    log.info(f"Skipped {skipped} groups that already had an organization")  # noqa: G004
     log.info(
-        f"Assigned {assigned_to_default_org} groups to the __default__ organization"
+        f"Assigned {assigned_to_default_org} groups to the __default__ organization"  # noqa: G004
     )
-    log.info(f"Assigned {assigned_to_authority_org} groups to authority organizations")
+    log.info(f"Assigned {assigned_to_authority_org} groups to authority organizations")  # noqa: G004
 
 
 def downgrade():

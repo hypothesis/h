@@ -65,16 +65,16 @@ class DBAction:
             # This is technically overkill as the schema should make sure we
             # can't receive queries we aren't expecting
             if set(query.keys()) != set(expected_keys):
-                raise UnsupportedOperationError(
-                    f"Upserting by query fields '{query.keys()}' is not supported"
+                raise UnsupportedOperationError(  # noqa: TRY003
+                    f"Upserting by query fields '{query.keys()}' is not supported"  # noqa: EM102
                 )
 
             # Checking that the values are the same is a bit more important, as
             # this happens post schema, and could therefore be wrong
             for key, expected in query.items():
                 if command.body.attributes[key] != expected:
-                    raise UnsupportedOperationError(
-                        "Upserting different values to the query is not supported. "
+                    raise UnsupportedOperationError(  # noqa: TRY003
+                        "Upserting different values to the query is not supported. "  # noqa: EM102
                         f"Different value found in key '{key}'"
                     )
 
@@ -96,8 +96,8 @@ class GroupUpsertAction(DBAction):
 
     def execute(self, batch, effective_user_id=None, **_):
         if effective_user_id is None:
-            raise CommandSequenceError(
-                "Effective user must be configured before upserting groups"
+            raise CommandSequenceError(  # noqa: TRY003
+                "Effective user must be configured before upserting groups"  # noqa: EM101
             )
 
         # Check that we can actually process this batch
@@ -133,8 +133,8 @@ class GroupUpsertAction(DBAction):
             # https://www.postgresql.org/docs/9.4/errcodes-appendix.html
             # 21000 == cardinality violation
             if err.orig.pgcode == "21000":
-                raise ConflictingDataError(
-                    "Attempted to create two groups with the same authority and id"
+                raise ConflictingDataError(  # noqa: TRY003
+                    "Attempted to create two groups with the same authority and id"  # noqa: EM101
                 ) from err
 
             raise
@@ -167,8 +167,8 @@ class GroupMembershipCreateAction(DBAction):
                              default is "continue"
         """
         if on_duplicate != "continue":
-            raise UnsupportedOperationError(
-                "Create modes other than 'continue' have not been implemented"
+            raise UnsupportedOperationError(  # noqa: TRY003
+                "Create modes other than 'continue' have not been implemented"  # noqa: EM101
             )
 
         values = [
@@ -195,8 +195,8 @@ class GroupMembershipCreateAction(DBAction):
             # https://www.postgresql.org/docs/9.1/errcodes-appendix.html
             # 23503 = foreign_key_violation
             if err.orig.pgcode == "23503":
-                raise ConflictingDataError(
-                    "Cannot insert group membership as either the user or "
+                raise ConflictingDataError(  # noqa: TRY003
+                    "Cannot insert group membership as either the user or "  # noqa: EM102
                     f"group specified does not exist: {err.params}"
                 ) from err
 
@@ -284,8 +284,8 @@ class UserUpsertAction(DBAction):
             # 21000 == cardinality violation
             # This indicates the identity belongs to another user
             if err.orig.pgcode == "21000":
-                raise ConflictingDataError(
-                    "Attempted to assign existing identity to a different user"
+                raise ConflictingDataError(  # noqa: TRY003
+                    "Attempted to assign existing identity to a different user"  # noqa: EM101
                 ) from err
 
             raise

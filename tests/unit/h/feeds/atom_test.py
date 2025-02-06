@@ -25,7 +25,7 @@ def test_feed_subtitle():
 
 
 @mock.patch("h.feeds.atom._feed_entry_from_annotation")
-def test_feed_contains_entries(_feed_entry_from_annotation, factories):
+def test_feed_contains_entries(_feed_entry_from_annotation, factories):  # noqa: PT019
     """The feed should contain an entry for each annotation."""
     annotations = [
         factories.Annotation(),
@@ -40,7 +40,7 @@ def test_feed_contains_entries(_feed_entry_from_annotation, factories):
         "feed entry for annotation 3",
     ]
 
-    def pop(*args, **kwargs):
+    def pop(*args, **kwargs):  # noqa: ARG001
         return entries.pop(0)
 
     _feed_entry_from_annotation.side_effect = pop
@@ -127,11 +127,11 @@ def test_entry_title(factories):
 
 def test_entry_dates(factories):
     annotation = factories.Annotation(
-        created=datetime.utcnow(), updated=datetime.utcnow() + timedelta(hours=1)
+        created=datetime.utcnow(), updated=datetime.utcnow() + timedelta(hours=1)  # noqa: DTZ003
     )
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url"
+        [annotation], "atom_url", lambda annotation: "annotation url"  # noqa: ARG005
     )
 
     assert feed["entries"][0]["published"] == f"utc_iso8601_return:{annotation.created}"
@@ -147,7 +147,7 @@ def test_entry_content(factories):
         annotation = factories.Annotation()
 
         feed = atom.feed_from_annotations(
-            [annotation], "atom_url", lambda annotation: "annotation url"
+            [annotation], "atom_url", lambda annotation: "annotation url"  # noqa: ARG005
         )
 
         mock_description.assert_called_once_with()
@@ -155,7 +155,7 @@ def test_entry_content(factories):
 
 
 @mock.patch("h.feeds.util")
-def test_annotation_url_links(_, factories):
+def test_annotation_url_links(_, factories):  # noqa: PT019
     """Entries should contain links to the HTML pages for the annotations."""
     annotation = factories.Annotation()
     annotation_url = mock.Mock()
@@ -171,7 +171,7 @@ def test_annotation_url_links(_, factories):
 
 
 @mock.patch("h.feeds.util")
-def test_annotation_api_url_links(_, factories):
+def test_annotation_api_url_links(_, factories):  # noqa: PT019
     """Entries should contain links to the JSON pages for the annotations."""
     annotation = factories.Annotation()
     annotation_api_url = mock.Mock()
@@ -190,10 +190,10 @@ def test_annotation_api_url_links(_, factories):
 
 def test_feed_updated(factories):
     annotations = factories.Annotation.build_batch(3)
-    annotations[0].updated = datetime.utcnow()
+    annotations[0].updated = datetime.utcnow()  # noqa: DTZ003
 
     feed = atom.feed_from_annotations(
-        annotations, "atom_url", lambda annotation: "annotation url"
+        annotations, "atom_url", lambda annotation: "annotation url"  # noqa: ARG005
     )
 
     assert feed["updated"] == f"utc_iso8601_return:{annotations[0].updated}"

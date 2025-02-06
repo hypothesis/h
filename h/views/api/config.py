@@ -27,13 +27,13 @@ cors_policy = cors.policy(
 )
 
 
-def add_api_view(
+def add_api_view(  # noqa: PLR0913
     config,
     view,
     versions,
     link_name=None,
     description=None,
-    enable_preflight=True,
+    enable_preflight=True,  # noqa: FBT002
     subtype="json",
     **settings,
 ):
@@ -122,7 +122,7 @@ def api_config(versions, link_name=None, description=None, **settings):
 
         # Support use as a class method decorator.
         # Taken from Pyramid's `view_config` decorator implementation.
-        if info.scope == "class":
+        if info.scope == "class":  # noqa: SIM102
             if settings.get("attr") is None:
                 settings["attr"] = wrapped.__name__
 

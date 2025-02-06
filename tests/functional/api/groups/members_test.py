@@ -1,4 +1,4 @@
-import base64
+import base64  # noqa: INP001
 import logging
 from datetime import datetime
 
@@ -17,8 +17,8 @@ class TestListMembersLegacy:
             memberships=[
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, second),
-                    updated=datetime(1970, 1, 2, 0, 0, second),
+                    created=datetime(1970, 1, 1, 0, 0, second),  # noqa: DTZ001
+                    updated=datetime(1970, 1, 2, 0, 0, second),  # noqa: DTZ001
                 )
                 for second, user in enumerate(factories.User.create_batch(size=3))
             ]
@@ -58,13 +58,13 @@ class TestListMembersLegacy:
             [
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, 0),
-                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                    created=datetime(1970, 1, 1, 0, 0, 0),  # noqa: DTZ001
+                    updated=datetime(1970, 1, 1, 0, 0, 1),  # noqa: DTZ001
                 ),
                 GroupMembership(
                     user=other_user,
-                    created=datetime(1971, 1, 2, 0, 0, 0),
-                    updated=datetime(1971, 1, 2, 0, 0, 1),
+                    created=datetime(1971, 1, 2, 0, 0, 0),  # noqa: DTZ001
+                    updated=datetime(1971, 1, 2, 0, 0, 1),  # noqa: DTZ001
                 ),
             ]
         )
@@ -127,8 +127,8 @@ class TestListMembers:
             memberships=[
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, second),
-                    updated=datetime(1970, 1, 2, 0, 0, second),
+                    created=datetime(1970, 1, 1, 0, 0, second),  # noqa: DTZ001
+                    updated=datetime(1970, 1, 2, 0, 0, second),  # noqa: DTZ001
                 )
                 for second, user in enumerate(factories.User.create_batch(size=9))
             ]
@@ -169,13 +169,13 @@ class TestListMembers:
             [
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, 0),
-                    updated=datetime(1970, 1, 1, 0, 0, 1),
+                    created=datetime(1970, 1, 1, 0, 0, 0),  # noqa: DTZ001
+                    updated=datetime(1970, 1, 1, 0, 0, 1),  # noqa: DTZ001
                 ),
                 GroupMembership(
                     user=other_user,
-                    created=datetime(1971, 1, 2, 0, 0, 0),
-                    updated=datetime(1971, 1, 2, 0, 0, 1),
+                    created=datetime(1971, 1, 2, 0, 0, 0),  # noqa: DTZ001
+                    updated=datetime(1971, 1, 2, 0, 0, 1),  # noqa: DTZ001
                 ),
             ]
         )
@@ -221,8 +221,8 @@ class TestListMembers:
             memberships=[
                 GroupMembership(
                     user=user,
-                    created=datetime(1970, 1, 1, 0, 0, second),
-                    updated=datetime(1970, 1, 2, 0, 0, second),
+                    created=datetime(1970, 1, 1, 0, 0, second),  # noqa: DTZ001
+                    updated=datetime(1970, 1, 2, 0, 0, second),  # noqa: DTZ001
                 )
                 for second, user in enumerate(factories.User.create_batch(size=2))
             ]
@@ -285,7 +285,7 @@ class TestListMembers:
 
 
 class TestGetMember:
-    def test_it(self, app, db_session, do_request, group, target_user):
+    def test_it(self, app, db_session, do_request, group, target_user):  # noqa: ARG002
         response = do_request()
 
         assert response.json == {
@@ -357,8 +357,8 @@ class TestGetMember:
         group.memberships.append(
             GroupMembership(
                 user=target_user,
-                created=datetime(1970, 1, 1, 0, 0, 0),
-                updated=datetime(1970, 1, 1, 0, 0, 1),
+                created=datetime(1970, 1, 1, 0, 0, 0),  # noqa: DTZ001
+                updated=datetime(1970, 1, 1, 0, 0, 1),  # noqa: DTZ001
             )
         )
         return target_user
@@ -370,8 +370,8 @@ class TestGetMember:
             GroupMembership(
                 user=authenticated_user,
                 roles=[GroupMembershipRoles.OWNER],
-                created=datetime(1971, 1, 1, 0, 0, 0),
-                updated=datetime(1971, 1, 1, 0, 0, 1),
+                created=datetime(1971, 1, 1, 0, 0, 0),  # noqa: DTZ001
+                updated=datetime(1971, 1, 1, 0, 0, 1),  # noqa: DTZ001
             )
         )
         return authenticated_user
@@ -381,7 +381,7 @@ class TestGetMember:
         return factories.DeveloperToken(user=authenticated_user)
 
     @pytest.fixture
-    def headers(self, factories, token):
+    def headers(self, factories, token):  # noqa: ARG002
         return token_authorization_header(token)
 
     @pytest.fixture
@@ -413,7 +413,7 @@ class TestAddMember:
                 assert membership.roles == expected_roles
                 break
         else:
-            assert False, "No membership was created"
+            assert False, "No membership was created"  # noqa: B011, PT015
 
     def test_it_does_nothing_if_the_user_is_already_a_member_of_the_group(
         self, do_request, group, user
@@ -443,7 +443,7 @@ class TestAddMember:
     def test_it_errors_if_the_pubid_is_unknown(self, do_request):
         do_request(pubid="UNKNOWN_PUBID", status=404)
 
-    def test_it_errors_if_the_userid_is_unknown(self, do_request, authclient):
+    def test_it_errors_if_the_userid_is_unknown(self, do_request, authclient):  # noqa: ARG002
         do_request(userid="acct:UNKOWN_USERNAME@{authclient.authority}", status=404)
 
     def test_it_errors_if_the_userid_is_invalid(self, do_request):
@@ -875,7 +875,7 @@ class TestEditMembership:
         def do_request(
             pubid=group.pubid,
             userid=target_user.userid,
-            json={"roles": ["member"]},
+            json={"roles": ["member"]},  # noqa: B006
             headers=headers,
             status=200,
         ):

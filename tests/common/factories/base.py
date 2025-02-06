@@ -6,7 +6,7 @@ SESSION = None
 
 
 def set_session(value):
-    global SESSION
+    global SESSION  # noqa: PLW0603
 
     SESSION = value
 
@@ -23,7 +23,7 @@ class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
         # which is dynamically filled out by the `factories` fixture when
         # used.
         if SESSION is None:
-            raise RuntimeError("no session: did you use the factories fixture?")
+            raise RuntimeError("no session: did you use the factories fixture?")  # noqa: EM101, TRY003
         obj = model_class(*args, **kwargs)
         SESSION.add(obj)
         if cls._meta.sqlalchemy_session_persistence == "flush":

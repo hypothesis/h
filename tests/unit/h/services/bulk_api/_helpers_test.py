@@ -1,4 +1,4 @@
-from unittest.mock import sentinel
+from unittest.mock import sentinel  # noqa: INP001
 
 import pytest
 from _pytest.mark import param

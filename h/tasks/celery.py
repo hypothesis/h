@@ -179,7 +179,7 @@ def add_task_name_and_id_to_log_messages(
 
     root_loggers_handler.setFormatter(
         logging.Formatter(
-            "[%(asctime)s: %(levelname)s/%(processName)s] "
+            "[%(asctime)s: %(levelname)s/%(processName)s] "  # noqa: ISC003
             + f"{task.name}[{task_id}] "
             + "%(message)s"
         )

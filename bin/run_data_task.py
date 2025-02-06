@@ -4,7 +4,7 @@ Task runner for tasks written as SQL files in directories.
 This is a general mechanism for running tasks defined in SQL, however it's
 currently only used to perform the aggregations and mappings required for
 reporting.
-"""
+"""  # noqa: EXE002
 
 from argparse import ArgumentParser
 
@@ -60,18 +60,18 @@ def main():
         )
 
         # Run the update in a transaction, so we roll back if it goes wrong
-        with request.db.bind.connect() as connection:
+        with request.db.bind.connect() as connection:  # noqa: SIM117
             with connection.begin():
                 for script in scripts:
                     if args.no_python and isinstance(script, PythonScript):
-                        print(f"Skipping: {script}")
+                        print(f"Skipping: {script}")  # noqa: T201
                         continue
 
                     for step in script.execute(connection, dry_run=args.dry_run):
                         if args.dry_run:
-                            print("Dry run!")
+                            print("Dry run!")  # noqa: T201
 
-                        print(step.dump(indent="    ") + "\n")
+                        print(step.dump(indent="    ") + "\n")  # noqa: T201
 
 
 if __name__ == "__main__":

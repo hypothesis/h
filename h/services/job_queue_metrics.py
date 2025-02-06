@@ -20,7 +20,7 @@ class JobQueueMetrics:
         newrelic.agent.record_custom_metrics().
         """
         metrics = defaultdict(int)
-        now = datetime.utcnow()
+        now = datetime.utcnow()  # noqa: DTZ003
 
         # Expired jobs.
         metrics["Custom/JobQueue/Count/Expired"] = (

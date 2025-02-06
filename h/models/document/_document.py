@@ -24,7 +24,7 @@ class Document(Base, mixins.Timestamps):
     #: The denormalized value of the "best" http(s) DocumentURI for this Document.
     web_uri = sa.Column("web_uri", sa.UnicodeText())
 
-    # FIXME: This relationship should be named `uris` again after the
+    # FIXME: This relationship should be named `uris` again after the  # noqa: FIX001, TD001, TD002, TD003
     #        dependency on the annotator-store is removed, as it clashes with
     #        making the Postgres and Elasticsearch interface of a Document
     #        object behave the same way.
@@ -56,7 +56,7 @@ class Document(Base, mixins.Timestamps):
             If no type is given just return this document's first http(s)
             URL, or None.
             """
-            for document_uri in self.document_uris:
+            for document_uri in self.document_uris:  # noqa: RET503
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
@@ -97,7 +97,7 @@ class Document(Base, mixins.Timestamps):
         responsibility to create any other document uris.
         """
 
-        finduris = [claimant_uri] + uris
+        finduris = [claimant_uri] + uris  # noqa: RUF005
         documents = cls.find_by_uris(session, finduris)
 
         if not documents.count():
@@ -115,7 +115,7 @@ class Document(Base, mixins.Timestamps):
         try:
             session.flush()
         except sa.exc.IntegrityError as err:
-            raise ConcurrentUpdateError("concurrent document creation") from err
+            raise ConcurrentUpdateError("concurrent document creation") from err  # noqa: EM101, TRY003
 
         return documents
 
@@ -129,7 +129,7 @@ def merge_documents(session, documents, updated=None):
     """
 
     if updated is None:
-        updated = datetime.utcnow()
+        updated = datetime.utcnow()  # noqa: DTZ003
 
     master = documents[0]
     duplicates = documents[1:]
@@ -163,12 +163,12 @@ def merge_documents(session, documents, updated=None):
         )
 
     except sa.exc.IntegrityError as err:
-        raise ConcurrentUpdateError("concurrent document merges") from err
+        raise ConcurrentUpdateError("concurrent document merges") from err  # noqa: EM101, TRY003
 
     return master
 
 
-def update_document_metadata(
+def update_document_metadata(  # noqa: PLR0913
     session,
     target_uri,
     document_meta_dicts,
@@ -199,9 +199,9 @@ def update_document_metadata(
     :rtype: h.models.Document
     """
     if created is None:
-        created = datetime.utcnow()
+        created = datetime.utcnow()  # noqa: DTZ003
     if updated is None:
-        updated = datetime.utcnow()
+        updated = datetime.utcnow()  # noqa: DTZ003
 
     documents = Document.find_or_create_by_uris(
         session,

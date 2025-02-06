@@ -29,7 +29,7 @@ class TestUserPasswordService:
     def test_check_password_validates_old_style_passwords(self, svc, user):
         user.salt = "somesalt"
         # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
-        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"
+        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"  # noqa: S105
 
         assert not svc.check_password(user, "somethingelse")
         assert svc.check_password(user, "foobar")
@@ -37,7 +37,7 @@ class TestUserPasswordService:
     def test_check_password_upgrades_old_style_passwords(self, hasher, svc, user):
         user.salt = "somesalt"
         # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
-        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"
+        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"  # noqa: S105
 
         svc.check_password(user, "foobar")
 
@@ -49,7 +49,7 @@ class TestUserPasswordService:
     ):
         user.salt = "somesalt"
         # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
-        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"
+        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"  # noqa: S105
 
         svc.check_password(user, "donkeys")
 
@@ -59,7 +59,7 @@ class TestUserPasswordService:
     def test_check_password_works_after_upgrade(self, svc, user):
         user.salt = "somesalt"
         # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
-        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"
+        user.password = "$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy"  # noqa: S105
 
         svc.check_password(user, "foobar")
 
@@ -67,7 +67,7 @@ class TestUserPasswordService:
 
     def test_check_password_upgrades_new_style_passwords(self, hasher, svc, user):
         # Generated with passlib.hash.bcrypt.hash('foobar', rounds=4, ident='2b')
-        user.password = "$2b$04$L2j.vXxlLt9JJNHHsy0EguslcaphW7vssSpHbhqCmf9ECsMiuTd1y"
+        user.password = "$2b$04$L2j.vXxlLt9JJNHHsy0EguslcaphW7vssSpHbhqCmf9ECsMiuTd1y"  # noqa: S105
 
         svc.check_password(user, "foobar")
 
@@ -75,7 +75,7 @@ class TestUserPasswordService:
 
     def test_updating_password_unsets_salt(self, svc, user):
         user.salt = "somesalt"
-        user.password = "whatever"
+        user.password = "whatever"  # noqa: S105
 
         svc.update_password(user, "flibble")
 

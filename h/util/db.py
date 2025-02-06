@@ -32,7 +32,7 @@ class lru_cache_in_transaction:  # noqa: N801
         fetch_user('acct:foo@example.com')  # => executes a query
     """
 
-    def __init__(self, session, maxsize=128, typed=False):
+    def __init__(self, session, maxsize=128, typed=False):  # noqa: FBT002
         self._session = session
         self._maxsize = maxsize
         self._typed = typed

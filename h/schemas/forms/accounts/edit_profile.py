@@ -14,14 +14,14 @@ def validate_url(node, cstruct):
     try:
         util.validate_url(cstruct)
     except ValueError as exc:
-        raise colander.Invalid(node, str(exc))
+        raise colander.Invalid(node, str(exc))  # noqa: B904
 
 
 def validate_orcid(node, cstruct):
     try:
         util.validate_orcid(cstruct)
     except ValueError as exc:
-        raise colander.Invalid(node, str(exc))
+        raise colander.Invalid(node, str(exc))  # noqa: B904
 
 
 class EditProfileSchema(CSRFSchema):

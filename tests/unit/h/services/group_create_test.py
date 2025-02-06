@@ -83,7 +83,7 @@ class TestCreatePrivateGroup:
         and if the caller passes `organization=None`. It's convenient for the
         caller to be able to do it either way.
         """
-        if pass_kwarg:
+        if pass_kwarg:  # noqa: SIM108
             kwargs = {"organization": None}
         else:
             kwargs = {}
@@ -203,7 +203,7 @@ class TestCreateOpenGroup:
         and if the caller passes `organization=None`. It's convenient for the
         caller to be able to do it either way.
         """
-        if pass_kwarg:
+        if pass_kwarg:  # noqa: SIM108
             kwargs = {"organization": None}
         else:
             kwargs = {}
@@ -371,7 +371,7 @@ class TestCreateRestrictedGroup:
         and if the caller passes `organization=None`. It's convenient for the
         caller to be able to do it either way.
         """
-        if pass_kwarg:
+        if pass_kwarg:  # noqa: SIM108
             kwargs = {"organization": None}
         else:
             kwargs = {}
@@ -452,7 +452,7 @@ class TestCreateRestrictedGroup:
         self, svc, origins, creator, factories
     ):
         org = factories.Organization(name="My organization", authority="bar.com")
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             svc.create_restricted_group(
                 name="test_group",
                 userid=creator.userid,

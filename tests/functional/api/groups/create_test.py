@@ -1,4 +1,4 @@
-import base64
+import base64  # noqa: INP001
 
 import pytest
 
@@ -49,7 +49,7 @@ class TestCreateGroup:
     def test_it_returns_http_404_if_no_authenticated_user(
         self, app, auth_client_header, group_payload
     ):
-        # FIXME: This should return a 403
+        # FIXME: This should return a 403  # noqa: FIX001, TD001, TD002, TD003
         res = app.post_json(
             "/api/groups", group_payload, headers=auth_client_header, expect_errors=True
         )
@@ -107,7 +107,7 @@ class TestCreateGroup:
     def test_it_returns_http_404_with_invalid_forwarded_user_format(
         self, app, auth_client_header
     ):
-        # FIXME: This should return a 403
+        # FIXME: This should return a 403  # noqa: FIX001, TD001, TD002, TD003
         headers = auth_client_header
         headers["X-Forwarded-User"] = "floopflarp"
         group = {}

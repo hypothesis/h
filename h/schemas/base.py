@@ -47,7 +47,7 @@ class JSONSchema:
     valid JSON schema.
     """
 
-    schema = {}
+    schema = {}  # noqa: RUF012
 
     schema_version = 4
     """The JSON Schema version used by this schema."""
@@ -60,7 +60,7 @@ class JSONSchema:
         elif self.schema_version == 7:
             validator_cls = jsonschema.Draft7Validator
         else:
-            raise ValueError("Unsupported schema version")
+            raise ValueError("Unsupported schema version")  # noqa: EM101, TRY003
 
         self.validator = validator_cls(self.schema, format_checker=format_checker)
 

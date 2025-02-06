@@ -89,7 +89,7 @@ __all__ = (
 
 @pytest.fixture
 def mock_service(pyramid_config):
-    def mock_service(service_class, name=None, iface=None, spec_set=True, **kwargs):
+    def mock_service(service_class, name=None, iface=None, spec_set=True, **kwargs):  # noqa: FBT002
         service = create_autospec(
             service_class, instance=True, spec_set=spec_set, **kwargs
         )

@@ -887,10 +887,10 @@ class TestDeleteController:
         self, authenticated_user, controller, factories, pyramid_request, schemas
     ):
         oldest_annotation = factories.Annotation(
-            userid=authenticated_user.userid, created=datetime(1970, 1, 1)
+            userid=authenticated_user.userid, created=datetime(1970, 1, 1)  # noqa: DTZ001
         )
         newest_annotation = factories.Annotation(
-            userid=authenticated_user.userid, created=datetime(1990, 1, 1)
+            userid=authenticated_user.userid, created=datetime(1990, 1, 1)  # noqa: DTZ001
         )
         # An annotation by another user. This shouldn't be counted.
         factories.Annotation(created=oldest_annotation.created - timedelta(days=1))

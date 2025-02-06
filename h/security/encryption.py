@@ -50,12 +50,12 @@ def derive_key(key_material, salt, info):
 # If we have problems with PyCryptodome, an alternative implementation using
 # cryptography would be:
 
-# from cryptography.hazmat.primitives.kdf.hkdf import HKDF as HKDF2
-# from cryptography.hazmat.primitives import hashes
+# from cryptography.hazmat.primitives.kdf.hkdf import HKDF as HKDF2  # noqa: ERA001
+# from cryptography.hazmat.primitives import hashes  # noqa: ERA001
 #
 # def derive_key(key_material, salt, info):
 #     if not isinstance(key_material, bytes):
-#         key_material = key_material.encode()
+#         key_material = key_material.encode()  # noqa: ERA001
 #
 #     return HKDF2(
 #         algorithm=hashes.SHA512(), length=64, salt=salt, info=info

@@ -342,7 +342,7 @@ class TestCreateUpdateAnnotationSchema:
 
         def document_uris_from_data(
             document,
-            claimant,
+            claimant,  # noqa: ARG001
         ):
             document["new_key"] = "new_value"
             document["top_level_key"] = "new_value"

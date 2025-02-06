@@ -83,12 +83,12 @@ def badge(request):
     that there are 0 annotations.
     """
     # Disable NewRelic for this function.
-    # newrelic.agent.ignore_transaction(flag=True)
+    # newrelic.agent.ignore_transaction(flag=True)  # noqa: ERA001
 
     uri = request.params.get("uri")
 
     if not uri:
-        raise httpexceptions.HTTPBadRequest()
+        raise httpexceptions.HTTPBadRequest()  # noqa: RSE102
 
     if Blocklist.is_blocked(uri):
         count = 0

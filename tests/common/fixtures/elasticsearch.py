@@ -68,7 +68,7 @@ def init_elasticsearch(request):
                 es_client.conn.indices.delete(index=index)
 
     # Delete the test search index at the end of the test run.
-    request.addfinalizer(maybe_delete_index)
+    request.addfinalizer(maybe_delete_index)  # noqa: PT021
 
     # Delete the test search index at the start of the run, just in case it
     # was somehow left behind by a previous test run.

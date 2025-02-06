@@ -16,16 +16,16 @@ def user(factories):
 
 @pytest.fixture
 def login_user(db_session, app, user):
-    def login_user(staff=False, admin=False):
+    def login_user(staff=False, admin=False):  # noqa: FBT002
         # This is the hash for `pass` used below
-        user.password = "$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"
+        user.password = "$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"  # noqa: S105
         user.staff = staff
         user.admin = admin
         db_session.commit()
 
         login_page = app.get("/login")
         login_page.form["username"] = user.username
-        login_page.form["password"] = "pass"
+        login_page.form["password"] = "pass"  # noqa: S105
         login_page.form.submit()
 
     return login_user

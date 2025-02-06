@@ -22,7 +22,7 @@ def date_match(column: sa.Column, spec: dict):
     :raises BadDateFilter: For unrecognised operators or no spec
     """
     if not spec:
-        raise BadDateFilter(f"No spec given to filter '{column}' on")
+        raise BadDateFilter(f"No spec given to filter '{column}' on")  # noqa: EM102, TRY003
 
     clauses = []
 
@@ -40,6 +40,6 @@ def date_match(column: sa.Column, spec: dict):
         elif op_key == "ne":
             clauses.append(column != value)
         else:
-            raise BadDateFilter(f"Unknown date filter operator: {op_key}")
+            raise BadDateFilter(f"Unknown date filter operator: {op_key}")  # noqa: EM102, TRY003
 
     return sa.and_(*clauses)

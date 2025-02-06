@@ -8,8 +8,8 @@ from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
 
 class TestAnnotationJSONLDPresenter:
     def test_it(self, presenter, annotation, links_service):
-        annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)
-        annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)
+        annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)  # noqa: DTZ001
+        annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)  # noqa: DTZ001
 
         expected = {
             "@context": "http://www.w3.org/ns/anno.jsonld",

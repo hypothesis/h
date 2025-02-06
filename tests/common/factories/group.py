@@ -24,7 +24,7 @@ class Group(ModelFactory):
     enforce_scope = True
 
     @factory.post_generation
-    def scopes(self, create, scopes=0, **kwargs):
+    def scopes(self, create, scopes=0, **kwargs):  # noqa: ARG002
         if isinstance(scopes, int):
             scopes = [GroupScope(group=self) for _ in range(scopes)]
 

@@ -1,4 +1,4 @@
-import base64
+import base64  # noqa: INP001
 
 import pytest
 
@@ -7,7 +7,7 @@ from h.models.auth_client import GrantType
 
 
 class TestReadGroups:
-    # TODO: In subsequent versions of the API, this should really be a group
+    # TODO: In subsequent versions of the API, this should really be a group  # noqa: FIX002, TD002, TD003
     # search endpoint and should have its own functional test module
 
     def test_it_returns_world_group(self, app):

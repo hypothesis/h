@@ -22,7 +22,7 @@ SUBCOMMANDS = (
 )
 
 
-def bootstrap(app_url, dev=False):
+def bootstrap(app_url, dev=False):  # noqa: FBT002
     """
     Bootstrap the application from the given arguments.
 
@@ -34,7 +34,7 @@ def bootstrap(app_url, dev=False):
         if dev:
             app_url = "http://localhost:5000"
         else:
-            raise click.ClickException("the app URL must be set in production mode!")
+            raise click.ClickException("the app URL must be set in production mode!")  # noqa: EM101, TRY003
 
     config = "conf/development.ini" if dev else "conf/production.ini"
 

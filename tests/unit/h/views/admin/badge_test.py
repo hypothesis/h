@@ -80,7 +80,7 @@ class TestBadgeAddRemove:
 def blocked_uris(db_session):
     uris = []
     for uri in ["blocked1", "blocked2", "blocked3"]:
-        uris.append(models.Blocklist(uri=uri))
+        uris.append(models.Blocklist(uri=uri))  # noqa: PERF401
     db_session.add_all(uris)
     db_session.flush()
 

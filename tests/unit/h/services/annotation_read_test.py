@@ -58,7 +58,7 @@ class TestAnnotationReadService:
         class QueryCounter:
             count = 0
 
-            def __call__(self, *args, **kwargs):
+            def __call__(self, *args, **kwargs):  # noqa: ARG002
                 self.count += 1
 
             def reset(self):

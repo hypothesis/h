@@ -11,7 +11,7 @@ from h.jinja_extensions.svg_icon import svg_icon
 
 class TestSetupJinja2Env:
     def test_it(self):
-        environment = Environment()
+        environment = Environment()  # noqa: S701
 
         setup_jinja2_env(environment)
 

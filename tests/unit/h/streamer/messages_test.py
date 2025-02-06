@@ -26,14 +26,14 @@ class TestProcessMessages:
         consumer = Consumer.return_value
         consumer.run.assert_called_once_with()
 
-    def test_it_puts_message_on_queue(self, _handler, work_queue):
+    def test_it_puts_message_on_queue(self, _handler, work_queue):  # noqa: PT019
         _handler({"foo": "bar"})
 
         result = work_queue.get_nowait()
         assert result.topic == "routing_key"  # Set by _handler fixture
         assert result.payload == {"foo": "bar"}
 
-    def test_it_handles_a_full_queue(self, _handler, work_queue):
+    def test_it_handles_a_full_queue(self, _handler, work_queue):  # noqa: PT019
         work_queue.put(messages.Message(topic="queue_is_full", payload={}))
 
         _handler({"foo": "bar"})
@@ -269,7 +269,7 @@ class TestHandleAnnotationEvent:
     def SocketFilter(self, patch):
         SocketFilter = patch("h.streamer.messages.SocketFilter")
         SocketFilter.matching.side_effect = (
-            lambda sockets, annotation, db_session: iter(sockets)
+            lambda sockets, annotation, db_session: iter(sockets)  # noqa: ARG005
         )
         return SocketFilter
 

@@ -8,7 +8,7 @@ from h.services.annotation_read import AnnotationReadService
 log = logging.getLogger(__name__)
 
 
-class Notification(
+class Notification(  # noqa: SLOT002
     namedtuple(  # noqa: PYI024
         "Notification", ["reply", "reply_user", "parent", "parent_user", "document"]
     )
@@ -29,7 +29,7 @@ class Notification(
     """
 
 
-def get_notification(  # noqa: C901
+def get_notification(  # noqa: C901, PLR0911
     request, annotation, action
 ):
     """
@@ -94,7 +94,7 @@ def get_notification(  # noqa: C901
     if not reply.shared:
         return None
 
-    # FIXME: we should be retrieving the document from the root annotation, not
+    # FIXME: we should be retrieving the document from the root annotation, not  # noqa: FIX001, TD001, TD002, TD003
     # the reply, and dealing with the possibility that we have no document
     # metadata.
     if reply.document is None:

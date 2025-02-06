@@ -26,7 +26,7 @@ class LongLivedToken:
         if self.expires is None:
             return True
 
-        return datetime.utcnow() < self.expires
+        return datetime.utcnow() < self.expires  # noqa: DTZ003
 
 
 class AuthTokenService:

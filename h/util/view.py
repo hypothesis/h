@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 
 
-def handle_exception(request, exception):
+def handle_exception(request, exception):  # noqa: ARG001
     """
     Handle an uncaught exception for the passed request.
 

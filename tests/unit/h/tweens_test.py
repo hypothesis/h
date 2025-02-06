@@ -46,7 +46,7 @@ class TestRedirectTween:
         pyramid_request.path = "/foo"
 
         tween = tweens.redirect_tween_factory(
-            # pragma: nocover
+            # pragma: nocover  # noqa: ERA001
             lambda req: req.response,
             pyramid_request.registry,
             redirects,
@@ -61,7 +61,7 @@ class TestRedirectTween:
 class TestSecurityHeaderTween:
     def test_it_adds_security_headers_to_the_response(self, pyramid_request):
         tween = tweens.security_header_tween_factory(
-            # pragma: nocover
+            # pragma: nocover  # noqa: ERA001
             lambda req: req.response,
             pyramid_request.registry,
         )
@@ -121,7 +121,7 @@ class TestDBRollbackSessionOnExceptionTween:
             handler, pyramid_request.registry
         )
 
-        with pytest.raises(IOError):
+        with pytest.raises(IOError):  # noqa: PT011
             tween(pyramid_request)
 
         handler.assert_called_once_with(pyramid_request)
@@ -129,7 +129,7 @@ class TestDBRollbackSessionOnExceptionTween:
 
     @pytest.fixture
     def handler(self):
-        return mock.create_autospec(lambda request: None)  # pragma: nocover
+        return mock.create_autospec(lambda request: None)  # pragma: nocover  # noqa: ARG005
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

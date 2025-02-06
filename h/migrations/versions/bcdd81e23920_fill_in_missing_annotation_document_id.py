@@ -26,7 +26,7 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024
+class Window(namedtuple("Window", ["start", "end"])):  # noqa: PYI024, SLOT002
     pass
 
 
@@ -118,8 +118,8 @@ def upgrade():
 
         session.commit()
 
-    log.debug("Created %d new documents" % new_documents)
-    log.debug("Filled in %d existing document ids" % document_id_updated)
+    log.debug("Created %d new documents" % new_documents)  # noqa: G002, UP031
+    log.debug("Filled in %d existing document ids" % document_id_updated)  # noqa: G002, UP031
 
 
 def downgrade():

@@ -36,7 +36,7 @@ def staff_add(request):
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
         request.session.flash(
-            _(f"User {username} doesn't exist."),
+            _(f"User {username} doesn't exist."),  # noqa: INT001
             "error",
         )
     else:

@@ -123,7 +123,7 @@ def cohorts_edit_add(request):
     if member is None:  # pragma: no cover
         request.session.flash(
             _(
-                "User {member_name} with authority {authority} doesn't exist.".format(  # noqa: INT002
+                "User {member_name} with authority {authority} doesn't exist.".format(  # noqa: INT002, UP032
                     member_name=member_name, authority=member_authority
                 )
             ),
@@ -156,7 +156,7 @@ def cohorts_edit_remove(request):
     except ValueError:  # pragma: no cover
         request.session.flash(
             _(
-                "User {member_userid} doesn't exist.".format(  # noqa: INT002
+                "User {member_userid} doesn't exist.".format(  # noqa: INT002, UP032
                     member_userid=member_userid
                 )
             ),

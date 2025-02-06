@@ -134,8 +134,8 @@ class GroupCreateService:
     @staticmethod
     def _validate_authorities_match(group_authority, org_authority):
         if group_authority != org_authority:
-            raise ValueError(
-                f"Organization's authority {org_authority} must match the group creator's authority {group_authority}."
+            raise ValueError(  # noqa: TRY003
+                f"Organization's authority {org_authority} must match the group creator's authority {group_authority}."  # noqa: EM102
             )
 
 

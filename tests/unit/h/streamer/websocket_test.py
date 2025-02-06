@@ -251,7 +251,7 @@ class TestHandleMessage:
             clear=True,
         )
         handlers = patcher.start()
-        request.addfinalizer(patcher.stop)
+        request.addfinalizer(patcher.stop)  # noqa: PT021
         return handlers
 
 
