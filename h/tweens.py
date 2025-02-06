@@ -14,7 +14,7 @@ resolver = DottedNameResolver(None)
 
 def conditional_http_tween_factory(
     handler, registry
-):  # pragma: no cover  # noqa: ARG001
+):  # pragma: no cover
     """Set up conditional response handling for some requests."""
 
     def conditional_http_tween(request):

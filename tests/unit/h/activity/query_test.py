@@ -376,7 +376,7 @@ class TestExecute:
         self,
         _fetch_groups,
         group_pubids,
-        pyramid_request,  # noqa: PT019
+        pyramid_request,
     ):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
