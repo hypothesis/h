@@ -7,7 +7,7 @@ from h.settings import SettingError, SettingsManager
 
 class TestSettingsManager:
     def test_set_does_not_warn_when_deprecated_setting_is_not_used(self, caplog):
-        with caplog.at_level(logging.WARN):
+        with caplog.at_level(logging.WARNING):
             settings_manager = SettingsManager({}, {})
             settings_manager.set("foo", "FOO", deprecated_msg="what to do instead")
         assert not caplog.records
@@ -21,7 +21,7 @@ class TestSettingsManager:
         assert result == "bar"
 
     def test_set_warns_when_deprecated_setting_is_used(self, caplog):
-        with caplog.at_level(logging.WARN):
+        with caplog.at_level(logging.WARNING):
             settings_manager = SettingsManager({}, {"FOO": "bar"})
             settings_manager.set("foo", "FOO", deprecated_msg="what to do instead")
         assert "what to do instead" in caplog.text

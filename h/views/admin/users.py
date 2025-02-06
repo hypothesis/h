@@ -86,7 +86,7 @@ def users_activate(request):
     user.activate()
 
     request.session.flash(
-        Markup(_("User {name} has been activated!".format(name=user.username))),  # noqa: INT002
+        Markup(_(f"User {user.username} has been activated!")),
         "success",
     )
 

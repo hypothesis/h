@@ -41,7 +41,7 @@ def upgrade():
     session = Session(bind=op.get_bind())
 
     anns = session.query(Annotation).filter(
-        Annotation.extra.has_key("moderation"),  # noqa
+        Annotation.extra.has_key("moderation"),
     )
     found = 0
     for ann in anns:

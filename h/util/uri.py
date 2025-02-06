@@ -211,9 +211,7 @@ def _normalize_netloc(uri):
     hostname = hostname.lower()
 
     # Remove port if default for the scheme
-    if uri.scheme == "http" and port == 80:
-        port = None
-    elif uri.scheme == "https" and port == 443:
+    if (uri.scheme == "http" and port == 80) or (uri.scheme == "https" and port == 443):
         port = None
 
     # Put it all back together again...

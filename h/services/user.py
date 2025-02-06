@@ -157,7 +157,7 @@ class UserService:
             return None
 
         if not user.is_activated:
-            raise UserNotActivated()
+            raise UserNotActivated
 
         return user
 

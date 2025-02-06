@@ -309,6 +309,6 @@ class TestGroupMembership:
         return factories.Group()
 
 
-@pytest.fixture()
+@pytest.fixture
 def organization(factories):
     return factories.Organization()

@@ -26,7 +26,7 @@ class TestListMembersLegacy:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
         )
 
@@ -71,7 +71,7 @@ class TestListMembersLegacy:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             headers=token_authorization_header(token),
         )
 
@@ -106,7 +106,7 @@ class TestListMembersLegacy:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             headers=token_authorization_header(factories.DeveloperToken()),
             expect_errors=True,
         )
@@ -136,7 +136,7 @@ class TestListMembers:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             params={"page[number]": 2, "page[size]": 3},
             headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
         )
@@ -182,7 +182,7 @@ class TestListMembers:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             params={"page[number]": 1},
             headers=token_authorization_header(token),
         )
@@ -230,7 +230,7 @@ class TestListMembers:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             params={"page[number]": 2, "page[size]": 10},
             headers={"User-Agent": "test_user_agent", "Referer": "test_referer"},
         )
@@ -245,7 +245,7 @@ class TestListMembers:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             params={"page[number]": 1},
             headers=token_authorization_header(factories.DeveloperToken()),
             expect_errors=True,
@@ -271,7 +271,7 @@ class TestListMembers:
         db_session.commit()
 
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             params={"page[number]": 0, "page[size]": 0},
             headers=token_authorization_header(token),
             expect_errors=True,
@@ -528,8 +528,7 @@ class TestAddMember:
 
             if json is None:
                 return app.post(path, headers=headers, status=status)
-            else:
-                return app.post_json(path, json, headers=headers, status=status)
+            return app.post_json(path, json, headers=headers, status=status)
 
         return do_request
 
@@ -541,9 +540,7 @@ class TestAddMember:
 
     @pytest.fixture
     def headers(self, authclient):
-        user_pass = "{client_id}:{secret}".format(
-            client_id=authclient.id, secret=authclient.secret
-        )
+        user_pass = f"{authclient.id}:{authclient.secret}"
         encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
         return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
 
@@ -895,7 +892,7 @@ class TestEditMembership:
 
 def token_authorization_header(token) -> dict:
     """Return an Authorization header for the given developer token."""
-    return {"Authorization": "Bearer {}".format(token.value)}
+    return {"Authorization": f"Bearer {token.value}"}
 
 
 @pytest.fixture

@@ -46,4 +46,4 @@ def db_session(db_engine, db_sessionfactory):
 @pytest.fixture
 def db_session_replica(db_session):
     db_session.execute(text("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY;"))
-    yield db_session
+    return db_session

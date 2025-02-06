@@ -20,7 +20,7 @@ import zope.sqlalchemy.datamanager
 from sqlalchemy import text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-__all__ = ("Base", "Session", "pre_create", "post_create", "create_engine")
+__all__ = ("Base", "Session", "create_engine", "post_create", "pre_create")
 
 log = logging.getLogger(__name__)
 

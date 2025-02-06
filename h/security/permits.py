@@ -1,4 +1,3 @@
-from typing import Optional
 
 from pyramid.security import Allowed, Denied
 
@@ -7,7 +6,7 @@ from h.security.permission_map import PERMISSION_MAP
 
 
 def identity_permits(
-    identity: Optional[Identity], context, permission
+    identity: Identity | None, context, permission
 ) -> Allowed | Denied:
     """
     Check whether a given identity has permission to operate on a context.

@@ -134,7 +134,7 @@ def group_organization_select_widget(_node, kwargs):
 
     # `zip` returns an iterator. The `SelectWidget` constructor requires an
     # actual list.
-    return SelectWidget(values=list(zip(org_pubids, org_labels)))
+    return SelectWidget(values=list(zip(org_pubids, org_labels, strict=False)))
 
 
 class AdminGroupSchema(CSRFSchema):

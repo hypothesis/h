@@ -42,9 +42,7 @@ def upgrade():
             if original_title != stripped_title:
                 n += 1
                 log.info(
-                    "updated '{original_title}' to '{stripped_title}'".format(
-                        original_title=original_title, stripped_title=stripped_title
-                    )
+                    f"updated '{original_title}' to '{stripped_title}'"
                 )
             new_titles.append(stripped_title)
 
@@ -52,7 +50,7 @@ def upgrade():
             document_meta.value = new_titles
 
     session.commit()
-    log.info("updated {n} document titles".format(n=n))
+    log.info(f"updated {n} document titles")
 
 
 def downgrade():

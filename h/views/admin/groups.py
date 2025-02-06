@@ -3,7 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
 from h import (
-    form,  # noqa F401
+    form,
     i18n,
     models,
     paginator,

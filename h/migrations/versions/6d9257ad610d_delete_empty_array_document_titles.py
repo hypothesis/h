@@ -41,7 +41,7 @@ def upgrade():
     for document_meta in to_delete:
         session.delete(document_meta)
     session.commit()
-    log.info("deleted {n} empty-array document titles".format(n=len(to_delete)))
+    log.info(f"deleted {len(to_delete)} empty-array document titles")
 
 
 def downgrade():

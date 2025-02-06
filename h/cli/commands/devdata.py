@@ -161,7 +161,7 @@ def devdata(ctx):
         )
 
         with open(
-            os.path.join(git_dir, "h", "devdata.json"), "r", encoding="utf8"
+            os.path.join(git_dir, "h", "devdata.json"), encoding="utf8"
         ) as handle:
             DevDataFactory(
                 ctx.obj["bootstrap"](),

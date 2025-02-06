@@ -41,16 +41,14 @@ def upgrade():
             if original_title is None:
                 n += 1
                 log.info(
-                    "removing null title from document_meta {id}".format(
-                        id=document_meta.id
-                    )
+                    f"removing null title from document_meta {document_meta.id}"
                 )
             else:
                 new_titles.append(original_title)
         if len(new_titles) != len(document_meta.value):
             document_meta.value = new_titles
     session.commit()
-    log.info("deleted {n} null document titles".format(n=n))
+    log.info(f"deleted {n} null document titles")
 
 
 def downgrade():

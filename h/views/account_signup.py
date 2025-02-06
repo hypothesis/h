@@ -61,7 +61,7 @@ class SignupController:
         except ConflictError as exc:
             template_context["heading"] = _("Account already registered")
             template_context["message"] = _(
-                "{failure_reason}".format(failure_reason=exc.args[0])  # noqa: INT002
+                f"{exc.args[0]}"
             )
 
         return template_context

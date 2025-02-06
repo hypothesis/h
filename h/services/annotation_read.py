@@ -1,4 +1,4 @@
-from typing import Iterable, List, Optional
+from collections.abc import Iterable
 
 from sqlalchemy import select
 from sqlalchemy.orm import Query, Session, subqueryload
@@ -13,7 +13,7 @@ class AnnotationReadService:
     def __init__(self, db_session: Session):
         self._db = db_session
 
-    def get_annotation_by_id(self, id_: str) -> Optional[Annotation]:
+    def get_annotation_by_id(self, id_: str) -> Annotation | None:
         """
         Fetch the annotation with the given id.
 
@@ -25,7 +25,7 @@ class AnnotationReadService:
             return None
 
     def get_annotations_by_id(
-        self, ids: List[str], eager_load: Optional[List] = None
+        self, ids: list[str], eager_load: list | None = None
     ) -> Iterable[Annotation]:
         """
         Get annotations in the same order as the provided ids.
@@ -46,7 +46,7 @@ class AnnotationReadService:
 
     @staticmethod
     def _annotation_search_query(
-        ids: List[str] = None, eager_load: Optional[List] = None
+        ids: list[str] = None, eager_load: list | None = None
     ) -> Query:
         """Create a query for searching for annotations."""
 

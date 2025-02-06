@@ -34,7 +34,7 @@ class DBAction:
         The commands are assumed to be appropriate for this action type.
         """
 
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @staticmethod
     def _check_upsert_queries(batch, expected_keys):
@@ -257,7 +257,7 @@ class UserUpsertAction(DBAction):
         flat_identities = []
 
         # Flatten the nested lists into a single list with user ids
-        for id_, identity_list in zip(user_ids, identities):
+        for id_, identity_list in zip(user_ids, identities, strict=False):
             for identity in identity_list:
                 identity["user_id"] = id_
                 flat_identities.append(identity)

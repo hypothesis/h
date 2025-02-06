@@ -21,6 +21,6 @@ class OrganizationRoot:
             pubid
         )
         if organization is None:
-            raise KeyError()
+            raise KeyError
 
         return OrganizationContext(organization=organization)
