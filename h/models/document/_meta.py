@@ -51,7 +51,7 @@ class DocumentMeta(Base, mixins.Timestamps):
 def create_or_update_document_meta(  # noqa: PLR0913
     session,
     claimant,
-    type,
+    type,  # noqa: A002
     value,
     document,
     created,

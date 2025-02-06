@@ -374,7 +374,7 @@ class TestExecute:
 
     def test_it_fetches_the_groups_from_the_database(
         self,
-        _fetch_groups,
+        _fetch_groups,  # noqa: PT019
         group_pubids,
         pyramid_request,
     ):

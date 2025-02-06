@@ -117,7 +117,7 @@ class TestCookiePolicy:
                     sentinel.api_authcookie_header_2,
                 ]
 
-            assert False, (
+            assert False, (  # noqa: B011, PT015
                 "Should never reach here"
             )  # pragma: no cover
 
@@ -167,7 +167,7 @@ class TestCookiePolicy:
                     sentinel.api_authcookie_header_2,
                 ]
 
-            assert False, (
+            assert False, (  # noqa: B011, PT015
                 "Should never reach here"
             )  # pragma: no cover
 

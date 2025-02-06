@@ -79,7 +79,7 @@ def create_or_update_document_uri(  # noqa: PLR0913
     session,
     claimant,
     uri,
-    type,
+    type,  # noqa: A002
     content_type,
     document,
     created,

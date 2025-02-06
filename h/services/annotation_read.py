@@ -46,7 +46,7 @@ class AnnotationReadService:
 
     @staticmethod
     def _annotation_search_query(
-        ids: list[str] = None,
+        ids: list[str] = None,  # noqa: RUF013
         eager_load: list | None = None,
     ) -> Query:
         """Create a query for searching for annotations."""

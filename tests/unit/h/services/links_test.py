@@ -100,7 +100,7 @@ def registry(pyramid_config):
     add_annotation_link_generator(
         pyramid_config,
         "kiwi",
-        lambda r, a: "http://kiwi.net",
+        lambda r, a: "http://kiwi.net",  # noqa: ARG005
         hidden=True,
     )
     add_annotation_link_generator(pyramid_config, "returnsnone", lambda r, a: None)  # noqa: ARG005
