@@ -1,4 +1,4 @@
-import base64
+import base64  # noqa: INP001
 
 import pytest
 

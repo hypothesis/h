@@ -11,14 +11,14 @@ def add_annotations_between_times(name, start_time, end_time, tag):
 
 
 @celery.task
-def add_annotations_from_user(name, userid, tag, force=False, schedule_in=None):
+def add_annotations_from_user(name, userid, tag, force=False, schedule_in=None):  # noqa: FBT002
     celery.request.find_service(name="queue_service").add_by_user(
         name, userid, tag, force=force, schedule_in=schedule_in
     )
 
 
 @celery.task
-def add_annotations_from_group(name, groupid, tag, force=False, schedule_in=None):
+def add_annotations_from_group(name, groupid, tag, force=False, schedule_in=None):  # noqa: FBT002
     celery.request.find_service(name="queue_service").add_by_group(
         name, groupid, tag, force=force, schedule_in=schedule_in
     )
@@ -26,7 +26,7 @@ def add_annotations_from_group(name, groupid, tag, force=False, schedule_in=None
 
 @celery.task
 def add_annotations_by_ids(
-    name, annotation_ids: list[str], tag, force=False, schedule_in=None
+    name, annotation_ids: list[str], tag, force=False, schedule_in=None  # noqa: FBT002
 ):
     celery.request.find_service(name="queue_service").add_by_ids(
         name, annotation_ids, tag, force=force, schedule_in=schedule_in

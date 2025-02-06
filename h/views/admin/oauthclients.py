@@ -163,4 +163,4 @@ class AuthClientEditController:
             return request.db.query(AuthClient).filter_by(id=client_id).one()
         except (NoResultFound, StatementError) as err:
             # Statement errors happen if the id is invalid
-            raise HTTPNotFound() from err
+            raise HTTPNotFound() from err  # noqa: RSE102

@@ -60,4 +60,4 @@ class TestFeature:
             clear=True,
         )
         patcher.start()
-        request.addfinalizer(patcher.stop)
+        request.addfinalizer(patcher.stop)  # noqa: PT021

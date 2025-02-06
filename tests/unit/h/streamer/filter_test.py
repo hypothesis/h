@@ -3,7 +3,7 @@ from random import random
 
 import pytest
 from h_matchers import Any
-from pytest import param
+from pytest import param  # noqa: PT013
 
 from h.streamer.filter import SocketFilter
 
@@ -199,13 +199,13 @@ class TestFilterHandler:
 
         ann = factories.Annotation(target_uri="https://example.org")
 
-        start = datetime.utcnow()
+        start = datetime.utcnow()  # noqa: DTZ003
         # This returns a generator, we need to force it to produce answers
         tuple(SocketFilter.matching(sockets, ann, db_session))
 
-        diff = datetime.utcnow() - start
+        diff = datetime.utcnow() - start  # noqa: DTZ003
         ms = diff.seconds * 1000 + diff.microseconds / 1000
-        print(ms, "ms")
+        print(ms, "ms")  # noqa: T201
 
     def get_randomized_filter(self):  # pragma: no cover
         return {
@@ -215,14 +215,14 @@ class TestFilterHandler:
                 {
                     "field": "/id",
                     "operator": "equals",
-                    "value": "3jgSANNlEeebpLMf36MACw" + str(random()),
+                    "value": "3jgSANNlEeebpLMf36MACw" + str(random()),  # noqa: S311
                 },
                 {
                     "field": "/references",
                     "operator": "one_of",
                     "value": [
-                        "3jgSANNlEeebpLMf36MACw" + str(random()),
-                        "3jgSANNlEeebpLMf36MACw" + str(random()),
+                        "3jgSANNlEeebpLMf36MACw" + str(random()),  # noqa: S311
+                        "3jgSANNlEeebpLMf36MACw" + str(random()),  # noqa: S311
                     ],
                 },
                 {
@@ -230,15 +230,15 @@ class TestFilterHandler:
                     "operator": "one_of",
                     "value": [
                         "https://example.com",
-                        "https://example.org" + str(random()),
+                        "https://example.org" + str(random()),  # noqa: S311
                     ],
                 },
                 {
                     "field": "/group",
                     "operator": "equals",
                     "value": [
-                        "3jgSANNlEeebpLMf36MACw" + str(random()),
-                        "3jgSANNlEeebpLMf36MACw" + str(random()),
+                        "3jgSANNlEeebpLMf36MACw" + str(random()),  # noqa: S311
+                        "3jgSANNlEeebpLMf36MACw" + str(random()),  # noqa: S311
                     ],
                 },
             ],

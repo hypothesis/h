@@ -4,7 +4,7 @@ from h.accounts.util import validate_orcid, validate_url
 
 
 def test_validate_url_rejects_urls_without_domains():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         validate_url("http:///path")
 
 
@@ -17,7 +17,7 @@ def test_validate_url_accepts_http_urls():
 
 
 def test_validate_url_rejects_non_http_urls():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         validate_url("mailto:jim@smith.org")
 
 
@@ -29,10 +29,10 @@ def test_validate_orcid_accepts_valid_ids(orcid_id):
 
 
 def test_validate_orcid_rejects_malformed_ids():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         validate_orcid("not-an-orcid")
 
 
 def test_validate_orcid_rejects_mismatching_check_digit():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         validate_orcid("1000-0002-1825-0097")

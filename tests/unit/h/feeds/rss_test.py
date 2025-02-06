@@ -22,8 +22,8 @@ def _annotation(**kwargs):
     args = {
         "userid": "acct:janebloggs@hypothes.is",
         "target_selectors": [],
-        "created": datetime.datetime.utcnow(),
-        "updated": datetime.datetime.utcnow(),
+        "created": datetime.datetime.utcnow(),  # noqa: DTZ003
+        "updated": datetime.datetime.utcnow(),  # noqa: DTZ003
         "document": models.Document(),
     }
     args.update(**kwargs)
@@ -51,7 +51,7 @@ def test_feed_from_annotations_item_author(userid, name):
 def test_feed_annotations_pubDate():
     """It should render the pubDates of annotations correctly."""
     ann = _annotation(
-        created=datetime.datetime(
+        created=datetime.datetime(  # noqa: DTZ001
             year=2015, month=3, day=11, hour=10, minute=43, second=54
         )
     )
@@ -101,7 +101,7 @@ def test_feed_from_annotations_item_descriptions(factories):
 def test_feed_from_annotations_item_guid(factories):
     """Feed items should use the annotation's HTML URL as their GUID."""
     annotation = factories.Annotation(
-        created=datetime.datetime(year=2015, month=3, day=11)
+        created=datetime.datetime(year=2015, month=3, day=11)  # noqa: DTZ001
     )
 
     feed = rss.feed_from_annotations(
@@ -173,7 +173,7 @@ def test_feed_from_annotations_pubDate():
     """The pubDate should be the updated time of the most recent annotation."""
     annotations = [
         _annotation(
-            updated=datetime.datetime(
+            updated=datetime.datetime(  # noqa: DTZ001
                 year=2015,
                 month=3,
                 day=11,
@@ -184,7 +184,7 @@ def test_feed_from_annotations_pubDate():
             )
         ),
         _annotation(
-            updated=datetime.datetime(
+            updated=datetime.datetime(  # noqa: DTZ001
                 year=2015,
                 month=2,
                 day=11,
@@ -195,7 +195,7 @@ def test_feed_from_annotations_pubDate():
             )
         ),
         _annotation(
-            updated=datetime.datetime(
+            updated=datetime.datetime(  # noqa: DTZ001
                 year=2015,
                 month=1,
                 day=11,

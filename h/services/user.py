@@ -166,7 +166,7 @@ class UserService:
         invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
         if invalid_keys:
             keys = ", ".join(sorted(invalid_keys))
-            raise TypeError(f"settings with keys {keys} are not allowed")
+            raise TypeError(f"settings with keys {keys} are not allowed")  # noqa: EM102, TRY003
 
         if "show_sidebar_tutorial" in kwargs:  # pragma: no cover
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]

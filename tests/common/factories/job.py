@@ -41,7 +41,7 @@ class SyncAnnotationJob(Job):
 
     name = "sync_annotation"
     scheduled_at = LazyFunction(
-        lambda: datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        lambda: datetime.datetime.utcnow() - datetime.timedelta(hours=1)  # noqa: DTZ003
     )
     kwargs = LazyAttribute(
         lambda o: {

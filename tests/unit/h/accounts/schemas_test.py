@@ -80,7 +80,7 @@ class TestRegisterSchema:
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"password": "a"})
-        assert exc.value.asdict()["password"] == ("Must be 8 characters or more.")
+        assert exc.value.asdict()["password"] == ("Must be 8 characters or more.")  # noqa: S105
 
     def test_it_is_invalid_when_username_too_short(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
@@ -151,7 +151,7 @@ class TestRegisterSchema:
             userid=format_userid(
                 valid_params["username"], pyramid_csrf_request.default_authority
             ),
-            requested_at=datetime.now() - timedelta(days=32),
+            requested_at=datetime.now() - timedelta(days=32),  # noqa: DTZ005
         )
 
         result = schema.deserialize(valid_params)

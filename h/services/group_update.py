@@ -41,8 +41,8 @@ class GroupUpdateService:
                 'duplicate key value violates unique constraint "ix__group__groupid"'
                 in repr(err)
             ):
-                raise ConflictError(
-                    f"""authority_provided_id '{kwargs["authority_provided_id"]}' is already in use"""
+                raise ConflictError(  # noqa: TRY003
+                    f"""authority_provided_id '{kwargs["authority_provided_id"]}' is already in use"""  # noqa: EM102
                 ) from err
 
             # Re-raise as this is an unexpected problem

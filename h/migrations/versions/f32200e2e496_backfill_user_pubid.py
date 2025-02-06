@@ -69,7 +69,7 @@ def backfill_users(
                 )
                 session.rollback()
         else:
-            raise RuntimeError(f"Failed to generate {batch_count} unique pubids")
+            raise RuntimeError(f"Failed to generate {batch_count} unique pubids")  # noqa: EM102, TRY003
 
         logger.info("Back-filled %d user.pubid's", count)
 

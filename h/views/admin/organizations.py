@@ -60,7 +60,7 @@ class OrganizationCreateController:
 
             self.request.db.add(organization)
             self.request.session.flash(
-                Markup(_(f"Created new organization {name}")),
+                Markup(_(f"Created new organization {name}")),  # noqa: INT001
                 "success",
             )
 
@@ -106,7 +106,7 @@ class OrganizationEditController:
             self.request.response.status_int = 400
             self.request.session.flash(
                 _(
-                    "Cannot delete organization because it is associated with {} groups".format(  # noqa: INT002
+                    "Cannot delete organization because it is associated with {} groups".format(  # noqa: INT002, UP032
                         group_count
                     )
                 ),
@@ -118,7 +118,7 @@ class OrganizationEditController:
         self.request.db.delete(self.organization)
         self.request.session.flash(
             _(
-                "Successfully deleted organization %s" % (self.organization.name),  # noqa: INT003
+                "Successfully deleted organization %s" % (self.organization.name),  # noqa: INT003, UP031
                 "success",
             )
         )

@@ -35,7 +35,7 @@ def get_blacklist():
     except (OSError, ValueError):  # pragma: no cover
         log.exception("unable to load blacklist")
         blacklist = []
-    return set(line.strip().lower() for line in blacklist)
+    return set(line.strip().lower() for line in blacklist)  # noqa: C401
 
 
 def unique_email(node, value):
@@ -68,7 +68,7 @@ def unique_username(node, value):
         )
         # 31 days is an arbitrary time delta that should be more than enough
         # time for all the previous user's data to be expunged.
-        .where(models.UserDeletion.requested_at > datetime.now() - timedelta(days=31))
+        .where(models.UserDeletion.requested_at > datetime.now() - timedelta(days=31))  # noqa: DTZ005
     ).first():
         raise exc
 

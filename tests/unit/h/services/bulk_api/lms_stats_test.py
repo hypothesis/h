@@ -1,4 +1,4 @@
-from unittest.mock import sentinel
+from unittest.mock import sentinel  # noqa: INP001
 
 import pytest
 
@@ -85,7 +85,7 @@ class TestBulkLMSStatsService:
         svc,
         group,
         annotation_reply,
-        annotation_in_another_assignment,
+        annotation_in_another_assignment,  # noqa: ARG002
         reply_user,
     ):
         stats = svc.get_annotation_counts(

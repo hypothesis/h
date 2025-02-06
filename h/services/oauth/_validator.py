@@ -45,7 +45,7 @@ class OAuthValidator(RequestValidator):
             self._find_token
         )
 
-    def authenticate_client(self, request, *args, **kwargs):
+    def authenticate_client(self, request, *args, **kwargs):  # noqa: ARG002
         """Authenticate a client, returns True if the client exists and its secret matches the request."""
         client = self.find_client(request.client_id)
         provided_secret = request.client_secret
@@ -59,7 +59,7 @@ class OAuthValidator(RequestValidator):
         request.client = Client(client)
         return True
 
-    def authenticate_client_id(self, client_id, request, *args, **kwargs):
+    def authenticate_client_id(self, client_id, request, *args, **kwargs):  # noqa: ARG002
         """Authenticate a client_id, returns True if the client_id exists."""
         client = self.find_client(client_id)
 
@@ -69,7 +69,7 @@ class OAuthValidator(RequestValidator):
         request.client = Client(client)
         return True
 
-    def client_authentication_required(self, request, *args, **kwargs):
+    def client_authentication_required(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Determine if client authentication is required for an access token request.
 
@@ -99,7 +99,7 @@ class OAuthValidator(RequestValidator):
         return client.secret is not None
 
     def confirm_redirect_uri(
-        self, client_id, code, redirect_uri, client, *args, **kwargs
+        self, client_id, code, redirect_uri, client, *args, **kwargs  # noqa: ARG002
     ):
         """
         Validate that the redirect_uri didn't get tampered with.
@@ -135,7 +135,7 @@ class OAuthValidator(RequestValidator):
     def find_token(self, value):
         return self._cached_find_token(value)
 
-    def get_default_redirect_uri(self, client_id, request, *args, **kwargs):
+    def get_default_redirect_uri(self, client_id, request, *args, **kwargs):  # noqa: ARG002
         """Return the ``redirect_uri`` stored on the client with the given id."""
 
         client = self.find_client(client_id)
@@ -144,15 +144,15 @@ class OAuthValidator(RequestValidator):
 
         return render_url_template(client.redirect_uri, example_url=request.uri)
 
-    def get_default_scopes(self, client_id, request, *args, **kwargs):
+    def get_default_scopes(self, client_id, request, *args, **kwargs):  # noqa: ARG002
         """Return the default scopes for the provided client."""
         return DEFAULT_SCOPES
 
-    def get_original_scopes(self, refresh_token, request, *args, **kwargs):
+    def get_original_scopes(self, refresh_token, request, *args, **kwargs):  # noqa: ARG002
         """As we don't supports scopes, this returns the default scopes."""
         return self.get_default_scopes(self, request.client_id, request)
 
-    def invalidate_authorization_code(self, client_id, code, request, *args, **kwargs):
+    def invalidate_authorization_code(self, client_id, code, request, *args, **kwargs):  # noqa: ARG002
         """Delete authorization code once it has been exchanged for an access token."""
         authz_code = self.find_authz_code(code)
         if authz_code:
@@ -172,7 +172,7 @@ class OAuthValidator(RequestValidator):
         if (token.refresh_token_expires - now) > new_ttl:
             token.refresh_token_expires = now + new_ttl
 
-    def revoke_token(self, token, token_type_hint, request, *args, **kwargs):
+    def revoke_token(self, token, token_type_hint, request, *args, **kwargs):  # noqa: ARG002
         """
         Revoke a token.
 
@@ -195,10 +195,10 @@ class OAuthValidator(RequestValidator):
         if tok:
             self.session.delete(tok)
 
-    def save_authorization_code(self, client_id, code, request, *args, **kwargs):
+    def save_authorization_code(self, client_id, code, request, *args, **kwargs):  # noqa: ARG002
         client = self.find_client(client_id)
         if client is None:
-            raise InvalidClientIdError()
+            raise InvalidClientIdError()  # noqa: RSE102
 
         codestr = code.get("code")
         expires = utcnow() + AUTHZ_CODE_TTL
@@ -208,7 +208,7 @@ class OAuthValidator(RequestValidator):
         self.session.add(authzcode)
         return authzcode
 
-    def save_bearer_token(self, token, request, *args, **kwargs):
+    def save_bearer_token(self, token, request, *args, **kwargs):  # noqa: ARG002
         """Save a generated bearer token for the authenticated user to the database."""
         expires = utcnow() + datetime.timedelta(seconds=token["expires_in"])
 
@@ -235,13 +235,13 @@ class OAuthValidator(RequestValidator):
 
         return oauth_token
 
-    def validate_client_id(self, client_id, request, *args, **kwargs):
+    def validate_client_id(self, client_id, request, *args, **kwargs):  # noqa: ARG002
         """Check if the provided client_id belongs to a valid AuthClient."""
 
         client = self.find_client(client_id)
         return client is not None
 
-    def validate_code(self, client_id, code, client, request, *args, **kwargs):
+    def validate_code(self, client_id, code, client, request, *args, **kwargs):  # noqa: ARG002
         """
         Validate an authorization code.
 
@@ -271,7 +271,7 @@ class OAuthValidator(RequestValidator):
         return True
 
     def validate_grant_type(
-        self, client_id, grant_type, client, request, *args, **kwargs
+        self, client_id, grant_type, client, request, *args, **kwargs  # noqa: ARG002
     ):
         """Validate that the given client is allowed to use the give grant type."""
         if client.authclient.grant_type is None:
@@ -282,7 +282,7 @@ class OAuthValidator(RequestValidator):
 
         return grant_type == client.authclient.grant_type.value
 
-    def validate_redirect_uri(self, client_id, redirect_uri, request, *args, **kwargs):
+    def validate_redirect_uri(self, client_id, redirect_uri, request, *args, **kwargs):  # noqa: ARG002
         """Validate that the provided ``redirect_uri`` matches the one stored on the client."""
 
         client = self.find_client(client_id)
@@ -296,7 +296,7 @@ class OAuthValidator(RequestValidator):
 
         return False
 
-    def validate_refresh_token(self, refresh_token, client, request, *args, **kwargs):
+    def validate_refresh_token(self, refresh_token, client, request, *args, **kwargs):  # noqa: ARG002
         """
         Validate a supplied refresh token.
 
@@ -321,7 +321,7 @@ class OAuthValidator(RequestValidator):
         return True
 
     def validate_response_type(
-        self, client_id, response_type, request, *args, **kwargs
+        self, client_id, response_type, request, *args, **kwargs  # noqa: ARG002
     ):
         """Validate that the provided ``response_type`` matches the one stored on the client."""
 
@@ -383,4 +383,4 @@ class OAuthValidator(RequestValidator):
 
 
 def utcnow():
-    return datetime.datetime.utcnow()
+    return datetime.datetime.utcnow()  # noqa: DTZ003

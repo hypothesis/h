@@ -455,7 +455,7 @@ class TestUserFilter:
 
 
 class TestUriCombinedWildcardFilter:
-    # TODO - Explicit test of URL normalization (ie. that search normalizes input
+    # TODO - Explicit test of URL normalization (ie. that search normalizes input  # noqa: FIX002, TD002, TD003, TD004
     # URL using `h.util.uri.normalize` and queries with that).
 
     @pytest.mark.parametrize("field", ("uri", "url"))
@@ -496,7 +496,7 @@ class TestUriCombinedWildcardFilter:
     ):
         search = get_search()
         # Mark all these uri's as equivalent uri's.
-        storage.expand_uri.side_effect = lambda _, x: [
+        storage.expand_uri.side_effect = lambda _, x: [  # noqa: ARG005
             "urn:x-pdf:1234",
             "file:///Users/june/article.pdf",
             "doi:10.1.1/1234",
@@ -659,7 +659,7 @@ class TestUriCombinedWildcardFilter:
 
     @pytest.fixture
     def get_search(self, search, pyramid_request):
-        def _get_search(separate_keys=True):
+        def _get_search(separate_keys=True):  # noqa: FBT002
             search.append_modifier(
                 query.UriCombinedWildcardFilter(pyramid_request, separate_keys)
             )
@@ -1003,7 +1003,7 @@ class TestUsersAggregation:
 
 
 @pytest.fixture
-def search(pyramid_request, group_service):
+def search(pyramid_request, group_service):  # noqa: ARG001
     search = Search(pyramid_request)
     # Remove all default modifiers and aggregators except Sorter.
     search.clear()

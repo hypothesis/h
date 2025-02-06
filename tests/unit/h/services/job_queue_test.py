@@ -17,14 +17,14 @@ ONE_WEEK_IN_SECONDS = int(ONE_WEEK.total_seconds())
 
 class TestQueueService:
     def test_get_ignores_jobs_that_are_expired(self, factories, svc):
-        now = datetime.utcnow()
+        now = datetime.utcnow()  # noqa: DTZ003
 
         factories.SyncAnnotationJob(expires_at=now - timedelta(hours=1))
 
         assert not svc.get("sync_annotation", limit=100)
 
     def test_it_ignores_jobs_that_arent_scheduled_yet(self, factories, svc):
-        now = datetime.utcnow()
+        now = datetime.utcnow()  # noqa: DTZ003
         factories.SyncAnnotationJob(scheduled_at=now + timedelta(hours=1))
 
         assert not svc.get("sync_annotation", limit=100)
@@ -39,7 +39,7 @@ class TestQueueService:
 
     @freeze_time("2023-01-01")
     def test_add_where(self, factories, db_session, svc):
-        now = datetime.utcnow()
+        now = datetime.utcnow()  # noqa: DTZ003
         matching = [
             factories.Annotation(shared=True),
             factories.Annotation(shared=True),

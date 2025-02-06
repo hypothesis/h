@@ -36,8 +36,8 @@ class Search:
     def __init__(
         self,
         request,
-        separate_replies=False,
-        separate_wildcard_uri_keys=True,
+        separate_replies=False,  # noqa: FBT002
+        separate_wildcard_uri_keys=True,  # noqa: FBT002
         _replies_limit=200,
     ):
         self.es = request.es
@@ -99,7 +99,7 @@ class Search:
         # Don't return any fields, just the metadata so set _source=False.
         search = elasticsearch_dsl.Search(
             using=self.es.conn, index=self.es.index
-        ).source(False)
+        ).source(False)  # noqa: FBT003
 
         for agg in aggregations:
             agg(search, params)
@@ -112,7 +112,7 @@ class Search:
         # If separate_replies is True, don't return any replies to annotations.
         modifiers = self._modifiers
         if self.separate_replies:
-            modifiers = [query.TopLevelAnnotationsFilter()] + modifiers
+            modifiers = [query.TopLevelAnnotationsFilter()] + modifiers  # noqa: RUF005
 
         response = self._search(modifiers, self._aggregations, params)
 
@@ -129,7 +129,7 @@ class Search:
         # replies to annotations is the RepliesMatcher and the params passed to
         # the modifiers.
         response = self._search(
-            [query.RepliesMatcher(annotation_ids)] + self._modifiers,
+            [query.RepliesMatcher(annotation_ids)] + self._modifiers,  # noqa: RUF005
             [],  # Aggregations aren't used in replies.
             MultiDict({"limit": self._replies_limit}),
         )

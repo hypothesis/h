@@ -30,7 +30,7 @@ def valid_media_types():
 
     :rtype: list(str)
     """
-    valid_types = ["*/*", "application/json"] + version_media_types()
+    valid_types = ["*/*", "application/json"] + version_media_types()  # noqa: RUF005
     return valid_types
 
 
@@ -46,5 +46,5 @@ def version_media_types(versions=None):
     versions = versions or API_VERSIONS
     version_types = []
     for version in versions:
-        version_types.append(media_type_for_version(version))
+        version_types.append(media_type_for_version(version))  # noqa: PERF401
     return version_types

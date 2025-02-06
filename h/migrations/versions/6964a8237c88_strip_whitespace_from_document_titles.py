@@ -41,14 +41,14 @@ def upgrade():
             stripped_title = original_title.strip()
             if original_title != stripped_title:
                 n += 1
-                log.info(f"updated '{original_title}' to '{stripped_title}'")
+                log.info(f"updated '{original_title}' to '{stripped_title}'")  # noqa: G004
             new_titles.append(stripped_title)
 
         if new_titles != document_meta.value:
             document_meta.value = new_titles
 
     session.commit()
-    log.info(f"updated {n} document titles")
+    log.info(f"updated {n} document titles")  # noqa: G004
 
 
 def downgrade():

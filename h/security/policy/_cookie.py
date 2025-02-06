@@ -54,7 +54,7 @@ class CookiePolicy:
     def authenticated_userid(self, request):
         return Identity.authenticated_userid(self.identity(request))
 
-    def remember(self, request, userid, **kw):
+    def remember(self, request, userid, **kw):  # noqa: ARG002
         self.helper.add_vary_by_cookie(request)
 
         previous_userid = self.authenticated_userid(request)
@@ -111,7 +111,7 @@ class CookiePolicy:
         )
 
         def add_api_authcookie_headers(
-            request,
+            request,  # noqa: ARG001
             response,
         ):
             log.info("Fixing missing API auth cookie")

@@ -34,13 +34,13 @@ class JWTGrantToken:
                 options={"verify_signature": False},
             )
         except jwt.DecodeError as err:
-            raise InvalidRequestFatalError("Invalid JWT grant token format.") from err
+            raise InvalidRequestFatalError("Invalid JWT grant token format.") from err  # noqa: EM101, TRY003
 
     @property
     def issuer(self):
         iss = self._claims.get("iss", None)
         if not iss:
-            raise MissingJWTGrantTokenClaimError("iss", "issuer")
+            raise MissingJWTGrantTokenClaimError("iss", "issuer")  # noqa: EM101
         return iss
 
     def verified(self, key, audience):
@@ -65,7 +65,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
 
     def _verify(self, key, audience):  # noqa: C901
         if self.expiry - self.not_before > self.MAX_LIFETIME:
-            raise InvalidGrantError("Grant token lifetime is too long.")
+            raise InvalidGrantError("Grant token lifetime is too long.")  # noqa: EM101, TRY003
         try:
             jwt.decode(
                 self._token,
@@ -75,25 +75,25 @@ class VerifiedJWTGrantToken(JWTGrantToken):
                 leeway=self.LEEWAY,
             )
         except TypeError as err:
-            raise InvalidClientError("Client is invalid.") from err
+            raise InvalidClientError("Client is invalid.") from err  # noqa: EM101, TRY003
         except jwt.DecodeError as err:
-            raise InvalidGrantError("Invalid grant token signature.") from err
+            raise InvalidGrantError("Invalid grant token signature.") from err  # noqa: EM101, TRY003
         except jwt.exceptions.InvalidAlgorithmError as err:
-            raise InvalidGrantError("Invalid grant token signature algorithm.") from err
+            raise InvalidGrantError("Invalid grant token signature algorithm.") from err  # noqa: EM101, TRY003
         except jwt.MissingRequiredClaimError as err:  # pragma: no cover
             if err.claim == "aud":
-                raise MissingJWTGrantTokenClaimError("aud", "audience") from err
+                raise MissingJWTGrantTokenClaimError("aud", "audience") from err  # noqa: EM101
 
             raise MissingJWTGrantTokenClaimError(err.claim) from err
         except jwt.InvalidAudienceError as err:
-            raise InvalidJWTGrantTokenClaimError("aud", "audience") from err
+            raise InvalidJWTGrantTokenClaimError("aud", "audience") from err  # noqa: EM101
         except jwt.ImmatureSignatureError as err:
-            raise InvalidGrantError("Grant token is not yet valid.") from err
+            raise InvalidGrantError("Grant token is not yet valid.") from err  # noqa: EM101, TRY003
         except jwt.ExpiredSignatureError as err:
-            raise InvalidGrantError("Grant token is expired.") from err
+            raise InvalidGrantError("Grant token is expired.") from err  # noqa: EM101, TRY003
         except jwt.InvalidIssuedAtError as err:  # pragma: no cover
-            raise InvalidGrantError(
-                "Grant token issue time (iat) is in the future."
+            raise InvalidGrantError(  # noqa: TRY003
+                "Grant token issue time (iat) is in the future."  # noqa: EM101
             ) from err
 
     @property
@@ -109,7 +109,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
         if claim is None:
             raise MissingJWTGrantTokenClaimError(key, description)
         try:
-            return datetime.datetime.utcfromtimestamp(claim)
+            return datetime.datetime.utcfromtimestamp(claim)  # noqa: DTZ004
         except (TypeError, ValueError) as err:
             raise InvalidJWTGrantTokenClaimError(key, description) from err
 
@@ -117,5 +117,5 @@ class VerifiedJWTGrantToken(JWTGrantToken):
     def subject(self):
         sub = self._claims.get("sub", None)
         if not sub:
-            raise MissingJWTGrantTokenClaimError("sub", "subject")
+            raise MissingJWTGrantTokenClaimError("sub", "subject")  # noqa: EM101
         return sub

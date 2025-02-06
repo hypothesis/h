@@ -112,11 +112,11 @@ BLACKLISTED_QUERY_PARAMS = [
 #
 #   path-abempty  = *( "/" segment )
 #   ...
-#   segment       = *pchar
+#   segment       = *pchar  # noqa: ERA001
 #   ...
-#   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+#   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"  # noqa: ERA001
 #   ...
-#   unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+#   unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"  # noqa: ERA001
 #   sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
 #                    / "*" / "+" / "," / ";" / "="
 #
@@ -126,7 +126,7 @@ UNRESERVED_PATHSEGMENT = "-._~:@!$&'()*+,;="
 
 # From RFC3986. The ABNF for query strings is
 #
-#   query         = *( pchar / "/" / "?" )
+#   query         = *( pchar / "/" / "?" )  # noqa: ERA001
 #
 # Where the definition of pchar is as given above.
 #
@@ -228,8 +228,8 @@ def _normalize_netloc(uri):
     if port is not None:
         hostinfo += ":" + str(port)
 
-    if userinfo is not None:
-        netloc = "@".join([userinfo, hostinfo])
+    if userinfo is not None:  # noqa: SIM108
+        netloc = "@".join([userinfo, hostinfo])  # noqa: FLY002
     else:
         netloc = hostinfo
 

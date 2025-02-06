@@ -17,7 +17,7 @@ def identity_permits(
     :param context: Context object representing the objects acted upon
     :param permission: Permission requested
     """
-    if clauses := PERMISSION_MAP.get(permission):
+    if clauses := PERMISSION_MAP.get(permission):  # noqa: SIM102
         # Grant the permissions if for *any* single clause...
         if any(
             # .. *all* elements in it are true

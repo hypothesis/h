@@ -37,11 +37,11 @@ def upgrade():
     to_delete = []
     for document_meta in session.query(DocumentMeta).filter_by(type="title"):
         if document_meta.value == []:
-            to_delete.append(document_meta)
+            to_delete.append(document_meta)  # noqa: PERF401
     for document_meta in to_delete:
         session.delete(document_meta)
     session.commit()
-    log.info(f"deleted {len(to_delete)} empty-array document titles")
+    log.info(f"deleted {len(to_delete)} empty-array document titles")  # noqa: G004
 
 
 def downgrade():

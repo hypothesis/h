@@ -4,7 +4,7 @@ from h.schemas.base import JSONSchema
 
 
 class EventSchema(JSONSchema):
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         "required": ["event"],
         "properties": {

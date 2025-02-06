@@ -100,7 +100,7 @@ class TestDocumentFindOrCreateByURIs:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(ConcurrentUpdateError):
+        with pytest.raises(ConcurrentUpdateError):  # noqa: SIM117
             with db_session.no_autoflush:  # prevent premature IntegrityError
                 Document.find_or_create_by_uris(
                     db_session,
@@ -194,7 +194,7 @@ class TestMergeDocuments:
             .count()
         )
 
-    @pytest.mark.parametrize("updated", (None, _datetime(2001, 1, 1)))
+    @pytest.mark.parametrize("updated", (None, _datetime(2001, 1, 1)))  # noqa: DTZ001
     @pytest.mark.parametrize("sub_item", ("document_uris", "meta"))
     def test_it_moves_sub_items_to_the_first(
         self, db_session, duplicate_docs, datetime, updated, sub_item
@@ -432,6 +432,6 @@ class TestUpdateDocumentMetadata:
 @pytest.fixture
 def datetime(patch):
     datetime = patch("h.models.document._document.datetime")
-    datetime.utcnow.return_value = _datetime.utcnow()
+    datetime.utcnow.return_value = _datetime.utcnow()  # noqa: DTZ003
 
     return datetime

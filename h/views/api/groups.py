@@ -73,13 +73,13 @@ def create(request):
     if group_type == "private":
         method = group_create_service.create_private_group
     else:
-        assert group_type in ("restricted", "open")
+        assert group_type in ("restricted", "open")  # noqa: S101
         kwargs["scopes"] = []
 
         if group_type == "restricted":
             method = group_create_service.create_restricted_group
         else:
-            assert group_type == "open"
+            assert group_type == "open"  # noqa: S101
             method = group_create_service.create_open_group
 
     group = method(**kwargs)

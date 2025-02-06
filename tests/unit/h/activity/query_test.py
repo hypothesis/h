@@ -373,7 +373,7 @@ class TestExecute:
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(
-        self, _fetch_groups, group_pubids, pyramid_request
+        self, _fetch_groups, group_pubids, pyramid_request  # noqa: PT019
     ):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
@@ -396,7 +396,7 @@ class TestExecute:
             }
         )
 
-    def test_it_returns_each_annotations_group(self, _fetch_groups, pyramid_request):
+    def test_it_returns_each_annotations_group(self, _fetch_groups, pyramid_request):  # noqa: PT019
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         presented_annotations = []

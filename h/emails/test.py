@@ -19,7 +19,7 @@ def generate(request, recipient):
     """
 
     context = {
-        "time": datetime.datetime.utcnow().isoformat(),
+        "time": datetime.datetime.utcnow().isoformat(),  # noqa: DTZ003
         "hostname": platform.node(),
         "python_version": platform.python_version(),
         "version": __version__,

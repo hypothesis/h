@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from pyramid.request import Request
 
 from h.schemas.analytics import CreateEventSchema
-from h.services.analytics import AnalyticsService
+from h.services.analytics import AnalyticsService  # noqa: TC001
 from h.views.api.config import api_config
 
 

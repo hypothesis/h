@@ -10,7 +10,7 @@ def unauthorized_to_not_found(wrapped):
 
     def wrapper(_context, request):
         # We convert all 403s to 404s—replace the current context with a 404
-        # FIXME: We should be more nuanced about when we do this
+        # FIXME: We should be more nuanced about when we do this  # noqa: FIX001, TD001, TD002, TD003
         response = wrapped(_standard_not_found(), request)
         return response
 
@@ -33,7 +33,7 @@ def validate_media_types(wrapped):
 
     def wrapper(context, request):
         # If Accept has been set
-        if request.accept:
+        if request.accept:  # noqa: SIM102
             # At least one of the media types in Accept must be known to the app
             if not any(t in valid_media_types() for t in request.accept):
                 # If no Accept media types are known, convert to a 406 error

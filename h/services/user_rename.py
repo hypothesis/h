@@ -30,8 +30,8 @@ class UserRenameService:
     def check(self, user, new_username):
         existing_user = User.get_by_username(self.db, new_username, user.authority)
         if existing_user and existing_user != user:
-            raise UserRenameError(
-                f'Another user already has the username "{new_username}"'
+            raise UserRenameError(  # noqa: TRY003
+                f'Another user already has the username "{new_username}"'  # noqa: EM102
             )
 
         return True

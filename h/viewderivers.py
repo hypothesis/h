@@ -17,7 +17,7 @@ def csp_protected_view(view, info):
 
     policy = info.registry.settings.get("csp", {})
     clauses = [
-        " ".join([directive] + values) for directive, values in sorted(policy.items())
+        " ".join([directive] + values) for directive, values in sorted(policy.items())  # noqa: RUF005
     ]
     header_value = "; ".join(clauses)
 

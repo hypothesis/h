@@ -45,7 +45,7 @@ class DocumentURI(Base):
     content_type = sa.Column(sa.UnicodeText)
 
 
-def upgrade():
+def upgrade():  # noqa: PLR0912
     session = Session(bind=op.get_bind())
 
     document_uris = session.query(DocumentURI).filter(

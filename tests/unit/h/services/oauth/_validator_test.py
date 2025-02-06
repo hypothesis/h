@@ -50,7 +50,7 @@ class TestAuthenticateClient:
 
     def test_returns_False_when_secrets_do_not_match(self, svc, client, oauth_request):
         oauth_request.client_id = client.id
-        oauth_request.client_secret = "this-is-invalid"
+        oauth_request.client_secret = "this-is-invalid"  # noqa: S105
 
         assert not svc.authenticate_client(oauth_request)
 
@@ -283,19 +283,19 @@ class TestFindToken:
 
 class TestInvalidateRefreshToken:
     def test_it_shortens_refresh_token_expires(self, svc, oauth_request, token, utcnow):
-        utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)
+        utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)  # noqa: DTZ001
 
         svc.invalidate_refresh_token(token.refresh_token, oauth_request)
-        assert token.refresh_token_expires == datetime.datetime(2017, 8, 2, 18, 39, 53)
+        assert token.refresh_token_expires == datetime.datetime(2017, 8, 2, 18, 39, 53)  # noqa: DTZ001
 
     def test_it_is_noop_when_refresh_token_expires_within_new_ttl(
         self, svc, oauth_request, token, utcnow
     ):
-        utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)
-        token.refresh_token_expires = datetime.datetime(2017, 8, 2, 18, 37, 53)
+        utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)  # noqa: DTZ001
+        token.refresh_token_expires = datetime.datetime(2017, 8, 2, 18, 37, 53)  # noqa: DTZ001
 
         svc.invalidate_refresh_token(token.refresh_token, oauth_request)
-        assert token.refresh_token_expires == datetime.datetime(2017, 8, 2, 18, 37, 53)
+        assert token.refresh_token_expires == datetime.datetime(2017, 8, 2, 18, 37, 53)  # noqa: DTZ001
 
     @pytest.fixture
     def token(self, factories):
@@ -358,10 +358,10 @@ class TestSaveAuthorizationCode:
         assert authz_code.authclient == client
 
     def test_it_sets_expires(self, svc, client, code, oauth_request, utcnow):
-        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)
+        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)  # noqa: DTZ001
 
         authz_code = svc.save_authorization_code(client.id, code, oauth_request)
-        assert authz_code.expires == datetime.datetime(2017, 7, 13, 18, 39, 28)
+        assert authz_code.expires == datetime.datetime(2017, 7, 13, 18, 39, 28)  # noqa: DTZ001
 
     def test_it_sets_code(self, svc, client, code, oauth_request):
         authz_code = svc.save_authorization_code(client.id, code, oauth_request)
@@ -391,22 +391,22 @@ class TestSaveBearerToken:
         assert token.value == "test-access-token"
 
     def test_it_sets_expires(self, svc, token_payload, oauth_request, utcnow):
-        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)
+        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)  # noqa: DTZ001
 
         token = svc.save_bearer_token(token_payload, oauth_request)
-        assert token.expires == datetime.datetime(2017, 7, 13, 19, 29, 28)
+        assert token.expires == datetime.datetime(2017, 7, 13, 19, 29, 28)  # noqa: DTZ001
 
     def test_it_sets_refresh_token_expires(
         self, svc, token_payload, oauth_request, utcnow
     ):
-        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)
+        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)  # noqa: DTZ001
 
         token = svc.save_bearer_token(token_payload, oauth_request)
-        assert token.refresh_token_expires == datetime.datetime(2017, 7, 13, 20, 29, 28)
+        assert token.refresh_token_expires == datetime.datetime(2017, 7, 13, 20, 29, 28)  # noqa: DTZ001
 
     def test_it_sets_authclient(self, svc, token_payload, oauth_request):
         token = svc.save_bearer_token(token_payload, oauth_request)
-        assert token.refresh_token == "test-refresh-token"
+        assert token.refresh_token == "test-refresh-token"  # noqa: S105
 
     def test_it_removes_refresh_token_expires_in_from_payload(
         self, svc, token_payload, oauth_request
@@ -422,7 +422,7 @@ class TestSaveBearerToken:
             "h.services.oauth._validator.OAuthValidator.invalidate_refresh_token"
         )
         oauth_request.grant_type = "refresh_token"
-        oauth_request.refresh_token = "the-refresh-token"
+        oauth_request.refresh_token = "the-refresh-token"  # noqa: S105
 
         svc.save_bearer_token(token_payload, oauth_request)
 
@@ -502,7 +502,7 @@ class TestValidateCode:
         assert not result
 
     def test_returns_False_when_expired(self, svc, authz_code, client, oauth_request):
-        authz_code.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+        authz_code.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)  # noqa: DTZ003
 
         result = svc.validate_code(
             client.client_id, authz_code.code, client, oauth_request
@@ -612,7 +612,7 @@ class TestValidateRefreshToken:
     def test_returns_False_when_refresh_token_expired(
         self, svc, client, oauth_request, token
     ):
-        token.refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(
+        token.refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(  # noqa: DTZ003
             minutes=2
         )
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
@@ -634,7 +634,7 @@ class TestValidateRefreshToken:
     def test_returns_True_when_access_token_expired(
         self, svc, client, oauth_request, token
     ):
-        token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
+        token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)  # noqa: DTZ003
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is True
 

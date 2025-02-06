@@ -86,7 +86,7 @@ def users_activate(request):
     user.activate()
 
     request.session.flash(
-        Markup(_(f"User {user.username} has been activated!")),
+        Markup(_(f"User {user.username} has been activated!")),  # noqa: INT001
         "success",
     )
 
@@ -172,6 +172,6 @@ def _form_request_user(request):
     user = user_service.fetch(userid)
 
     if user is None:
-        raise UserNotFoundError(f"Could not find user with userid {userid}")
+        raise UserNotFoundError(f"Could not find user with userid {userid}")  # noqa: EM102, TRY003
 
     return user

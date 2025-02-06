@@ -39,7 +39,7 @@ def add(ctx, username, email, password, authority):
         message = (
             f"could not create user due to integrity constraint.\n\n{upstream_error}"
         )
-        raise click.ClickException(message)
+        raise click.ClickException(message)  # noqa: B904
 
     click.echo(f"{username} created", err=True)
 
@@ -92,8 +92,8 @@ def password(ctx, username, authority, password):
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        raise click.ClickException(
-            f'no user with username "{username}" and authority "{authority}"'
+        raise click.ClickException(  # noqa: TRY003
+            f'no user with username "{username}" and authority "{authority}"'  # noqa: EM102
         )
 
     password_service.update_password(user, password)

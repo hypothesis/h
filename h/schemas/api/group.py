@@ -24,7 +24,7 @@ GROUP_SCHEMA_PROPERTIES = {
 class GroupAPISchema(JSONSchema):
     """Base class for validating group resource API data."""
 
-    schema = {"type": "object", "properties": GROUP_SCHEMA_PROPERTIES}
+    schema = {"type": "object", "properties": GROUP_SCHEMA_PROPERTIES}  # noqa: RUF012
 
     def __init__(self, group_authority=None, default_authority=None):
         """
@@ -63,8 +63,8 @@ class GroupAPISchema(JSONSchema):
         name = appstruct.get("name")
 
         if name and name.strip() != name:
-            raise ValidationError(
-                "Group names can't have leading or trailing whitespace."
+            raise ValidationError(  # noqa: TRY003
+                "Group names can't have leading or trailing whitespace."  # noqa: EM101
             )
 
     def _validate_groupid(self, appstruct):
@@ -88,7 +88,7 @@ class GroupAPISchema(JSONSchema):
         ):
             # This is a first-party group
             raise ValidationError(
-                "{err_msg} '{authority}'".format(
+                "{err_msg} '{authority}'".format(  # noqa: EM103
                     err_msg=_(
                         "groupid may only be set on groups outside of the default authority"
                     ),
@@ -102,7 +102,7 @@ class GroupAPISchema(JSONSchema):
             # The authority part of the ``groupid`` doesn't match the
             # group's authority
             raise ValidationError(
-                "{err_msg} '{groupid}'".format(
+                "{err_msg} '{groupid}'".format(  # noqa: EM103
                     err_msg=_("Invalid authority specified in groupid"), groupid=groupid
                 )
             )
@@ -123,7 +123,7 @@ class GroupAPISchema(JSONSchema):
 class CreateGroupAPISchema(GroupAPISchema):
     """Schema for validating create-group API data."""
 
-    schema = {
+    schema = {  # noqa: RUF012
         "type": "object",
         "properties": GROUP_SCHEMA_PROPERTIES,
         "required": ["name"],  # ``name`` is a required field when creating

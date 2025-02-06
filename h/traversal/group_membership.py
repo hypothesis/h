@@ -63,10 +63,10 @@ def group_membership_api_factory(
     group = _get_group(request, pubid)
 
     if not user:
-        raise HTTPNotFound(f"User not found: {userid}")
+        raise HTTPNotFound(f"User not found: {userid}")  # noqa: EM102, TRY003
 
     if not group:
-        raise HTTPNotFound(f"Group not found: {pubid}")
+        raise HTTPNotFound(f"Group not found: {pubid}")  # noqa: EM102, TRY003
 
     if request.method == "POST":
         return AddGroupMembershipContext(group, user, new_roles=None)
@@ -74,10 +74,10 @@ def group_membership_api_factory(
     membership = _get_membership(request, group, user)
 
     if not membership:
-        raise HTTPNotFound(f"Membership not found: ({pubid}, {userid})")
+        raise HTTPNotFound(f"Membership not found: ({pubid}, {userid})")  # noqa: EM102, TRY003
 
     if request.method in ("GET", "DELETE"):
         return GroupMembershipContext(group=group, user=user, membership=membership)
 
-    assert request.method == "PATCH"
+    assert request.method == "PATCH"  # noqa: S101
     return EditGroupMembershipContext(group, user, membership, new_roles=None)

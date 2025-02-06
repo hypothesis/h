@@ -4,7 +4,7 @@ from subprocess import check_output
 
 import pytest
 from importlib_resources import files
-from pytest import fixture
+from pytest import fixture  # noqa: PT013
 
 from tests.functional.conftest import TEST_ENVIRONMENT
 
@@ -24,7 +24,7 @@ class TestRunSQLTask:
             # Ensure we can run the "create from scratch" after everything
             "report/create_from_scratch",
         ):
-            result = check_output(
+            result = check_output(  # noqa: S603
                 [
                     sys.executable,
                     "bin/run_data_task.py",
@@ -38,8 +38,8 @@ class TestRunSQLTask:
 
             assert result
 
-            print(f"Task {task_name} OK!")
-            print(result.decode("utf-8"))
+            print(f"Task {task_name} OK!")  # noqa: T201
+            print(result.decode("utf-8"))  # noqa: T201
 
     @fixture
     def environ(self):
@@ -54,7 +54,7 @@ class TestRunSQLTask:
     def run_in_root(self):
         # A context manager to ensure we work from the root, but return the
         # path to where it was before
-        current_dir = os.getcwd()
+        current_dir = os.getcwd()  # noqa: PTH109
         os.chdir(str(files("h") / ".."))
 
         yield

@@ -19,7 +19,7 @@ class BearerToken(OAuthlibBearerToken):
 
         self.refresh_token_expires_in = refresh_token_expires_in
 
-    def create_token(self, request, refresh_token=False, **kwargs):
+    def create_token(self, request, refresh_token=False, **kwargs):  # noqa: FBT002, ARG002
         if request.extra_credentials is None:
             request.extra_credentials = {}
         request.extra_credentials["refresh_token_expires_in"] = (

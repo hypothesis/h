@@ -48,20 +48,20 @@ class TestBlocklist:
         # Check any modifications haven't made this significantly slower
         reps = 10000
 
-        start = datetime.utcnow()
+        start = datetime.utcnow()  # noqa: DTZ003
         for _ in range(reps):
             Blocklist.is_blocked("http://example.com/this/is/fine")
 
-        diff = datetime.utcnow() - start
+        diff = datetime.utcnow() - start  # noqa: DTZ003
 
         seconds = diff.seconds + diff.microseconds / 1000000
         calls_per_second = int(reps // seconds)
 
         # Handy to know while tinkering
         # print(
-        #     f"Calls per second: {calls_per_second}, "
-        #     f"{1000000 / calls_per_second:.03f} μs/call"
-        # )
+        #     f"Calls per second: {calls_per_second}, "  # noqa: ERA001
+        #     f"{1000000 / calls_per_second:.03f} μs/call"  # noqa: ERA001
+        # )  # noqa: ERA001
 
         # It should be above this number by quite a margin (20x), but we
         # don't want flaky tests
@@ -105,7 +105,7 @@ class TestBadge:
 
     @pytest.fixture
     def badge_request(self, pyramid_request, factories, Blocklist):
-        def caller(uri, annotated=True, blocked=False):
+        def caller(uri, annotated=True, blocked=False):  # noqa: FBT002
             if annotated:
                 factories.DocumentURI(uri=uri)
                 pyramid_request.db.flush()

@@ -172,8 +172,8 @@ class OAuthAuthorizeController:
             return HTTPFound(location=headers["Location"])
         except KeyError as err:  # pragma: no cover
             client_id = self.request.params.get("client_id")
-            raise RuntimeError(
-                f'created authorisation code for client "{client_id}" but got no redirect location'
+            raise RuntimeError(  # noqa: TRY003
+                f'created authorisation code for client "{client_id}" but got no redirect location'  # noqa: EM102
             ) from err
 
     @classmethod
@@ -239,13 +239,13 @@ def debug_token(request):
 
     bearer_token = svc.get_bearer_token(request)
     if not bearer_token:
-        raise OAuthTokenError(
-            "Bearer token is missing in Authorization HTTP header", "missing_token"
+        raise OAuthTokenError(  # noqa: TRY003
+            "Bearer token is missing in Authorization HTTP header", "missing_token"  # noqa: EM101
         )
 
     if not svc.validate(bearer_token):
-        raise OAuthTokenError(
-            "Bearer token does not exist or is expired", "missing_token"
+        raise OAuthTokenError(  # noqa: TRY003
+            "Bearer token does not exist or is expired", "missing_token"  # noqa: EM101
         )
 
     token = svc.fetch(bearer_token)

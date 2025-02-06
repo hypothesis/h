@@ -135,7 +135,7 @@ class DocumentHTMLPresenter:
         # has no title). In those cases we want to remove the http(s):// from
         # the front and unquote it for link text.
         lower = title.lower()
-        if lower.startswith("http://") or lower.startswith("https://"):
+        if lower.startswith("http://") or lower.startswith("https://"):  # noqa: PIE810
             parts = urlparse(title)
             return unquote(parts.netloc + parts.path)
 

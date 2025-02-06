@@ -12,7 +12,7 @@ log = get_task_logger(__name__)
 # See: https://docs.celeryproject.org/en/stable/userguide/tasks.html#automatic-retry-for-known-exceptions
 class _BaseTaskWithRetry(ABC, Task):
     autoretry_for = (Exception,)
-    retry_kwargs = {"countdown": 5, "max_retries": 1}
+    retry_kwargs = {"countdown": 5, "max_retries": 1}  # noqa: RUF012
 
 
 @celery.task(base=_BaseTaskWithRetry, acks_late=True)

@@ -121,7 +121,7 @@ class TestUserService:
 
         # We need to capture the inline `clear_cache` function so we can
         # call it manually later
-        def on_transaction_end_decorator(session):
+        def on_transaction_end_decorator(session):  # noqa: ARG001
             def on_transaction_end(func):
                 funcs["clear_cache"] = func
 

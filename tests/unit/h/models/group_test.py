@@ -20,13 +20,13 @@ def test_init_sets_given_attributes():
 
 def test_with_short_name():
     """Should raise ValueError if name shorter than 3 characters."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         models.Group(name="ab")
 
 
 def test_with_long_name():
     """Should raise ValueError if name longer than 25 characters."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         models.Group(name="abcdefghijklmnopqrstuvwxyz")
 
 
@@ -172,7 +172,7 @@ def test_you_can_set_type(factories, original_type, new_type):
 
 
 def test_you_cant_set_type_to_an_invalid_value(factories):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         factories.Group().type = "invalid"
 
 

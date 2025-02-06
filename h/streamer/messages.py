@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 Message = namedtuple("Message", ["topic", "payload"])  # noqa: PYI024
 
 
-def process_messages(settings, routing_key, work_queue, raise_error=True):
+def process_messages(settings, routing_key, work_queue, raise_error=True):  # noqa: FBT002
     """
     Configure, start, and monitor a realtime consumer for the specified routing key.
 
@@ -44,7 +44,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
     consumer.run()
 
     if raise_error:
-        raise RuntimeError("Realtime consumer quit unexpectedly!")
+        raise RuntimeError("Realtime consumer quit unexpectedly!")  # noqa: EM101, TRY003
 
 
 def handle_message(message, registry, session, topic_handlers):
@@ -61,8 +61,8 @@ def handle_message(message, registry, session, topic_handlers):
     try:
         handler = topic_handlers[message.topic]
     except KeyError as err:
-        raise RuntimeError(
-            f"Don't know how to handle message from topic: {message.topic}"
+        raise RuntimeError(  # noqa: TRY003
+            f"Don't know how to handle message from topic: {message.topic}"  # noqa: EM102
         ) from err
 
     # N.B. We iterate over a non-weak list of instances because there's nothing
