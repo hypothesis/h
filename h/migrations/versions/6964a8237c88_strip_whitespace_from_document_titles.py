@@ -41,9 +41,7 @@ def upgrade():
             stripped_title = original_title.strip()
             if original_title != stripped_title:
                 n += 1
-                log.info(
-                    f"updated '{original_title}' to '{stripped_title}'"
-                )
+                log.info(f"updated '{original_title}' to '{stripped_title}'")
             new_titles.append(stripped_title)
 
         if new_titles != document_meta.value:

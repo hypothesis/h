@@ -1,4 +1,3 @@
-
 from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity

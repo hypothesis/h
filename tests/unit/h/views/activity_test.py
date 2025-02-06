@@ -240,7 +240,10 @@ class TestGroupSearchController:
     ):
         group_info = controller.search()["group"]
 
-        assert group_info["created"] == f"{test_group.created:%B} {test_group.created.day}, {test_group.created:%Y}"
+        assert (
+            group_info["created"]
+            == f"{test_group.created:%B} {test_group.created.day}, {test_group.created:%Y}"
+        )
         assert group_info["description"] == test_group.description
         assert group_info["name"] == test_group.name
         assert group_info["pubid"] == test_group.pubid
@@ -259,7 +262,10 @@ class TestGroupSearchController:
     ):
         group_info = controller.search()["group"]
 
-        assert group_info["created"] == f"{test_group.created:%B} {test_group.created.day}, {test_group.created:%Y}"
+        assert (
+            group_info["created"]
+            == f"{test_group.created:%B} {test_group.created.day}, {test_group.created:%Y}"
+        )
         assert group_info["description"] == test_group.description
         assert group_info["name"] == test_group.name
         assert group_info["pubid"] == test_group.pubid
