@@ -149,7 +149,11 @@ class TestGroupSearchController:
     )
     @pytest.mark.usefixtures("toggle_user_facet_request")
     def test_raises_not_found_when_no_read_or_join_permissions(
-        self, controller, pyramid_request, test_group, test_user  # noqa: ARG002
+        self,
+        controller,
+        pyramid_request,
+        test_group,
+        test_user,  # noqa: ARG002
     ):
         pyramid_request.has_permission = mock.Mock(side_effect=self.fake_has_permission)
 
@@ -182,7 +186,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_calls_search_with_the_request(
-        self, controller, test_group, test_user, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        search,  # noqa: ARG002
     ):
         controller.search()
 
@@ -196,7 +204,12 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_just_returns_search_result_if_group_does_not_exist(
-        self, controller, test_group, test_user, pyramid_request, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        pyramid_request,
+        search,  # noqa: ARG002
     ):
         pyramid_request.matchdict["pubid"] = "does_not_exist"
 
@@ -204,7 +217,10 @@ class TestGroupSearchController:
 
     @pytest.mark.parametrize("test_group", GROUP_TYPE_OPTIONS, indirect=["test_group"])
     def test_search_just_returns_search_result_if_user_not_logged_in(
-        self, controller, test_group, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        search,  # noqa: ARG002
     ):
         assert controller.search() == search.return_value
 
@@ -214,7 +230,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_just_returns_search_result_if_user_not_a_member_of_group(
-        self, controller, test_group, test_user, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        search,  # noqa: ARG002
     ):
         assert controller.search() == search.return_value
 
@@ -224,7 +244,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_creator_is_none_if_group_creator_is_empty(
-        self, controller, test_group, test_user  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,  # noqa: ARG002
     ):
         group_info = controller.search()["group_users_args"]
 
@@ -236,7 +259,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_info_if_user_has_read_permissions(
-        self, controller, test_group, test_user  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,  # noqa: ARG002
     ):
         group_info = controller.search()["group"]
 
@@ -277,7 +303,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_does_not_show_the_edit_link_to_non_admin_users(
-        self, controller, test_group, test_user, pyramid_request  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        pyramid_request,  # noqa: ARG002
     ):
         def fake_has_permission(permission, context=None):  # noqa: ARG001
             return permission != Permission.Group.EDIT
@@ -294,7 +324,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_does_show_the_group_edit_link_to_group_creators(
-        self, controller, test_group, test_user, pyramid_request  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        pyramid_request,  # noqa: ARG002
     ):
         pyramid_request.has_permission = mock.Mock(return_value=True)
 
@@ -308,7 +342,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
-        self, controller, test_group, test_user, pyramid_request  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        pyramid_request,  # noqa: ARG002
     ):
         pyramid_request.params["more_info"] = ""
 
@@ -320,7 +358,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
-        self, controller, test_group, test_user  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,  # noqa: ARG002
     ):
         assert not controller.search()["more_info"]
 
@@ -346,7 +387,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_members_usernames(
-        self, controller, test_user, test_group  # noqa: ARG002
+        self,
+        controller,
+        test_user,
+        test_group,  # noqa: ARG002
     ):
         result = controller.search()
 
@@ -360,7 +404,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_members_userid(
-        self, controller, test_user, test_group  # noqa: ARG002
+        self,
+        controller,
+        test_user,
+        test_group,  # noqa: ARG002
     ):
         result = controller.search()
 
@@ -375,7 +422,10 @@ class TestGroupSearchController:
     )
     @pytest.mark.usefixtures("query")
     def test_search_returns_group_members_faceted_by(
-        self, controller, test_user, test_group  # noqa: ARG002
+        self,
+        controller,
+        test_user,
+        test_group,  # noqa: ARG002
     ):
         faceted_user = test_group.members[0]
         controller.parsed_query_params = MultiDict({"user": faceted_user.username})
@@ -416,7 +466,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_moderators_usernames(
-        self, controller, test_user, test_group  # noqa: ARG002
+        self,
+        controller,
+        test_user,
+        test_group,  # noqa: ARG002
     ):
         result = controller.search()
 
@@ -430,7 +483,10 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_moderators_userid(
-        self, controller, test_user, test_group  # noqa: ARG002
+        self,
+        controller,
+        test_user,
+        test_group,  # noqa: ARG002
     ):
         result = controller.search()
 
@@ -444,7 +500,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_group_moderators_faceted_by(
-        self, controller, pyramid_request, test_user, test_group  # noqa: ARG002
+        self,
+        controller,
+        pyramid_request,
+        test_user,
+        test_group,  # noqa: ARG002
     ):
         pyramid_request.params = {"q": "user:does_not_matter"}
 
@@ -458,7 +518,12 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_annotation_count_for_group_moderators(
-        self, controller, test_group, test_user, search, factories  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        search,
+        factories,  # noqa: ARG002
     ):
         user_1 = test_group.creator
         user_2 = factories.User()
@@ -484,7 +549,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_the_default_zero_message_to_the_template(
-        self, controller, test_group, test_user, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        search,  # noqa: ARG002
     ):
         """If there's a non-empty query it uses the default zero message."""
         search.return_value["q"] = "foo"
@@ -499,7 +568,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_returns_the_group_zero_message_to_the_template(
-        self, controller, test_group, test_user, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        search,  # noqa: ARG002
     ):
         """If the query is empty it overrides the default zero message."""
         search.return_value["q"] = ""
@@ -669,7 +742,11 @@ class TestGroupSearchController:
         indirect=["test_group", "test_user"],
     )
     def test_search_sets_display_members_for_group(
-        self, controller, test_group, test_user, search  # noqa: ARG002
+        self,
+        controller,
+        test_group,
+        test_user,
+        search,  # noqa: ARG002
     ):
         info = controller.search()["group_users_args"]
         userids = [i["userid"] for i in info[1]]

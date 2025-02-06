@@ -76,7 +76,14 @@ class DocumentURI(Base, mixins.Timestamps):
 
 
 def create_or_update_document_uri(  # noqa: PLR0913
-    session, claimant, uri, type, content_type, document, created, updated  # noqa: A002
+    session,
+    claimant,
+    uri,
+    type,
+    content_type,
+    document,
+    created,
+    updated,  # noqa: A002
 ):
     """
     Create or update a DocumentURI with the given parameters.

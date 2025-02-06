@@ -127,11 +127,14 @@ def test_entry_title(factories):
 
 def test_entry_dates(factories):
     annotation = factories.Annotation(
-        created=datetime.utcnow(), updated=datetime.utcnow() + timedelta(hours=1)  # noqa: DTZ003
+        created=datetime.utcnow(),
+        updated=datetime.utcnow() + timedelta(hours=1),  # noqa: DTZ003
     )
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url"  # noqa: ARG005
+        [annotation],
+        "atom_url",
+        lambda annotation: "annotation url",  # noqa: ARG005
     )
 
     assert feed["entries"][0]["published"] == f"utc_iso8601_return:{annotation.created}"
@@ -147,7 +150,9 @@ def test_entry_content(factories):
         annotation = factories.Annotation()
 
         feed = atom.feed_from_annotations(
-            [annotation], "atom_url", lambda annotation: "annotation url"  # noqa: ARG005
+            [annotation],
+            "atom_url",
+            lambda annotation: "annotation url",  # noqa: ARG005
         )
 
         mock_description.assert_called_once_with()
@@ -193,7 +198,9 @@ def test_feed_updated(factories):
     annotations[0].updated = datetime.utcnow()  # noqa: DTZ003
 
     feed = atom.feed_from_annotations(
-        annotations, "atom_url", lambda annotation: "annotation url"  # noqa: ARG005
+        annotations,
+        "atom_url",
+        lambda annotation: "annotation url",  # noqa: ARG005
     )
 
     assert feed["updated"] == f"utc_iso8601_return:{annotations[0].updated}"

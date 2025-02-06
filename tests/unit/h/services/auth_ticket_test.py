@@ -70,7 +70,8 @@ class TestAuthTicketService:
 
         if expect_update:
             assert_nearly_equal(
-                auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL  # noqa: DTZ003
+                auth_ticket.expires,
+                datetime.utcnow() + AuthTicketService.TICKET_TTL,  # noqa: DTZ003
             )
         else:
             assert auth_ticket.expires == expires
@@ -85,7 +86,8 @@ class TestAuthTicketService:
         assert auth_ticket.user_userid == user.userid
         assert auth_ticket.id == "test_ticket_id"
         assert_nearly_equal(
-            auth_ticket.expires, datetime.utcnow() + AuthTicketService.TICKET_TTL  # noqa: DTZ003
+            auth_ticket.expires,
+            datetime.utcnow() + AuthTicketService.TICKET_TTL,  # noqa: DTZ003
         )
         assert service._ticket == auth_ticket  # noqa: SLF001
         assert inspect(auth_ticket).pending is True

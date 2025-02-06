@@ -373,7 +373,10 @@ class TestExecute:
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(
-        self, _fetch_groups, group_pubids, pyramid_request  # noqa: PT019
+        self,
+        _fetch_groups,
+        group_pubids,
+        pyramid_request,  # noqa: PT019
     ):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 

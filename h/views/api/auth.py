@@ -240,12 +240,14 @@ def debug_token(request):
     bearer_token = svc.get_bearer_token(request)
     if not bearer_token:
         raise OAuthTokenError(  # noqa: TRY003
-            "Bearer token is missing in Authorization HTTP header", "missing_token"  # noqa: EM101
+            "Bearer token is missing in Authorization HTTP header",
+            "missing_token",  # noqa: EM101
         )
 
     if not svc.validate(bearer_token):
         raise OAuthTokenError(  # noqa: TRY003
-            "Bearer token does not exist or is expired", "missing_token"  # noqa: EM101
+            "Bearer token does not exist or is expired",
+            "missing_token",  # noqa: EM101
         )
 
     token = svc.fetch(bearer_token)

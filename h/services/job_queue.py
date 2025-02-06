@@ -61,7 +61,12 @@ class JobQueueService:
         self.add_where(name, where, tag, Priority.SINGLE_ITEM, force, schedule_in)
 
     def add_by_ids(
-        self, name, annotation_ids: list[str], tag, force=False, schedule_in=None  # noqa: FBT002
+        self,
+        name,
+        annotation_ids: list[str],
+        tag,
+        force=False,
+        schedule_in=None,  # noqa: FBT002
     ):
         """
         Queue annotations by ID.

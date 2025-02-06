@@ -12,7 +12,9 @@ log = logging.getLogger(__name__)
 resolver = DottedNameResolver(None)
 
 
-def conditional_http_tween_factory(handler, registry):  # pragma: no cover  # noqa: ARG001
+def conditional_http_tween_factory(
+    handler, registry
+):  # pragma: no cover  # noqa: ARG001
     """Set up conditional response handling for some requests."""
 
     def conditional_http_tween(request):

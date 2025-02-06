@@ -16,7 +16,8 @@ VERSION_UNKNOWN = "0+unknown"
 
 def fetch_git_ref():
     return subprocess.check_output(  # noqa: S603
-        ["git", "rev-parse", "--short", "HEAD"], stderr=DEVNULL  # noqa: S607
+        ["git", "rev-parse", "--short", "HEAD"],
+        stderr=DEVNULL,  # noqa: S607
     ).strip()
 
 
