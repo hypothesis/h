@@ -57,12 +57,6 @@ class TestBlocklist:
         seconds = diff.seconds + diff.microseconds / 1000000
         calls_per_second = int(reps // seconds)
 
-        # Handy to know while tinkering
-        # print(
-        #     f"Calls per second: {calls_per_second}, "  # noqa: ERA001
-        #     f"{1000000 / calls_per_second:.03f} μs/call"  # noqa: ERA001
-        # )  # noqa: ERA001
-
         # It should be above this number by quite a margin (20x), but we
         # don't want flaky tests
         assert calls_per_second > 50000
