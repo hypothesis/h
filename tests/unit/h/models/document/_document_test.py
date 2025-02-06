@@ -217,7 +217,7 @@ class TestMergeDocuments:
         merge_documents(db_session, duplicate_docs)
         db_session.flush()
 
-        for document, expected_count in zip(duplicate_docs, (3, 0, 0)):
+        for document, expected_count in zip(duplicate_docs, (3, 0, 0), strict=False):
             count = (
                 db_session.query(models.Annotation)
                 .filter_by(document_id=document.id)

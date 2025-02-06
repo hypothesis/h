@@ -79,7 +79,7 @@ class Organization(Base):
 def new_org(authority, session):
     organization = Organization(authority=authority, name=authority)
     session.add(organization)
-    log.info("Created new organization {name}".format(name=organization.name))
+    log.info(f"Created new organization {organization.name}")
     return organization
 
 
@@ -119,16 +119,12 @@ def upgrade():
 
     session.commit()
 
-    log.info("Skipped {n} groups that already had an organization".format(n=skipped))
+    log.info(f"Skipped {skipped} groups that already had an organization")
     log.info(
-        "Assigned {n} groups to the __default__ organization".format(
-            n=assigned_to_default_org
-        )
+        f"Assigned {assigned_to_default_org} groups to the __default__ organization"
     )
     log.info(
-        "Assigned {n} groups to authority organizations".format(
-            n=assigned_to_authority_org
-        )
+        f"Assigned {assigned_to_authority_org} groups to authority organizations"
     )
 
 

@@ -1,4 +1,4 @@
-from functools import lru_cache, partial
+from functools import cache, partial
 
 import bleach
 from bleach.linkifier import LinkifyFilter
@@ -48,7 +48,7 @@ def render(text):
     # them we'll double escape them.
     text = text.replace("\\(", "\\\\(").replace("\\)", "\\\\)")
 
-    return _get_cleaner().clean((RENDER_MARKDOWN(text)))
+    return _get_cleaner().clean(RENDER_MARKDOWN(text))
 
 
 def _filter_link_attributes(_tag, name, value):
@@ -103,7 +103,7 @@ ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
 ALLOWED_ATTRIBUTES.update(MARKDOWN_ATTRIBUTES)
 
 
-@lru_cache(maxsize=None)
+@cache
 def _get_cleaner():
     linkify_filter = partial(
         LinkifyFilter, callbacks=[_linkify_target_blank, _linkify_rel]

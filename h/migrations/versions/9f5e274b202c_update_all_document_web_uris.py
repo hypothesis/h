@@ -89,8 +89,8 @@ def upgrade():
 
         session.commit()
 
-    log.info("Updated {updated} web_uris".format(updated=updated))
-    log.info("Left {not_changed} web_uris unchanged".format(not_changed=not_changed))
+    log.info(f"Updated {updated} web_uris")
+    log.info(f"Left {not_changed} web_uris unchanged")
 
 
 def downgrade():

@@ -409,7 +409,7 @@ class LimitedWorker:
 
     def _execute(self, stmnt):
         if self.limit < 1:
-            raise LimitReached()
+            raise LimitReached
 
         affected_ids = self.db.scalars(stmnt).all()
         self.limit -= len(affected_ids)

@@ -170,7 +170,7 @@ class TestCreateOrUpdateDocumentURI:
             "updated": datetime.now() - timedelta(days=1),
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_db_session(self, db_session):
         return Mock(spec=db_session)
 

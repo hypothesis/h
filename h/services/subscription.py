@@ -1,4 +1,3 @@
-from typing import List
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -49,7 +48,7 @@ class SubscriptionService:
 
         return subscription
 
-    def get_all_subscriptions(self, user_id: str) -> List[Subscriptions]:
+    def get_all_subscriptions(self, user_id: str) -> list[Subscriptions]:
         """
         Get all subscriptions for a particular user, creating any missing ones.
 
@@ -79,7 +78,7 @@ class SubscriptionService:
         try:
             payload = self._token_serializer.loads(token)
         except ValueError as err:
-            raise InvalidUnsubscribeToken() from err
+            raise InvalidUnsubscribeToken from err
 
         self.get_subscription(
             user_id=payload["uri"], type_=Subscriptions.Type(payload["type"])

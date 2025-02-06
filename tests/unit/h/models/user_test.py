@@ -201,7 +201,7 @@ class TestUserModel:
 
     def test_privacy_accepted_defaults_to_None(self):
         # nullable
-        assert getattr(User(), "privacy_accepted") is None
+        assert User().privacy_accepted is None
 
     def test_repr(self, user):
         assert repr(user) == f"User(id={user.id})"

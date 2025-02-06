@@ -26,7 +26,7 @@ class Group(ModelFactory):
     @factory.post_generation
     def scopes(self, create, scopes=0, **kwargs):
         if isinstance(scopes, int):
-            scopes = [GroupScope(group=self) for _ in range(0, scopes)]
+            scopes = [GroupScope(group=self) for _ in range(scopes)]
 
         self.scopes = scopes or []
 

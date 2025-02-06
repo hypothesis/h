@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
@@ -34,7 +33,7 @@ class BulkAnnotationService:
         username: str,
         created: dict,
         limit=100000,
-    ) -> List[BulkAnnotation]:
+    ) -> list[BulkAnnotation]:
         """
         Get a list of annotations or rows viewable by a given user.
 

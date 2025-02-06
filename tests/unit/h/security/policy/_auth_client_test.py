@@ -137,7 +137,7 @@ class TestAuthClientPolicy:
     @classmethod
     def set_http_credentials(cls, pyramid_request, client_id, client_secret):
         encoded = base64.standard_b64encode(
-            f"{client_id}:{client_secret}".encode("utf-8")
+            f"{client_id}:{client_secret}".encode()
         )
         creds = encoded.decode("ascii")
         pyramid_request.headers["Authorization"] = f"Basic {creds}"

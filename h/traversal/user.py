@@ -28,7 +28,7 @@ class UserRoot:
             raise HTTPBadRequest(err.args[0]) from err
 
         if not user:
-            raise KeyError()
+            raise KeyError
 
         return UserContext(user)
 

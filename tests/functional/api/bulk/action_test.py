@@ -158,7 +158,7 @@ class TestBulk:
 
     @pytest.fixture(params=[None, "token", "non_lms_auth"])
     def bad_header(self, request, token_auth_header, auth_header):
-        yield {"token": token_auth_header, "non_lms_auth": auth_header}.get(
+        return {"token": token_auth_header, "non_lms_auth": auth_header}.get(
             request.param, request.param
         )
 

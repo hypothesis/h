@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from h.models import Group
 
@@ -8,7 +7,7 @@ from h.models import Group
 class GroupContext:
     """Context for a single (optional) group."""
 
-    group: Optional[Group] = None
+    group: Group | None = None
 
 
 class GroupRoot:
@@ -29,6 +28,6 @@ class GroupRequiredRoot(GroupRoot):
     def __getitem__(self, pubid_or_groupid):
         group_context = super().__getitem__(pubid_or_groupid)
         if group_context.group is None:
-            raise KeyError()
+            raise KeyError
 
         return group_context

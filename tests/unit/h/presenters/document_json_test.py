@@ -46,4 +46,4 @@ class TestDocumentJSONPresenter:
         db_session.flush()
 
         presenter = DocumentJSONPresenter(document)
-        assert {"title": ["Foo"]} == presenter.asdict()
+        assert presenter.asdict() == {"title": ["Foo"]}

@@ -222,11 +222,11 @@ class TestQueueService:
         """Return `annotation.id` in the internal format used within the database."""
         return str(uuid.UUID(URLSafeUUID.url_safe_to_hex(annotation.id)))
 
-    @pytest.fixture()
+    @pytest.fixture
     def add_where(self, svc):
         with patch.object(svc, "add_where") as add_where:
             yield add_where
 
-    @pytest.fixture()
+    @pytest.fixture
     def svc(self, db_session):
         return JobQueueService(db_session)

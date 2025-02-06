@@ -1,11 +1,11 @@
 import pytest
 
 __all__ = (
-    "user",
     "login_user",
-    "with_logged_in_user",
-    "with_logged_in_staff_member",
+    "user",
     "with_logged_in_admin",
+    "with_logged_in_staff_member",
+    "with_logged_in_user",
 )
 
 

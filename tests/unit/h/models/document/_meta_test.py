@@ -111,7 +111,7 @@ class TestCreateOrUpdateDocumentMeta:
             "updated": datetime.now(),
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_db_session(self, db_session):
         return Mock(spec=db_session)
 

@@ -2,13 +2,13 @@
 
 import logging
 
-from h.security.encryption import (  # noqa:F401
+from h.security.encryption import (
     derive_key,
     password_context,
     token_urlsafe,
 )
-from h.security.identity import Identity  # noqa:F401
-from h.security.permissions import Permission  # noqa:F401
+from h.security.identity import Identity
+from h.security.permissions import Permission
 from h.security.permits import identity_permits
 from h.security.policy import StreamerPolicy, TopLevelPolicy
 

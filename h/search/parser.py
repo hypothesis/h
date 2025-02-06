@@ -6,7 +6,7 @@ transforms it into a MultiDict structure that h.search understands.
 """
 
 from collections import namedtuple
-from functools import lru_cache
+from functools import cache
 
 import pyparsing as pp
 from webob.multidict import MultiDict
@@ -92,7 +92,7 @@ def unparse(query):
     return " ".join(terms)
 
 
-@lru_cache(maxsize=None)
+@cache
 def _make_parser():
     word = pp.CharsNotIn("".join(whitespace))
     word.skipWhitespace = True

@@ -278,8 +278,7 @@ def doi_uri_from_string(string):
     """
     string = string.strip()
 
-    if string.startswith("doi:"):
-        string = string[len("doi:") :]
+    string = string.removeprefix("doi:")
 
     string = string.strip()
 

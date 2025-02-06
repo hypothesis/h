@@ -9,8 +9,8 @@ class TestCorsPreflight:
         # Note that no `Authorization` header is set.
         origin = "https://custom-client.herokuapp.com"
         headers = {
-            "Access-Control-Request-Headers": str("authorization,content-type"),
-            "Access-Control-Request-Method": str("POST"),
+            "Access-Control-Request-Headers": "authorization,content-type",
+            "Access-Control-Request-Method": "POST",
             "Origin": str(origin),
         }
 

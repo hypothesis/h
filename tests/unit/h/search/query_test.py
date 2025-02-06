@@ -378,7 +378,7 @@ class TestGroupFilter:
         annotation_ids = [Annotation(groupid=pubid).id for pubid in group_pubids]
 
         result = search.run(
-            webob.multidict.MultiDict((("group", pubid) for pubid in group_pubids))
+            webob.multidict.MultiDict(("group", pubid) for pubid in group_pubids)
         )
 
         group_service.groupids_readable_by.assert_called_with(

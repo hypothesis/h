@@ -277,7 +277,7 @@ class Group(Base, mixins.Timestamps):
         try:
             new_type_flags = GROUP_TYPE_FLAGS[value]
         except KeyError as err:
-            raise ValueError() from err
+            raise ValueError from err
 
         for index, flag in enumerate(new_type_flags._fields):
             setattr(self, flag, new_type_flags[index])
