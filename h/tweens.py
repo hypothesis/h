@@ -13,7 +13,7 @@ resolver = DottedNameResolver(None)
 
 
 def conditional_http_tween_factory(
-    handler, registry
+    handler, registry  # noqa: ARG001
 ):  # pragma: no cover
     """Set up conditional response handling for some requests."""
 

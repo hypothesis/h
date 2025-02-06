@@ -100,11 +100,11 @@ class OAuthValidator(RequestValidator):
 
     def confirm_redirect_uri(
         self,
-        client_id,
-        code,
+        client_id,  # noqa: ARG002
+        code,  # noqa: ARG002
         redirect_uri,
         client,
-        *args,
+        *args,  # noqa: ARG002
         **kwargs,  # noqa: ARG002
     ):
         """
@@ -278,11 +278,11 @@ class OAuthValidator(RequestValidator):
 
     def validate_grant_type(
         self,
-        client_id,
+        client_id,  # noqa: ARG002
         grant_type,
         client,
-        request,
-        *args,
+        request,  # noqa: ARG002
+        *args,  # noqa: ARG002
         **kwargs,  # noqa: ARG002
     ):
         """Validate that the given client is allowed to use the give grant type."""
@@ -336,8 +336,8 @@ class OAuthValidator(RequestValidator):
         self,
         client_id,
         response_type,
-        request,
-        *args,
+        request,  # noqa: ARG002
+        *args,  # noqa: ARG002
         **kwargs,  # noqa: ARG002
     ):
         """Validate that the provided ``response_type`` matches the one stored on the client."""

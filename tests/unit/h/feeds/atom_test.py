@@ -127,7 +127,7 @@ def test_entry_title(factories):
 
 def test_entry_dates(factories):
     annotation = factories.Annotation(
-        created=datetime.utcnow(),
+        created=datetime.utcnow(),  # noqa: DTZ003
         updated=datetime.utcnow() + timedelta(hours=1),  # noqa: DTZ003
     )
 

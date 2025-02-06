@@ -88,7 +88,7 @@ class TestCreateOrUpdateDocumentURI:
         original_attrs = doc_uri_attrs
         updated_attrs = dict(
             original_attrs,
-            created=datetime.now(),
+            created=datetime.now(),  # noqa: DTZ005
             updated=datetime.now(),  # noqa: DTZ005
         )
         document_uri = DocumentURI(**original_attrs)
@@ -108,7 +108,7 @@ class TestCreateOrUpdateDocumentURI:
         original_attrs = doc_uri_attrs
         updated_attrs = dict(
             original_attrs,
-            created=datetime.now(),
+            created=datetime.now(),  # noqa: DTZ005
             updated=datetime.now(),  # noqa: DTZ005
         )
         # Add one non-matching DocumentURI to the database.
