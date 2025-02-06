@@ -66,7 +66,7 @@ class JobQueueService:
         annotation_ids: list[str],
         tag,
         force=False,
-        schedule_in=None,  # noqa: FBT002
+        schedule_in=None,
     ):
         """
         Queue annotations by ID.

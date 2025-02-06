@@ -55,7 +55,7 @@ def create_or_update_document_meta(  # noqa: PLR0913
     value,
     document,
     created,
-    updated,  # noqa: A002
+    updated,
 ):
     """
     Create or update a DocumentMeta with the given parameters.

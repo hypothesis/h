@@ -119,7 +119,7 @@ class TestCookiePolicy:
 
             assert False, (
                 "Should never reach here"
-            )  # pragma: no cover  # noqa: B011, PT015
+            )  # pragma: no cover
 
         helper.remember.side_effect = remember
 
@@ -169,7 +169,7 @@ class TestCookiePolicy:
 
             assert False, (
                 "Should never reach here"
-            )  # pragma: no cover  # noqa: B011, PT015
+            )  # pragma: no cover
 
         helper.forget.side_effect = forget
 

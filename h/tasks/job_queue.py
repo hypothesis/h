@@ -30,7 +30,7 @@ def add_annotations_by_ids(
     annotation_ids: list[str],
     tag,
     force=False,
-    schedule_in=None,  # noqa: FBT002
+    schedule_in=None,
 ):
     celery.request.find_service(name="queue_service").add_by_ids(
         name, annotation_ids, tag, force=force, schedule_in=schedule_in

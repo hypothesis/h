@@ -190,7 +190,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        search,  # noqa: ARG002
+        search,
     ):
         controller.search()
 
@@ -209,7 +209,7 @@ class TestGroupSearchController:
         test_group,
         test_user,
         pyramid_request,
-        search,  # noqa: ARG002
+        search,
     ):
         pyramid_request.matchdict["pubid"] = "does_not_exist"
 
@@ -220,7 +220,7 @@ class TestGroupSearchController:
         self,
         controller,
         test_group,
-        search,  # noqa: ARG002
+        search,
     ):
         assert controller.search() == search.return_value
 
@@ -234,7 +234,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        search,  # noqa: ARG002
+        search,
     ):
         assert controller.search() == search.return_value
 
@@ -307,7 +307,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        pyramid_request,  # noqa: ARG002
+        pyramid_request,
     ):
         def fake_has_permission(permission, context=None):  # noqa: ARG001
             return permission != Permission.Group.EDIT
@@ -328,7 +328,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        pyramid_request,  # noqa: ARG002
+        pyramid_request,
     ):
         pyramid_request.has_permission = mock.Mock(return_value=True)
 
@@ -346,7 +346,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        pyramid_request,  # noqa: ARG002
+        pyramid_request,
     ):
         pyramid_request.params["more_info"] = ""
 
@@ -390,7 +390,7 @@ class TestGroupSearchController:
         self,
         controller,
         test_user,
-        test_group,  # noqa: ARG002
+        test_group,
     ):
         result = controller.search()
 
@@ -407,7 +407,7 @@ class TestGroupSearchController:
         self,
         controller,
         test_user,
-        test_group,  # noqa: ARG002
+        test_group,
     ):
         result = controller.search()
 
@@ -425,7 +425,7 @@ class TestGroupSearchController:
         self,
         controller,
         test_user,
-        test_group,  # noqa: ARG002
+        test_group,
     ):
         faceted_user = test_group.members[0]
         controller.parsed_query_params = MultiDict({"user": faceted_user.username})
@@ -469,7 +469,7 @@ class TestGroupSearchController:
         self,
         controller,
         test_user,
-        test_group,  # noqa: ARG002
+        test_group,
     ):
         result = controller.search()
 
@@ -486,7 +486,7 @@ class TestGroupSearchController:
         self,
         controller,
         test_user,
-        test_group,  # noqa: ARG002
+        test_group,
     ):
         result = controller.search()
 
@@ -523,7 +523,7 @@ class TestGroupSearchController:
         test_group,
         test_user,
         search,
-        factories,  # noqa: ARG002
+        factories,
     ):
         user_1 = test_group.creator
         user_2 = factories.User()
@@ -553,7 +553,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        search,  # noqa: ARG002
+        search,
     ):
         """If there's a non-empty query it uses the default zero message."""
         search.return_value["q"] = "foo"
@@ -572,7 +572,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        search,  # noqa: ARG002
+        search,
     ):
         """If the query is empty it overrides the default zero message."""
         search.return_value["q"] = ""
@@ -746,7 +746,7 @@ class TestGroupSearchController:
         controller,
         test_group,
         test_user,
-        search,  # noqa: ARG002
+        search,
     ):
         info = controller.search()["group_users_args"]
         userids = [i["userid"] for i in info[1]]

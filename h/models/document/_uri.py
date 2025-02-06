@@ -83,7 +83,7 @@ def create_or_update_document_uri(  # noqa: PLR0913
     content_type,
     document,
     created,
-    updated,  # noqa: A002
+    updated,
 ):
     """
     Create or update a DocumentURI with the given parameters.
