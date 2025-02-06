@@ -6,14 +6,10 @@ This module defines a Celery task for sending emails in a worker process.
 
 import smtplib
 
-import pyramid_mailer
-import pyramid_mailer.message
-
-from h.tasks.celery import celery, get_task_logger
+from h.services.email import EmailService
+from h.tasks.celery import celery
 
 __all__ = ("send",)
-
-log = get_task_logger(__name__)
 
 
 @celery.task(bind=True, max_retries=3, acks_late=True)
@@ -30,19 +26,9 @@ def send(self, recipients, subject, body, html=None):
     :param body: the body of the email
     :type body: unicode
     """
-    email = pyramid_mailer.message.Message(
-        subject=subject, recipients=recipients, body=body, html=html
-    )
-    mailer = pyramid_mailer.get_mailer(celery.request)
-    if celery.request.debug:  # pragma: no cover
-        log.info("emailing in debug mode: check the `mail/' directory")
+    service = celery.request.find_service(EmailService)
     try:
-        mailer.send_immediately(email)
-    except smtplib.SMTPRecipientsRefused as exc:  # pragma: no cover
-        log.warning(
-            "Recipient was refused when trying to send an email. Does the user have an invalid email address?",
-            exc_info=exc,
-        )
+        service.send(recipients=recipients, subject=subject, body=body, html=html)
     except smtplib.socket.error as exc:
         # Exponential backoff in case the SMTP service is having problems.
         countdown = self.default_retry_delay * 2**self.request.retries
