@@ -15,7 +15,7 @@ $(call help,make db,initialize the DB and upgrade it to the latest migration)
 db: args?=upgrade head
 db: python
 	@tox -qe dev --run-command 'python3 -m h.scripts.init_db --create --stamp'
-	@tox -qe dev --run-command 'alembic $(args)'
+	@PYTHONPATH=$(CURDIR) TOX_TESTENV_PASSENV=PYTHONPATH tox -qe dev --run-command 'alembic $(args)'
 
 .PHONY: devdata
 $(call help,make devdata,load development data and environment variables)
