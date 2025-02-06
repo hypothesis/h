@@ -17,7 +17,7 @@ class TestAnnotationJSONService:
     ):
         annotation.created = datetime(2016, 2, 24, 18, 3, 25, 768)  # noqa: DTZ001
         annotation.updated = datetime(2016, 2, 29, 10, 24, 5, 564)  # noqa: DTZ001
-        annotation.references = ["referenced-id-1", "referenced-id-2"]
+        annotation.references = ["pUQBbZOcRA2h_5259SY98Q", "473NFWUVSiqlSDLmpBbNOg"]
         annotation.extra = {"extra-1": "foo", "extra-2": "bar"}
 
         result = service.present(annotation)
@@ -47,6 +47,7 @@ class TestAnnotationJSONService:
             "extra-1": "foo",
             "extra-2": "bar",
             "user_info": {"display_name": user_service.fetch.return_value.display_name},
+            "mentions": [],
         }
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
@@ -188,7 +189,12 @@ class TestAnnotationJSONService:
 
         annotation_read_service.get_annotations_by_id.assert_called_once_with(
             ids=sentinel.annotation_ids,
-            eager_load=[Annotation.document, Annotation.moderation, Annotation.group],
+            eager_load=[
+                Annotation.document,
+                Annotation.moderation,
+                Annotation.group,
+                Annotation.mentions,
+            ],
         )
         flag_service.all_flagged.assert_called_once_with(user, sentinel.annotation_ids)
         flag_service.flag_counts.assert_called_once_with(sentinel.annotation_ids)
@@ -201,13 +207,21 @@ class TestAnnotationJSONService:
 
     @pytest.fixture
     def service(
-        self, annotation_read_service, links_service, flag_service, user_service
+        self,
+        annotation_read_service,
+        links_service,
+        flag_service,
+        user_service,
+        mention_service,
+        feature_service,
     ):
         return AnnotationJSONService(
             annotation_read_service=annotation_read_service,
             links_service=links_service,
             flag_service=flag_service,
             user_service=user_service,
+            mention_service=mention_service,
+            feature_service=feature_service,
         )
 
     @pytest.fixture
@@ -246,6 +260,8 @@ class TestFactory:
         flag_service,
         links_service,
         user_service,
+        mention_service,
+        feature_service,
     ):
         service = factory(sentinel.context, pyramid_request)
 
@@ -254,6 +270,8 @@ class TestFactory:
             links_service=links_service,
             flag_service=flag_service,
             user_service=user_service,
+            mention_service=mention_service,
+            feature_service=feature_service,
         )
         assert service == AnnotationJSONService.return_value
 
