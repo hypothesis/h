@@ -139,7 +139,7 @@ def group_organization_select_widget(_node, kwargs):
 
 class AdminGroupSchema(CSRFSchema):
     def __init__(self, *args):
-        super().__init__(validator=username_validator, *args)  # noqa: B026
+        super().__init__(*args)
 
     group_type = colander.SchemaNode(
         colander.String(),
@@ -217,3 +217,7 @@ class AdminGroupSchema(CSRFSchema):
         widget=SequenceWidget(add_subitem_text_template=_("Add member")),
         missing=None,
     )
+
+    def validator(self, node, value):
+        super().validator(node, value)
+        username_validator(node, value)
