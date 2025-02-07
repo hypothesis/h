@@ -29,7 +29,6 @@ def username_validator(form, value):
     The creator and members of a group must belong to the same authority as the
     group and the group's organization.
     """
-    breakpoint()
     # Unlike other validators, this one is applied at the root level of the
     # form. This is because we need to read the value from the organization
     # to get the right authority to check the users. This isn't possible in
@@ -208,6 +207,7 @@ class AdminGroupSchema(CSRFSchema):
             " of the entered scope strings (e.g. 'http://www.example.com')"
         ),
         widget=SequenceWidget(add_subitem_text_template=_("Add scope")),
+        missing=colander.drop,
     )
 
     members = colander.SequenceSchema(
