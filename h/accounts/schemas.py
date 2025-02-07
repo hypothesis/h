@@ -16,7 +16,6 @@ from h.models.user import (
     USERNAME_PATTERN,
 )
 from h.schemas import validators
-from h.schemas.base import CSRFSchema
 from h.schemas.forms.accounts.util import PASSWORD_MIN_LENGTH
 from h.util.user import format_userid
 
@@ -153,7 +152,7 @@ def _privacy_accepted_message():
     return privacy_msg
 
 
-class RegisterSchema(CSRFSchema):
+class RegisterSchema(colander.Schema):
     username = colander.SchemaNode(
         colander.String(),
         validator=colander.All(
@@ -197,7 +196,7 @@ class RegisterSchema(CSRFSchema):
     )
 
 
-class EmailChangeSchema(CSRFSchema):
+class EmailChangeSchema(colander.Schema):
     email = email_node(title=_("Email address"))
     # No validators: all validation is done on the email field
     password = password_node(title=_("Confirm password"), hide_until_form_active=True)
@@ -215,7 +214,7 @@ class EmailChangeSchema(CSRFSchema):
             raise exc
 
 
-class PasswordChangeSchema(CSRFSchema):
+class PasswordChangeSchema(colander.Schema):
     password = password_node(title=_("Current password"), inactive_label=_("Password"))
     new_password = new_password_node(
         title=_("New password"), hide_until_form_active=True
@@ -245,7 +244,7 @@ class PasswordChangeSchema(CSRFSchema):
             raise exc
 
 
-class DeleteAccountSchema(CSRFSchema):
+class DeleteAccountSchema(colander.Schema):
     password = password_node(title=_("Confirm password"))
 
     def validator(self, node, value):
@@ -258,7 +257,7 @@ class DeleteAccountSchema(CSRFSchema):
             raise exc
 
 
-class NotificationsSchema(CSRFSchema):
+class NotificationsSchema(colander.Schema):
     types = (("reply", _("Email me when someone replies to one of my annotations.")),)
 
     notifications = colander.SchemaNode(
