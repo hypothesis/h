@@ -1,0 +1,18 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'groups_edit' %}
+{% set page_title = 'Edit group' %}
+
+{% block content %}
+  <div id="admin-group-create-edit-form"></div>
+  <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('admin_pages_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
+{% endblock %}

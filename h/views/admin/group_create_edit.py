@@ -16,7 +16,7 @@ class AdminGroupCreateViews:
 
     @view_config(request_method="GET")
     def get(self):
-        return {}
+        return {"js_config": {}}
 
 
 @view_defaults(route_name="admin.groups_edit", **VIEW_DEFAULTS)
@@ -27,4 +27,4 @@ class AdminGroupEditViews:
 
     @view_config(request_method="GET")
     def get(self):
-        return {}
+        return {"js_config": {}}
