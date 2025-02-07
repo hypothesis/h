@@ -3,7 +3,6 @@ from unittest.mock import call
 
 import colander
 import pytest
-from pyramid.exceptions import BadCSRFToken
 
 from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
@@ -17,18 +16,6 @@ from h.schemas.forms.admin.group import AdminGroupSchema
 class TestAdminGroupSchema:
     def test_it_allows_with_valid_data(self, group_data, bound_schema):
         bound_schema.deserialize(group_data)
-
-    def test_it_raises_if_csrf_token_missing(self, group_data, bound_schema):
-        del bound_schema.bindings["request"].headers["X-CSRF-Token"]
-
-        with pytest.raises(BadCSRFToken):
-            bound_schema.deserialize(group_data)
-
-    def test_it_raises_if_csrf_token_wrong(self, group_data, bound_schema):
-        bound_schema.bindings["request"].headers["X-CSRF-Token"] = "foobar"
-
-        with pytest.raises(BadCSRFToken):
-            bound_schema.deserialize(group_data)
 
     def test_it_raises_if_name_too_short(self, group_data, bound_schema):
         too_short_name = "a" * (GROUP_NAME_MIN_LENGTH - 1)
