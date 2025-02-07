@@ -1,6 +1,7 @@
 from pyramid.renderers import render
 
 from h.i18n import TranslationString as _
+from h.services.email import EmailTag
 
 
 def generate(request, email, incontext_link):
@@ -27,4 +28,4 @@ def generate(request, email, incontext_link):
         "h:templates/emails/flag_notification.html.jinja2", context, request=request
     )
 
-    return [email], subject, text, html
+    return [email], subject, text, EmailTag.FLAG_NOTIFICATION, html

@@ -1,6 +1,7 @@
 import pytest
 
 from h.emails.signup import generate
+from h.services.email import EmailTag
 
 
 @pytest.mark.usefixtures("routes")
@@ -27,7 +28,7 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, html = generate(
+        recipients, subject, text, tag, html = generate(
             pyramid_request,
             user_id=1234,
             email="foo@example.com",
@@ -37,6 +38,7 @@ class TestGenerate:
         assert recipients == ["foo@example.com"]
         assert subject == "Please activate your account"
         assert html == "HTML output"
+        assert tag == EmailTag.ACTIVATION
         assert text == "Text output"
 
     def test_jinja_templates_render(self, pyramid_config, pyramid_request):
