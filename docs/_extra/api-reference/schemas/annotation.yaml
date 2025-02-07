@@ -209,9 +209,12 @@ Annotation:
             pattern: "acct:^[A-Za-z0-9._]{3,30}@.*$"
             description: user account ID in the format `"acct:<username>@<authority>"`
             example: "acct:felicity_nunsun@hypothes.is"
+          original_userid:
+            type: string
+            description: The original account ID mentioned in the annotation text
           username:
             type: string
-            description: The username of the user at the time of the mention
+            description: The username of the user
           display_name:
             type: string
             description: The display name of the user
