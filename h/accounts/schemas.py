@@ -203,7 +203,6 @@ class EmailChangeSchema(CSRFSchema):
     password = password_node(title=_("Confirm password"), hide_until_form_active=True)
 
     def validator(self, node, value):
-        super().validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")
@@ -231,7 +230,6 @@ class PasswordChangeSchema(CSRFSchema):
     )
 
     def validator(self, node, value):  # pragma: no cover
-        super().validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")
@@ -251,8 +249,6 @@ class DeleteAccountSchema(CSRFSchema):
     password = password_node(title=_("Confirm password"))
 
     def validator(self, node, value):
-        super().validator(node, value)
-
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")
 

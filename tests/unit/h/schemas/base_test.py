@@ -3,8 +3,6 @@ from unittest.mock import Mock
 
 import colander
 import pytest
-from pyramid import csrf
-from pyramid.exceptions import BadCSRFToken
 
 from h.schemas import ValidationError
 from h.schemas.base import CSRFSchema, JSONSchema, enum_type
@@ -23,28 +21,6 @@ class ExampleJSONSchema(JSONSchema):
         "properties": {"foo": {"type": "string"}, "bar": {"type": "integer"}},
         "required": ["foo", "bar"],
     }
-
-
-class TestCSRFSchema:
-    def test_raises_badcsrf_with_bad_csrf(self, pyramid_request):
-        schema = ExampleCSRFSchema().bind(request=pyramid_request)
-
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize({})
-
-    def test_ok_with_good_csrf(self, pyramid_request):
-        csrf_token = csrf.get_csrf_token(pyramid_request)
-        pyramid_request.POST["csrf_token"] = csrf_token
-        schema = ExampleCSRFSchema().bind(request=pyramid_request)
-
-        # Does not raise
-        schema.deserialize({})
-
-    def test_ok_with_good_csrf_from_header(self, pyramid_csrf_request):
-        schema = ExampleCSRFSchema().bind(request=pyramid_csrf_request)
-
-        # Does not raise
-        schema.deserialize({})
 
 
 class TestJSONSchema:

@@ -104,6 +104,7 @@ class OAuthAuthorizeController:
         request_param="response_mode=web_message",
         is_authenticated=True,
         renderer="h:templates/oauth/authorize_web_message.html.jinja2",
+        require_csrf=False,
     )
     def post_web_message(self):
         """

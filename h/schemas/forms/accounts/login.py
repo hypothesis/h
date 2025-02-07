@@ -36,8 +36,6 @@ class LoginSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
-        super().validator(node, value)
-
         request = node.bindings["request"]
         username = value.get("username")
         password = value.get("password")
