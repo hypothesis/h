@@ -99,7 +99,7 @@ class TestGenerate:
         parent_user.display_name = "Parent 👩"
         reply_user.display_name = "Child 👧"
 
-        (_, subject, _, _) = generate(pyramid_request, notification)
+        (_, subject, _, _, _) = generate(pyramid_request, notification)
 
         assert subject == "Child 👧 has replied to your annotation"
 
@@ -130,7 +130,7 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        _, _, text, html = generate(pyramid_request, notification)
+        _, _, text, _, html = generate(pyramid_request, notification)
 
         assert html == "HTML output"
         assert text == "Text output"
@@ -138,7 +138,7 @@ class TestGenerate:
     def test_returns_subject_with_reply_display_name(
         self, notification, pyramid_request
     ):
-        _, subject, _, _ = generate(pyramid_request, notification)
+        _, subject, _, _, _ = generate(pyramid_request, notification)
 
         assert subject == "Ron Burgundy has replied to your annotation"
 
@@ -146,12 +146,12 @@ class TestGenerate:
         self, notification, pyramid_request, reply_user
     ):
         reply_user.display_name = None
-        _, subject, _, _ = generate(pyramid_request, notification)
+        _, subject, _, _, _ = generate(pyramid_request, notification)
 
         assert subject == "ron has replied to your annotation"
 
     def test_returns_parent_email_as_recipients(self, notification, pyramid_request):
-        recipients, _, _, _ = generate(pyramid_request, notification)
+        recipients, _, _, _, _ = generate(pyramid_request, notification)
 
         assert recipients == ["pat@ric.ia"]
 

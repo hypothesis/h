@@ -3,7 +3,7 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.services.email import EmailService, factory
+from h.services.email import EmailService, EmailTag, factory
 
 
 class TestEmailService:
@@ -12,6 +12,7 @@ class TestEmailService:
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
+            tag=EmailTag.TEST,
         )
 
         pyramid_mailer.message.Message.assert_called_once_with(
@@ -19,6 +20,7 @@ class TestEmailService:
             subject="My email subject",
             body="Some text body",
             html=None,
+            extra_headers={"X-MC-Tags": EmailTag.TEST},
         )
 
     def test_send_creates_email_message_with_html_body(
@@ -28,6 +30,7 @@ class TestEmailService:
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
+            tag=EmailTag.TEST,
             html="<p>An HTML body</p>",
         )
 
@@ -36,6 +39,7 @@ class TestEmailService:
             subject="My email subject",
             body="Some text body",
             html="<p>An HTML body</p>",
+            extra_headers={"X-MC-Tags": EmailTag.TEST},
         )
 
     def test_send_dispatches_email_using_request_mailer(
@@ -48,6 +52,7 @@ class TestEmailService:
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
+            tag=EmailTag.TEST,
         )
 
         request_mailer.send_immediately.assert_called_once_with(message)
@@ -61,6 +66,7 @@ class TestEmailService:
                 recipients=["foo@example.com"],
                 subject="My email subject",
                 body="Some text body",
+                tag=EmailTag.TEST,
             )
 
     @pytest.fixture

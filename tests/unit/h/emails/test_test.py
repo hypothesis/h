@@ -3,6 +3,7 @@ from h_matchers import Any
 
 from h import __version__
 from h.emails.test import generate
+from h.services.email import EmailTag
 
 
 class TestGenerate:
@@ -26,13 +27,14 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, html = generate(
+        recipients, subject, text, tag, html = generate(
             pyramid_request, "meerkat@example.com"
         )
 
         assert recipients == ["meerkat@example.com"]
         assert subject == "Test mail"
         assert html == "HTML output"
+        assert tag == EmailTag.TEST
         assert text == "Text output"
 
     def test_jinja_templates_render(self, pyramid_config, pyramid_request):

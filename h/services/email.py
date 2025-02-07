@@ -1,6 +1,7 @@
 # noqa: A005
 
 import smtplib
+from enum import StrEnum
 
 import pyramid_mailer
 import pyramid_mailer.message
@@ -12,6 +13,14 @@ from h.tasks.celery import get_task_logger
 logger = get_task_logger(__name__)
 
 
+class EmailTag(StrEnum):
+    ACTIVATION = "activation"
+    FLAG_NOTIFICATION = "flag_notification"
+    REPLY_NOTIFICATION = "reply_notification"
+    RESET_PASSWORD = "reset_password"  # noqa: S105
+    TEST = "test"
+
+
 class EmailService:
     """A service for sending emails."""
 
@@ -20,10 +29,20 @@ class EmailService:
         self._mailer = mailer
 
     def send(
-        self, recipients: list[str], subject: str, body: str, html: str | None = None
-    ):
+        self,
+        recipients: list[str],
+        subject: str,
+        body: str,
+        tag: EmailTag,
+        html: str | None = None,
+    ) -> None:
+        extra_headers = {"X-MC-Tags": tag}
         email = pyramid_mailer.message.Message(
-            subject=subject, recipients=recipients, body=body, html=html
+            subject=subject,
+            recipients=recipients,
+            body=body,
+            html=html,
+            extra_headers=extra_headers,
         )
         if self._request.debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")

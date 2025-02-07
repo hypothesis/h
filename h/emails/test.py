@@ -4,6 +4,7 @@ import platform
 from pyramid.renderers import render
 
 from h import __version__
+from h.services.email import EmailTag
 
 
 def generate(request, recipient):
@@ -28,4 +29,4 @@ def generate(request, recipient):
     text = render("h:templates/emails/test.txt.jinja2", context, request=request)
     html = render("h:templates/emails/test.html.jinja2", context, request=request)
 
-    return [recipient], "Test mail", text, html
+    return [recipient], "Test mail", text, EmailTag.TEST, html

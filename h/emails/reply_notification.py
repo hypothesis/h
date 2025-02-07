@@ -5,6 +5,7 @@ from h import links
 from h.models import Subscriptions
 from h.notification.reply import Notification
 from h.services import SubscriptionService
+from h.services.email import EmailTag
 
 
 def generate(request: Request, notification: Notification):
@@ -49,7 +50,13 @@ def generate(request: Request, notification: Notification):
         "h:templates/emails/reply_notification.html.jinja2", context, request=request
     )
 
-    return [notification.parent_user.email], subject, text, html
+    return (
+        [notification.parent_user.email],
+        subject,
+        text,
+        EmailTag.REPLY_NOTIFICATION,
+        html,
+    )
 
 
 def _get_user_url(user, request):

@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from h.services.email import EmailTag
 from h.tasks import mailer
 
 
@@ -14,6 +15,7 @@ def test_send_retries_if_mailing_fails(email_service):
         recipients=["foo@example.com"],
         subject="My email subject",
         body="Some text body",
+        tag=EmailTag.TEST,
     )
 
     assert mailer.send.retry.called
