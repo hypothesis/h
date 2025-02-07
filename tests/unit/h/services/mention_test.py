@@ -104,6 +104,7 @@ class TestFactory:
             session=pyramid_request.db,
             user_service=user_service,
         )
+
         assert service == MentionService.return_value
 
     @pytest.fixture
