@@ -30,6 +30,8 @@ def create_app(_global_config, **settings):  # pragma: no cover
 
 
 def includeme(config):  # pragma: no cover
+    config.set_default_csrf_options(require_csrf=True)
+
     config.scan("h.subscribers")
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)
