@@ -18,6 +18,10 @@ class AdminGroupCreateViews:
     def get(self):
         return {"js_config": {}}
 
+    @view_config(request_method="POST")
+    def post(self):
+        return {"js_config": {}}
+
 
 @view_defaults(route_name="admin.groups_edit", **VIEW_DEFAULTS)
 class AdminGroupEditViews:
