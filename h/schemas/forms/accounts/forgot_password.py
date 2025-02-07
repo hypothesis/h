@@ -3,12 +3,11 @@ import deform
 
 from h import i18n, models
 from h.schemas import validators
-from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString
 
 
-class ForgotPasswordSchema(CSRFSchema):
+class ForgotPasswordSchema(colander.Schema):
     email = colander.SchemaNode(
         colander.String(),
         validator=colander.All(validators.Email()),

@@ -8,7 +8,7 @@ from h import form
 
 class TestJinja2Renderer:
     def test_call_fetches_correct_templates(self, jinja2_env):
-        renderer = form.Jinja2Renderer(jinja2_env)
+        renderer = form.Jinja2Renderer(jinja2_env, {"request": mock.sentinel.request})
 
         renderer("foo")
         renderer("foo.jinja2")
@@ -23,23 +23,52 @@ class TestJinja2Renderer:
         ]
 
     def test_call_passes_kwargs_to_render(self, jinja2_env, jinja2_template):
-        renderer = form.Jinja2Renderer(jinja2_env)
+        renderer = form.Jinja2Renderer(jinja2_env, {"request": mock.sentinel.request})
 
         renderer("textinput", foo="foo", bar="bar")
 
-        jinja2_template.render.assert_called_once_with({"foo": "foo", "bar": "bar"})
+        jinja2_template.render.assert_called_once_with(
+            {
+                "foo": "foo",
+                "bar": "bar",
+                "request": mock.sentinel.request,
+                "get_csrf_token": mock.ANY,
+            }
+        )
 
     def test_call_passes_system_context_to_render(self, jinja2_env, jinja2_template):
-        renderer = form.Jinja2Renderer(jinja2_env, {"bar": "default"})
+        renderer = form.Jinja2Renderer(
+            jinja2_env, {"bar": "default", "request": mock.sentinel.request}
+        )
 
         renderer("textinput")
         renderer("textinput", foo="foo")
         renderer("textinput", foo="foo", bar="bar")
 
         assert jinja2_template.render.call_args_list == [
-            mock.call({"bar": "default"}),
-            mock.call({"foo": "foo", "bar": "default"}),
-            mock.call({"foo": "foo", "bar": "bar"}),
+            mock.call(
+                {
+                    "bar": "default",
+                    "request": mock.sentinel.request,
+                    "get_csrf_token": mock.ANY,
+                }
+            ),
+            mock.call(
+                {
+                    "foo": "foo",
+                    "bar": "default",
+                    "request": mock.sentinel.request,
+                    "get_csrf_token": mock.ANY,
+                }
+            ),
+            mock.call(
+                {
+                    "foo": "foo",
+                    "bar": "bar",
+                    "request": mock.sentinel.request,
+                    "get_csrf_token": mock.ANY,
+                }
+            ),
         ]
 
     @pytest.fixture
@@ -92,7 +121,8 @@ class TestCreateForm:
         form.create_form(pyramid_request, mock.sentinel.schema)
 
         Jinja2Renderer.assert_called_once_with(
-            mock.sentinel.jinja2_env, {"feature": pyramid_request.feature}
+            mock.sentinel.jinja2_env,
+            {"feature": pyramid_request.feature, "request": pyramid_request},
         )
 
     @pytest.fixture(autouse=True)
