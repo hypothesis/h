@@ -14,6 +14,7 @@
     </p>
 
     <form class="form js-authorize-form" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
       <div class="form-actions">
         <button type="button" class="btn btn--cancel" data-ref="cancelBtn">Cancel</button>
         <div class="u-stretch"></div>
