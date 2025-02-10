@@ -120,6 +120,29 @@ class TestGenerate:
 
         generate(pyramid_request, notification)
 
+    def test_urls_not_set_for_third_party_users(
+        self, notification, pyramid_request, html_renderer, text_renderer
+    ):
+        pyramid_request.default_authority = "foo.org"
+        expected_context = {"user_url": None}
+
+        generate(pyramid_request, notification)
+
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
+
+    def test_urls_set_for_first_party_users(
+        self, notification, pyramid_request, html_renderer, text_renderer, mentioning_user
+    ):
+        expected_context = {
+            "user_url": f"http://example.com/stream/user/{mentioning_user.username}",
+        }
+
+        generate(pyramid_request, notification)
+
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
+
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
         return Notification(
