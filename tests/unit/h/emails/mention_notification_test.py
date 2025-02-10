@@ -106,6 +106,20 @@ class TestGenerate:
 
         assert subject == f"{mentioning_user.username} has mentioned you in an annotation"
 
+    def test_returns_parent_email_as_recipients(self, notification, pyramid_request, mentioned_user):
+        recipients, _, _, _ = generate(pyramid_request, notification)
+
+        assert recipients == [mentioned_user.email]
+
+    def test_jinja_templates_render(
+        self, notification, pyramid_config, pyramid_request
+    ):
+        """Ensure that the jinja templates don't contain syntax errors."""
+        pyramid_config.include("pyramid_jinja2")
+        pyramid_config.include("h.jinja_extensions")
+
+        generate(pyramid_request, notification)
+
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
         return Notification(
