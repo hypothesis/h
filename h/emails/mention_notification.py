@@ -1,61 +1,36 @@
-import logging
-from dataclasses import dataclass
+from pyramid.renderers import render
+from pyramid.request import Request
 
-from h.models import Annotation, Document, User
-
-logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Notification:
-    """A data structure representing a mention notification in an annotation."""
-
-    mentioning_user: User
-    mentioned_user: User
-    annotation: Annotation
-    document: Document
+from h import links
+from h.notification.mention import Notification
 
 
-def get_notifications(request, annotation: Annotation, action) -> list[Notification]:
-    # Only send notifications when new annotations are created
-    if action != "create":
-        return []
+def generate(request: Request, notification: Notification):
+    context = {
+        "user_url": _get_user_url(notification.mentioning_user, request),
+        "user_display_name": notification.mentioning_user.display_name
+        or notification.mentioning_user.username,
+        "annotation_url": links.incontext_link(request, notification.annotation)
+        or request.route_url("annotation", id=notification.annotation.id),
+        "document_title": notification.document.title
+        or notification.annotation.target_uri,
+        "document_url": notification.annotation.target_uri,
+        "annotation": notification.annotation,
+    }
 
-    user_service = request.find_service(name="user")
+    subject = f"{context['user_display_name']} has mentioned you in an annotation"
+    text = render(
+        "h:templates/emails/mention_notification.txt.jinja2", context, request=request
+    )
+    html = render(
+        "h:templates/emails/mention_notification.html.jinja2", context, request=request
+    )
 
-    # If the mentioning user doesn't exist (anymore), we can't send emails, but
-    # this would be super weird, so log a warning.
-    mentioning_user = user_service.fetch(annotation.userid)
-    if mentioning_user is None:
-        logger.warning(
-            "user who just mentioned another user no longer exists: %s",
-            annotation.userid,
-        )
-        return []
+    return [notification.mentioned_user.email], subject, text, html
 
-    notifications = []
-    for mention in annotation.mentions:
-        # If the mentioning user doesn't exist (anymore), we can't send emails
-        mentioned_user = user_service.fetch(mention.user.userid)
-        if mentioned_user is None:
-            continue
 
-        # If mentioned user doesn't have an email address we can't email them.
-        if not mention.user.email:
-            continue
+def _get_user_url(user, request):
+    if user.authority == request.default_authority:
+        return request.route_url("stream.user_query", user=user.username)
 
-        # Do not notify users about their own replies
-        if mentioning_user == mentioned_user:
-            continue
-
-        # If the annotation doesn't have a document, we can't send an email.
-        if annotation.document is None:
-            continue
-
-        notifications.append(
-            Notification(
-                mentioning_user, mentioned_user, annotation, annotation.document
-            )
-        )
-
-    return notifications
+    return None
