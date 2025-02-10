@@ -5,7 +5,7 @@ from pyramid.events import BeforeRender, subscriber
 from h import __version__, emails
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
-from h.notification import reply
+from h.notification import mention, reply
 from h.services.annotation_read import AnnotationReadService
 from h.tasks import mailer
 
@@ -89,3 +89,28 @@ def send_reply_notifications(event):
         except OperationalError as err:  # pragma: no cover
             # We could not connect to rabbit! So carry on
             report_exception(err)
+
+
+@subscriber(AnnotationEvent)
+def send_mention_notifications(event):
+    """Send mention notifications triggered by a mention event."""
+
+    request = event.request
+
+    with request.tm:
+        annotation = request.find_service(AnnotationReadService).get_annotation_by_id(
+            event.annotation_id,
+        )
+        notifications = mention.get_notifications(request, annotation, event.action)
+
+        if not notifications:
+            return
+
+        for notification in notifications:
+            send_params = emails.mention_notification.generate(request, notification)
+
+            try:
+                mailer.send.delay(*send_params)
+            except OperationalError as err:  # pragma: no cover
+                # We could not connect to rabbit! So carry on
+                report_exception(err)
