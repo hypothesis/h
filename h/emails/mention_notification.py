@@ -2,12 +2,13 @@ from pyramid.renderers import render
 from pyramid.request import Request
 
 from h import links
+from h.emails.util import get_user_url
 from h.notification.mention import Notification
 
 
 def generate(request: Request, notification: Notification):
     context = {
-        "user_url": _get_user_url(notification.mentioning_user, request),
+        "user_url": get_user_url(notification.mentioning_user, request),
         "user_display_name": notification.mentioning_user.display_name
         or notification.mentioning_user.username,
         "annotation_url": links.incontext_link(request, notification.annotation)
@@ -27,10 +28,3 @@ def generate(request: Request, notification: Notification):
     )
 
     return [notification.mentioned_user.email], subject, text, html
-
-
-def _get_user_url(user, request):
-    if user.authority == request.default_authority:
-        return request.route_url("stream.user_query", user=user.username)
-
-    return None
