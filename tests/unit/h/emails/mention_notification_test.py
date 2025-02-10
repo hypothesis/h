@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from h.emails.mention_notification import generate
+from h.emails.util import get_user_url
 from h.models import Annotation, Document
 from h.notification.mention import Notification
 
@@ -10,19 +11,27 @@ from h.notification.mention import Notification
 class TestGenerate:
     def test_it(
         self,
+        annotation,
         notification,
+        document,
+        mentioning_user,
         pyramid_request,
         html_renderer,
         text_renderer,
+        links,
     ):
         generate(pyramid_request, notification)
 
+        links.incontext_link.assert_called_once_with(
+            pyramid_request, notification.annotation
+        )
+
         expected_context = {
-            "user_url": "http://example.com/stream/user/patricia",
-            "user_display_name": "Patricia Demylus",
-            "annotation_url": "http://example.com/ann/foo123",
-            "document_title": "My fascinating page",
-            "document_url": "http://example.org/",
+            "user_url": get_user_url(notification.mentioning_user, pyramid_request),
+            "user_display_name": mentioning_user.display_name,
+            "annotation_url": links.incontext_link.return_value,
+            "document_title": document.title,
+            "document_url": annotation.target_uri,
             "annotation": notification.annotation,
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
@@ -65,6 +74,10 @@ class TestGenerate:
             "text": "Foo is true",
         }
         return Annotation(target_uri="http://example.org/", **common)
+
+    @pytest.fixture(autouse=True)
+    def links(self, patch):
+        return patch("h.emails.mention_notification.links")
 
     @pytest.fixture(autouse=True)
     def html_renderer(self, pyramid_config):
