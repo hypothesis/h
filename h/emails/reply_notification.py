@@ -5,7 +5,7 @@ from h import links
 from h.models import Subscriptions
 from h.notification.reply import Notification
 from h.services import SubscriptionService
-from h.services.email import EmailTag
+from h.services.email import EmailLogData, EmailTag
 
 
 def generate(request: Request, notification: Notification):
@@ -50,12 +50,20 @@ def generate(request: Request, notification: Notification):
         "h:templates/emails/reply_notification.html.jinja2", context, request=request
     )
 
+    log_data = EmailLogData(
+        tag=EmailTag.REPLY_NOTIFICATION,
+        recipient_ids=[notification.parent_user.id],
+        sender_id=notification.reply_user.id,
+        annotation_id=notification.reply.id,
+    )
+
     return (
         [notification.parent_user.email],
         subject,
         text,
         EmailTag.REPLY_NOTIFICATION,
         html,
+        log_data,
     )
 
 

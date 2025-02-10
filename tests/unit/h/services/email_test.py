@@ -1,9 +1,10 @@
+import logging
 import smtplib
 from unittest.mock import sentinel
 
 import pytest
 
-from h.services.email import EmailService, EmailTag, factory
+from h.services.email import EmailLogData, EmailService, EmailTag, factory
 
 
 class TestEmailService:
@@ -69,6 +70,25 @@ class TestEmailService:
                 tag=EmailTag.TEST,
             )
 
+    def test_logs_data(self, email_service, caplog):
+        caplog.set_level(logging.INFO)
+
+        tag = EmailTag.TEST
+        recipient_ids = [1, 2]
+        log_data = EmailLogData(tag=tag, recipient_ids=recipient_ids)
+        email_service.send(
+            recipients=["foo@example.com", "bar@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=tag,
+            html="<p>An HTML body</p>",
+            log_data=log_data,
+        )
+
+        assert caplog.messages == [
+            f'Email sent: {{"tag": "{tag}", "recipient_ids": {recipient_ids}}}'
+        ]
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.debug = False
@@ -93,6 +113,26 @@ class TestFactory:
     @pytest.fixture(autouse=True)
     def EmailService(self, patch):
         return patch("h.services.email.EmailService")
+
+
+class TestEmailLogData:
+    def test_repr(self):
+        log_data = EmailLogData(tag=EmailTag.TEST, recipient_ids=[1, 2, 3])
+
+        assert repr(log_data) == '{"tag": "test", "recipient_ids": [1, 2, 3]}'
+
+    def test_repr_with_additional_data(self):
+        log_data = EmailLogData(
+            tag=EmailTag.TEST,
+            recipient_ids=[1, 2, 3],
+            annotation_id="abc123",
+            sender_id=4,
+            additional_data={"foo": "bar"},
+        )
+
+        assert repr(log_data) == (
+            '{"tag": "test", "recipient_ids": [1, 2, 3], "annotation_id": "abc123", "sender_id": 4, "foo": "bar"}'
+        )
 
 
 @pytest.fixture(autouse=True)

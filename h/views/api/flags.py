@@ -34,8 +34,11 @@ def _email_group_moderators(request, annotation):
     memberships = group_members_service.get_memberships(
         annotation.group, roles=list(GROUP_MODERATE_PREDICATES.keys())
     )
+    users = [membership.user for membership in memberships]
+    if not users:
+        return
 
-    for membership in memberships:
-        if email := membership.user.email:
-            send_params = flag_notification.generate(request, email, incontext_link)
-            mailer.send.delay(*send_params)
+    send_params = flag_notification.generate(
+        request, users, incontext_link, annotation.id
+    )
+    mailer.send.delay(*send_params)

@@ -1,7 +1,7 @@
 from pyramid.renderers import render
 
 from h.i18n import TranslationString as _
-from h.services.email import EmailTag
+from h.services.email import EmailLogData, EmailTag
 
 
 def generate(request, user):
@@ -32,4 +32,8 @@ def generate(request, user):
         "h:templates/emails/reset_password.html.jinja2", context, request=request
     )
 
-    return [user.email], subject, text, EmailTag.RESET_PASSWORD, html
+    log_data = EmailLogData(
+        tag=EmailTag.RESET_PASSWORD, recipient_ids=[user.id], sender_id=user.id
+    )
+
+    return [user.email], subject, text, EmailTag.RESET_PASSWORD, html, log_data

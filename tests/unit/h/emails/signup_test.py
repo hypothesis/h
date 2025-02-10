@@ -1,7 +1,7 @@
 import pytest
 
 from h.emails.signup import generate
-from h.services.email import EmailTag
+from h.services.email import EmailLogData, EmailTag
 
 
 @pytest.mark.usefixtures("routes")
@@ -28,9 +28,10 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, tag, html = generate(
+        user_id = 1234
+        recipients, subject, text, tag, html, log_data = generate(
             pyramid_request,
-            user_id=1234,
+            user_id=user_id,
             email="foo@example.com",
             activation_code="abcd4567",
         )
@@ -40,6 +41,10 @@ class TestGenerate:
         assert html == "HTML output"
         assert tag == EmailTag.ACTIVATION
         assert text == "Text output"
+        assert log_data == EmailLogData(
+            tag=EmailTag.ACTIVATION,
+            recipient_ids=[user_id],
+        )
 
     def test_jinja_templates_render(self, pyramid_config, pyramid_request):
         """Ensure that the jinja templates don't contain syntax errors."""
