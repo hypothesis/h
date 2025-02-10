@@ -47,8 +47,16 @@ class TestCreateUserAPISchema:
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
-    def test_it_raises_when_username_format_invalid(self, schema, payload):
-        payload["username"] = "dagr!un"
+    @pytest.mark.parametrize(
+        "username",
+        [
+            "invalid!chars",
+            ".starts_with_period",
+            "ends_with_period.",
+        ],
+    )
+    def test_it_raises_when_username_format_invalid(self, schema, payload, username):
+        payload["username"] = username
 
         with pytest.raises(ValidationError):
             schema.validate(payload)

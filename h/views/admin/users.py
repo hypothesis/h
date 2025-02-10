@@ -5,6 +5,7 @@ from pyramid.view import view_config
 from h import models
 from h.accounts.events import ActivationEvent
 from h.i18n import TranslationString as _
+from h.models.user import USERNAME_PATTERN
 from h.security import Permission
 from h.services.user_rename import UserRenameError, UserRenameService
 
@@ -69,6 +70,7 @@ def users_index(request):
         "authority": authority,
         "user": user,
         "user_meta": user_meta,
+        "username_pattern": USERNAME_PATTERN,
         "format_date": format_date,
     }
 

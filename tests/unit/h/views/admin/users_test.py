@@ -2,6 +2,7 @@ from datetime import datetime
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.models import Annotation
@@ -35,6 +36,7 @@ def test_users_index(pyramid_request):
         "username": None,
         "authority": None,
         "user": None,
+        "username_pattern": Any.string(),
         "user_meta": {},
         "format_date": format_date,
     }
@@ -89,6 +91,7 @@ def test_users_index_no_user_found(models, pyramid_request):
         "authority": "foo.org",
         "user": None,
         "user_meta": {},
+        "username_pattern": Any.string(),
         "format_date": format_date,
     }
 
@@ -107,6 +110,7 @@ def test_users_index_user_marked_as_deleted(models, pyramid_request, factories):
         "authority": "foo.org",
         "user": None,
         "user_meta": {},
+        "username_pattern": Any.string(),
         "format_date": format_date,
     }
 
@@ -128,6 +132,7 @@ def test_users_index_user_found(
         "authority": "foo.org",
         "user": user,
         "user_meta": {"annotations_count": 8},
+        "username_pattern": Any.string(),
         "format_date": format_date,
     }
 

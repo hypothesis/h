@@ -3,6 +3,7 @@ from h.models.user import (
     EMAIL_MAX_LENGTH,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
+    USERNAME_PATTERN,
 )
 from h.schemas.base import JSONSchema
 
@@ -18,7 +19,7 @@ class CreateUserAPISchema(JSONSchema):
                 "type": "string",
                 "minLength": USERNAME_MIN_LENGTH,
                 "maxLength": USERNAME_MAX_LENGTH,
-                "pattern": "^[A-Za-z0-9._]+$",
+                "pattern": USERNAME_PATTERN,
             },
             "email": {
                 "type": "string",

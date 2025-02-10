@@ -86,8 +86,8 @@ class TestRegisterSchema:
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"username": "a"})
-        assert exc.value.asdict()["username"] == ("Must be 3 characters or more.")
+            schema.deserialize({"username": "ab"})
+        assert "Must be 3 characters or more." in exc.value.asdict()["username"]
 
     def test_it_is_invalid_when_username_too_long(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
@@ -102,7 +102,7 @@ class TestRegisterSchema:
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "Fred Flintstone"})
         assert exc.value.asdict()["username"] == (
-            "Must have only letters, numbers, periods, and underscores."
+            "Must have only letters, numbers, periods and underscores. May not start or end with period."
         )
 
     def test_it_is_invalid_with_false_privacy_accepted(self, pyramid_request):

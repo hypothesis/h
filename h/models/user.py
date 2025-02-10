@@ -19,7 +19,11 @@ if TYPE_CHECKING:
 
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
-USERNAME_PATTERN = "(?i)^[A-Z0-9._]+$"
+
+# nb. This pattern is used in Python code, JSON schemas and HTML forms, so it
+# needs to use portable syntax.
+USERNAME_PATTERN = "^[A-Za-z0-9_][A-Za-z0-9._]+[A-Za-z0-9_]$"
+
 EMAIL_MAX_LENGTH = 100
 DISPLAY_NAME_MAX_LENGTH = 30
 USER_PUBID_LENGTH = 12
