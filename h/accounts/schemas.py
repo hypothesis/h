@@ -160,7 +160,9 @@ class RegisterSchema(CSRFSchema):
             validators.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
             colander.Regex(
                 USERNAME_PATTERN,
-                msg=_("Must have only letters, numbers, periods, and underscores."),
+                msg=_(
+                    "Must have only letters, numbers, periods and underscores. May not start or end with period."
+                ),
             ),
             unique_username,
             unblacklisted_username,

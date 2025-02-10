@@ -192,7 +192,7 @@ components:
         The userID should be of the format `acct:<username>@<authority>`
       schema:
         type: string
-        pattern: 'acct:^[A-Za-z0-9._]{3,30}@.*$'
+        pattern: 'acct:^[A-Za-z0.9_][A-Za-z0-9._]{1,28}[A-Za-z0-9_]@.*$'
 
   # -------------------------
   # Reusable responses
