@@ -90,6 +90,22 @@ class TestGenerate:
         assert html == "HTML output"
         assert text == "Text output"
 
+    def test_returns_subject_with_reply_display_name(
+        self, notification, pyramid_request, mentioning_user
+    ):
+        _, subject, _, _ = generate(pyramid_request, notification)
+
+        assert subject == f"{mentioning_user.display_name} has mentioned you in an annotation"
+
+    def test_returns_subject_with_reply_username(
+        self, notification, pyramid_request, mentioning_user
+    ):
+        mentioning_user.display_name = None
+
+        _, subject, _, _ = generate(pyramid_request, notification)
+
+        assert subject == f"{mentioning_user.username} has mentioned you in an annotation"
+
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
         return Notification(
