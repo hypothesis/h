@@ -79,6 +79,17 @@ class TestGenerate:
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT00
 
+    def test_returns_text_and_body_results_from_renderers(
+        self, notification, pyramid_request, html_renderer, text_renderer
+    ):
+        html_renderer.string_response = "HTML output"
+        text_renderer.string_response = "Text output"
+
+        _, _, text, html = generate(pyramid_request, notification)
+
+        assert html == "HTML output"
+        assert text == "Text output"
+
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
         return Notification(
