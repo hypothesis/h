@@ -1,7 +1,7 @@
 from pyramid.renderers import render
 
 from h.i18n import TranslationString as _
-from h.services.email import EmailTag
+from h.services.email import EmailLogData, EmailTag
 
 
 def generate(request, user_id, email, activation_code):
@@ -28,4 +28,6 @@ def generate(request, user_id, email, activation_code):
     text = render("h:templates/emails/signup.txt.jinja2", context, request=request)
     html = render("h:templates/emails/signup.html.jinja2", context, request=request)
 
-    return [email], subject, text, EmailTag.ACTIVATION, html
+    log_data = EmailLogData(tag=EmailTag.ACTIVATION, recipient_ids=[user_id])
+
+    return [email], subject, text, EmailTag.ACTIVATION, html, log_data

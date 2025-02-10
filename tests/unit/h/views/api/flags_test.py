@@ -35,12 +35,21 @@ class TestCreate:
             ],
         )
         assert flag_notification.generate.call_args_list == [
-            call(pyramid_request, user.email, links.incontext_link.return_value)
-            for user in moderators
+            call(
+                pyramid_request,
+                moderators,
+                links.incontext_link.return_value,
+                annotation.id,
+            )
         ]
         assert mailer.send.delay.call_args_list == [
-            call(sentinel.email1, sentinel.subject1, sentinel.text1, sentinel.html1),
-            call(sentinel.email2, sentinel.subject2, sentinel.text2, sentinel.html2),
+            call(
+                sentinel.email,
+                sentinel.subject,
+                sentinel.text,
+                sentinel.html,
+                sentinel.log_data,
+            ),
         ]
         assert isinstance(response, HTTPNoContent)
 
@@ -61,7 +70,7 @@ class TestCreate:
         flags.create(context, pyramid_request)
 
         assert flag_notification.generate.call_args_list == [
-            call(ANY, moderators[1].email, ANY)
+            call(ANY, moderators, ANY, ANY),
         ]
 
     def test_when_there_are_no_moderators(
@@ -102,8 +111,13 @@ def flag_notification(mocker):
         "h.views.api.flags.flag_notification", autospec=True
     )
     flag_notification.generate.side_effect = [
-        (sentinel.email1, sentinel.subject1, sentinel.text1, sentinel.html1),
-        (sentinel.email2, sentinel.subject2, sentinel.text2, sentinel.html2),
+        (
+            sentinel.email,
+            sentinel.subject,
+            sentinel.text,
+            sentinel.html,
+            sentinel.log_data,
+        ),
     ]
     return flag_notification
 
