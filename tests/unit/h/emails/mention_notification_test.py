@@ -37,6 +37,32 @@ class TestGenerate:
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
 
+    def test_falls_back_to_individual_page_if_no_bouncer(
+        self,
+        annotation,
+        notification,
+        document,
+        mentioning_user,
+        pyramid_request,
+        html_renderer,
+        text_renderer,
+        links,
+    ):
+        links.incontext_link.return_value = None
+
+        generate(pyramid_request, notification)
+
+        expected_context = {
+            "user_url": get_user_url(notification.mentioning_user, pyramid_request),
+            "user_display_name": mentioning_user.display_name,
+            "annotation_url": f"http://example.com/ann/{annotation.id}",
+            "document_title": document.title,
+            "document_url": annotation.target_uri,
+            "annotation": notification.annotation,
+        }
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
+
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
         return Notification(
