@@ -41,8 +41,6 @@ class TestGenerate:
         self,
         annotation,
         notification,
-        document,
-        mentioning_user,
         pyramid_request,
         html_renderer,
         text_renderer,
@@ -60,14 +58,11 @@ class TestGenerate:
 
     def test_returns_usernames_if_no_display_names(
         self,
-        annotation,
         notification,
-        document,
         mentioning_user,
         pyramid_request,
         html_renderer,
         text_renderer,
-        links,
     ):
         mentioning_user.display_name = None
 
@@ -77,7 +72,7 @@ class TestGenerate:
             "user_display_name": mentioning_user.username,
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
-        text_renderer.assert_(**expected_context)  # noqa: PT00
+        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_returns_text_and_body_results_from_renderers(
         self, notification, pyramid_request, html_renderer, text_renderer
@@ -95,7 +90,10 @@ class TestGenerate:
     ):
         _, subject, _, _ = generate(pyramid_request, notification)
 
-        assert subject == f"{mentioning_user.display_name} has mentioned you in an annotation"
+        assert (
+            subject
+            == f"{mentioning_user.display_name} has mentioned you in an annotation"
+        )
 
     def test_returns_subject_with_reply_username(
         self, notification, pyramid_request, mentioning_user
@@ -104,9 +102,13 @@ class TestGenerate:
 
         _, subject, _, _ = generate(pyramid_request, notification)
 
-        assert subject == f"{mentioning_user.username} has mentioned you in an annotation"
+        assert (
+            subject == f"{mentioning_user.username} has mentioned you in an annotation"
+        )
 
-    def test_returns_parent_email_as_recipients(self, notification, pyramid_request, mentioned_user):
+    def test_returns_parent_email_as_recipients(
+        self, notification, pyramid_request, mentioned_user
+    ):
         recipients, _, _, _ = generate(pyramid_request, notification)
 
         assert recipients == [mentioned_user.email]
@@ -132,7 +134,12 @@ class TestGenerate:
         text_renderer.assert_(**expected_context)  # noqa: PT009
 
     def test_urls_set_for_first_party_users(
-        self, notification, pyramid_request, html_renderer, text_renderer, mentioning_user
+        self,
+        notification,
+        pyramid_request,
+        html_renderer,
+        text_renderer,
+        mentioning_user,
     ):
         expected_context = {
             "user_url": f"http://example.com/stream/user/{mentioning_user.username}",
