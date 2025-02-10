@@ -53,15 +53,31 @@ class TestGenerate:
         generate(pyramid_request, notification)
 
         expected_context = {
-            "user_url": get_user_url(notification.mentioning_user, pyramid_request),
-            "user_display_name": mentioning_user.display_name,
             "annotation_url": f"http://example.com/ann/{annotation.id}",
-            "document_title": document.title,
-            "document_url": annotation.target_uri,
-            "annotation": notification.annotation,
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
+
+    def test_returns_usernames_if_no_display_names(
+        self,
+        annotation,
+        notification,
+        document,
+        mentioning_user,
+        pyramid_request,
+        html_renderer,
+        text_renderer,
+        links,
+    ):
+        mentioning_user.display_name = None
+
+        generate(pyramid_request, notification)
+
+        expected_context = {
+            "user_display_name": mentioning_user.username,
+        }
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT00
 
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
