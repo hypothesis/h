@@ -80,7 +80,7 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        _, _, text, html = generate(pyramid_request, notification)
+        _, _, text, _, html = generate(pyramid_request, notification)
 
         assert html == "HTML output"
         assert text == "Text output"
@@ -88,7 +88,7 @@ class TestGenerate:
     def test_returns_subject_with_reply_display_name(
         self, notification, pyramid_request, mentioning_user
     ):
-        _, subject, _, _ = generate(pyramid_request, notification)
+        _, subject, _, _, _ = generate(pyramid_request, notification)
 
         assert (
             subject
@@ -100,7 +100,7 @@ class TestGenerate:
     ):
         mentioning_user.display_name = None
 
-        _, subject, _, _ = generate(pyramid_request, notification)
+        _, subject, _, _, _ = generate(pyramid_request, notification)
 
         assert (
             subject == f"{mentioning_user.username} has mentioned you in an annotation"
@@ -109,7 +109,7 @@ class TestGenerate:
     def test_returns_parent_email_as_recipients(
         self, notification, pyramid_request, mentioned_user
     ):
-        recipients, _, _, _ = generate(pyramid_request, notification)
+        recipients, _, _, _, _ = generate(pyramid_request, notification)
 
         assert recipients == [mentioned_user.email]
 
