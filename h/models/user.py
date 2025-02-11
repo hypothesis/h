@@ -22,6 +22,12 @@ USERNAME_MAX_LENGTH = 30
 
 # nb. This pattern is used in Python code, JSON schemas and HTML forms, so it
 # needs to use portable syntax.
+#
+# This pattern was changed in Feb 2025 to restrict the characters that can occur
+# at the start and end of usernames. There are a small number of existing user
+# accounts which do not conform to the latest pattern. Hence APIs and forms
+# which accept existing usernames need to support a more liberal pattern
+# (`[A-Za-z0-9._]+`).
 USERNAME_PATTERN = "^[A-Za-z0-9_][A-Za-z0-9._]+[A-Za-z0-9_]$"
 
 EMAIL_MAX_LENGTH = 100
