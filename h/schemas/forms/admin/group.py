@@ -14,7 +14,6 @@ from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
 )
 from h.schemas import validators
-from h.schemas.base import CSRFSchema
 from h.util import group_scope
 
 _ = i18n.TranslationString
@@ -137,9 +136,9 @@ def group_organization_select_widget(_node, kwargs):
     return SelectWidget(values=list(zip(org_pubids, org_labels, strict=False)))
 
 
-class AdminGroupSchema(CSRFSchema):
+class AdminGroupSchema(colander.Schema):
     def __init__(self, *args):
-        super().__init__(validator=username_validator, *args)  # noqa: B026
+        super().__init__(*args)
 
     group_type = colander.SchemaNode(
         colander.String(),
@@ -207,7 +206,6 @@ class AdminGroupSchema(CSRFSchema):
             " of the entered scope strings (e.g. 'http://www.example.com')"
         ),
         widget=SequenceWidget(add_subitem_text_template=_("Add scope")),
-        missing=colander.drop,
     )
 
     members = colander.SequenceSchema(
@@ -218,3 +216,6 @@ class AdminGroupSchema(CSRFSchema):
         widget=SequenceWidget(add_subitem_text_template=_("Add member")),
         missing=None,
     )
+
+    def validator(self, node, value):
+        username_validator(node, value)
