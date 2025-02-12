@@ -2,6 +2,8 @@
 
 import re
 
+from pyramid.request import Request
+
 from h.exceptions import InvalidUserId
 
 
@@ -23,3 +25,10 @@ def split_user(userid):
 
 def format_userid(username, authority):
     return f"acct:{username}@{authority}"
+
+
+def get_user_url(user, request: Request) -> str | None:
+    if user.authority == request.default_authority:
+        return request.route_url("activity.user_search", username=user.username)
+
+    return None
