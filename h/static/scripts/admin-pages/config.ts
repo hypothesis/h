@@ -1,10 +1,18 @@
 import { createContext } from 'preact';
 
+type Organization = {
+  label: string;
+  pubid: string;
+};
+
+type Group = null;
+
 export type ConfigObject = {
   styles: string[]; // The URLs of the app's CSS stylesheets.
   CSRFToken: string; // The CSRF token that must be included in form submissions.
   context: {
-    organizations: {}[];
+    organizations: Organization[];
+    defaultOrganization: Organization;
     group: Group | null;
     user: {
       username: string;

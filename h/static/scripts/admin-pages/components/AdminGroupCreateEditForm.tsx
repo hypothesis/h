@@ -21,7 +21,11 @@ export default function AdminGroupCreateEditForm({
     [config],
   );
 
-  const [memberships, setMemberships] = useState([]);
+  type Membership = {
+    username: string;
+  };
+
+  const [memberships, setMemberships] = useState<Membership[]>([]);
 
   const membershipElements = memberships.map((membership, index) => (
     <li className="list-input__item" key={index}>
