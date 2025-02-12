@@ -189,7 +189,7 @@ export default function AdminGroupCreateEditForm({
             name="name"
             id="name"
             required
-            value=""
+            defaultValue=""
             data-maxlength="25"
             className="form-input__input has-label"
           />
@@ -202,7 +202,7 @@ export default function AdminGroupCreateEditForm({
           <select
             name="organization"
             id="organization"
-            value={config.context.defaultOrganization.pubid}
+            defaultValue={config.context.defaultOrganization.pubid}
             className="form-input__input has-label"
           >
             <option value="">-- None --</option>
@@ -218,7 +218,7 @@ export default function AdminGroupCreateEditForm({
             type="text"
             name="creator"
             id="creator"
-            value={config.context.user.username}
+            defaultValue={config.context.user.username}
             required
             className="form-input__input has-label"
           />
@@ -231,7 +231,7 @@ export default function AdminGroupCreateEditForm({
           <textarea
             name="description"
             id="description"
-            value=""
+            defaultValue=""
             rows={3}
             data-maxlength="250"
             className="form-input__input has-label"
@@ -248,7 +248,7 @@ export default function AdminGroupCreateEditForm({
               className="form-checkbox__input"
               name="enforce_scope"
               id="enforce_scope"
-              checked
+              defaultChecked
             />
           </div>
         </div>
