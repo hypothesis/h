@@ -3,6 +3,13 @@ import { createContext } from 'preact';
 export type ConfigObject = {
   styles: string[]; // The URLs of the app's CSS stylesheets.
   CSRFToken: string; // The CSRF token that must be included in form submissions.
+  context: {
+    organizations: {}[];
+    group: Group | null;
+    user: {
+      username: string;
+    };
+  };
 };
 
 /** Return the frontend config from the page's <script class="js-config">. */

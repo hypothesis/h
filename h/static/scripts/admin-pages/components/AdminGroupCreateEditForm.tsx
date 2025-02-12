@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 
 import type { ConfigObject } from '../config';
 
@@ -21,6 +21,52 @@ export default function AdminGroupCreateEditForm({
     [config],
   );
 
+  const [memberships, setMemberships] = useState([]);
+
+  const membershipElements = memberships.map((membership, index) => (
+    <li className="list-input__item" key={index}>
+      <div className="list-input__item-inner">
+        <input
+          type="text"
+          name="membership"
+          value={membership.username}
+          className="form-input__input"
+          required
+        />
+        <button
+          className="list-input__remove-btn"
+          title="Remove item"
+          type="button"
+          onClick={() =>
+            setMemberships([
+              ...memberships.slice(0, index),
+              ...memberships.slice(index + 1),
+            ])
+          }
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="10"
+            height="10"
+            className="svg-icon"
+          >
+            <path
+              d="M3.586 5 1.293 7.293.586 8 2 9.414l.707-.707L5 6.414l2.293 2.293.707.707L9.414 8l-.707-.707L6.414 5l2.293-2.293L9.414 2 8 .586l-.707.707L5 3.586 2.707 1.293 2 .586.586 2l.707.707z"
+              fill="currentColor"
+              fillRule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </li>
+  ));
+
+  const organizationOptions = config.context.organizations.map(organization => (
+    <option value={organization.pubid} key={organization.pubid}>
+      {organization.label}
+    </option>
+  ));
+
   return (
     <>
       {stylesheetLinks}
@@ -34,7 +80,6 @@ export default function AdminGroupCreateEditForm({
           <select
             name="group_type"
             id="group_type"
-            value="restricted"
             required
             className="form-input__input has-label"
           >
@@ -66,10 +111,11 @@ export default function AdminGroupCreateEditForm({
           <select
             name="organization"
             id="organization"
-            value=""
+            value={config.context.defaultOrganization.pubid}
             className="form-input__input has-label"
           >
             <option value="">-- None --</option>
+            {organizationOptions}
           </select>
         </div>
 
@@ -81,7 +127,7 @@ export default function AdminGroupCreateEditForm({
             type="text"
             name="creator"
             id="creator"
-            value=""
+            value={config.context.user.username}
             required
             className="form-input__input has-label"
           />
@@ -133,8 +179,12 @@ export default function AdminGroupCreateEditForm({
             Members
           </label>
           <div className="list-input" id="members">
-            <ul className="list-input__list" />
-            <button className="btn" type="button">
+            <ul className="list-input__list">{membershipElements}</ul>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => setMemberships([...memberships, { username: '' }])}
+            >
               Add member
             </button>
           </div>
