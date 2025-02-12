@@ -206,6 +206,7 @@ class AdminGroupSchema(colander.Schema):
             " of the entered scope strings (e.g. 'http://www.example.com')"
         ),
         widget=SequenceWidget(add_subitem_text_template=_("Add scope")),
+        missing=None,
     )
 
     members = colander.SequenceSchema(
@@ -219,3 +220,12 @@ class AdminGroupSchema(colander.Schema):
 
     def validator(self, node, value):
         username_validator(node, value)
+
+        # You can't just do `missing=[]` in a Colander schema because every
+        # call to deserialize() on any instance of the schema will return the
+        # same single mutable list object.
+        # The only way I could find to have a sequence field that defaults to
+        # an empty list is to use `missing=None` and then override `None` here
+        # in the validator() method.
+        for dotted_name in ["scopes", "members"]:
+            node.set_value(value, dotted_name, node.get_value(value, dotted_name) or [])
