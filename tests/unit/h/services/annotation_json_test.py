@@ -214,6 +214,7 @@ class TestAnnotationJSONService:
         user_service,
         mention_service,
         feature_service,
+        pyramid_request,
     ):
         return AnnotationJSONService(
             annotation_read_service=annotation_read_service,
@@ -222,6 +223,7 @@ class TestAnnotationJSONService:
             user_service=user_service,
             mention_service=mention_service,
             feature_service=feature_service,
+            request=pyramid_request,
         )
 
     @pytest.fixture
@@ -272,6 +274,7 @@ class TestFactory:
             user_service=user_service,
             mention_service=mention_service,
             feature_service=feature_service,
+            request=pyramid_request,
         )
         assert service == AnnotationJSONService.return_value
 

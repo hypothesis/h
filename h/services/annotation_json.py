@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from pyramid.request import Request
+
 from h.models import Annotation, User
 from h.presenters import DocumentJSONPresenter
 from h.presenters.mention_json import MentionJSONPresenter
@@ -27,6 +29,7 @@ class AnnotationJSONService:
         user_service: UserService,
         mention_service: MentionService,
         feature_service: FeatureService,
+        request: Request,
     ):
         """
         Instantiate the service.
@@ -36,6 +39,8 @@ class AnnotationJSONService:
         :param flag_service: FlagService instance
         :param user_service: UserService instance
         :param mention_service: MentionService instance
+        :param feature_service: FeatureService instance
+        :param request: The current request
         """
         self._annotation_read_service = annotation_read_service
         self._links_service = links_service
@@ -43,6 +48,7 @@ class AnnotationJSONService:
         self._user_service = user_service
         self._mention_service = mention_service
         self._feature_service = feature_service
+        self._request = request
 
     def present(self, annotation: Annotation):
         """
@@ -83,7 +89,7 @@ class AnnotationJSONService:
         )
         if self._feature_service.enabled("at_mentions"):  # pragma: no cover
             model["mentions"] = [
-                MentionJSONPresenter(mention).asdict()
+                MentionJSONPresenter(mention, self._request).asdict()
                 for mention in annotation.mentions
             ]
 
@@ -201,4 +207,5 @@ def factory(_context, request):
         user_service=request.find_service(name="user"),
         mention_service=request.find_service(MentionService),
         feature_service=request.find_service(name="feature"),
+        request=request,
     )
