@@ -21,11 +21,100 @@ export default function AdminGroupCreateEditForm({
     [config],
   );
 
+  const [scopes, setScopes] = useState<string[]>([]);
+
+  /**
+   * Append the given `scope` to `scopes`.
+   */
+  const addScope = (scope: string) => {
+    setScopes([...scopes, scope]);
+  };
+
+  /**
+   * Replace the the scope with the given `index` with `newScope`.
+   */
+  const replaceScope = (index: number, newScope: string) => {
+    setScopes([
+      ...scopes.slice(0, index),
+      newScope,
+      ...scopes.slice(index + 1),
+    ]);
+  };
+
+  /**
+   * Remove the scope with the given `index` from `scopes`.
+   */
+  const removeScope = (index: number) => {
+    setScopes([...scopes.slice(0, index), ...scopes.slice(index + 1)]);
+  };
+
+  const scopeElements = scopes.map((scope, index) => (
+    <li className="list-input__item" key={index}>
+      <div className="list-input__item-inner">
+        <input
+          type="text"
+          name="scope"
+          className="form-input__input"
+          value={scope}
+          required
+          onInput={e => replaceScope(index, e.currentTarget.value)}
+        />
+        <button
+          className="list-input__remove-btn"
+          title="Remove scope"
+          type="button"
+          onClick={() => removeScope(index)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="10"
+            height="10"
+            className="svg-icon"
+          >
+            <path
+              d="M3.586 5 1.293 7.293.586 8 2 9.414l.707-.707L5 6.414l2.293 2.293.707.707L9.414 8l-.707-.707L6.414 5l2.293-2.293L9.414 2 8 .586l-.707.707L5 3.586 2.707 1.293 2 .586.586 2l.707.707z"
+              fill="currentColor"
+              fillRule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </li>
+  ));
+
   type Membership = {
     username: string;
   };
 
   const [memberships, setMemberships] = useState<Membership[]>([]);
+
+  /**
+   * Append the given `membership` to `memberships`.
+   */
+  const addMembership = (membership: Membership) => {
+    setMemberships([...memberships, membership]);
+  };
+
+  /**
+   * Replace the the membership with the given `index` with `newMembership`.
+   */
+  const replaceMembership = (index: number, newMembership: Membership) => {
+    setMemberships([
+      ...memberships.slice(0, index),
+      newMembership,
+      ...memberships.slice(index + 1),
+    ]);
+  };
+
+  /**
+   * Remove the membership with the given `index` from `memberships`.
+   */
+  const removeMembership = (index: number) => {
+    setMemberships([
+      ...memberships.slice(0, index),
+      ...memberships.slice(index + 1),
+    ]);
+  };
 
   const membershipElements = memberships.map((membership, index) => (
     <li className="list-input__item" key={index}>
@@ -35,18 +124,16 @@ export default function AdminGroupCreateEditForm({
           name="membership"
           value={membership.username}
           className="form-input__input"
+          onInput={e =>
+            replaceMembership(index, { username: e.currentTarget.value })
+          }
           required
         />
         <button
           className="list-input__remove-btn"
-          title="Remove item"
+          title="Remove member"
           type="button"
-          onClick={() =>
-            setMemberships([
-              ...memberships.slice(0, index),
-              ...memberships.slice(index + 1),
-            ])
-          }
+          onClick={() => removeMembership(index)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -171,8 +258,8 @@ export default function AdminGroupCreateEditForm({
             Scopes
           </label>
           <div className="list-input" id="scopes">
-            <ul className="list-input__list" />
-            <button className="btn" type="button">
+            <ul className="list-input__list">{scopeElements}</ul>
+            <button className="btn" type="button" onClick={() => addScope('')}>
               Add scope
             </button>
           </div>
@@ -187,7 +274,7 @@ export default function AdminGroupCreateEditForm({
             <button
               className="btn"
               type="button"
-              onClick={() => setMemberships([...memberships, { username: '' }])}
+              onClick={() => addMembership({ username: '' })}
             >
               Add member
             </button>
