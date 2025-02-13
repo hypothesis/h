@@ -21,7 +21,211 @@ export default function AdminGroupCreateEditForm({
     [config],
   );
 
-  const [scopes, setScopes] = useState<string[]>([]);
+  return (
+    <>
+      {stylesheetLinks}
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value={config.CSRFToken} />
+
+        <TypeField defaultValue={config.context.group.type || ''} />
+        <NameField
+          defaultValue={config.context.group.name || ''}
+          error={config.context.errors?.name}
+        />
+        <OrganizationField
+          organizations={config.context.organizations}
+          defaultValue={
+            config.context.group.organization ||
+            config.context.defaultOrganization.pubid
+          }
+        />
+        <CreatorField
+          defaultValue={
+            config.context.group.creator || config.context.user.username
+          }
+        />
+        <DescriptionField
+          defaultValue={config.context.group.description || ''}
+        />
+        <EnforceScopeField
+          defaultChecked={config.context.group.enforceScope ?? true}
+        />
+        <ScopesFields initialScopes={config.context.group.scopes || []} />
+        <MembershipFields initialMemberships={config.context.group.memberships || []} />
+
+        <div className="form-actions">
+          <div className="u-stretch" />
+          <div className="form-actions__buttons">
+            <button
+              name="Save"
+              type="submit"
+              className="form-actions__btn btn"
+              value="Save"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <form method="POST" action="">
+        <button className="btn btn--danger">Delete</button>
+      </form>
+    </>
+  );
+}
+
+function TypeField({ defaultValue }: { defaultValue: string }) {
+  return (
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="group_type">
+        Group Type
+      </label>
+      <select
+        name="group_type"
+        id="group_type"
+        required
+        className="form-input__input has-label"
+      >
+        <option value="restricted" selected={defaultValue === 'restricted'}>
+          Restricted
+        </option>
+        <option value="open" selected={defaultValue === 'open'}>
+          Open
+        </option>
+      </select>
+    </div>
+  );
+}
+
+function NameField({
+  defaultValue,
+  error,
+}: {
+  defaultValue: string;
+  error: string | undefined;
+}) {
+  return (
+    <div className={`form-input ${error ? 'is-error' : ''}`}>
+      <label className="form-input__label" htmlFor="name">
+        Group Name
+      </label>
+      <input
+        type="text"
+        name="name"
+        id="name"
+        required
+        defaultValue={defaultValue}
+        data-maxlength="25"
+        className="form-input__input has-label"
+      />
+      {error ? (
+        <ul className="form-input__error-list">
+          <li className="form-input__error-item">{error}</li>
+        </ul>
+      ) : (
+        ''
+      )}
+    </div>
+  );
+}
+
+type Organization = {
+  label: string;
+  pubid: string;
+};
+
+function OrganizationField({
+  organizations,
+  defaultValue,
+}: {
+  organizations: Organization[];
+  defaultValue: string;
+}) {
+  const organizationOptions = organizations.map(organization => (
+    <option
+      value={organization.pubid}
+      key={organization.pubid}
+      selected={organization.pubid === defaultValue}
+    >
+      {organization.label}
+    </option>
+  ));
+
+  return (
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="organization">
+        Organization
+      </label>
+      <select
+        name="organization"
+        id="organization"
+        className="form-input__input has-label"
+      >
+        <option value="">-- None --</option>
+        {organizationOptions}
+      </select>
+    </div>
+  );
+}
+
+function CreatorField({ defaultValue }: { defaultValue: string }) {
+  return (
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="creator">
+        Creator
+      </label>
+      <input
+        type="text"
+        name="creator"
+        id="creator"
+        defaultValue={defaultValue}
+        required
+        className="form-input__input has-label"
+      />
+    </div>
+  );
+}
+
+function DescriptionField({ defaultValue }: { defaultValue: string }) {
+  return (
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="description">
+        Description
+      </label>
+      <textarea
+        name="description"
+        id="description"
+        defaultValue={defaultValue}
+        rows={3}
+        data-maxlength="250"
+        className="form-input__input has-label"
+      />
+    </div>
+  );
+}
+
+function EnforceScopeField({ defaultChecked }: { defaultChecked: boolean }) {
+  return (
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="enforce_scope">
+        Enfore Scope
+      </label>
+      <div className="form-checkbox form-checkbox--inline">
+        <input
+          type="checkbox"
+          className="form-checkbox__input"
+          name="enforce_scope"
+          id="enforce_scope"
+          defaultChecked={defaultChecked}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ScopesFields({ initialScopes }: { initialScopes: string[] }) {
+  const [scopes, setScopes] = useState<string[]>(initialScopes);
 
   /**
    * Append the given `scope` to `scopes`.
@@ -53,7 +257,7 @@ export default function AdminGroupCreateEditForm({
       <div className="list-input__item-inner">
         <input
           type="text"
-          name="scope"
+          name="scopes"
           className="form-input__input"
           value={scope}
           required
@@ -82,11 +286,27 @@ export default function AdminGroupCreateEditForm({
     </li>
   ));
 
+  return (
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="scopes">
+        Scopes
+      </label>
+      <div className="list-input" id="scopes">
+        <ul className="list-input__list">{scopeElements}</ul>
+        <button className="btn" type="button" onClick={() => addScope('')}>
+          Add scope
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MembershipFields({ initialMemberships }: { initialMemberships: string[] }) {
   type Membership = {
     username: string;
   };
 
-  const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [memberships, setMemberships] = useState<Membership[]>(initialMemberships);
 
   /**
    * Append the given `membership` to `memberships`.
@@ -115,13 +335,12 @@ export default function AdminGroupCreateEditForm({
       ...memberships.slice(index + 1),
     ]);
   };
-
   const membershipElements = memberships.map((membership, index) => (
     <li className="list-input__item" key={index}>
       <div className="list-input__item-inner">
         <input
           type="text"
-          name="membership"
+          name="members"
           value={membership.username}
           className="form-input__input"
           onInput={e =>
@@ -152,153 +371,21 @@ export default function AdminGroupCreateEditForm({
     </li>
   ));
 
-  const organizationOptions = config.context.organizations.map(organization => (
-    <option value={organization.pubid} key={organization.pubid}>
-      {organization.label}
-    </option>
-  ));
-
   return (
-    <>
-      {stylesheetLinks}
-      <form method="POST">
-        <input type="hidden" name="csrf_token" value={config.CSRFToken} />
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="group_type">
-            Group Type
-          </label>
-          <select
-            name="group_type"
-            id="group_type"
-            required
-            className="form-input__input has-label"
-          >
-            <option selected>Select</option>
-            <option value="restricted">Restricted</option>
-            <option value="open">Open</option>
-          </select>
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="name">
-            Group Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            required
-            defaultValue=""
-            data-maxlength="25"
-            className="form-input__input has-label"
-          />
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="organization">
-            Organization
-          </label>
-          <select
-            name="organization"
-            id="organization"
-            defaultValue={config.context.defaultOrganization.pubid}
-            className="form-input__input has-label"
-          >
-            <option value="">-- None --</option>
-            {organizationOptions}
-          </select>
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="creator">
-            Creator
-          </label>
-          <input
-            type="text"
-            name="creator"
-            id="creator"
-            defaultValue={config.context.user.username}
-            required
-            className="form-input__input has-label"
-          />
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="description">
-            Description
-          </label>
-          <textarea
-            name="description"
-            id="description"
-            defaultValue=""
-            rows={3}
-            data-maxlength="250"
-            className="form-input__input has-label"
-          />
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="enforce_scope">
-            Enfore Scope
-          </label>
-          <div className="form-checkbox form-checkbox--inline">
-            <input
-              type="checkbox"
-              className="form-checkbox__input"
-              name="enforce_scope"
-              id="enforce_scope"
-              defaultChecked
-            />
-          </div>
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="scopes">
-            Scopes
-          </label>
-          <div className="list-input" id="scopes">
-            <ul className="list-input__list">{scopeElements}</ul>
-            <button className="btn" type="button" onClick={() => addScope('')}>
-              Add scope
-            </button>
-          </div>
-        </div>
-
-        <div className="form-input">
-          <label className="form-input__label" htmlFor="members">
-            Members
-          </label>
-          <div className="list-input" id="members">
-            <ul className="list-input__list">{membershipElements}</ul>
-            <button
-              className="btn"
-              type="button"
-              onClick={() => addMembership({ username: '' })}
-            >
-              Add member
-            </button>
-          </div>
-        </div>
-
-        <div className="form-actions">
-          <div className="u-stretch" />
-          <div className="form-actions__buttons">
-            <button
-              name="Save"
-              type="submit"
-              className="form-actions__btn btn"
-              value="Save"
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <form method="POST" action="">
-        <button className="btn btn--danger">Delete</button>
-      </form>
-    </>
+    <div className="form-input">
+      <label className="form-input__label" htmlFor="members">
+        Members
+      </label>
+      <div className="list-input" id="members">
+        <ul className="list-input__list">{membershipElements}</ul>
+        <button
+          className="btn"
+          type="button"
+          onClick={() => addMembership({ username: '' })}
+        >
+          Add member
+        </button>
+      </div>
+    </div>
   );
 }

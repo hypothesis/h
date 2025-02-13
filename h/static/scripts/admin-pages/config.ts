@@ -5,7 +5,25 @@ type Organization = {
   pubid: string;
 };
 
-type Group = null;
+type Membership = {
+  username: string;
+};
+
+type Group = {
+  type?: string;
+  name?: string;
+  organization?: string;
+  creator?: string;
+  description?: string;
+  enforceScope?: boolean;
+  scopes?: string[];
+  memberships?: Membership[];
+};
+
+type Errors = {
+  type?: string;
+  name?: string;
+};
 
 export type ConfigObject = {
   styles: string[]; // The URLs of the app's CSS stylesheets.
@@ -13,10 +31,11 @@ export type ConfigObject = {
   context: {
     organizations: Organization[];
     defaultOrganization: Organization;
-    group: Group | null;
+    group: Group;
     user: {
       username: string;
     };
+    errors: Errors;
   };
 };
 
