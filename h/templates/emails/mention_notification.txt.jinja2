@@ -1,0 +1,7 @@
+{{ user_display_name }} has mentioned you on "{{ document_title }}":
+
+On {{ annotation.updated | human_timestamp }} {{ user_display_name }} commented:
+
+> {{ (annotation.text or "")|striptags }}
+
+View the thread and respond: {{ annotation_url }}
