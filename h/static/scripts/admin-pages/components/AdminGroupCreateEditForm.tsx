@@ -108,6 +108,37 @@ function FormField({
   );
 }
 
+function SelectField({
+  label,
+  name,
+  title,
+  required = false,
+  error,
+  children,
+}: {
+  label: string;
+  name: string;
+  title?: string;
+  required?: boolean;
+  error?: string;
+  children: ComponentChildren;
+}) {
+  const id = useId();
+
+  return (
+    <FormField id={id} error={error} label={label} title={title}>
+      <select
+        id={id}
+        name={name}
+        required={required}
+        className="form-input__input has-label"
+      >
+        {children}
+      </select>
+    </FormField>
+  );
+}
+
 function TypeField({
   defaultValue,
   error,
@@ -115,24 +146,20 @@ function TypeField({
   defaultValue: string;
   error?: string;
 }) {
-  const id = useId();
-
   return (
-    <FormField id={id} error={error} label="Group Type">
-      <select
-        id={id}
-        name="group_type"
-        required
-        className="form-input__input has-label"
-      >
-        <option value="restricted" selected={defaultValue === 'restricted'}>
-          Restricted
-        </option>
-        <option value="open" selected={defaultValue === 'open'}>
-          Open
-        </option>
-      </select>
-    </FormField>
+    <SelectField
+      label="Group Type"
+      name="group_type"
+      error={error}
+      required={true}
+    >
+      <option value="restricted" selected={defaultValue === 'restricted'}>
+        Restricted
+      </option>
+      <option value="open" selected={defaultValue === 'open'}>
+        Open
+      </option>
+    </SelectField>
   );
 }
 
@@ -173,8 +200,6 @@ function OrganizationField({
   defaultValue: string;
   error?: string;
 }) {
-  const id = useId();
-
   const organizationOptions = organizations.map(organization => (
     <option
       value={organization.pubid}
@@ -186,21 +211,15 @@ function OrganizationField({
   ));
 
   return (
-    <FormField
-      id={id}
-      error={error}
+    <SelectField
+      name="organization"
       label="Organization"
       title="Organization which this group belongs to"
+      error={error}
     >
-      <select
-        id={id}
-        name="organization"
-        className="form-input__input has-label"
-      >
-        <option value="">-- None --</option>
-        {organizationOptions}
-      </select>
-    </FormField>
+      <option value="">-- None --</option>
+      {organizationOptions}
+    </SelectField>
   );
 }
 
