@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'preact/hooks';
+import type { ComponentChildren } from 'preact';
+import { useMemo, useState, useId } from 'preact/hooks';
 
 import type { ConfigObject } from '../config';
 
@@ -26,7 +27,6 @@ export default function AdminGroupCreateEditForm({
       {stylesheetLinks}
       <form method="POST">
         <input type="hidden" name="csrf_token" value={config.CSRFToken} />
-
         <TypeField defaultValue={config.context.group.type || ''} />
         <NameField
           defaultValue={config.context.group.name || ''}
@@ -75,50 +75,28 @@ export default function AdminGroupCreateEditForm({
   );
 }
 
-function TypeField({ defaultValue }: { defaultValue: string }) {
-  return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="group_type">
-        Group Type
-      </label>
-      <select
-        name="group_type"
-        id="group_type"
-        required
-        className="form-input__input has-label"
-      >
-        <option value="restricted" selected={defaultValue === 'restricted'}>
-          Restricted
-        </option>
-        <option value="open" selected={defaultValue === 'open'}>
-          Open
-        </option>
-      </select>
-    </div>
-  );
-}
-
-function NameField({
-  defaultValue,
+function FormField({
+  id,
+  label,
+  title,
   error,
+  children,
 }: {
-  defaultValue: string;
-  error: string | undefined;
+  id: string;
+  label: string;
+  title?: string;
+  error?: string;
+  children: ComponentChildren;
 }) {
   return (
-    <div className={`form-input ${error ? 'is-error' : ''}`}>
-      <label className="form-input__label" htmlFor="name">
-        Group Name
+    <div
+      className={`form-input ${error ? 'is-error' : ''}`}
+      {...(title && { title: title })}
+    >
+      <label className="form-input__label" htmlFor={id}>
+        {label}
       </label>
-      <input
-        type="text"
-        name="name"
-        id="name"
-        required
-        defaultValue={defaultValue}
-        data-maxlength="25"
-        className="form-input__input has-label"
-      />
+      {children}
       {error ? (
         <ul className="form-input__error-list">
           <li className="form-input__error-item">{error}</li>
@@ -130,6 +108,57 @@ function NameField({
   );
 }
 
+function TypeField({
+  defaultValue,
+  error,
+}: {
+  defaultValue: string;
+  error?: string;
+}) {
+  const id = useId();
+
+  return (
+    <FormField id={id} error={error} label="Group Type">
+      <select
+        id={id}
+        name="group_type"
+        required
+        className="form-input__input has-label"
+      >
+        <option value="restricted" selected={defaultValue === 'restricted'}>
+          Restricted
+        </option>
+        <option value="open" selected={defaultValue === 'open'}>
+          Open
+        </option>
+      </select>
+    </FormField>
+  );
+}
+
+function NameField({
+  defaultValue,
+  error,
+}: {
+  defaultValue: string;
+  error?: string;
+}) {
+  const id = useId();
+
+  return (
+    <FormField id={id} error={error} label="Group Name">
+      <input
+        id={id}
+        type="text"
+        name="name"
+        required
+        defaultValue={defaultValue}
+        className="form-input__input has-label"
+      />
+    </FormField>
+  );
+}
+
 type Organization = {
   label: string;
   pubid: string;
@@ -138,10 +167,14 @@ type Organization = {
 function OrganizationField({
   organizations,
   defaultValue,
+  error,
 }: {
   organizations: Organization[];
   defaultValue: string;
+  error?: string;
 }) {
+  const id = useId();
+
   const organizationOptions = organizations.map(organization => (
     <option
       value={organization.pubid}
@@ -153,78 +186,105 @@ function OrganizationField({
   ));
 
   return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="organization">
-        Organization
-      </label>
+    <FormField
+      id={id}
+      error={error}
+      label="Organization"
+      title="Organization which this group belongs to"
+    >
       <select
+        id={id}
         name="organization"
-        id="organization"
         className="form-input__input has-label"
       >
         <option value="">-- None --</option>
         {organizationOptions}
       </select>
-    </div>
+    </FormField>
   );
 }
 
-function CreatorField({ defaultValue }: { defaultValue: string }) {
+function CreatorField({
+  defaultValue,
+  error,
+}: {
+  defaultValue: string;
+  error?: string;
+}) {
+  const id = useId();
+
   return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="creator">
-        Creator
-      </label>
+    <FormField
+      id={id}
+      error={error}
+      label="Creator"
+      title="Username for this group's creator"
+    >
       <input
+        id={id}
         type="text"
         name="creator"
-        id="creator"
         defaultValue={defaultValue}
         required
         className="form-input__input has-label"
       />
-    </div>
+    </FormField>
   );
 }
 
-function DescriptionField({ defaultValue }: { defaultValue: string }) {
+function DescriptionField({
+  defaultValue,
+  error,
+}: {
+  defaultValue: string;
+  error?: string;
+}) {
+  const id = useId();
+
   return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="description">
-        Description
-      </label>
+    <FormField
+      id={id}
+      error={error}
+      label="Description"
+      title="Optional group description"
+    >
       <textarea
+        id={id}
         name="description"
-        id="description"
         defaultValue={defaultValue}
         rows={3}
-        data-maxlength="250"
         className="form-input__input has-label"
       />
-    </div>
+    </FormField>
   );
 }
 
-function EnforceScopeField({ defaultChecked }: { defaultChecked: boolean }) {
+function EnforceScopeField({
+  defaultChecked,
+  error,
+}: {
+  defaultChecked: boolean;
+  error?: string;
+}) {
+  const id = useId();
+
   return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="enforce_scope">
-        Enfore Scope
-      </label>
+    <FormField id={id} error={error} label="Enforce Scope">
       <div className="form-checkbox form-checkbox--inline">
         <input
+          id={id}
           type="checkbox"
           className="form-checkbox__input"
           name="enforce_scope"
-          id="enforce_scope"
           defaultChecked={defaultChecked}
         />
       </div>
-    </div>
+    </FormField>
   );
 }
 
 function ScopesFields({ initialScopes }: { initialScopes: string[] }) {
+  const id = useId();
   const [scopes, setScopes] = useState<string[]>(initialScopes);
 
   /**
@@ -287,21 +347,19 @@ function ScopesFields({ initialScopes }: { initialScopes: string[] }) {
   ));
 
   return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="scopes">
-        Scopes
-      </label>
-      <div className="list-input" id="scopes">
+    <FormField id={id} label="Scopes">
+      <div className="list-input" id={id}>
         <ul className="list-input__list">{scopeElements}</ul>
         <button className="btn" type="button" onClick={() => addScope('')}>
           Add scope
         </button>
       </div>
-    </div>
+    </FormField>
   );
 }
 
 function MembersFields({ initialMembers }: { initialMembers: string[] }) {
+  const id = useId();
   const [members, setMembers] = useState<string[]>(initialMembers);
 
   /**
@@ -363,16 +421,13 @@ function MembersFields({ initialMembers }: { initialMembers: string[] }) {
   ));
 
   return (
-    <div className="form-input">
-      <label className="form-input__label" htmlFor="members">
-        Members
-      </label>
-      <div className="list-input" id="members">
+    <FormField id={id} label="Members">
+      <div className="list-input" id={id}>
         <ul className="list-input__list">{memberElements}</ul>
         <button className="btn" type="button" onClick={() => addMember('')}>
           Add member
         </button>
       </div>
-    </div>
+    </FormField>
   );
 }
