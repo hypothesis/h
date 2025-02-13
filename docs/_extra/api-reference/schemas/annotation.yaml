@@ -222,4 +222,11 @@ Annotation:
             type: string
             format: uri
             description: The link to the user profile
+          description:
+            type: string
+            description: The user description
+          created:
+            type: string
+            format: date-time
+            description: When the user was created
       description: An array of user mentions the annotation text
