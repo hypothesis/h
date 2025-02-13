@@ -1,3 +1,4 @@
+from contextlib import suppress
 from unittest import mock
 from unittest.mock import call
 
@@ -69,10 +70,19 @@ class TestAdminGroupSchema:
         with pytest.raises(colander.Invalid, match="scope.*must be a complete URL"):
             bound_schema.deserialize(group_data)
 
-    def test_it_allows_no_scopes(self, group_data, bound_schema):
+    def test_it_allows_scopes_to_be_an_empty_list(self, group_data, bound_schema):
         group_data["scopes"] = []
 
-        bound_schema.deserialize(group_data)
+        appstruct = bound_schema.deserialize(group_data)
+
+        assert appstruct["scopes"] == []
+
+    def test_it_allows_scopes_to_be_missing(self, group_data, bound_schema):
+        del group_data["scopes"]
+
+        appstruct = bound_schema.deserialize(group_data)
+
+        assert appstruct["scopes"] == []
 
     def test_it_raises_if_group_type_changed(
         self, group_data, pyramid_csrf_request, org, user_service
@@ -109,6 +119,21 @@ class TestAdminGroupSchema:
         group_data["members"] = ["valid_user", "invalid_user"]
         with pytest.raises(colander.Invalid, match="members.1"):
             bound_schema.deserialize(group_data)
+
+    def test_it_allows_members_to_be_an_empty_list(self, group_data, bound_schema):
+        group_data["members"] = []
+
+        appstruct = bound_schema.deserialize(group_data)
+
+        assert appstruct["members"] == []
+
+    def test_it_allows_members_to_be_missing(self, group_data, bound_schema):
+        with suppress(KeyError):
+            del group_data["members"]
+
+        appstruct = bound_schema.deserialize(group_data)
+
+        assert appstruct["members"] == []
 
     def test_it_passes_through_the_authority_when_checking_users(
         self, group_data, bound_schema, user_service, third_party_org

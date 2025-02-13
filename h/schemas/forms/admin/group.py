@@ -206,6 +206,7 @@ class AdminGroupSchema(colander.Schema):
             " of the entered scope strings (e.g. 'http://www.example.com')"
         ),
         widget=SequenceWidget(add_subitem_text_template=_("Add scope")),
+        missing=None,
     )
 
     members = colander.SequenceSchema(
@@ -216,6 +217,3 @@ class AdminGroupSchema(colander.Schema):
         widget=SequenceWidget(add_subitem_text_template=_("Add member")),
         missing=None,
     )
-
-    def validator(self, node, value):
-        username_validator(node, value)

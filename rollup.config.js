@@ -49,6 +49,8 @@ export default [
   bundleConfig('group-forms', 'h/static/scripts/group-forms/index.tsx'),
   // Admin areas of the site
   bundleConfig('admin-site', 'h/static/scripts/admin-site.js'),
+  // Preact app for the admin pages.
+  bundleConfig('admin-pages', 'h/static/scripts/admin-pages/index.tsx'),
   // Header script inserted inline at the top of the page
   bundleConfig('header', 'h/static/scripts/header.js'),
   // Helper script for the OAuth post-authorization page.
