@@ -159,6 +159,65 @@ class TestSendReplyNotifications:
         return pyramid_request
 
 
+@pytest.mark.usefixtures("annotation_read_service")
+class TestSendMentionNotifications:
+    def test_it_sends_emails(
+        self,
+        event,
+        pyramid_request,
+        annotation_read_service,
+        mention,
+        emails,
+        mailer,
+    ):
+        notifications = [mock.MagicMock()]
+        mention.get_notifications.return_value = notifications
+
+        subscribers.send_mention_notifications(event)
+
+        # This is a pure plumbing test, checking everything is connected to
+        # everything else as we expect
+        annotation_read_service.get_annotation_by_id.assert_called_once_with(
+            event.annotation_id
+        )
+        annotation = annotation_read_service.get_annotation_by_id.return_value
+        mention.get_notifications.assert_called_once_with(
+            pyramid_request, annotation, event.action
+        )
+        emails.mention_notification.generate.assert_called_once_with(
+            pyramid_request, notifications[0]
+        )
+        send_params = emails.mention_notification.generate.return_value
+        mailer.send.delay.assert_called_once_with(*send_params)
+
+    def test_it_does_nothing_if_no_notification_is_required(
+        self, event, mention, mailer
+    ):
+        mention.get_notifications.return_value = []
+
+        subscribers.send_mention_notifications(event)
+
+        mailer.send.delay.assert_not_called()
+
+    def test_it_fails_gracefully_if_the_task_does_not_queue(
+        self, event, mailer, mention
+    ):
+        mention.get_notifications.return_value = [mock.MagicMock()]
+        mailer.send.side_effect = OperationalError
+
+        # No explosions please
+        subscribers.send_mention_notifications(event)
+
+    @pytest.fixture
+    def event(self, pyramid_request):
+        return AnnotationEvent(pyramid_request, {"id": "any"}, "action")
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.tm = mock.MagicMock()
+        return pyramid_request
+
+
 class TestSyncAnnotation:
     def test_it_calls_sync_service(
         self, pyramid_request, search_index, transaction_manager
@@ -182,6 +241,11 @@ class TestSyncAnnotation:
 @pytest.fixture(autouse=True)
 def reply(patch):
     return patch("h.subscribers.reply")
+
+
+@pytest.fixture(autouse=True)
+def mention(patch):
+    return patch("h.subscribers.mention")
 
 
 @pytest.fixture(autouse=True)

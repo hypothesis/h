@@ -18,6 +18,7 @@ class EmailTag(StrEnum):
     FLAG_NOTIFICATION = "flag_notification"
     REPLY_NOTIFICATION = "reply_notification"
     RESET_PASSWORD = "reset_password"  # noqa: S105
+    MENTION_NOTIFICATION = "mention_notification"
     TEST = "test"
 
 

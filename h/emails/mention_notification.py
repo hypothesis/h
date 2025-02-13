@@ -4,6 +4,7 @@ from pyramid.request import Request
 from h import links
 from h.emails.util import get_user_url
 from h.notification.mention import MentionNotification
+from h.services.email import EmailTag
 
 
 def generate(request: Request, notification: MentionNotification):
@@ -27,4 +28,10 @@ def generate(request: Request, notification: MentionNotification):
         "h:templates/emails/mention_notification.html.jinja2", context, request=request
     )
 
-    return [notification.mentioned_user.email], subject, text, html
+    return (
+        [notification.mentioned_user.email],
+        subject,
+        text,
+        EmailTag.MENTION_NOTIFICATION,
+        html,
+    )
