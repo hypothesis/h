@@ -51,7 +51,7 @@ export default function AdminGroupCreateEditForm({
           defaultChecked={config.context.group.enforceScope ?? true}
         />
         <ScopesFields initialScopes={config.context.group.scopes || []} />
-        <MembershipFields initialMemberships={config.context.group.memberships || []} />
+        <MembersFields initialMembers={config.context.group.members || []} />
 
         <div className="form-actions">
           <div className="u-stretch" />
@@ -301,58 +301,49 @@ function ScopesFields({ initialScopes }: { initialScopes: string[] }) {
   );
 }
 
-function MembershipFields({ initialMemberships }: { initialMemberships: string[] }) {
-  type Membership = {
-    username: string;
-  };
-
-  const [memberships, setMemberships] = useState<Membership[]>(initialMemberships);
+function MembersFields({ initialMembers }: { initialMembers: string[] }) {
+  const [members, setMembers] = useState<string[]>(initialMembers);
 
   /**
-   * Append the given `membership` to `memberships`.
+   * Append the given `member` to `members`.
    */
-  const addMembership = (membership: Membership) => {
-    setMemberships([...memberships, membership]);
+  const addMember = (member: string) => {
+    setMembers([...members, member]);
   };
 
   /**
-   * Replace the the membership with the given `index` with `newMembership`.
+   * Replace the the member with the given `index` with `newMember`.
    */
-  const replaceMembership = (index: number, newMembership: Membership) => {
-    setMemberships([
-      ...memberships.slice(0, index),
-      newMembership,
-      ...memberships.slice(index + 1),
+  const replaceMember = (index: number, newMember: string) => {
+    setMembers([
+      ...members.slice(0, index),
+      newMember,
+      ...members.slice(index + 1),
     ]);
   };
 
   /**
-   * Remove the membership with the given `index` from `memberships`.
+   * Remove the member with the given `index` from `members`.
    */
-  const removeMembership = (index: number) => {
-    setMemberships([
-      ...memberships.slice(0, index),
-      ...memberships.slice(index + 1),
-    ]);
+  const removeMember = (index: number) => {
+    setMembers([...members.slice(0, index), ...members.slice(index + 1)]);
   };
-  const membershipElements = memberships.map((membership, index) => (
+  const memberElements = members.map((member, index) => (
     <li className="list-input__item" key={index}>
       <div className="list-input__item-inner">
         <input
           type="text"
           name="members"
-          value={membership.username}
+          value={member}
           className="form-input__input"
-          onInput={e =>
-            replaceMembership(index, { username: e.currentTarget.value })
-          }
+          onInput={e => replaceMember(index, e.currentTarget.value)}
           required
         />
         <button
           className="list-input__remove-btn"
           title="Remove member"
           type="button"
-          onClick={() => removeMembership(index)}
+          onClick={() => removeMember(index)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -377,12 +368,8 @@ function MembershipFields({ initialMemberships }: { initialMemberships: string[]
         Members
       </label>
       <div className="list-input" id="members">
-        <ul className="list-input__list">{membershipElements}</ul>
-        <button
-          className="btn"
-          type="button"
-          onClick={() => addMembership({ username: '' })}
-        >
+        <ul className="list-input__list">{memberElements}</ul>
+        <button className="btn" type="button" onClick={() => addMember('')}>
           Add member
         </button>
       </div>

@@ -64,9 +64,11 @@ class AdminGroupCreateViews:
                         "organization": cstruct.get("organization"),
                         "creator": cstruct.get("creator"),
                         "description": cstruct.get("description"),
-                        "enforceScope": bool(cstruct.get("enforce_scope", False) == "on"),
+                        "enforceScope": bool(
+                            cstruct.get("enforce_scope", False) == "on"
+                        ),
                         "scopes": cstruct.get("scopes"),
-                        "memberships": cstruct.get("scopes"),
+                        "members": cstruct.get("members"),
                     },
                     validation_error=err,
                 )

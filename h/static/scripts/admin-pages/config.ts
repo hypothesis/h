@@ -5,10 +5,6 @@ type Organization = {
   pubid: string;
 };
 
-type Membership = {
-  username: string;
-};
-
 type Group = {
   type?: string;
   name?: string;
@@ -17,7 +13,7 @@ type Group = {
   description?: string;
   enforceScope?: boolean;
   scopes?: string[];
-  memberships?: Membership[];
+  members?: string[];
 };
 
 type Errors = {
