@@ -3,13 +3,13 @@ import deform
 
 from h import i18n
 from h.models.auth_client import GrantType
-from h.schemas.base import CSRFSchema, enum_type
+from h.schemas.base import enum_type
 
 _ = i18n.TranslationString
 GrantTypeSchemaType = enum_type(GrantType)
 
 
-class CreateAuthClientSchema(CSRFSchema):
+class CreateAuthClientSchema(colander.Schema):
     name = colander.SchemaNode(
         colander.String(),
         title=_("Name"),
@@ -57,8 +57,6 @@ class CreateAuthClientSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
-        super().validator(node, value)
-
         grant_type = value.get("grant_type")
         redirect_url = value.get("redirect_url")
 
