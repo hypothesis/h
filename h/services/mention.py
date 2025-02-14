@@ -25,9 +25,6 @@ class MentionService:
     def update_mentions(self, annotation: Annotation) -> None:
         self._session.flush()
 
-        # Only shared annotations can have mentions
-        if not annotation.shared:
-            return
         mentioning_user = self._user_service.fetch(annotation.userid)
         # NIPSA users do not send mentions
         if mentioning_user.nipsa:

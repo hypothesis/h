@@ -61,6 +61,13 @@ class TestGetNotifications:
 
         assert get_notifications(pyramid_request, annotation, "create") == []
 
+    def test_it_returns_empty_list_when_annotation_not_shared(
+        self, pyramid_request, annotation
+    ):
+        annotation.shared = False
+
+        assert get_notifications(pyramid_request, annotation, "create") == []
+
     @pytest.fixture
     def annotation(self, factories, mentioning_user, mention):
         return factories.Annotation(
