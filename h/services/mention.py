@@ -33,7 +33,9 @@ class MentionService:
         if mentioning_user.nipsa:
             return
 
-        mentioned_userids = OrderedDict.fromkeys(self._parse_userids(annotation.text))
+        mentioned_userids = OrderedDict.fromkeys(
+            self._parse_userids(annotation.text)
+        ).keys()
         mentioned_users = self._user_service.fetch_all(mentioned_userids)
         self._session.execute(
             delete(Mention).where(Mention.annotation_id == annotation.id)

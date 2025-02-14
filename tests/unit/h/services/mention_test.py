@@ -76,10 +76,12 @@ class TestMentionService:
         return annotation
 
     @pytest.fixture
-    def annotation_slim(self, factories):
-        slim = factories.AnnotationSlim()
-        slim.user.nipsa = False
-        return slim
+    def annotation_slim(self, factories, mentioning_user):
+        return factories.AnnotationSlim(user=mentioning_user)
+
+    @pytest.fixture
+    def mentioning_user(self, factories):
+        return factories.User(nipsa=False)
 
     @pytest.fixture
     def mentioned_user(self, factories):
