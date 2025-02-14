@@ -23,6 +23,10 @@ def get_notifications(
     if action != "create":
         return []
 
+    # Only send notifications for shared annotations
+    if not annotation.shared:
+        return []
+
     user_service = request.find_service(name="user")
 
     # If the mentioning user doesn't exist (anymore), we can't send emails, but

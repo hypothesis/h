@@ -61,13 +61,6 @@ class TestMentionService:
 
         assert len(annotation.mentions) == 0
 
-    def test_update_mentions_with_private_annotation(self, service, annotation):
-        annotation.shared = False
-
-        service.update_mentions(annotation)
-
-        assert len(annotation.mentions) == 0
-
     @pytest.fixture
     def annotation(self, annotation_slim, mentioned_user):
         annotation = annotation_slim.annotation
