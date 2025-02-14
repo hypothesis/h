@@ -225,8 +225,8 @@ Annotation:
           description:
             type: string
             description: The user description
-          created:
+          joined:
             type: string
             format: date-time
-            description: When the user was created
+            description: When the user joined
       description: An array of user mentions the annotation text
