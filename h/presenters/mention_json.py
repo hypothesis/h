@@ -24,5 +24,5 @@ class MentionJSONPresenter:
             "display_name": self._mention.user.display_name,
             "link": get_user_url(self._mention.user, self._request),
             "description": self._mention.user.description,
-            "created": utc_iso8601(self._mention.user.activation_date),
+            "joined": utc_iso8601(self._mention.user.activation_date),
         }
