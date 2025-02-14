@@ -87,13 +87,14 @@ class AnnotationJSONService:
                 "links": self._links_service.get_all(annotation),
             }
         )
-        if self._feature_service.enabled("at_mentions"):  # pragma: no cover
+
+        user = self._user_service.fetch(annotation.userid)
+        if self._feature_service.enabled("at_mentions", user):  # pragma: no cover
             model["mentions"] = [
                 MentionJSONPresenter(mention, self._request).asdict()
                 for mention in annotation.mentions
             ]
-
-        model.update(user_info(self._user_service.fetch(annotation.userid)))
+        model.update(user_info(user))
 
         if annotation.references:
             model["references"] = annotation.references

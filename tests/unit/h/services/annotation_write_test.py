@@ -21,6 +21,7 @@ class TestAnnotationWriteService:
         queue_service,
         annotation_read_service,
         mention_service,
+        user_service,
         _validate_group,  # noqa: PT019
         db_session,
     ):
@@ -42,6 +43,7 @@ class TestAnnotationWriteService:
             tag="storage.create_annotation",
             schedule_in=60,
         )
+        user_service.fetch.assert_called_once_with(create_data["userid"])
         mention_service.update_mentions.assert_called_once_with(anno)
 
         assert anno == Any.instance_of(Annotation).with_attrs(
@@ -282,6 +284,7 @@ class TestAnnotationWriteService:
         annotation_read_service,
         annotation_metadata_service,
         mention_service,
+        user_service,
         feature_service,
     ):
         return AnnotationWriteService(
@@ -291,6 +294,7 @@ class TestAnnotationWriteService:
             annotation_read_service=annotation_read_service,
             annotation_metadata_service=annotation_metadata_service,
             mention_service=mention_service,
+            user_service=user_service,
             feature_service=feature_service,
         )
 
@@ -328,6 +332,7 @@ class TestServiceFactory:
         annotation_read_service,
         annotation_metadata_service,
         mention_service,
+        user_service,
         feature_service,
     ):
         svc = service_factory(sentinel.context, pyramid_request)
@@ -339,6 +344,7 @@ class TestServiceFactory:
             annotation_read_service=annotation_read_service,
             annotation_metadata_service=annotation_metadata_service,
             mention_service=mention_service,
+            user_service=user_service,
             feature_service=feature_service,
         )
         assert svc == AnnotationWriteService.return_value

@@ -12,8 +12,10 @@ from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
+from h.services.feature import FeatureService
 from h.services.job_queue import JobQueueService
 from h.services.mention import MentionService
+from h.services.user import UserService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 
@@ -31,7 +33,8 @@ class AnnotationWriteService:
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
         mention_service: MentionService,
-        feature_service,
+        user_service: UserService,
+        feature_service: FeatureService,
     ):
         self._db = db_session
         self._has_permission = has_permission
@@ -39,6 +42,7 @@ class AnnotationWriteService:
         self._annotation_read_service = annotation_read_service
         self._annotation_metadata_service = annotation_metadata_service
         self._mention_service = mention_service
+        self._user_service = user_service
         self._feature_service = feature_service
 
     def create_annotation(self, data: dict) -> Annotation:
@@ -93,7 +97,8 @@ class AnnotationWriteService:
             schedule_in=60,
         )
 
-        if self._feature_service.enabled("at_mentions"):  # pragma: no cover
+        user = self._user_service.fetch(annotation.userid)
+        if self._feature_service.enabled("at_mentions", user):  # pragma: no cover
             self._mention_service.update_mentions(annotation)
 
         return annotation
@@ -290,5 +295,6 @@ def service_factory(_context, request) -> AnnotationWriteService:
         annotation_read_service=request.find_service(AnnotationReadService),
         annotation_metadata_service=request.find_service(AnnotationMetadataService),
         mention_service=request.find_service(MentionService),
+        user_service=request.find_service(name="user"),
         feature_service=request.find_service(name="feature"),
     )
