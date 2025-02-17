@@ -70,20 +70,25 @@ def publish_annotation_event(event):
 @subscriber(AnnotationEvent)
 def send_reply_notifications(event):
     """Queue any reply notification emails triggered by an annotation event."""
-
     request = event.request
 
     with request.tm:
         annotation = request.find_service(AnnotationReadService).get_annotation_by_id(
             event.annotation_id
         )
-        notification = reply.get_notification(request, annotation, event.action)
 
-        if notification is None:
+        reply_notification = reply.get_notification(request, annotation, event.action)
+        if reply_notification is None:
             return
 
-        send_params = emails.reply_notification.generate(request, notification)
+        mention_notifications = mention.get_notifications(
+            request, annotation, event.action
+        )
+        mentioned_users = {mention.mentioned_user for mention in mention_notifications}
+        if reply_notification.parent_user in mentioned_users:
+            return
 
+        send_params = emails.reply_notification.generate(request, reply_notification)
         try:
             mailer.send.delay(*send_params)
         except OperationalError as err:  # pragma: no cover
@@ -102,12 +107,8 @@ def send_mention_notifications(event):
         )
         notifications = mention.get_notifications(request, annotation, event.action)
 
-        if not notifications:
-            return
-
         for notification in notifications:
             send_params = emails.mention_notification.generate(request, notification)
-
             try:
                 mailer.send.delay(*send_params)
             except OperationalError as err:  # pragma: no cover

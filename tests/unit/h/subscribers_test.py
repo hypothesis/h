@@ -149,6 +149,20 @@ class TestSendReplyNotifications:
         # No explosions please
         subscribers.send_reply_notifications(event)
 
+    def test_it_does_nothing_if_the_reply_user_is_mentioned(
+        self, event, reply, mailer, mention
+    ):
+        reply_notification = mock.MagicMock()
+        reply.get_notification.return_value = reply_notification
+
+        mention_notifications = [mock.MagicMock()]
+        mention.get_notifications.return_value = mention_notifications
+        mention_notifications[0].mentioned_user = reply_notification.parent_user
+
+        subscribers.send_reply_notifications(event)
+
+        mailer.send.delay.assert_not_called()
+
     @pytest.fixture
     def event(self, pyramid_request):
         return AnnotationEvent(pyramid_request, {"id": "any"}, "action")
