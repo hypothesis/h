@@ -61,6 +61,10 @@ def test_includeme():
         ),
         call("admin.mailer", "/admin/mailer"),
         call("admin.mailer_test", "/admin/mailer/test"),
+        call(
+            "admin.mailer.preview.mention_notification",
+            "/admin/mailer/preview/mention-notification",
+        ),
         call("admin.nipsa", "/admin/nipsa"),
         call("admin.oauthclients", "/admin/oauthclients"),
         call("admin.oauthclients_create", "/admin/oauthclients/new"),

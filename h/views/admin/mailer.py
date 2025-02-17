@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config
 
@@ -33,3 +35,24 @@ def mailer_test(request):
     result = mailer.send.delay(*mail)
     index = request.route_path("admin.mailer", _query={"taskid": result.task_id})
     return HTTPSeeOther(location=index)
+
+
+@view_config(
+    route_name="admin.mailer.preview.mention_notification",
+    request_method="GET",
+    permission=Permission.AdminPage.LOW_RISK,
+    renderer="h:templates/emails/mention_notification.html.jinja2",
+)
+def preview_mention_notification(_request):
+    return {
+        "user_url": "https://example.com/user",
+        "user_display_name": "Jane Doe",
+        "annotation_url": "https://example.com/bouncer",  # Bouncer link (AKA: annotation deeplink)
+        "document_title": "The title",
+        "document_url": "https://example.com/document",  # Document public URL
+        "annotation": {
+            "updated": datetime(year=2025, month=1, day=11, hour=18, minute=36),  # noqa: DTZ001
+            "text": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
+            "text_rendered": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
+        },
+    }

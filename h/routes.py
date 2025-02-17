@@ -54,6 +54,10 @@ def includeme(config):  # noqa: PLR0915
     )
     config.add_route("admin.mailer", "/admin/mailer")
     config.add_route("admin.mailer_test", "/admin/mailer/test")
+    config.add_route(
+        "admin.mailer.preview.mention_notification",
+        "/admin/mailer/preview/mention-notification",
+    )
     config.add_route("admin.nipsa", "/admin/nipsa")
     config.add_route("admin.oauthclients", "/admin/oauthclients")
     config.add_route("admin.oauthclients_create", "/admin/oauthclients/new")
