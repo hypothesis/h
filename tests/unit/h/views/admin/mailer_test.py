@@ -1,7 +1,9 @@
+from datetime import datetime
+
 import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
-from h.views.admin.mailer import mailer_index, mailer_test
+from h.views.admin.mailer import mailer_index, mailer_test, preview_mention_notification
 
 
 class TestMailerIndex:
@@ -47,6 +49,27 @@ class TestMailerTest:
 
         assert isinstance(result, HTTPSeeOther)
         assert result.location == "/adm/mailer?taskid=a1b2c3"
+
+
+class TestPreviewMentionNotification:
+    def test_returns_dummy_data(self, pyramid_request):
+        result = preview_mention_notification(pyramid_request)
+
+        assert (
+            result
+            == {
+                "user_url": "https://example.com/user",
+                "user_display_name": "Jane Doe",
+                "annotation_url": "https://example.com/bouncer",  # Bouncer link (AKA: annotation deeplink)
+                "document_title": "The title",
+                "document_url": "https://example.com/document",  # Document public URL
+                "annotation": {
+                    "updated": datetime(year=2025, month=1, day=11, hour=18, minute=36),  # noqa: DTZ001
+                    "text": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
+                    "text_rendered": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
+                },
+            }
+        )
 
 
 class FakeResult:
