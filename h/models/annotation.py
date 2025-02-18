@@ -140,6 +140,10 @@ class Annotation(Base):
 
     mentions = sa.orm.relationship("Mention", back_populates="annotation")
 
+    notifications = sa.orm.relationship(
+        "Notification", back_populates="source_annotation"
+    )
+
     @property
     def uuid(self):
         """
