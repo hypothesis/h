@@ -12,7 +12,7 @@
   </div>
 {% endif %}
 
-  <div class="card">
+  <div class="card mb-3">
     <div class="card-header">
       <h3 class="card-title mb-0">Send a test email</h3>
     </div>
@@ -28,13 +28,13 @@
     </div>
   </div>
 
-  <div class="card mt-3">
+  <div class="card mb-3">
     <div class="card-header">
       <h3 class="card-title mb-0">Preview the Mentions Email Template</h3>
     </div>
     <iframe
       class="card-body p-0"
-      style="height: 20em; border: none;"
+      style="height: 40em; border: none;"
       src="{{ request.route_url("admin.mailer.preview.mention_notification") }}"
     >
     </iframe>

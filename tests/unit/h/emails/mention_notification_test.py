@@ -3,7 +3,6 @@ import datetime
 import pytest
 
 from h.emails.mention_notification import generate
-from h.emails.util import get_user_url
 from h.models import Annotation, Document
 from h.notification.mention import MentionNotification
 
@@ -27,12 +26,13 @@ class TestGenerate:
         )
 
         expected_context = {
-            "user_url": get_user_url(notification.mentioning_user, pyramid_request),
+            "username": mentioning_user.username,
             "user_display_name": mentioning_user.display_name,
             "annotation_url": links.incontext_link.return_value,
             "document_title": document.title,
             "document_url": annotation.target_uri,
             "annotation": notification.annotation,
+            "annotation_quote": "quoted text",
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
@@ -69,7 +69,7 @@ class TestGenerate:
         generate(pyramid_request, notification)
 
         expected_context = {
-            "user_display_name": mentioning_user.username,
+            "user_display_name": f"@{mentioning_user.username}",
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
@@ -103,7 +103,7 @@ class TestGenerate:
         _, subject, _, _, _ = generate(pyramid_request, notification)
 
         assert (
-            subject == f"{mentioning_user.username} has mentioned you in an annotation"
+            subject == f"@{mentioning_user.username} has mentioned you in an annotation"
         )
 
     def test_returns_parent_email_as_recipients(
@@ -120,35 +120,11 @@ class TestGenerate:
         pyramid_config.include("pyramid_jinja2")
         pyramid_config.include("h.jinja_extensions")
 
-        generate(pyramid_request, notification)
-
-    def test_urls_not_set_for_third_party_users(
-        self, notification, pyramid_request, html_renderer, text_renderer
-    ):
-        pyramid_request.default_authority = "foo.org"
-        expected_context = {"user_url": None}
+        # Mock asset_url jinja global only for this test
+        environment = pyramid_config.get_jinja2_environment()
+        environment.globals["asset_url"] = lambda url: url
 
         generate(pyramid_request, notification)
-
-        html_renderer.assert_(**expected_context)  # noqa: PT009
-        text_renderer.assert_(**expected_context)  # noqa: PT009
-
-    def test_urls_set_for_first_party_users(
-        self,
-        notification,
-        pyramid_request,
-        html_renderer,
-        text_renderer,
-        mentioning_user,
-    ):
-        expected_context = {
-            "user_url": f"http://example.com/stream/user/{mentioning_user.username}",
-        }
-
-        generate(pyramid_request, notification)
-
-        html_renderer.assert_(**expected_context)  # noqa: PT009
-        text_renderer.assert_(**expected_context)  # noqa: PT009
 
     @pytest.fixture
     def notification(self, mentioning_user, mentioned_user, annotation, document):
@@ -182,7 +158,11 @@ class TestGenerate:
             "updated": datetime.datetime.now(tz=datetime.UTC),
             "text": "Foo is true",
         }
-        return Annotation(target_uri="http://example.org/", **common)
+        return Annotation(
+            target_uri="http://example.org/",
+            target_selectors=[{"type": "TextQuoteSelector", "exact": "quoted text"}],
+            **common,
+        )
 
     @pytest.fixture(autouse=True)
     def links(self, patch):

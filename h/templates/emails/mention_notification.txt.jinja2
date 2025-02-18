@@ -1,7 +1,9 @@
-{{ user_display_name }} has mentioned you on "{{ document_title }}":
+{{ user_display_name }} mentioned you on "{{ document_title }}": {{ document_url }}
 
-On {{ annotation.updated | human_timestamp }} {{ user_display_name }} commented:
+{% if annotation_quote %}
+> {{ annotation_quote }}
+{% endif %}
 
-> {{ (annotation.text or "")|striptags }}
+{{ (annotation.text or "")|striptags }}
 
 View the thread and respond: {{ annotation_url }}
