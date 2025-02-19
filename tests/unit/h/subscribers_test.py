@@ -138,10 +138,10 @@ class TestSendReplyNotifications:
         reply.get_notification.assert_called_once_with(
             pyramid_request, annotation, event.action
         )
-        reply_notification = reply.get_notification.return_value
+        notification = reply.get_notification.return_value
 
         emails.reply_notification.generate.assert_called_once_with(
-            pyramid_request, reply_notification
+            pyramid_request, notification
         )
 
         mention.get_notifications.assert_called_once_with(
@@ -149,7 +149,7 @@ class TestSendReplyNotifications:
         )
 
         notification_service.allow_notifications.assert_called_once_with(
-            annotation, reply_notification.parent_user
+            annotation, notification.parent_user
         )
         email = emails.reply_notification.generate.return_value
         asdict.assert_called_once_with(email)
@@ -158,7 +158,7 @@ class TestSendReplyNotifications:
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
-            recipient=reply_notification.parent_user,
+            recipient=notification.parent_user,
             notification_type=NotificationType.REPLY,
         )
 
