@@ -151,4 +151,10 @@
   & {
     overflow-wrap: break-word;
   }
+
+  & a[data-hyp-mention] {
+    text-decoration: none;
+    font-weight: bold;
+    color: color.$brand;
+  }
 }
