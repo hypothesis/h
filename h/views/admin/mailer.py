@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config
 
@@ -29,8 +31,8 @@ def mailer_test(request):
         index = request.route_path("admin.mailer")
         return HTTPSeeOther(location=index)
 
-    mail = test.generate(request, request.params["recipient"])
-    result = mailer.send.delay(*mail)
+    email = test.generate(request, request.params["recipient"])
+    result = mailer.send.delay(asdict(email))
     index = request.route_path("admin.mailer", _query={"taskid": result.task_id})
     return HTTPSeeOther(location=index)
 

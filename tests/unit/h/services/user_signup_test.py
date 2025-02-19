@@ -93,8 +93,11 @@ class TestUserSignupService:
 
         user_password_service.update_password.assert_called_once_with(user, "wibble")
 
-    def test_signup_sends_email(self, svc, signup, tasks_mailer, pyramid_request):
-        signup.generate.return_value = ["signup", "args"]
+    def test_signup_sends_email(
+        self, svc, signup, tasks_mailer, pyramid_request, asdict
+    ):
+        signup.generate.return_value = sentinel.email
+        asdict.return_value = sentinel.email_data
 
         user = svc.signup(username="foo", email="foo@bar.com")
 
@@ -105,7 +108,8 @@ class TestUserSignupService:
             activation_code=user.activation.code,
         )
 
-        tasks_mailer.send.delay.assert_called_once_with(*signup.generate.return_value)
+        asdict.assert_called_once_with(signup.generate.return_value)
+        tasks_mailer.send.delay.assert_called_once_with(asdict.return_value)
 
     def test_signup_does_not_send_email_when_activation_not_required(
         self, svc, signup, tasks_mailer
@@ -180,6 +184,10 @@ class TestUserSignupService:
     @pytest.fixture(autouse=True)
     def signup(self, patch):
         return patch("h.services.user_signup.signup")
+
+    @pytest.fixture(autouse=True)
+    def asdict(self, patch):
+        return patch("h.services.user_signup.asdict")
 
 
 @pytest.mark.usefixtures("user_password_service")

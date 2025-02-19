@@ -99,9 +99,9 @@ class TestGenerate:
         parent_user.display_name = "Parent 👩"
         reply_user.display_name = "Child 👧"
 
-        (_, subject, _, _, _) = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert subject == "Child 👧 has replied to your annotation"
+        assert email.subject == "Child 👧 has replied to your annotation"
 
     def test_returns_usernames_if_no_display_names(
         self,
@@ -130,30 +130,30 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        _, _, text, _, html = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert html == "HTML output"
-        assert text == "Text output"
+        assert email.body == "Text output"
+        assert email.html == "HTML output"
 
     def test_returns_subject_with_reply_display_name(
         self, notification, pyramid_request
     ):
-        _, subject, _, _, _ = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert subject == "Ron Burgundy has replied to your annotation"
+        assert email.subject == "Ron Burgundy has replied to your annotation"
 
     def test_returns_subject_with_reply_username(
         self, notification, pyramid_request, reply_user
     ):
         reply_user.display_name = None
-        _, subject, _, _, _ = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert subject == "ron has replied to your annotation"
+        assert email.subject == "ron has replied to your annotation"
 
     def test_returns_parent_email_as_recipients(self, notification, pyramid_request):
-        recipients, _, _, _, _ = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert recipients == ["pat@ric.ia"]
+        assert email.recipients == ["pat@ric.ia"]
 
     def test_jinja_templates_render(
         self, notification, pyramid_config, pyramid_request

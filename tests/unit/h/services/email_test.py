@@ -3,17 +3,18 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.services.email import EmailService, EmailTag, factory
+from h.services.email import EmailData, EmailService, EmailTag, factory
 
 
 class TestEmailService:
     def test_send_creates_email_message(self, email_service, pyramid_mailer):
-        email_service.send(
+        email = EmailData(
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
             tag=EmailTag.TEST,
         )
+        email_service.send(email)
 
         pyramid_mailer.message.Message.assert_called_once_with(
             recipients=["foo@example.com"],
@@ -26,13 +27,14 @@ class TestEmailService:
     def test_send_creates_email_message_with_html_body(
         self, email_service, pyramid_mailer
     ):
-        email_service.send(
+        email = EmailData(
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
             tag=EmailTag.TEST,
             html="<p>An HTML body</p>",
         )
+        email_service.send(email)
 
         pyramid_mailer.message.Message.assert_called_once_with(
             recipients=["foo@example.com"],
@@ -48,12 +50,13 @@ class TestEmailService:
         request_mailer = pyramid_mailer.get_mailer.return_value
         message = pyramid_mailer.message.Message.return_value
 
-        email_service.send(
+        email = EmailData(
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
             tag=EmailTag.TEST,
         )
+        email_service.send(email)
 
         request_mailer.send_immediately.assert_called_once_with(message)
 
@@ -61,13 +64,14 @@ class TestEmailService:
         request_mailer = pyramid_mailer.get_mailer.return_value
         request_mailer.send_immediately.side_effect = smtplib.SMTPException()
 
+        email = EmailData(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=EmailTag.TEST,
+        )
         with pytest.raises(smtplib.SMTPException):
-            email_service.send(
-                recipients=["foo@example.com"],
-                subject="My email subject",
-                body="Some text body",
-                tag=EmailTag.TEST,
-            )
+            email_service.send(email)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

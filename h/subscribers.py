@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 
 from h_pyramid_sentry import report_exception
 from kombu.exceptions import OperationalError
@@ -107,9 +108,9 @@ def send_reply_notifications(event):
             logger.info("Skipping reply notification for %s", notification.parent_user)
             return
 
-        send_params = emails.reply_notification.generate(request, notification)
+        email = emails.reply_notification.generate(request, notification)
         try:
-            mailer.send.delay(*send_params)
+            mailer.send.delay(asdict(email))
         except OperationalError as err:  # pragma: no cover
             # We could not connect to rabbit! So carry on
             report_exception(err)
@@ -145,9 +146,9 @@ def send_mention_notifications(event):
                 )
                 continue
 
-            send_params = emails.mention_notification.generate(request, notification)
+            email = emails.mention_notification.generate(request, notification)
             try:
-                mailer.send.delay(*send_params)
+                mailer.send.delay(asdict(email))
             except OperationalError as err:  # pragma: no cover
                 # We could not connect to rabbit! So carry on
                 report_exception(err)

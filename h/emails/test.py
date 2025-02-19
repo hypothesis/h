@@ -2,21 +2,17 @@ import datetime
 import platform
 
 from pyramid.renderers import render
+from pyramid.request import Request
 
 from h import __version__
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 
 
-def generate(request, recipient):
-    """
-    Generate a test email.
+def generate(request: Request, recipient: str) -> EmailData:
+    """Generate a test email.
 
     :param request: the current request
-    :type request: pyramid.request.Request
     :param recipient: the recipient of the test email
-    :type recipient: str
-
-    :returns: a 4-element tuple containing: recipients, subject, text, html
     """
 
     context = {
@@ -29,4 +25,10 @@ def generate(request, recipient):
     text = render("h:templates/emails/test.txt.jinja2", context, request=request)
     html = render("h:templates/emails/test.html.jinja2", context, request=request)
 
-    return [recipient], "Test mail", text, EmailTag.TEST, html
+    return EmailData(
+        recipients=[recipient],
+        subject="Test mail",
+        body=text,
+        tag=EmailTag.TEST,
+        html=html,
+    )
