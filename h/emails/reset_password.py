@@ -1,19 +1,16 @@
 from pyramid.renderers import render
+from pyramid.request import Request
 
 from h.i18n import TranslationString as _
-from h.services.email import EmailTag
+from h.models import User
+from h.services.email import EmailData, EmailTag
 
 
-def generate(request, user):
-    """
-    Generate an email for a user password reset request.
+def generate(request: Request, user: User) -> EmailData:
+    """Generate an email for a user password reset request.
 
     :param request: the current request
-    :type request: pyramid.request.Request
     :param user: the user to whom to send the reset code
-    :type user: h.models.User
-
-    :returns: a 4-element tuple containing: recipients, subject, text, html
     """
     serializer = request.registry.password_reset_serializer
     code = serializer.dumps(user.username)
@@ -32,4 +29,10 @@ def generate(request, user):
         "h:templates/emails/reset_password.html.jinja2", context, request=request
     )
 
-    return [user.email], subject, text, EmailTag.RESET_PASSWORD, html
+    return EmailData(
+        recipients=[user.email],
+        subject=subject,
+        body=text,
+        tag=EmailTag.RESET_PASSWORD,
+        html=html,
+    )

@@ -1,6 +1,7 @@
 import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
+from h.services.email import EmailData, EmailTag
 from h.views.admin.mailer import mailer_index, mailer_test, preview_mention_notification
 
 
@@ -36,9 +37,14 @@ class TestMailerTest:
 
         mailer_test(pyramid_request)
 
-        mailer.send.delay.assert_called_once_with(
-            ["meerkat@example.com"], "TEST", "text", "html"
+        email = EmailData(
+            recipients=["meerkat@example.com"],
+            subject="TEST",
+            body="text",
+            tag=EmailTag.TEST,
+            html="html",
         )
+        mailer.send.delay.assert_called_once_with(email)
 
     def test_redirects(self, pyramid_request):
         pyramid_request.params["recipient"] = "meerkat@example.com"
@@ -81,7 +87,9 @@ def mailer(patch):
 @pytest.fixture
 def testmail(patch):
     test = patch("h.views.admin.mailer.test")
-    test.generate.side_effect = lambda _, r: ([r], "TEST", "text", "html")
+    test.generate.side_effect = lambda _, r: EmailData(
+        recipients=[r], subject="TEST", body="text", tag=EmailTag.TEST, html="html"
+    )
     return test
 
 

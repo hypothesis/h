@@ -94,7 +94,7 @@ class TestUserSignupService:
         user_password_service.update_password.assert_called_once_with(user, "wibble")
 
     def test_signup_sends_email(self, svc, signup, tasks_mailer, pyramid_request):
-        signup.generate.return_value = ["signup", "args"]
+        signup.generate.return_value = sentinel.email
 
         user = svc.signup(username="foo", email="foo@bar.com")
 
@@ -105,7 +105,7 @@ class TestUserSignupService:
             activation_code=user.activation.code,
         )
 
-        tasks_mailer.send.delay.assert_called_once_with(*signup.generate.return_value)
+        tasks_mailer.send.delay.assert_called_once_with(signup.generate.return_value)
 
     def test_signup_does_not_send_email_when_activation_not_required(
         self, svc, signup, tasks_mailer

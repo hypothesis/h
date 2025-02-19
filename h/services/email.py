@@ -1,6 +1,7 @@
 # noqa: A005
 
 import smtplib
+from dataclasses import dataclass
 from enum import StrEnum
 
 import pyramid_mailer
@@ -22,6 +23,25 @@ class EmailTag(StrEnum):
     TEST = "test"
 
 
+@dataclass(frozen=True)
+class EmailData:
+    recipients: list[str]
+    subject: str
+    body: str
+    tag: EmailTag
+    html: str | None = None
+
+    @property
+    def message(self) -> pyramid_mailer.message.Message:
+        return pyramid_mailer.message.Message(
+            subject=self.subject,
+            recipients=self.recipients,
+            body=self.body,
+            html=self.html,
+            extra_headers={"X-MC-Tags": self.tag},
+        )
+
+
 class EmailService:
     """A service for sending emails."""
 
@@ -29,26 +49,11 @@ class EmailService:
         self._request = request
         self._mailer = mailer
 
-    def send(
-        self,
-        recipients: list[str],
-        subject: str,
-        body: str,
-        tag: EmailTag,
-        html: str | None = None,
-    ) -> None:
-        extra_headers = {"X-MC-Tags": tag}
-        email = pyramid_mailer.message.Message(
-            subject=subject,
-            recipients=recipients,
-            body=body,
-            html=html,
-            extra_headers=extra_headers,
-        )
+    def send(self, email: EmailData) -> None:
         if self._request.debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
-            self._mailer.send_immediately(email)
+            self._mailer.send_immediately(email.message)
         except smtplib.SMTPRecipientsRefused as exc:  # pragma: no cover
             logger.warning(
                 "Recipient was refused when trying to send an email. Does the user have an invalid email address?",

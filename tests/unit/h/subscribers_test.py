@@ -133,8 +133,8 @@ class TestSendReplyNotifications:
         emails.reply_notification.generate.assert_called_once_with(
             pyramid_request, notification
         )
-        send_params = emails.reply_notification.generate.return_value
-        mailer.send.delay.assert_called_once_with(*send_params)
+        email = emails.reply_notification.generate.return_value
+        mailer.send.delay.assert_called_once_with(email)
 
     def test_it_does_nothing_if_no_notification_is_required(self, event, reply, mailer):
         reply.get_notification.return_value = None
@@ -201,8 +201,8 @@ class TestSendMentionNotifications:
         emails.mention_notification.generate.assert_called_once_with(
             pyramid_request, notifications[0]
         )
-        send_params = emails.mention_notification.generate.return_value
-        mailer.send.delay.assert_called_once_with(*send_params)
+        email = emails.mention_notification.generate.return_value
+        mailer.send.delay.assert_called_once_with(email)
 
     def test_it_does_nothing_if_no_notification_is_required(
         self, event, mention, mailer
