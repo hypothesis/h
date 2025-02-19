@@ -67,7 +67,8 @@ gulp.task('build-images', () => {
     return IS_PRODUCTION_BUILD && file.path.match(/\.svg$/);
   };
 
-  // See https://github.com/ben-eb/gulp-svgmin#plugins
+  // See https://github.com/ben-eb/gulp-svgmin#plugins and
+  // https://github.com/ben-eb/gulp-svgmin/issues/125#issuecomment-972082805
   const svgminConfig = {
     plugins: [
       {
@@ -75,8 +76,7 @@ gulp.task('build-images', () => {
         // the SVG.
         //
         // See https://github.com/svg/svgo/issues/1128
-        name: 'removeViewBox',
-        active: false,
+        removeViewBox: false,
       },
     ],
   };
