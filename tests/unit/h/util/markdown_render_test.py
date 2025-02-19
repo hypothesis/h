@@ -16,10 +16,20 @@ class TestRender:
         actual = markdown_render.render(r"Foobar \(1 + 1 = 2\)")
         assert actual == "<p>Foobar \\(1 + 1 = 2\\)</p>"
 
+    def test_it_preserves_mention_attributes(self):
+        actual = markdown_render.render(
+            '<a data-hyp-mention="" data-userid="acct:username@example.com">@username</a>'
+        )
+        assert (
+            actual
+            == '<p><a data-hyp-mention="" data-userid="acct:username@example.com">@username</a></p>'
+        )
+
     @pytest.mark.parametrize(
         "text",
         [
             '<p><a href="mailto:foo@example.net">example</a></p>',  # Don't add rel and target attrs to mailto: links
+            '<p><a data-hyp-mention="" data-userid="acct:username@example.com">@username</a></p>',
             '<p><a title="foobar">example</a></p>',
             '<p><a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a></p>',
             "<blockquote>Foobar</blockquote>",

@@ -7,9 +7,8 @@ from sqlalchemy.orm import Session
 from h.models import Annotation, Mention
 from h.services.html import parse_html_links
 from h.services.user import UserService
+from h.util.markdown_render import MENTION_ATTRIBUTE, MENTION_USERID
 
-MENTION_ATTRIBUTE = "data-hyp-mention"
-MENTION_USERID = "data-userid"
 MENTION_LIMIT = 5
 
 logger = logging.getLogger(__name__)

@@ -41,7 +41,6 @@ class TestGenerate:
         self,
         annotation,
         notification,
-        mentioning_user,
         pyramid_request,
         html_renderer,
         text_renderer,
@@ -52,7 +51,6 @@ class TestGenerate:
         generate(pyramid_request, notification)
 
         expected_context = {
-            "username": f"@{mentioning_user.username}",
             "annotation_url": f"http://example.com/ann/{annotation.id}",
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
