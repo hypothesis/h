@@ -3,10 +3,10 @@ from pyramid.request import Request
 
 from h import links
 from h.notification.mention import MentionNotification
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 
 
-def generate(request: Request, notification: MentionNotification):
+def generate(request: Request, notification: MentionNotification) -> EmailData:
     selectors = notification.annotation.target[0].get("selector", [])
     quote = next((s for s in selectors if s.get("type") == "TextQuoteSelector"), None)
     username = notification.mentioning_user.username
@@ -31,10 +31,10 @@ def generate(request: Request, notification: MentionNotification):
         "h:templates/emails/mention_notification.html.jinja2", context, request=request
     )
 
-    return (
-        [notification.mentioned_user.email],
-        subject,
-        text,
-        EmailTag.MENTION_NOTIFICATION,
-        html,
+    return EmailData(
+        recipients=[notification.mentioned_user.email],
+        subject=subject,
+        body=text,
+        tag=EmailTag.MENTION_NOTIFICATION,
+        html=html,
     )

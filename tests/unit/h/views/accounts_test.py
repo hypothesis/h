@@ -8,6 +8,7 @@ from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.models import Subscriptions
+from h.services.email import EmailData, EmailTag
 from h.views import accounts as views
 
 
@@ -277,9 +278,14 @@ class TestForgotPasswordController:
 
         controller.post()
 
-        mailer.send.delay.assert_called_once_with(
-            ["giraffe@thezoo.org"], "Reset yer passwor!", "HTML output", "Text output"
+        email = EmailData(
+            recipients=["giraffe@thezoo.org"],
+            subject="Reset yer passwor!",
+            body="Text output",
+            tag=EmailTag.TEST,
+            html="HTML output",
         )
+        mailer.send.delay.assert_called_once_with(email)
 
     def test_post_redirects_on_success(
         self, factories, form_validating_to, pyramid_request
@@ -302,11 +308,12 @@ class TestForgotPasswordController:
     @pytest.fixture
     def reset_password_email(self, patch):
         reset_password_email = patch("h.views.accounts.reset_password")
-        reset_password_email.generate.return_value = (
-            ["giraffe@thezoo.org"],
-            "Reset yer passwor!",
-            "HTML output",
-            "Text output",
+        reset_password_email.generate.return_value = EmailData(
+            recipients=["giraffe@thezoo.org"],
+            subject="Reset yer passwor!",
+            body="Text output",
+            tag=EmailTag.TEST,
+            html="HTML output",
         )
         return reset_password_email
 

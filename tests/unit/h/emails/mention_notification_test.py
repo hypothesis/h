@@ -80,18 +80,18 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        _, _, text, _, html = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert html == "HTML output"
-        assert text == "Text output"
+        assert email.body == "Text output"
+        assert email.html == "HTML output"
 
     def test_returns_subject_with_reply_display_name(
         self, notification, pyramid_request, mentioning_user
     ):
-        _, subject, _, _, _ = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
         assert (
-            subject
+            email.subject
             == f"{mentioning_user.display_name} has mentioned you in an annotation"
         )
 
@@ -100,18 +100,19 @@ class TestGenerate:
     ):
         mentioning_user.display_name = None
 
-        _, subject, _, _, _ = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
         assert (
-            subject == f"@{mentioning_user.username} has mentioned you in an annotation"
+            email.subject
+            == f"@{mentioning_user.username} has mentioned you in an annotation"
         )
 
     def test_returns_parent_email_as_recipients(
         self, notification, pyramid_request, mentioned_user
     ):
-        recipients, _, _, _, _ = generate(pyramid_request, notification)
+        email = generate(pyramid_request, notification)
 
-        assert recipients == [mentioned_user.email]
+        assert email.recipients == [mentioned_user.email]
 
     def test_jinja_templates_render(
         self, notification, pyramid_config, pyramid_request
