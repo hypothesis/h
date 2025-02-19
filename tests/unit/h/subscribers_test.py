@@ -1,4 +1,5 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 from kombu.exceptions import OperationalError
@@ -120,7 +121,10 @@ class TestSendReplyNotifications:
         mention,
         emails,
         mailer,
+        asdict,
     ):
+        asdict.return_value = sentinel.email_data
+
         subscribers.send_reply_notifications(event)
 
         # This is a pure plumbing test, checking everything is connected to
@@ -147,9 +151,10 @@ class TestSendReplyNotifications:
         notification_service.allow_notifications.assert_called_once_with(
             annotation, reply_notification.parent_user
         )
-        send_params = emails.reply_notification.generate.return_value
+        email = emails.reply_notification.generate.return_value
+        asdict.assert_called_once_with(email)
 
-        mailer.send.delay.assert_called_once_with(*send_params)
+        mailer.send.delay.assert_called_once_with(asdict.return_value)
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
@@ -214,6 +219,7 @@ class TestSendMentionNotifications:
         mention,
         emails,
         mailer,
+        asdict,
     ):
         notifications = mention.get_notifications.return_value
 
@@ -238,9 +244,9 @@ class TestSendMentionNotifications:
         notification_service.allow_notifications.assert_called_once_with(
             annotation, notifications[0].mentioned_user
         )
-        send_params = emails.mention_notification.generate.return_value
-
-        mailer.send.delay.assert_called_once_with(*send_params)
+        email = emails.mention_notification.generate.return_value
+        asdict.assert_called_once_with(email)
+        mailer.send.delay.assert_called_once_with(asdict.return_value)
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
@@ -327,3 +333,8 @@ def emails(patch):
 @pytest.fixture(autouse=True)
 def report_exception(patch):
     return patch("h.subscribers.report_exception")
+
+
+@pytest.fixture(autouse=True)
+def asdict(patch):
+    return patch("h.subscribers.asdict")

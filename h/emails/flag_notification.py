@@ -1,21 +1,16 @@
 from pyramid.renderers import render
+from pyramid.request import Request
 
 from h.i18n import TranslationString as _
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 
 
-def generate(request, email, incontext_link):
-    """
-    Generate an email to notify the group admin when a group member flags an annotation.
+def generate(request: Request, email: str, incontext_link: str) -> EmailData:
+    """Generate an email to notify the group admin when a group member flags an annotation.
 
     :param request: the current request
-    :type request: pyramid.request.Request
     :param email: the group admin's email address
-    :type email: text
     :param incontext_link: the direct link to the flagged annotation
-    :type incontext_link: text
-
-    :returns: a 4-element tuple containing: recipients, subject, text, html
     """
     context = {"incontext_link": incontext_link}
 
@@ -28,4 +23,10 @@ def generate(request, email, incontext_link):
         "h:templates/emails/flag_notification.html.jinja2", context, request=request
     )
 
-    return [email], subject, text, EmailTag.FLAG_NOTIFICATION, html
+    return EmailData(
+        recipients=[email],
+        subject=subject,
+        body=text,
+        tag=EmailTag.FLAG_NOTIFICATION,
+        html=html,
+    )
