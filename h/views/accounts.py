@@ -1,5 +1,6 @@
 import datetime
 import itertools
+from dataclasses import asdict
 from urllib.parse import urlparse
 
 import colander
@@ -210,8 +211,8 @@ class ForgotPasswordController:
             raise httpexceptions.HTTPFound(self.request.route_path("index"))
 
     def _send_forgot_password_email(self, user):
-        send_params = reset_password.generate(self.request, user)
-        mailer.send.delay(*send_params)
+        email = reset_password.generate(self.request, user)
+        mailer.send.delay(asdict(email))
 
 
 @view_defaults(

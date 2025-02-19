@@ -4,6 +4,7 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.models import GroupMembership, GroupMembershipRoles
+from h.services.email import EmailData
 from h.traversal import AnnotationContext
 from h.views.api import flags
 
@@ -39,8 +40,24 @@ class TestCreate:
             for user in moderators
         ]
         assert mailer.send.delay.call_args_list == [
-            call(sentinel.email1, sentinel.subject1, sentinel.text1, sentinel.html1),
-            call(sentinel.email2, sentinel.subject2, sentinel.text2, sentinel.html2),
+            call(
+                {
+                    "recipients": sentinel.email1,
+                    "subject": sentinel.subject1,
+                    "body": sentinel.text1,
+                    "tag": sentinel.tag1,
+                    "html": sentinel.html1,
+                }
+            ),
+            call(
+                {
+                    "recipients": sentinel.email2,
+                    "subject": sentinel.subject2,
+                    "body": sentinel.text2,
+                    "tag": sentinel.tag2,
+                    "html": sentinel.html2,
+                }
+            ),
         ]
         assert isinstance(response, HTTPNoContent)
 
@@ -102,8 +119,20 @@ def flag_notification(mocker):
         "h.views.api.flags.flag_notification", autospec=True
     )
     flag_notification.generate.side_effect = [
-        (sentinel.email1, sentinel.subject1, sentinel.text1, sentinel.html1),
-        (sentinel.email2, sentinel.subject2, sentinel.text2, sentinel.html2),
+        EmailData(
+            recipients=sentinel.email1,
+            subject=sentinel.subject1,
+            body=sentinel.text1,
+            tag=sentinel.tag1,
+            html=sentinel.html1,
+        ),
+        EmailData(
+            recipients=sentinel.email2,
+            subject=sentinel.subject2,
+            body=sentinel.text2,
+            tag=sentinel.tag2,
+            html=sentinel.html2,
+        ),
     ]
     return flag_notification
 

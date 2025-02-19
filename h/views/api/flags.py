@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from pyramid.httpexceptions import HTTPNoContent
 
 from h import links
@@ -37,5 +39,5 @@ def _email_group_moderators(request, annotation):
 
     for membership in memberships:
         if email := membership.user.email:
-            send_params = flag_notification.generate(request, email, incontext_link)
-            mailer.send.delay(*send_params)
+            email = flag_notification.generate(request, email, incontext_link)
+            mailer.send.delay(asdict(email))

@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 
 from pyramid.request import Request
 from sqlalchemy.exc import IntegrityError
@@ -123,13 +124,13 @@ class UserSignupService:
         self.session.flush()
 
         # Send the activation email
-        mail_params = signup.generate(
+        email = signup.generate(
             request=self.request,
             user_id=user.id,
             email=user.email,
             activation_code=user.activation.code,
         )
-        tasks_mailer.send.delay(*mail_params)
+        tasks_mailer.send.delay(asdict(email))
 
 
 def user_signup_service_factory(_context, request):
