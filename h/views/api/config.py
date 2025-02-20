@@ -65,6 +65,7 @@ def add_api_view(  # noqa: PLR0913
                                   `route_name` must be specified.
     :param dict **settings: Arguments to pass on to ``config.add_view``
     """
+    settings.setdefault("require_csrf", False)
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", (cors_policy, version_media_type_header(subtype)))
 
