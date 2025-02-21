@@ -39,13 +39,13 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, tag, html = generate(pyramid_request, user)
+        email = generate(pyramid_request, user)
 
-        assert recipients == [user.email]
-        assert subject == "Reset your password"
-        assert html == "HTML output"
-        assert tag == EmailTag.RESET_PASSWORD
-        assert text == "Text output"
+        assert email.recipients == [user.email]
+        assert email.subject == "Reset your password"
+        assert email.body == "Text output"
+        assert email.html == "HTML output"
+        assert email.tag == EmailTag.RESET_PASSWORD
 
     def test_jinja_templates_render(
         self, pyramid_config, pyramid_request, serializer, user

@@ -27,15 +27,13 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, tag, html = generate(
-            pyramid_request, "meerkat@example.com"
-        )
+        email = generate(pyramid_request, "meerkat@example.com")
 
-        assert recipients == ["meerkat@example.com"]
-        assert subject == "Test mail"
-        assert html == "HTML output"
-        assert tag == EmailTag.TEST
-        assert text == "Text output"
+        assert email.recipients == ["meerkat@example.com"]
+        assert email.subject == "Test mail"
+        assert email.body == "Text output"
+        assert email.html == "HTML output"
+        assert email.tag == EmailTag.TEST
 
     def test_jinja_templates_render(self, pyramid_config, pyramid_request):
         """Ensure that the jinja templates don't contain syntax errors"""  # noqa: D400, D415

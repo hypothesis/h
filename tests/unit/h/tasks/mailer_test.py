@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 from h.tasks import mailer
 
 
@@ -17,6 +17,21 @@ def test_send_retries_if_mailing_fails(email_service):
         body="Some text body",
         tag=EmailTag.TEST,
     )
+
+    assert mailer.send.retry.called
+
+
+def test_send_retries_if_mailing_fails_with_email_data(email_service):
+    email_service.send.side_effect = SMTPServerDisconnected()
+
+    mailer.send.retry = mock.Mock(spec_set=[])
+    email = EmailData(
+        recipients=["foo@example.com"],
+        subject="My email subject",
+        body="Some text body",
+        tag=EmailTag.TEST,
+    )
+    mailer.send(email)
 
     assert mailer.send.retry.called
 
