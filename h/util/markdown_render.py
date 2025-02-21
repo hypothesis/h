@@ -5,6 +5,8 @@ from bleach.linkifier import LinkifyFilter
 from markdown import Markdown
 
 LINK_REL = "nofollow noopener"
+MENTION_ATTRIBUTE = "data-hyp-mention"
+MENTION_USERID = "data-userid"
 
 MARKDOWN_TAGS = [
     "a",
@@ -53,6 +55,10 @@ def render(text):
 
 def _filter_link_attributes(_tag, name, value):
     if name in ["href", "title"]:
+        return True
+
+    # Keep attributes used in mention tags
+    if name in [MENTION_ATTRIBUTE, MENTION_USERID]:
         return True
 
     if name == "target" and value == "_blank":

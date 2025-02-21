@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
@@ -55,21 +53,17 @@ class TestPreviewMentionNotification:
     def test_returns_dummy_data(self, pyramid_request):
         result = preview_mention_notification(pyramid_request)
 
-        assert (
-            result
-            == {
-                "user_url": "https://example.com/user",
-                "user_display_name": "Jane Doe",
-                "annotation_url": "https://example.com/bouncer",  # Bouncer link (AKA: annotation deeplink)
-                "document_title": "The title",
-                "document_url": "https://example.com/document",  # Document public URL
-                "annotation": {
-                    "updated": datetime(year=2025, month=1, day=11, hour=18, minute=36),  # noqa: DTZ001
-                    "text": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
-                    "text_rendered": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
-                },
-            }
-        )
+        assert result == {
+            "username": "janedoe",
+            "user_display_name": "Jane Doe",
+            "annotation_url": "https://example.com/bouncer",
+            "document_title": "The document",
+            "document_url": "https://example.com/document",
+            "annotation": {
+                "text_rendered": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
+            },
+            "annotation_quote": "This is a very important text",
+        }
 
 
 class FakeResult:
