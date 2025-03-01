@@ -39,7 +39,7 @@
     "postcss": "^8.5.1",
     "preact": "^10.25.4",
     "rollup": "^4.30.0",
-    "sass": "^1.83.4",
+    "sass": "^1.85.1",
     "scroll-into-view": "^1.16.2",
     "tailwindcss": "^3.4.17",
     "wouter-preact": "^3.3.5"
