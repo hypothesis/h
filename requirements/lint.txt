@@ -114,7 +114,7 @@ execnet==2.1.1
     # via
     #   -r requirements/tests.txt
     #   pytest-xdist
-factory-boy==3.3.1
+factory-boy==3.3.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
