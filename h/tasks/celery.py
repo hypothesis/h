@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 
 celery = Celery("h")
 celery.conf.update(
+    accept_content=["json", "pickle"],
     broker_url=os.environ.get(
         "CELERY_BROKER_URL",
         os.environ.get("BROKER_URL", "amqp://guest:guest@localhost:5672//"),
