@@ -2,9 +2,9 @@ import logging
 from collections import OrderedDict
 
 from sqlalchemy import delete
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, subqueryload
 
-from h.models import Annotation, Mention
+from h.models import Annotation, GroupMembership, Mention, User
 from h.services.html import parse_html_links
 from h.services.user import UserService
 from h.util.markdown_render import MENTION_ATTRIBUTE, MENTION_USERID
@@ -32,7 +32,13 @@ class MentionService:
         mentioned_userids = OrderedDict.fromkeys(
             self._parse_userids(annotation.text)
         ).keys()
-        mentioned_users = self._user_service.fetch_all(mentioned_userids)
+        mentioned_users = (
+            self._session.query(User)
+            .filter(User.userid.in_(mentioned_userids))
+            .options(subqueryload(User.memberships).subqueryload(GroupMembership.group))
+            .all()
+        )
+
         self._session.execute(
             delete(Mention).where(Mention.annotation_id == annotation.id)
         )
