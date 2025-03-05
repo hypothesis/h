@@ -4,17 +4,21 @@ A module for sending email.
 This module defines a Celery task for sending emails in a worker process.
 """
 
-import smtplib
-
 from h.services.email import EmailService, EmailTag
 from h.tasks.celery import celery
 
 __all__ = ("send",)
 
 
-@celery.task(bind=True, max_retries=3, acks_late=True)
+@celery.task(
+    bind=True,
+    acks_late=True,
+    autoretry_for=(Exception,),
+    max_retries=3,
+    retry_jitter=False,
+)
 def send(  # noqa: PLR0913
-    self,
+    self,  # noqa: ARG001
     recipients: list[str],
     subject: str,
     body: str,
@@ -34,11 +38,4 @@ def send(  # noqa: PLR0913
     :type body: unicode
     """
     service = celery.request.find_service(EmailService)
-    try:
-        service.send(
-            recipients=recipients, subject=subject, body=body, html=html, tag=tag
-        )
-    except smtplib.socket.error as exc:
-        # Exponential backoff in case the SMTP service is having problems.
-        countdown = self.default_retry_delay * 2**self.request.retries
-        self.retry(exc=exc, countdown=countdown)
+    service.send(recipients=recipients, subject=subject, body=body, html=html, tag=tag)
