@@ -5,10 +5,13 @@ Sets up the form handling and rendering library, deform, to use our own custom
 form templates in preference to the defaults.
 """
 
+from functools import partial
+
 import deform
 import pyramid_jinja2
 from markupsafe import Markup
 from pyramid import httpexceptions
+from pyramid.csrf import get_csrf_token
 from pyramid.path import AssetResolver
 
 from h import i18n
@@ -46,6 +49,10 @@ class Jinja2Renderer:
         context = self._system.copy()
         context.update(kwargs)
 
+        context.setdefault(
+            "get_csrf_token", partial(get_csrf_token, context["request"])
+        )
+
         return Markup(template.render(context))
 
 
@@ -75,7 +82,7 @@ def create_form(request, *args, **kwargs):
     default) will use the renderer configured in the :py:mod:`h.form` module.
     """
     env = request.registry[ENVIRONMENT_KEY]
-    renderer = Jinja2Renderer(env, {"feature": request.feature})
+    renderer = Jinja2Renderer(env, {"feature": request.feature, "request": request})
     kwargs.setdefault("renderer", renderer)
 
     return deform.Form(*args, **kwargs)

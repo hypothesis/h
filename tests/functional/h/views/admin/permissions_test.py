@@ -35,10 +35,7 @@ class TestAdminPermissions:
 
         assert res.status_code == 200 if accessible else 404
 
-    GROUP_PAGES = (
-        ("POST", "/admin/groups/delete/{pubid}", 302),
-        ("GET", "/admin/groups/{pubid}", 200),
-    )
+    GROUP_PAGES = (("GET", "/admin/groups/{pubid}", 200),)
 
     @pytest.mark.usefixtures("with_logged_in_admin")
     @pytest.mark.parametrize("method,url_template,success_code", GROUP_PAGES)

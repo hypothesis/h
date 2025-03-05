@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import colander
 import pytest
-from pyramid.exceptions import BadCSRFToken
 
 from h.schemas.forms.accounts import LoginSchema
 from h.services.user import UserNotActivated
@@ -45,12 +44,6 @@ class TestLoginSchema:
         result = schema.deserialize({"username": "jeannie", "password": "cake"})
 
         assert result["user"] is user
-
-    def test_invalid_with_bad_csrf(self, pyramid_request):
-        schema = LoginSchema().bind(request=pyramid_request)
-
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize({"username": "jeannie", "password": "cake"})
 
     def test_invalid_with_inactive_user(self, pyramid_csrf_request, user_service):
         schema = LoginSchema().bind(request=pyramid_csrf_request)
