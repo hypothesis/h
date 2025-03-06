@@ -38,7 +38,7 @@ imagesize==1.4.1
     # via sphinx
 importlib-metadata==7.0.1
     # via pip-sync-faster
-jinja2==3.1.5
+jinja2==3.1.6
     # via sphinx
 markupsafe==2.1.5
     # via jinja2
@@ -47,10 +47,10 @@ packaging==24.2
     #   build
     #   sphinx
 pip-sync-faster==0.0.5
-    # via -r requirements/docs.in
+    # via -r docs.in
 pip-tools==7.4.1
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   pip-sync-faster
 pygments==2.17.2
     # via sphinx
@@ -66,7 +66,7 @@ snowballstemmer==2.2.0
     # via sphinx
 sphinx==8.1.3
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
     #   sphinxcontrib-applehelp
@@ -74,9 +74,9 @@ sphinx==8.1.3
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
 sphinx-autobuild==2024.10.3
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinx-rtd-theme==3.0.2
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinxcontrib-applehelp==1.0.7
     # via sphinx
 sphinxcontrib-devhelp==2.0.0
