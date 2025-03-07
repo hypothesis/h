@@ -104,15 +104,14 @@ class GroupMembersService:
                         be the members of this group
         """
         current_mem_ids = [member.userid for member in group.members]
-        userids_for_removal = [
-            mem_id for mem_id in current_mem_ids if mem_id not in userids
-        ]
 
         for userid in userids:
-            self.member_join(group, userid)
+            if userid not in current_mem_ids:
+                self.member_join(group, userid)
 
-        for userid in userids_for_removal:
-            self.member_leave(group, userid)
+        for userid in current_mem_ids:
+            if userid not in userids:
+                self.member_leave(group, userid)
 
     def member_join(self, group, userid, roles=None) -> GroupMembership:
         """
