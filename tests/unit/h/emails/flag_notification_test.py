@@ -1,7 +1,7 @@
 import pytest
 
 from h.emails.flag_notification import generate
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 
 
 class TestGenerate:
@@ -24,17 +24,19 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, tag, html = generate(
+        email = generate(
             pyramid_request,
             email="foo@example.com",
             incontext_link="http://hyp.is/a/ann1",
         )
 
-        assert recipients == ["foo@example.com"]
-        assert subject == "An annotation has been flagged"
-        assert html == "HTML output"
-        assert tag == EmailTag.FLAG_NOTIFICATION
-        assert text == "Text output"
+        assert email == EmailData(
+            recipients=["foo@example.com"],
+            subject="An annotation has been flagged",
+            body="Text output",
+            html="HTML output",
+            tag=EmailTag.FLAG_NOTIFICATION,
+        )
 
     @pytest.fixture
     def html_renderer(self, pyramid_config):
