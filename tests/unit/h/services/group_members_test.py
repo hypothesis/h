@@ -378,16 +378,34 @@ class TestUpdateMembers:
             ]
         )
 
-    def test_it_does_not_add_duplicate_members(self, factories, group_members_service):
-        # test for idempotency
+    def test_it_doesnt_add_duplicate_members(self, factories, group_members_service):
         group = factories.OpenGroup()
         new_member = factories.User()
 
         group_members_service.update_members(
-            group, [new_member.userid, new_member.userid]
+            group,
+            # Ask the method to add the same member twice:
+            [new_member.userid, new_member.userid],
         )
 
+        # It should have added the member only once.
         assert group.members == (new_member,)
+
+    def test_it_doesnt_change_existing_memberships(
+        self, db_session, factories, group_members_service
+    ):
+        group = factories.OpenGroup()
+        user = factories.User()
+        membership = GroupMembership(
+            group=group, user=user, roles=[GroupMembershipRoles.OWNER]
+        )
+        db_session.add(membership)
+
+        group_members_service.update_members(group, [user.userid])
+
+        assert db_session.scalars(
+            select(GroupMembership).where(GroupMembership.group == group)
+        ).all() == [membership]
 
 
 @pytest.mark.usefixtures("user_service")
