@@ -76,7 +76,7 @@ elasticsearch-dsl==6.4.0
     # via -r requirements/prod.txt
 execnet==2.1.1
     # via pytest-xdist
-factory-boy==3.3.1
+factory-boy==3.3.3
     # via
     #   -r requirements/tests.in
     #   pytest-factoryboy
