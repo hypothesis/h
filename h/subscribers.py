@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from h_pyramid_sentry import report_exception
 from kombu.exceptions import OperationalError
 from pyramid.events import BeforeRender, subscriber
@@ -88,9 +90,9 @@ def send_reply_notifications(event):
         if reply_notification.parent_user in mentioned_users:
             return
 
-        send_params = emails.reply_notification.generate(request, reply_notification)
+        email = emails.reply_notification.generate(request, reply_notification)
         try:
-            mailer.send.delay(*send_params)
+            mailer.send.delay(asdict(email))
         except OperationalError as err:  # pragma: no cover
             # We could not connect to rabbit! So carry on
             report_exception(err)
@@ -108,9 +110,9 @@ def send_mention_notifications(event):
         notifications = mention.get_notifications(request, annotation, event.action)
 
         for notification in notifications:
-            send_params = emails.mention_notification.generate(request, notification)
+            email = emails.mention_notification.generate(request, notification)
             try:
-                mailer.send.delay(*send_params)
+                mailer.send.delay(asdict(email))
             except OperationalError as err:  # pragma: no cover
                 # We could not connect to rabbit! So carry on
                 report_exception(err)

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from h.emails.reset_password import generate
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 
 
 @pytest.mark.usefixtures("routes")
@@ -39,13 +39,15 @@ class TestGenerate:
         html_renderer.string_response = "HTML output"
         text_renderer.string_response = "Text output"
 
-        recipients, subject, text, tag, html = generate(pyramid_request, user)
+        email = generate(pyramid_request, user)
 
-        assert recipients == [user.email]
-        assert subject == "Reset your password"
-        assert html == "HTML output"
-        assert tag == EmailTag.RESET_PASSWORD
-        assert text == "Text output"
+        assert email == EmailData(
+            recipients=[user.email],
+            subject="Reset your password",
+            body="Text output",
+            html="HTML output",
+            tag=EmailTag.RESET_PASSWORD,
+        )
 
     def test_jinja_templates_render(
         self, pyramid_config, pyramid_request, serializer, user

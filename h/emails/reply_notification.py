@@ -6,16 +6,14 @@ from h.emails.util import get_user_url
 from h.models import Subscriptions
 from h.notification.reply import Notification
 from h.services import SubscriptionService
-from h.services.email import EmailTag
+from h.services.email import EmailData, EmailTag
 
 
-def generate(request: Request, notification: Notification):
-    """
-    Generate an email for a reply notification.
+def generate(request: Request, notification: Notification) -> EmailData:
+    """Generate an email for a reply notification.
 
     :param request: the current request
     :param notification: the reply notification data structure
-    :returns: a 4-element tuple containing: recipients, subject, text, html
     """
 
     unsubscribe_token = request.find_service(SubscriptionService).get_unsubscribe_token(
@@ -51,10 +49,10 @@ def generate(request: Request, notification: Notification):
         "h:templates/emails/reply_notification.html.jinja2", context, request=request
     )
 
-    return (
-        [notification.parent_user.email],
-        subject,
-        text,
-        EmailTag.REPLY_NOTIFICATION,
-        html,
+    return EmailData(
+        recipients=[notification.parent_user.email],
+        subject=subject,
+        body=text,
+        tag=EmailTag.REPLY_NOTIFICATION,
+        html=html,
     )

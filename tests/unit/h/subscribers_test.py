@@ -1,4 +1,5 @@
 from unittest import mock
+from unittest.mock import sentinel
 
 import pytest
 from kombu.exceptions import OperationalError
@@ -117,7 +118,10 @@ class TestSendReplyNotifications:
         reply,
         emails,
         mailer,
+        asdict,
     ):
+        asdict.return_value = sentinel.email_data
+
         subscribers.send_reply_notifications(event)
 
         # This is a pure plumbing test, checking everything is connected to
@@ -133,8 +137,9 @@ class TestSendReplyNotifications:
         emails.reply_notification.generate.assert_called_once_with(
             pyramid_request, notification
         )
-        send_params = emails.reply_notification.generate.return_value
-        mailer.send.delay.assert_called_once_with(*send_params)
+        email = emails.reply_notification.generate.return_value
+        asdict.assert_called_once_with(email)
+        mailer.send.delay.assert_called_once_with(asdict.return_value)
 
     def test_it_does_nothing_if_no_notification_is_required(self, event, reply, mailer):
         reply.get_notification.return_value = None
@@ -183,9 +188,11 @@ class TestSendMentionNotifications:
         mention,
         emails,
         mailer,
+        asdict,
     ):
-        notifications = [mock.MagicMock()]
+        notifications = [sentinel.notification]
         mention.get_notifications.return_value = notifications
+        asdict.return_value = sentinel.email_data
 
         subscribers.send_mention_notifications(event)
 
@@ -201,8 +208,9 @@ class TestSendMentionNotifications:
         emails.mention_notification.generate.assert_called_once_with(
             pyramid_request, notifications[0]
         )
-        send_params = emails.mention_notification.generate.return_value
-        mailer.send.delay.assert_called_once_with(*send_params)
+        email = emails.mention_notification.generate.return_value
+        asdict.assert_called_once_with(email)
+        mailer.send.delay.assert_called_once_with(asdict.return_value)
 
     def test_it_does_nothing_if_no_notification_is_required(
         self, event, mention, mailer
@@ -275,3 +283,8 @@ def emails(patch):
 @pytest.fixture(autouse=True)
 def report_exception(patch):
     return patch("h.subscribers.report_exception")
+
+
+@pytest.fixture(autouse=True)
+def asdict(patch):
+    return patch("h.subscribers.asdict")
