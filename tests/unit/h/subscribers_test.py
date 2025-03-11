@@ -7,6 +7,7 @@ from transaction import TransactionManager
 from h import __version__, subscribers
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
+from h.models.notification import NotificationType
 
 
 @pytest.mark.usefixtures("routes")
@@ -107,14 +108,16 @@ class TestPublishAnnotationEvent:
         return event
 
 
-@pytest.mark.usefixtures("annotation_read_service")
+@pytest.mark.usefixtures("annotation_read_service", "notification_service")
 class TestSendReplyNotifications:
     def test_it_sends_emails(
         self,
         event,
         pyramid_request,
         annotation_read_service,
+        notification_service,
         reply,
+        mention,
         emails,
         mailer,
     ):
@@ -122,19 +125,37 @@ class TestSendReplyNotifications:
 
         # This is a pure plumbing test, checking everything is connected to
         # everything else as we expect
+
         annotation_read_service.get_annotation_by_id.assert_called_once_with(
             event.annotation_id
         )
         annotation = annotation_read_service.get_annotation_by_id.return_value
+
         reply.get_notification.assert_called_once_with(
             pyramid_request, annotation, event.action
         )
-        notification = reply.get_notification.return_value
+        reply_notification = reply.get_notification.return_value
+
         emails.reply_notification.generate.assert_called_once_with(
-            pyramid_request, notification
+            pyramid_request, reply_notification
+        )
+
+        mention.get_notifications.assert_called_once_with(
+            pyramid_request, annotation, event.action
+        )
+
+        notification_service.allow_notifications.assert_called_once_with(
+            annotation, reply_notification.parent_user
         )
         send_params = emails.reply_notification.generate.return_value
+
         mailer.send.delay.assert_called_once_with(*send_params)
+
+        notification_service.save_notification.assert_called_once_with(
+            annotation=annotation,
+            recipient=reply_notification.parent_user,
+            notification_type=NotificationType.REPLY,
+        )
 
     def test_it_does_nothing_if_no_notification_is_required(self, event, reply, mailer):
         reply.get_notification.return_value = None
@@ -163,6 +184,15 @@ class TestSendReplyNotifications:
 
         mailer.send.delay.assert_not_called()
 
+    def test_it_does_nothing_if_notifications_arent_allowed(
+        self, event, mailer, notification_service
+    ):
+        notification_service.allow_notifications.return_value = False
+
+        subscribers.send_reply_notifications(event)
+
+        mailer.send.delay.assert_not_called()
+
     @pytest.fixture
     def event(self, pyramid_request):
         return AnnotationEvent(pyramid_request, {"id": "any"}, "action")
@@ -173,36 +203,50 @@ class TestSendReplyNotifications:
         return pyramid_request
 
 
-@pytest.mark.usefixtures("annotation_read_service")
+@pytest.mark.usefixtures("annotation_read_service", "notification_service")
 class TestSendMentionNotifications:
     def test_it_sends_emails(
         self,
         event,
         pyramid_request,
         annotation_read_service,
+        notification_service,
         mention,
         emails,
         mailer,
     ):
-        notifications = [mock.MagicMock()]
-        mention.get_notifications.return_value = notifications
+        notifications = mention.get_notifications.return_value
 
         subscribers.send_mention_notifications(event)
 
         # This is a pure plumbing test, checking everything is connected to
         # everything else as we expect
+
         annotation_read_service.get_annotation_by_id.assert_called_once_with(
             event.annotation_id
         )
         annotation = annotation_read_service.get_annotation_by_id.return_value
+
         mention.get_notifications.assert_called_once_with(
             pyramid_request, annotation, event.action
         )
+
         emails.mention_notification.generate.assert_called_once_with(
             pyramid_request, notifications[0]
         )
+
+        notification_service.allow_notifications.assert_called_once_with(
+            annotation, notifications[0].mentioned_user
+        )
         send_params = emails.mention_notification.generate.return_value
+
         mailer.send.delay.assert_called_once_with(*send_params)
+
+        notification_service.save_notification.assert_called_once_with(
+            annotation=annotation,
+            recipient=notifications[0].mentioned_user,
+            notification_type=NotificationType.MENTION,
+        )
 
     def test_it_does_nothing_if_no_notification_is_required(
         self, event, mention, mailer
@@ -213,14 +257,20 @@ class TestSendMentionNotifications:
 
         mailer.send.delay.assert_not_called()
 
-    def test_it_fails_gracefully_if_the_task_does_not_queue(
-        self, event, mailer, mention
-    ):
-        mention.get_notifications.return_value = [mock.MagicMock()]
+    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer):
         mailer.send.side_effect = OperationalError
 
         # No explosions please
         subscribers.send_mention_notifications(event)
+
+    def test_it_does_nothing_if_notifications_arent_allowed(
+        self, event, mailer, notification_service
+    ):
+        notification_service.allow_notifications.return_value = False
+
+        subscribers.send_mention_notifications(event)
+
+        mailer.send.delay.assert_not_called()
 
     @pytest.fixture
     def event(self, pyramid_request):
@@ -259,7 +309,9 @@ def reply(patch):
 
 @pytest.fixture(autouse=True)
 def mention(patch):
-    return patch("h.subscribers.mention")
+    mention = patch("h.subscribers.mention")
+    mention.get_notifications.return_value = [mock.MagicMock()]
+    return mention
 
 
 @pytest.fixture(autouse=True)

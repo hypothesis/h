@@ -19,8 +19,8 @@ class MentionNotification:
 def get_notifications(
     request, annotation: Annotation, action
 ) -> list[MentionNotification]:
-    # Only send notifications when new annotations are created
-    if action != "create":
+    # Only send notifications when annotations are created or updated
+    if action not in {"create", "update"}:
         return []
 
     # Only send notifications for shared annotations
