@@ -17,7 +17,7 @@ class AnnotationMetadata(Base):
     )
     """FK to annotation_slim.id"""
 
-    annotation_slim = sa.orm.relationship("AnnotationSlim")
+    annotation_slim = sa.orm.relationship("AnnotationSlim", back_populates="meta")
 
     data = sa.Column(
         MutableDict.as_mutable(pg.JSONB),

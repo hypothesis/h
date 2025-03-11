@@ -6,6 +6,7 @@ from h import __version__, emails
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 from h.notification import mention, reply
+from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_read import AnnotationReadService
 from h.tasks import mailer
 
@@ -114,3 +115,8 @@ def send_mention_notifications(event):
             except OperationalError as err:  # pragma: no cover
                 # We could not connect to rabbit! So carry on
                 report_exception(err)
+
+
+@subscriber(AnnotationEvent)
+def publish_annotation_event_for_authority(event):
+    event.request.find_service(AnnotationAuthorityQueueService).publish(event)

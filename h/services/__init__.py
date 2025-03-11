@@ -1,5 +1,6 @@
 """Service definitions that handle business logic."""
 
+from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_sync import AnnotationSyncService
@@ -45,6 +46,10 @@ def includeme(config):  # pragma: no cover
         "h.services.annotation_write.service_factory", iface=AnnotationWriteService
     )
     config.register_service_factory("h.services.mention.factory", iface=MentionService)
+    config.register_service_factory(
+        "h.services.annotation_authority_queue.factory",
+        iface=AnnotationAuthorityQueueService,
+    )
 
     # Other services
     config.register_service_factory(

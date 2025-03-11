@@ -8,6 +8,7 @@ from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
 from h.models.group import Group
+from h.models.user import User
 from h.util import markdown_render, uri
 from h.util.user import split_user
 
@@ -58,6 +59,13 @@ class Annotation(Base):
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
     #: annotation.
     userid = sa.Column(sa.UnicodeText, nullable=False, index=True)
+    user = sa.orm.relationship(
+        User,
+        primaryjoin=(User.userid == userid),
+        foreign_keys=[userid],
+        lazy="select",
+    )
+
     #: The string id of the group in which this annotation is published.
     #: Defaults to the global public group, "__world__".
     groupid = sa.Column(
