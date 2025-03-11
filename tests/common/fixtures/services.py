@@ -2,7 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from h.services import MentionService
+from h.services import MentionService, NotificationService
 from h.services.analytics import AnalyticsService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
@@ -77,6 +77,7 @@ __all__ = (
     "mock_service",
     "moderation_service",
     "nipsa_service",
+    "notification_service",
     "oauth_provider_service",
     "organization_service",
     "queue_service",
@@ -317,6 +318,11 @@ def user_update_service(mock_service):
 @pytest.fixture
 def mention_service(mock_service):
     return mock_service(MentionService)
+
+
+@pytest.fixture
+def notification_service(mock_service):
+    return mock_service(NotificationService)
 
 
 @pytest.fixture

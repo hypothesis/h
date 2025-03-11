@@ -164,6 +164,10 @@ class AnnotationWriteService:
             force=not update_timestamp,
         )
 
+        user = self._user_service.fetch(annotation.userid)
+        if self._feature_service.enabled("at_mentions", user):  # pragma: no cover
+            self._mention_service.update_mentions(annotation)
+
         return annotation
 
     def hide(self, annotation):

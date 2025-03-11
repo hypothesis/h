@@ -1,3 +1,5 @@
+import logging
+
 from h_pyramid_sentry import report_exception
 from kombu.exceptions import OperationalError
 from pyramid.events import BeforeRender, subscriber
@@ -5,9 +7,13 @@ from pyramid.events import BeforeRender, subscriber
 from h import __version__, emails
 from h.events import AnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
+from h.models.notification import NotificationType
 from h.notification import mention, reply
+from h.services import NotificationService
 from h.services.annotation_read import AnnotationReadService
 from h.tasks import mailer
+
+logger = logging.getLogger(__name__)
 
 
 @subscriber(BeforeRender)
@@ -72,28 +78,47 @@ def send_reply_notifications(event):
     """Queue any reply notification emails triggered by an annotation event."""
     request = event.request
 
+    notification_service: NotificationService = request.find_service(
+        NotificationService
+    )
+
     with request.tm:
         annotation = request.find_service(AnnotationReadService).get_annotation_by_id(
             event.annotation_id
         )
 
-        reply_notification = reply.get_notification(request, annotation, event.action)
-        if reply_notification is None:
+        notification = reply.get_notification(request, annotation, event.action)
+        if notification is None:
             return
 
-        mention_notifications = mention.get_notifications(
-            request, annotation, event.action
-        )
-        mentioned_users = {mention.mentioned_user for mention in mention_notifications}
-        if reply_notification.parent_user in mentioned_users:
+        # Don't send a notification to users already mentioned in the reply
+        mentioned_users = {
+            notification.mentioned_user
+            for notification in mention.get_notifications(
+                request, annotation, event.action
+            )
+        }
+        if notification.parent_user in mentioned_users:
             return
 
-        send_params = emails.reply_notification.generate(request, reply_notification)
+        if not notification_service.allow_notifications(
+            annotation, notification.parent_user
+        ):
+            logger.info("Skipping reply notification for %s", notification.parent_user)
+            return
+
+        send_params = emails.reply_notification.generate(request, notification)
         try:
             mailer.send.delay(*send_params)
         except OperationalError as err:  # pragma: no cover
             # We could not connect to rabbit! So carry on
             report_exception(err)
+
+        notification_service.save_notification(
+            annotation=annotation,
+            recipient=notification.parent_user,
+            notification_type=NotificationType.REPLY,
+        )
 
 
 @subscriber(AnnotationEvent)
@@ -101,16 +126,34 @@ def send_mention_notifications(event):
     """Send mention notifications triggered by a mention event."""
     request = event.request
 
+    notification_service: NotificationService = request.find_service(
+        NotificationService
+    )
+
     with request.tm:
         annotation = request.find_service(AnnotationReadService).get_annotation_by_id(
             event.annotation_id,
         )
-        notifications = mention.get_notifications(request, annotation, event.action)
 
+        notifications = mention.get_notifications(request, annotation, event.action)
         for notification in notifications:
+            if not notification_service.allow_notifications(
+                annotation, notification.mentioned_user
+            ):
+                logger.info(
+                    "Skipping mention notification for %s", notification.mentioned_user
+                )
+                continue
+
             send_params = emails.mention_notification.generate(request, notification)
             try:
                 mailer.send.delay(*send_params)
             except OperationalError as err:  # pragma: no cover
                 # We could not connect to rabbit! So carry on
                 report_exception(err)
+
+            notification_service.save_notification(
+                annotation=annotation,
+                recipient=notification.mentioned_user,
+                notification_type=NotificationType.MENTION,
+            )
