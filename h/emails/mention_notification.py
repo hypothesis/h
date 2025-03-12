@@ -10,6 +10,7 @@ def generate(request: Request, notification: MentionNotification):
     selectors = notification.annotation.target[0].get("selector", [])
     quote = next((s for s in selectors if s.get("type") == "TextQuoteSelector"), None)
     username = notification.mentioning_user.username
+
     context = {
         "username": username,
         "user_display_name": notification.mentioning_user.display_name
@@ -21,6 +22,7 @@ def generate(request: Request, notification: MentionNotification):
         "document_url": notification.annotation.target_uri,
         "annotation": notification.annotation,
         "annotation_quote": quote.get("exact") if quote else None,
+        "app_url": request.registry.settings.get("h.app_url"),
     }
 
     subject = f"{context['user_display_name']} has mentioned you in an annotation"

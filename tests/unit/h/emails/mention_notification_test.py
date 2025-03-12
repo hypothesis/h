@@ -19,6 +19,13 @@ class TestGenerate:
         text_renderer,
         links,
     ):
+        app_url = "https://example.com"
+        pyramid_request.registry.settings.update(
+            {
+                "h.app_url": app_url,
+            }
+        )
+
         generate(pyramid_request, notification)
 
         links.incontext_link.assert_called_once_with(
@@ -33,6 +40,7 @@ class TestGenerate:
             "document_url": annotation.target_uri,
             "annotation": notification.annotation,
             "annotation_quote": "quoted text",
+            "app_url": app_url,
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
