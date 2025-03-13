@@ -16,6 +16,7 @@ class Subscriptions(Base):
         """
 
         REPLY = "reply"
+        MENTION = "mention"
 
     __tablename__ = "subscriptions"
 

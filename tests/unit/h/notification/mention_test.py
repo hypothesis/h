@@ -2,17 +2,27 @@ from unittest.mock import call
 
 import pytest
 
+from h.models import Subscriptions
 from h.notification.mention import MentionNotification, get_notifications
 
 
 class TestGetNotifications:
     def test_it(
-        self, annotation, mentioning_user, mentioned_user, pyramid_request, user_service
+        self,
+        annotation,
+        mentioning_user,
+        mentioned_user,
+        pyramid_request,
+        user_service,
+        subscription_service,
     ):
         result = get_notifications(pyramid_request, annotation, "create")
 
         user_service.fetch.assert_has_calls(
             [call(mentioning_user.userid), call(mentioned_user.userid)]
+        )
+        subscription_service.get_subscription.assert_called_once_with(
+            user_id=mentioned_user.userid, type_=Subscriptions.Type.MENTION
         )
 
         assert len(result) == 1
@@ -68,6 +78,13 @@ class TestGetNotifications:
 
         assert get_notifications(pyramid_request, annotation, "create") == []
 
+    def test_it_returns_none_when_subscription_inactive(
+        self, pyramid_request, annotation, subscription_service
+    ):
+        subscription_service.get_subscription.return_value.active = False
+
+        assert not get_notifications(pyramid_request, annotation, "create")
+
     @pytest.fixture
     def annotation(self, factories, mentioning_user, mention):
         return factories.Annotation(
@@ -90,3 +107,10 @@ class TestGetNotifications:
     def user_service(self, user_service, mentioning_user, mentioned_user):
         user_service.fetch.side_effect = (mentioning_user, mentioned_user)
         return user_service
+
+    @pytest.fixture(autouse=True)
+    def subscription_service(self, subscription_service, factories):
+        subscription_service.get_subscription.return_value = factories.Subscriptions(
+            active=True
+        )
+        return subscription_service

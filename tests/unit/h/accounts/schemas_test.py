@@ -376,6 +376,27 @@ class TestDeleteAccountSchema:
         return schemas.DeleteAccountSchema().bind(request=pyramid_csrf_request)
 
 
+@pytest.mark.usefixtures("feature_service")
+class TestNotificationSchema:
+    def test_it(self, schema, user, feature_service):
+        schema.deserialize({"notifications": ["reply", "mention"]})
+
+        feature_service.enabled.assert_called_once_with("at_mentions", user)
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def pyramid_csrf_request(self, pyramid_csrf_request, user):
+        pyramid_csrf_request.user = user
+        return pyramid_csrf_request
+
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return schemas.NotificationsSchema().bind(request=pyramid_csrf_request)
+
+
 @pytest.fixture
 def dummy_node(pyramid_request):
     class DummyNode:

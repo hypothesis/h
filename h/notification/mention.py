@@ -1,7 +1,8 @@
 import logging
 from dataclasses import dataclass
 
-from h.models import Annotation, Document, User
+from h.models import Annotation, Document, Subscriptions, User
+from h.services import SubscriptionService
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,8 @@ def get_notifications(
         )
         return []
 
+    subscription_service = request.find_service(SubscriptionService)
+
     notifications = []
     for mention in annotation.mentions:
         # If the mentioned user doesn't exist (anymore), we can't send emails
@@ -56,6 +59,12 @@ def get_notifications(
 
         # If the annotation doesn't have a document, we can't send an email.
         if annotation.document is None:
+            continue
+
+        # Bail if there is no active 'mention' subscription for the user being mentioned.
+        if not subscription_service.get_subscription(
+            user_id=mentioned_user.userid, type_=Subscriptions.Type.MENTION
+        ).active:
             continue
 
         notifications.append(
