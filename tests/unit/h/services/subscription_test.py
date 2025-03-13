@@ -1,4 +1,4 @@
-from unittest.mock import patch, sentinel
+from unittest.mock import call, patch, sentinel
 
 import pytest
 from h_matchers import Any
@@ -43,14 +43,21 @@ class TestSubscriptionService:
         )
 
     def test_get_all_subscriptions(self, svc):
-        with patch.object(svc, "get_subscription") as get_subscription:
+        mocks_subscriptions = [
+            sentinel.reply_subscription,
+            sentinel.mention_subscription,
+        ]
+        with patch.object(
+            svc, "get_subscription", side_effect=mocks_subscriptions
+        ) as get_subscription:
             subscriptions = svc.get_all_subscriptions(sentinel.user_id)
 
-            # Despite the name, there is only one subscription type
-            get_subscription.assert_called_once_with(
-                sentinel.user_id, Subscriptions.Type.REPLY
-            )
-            assert subscriptions == [get_subscription.return_value]
+            assert get_subscription.mock_calls == [
+                call(sentinel.user_id, Subscriptions.Type.REPLY),
+                call(sentinel.user_id, Subscriptions.Type.MENTION),
+            ]
+
+            assert subscriptions == mocks_subscriptions
 
     def test_get_unsubscribe_token(self, svc, SignedSerializer):
         result = svc.get_unsubscribe_token(
