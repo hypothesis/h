@@ -4,6 +4,7 @@ import pytest
 
 from h.services import MentionService, NotificationService
 from h.services.analytics import AnalyticsService
+from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_delete import AnnotationDeleteService
 from h.services.annotation_json import AnnotationJSONService
 from h.services.annotation_metadata import AnnotationMetadataService
@@ -48,6 +49,7 @@ from h.services.user_update import UserUpdateService
 
 __all__ = (
     "analytics_service",
+    "annotation_authority_queue_service",
     "annotation_delete_service",
     "annotation_json_service",
     "annotation_metadata_service",
@@ -323,6 +325,11 @@ def mention_service(mock_service):
 @pytest.fixture
 def notification_service(mock_service):
     return mock_service(NotificationService)
+
+
+@pytest.fixture
+def annotation_authority_queue_service(mock_service):
+    return mock_service(AnnotationAuthorityQueueService)
 
 
 @pytest.fixture

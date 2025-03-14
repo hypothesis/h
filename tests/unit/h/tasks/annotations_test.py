@@ -1,6 +1,9 @@
 import pytest
 
-from h.tasks.annotations import sync_annotation_slim
+from h.tasks.annotations import (
+    publish_annotation_event_for_authority,
+    sync_annotation_slim,
+)
 
 
 class TestSyncAnnotationSlim:
@@ -49,8 +52,18 @@ class TestSyncAnnotationSlim:
 
         annotation_write_service.upsert_annotation_slim.assert_not_called()
 
-    @pytest.fixture(autouse=True)
-    def celery(self, patch, pyramid_request):
-        cel = patch("h.tasks.annotations.celery", autospec=False)
-        cel.request = pyramid_request
-        return cel
+
+class TestPublishAnnotationEventForAuthority:
+    def test_it(self, annotation_authority_queue_service):
+        publish_annotation_event_for_authority("create", "123")
+
+        annotation_authority_queue_service.publish.assert_called_once_with(
+            "create", "123"
+        )
+
+
+@pytest.fixture(autouse=True)
+def celery(patch, pyramid_request):
+    cel = patch("h.tasks.annotations.celery", autospec=False)
+    cel.request = pyramid_request
+    return cel
