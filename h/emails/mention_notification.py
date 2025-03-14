@@ -2,7 +2,9 @@ from pyramid.renderers import render
 from pyramid.request import Request
 
 from h import links
+from h.models import Subscriptions
 from h.notification.mention import MentionNotification
+from h.services import SubscriptionService
 from h.services.email import EmailData, EmailTag
 
 
@@ -10,6 +12,10 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
     selectors = notification.annotation.target[0].get("selector", [])
     quote = next((s for s in selectors if s.get("type") == "TextQuoteSelector"), None)
     username = notification.mentioning_user.username
+
+    unsubscribe_token = request.find_service(SubscriptionService).get_unsubscribe_token(
+        user_id=notification.mentioned_user.userid, type_=Subscriptions.Type.MENTION
+    )
 
     context = {
         "username": username,
@@ -23,6 +29,11 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
         "annotation": notification.annotation,
         "annotation_quote": quote.get("exact") if quote else None,
         "app_url": request.registry.settings.get("h.app_url"),
+        "unsubscribe_url": request.route_url(
+            "unsubscribe",
+            token=unsubscribe_token,
+        ),
+        "preferences_url": request.route_url("account_notifications"),
     }
 
     subject = f"{context['user_display_name']} has mentioned you in an annotation"
