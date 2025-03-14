@@ -3,40 +3,12 @@
 import copy
 
 import colander
-import deform
 import jsonschema
 from pyramid import httpexceptions
-from pyramid.csrf import check_csrf_token, get_csrf_token
-
-
-@colander.deferred
-def deferred_csrf_token(_node, kwargs):
-    request = kwargs.get("request")
-    return get_csrf_token(request)
 
 
 class ValidationError(httpexceptions.HTTPBadRequest):
     pass
-
-
-class CSRFSchema(colander.Schema):
-    """
-    A CSRFSchema backward-compatible with the one from the hem module.
-
-    Unlike hem, this doesn't require that the csrf_token appear in the
-    serialized appstruct.
-    """
-
-    csrf_token = colander.SchemaNode(
-        colander.String(),
-        widget=deform.widget.HiddenWidget(),
-        default=deferred_csrf_token,
-        missing=None,
-    )
-
-    def validator(self, node, _value):
-        request = node.bindings["request"]
-        check_csrf_token(request)
 
 
 class JSONSchema:

@@ -35,42 +35,29 @@ class TestAdminPermissions:
 
         assert res.status_code == 200 if accessible else 404
 
-    GROUP_PAGES = (
-        ("POST", "/admin/groups/delete/{pubid}", 302),
-        ("GET", "/admin/groups/{pubid}", 200),
-    )
-
     @pytest.mark.usefixtures("with_logged_in_admin")
-    @pytest.mark.parametrize("method,url_template,success_code", GROUP_PAGES)
-    def test_group_end_points_accessible_by_admin(
-        self, app, group, method, url_template, success_code
-    ):
-        url = url_template.format(pubid=group.pubid)
-
-        app.request(url, method=method, status=success_code)
+    def test_admin_group_pages_accessible_by_admins(self, app, group):
+        app.request(f"/admin/groups/{group.pubid}", method="GET", status=200)
 
     @pytest.mark.usefixtures("with_logged_in_staff_member")
-    @pytest.mark.parametrize("method,url_template,success_code", GROUP_PAGES)
-    def test_group_end_points_accessible_by_staff(
-        self, app, group, method, url_template, success_code
-    ):
-        url = url_template.format(pubid=group.pubid)
-
-        app.request(url, method=method, status=success_code)
+    def test_admin_group_pages_accessible_by_staff(self, app, group):
+        app.request(f"/admin/groups/{group.pubid}", method="GET", status=200)
 
     @pytest.mark.usefixtures("with_logged_in_user")
-    @pytest.mark.parametrize("method,url_template,_", GROUP_PAGES)
-    def test_group_end_points_not_accessible_by_regular_user(
-        self,
-        app,
-        group,
-        method,
-        url_template,
-        _,  # noqa: PT019
-    ):
-        url = url_template.format(pubid=group.pubid)
+    def test_admin_group_pages_NOT_accessible_by_regular_users(self, app, group):
+        app.request(f"/admin/groups/{group.pubid}", method="GET", status=404)
 
-        app.request(url, method=method, status=404)
+    @pytest.mark.usefixtures("with_logged_in_admin")
+    def test_admins_can_use_admin_pages_to_delete_groups(self, app, group):
+        response = app.request(f"/admin/groups/{group.pubid}")
+
+        response.forms["delete_group"].submit(status=302)
+
+    @pytest.mark.usefixtures("with_logged_in_staff_member")
+    def test_staff_can_use_admin_pages_to_delete_groups(self, app, group):
+        response = app.request(f"/admin/groups/{group.pubid}")
+
+        response.forms["delete_group"].submit(status=302)
 
     @pytest.fixture
     def group(self, factories, db_session):
