@@ -3,7 +3,7 @@ from unittest.mock import sentinel
 
 import pytest
 
-from h.services.email import EmailData, EmailService, EmailTag, factory
+from h.services.email import EmailData, EmailService, EmailTag, LogData, factory
 
 
 class TestEmailService:
@@ -73,6 +73,46 @@ class TestEmailService:
         with pytest.raises(smtplib.SMTPException):
             email_service.send(email)
 
+    def test_send_logging(self, email_service, info_caplog):
+        email_data = EmailData(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=EmailTag.TEST,
+        )
+        user_id = 123
+        log_data = LogData(
+            tag=email_data.tag,
+            sender_id=user_id,
+            recipient_ids=[user_id],
+        )
+        email_service.send(email_data, log_data)
+
+        assert info_caplog.messages == [
+            f"Sent email: tag={log_data.tag!r}, sender_id={user_id}, recipient_ids={[user_id]}"
+        ]
+
+    def test_send_logging_with_extra(self, email_service, info_caplog):
+        email_data = EmailData(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=EmailTag.TEST,
+        )
+        user_id = 123
+        annotation_id = "annotation_id"
+        log_data = LogData(
+            tag=email_data.tag,
+            sender_id=user_id,
+            recipient_ids=[user_id],
+            extra={"annotation_id": annotation_id},
+        )
+        email_service.send(email_data, log_data)
+
+        assert info_caplog.messages == [
+            f"Sent email: tag={log_data.tag!r}, sender_id={user_id}, recipient_ids={[user_id]}, annotation_id={annotation_id!r}"
+        ]
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.debug = False
@@ -82,6 +122,11 @@ class TestEmailService:
     def email_service(self, pyramid_request, pyramid_mailer):
         request_mailer = pyramid_mailer.get_mailer.return_value
         return EmailService(pyramid_request, request_mailer)
+
+    @pytest.fixture
+    def info_caplog(self, caplog):
+        caplog.set_level("INFO")
+        return caplog
 
 
 class TestFactory:

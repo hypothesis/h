@@ -1,5 +1,5 @@
 from unittest import mock
-from unittest.mock import sentinel
+from unittest.mock import call, sentinel
 
 import pytest
 from kombu.exceptions import OperationalError
@@ -122,9 +122,8 @@ class TestSendReplyNotifications:
         emails,
         mailer,
         asdict,
+        LogData,
     ):
-        asdict.return_value = sentinel.email_data
-
         subscribers.send_reply_notifications(event)
 
         # This is a pure plumbing test, checking everything is connected to
@@ -151,10 +150,12 @@ class TestSendReplyNotifications:
         notification_service.allow_notifications.assert_called_once_with(
             annotation, notification.parent_user
         )
-        email = emails.reply_notification.generate.return_value
-        asdict.assert_called_once_with(email)
 
-        mailer.send.delay.assert_called_once_with(asdict.return_value)
+        email_data = emails.reply_notification.generate.return_value
+        asdict.assert_has_calls([call(email_data), call(LogData.return_value)])
+        mailer.send.delay.assert_called_once_with(
+            sentinel.email_data, sentinel.log_data
+        )
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
@@ -220,6 +221,7 @@ class TestSendMentionNotifications:
         emails,
         mailer,
         asdict,
+        LogData,
     ):
         notifications = mention.get_notifications.return_value
 
@@ -244,9 +246,12 @@ class TestSendMentionNotifications:
         notification_service.allow_notifications.assert_called_once_with(
             annotation, notifications[0].mentioned_user
         )
-        email = emails.mention_notification.generate.return_value
-        asdict.assert_called_once_with(email)
-        mailer.send.delay.assert_called_once_with(asdict.return_value)
+
+        email_data = emails.mention_notification.generate.return_value
+        asdict.assert_has_calls([call(email_data), call(LogData.return_value)])
+        mailer.send.delay.assert_called_once_with(
+            sentinel.email_data, sentinel.log_data
+        )
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
@@ -353,4 +358,11 @@ def report_exception(patch):
 
 @pytest.fixture(autouse=True)
 def asdict(patch):
-    return patch("h.subscribers.asdict")
+    return patch(
+        "h.subscribers.asdict", side_effect=[sentinel.email_data, sentinel.log_data]
+    )
+
+
+@pytest.fixture(autouse=True)
+def LogData(patch):
+    return patch("h.subscribers.LogData", autospec=True)

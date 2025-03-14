@@ -9,7 +9,7 @@ from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.models import Subscriptions
-from h.services.email import EmailData, EmailTag
+from h.services.email import EmailData, EmailTag, LogData
 from h.views import accounts as views
 
 
@@ -267,26 +267,30 @@ class TestForgotPasswordController:
 
     def test_post_sends_mail(
         self,
-        factories,
         form_validating_to,
         mailer,
         pyramid_request,
+        user,
     ):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
-        user = factories.User(username="giraffe", email="giraffe@thezoo.org")
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
 
         controller.post()
 
-        email = EmailData(
+        email_data = EmailData(
             recipients=["giraffe@thezoo.org"],
             subject="Reset yer passwor!",
             body="Text output",
             tag=EmailTag.TEST,
             html="HTML output",
         )
-        mailer.send.delay.assert_called_once_with(asdict(email))
+        log_data = LogData(
+            tag=email_data.tag,
+            sender_id=user.id,
+            recipient_ids=[user.id],
+        )
+        mailer.send.delay.assert_called_once_with(asdict(email_data), asdict(log_data))
 
     def test_post_redirects_on_success(
         self, factories, form_validating_to, pyramid_request
@@ -322,6 +326,17 @@ class TestForgotPasswordController:
     def routes(self, pyramid_config):
         pyramid_config.add_route("index", "/index")
         pyramid_config.add_route("account_reset", "/account/reset")
+
+    @pytest.fixture
+    def user(self, factories, db_session):
+        user = factories.User.create(username="giraffe", email="giraffe@thezoo.org")
+        db_session.commit()
+        return user
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        return pyramid_request
 
 
 @pytest.mark.usefixtures("routes", "user_password_service")
