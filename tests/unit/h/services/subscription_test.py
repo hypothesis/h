@@ -69,7 +69,9 @@ class TestSubscriptionService:
         )
         assert result == SignedSerializer.return_value.dumps.return_value
 
-    def test_unsubscribe_using_token(self, svc, SignedSerializer, reply_subscription):
+    def test_reply_unsubscribe_using_token(
+        self, svc, SignedSerializer, reply_subscription
+    ):
         reply_subscription.active = True
         SignedSerializer.return_value.loads.return_value = {
             "uri": reply_subscription.uri,
@@ -81,6 +83,20 @@ class TestSubscriptionService:
         SignedSerializer.return_value.loads.assert_called_once_with(sentinel.good_token)
         reply_subscription.active = False
 
+    def test_mention_unsubscribe_using_token(
+        self, svc, SignedSerializer, mention_subscription
+    ):
+        mention_subscription.active = True
+        SignedSerializer.return_value.loads.return_value = {
+            "uri": mention_subscription.uri,
+            "type": mention_subscription.type,
+        }
+
+        svc.unsubscribe_using_token(token=sentinel.good_token)
+
+        SignedSerializer.return_value.loads.assert_called_once_with(sentinel.good_token)
+        mention_subscription.active = False
+
     def test_unsubscribe_using_token_with_invalid_token(self, svc, SignedSerializer):
         SignedSerializer.return_value.loads.side_effect = ValueError
 
@@ -89,8 +105,11 @@ class TestSubscriptionService:
 
     @pytest.fixture
     def reply_subscription(self, factories):
-        # Despite being named in the plural, this is only one subscription
         return factories.Subscriptions(type=Subscriptions.Type.REPLY.value)
+
+    @pytest.fixture
+    def mention_subscription(self, factories):
+        return factories.Subscriptions(type=Subscriptions.Type.MENTION.value)
 
     @pytest.fixture
     def svc(self, db_session):

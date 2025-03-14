@@ -190,6 +190,15 @@ class TestGenerate:
         )
 
     @pytest.fixture(autouse=True)
+    def subscription_service(self, subscription_service):
+        subscription_service.get_unsubscribe_token.return_value = "FAKETOKEN"
+        return subscription_service
+
+    @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
         pyramid_config.add_route("annotation", "/ann/{id}")
         pyramid_config.add_route("stream.user_query", "/stream/user/{user}")
+        pyramid_config.add_route("unsubscribe", "/unsub/{token}")
+        pyramid_config.add_route(
+            "account_notifications", "/account/settings/notifications"
+        )
