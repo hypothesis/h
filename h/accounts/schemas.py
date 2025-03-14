@@ -262,12 +262,24 @@ class DeleteAccountSchema(CSRFSchema):
             raise exc
 
 
-class NotificationsSchema(CSRFSchema):
-    types = (("reply", _("Email me when someone replies to one of my annotations.")),)
+@colander.deferred
+def deferred_notification_widget(node, kw):  # noqa: ARG001
+    types = [("reply", _("Email me when someone replies to one of my annotations."))]
 
+    request = node.bindings["request"]
+    feature_service = request.find_service(name="feature")
+    if feature_service.enabled("at_mentions", request.user):  # pragma: no cover
+        types.append(
+            ("mention", _("Email me when someone mentions me in an annotation."))
+        )
+
+    return deform.widget.CheckboxChoiceWidget(omit_label=True, values=types)
+
+
+class NotificationsSchema(CSRFSchema):
     notifications = colander.SchemaNode(
         colander.Set(),
-        widget=deform.widget.CheckboxChoiceWidget(omit_label=True, values=types),
+        widget=deferred_notification_widget,
     )
 
 
