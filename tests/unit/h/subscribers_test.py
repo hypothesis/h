@@ -308,6 +308,17 @@ class TestSyncAnnotation:
         return pyramid_request.tm
 
 
+class TestPublishAnnotationEventForAuthority:
+    def test_it(self, pyramid_request, annotations):
+        event = AnnotationEvent(pyramid_request, {"id": "any"}, "action")
+
+        subscribers.publish_annotation_event_for_authority(event)
+
+        annotations.publish_annotation_event_for_authority.delay.assert_called_once_with(
+            event.action, event.annotation_id
+        )
+
+
 @pytest.fixture(autouse=True)
 def reply(patch):
     return patch("h.subscribers.reply")
@@ -323,6 +334,11 @@ def mention(patch):
 @pytest.fixture(autouse=True)
 def mailer(patch):
     return patch("h.subscribers.mailer")
+
+
+@pytest.fixture(autouse=True)
+def annotations(patch):
+    return patch("h.subscribers.annotations")
 
 
 @pytest.fixture(autouse=True)

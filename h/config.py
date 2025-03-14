@@ -121,6 +121,9 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
     # Reporting settings
     settings_manager.set("h.report.fdw_users", "REPORT_FDW_USERS", type_=aslist)
 
+    # Optional configuration for publishing annotation events to an authority's queue
+    settings_manager.set("h.authority_queue_config", "AUTHORITY_QUEUE_CONFIG")
+
     # Debug/development settings
     settings_manager.set("debug_query", "DEBUG_QUERY")
 

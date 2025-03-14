@@ -12,7 +12,7 @@ from h.models.notification import NotificationType
 from h.notification import mention, reply
 from h.services import NotificationService
 from h.services.annotation_read import AnnotationReadService
-from h.tasks import mailer
+from h.tasks import annotations, mailer
 
 logger = logging.getLogger(__name__)
 
@@ -158,3 +158,10 @@ def send_mention_notifications(event):
                 recipient=notification.mentioned_user,
                 notification_type=NotificationType.MENTION,
             )
+
+
+@subscriber(AnnotationEvent)
+def publish_annotation_event_for_authority(event):
+    annotations.publish_annotation_event_for_authority.delay(
+        event.action, event.annotation_id
+    )
