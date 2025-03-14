@@ -1,5 +1,6 @@
 from h.db.types import URLSafeUUID
 from h.models import Annotation
+from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_write import AnnotationWriteService
 from h.tasks.celery import celery, get_task_logger
 
@@ -38,3 +39,11 @@ def sync_annotation_slim(limit):
 
     # Remove all jobs we've processed
     queue_svc.delete(jobs)
+
+
+@celery.task
+def publish_annotation_event_for_authority(event_action, annotation_id):
+    """Optionally publish an annotation event to the authority's message queue."""
+    celery.request.find_service(AnnotationAuthorityQueueService).publish(
+        event_action, annotation_id
+    )
