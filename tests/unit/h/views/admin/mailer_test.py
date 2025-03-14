@@ -3,7 +3,7 @@ from dataclasses import asdict
 import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
-from h.services.email import EmailData, EmailTag
+from h.services.email import EmailData, EmailTag, LogData
 from h.views.admin.mailer import mailer_index, mailer_test, preview_mention_notification
 
 
@@ -34,19 +34,20 @@ class TestMailerTest:
         assert isinstance(result, HTTPSeeOther)
         assert result.location == "/adm/mailer"
 
-    def test_sends_mail(self, mailer, pyramid_request):
+    def test_sends_mail(self, mailer, pyramid_request, user):
         pyramid_request.params["recipient"] = "meerkat@example.com"
 
         mailer_test(pyramid_request)
 
-        email = EmailData(
+        email_data = EmailData(
             recipients=["meerkat@example.com"],
             subject="TEST",
             body="text",
             tag=EmailTag.TEST,
             html="html",
         )
-        mailer.send.delay.assert_called_once_with(asdict(email))
+        log_data = LogData(tag=email_data.tag, sender_id=user.id)
+        mailer.send.delay.assert_called_once_with(asdict(email_data), asdict(log_data))
 
     def test_redirects(self, pyramid_request):
         pyramid_request.params["recipient"] = "meerkat@example.com"
@@ -55,6 +56,17 @@ class TestMailerTest:
 
         assert isinstance(result, HTTPSeeOther)
         assert result.location == "/adm/mailer?taskid=a1b2c3"
+
+    @pytest.fixture
+    def user(self, factories, db_session):
+        user = factories.User.create()
+        db_session.commit()
+        return user
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        return pyramid_request
 
 
 class TestPreviewMentionNotification:

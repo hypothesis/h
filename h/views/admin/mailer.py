@@ -5,6 +5,7 @@ from pyramid.view import view_config
 
 from h.emails import test
 from h.security import Permission
+from h.services.email import LogData
 from h.tasks import mailer
 
 
@@ -31,8 +32,12 @@ def mailer_test(request):
         index = request.route_path("admin.mailer")
         return HTTPSeeOther(location=index)
 
-    email = test.generate(request, request.params["recipient"])
-    result = mailer.send.delay(asdict(email))
+    email_data = test.generate(request, request.params["recipient"])
+    log_data = LogData(
+        tag=email_data.tag,
+        sender_id=request.user.id,
+    )
+    result = mailer.send.delay(asdict(email_data), asdict(log_data))
     index = request.route_path("admin.mailer", _query={"taskid": result.task_id})
     return HTTPSeeOther(location=index)
 

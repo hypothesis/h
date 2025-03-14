@@ -4,7 +4,7 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.models import GroupMembership, GroupMembershipRoles
-from h.services.email import EmailData
+from h.services.email import EmailData, EmailTag
 from h.traversal import AnnotationContext
 from h.views.api import flags
 
@@ -39,24 +39,37 @@ class TestCreate:
             call(pyramid_request, user.email, links.incontext_link.return_value)
             for user in moderators
         ]
+
         assert mailer.send.delay.call_args_list == [
             call(
                 {
                     "recipients": sentinel.email1,
                     "subject": sentinel.subject1,
                     "body": sentinel.text1,
-                    "tag": sentinel.tag1,
+                    "tag": EmailTag.FLAG_NOTIFICATION,
                     "html": sentinel.html1,
-                }
+                },
+                {
+                    "sender_id": pyramid_request.user.id,
+                    "tag": EmailTag.FLAG_NOTIFICATION,
+                    "recipient_ids": [moderators[0].id],
+                    "extra": {"annotation_id": annotation.id},
+                },
             ),
             call(
                 {
                     "recipients": sentinel.email2,
                     "subject": sentinel.subject2,
                     "body": sentinel.text2,
-                    "tag": sentinel.tag2,
+                    "tag": EmailTag.FLAG_NOTIFICATION,
                     "html": sentinel.html2,
-                }
+                },
+                {
+                    "sender_id": pyramid_request.user.id,
+                    "tag": EmailTag.FLAG_NOTIFICATION,
+                    "recipient_ids": [moderators[1].id],
+                    "extra": {"annotation_id": annotation.id},
+                },
             ),
         ]
         assert isinstance(response, HTTPNoContent)
@@ -92,11 +105,14 @@ class TestCreate:
         mailer.send.delay.assert_not_called()
 
     @pytest.fixture(autouse=True)
-    def moderators(self, factories, group_members_service):
-        moderators = factories.User.build_batch(2)
-        group_members_service.get_memberships.return_value = [
-            GroupMembership(user=user) for user in moderators
-        ]
+    def moderators(self, factories, group_members_service, db_session):
+        moderators = factories.User.create_batch(2)
+        group = factories.Group()
+        memberships = [GroupMembership(user=user, group=group) for user in moderators]
+        for membership in memberships:
+            db_session.add(membership)
+        group_members_service.get_memberships.return_value = memberships
+        db_session.commit()
         return moderators
 
     @pytest.fixture
@@ -106,6 +122,17 @@ class TestCreate:
     @pytest.fixture
     def context(self, annotation):
         return AnnotationContext(annotation)
+
+    @pytest.fixture
+    def user(self, factories, db_session):
+        user = factories.User.create()
+        db_session.commit()
+        return user
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        return pyramid_request
 
 
 @pytest.fixture(autouse=True)
@@ -123,14 +150,14 @@ def flag_notification(mocker):
             recipients=sentinel.email1,
             subject=sentinel.subject1,
             body=sentinel.text1,
-            tag=sentinel.tag1,
+            tag=EmailTag.FLAG_NOTIFICATION,
             html=sentinel.html1,
         ),
         EmailData(
             recipients=sentinel.email2,
             subject=sentinel.subject2,
             body=sentinel.text2,
-            tag=sentinel.tag2,
+            tag=EmailTag.FLAG_NOTIFICATION,
             html=sentinel.html2,
         ),
     ]
