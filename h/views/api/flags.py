@@ -6,7 +6,7 @@ from h import links
 from h.emails import flag_notification
 from h.security import Permission
 from h.security.permission_map import GROUP_MODERATE_PREDICATES
-from h.tasks import mailer
+from h.tasks import email
 from h.views.api.config import api_config
 
 
@@ -38,6 +38,6 @@ def _email_group_moderators(request, annotation):
     )
 
     for membership in memberships:
-        if email := membership.user.email:
-            email = flag_notification.generate(request, email, incontext_link)
-            mailer.send.delay(asdict(email))
+        if user_email := membership.user.email:
+            email_data = flag_notification.generate(request, user_email, incontext_link)
+            email.send.delay(asdict(email_data))

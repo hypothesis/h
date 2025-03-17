@@ -81,7 +81,7 @@ celery.conf.update(
         "h.tasks.cleanup",
         "h.tasks.indexer",
         "h.tasks.job_queue",
-        "h.tasks.mailer",
+        "h.tasks.email",
         "h.tasks.url_migration",
     ),
     task_routes={

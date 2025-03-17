@@ -93,9 +93,7 @@ class TestUserSignupService:
 
         user_password_service.update_password.assert_called_once_with(user, "wibble")
 
-    def test_signup_sends_email(
-        self, svc, signup, tasks_mailer, pyramid_request, asdict
-    ):
+    def test_signup_sends_email(self, svc, signup, email, pyramid_request, asdict):
         signup.generate.return_value = sentinel.email
         asdict.return_value = sentinel.email_data
 
@@ -109,15 +107,15 @@ class TestUserSignupService:
         )
 
         asdict.assert_called_once_with(signup.generate.return_value)
-        tasks_mailer.send.delay.assert_called_once_with(asdict.return_value)
+        email.send.delay.assert_called_once_with(asdict.return_value)
 
     def test_signup_does_not_send_email_when_activation_not_required(
-        self, svc, signup, tasks_mailer
+        self, svc, signup, email
     ):
         svc.signup(require_activation=False, username="foo", email="foo@bar.com")
 
         signup.generate.assert_not_called()
-        tasks_mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
     def test_signup_creates_subscriptions(self, svc, subscription_service, factories):
         subscription = factories.Subscriptions(active=False)
@@ -144,7 +142,7 @@ class TestUserSignupService:
         )
 
     @pytest.mark.parametrize(
-        "username,email",
+        "username,user_email",
         [
             # In the real world these values would be identical to the first signup but
             # since we need to force one to error before the other, only the email or
@@ -157,16 +155,16 @@ class TestUserSignupService:
         ],
     )
     def test_signup_raises_conflict_error_when_account_already_exists(
-        self, svc, username, email
+        self, svc, username, user_email
     ):
         # This happens when two or more identical
         # concurrent signup requests race each other to the db.
         with pytest.raises(  # noqa: PT012
             ConflictError,
-            match=f"The email address {email} has already been registered.",
+            match=f"The email address {user_email} has already been registered.",
         ):
             svc.signup(username="foo", email="foo@bar.com")
-            svc.signup(username=username, email=email)
+            svc.signup(username=username, email=user_email)
 
     @pytest.fixture
     def svc(self, pyramid_request, user_password_service, subscription_service):
@@ -178,8 +176,8 @@ class TestUserSignupService:
         )
 
     @pytest.fixture(autouse=True)
-    def tasks_mailer(self, patch):
-        return patch("h.services.user_signup.tasks_mailer")
+    def email(self, patch):
+        return patch("h.services.user_signup.email")
 
     @pytest.fixture(autouse=True)
     def signup(self, patch):

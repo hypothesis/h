@@ -227,7 +227,7 @@ class TestAuthController:
         pyramid_config.add_route("stream", "/stream")
 
 
-@pytest.mark.usefixtures("activation_model", "mailer", "reset_password_email", "routes")
+@pytest.mark.usefixtures("activation_model", "email", "reset_password_email", "routes")
 class TestForgotPasswordController:
     def test_post_returns_form_when_validation_fails(
         self, invalid_form, pyramid_request
@@ -269,7 +269,7 @@ class TestForgotPasswordController:
         self,
         factories,
         form_validating_to,
-        mailer,
+        email,
         pyramid_request,
     ):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
@@ -279,14 +279,14 @@ class TestForgotPasswordController:
 
         controller.post()
 
-        email = EmailData(
+        email_data = EmailData(
             recipients=["giraffe@thezoo.org"],
             subject="Reset yer passwor!",
             body="Text output",
             tag=EmailTag.TEST,
             html="HTML output",
         )
-        mailer.send.delay.assert_called_once_with(asdict(email))
+        email.send.delay.assert_called_once_with(asdict(email_data))
 
     def test_post_redirects_on_success(
         self, factories, form_validating_to, pyramid_request
@@ -1026,8 +1026,8 @@ def ActivationEvent(patch):
 
 
 @pytest.fixture
-def mailer(patch):
-    return patch("h.views.accounts.mailer")
+def email(patch):
+    return patch("h.views.accounts.email")
 
 
 @pytest.fixture(autouse=True)

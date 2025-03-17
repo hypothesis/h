@@ -9,7 +9,7 @@ from h.models import Activation, User, UserIdentity
 from h.services import SubscriptionService
 from h.services.exceptions import ConflictError
 from h.services.user_password import UserPasswordService
-from h.tasks import mailer as tasks_mailer
+from h.tasks import email
 
 log = logging.getLogger(__name__)
 
@@ -124,13 +124,13 @@ class UserSignupService:
         self.session.flush()
 
         # Send the activation email
-        email = signup.generate(
+        email_data = signup.generate(
             request=self.request,
             user_id=user.id,
             email=user.email,
             activation_code=user.activation.code,
         )
-        tasks_mailer.send.delay(asdict(email))
+        email.send.delay(asdict(email_data))
 
 
 def user_signup_service_factory(_context, request):
