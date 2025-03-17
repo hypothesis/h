@@ -19,7 +19,7 @@ class TestCreate:
         flag_service,
         links,
         group_members_service,
-        mailer,
+        email,
         flag_notification,
         moderators,
     ):
@@ -39,7 +39,7 @@ class TestCreate:
             call(pyramid_request, user.email, links.incontext_link.return_value)
             for user in moderators
         ]
-        assert mailer.send.delay.call_args_list == [
+        assert email.send.delay.call_args_list == [
             call(
                 {
                     "recipients": sentinel.email1,
@@ -82,14 +82,14 @@ class TestCreate:
         ]
 
     def test_when_there_are_no_moderators(
-        self, context, pyramid_request, group_members_service, flag_notification, mailer
+        self, context, pyramid_request, group_members_service, flag_notification, email
     ):
         group_members_service.get_memberships.return_value = []
 
         flags.create(context, pyramid_request)
 
         flag_notification.generate.assert_not_called()
-        mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
     @pytest.fixture(autouse=True)
     def moderators(self, factories, group_members_service):
@@ -138,5 +138,5 @@ def flag_notification(mocker):
 
 
 @pytest.fixture(autouse=True)
-def mailer(mocker):
-    return mocker.patch("h.views.api.flags.mailer", autospec=True)
+def email(mocker):
+    return mocker.patch("h.views.api.flags.email", autospec=True)

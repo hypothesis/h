@@ -68,10 +68,10 @@ _ADMIN_MENU = [
         ],
     },
     {
-        "id": "mailer",
+        "id": "email",
         "permission": Permission.AdminPage.LOW_RISK,
-        "title": "Mailer",
-        "route": "admin.mailer",
+        "title": "Email",
+        "route": "admin.email",
     },
     {
         "id": "nipsa",

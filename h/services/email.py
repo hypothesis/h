@@ -49,11 +49,11 @@ class EmailService:
         self._request = request
         self._mailer = mailer
 
-    def send(self, email: EmailData) -> None:
+    def send(self, email_data: EmailData) -> None:
         if self._request.debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
-            self._mailer.send_immediately(email.message)
+            self._mailer.send_immediately(email_data.message)
         except smtplib.SMTPRecipientsRefused as exc:  # pragma: no cover
             logger.warning(
                 "Recipient was refused when trying to send an email. Does the user have an invalid email address?",

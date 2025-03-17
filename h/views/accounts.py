@@ -30,7 +30,7 @@ from h.schemas.forms.accounts import (
     ResetPasswordSchema,
 )
 from h.services import SubscriptionService
-from h.tasks import mailer
+from h.tasks import email
 from h.util.view import json_view
 
 _ = i18n.TranslationString
@@ -211,8 +211,8 @@ class ForgotPasswordController:
             raise httpexceptions.HTTPFound(self.request.route_path("index"))
 
     def _send_forgot_password_email(self, user):
-        email = reset_password.generate(self.request, user)
-        mailer.send.delay(asdict(email))
+        email_data = reset_password.generate(self.request, user)
+        email.send.delay(asdict(email_data))
 
 
 @view_defaults(

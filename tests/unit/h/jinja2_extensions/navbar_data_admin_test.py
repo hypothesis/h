@@ -4,7 +4,7 @@ import pytest
 
 from h.jinja_extensions import navbar_data_admin
 
-STAFF_TABS = ["index", "groups", "mailer", "organizations", "users"]
+STAFF_TABS = ["index", "groups", "email", "organizations", "users"]
 
 
 class TestNavbarDataAdmin:

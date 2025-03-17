@@ -52,11 +52,11 @@ def includeme(config):  # noqa: PLR0915
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{id}",
     )
-    config.add_route("admin.mailer", "/admin/mailer")
-    config.add_route("admin.mailer_test", "/admin/mailer/test")
+    config.add_route("admin.email", "/admin/email")
+    config.add_route("admin.email_test", "/admin/email/test")
     config.add_route(
-        "admin.mailer.preview.mention_notification",
-        "/admin/mailer/preview/mention-notification",
+        "admin.email.preview.mention_notification",
+        "/admin/email/preview/mention-notification",
     )
     config.add_route("admin.nipsa", "/admin/nipsa")
     config.add_route("admin.oauthclients", "/admin/oauthclients")

@@ -120,7 +120,7 @@ class TestSendReplyNotifications:
         reply,
         mention,
         emails,
-        mailer,
+        email,
         asdict,
     ):
         asdict.return_value = sentinel.email_data
@@ -151,10 +151,10 @@ class TestSendReplyNotifications:
         notification_service.allow_notifications.assert_called_once_with(
             annotation, notification.parent_user
         )
-        email = emails.reply_notification.generate.return_value
-        asdict.assert_called_once_with(email)
+        email_data = emails.reply_notification.generate.return_value
+        asdict.assert_called_once_with(email_data)
 
-        mailer.send.delay.assert_called_once_with(asdict.return_value)
+        email.send.delay.assert_called_once_with(asdict.return_value)
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
@@ -162,21 +162,21 @@ class TestSendReplyNotifications:
             notification_type=NotificationType.REPLY,
         )
 
-    def test_it_does_nothing_if_no_notification_is_required(self, event, reply, mailer):
+    def test_it_does_nothing_if_no_notification_is_required(self, event, reply, email):
         reply.get_notification.return_value = None
 
         subscribers.send_reply_notifications(event)
 
-        mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
-    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer):
-        mailer.send.side_effect = OperationalError
+    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, email):
+        email.send.side_effect = OperationalError
 
         # No explosions please
         subscribers.send_reply_notifications(event)
 
     def test_it_does_nothing_if_the_reply_user_is_mentioned(
-        self, event, reply, mailer, mention
+        self, event, reply, email, mention
     ):
         reply_notification = mock.MagicMock()
         reply.get_notification.return_value = reply_notification
@@ -187,16 +187,16 @@ class TestSendReplyNotifications:
 
         subscribers.send_reply_notifications(event)
 
-        mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
     def test_it_does_nothing_if_notifications_arent_allowed(
-        self, event, mailer, notification_service
+        self, event, email, notification_service
     ):
         notification_service.allow_notifications.return_value = False
 
         subscribers.send_reply_notifications(event)
 
-        mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
     @pytest.fixture
     def event(self, pyramid_request):
@@ -218,7 +218,7 @@ class TestSendMentionNotifications:
         notification_service,
         mention,
         emails,
-        mailer,
+        email,
         asdict,
     ):
         notifications = mention.get_notifications.return_value
@@ -244,9 +244,9 @@ class TestSendMentionNotifications:
         notification_service.allow_notifications.assert_called_once_with(
             annotation, notifications[0].mentioned_user
         )
-        email = emails.mention_notification.generate.return_value
-        asdict.assert_called_once_with(email)
-        mailer.send.delay.assert_called_once_with(asdict.return_value)
+        email_data = emails.mention_notification.generate.return_value
+        asdict.assert_called_once_with(email_data)
+        email.send.delay.assert_called_once_with(asdict.return_value)
 
         notification_service.save_notification.assert_called_once_with(
             annotation=annotation,
@@ -255,28 +255,28 @@ class TestSendMentionNotifications:
         )
 
     def test_it_does_nothing_if_no_notification_is_required(
-        self, event, mention, mailer
+        self, event, mention, email
     ):
         mention.get_notifications.return_value = []
 
         subscribers.send_mention_notifications(event)
 
-        mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
-    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, mailer):
-        mailer.send.side_effect = OperationalError
+    def test_it_fails_gracefully_if_the_task_does_not_queue(self, event, email):
+        email.send.side_effect = OperationalError
 
         # No explosions please
         subscribers.send_mention_notifications(event)
 
     def test_it_does_nothing_if_notifications_arent_allowed(
-        self, event, mailer, notification_service
+        self, event, email, notification_service
     ):
         notification_service.allow_notifications.return_value = False
 
         subscribers.send_mention_notifications(event)
 
-        mailer.send.delay.assert_not_called()
+        email.send.delay.assert_not_called()
 
     @pytest.fixture
     def event(self, pyramid_request):
@@ -321,8 +321,8 @@ def mention(patch):
 
 
 @pytest.fixture(autouse=True)
-def mailer(patch):
-    return patch("h.subscribers.mailer")
+def email(patch):
+    return patch("h.subscribers.email")
 
 
 @pytest.fixture(autouse=True)
