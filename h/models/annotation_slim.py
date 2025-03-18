@@ -96,5 +96,8 @@ class AnnotationSlim(Base):
     )
     group = sa.orm.relationship("Group")
 
+    # Using `meta` as `metadata` is reserved by SQLAlchemy
+    meta = sa.orm.relationship("AnnotationMetadata", uselist=False)
+
     def __repr__(self):
         return helpers.repr_(self, ["id"])

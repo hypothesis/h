@@ -5,7 +5,7 @@ import pytest
 from h_matchers import Any
 from pyramid.authorization import Everyone
 
-from h.models import Annotation
+from h.models import Annotation, AnnotationMetadata
 from h.security.permissions import Permission
 from h.services.annotation_json import AnnotationJSONService, factory
 from h.traversal import AnnotationContext
@@ -52,6 +52,19 @@ class TestAnnotationJSONService:
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
         DocumentJSONPresenter.return_value.asdict.assert_called_once_with()
+
+    def test_present_with_metadata(self, service, annotation):
+        data = {
+            "lms": {
+                "guid": "guid",
+                "assignment": {"resource_link_id": "resource_link_id"},
+            }
+        }
+        annotation.slim.meta = AnnotationMetadata(data=data)
+
+        result = service.present(annotation, with_metadata=True)
+
+        assert result["metadata"] == data
 
     def test_present_without_references(self, service, annotation):
         annotation.references = None
@@ -233,7 +246,10 @@ class TestAnnotationJSONService:
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation(
-            moderation=None, groupid="NOT WORLD", tags=["some-tags"]
+            moderation=None,
+            groupid="NOT WORLD",
+            tags=["some-tags"],
+            slim=factories.AnnotationSlim(),
         )
 
     @pytest.fixture

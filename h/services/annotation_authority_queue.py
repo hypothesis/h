@@ -44,7 +44,7 @@ class AnnotationAuthorityQueueService:
             return
 
         annotation_dict = self._annotation_json_service.present_for_user(
-            annotation=annotation, user=annotation.slim.user
+            annotation=annotation, user=annotation.slim.user, with_metadata=True
         )
 
         payload = {
