@@ -48,6 +48,7 @@ class TestAnnotationAuthorityQueueService:
         annotation_json_service.present_for_user.assert_called_once_with(
             annotation=annotation_read_service.get_annotation_by_id.return_value,
             user=annotation_read_service.get_annotation_by_id.return_value.slim.user,
+            with_metadata=True,
         )
         Celery.assert_called_once_with(
             annotation_read_service.get_annotation_by_id.return_value.authority

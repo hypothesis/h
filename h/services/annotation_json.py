@@ -50,7 +50,7 @@ class AnnotationJSONService:
         self._feature_service = feature_service
         self._request = request
 
-    def present(self, annotation: Annotation):
+    def present(self, annotation: Annotation, with_metadata: bool = False):  # noqa: FBT002, FBT001
         """
         Get the JSON presentation of an annotation.
 
@@ -99,9 +99,17 @@ class AnnotationJSONService:
         if annotation.references:
             model["references"] = annotation.references
 
+        if with_metadata and annotation.slim.meta:
+            model["metadata"] = annotation.slim.meta.data
+
         return model
 
-    def present_for_user(self, annotation: Annotation, user: User):
+    def present_for_user(
+        self,
+        annotation: Annotation,
+        user: User,
+        with_metadata: bool = False,  # noqa: FBT002, FBT001
+    ):
         """
         Get the JSON presentation of an annotation for a particular user.
 
@@ -114,7 +122,7 @@ class AnnotationJSONService:
         """
 
         # Get the basic version which isn't user specific
-        model = self.present(annotation)
+        model = self.present(annotation, with_metadata=with_metadata)
 
         # The flagged value depends on whether this particular user has flagged
         model["flagged"] = self._flag_service.flagged(user=user, annotation=annotation)
