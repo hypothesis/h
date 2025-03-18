@@ -57,6 +57,8 @@ class CreateAuthClientSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
+        super().validator(node, value)
+
         grant_type = value.get("grant_type")
         redirect_url = value.get("redirect_url")
 

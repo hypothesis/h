@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 import colander
 import pytest
+from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas
 from h.services.user_password import UserPasswordService
@@ -155,7 +156,9 @@ class TestRegisterSchema:
 
         result = schema.deserialize(valid_params)
 
-        assert result == dict(valid_params, privacy_accepted=True, comms_opt_in=None)
+        assert result == dict(
+            valid_params, privacy_accepted=True, comms_opt_in=None, csrf_token=None
+        )
 
     @pytest.fixture
     def valid_params(self):
@@ -190,6 +193,18 @@ class TestEmailChangeSchema:
         pyramid_config.testing_securitypolicy(user.userid)
 
         schema.deserialize({"email": user.email, "password": "flibble"})
+
+    def test_it_is_invalid_if_csrf_token_missing(self, pyramid_request, schema):
+        del pyramid_request.headers["X-CSRF-Token"]
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({"email": "foo@bar.com", "password": "flibble"})
+
+    def test_it_is_invalid_if_csrf_token_wrong(self, pyramid_request, schema):
+        pyramid_request.headers["X-CSRF-Token"] = "WRONG"
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({"email": "foo@bar.com", "password": "flibble"})
 
     def test_it_is_invalid_if_password_wrong(self, schema, user_password_service):
         user_password_service.check_password.return_value = False
