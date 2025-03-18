@@ -219,4 +219,5 @@ class AdminGroupSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
+        super().validator(node, value)
         username_validator(node, value)

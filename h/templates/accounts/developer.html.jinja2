@@ -20,7 +20,6 @@
     {% endif %}
 
       <form method="post" class="js-disable-on-submit">
-        <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
         {% if token %}
           <button type="submit" class="btn"
                   title="{% trans %}Delete your API token and generate a new one{% endtrans%}">

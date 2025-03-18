@@ -6,7 +6,7 @@ import colander
 import deform
 import jsonschema
 from pyramid import httpexceptions
-from pyramid.csrf import get_csrf_token
+from pyramid.csrf import check_csrf_token, get_csrf_token
 
 
 @colander.deferred
@@ -21,48 +21,22 @@ class ValidationError(httpexceptions.HTTPBadRequest):
 
 class CSRFSchema(colander.Schema):
     """
-    Add a hidden CSRF token to forms when seralized using Deform.
+    A CSRFSchema backward-compatible with the one from the hem module.
 
-    This is intended as a base class for other schemas to inherit from if the
-    schema's form needs a CSRF token (by default all form submissions do need a
-    CSRF token).
-
-    This schema *does not* implement CSRF verification when receiving requests.
-    That's enabled globally for non-GET requests by
-    config.set_default_csrf_options(require_csrf=True).
+    Unlike hem, this doesn't require that the csrf_token appear in the
+    serialized appstruct.
     """
 
     csrf_token = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.HiddenWidget(),
-        # When serializing (i.e. when rendering a form) if there's no
-        # csrf_token then call deferred_csrf_token() to get one.
         default=deferred_csrf_token,
-        # Allow data with no "csrf_token" field to be *deserialized* successfully
-        # (the deserialized data will contain no "csrf_token" field.)
-        #
-        # CSRF protection isn't provided by this schema, it's provided by
-        # Pyramid's config.set_default_csrf_options(require_csrf=True).
-        #
-        # Nonetheless, without a `missing` value, when deserializing any
-        # subclass of this schema Colander would require a csrf_token field to
-        # be present in the data (even if this schema doesn't actually check
-        # that the token is valid).
-        #
-        # In production any request missing a CSRF token would be rejected by
-        # Pyramid's CSRF protection before even reaching schema
-        # deserialization. So by the time we get to schema deserialization
-        # there must be a CSRF token and this `missing` value is seemingly
-        # unnecessary.
-        #
-        # However:
-        #
-        # 1. The CSRF token may be in an X-CSRF-Token header rather than in a
-        #    POST param.
-        # 2. Unittests for schemas often don't set a CSRF token and would fail
-        #    if this `missing` value wasn't here.
-        missing=colander.drop,
+        missing=None,
     )
+
+    def validator(self, node, _value):
+        request = node.bindings["request"]
+        check_csrf_token(request)
 
 
 class JSONSchema:
