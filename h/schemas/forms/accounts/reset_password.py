@@ -4,6 +4,7 @@ import pytz
 from itsdangerous import BadData, SignatureExpired
 
 from h import i18n, models
+from h.schemas.base import CSRFSchema
 from h.schemas.forms.accounts import util
 
 _ = i18n.TranslationString
@@ -59,7 +60,7 @@ class ResetCode(colander.SchemaType):
         return user
 
 
-class ResetPasswordSchema(colander.Schema):
+class ResetPasswordSchema(CSRFSchema):
     # N.B. this is the field into which the user puts their reset code, but we
     # call it `user` because when validated, it will return a `User` object.
     user = colander.SchemaNode(

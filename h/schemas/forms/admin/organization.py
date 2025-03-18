@@ -6,6 +6,7 @@ from deform.widget import TextAreaWidget, TextInputWidget
 import h.i18n
 from h.models.organization import Organization
 from h.schemas import validators
+from h.schemas.base import CSRFSchema
 
 _ = h.i18n.TranslationString
 
@@ -35,7 +36,7 @@ def validate_logo(node, value):
         raise colander.Invalid(node, _("Logo does not start with <svg> tag"))
 
 
-class OrganizationSchema(colander.Schema):
+class OrganizationSchema(CSRFSchema):
     authority = colander.SchemaNode(colander.String(), title=_("Authority"))
 
     name = colander.SchemaNode(
