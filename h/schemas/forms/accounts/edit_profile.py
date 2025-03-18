@@ -5,6 +5,7 @@ from h import i18n
 from h.accounts import util
 from h.models.user import DISPLAY_NAME_MAX_LENGTH
 from h.schemas import validators
+from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString
 
@@ -23,7 +24,7 @@ def validate_orcid(node, cstruct):
         raise colander.Invalid(node, str(exc))  # noqa: B904
 
 
-class EditProfileSchema(colander.Schema):
+class EditProfileSchema(CSRFSchema):
     display_name = colander.SchemaNode(
         colander.String(),
         missing=None,

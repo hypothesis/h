@@ -2,6 +2,7 @@ import colander
 import deform
 
 from h import i18n
+from h.schemas.base import CSRFSchema
 from h.services.user import UserNotActivated
 
 _ = i18n.TranslationString
@@ -24,7 +25,7 @@ def _deferred_password_widget(_node, kwargs):
     )
 
 
-class LoginSchema(colander.Schema):
+class LoginSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
         title=_("Username / email"),

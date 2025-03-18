@@ -14,6 +14,7 @@ from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
 )
 from h.schemas import validators
+from h.schemas.base import CSRFSchema
 from h.util import group_scope
 
 _ = i18n.TranslationString
@@ -136,7 +137,7 @@ def group_organization_select_widget(_node, kwargs):
     return SelectWidget(values=list(zip(org_pubids, org_labels, strict=False)))
 
 
-class AdminGroupSchema(colander.Schema):
+class AdminGroupSchema(CSRFSchema):
     def __init__(self, *args):
         super().__init__(*args)
 

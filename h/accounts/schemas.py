@@ -16,6 +16,7 @@ from h.models.user import (
     USERNAME_PATTERN,
 )
 from h.schemas import validators
+from h.schemas.base import CSRFSchema
 from h.schemas.forms.accounts.util import PASSWORD_MIN_LENGTH
 from h.util.user import format_userid
 
@@ -152,7 +153,7 @@ def _privacy_accepted_message():
     return privacy_msg
 
 
-class RegisterSchema(colander.Schema):
+class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
         validator=colander.All(
@@ -196,7 +197,7 @@ class RegisterSchema(colander.Schema):
     )
 
 
-class EmailChangeSchema(colander.Schema):
+class EmailChangeSchema(CSRFSchema):
     email = email_node(title=_("Email address"))
     # No validators: all validation is done on the email field
     password = password_node(title=_("Confirm password"), hide_until_form_active=True)
@@ -214,7 +215,7 @@ class EmailChangeSchema(colander.Schema):
             raise exc
 
 
-class PasswordChangeSchema(colander.Schema):
+class PasswordChangeSchema(CSRFSchema):
     password = password_node(title=_("Current password"), inactive_label=_("Password"))
     new_password = new_password_node(
         title=_("New password"), hide_until_form_active=True
@@ -244,7 +245,7 @@ class PasswordChangeSchema(colander.Schema):
             raise exc
 
 
-class DeleteAccountSchema(colander.Schema):
+class DeleteAccountSchema(CSRFSchema):
     password = password_node(title=_("Confirm password"))
 
     def validator(self, node, value):
@@ -271,7 +272,7 @@ def deferred_notification_widget(node, kw):  # noqa: ARG001
     return deform.widget.CheckboxChoiceWidget(omit_label=True, values=types)
 
 
-class NotificationsSchema(colander.Schema):
+class NotificationsSchema(CSRFSchema):
     notifications = colander.SchemaNode(
         colander.Set(),
         widget=deferred_notification_widget,

@@ -5,9 +5,13 @@ import colander
 import pytest
 
 from h.schemas import ValidationError
-from h.schemas.base import JSONSchema, enum_type
+from h.schemas.base import CSRFSchema, JSONSchema, enum_type
 
 pytestmark = pytest.mark.usefixtures("pyramid_config")
+
+
+class ExampleCSRFSchema(CSRFSchema):
+    pass
 
 
 class ExampleJSONSchema(JSONSchema):
