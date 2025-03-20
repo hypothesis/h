@@ -226,7 +226,6 @@ class TestAnnotationJSONService:
         flag_service,
         user_service,
         mention_service,
-        feature_service,
         pyramid_request,
     ):
         return AnnotationJSONService(
@@ -235,7 +234,6 @@ class TestAnnotationJSONService:
             flag_service=flag_service,
             user_service=user_service,
             mention_service=mention_service,
-            feature_service=feature_service,
             request=pyramid_request,
         )
 
@@ -279,7 +277,6 @@ class TestFactory:
         links_service,
         user_service,
         mention_service,
-        feature_service,
     ):
         service = factory(sentinel.context, pyramid_request)
 
@@ -289,7 +286,6 @@ class TestFactory:
             flag_service=flag_service,
             user_service=user_service,
             mention_service=mention_service,
-            feature_service=feature_service,
             request=pyramid_request,
         )
         assert service == AnnotationJSONService.return_value

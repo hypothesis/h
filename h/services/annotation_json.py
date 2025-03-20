@@ -9,7 +9,6 @@ from h.security import Identity, identity_permits
 from h.security.permissions import Permission
 from h.services import MentionService
 from h.services.annotation_read import AnnotationReadService
-from h.services.feature import FeatureService
 from h.services.flag import FlagService
 from h.services.links import LinksService
 from h.services.user import UserService
@@ -28,7 +27,6 @@ class AnnotationJSONService:
         flag_service: FlagService,
         user_service: UserService,
         mention_service: MentionService,
-        feature_service: FeatureService,
         request: Request,
     ):
         """
@@ -39,7 +37,6 @@ class AnnotationJSONService:
         :param flag_service: FlagService instance
         :param user_service: UserService instance
         :param mention_service: MentionService instance
-        :param feature_service: FeatureService instance
         :param request: The current request
         """
         self._annotation_read_service = annotation_read_service
@@ -47,7 +44,6 @@ class AnnotationJSONService:
         self._flag_service = flag_service
         self._user_service = user_service
         self._mention_service = mention_service
-        self._feature_service = feature_service
         self._request = request
 
     def present(self, annotation: Annotation, with_metadata: bool = False):  # noqa: FBT002, FBT001
@@ -89,11 +85,10 @@ class AnnotationJSONService:
         )
 
         user = self._user_service.fetch(annotation.userid)
-        if self._feature_service.enabled("at_mentions", user):  # pragma: no cover
-            model["mentions"] = [
-                MentionJSONPresenter(mention, self._request).asdict()
-                for mention in annotation.mentions
-            ]
+        model["mentions"] = [
+            MentionJSONPresenter(mention, self._request).asdict()
+            for mention in annotation.mentions
+        ]
         model.update(user_info(user))
 
         if annotation.references:
@@ -215,6 +210,5 @@ def factory(_context, request):
         flag_service=request.find_service(name="flag"),
         user_service=request.find_service(name="user"),
         mention_service=request.find_service(MentionService),
-        feature_service=request.find_service(name="feature"),
         request=request,
     )
