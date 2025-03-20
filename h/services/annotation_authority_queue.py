@@ -41,6 +41,7 @@ class AnnotationAuthorityQueueService:
 
         if event_action != "create" or not annotation.mentions:
             # For now we'll limit the events to only those that create annotations that contain mentions
+            LOG.info("Skipping event %s for annotation %s", event_action, annotation.id)
             return
 
         annotation_dict = self._annotation_json_service.present_for_user(
@@ -60,13 +61,19 @@ class AnnotationAuthorityQueueService:
             queue=authority_queue_config.queue_name,
             kwargs={"event": payload},
         )
+        LOG.info(
+            "Published event %s for annotation %s to %s",
+            event_action,
+            annotation.id,
+            annotation.authority,
+        )
 
     def _parse_authority_queue_config(
         self, config_json: str | None
     ) -> dict[str, AuthorityQueueConfiguration]:
         """Parse the authority queue config JSON string into dictionary by authority name."""
         if not config_json:
-            LOG.debug("No authority queue config found")
+            LOG.info("No authority queue config found")
             return {}
         try:
             config = json.loads(config_json)
