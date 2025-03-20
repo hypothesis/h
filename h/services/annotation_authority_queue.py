@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 
 from celery import Celery
+from kombu import Connection
 
 from h.services.annotation_read import AnnotationReadService
 
@@ -54,19 +55,20 @@ class AnnotationAuthorityQueueService:
         }
 
         authority_celery = Celery(annotation.authority)
-        authority_celery.conf.broker_url = authority_queue_config.broker_url
-
-        authority_celery.send_task(
-            authority_queue_config.task_name,
-            queue=authority_queue_config.queue_name,
-            kwargs={"event": payload},
-        )
-        LOG.info(
-            "Published event %s for annotation %s to %s",
-            event_action,
-            annotation.id,
-            annotation.authority,
-        )
+        with Connection(authority_queue_config.broker_url) as connection:
+            authority_celery.send_task(
+                authority_queue_config.task_name,
+                queue=authority_queue_config.queue_name,
+                # We need to pass the connection explicitly to avoid using the default connection / broker
+                connection=connection,
+                kwargs={"event": payload},
+            )
+            LOG.info(
+                "Published event %s for annotation %s to %s",
+                event_action,
+                annotation.id,
+                annotation.authority,
+            )
 
     def _parse_authority_queue_config(
         self, config_json: str | None
