@@ -36,7 +36,13 @@ class TestAnnotationAuthorityQueueService:
         Celery.assert_not_called()
 
     def test_publish(
-        self, svc, Celery, annotation_read_service, annotation_json_service, annotation
+        self,
+        svc,
+        Celery,
+        annotation_read_service,
+        annotation_json_service,
+        annotation,
+        Connection,
     ):
         annotation_read_service.get_annotation_by_id.return_value = annotation
 
@@ -51,12 +57,13 @@ class TestAnnotationAuthorityQueueService:
             with_metadata=True,
         )
         Celery.assert_called_once_with(
-            annotation_read_service.get_annotation_by_id.return_value.authority
+            annotation_read_service.get_annotation_by_id.return_value.authority,
         )
-        Celery.return_value.conf.broker_url = "broker_url"
+        Connection.assert_called_once_with("url")
         Celery.return_value.send_task.assert_called_once_with(
             "task",
             queue="queue",
+            connection=Connection.return_value.__enter__.return_value,
             kwargs={
                 "event": {
                     "action": "create",
@@ -86,6 +93,10 @@ class TestAnnotationAuthorityQueueService:
     @pytest.fixture
     def Celery(self, patch):
         return patch("h.services.annotation_authority_queue.Celery")
+
+    @pytest.fixture
+    def Connection(self, patch):
+        return patch("h.services.annotation_authority_queue.Connection")
 
     @pytest.fixture
     def valid_config(self):
