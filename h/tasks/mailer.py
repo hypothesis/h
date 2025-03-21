@@ -24,11 +24,11 @@ logger = get_task_logger(__name__)
 def send(
     self,  # noqa: ARG001
     email_data: dict[str, Any],
-    log_data: dict[str, Any],
+    log_data: dict[str, Any] | None = None,
 ) -> None:
     """Send an email.
 
     :param email_data: A dictionary containing email data compatible with EmailData class.
     """
     service: EmailService = celery.request.find_service(EmailService)
-    service.send(EmailData(**email_data), LogData(**log_data))
+    service.send(EmailData(**email_data), LogData(**log_data) if log_data else None)
