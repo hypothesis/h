@@ -61,6 +61,8 @@ class AnnotationAuthorityQueueService:
                 queue=authority_queue_config.queue_name,
                 # We need to pass the connection explicitly to avoid using the default connection / broker
                 connection=connection,
+                # Expire these tasks just in case something prevents them from being processed
+                expires=60 * 60 * 24,
                 kwargs={"event": payload},
             )
             LOG.info(
