@@ -64,6 +64,7 @@ class TestAnnotationAuthorityQueueService:
             "task",
             queue="queue",
             connection=Connection.return_value.__enter__.return_value,
+            expires=60 * 60 * 24,
             kwargs={
                 "event": {
                     "action": "create",
