@@ -1,9 +1,11 @@
 from dataclasses import asdict
+from unittest.mock import create_autospec
 
 import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
 from h.services.email import EmailData, EmailTag, LogData
+from h.tasks import mailer
 from h.views.admin.mailer import mailer_index, mailer_test, preview_mention_notification
 
 
@@ -21,12 +23,12 @@ class TestMailerIndex:
         assert result == {"taskid": "abcd1234"}
 
 
-@pytest.mark.usefixtures("mailer", "testmail", "routes")
+@pytest.mark.usefixtures("tasks_mailer", "testmail", "routes")
 class TestMailerTest:
-    def test_doesnt_mail_when_no_recipient(self, mailer, pyramid_request):
+    def test_doesnt_mail_when_no_recipient(self, tasks_mailer, pyramid_request):
         mailer_test(pyramid_request)
 
-        assert not mailer.send.delay.called
+        assert not tasks_mailer.send.delay.called
 
     def test_redirects_when_no_recipient(self, pyramid_request):
         result = mailer_test(pyramid_request)
@@ -34,7 +36,7 @@ class TestMailerTest:
         assert isinstance(result, HTTPSeeOther)
         assert result.location == "/adm/mailer"
 
-    def test_sends_mail(self, mailer, pyramid_request, user):
+    def test_sends_mail(self, tasks_mailer, pyramid_request, user):
         pyramid_request.params["recipient"] = "meerkat@example.com"
 
         mailer_test(pyramid_request)
@@ -47,7 +49,9 @@ class TestMailerTest:
             html="html",
         )
         log_data = LogData(tag=email_data.tag, sender_id=user.id)
-        mailer.send.delay.assert_called_once_with(asdict(email_data), asdict(log_data))
+        tasks_mailer.send.delay.assert_called_once_with(
+            asdict(email_data), asdict(log_data)
+        )
 
     def test_redirects(self, pyramid_request):
         pyramid_request.params["recipient"] = "meerkat@example.com"
@@ -92,10 +96,10 @@ class FakeResult:
 
 
 @pytest.fixture
-def mailer(patch):
-    mailer = patch("h.views.admin.mailer.mailer")
-    mailer.send.delay.return_value = FakeResult()
-    return mailer
+def tasks_mailer(patch):
+    mock = patch("h.views.admin.mailer.mailer")
+    mock.send.delay = create_autospec(mailer.send.run, return_value=FakeResult())
+    return mock
 
 
 @pytest.fixture

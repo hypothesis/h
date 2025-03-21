@@ -1,10 +1,11 @@
-from unittest.mock import ANY, call, sentinel
+from unittest.mock import ANY, call, create_autospec, sentinel
 
 import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.models import GroupMembership, GroupMembershipRoles
 from h.services.email import EmailData, EmailTag
+from h.tasks import mailer
 from h.traversal import AnnotationContext
 from h.views.api import flags
 
@@ -19,7 +20,7 @@ class TestCreate:
         flag_service,
         links,
         group_members_service,
-        mailer,
+        tasks_mailer,
         flag_notification,
         moderators,
     ):
@@ -40,7 +41,7 @@ class TestCreate:
             for user in moderators
         ]
 
-        assert mailer.send.delay.call_args_list == [
+        assert tasks_mailer.send.delay.call_args_list == [
             call(
                 {
                     "recipients": sentinel.email1,
@@ -95,14 +96,19 @@ class TestCreate:
         ]
 
     def test_when_there_are_no_moderators(
-        self, context, pyramid_request, group_members_service, flag_notification, mailer
+        self,
+        context,
+        pyramid_request,
+        group_members_service,
+        flag_notification,
+        tasks_mailer,
     ):
         group_members_service.get_memberships.return_value = []
 
         flags.create(context, pyramid_request)
 
         flag_notification.generate.assert_not_called()
-        mailer.send.delay.assert_not_called()
+        tasks_mailer.send.delay.assert_not_called()
 
     @pytest.fixture(autouse=True)
     def moderators(self, factories, group_members_service, db_session):
@@ -165,5 +171,7 @@ def flag_notification(mocker):
 
 
 @pytest.fixture(autouse=True)
-def mailer(mocker):
-    return mocker.patch("h.views.api.flags.mailer", autospec=True)
+def tasks_mailer(patch):
+    mock = patch("h.views.api.flags.mailer")
+    mock.send.delay = create_autospec(mailer.send.run)
+    return mock
