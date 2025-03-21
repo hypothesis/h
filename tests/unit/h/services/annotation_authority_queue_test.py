@@ -44,6 +44,8 @@ class TestAnnotationAuthorityQueueService:
         annotation,
         Connection,
     ):
+        annotation_presented = {"id": annotation.id}
+        annotation_json_service.present_for_user.return_value = annotation_presented
         annotation_read_service.get_annotation_by_id.return_value = annotation
 
         svc.publish("create", sentinel.annotation_id)
@@ -56,6 +58,7 @@ class TestAnnotationAuthorityQueueService:
             user=annotation_read_service.get_annotation_by_id.return_value.slim.user,
             with_metadata=True,
         )
+        assert annotation_presented["text_rendered"] == annotation.text_rendered
         Celery.assert_called_once_with(
             annotation_read_service.get_annotation_by_id.return_value.authority,
         )
@@ -67,7 +70,7 @@ class TestAnnotationAuthorityQueueService:
             kwargs={
                 "event": {
                     "action": "create",
-                    "annotation": annotation_json_service.present_for_user.return_value,
+                    "annotation": annotation_presented,
                 }
             },
         )
