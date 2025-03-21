@@ -62,7 +62,7 @@ class EmailService:
         self._request = request
         self._mailer = mailer
 
-    def send(self, email_data: EmailData, log_data: LogData | None = None) -> None:
+    def send(self, email_data: EmailData, log_data: LogData) -> None:
         if self._request.debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
@@ -75,16 +75,15 @@ class EmailService:
         except smtplib.SMTPException:
             raise
 
-        if log_data:
-            separator = ", " if log_data.extra_msg else ""
-            logger.info(
-                "Sent email: tag=%r, sender_id=%s, recipient_ids=%s%s%s",
-                log_data.tag,
-                log_data.sender_id,
-                log_data.recipient_ids,
-                separator,
-                log_data.extra_msg,
-            )
+        separator = ", " if log_data.extra_msg else ""
+        logger.info(
+            "Sent email: tag=%r, sender_id=%s, recipient_ids=%s%s%s",
+            log_data.tag,
+            log_data.sender_id,
+            log_data.recipient_ids,
+            separator,
+            log_data.extra_msg,
+        )
 
 
 def factory(_context, request: Request) -> EmailService:
