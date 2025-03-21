@@ -1,5 +1,5 @@
 import datetime
-from unittest.mock import sentinel
+from unittest.mock import call, create_autospec, sentinel
 
 import pytest
 from sqlalchemy.exc import IntegrityError
@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from h.models import Activation, User
 from h.services.exceptions import ConflictError
 from h.services.user_signup import UserSignupService, user_signup_service_factory
+from h.tasks import mailer
 
 
 class TestUserSignupService:
@@ -22,7 +23,6 @@ class TestUserSignupService:
         db_session.close()
 
         user = db_session.query(User).filter_by(username="foo").one_or_none()
-
         assert user is not None
 
     def test_signup_creates_activation_for_user(self, svc):
@@ -94,10 +94,9 @@ class TestUserSignupService:
         user_password_service.update_password.assert_called_once_with(user, "wibble")
 
     def test_signup_sends_email(
-        self, svc, signup, tasks_mailer, pyramid_request, asdict
+        self, svc, signup, tasks_mailer, pyramid_request, asdict, LogData
     ):
         signup.generate.return_value = sentinel.email
-        asdict.return_value = sentinel.email_data
 
         user = svc.signup(username="foo", email="foo@bar.com")
 
@@ -108,8 +107,12 @@ class TestUserSignupService:
             activation_code=user.activation.code,
         )
 
-        asdict.assert_called_once_with(signup.generate.return_value)
-        tasks_mailer.send.delay.assert_called_once_with(asdict.return_value)
+        asdict.assert_has_calls(
+            [call(signup.generate.return_value), call(LogData.return_value)]
+        )
+        tasks_mailer.send.delay.assert_called_once_with(
+            sentinel.email_data, sentinel.log_data
+        )
 
     def test_signup_does_not_send_email_when_activation_not_required(
         self, svc, signup, tasks_mailer
@@ -179,7 +182,9 @@ class TestUserSignupService:
 
     @pytest.fixture(autouse=True)
     def tasks_mailer(self, patch):
-        return patch("h.services.user_signup.tasks_mailer")
+        mock = patch("h.services.user_signup.tasks_mailer")
+        mock.send.delay = create_autospec(mailer.send.run)
+        return mock
 
     @pytest.fixture(autouse=True)
     def signup(self, patch):
@@ -187,7 +192,10 @@ class TestUserSignupService:
 
     @pytest.fixture(autouse=True)
     def asdict(self, patch):
-        return patch("h.services.user_signup.asdict")
+        return patch(
+            "h.services.user_signup.asdict",
+            side_effect=[sentinel.email_data, sentinel.log_data],
+        )
 
 
 @pytest.mark.usefixtures("user_password_service")
@@ -212,3 +220,8 @@ class TestUserSignupServiceFactory:
     @pytest.fixture
     def UserSignupService(self, patch):
         return patch("h.services.user_signup.UserSignupService")
+
+
+@pytest.fixture(autouse=True)
+def LogData(patch):
+    return patch("h.services.user_signup.LogData")
