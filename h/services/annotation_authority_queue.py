@@ -40,9 +40,11 @@ class AnnotationAuthorityQueueService:
         if not authority_queue_config:
             return
 
-        if event_action != "create" or not annotation.mentions:
+        if event_action not in {"create", "update"} or not annotation.mentions:
             # For now we'll limit the events to only those that create annotations that contain mentions
-            LOG.info("Skipping event %s for annotation %s", event_action, annotation.id)
+            LOG.info(
+                "Skipping event '%s' for annotation '%s'", event_action, annotation.id
+            )
             return
 
         annotation_dict = self._annotation_json_service.present_for_user(
