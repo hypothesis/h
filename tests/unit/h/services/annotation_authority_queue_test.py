@@ -18,12 +18,12 @@ class TestAnnotationAuthorityQueueService:
 
         Celery.assert_not_called()
 
-    def test_publish_when_no_creation(
+    def test_publish_when_no_creation_or_edit(
         self, svc, Celery, annotation_read_service, annotation
     ):
         annotation_read_service.get_annotation_by_id.return_value = annotation
 
-        svc.publish("edit", sentinel.annotation_id)
+        svc.publish("delete", sentinel.annotation_id)
 
         Celery.assert_not_called()
 
