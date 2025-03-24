@@ -30,15 +30,32 @@ class EmailData:
     body: str
     tag: EmailTag
     html: str | None = None
+    id: str | None = None
+    """Message ID to set in Message-ID header"""
+    parent_id: str | None = None
+    """
+    Parent message ID to be set in In-Reply-To and References headers.
+    Defaults to `id`
+    """
 
     @property
     def message(self) -> pyramid_mailer.message.Message:
+        extra_headers = {"X-MC-Tags": self.tag}
+        parent_id = self.parent_id if self.parent_id is not None else self.id
+
+        if self.id:
+            extra_headers["Message-ID"] = self.id
+
+        if parent_id:
+            extra_headers["In-Reply-To"] = parent_id
+            extra_headers["References"] = parent_id
+
         return pyramid_mailer.message.Message(
             subject=self.subject,
             recipients=self.recipients,
             body=self.body,
             html=self.html,
-            extra_headers={"X-MC-Tags": self.tag},
+            extra_headers=extra_headers,
         )
 
 

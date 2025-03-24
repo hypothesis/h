@@ -12,6 +12,7 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
     selectors = notification.annotation.target[0].get("selector", [])
     quote = next((s for s in selectors if s.get("type") == "TextQuoteSelector"), None)
     username = notification.mentioning_user.username
+    document_url = notification.annotation.target_uri
 
     unsubscribe_token = request.find_service(SubscriptionService).get_unsubscribe_token(
         user_id=notification.mentioned_user.userid, type_=Subscriptions.Type.MENTION
@@ -24,8 +25,8 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
         "annotation_url": links.incontext_link(request, notification.annotation)
         or request.route_url("annotation", id=notification.annotation.id),
         "document_title": notification.document.title
-        or notification.annotation.target_uri,
-        "document_url": notification.annotation.target_uri,
+        or document_url,
+        "document_url": document_url,
         "annotation": notification.annotation,
         "annotation_quote": quote.get("exact") if quote else None,
         "app_url": request.registry.settings.get("h.app_url"),
@@ -50,4 +51,5 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
         body=text,
         tag=EmailTag.MENTION_NOTIFICATION,
         html=html,
+        id=f"<hypothesis/h/mention/{document_url}>"
     )
