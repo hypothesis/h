@@ -50,6 +50,7 @@ class TestMentionService:
         service.update_mentions(annotation)
 
         assert len(annotation.mentions) == limit
+        assert annotation.mentions[0].user == mentioned_user
 
     def test_update_mentions_with_groupid_not_world(
         self, service, annotation, factories
