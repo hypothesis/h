@@ -18,29 +18,30 @@ import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
 from sqlalchemy import text
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 __all__ = ("Base", "Session", "create_engine", "post_create", "pre_create")
 
 log = logging.getLogger(__name__)
 
-# Create a default metadata object with naming conventions for indexes and
-# constraints. This makes changing such constraints and indexes with alembic
-# after creation much easier. See:
-#
-#   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
-#
-metadata = sqlalchemy.MetaData(
-    naming_convention={
-        "ix": "ix__%(column_0_label)s",
-        "uq": "uq__%(table_name)s__%(column_0_name)s",
-        "ck": "ck__%(table_name)s__%(constraint_name)s",
-        "fk": "fk__%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
-        "pk": "pk__%(table_name)s",
-    }
-)
 
-Base = declarative_base(metadata=metadata)
+class Base(DeclarativeBase):
+    # Create a default metadata object with naming conventions for indexes and
+    # constraints. This makes changing such constraints and indexes with
+    # alembic after creation much easier. See:
+    #
+    #   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
+    #
+    metadata = sqlalchemy.MetaData(
+        naming_convention={
+            "ix": "ix__%(column_0_label)s",
+            "uq": "uq__%(table_name)s__%(column_0_name)s",
+            "ck": "ck__%(table_name)s__%(constraint_name)s",
+            "fk": "fk__%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
+            "pk": "pk__%(table_name)s",
+        }
+    )
+
 
 Session = sessionmaker()
 
