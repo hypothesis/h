@@ -29,9 +29,16 @@ class MentionService:
         if mentioning_user.nipsa:
             return
 
-        mentioned_userids = OrderedDict.fromkeys(
-            self._parse_userids(annotation.text)
-        ).keys()
+        mentioned_userids = list(
+            OrderedDict.fromkeys(self._parse_userids(annotation.text)).keys()
+        )
+        if len(mentioned_userids) > MENTION_LIMIT:
+            logger.warning(
+                "Annotation %s has more than %s mentions",
+                annotation.id,
+                MENTION_LIMIT,
+            )
+            mentioned_userids = mentioned_userids[:MENTION_LIMIT]
         mentioned_users = (
             self._session.query(User)
             .filter(User.userid.in_(mentioned_userids))
@@ -43,14 +50,7 @@ class MentionService:
             delete(Mention).where(Mention.annotation_id == annotation.id)
         )
 
-        for i, user in enumerate(mentioned_users):
-            if i >= MENTION_LIMIT:
-                logger.warning(
-                    "Annotation %s has more than %s mentions",
-                    annotation.id,
-                    MENTION_LIMIT,
-                )
-                break
+        for user in mentioned_users:
             # NIPSA users do not receive mentions
             if user.nipsa:
                 continue
