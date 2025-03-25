@@ -9,7 +9,7 @@ from h.services.html import parse_html_links
 from h.services.user import UserService
 from h.util.markdown_render import MENTION_ATTRIBUTE, MENTION_USERID
 
-MENTION_LIMIT = 5
+MENTION_LIMIT = 25
 
 logger = logging.getLogger(__name__)
 
