@@ -27,6 +27,7 @@ def create_app(_global_config, **settings):
     config.add_route("ws", "/ws")
     config.add_route("annotation", "/a/{id}", static=True)
     config.add_route("api.annotation", "/api/annotations/{id}", static=True)
+    config.add_route("activity.user_search", "/users/{username}", static=True)
 
     # Health check
     config.scan("h.views.status")
