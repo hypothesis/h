@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from h.models import Activation, User
 from h.services.exceptions import ConflictError
 from h.services.user_signup import UserSignupService, user_signup_service_factory
-from h.tasks import mailer
+from h.tasks import email
 
 
 class TestUserSignupService:
@@ -94,9 +94,9 @@ class TestUserSignupService:
         user_password_service.update_password.assert_called_once_with(user, "wibble")
 
     def test_signup_sends_email(
-        self, svc, signup, tasks_mailer, pyramid_request, asdict, LogData
+        self, svc, signup, tasks_email, pyramid_request, asdict, LogData
     ):
-        signup.generate.return_value = sentinel.email
+        signup.generate.return_value = sentinel.email_data
 
         user = svc.signup(username="foo", email="foo@bar.com")
 
@@ -110,17 +110,17 @@ class TestUserSignupService:
         asdict.assert_has_calls(
             [call(signup.generate.return_value), call(LogData.return_value)]
         )
-        tasks_mailer.send.delay.assert_called_once_with(
+        tasks_email.send.delay.assert_called_once_with(
             sentinel.email_data, sentinel.log_data
         )
 
     def test_signup_does_not_send_email_when_activation_not_required(
-        self, svc, signup, tasks_mailer
+        self, svc, signup, tasks_email
     ):
         svc.signup(require_activation=False, username="foo", email="foo@bar.com")
 
         signup.generate.assert_not_called()
-        tasks_mailer.send.delay.assert_not_called()
+        tasks_email.send.delay.assert_not_called()
 
     def test_signup_creates_subscriptions(self, svc, subscription_service, factories):
         subscription = factories.Subscriptions(active=False)
@@ -181,9 +181,9 @@ class TestUserSignupService:
         )
 
     @pytest.fixture(autouse=True)
-    def tasks_mailer(self, patch):
-        mock = patch("h.services.user_signup.tasks_mailer")
-        mock.send.delay = create_autospec(mailer.send.run)
+    def tasks_email(self, patch):
+        mock = patch("h.services.user_signup.email")
+        mock.send.delay = create_autospec(email.send.run)
         return mock
 
     @pytest.fixture(autouse=True)

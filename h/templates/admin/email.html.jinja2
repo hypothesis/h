@@ -1,7 +1,7 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
-{% set page_id = 'mailer' %}
-{% set page_title = 'Mailer' %}
+{% set page_id = 'email' %}
+{% set page_title = 'Email' %}
 
 {% block content %}
 
@@ -17,7 +17,7 @@
       <h3 class="card-title mb-0">Send a test email</h3>
     </div>
     <div class="card-body">
-      <form method="POST" action="{{ request.route_path('admin.mailer_test') }}" class="form-inline">
+      <form method="POST" action="{{ request.route_path('admin.email_test') }}" class="form-inline">
         <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
         <div class="form-group">
           <label for="recipient">Recipient</label>
@@ -35,7 +35,7 @@
     <iframe
       class="card-body p-0"
       style="height: 40em; border: none;"
-      src="{{ request.route_url("admin.mailer.preview.mention_notification") }}"
+      src="{{ request.route_url("admin.email.preview.mention_notification") }}"
     >
     </iframe>
   </div>

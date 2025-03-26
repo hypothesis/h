@@ -11,7 +11,7 @@ from pyramid import httpexceptions
 
 from h.models import Subscriptions
 from h.services.email import EmailData, EmailTag, LogData
-from h.tasks import mailer
+from h.tasks import email
 from h.views import accounts as views
 
 
@@ -230,7 +230,7 @@ class TestAuthController:
 
 
 @pytest.mark.usefixtures(
-    "activation_model", "tasks_mailer", "reset_password_email", "routes"
+    "activation_model", "tasks_email", "reset_password_email", "routes"
 )
 class TestForgotPasswordController:
     def test_post_returns_form_when_validation_fails(
@@ -272,7 +272,7 @@ class TestForgotPasswordController:
     def test_post_sends_mail(
         self,
         form_validating_to,
-        tasks_mailer,
+        tasks_email,
         pyramid_request,
         user,
     ):
@@ -294,7 +294,7 @@ class TestForgotPasswordController:
             sender_id=user.id,
             recipient_ids=[user.id],
         )
-        tasks_mailer.send.delay.assert_called_once_with(
+        tasks_email.send.delay.assert_called_once_with(
             asdict(email_data), asdict(log_data)
         )
 
@@ -1047,9 +1047,9 @@ def ActivationEvent(patch):
 
 
 @pytest.fixture
-def tasks_mailer(patch):
-    mock = patch("h.views.accounts.mailer")
-    mock.send.delay = create_autospec(mailer.send.run)
+def tasks_email(patch):
+    mock = patch("h.views.accounts.email")
+    mock.send.delay = create_autospec(email.send.run)
     return mock
 
 

@@ -10,7 +10,7 @@ from h.services import SubscriptionService
 from h.services.email import EmailTag, LogData
 from h.services.exceptions import ConflictError
 from h.services.user_password import UserPasswordService
-from h.tasks import mailer as tasks_mailer
+from h.tasks import email
 
 log = logging.getLogger(__name__)
 
@@ -125,7 +125,7 @@ class UserSignupService:
         self.session.flush()
 
         # Send the activation email
-        email = signup.generate(
+        email_data = signup.generate(
             request=self.request,
             user_id=user.id,
             email=user.email,
@@ -136,7 +136,7 @@ class UserSignupService:
             sender_id=user.id,
             recipient_ids=[user.id],
         )
-        tasks_mailer.send.delay(asdict(email), asdict(log_data))
+        email.send.delay(asdict(email_data), asdict(log_data))
 
 
 def user_signup_service_factory(_context, request):

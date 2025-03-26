@@ -31,7 +31,7 @@ from h.schemas.forms.accounts import (
 )
 from h.services import SubscriptionService
 from h.services.email import LogData
-from h.tasks import mailer
+from h.tasks import email
 from h.util.view import json_view
 
 _ = i18n.TranslationString
@@ -216,7 +216,7 @@ class ForgotPasswordController:
         log_data = LogData(
             tag=email_data.tag, sender_id=user.id, recipient_ids=[user.id]
         )
-        mailer.send.delay(asdict(email_data), asdict(log_data))
+        email.send.delay(asdict(email_data), asdict(log_data))
 
 
 @view_defaults(

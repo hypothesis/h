@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import asdict  # noqa: A005
 
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config
@@ -6,30 +6,30 @@ from pyramid.view import view_config
 from h.emails import test
 from h.security import Permission
 from h.services.email import LogData
-from h.tasks import mailer
+from h.tasks import email
 
 
 @view_config(
-    route_name="admin.mailer",
+    route_name="admin.email",
     request_method="GET",
-    renderer="h:templates/admin/mailer.html.jinja2",
+    renderer="h:templates/admin/email.html.jinja2",
     permission=Permission.AdminPage.LOW_RISK,
 )
-def mailer_index(request):
-    """Show the mailer test tools."""
+def email_index(request):
+    """Show the email test tools."""
     return {"taskid": request.params.get("taskid")}
 
 
 @view_config(
-    route_name="admin.mailer_test",
+    route_name="admin.email_test",
     request_method="POST",
     permission=Permission.AdminPage.LOW_RISK,
     require_csrf=True,
 )
-def mailer_test(request):
+def email_test(request):
     """Send a test email."""
     if "recipient" not in request.params:
-        index = request.route_path("admin.mailer")
+        index = request.route_path("admin.email")
         return HTTPSeeOther(location=index)
 
     email_data = test.generate(request, request.params["recipient"])
@@ -37,13 +37,13 @@ def mailer_test(request):
         tag=email_data.tag,
         sender_id=request.user.id,
     )
-    result = mailer.send.delay(asdict(email_data), asdict(log_data))
-    index = request.route_path("admin.mailer", _query={"taskid": result.task_id})
+    result = email.send.delay(asdict(email_data), asdict(log_data))
+    index = request.route_path("admin.email", _query={"taskid": result.task_id})
     return HTTPSeeOther(location=index)
 
 
 @view_config(
-    route_name="admin.mailer.preview.mention_notification",
+    route_name="admin.email.preview.mention_notification",
     request_method="GET",
     permission=Permission.AdminPage.LOW_RISK,
     renderer="h:templates/emails/mention_notification.html.jinja2",

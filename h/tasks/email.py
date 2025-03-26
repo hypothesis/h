@@ -2,7 +2,7 @@
 A module for sending email.
 
 This module defines a Celery task for sending emails in a worker process.
-"""
+"""  # noqa: A005
 
 from typing import Any
 
