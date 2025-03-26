@@ -59,6 +59,7 @@ class TestAnnotationAuthorityQueueService:
             with_metadata=True,
         )
         assert annotation_presented["text_rendered"] == annotation.text_rendered
+        assert annotation_presented["quote"] == annotation.quote
         Celery.assert_called_once_with(
             annotation_read_service.get_annotation_by_id.return_value.authority,
         )

@@ -175,6 +175,15 @@ class Annotation(Base):
 
         return [target]
 
+    @property
+    def quote(self) -> str | None:
+        """Quote text the annotation is referring to."""
+        selectors = self.target[0].get("selector", [])
+        quote = next(
+            (s for s in selectors if s.get("type") == "TextQuoteSelector"), None
+        )
+        return quote.get("exact") if quote else None
+
     @hybrid_property
     def text(self):
         return self._text

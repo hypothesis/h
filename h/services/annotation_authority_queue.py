@@ -50,6 +50,8 @@ class AnnotationAuthorityQueueService:
         )
         # We already done the work to sanitize the text, send that value to the queue
         annotation_dict["text_rendered"] = annotation.text_rendered
+        # Also expose the quoted text if it exists
+        annotation_dict["quote"] = annotation.quote
 
         payload = {
             "action": event_action,
