@@ -36,6 +36,10 @@ class AnnotationAuthorityQueueService:
 
     def publish(self, event_action: str, annotation_id: str) -> None:
         annotation = self._annotation_read_service.get_annotation_by_id(annotation_id)
+        if not annotation:
+            LOG.error("Annotation %r not found", annotation_id)
+            return
+
         authority_queue_config = self._authority_queue_config.get(annotation.authority)
         if not authority_queue_config:
             return
