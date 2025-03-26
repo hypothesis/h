@@ -77,6 +77,18 @@ class TestAnnotationAuthorityQueueService:
             },
         )
 
+    def test_publish_with_invalid_annotation(
+        self, svc, Celery, annotation_read_service
+    ):
+        annotation_read_service.get_annotation_by_id.return_value = None
+
+        svc.publish("create", sentinel.annotation_id)
+
+        annotation_read_service.get_annotation_by_id.assert_called_once_with(
+            sentinel.annotation_id
+        )
+        Celery.assert_not_called()
+
     def test_parse_config_when_not_present(self, svc):
         assert not svc._parse_authority_queue_config(None)  # noqa: SLF001
 
