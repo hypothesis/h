@@ -5,7 +5,7 @@ from pyramid.httpexceptions import HTTPNoContent
 
 from h.models import GroupMembership, GroupMembershipRoles
 from h.services.email import EmailData, EmailTag
-from h.tasks import mailer
+from h.tasks import email
 from h.traversal import AnnotationContext
 from h.views.api import flags
 
@@ -20,7 +20,7 @@ class TestCreate:
         flag_service,
         links,
         group_members_service,
-        tasks_mailer,
+        tasks_email,
         flag_notification,
         moderators,
     ):
@@ -41,10 +41,10 @@ class TestCreate:
             for user in moderators
         ]
 
-        assert tasks_mailer.send.delay.call_args_list == [
+        assert tasks_email.send.delay.call_args_list == [
             call(
                 {
-                    "recipients": sentinel.email1,
+                    "recipients": [sentinel.email1],
                     "subject": sentinel.subject1,
                     "body": sentinel.text1,
                     "tag": EmailTag.FLAG_NOTIFICATION,
@@ -59,7 +59,7 @@ class TestCreate:
             ),
             call(
                 {
-                    "recipients": sentinel.email2,
+                    "recipients": [sentinel.email2],
                     "subject": sentinel.subject2,
                     "body": sentinel.text2,
                     "tag": EmailTag.FLAG_NOTIFICATION,
@@ -101,14 +101,14 @@ class TestCreate:
         pyramid_request,
         group_members_service,
         flag_notification,
-        tasks_mailer,
+        tasks_email,
     ):
         group_members_service.get_memberships.return_value = []
 
         flags.create(context, pyramid_request)
 
         flag_notification.generate.assert_not_called()
-        tasks_mailer.send.delay.assert_not_called()
+        tasks_email.send.delay.assert_not_called()
 
     @pytest.fixture(autouse=True)
     def moderators(self, factories, group_members_service, db_session):
@@ -153,14 +153,14 @@ def flag_notification(mocker):
     )
     flag_notification.generate.side_effect = [
         EmailData(
-            recipients=sentinel.email1,
+            recipients=[sentinel.email1],
             subject=sentinel.subject1,
             body=sentinel.text1,
             tag=EmailTag.FLAG_NOTIFICATION,
             html=sentinel.html1,
         ),
         EmailData(
-            recipients=sentinel.email2,
+            recipients=[sentinel.email2],
             subject=sentinel.subject2,
             body=sentinel.text2,
             tag=EmailTag.FLAG_NOTIFICATION,
@@ -171,7 +171,7 @@ def flag_notification(mocker):
 
 
 @pytest.fixture(autouse=True)
-def tasks_mailer(patch):
-    mock = patch("h.views.api.flags.mailer")
-    mock.send.delay = create_autospec(mailer.send.run)
+def tasks_email(patch):
+    mock = patch("h.views.api.flags.email")
+    mock.send.delay = create_autospec(email.send.run)
     return mock

@@ -5,41 +5,41 @@ import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
 from h.services.email import EmailData, EmailTag, LogData
-from h.tasks import mailer
-from h.views.admin.mailer import mailer_index, mailer_test, preview_mention_notification
+from h.tasks import email
+from h.views.admin.email import email_index, email_test, preview_mention_notification
 
 
-class TestMailerIndex:
+class TestEmailIndex:
     def test_when_no_taskid(self, pyramid_request):
-        result = mailer_index(pyramid_request)
+        result = email_index(pyramid_request)
 
         assert result == {"taskid": None}
 
     def test_with_taskid(self, pyramid_request):
         pyramid_request.params["taskid"] = "abcd1234"
 
-        result = mailer_index(pyramid_request)
+        result = email_index(pyramid_request)
 
         assert result == {"taskid": "abcd1234"}
 
 
-@pytest.mark.usefixtures("tasks_mailer", "testmail", "routes")
-class TestMailerTest:
-    def test_doesnt_mail_when_no_recipient(self, tasks_mailer, pyramid_request):
-        mailer_test(pyramid_request)
+@pytest.mark.usefixtures("tasks_email", "testmail", "routes")
+class TestEmailTest:
+    def test_doesnt_mail_when_no_recipient(self, tasks_email, pyramid_request):
+        email_test(pyramid_request)
 
-        assert not tasks_mailer.send.delay.called
+        assert not tasks_email.send.delay.called
 
     def test_redirects_when_no_recipient(self, pyramid_request):
-        result = mailer_test(pyramid_request)
+        result = email_test(pyramid_request)
 
         assert isinstance(result, HTTPSeeOther)
-        assert result.location == "/adm/mailer"
+        assert result.location == "/adm/email"
 
-    def test_sends_mail(self, tasks_mailer, pyramid_request, user):
+    def test_sends_mail(self, tasks_email, pyramid_request, user):
         pyramid_request.params["recipient"] = "meerkat@example.com"
 
-        mailer_test(pyramid_request)
+        email_test(pyramid_request)
 
         email_data = EmailData(
             recipients=["meerkat@example.com"],
@@ -49,17 +49,17 @@ class TestMailerTest:
             html="html",
         )
         log_data = LogData(tag=email_data.tag, sender_id=user.id)
-        tasks_mailer.send.delay.assert_called_once_with(
+        tasks_email.send.delay.assert_called_once_with(
             asdict(email_data), asdict(log_data)
         )
 
     def test_redirects(self, pyramid_request):
         pyramid_request.params["recipient"] = "meerkat@example.com"
 
-        result = mailer_test(pyramid_request)
+        result = email_test(pyramid_request)
 
         assert isinstance(result, HTTPSeeOther)
-        assert result.location == "/adm/mailer?taskid=a1b2c3"
+        assert result.location == "/adm/email?taskid=a1b2c3"
 
     @pytest.fixture
     def user(self, factories, db_session):
@@ -96,15 +96,15 @@ class FakeResult:
 
 
 @pytest.fixture
-def tasks_mailer(patch):
-    mock = patch("h.views.admin.mailer.mailer")
-    mock.send.delay = create_autospec(mailer.send.run, return_value=FakeResult())
+def tasks_email(patch):
+    mock = patch("h.views.admin.email.email")
+    mock.send.delay = create_autospec(email.send.run, return_value=FakeResult())
     return mock
 
 
 @pytest.fixture
 def testmail(patch):
-    test = patch("h.views.admin.mailer.test")
+    test = patch("h.views.admin.email.test")
     test.generate.side_effect = lambda _, r: EmailData(
         recipients=[r], subject="TEST", body="text", tag=EmailTag.TEST, html="html"
     )
@@ -113,4 +113,4 @@ def testmail(patch):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route("admin.mailer", "/adm/mailer")
+    pyramid_config.add_route("admin.email", "/adm/email")

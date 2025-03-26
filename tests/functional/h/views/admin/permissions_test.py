@@ -9,7 +9,7 @@ class TestAdminPermissions:
         ("/admin/badge", False),
         ("/admin/features", False),
         ("/admin/groups", True),
-        ("/admin/mailer", True),
+        ("/admin/email", True),
         ("/admin/nipsa", False),
         ("/admin/oauthclients", False),
         ("/admin/organizations", True),
