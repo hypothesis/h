@@ -8,3 +8,7 @@ def get_user_url(user: User, request: Request) -> str | None:
         return request.route_url("stream.user_query", user=user.username)
 
     return None
+
+
+def email_subject(document: str) -> str:
+    return f"New activity on {document}"

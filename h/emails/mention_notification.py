@@ -2,6 +2,7 @@ from pyramid.renderers import render
 from pyramid.request import Request
 
 from h import links
+from h.emails.util import email_subject
 from h.models import Subscriptions
 from h.notification.mention import MentionNotification
 from h.services import SubscriptionService
@@ -34,7 +35,7 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
         "preferences_url": request.route_url("account_notifications"),
     }
 
-    subject = f"{context['user_display_name']} has mentioned you in an annotation"
+    subject = email_subject(context["document_title"])
     text = render(
         "h:templates/emails/mention_notification.txt.jinja2", context, request=request
     )

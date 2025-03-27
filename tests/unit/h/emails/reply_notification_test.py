@@ -89,20 +89,6 @@ class TestGenerate:
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
 
-    def test_supports_non_ascii_display_names(
-        self,
-        notification,
-        pyramid_request,
-        parent_user,
-        reply_user,
-    ):
-        parent_user.display_name = "Parent 👩"
-        reply_user.display_name = "Child 👧"
-
-        email = generate(pyramid_request, notification)
-
-        assert email.subject == "Child 👧 has replied to your annotation"
-
     def test_returns_usernames_if_no_display_names(
         self,
         notification,
@@ -135,20 +121,12 @@ class TestGenerate:
         assert email.body == "Text output"
         assert email.html == "HTML output"
 
-    def test_returns_subject_with_reply_display_name(
-        self, notification, pyramid_request
+    def test_returns_subject_with_document_title(
+        self, document, notification, pyramid_request
     ):
         email = generate(pyramid_request, notification)
 
-        assert email.subject == "Ron Burgundy has replied to your annotation"
-
-    def test_returns_subject_with_reply_username(
-        self, notification, pyramid_request, reply_user
-    ):
-        reply_user.display_name = None
-        email = generate(pyramid_request, notification)
-
-        assert email.subject == "ron has replied to your annotation"
+        assert email.subject == f"New activity on {document.title}"
 
     def test_returns_parent_email_as_recipients(self, notification, pyramid_request):
         email = generate(pyramid_request, notification)
