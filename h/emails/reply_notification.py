@@ -2,7 +2,7 @@ from pyramid.renderers import render
 from pyramid.request import Request
 
 from h import links
-from h.emails.util import get_user_url
+from h.emails.util import email_subject, get_user_url
 from h.models import Subscriptions
 from h.notification.reply import Notification
 from h.services import SubscriptionService
@@ -41,7 +41,7 @@ def generate(request: Request, notification: Notification) -> EmailData:
         "reply_user_url": get_user_url(notification.reply_user, request),
     }
 
-    subject = f"{context['reply_user_display_name']} has replied to your annotation"
+    subject = email_subject(context["document_title"])
     text = render(
         "h:templates/emails/reply_notification.txt.jinja2", context, request=request
     )

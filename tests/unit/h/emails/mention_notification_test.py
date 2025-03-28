@@ -93,27 +93,12 @@ class TestGenerate:
         assert email.body == "Text output"
         assert email.html == "HTML output"
 
-    def test_returns_subject_with_reply_display_name(
-        self, notification, pyramid_request, mentioning_user
+    def test_returns_subject_with_document_title(
+        self, document, notification, pyramid_request
     ):
         email = generate(pyramid_request, notification)
 
-        assert (
-            email.subject
-            == f"{mentioning_user.display_name} has mentioned you in an annotation"
-        )
-
-    def test_returns_subject_with_reply_username(
-        self, notification, pyramid_request, mentioning_user
-    ):
-        mentioning_user.display_name = None
-
-        email = generate(pyramid_request, notification)
-
-        assert (
-            email.subject
-            == f"@{mentioning_user.username} has mentioned you in an annotation"
-        )
+        assert email.subject == f"New activity on {document.title}"
 
     def test_returns_parent_email_as_recipients(
         self, notification, pyramid_request, mentioned_user
