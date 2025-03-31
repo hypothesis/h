@@ -12,7 +12,7 @@ from h.models.notification import NotificationType
 from h.notification import mention, reply
 from h.services import NotificationService
 from h.services.annotation_read import AnnotationReadService
-from h.services.email import LogData
+from h.services.email import TaskData
 from h.tasks import annotations, email
 
 logger = logging.getLogger(__name__)
@@ -110,14 +110,14 @@ def send_reply_notifications(event):
             return
 
         email_data = emails.reply_notification.generate(request, notification)
-        log_data = LogData(
+        task_data = TaskData(
             tag=email_data.tag,
             sender_id=notification.reply_user.id,
             recipient_ids=[notification.parent_user.id],
             extra={"annotation_id": annotation.id},
         )
         try:
-            email.send.delay(asdict(email_data), asdict(log_data))
+            email.send.delay(asdict(email_data), asdict(task_data))
         except OperationalError as err:  # pragma: no cover
             # We could not connect to rabbit! So carry on
             report_exception(err)
@@ -154,14 +154,14 @@ def send_mention_notifications(event):
                 continue
 
             email_data = emails.mention_notification.generate(request, notification)
-            log_data = LogData(
+            task_data = TaskData(
                 tag=email_data.tag,
                 sender_id=notification.mentioning_user.id,
                 recipient_ids=[notification.mentioned_user.id],
                 extra={"annotation_id": annotation.id},
             )
             try:
-                email.send.delay(asdict(email_data), asdict(log_data))
+                email.send.delay(asdict(email_data), asdict(task_data))
             except OperationalError as err:  # pragma: no cover
                 # We could not connect to rabbit! So carry on
                 report_exception(err)

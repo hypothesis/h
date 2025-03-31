@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from h.emails import signup
 from h.models import Activation, User, UserIdentity
 from h.services import SubscriptionService
-from h.services.email import EmailTag, LogData
+from h.services.email import EmailTag, TaskData
 from h.services.exceptions import ConflictError
 from h.services.user_password import UserPasswordService
 from h.tasks import email
@@ -131,12 +131,10 @@ class UserSignupService:
             email=user.email,
             activation_code=user.activation.code,
         )
-        log_data = LogData(
-            tag=EmailTag.ACTIVATION,
-            sender_id=user.id,
-            recipient_ids=[user.id],
+        task_data = TaskData(
+            tag=EmailTag.ACTIVATION, sender_id=user.id, recipient_ids=[user.id]
         )
-        email.send.delay(asdict(email_data), asdict(log_data))
+        email.send.delay(asdict(email_data), asdict(task_data))
 
 
 def user_signup_service_factory(_context, request):

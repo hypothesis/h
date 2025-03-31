@@ -1,7 +1,7 @@
 # noqa: A005
 
 import smtplib
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any
 
@@ -10,6 +10,7 @@ import pyramid_mailer.message
 from pyramid.request import Request
 from pyramid_mailer import IMailer
 
+from h.models import TaskDone
 from h.tasks.celery import get_task_logger
 
 logger = get_task_logger(__name__)
@@ -44,14 +45,14 @@ class EmailData:
 
 
 @dataclass(frozen=True)
-class LogData:
+class TaskData:
     tag: EmailTag
     sender_id: int
     recipient_ids: list[int] = field(default_factory=list)
     extra: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def extra_msg(self) -> str:
+    def formatted_extra(self) -> str:
         return ", ".join(f"{k}={v!r}" for k, v in self.extra.items() if v is not None)
 
 
@@ -62,7 +63,7 @@ class EmailService:
         self._request = request
         self._mailer = mailer
 
-    def send(self, email_data: EmailData, log_data: LogData) -> None:
+    def send(self, email_data: EmailData, task_data: TaskData) -> None:
         if self._request.debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
@@ -75,15 +76,20 @@ class EmailService:
         except smtplib.SMTPException:
             raise
 
-        separator = ", " if log_data.extra_msg else ""
+        separator = ", " if task_data.extra else ""
         logger.info(
             "Sent email: tag=%r, sender_id=%s, recipient_ids=%s%s%s",
-            log_data.tag,
-            log_data.sender_id,
-            log_data.recipient_ids,
+            task_data.tag,
+            task_data.sender_id,
+            task_data.recipient_ids,
             separator,
-            log_data.extra_msg,
+            task_data.formatted_extra,
         )
+        self._create_task_done(task_data)
+
+    def _create_task_done(self, task_data: TaskData) -> None:
+        task_done = TaskDone(data=asdict(task_data))
+        self._request.db.add(task_done)
 
 
 def factory(_context, request: Request) -> EmailService:
