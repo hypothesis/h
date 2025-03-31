@@ -10,7 +10,7 @@ from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.models import Subscriptions
-from h.services.email import EmailData, EmailTag, LogData
+from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
 from h.views import accounts as views
 
@@ -289,13 +289,13 @@ class TestForgotPasswordController:
             tag=EmailTag.TEST,
             html="HTML output",
         )
-        log_data = LogData(
+        task_data = TaskData(
             tag=email_data.tag,
             sender_id=user.id,
             recipient_ids=[user.id],
         )
         tasks_email.send.delay.assert_called_once_with(
-            asdict(email_data), asdict(log_data)
+            asdict(email_data), asdict(task_data)
         )
 
     def test_post_redirects_on_success(
