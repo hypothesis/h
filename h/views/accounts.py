@@ -30,7 +30,7 @@ from h.schemas.forms.accounts import (
     ResetPasswordSchema,
 )
 from h.services import SubscriptionService
-from h.services.email import LogData
+from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
 
@@ -213,10 +213,10 @@ class ForgotPasswordController:
 
     def _send_forgot_password_email(self, user):
         email_data = reset_password.generate(self.request, user)
-        log_data = LogData(
+        task_data = TaskData(
             tag=email_data.tag, sender_id=user.id, recipient_ids=[user.id]
         )
-        email.send.delay(asdict(email_data), asdict(log_data))
+        email.send.delay(asdict(email_data), asdict(task_data))
 
 
 @view_defaults(

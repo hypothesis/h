@@ -2,24 +2,24 @@ from unittest import mock
 
 import pytest
 
-from h.services.email import EmailData, EmailTag, LogData
+from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
 
 
-def test_send(email_data, log_data, email_service):
-    email.send(email_data, log_data)
+def test_send(email_data, task_data, email_service):
+    email.send(email_data, task_data)
 
     email_service.send.assert_called_once_with(
-        EmailData(**email_data), LogData(**log_data)
+        EmailData(**email_data), TaskData(**task_data)
     )
 
 
-def test_send_retries_if_mailing_fails(email_data, log_data, email_service):
+def test_send_retries_if_mailing_fails(email_data, task_data, email_service):
     email_service.send.side_effect = Exception()
     email.send.retry = mock.Mock(wraps=email.send.retry)
 
     with pytest.raises(Exception) as exc_info:  # noqa: PT011
-        email.send(email_data, log_data)
+        email.send(email_data, task_data)
     assert exc_info.type is Exception
 
     assert email.send.retry.called
@@ -36,7 +36,7 @@ def email_data():
 
 
 @pytest.fixture
-def log_data():
+def task_data():
     return {"tag": EmailTag.TEST, "sender_id": 123, "recipient_ids": [123]}
 
 

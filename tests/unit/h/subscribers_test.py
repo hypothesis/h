@@ -123,7 +123,7 @@ class TestSendReplyNotifications:
         emails,
         tasks_email,
         asdict,
-        LogData,
+        TaskData,
     ):
         subscribers.send_reply_notifications(event)
 
@@ -153,9 +153,9 @@ class TestSendReplyNotifications:
         )
 
         email_data = emails.reply_notification.generate.return_value
-        asdict.assert_has_calls([call(email_data), call(LogData.return_value)])
+        asdict.assert_has_calls([call(email_data), call(TaskData.return_value)])
         tasks_email.send.delay.assert_called_once_with(
-            sentinel.email_data, sentinel.log_data
+            sentinel.email_data, sentinel.task_data
         )
 
         notification_service.save_notification.assert_called_once_with(
@@ -224,7 +224,7 @@ class TestSendMentionNotifications:
         emails,
         tasks_email,
         asdict,
-        LogData,
+        TaskData,
     ):
         notifications = mention.get_notifications.return_value
 
@@ -251,9 +251,9 @@ class TestSendMentionNotifications:
         )
 
         email_data = emails.mention_notification.generate.return_value
-        asdict.assert_has_calls([call(email_data), call(LogData.return_value)])
+        asdict.assert_has_calls([call(email_data), call(TaskData.return_value)])
         tasks_email.send.delay.assert_called_once_with(
-            sentinel.email_data, sentinel.log_data
+            sentinel.email_data, sentinel.task_data
         )
 
         notification_service.save_notification.assert_called_once_with(
@@ -364,10 +364,10 @@ def report_exception(patch):
 @pytest.fixture(autouse=True)
 def asdict(patch):
     return patch(
-        "h.subscribers.asdict", side_effect=[sentinel.email_data, sentinel.log_data]
+        "h.subscribers.asdict", side_effect=[sentinel.email_data, sentinel.task_data]
     )
 
 
 @pytest.fixture(autouse=True)
-def LogData(patch):
-    return patch("h.subscribers.LogData", autospec=True)
+def TaskData(patch):
+    return patch("h.subscribers.TaskData", autospec=True)

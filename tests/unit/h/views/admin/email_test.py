@@ -4,7 +4,7 @@ from unittest.mock import create_autospec
 import pytest
 from pyramid.httpexceptions import HTTPSeeOther
 
-from h.services.email import EmailData, EmailTag, LogData
+from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
 from h.views.admin.email import email_index, email_test, preview_mention_notification
 
@@ -48,9 +48,9 @@ class TestEmailTest:
             tag=EmailTag.TEST,
             html="html",
         )
-        log_data = LogData(tag=email_data.tag, sender_id=user.id)
+        task_data = TaskData(tag=email_data.tag, sender_id=user.id)
         tasks_email.send.delay.assert_called_once_with(
-            asdict(email_data), asdict(log_data)
+            asdict(email_data), asdict(task_data)
         )
 
     def test_redirects(self, pyramid_request):

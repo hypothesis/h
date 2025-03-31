@@ -1,16 +1,19 @@
 import smtplib
+from dataclasses import asdict
 from unittest.mock import sentinel
 
 import pytest
+from sqlalchemy import select
 
-from h.services.email import EmailData, EmailService, EmailTag, LogData, factory
+from h.models import TaskDone
+from h.services.email import EmailData, EmailService, EmailTag, TaskData, factory
 
 
 class TestEmailService:
     def test_send_creates_email_message(
-        self, email_data, log_data, email_service, pyramid_mailer
+        self, email_data, task_data, email_service, pyramid_mailer
     ):
-        email_service.send(email_data, log_data)
+        email_service.send(email_data, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
             recipients=["foo@example.com"],
@@ -21,7 +24,7 @@ class TestEmailService:
         )
 
     def test_send_creates_email_message_with_html_body(
-        self, log_data, email_service, pyramid_mailer
+        self, task_data, email_service, pyramid_mailer
     ):
         email = EmailData(
             recipients=["foo@example.com"],
@@ -30,7 +33,7 @@ class TestEmailService:
             tag=EmailTag.TEST,
             html="<p>An HTML body</p>",
         )
-        email_service.send(email, log_data)
+        email_service.send(email, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
             recipients=["foo@example.com"],
@@ -41,45 +44,60 @@ class TestEmailService:
         )
 
     def test_send_dispatches_email_using_request_mailer(
-        self, email_data, log_data, email_service, pyramid_mailer
+        self, email_data, task_data, email_service, pyramid_mailer
     ):
         request_mailer = pyramid_mailer.get_mailer.return_value
         message = pyramid_mailer.message.Message.return_value
 
-        email_service.send(email_data, log_data)
+        email_service.send(email_data, task_data)
 
         request_mailer.send_immediately.assert_called_once_with(message)
 
     def test_raises_smtplib_exception(
-        self, email_data, log_data, email_service, pyramid_mailer
+        self, email_data, task_data, email_service, pyramid_mailer
     ):
         request_mailer = pyramid_mailer.get_mailer.return_value
         request_mailer.send_immediately.side_effect = smtplib.SMTPException()
 
         with pytest.raises(smtplib.SMTPException):
-            email_service.send(email_data, log_data)
+            email_service.send(email_data, task_data)
 
-    def test_send_logging(self, email_data, log_data, email_service, info_caplog):
-        email_service.send(email_data, log_data)
+    def test_send_logging(self, email_data, task_data, email_service, info_caplog):
+        email_service.send(email_data, task_data)
 
         assert info_caplog.messages == [
-            f"Sent email: tag={log_data.tag!r}, sender_id={log_data.sender_id}, recipient_ids={log_data.recipient_ids}"
+            f"Sent email: tag={task_data.tag!r}, sender_id={task_data.sender_id}, recipient_ids={task_data.recipient_ids}"
         ]
 
     def test_send_logging_with_extra(self, email_data, email_service, info_caplog):
         user_id = 123
         annotation_id = "annotation_id"
-        log_data = LogData(
+        task_data = TaskData(
             tag=email_data.tag,
             sender_id=user_id,
             recipient_ids=[user_id],
             extra={"annotation_id": annotation_id},
         )
-        email_service.send(email_data, log_data)
+        email_service.send(email_data, task_data)
 
         assert info_caplog.messages == [
-            f"Sent email: tag={log_data.tag!r}, sender_id={user_id}, recipient_ids={[user_id]}, annotation_id={annotation_id!r}"
+            f"Sent email: tag={task_data.tag!r}, sender_id={user_id}, recipient_ids={[user_id]}, annotation_id={annotation_id!r}"
         ]
+
+    def test_send_creates_task_done(
+        self, email_data, task_data, email_service, db_session
+    ):
+        task_data = TaskData(
+            tag=email_data.tag,
+            sender_id=123,
+            recipient_ids=[123],
+            extra={"annotation_id": "annotation_id"},
+        )
+        email_service.send(email_data, task_data)
+
+        task_dones = db_session.execute(select(TaskDone)).scalars().all()
+        assert len(task_dones) == 1
+        assert task_dones[0].data == asdict(task_data)
 
     @pytest.fixture
     def email_data(self):
@@ -91,8 +109,8 @@ class TestEmailService:
         )
 
     @pytest.fixture
-    def log_data(self):
-        return LogData(
+    def task_data(self):
+        return TaskData(
             tag=EmailTag.TEST,
             sender_id=123,
             recipient_ids=[123],
