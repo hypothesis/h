@@ -93,7 +93,7 @@ jsonschema==4.23.0
     #   h-api
 jsonschema-specifications==2024.10.1
     # via jsonschema
-kombu==5.4.2
+kombu==5.5.2
     # via
     #   -r requirements/prod.in
     #   celery
@@ -236,7 +236,7 @@ typing-extensions==4.9.0
     #   alembic
     #   referencing
     #   sqlalchemy
-tzdata==2025.1
+tzdata==2025.2
     # via
     #   celery
     #   kombu

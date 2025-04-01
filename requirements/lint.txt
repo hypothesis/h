@@ -218,7 +218,7 @@ jsonschema-specifications==2024.10.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-kombu==5.4.2
+kombu==5.5.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -509,7 +509,7 @@ typing-extensions==4.9.0
     #   pytest-factoryboy
     #   referencing
     #   sqlalchemy
-tzdata==2025.1
+tzdata==2025.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
