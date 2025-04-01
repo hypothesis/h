@@ -8,7 +8,7 @@ build==1.0.3
     # via pip-tools
 click==8.1.8
     # via pip-tools
-coverage[toml]==7.6.10
+coverage[toml]==7.8.0
     # via -r requirements/coverage.in
 importlib-metadata==7.0.1
     # via pip-sync-faster
