@@ -9,6 +9,7 @@ import pyramid_mailer
 import pyramid_mailer.message
 from pyramid.request import Request
 from pyramid_mailer import IMailer
+from sqlalchemy.orm import Session
 
 from h.models import TaskDone
 from h.tasks.celery import get_task_logger
@@ -59,12 +60,13 @@ class TaskData:
 class EmailService:
     """A service for sending emails."""
 
-    def __init__(self, request: Request, mailer: IMailer) -> None:
-        self._request = request
+    def __init__(self, debug: bool, session: Session, mailer: IMailer) -> None:  # noqa: FBT001
+        self._debug = debug
+        self._session = session
         self._mailer = mailer
 
     def send(self, email_data: EmailData, task_data: TaskData) -> None:
-        if self._request.debug:  # pragma: no cover
+        if self._debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
             self._mailer.send_immediately(email_data.message)
@@ -89,9 +91,9 @@ class EmailService:
 
     def _create_task_done(self, task_data: TaskData) -> None:
         task_done = TaskDone(data=asdict(task_data))
-        self._request.db.add(task_done)
+        self._session.add(task_done)
 
 
 def factory(_context, request: Request) -> EmailService:
     mailer = pyramid_mailer.get_mailer(request)
-    return EmailService(request, mailer)
+    return EmailService(debug=request.debug, session=request.db, mailer=mailer)
