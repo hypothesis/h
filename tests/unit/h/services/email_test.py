@@ -117,14 +117,9 @@ class TestEmailService:
         )
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.debug = False
-        return pyramid_request
-
-    @pytest.fixture
     def email_service(self, pyramid_request, pyramid_mailer):
         request_mailer = pyramid_mailer.get_mailer.return_value
-        return EmailService(pyramid_request, request_mailer)
+        return EmailService(pyramid_request.debug, pyramid_request.db, request_mailer)
 
     @pytest.fixture
     def info_caplog(self, caplog):
@@ -137,7 +132,9 @@ class TestFactory:
         service = factory(sentinel.context, pyramid_request)
 
         EmailService.assert_called_once_with(
-            request=pyramid_request, mailer=pyramid_mailer.get_mailer.return_value
+            debug=pyramid_request.debug,
+            session=pyramid_request.db,
+            mailer=pyramid_mailer.get_mailer.return_value,
         )
 
         assert service == EmailService.return_value
@@ -150,3 +147,9 @@ class TestFactory:
 @pytest.fixture(autouse=True)
 def pyramid_mailer(patch):
     return patch("h.services.email.pyramid_mailer", autospec=True)
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.debug = False
+    return pyramid_request
