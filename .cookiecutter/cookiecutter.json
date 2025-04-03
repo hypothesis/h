@@ -17,7 +17,7 @@
     "package_name": "h",
     "slug": "h",
     "short_description": "h is the web app that serves most of the https://hypothes.is/ website, including the web annotations API at https://hypothes.is/api/. The [Hypothesis client](https://github.com/hypothesis/client) is a browser-based annotator that is a client for h's API.",
-    "python_version": "3.11.7",
+    "python_version": "3.12.9",
     "port": "5000",
     "github_owner": "hypothesis",
     "visibility": "public",

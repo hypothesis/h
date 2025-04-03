@@ -15,7 +15,7 @@ class TestGroupServiceFetch:
 
         result = svc.fetch("group:something@somewhere.com")
 
-        assert svc.fetch_by_groupid.called_once_with("group:something@somewhere.com")  # noqa: PGH005
+        svc.fetch_by_groupid.assert_called_once_with("group:something@somewhere.com")
         assert result == svc.fetch_by_groupid.return_value
 
     def test_it_proxies_to_fetch_by_pubid_if_not_groupid_syntax(self, svc):
@@ -23,7 +23,7 @@ class TestGroupServiceFetch:
 
         result = svc.fetch("abcdppp")
 
-        assert svc.fetch_by_pubid.called_once_with("abcdppp")  # noqa: PGH005
+        svc.fetch_by_pubid.assert_called_once_with("abcdppp")
         assert result == svc.fetch_by_pubid.return_value
 
 
