@@ -1,5 +1,5 @@
 from calendar import timegm
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
@@ -179,7 +179,7 @@ class TestVerifiedJWTGrantToken:
         assert exc.value.description == "Grant token is not yet valid."
 
     def test_expiry_returns_exp_claim(self, claims):
-        now = datetime.utcnow().replace(microsecond=0)  # noqa: DTZ003
+        now = datetime.now(UTC).replace(microsecond=0)
         delta = timedelta(minutes=2)
 
         claims["exp"] = epoch(timestamp=now, delta=delta)
@@ -190,7 +190,7 @@ class TestVerifiedJWTGrantToken:
         assert grant_token.expiry == (now + delta)
 
     def test_not_before_returns_nbf_claim(self, claims):
-        now = datetime.utcnow().replace(microsecond=0)  # noqa: DTZ003
+        now = datetime.now(UTC).replace(microsecond=0)
         delta = timedelta(minutes=-2)
 
         claims["nbf"] = epoch(timestamp=now, delta=delta)

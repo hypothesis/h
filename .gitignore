@@ -12,6 +12,7 @@ supervisord.pid
 .devdata*
 .eslintcache
 *.tsbuildinfo
+.vscode
 .hypothesis/
 
 # Pyramid debug mailer
