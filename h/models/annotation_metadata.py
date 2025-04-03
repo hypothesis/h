@@ -12,7 +12,6 @@ class AnnotationMetadata(Base):
         sa.Integer,
         sa.ForeignKey("annotation_slim.id", ondelete="cascade"),
         nullable=False,
-        unique=True,
         primary_key=True,
     )
     """FK to annotation_slim.id"""
