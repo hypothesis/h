@@ -1,10 +1,12 @@
 import datetime
+from enum import Enum
 from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from h.db import Base, types
 from h.models.group import Group
@@ -14,6 +16,12 @@ from h.util.user import split_user
 
 class Annotation(Base):
     """Model class representing a single annotation."""
+
+    class ModerationStatus(Enum):
+        APPROVED = "APPROVED"
+        DENIED = "DENIED"
+        SPAM = "SPAM"
+        PRIVATE = "PRIVATE"
 
     __tablename__ = "annotation"
     __table_args__ = (
@@ -68,7 +76,7 @@ class Annotation(Base):
         index=True,
     )
 
-    group = sa.orm.relationship(
+    group = relationship(
         Group,
         primaryjoin=(Group.pubid == groupid),
         foreign_keys=[groupid],
@@ -138,11 +146,11 @@ class Annotation(Base):
         uselist=True,
     )
 
-    mentions = sa.orm.relationship("Mention", back_populates="annotation")
+    mentions = relationship("Mention", back_populates="annotation")
 
-    notifications = sa.orm.relationship(
-        "Notification", back_populates="source_annotation"
-    )
+    notifications = relationship("Notification", back_populates="source_annotation")
+
+    moderation_status: Mapped[ModerationStatus | None]
 
     @property
     def uuid(self):

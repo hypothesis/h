@@ -1,8 +1,4 @@
-"""Create the moderation_status column
-
-Revision ID: c8f748cbfb8f
-Revises: 372308320143
-"""
+"""Create the moderation_status column."""
 
 import sqlalchemy as sa
 from alembic import op
