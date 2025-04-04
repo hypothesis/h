@@ -8,7 +8,7 @@ if [ -n "${CI+x}" ]; then exit; fi
 
 pyenv_root=$(pyenv root)
 
-for python_version in 3.11.7; do
+for python_version in 3.12.9; do
     bin_dir=$pyenv_root/versions/$python_version/bin
     if [ ! -f "$bin_dir"/tox ]; then
         pyenv install --skip-existing "$python_version"

@@ -109,7 +109,7 @@ class VerifiedJWTGrantToken(JWTGrantToken):
         if claim is None:
             raise MissingJWTGrantTokenClaimError(key, description)
         try:
-            return datetime.datetime.utcfromtimestamp(claim)  # noqa: DTZ004
+            return datetime.datetime.fromtimestamp(claim, datetime.UTC)
         except (TypeError, ValueError) as err:
             raise InvalidJWTGrantTokenClaimError(key, description) from err
 

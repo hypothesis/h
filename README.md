@@ -1,5 +1,5 @@
 <a href="https://github.com/hypothesis/h/actions/workflows/ci.yml?query=branch%3Amain"><img src="https://img.shields.io/github/actions/workflow/status/hypothesis/h/ci.yml?branch=main"></a>
-<a><img src="https://img.shields.io/badge/python-3.11-success"></a>
+<a><img src="https://img.shields.io/badge/python-3.12-success"></a>
 <a href="https://github.com/hypothesis/h/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-BSD--2--Clause-success"></a>
 <a href="https://github.com/hypothesis/cookiecutters/tree/main/pyramid-app"><img src="https://img.shields.io/badge/cookiecutter-pyramid--app-success"></a>
 <a href="https://black.readthedocs.io/en/stable/"><img src="https://img.shields.io/badge/code%20style-black-000000"></a>

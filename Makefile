@@ -21,7 +21,7 @@ db: python
 $(call help,make devdata,load development data and environment variables)
 devdata: python
 	@tox -qe dev --run-command 'python3 -m h.scripts.init_db --create --stamp'
-	@tox -qe dev --run-command 'python bin/make_devdata'
+	@PYTHONPATH=$(CURDIR) TOX_TESTENV_PASSENV=PYTHONPATH tox -qe dev --run-command 'python bin/make_devdata'
 
 .PHONY: dev
 $(call help,make dev,run the whole app \(all workers\))
