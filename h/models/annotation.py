@@ -6,7 +6,11 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
+<<<<<<< HEAD
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+=======
+from sqlalchemy.orm import Mapped, relationship
+>>>>>>> 18ca3ca3c (Model changes for Group.pre_moderated)
 
 from h.db import Base, types
 from h.models.group import Group

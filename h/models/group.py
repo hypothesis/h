@@ -6,7 +6,7 @@ from collections import namedtuple
 import slugify
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from h import pubid
 from h.db import Base, mixins
@@ -84,6 +84,8 @@ class GroupMembership(Base):
         onupdate=datetime.datetime.utcnow,
         index=True,
     )
+
+    pre_moderated: Mapped[bool | None] = mapped_column()
 
     def __repr__(self):
         return helpers.repr_(
