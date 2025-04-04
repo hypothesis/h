@@ -15,10 +15,10 @@ class AnnotationModerationService:
         if not annotation_ids:
             return set()
 
+        # TODO, move to the new column after migration and backfill migration
         query = self._session.query(AnnotationModeration.annotation_id).filter(
             AnnotationModeration.annotation_id.in_(annotation_ids)
         )
-
         return {m.annotation_id for m in query}
 
 

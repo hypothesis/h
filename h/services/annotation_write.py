@@ -165,11 +165,15 @@ class AnnotationWriteService:
         if not annotation.is_hidden:
             annotation.moderation = AnnotationModeration()
 
+        annotation.moderation.status = Annotation.ModerationStatus.DENIED
+
         self.upsert_annotation_slim(annotation)
 
     def unhide(self, annotation):
         """Remove the moderation status of an annotation."""
         annotation.moderation = None
+        annotation.moderation.status = Annotation.ModerationStatus.APPROVED
+        # TODO, or private ?
         self.upsert_annotation_slim(annotation)
 
     @staticmethod

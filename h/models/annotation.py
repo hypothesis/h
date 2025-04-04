@@ -266,7 +266,7 @@ class Annotation(Base):
     @property
     def is_hidden(self):
         """Check if this annotation id is hidden."""
-
+        # TODO, move to the new column after migration and backfill migration
         return self.moderation is not None
 
     def __repr__(self):
