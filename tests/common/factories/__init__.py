@@ -20,6 +20,7 @@ from tests.common.factories.mention import Mention
 from tests.common.factories.organization import Organization
 from tests.common.factories.setting import Setting
 from tests.common.factories.subscriptions import Subscriptions
+from tests.common.factories.task_done import TaskDone
 from tests.common.factories.token import DeveloperToken, OAuth2Token
 from tests.common.factories.user import User
 from tests.common.factories.user_deletion import UserDeletion
