@@ -22,18 +22,13 @@ class AnnotationModerationService:
         )
         return {m.annotation_id for m in query}
 
-    def update_status(
-        self,
-        action: AnnotationAction,
-        annotation: Annotation,
-        group: Group,
-        status: Annotation.ModerationStatus | None,
-    ) -> None:
-        if status:
-            # If we get an explict status, we set it
-            annotation.moderation_status = status
-            return
+    def set_status(self, annotation, status):
+        # If we get an explict status, we set it
+        annotation.moderation_status = status
 
+    def update_status(
+        self, action: AnnotationAction, annotation: Annotation, group: Group
+    ) -> None:
         if not annotation.moderation_status:
             # First set the right moderation status if this row as not been migrated
             # We have already migrated all moderated (hide/unhide) annotaionts
