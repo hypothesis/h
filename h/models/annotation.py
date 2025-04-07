@@ -19,7 +19,6 @@ class ModerationStatus(Enum):
     PENDING = "PENDING"
     DENIED = "DENIED"
     SPAM = "SPAM"
-    PRIVATE = "PRIVATE"
 
     def is_hidden(self):
         return self in {self.DENIED, self.SPAM}

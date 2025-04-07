@@ -28,24 +28,22 @@ class AnnotationModerationService:
         annotation.moderation_status = status
 
     def initialize_status(self, annotation):
-        if not annotation.moderation_status:
+        if not annotation.moderation_status and annotation.shared:
             # First set the right moderation status if this row as not been migrated
             # We have already migrated all moderated (hide/unhide) annotations
             # The reminding ones are either private
-            if annotation.shared:
-                annotation.moderation_status = ModerationStatus.APPROVED
-            else:
-                annotation.moderation_status = ModerationStatus.PRIVATE
+            annotation.moderation_status = ModerationStatus.APPROVED
 
     def update_status(
         self, action: AnnotationAction, annotation: Annotation, group: Group
     ) -> None:
         self.initialize_status(annotation)
 
+        if not annotation.shared:
+            return
+
         if action == "created":
-            if not annotation.shared:
-                annotation.moderation_status = ModerationStatus.PRIVATE
-            elif group.pre_moderated:
+            if group.pre_moderated:
                 annotation.moderation_status = ModerationStatus.PENDING
             else:
                 annotation.moderation_status = ModerationStatus.APPROVED

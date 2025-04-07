@@ -13,7 +13,6 @@ def upgrade() -> None:
         "APPROVED",
         "DENIED",
         "SPAM",
-        "PRIVATE",
         "PENDING",
         name="moderationstatus",
     )
