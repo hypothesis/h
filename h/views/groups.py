@@ -39,6 +39,11 @@ class GroupCreateEditController:
         request_method="GET",
         permission=Permission.Group.EDIT,
     )
+    @view_config(
+        route_name="group_edit_moderation",
+        request_method="GET",
+        permission=Permission.Group.EDIT,  # TODO  permission for moderation?
+    )
     def edit(self):
         """Render the page for editing an existing group."""
         return {
@@ -91,6 +96,9 @@ class GroupCreateEditController:
                     "updateGroup": api_config("api.group", "PATCH", id=group.pubid),
                     "readGroupMembers": api_config(
                         "api.group_members", "GET", pubid=group.pubid
+                    ),
+                    "readGroupAnnotations": api_config(
+                        "api.group_annotations", "GET", pubid=group.pubid
                     ),
                     "editGroupMember": api_config(
                         "api.group_member", "PATCH", pubid=group.pubid, userid=":userid"
