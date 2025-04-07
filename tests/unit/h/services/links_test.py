@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from h.services.links import LinksService, add_annotation_link_generator, links_factory
+from h.services.links import LinksService, links_factory
 
 
 class TestLinksService:
@@ -86,34 +86,5 @@ class TestLinksFactory:
 def registry(pyramid_config):
     pyramid_config.add_route("some.named.route", "/some/path")
     pyramid_config.add_route("param.route", "/annotations/{id}")
-
-    add_annotation_link_generator(
-        pyramid_config,
-        "giraffe",
-        lambda r, a: "http://giraffes.com",  # noqa: ARG005
-    )
-    add_annotation_link_generator(
-        pyramid_config,
-        "elephant",
-        lambda r, a: "https://elephant.org",  # noqa: ARG005
-    )
-    add_annotation_link_generator(
-        pyramid_config,
-        "kiwi",
-        lambda r, a: "http://kiwi.net",  # noqa: ARG005
-        hidden=True,
-    )
-    add_annotation_link_generator(pyramid_config, "returnsnone", lambda r, a: None)  # noqa: ARG005
-    add_annotation_link_generator(
-        pyramid_config,
-        "namedroute",
-        lambda r, a: r.route_url("some.named.route"),  # noqa: ARG005
-    )
-    add_annotation_link_generator(
-        pyramid_config,
-        "paramroute",
-        lambda r, a: r.route_url("param.route", id=a.id),
-        hidden=True,
-    )
 
     return pyramid_config.registry

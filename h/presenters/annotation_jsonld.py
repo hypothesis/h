@@ -1,3 +1,4 @@
+from h.services.links import LinksService
 from h.util.datetime import utc_iso8601
 
 
@@ -10,7 +11,7 @@ class AnnotationJSONLDPresenter:
       https://www.w3.org/TR/annotation-model/
     """
 
-    def __init__(self, annotation, links_service):
+    def __init__(self, annotation, links_service: LinksService):
         self.annotation = annotation
         self._links_service = links_service
 
@@ -20,7 +21,7 @@ class AnnotationJSONLDPresenter:
         return {
             "@context": self.CONTEXT_URL,
             "type": "Annotation",
-            "id": self._links_service.get(self.annotation, "jsonld_id"),
+            "id": self._links_service.jsonld_id(self.annotation),
             "created": utc_iso8601(self.annotation.created),
             "modified": utc_iso8601(self.annotation.updated),
             "creator": self.annotation.userid,

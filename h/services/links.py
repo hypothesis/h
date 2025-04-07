@@ -1,16 +1,56 @@
 """Tools for generating links to domain objects."""
 
+from urllib.parse import urljoin
+
 from pyramid.request import Request
 
 from h.security.request_methods import default_authority
 
-LINK_GENERATORS_KEY = "h.links.link_generators"
+
+def json_link(request, annotation) -> str:
+    return request.route_url("api.annotation", id=annotation.id)
+
+
+def jsonld_id_link(request, annotation) -> str:
+    return request.route_url("annotation", id=annotation.id)
+
+
+def html_link(request, annotation) -> str | None:
+    """Return a link to an HTML representation of the given annotation, or None."""
+    is_third_party_annotation = annotation.authority != request.default_authority
+    if is_third_party_annotation:
+        # We don't currently support HTML representations of third party
+        # annotations.
+        return None
+    return request.route_url("annotation", id=annotation.id)
+
+
+def incontext_link(request, annotation) -> str | None:
+    """Generate a link to an annotation on the page where it was made."""
+    bouncer_url = request.registry.settings.get("h.bouncer_url")
+    if not bouncer_url:
+        return None
+
+    link = urljoin(bouncer_url, annotation.thread_root_id)
+    uri = annotation.target_uri
+    if uri.startswith(("http://", "https://")):
+        # We can't use urljoin here, because if it detects the second argument
+        # is a URL it will discard the base URL, breaking the link entirely.
+        link += "/" + uri[uri.index("://") + 3 :]
+    elif uri.startswith("urn:x-pdf:") and annotation.document:  # pragma: no cover
+        for docuri in annotation.document.document_uris:
+            uri = docuri.uri
+            if uri.startswith(("http://", "https://")):
+                link += "/" + uri[uri.index("://") + 3 :]
+                break
+
+    return link
 
 
 class LinksService:
     """A service for generating links to annotations."""
 
-    def __init__(self, base_url, registry):
+    def __init__(self, base_url):
         """
         Create a new links service.
 
@@ -19,7 +59,6 @@ class LinksService:
         :type registry: pyramid.registry.Registry
         """
         self.base_url = base_url
-        self.registry = registry
 
         # It would be absolutely fair if at this point you asked yourself any
         # of the following questions:
@@ -41,7 +80,6 @@ class LinksService:
         # error-prone way to get access to the route_url function, which can
         # be used by link generators.
         self._request = Request.blank("/", base_url=base_url)
-        self._request.registry = registry
 
         # Allow retrieval of the authority from the fake request object, the
         # same as we do for real requests.
@@ -49,45 +87,21 @@ class LinksService:
             default_authority, name="default_authority", reify=True
         )
 
-    def get(self, annotation, name):
-        """Get the link named `name` for the passed `annotation`."""
-        link_generator, _ = self.registry[LINK_GENERATORS_KEY][name]
-        return link_generator(self._request, annotation)
+    def json_link(self, annotation):
+        return json_link(self._request, annotation)
 
-    def get_all(self, annotation):
-        """Get all (non-hidden) links for the passed `annotation`."""
-        links = {}
-        for name, (link_generator, hidden) in self.registry[
-            LINK_GENERATORS_KEY
-        ].items():
-            if hidden:
-                continue
-            link = link_generator(self._request, annotation)
-            if link is not None:
-                links[name] = link
-        return links
+    def jsonld_id_link(self, annotation) -> str:
+        return jsonld_id_link(self._request, annotation)
+
+    def html_link(self, annotation):
+        return html_link(self._request, annotation)
+
+    def incontext_link(self, annotation):
+        return incontext_link(self._request, annotation)
 
 
 def links_factory(_context, request):
     """Return a LinksService instance for the passed context and request."""
-    base_url = request.registry.settings.get("h.app_url", "http://localhost:5000")
-    return LinksService(base_url=base_url, registry=request.registry)
-
-
-def add_annotation_link_generator(config, name, generator, hidden=False):  # noqa: FBT002
-    """
-    Register a function which generates a named link for an annotation.
-
-    Annotation hypermedia links are added to the rendered annotations in a
-    `links` property or similar. `name` is the unique identifier for the link
-    type, and `generator` is a callable which accepts two arguments -- the
-    current request, and the annotation for which to generate a link -- and
-    returns a string.
-
-    If `hidden` is True, then the link generator will not be included in the
-    default links output when rendering annotations.
-    """
-    registry = config.registry
-    if LINK_GENERATORS_KEY not in registry:
-        registry[LINK_GENERATORS_KEY] = {}
-    registry[LINK_GENERATORS_KEY][name] = (generator, hidden)
+    return LinksService(
+        base_url=request.registry.settings.get("h.app_url", "http://localhost:5000")
+    )

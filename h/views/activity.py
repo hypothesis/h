@@ -1,6 +1,6 @@
 """Activity pages views."""
 
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from markupsafe import Markup
 from pyramid import httpexceptions
@@ -9,7 +9,6 @@ from pyramid.view import view_config, view_defaults
 from h import util
 from h.activity import query
 from h.i18n import TranslationString as _
-from h.links import pretty_link
 from h.paginator import paginate
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
@@ -19,6 +18,21 @@ from h.util.user import split_user
 from h.views.groups import check_slug
 
 PAGE_SIZE = 200
+
+
+def pretty_link(url):
+    """
+    Return a nicely formatted version of a URL.
+
+    This strips off 'visual noise' from the URL including common schemes
+    (HTTP, HTTPS), domain prefixes ('www.') and query strings.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ["http", "https"]:
+        return url
+    netloc = parsed.netloc
+    netloc = netloc.removeprefix("www.")
+    return unquote(netloc + parsed.path)
 
 
 @view_defaults(

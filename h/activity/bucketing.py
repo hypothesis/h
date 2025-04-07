@@ -7,7 +7,8 @@ from urllib.parse import urlparse
 import newrelic.agent
 from pyramid import i18n
 
-from h import links, presenters
+from h import presenters
+from h.services.links import incontext_link
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -48,7 +49,7 @@ class DocumentBucket:
         """
         if not self.annotations:
             return None
-        return links.incontext_link(request, self.annotations[0])
+        return incontext_link(request, self.annotations[0])
 
     def append(self, annotation):
         self.annotations.append(annotation)
