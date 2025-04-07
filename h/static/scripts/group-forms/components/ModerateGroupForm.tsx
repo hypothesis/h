@@ -26,6 +26,7 @@ type TableColumn<Row> = {
 
 type AnnotationRow = {
   id: string,
+  text: string,
 };
 
 /**
@@ -43,6 +44,7 @@ const possibleRoles: Role[] = Object.keys(roleStrings) as Role[];
 function annotationToRow(annotation: Annotation): AnnotationRow {
   return {
     id: annotation.id,
+    text: annotation.text,
   };
 }
 
@@ -196,6 +198,10 @@ export default function ModerateGroupForm({
       field: 'id',
       label: 'id',
     },
+    {
+      field: 'text',
+      label: 'text',
+    },
   ];
 
   const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
@@ -261,9 +267,18 @@ export default function ModerateGroupForm({
         case 'id':
           return (
             <span data-testid="id" className="font-bold text-grey-7">
-              @{annotation.id}
+              {annotation.id}
             </span>
+
           )
+        case 'text':
+          return (
+            <span data-testid="id" className="font-bold text-grey-7">
+              {annotation.text}
+            </span>
+
+          )
+
         // istanbul ignore next
         default:
           return null;

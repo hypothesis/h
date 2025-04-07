@@ -50,6 +50,7 @@ export type GroupMember = {
 
 export type Annotation = {
   id: string;
+  text: string;
 };
 
 
@@ -73,7 +74,7 @@ export type GroupMembersResponse = PaginatedResponse<GroupMember>;
 /**
  * Response to group members API.
  *
- * TOOD RIHGT LINK
+ * TODO RIGHT LINK
  * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}~1members/get
  */
 export type GroupAnnotationsResponse = PaginatedResponse<Annotation>;
