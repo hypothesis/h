@@ -49,4 +49,5 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
         body=text,
         tag=EmailTag.MENTION_NOTIFICATION,
         html=html,
+        subaccount=request.registry.settings.get("mailchimp_user_actions_subaccount"),
     )
