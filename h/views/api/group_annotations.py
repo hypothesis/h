@@ -2,11 +2,9 @@ import logging
 
 from h.schemas.pagination import PaginationQueryParamsSchema
 from h.schemas.util import validate_query_params
-from h.security import Permission
 from h.services.annotation_read import AnnotationReadService
 from h.traversal import GroupContext
 from h.views.api.config import api_config
-from h.views.api.helpers.json_payload import json_payload
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +15,7 @@ LIST_MEMBERS_API_CONFIG = {
     "request_method": "GET",
     "link_name": "group.annotations.read",
     "description": "Fetch a list of all annotations of a group",
-    # "permission": Permission.Group.READ, TOOD # add permission
+    # "permission": Permission.Group.READ, TODO # add permission
 }
 
 
@@ -38,8 +36,20 @@ def list_annotations(context: GroupContext, request):
     annotations = request.db.scalars(query.offset(offset).limit(limit))
 
     annotations_dicts = [
-        annotation_json_service.present_for_user(annotation, request.user)
+        _present_for_user(annotation_json_service, annotation, request.user)
         for annotation in annotations
     ]
 
     return {"meta": {"page": {"total": total}}, "data": annotations_dicts}
+
+
+def _present_for_user(service, annotation, user):
+    annotation_json = service.present_for_user(annotation, user)
+
+    annotation_json["moderation_status"] = (
+        annotation.moderation_status.value
+        if annotation.moderation_status
+        else annotation.ModerationStatus.APPROVED.value
+    )
+
+    return annotation_json

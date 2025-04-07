@@ -100,6 +100,11 @@ class GroupCreateEditController:
                     "readGroupAnnotations": api_config(
                         "api.group_annotations", "GET", pubid=group.pubid
                     ),
+                    "changeAnnotationModerationStatus": api_config(
+                        "api.annotation_moderation",
+                        "PATCH",
+                        id=":annotation_id",
+                    ),
                     "editGroupMember": api_config(
                         "api.group_member", "PATCH", pubid=group.pubid, userid=":userid"
                     ),
