@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Query, Session, subqueryload
 
 from h.db.types import InvalidUUID

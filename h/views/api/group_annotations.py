@@ -1,13 +1,12 @@
 import logging
 
-
 from h.schemas.pagination import PaginationQueryParamsSchema
 from h.schemas.util import validate_query_params
 from h.security import Permission
+from h.services.annotation_read import AnnotationReadService
 from h.traversal import GroupContext
 from h.views.api.config import api_config
 from h.views.api.helpers.json_payload import json_payload
-from h.services.annotation_read import AnnotationReadService
 
 log = logging.getLogger(__name__)
 
