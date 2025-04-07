@@ -10,7 +10,8 @@
       "h/db.py",
       "h/migrations/env.py",
       "h/templates/.gitkeep",
-      "tests/functional/app_test.py"
+      "tests/functional/app_test.py",
+      "conf/production.ini"
   ],
   "extra_context": {
     "name": "h",
