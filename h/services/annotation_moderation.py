@@ -26,27 +26,34 @@ class AnnotationModerationService:
         # If we get an explict status, we set it
         annotation.moderation_status = status
 
-    def update_status(
-        self, action: AnnotationAction, annotation: Annotation, group: Group
-    ) -> None:
+    def initialize_status(self, annotation):
         if not annotation.moderation_status:
             # First set the right moderation status if this row as not been migrated
             # We have already migrated all moderated (hide/unhide) annotations
             # The reminding ones are either private
-            if annotation.private:
-                annotation.moderation_status = Annotation.ModerationStatus.PRIVATE
+            if annotation.shared:
+                annotation.moderation_status = ModerationStatus.APPROVED
             else:
-                annotation.moderation_status = Annotation.ModerationStatus.APPROVED
+                annotation.moderation_status = ModerationStatus.PRIVATE
+
+    def update_status(
+        self, action: AnnotationAction, annotation: Annotation, group: Group
+    ) -> None:
+        self.initialize_status(annotation)
 
         if action == "created":
-            if annotation.private:
-                annotation.moderation_status = Annotation.ModerationStatus.PRIVATE
+            if not annotation.shared:
+                annotation.moderation_status = ModerationStatus.PRIVATE
             elif group.pre_moderated:
-                annotation.moderation_status = Annotation.ModerationStatus.PENDING
+                annotation.moderation_status = ModerationStatus.PENDING
             else:
-                annotation.moderation_status = Annotation.ModerationStatus.APPROVED
-        elif action == "updated" and group.pre_moderated:
-            annotation.moderation_status = Annotation.ModerationStatus.PENDING
+                annotation.moderation_status = ModerationStatus.APPROVED
+        elif (
+            action == "updated"
+            and group.pre_moderated
+            and annotation.moderation_status != ModerationStatus.SPAM
+        ):
+            annotation.moderation_status = ModerationStatus.PENDING
 
 
 def annotation_moderation_service_factory(_context, request):

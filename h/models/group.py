@@ -85,8 +85,6 @@ class GroupMembership(Base):
         index=True,
     )
 
-    pre_moderated: Mapped[bool | None] = mapped_column()
-
     def __repr__(self):
         return helpers.repr_(
             self,
@@ -158,6 +156,8 @@ class Group(Base, mixins.Timestamps):
     writeable_by = sa.Column(
         sa.Enum(WriteableBy, name="group_writeable_by"), nullable=True
     )
+
+    pre_moderated: Mapped[bool | None] = mapped_column()
 
     @property
     def groupid(self):

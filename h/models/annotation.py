@@ -14,14 +14,22 @@ from h.util import markdown_render, uri
 from h.util.user import split_user
 
 
+class ModerationStatus(Enum):
+    APPROVED = "APPROVED"
+    PENDING = "PENDING"
+    DENIED = "DENIED"
+    SPAM = "SPAM"
+    PRIVATE = "PRIVATE"
+
+    def is_hidden(self):
+        return self in {self.DENIED, self.SPAM}
+
+
 class Annotation(Base):
     """Model class representing a single annotation."""
 
-    class ModerationStatus(Enum):
-        APPROVED = "APPROVED"
-        DENIED = "DENIED"
-        SPAM = "SPAM"
-        PRIVATE = "PRIVATE"
+    # Expose the ModerationStatus directly here
+    ModerationStatus = ModerationStatus
 
     __tablename__ = "annotation"
     __table_args__ = (
