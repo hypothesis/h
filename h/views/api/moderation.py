@@ -46,7 +46,7 @@ def delete(context, request):
     route_name="api.annotation_moderation",
     request_method="PATCH",
     link_name="annotation_moderation",
-    # permission=Permission.Annotation.MODERATE,
+    # permission=Permission.Annotation.MODERATE,  TODO: add permission
 )
 def change_annotation_moderation_status(context, request):
     status = Annotation.ModerationStatus(request.json_body["moderation_status"].upper())
