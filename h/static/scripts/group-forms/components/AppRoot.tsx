@@ -3,6 +3,7 @@ import { useMemo, useState } from 'preact/hooks';
 
 import CreateEditGroupForm from './CreateEditGroupForm';
 import EditGroupMembersForm from './EditGroupMembersForm';
+import ModerateGroupForm from './ModerateGroupForm';
 import Router from './Router';
 import type { ConfigObject } from '../config';
 import { Config } from '../config';
@@ -44,6 +45,10 @@ export default function AppRoot({ config }: AppRootProps) {
             <Route path={routes.groups.editMembers}>
               <EditGroupMembersForm group={group!} />
             </Route>
+            <Route path={routes.groups.moderate}>
+              <ModerateGroupForm group={group!} />
+            </Route>
+
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>
             </Route>

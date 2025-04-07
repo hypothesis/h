@@ -47,6 +47,12 @@ export type GroupMember = {
   updated: ISODateTime | null;
 };
 
+
+export type Annotation = {
+  id: string;
+};
+
+
 export type PaginatedResponse<Item> = {
   meta: {
     page: {
@@ -63,6 +69,16 @@ export type PaginatedResponse<Item> = {
  * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}~1members/get
  */
 export type GroupMembersResponse = PaginatedResponse<GroupMember>;
+
+/**
+ * Response to group members API.
+ *
+ * TOOD RIHGT LINK
+ * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}~1members/get
+ */
+export type GroupAnnotationsResponse = PaginatedResponse<Annotation>;
+
+
 
 /** An error response from the h API:
  * https://h.readthedocs.io/en/latest/api-reference/v2/#section/Hypothesis-API/Errors
