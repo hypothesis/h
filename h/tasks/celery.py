@@ -83,6 +83,7 @@ celery.conf.update(
         "h.tasks.job_queue",
         "h.tasks.email",
         "h.tasks.url_migration",
+        "h.tasks.task_done",
     ),
     task_routes={
         "h.tasks.indexer.add_annotation": "indexer",
