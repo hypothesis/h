@@ -8,7 +8,11 @@ import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
-import type { Annotation, AnnotationModerationStatus, GroupAnnotationsResponse } from '../utils/api';
+import type {
+  Annotation,
+  AnnotationModerationStatus,
+  GroupAnnotationsResponse,
+} from '../utils/api';
 import { callAPI } from '../utils/api';
 import type { APIError } from '../utils/api';
 import FormContainer from './forms/FormContainer';
@@ -22,14 +26,13 @@ type TableColumn<Row> = {
 };
 
 type AnnotationRow = {
-  id: string,
-  text: string,
-  moderation_status: AnnotationModerationStatus,
-  created: string,
+  id: string;
+  text: string;
+  moderation_status: AnnotationModerationStatus;
+  created: string;
 
   /** True if an operation is currently being performed against this annotation. */
   busy: boolean;
-
 };
 
 /**
@@ -40,10 +43,11 @@ const statusesStrings: Record<AnnotationModerationStatus, string> = {
   denied: 'Denied',
   APPROVED: 'Approved',
   pending: 'Pending',
-  private: 'Private', // TODO IS this relevant here, I don't think  private ones should appear 
   spam: 'Spam',
 };
-const possibleStatuses: AnnotationModerationStatus[] = Object.keys(statusesStrings) as AnnotationModerationStatus[];
+const possibleStatuses: AnnotationModerationStatus[] = Object.keys(
+  statusesStrings,
+) as AnnotationModerationStatus[];
 
 function annotationToRow(annotation: Annotation): AnnotationRow {
   return {
@@ -51,7 +55,7 @@ function annotationToRow(annotation: Annotation): AnnotationRow {
     text: annotation.text,
     created: annotation.created,
     moderation_status: annotation.moderation_status,
-    busy: false
+    busy: false,
   };
 }
 
@@ -62,11 +66,20 @@ async function fetchAnnotations(
     pageNumber: number;
     pageSize: number;
   },
+  statusFilter: AnnotationModerationStatus | 'ALL',
 ): Promise<{ total: number; annotations: AnnotationRow[] }> {
   const { pageNumber, pageSize, signal } = options;
   const { url, method, headers } = api;
+  let query = {};
+  if (statusFilter !== 'ALL') {
+    query = {
+      moderation_status: statusFilter,
+    };
+  }
+
   const { meta, data }: GroupAnnotationsResponse = await callAPI(url, {
     headers,
+    query,
     pageSize,
     method,
     pageNumber,
@@ -79,14 +92,16 @@ async function fetchAnnotations(
   };
 }
 
-
 async function setModerationStatus(
   api: APIConfig,
   annotation_id: string,
   moderation_status: AnnotationModerationStatus,
 ): Promise<Annotation> {
   const { url: urlTemplate, method, headers } = api;
-  const url = urlTemplate.replace(':annotation_id', encodeURIComponent(annotation_id));
+  const url = urlTemplate.replace(
+    ':annotation_id',
+    encodeURIComponent(annotation_id),
+  );
   return callAPI(url, {
     method,
     headers,
@@ -99,7 +114,7 @@ async function setModerationStatus(
 type StatusSelectProps = {
   annotation_id: string;
 
-  disabled?: boolean;
+  disabled: boolean;
 
   /** The current role of the member. */
   current: AnnotationModerationStatus;
@@ -131,6 +146,41 @@ function StatusSelect({
   );
 }
 
+type StatusFilterProps = {
+  disabled: boolean;
+
+  /** The current role of the member. */
+  current: AnnotationModerationStatus | 'ALL';
+
+  /** Callback for when the user requests to change the role of the member. */
+  onChange: (r: AnnotationModerationStatus | 'ALL') => void;
+};
+
+function StatusFilter({
+  disabled = false,
+  current,
+  onChange,
+}: StatusFilterProps) {
+  return (
+    <Select
+      value={current}
+      onChange={onChange}
+      buttonContent={[current]}
+      data-testid="status-filter"
+      disabled={disabled}
+    >
+      {possibleStatuses.map(status => (
+        <Select.Option key={status} value={status}>
+          {statusesStrings[status]}
+        </Select.Option>
+      ))}
+      <Select.Option key="ALL" value="ALL">
+        All
+      </Select.Option>
+    </Select>
+  );
+}
+
 const defaultDateFormatter = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
   month: 'short',
@@ -158,6 +208,10 @@ export default function ModerateGroupForm({
     totalAnnotations !== null ? Math.ceil(totalAnnotations / pageSize) : null;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [statusFilter, setStatusFilter] = useState<
+    AnnotationModerationStatus | 'ALL'
+  >('pending');
+
   const setError = useCallback((context: string, err: Error) => {
     const apiErr = err as APIError;
     if (apiErr.aborted) {
@@ -176,11 +230,15 @@ export default function ModerateGroupForm({
     }
     const abort = new AbortController();
     setErrorMessage(null);
-    fetchAnnotations(config.api.readGroupAnnotations, {
-      pageNumber,
-      pageSize,
-      signal: abort.signal,
-    })
+    fetchAnnotations(
+      config.api.readGroupAnnotations,
+      {
+        pageNumber,
+        pageSize,
+        signal: abort.signal,
+      },
+      statusFilter,
+    )
       .then(({ total, annotations }) => {
         setAnnotations(annotations);
         setTotalAnnotations(total);
@@ -191,7 +249,7 @@ export default function ModerateGroupForm({
     return () => {
       abort.abort();
     };
-  }, [config.api.readGroupAnnotations, pageNumber, setError]);
+  }, [config.api.readGroupAnnotations, statusFilter, pageNumber, setError]);
 
   const columns: TableColumn<AnnotationRow>[] = [
     {
@@ -206,10 +264,12 @@ export default function ModerateGroupForm({
       field: 'moderation_status',
       label: 'status',
     },
-
   ];
 
-  const updateAnnotation = (annotation_id: string, update: Partial<AnnotationRow>) => {
+  const updateAnnotation = (
+    annotation_id: string,
+    update: Partial<AnnotationRow>,
+  ) => {
     setAnnotations(
       annotations =>
         annotations?.map(a => {
@@ -218,10 +278,11 @@ export default function ModerateGroupForm({
     );
   };
 
-
-
   const changeStatus = useCallback(
-    async (annotation: AnnotationRow, moderation_status: AnnotationModerationStatus) => {
+    async (
+      annotation: AnnotationRow,
+      moderation_status: AnnotationModerationStatus,
+    ) => {
       updateAnnotation(annotation.id, { moderation_status, busy: true });
       try {
         const updatedAnnotation = await setModerationStatus(
@@ -245,15 +306,13 @@ export default function ModerateGroupForm({
             <span data-testid="id" className="font-bold text-grey-7">
               {annotation.id}
             </span>
-
-          )
+          );
         case 'text':
           return (
             <span data-testid="id" className="font-bold text-grey-7">
               {annotation.text}
             </span>
-
-          )
+          );
 
         case 'created':
           return (
@@ -272,7 +331,6 @@ export default function ModerateGroupForm({
             />
           );
 
-
         // istanbul ignore next
         default:
           return null;
@@ -286,6 +344,8 @@ export default function ModerateGroupForm({
       <FormContainer>
         <GroupFormHeader title="Moderate group" group={group} />
         <ErrorNotice message={errorMessage} />
+        <StatusFilter current={statusFilter} onChange={setStatusFilter} />
+
         <div className="w-full">
           <Scroll>
             <DataTable

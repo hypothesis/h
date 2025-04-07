@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Query, Session, subqueryload
 
 from h.db.types import InvalidUUID
@@ -47,9 +47,11 @@ class AnnotationReadService:
     @staticmethod
     def annotation_search_query(
         ids: list[str] = None,  # noqa: RUF013
+        *,
         eager_load: list | None = None,
         groupid: str | None = None,
         include_private: bool = True,
+        moderation_status: Annotation.ModerationStatus | None = None,
     ) -> Query:
         """Create a query for searching for annotations."""
 
@@ -59,6 +61,18 @@ class AnnotationReadService:
 
         if groupid:
             query = query.where(Annotation.groupid == groupid)
+
+        if moderation_status:
+            if moderation_status == Annotation.ModerationStatus.APPROVED:
+                query = query.where(
+                    or_(
+                        Annotation.moderation_status.is_(None),
+                        Annotation.moderation_status
+                        == Annotation.ModerationStatus.APPROVED,
+                    )
+                )
+            else:
+                query = query.where(Annotation.moderation_status == moderation_status)
 
         if not include_private:
             query = query.where(Annotation.shared.is_(True))

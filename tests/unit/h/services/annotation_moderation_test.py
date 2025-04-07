@@ -1,11 +1,10 @@
 import pytest
 
+from h.models.annotation import ModerationStatus
 from h.services.annotation_moderation import (
     AnnotationModerationService,
     annotation_moderation_service_factory,
 )
-
-from h.models.annotation import ModerationStatus
 
 
 class TestModerationStatusService:
@@ -43,10 +42,9 @@ class TestModerationStatusService:
         ("created", False, False, None, ModerationStatus.APPROVED),
         ("created", False,True, None, ModerationStatus.PENDING),
         #When an Approved annotation is edited:
-        #If the group has pre-moderation disabled the moderation state doesn’t change
+        #If the group has pre-moderation disabled the moderation state doesn't change
         #If the group has pre-moderation enabled the moderation state changes to Pending
         ("updated", False,False, ModerationStatus.APPROVED, ModerationStatus.APPROVED),
-        ("updated", False,False, ModerationStatus.SPAM, ModerationStatus.SPAM),
         ("updated", False,False, ModerationStatus.DENIED, ModerationStatus.DENIED),
         ("updated", False,True, ModerationStatus.APPROVED, ModerationStatus.PENDING),
         #When a Denied annotation is edited the moderation state changes to Pending
@@ -59,7 +57,7 @@ class TestModerationStatusService:
         ("updated", False,True, ModerationStatus.PENDING, ModerationStatus.PENDING),
         #When a Spam annotation is edited its moderation state doesn't change
         #(whether pre-moderation is disabled or enabled)
-        # DUPLICTED ("updated", False,False, ModerationStatus.SPAM, ModerationStatus.SPAM),
+        ("updated", False,False, ModerationStatus.SPAM, ModerationStatus.SPAM),
         ("updated", False,True, ModerationStatus.SPAM, ModerationStatus.SPAM),
         #Editing a private annotation does not change its moderation state as long as the annotation remains private:
         #A private annotation whose state is NULL will remain NULL if edited.

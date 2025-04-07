@@ -53,8 +53,6 @@ export default function GroupFormHeader({
     ? routes.groups.moderate.replace(':pubid', group.pubid)
     : null;
 
-
-
   return (
     <div className="mb-4 pb-1 border-b border-b-text-grey-6">
       {group && (
@@ -89,7 +87,6 @@ export default function GroupFormHeader({
             Moderate
           </TabLink>
         )}
-
       </div>
     </div>
   );

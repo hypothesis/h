@@ -6,7 +6,11 @@ export type GroupType = 'private' | 'restricted' | 'open';
 /** Member role within a group. */
 export type Role = 'owner' | 'admin' | 'moderator' | 'member';
 
-export type AnnotationModerationStatus = "pending" | "APPROVED" | "denied" | "private" | "spam";
+export type AnnotationModerationStatus =
+  | 'pending'
+  | 'APPROVED'
+  | 'denied'
+  | 'spam';
 
 /** A date and time in ISO format (eg. "2024-12-09T07:17:52+00:00") */
 export type ISODateTime = string;
@@ -49,14 +53,12 @@ export type GroupMember = {
   updated: ISODateTime | null;
 };
 
-
 export type Annotation = {
   id: string;
   text: string;
   created: string;
   moderation_status: AnnotationModerationStatus;
 };
-
 
 export type PaginatedResponse<Item> = {
   meta: {
@@ -82,8 +84,6 @@ export type GroupMembersResponse = PaginatedResponse<GroupMember>;
  * https://h.readthedocs.io/en/latest/api-reference/v2/#tag/groups/paths/~1groups~1{id}~1members/get
  */
 export type GroupAnnotationsResponse = PaginatedResponse<Annotation>;
-
-
 
 /** An error response from the h API:
  * https://h.readthedocs.io/en/latest/api-reference/v2/#section/Hypothesis-API/Errors
@@ -138,6 +138,8 @@ export type APIOptions = {
 
   /** Maximum number of items to return in response for a paginated API. */
   pageSize?: number;
+
+  query?: Record<string, string | number>;
 };
 
 /** Make an API call and return the parsed JSON body or throw APIError. */
@@ -145,6 +147,7 @@ export async function callAPI<R = unknown>(
   url: string,
   {
     headers = {},
+    query = {},
     json = null,
     pageSize,
     method = 'GET',
@@ -165,7 +168,7 @@ export async function callAPI<R = unknown>(
     options.body = JSON.stringify(json);
   }
 
-  const queryParams: Record<string, string | number> = {};
+  const queryParams: Record<string, string | number> = query;
   if (typeof pageNumber === 'number') {
     queryParams['page[number]'] = pageNumber;
   }
