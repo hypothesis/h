@@ -31,16 +31,12 @@ class AnnotationModerationService:
     ) -> None:
         if not annotation.moderation_status:
             # First set the right moderation status if this row as not been migrated
-            # We have already migrated all moderated (hide/unhide) annotaionts
-            # The reaminding ones are either private
+            # We have already migrated all moderated (hide/unhide) annotations
+            # The reminding ones are either private
             if annotation.private:
                 annotation.moderation_status = Annotation.ModerationStatus.PRIVATE
             else:
                 annotation.moderation_status = Annotation.ModerationStatus.APPROVED
-
-        if status is None:
-            # This is either a new annotation or an existing one created before `moderation_status`
-            pass
 
         if action == "created":
             if annotation.private:
@@ -49,9 +45,8 @@ class AnnotationModerationService:
                 annotation.moderation_status = Annotation.ModerationStatus.PENDING
             else:
                 annotation.moderation_status = Annotation.ModerationStatus.APPROVED
-        elif action == "updated":
-            if group.pre_moderated:
-                annotation.moderation_status = Annotation.ModerationStatus.PENDING
+        elif action == "updated" and group.pre_moderated:
+            annotation.moderation_status = Annotation.ModerationStatus.PENDING
 
 
 def annotation_moderation_service_factory(_context, request):
