@@ -40,6 +40,7 @@ class AnnotationSearchIndexPresenter:
             result["references"] = self.annotation.references
 
         self._add_hidden(result)
+        self._add_moderated(result)
         self._add_nipsa(result, self.annotation.userid)
 
         return result
@@ -54,7 +55,15 @@ class AnnotationSearchIndexPresenter:
             parents_and_replies
         )
 
+        # Note that all hidden annotations are also moderated
+        # We have both concepts now to avoid a migration/reindexing on the ES side
         result["hidden"] = is_hidden
+
+    def _add_moderated(self, result):
+        moderation_service = self.request.find_service(name="annotation_moderation")
+        moderation_service.initialize_status(self.annotation)
+
+        result["moderated"] = self.annotation.is_hidden()
 
     def _add_nipsa(self, result, user_id):
         nipsa_service = self.request.find_service(name="nipsa")
