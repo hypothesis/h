@@ -26,6 +26,7 @@ export type ConfigObject = {
     editGroupMember?: APIConfig;
     removeGroupMember?: APIConfig;
     readGroupAnnotations?: APIConfig;
+    changeAnnotationModerationStatus?: APIConfig;
   };
   context: {
     group: Group | null;

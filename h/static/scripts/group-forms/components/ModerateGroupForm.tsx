@@ -1,8 +1,6 @@
 import {
   DataTable,
   Scroll,
-  TrashIcon,
-  IconButton,
   Pagination,
   Select,
 } from '@hypothesis/frontend-shared';
@@ -10,13 +8,12 @@ import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
-import type { Annotation, GroupAnnotationsResponse, Role } from '../utils/api';
+import type { Annotation, AnnotationModerationStatus, GroupAnnotationsResponse } from '../utils/api';
 import { callAPI } from '../utils/api';
 import type { APIError } from '../utils/api';
 import FormContainer from './forms/FormContainer';
 import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
-import WarningDialog from './WarningDialog';
 
 type TableColumn<Row> = {
   field: keyof Row;
@@ -27,30 +24,39 @@ type TableColumn<Row> = {
 type AnnotationRow = {
   id: string,
   text: string,
+  moderation_status: AnnotationModerationStatus,
+  created: string,
+
+  /** True if an operation is currently being performed against this annotation. */
+  busy: boolean;
+
 };
 
 /**
  * Mappings between roles and labels. The keys are sorted in descending order
  * of permissions.
  */
-const roleStrings: Record<Role, string> = {
-  owner: 'Owner',
-  admin: 'Admin',
-  moderator: 'Moderator',
-  member: 'Member',
+const statusesStrings: Record<AnnotationModerationStatus, string> = {
+  denied: 'Denied',
+  APPROVED: 'Approved',
+  pending: 'Pending',
+  private: 'Private', // TODO IS this relevant here, I don't think  private ones should appear 
+  spam: 'Spam',
 };
-const possibleRoles: Role[] = Object.keys(roleStrings) as Role[];
+const possibleStatuses: AnnotationModerationStatus[] = Object.keys(statusesStrings) as AnnotationModerationStatus[];
 
 function annotationToRow(annotation: Annotation): AnnotationRow {
   return {
     id: annotation.id,
     text: annotation.text,
+    created: annotation.created,
+    moderation_status: annotation.moderation_status,
+    busy: false
   };
 }
 
 async function fetchAnnotations(
   api: APIConfig,
-  currentUserid: string,
   options: {
     signal: AbortSignal;
     pageNumber: number;
@@ -69,60 +75,56 @@ async function fetchAnnotations(
 
   return {
     total: meta.page.total,
-    annotations: data.map(a => annotationToRow(a, currentUserid)),
+    annotations: data.map(a => annotationToRow(a)),
   };
 }
 
 
-async function setMemberRoles(
+async function setModerationStatus(
   api: APIConfig,
-  userid: string,
-  roles: Role[],
-): Promise<GroupMember> {
+  annotation_id: string,
+  moderation_status: AnnotationModerationStatus,
+): Promise<Annotation> {
   const { url: urlTemplate, method, headers } = api;
-  const url = urlTemplate.replace(':userid', encodeURIComponent(userid));
+  const url = urlTemplate.replace(':annotation_id', encodeURIComponent(annotation_id));
   return callAPI(url, {
     method,
     headers,
     json: {
-      roles,
+      moderation_status,
     },
   });
 }
 
-type RoleSelectProps = {
-  username: string;
+type StatusSelectProps = {
+  annotation_id: string;
 
   disabled?: boolean;
 
   /** The current role of the member. */
-  current: Role;
-
-  /** Ordered list of possible roles that the current user can assign to the member. */
-  available: Role[];
+  current: AnnotationModerationStatus;
 
   /** Callback for when the user requests to change the role of the member. */
-  onChange: (r: Role) => void;
+  onChange: (r: AnnotationModerationStatus) => void;
 };
 
-function RoleSelect({
-  username,
+function StatusSelect({
+  annotation_id,
   disabled = false,
   current,
-  available,
   onChange,
-}: RoleSelectProps) {
+}: StatusSelectProps) {
   return (
     <Select
       value={current}
       onChange={onChange}
-      buttonContent={roleStrings[current]}
-      data-testid={`role-${username}`}
+      buttonContent={[current]}
+      data-testid={`status-${annotation_id}`}
       disabled={disabled}
     >
-      {available.map(role => (
-        <Select.Option key={role} value={role}>
-          {roleStrings[role]}
+      {possibleStatuses.map(status => (
+        <Select.Option key={status} value={status}>
+          {statusesStrings[status]}
         </Select.Option>
       ))}
     </Select>
@@ -137,20 +139,18 @@ const defaultDateFormatter = new Intl.DateTimeFormat(undefined, {
 
 export const pageSize = 20;
 
-export type EditGroupMembersFormProps = {
+export type ModerateGroupMembersFormProps = {
   /** The saved group details. */
   group: Group;
 
-  /** Test seam. Formatter used to format the "Joined" date. */
   dateFormatter?: Intl.DateTimeFormat;
 };
 
 export default function ModerateGroupForm({
   group,
   dateFormatter = defaultDateFormatter,
-}: EditGroupMembersFormProps) {
+}: ModerateGroupMembersFormProps) {
   const config = useContext(Config)!;
-  const currentUserid = config.context.user.userid;
 
   const [pageNumber, setPageNumber] = useState(1);
   const [totalAnnotations, setTotalAnnotations] = useState<number | null>(null);
@@ -171,12 +171,12 @@ export default function ModerateGroupForm({
   const [annotations, setAnnotations] = useState<AnnotationRow[] | null>(null);
   useEffect(() => {
     // istanbul ignore next
-    if (!config.api.readGroupMembers) {
-      throw new Error('readGroupMembers API config missing');
+    if (!config.api.readGroupAnnotations) {
+      throw new Error('readGroupAnnotations API config missing');
     }
     const abort = new AbortController();
     setErrorMessage(null);
-    fetchAnnotations(config.api.readGroupAnnotations, currentUserid, {
+    fetchAnnotations(config.api.readGroupAnnotations, {
       pageNumber,
       pageSize,
       signal: abort.signal,
@@ -191,7 +191,7 @@ export default function ModerateGroupForm({
     return () => {
       abort.abort();
     };
-  }, [config.api.readGroupMembers, currentUserid, pageNumber, setError]);
+  }, [config.api.readGroupAnnotations, pageNumber, setError]);
 
   const columns: TableColumn<AnnotationRow>[] = [
     {
@@ -202,63 +202,39 @@ export default function ModerateGroupForm({
       field: 'text',
       label: 'text',
     },
+    {
+      field: 'moderation_status',
+      label: 'status',
+    },
+
   ];
 
-  const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
-
-  const updateMember = (userid: string, update: Partial<MemberRow>) => {
-    setMembers(
-      members =>
-        members?.map(m => {
-          return m.userid === userid ? { ...m, ...update } : m;
+  const updateAnnotation = (annotation_id: string, update: Partial<AnnotationRow>) => {
+    setAnnotations(
+      annotations =>
+        annotations?.map(a => {
+          return a.id === annotation_id ? { ...a, ...update } : a;
         }) ?? null,
     );
   };
 
-  const removeUserFromGroup = async (username: string) => {
-    // istanbul ignore next
-    if (!members || !config.api.removeGroupMember) {
-      return;
-    }
-    const member = members.find(m => m.username === username);
-    // istanbul ignore next
-    if (!member) {
-      return;
-    }
-    setPendingRemoval(null);
 
-    updateMember(member.userid, { busy: true });
 
-    try {
-      await removeMember(config.api.removeGroupMember, member.userid);
-      setMembers(members =>
-        members ? members.filter(m => m.userid !== member.userid) : null,
-      );
-    } catch (err) {
-      updateMember(member.userid, { busy: false });
-      setError('Failed to remove member', err);
-    }
-  };
-
-  const changeRole = useCallback(
-    async (member: MemberRow, role: Role) => {
-      updateMember(member.userid, { role, busy: true });
+  const changeStatus = useCallback(
+    async (annotation: AnnotationRow, moderation_status: AnnotationModerationStatus) => {
+      updateAnnotation(annotation.id, { moderation_status, busy: true });
       try {
-        const updatedMember = await setMemberRoles(
-          config.api.editGroupMember!,
-          member.userid,
-          [role],
+        const updatedAnnotation = await setModerationStatus(
+          config.api.changeAnnotationModerationStatus!,
+          annotation.id,
+          moderation_status,
         );
-        // Update the member row in case the role change affected other columns
-        // (eg. whether we have permission to delete the user).
-        updateMember(member.userid, memberToRow(updatedMember, currentUserid));
+        updateAnnotation(annotation.id, annotationToRow(updatedAnnotation));
       } catch (err) {
-        const prevRole = member.role;
-        updateMember(member.userid, { role: prevRole, busy: false });
-        setError('Failed to change member role', err);
+        setError('Failed to change', err);
       }
     },
-    [currentUserid, config.api.editGroupMember, setError],
+    [config.api.changeAnnotationModerationStatus, setError],
   );
 
   const renderRow = useCallback(
@@ -279,12 +255,30 @@ export default function ModerateGroupForm({
 
           )
 
+        case 'created':
+          return (
+            <span data-testid={`created-${annotation.id}`}>
+              {dateFormatter.format(annotation.created)}
+            </span>
+          );
+
+        case 'moderation_status':
+          return (
+            <StatusSelect
+              annotation_id={annotation.id}
+              current={annotation.moderation_status}
+              onChange={status => changeStatus(annotation, status)}
+              disabled={annotation.busy}
+            />
+          );
+
+
         // istanbul ignore next
         default:
           return null;
       }
     },
-    [changeRole, dateFormatter],
+    [changeStatus, dateFormatter],
   );
 
   return (
@@ -315,20 +309,6 @@ export default function ModerateGroupForm({
           </div>
         )}
       </FormContainer>
-      {pendingRemoval && (
-        <WarningDialog
-          title="Remove member?"
-          confirmAction="Remove member"
-          message={
-            <p>
-              Are you sure you want to remove <b>{pendingRemoval}</b> from the
-              group?
-            </p>
-          }
-          onConfirm={() => removeUserFromGroup(pendingRemoval)}
-          onCancel={() => setPendingRemoval(null)}
-        />
-      )}
     </>
   );
 }

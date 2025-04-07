@@ -6,6 +6,8 @@ export type GroupType = 'private' | 'restricted' | 'open';
 /** Member role within a group. */
 export type Role = 'owner' | 'admin' | 'moderator' | 'member';
 
+export type AnnotationModerationStatus = "pending" | "APPROVED" | "denied" | "private" | "spam";
+
 /** A date and time in ISO format (eg. "2024-12-09T07:17:52+00:00") */
 export type ISODateTime = string;
 
@@ -51,6 +53,8 @@ export type GroupMember = {
 export type Annotation = {
   id: string;
   text: string;
+  created: string;
+  moderation_status: AnnotationModerationStatus;
 };
 
 
