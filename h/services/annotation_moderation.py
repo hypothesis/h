@@ -1,5 +1,6 @@
 from h.events import AnnotationAction
 from h.models import Annotation, AnnotationModeration, Group
+from h.models.annotation import ModerationStatus
 
 
 class AnnotationModerationService:

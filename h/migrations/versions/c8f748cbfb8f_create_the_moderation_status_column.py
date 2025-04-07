@@ -5,7 +5,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision = "c8f748cbfb8f"
-down_revision = "372308320143"
+down_revision = "cf4eedee60f7"
 
 
 def upgrade() -> None:
@@ -14,6 +14,7 @@ def upgrade() -> None:
         "DENIED",
         "SPAM",
         "PRIVATE",
+        "PENDING",
         name="moderationstatus",
     )
     moderation_status_type.create(op.get_bind(), checkfirst=True)
