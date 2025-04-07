@@ -5,6 +5,7 @@ from h.schemas.util import validate_query_params
 from h.services.annotation_read import AnnotationReadService
 from h.traversal import GroupContext
 from h.views.api.config import api_config
+from h.models import Annotation
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +31,9 @@ def list_annotations(context: GroupContext, request):
 
     annotation_json_service = request.find_service(name="annotation_json")
 
-    query = AnnotationReadService.annotation_search_query(groupid=group.pubid)
+    query = AnnotationReadService.annotation_search_query(
+        groupid=group.pubid, include_private=False
+    ).order_by(Annotation.created.desc())
 
     total = request.db.execute(AnnotationReadService.count_query(query)).scalar_one()
     annotations = request.db.scalars(query.offset(offset).limit(limit))

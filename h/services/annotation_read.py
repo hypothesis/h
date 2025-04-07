@@ -49,6 +49,7 @@ class AnnotationReadService:
         ids: list[str] = None,  # noqa: RUF013
         eager_load: list | None = None,
         groupid: str | None = None,
+        include_private: bool = True,
     ) -> Query:
         """Create a query for searching for annotations."""
 
@@ -58,6 +59,9 @@ class AnnotationReadService:
 
         if groupid:
             query = query.where(Annotation.groupid == groupid)
+
+        if not include_private:
+            query = query.where(Annotation.shared.is_(True))
 
         if eager_load:
             query = query.options(*(subqueryload(prop) for prop in eager_load))
