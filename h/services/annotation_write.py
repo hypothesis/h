@@ -163,21 +163,21 @@ class AnnotationWriteService:
 
         return annotation
 
-    def hide(self, annotation):
+    def hide(self, annotation, user):
         """Hides  an annotation marking it it as "moderated"."""
         if not annotation.is_hidden:
             annotation.moderation = AnnotationModeration()
             self._moderation_service.set_status(
-                annotation, Annotation.ModerationStatus.DENIED
+                annotation, user, Annotation.ModerationStatus.DENIED
             )
 
         self.upsert_annotation_slim(annotation)
 
-    def unhide(self, annotation):
+    def unhide(self, annotation, user):
         """Remove the moderation status of an annotation."""
         annotation.moderation = None
         self._moderation_service.set_status(
-            annotation, Annotation.ModerationStatus.DENIED
+            annotation, user, Annotation.ModerationStatus.DENIED
         )
 
         self.upsert_annotation_slim(annotation)

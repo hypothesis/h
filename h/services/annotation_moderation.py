@@ -1,6 +1,7 @@
 from h.events import AnnotationAction
-from h.models import Annotation, AnnotationModeration, Group
+from h.models import Annotation, AnnotationModeration, Group, User
 from h.models.annotation import ModerationStatus
+from h.models.annotation_moderation import ModerationLog
 
 
 class AnnotationModerationService:
@@ -23,9 +24,19 @@ class AnnotationModerationService:
         )
         return {m.annotation_id for m in query}
 
-    def set_status(self, annotation, status):
-        # If we get an explict status, we set it
-        annotation.moderation_status = status
+    def set_status(
+        self, annotation: Annotation, user: User, status: ModerationStatus | None
+    ) -> None:
+        if status and status != annotation.moderation_status:
+            self._session.add(
+                ModerationLog(
+                    annotation=annotation,
+                    old_moderation_status=annotation.moderation_status,
+                    new_moderation_status=status,
+                    user=user,
+                )
+            )
+            annotation.moderation_status = status
 
     def initialize_status(self, annotation):
         if not annotation.moderation_status and annotation.shared:
@@ -55,8 +66,7 @@ class AnnotationModerationService:
         ):
             new_status = ModerationStatus.PENDING
 
-        if new_status and new_status != annotation.moderation_status:
-            self.set_status(annotation, new_status)
+        self.set_status(annotation, new_status)
 
 
 def annotation_moderation_service_factory(_context, request):

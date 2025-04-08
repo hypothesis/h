@@ -16,7 +16,7 @@ from h.views.api.config import api_config
     permission=Permission.Annotation.MODERATE,
 )
 def create(context, request):
-    request.find_service(AnnotationWriteService).hide(context.annotation)
+    request.find_service(AnnotationWriteService).hide(context.annotation, request.user)
 
     event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
@@ -33,7 +33,9 @@ def create(context, request):
     permission=Permission.Annotation.MODERATE,
 )
 def delete(context, request):
-    request.find_service(AnnotationWriteService).unhide(context.annotation)
+    request.find_service(AnnotationWriteService).unhide(
+        context.annotation, request.user
+    )
 
     event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
@@ -51,7 +53,7 @@ def delete(context, request):
 def change_annotation_moderation_status(context, request):
     status = Annotation.ModerationStatus(request.json_body["moderation_status"].upper())
     request.find_service(name="annotation_moderation").set_status(
-        context.annotation, status
+        context.annotation, request.user, status
     )
     request.notify_after_commit(event)
 
