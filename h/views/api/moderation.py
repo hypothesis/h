@@ -53,6 +53,7 @@ def change_annotation_moderation_status(context, request):
     request.find_service(name="annotation_moderation").set_status(
         context.annotation, status
     )
+    request.notify_after_commit(event)
 
     annotation_json_service = request.find_service(name="annotation_json")
 
