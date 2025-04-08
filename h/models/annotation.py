@@ -20,9 +20,6 @@ class ModerationStatus(Enum):
     DENIED = "DENIED"
     SPAM = "SPAM"
 
-    def is_hidden(self):
-        return self in {self.DENIED, self.SPAM}
-
 
 class Annotation(Base):
     """Model class representing a single annotation."""
@@ -275,6 +272,14 @@ class Annotation(Base):
         """Check if this annotation id is hidden."""
         # TODO, move to the new column after migration and backfill migration
         return self.moderation is not None
+
+    @property
+    def moderated(self):
+        # This replaces is_hidden, adding a new property to give more visibility to the change in the PoC
+        return bool(
+            self.moderation_status
+            and self.moderation_status != ModerationStatus.APPROVED
+        )
 
     def __repr__(self):
         return f"<Annotation {self.id}>"

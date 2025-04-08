@@ -59,12 +59,6 @@ class AnnotationSearchIndexPresenter:
         # We have both concepts now to avoid a migration/reindexing on the ES side
         result["hidden"] = is_hidden
 
-    def _add_moderated(self, result):
-        moderation_service = self.request.find_service(name="annotation_moderation")
-        moderation_service.initialize_status(self.annotation)
-
-        result["moderated"] = self.annotation.is_hidden()
-
     def _add_nipsa(self, result, user_id):
         nipsa_service = self.request.find_service(name="nipsa")
         if nipsa_service.is_flagged(user_id):
