@@ -1,15 +1,16 @@
-from h.db.mixins_dataclasses import AutoincrementingIntegerID
 import sqlalchemy as sa
-
-from h.db import Base, types
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import (
     Mapped,
     MappedAsDataclass,
-    relationship,
     mapped_column,
+    relationship,
 )
+
+from h.db import Base, types
 from h.db.mixins import CreatedMixin, Timestamps
-from sqlalchemy import ForeignKey
+from h.db.mixins_dataclasses import AutoincrementingIntegerID
+from h.models.annotation import ModerationStatus
 
 
 class ModerationLog(Base, AutoincrementingIntegerID, CreatedMixin, MappedAsDataclass):
@@ -21,9 +22,10 @@ class ModerationLog(Base, AutoincrementingIntegerID, CreatedMixin, MappedAsDatac
     annotation_id: Mapped[types.URLSafeUUID] = mapped_column(
         ForeignKey("annotation.id", ondelete="CASCADE"), index=True
     )
+    annotation = relationship("Annotation")
 
-    old_moderation_status: Mapped[str] = mapped_column()
-    new_moderation_status: Mapped[str] = mapped_column()
+    old_moderation_status: Mapped[ModerationStatus | None] = mapped_column()
+    new_moderation_status: Mapped[ModerationStatus] = mapped_column()
 
 
 class AnnotationModeration(Base, Timestamps):

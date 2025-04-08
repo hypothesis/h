@@ -11,8 +11,8 @@ from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
-from h.services.annotation_read import AnnotationReadService
 from h.services.annotation_moderation import AnnotationModerationService
+from h.services.annotation_read import AnnotationReadService
 from h.services.job_queue import JobQueueService
 from h.services.mention import MentionService
 from h.traversal.group import GroupContext

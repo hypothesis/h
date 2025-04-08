@@ -48,13 +48,14 @@ def delete(context, request):
     route_name="api.annotation_moderation",
     request_method="PATCH",
     link_name="annotation_moderation",
-    # permission=Permission.Annotation.MODERATE,  TODO: add permission
+    # permission=Permission.Annotation.MODERATE,
 )
 def change_annotation_moderation_status(context, request):
     status = Annotation.ModerationStatus(request.json_body["moderation_status"].upper())
     request.find_service(name="annotation_moderation").set_status(
         context.annotation, request.user, status
     )
+    event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
 
     annotation_json_service = request.find_service(name="annotation_json")

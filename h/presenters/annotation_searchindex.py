@@ -40,7 +40,6 @@ class AnnotationSearchIndexPresenter:
             result["references"] = self.annotation.references
 
         self._add_hidden(result)
-        self._add_moderated(result)
         self._add_nipsa(result, self.annotation.userid)
 
         return result

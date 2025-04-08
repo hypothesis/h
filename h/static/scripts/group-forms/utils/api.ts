@@ -7,10 +7,10 @@ export type GroupType = 'private' | 'restricted' | 'open';
 export type Role = 'owner' | 'admin' | 'moderator' | 'member';
 
 export type AnnotationModerationStatus =
-  | 'pending'
+  | 'PENDING'
   | 'APPROVED'
-  | 'denied'
-  | 'spam';
+  | 'DENIED'
+  | 'SPAM';
 
 /** A date and time in ISO format (eg. "2024-12-09T07:17:52+00:00") */
 export type ISODateTime = string;

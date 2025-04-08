@@ -4,7 +4,7 @@ import {
   Pagination,
   Select,
 } from '@hypothesis/frontend-shared';
-import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
@@ -40,10 +40,10 @@ type AnnotationRow = {
  * of permissions.
  */
 const statusesStrings: Record<AnnotationModerationStatus, string> = {
-  denied: 'Denied',
+  DENIED: 'Denied',
   APPROVED: 'Approved',
-  pending: 'Pending',
-  spam: 'Spam',
+  PENDING: 'Pending',
+  SPAM: 'Spam',
 };
 const possibleStatuses: AnnotationModerationStatus[] = Object.keys(
   statusesStrings,
@@ -221,6 +221,7 @@ export default function ModerateGroupForm({
     setErrorMessage(message);
   }, []);
 
+
   // Fetch group members when the form loads.
   const [annotations, setAnnotations] = useState<AnnotationRow[] | null>(null);
   useEffect(() => {
@@ -251,6 +252,20 @@ export default function ModerateGroupForm({
     };
   }, [config.api.readGroupAnnotations, statusFilter, pageNumber, setError]);
 
+  const filteredAnnotations = useMemo(() => {
+    // I'm sure there's a better way but this handles removing annos when changing their status
+    if (!annotations) return [];
+
+    if (statusFilter === 'ALL') {
+      return annotations;
+    }
+
+    console.log(annotations, statusFilter);
+    return annotations.filter(
+      (annotation) => annotation.moderation_status === statusFilter
+    );
+  }, [annotations, statusFilter]);
+
   const columns: TableColumn<AnnotationRow>[] = [
     {
       field: 'id',
@@ -270,6 +285,7 @@ export default function ModerateGroupForm({
     annotation_id: string,
     update: Partial<AnnotationRow>,
   ) => {
+
     setAnnotations(
       annotations =>
         annotations?.map(a => {
@@ -352,7 +368,7 @@ export default function ModerateGroupForm({
               grid
               striped={false}
               title="Group annotations"
-              rows={annotations ?? []}
+              rows={filteredAnnotations}
               columns={columns}
               renderItem={renderRow}
               loading={!annotations}
