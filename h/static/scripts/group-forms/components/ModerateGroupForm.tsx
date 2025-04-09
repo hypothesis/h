@@ -254,13 +254,12 @@ export default function ModerateGroupForm({
 
   const filteredAnnotations = useMemo(() => {
     // I'm sure there's a better way but this handles removing annos when changing their status
-    if (!annotations) return [];
+    if (!annotations) { return [] };
 
     if (statusFilter === 'ALL') {
       return annotations;
     }
 
-    console.log(annotations, statusFilter);
     return annotations.filter(
       (annotation) => annotation.moderation_status === statusFilter
     );

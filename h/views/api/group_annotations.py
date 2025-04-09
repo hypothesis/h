@@ -3,6 +3,7 @@ import logging
 from h.models import Annotation
 from h.schemas.pagination import PaginationQueryParamsSchema
 from h.schemas.util import validate_query_params
+from h.security import Permission
 from h.services.annotation_read import AnnotationReadService
 from h.traversal import GroupContext
 from h.views.api.config import api_config
@@ -16,7 +17,7 @@ LIST_MEMBERS_API_CONFIG = {
     "request_method": "GET",
     "link_name": "group.annotations.read",
     "description": "Fetch a list of all annotations of a group",
-    # "permission": Permission.Group.READ, TODO # add permission
+    "permission": Permission.Group.READ,
 }
 
 

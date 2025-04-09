@@ -49,10 +49,6 @@ export default function GroupFormHeader({
     ? routes.groups.editMembers.replace(':pubid', group.pubid)
     : null;
 
-  const moderateLink = group
-    ? routes.groups.moderate.replace(':pubid', group.pubid)
-    : null;
-
   return (
     <div className="mb-4 pb-1 border-b border-b-text-grey-6">
       {group && (
@@ -80,11 +76,6 @@ export default function GroupFormHeader({
         {enableMembers && editMembersLinks && (
           <TabLink testId="members-link" href={editMembersLinks}>
             Members
-          </TabLink>
-        )}
-        {moderateLink && (
-          <TabLink testId="moderate-link" href={moderateLink}>
-            Moderate
           </TabLink>
         )}
       </div>

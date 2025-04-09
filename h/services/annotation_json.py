@@ -104,7 +104,7 @@ class AnnotationJSONService:
         annotation: Annotation,
         user: User,
         with_metadata: bool = False,  # noqa: FBT002, FBT001
-        hide_moderated: bool = True,
+        hide_moderated: bool = True,  # noqa: FBT002, FBT001
     ):
         """
         Get the JSON presentation of an annotation for a particular user.
@@ -135,7 +135,6 @@ class AnnotationJSONService:
             }
 
         if hide_moderated:
-            print("HIDDINGI")
             # The hidden value depends on whether you are the author
             user_is_author = user and user.userid == annotation.userid
             if user_is_author or not (annotation.is_hidden or annotation.moderated):
