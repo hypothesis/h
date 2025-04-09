@@ -33,15 +33,19 @@ class EmailData:
     body: str
     tag: EmailTag
     html: str | None = None
+    subaccount: str | None = None
 
     @property
     def message(self) -> pyramid_mailer.message.Message:
+        extra_headers = {"X-MC-Tags": self.tag}
+        if self.subaccount:
+            extra_headers["X-MC-Subaccount"] = self.subaccount
         return pyramid_mailer.message.Message(
             subject=self.subject,
             recipients=self.recipients,
             body=self.body,
             html=self.html,
-            extra_headers={"X-MC-Tags": self.tag},
+            extra_headers=extra_headers,
         )
 
 

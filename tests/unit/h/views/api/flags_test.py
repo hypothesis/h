@@ -49,6 +49,7 @@ class TestCreate:
                     "body": sentinel.text1,
                     "tag": EmailTag.FLAG_NOTIFICATION,
                     "html": sentinel.html1,
+                    "subaccount": None,
                 },
                 {
                     "sender_id": pyramid_request.user.id,
@@ -64,6 +65,7 @@ class TestCreate:
                     "body": sentinel.text2,
                     "tag": EmailTag.FLAG_NOTIFICATION,
                     "html": sentinel.html2,
+                    "subaccount": None,
                 },
                 {
                     "sender_id": pyramid_request.user.id,

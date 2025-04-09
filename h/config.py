@@ -139,6 +139,10 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
         settings_manager.set("mail.tls", "MANDRILL_TLS", default=True)
 
     settings_manager.set(
+        "mailchimp_user_actions_subaccount", "MAILCHIMP_USER_ACTIONS_SUBACCOUNT"
+    )
+
+    settings_manager.set(
         "h_api_auth_cookie_secret_key",
         "H_API_AUTH_COOKIE_SECRET_KEY",
         type_=_to_utf8,

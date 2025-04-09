@@ -43,6 +43,26 @@ class TestEmailService:
             extra_headers={"X-MC-Tags": EmailTag.TEST},
         )
 
+    def test_send_creates_email_message_with_subaccount(
+        self, task_data, email_service, pyramid_mailer
+    ):
+        email = EmailData(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=EmailTag.TEST,
+            subaccount="subaccount",
+        )
+        email_service.send(email, task_data)
+
+        pyramid_mailer.message.Message.assert_called_once_with(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            html=None,
+            extra_headers={"X-MC-Tags": EmailTag.TEST, "X-MC-Subaccount": "subaccount"},
+        )
+
     def test_send_dispatches_email_using_request_mailer(
         self, email_data, task_data, email_service, pyramid_mailer
     ):
