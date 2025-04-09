@@ -359,14 +359,7 @@ class HiddenFilter:
         # If any one of these "should" clauses is true then the annotation will
         # get through the filter.
         should_clauses = [
-            Q(
-                "bool",
-                must_not=[
-                    Q("term", nipsa=True),
-                    Q("term", hidden=True),
-                    Q("term", moderated=True),
-                ],
-            )
+            Q("bool", must_not=[Q("term", nipsa=True), Q("term", hidden=True)])
         ]
 
         if self.user is not None:

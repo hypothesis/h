@@ -38,17 +38,14 @@ class AnnotationModerationService:
             )
             annotation.moderation_status = status
 
-    def initialize_status(self, annotation):
-        if not annotation.moderation_status and annotation.shared:
-            # First set the right moderation status if this row as not been migrated
-            # We have already migrated all moderated (hide/unhide) annotations
-            # The reminding ones are either private or approved
-            annotation.moderation_status = ModerationStatus.APPROVED
-
     def update_status(
-        self, action: AnnotationAction, annotation: Annotation, group: Group
+        self, action: AnnotationAction, annotation: Annotation, user: User, group: Group
     ) -> None:
-        self.initialize_status(annotation)
+        if not annotation.moderation_status and annotation.shared:
+            # If an annotation is not private but doesn't have a moderation status
+            # it means that the moderation status hasn't been migrated yet
+            # set the default `APPROVED` status
+            annotation.moderation_status = ModerationStatus.APPROVED
 
         if not annotation.shared:
             return
@@ -66,7 +63,7 @@ class AnnotationModerationService:
         ):
             new_status = ModerationStatus.PENDING
 
-        self.set_status(annotation, new_status)
+        self.set_status(annotation, user, new_status)
 
 
 def annotation_moderation_service_factory(_context, request):

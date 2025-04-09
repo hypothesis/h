@@ -54,8 +54,6 @@ class AnnotationSearchIndexPresenter:
             parents_and_replies
         )
 
-        # Note that all hidden annotations are also moderated
-        # We have both concepts now to avoid a migration/reindexing on the ES side
         result["hidden"] = is_hidden
 
     def _add_nipsa(self, result, user_id):

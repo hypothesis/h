@@ -20,7 +20,7 @@ class AnnotationDeleteService:
         self.annotation_write = annotation_write
         self.job_queue = job_queue
 
-    def delete(self, annotation):
+    def delete(self, annotation, user):
         """
         Delete the given annotation.
 
@@ -36,7 +36,7 @@ class AnnotationDeleteService:
             schedule_in=60,
         )
 
-        self.annotation_write.upsert_annotation_slim(annotation)
+        self.annotation_write.upsert_annotation_slim(annotation, user)
 
         event = AnnotationEvent(self.request, annotation.id, "delete")
         self.request.notify_after_commit(event)

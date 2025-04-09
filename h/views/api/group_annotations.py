@@ -59,10 +59,14 @@ def list_annotations(context: GroupContext, request):
 def _present_for_user(_request, service, annotation, user):
     annotation_json = service.present_for_user(annotation, user, hide_moderated=False)
 
-    annotation_json["moderation_status"] = (
-        annotation.moderation_status.value
-        if annotation.moderation_status
-        else annotation.ModerationStatus.APPROVED.value
-    )
+    if not annotation.moderation_status:
+        if annotation.shared:
+            annotation_json["moderation_status"] = (
+                annotation.ModerationStatus.APPROVED.value
+            )
+        else:
+            annotation_json["moderation_status"] = None
+    else:
+        annotation_json["moderation_status"] = annotation.moderation_status.value
 
     return annotation_json
