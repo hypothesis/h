@@ -39,6 +39,7 @@ from h.services.oauth.service import OAuthProviderService
 from h.services.organization import OrganizationService
 from h.services.search_index import SearchIndexService
 from h.services.subscription import SubscriptionService
+from h.services.task_done import TaskDoneService
 from h.services.url_migration import URLMigrationService
 from h.services.user import UserService
 from h.services.user_delete import UserDeleteService
@@ -85,6 +86,7 @@ __all__ = (
     "queue_service",
     "search_index",
     "subscription_service",
+    "task_done_service",
     "url_migration_service",
     "user_delete_service",
     "user_password_service",
@@ -340,3 +342,8 @@ def feature_service(mock_service):
 @pytest.fixture
 def email_service(mock_service):
     return mock_service(EmailService)
+
+
+@pytest.fixture
+def task_done_service(mock_service):
+    return mock_service(TaskDoneService)

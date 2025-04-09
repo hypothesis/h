@@ -16,9 +16,10 @@ from h.services.job_queue import JobQueueService
 from h.services.mention import MentionService
 from h.services.notification import NotificationService
 from h.services.subscription import SubscriptionService
+from h.services.task_done import TaskDoneService
 
 
-def includeme(config):  # pragma: no cover
+def includeme(config):  # pragma: no cover  # noqa: PLR0915
     # Annotation related services
     config.register_service_factory(
         "h.services.annotation_delete.annotation_delete_service_factory",
@@ -174,3 +175,6 @@ def includeme(config):  # pragma: no cover
         "h.services.analytics.analytics_service_factory", name="analytics"
     )
     config.register_service_factory("h.services.email.factory", iface=EmailService)
+    config.register_service_factory(
+        "h.services.task_done.factory", iface=TaskDoneService
+    )
