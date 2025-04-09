@@ -2,6 +2,7 @@
 
 import smtplib
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 
 import pyramid_mailer
 import pyramid_mailer.message
@@ -14,6 +15,9 @@ from h.services.task_done import TaskData, TaskDoneService
 from h.tasks.celery import get_task_logger
 
 logger = get_task_logger(__name__)
+
+# Limit for the number of mention emails sent by a single user in a day to prevent abuse
+DAILY_SENDER_MENTION_LIMIT = 5
 
 
 @dataclass(frozen=True)
@@ -51,6 +55,9 @@ class EmailService:
         self._task_done_service = task_done_service
 
     def send(self, email_data: EmailData, task_data: TaskData) -> None:
+        if not self._allow_sending(task_data):
+            return
+
         if self._debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
@@ -73,6 +80,23 @@ class EmailService:
             task_data.formatted_extra,
         )
         self._task_done_service.create(task_data)
+
+    def _allow_sending(self, task_data: TaskData) -> bool:
+        if (
+            task_data.tag == EmailTag.MENTION_NOTIFICATION
+            and self._sender_limit_reached(task_data)
+        ):
+            logger.warning(
+                "Email not sent for sender_id=%s: limit reached",
+                task_data.sender_id,
+            )
+            return False
+        return True
+
+    def _sender_limit_reached(self, task_data: TaskData) -> bool:
+        after = datetime.now(UTC) - timedelta(days=1)
+        count = self._task_done_service.sender_mention_count(task_data.sender_id, after)
+        return count >= DAILY_SENDER_MENTION_LIMIT
 
 
 def factory(_context, request: Request) -> EmailService:
