@@ -64,7 +64,7 @@ def change_annotation_moderation_status(context, request):
 
 
 def _present_for_user(service, annotation, user):
-    annotation_json = service.present_for_user(annotation, user)
+    annotation_json = service.present_for_user(annotation, user, hide_moderated=False)
 
     annotation_json["moderation_status"] = (
         annotation.moderation_status.value

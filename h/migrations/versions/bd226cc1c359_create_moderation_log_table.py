@@ -4,9 +4,10 @@ Revision ID: bd226cc1c359
 Revises: 96cde96b2fd7
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
+
 from h.db import types
 
 revision = "bd226cc1c359"

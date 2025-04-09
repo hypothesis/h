@@ -104,6 +104,7 @@ class AnnotationJSONService:
         annotation: Annotation,
         user: User,
         with_metadata: bool = False,  # noqa: FBT002, FBT001
+        hide_moderated: bool = True,
     ):
         """
         Get the JSON presentation of an annotation for a particular user.
@@ -133,16 +134,18 @@ class AnnotationJSONService:
                 "flagCount": self._flag_service.flag_count(annotation)
             }
 
-        # The hidden value depends on whether you are the author
-        user_is_author = user and user.userid == annotation.userid
-        if user_is_author or not (annotation.is_hidden or annotation.moderated):
-            model["hidden"] = False
-        else:
-            model["hidden"] = True
+        if hide_moderated:
+            print("HIDDINGI")
+            # The hidden value depends on whether you are the author
+            user_is_author = user and user.userid == annotation.userid
+            if user_is_author or not (annotation.is_hidden or annotation.moderated):
+                model["hidden"] = False
+            else:
+                model["hidden"] = True
 
-            # Non moderators have bad content hidden from them
-            if not user_is_moderator:
-                model.update({"text": "", "tags": []})
+                # Non moderators have bad content hidden from them
+                if not user_is_moderator:
+                    model.update({"text": "", "tags": []})
 
         return model
 
