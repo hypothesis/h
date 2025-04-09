@@ -80,7 +80,11 @@ class AnnotationJSONService:
                 },
                 "target": annotation.target,
                 "document": DocumentJSONPresenter(annotation.document).asdict(),
-                "links": self._links_service.get_all(annotation),
+                "links": {
+                    "html": self._links_service.html_link(annotation),
+                    "incontext": self._links_service.incontext_link(annotation),
+                    "json": self._links_service.json_link(annotation),
+                },
             }
         )
 
