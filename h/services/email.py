@@ -1,9 +1,7 @@
 # noqa: A005
 
 import smtplib
-from dataclasses import asdict, dataclass, field
-from enum import StrEnum
-from typing import Any
+from dataclasses import dataclass
 
 import pyramid_mailer
 import pyramid_mailer.message
@@ -11,19 +9,11 @@ from pyramid.request import Request
 from pyramid_mailer import IMailer
 from sqlalchemy.orm import Session
 
-from h.models import TaskDone
+from h.models.notification import EmailTag
+from h.services.task_done import TaskData, TaskDoneService
 from h.tasks.celery import get_task_logger
 
 logger = get_task_logger(__name__)
-
-
-class EmailTag(StrEnum):
-    ACTIVATION = "activation"
-    FLAG_NOTIFICATION = "flag_notification"
-    REPLY_NOTIFICATION = "reply_notification"
-    RESET_PASSWORD = "reset_password"  # noqa: S105
-    MENTION_NOTIFICATION = "mention_notification"
-    TEST = "test"
 
 
 @dataclass(frozen=True)
@@ -49,25 +39,20 @@ class EmailData:
         )
 
 
-@dataclass(frozen=True)
-class TaskData:
-    tag: EmailTag
-    sender_id: int
-    recipient_ids: list[int] = field(default_factory=list)
-    extra: dict[str, Any] = field(default_factory=dict)
-
-    @property
-    def formatted_extra(self) -> str:
-        return ", ".join(f"{k}={v!r}" for k, v in self.extra.items() if v is not None)
-
-
 class EmailService:
     """A service for sending emails."""
 
-    def __init__(self, debug: bool, session: Session, mailer: IMailer) -> None:  # noqa: FBT001
+    def __init__(
+        self,
+        debug: bool,  # noqa: FBT001
+        session: Session,
+        mailer: IMailer,
+        task_done_service: TaskDoneService,
+    ) -> None:
         self._debug = debug
         self._session = session
         self._mailer = mailer
+        self._task_done_service = task_done_service
 
     def send(self, email_data: EmailData, task_data: TaskData) -> None:
         if self._debug:  # pragma: no cover
@@ -91,13 +76,14 @@ class EmailService:
             separator,
             task_data.formatted_extra,
         )
-        self._create_task_done(task_data)
-
-    def _create_task_done(self, task_data: TaskData) -> None:
-        task_done = TaskDone(data=asdict(task_data))
-        self._session.add(task_done)
+        self._task_done_service.create(task_data)
 
 
 def factory(_context, request: Request) -> EmailService:
     mailer = pyramid_mailer.get_mailer(request)
-    return EmailService(debug=request.debug, session=request.db, mailer=mailer)
+    return EmailService(
+        debug=request.debug,
+        session=request.db,
+        mailer=mailer,
+        task_done_service=request.find_service(TaskDoneService),
+    )

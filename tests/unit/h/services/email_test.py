@@ -1,11 +1,8 @@
 import smtplib
-from dataclasses import asdict
 from unittest.mock import sentinel
 
 import pytest
-from sqlalchemy import select
 
-from h.models import TaskDone
 from h.services.email import EmailData, EmailService, EmailTag, TaskData, factory
 
 
@@ -105,7 +102,7 @@ class TestEmailService:
         ]
 
     def test_send_creates_task_done(
-        self, email_data, task_data, email_service, db_session
+        self, email_data, task_data, email_service, task_done_service
     ):
         task_data = TaskData(
             tag=email_data.tag,
@@ -115,9 +112,7 @@ class TestEmailService:
         )
         email_service.send(email_data, task_data)
 
-        task_dones = db_session.execute(select(TaskDone)).scalars().all()
-        assert len(task_dones) == 1
-        assert task_dones[0].data == asdict(task_data)
+        task_done_service.create.assert_called_once_with(task_data)
 
     @pytest.fixture
     def email_data(self):
@@ -137,9 +132,14 @@ class TestEmailService:
         )
 
     @pytest.fixture
-    def email_service(self, pyramid_request, pyramid_mailer):
+    def email_service(self, pyramid_request, pyramid_mailer, task_done_service):
         request_mailer = pyramid_mailer.get_mailer.return_value
-        return EmailService(pyramid_request.debug, pyramid_request.db, request_mailer)
+        return EmailService(
+            debug=pyramid_request.debug,
+            session=pyramid_request.db,
+            mailer=request_mailer,
+            task_done_service=task_done_service,
+        )
 
     @pytest.fixture
     def info_caplog(self, caplog):
@@ -148,13 +148,14 @@ class TestEmailService:
 
 
 class TestFactory:
-    def test_it(self, pyramid_request, pyramid_mailer, EmailService):
+    def test_it(self, pyramid_request, pyramid_mailer, EmailService, task_done_service):
         service = factory(sentinel.context, pyramid_request)
 
         EmailService.assert_called_once_with(
             debug=pyramid_request.debug,
             session=pyramid_request.db,
             mailer=pyramid_mailer.get_mailer.return_value,
+            task_done_service=task_done_service,
         )
 
         assert service == EmailService.return_value
