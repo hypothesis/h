@@ -15,6 +15,7 @@ FEATURES = {
     ),
     "group_members": "Allow users to manage group members in new group forms",
     "group_type": "Allow users to choose group type in new group forms",
+    "html_image_annotation": "Support image annotations in HTML",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "pdf_image_annotation": "Support image annotations in PDFs",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
