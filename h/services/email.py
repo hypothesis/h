@@ -17,7 +17,7 @@ from h.tasks.celery import get_task_logger
 logger = get_task_logger(__name__)
 
 # Limit for the number of mention emails sent by a single user in a day to prevent abuse
-DAILY_SENDER_MENTION_LIMIT = 5
+DAILY_SENDER_MENTION_LIMIT = 100
 
 
 @dataclass(frozen=True)

@@ -49,26 +49,22 @@ class TestEmailService:
             extra_headers={"X-MC-Tags": EmailTag.TEST},
         )
 
-    def test_send_creates_email_with_mention(
-        self, email_data, task_data, email_service, pyramid_mailer, task_done_service
+    def test_send_creates_mention_email_when_sender_limit_not_reached(
+        self,
+        mention_email_data,
+        mention_task_data,
+        email_service,
+        pyramid_mailer,
+        task_done_service,
     ):
-        email_data = EmailData(
-            recipients=["foo@example.com"],
-            subject="My email subject",
-            body="Some text body",
-            tag=EmailTag.MENTION_NOTIFICATION,
+        task_done_service.sender_mention_count.return_value = (
+            DAILY_SENDER_MENTION_LIMIT - 1
         )
-        task_data = TaskData(
-            tag=email_data.tag,
-            sender_id=123,
-            recipient_ids=[124],
-        )
-        task_done_service.sender_mention_count.return_value = DAILY_SENDER_MENTION_LIMIT
 
-        email_service.send(email_data, task_data)
+        email_service.send(mention_email_data, mention_task_data)
 
         task_done_service.sender_mention_count.assert_called_once_with(
-            task_data.sender_id, mock.ANY
+            mention_task_data.sender_id, mock.ANY
         )
         pyramid_mailer.message.Message.assert_called_once_with(
             recipients=["foo@example.com"],
@@ -78,28 +74,20 @@ class TestEmailService:
             extra_headers={"X-MC-Tags": EmailTag.MENTION_NOTIFICATION},
         )
 
-    def test_send_does_not_create_email_with_mention(
-        self, email_data, task_data, email_service, pyramid_mailer, task_done_service
+    def test_send_does_not_create_mention_email_when_sender_limit_reached(
+        self,
+        mention_email_data,
+        mention_task_data,
+        email_service,
+        pyramid_mailer,
+        task_done_service,
     ):
-        email_data = EmailData(
-            recipients=["foo@example.com"],
-            subject="My email subject",
-            body="Some text body",
-            tag=EmailTag.MENTION_NOTIFICATION,
-        )
-        task_data = TaskData(
-            tag=email_data.tag,
-            sender_id=123,
-            recipient_ids=[124],
-        )
-        task_done_service.sender_mention_count.return_value = (
-            DAILY_SENDER_MENTION_LIMIT + 1
-        )
+        task_done_service.sender_mention_count.return_value = DAILY_SENDER_MENTION_LIMIT
 
-        email_service.send(email_data, task_data)
+        email_service.send(mention_email_data, mention_task_data)
 
         task_done_service.sender_mention_count.assert_called_once_with(
-            task_data.sender_id, mock.ANY
+            mention_task_data.sender_id, mock.ANY
         )
         pyramid_mailer.message.Message.assert_not_called()
 
@@ -139,10 +127,27 @@ class TestEmailService:
             recipient_ids=[recipient_id],
             extra={"annotation_id": annotation_id},
         )
+
         email_service.send(email_data, task_data)
 
         assert info_caplog.messages == [
             f"Sent email: tag={task_data.tag!r}, sender_id={sender_id}, recipient_ids={[recipient_id]}, annotation_id={annotation_id!r}"
+        ]
+
+    def test_sender_limit_reached_logging(
+        self,
+        mention_email_data,
+        mention_task_data,
+        email_service,
+        task_done_service,
+        info_caplog,
+    ):
+        task_done_service.sender_mention_count.return_value = DAILY_SENDER_MENTION_LIMIT
+
+        email_service.send(mention_email_data, mention_task_data)
+
+        assert info_caplog.messages == [
+            f"Email not sent for sender_id={mention_task_data.sender_id}: limit reached"
         ]
 
     def test_send_creates_task_done(
@@ -154,6 +159,7 @@ class TestEmailService:
             recipient_ids=[124],
             extra={"annotation_id": "annotation_id"},
         )
+
         email_service.send(email_data, task_data)
 
         task_done_service.create.assert_called_once_with(task_data)
@@ -171,6 +177,23 @@ class TestEmailService:
     def task_data(self):
         return TaskData(
             tag=EmailTag.TEST,
+            sender_id=123,
+            recipient_ids=[124],
+        )
+
+    @pytest.fixture
+    def mention_email_data(self):
+        return EmailData(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=EmailTag.MENTION_NOTIFICATION,
+        )
+
+    @pytest.fixture
+    def mention_task_data(self):
+        return TaskData(
+            tag=EmailTag.MENTION_NOTIFICATION,
             sender_id=123,
             recipient_ids=[124],
         )
