@@ -15,3 +15,8 @@ class TaskDone(ModelFactory):
     def expires_at(self, _create, extracted, **_kwargs):
         if extracted:
             self.expires_at = extracted
+
+    @post_generation
+    def created(self, _create, extracted, **_kwargs):
+        if extracted:
+            self.created = extracted

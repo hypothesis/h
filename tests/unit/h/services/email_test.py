@@ -1,12 +1,17 @@
 import smtplib
-from dataclasses import asdict
+from unittest import mock
 from unittest.mock import sentinel
 
 import pytest
-from sqlalchemy import select
 
-from h.models import TaskDone
-from h.services.email import EmailData, EmailService, EmailTag, TaskData, factory
+from h.services.email import (
+    DAILY_SENDER_MENTION_LIMIT,
+    EmailData,
+    EmailService,
+    EmailTag,
+    TaskData,
+    factory,
+)
 
 
 class TestEmailService:
@@ -24,16 +29,17 @@ class TestEmailService:
         )
 
     def test_send_creates_email_message_with_html_body(
-        self, task_data, email_service, pyramid_mailer
+        self, email_service, task_data, pyramid_mailer
     ):
-        email = EmailData(
+        email_data = EmailData(
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
             tag=EmailTag.TEST,
             html="<p>An HTML body</p>",
         )
-        email_service.send(email, task_data)
+
+        email_service.send(email_data, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
             recipients=["foo@example.com"],
@@ -42,6 +48,48 @@ class TestEmailService:
             html="<p>An HTML body</p>",
             extra_headers={"X-MC-Tags": EmailTag.TEST},
         )
+
+    def test_send_creates_mention_email_when_sender_limit_not_reached(
+        self,
+        mention_email_data,
+        mention_task_data,
+        email_service,
+        pyramid_mailer,
+        task_done_service,
+    ):
+        task_done_service.sender_mention_count.return_value = (
+            DAILY_SENDER_MENTION_LIMIT - 1
+        )
+
+        email_service.send(mention_email_data, mention_task_data)
+
+        task_done_service.sender_mention_count.assert_called_once_with(
+            mention_task_data.sender_id, mock.ANY
+        )
+        pyramid_mailer.message.Message.assert_called_once_with(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            html=None,
+            extra_headers={"X-MC-Tags": EmailTag.MENTION_NOTIFICATION},
+        )
+
+    def test_send_does_not_create_mention_email_when_sender_limit_reached(
+        self,
+        mention_email_data,
+        mention_task_data,
+        email_service,
+        pyramid_mailer,
+        task_done_service,
+    ):
+        task_done_service.sender_mention_count.return_value = DAILY_SENDER_MENTION_LIMIT
+
+        email_service.send(mention_email_data, mention_task_data)
+
+        task_done_service.sender_mention_count.assert_called_once_with(
+            mention_task_data.sender_id, mock.ANY
+        )
+        pyramid_mailer.message.Message.assert_not_called()
 
     def test_send_dispatches_email_using_request_mailer(
         self, email_data, task_data, email_service, pyramid_mailer
@@ -70,34 +118,51 @@ class TestEmailService:
         ]
 
     def test_send_logging_with_extra(self, email_data, email_service, info_caplog):
-        user_id = 123
+        sender_id = 123
+        recipient_id = 124
         annotation_id = "annotation_id"
         task_data = TaskData(
             tag=email_data.tag,
-            sender_id=user_id,
-            recipient_ids=[user_id],
+            sender_id=sender_id,
+            recipient_ids=[recipient_id],
             extra={"annotation_id": annotation_id},
         )
+
         email_service.send(email_data, task_data)
 
         assert info_caplog.messages == [
-            f"Sent email: tag={task_data.tag!r}, sender_id={user_id}, recipient_ids={[user_id]}, annotation_id={annotation_id!r}"
+            f"Sent email: tag={task_data.tag!r}, sender_id={sender_id}, recipient_ids={[recipient_id]}, annotation_id={annotation_id!r}"
+        ]
+
+    def test_sender_limit_reached_logging(
+        self,
+        mention_email_data,
+        mention_task_data,
+        email_service,
+        task_done_service,
+        info_caplog,
+    ):
+        task_done_service.sender_mention_count.return_value = DAILY_SENDER_MENTION_LIMIT
+
+        email_service.send(mention_email_data, mention_task_data)
+
+        assert info_caplog.messages == [
+            f"Email not sent for sender_id={mention_task_data.sender_id}: limit reached"
         ]
 
     def test_send_creates_task_done(
-        self, email_data, task_data, email_service, db_session
+        self, email_data, task_data, email_service, task_done_service
     ):
         task_data = TaskData(
             tag=email_data.tag,
             sender_id=123,
-            recipient_ids=[123],
+            recipient_ids=[124],
             extra={"annotation_id": "annotation_id"},
         )
+
         email_service.send(email_data, task_data)
 
-        task_dones = db_session.execute(select(TaskDone)).scalars().all()
-        assert len(task_dones) == 1
-        assert task_dones[0].data == asdict(task_data)
+        task_done_service.create.assert_called_once_with(task_data)
 
     @pytest.fixture
     def email_data(self):
@@ -113,13 +178,35 @@ class TestEmailService:
         return TaskData(
             tag=EmailTag.TEST,
             sender_id=123,
-            recipient_ids=[123],
+            recipient_ids=[124],
         )
 
     @pytest.fixture
-    def email_service(self, pyramid_request, pyramid_mailer):
+    def mention_email_data(self):
+        return EmailData(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            tag=EmailTag.MENTION_NOTIFICATION,
+        )
+
+    @pytest.fixture
+    def mention_task_data(self):
+        return TaskData(
+            tag=EmailTag.MENTION_NOTIFICATION,
+            sender_id=123,
+            recipient_ids=[124],
+        )
+
+    @pytest.fixture
+    def email_service(self, pyramid_request, pyramid_mailer, task_done_service):
         request_mailer = pyramid_mailer.get_mailer.return_value
-        return EmailService(pyramid_request.debug, pyramid_request.db, request_mailer)
+        return EmailService(
+            debug=pyramid_request.debug,
+            session=pyramid_request.db,
+            mailer=request_mailer,
+            task_done_service=task_done_service,
+        )
 
     @pytest.fixture
     def info_caplog(self, caplog):
@@ -128,13 +215,14 @@ class TestEmailService:
 
 
 class TestFactory:
-    def test_it(self, pyramid_request, pyramid_mailer, EmailService):
+    def test_it(self, pyramid_request, pyramid_mailer, EmailService, task_done_service):
         service = factory(sentinel.context, pyramid_request)
 
         EmailService.assert_called_once_with(
             debug=pyramid_request.debug,
             session=pyramid_request.db,
             mailer=pyramid_mailer.get_mailer.return_value,
+            task_done_service=task_done_service,
         )
 
         assert service == EmailService.return_value

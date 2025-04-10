@@ -1,4 +1,4 @@
-import enum
+from enum import StrEnum
 
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,9 +8,18 @@ from h.db.mixins import Timestamps
 from h.models import helpers
 
 
-class NotificationType(enum.StrEnum):
+class NotificationType(StrEnum):
     MENTION = "mention"
     REPLY = "reply"
+
+
+class EmailTag(StrEnum):
+    ACTIVATION = "activation"
+    FLAG_NOTIFICATION = "flag_notification"
+    REPLY_NOTIFICATION = "reply_notification"
+    RESET_PASSWORD = "reset_password"  # noqa: S105
+    MENTION_NOTIFICATION = "mention_notification"
+    TEST = "test"
 
 
 class Notification(Base, Timestamps):  # pragma: no cover
