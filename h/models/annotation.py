@@ -1,10 +1,12 @@
 import datetime
+from enum import Enum
 from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
+from sqlalchemy.orm import Mapped, relationship
 
 from h.db import Base, types
 from h.models.group import Group
@@ -12,8 +14,18 @@ from h.util import markdown_render, uri
 from h.util.user import split_user
 
 
+class ModerationStatus(Enum):
+    APPROVED = "APPROVED"
+    PENDING = "PENDING"
+    DENIED = "DENIED"
+    SPAM = "SPAM"
+
+
 class Annotation(Base):
     """Model class representing a single annotation."""
+
+    # Expose the ModerationStatus directly here
+    ModerationStatus = ModerationStatus
 
     __tablename__ = "annotation"
     __table_args__ = (
@@ -68,7 +80,7 @@ class Annotation(Base):
         index=True,
     )
 
-    group = sa.orm.relationship(
+    group = relationship(
         Group,
         primaryjoin=(Group.pubid == groupid),
         foreign_keys=[groupid],
@@ -138,11 +150,11 @@ class Annotation(Base):
         uselist=True,
     )
 
-    mentions = sa.orm.relationship("Mention", back_populates="annotation")
+    mentions = relationship("Mention", back_populates="annotation")
 
-    notifications = sa.orm.relationship(
-        "Notification", back_populates="source_annotation"
-    )
+    notifications = relationship("Notification", back_populates="source_annotation")
+
+    moderation_status: Mapped[ModerationStatus | None]
 
     @property
     def uuid(self):
@@ -258,8 +270,16 @@ class Annotation(Base):
     @property
     def is_hidden(self):
         """Check if this annotation id is hidden."""
-
+        # TODO, move to the new column after migration and backfill migration
         return self.moderation is not None
+
+    @property
+    def moderated(self):
+        # This replaces is_hidden, adding a new property to give more visibility to the change in the PoC
+        return bool(
+            self.moderation_status
+            and self.moderation_status != ModerationStatus.APPROVED
+        )
 
     def __repr__(self):
         return f"<Annotation {self.id}>"

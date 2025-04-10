@@ -48,6 +48,9 @@ ignore = [
     "PLR6301", # Method could be a function/classmethod/static method (doesn't use self)
     "RET501", # Do not explicitly return None if it's the only possible return value.
     "RET504", # Unnecessary assignment before return statement.
+
+    # PoC-mode 
+    "FIX002", "RUF100", "TD003", "TD004", "TD002"
 ]
 
 [tool.ruff.lint.per-file-ignores]

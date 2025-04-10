@@ -9,5 +9,6 @@ export const routes = {
     new: '/groups/new',
     edit: '/groups/:pubid/edit',
     editMembers: '/groups/:pubid/edit/members',
+    moderate: '/groups/:pubid/edit/moderate',
   },
 };

@@ -1,9 +1,11 @@
 import datetime
 
 import sqlalchemy as sa
+from sqlalchemy.orm import Mapped, relationship
 
 from h.db import Base, types
 from h.models import helpers
+from h.models.annotation import Annotation
 
 
 class AnnotationSlim(Base):
@@ -31,7 +33,7 @@ class AnnotationSlim(Base):
     )
     """The value of annotation.id, named here pubid following the convention of group.pubid"""
 
-    annotation = sa.orm.relationship(
+    annotation = relationship(
         "Annotation", backref=sa.orm.backref("slim", uselist=False)
     )
 
@@ -64,6 +66,7 @@ class AnnotationSlim(Base):
         default=False,
         server_default=sa.sql.expression.false(),
     )
+    moderation_status: Mapped[Annotation.ModerationStatus | None]
 
     shared = sa.Column(
         sa.Boolean,
@@ -78,7 +81,7 @@ class AnnotationSlim(Base):
         nullable=False,
         index=True,
     )
-    document = sa.orm.relationship("Document")
+    document = relationship("Document")
 
     user_id = sa.Column(
         sa.Integer,
@@ -86,7 +89,7 @@ class AnnotationSlim(Base):
         nullable=False,
         index=True,
     )
-    user = sa.orm.relationship("User")
+    user = relationship("User")
 
     group_id = sa.Column(
         sa.Integer,
@@ -94,10 +97,10 @@ class AnnotationSlim(Base):
         nullable=False,
         index=True,
     )
-    group = sa.orm.relationship("Group")
+    group = relationship("Group")
 
     # Using `meta` as `metadata` is reserved by SQLAlchemy
-    meta = sa.orm.relationship("AnnotationMetadata", uselist=False)
+    meta = relationship("AnnotationMetadata", uselist=False)
 
     def __repr__(self):
         return helpers.repr_(self, ["id"])

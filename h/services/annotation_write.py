@@ -11,6 +11,7 @@ from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
+from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_read import AnnotationReadService
 from h.services.job_queue import JobQueueService
 from h.services.mention import MentionService
@@ -31,6 +32,7 @@ class AnnotationWriteService:
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
         mention_service: MentionService,
+        moderation_service: AnnotationModerationService,
     ):
         self._db = db_session
         self._has_permission = has_permission
@@ -38,8 +40,9 @@ class AnnotationWriteService:
         self._annotation_read_service = annotation_read_service
         self._annotation_metadata_service = annotation_metadata_service
         self._mention_service = mention_service
+        self._moderation_service = moderation_service
 
-    def create_annotation(self, data: dict) -> Annotation:
+    def create_annotation(self, data: dict, user: User) -> Annotation:
         """
         Create an annotation from already-validated data.
 
@@ -77,9 +80,12 @@ class AnnotationWriteService:
             created=annotation.created,
             updated=annotation.updated,
         )
+        self._moderation_service.update_status(
+            action="created", annotation=annotation, group=annotation.group, user=user
+        )
 
         self._db.add(annotation)
-        self.upsert_annotation_slim(annotation)
+        self.upsert_annotation_slim(annotation, user)
 
         if annotation_metadata:
             self._annotation_metadata_service.set(annotation, annotation_metadata)
@@ -95,10 +101,11 @@ class AnnotationWriteService:
 
         return annotation
 
-    def update_annotation(
+    def update_annotation(  # noqa: PLR0913
         self,
         annotation: Annotation,
         data: dict,
+        user: User,
         update_timestamp: bool = True,  # noqa: FBT001, FBT002
         reindex_tag: str = "storage.update_annotation",
         enforce_write_permission: bool = True,  # noqa: FBT001, FBT002
@@ -140,7 +147,12 @@ class AnnotationWriteService:
                 document.get("document_uri_dicts", {}),
                 updated=annotation.updated,
             )
-        self.upsert_annotation_slim(annotation)
+
+        self._moderation_service.update_status(
+            action="updated", annotation=annotation, user=user, group=annotation.group
+        )
+
+        self.upsert_annotation_slim(annotation, user)
 
         if annotation_metadata:
             self._annotation_metadata_service.set(annotation, annotation_metadata)
@@ -160,17 +172,24 @@ class AnnotationWriteService:
 
         return annotation
 
-    def hide(self, annotation):
+    def hide(self, annotation, user):
         """Hides  an annotation marking it it as "moderated"."""
         if not annotation.is_hidden:
             annotation.moderation = AnnotationModeration()
+            self._moderation_service.set_status(
+                annotation, user, Annotation.ModerationStatus.DENIED
+            )
 
-        self.upsert_annotation_slim(annotation)
+        self.upsert_annotation_slim(annotation, user)
 
-    def unhide(self, annotation):
+    def unhide(self, annotation, user):
         """Remove the moderation status of an annotation."""
         annotation.moderation = None
-        self.upsert_annotation_slim(annotation)
+        self._moderation_service.set_status(
+            annotation, user, Annotation.ModerationStatus.DENIED
+        )
+
+        self.upsert_annotation_slim(annotation, user)
 
     @staticmethod
     def change_document(db, old_document_ids, new_document):
@@ -224,13 +243,10 @@ class AnnotationWriteService:
                 + _("Annotations for this target URI are not allowed in this group")
             )
 
-    def upsert_annotation_slim(self, annotation):
+    def upsert_annotation_slim(self, annotation: Annotation, user: User):
         self._db.flush()  # See the last model changes in the transaction
 
-        user_id = self._db.scalar(
-            select(User.id).where(User.userid == annotation.userid)
-        )
-        if not annotation.group or not user_id:
+        if not annotation.group or not user:
             # Due to the design of the old table this is possible for a short while
             # when a user (and his groups) or a group is deleted.
             # The AnnotationSlim records will get deleted by a cascade, no need to do anything here.
@@ -258,7 +274,7 @@ class AnnotationWriteService:
                     "document_id": annotation.document_id,
                     # Fields of AnnotationSlim
                     "group_id": annotation.group.id,
-                    "user_id": user_id,
+                    "user_id": user.id,
                     "moderated": moderated,
                 }
             ]
@@ -289,4 +305,5 @@ def service_factory(_context, request) -> AnnotationWriteService:
         annotation_read_service=request.find_service(AnnotationReadService),
         annotation_metadata_service=request.find_service(AnnotationMetadataService),
         mention_service=request.find_service(MentionService),
+        moderation_service=request.find_service(name="annotation_moderation"),
     )

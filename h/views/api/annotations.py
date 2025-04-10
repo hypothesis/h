@@ -80,7 +80,7 @@ def create(request):
     appstruct = schema.validate(json_payload(request))
 
     annotation = request.find_service(AnnotationWriteService).create_annotation(
-        data=appstruct
+        data=appstruct, user=request.user
     )
 
     _publish_annotation_event(request, annotation, "create")
@@ -139,7 +139,7 @@ def update(context, request):
     appstruct = schema.validate(json_payload(request))
 
     annotation = request.find_service(AnnotationWriteService).update_annotation(
-        context.annotation, data=appstruct
+        context.annotation, data=appstruct, user=request.user
     )
 
     _publish_annotation_event(request, annotation, "update")
@@ -160,7 +160,7 @@ def update(context, request):
 def delete(context, request):
     """Delete the specified annotation."""
     annotation_delete_service = request.find_service(name="annotation_delete")
-    annotation_delete_service.delete(context.annotation)
+    annotation_delete_service.delete(context.annotation, request.user)
 
     # TODO: Track down why we don't return an HTTP 204 like other DELETEs  # noqa: FIX002, TD002, TD003
     return {"id": context.annotation.id, "deleted": True}

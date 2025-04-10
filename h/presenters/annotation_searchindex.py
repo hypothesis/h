@@ -47,7 +47,7 @@ class AnnotationSearchIndexPresenter:
     def _add_hidden(self, result):
         # Mark an annotation as hidden if it and all of it's children have been
         # moderated and hidden.
-        parents_and_replies = [self.annotation.id] + self.annotation.thread_ids  # noqa: RUF005
+        parents_and_replies = [self.annotation.id, *self.annotation.thread_ids]
 
         ann_mod_svc = self.request.find_service(name="annotation_moderation")
         is_hidden = len(ann_mod_svc.all_hidden(parents_and_replies)) == len(

@@ -132,6 +132,12 @@ def includeme(config):  # noqa: PLR0915
         factory="h.traversal:AnnotationRoot",
         traverse="/{id}",
     )
+    config.add_route(
+        "api.annotation_moderation",
+        "/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/moderation",
+        factory="h.traversal:AnnotationRoot",
+        traverse="/{id}",
+    )
 
     config.add_route("api.bulk.action", "/api/bulk", request_method="POST")
     config.add_route(
@@ -160,6 +166,13 @@ def includeme(config):  # noqa: PLR0915
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
+    config.add_route(
+        "api.group_annotations",
+        "/api/groups/{pubid}/annotations",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
+
     config.add_route(
         "api.group_member",
         "/api/groups/{pubid}/members/{userid}",
@@ -218,6 +231,12 @@ def includeme(config):  # noqa: PLR0915
     config.add_route(
         "group_edit_members",
         "/groups/{pubid}/edit/members",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
+    config.add_route(
+        "group_edit_moderation",
+        "/groups/{pubid}/edit/moderate",
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
