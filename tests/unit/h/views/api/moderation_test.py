@@ -7,7 +7,7 @@ from h.traversal import AnnotationContext
 from h.views.api import moderation as views
 
 
-class TestCreate:
+class TestHide:
     def test_it(
         self,
         pyramid_request,
@@ -16,10 +16,10 @@ class TestCreate:
         events,
         annotation,
     ):
-        response = views.create(annotation_context, pyramid_request)
+        response = views.hide(annotation_context, pyramid_request)
 
         annotation_write_service.hide.assert_called_once_with(
-            annotation_context.annotation
+            annotation_context.annotation, pyramid_request.user
         )
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
@@ -31,7 +31,7 @@ class TestCreate:
         assert isinstance(response, HTTPNoContent)
 
 
-class TestDelete:
+class TestUnhide:
     def test_it(
         self,
         pyramid_request,
@@ -40,10 +40,10 @@ class TestDelete:
         events,
         annotation,
     ):
-        response = views.delete(annotation_context, pyramid_request)
+        response = views.unhide(annotation_context, pyramid_request)
 
         annotation_write_service.unhide.assert_called_once_with(
-            annotation_context.annotation
+            annotation_context.annotation, pyramid_request.user
         )
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
