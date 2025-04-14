@@ -32,10 +32,17 @@ class AnnotationModerationService:
                     annotation_id=annotation.id,
                     old_moderation_status=annotation.moderation_status,
                     new_moderation_status=status.value,
-                    user_id=user.id,
+                    moderator_id=user.id,
                 )
             )
             annotation.moderation_status = status
+
+    def update_status(self, annotation: Annotation) -> None:
+        if not annotation.moderation_status and annotation.shared:
+            # If an annotation is not private but doesn't have a moderation status
+            # it means that the moderation status hasn't been migrated yet.
+            # Set the default `APPROVED` status
+            annotation.moderation_status = ModerationStatus.APPROVED
 
 
 def annotation_moderation_service_factory(_context, request):

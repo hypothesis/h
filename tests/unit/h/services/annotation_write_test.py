@@ -23,6 +23,7 @@ class TestAnnotationWriteService:
         mention_service,
         _validate_group,  # noqa: PT019
         db_session,
+        moderation_service,
     ):
         root_annotation = factories.Annotation()
         annotation_read_service.get_annotation_by_id.return_value = root_annotation
@@ -43,6 +44,7 @@ class TestAnnotationWriteService:
             schedule_in=60,
         )
         mention_service.update_mentions.assert_called_once_with(anno)
+        moderation_service.update_status.assert_called_once_with(anno)
 
         assert anno == Any.instance_of(Annotation).with_attrs(
             {
