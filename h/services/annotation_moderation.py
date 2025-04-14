@@ -20,7 +20,7 @@ class AnnotationModerationService:
         query = self._session.query(Annotation).filter(
             Annotation.id.in_(annotation_ids)
         )
-        return {a.id for a in query if a.is_hidden}
+        return {m.annotation_id for m in query}
 
     def set_status(
         self, annotation: Annotation, user: User, status: ModerationStatus | None

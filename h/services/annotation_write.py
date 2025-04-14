@@ -169,9 +169,7 @@ class AnnotationWriteService:
     def hide(self, annotation: Annotation, user: User):
         """Hides  an annotation marking it it as "moderated"."""
         if not annotation.is_hidden:
-            self._moderation_service.set_status(
-                annotation, user, Annotation.ModerationStatus.DENIED
-            )
+            annotation.moderation = AnnotationModeration()
 
         self.upsert_annotation_slim(annotation)
 
@@ -181,6 +179,9 @@ class AnnotationWriteService:
             annotation, user, Annotation.ModerationStatus.APPROVED
         )
         self.upsert_annotation_slim(annotation)
+        self._moderation_service.set_status(
+            annotation, user, Annotation.ModerationStatus.APPROVED
+        )
 
     @staticmethod
     def change_document(db, old_document_ids, new_document):

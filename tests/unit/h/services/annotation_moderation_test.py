@@ -12,6 +12,7 @@ class TestAnnotationModerationService:
         self, svc, moderated_annotations
     ):
         ids = [a.id for a in moderated_annotations[0:-1]]
+
         assert svc.all_hidden(ids) == set(ids)
 
     def test_all_hidden_skips_non_moderated_annotations(self, svc, factories):
@@ -74,6 +75,16 @@ class TestAnnotationModerationService:
         return factories.Annotation.create_batch(
             3, moderation_status=ModerationStatus.DENIED
         )
+
+    @pytest.fixture
+    def annotation(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def user(self, factories, db_session):
+        user = factories.User()
+        db_session.flush()
+        return user
 
     @pytest.fixture
     def annotation(self, factories):
