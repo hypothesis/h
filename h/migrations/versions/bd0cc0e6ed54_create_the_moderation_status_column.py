@@ -20,11 +20,7 @@ def upgrade() -> None:
 
     op.add_column(
         "annotation",
-        sa.Column(
-            "moderation_status",
-            sa.Enum("APPROVED", "PENDING", "DENIED", "SPAM", name="moderationstatus"),
-            nullable=True,
-        ),
+        sa.Column("moderation_status", moderation_status_type, nullable=True),
     )
 
 
