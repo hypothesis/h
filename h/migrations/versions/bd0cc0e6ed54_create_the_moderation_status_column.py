@@ -5,7 +5,11 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision = "bd0cc0e6ed54"
+<<<<<<< HEAD
 down_revision = "9d97a3e4921e"
+=======
+down_revision = "1d26b96db4af"
+>>>>>>> 1169c15f3 (Migration for annotation.moderation_status)
 
 
 def upgrade() -> None:
