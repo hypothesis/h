@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -12,6 +13,9 @@ from h.db import Base, types
 from h.models.group import Group
 from h.util import markdown_render, uri
 from h.util.user import split_user
+
+if TYPE_CHECKING:
+    from h.models.moderation_log import ModerationLog
 
 
 class ModerationStatus(Enum):
@@ -159,6 +163,10 @@ class Annotation(Base):
 
     None means the annotation is either "approved" before this column was added  or it's a private annotation.
     """
+
+    moderation_log: Mapped[list["ModerationLog"]] = relationship(
+        "ModerationLog", back_populates="annotation"
+    )
 
     @property
     def uuid(self):
