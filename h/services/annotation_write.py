@@ -80,8 +80,10 @@ class AnnotationWriteService:
             created=annotation.created,
             updated=annotation.updated,
         )
+        self._moderation_service.update_status(annotation)
 
         self._db.add(annotation)
+
         self.upsert_annotation_slim(annotation)
 
         if annotation_metadata:
@@ -143,6 +145,7 @@ class AnnotationWriteService:
                 document.get("document_uri_dicts", {}),
                 updated=annotation.updated,
             )
+        self._moderation_service.update_status(annotation)
         self.upsert_annotation_slim(annotation)
 
         if annotation_metadata:
