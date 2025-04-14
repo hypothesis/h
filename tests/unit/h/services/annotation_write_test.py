@@ -216,30 +216,39 @@ class TestAnnotationWriteService:
         else:
             svc._validate_group(annotation)  # noqa: SLF001
 
-    def test_hide_hides_the_annotation(self, annotation, svc):
+    def test_hide_hides_the_annotation(self, annotation, svc, user, moderation_service):
         annotation.moderation = None
 
-        svc.hide(annotation)
+        svc.hide(annotation, user)
 
         assert annotation.is_hidden
+        moderation_service.set_status.assert_called_once_with(
+            annotation, user, Annotation.ModerationStatus.DENIED
+        )
 
-    def test_hide_does_not_modify_an_already_hidden_annotation(self, annotation, svc):
+    def test_hide_does_not_modify_an_already_hidden_annotation(
+        self, annotation, svc, user, moderation_service
+    ):
         moderation = AnnotationModeration()
         annotation.moderation = moderation
 
-        svc.hide(annotation)
+        svc.hide(annotation, user)
 
         assert annotation.is_hidden
         # It's the same one not a new one
         assert annotation.moderation == moderation
+        moderation_service.set_status.assert_not_called()
 
-    def test_unhide(self, annotation, svc):
+    def test_unhide(self, annotation, svc, user, moderation_service):
         moderation = AnnotationModeration()
         annotation.moderation = moderation
 
-        svc.unhide(annotation)
+        svc.unhide(annotation, user)
 
         assert not annotation.is_hidden
+        moderation_service.set_status.assert_called_once_with(
+            annotation, user, Annotation.ModerationStatus.APPROVED
+        )
 
     def test_upsert_annotation_slim_with_deleted_group(self, annotation, svc):
         annotation.groupid = "deleted group"
@@ -270,6 +279,10 @@ class TestAnnotationWriteService:
         return factories.Annotation(userid=user.userid)
 
     @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
     def has_permission(self):
         return Mock(return_value=True)
 
@@ -282,6 +295,7 @@ class TestAnnotationWriteService:
         annotation_read_service,
         annotation_metadata_service,
         mention_service,
+        moderation_service,
     ):
         return AnnotationWriteService(
             db_session=db_session,
@@ -290,6 +304,7 @@ class TestAnnotationWriteService:
             annotation_read_service=annotation_read_service,
             annotation_metadata_service=annotation_metadata_service,
             mention_service=mention_service,
+            moderation_service=moderation_service,
         )
 
     @pytest.fixture
@@ -326,6 +341,7 @@ class TestServiceFactory:
         annotation_read_service,
         annotation_metadata_service,
         mention_service,
+        moderation_service,
     ):
         svc = service_factory(sentinel.context, pyramid_request)
 
@@ -336,6 +352,7 @@ class TestServiceFactory:
             annotation_read_service=annotation_read_service,
             annotation_metadata_service=annotation_metadata_service,
             mention_service=mention_service,
+            moderation_service=moderation_service,
         )
         assert svc == AnnotationWriteService.return_value
 

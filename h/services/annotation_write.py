@@ -11,6 +11,7 @@ from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_metadata import AnnotationMetadataService
+from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_read import AnnotationReadService
 from h.services.job_queue import JobQueueService
 from h.services.mention import MentionService
@@ -31,6 +32,7 @@ class AnnotationWriteService:
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
         mention_service: MentionService,
+        moderation_service: AnnotationModerationService,
     ):
         self._db = db_session
         self._has_permission = has_permission
@@ -38,6 +40,7 @@ class AnnotationWriteService:
         self._annotation_read_service = annotation_read_service
         self._annotation_metadata_service = annotation_metadata_service
         self._mention_service = mention_service
+        self._moderation_service = moderation_service
 
     def create_annotation(self, data: dict) -> Annotation:
         """
@@ -160,17 +163,23 @@ class AnnotationWriteService:
 
         return annotation
 
-    def hide(self, annotation):
+    def hide(self, annotation: Annotation, user: User):
         """Hides  an annotation marking it it as "moderated"."""
         if not annotation.is_hidden:
             annotation.moderation = AnnotationModeration()
+            self._moderation_service.set_status(
+                annotation, user, Annotation.ModerationStatus.DENIED
+            )
 
         self.upsert_annotation_slim(annotation)
 
-    def unhide(self, annotation):
+    def unhide(self, annotation: Annotation, user: User):
         """Remove the moderation status of an annotation."""
         annotation.moderation = None
         self.upsert_annotation_slim(annotation)
+        self._moderation_service.set_status(
+            annotation, user, Annotation.ModerationStatus.APPROVED
+        )
 
     @staticmethod
     def change_document(db, old_document_ids, new_document):
@@ -289,4 +298,5 @@ def service_factory(_context, request) -> AnnotationWriteService:
         annotation_read_service=request.find_service(AnnotationReadService),
         annotation_metadata_service=request.find_service(AnnotationMetadataService),
         mention_service=request.find_service(MentionService),
+        moderation_service=request.find_service(name="annotation_moderation"),
     )
