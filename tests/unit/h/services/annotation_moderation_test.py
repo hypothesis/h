@@ -52,6 +52,21 @@ class TestAnnotationModerationService:
             == ModerationStatus.DENIED
         )
 
+    @pytest.mark.parametrize("moderation_status", [None, ModerationStatus.APPROVED])
+    @pytest.mark.parametrize("shared", [False, True])
+    def test_update_status_initializes_moderation_status(
+        self, svc, annotation, moderation_status, shared
+    ):
+        annotation.moderation_status = moderation_status
+        annotation.shared = shared
+
+        svc.update_status(annotation)
+
+        if not moderation_status and shared:
+            assert annotation.moderation_status == ModerationStatus.APPROVED
+        else:
+            assert annotation.moderation_status == moderation_status
+
     @pytest.fixture(autouse=True)
     def mods(self, factories):
         return factories.AnnotationModeration.create_batch(3)
