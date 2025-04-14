@@ -16,7 +16,7 @@ class AutoincrementingIntegerID(MappedAsDataclass):
     )
 
 
-class Timestamps(MappedAsDataclass):
+class CreatedMixin(MappedAsDataclass):
     created: Mapped[datetime] = mapped_column(
         init=False,
         repr=False,
@@ -24,6 +24,9 @@ class Timestamps(MappedAsDataclass):
         sort_order=-10,
         nullable=False,
     )
+
+
+class Timestamps(CreatedMixin, MappedAsDataclass):
     updated: Mapped[datetime] = mapped_column(
         init=False,
         repr=False,
