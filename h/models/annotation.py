@@ -280,10 +280,12 @@ class Annotation(Base):
         return split_user(self.userid)["domain"]
 
     @property
-    def is_hidden(self):
+    def is_hidden(self) -> bool:
         """Check if this annotation id is hidden."""
-
-        return self.moderation is not None
+        return bool(
+            self.moderation_status
+            and self.moderation_status != ModerationStatus.APPROVED
+        )
 
     def __repr__(self):
         return f"<Annotation {self.id}>"

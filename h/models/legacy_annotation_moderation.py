@@ -4,12 +4,15 @@ from h.db import Base, types
 from h.db.mixins import Timestamps
 
 
-class AnnotationModeration(Base, Timestamps):
+class _LegacyAnnotationModeration(Base, Timestamps):
     """
     A flag for a moderated and hidden annotation.
 
     This means that the annotation is violating the community guidelines and
     should be hidden from other users.
+
+    This model/table is deprecated and replaced by Annoation.moderation_status column
+    and the ModerationLog table.
     """
 
     __tablename__ = "annotation_moderation"
@@ -27,7 +30,7 @@ class AnnotationModeration(Base, Timestamps):
     annotation = sa.orm.relationship(
         "Annotation",
         backref=sa.orm.backref(
-            "moderation",
+            "_moderation",
             uselist=False,
             cascade="all, delete-orphan",
             passive_deletes=True,
@@ -35,4 +38,4 @@ class AnnotationModeration(Base, Timestamps):
     )
 
     def __repr__(self):
-        return f"<AnnotationModeration annotation_id={self.annotation_id}>"
+        return f"<_LegacyAnnotationModeration annotation_id={self.annotation_id}>"

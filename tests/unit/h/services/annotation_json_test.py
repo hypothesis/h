@@ -204,7 +204,6 @@ class TestAnnotationJSONService:
             ids=sentinel.annotation_ids,
             eager_load=[
                 Annotation.document,
-                Annotation.moderation,
                 Annotation.group,
                 Annotation.mentions,
             ],
@@ -244,15 +243,14 @@ class TestAnnotationJSONService:
     @pytest.fixture
     def annotation(self, factories):
         return factories.Annotation(
-            moderation=None,
             groupid="NOT WORLD",
             tags=["some-tags"],
             slim=factories.AnnotationSlim(),
         )
 
     @pytest.fixture
-    def with_hidden_annotation(self, annotation, factories):
-        annotation.moderation = factories.AnnotationModeration()
+    def with_hidden_annotation(self, annotation):
+        annotation.moderation_status = Annotation.ModerationStatus.DENIED
 
     @pytest.fixture(autouse=True)
     def Identity(self, patch):
