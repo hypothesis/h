@@ -6,7 +6,7 @@ from collections import namedtuple
 import slugify
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from h import pubid
 from h.db import Base, mixins
@@ -156,6 +156,8 @@ class Group(Base, mixins.Timestamps):
     writeable_by = sa.Column(
         sa.Enum(WriteableBy, name="group_writeable_by"), nullable=True
     )
+
+    pre_moderated: Mapped[bool | None] = mapped_column()
 
     @property
     def groupid(self):
