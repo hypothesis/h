@@ -20,7 +20,6 @@ key to. So for convenience the test module can instead just do
 from h.models.activation import Activation
 from h.models.annotation import Annotation
 from h.models.annotation_metadata import AnnotationMetadata
-from h.models.annotation_moderation import AnnotationModeration
 from h.models.annotation_slim import AnnotationSlim
 from h.models.auth_client import AuthClient
 from h.models.auth_ticket import AuthTicket
@@ -33,6 +32,7 @@ from h.models.flag import Flag
 from h.models.group import Group, GroupMembership, GroupMembershipRoles
 from h.models.group_scope import GroupScope
 from h.models.job import Job
+from h.models.legacy_annotation_moderation import _LegacyAnnotationModeration
 from h.models.mention import Mention
 from h.models.moderation_log import ModerationLog
 from h.models.notification import Notification
@@ -49,7 +49,6 @@ from h.models.user_rename import UserRename
 __all__ = (
     "Activation",
     "Annotation",
-    "AnnotationModeration",
     "AnnotationSlim",
     "AuthClient",
     "AuthTicket",
