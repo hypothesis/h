@@ -14,8 +14,8 @@ from h.views.api.config import api_config
     description="Hide an annotation as a group moderator",
     permission=Permission.Annotation.MODERATE,
 )
-def create(context, request):
-    request.find_service(AnnotationWriteService).hide(context.annotation)
+def hide(context, request):
+    request.find_service(AnnotationWriteService).hide(context.annotation, request.user)
 
     event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
@@ -31,8 +31,10 @@ def create(context, request):
     description="Unhide an annotation as a group moderator",
     permission=Permission.Annotation.MODERATE,
 )
-def delete(context, request):
-    request.find_service(AnnotationWriteService).unhide(context.annotation)
+def unhide(context, request):
+    request.find_service(AnnotationWriteService).unhide(
+        context.annotation, request.user
+    )
 
     event = events.AnnotationEvent(request, context.annotation.id, "update")
     request.notify_after_commit(event)
