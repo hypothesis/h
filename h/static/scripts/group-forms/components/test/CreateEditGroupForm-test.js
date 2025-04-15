@@ -196,6 +196,7 @@ describe('CreateEditGroupForm', () => {
           name,
           description,
           type,
+          moderation_enabled: false,
         },
       });
       assert.calledOnceWithExactly(fakeSetLocation, groupURL);
@@ -217,6 +218,45 @@ describe('CreateEditGroupForm', () => {
     // It exits its loading state after receiving an error response.
     await assertInLoadingState(wrapper, false);
     assert.isFalse(savedConfirmationShowing(wrapper));
+  });
+
+  describe('pre-moderation', () => {
+    const isModerationEnabled = wrapper =>
+      wrapper.find('[data-testid="pre-moderation"]').prop('aria-checked');
+
+    [true, false].forEach(moderationEnabled => {
+      it('shows pre-moderation checkbox when group moderation is enabled', () => {
+        config.features.group_moderation = moderationEnabled;
+        const { wrapper } = createWrapper();
+
+        assert.equal(
+          wrapper.exists('[data-testid="pre-moderation"]'),
+          moderationEnabled,
+        );
+      });
+    });
+
+    it('toggles pre-moderation by clicking on it', () => {
+      config.features.group_moderation = true;
+      const { wrapper } = createWrapper();
+
+      assert.isFalse(isModerationEnabled(wrapper));
+      wrapper.find('[data-testid="pre-moderation"]').simulate('click');
+      assert.isTrue(isModerationEnabled(wrapper));
+    });
+
+    ['Enter', ' '].forEach(key => {
+      it('toggles pre-moderation by pressing Enter or Space', () => {
+        config.features.group_moderation = true;
+        const { wrapper } = createWrapper();
+
+        assert.isFalse(isModerationEnabled(wrapper));
+        wrapper
+          .find('[data-testid="pre-moderation"]')
+          .simulate('keydown', { key });
+        assert.isTrue(isModerationEnabled(wrapper));
+      });
+    });
   });
 
   context('when editing an existing group', () => {
@@ -329,6 +369,7 @@ describe('CreateEditGroupForm', () => {
             name,
             description,
             type: newGroupType,
+            moderation_enabled: false,
           },
         }),
       );
