@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch, sentinel
 import pytest
 from h_matchers import Any
 
-from h.models import Annotation, AnnotationModeration, AnnotationSlim, User
+from h.models import Annotation, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_write import AnnotationWriteService, service_factory
@@ -100,6 +100,7 @@ class TestAnnotationWriteService:
         update_document_metadata,
         queue_service,
         _validate_group,  # noqa: PT019
+        moderation_service,
     ):
         then = datetime.now() - timedelta(days=1)  # noqa: DTZ005
         annotation.extra = {"key": "value"}
@@ -130,6 +131,7 @@ class TestAnnotationWriteService:
             {"uri": 1},
             updated=anno.updated,
         )
+        moderation_service.update_status.assert_called_once_with(anno)
 
         queue_service.add_by_id.assert_called_once_with(
             "sync_annotation",
@@ -219,11 +221,8 @@ class TestAnnotationWriteService:
             svc._validate_group(annotation)  # noqa: SLF001
 
     def test_hide_hides_the_annotation(self, annotation, svc, user, moderation_service):
-        annotation.moderation = None
-
         svc.hide(annotation, user)
 
-        assert annotation.is_hidden
         moderation_service.set_status.assert_called_once_with(
             annotation, user, Annotation.ModerationStatus.DENIED
         )
@@ -231,23 +230,15 @@ class TestAnnotationWriteService:
     def test_hide_does_not_modify_an_already_hidden_annotation(
         self, annotation, svc, user, moderation_service
     ):
-        moderation = AnnotationModeration()
-        annotation.moderation = moderation
+        annotation.moderation_status = Annotation.ModerationStatus.DENIED
 
         svc.hide(annotation, user)
 
-        assert annotation.is_hidden
-        # It's the same one not a new one
-        assert annotation.moderation == moderation
         moderation_service.set_status.assert_not_called()
 
     def test_unhide(self, annotation, svc, user, moderation_service):
-        moderation = AnnotationModeration()
-        annotation.moderation = moderation
-
         svc.unhide(annotation, user)
 
-        assert not annotation.is_hidden
         moderation_service.set_status.assert_called_once_with(
             annotation, user, Annotation.ModerationStatus.APPROVED
         )

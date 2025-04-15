@@ -3,7 +3,7 @@ from uuid import UUID
 import pytest
 
 from h.db.types import URLSafeUUID
-from h.models.annotation import Annotation
+from h.models.annotation import Annotation, ModerationStatus
 
 
 def test_parent_id_of_direct_reply():
@@ -234,13 +234,20 @@ class TestThread:
         return factories.Annotation(references=[root.id, reply.id])
 
 
-@pytest.mark.parametrize("has_moderation", (True, False))
-def test_is_hidden(factories, has_moderation):
+@pytest.mark.parametrize(
+    "moderation_status,hidden",
+    [
+        (None, False),
+        (ModerationStatus.APPROVED, False),
+        (ModerationStatus.DENIED, True),
+    ],
+)
+def test_is_hidden(factories, moderation_status, hidden):
     annotation = factories.Annotation(
-        moderation=factories.AnnotationModeration() if has_moderation else None
+        moderation_status=moderation_status,
     )
 
-    assert annotation.is_hidden == has_moderation
+    assert annotation.is_hidden == hidden
 
 
 def test_uuid(factories):

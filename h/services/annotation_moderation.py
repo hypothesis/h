@@ -1,4 +1,4 @@
-from h.models import Annotation, AnnotationModeration, User
+from h.models import Annotation, User
 from h.models.annotation import ModerationStatus
 from h.models.moderation_log import ModerationLog
 
@@ -7,7 +7,7 @@ class AnnotationModerationService:
     def __init__(self, session):
         self._session = session
 
-    def all_hidden(self, annotation_ids):
+    def all_hidden(self, annotation_ids: str) -> set[str]:
         """
         Check which of the given annotation ids is hidden.
 
@@ -17,10 +17,10 @@ class AnnotationModerationService:
         if not annotation_ids:
             return set()
 
-        query = self._session.query(AnnotationModeration.annotation_id).filter(
-            AnnotationModeration.annotation_id.in_(annotation_ids)
+        query = self._session.query(Annotation).filter(
+            Annotation.id.in_(annotation_ids)
         )
-        return {m.annotation_id for m in query}
+        return {a.id for a in query if a.is_hidden}
 
     def set_status(
         self, annotation: Annotation, user: User, status: ModerationStatus | None

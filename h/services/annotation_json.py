@@ -168,8 +168,6 @@ class AnnotationJSONService:
             eager_load=[
                 # Optimise access to the document
                 Annotation.document,
-                # Optimise the check used for "hidden" above
-                Annotation.moderation,
                 # Optimise the permissions check for MODERATE permissions,
                 # which ultimately depends on group permissions, causing a
                 # group lookup for every annotation without this

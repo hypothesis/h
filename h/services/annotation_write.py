@@ -1,12 +1,12 @@
 from collections.abc import Callable
 from datetime import datetime
 
-from sqlalchemy import exists, select
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from h import i18n
-from h.models import Annotation, AnnotationModeration, AnnotationSlim, User
+from h.models import Annotation, AnnotationSlim, User
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
@@ -168,7 +168,6 @@ class AnnotationWriteService:
     def hide(self, annotation: Annotation, user: User):
         """Hides  an annotation marking it it as "moderated"."""
         if not annotation.is_hidden:
-            annotation.moderation = AnnotationModeration()
             self._moderation_service.set_status(
                 annotation, user, Annotation.ModerationStatus.DENIED
             )
@@ -177,11 +176,10 @@ class AnnotationWriteService:
 
     def unhide(self, annotation: Annotation, user: User):
         """Remove the moderation status of an annotation."""
-        annotation.moderation = None
-        self.upsert_annotation_slim(annotation)
         self._moderation_service.set_status(
             annotation, user, Annotation.ModerationStatus.APPROVED
         )
+        self.upsert_annotation_slim(annotation)
 
     @staticmethod
     def change_document(db, old_document_ids, new_document):
@@ -235,7 +233,7 @@ class AnnotationWriteService:
                 + _("Annotations for this target URI are not allowed in this group")
             )
 
-    def upsert_annotation_slim(self, annotation):
+    def upsert_annotation_slim(self, annotation: Annotation) -> None:
         self._db.flush()  # See the last model changes in the transaction
 
         user_id = self._db.scalar(
@@ -247,15 +245,6 @@ class AnnotationWriteService:
             # The AnnotationSlim records will get deleted by a cascade, no need to do anything here.
             return
 
-        moderated = self._db.scalar(
-            select(
-                exists(
-                    select(AnnotationModeration.id).where(
-                        AnnotationModeration.annotation_id == annotation.id
-                    )
-                )
-            )
-        )
         stmt = insert(AnnotationSlim).values(
             [
                 {
@@ -270,7 +259,7 @@ class AnnotationWriteService:
                     # Fields of AnnotationSlim
                     "group_id": annotation.group.id,
                     "user_id": user_id,
-                    "moderated": moderated,
+                    "moderated": annotation.is_hidden,
                 }
             ]
         )

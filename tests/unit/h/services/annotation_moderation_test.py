@@ -8,8 +8,10 @@ from h.services.annotation_moderation import (
 
 
 class TestAnnotationModerationService:
-    def test_all_hidden_lists_moderated_annotation_ids(self, svc, mods):
-        ids = [m.annotation.id for m in mods[0:-1]]
+    def test_all_hidden_lists_moderated_annotation_ids(
+        self, svc, moderated_annotations
+    ):
+        ids = [a.id for a in moderated_annotations[0:-1]]
         assert svc.all_hidden(ids) == set(ids)
 
     def test_all_hidden_skips_non_moderated_annotations(self, svc, factories):
@@ -68,8 +70,10 @@ class TestAnnotationModerationService:
             assert annotation.moderation_status == moderation_status
 
     @pytest.fixture(autouse=True)
-    def mods(self, factories):
-        return factories.AnnotationModeration.create_batch(3)
+    def moderated_annotations(self, factories):
+        return factories.Annotation.create_batch(
+            3, moderation_status=ModerationStatus.DENIED
+        )
 
     @pytest.fixture
     def annotation(self, factories):

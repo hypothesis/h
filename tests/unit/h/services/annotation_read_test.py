@@ -29,7 +29,7 @@ class TestAnnotationReadService:
     def test_get_annotations_by_id_with_no_input(self, svc):
         assert not svc.get_annotations_by_id(ids=[])
 
-    @pytest.mark.parametrize("attribute", ("document", "moderation", "group"))
+    @pytest.mark.parametrize("attribute", ("document", "group"))
     def test_get_annotations_by_id_preloading(
         self, svc, factories, db_session, query_counter, attribute
     ):
