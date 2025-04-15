@@ -5,13 +5,16 @@ import datetime
 import sqlalchemy as sa
 
 
-class Timestamps:
+class CreatedMixin:
     created = sa.Column(
         sa.DateTime,
         default=datetime.datetime.utcnow,
         server_default=sa.func.now(),
         nullable=False,
     )
+
+
+class Timestamps(CreatedMixin):
     updated = sa.Column(
         sa.DateTime,
         server_default=sa.func.now(),
