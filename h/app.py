@@ -7,6 +7,7 @@ import transaction
 from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
 
+from h._version import get_version
 from h.config import configure
 from h.sentry_filters import SENTRY_FILTERS
 from h.views.client import DEFAULT_CLIENT_URL
@@ -116,6 +117,7 @@ def _configure_sentry(config):
             "h_pyramid_sentry.retry_support": True,
             "h_pyramid_sentry.celery_support": True,
             "h_pyramid_sentry.sqlalchemy_support": True,
+            "h_pyramid_sentry.init.release": get_version(),
         }
     )
     config.include("h_pyramid_sentry")
