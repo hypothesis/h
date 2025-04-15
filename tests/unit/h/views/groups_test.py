@@ -10,9 +10,10 @@ from h.views import groups as views
 
 @pytest.mark.usefixtures("annotation_stats_service")
 class TestGroupCreateEditController:
-    @pytest.mark.parametrize("group_type_flag", [True, False])
-    def test_create(self, pyramid_request, assets_env, mocker, group_type_flag):
-        pyramid_request.feature.flags["group_type"] = group_type_flag
+    @pytest.mark.parametrize("flag", [True, False])
+    def test_create(self, pyramid_request, assets_env, mocker, flag):
+        pyramid_request.feature.flags["group_type"] = flag
+        pyramid_request.feature.flags["group_moderation"] = flag
 
         mocker.spy(views, "get_csrf_token")
 
@@ -24,9 +25,7 @@ class TestGroupCreateEditController:
         views.get_csrf_token.assert_called_once_with(pyramid_request)
         assert result == {
             "page_title": (
-                "Create a new group"
-                if group_type_flag
-                else "Create a new private group"
+                "Create a new group" if flag else "Create a new private group"
             ),
             "js_config": {
                 "styles": assets_env.urls.return_value,
@@ -42,8 +41,9 @@ class TestGroupCreateEditController:
                     "user": {"userid": sentinel.authenticated_userid},
                 },
                 "features": {
-                    "group_type": group_type_flag,
+                    "group_type": flag,
                     "group_members": pyramid_request.feature.flags["group_members"],
+                    "group_moderation": flag,
                 },
             },
         }
@@ -125,6 +125,9 @@ class TestGroupCreateEditController:
                 "features": {
                     "group_type": pyramid_request.feature.flags["group_type"],
                     "group_members": pyramid_request.feature.flags["group_members"],
+                    "group_moderation": pyramid_request.feature.flags[
+                        "group_moderation"
+                    ],
                 },
             },
         }
@@ -143,6 +146,7 @@ class TestGroupCreateEditController:
     def pyramid_request(self, pyramid_request):
         pyramid_request.feature.flags["group_type"] = True
         pyramid_request.feature.flags["group_members"] = True
+        pyramid_request.feature.flags["group_moderation"] = True
         return pyramid_request
 
 

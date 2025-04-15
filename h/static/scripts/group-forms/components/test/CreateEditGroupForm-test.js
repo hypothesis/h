@@ -201,6 +201,7 @@ describe('CreateEditGroupForm', () => {
           name,
           description,
           type,
+          pre_moderated: false,
         },
       });
       assert.calledOnceWithExactly(fakeSetLocation, groupURL);
@@ -222,6 +223,40 @@ describe('CreateEditGroupForm', () => {
     // It exits its loading state after receiving an error response.
     await assertInLoadingState(wrapper, false);
     assert.isFalse(savedConfirmationShowing(wrapper));
+  });
+
+  describe('pre-moderation', () => {
+    const preModerationCheckbox = wrapper =>
+      wrapper.find('Checkbox[data-testid="pre-moderation"]');
+
+    const isModerationEnabled = wrapper =>
+      preModerationCheckbox(wrapper).prop('checked');
+
+    [true, false].forEach(moderationEnabled => {
+      it('shows pre-moderation checkbox when group moderation is enabled', () => {
+        config.features.group_moderation = moderationEnabled;
+        const { wrapper } = createWrapper();
+
+        assert.equal(
+          preModerationCheckbox(wrapper).exists(),
+          moderationEnabled,
+        );
+      });
+    });
+
+    it('toggles pre-moderation by clicking on it', () => {
+      config.features.group_moderation = true;
+      const { wrapper } = createWrapper();
+
+      assert.isFalse(isModerationEnabled(wrapper));
+      preModerationCheckbox(wrapper)
+        .props()
+        .onChange({
+          target: { checked: true },
+        });
+      wrapper.update();
+      assert.isTrue(isModerationEnabled(wrapper));
+    });
   });
 
   context('when editing an existing group', () => {
@@ -334,6 +369,7 @@ describe('CreateEditGroupForm', () => {
             name,
             description,
             type: newGroupType,
+            pre_moderated: false,
           },
         }),
       );
