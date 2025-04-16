@@ -34,8 +34,9 @@ class EmailData:
         extra_headers = {"X-MC-Tags": self.tag}
         if self.subaccount:
             extra_headers["X-MC-Subaccount"] = self.subaccount
+        subject = " ".join(self.subject.splitlines())
         return pyramid_mailer.message.Message(
-            subject=self.subject,
+            subject=subject,
             recipients=self.recipients,
             body=self.body,
             html=self.html,

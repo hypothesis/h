@@ -59,6 +59,7 @@ class TestEmailService:
             tag=EmailTag.TEST,
             subaccount="subaccount",
         )
+
         email_service.send(email, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
@@ -67,6 +68,26 @@ class TestEmailService:
             body="Some text body",
             html=None,
             extra_headers={"X-MC-Tags": EmailTag.TEST, "X-MC-Subaccount": "subaccount"},
+        )
+
+    def test_send_creates_email_message_normalizing_subject(
+        self, task_data, email_service, pyramid_mailer
+    ):
+        email = EmailData(
+            recipients=["foo@example.com"],
+            subject="My email\nsubject",
+            body="Some text body",
+            tag=EmailTag.TEST,
+        )
+
+        email_service.send(email, task_data)
+
+        pyramid_mailer.message.Message.assert_called_once_with(
+            recipients=["foo@example.com"],
+            subject="My email subject",
+            body="Some text body",
+            html=None,
+            extra_headers={"X-MC-Tags": EmailTag.TEST},
         )
 
     def test_send_creates_mention_email_when_sender_limit_not_reached(
