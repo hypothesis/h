@@ -13,24 +13,29 @@ pytestmark = [
 
 @pytest.mark.usefixtures("group_links_service")
 class TestGroupJSONPresenter:
-    def test_it(self, factories, pyramid_request, group_links_service):
+    @pytest.mark.parametrize("pre_moderated", (True, False))
+    def test_it(self, factories, pyramid_request, group_links_service, pre_moderated):
         group = factories.Group(
             name="My Group",
             pubid="mygroup",
             authority_provided_id="abc123",
             organization=factories.Organization(),
+            pre_moderated=pre_moderated,
         )
 
         results = GroupJSONPresenter(group, pyramid_request).asdict()
 
         assert results == Any.dict.containing(
             {
-                "name": "My Group",
                 "id": "mygroup",
-                "groupid": "group:abc123@example.com",
-                "organization": group.organization.pubid,
                 "links": group_links_service.get_all.return_value,
+                "groupid": "group:abc123@example.com",
+                "name": "My Group",
+                "organization": group.organization.pubid,
+                "public": group.is_public,
                 "scoped": False,
+                "type": group.type,
+                "pre_moderated": pre_moderated,
             }
         )
 
