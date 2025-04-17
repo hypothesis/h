@@ -1,7 +1,6 @@
 from pyramid.security import Allowed, Denied
 
 from h.security.identity import Identity
-from h.security.permission_map import PERMISSION_MAP
 
 
 def identity_permits(
@@ -17,6 +16,8 @@ def identity_permits(
     :param context: Context object representing the objects acted upon
     :param permission: Permission requested
     """
+    from h.security.permission_map import PERMISSION_MAP
+
     if clauses := PERMISSION_MAP.get(permission):  # noqa: SIM102
         # Grant the permissions if for *any* single clause...
         if any(
