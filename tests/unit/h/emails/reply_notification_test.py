@@ -16,14 +16,12 @@ class TestGenerate:
         reply_user,
         html_renderer,
         text_renderer,
-        links,
+        links_service,
         subscription_service,
     ):
         generate(pyramid_request, notification)
 
-        links.incontext_link.assert_called_once_with(
-            pyramid_request, notification.reply
-        )
+        links_service.incontext_link.assert_called_once_with(notification.reply)
 
         subscription_service.get_unsubscribe_token.assert_called_once_with(
             user_id=notification.parent_user.userid, type_=Subscriptions.Type.REPLY
@@ -36,7 +34,7 @@ class TestGenerate:
             "parent_user_display_name": parent_user.display_name,
             "parent_user_url": "http://example.com/stream/user/patricia",
             "reply": notification.reply,
-            "reply_url": links.incontext_link.return_value,
+            "reply_url": links_service.incontext_link.return_value,
             "reply_user_display_name": reply_user.display_name,
             "reply_user_url": "http://example.com/stream/user/ron",
             "unsubscribe_url": "http://example.com/unsub/FAKETOKEN",
@@ -62,7 +60,7 @@ class TestGenerate:
         reply_user,
         html_renderer,
         text_renderer,
-        links,
+        links_service,
     ):
         # It links to individual pages if bouncer isn't available.
         # If bouncer isn't enabled direct links in reply notification emails
@@ -70,7 +68,7 @@ class TestGenerate:
         # the bouncer direct link.
 
         # incontext_link() returns None if bouncer isn't available.
-        links.incontext_link.return_value = None
+        links_service.incontext_link.return_value = None
 
         generate(pyramid_request, notification)
 
@@ -172,10 +170,6 @@ class TestGenerate:
         db_session.add(doc)
         db_session.flush()
         return doc
-
-    @pytest.fixture
-    def links(self, patch):
-        return patch("h.emails.reply_notification.links")
 
     @pytest.fixture
     def notification(self, reply, reply_user, parent, parent_user, document):
