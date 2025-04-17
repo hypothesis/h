@@ -50,9 +50,8 @@ class Search:
             query.Limiter(),
             query.DeletedFilter(),
             query.AuthFilter(request),
-            query.GroupFilter(request),
+            query.GroupAndModerationFilter(request),
             query.UserFilter(),
-            query.HiddenFilter(request),
             query.AnyMatcher(),
             query.TagsMatcher(),
             query.UriCombinedWildcardFilter(

@@ -7,6 +7,7 @@ from elasticsearch_dsl.query import SimpleQueryString
 
 from h import storage
 from h.search.util import add_default_scheme, wildcard_uri_is_valid
+from h.security.permissions import Permission
 from h.util import uri
 
 LIMIT_DEFAULT = 20
@@ -207,23 +208,62 @@ class SharedAnnotationsFilter:
         return search.filter("term", shared=True)
 
 
-class GroupFilter:
-    """
-    Filter that limits which groups annotations are returned from.
-
-    This excludes annotations from groups that the user is not authorized to
-    read or which are explicitly excluded by the search query.
-    """
-
+class GroupAndModerationFilter:
     def __init__(self, request):
         self.user = request.user
         self.group_service = request.find_service(name="group")
 
     def __call__(self, search, params):
-        # Remove parameter if passed, preventing it being passed to default query
         group_ids = popall(params, "group") or None
-        groups = self.group_service.groupids_readable_by(self.user, group_ids)
-        return search.filter("terms", group=groups)
+        groups = self.group_service.groups_readable_by(self.user, group_ids)
+
+        not_nipsa = ~Q("term", nipsa=True)
+        not_hidden = ~Q("term", hidden=True)
+
+        if not self.user:
+            # If there not a logged in user
+            if groups:
+                # Apply the group filter as it is
+                search = search.filter("terms", group=[g.pubid for g in groups])
+            # And don't show any hidden or NIPSA'd annotations
+            return search.filter(not_nipsa & not_hidden)
+
+        if not groups:
+            # If  the user is logged in, hide hidden annos and NIPSA'd annos except the ones authored by the user
+            return search.filter(
+                (not_hidden & not_nipsa) | Q("term", user=self.user.userid.lower())
+            )
+
+        query_clauses = []
+
+        from h.security import Identity, identity_permits
+        from h.traversal import GroupContext
+
+        # If t he user is logged in and we are filtering by groups
+        # we'll check for each group if we are a moderator
+        for group in groups:
+            user_is_moderator = identity_permits(
+                identity=Identity.from_models(user=self.user),
+                context=GroupContext(group),
+                permission=Permission.Group.MODERATE,
+            )
+            if user_is_moderator:
+                # For modereators:
+                # - We show all their annos
+                # - We don't filter out hideden annos
+                # - We do hide NIPSA'd annos
+                query_clauses = Q("term", group=group.pubid) & not_nipsa
+
+            else:
+                # For non moderators:
+                # - We show all their annos
+                # - We hide hidden annos
+                # - We hide NIPSA'd annos
+                query_clauses = Q("term", group=group.pubid) & (
+                    not_hidden & not_nipsa
+                ) | Q("term", user=self.user.userid.lower())
+
+        return search.filter(Q("bool", should=query_clauses))
 
 
 class UriCombinedWildcardFilter:
@@ -345,29 +385,6 @@ class DeletedFilter:
 
     def __call__(self, search, _):
         return search.exclude("exists", field="deleted")
-
-
-class HiddenFilter:
-    """Return an Elasticsearch filter for filtering out moderated or NIPSA'd annotations."""
-
-    def __init__(self, request):
-        self.group_service = request.find_service(name="group")
-        self.user = request.user
-
-    def __call__(self, search, _):
-        """Filter out all hidden and NIPSA'd annotations except the current user's."""
-        # If any one of these "should" clauses is true then the annotation will
-        # get through the filter.
-        should_clauses = [
-            Q("bool", must_not=[Q("term", nipsa=True), Q("term", hidden=True)])
-        ]
-
-        if self.user is not None:
-            # Always show the logged-in user's annotations even if they have
-            # been hidden or the user has been NIPSA'd
-            should_clauses.append(Q("term", user=self.user.userid.lower()))
-
-        return search.filter(Q("bool", should=should_clauses))
 
 
 class AnyMatcher:
