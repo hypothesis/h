@@ -137,17 +137,17 @@ class TestSearchAnnotations:
             {
                 "moderation_status": ModerationStatus.PENDING,
                 "group_role": GroupMembershipRoles.MODERATOR,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.PENDING,
                 "group_role": GroupMembershipRoles.ADMIN,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.PENDING,
                 "group_role": GroupMembershipRoles.OWNER,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.APPROVED,
@@ -187,17 +187,17 @@ class TestSearchAnnotations:
             {
                 "moderation_status": ModerationStatus.DENIED,
                 "group_role": GroupMembershipRoles.MODERATOR,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.DENIED,
                 "group_role": GroupMembershipRoles.ADMIN,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.DENIED,
                 "group_role": GroupMembershipRoles.OWNER,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.SPAM,
@@ -212,17 +212,17 @@ class TestSearchAnnotations:
             {
                 "moderation_status": ModerationStatus.SPAM,
                 "group_role": GroupMembershipRoles.MODERATOR,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.SPAM,
                 "group_role": GroupMembershipRoles.ADMIN,
-                "can_see": False,
+                "can_see": True,
             },
             {
                 "moderation_status": ModerationStatus.SPAM,
                 "group_role": GroupMembershipRoles.OWNER,
-                "can_see": False,
+                "can_see": True,
             },
         ],
     )

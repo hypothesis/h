@@ -5,7 +5,10 @@ from elasticsearch_dsl import Q
 from elasticsearch_dsl.query import SimpleQueryString
 
 from h import storage
+from h.models import Group, User
 from h.search.util import add_default_scheme, wildcard_uri_is_valid
+from h.security import Identity, Permission, identity_permits
+from h.traversal import GroupContext
 from h.util import uri
 
 LIMIT_DEFAULT = 20
@@ -206,26 +209,57 @@ class SharedAnnotationsFilter:
         return search.filter("term", shared=True)
 
 
-class GroupFilter:
-    """
-    Filter that limits which groups annotations are returned from.
-
-    This excludes annotations from groups that the user is not authorized to
-    read or which are explicitly excluded by the search query.
-    """
-
+class GroupAndModerationFilter:
     def __init__(self, request):
         self.user = request.user
         self.group_service = request.find_service(name="group")
 
+    @staticmethod
+    def _is_moderator(user: User, group: Group) -> bool:
+        return identity_permits(
+            identity=Identity.from_models(user=user),
+            context=GroupContext(group),
+            permission=Permission.Group.MODERATE,
+        )
+
     def __call__(self, search, params):
         # Remove parameter if passed, preventing it being passed to default query.
-        groupids = popall(params, "group") or None
+        group_ids = popall(params, "group") or None
 
-        user_readable_groupids = [
-            g.pubid for g in self.group_service.groups_readable_by(self.user, groupids)
-        ]
-        return search.filter("terms", group=user_readable_groupids)
+        user_readable_groups = self.group_service.groups_readable_by(
+            self.user, group_ids
+        )
+
+        not_hidden = ~Q("term", hidden=True)
+
+        if not user_readable_groups:
+            # If the current user can't read any of the groups requested (or any at all)
+            # make sure we filter out all annotations.
+            return search.filter("terms", group=[])
+
+        if not self.user:
+            return search.filter(
+                not_hidden & Q("terms", group=[g.pubid for g in user_readable_groups])
+            )
+
+        user_annotations = Q("term", user=self.user.userid.lower())
+        query_clauses = []
+        # If the user is logged in and we are filtering by groups
+        # we'll check for each group if we are a moderator
+        for group in user_readable_groups:
+            group_annotations = Q("term", group=group.pubid)
+            if self._is_moderator(self.user, group):
+                # We don't filter out hidden annotations for moderators
+                query_clauses.append(group_annotations)
+
+            else:
+                # For non moderators we hide moderated annotations except the ones authored
+                # by the user
+                query_clauses.append(
+                    group_annotations & (not_hidden | user_annotations)
+                )
+
+        return search.filter(Q("bool", should=query_clauses))
 
 
 class UriCombinedWildcardFilter:
@@ -360,32 +394,13 @@ class NIPSAFilter:
         self.user = request.user
 
     def __call__(self, search, _):
-        """Filter out all hidden and NIPSA'd annotations except the current user's."""
+        """Filter out all NIPSA'd annotations except the current user's."""
         # If any one of these "should" clauses is true then the annotation will
         # get through the filter.
         should_clauses = [Q("bool", must_not=[Q("term", nipsa=True)])]
 
         if self.user is not None:
             # Always show the logged-in user's annotations even if the user has been NIPSA'd
-            should_clauses.append(Q("term", user=self.user.userid.lower()))
-
-        return search.filter(Q("bool", should=should_clauses))
-
-
-class HiddenFilter:
-    """Return an Elasticsearch filter for filtering out moderated annotations."""
-
-    def __init__(self, request):
-        self.user = request.user
-
-    def __call__(self, search, _):
-        """Filter out all hidden annotations except the current user's."""
-        # If any one of these "should" clauses is true then the annotation will
-        # get through the filter.
-        should_clauses = [Q("bool", must_not=[Q("term", hidden=True)])]
-
-        if self.user is not None:
-            # Always show the logged-in user's annotations even if they have been hidden.
             should_clauses.append(Q("term", user=self.user.userid.lower()))
 
         return search.filter(Q("bool", should=should_clauses))
