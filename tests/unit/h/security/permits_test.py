@@ -5,7 +5,8 @@ from pyramid.security import Allowed, Denied
 
 from h.models import GroupMembership, GroupMembershipRoles
 from h.security import Identity, Permission
-from h.security.permits import PERMISSION_MAP, identity_permits
+from h.security.permission_map import PERMISSION_MAP
+from h.security.permits import identity_permits
 from h.traversal import AnnotationContext
 
 
