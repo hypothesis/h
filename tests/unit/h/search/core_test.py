@@ -306,3 +306,9 @@ class TestSearchWithSeparateReplies:
 
         assert len(result.reply_ids) == 3
         assert oldest_reply.id not in result.reply_ids
+
+
+@pytest.fixture
+def group_service(group_service):
+    group_service.groups_readable_by.return_value = []
+    return group_service
