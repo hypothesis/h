@@ -337,6 +337,7 @@ class TestUpdate:
                     type="private",
                 ),
             ),
+            ({"pre_moderated": True}, call.update(sentinel.group, pre_moderated=True)),
         ],
     )
     def test_update(
