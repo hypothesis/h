@@ -19,6 +19,7 @@ export type CreateUpdateGroupAPIRequest = {
   name: string;
   description?: string;
   type?: GroupType;
+  moderation_enabled?: boolean;
 };
 
 /**

@@ -6,6 +6,8 @@ import {
   LockFilledIcon,
   GlobeIcon,
   GlobeLockIcon,
+  CheckboxCheckedFilledIcon,
+  CheckboxIcon,
 } from '@hypothesis/frontend-shared';
 import { Config } from '../config';
 import type { Group } from '../config';
@@ -26,6 +28,7 @@ import TextField from './forms/TextField';
 import GroupFormHeader from './GroupFormHeader';
 import SaveStateIcon from './SaveStateIcon';
 import WarningDialog from './WarningDialog';
+import classnames from 'classnames';
 
 /**
  * Dialog that warns users about existing annotations in a group being exposed
@@ -108,6 +111,9 @@ export default function CreateEditGroupForm({
   const [groupType, setGroupType] = useState<GroupType>(
     group?.type ?? 'private',
   );
+  const [moderationEnabled, setModerationEnabled] = useState(
+    group?.moderation_enabled ?? false,
+  );
 
   // Set when the user selects a new group type if confirmation is required.
   // Cleared after confirmation.
@@ -158,6 +164,7 @@ export default function CreateEditGroupForm({
         name,
         description,
         type: groupType,
+        moderation_enabled: moderationEnabled,
       };
 
       response = (await callAPI(config.api.createGroup.url, {
@@ -185,6 +192,7 @@ export default function CreateEditGroupForm({
         name,
         description,
         type: groupType,
+        moderation_enabled: moderationEnabled,
       };
 
       (await callAPI(config.api.updateGroup!.url, {
@@ -241,7 +249,11 @@ export default function CreateEditGroupForm({
         title={heading}
         enableMembers={config.features.group_members}
       />
-      <form onSubmit={onSubmit} data-testid="form">
+      <form
+        onSubmit={onSubmit}
+        data-testid="form"
+        className="flex flex-col gap-y-4"
+      >
         <TextField
           type="input"
           value={name}
@@ -262,7 +274,7 @@ export default function CreateEditGroupForm({
         />
 
         {config.features.group_type && (
-          <>
+          <div>
             <Label id={groupTypeLabel} text="Group type" />
             <RadioGroup
               aria-labelledby={groupTypeLabel}
@@ -290,10 +302,44 @@ export default function CreateEditGroupForm({
                 <GlobeIcon /> Open
               </RadioGroup.Radio>
             </RadioGroup>
-          </>
+          </div>
         )}
 
-        <div className="mt-2 pt-2 border-t border-t-text-grey-6 flex items-center gap-x-4">
+        {config.features.group_moderation && (
+          <div>
+            <Label text="Pre-moderation" />
+            <div
+              className={classnames(
+                'focus-visible-ring flex gap-x-1.5 items-start',
+                'px-3 py-2 rounded-lg cursor-pointer',
+                'aria-checked:bg-grey-3/50',
+              )}
+              role="checkbox"
+              aria-checked={moderationEnabled}
+              onClick={() => setModerationEnabled(prev => !prev)}
+              onKeyDown={e =>
+                ['Enter', ' '].includes(e.key) &&
+                setModerationEnabled(prev => !prev)
+              }
+              tabIndex={0}
+              data-testid="pre-moderation"
+            >
+              {!moderationEnabled && <CheckboxIcon className="mt-1" />}
+              {moderationEnabled && (
+                <CheckboxCheckedFilledIcon className="mt-1" />
+              )}
+              <div>
+                <p>Enable pre-moderation for this group</p>
+                <p>
+                  Moderators must approve new annotations before they are shown
+                  to group members.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="pt-2 border-t border-t-text-grey-6 flex items-center gap-x-4">
           <span>
             {/* These are in a child span to avoid a gap between them. */}
             <Star />

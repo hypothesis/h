@@ -14,6 +14,7 @@ export type Group = {
   link: string;
   type: GroupType;
   num_annotations: number;
+  moderation_enabled?: boolean;
 };
 
 export type ConfigObject = {
@@ -35,6 +36,7 @@ export type ConfigObject = {
   features: {
     group_members: boolean;
     group_type: boolean;
+    group_moderation: boolean;
   };
 };
 

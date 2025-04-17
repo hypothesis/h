@@ -98,7 +98,7 @@ export default function TextField({
   const InputComponent = type === 'input' ? Input : Textarea;
 
   return (
-    <div className="mb-4">
+    <div>
       <Label htmlFor={id} text={label} required={required} />
       <InputComponent
         id={id}
