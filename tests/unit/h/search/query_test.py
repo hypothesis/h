@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import call
 
 import elasticsearch_dsl
 import pytest
@@ -6,6 +7,9 @@ from webob.multidict import MultiDict
 
 from h.models.annotation import ModerationStatus
 from h.search import Search, query
+from h.security.identity import Identity
+from h.security.permissions import Permission
+from h.traversal import GroupContext
 
 MISSING = object()
 ES_VERSION = (1, 7, 0)
@@ -359,47 +363,6 @@ class TestSharedAnnotationsFilter:
         return search
 
 
-class TestGroupFilter:
-    def test_matches_only_annotations_from_specified_groups(
-        self, search, Annotation, groups, group_service, pyramid_request
-    ):
-        group_pubids = [group.pubid for group in groups]
-        group_service.groups_readable_by.return_value = groups
-        Annotation(groupid="other_group")
-        annotation_ids = [Annotation(groupid=pubid).id for pubid in group_pubids]
-
-        result = search.run(MultiDict(("group", pubid) for pubid in group_pubids))
-
-        group_service.groups_readable_by.assert_called_with(
-            pyramid_request.user, group_ids=group_pubids
-        )
-        assert sorted(result.annotation_ids) == sorted(annotation_ids)
-
-    def test_matches_only_annotations_in_groups_readable_by_user(
-        self, search, Annotation, group_service, factories
-    ):
-        readable_group = factories.Group()
-        group_service.groups_readable_by.return_value = [readable_group]
-        Annotation(groupid="unreadable_group", shared=True)
-        annotation_ids = [
-            Annotation(groupid=readable_group.pubid).id,
-            Annotation(groupid=readable_group.pubid).id,
-        ]
-
-        result = search.run(MultiDict({}))
-
-        assert sorted(result.annotation_ids) == sorted(annotation_ids)
-
-    @pytest.fixture
-    def search(self, pyramid_request, search):
-        search.append_modifier(query.GroupFilter(pyramid_request))
-        return search
-
-    @pytest.fixture
-    def groups(self, factories):
-        return factories.OpenGroup.create_batch(2)
-
-
 class TestUserFilter:
     def test_filters_annotations_by_user(self, search, Annotation):
         Annotation(userid="acct:foo@auth2", shared=True)
@@ -679,13 +642,55 @@ class TestDeletedFilter:
         return search
 
 
-@pytest.mark.usefixtures("pyramid_config")
-class TestHiddenFilter:
+class TestGroupAndModerationFilter:
+    def test_matches_only_annotations_from_specified_groups(
+        self, search, Annotation, groups, group_service, pyramid_request
+    ):
+        group_service.groups_readable_by.return_value = groups
+        Annotation(groupid="other_group")
+        annotation_ids = [Annotation(groupid=group.pubid).id for group in groups]
+
+        result = search.run(MultiDict(("group", group.pubid) for group in groups))
+
+        group_service.groups_readable_by.assert_called_with(
+            pyramid_request.user, group_ids=[group.pubid for group in groups]
+        )
+        assert sorted(result.annotation_ids) == sorted(annotation_ids)
+
+    def test_doesnt_return_annos_if_no_readable_groups(
+        self, search, Annotation, groups, group_service, pyramid_request
+    ):
+        group_service.groups_readable_by.return_value = []
+        Annotation(groupid="other_group")
+
+        result = search.run(MultiDict(("group", group.pubid) for group in groups))
+
+        group_service.groups_readable_by.assert_called_with(
+            pyramid_request.user, group_ids=[group.pubid for group in groups]
+        )
+        assert not result.annotation_ids
+
+    def test_matches_only_annotations_in_groups_readable_by_user(
+        self, search, Annotation, group_service, factories
+    ):
+        readable_group = factories.Group(pubid="readable_group")
+        group_service.groups_readable_by.return_value = [readable_group]
+        Annotation(groupid="unreadable_group", shared=True)
+        annotation_ids = [
+            Annotation(groupid="readable_group").id,
+            Annotation(groupid="readable_group").id,
+        ]
+
+        result = search.run(MultiDict({}))
+
+        assert sorted(result.annotation_ids) == sorted(annotation_ids)
+
     @pytest.mark.usefixtures("as_user")
     @pytest.mark.parametrize("is_hidden", (True, False))
     def test_visibility_annotations_by_others(
-        self, search, make_annotation, other_user, is_hidden
+        self, search, make_annotation, other_user, is_hidden, identity_permits
     ):
+        identity_permits.return_value = False
         annotation = make_annotation(
             other_user,
             moderation_status=ModerationStatus.DENIED
@@ -693,7 +698,7 @@ class TestHiddenFilter:
             else ModerationStatus.APPROVED,
         )
 
-        result = search.run({})
+        result = search.run(MultiDict({}))
 
         if is_hidden:
             # We should not see the annotation
@@ -713,15 +718,97 @@ class TestHiddenFilter:
             else ModerationStatus.APPROVED,
         )
 
-        result = search.run({})
+        result = search.run(MultiDict({}))
 
         assert result.annotation_ids == [annotation.id]
 
-    @pytest.fixture
-    def search(self, search, pyramid_request):
-        # This filter is the code under test
-        search.append_modifier(query.HiddenFilter(pyramid_request))
+    @pytest.mark.usefixtures("as_user")
+    @pytest.mark.parametrize("is_hidden", (True, False))
+    def test_moderators_see_hidden_annotations(
+        self,
+        search,
+        factories,
+        user,
+        group_service,
+        identity_permits,
+        make_annotation,
+        is_hidden,
+    ):
+        group_where_moderator = factories.Group(pubid="group_where_moderator")
+        group_where_not_moderator = factories.Group(pubid="group_where_not_moderator")
+        group_service.groups_readable_by.return_value = [
+            group_where_moderator,
+            group_where_not_moderator,
+        ]
+        other_user = factories.User(username="other_user")
+        anno_where_moderator = make_annotation(
+            user,
+            groupid=group_where_moderator.pubid,
+            moderation_status=ModerationStatus.DENIED
+            if is_hidden
+            else ModerationStatus.APPROVED,
+        )
+        anno_where_not_moderator = make_annotation(
+            user, groupid=group_where_not_moderator.pubid
+        )
+        anno_where_moderator_by_other_user = make_annotation(
+            other_user,
+            groupid=group_where_moderator.pubid,
+            moderation_status=ModerationStatus.DENIED
+            if is_hidden
+            else ModerationStatus.APPROVED,
+        )
+        anno_where_not_moderator_by_other_user = make_annotation(
+            other_user,
+            groupid=group_where_not_moderator.pubid,
+            moderation_status=ModerationStatus.DENIED
+            if is_hidden
+            else ModerationStatus.APPROVED,
+        )
 
+        identity_permits.side_effect = [True, False]
+
+        result = search.run(
+            MultiDict(
+                ("group", group.pubid)
+                for group in [group_where_moderator, group_where_not_moderator]
+            )
+        )
+
+        identity_permits.assert_has_calls(
+            [
+                call(
+                    identity=Identity.from_models(user=user),
+                    context=GroupContext(group_where_moderator),
+                    permission=Permission.Group.MODERATE,
+                ),
+                call(
+                    identity=Identity.from_models(user=user),
+                    context=GroupContext(group_where_not_moderator),
+                    permission=Permission.Group.MODERATE,
+                ),
+            ],
+            any_order=True,
+        )
+
+        if is_hidden:
+            assert set(result.annotation_ids) == {
+                anno_where_moderator.id,
+                anno_where_not_moderator.id,
+                anno_where_moderator_by_other_user.id,
+            }
+
+        else:
+            assert set(result.annotation_ids) == {
+                anno_where_moderator.id,
+                anno_where_not_moderator.id,
+                anno_where_moderator_by_other_user.id,
+                anno_where_not_moderator_by_other_user.id,
+            }
+
+    @pytest.fixture
+    def search(self, pyramid_request, search):
+        search.append_modifier(query.GroupAndModerationFilter(pyramid_request))
         return search
 
     @pytest.fixture
@@ -739,6 +826,14 @@ class TestHiddenFilter:
     @pytest.fixture
     def as_other_user(self, pyramid_request, other_user):
         pyramid_request.user = other_user
+
+    @pytest.fixture
+    def groups(self, factories):
+        return factories.OpenGroup.create_batch(2)
+
+    @pytest.fixture(autouse=True)
+    def identity_permits(self, patch):
+        return patch("h.search.query.identity_permits")
 
 
 @pytest.mark.usefixtures("pyramid_config")
