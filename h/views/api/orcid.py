@@ -3,11 +3,12 @@ from urllib.parse import urlencode, urlunparse
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
+from h.services import ORCIDClientService
+
 
 @view_config(
     request_method="GET",
     route_name="orcid.oauth.authorize",
-    # permission=Permission.API,  # noqa: ERA001
 )
 def authorize(request):
     host = request.registry.settings["orcid_host"]
@@ -25,7 +26,7 @@ def authorize(request):
                     {
                         "client_id": client_id,
                         "response_type": "code",
-                        "redirect_uri": request.route_url("orcid.oauth.callback"),
+                        "redirect_uri": "http://localhost.is:5000/orcid/callback",
                         # "state": state,  # noqa: ERA001
                         "scope": "openid",
                     }
@@ -39,9 +40,8 @@ def authorize(request):
 @view_config(
     request_method="GET",
     route_name="orcid.oauth.callback",
-    # permission=Permission.API,  # noqa: ERA001
     # schema=OAuthCallbackSchema,  # noqa: ERA001
 )
 def oauth_redirect(request):
-    request.find_service(name="orcid_client").get_orcid(request.params["code"])
+    request.find_service(ORCIDClientService).get_orcid(request.params["code"])
     return HTTPFound(location=request.route_url("index"))

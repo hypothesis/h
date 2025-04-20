@@ -22,7 +22,7 @@ class OAuth2ClientService:
     def get_id_token(
         self, token_url: str, redirect_uri: str, auth, authorization_code: str
     ) -> str:
-        self._id_token_request(
+        return self._id_token_request(
             token_url=token_url,
             auth=auth,
             data={
@@ -42,4 +42,4 @@ class OAuth2ClientService:
 
 def factory(_context, request) -> OAuth2ClientService:
     """Return OAuth2HTTPService instance for the passed context and request."""
-    return OAuth2ClientService(request.find_service(name="http"))
+    return OAuth2ClientService(request.find_service(HTTPService))

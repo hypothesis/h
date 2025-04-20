@@ -46,6 +46,8 @@ class HTTPService:
         except RequestException as err:
             raise ExternalRequestError(request=err.request, response=response) from err
 
+        return response
+
     def get(self, *args, **kwargs) -> Response:
         return self.request("GET", *args, **kwargs)
 
