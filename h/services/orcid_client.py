@@ -35,7 +35,7 @@ class ORCIDClientService:
         return f"https://{self._host}/oauth/token"
 
 
-def orcid_client_factory(_context, request) -> ORCIDClientService:
+def factory(_context, request) -> ORCIDClientService:
     settings = request.registry.settings
 
     return ORCIDClientService(
