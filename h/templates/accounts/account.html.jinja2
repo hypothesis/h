@@ -9,8 +9,8 @@
     {{ password_form }}
   </div>
 
-  <a class="btn" href="{{ request.route_path('account_profile') }}">{% trans %}Connect with ORCID iD{% endtrans %}</a>
-  <p class="text">Connecting your ORCID iD enables you to log in to Hypothesis with ORCID, instead of your Hypothesis password.</p>
+  <a class="btn" href="{{ request.route_path('orcid.oauth.authorize') }}">{% trans %}Connect with ORCID{% endtrans %}</a>
+  <p class="text">Connecting your ORCID enables you to log in to Hypothesis with ORCID, instead of your Hypothesis password.</p>
 {% endblock page_content %}
 
 {% block form_footer_right %}
