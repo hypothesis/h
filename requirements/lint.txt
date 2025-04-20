@@ -50,6 +50,7 @@ certifi==2025.1.31
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   requests
     #   sentry-sdk
 cffi==1.17.1
     # via
@@ -60,6 +61,11 @@ chameleon==4.6.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
+charset-normalizer==3.4.1
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   requests
 click==8.1.8
     # via
     #   -r requirements/functests.txt
@@ -170,6 +176,11 @@ hupper==1.12
     #   pyramid
 hypothesis==6.130.6
     # via -r requirements/tests.txt
+idna==3.10
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   requests
 importlib-metadata==7.0.1
     # via
     #   -r requirements/functests.txt
@@ -427,6 +438,10 @@ repoze-sendmail==4.4.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid-mailer
+requests==2.32.3
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 rfc3339-validator==0.1.4
     # via
     #   -r requirements/functests.txt
@@ -519,6 +534,7 @@ urllib3==2.3.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   elasticsearch
+    #   requests
     #   sentry-sdk
 venusian==3.1.1
     # via
