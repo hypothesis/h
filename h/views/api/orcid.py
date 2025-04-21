@@ -1,8 +1,14 @@
+from datetime import UTC, datetime
 from urllib.parse import urlencode, urlunparse
 
+from markupsafe import Markup
+from pyramid import security
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
+from h.accounts.events import LoginEvent
+from h.i18n import TranslationString
+from h.models.user_identity import IdentityProvider
 from h.services import ORCIDClientService
 
 
@@ -45,5 +51,23 @@ def authorize(request):
 def oauth_redirect(request):
     orcid_client = request.find_service(ORCIDClientService)
     orcid = orcid_client.get_orcid(request.params["code"])
-    orcid_client.add_identity(request.user, orcid)
-    return HTTPFound(location=request.route_url("index"))
+
+    user_service = request.find_service(name="user")
+    user = user_service.fetch_by_identity(IdentityProvider.ORCID, orcid)
+    if not user and not request.authenticated_userid:
+        request.session.flash(
+            Markup(TranslationString("You need to connect your ORCID account first.")),
+            "error",
+        )
+        return HTTPFound(location=request.route_url("login"))
+
+    if not user:
+        orcid_client.add_identity(request.user, orcid)
+
+    headers = {}
+    if not request.authenticated_userid:
+        user.last_login_date = datetime.now(UTC)
+        request.registry.notify(LoginEvent(request, user))
+        headers = security.remember(request, user.userid)
+
+    return HTTPFound(location=request.route_url("index"), headers=headers)

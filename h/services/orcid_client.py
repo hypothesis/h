@@ -6,6 +6,7 @@ from h.models import User, UserIdentity
 from h.models.user_identity import IdentityProvider
 from h.services.jwt import JWTService
 from h.services.oauth2_client import OAuth2ClientService
+from h.services.user import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class ORCIDClientService:
         redirect_uri: str,
         oauth_client_service: OAuth2ClientService,
         jwt_service: JWTService,
+        user_service: UserService,
     ) -> None:
         self._session = session
         self._host = host
@@ -28,6 +30,7 @@ class ORCIDClientService:
         self._redirect_uri = redirect_uri
         self._oauth_client_service = oauth_client_service
         self._jwt_service = jwt_service
+        self._user_service = user_service
 
     def _get_id_token(self, authorization_code: str) -> str:
         return self._oauth_client_service.get_id_token(
@@ -37,10 +40,10 @@ class ORCIDClientService:
             authorization_code=authorization_code,
         )
 
-    def get_orcid(self, authorization_code: str) -> str:
+    def get_orcid(self, authorization_code: str) -> str | None:
         id_token = self._get_id_token(authorization_code)
         decoded_id_token = self._jwt_service.decode_id_token(id_token, self.key_set_url)
-        return decoded_id_token["sub"]
+        return decoded_id_token.get("sub")
 
     def add_identity(self, user: User, orcid: str) -> None:
         identity = UserIdentity(
@@ -80,4 +83,5 @@ def factory(_context, request) -> ORCIDClientService:
         redirect_uri=request.route_url("orcid.oauth.callback"),
         oauth_client_service=request.find_service(OAuth2ClientService),
         jwt_service=request.find_service(JWTService),
+        user_service=request.find_service(name="user"),
     )

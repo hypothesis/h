@@ -20,6 +20,10 @@
 
     <footer class="form-footer">
       {% block form_footer %}{% endblock %}
+      {% if orcid_message %}
+        <a class="btn" href="{{ request.route_path('orcid.oauth.authorize') }}">{{ orcid_message }}</a>
+        <br>
+      {% endif %}
       {% if signup_message %}
         {{ signup_message }}
         <a class="link--footer" href="{{ request.route_path('signup') }}">Sign up</a>
