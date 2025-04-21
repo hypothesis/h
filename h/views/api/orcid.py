@@ -63,11 +63,11 @@ def oauth_redirect(request):
 
     if not orcid_user and request.user:
         orcid_client.add_identity(request.user, orcid)
-        return HTTPFound(location=request.route_url("index"))
 
     headers = {}
     if orcid_user and not request.user:
         orcid_user.last_login_date = datetime.now(UTC)
         request.registry.notify(LoginEvent(request, orcid_user))
         headers = security.remember(request, orcid_user.userid)
+
     return HTTPFound(location=request.route_url("index"), headers=headers)
