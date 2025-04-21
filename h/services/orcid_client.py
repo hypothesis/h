@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class ORCIDClientService:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         session: Session,
         host: str,
