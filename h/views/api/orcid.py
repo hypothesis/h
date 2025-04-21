@@ -51,23 +51,23 @@ def authorize(request):
 def oauth_redirect(request):
     orcid_client = request.find_service(ORCIDClientService)
     orcid = orcid_client.get_orcid(request.params["code"])
-
     user_service = request.find_service(name="user")
-    user = user_service.fetch_by_identity(IdentityProvider.ORCID, orcid)
-    if not user and not request.authenticated_userid:
+    orcid_user = user_service.fetch_by_identity(IdentityProvider.ORCID, orcid)
+
+    if not orcid_user and not request.user:
         request.session.flash(
             Markup(TranslationString("You need to connect your ORCID account first.")),
             "error",
         )
         return HTTPFound(location=request.route_url("login"))
 
-    if not user:
+    if not orcid_user and request.user:
         orcid_client.add_identity(request.user, orcid)
+        return HTTPFound(location=request.route_url("index"))
 
     headers = {}
-    if not request.authenticated_userid:
-        user.last_login_date = datetime.now(UTC)
-        request.registry.notify(LoginEvent(request, user))
-        headers = security.remember(request, user.userid)
-
+    if orcid_user and not request.user:
+        orcid_user.last_login_date = datetime.now(UTC)
+        request.registry.notify(LoginEvent(request, orcid_user))
+        headers = security.remember(request, orcid_user.userid)
     return HTTPFound(location=request.route_url("index"), headers=headers)
