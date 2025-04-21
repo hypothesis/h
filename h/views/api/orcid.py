@@ -56,7 +56,7 @@ def oauth_redirect(request):
 
     if not orcid_user and not request.user:
         request.session.flash(
-            Markup(TranslationString("You need to connect your ORCID account first.")),
+            Markup(TranslationString("ORCID account not connected.")),
             "error",
         )
         return HTTPFound(location=request.route_url("login"))
