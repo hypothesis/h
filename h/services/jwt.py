@@ -19,13 +19,13 @@ class JWTService:
                 id_token, options={"verify_signature": False}
             )
         except PyJWTError as err:
-            raise ValidationError(f"Invalid JWT. {err}") from err
+            raise ValidationError(f"Invalid JWT. {err}") from err  # noqa: EM102, TRY003
 
         if not unverified_header.get("kid"):
-            raise ValidationError("Missing 'kid' value in JWT header")
+            raise ValidationError("Missing 'kid' value in JWT header")  # noqa: EM101, TRY003
 
         if not unverified_header.get("alg"):
-            raise ValidationError("Missing 'alg' value in JWT header")
+            raise ValidationError("Missing 'alg' value in JWT header")  # noqa: EM101, TRY003
         alg = unverified_header.get("alg")
 
         iss, aud = unverified_payload.get("iss"), unverified_payload.get("aud")
@@ -39,7 +39,7 @@ class JWTService:
                 id_token, key=signing_key.key, audience=aud, algorithms=[alg]
             )
         except PyJWTError as err:
-            raise ValidationError(f"Invalid JWT for: {iss}, {aud}. {err}") from err
+            raise ValidationError(f"Invalid JWT for: {iss}, {aud}. {err}") from err  # noqa: EM102, TRY003
 
     @staticmethod
     @lru_cache(maxsize=256)
