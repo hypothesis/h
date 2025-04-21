@@ -14,7 +14,6 @@ class ORCIDClientService:
     def __init__(
         self,
         session: Session,
-        user: User,
         host: str,
         client_id: str,
         client_secret: str,
@@ -23,7 +22,6 @@ class ORCIDClientService:
         jwt_service: JWTService,
     ) -> None:
         self._session = session
-        self._user = user
         self._host = host
         self._client_id = client_id
         self._client_secret = client_secret
@@ -44,13 +42,20 @@ class ORCIDClientService:
         decoded_id_token = self._jwt_service.decode_id_token(id_token, self.key_set_url)
         return decoded_id_token["sub"]
 
-    def save_identity(self, orcid: str) -> None:
+    def add_identity(self, user: User, orcid: str) -> None:
         identity = UserIdentity(
-            user=self._user,
+            user=user,
             provider=IdentityProvider.ORCID,
             provider_unique_id=orcid,
         )
         self._session.add(identity)
+
+    @staticmethod
+    def get_identity(user: User) -> UserIdentity | None:
+        for identity in user.identities:
+            if identity.provider == IdentityProvider.ORCID:
+                return identity
+        return None
 
     @property
     def token_url(self) -> str:
@@ -69,7 +74,6 @@ def factory(_context, request) -> ORCIDClientService:
 
     return ORCIDClientService(
         session=request.db,
-        user=request.user,
         host=settings["orcid_host"],
         client_id=settings["orcid_client_id"],
         client_secret=settings["orcid_client_secret"],

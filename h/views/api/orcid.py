@@ -45,5 +45,5 @@ def authorize(request):
 def oauth_redirect(request):
     orcid_client = request.find_service(ORCIDClientService)
     orcid = orcid_client.get_orcid(request.params["code"])
-    orcid_client.save_identity(orcid)
+    orcid_client.add_identity(request.user, orcid)
     return HTTPFound(location=request.route_url("index"))

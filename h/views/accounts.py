@@ -29,7 +29,7 @@ from h.schemas.forms.accounts import (
     ResetCode,
     ResetPasswordSchema,
 )
-from h.services import SubscriptionService
+from h.services import ORCIDClientService, SubscriptionService
 from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
@@ -466,11 +466,13 @@ class AccountController:
         email = self.request.user.email or ""
         password_form = self.forms["password"].render()
         email_form = self.forms["email"].render({"email": email})
+        identity = ORCIDClientService.get_identity(self.request.user)
 
         return {
             "email": email,
             "email_form": email_form,
             "password_form": password_form,
+            "orcid": identity.provider_unique_id if identity else None,
         }
 
 
