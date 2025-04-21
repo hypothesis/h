@@ -22,7 +22,7 @@ class OAuth2ClientService:
     def get_id_token(
         self, token_url: str, redirect_uri: str, auth, authorization_code: str
     ) -> str:
-        return self._id_token_request(
+        return self._request_id_token(
             token_url=token_url,
             auth=auth,
             data={
@@ -32,7 +32,7 @@ class OAuth2ClientService:
             },
         )
 
-    def _id_token_request(self, token_url: str, data, auth) -> str:
+    def _request_id_token(self, token_url: str, data, auth) -> str:
         response = self._http_service.post(token_url, data=data, auth=auth)
 
         data = response.json()

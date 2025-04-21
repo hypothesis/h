@@ -26,7 +26,9 @@ certifi==2025.1.31
     #   requests
     #   sentry-sdk
 cffi==1.17.1
-    # via -r requirements/prod.in
+    # via
+    #   -r requirements/prod.in
+    #   cryptography
 chameleon==4.6.0
     # via deform
 charset-normalizer==3.4.1
@@ -46,6 +48,8 @@ click-repl==0.3.0
     # via celery
 colander==2.0
     # via deform
+cryptography==44.0.2
+    # via pyjwt
 data-tasks==0.0.5
     # via -r requirements/prod.in
 deform==2.0.15
@@ -143,7 +147,7 @@ pycparser==2.22
     # via cffi
 pycryptodomex==3.21.0
     # via -r requirements/prod.in
-pyjwt==2.10.1
+pyjwt[crypto]==2.10.1
     # via -r requirements/prod.in
 pyparsing==3.2.1
     # via -r requirements/prod.in
