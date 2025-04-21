@@ -43,5 +43,7 @@ def authorize(request):
     # schema=OAuthCallbackSchema,  # noqa: ERA001
 )
 def oauth_redirect(request):
-    request.find_service(ORCIDClientService).get_orcid(request.params["code"])
+    orcid_client = request.find_service(ORCIDClientService)
+    orcid = orcid_client.get_orcid(request.params["code"])
+    orcid_client.save_identity(orcid)
     return HTTPFound(location=request.route_url("index"))

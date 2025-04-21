@@ -1,5 +1,9 @@
 import logging
 
+from sqlalchemy.orm import Session
+
+from h.models import User, UserIdentity
+from h.models.user_identity import IdentityProvider
 from h.services.jwt import JWTService
 from h.services.oauth2_client import OAuth2ClientService
 
@@ -9,6 +13,8 @@ logger = logging.getLogger(__name__)
 class ORCIDClientService:
     def __init__(
         self,
+        session: Session,
+        user: User,
         host: str,
         client_id: str,
         client_secret: str,
@@ -16,6 +22,8 @@ class ORCIDClientService:
         oauth_client_service: OAuth2ClientService,
         jwt_service: JWTService,
     ) -> None:
+        self._session = session
+        self._user = user
         self._host = host
         self._client_id = client_id
         self._client_secret = client_secret
@@ -34,8 +42,15 @@ class ORCIDClientService:
     def get_orcid(self, authorization_code: str) -> str:
         id_token = self._get_id_token(authorization_code)
         decoded_id_token = self._jwt_service.decode_id_token(id_token, self.key_set_url)
-        logger.debug("decoded_id_token: %s", decoded_id_token)
         return decoded_id_token["sub"]
+
+    def save_identity(self, orcid: str) -> None:
+        identity = UserIdentity(
+            user=self._user,
+            provider=IdentityProvider.ORCID,
+            provider_unique_id=orcid,
+        )
+        self._session.add(identity)
 
     @property
     def token_url(self) -> str:
@@ -53,6 +68,8 @@ def factory(_context, request) -> ORCIDClientService:
     settings = request.registry.settings
 
     return ORCIDClientService(
+        session=request.db,
+        user=request.user,
         host=settings["orcid_host"],
         client_id=settings["orcid_client_id"],
         client_secret=settings["orcid_client_secret"],
