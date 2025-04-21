@@ -14,6 +14,7 @@ from h.services.bulk_api import (
 from h.services.email import EmailService
 from h.services.http import HTTPService
 from h.services.job_queue import JobQueueService
+from h.services.jwt import JWTService
 from h.services.mention import MentionService
 from h.services.notification import NotificationService
 from h.services.oauth2_client import OAuth2ClientService
@@ -182,7 +183,7 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
         "h.services.task_done.factory", iface=TaskDoneService
     )
 
-    # OAuth2 service
+    # Auth related services
     config.register_service_factory("h.services.http.factory", iface=HTTPService)
     config.register_service_factory(
         "h.services.oauth2_client.factory", iface=OAuth2ClientService
@@ -190,3 +191,4 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     config.register_service_factory(
         "h.services.orcid_client.factory", iface=ORCIDClientService
     )
+    config.register_service_factory("h.services.jwt.factory", iface=JWTService)
