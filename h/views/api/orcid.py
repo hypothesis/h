@@ -55,11 +55,7 @@ def oauth_redirect(request):
     orcid_user = user_service.fetch_by_identity(IdentityProvider.ORCID, orcid)
 
     if not orcid_user and not request.user:
-        request.session.flash(
-            Markup(TranslationString("ORCID account not connected.")),
-            "error",
-        )
-        return HTTPFound(location=request.route_url("login"))
+        return HTTPFound(location=request.route_url("signup", _query={"orcid": orcid}))
 
     if not orcid_user and request.user:
         orcid_client.add_identity(request.user, orcid)

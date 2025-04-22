@@ -175,7 +175,6 @@ class RegisterSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
     email = email_node(title=_("Email address"))
-    password = new_password_node(title=_("Password"))
 
     privacy_accepted = colander.SchemaNode(
         colander.Boolean(),
@@ -194,6 +193,22 @@ class RegisterSchema(CSRFSchema):
         ),
         missing=None,
         default=False,
+    )
+
+
+class RegisterPasswordSchema(RegisterSchema):
+    password = new_password_node(title=_("Password"))
+
+
+class RegisterORCIDSchema(RegisterSchema):
+    orcid = colander.SchemaNode(
+        colander.String(),
+        title=_("ORCID"),
+        validator=colander.Regex(
+            r"^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{4}$",
+            msg=_("Must be a valid ORCID URL."),
+        ),
+        widget=deform.widget.TextInputWidget(readonly=True),
     )
 
 
