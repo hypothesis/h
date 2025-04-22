@@ -200,6 +200,12 @@ class RegisterPasswordSchema(RegisterSchema):
     password = new_password_node(title=_("Password"))
 
 
+@colander.deferred
+def deferred_orcid_default(node, kw):  # noqa: ARG001
+    request = node.bindings["request"]
+    return request.params.get("orcid")
+
+
 class RegisterORCIDSchema(RegisterSchema):
     orcid = colander.SchemaNode(
         colander.String(),
@@ -209,7 +215,7 @@ class RegisterORCIDSchema(RegisterSchema):
             msg=_("Must be a valid ORCID URL."),
         ),
         widget=deform.widget.TextInputWidget(readonly="readonly"),
-        default="1234-5678-9012-3456",
+        default=deferred_orcid_default,
     )
 
     def __init__(self, *args, **kwargs):

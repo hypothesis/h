@@ -22,7 +22,7 @@ class SignupController:
         self.request = request
         orcid = request.params.get("orcid")
         schema_cls = RegisterORCIDSchema if orcid else schemas.RegisterPasswordSchema
-        self.schema = schema_cls().bind(request=self.request)
+        self.schema = schema_cls().bind(request=self.request, orcid=orcid)
         self.form = request.create_form(
             self.schema,
             buttons=(deform.Button(title=_("Sign up")),),
@@ -55,6 +55,7 @@ class SignupController:
         template_context = {"heading": _("Account registration successful")}
         try:
             signup_service.signup(
+                orcid=appstruct["orcid"],
                 username=appstruct["username"],
                 email=appstruct["email"],
                 password=appstruct["password"],
