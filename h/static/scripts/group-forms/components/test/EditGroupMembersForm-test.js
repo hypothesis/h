@@ -99,6 +99,7 @@ describe('EditGroupMembersForm', () => {
           userid: 'acct:jane@localhost',
         },
       },
+      features: {},
     };
 
     dateFormatter = {

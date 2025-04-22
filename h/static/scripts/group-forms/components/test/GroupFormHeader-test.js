@@ -1,9 +1,23 @@
 import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 
 import GroupFormHeader from '../GroupFormHeader';
+import { Config } from '../../config';
 
 describe('GroupFormHeader', () => {
-  const createHeader = (props = {}) => mount(<GroupFormHeader {...props} />);
+  let config;
+
+  beforeEach(() => {
+    config = {
+      features: { group_members: true },
+    };
+  });
+
+  const createHeader = (props = {}) =>
+    mount(
+      <Config.Provider value={config}>
+        <GroupFormHeader {...props} />
+      </Config.Provider>,
+    );
 
   const group = {
     pubid: 'abc123',
@@ -38,7 +52,8 @@ describe('GroupFormHeader', () => {
   });
 
   it('does not show tabs if the members flag is disabled', () => {
-    const header = createHeader({ group, enableMembers: false });
+    config.features.group_members = false;
+    const header = createHeader({ group });
     assert.isTrue(getLink(header, 'activity-link').exists());
     assert.isFalse(getLink(header, 'settings-link').exists());
     assert.isFalse(getLink(header, 'members-link').exists());
