@@ -4,7 +4,9 @@ import type { ComponentChildren } from 'preact';
 import { Link as RouterLink, useRoute } from 'wouter-preact';
 
 import type { Group } from '../config';
+import { Config } from '../config';
 import { routes } from '../routes';
+import { useContext } from 'preact/hooks';
 
 type TabLinkProps = {
   href: string;
@@ -32,14 +34,15 @@ function TabLink({ children, href, testId }: TabLinkProps) {
 export type GroupFormHeaderProps = {
   group: Group | null;
   title: string;
-  enableMembers?: boolean;
 };
 
 export default function GroupFormHeader({
-  enableMembers = true,
   group,
   title,
 }: GroupFormHeaderProps) {
+  const config = useContext(Config);
+  const enableMembers = config?.features.group_members;
+
   // This should be replaced with a proper URL generation function that handles
   // escaping etc.
   const editLink = group

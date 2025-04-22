@@ -236,11 +236,7 @@ export default function CreateEditGroupForm({
 
   return (
     <FormContainer classes="max-w-[530px] mx-auto">
-      <GroupFormHeader
-        group={group}
-        title={heading}
-        enableMembers={config.features.group_members}
-      />
+      <GroupFormHeader group={group} title={heading} />
       <form onSubmit={onSubmit} data-testid="form">
         <TextField
           type="input"
