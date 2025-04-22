@@ -1,4 +1,4 @@
-import { mount } from '@hypothesis/frontend-testing';
+import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 
 import GroupFormHeader from '../GroupFormHeader';
 
@@ -43,4 +43,6 @@ describe('GroupFormHeader', () => {
     assert.isFalse(getLink(header, 'settings-link').exists());
     assert.isFalse(getLink(header, 'members-link').exists());
   });
+
+  it('should pass a11y checks', checkAccessibility({ content: createHeader }));
 });

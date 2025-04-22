@@ -1,4 +1,4 @@
-import { mount } from '@hypothesis/frontend-testing';
+import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 
 import TextField from '../TextField';
 
@@ -78,4 +78,11 @@ describe('TextField', () => {
       'Must be 5 characters or more.',
     );
   });
+
+  it(
+    'should pass a11y checks',
+    checkAccessibility({
+      content: () => mount(<TextField value="" label="Text field" />),
+    }),
+  );
 });

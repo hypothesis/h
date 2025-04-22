@@ -1,4 +1,5 @@
 import {
+  checkAccessibility,
   delay,
   mount,
   waitFor,
@@ -536,5 +537,12 @@ describe('EditGroupMembersForm', () => {
     bobRole = getRoleSelect(wrapper, 'bob');
     assert.equal(bobRole.prop('value'), originalRole);
     assert.isFalse(controlsDisabled(wrapper, 'bob'));
+  });
+
+  it('should pass a11y checks', async () => {
+    const wrapper = createForm();
+    await waitForTable(wrapper);
+
+    await checkAccessibility({ content: () => wrapper })();
   });
 });
