@@ -221,6 +221,7 @@ class RegisterORCIDSchema(RegisterSchema):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Move the ORCID field to the top of the form
         for i, child in enumerate(self.children):
             if child.name == "orcid":
                 self.children.insert(0, self.children.pop(i))
