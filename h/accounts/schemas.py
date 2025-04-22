@@ -208,8 +208,17 @@ class RegisterORCIDSchema(RegisterSchema):
             r"^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{4}$",
             msg=_("Must be a valid ORCID URL."),
         ),
-        widget=deform.widget.TextInputWidget(readonly=True),
+        widget=deform.widget.TextInputWidget(readonly="readonly"),
+        default="1234-5678-9012-3456",
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for i, child in enumerate(self.children):
+            if child.name == "orcid":
+                self.children.insert(0, self.children.pop(i))
+                break
 
 
 class EmailChangeSchema(CSRFSchema):

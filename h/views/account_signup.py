@@ -21,7 +21,7 @@ class SignupController:
     def __init__(self, request):
         self.request = request
         orcid = request.params.get("orcid")
-        schema_cls = RegisterORCIDSchema if orcid else schemas.RegisterSchema
+        schema_cls = RegisterORCIDSchema if orcid else schemas.RegisterPasswordSchema
         self.schema = schema_cls().bind(request=self.request)
         self.form = request.create_form(
             self.schema,
