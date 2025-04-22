@@ -158,6 +158,7 @@ function RoleSelect({
       buttonContent={roleStrings[current]}
       data-testid={`role-${username}`}
       disabled={disabled}
+      aria-label="Select role"
     >
       {available.map(role => (
         <Select.Option key={role} value={role}>

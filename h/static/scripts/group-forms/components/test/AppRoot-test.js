@@ -1,4 +1,4 @@
-import { mount } from '@hypothesis/frontend-testing';
+import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 import { useContext } from 'preact/hooks';
 
 import { $imports, default as AppRoot } from '../AppRoot';
@@ -31,9 +31,13 @@ describe('AppRoot', () => {
     $imports.$restore();
   });
 
+  function createComponent() {
+    return mount(<AppRoot config={config} />);
+  }
+
   it('renders style links', () => {
     config.styles = ['/static/styles/foo.css'];
-    const links = mount(<AppRoot config={config} />).find('link');
+    const links = createComponent().find('link');
     assert.equal(links.length, 1);
     assert.equal(links.at(0).prop('rel'), 'stylesheet');
     assert.equal(links.at(0).prop('href'), '/static/styles/foo.css');
@@ -51,14 +55,14 @@ describe('AppRoot', () => {
 
   it('passes config to route', () => {
     navigate('/groups/new', () => {
-      mount(<AppRoot config={config} />);
+      createComponent();
       assert.strictEqual(configContext, config);
     });
   });
 
   it('passes saved group to group settings route', () => {
     navigate('/groups/1234/edit', () => {
-      const wrapper = mount(<AppRoot config={config} />);
+      const wrapper = createComponent();
       assert.equal(
         wrapper.find('CreateEditGroupForm').prop('group'),
         config.context.group,
@@ -68,7 +72,7 @@ describe('AppRoot', () => {
 
   it('passes updated group to group settings route', () => {
     navigate('/groups/1234/edit', () => {
-      const wrapper = mount(<AppRoot config={config} />);
+      const wrapper = createComponent();
       const updatedGroup = { name: 'foobar' };
       wrapper.find('CreateEditGroupForm').prop('onUpdateGroup')(updatedGroup);
       wrapper.update();
@@ -99,10 +103,15 @@ describe('AppRoot', () => {
   ].forEach(({ path, selector }) => {
     it(`renders expected component for URL (${path})`, () => {
       navigate(path, () => {
-        const wrapper = mount(<AppRoot config={config} />);
+        const wrapper = createComponent();
         const component = wrapper.find(selector);
         assert.isTrue(component.exists());
       });
     });
   });
+
+  it(
+    'should pass a11y checks',
+    checkAccessibility({ content: createComponent }),
+  );
 });

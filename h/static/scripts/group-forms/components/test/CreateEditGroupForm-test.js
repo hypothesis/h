@@ -1,5 +1,10 @@
 import { act } from 'preact/test-utils';
-import { delay, mount, waitForElement } from '@hypothesis/frontend-testing';
+import {
+  checkAccessibility,
+  delay,
+  mount,
+  waitForElement,
+} from '@hypothesis/frontend-testing';
 
 import {
   $imports,
@@ -581,6 +586,11 @@ describe('CreateEditGroupForm', () => {
 
     assert.equal(getSelectedGroupType(wrapper), 'private');
   });
+
+  it(
+    'should pass a11y checks',
+    checkAccessibility({ content: () => createWrapper().wrapper }),
+  );
 });
 
 async function assertInLoadingState(wrapper, inLoadingState) {
