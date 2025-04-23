@@ -1,10 +1,10 @@
-from typing import TypedDict
+from typing import ClassVar, TypedDict
 
 from h.schemas.base import JSONSchema
 
 
 class OAuthTokenSchema(JSONSchema):
-    schema = {
+    schema: ClassVar = {
         "type": "object",
         "required": ["access_token"],
         "properties": {
@@ -30,7 +30,7 @@ class ReadOAuthTokenSchema:
 
 
 class OAuthCallbackSchema(JSONSchema):
-    schema = {
+    schema: ClassVar = {
         "type": "object",
         "required": ["code"],
         "properties": {
