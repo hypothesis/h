@@ -54,12 +54,15 @@ def oauth_redirect(request):
     user_service = request.find_service(name="user")
     orcid_user = user_service.fetch_by_identity(IdentityProvider.ORCID, orcid)
 
+    # Sign up new user with ORCID identity
     if not orcid_user and not request.user:
         return HTTPFound(location=request.route_url("signup", _query={"orcid": orcid}))
 
+    # Link ORCID identity to existing user
     if not orcid_user and request.user:
         orcid_client.add_identity(request.user, orcid)
 
+    # Login existing user with ORCID identity
     headers = {}
     if orcid_user and not request.user:
         orcid_user.last_login_date = datetime.now(UTC)
