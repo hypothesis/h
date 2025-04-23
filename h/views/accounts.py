@@ -334,8 +334,8 @@ class ActivateController:
                     _(
                         "We didn't recognize that activation link. "
                         "Have you already activated your account? "
-                        "If so, try logging in using the username "
-                        "and password that you provided."
+                        "If so, try logging in using either the username "
+                        "and password that you provided or ORCID."
                     ),
                 ),
                 "error",
@@ -352,7 +352,7 @@ class ActivateController:
             Markup(
                 _(
                     "Your account has been activated! "
-                    "You can now log in using the password you provided."
+                    "You can now log in using either the password you provided or ORCID."
                 ),
             ),
             "success",

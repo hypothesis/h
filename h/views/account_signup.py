@@ -55,10 +55,10 @@ class SignupController:
         template_context = {"heading": _("Account registration successful")}
         try:
             signup_service.signup(
-                orcid=appstruct["orcid"],
+                orcid=appstruct.get("orcid"),
                 username=appstruct["username"],
                 email=appstruct["email"],
-                password=appstruct["password"],
+                password=appstruct.get("password"),
                 privacy_accepted=datetime.datetime.utcnow(),  # noqa: DTZ003
                 comms_opt_in=appstruct["comms_opt_in"],
             )

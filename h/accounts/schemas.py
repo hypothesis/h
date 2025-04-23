@@ -210,8 +210,8 @@ class RegisterORCIDSchema(RegisterSchema):
         colander.String(),
         title=_("ORCID"),
         validator=colander.Regex(
-            r"^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{4}$",
-            msg=_("Must be a valid ORCID URL."),
+            r"^\d{4}-\d{4}-\d{4}-\d{4}$",
+            msg=_("Must be a valid ORCID."),
         ),
         widget=deform.widget.TextInputWidget(readonly="readonly"),
         default=deferred_orcid_default,
