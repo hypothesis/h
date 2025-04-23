@@ -20,7 +20,7 @@ def _login_redirect_url(request):
 class SignupController:
     def __init__(self, request):
         self.request = request
-        orcid = request.params.get("orcid")
+        orcid = request.session.get("pending_orcid")
         schema_cls = RegisterORCIDSchema if orcid else schemas.RegisterPasswordSchema
         self.schema = schema_cls().bind(request=self.request, orcid=orcid)
         self.form = request.create_form(

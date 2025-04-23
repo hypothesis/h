@@ -56,7 +56,8 @@ def oauth_redirect(request):
 
     # Sign up new user with ORCID identity
     if not orcid_user and not request.user:
-        return HTTPFound(location=request.route_url("signup", _query={"orcid": orcid}))
+        request.session["pending_orcid"] = orcid
+        return HTTPFound(location=request.route_url("signup"))
 
     # Link ORCID identity to existing user
     if not orcid_user and request.user:

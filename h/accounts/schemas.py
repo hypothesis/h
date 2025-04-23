@@ -201,9 +201,8 @@ class RegisterPasswordSchema(RegisterSchema):
 
 
 @colander.deferred
-def deferred_orcid_default(node, kw):  # noqa: ARG001
-    request = node.bindings["request"]
-    return request.params.get("orcid")
+def deferred_orcid_default(node, _kw):  # noqa: ARG001
+    return node.bindings["orcid"]
 
 
 class RegisterORCIDSchema(RegisterSchema):
