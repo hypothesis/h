@@ -201,7 +201,7 @@ class RegisterPasswordSchema(RegisterSchema):
 
 
 @colander.deferred
-def deferred_orcid_default(node, _kw):  # noqa: ARG001
+def deferred_orcid_default(node, _kw):
     return node.bindings["orcid"]
 
 
@@ -244,6 +244,15 @@ class EmailChangeSchema(CSRFSchema):
 
         if exc.children:
             raise exc
+
+
+class AddPasswordSchema(CSRFSchema):
+    email = colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(validators.Email()),
+        title=_("Email address"),
+        widget=deform.widget.TextInputWidget(template="emailinput", readonly=True),
+    )
 
 
 class PasswordChangeSchema(CSRFSchema):

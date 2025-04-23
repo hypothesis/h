@@ -1,13 +1,11 @@
 from datetime import UTC, datetime
 from urllib.parse import urlencode, urlunparse
 
-from markupsafe import Markup
 from pyramid import security
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from h.accounts.events import LoginEvent
-from h.i18n import TranslationString
 from h.models.user_identity import IdentityProvider
 from h.services import ORCIDClientService
 

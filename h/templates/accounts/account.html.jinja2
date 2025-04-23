@@ -5,8 +5,15 @@
 
 {% block page_content %}
   <div class="form-vertical">
-    {{ email_form }}
-    {{ password_form }}
+    {% if add_password_form %}
+      {{ add_password_form }}
+    {% else %}
+      {{ email_form }}
+    {% endif %}
+
+    {% if password_form %}
+      {{ password_form }}
+    {% endif %}
   </div>
 
   {% if orcid %}

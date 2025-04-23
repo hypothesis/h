@@ -203,7 +203,7 @@ class ForgotPasswordController:
             return {"form": self.form.render()}
 
         user = appstruct["user"]
-        self._send_forgot_password_email(user)
+        _send_forgot_password_email(self.request, user)
 
         return httpexceptions.HTTPFound(self.request.route_path("account_reset"))
 
@@ -211,12 +211,11 @@ class ForgotPasswordController:
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(self.request.route_path("index"))
 
-    def _send_forgot_password_email(self, user):
-        email_data = reset_password.generate(self.request, user)
-        task_data = TaskData(
-            tag=email_data.tag, sender_id=user.id, recipient_ids=[user.id]
-        )
-        email.send.delay(asdict(email_data), asdict(task_data))
+
+def _send_forgot_password_email(request, user):
+    email_data = reset_password.generate(request, user)
+    task_data = TaskData(tag=email_data.tag, sender_id=user.id, recipient_ids=[user.id])
+    email.send.delay(asdict(email_data), asdict(task_data))
 
 
 @view_defaults(
@@ -406,6 +405,7 @@ class AccountController:
         self.request = request
 
         email_schema = schemas.EmailChangeSchema().bind(request=request)
+        add_password_schema = schemas.AddPasswordSchema().bind(request=request)
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         # Ensure deform generates unique field IDs for each field in this
@@ -419,6 +419,12 @@ class AccountController:
                 formid="email",
                 counter=counter,
                 use_inline_editing=True,
+            ),
+            "add_password": request.create_form(
+                add_password_schema,
+                buttons=(_("Add password"),),
+                formid="add-password",
+                counter=counter,
             ),
             "password": request.create_form(
                 password_schema,
@@ -454,6 +460,13 @@ class AccountController:
             on_failure=self._template_data,
         )
 
+    @view_config(request_method="POST", request_param="__formid__=add-password")
+    def post_add_password_form(self):
+        _send_forgot_password_email(self.request, self.request.user)
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url("account_reset")
+        )
+
     def update_email_address(self, appstruct):
         self.request.user.email = appstruct["email"]
 
@@ -466,13 +479,22 @@ class AccountController:
         email = self.request.user.email or ""
         password_form = self.forms["password"].render()
         email_form = self.forms["email"].render({"email": email})
-        identity = ORCIDClientService.get_identity(self.request.user)
+        add_password_form = self.forms["add_password"].render({"email": email})
+        orcid_identity = ORCIDClientService.get_identity(self.request.user)
+        orcid = orcid_identity.provider_unique_id if orcid_identity else None
 
+        no_password = not self.request.user.password
+        if no_password:
+            return {
+                "email": email,
+                "add_password_form": add_password_form,
+                "orcid": orcid,
+            }
         return {
             "email": email,
             "email_form": email_form,
             "password_form": password_form,
-            "orcid": identity.provider_unique_id if identity else None,
+            "orcid": orcid,
         }
 
 
