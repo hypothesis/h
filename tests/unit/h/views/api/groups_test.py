@@ -90,12 +90,14 @@ class TestCreate:
                     "name": sentinel.name,
                     "description": sentinel.description,
                     "type": "private",
+                    "pre_moderated": False,
                 },
                 call.create_private_group(
                     name=sentinel.name,
                     userid=sentinel.userid,
                     description=sentinel.description,
                     groupid=None,
+                    pre_moderated=False,
                 ),
             ),
             (
@@ -105,6 +107,7 @@ class TestCreate:
                     userid=sentinel.userid,
                     description=None,
                     groupid=None,
+                    pre_moderated=False,
                 ),
             ),
         ],
@@ -136,6 +139,7 @@ class TestCreate:
                     "name": sentinel.name,
                     "description": sentinel.description,
                     "type": "restricted",
+                    "pre_moderated": True,
                 },
                 call.create_restricted_group(
                     name=sentinel.name,
@@ -143,6 +147,7 @@ class TestCreate:
                     scopes=[],
                     description=sentinel.description,
                     groupid=None,
+                    pre_moderated=True,
                 ),
             ),
             (
@@ -153,6 +158,7 @@ class TestCreate:
                     scopes=[],
                     description=None,
                     groupid=None,
+                    pre_moderated=False,
                 ),
             ),
         ],
@@ -183,6 +189,7 @@ class TestCreate:
                     "name": sentinel.name,
                     "description": sentinel.description,
                     "type": "open",
+                    "pre_moderated": True,
                 },
                 call.create_open_group(
                     name=sentinel.name,
@@ -190,6 +197,7 @@ class TestCreate:
                     scopes=[],
                     description=sentinel.description,
                     groupid=None,
+                    pre_moderated=True,
                 ),
             ),
             (
@@ -200,6 +208,7 @@ class TestCreate:
                     scopes=[],
                     description=None,
                     groupid=None,
+                    pre_moderated=False,
                 ),
             ),
         ],
