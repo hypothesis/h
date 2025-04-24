@@ -23,9 +23,10 @@ class SignupController:
         orcid = request.session.get("pending_orcid")
         schema_cls = RegisterORCIDSchema if orcid else schemas.RegisterPasswordSchema
         self.schema = schema_cls().bind(request=self.request, orcid=orcid)
+        title = "Sign up" if not orcid else "Create account"
         self.form = request.create_form(
             self.schema,
-            buttons=(deform.Button(title=_("Sign up")),),
+            buttons=(deform.Button(title=_(title)),),
             css_class="js-disable-on-submit",
         )
 
