@@ -85,6 +85,7 @@ class GroupCreateEditController:
                 "num_annotations": self.annotation_stats_service.total_group_annotation_count(
                     group.pubid, unshared=False
                 ),
+                "pre_moderated": group.pre_moderated,
             }
             js_config["api"].update(
                 {

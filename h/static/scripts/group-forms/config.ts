@@ -14,6 +14,7 @@ export type Group = {
   link: string;
   type: GroupType;
   num_annotations: number;
+  pre_moderated: boolean;
 };
 
 export type ConfigObject = {
