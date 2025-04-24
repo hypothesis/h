@@ -216,6 +216,12 @@ def includeme(config):  # noqa: PLR0915
         traverse="/{pubid}",
     )
     config.add_route(
+        "api.group_annotations",
+        "/api/groups/{pubid}/annotations",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
+    config.add_route(
         "group_edit_members",
         "/groups/{pubid}/edit/members",
         factory="h.traversal.GroupRequiredRoot",
