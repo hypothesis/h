@@ -8,7 +8,6 @@ from pyramid.view import exception_view_config, view_config
 
 from h.accounts.events import LoginEvent
 from h.models.user_identity import IdentityProvider
-from h.schemas import ValidationError
 from h.schemas.oauth import ReadOAuthCallbackSchema
 from h.services import ORCIDClientService
 
