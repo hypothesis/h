@@ -28,7 +28,7 @@ GROUP_SCHEMA_PROPERTIES = {
 class FilterGroupAnnotationsSchema(colander.Schema):
     moderation_status = colander.SchemaNode(
         colander.String(),
-        validator=colander.OneOf(["approved", "pending", "denied", "spam"]),
+        validator=colander.OneOf(["APPROVED", "PENDING", "DENIED", "SPAM"]),
         missing=None,
     )
 
@@ -36,7 +36,7 @@ class FilterGroupAnnotationsSchema(colander.Schema):
         moderation_status = cstruct.get("moderation_status")
 
         if moderation_status:
-            cstruct["moderation_status"] = ModerationStatus(moderation_status.upper())
+            cstruct["moderation_status"] = ModerationStatus(moderation_status)
 
 
 class GroupAPISchema(JSONSchema):
