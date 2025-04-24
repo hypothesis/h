@@ -1,6 +1,5 @@
 from h.models import Annotation
-from h.schemas.pagination import PaginationQueryParamsSchema
-from h.schemas.util import validate_query_params
+from h.schemas.pagination import Pagination
 from h.security import Permission
 from h.services.annotation_read import AnnotationReadService
 from h.traversal import GroupContext
@@ -18,11 +17,8 @@ from h.views.api.config import api_config
 )
 def list_annotations(context: GroupContext, request):
     group = context.group
-    params = validate_query_params(PaginationQueryParamsSchema(), request.params)
-    page_number = params["page[number]"]
-    page_size = params["page[size]"]
-    offset = page_size * (page_number - 1)
-    limit = page_size
+
+    pagination = Pagination.from_params(request.params)
 
     annotation_json_service = request.find_service(name="annotation_json")
 
@@ -39,7 +35,9 @@ def list_annotations(context: GroupContext, request):
 
     total = request.db.execute(AnnotationReadService.count_query(query)).scalar_one()
     annotations = request.db.scalars(
-        query.order_by(Annotation.created.desc()).offset(offset).limit(limit)
+        query.order_by(Annotation.created.desc())
+        .offset(pagination.offset)
+        .limit(pagination.limit)
     )
 
     annotations_dicts = [

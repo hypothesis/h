@@ -1,5 +1,5 @@
 import logging
-from unittest.mock import PropertyMock, call, create_autospec, sentinel
+from unittest.mock import Mock, PropertyMock, call, create_autospec, sentinel
 
 import pytest
 from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
@@ -76,13 +76,9 @@ class TestListMembers:
         pyramid_request,
         GroupMembershipJSONPresenter,
         group_members_service,
-        PaginationQueryParamsSchema,
-        validate_query_params,
+        Pagination,
     ):
-        pyramid_request.params = validate_query_params.return_value = {
-            "page[number]": 3,
-            "page[size]": 2,
-        }
+        Pagination.from_params.return_value = Mock(offset=4, limit=2)
         group_members_service.get_memberships.return_value = [
             sentinel.membership_1,
             sentinel.membership_2,
@@ -98,10 +94,7 @@ class TestListMembers:
 
         response = views.list_members(context, pyramid_request)
 
-        PaginationQueryParamsSchema.assert_called_once_with()
-        validate_query_params.assert_called_once_with(
-            PaginationQueryParamsSchema.return_value, pyramid_request.params
-        )
+        Pagination.from_params.assert_called_once_with(pyramid_request.params)
         group_members_service.count_memberships.assert_called_once_with(context.group)
         group_members_service.get_memberships.assert_called_once_with(
             context.group, offset=4, limit=2
@@ -391,18 +384,9 @@ def EditGroupMembershipAPISchema(mocker):
 
 
 @pytest.fixture(autouse=True)
-def PaginationQueryParamsSchema(mocker):
+def Pagination(mocker):
     return mocker.patch(
-        "h.views.api.group_members.PaginationQueryParamsSchema",
-        autospec=True,
-        spec_set=True,
-    )
-
-
-@pytest.fixture(autouse=True)
-def validate_query_params(mocker):
-    return mocker.patch(
-        "h.views.api.group_members.validate_query_params", autospec=True, spec_set=True
+        "h.views.api.group_members.Pagination", autospec=True, spec_set=True
     )
 
 
