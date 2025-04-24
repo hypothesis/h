@@ -202,7 +202,7 @@ def deferred_orcid_default(node, _kw):
     return node.bindings["orcid"]
 
 
-class RegisterORCIDSchema(RegisterSchema):
+class RegisterORCIDSchema(CSRFSchema):
     orcid = colander.SchemaNode(
         colander.String(),
         title=_("ORCID"),
