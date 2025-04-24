@@ -175,6 +175,7 @@ class RegisterSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
     email = email_node(title=_("Email address"))
+    password = new_password_node(title=_("Password"))
 
     privacy_accepted = colander.SchemaNode(
         colander.Boolean(),
@@ -196,10 +197,6 @@ class RegisterSchema(CSRFSchema):
     )
 
 
-class RegisterPasswordSchema(RegisterSchema):
-    password = new_password_node(title=_("Password"))
-
-
 @colander.deferred
 def deferred_orcid_default(node, _kw):
     return node.bindings["orcid"]
@@ -217,14 +214,46 @@ class RegisterORCIDSchema(RegisterSchema):
         default=deferred_orcid_default,
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    username = colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(
+            validators.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+            colander.Regex(
+                USERNAME_PATTERN,
+                msg=_(
+                    "Must have only letters, numbers, periods and underscores. May not start or end with period."
+                ),
+            ),
+            unique_username,
+            unblacklisted_username,
+        ),
+        title=_("Username"),
+        hint=_(
+            "Must be between {min} and {max} characters, containing only "
+            "letters, numbers, periods, and underscores."
+        ).format(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+        widget=deform.widget.TextInputWidget(autofocus=True),
+    )
+    email = email_node(title=_("Email address"))
 
-        # Move the ORCID field to the top of the form
-        for i, child in enumerate(self.children):
-            if child.name == "orcid":
-                self.children.insert(0, self.children.pop(i))
-                break
+    privacy_accepted = colander.SchemaNode(
+        colander.Boolean(),
+        description=Markup(_privacy_accepted_message()),
+        validator=privacy_acceptance_validator,
+        widget=deform.widget.CheckboxWidget(
+            omit_label=True, css_class="form-checkbox--inline"
+        ),
+    )
+
+    comms_opt_in = colander.SchemaNode(
+        colander.Boolean(),
+        description=_("I would like to receive news about annotation and Hypothesis."),
+        widget=deform.widget.CheckboxWidget(
+            omit_label=True, css_class="form-checkbox--inline"
+        ),
+        missing=None,
+        default=False,
+    )
 
 
 class EmailChangeSchema(CSRFSchema):
