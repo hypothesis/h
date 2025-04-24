@@ -65,6 +65,7 @@ def oauth_redirect(request):
     # Link ORCID identity to existing user
     if not orcid_user and request.user:
         orcid_client.add_identity(request.user, orcid)
+        return HTTPFound(location=request.route_url("account"))
 
     # Login existing user with ORCID identity
     headers = {}
