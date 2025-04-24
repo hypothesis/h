@@ -5,8 +5,7 @@ from pyramid.httpexceptions import HTTPConflict, HTTPNoContent, HTTPNotFound
 
 from h.presenters import GroupMembershipJSONPresenter
 from h.schemas.api.group_membership import EditGroupMembershipAPISchema
-from h.schemas.pagination import PaginationQueryParamsSchema
-from h.schemas.util import validate_query_params
+from h.schemas.pagination import Pagination
 from h.security import Permission
 from h.services.group_members import ConflictError
 from h.traversal import (
@@ -60,15 +59,11 @@ def list_members(context: GroupContext, request):
     group = context.group
     group_members_service = request.find_service(name="group_members")
 
-    params = validate_query_params(PaginationQueryParamsSchema(), request.params)
-    page_number = params["page[number]"]
-    page_size = params["page[size]"]
-    offset = page_size * (page_number - 1)
-    limit = page_size
+    pagination = Pagination.from_params(request.params)
 
     total = group_members_service.count_memberships(group)
     memberships = group_members_service.get_memberships(
-        group, offset=offset, limit=limit
+        group, offset=pagination.offset, limit=pagination.limit
     )
 
     membership_dicts = [

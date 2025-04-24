@@ -1,8 +1,8 @@
 import pytest
-from webob.multidict import NestedMultiDict
+from webob.multidict import MultiDict, NestedMultiDict
 
 from h.schemas import ValidationError
-from h.schemas.pagination import PaginationQueryParamsSchema
+from h.schemas.pagination import Pagination, PaginationQueryParamsSchema
 from h.schemas.util import validate_query_params
 
 
@@ -49,3 +49,19 @@ class TestPaginationQueryParamsSchema:
     @pytest.fixture
     def schema(self):
         return PaginationQueryParamsSchema()
+
+
+class TestPagination:
+    @pytest.mark.parametrize(
+        "params,expected",
+        [
+            ({"page[number]": 1, "page[size]": 20}, (0, 20)),
+            ({"page[number]": 2, "page[size]": 20}, (20, 20)),
+            ({"page[number]": 3, "page[size]": 10}, (20, 10)),
+        ],
+    )
+    def test_from_params(self, params, expected):
+        pagination = Pagination.from_params(MultiDict(params))
+
+        assert pagination.offset == expected[0]
+        assert pagination.limit == expected[1]
