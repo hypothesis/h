@@ -6,7 +6,7 @@ describe('TooltipController', () => {
   let testEl;
   let tooltipEl;
 
-  before(() => {
+  beforeAll(() => {
     template =
       '<div class="form-input__hint-icon js-tooltip"' +
       'aria-label="Test"></div>';

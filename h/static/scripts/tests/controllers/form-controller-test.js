@@ -335,13 +335,16 @@ describe('FormController', () => {
   });
 
   context('when a checkbox is toggled', () => {
-    beforeEach(() => {
-      fakeSubmitForm.returns(
-        Promise.resolve({ status: 200, form: UPDATED_FORM }),
-      );
+    function changeCheckbox() {
       ctrl.refs.checkboxInput.focus();
       ctrl.refs.checkboxInput.dispatchEvent(
         new Event('change', { bubbles: true }),
+      );
+    }
+
+    beforeEach(() => {
+      fakeSubmitForm.returns(
+        Promise.resolve({ status: 200, form: UPDATED_FORM }),
       );
     });
 
@@ -351,10 +354,12 @@ describe('FormController', () => {
     });
 
     it('does not show form save buttons', () => {
+      changeCheckbox();
       assert.isTrue(ctrl.refs.formActions.classList.contains('is-hidden'));
     });
 
     it('automatically submits the form', () => {
+      changeCheckbox();
       assert.calledWith(fakeSubmitForm, ctrl.element);
     });
   });
