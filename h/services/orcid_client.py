@@ -68,6 +68,9 @@ class ORCIDClientService:
     def key_set_url(self) -> str:
         return self._api_url("oauth/jwks")
 
+    def orcid_url(self, orcid: str) -> str:
+        return self._api_url(orcid)
+
     def _api_url(self, path: str) -> str:
         return f"https://{self._host}/{path}"
 

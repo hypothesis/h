@@ -480,8 +480,10 @@ class AccountController:
         password_form = self.forms["password"].render()
         email_form = self.forms["email"].render({"email": email})
         add_password_form = self.forms["add_password"].render({"email": email})
-        orcid_identity = ORCIDClientService.get_identity(self.request.user)
+        orcid_client = self.request.find_service(ORCIDClientService)
+        orcid_identity = orcid_client.get_identity(self.request.user)
         orcid = orcid_identity.provider_unique_id if orcid_identity else None
+        orcid_url = orcid_client.orcid_url(orcid)
 
         no_password = not self.request.user.password
         if no_password:
@@ -489,12 +491,14 @@ class AccountController:
                 "email": email,
                 "add_password_form": add_password_form,
                 "orcid": orcid,
+                "orcid_url": orcid_url,
             }
         return {
             "email": email,
             "email_form": email_form,
             "password_form": password_form,
             "orcid": orcid,
+            "orcid_url": orcid_url,
         }
 
 
