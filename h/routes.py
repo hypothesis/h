@@ -151,6 +151,12 @@ def includeme(config):  # noqa: PLR0915
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{id}",
     )
+    config.add_route(
+        "api.group_annotations",
+        "/api/groups/{pubid}/annotations",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
     config.add_route("api.profile", "/api/profile")
     config.add_route("api.profile_groups", "/api/profile/groups")
     config.add_route("api.debug_token", "/api/debug-token")
@@ -212,12 +218,6 @@ def includeme(config):  # noqa: PLR0915
     config.add_route(
         "group_edit",
         "/groups/{pubid}/edit",
-        factory="h.traversal.GroupRequiredRoot",
-        traverse="/{pubid}",
-    )
-    config.add_route(
-        "api.group_annotations",
-        "/api/groups/{pubid}/annotations",
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )

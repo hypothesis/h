@@ -1,5 +1,7 @@
 import pytest
+from webob.multidict import MultiDict
 
+from h.models.annotation import ModerationStatus
 from h.models.group import (
     AUTHORITY_PROVIDED_ID_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH,
@@ -9,9 +11,11 @@ from h.models.group import (
 from h.schemas import ValidationError
 from h.schemas.api.group import (
     CreateGroupAPISchema,
+    FilterGroupAnnotationsSchema,
     GroupAPISchema,
     UpdateGroupAPISchema,
 )
+from h.schemas.util import validate_query_params
 
 DEFAULT_AUTHORITY = "hypothes.is"
 
@@ -191,6 +195,26 @@ class TestGroupAPISchema:
 
         assert schema.group_authority == "thirdparty.com"
         assert schema.default_authority == DEFAULT_AUTHORITY
+
+
+class TestFilterGroupAnnotationsSchema:
+    def test_it(self, schema):
+        data = MultiDict({"moderation_status": "pending"})
+
+        validated_data = validate_query_params(schema, data)
+
+        assert validated_data == {"moderation_status": ModerationStatus.PENDING}
+
+    def test_it_when_empty(self, schema):
+        data = MultiDict({})
+
+        validated_data = validate_query_params(schema, data)
+
+        assert validated_data == {"moderation_status": None}
+
+    @pytest.fixture
+    def schema(self):
+        return FilterGroupAnnotationsSchema()
 
 
 class TestCreateGroupAPISchema:

@@ -3,7 +3,7 @@ from unittest.mock import sentinel
 import pytest
 import sqlalchemy as sa
 
-from h.models import Annotation
+from h.models import Annotation, ModerationStatus
 from h.services.annotation_read import AnnotationReadService, service_factory
 
 
@@ -52,6 +52,59 @@ class TestAnnotationReadService:
 
         # If we preloaded, we shouldn't execute any queries
         assert not query_counter.count
+
+    def test_annotation_search_by_groupid(self, factories, db_session):
+        annotation = factories.Annotation(groupid="groupid")
+
+        query = AnnotationReadService.annotation_search_query(
+            groupid=annotation.groupid
+        )
+
+        assert db_session.scalars(query).all() == [annotation]
+
+    def test_annotation_search_by_moderation_status_approved(
+        self, factories, db_session
+    ):
+        annotation_none = factories.Annotation()
+        annotation_approved = factories.Annotation(
+            moderation_status=ModerationStatus.APPROVED
+        )
+
+        query = AnnotationReadService.annotation_search_query(
+            moderation_status=ModerationStatus.APPROVED
+        )
+
+        assert set(db_session.scalars(query).all()) == {
+            annotation_none,
+            annotation_approved,
+        }
+
+    def test_annotation_search_by_moderation_status(self, factories, db_session):
+        annotation = factories.Annotation(moderation_status=ModerationStatus.DENIED)
+
+        query = AnnotationReadService.annotation_search_query(
+            moderation_status=ModerationStatus.DENIED
+        )
+
+        assert db_session.scalars(query).all() == [annotation]
+
+    def test_annotation_search_include_private(self, factories, db_session):
+        shared = factories.Annotation(shared=True)
+        private = factories.Annotation(shared=False)
+
+        query = AnnotationReadService.annotation_search_query(include_private=False)
+        assert db_session.scalars(query).all() == [shared]
+
+        query = AnnotationReadService.annotation_search_query(include_private=True)
+        assert set(db_session.scalars(query).all()) == {shared, private}
+
+    def test_annotation_count_query(self, factories, db_session):
+        factories.Annotation(shared=True)
+        factories.Annotation(shared=False)
+
+        query = AnnotationReadService.annotation_search_query()
+
+        assert db_session.scalar(AnnotationReadService.count_query(query)) == 2
 
     @pytest.fixture
     def query_counter(self, db_engine):

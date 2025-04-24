@@ -1,6 +1,9 @@
 """Schema for validating API group resources."""
 
+import colander
+
 from h.i18n import TranslationString as _
+from h.models.annotation import ModerationStatus
 from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
     GROUP_NAME_MAX_LENGTH,
@@ -20,6 +23,20 @@ GROUP_SCHEMA_PROPERTIES = {
     "type": {"enum": ["private", "restricted", "open"]},
     "pre_moderated": {"type": "boolean"},
 }
+
+
+class FilterGroupAnnotationsSchema(colander.Schema):
+    moderation_status = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf(["approved", "pending", "denied", "spam"]),
+        missing=None,
+    )
+
+    def validator(self, _node, cstruct):
+        moderation_status = cstruct.get("moderation_status")
+
+        if moderation_status:
+            cstruct["moderation_status"] = ModerationStatus(moderation_status.upper())
 
 
 class GroupAPISchema(JSONSchema):
