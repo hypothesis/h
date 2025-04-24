@@ -111,6 +111,7 @@ class TestGroupCreateEditController:
                             "group_read", pubid=group.pubid, slug=group.slug
                         ),
                         "num_annotations": annotation_stats_service.total_group_annotation_count.return_value,
+                        "pre_moderated": group.pre_moderated,
                     },
                     "user": {"userid": sentinel.authenticated_userid},
                 },
