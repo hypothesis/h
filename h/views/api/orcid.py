@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def authorize(request):
     host = request.registry.settings["orcid_host"]
     client_id = request.registry.settings["orcid_client_id"]
-    # state = OAuthCallbackSchema(request).state_param()  # noqa: ERA001
+    state = ReadOAuthCallbackSchema(request).state_param()
 
     return HTTPFound(
         location=urlunparse(
@@ -35,7 +35,7 @@ def authorize(request):
                         "client_id": client_id,
                         "response_type": "code",
                         "redirect_uri": "http://localhost.is:5000/orcid/callback",
-                        # "state": state,  # noqa: ERA001
+                        "state": state,
                         "scope": "openid",
                     }
                 ),
@@ -50,7 +50,7 @@ def authorize(request):
     route_name="orcid.oauth.callback",
 )
 def oauth_redirect(request):
-    callback_data = ReadOAuthCallbackSchema().validate(dict(request.params))
+    callback_data = ReadOAuthCallbackSchema(request).validate(dict(request.params))
 
     orcid_client = request.find_service(ORCIDClientService)
     orcid = orcid_client.get_orcid(callback_data["code"])
@@ -87,4 +87,5 @@ def oauth_redirect(request):
     renderer="h:templates/5xx.html.jinja2",
 )
 def oauth_redirect_error(_request):
+    logger.error("ORCID oauth redirect error", exc_info=True)
     return {}

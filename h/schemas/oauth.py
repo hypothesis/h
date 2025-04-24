@@ -1,12 +1,18 @@
+import logging
+import secrets
 from typing import ClassVar, TypedDict
 
-from h.schemas.base import JSONSchema
+from pyramid.request import Request
+
+from h.schemas.base import JSONSchema, ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class OAuthCallbackSchema(JSONSchema):
     schema: ClassVar = {
         "type": "object",
-        "required": ["code", "code2"],
+        "required": ["code"],
         "properties": {
             "code": {"type": "string"},
             "state": {"type": "string"},
@@ -24,11 +30,20 @@ class OAuthCallback(TypedDict):
 
 
 class ReadOAuthCallbackSchema:
-    def __init__(self) -> None:
+    def __init__(self, request: Request) -> None:
         self._schema = OAuthCallbackSchema()
+        self._request = request
 
     def validate(self, data: dict) -> OAuthCallback:
+        if data.get("state") != self._request.session.pop("oauth2_state", None):
+            raise ValidationError("Invalid oauth state")  # noqa: EM101, TRY003
+
         return self._schema.validate(data)
+
+    def state_param(self) -> str:
+        state = secrets.token_hex()
+        self._request.session["oauth2_state"] = state
+        return state
 
 
 class OAuthTokenSchema(JSONSchema):
