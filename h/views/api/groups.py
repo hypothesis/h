@@ -68,6 +68,7 @@ def create(request):
         "userid": request.user.userid,
         "description": appstruct.get("description", None),
         "groupid": groupid,
+        "pre_moderated": appstruct.get("pre_moderated", False),
     }
 
     if group_type == "private":
