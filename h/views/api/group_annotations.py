@@ -26,9 +26,7 @@ def list_annotations(context: GroupContext, request):
 
     moderation_status_filter = params["moderation_status"]
     query = AnnotationReadService.annotation_search_query(
-        groupid=group.pubid,
-        include_private=False,
-        moderation_status=moderation_status_filter,
+        groupid=group.pubid, moderation_status=moderation_status_filter
     )
 
     total = request.db.execute(AnnotationReadService.count_query(query)).scalar_one()

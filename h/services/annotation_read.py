@@ -39,23 +39,36 @@ class AnnotationReadService:
             return []
 
         annotations = self._db.execute(
-            self.annotation_search_query(ids=ids, eager_load=eager_load)
+            self.annotation_search_query(
+                ids=ids,
+                eager_load=eager_load,
+                include_deleted=True,
+                include_private=True,
+            )
         ).scalars()
 
         return sorted(annotations, key=lambda annotation: ids.index(annotation.id))
 
     @staticmethod
-    def annotation_search_query(
+    def annotation_search_query(  # noqa: PLR0913
         ids: list[str] | None = None,
         *,
         eager_load: list | None = None,
         groupid: str | None = None,
-        include_private: bool = True,
+        include_private: bool = False,
+        include_deleted: bool = False,
         moderation_status: Annotation.ModerationStatus | None = None,
     ) -> Query:
         """Create a query for searching for annotations."""
 
         query = select(Annotation)
+
+        if not include_deleted:
+            query = query.where(Annotation.deleted.is_(False))
+
+        if not include_private:
+            query = query.where(Annotation.shared.is_(True))
+
         if ids:
             query = query.where(Annotation.id.in_(ids))
 
@@ -75,9 +88,6 @@ class AnnotationReadService:
                 )
             else:
                 query = query.where(Annotation.moderation_status == moderation_status)
-
-        if not include_private:
-            query = query.where(Annotation.shared.is_(True))
 
         if eager_load:
             query = query.options(*(subqueryload(prop) for prop in eager_load))

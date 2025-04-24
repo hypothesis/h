@@ -54,7 +54,7 @@ class TestAnnotationReadService:
         assert not query_counter.count
 
     def test_annotation_search_by_groupid(self, factories, db_session):
-        annotation = factories.Annotation(groupid="groupid")
+        annotation = factories.Annotation(groupid="groupid", shared=True)
 
         query = AnnotationReadService.annotation_search_query(
             groupid=annotation.groupid
@@ -65,13 +65,13 @@ class TestAnnotationReadService:
     def test_annotation_search_by_moderation_status_approved(
         self, factories, db_session
     ):
-        annotation_none = factories.Annotation()
+        annotation_none = factories.Annotation(shared=True)
         annotation_approved = factories.Annotation(
-            moderation_status=ModerationStatus.APPROVED
+            shared=True, moderation_status=ModerationStatus.APPROVED
         )
 
         query = AnnotationReadService.annotation_search_query(
-            moderation_status=ModerationStatus.APPROVED
+            moderation_status=ModerationStatus.APPROVED,
         )
 
         assert set(db_session.scalars(query).all()) == {
@@ -80,7 +80,9 @@ class TestAnnotationReadService:
         }
 
     def test_annotation_search_by_moderation_status(self, factories, db_session):
-        annotation = factories.Annotation(moderation_status=ModerationStatus.DENIED)
+        annotation = factories.Annotation(
+            moderation_status=ModerationStatus.DENIED, shared=True
+        )
 
         query = AnnotationReadService.annotation_search_query(
             moderation_status=ModerationStatus.DENIED
@@ -102,7 +104,7 @@ class TestAnnotationReadService:
         factories.Annotation(shared=True)
         factories.Annotation(shared=False)
 
-        query = AnnotationReadService.annotation_search_query()
+        query = AnnotationReadService.annotation_search_query(include_private=True)
 
         assert db_session.scalar(AnnotationReadService.count_query(query)) == 2
 

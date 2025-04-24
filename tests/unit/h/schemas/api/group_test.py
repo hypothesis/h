@@ -199,7 +199,7 @@ class TestGroupAPISchema:
 
 class TestFilterGroupAnnotationsSchema:
     def test_it(self, schema):
-        data = MultiDict({"moderation_status": "pending"})
+        data = MultiDict({"moderation_status": "PENDING"})
 
         validated_data = validate_query_params(schema, data)
 

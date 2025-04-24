@@ -102,6 +102,9 @@ class GroupCreateEditController:
                         pubid=group.pubid,
                         userid=":userid",
                     ),
+                    "groupAnnotations": api_config(
+                        "api.group_annotations", "GET", pubid=group.pubid
+                    ),
                 }
             )
 
