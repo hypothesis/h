@@ -24,7 +24,7 @@ class OAuthCallback(TypedDict):
 
 
 class ReadOAuthCallbackSchema:
-    def __init__(self):
+    def __init__(self) -> None:
         self._schema = OAuthCallbackSchema()
 
     def validate(self, data: dict) -> OAuthCallback:
@@ -34,11 +34,12 @@ class ReadOAuthCallbackSchema:
 class OAuthTokenSchema(JSONSchema):
     schema: ClassVar = {
         "type": "object",
-        "required": ["access_token"],
+        "required": ["access_token", "refresh_token", "expires_in"],
         "properties": {
             "access_token": {"type": "string"},
             "refresh_token": {"type": "string"},
             "expires_in": {"type": "integer", "minimum": 1},
+            "id_token": {"type": "string"},
         },
     }
 
@@ -47,6 +48,7 @@ class OAuthToken(TypedDict):
     access_token: str
     refresh_token: str
     expires_in: int
+    id_token: str
 
 
 class ReadOAuthTokenSchema:

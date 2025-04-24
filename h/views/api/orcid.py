@@ -7,6 +7,7 @@ from pyramid.view import view_config
 
 from h.accounts.events import LoginEvent
 from h.models.user_identity import IdentityProvider
+from h.schemas.oauth import ReadOAuthCallbackSchema
 from h.services import ORCIDClientService
 
 
@@ -44,11 +45,12 @@ def authorize(request):
 @view_config(
     request_method="GET",
     route_name="orcid.oauth.callback",
-    # schema=OAuthCallbackSchema,  # noqa: ERA001
 )
 def oauth_redirect(request):
+    callback_data = ReadOAuthCallbackSchema().validate(dict(request.params))
+
     orcid_client = request.find_service(ORCIDClientService)
-    orcid = orcid_client.get_orcid(request.params["code"])
+    orcid = orcid_client.get_orcid(callback_data["code"])
     user_service = request.find_service(name="user")
     orcid_user = user_service.fetch_by_identity(IdentityProvider.ORCID, orcid)
 

@@ -186,7 +186,7 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     # Auth related services
     config.register_service_factory("h.services.http.factory", iface=HTTPService)
     config.register_service_factory(
-        "h.services.oauth2_client.factory", iface=OAuthClientService
+        "h.services.oauth_client.factory", iface=OAuthClientService
     )
     config.register_service_factory(
         "h.services.orcid_client.factory", iface=ORCIDClientService

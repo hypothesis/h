@@ -1,5 +1,6 @@
 import logging
 
+from h.schemas.oauth import ReadOAuthTokenSchema
 from h.services.http import ExternalRequestError, HTTPService
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class OAuthClientService:
     def _request_id_token(self, token_url: str, data, auth) -> str:
         response = self._http_service.post(token_url, data=data, auth=auth)
 
-        data = response.json()
+        data = ReadOAuthTokenSchema().validate(response.json())
 
         return data["id_token"]
 
