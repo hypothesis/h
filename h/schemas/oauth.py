@@ -6,7 +6,7 @@ from h.schemas.base import JSONSchema
 class OAuthCallbackSchema(JSONSchema):
     schema: ClassVar = {
         "type": "object",
-        "required": ["code"],
+        "required": ["code", "code2"],
         "properties": {
             "code": {"type": "string"},
             "state": {"type": "string"},
