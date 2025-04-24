@@ -16,7 +16,7 @@
   {% if orcid %}
     <h3>ORCID connected: <a href="{{ orcid_url }}">{{ orcid }}</a></h3>
   {%  else %}
-    <a class="btn" href="{{ request.route_path('orcid.oauth.authorize') }}">{% trans %}Connect with ORCID{% endtrans %}</a>
+    <a class="btn" style="display: inline-flex;" href="{{ request.route_path('orcid.oauth.authorize') }}">{% trans %}Connect with ORCID{% endtrans %}</a>
     <p class="text">Connecting your ORCID enables you to log in to Hypothesis with ORCID, instead of your Hypothesis password.</p>
   {% endif %}
 {% endblock page_content %}
