@@ -144,6 +144,12 @@ def test_includeme():
             factory="h.traversal.GroupRequiredRoot",
             traverse="/{id}",
         ),
+        call(
+            "api.group_annotations",
+            "/api/groups/{pubid}/annotations",
+            factory="h.traversal.GroupRequiredRoot",
+            traverse="/{pubid}",
+        ),
         call("api.profile", "/api/profile"),
         call("api.profile_groups", "/api/profile/groups"),
         call("api.debug_token", "/api/debug-token"),
