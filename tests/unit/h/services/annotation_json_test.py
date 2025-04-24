@@ -5,7 +5,7 @@ import pytest
 from h_matchers import Any
 from pyramid.authorization import Everyone
 
-from h.models import Annotation, AnnotationMetadata
+from h.models import Annotation, AnnotationMetadata, ModerationStatus
 from h.security.permissions import Permission
 from h.services.annotation_json import AnnotationJSONService, factory
 from h.traversal import AnnotationContext
@@ -48,6 +48,7 @@ class TestAnnotationJSONService:
             "extra-2": "bar",
             "user_info": {"display_name": user_service.fetch.return_value.display_name},
             "mentions": [],
+            "moderation_status": None,
         }
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
@@ -118,6 +119,27 @@ class TestAnnotationJSONService:
 
         identity_permits.assert_not_called()
         assert presented["permissions"]["read"] == ["group:__world__"]
+
+    @pytest.mark.parametrize("shared", [True, False])
+    @pytest.mark.parametrize(
+        "moderation_status", [None, ModerationStatus.APPROVED, ModerationStatus.DENIED]
+    )
+    def test_present_moderation_status(
+        self, service, annotation, shared, moderation_status
+    ):
+        annotation.shared = shared
+        annotation.moderation_status = moderation_status
+
+        result = service.present(annotation)
+
+        if not shared and not moderation_status:
+            assert result["moderation_status"] is None
+
+        elif not moderation_status:
+            assert result["moderation_status"] == "APPROVED"
+
+        elif moderation_status and shared:
+            assert result["moderation_status"] == moderation_status.value
 
     def test_present_for_user(self, service, user, annotation, flag_service):
         result = service.present_for_user(annotation, user)
@@ -250,7 +272,7 @@ class TestAnnotationJSONService:
 
     @pytest.fixture
     def with_hidden_annotation(self, annotation):
-        annotation.moderation_status = Annotation.ModerationStatus.DENIED
+        annotation.moderation_status = ModerationStatus.DENIED
 
     @pytest.fixture(autouse=True)
     def Identity(self, patch):

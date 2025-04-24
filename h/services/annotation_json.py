@@ -69,6 +69,7 @@ class AnnotationJSONService:
                 "text": annotation.text or "",
                 "tags": annotation.tags or [],
                 "group": annotation.groupid,
+                "moderation_status": self._get_moderation_status(annotation),
                 #  Convert our simple internal annotation storage format into the
                 #  legacy complex permissions dict format that is still used in
                 #  some places.
@@ -199,6 +200,18 @@ class AnnotationJSONService:
 
         # Only people in the group can read it
         return f"group:{annotation.groupid}"
+
+    @staticmethod
+    def _get_moderation_status(annotation) -> str | None:
+        if not annotation.moderation_status:
+            if not annotation.shared:
+                # If an annotation is private and doesn't have a moderation status, return None.
+                return None
+
+            # Otherwise it means that the moderation status hasn't been migrated yet to "APPROVED"
+            return Annotation.ModerationStatus.APPROVED.value
+
+        return annotation.moderation_status.value
 
 
 def factory(_context, request):
