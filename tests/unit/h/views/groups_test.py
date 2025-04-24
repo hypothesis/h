@@ -100,6 +100,13 @@ class TestGroupCreateEditController:
                         "url": pyramid_request.route_url("api.group", id=group.pubid),
                         "headers": {"X-CSRF-Token": views.get_csrf_token.spy_return},
                     },
+                    "groupAnnotations": {
+                        "method": "GET",
+                        "url": pyramid_request.route_url(
+                            "api.group_annotations", pubid=group.pubid
+                        ),
+                        "headers": {"X-CSRF-Token": views.get_csrf_token.spy_return},
+                    },
                 },
                 "context": {
                     "group": {
@@ -154,5 +161,6 @@ def routes(pyramid_config):
     pyramid_config.add_route("group_read", "/g/{pubid}/{slug}")
     pyramid_config.add_route("api.group", "/api/group/{id}")
     pyramid_config.add_route("api.group_members", "/api/groups/{pubid}/members")
+    pyramid_config.add_route("api.group_annotations", "/api/groups/{pubid}/annotations")
     pyramid_config.add_route("api.group_member", "/api/groups/{pubid}/members/{userid}")
     pyramid_config.add_route("api.groups", "/api/groups")
