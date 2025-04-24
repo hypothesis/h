@@ -13,7 +13,7 @@
     {% endif %}
   </div>
 
-  {% if orcid_url %}
+  {% if orcid %}
     <h3>ORCID connected: <a href="{{ orcid_url }}">{{ orcid }}</a></h3>
   {%  else %}
     <a class="btn" href="{{ request.route_path('orcid.oauth.authorize') }}">{% trans %}Connect with ORCID{% endtrans %}</a>
