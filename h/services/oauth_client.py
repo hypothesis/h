@@ -5,7 +5,7 @@ from h.services.http import ExternalRequestError, HTTPService
 logger = logging.getLogger(__name__)
 
 
-class OAuth2TokenError(ExternalRequestError):
+class OAuthTokenError(ExternalRequestError):
     """
     A problem with an OAuth 2 token for an external API.
 
@@ -15,7 +15,7 @@ class OAuth2TokenError(ExternalRequestError):
     """
 
 
-class OAuth2ClientService:
+class OAuthClientService:
     def __init__(self, http_service: HTTPService) -> None:
         self._http_service = http_service
 
@@ -40,6 +40,6 @@ class OAuth2ClientService:
         return data["id_token"]
 
 
-def factory(_context, request) -> OAuth2ClientService:
+def factory(_context, request) -> OAuthClientService:
     """Return OAuth2HTTPService instance for the passed context and request."""
-    return OAuth2ClientService(request.find_service(HTTPService))
+    return OAuthClientService(request.find_service(HTTPService))

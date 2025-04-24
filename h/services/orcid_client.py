@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from h.models import User, UserIdentity
 from h.models.user_identity import IdentityProvider
 from h.services.jwt import JWTService
-from h.services.oauth2_client import OAuth2ClientService
+from h.services.oauth_client import OAuthClientService
 from h.services.user import UserService
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class ORCIDClientService:
         client_id: str,
         client_secret: str,
         redirect_uri: str,
-        oauth_client_service: OAuth2ClientService,
+        oauth_client_service: OAuthClientService,
         jwt_service: JWTService,
         user_service: UserService,
     ) -> None:
@@ -81,7 +81,7 @@ def factory(_context, request) -> ORCIDClientService:
         client_id=settings["orcid_client_id"],
         client_secret=settings["orcid_client_secret"],
         redirect_uri=request.route_url("orcid.oauth.callback"),
-        oauth_client_service=request.find_service(OAuth2ClientService),
+        oauth_client_service=request.find_service(OAuthClientService),
         jwt_service=request.find_service(JWTService),
         user_service=request.find_service(name="user"),
     )
