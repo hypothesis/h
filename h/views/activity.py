@@ -14,6 +14,7 @@ from h.paginator import paginate
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
 from h.security import Permission
+from h.services import ORCIDClientService
 from h.util.datetime import utc_us_style_date
 from h.util.user import split_user
 from h.views.groups import check_slug
@@ -346,7 +347,7 @@ class UserSearchController(SearchController):
             "location": self.user.location,
             "uri": self.user.uri,
             "domain": domain(self.user),
-            "orcid": self.user.orcid,
+            "orcid": ORCIDClientService.get_identity(self.user).provider_unique_id,
         }
 
         if self.request.user == self.user:
