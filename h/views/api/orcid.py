@@ -38,7 +38,7 @@ def authorize(request):
                     {
                         "client_id": client_id,
                         "response_type": "code",
-                        "redirect_uri": "http://localhost.is:5000/orcid/callback",
+                        "redirect_uri": request.route_url("orcid.oauth.callback"),
                         "state": state,
                         "scope": "openid",
                     }
