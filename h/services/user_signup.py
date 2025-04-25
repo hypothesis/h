@@ -65,6 +65,7 @@ class UserSignupService:
         # Extract any passed identities for this new user
         identities = kwargs.pop("identities", [])
 
+        orcid = kwargs.get("orcid")
         user = User(**kwargs)
 
         # Add identity relations to this new user, if provided
@@ -77,7 +78,6 @@ class UserSignupService:
             for i_args in identities
         ]
 
-        orcid = kwargs.get("orcid")
         if orcid:
             user.identities.append(
                 UserIdentity(

@@ -53,13 +53,3 @@ class EditProfileSchema(CSRFSchema):
         validator=colander.All(validators.Length(max=250), validate_url),
         title=_("Link"),
     )
-
-    orcid = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=validate_orcid,
-        title=_("ORCID"),
-        hint=_(
-            "ORCID provides a persistent identifier for researchers (see orcid.org)."
-        ),
-    )

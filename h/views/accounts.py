@@ -525,7 +525,6 @@ class EditProfileController:
                 "description": user.description or "",
                 "location": user.location or "",
                 "link": user.uri or "",
-                "orcid": user.orcid or "",
             }
         )
         return self._template_data()
@@ -548,7 +547,6 @@ class EditProfileController:
         user.description = appstruct["description"]
         user.location = appstruct["location"]
         user.uri = appstruct["link"]
-        user.orcid = appstruct["orcid"]
 
 
 @view_defaults(
