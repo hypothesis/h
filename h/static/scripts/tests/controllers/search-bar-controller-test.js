@@ -4,7 +4,6 @@ import syn from 'syn';
 import { LozengeController } from '../../controllers/lozenge-controller';
 import { SearchBarController } from '../../controllers/search-bar-controller';
 import { cloneTemplate } from '../../util/dom';
-import { unroll } from '../util';
 import lozengeTemplate from './lozenge-template';
 import * as util from './util';
 
@@ -184,7 +183,8 @@ describe('SearchBarController', () => {
     beforeEach(setup);
     afterEach(teardown);
 
-    it('uses autosuggestion for initial facets', done => {
+    it('uses autosuggestion for initial facets', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       assert.isFalse(dropdown.classList.contains('is-open'));
 
       syn.click(input, () => {
@@ -192,22 +192,28 @@ describe('SearchBarController', () => {
 
         assert.deepEqual(getItemTitles(), ['user:', 'tag:', 'url:', 'group:']);
 
-        done();
+        resolve();
       });
+
+      await promise;
     });
 
-    it('it filters and updates input with autosuggested facet selection', done => {
+    it('it filters and updates input with autosuggested facet selection', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       syn
         .click(input, () => {
           assert.notOk(input.value, 'baseline no value in input');
         })
         .type('r[down][enter]', () => {
           assert.equal(input.value, 'url:');
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
-    it('allows submitting the form dropdown is open but has no selected value', done => {
+    it('allows submitting the form dropdown is open but has no selected value', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       const form = testEl.querySelector('form');
       const submit = sinon.stub(form, 'submit');
 
@@ -222,8 +228,10 @@ describe('SearchBarController', () => {
             'test',
           );
           assert.isTrue(submit.calledOnce);
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
     describe('it allows group value suggestions', () => {
@@ -236,38 +244,42 @@ describe('SearchBarController', () => {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      unroll(
-        'shows group suggestions',
-        (done, fixture) => {
-          syn
-            .click(input)
-            .type(fixture.text, () => {
-              assert.isTrue(dropdown.classList.contains('is-open'));
+      [{ text: 'group:' }, { text: 'Group:' }, { text: 'GROUP:' }].forEach(
+        fixture => {
+          it('shows group suggestions', async () => {
+            const { resolve, promise } = Promise.withResolvers();
+            syn
+              .click(input)
+              .type(fixture.text, () => {
+                assert.isTrue(dropdown.classList.contains('is-open'));
 
-              const titles = getItemTitles();
+                const titles = getItemTitles();
 
-              assert.lengthOf(
-                titles,
-                5,
-                'we should be enforcing the 5 item max',
-              );
-            })
-            .type(
-              '[backspace][backspace][backspace][backspace][backspace][backspace]',
-              () => {
-                assert.deepEqual(
-                  getItemTitles(),
-                  ['user:', 'tag:', 'url:', 'group:'],
-                  'group suggestions go away as facet is removed',
+                assert.lengthOf(
+                  titles,
+                  5,
+                  'we should be enforcing the 5 item max',
                 );
-                done();
-              },
-            );
+              })
+              .type(
+                '[backspace][backspace][backspace][backspace][backspace][backspace]',
+                () => {
+                  assert.deepEqual(
+                    getItemTitles(),
+                    ['user:', 'tag:', 'url:', 'group:'],
+                    'group suggestions go away as facet is removed',
+                  );
+                  resolve();
+                },
+              );
+
+            await promise;
+          });
         },
-        [{ text: 'group:' }, { text: 'Group:' }, { text: 'GROUP:' }],
       );
 
-      it('orders groups by earliest value match first', done => {
+      it('orders groups by earliest value match first', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn
           .click(input)
           .type('group:', () => {
@@ -283,11 +295,14 @@ describe('SearchBarController', () => {
               ['aadf', 'aaad'],
               'sorting by indexof score with some input',
             );
-            done();
+            resolve();
           });
+
+        await promise;
       });
 
-      it('supports multi word matching', done => {
+      it('supports multi word matching', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn
           .click(input)
           .type('group:"mul', () => {
@@ -303,22 +318,28 @@ describe('SearchBarController', () => {
               ['multi word'],
               'supports matching on a single quote initial input',
             );
-            done();
+            resolve();
           });
+
+        await promise;
       });
 
-      it('handles filtering matches with unicode', done => {
+      it('handles filtering matches with unicode', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn.click(input).type('group:éf', () => {
           assert.deepEqual(
             getItemTitles(),
             ['effort'],
             'matches éffort with unicode value',
           );
-          done();
+          resolve();
         });
+
+        await promise;
       });
 
-      it('sets input and display friendly name value', done => {
+      it('sets input and display friendly name value', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn
           .click(input)
           .type('group:"mul[down][enter]', () => {
@@ -344,11 +365,14 @@ describe('SearchBarController', () => {
               ['group:"multi word"', 'group:aaac'],
               'adds single word as is to lozenge',
             );
-            done();
+            resolve();
           });
+
+        await promise;
       });
 
-      it('matches escaped values', done => {
+      it('matches escaped values', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn.click(input).type('group:<[down][enter]', () => {
           assert.equal(
             testEl.querySelector('input[type=hidden]').value.trim(),
@@ -360,8 +384,10 @@ describe('SearchBarController', () => {
             ['group:"<*>Haskell fans<*>"'],
             'adds and wraps multi word with quotes',
           );
-          done();
+          resolve();
         });
+
+        await promise;
       });
     });
 
@@ -375,35 +401,39 @@ describe('SearchBarController', () => {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      unroll(
-        'shows tag suggestions',
-        (done, fixture) => {
-          syn
-            .click(input)
-            .type(fixture.text, () => {
-              assert.isTrue(dropdown.classList.contains('is-open'));
+      [{ text: 'tag:' }, { text: 'Tag:' }, { text: 'TAG:' }].forEach(
+        fixture => {
+          it('shows tag suggestions', async () => {
+            const { resolve, promise } = Promise.withResolvers();
+            syn
+              .click(input)
+              .type(fixture.text, () => {
+                assert.isTrue(dropdown.classList.contains('is-open'));
 
-              const titles = getItemTitles();
+                const titles = getItemTitles();
 
-              assert.lengthOf(
-                titles,
-                5,
-                'we should be enforcing the 5 item max',
-              );
-            })
-            .type('[backspace][backspace][backspace][backspace]', () => {
-              assert.deepEqual(
-                getItemTitles(),
-                ['user:', 'tag:', 'url:', 'group:'],
-                'tags go away as facet is removed',
-              );
-              done();
-            });
+                assert.lengthOf(
+                  titles,
+                  5,
+                  'we should be enforcing the 5 item max',
+                );
+              })
+              .type('[backspace][backspace][backspace][backspace]', () => {
+                assert.deepEqual(
+                  getItemTitles(),
+                  ['user:', 'tag:', 'url:', 'group:'],
+                  'tags go away as facet is removed',
+                );
+                resolve();
+              });
+
+            await promise;
+          });
         },
-        [{ text: 'tag:' }, { text: 'Tag:' }, { text: 'TAG:' }],
       );
 
-      it('orders tags by priority and indexOf score', done => {
+      it('orders tags by priority and indexOf score', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn
           .click(input)
           .type('tag:', () => {
@@ -419,11 +449,14 @@ describe('SearchBarController', () => {
               ['aadf', 'aaad'],
               'sorting by indexof score with equal priority',
             );
-            done();
+            resolve();
           });
+
+        await promise;
       });
 
-      it('matches on multi word searches', done => {
+      it('matches on multi word searches', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn
           .click(input)
           .type('tag:"mul', () => {
@@ -446,19 +479,24 @@ describe('SearchBarController', () => {
               'tag:"multi word"',
               'selecting a multi word tag should wrap with quotes',
             );
-            done();
+            resolve();
           });
+
+        await promise;
       });
 
-      it('handles filtering matches with unicode', done => {
+      it('handles filtering matches with unicode', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         syn.click(input).type('tag:éf', () => {
           assert.deepEqual(
             getItemTitles(),
             ['effort'],
             'matches éffort with unicode value',
           );
-          done();
+          resolve();
         });
+
+        await promise;
       });
     });
   });
@@ -600,7 +638,8 @@ describe('SearchBarController', () => {
       assert.equal(input.value, "'bar");
     });
 
-    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', done => {
+    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       const { ctrl, input } = component('foo');
 
       syn
@@ -608,11 +647,14 @@ describe('SearchBarController', () => {
         .type('gar')
         .type('[space]', () => {
           assert.deepEqual(getLozengeValues(ctrl), ['foo', 'gar']);
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
-    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', done => {
+    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       const { ctrl, input } = component("'bar gar'");
 
       syn
@@ -620,11 +662,14 @@ describe('SearchBarController', () => {
         .type(" gar'")
         .type('[space]', () => {
           assert.deepEqual(getLozengeValues(ctrl), ["'bar gar'"]);
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
-    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', done => {
+    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       const { ctrl, input } = component("'bar");
 
       // Move cursor to end of field.
@@ -638,8 +683,10 @@ describe('SearchBarController', () => {
           const lozenges = getLozenges(ctrl);
           assert.equal(lozenges.length, 0);
           assert.equal(input.value, "'bar gar ");
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
     describe('mapping initial input value to proper group lozenge and input values', () => {
@@ -679,7 +726,8 @@ describe('SearchBarController', () => {
         assert.equal(hiddenInput.value, 'group:pid124');
       });
 
-      it('places lozenges as first elements in container', done => {
+      it('places lozenges as first elements in container', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         const template = `
             <div>
               <form data-ref="searchBarForm">
@@ -718,11 +766,14 @@ describe('SearchBarController', () => {
             'should be set as first child',
           );
 
-          done();
+          resolve();
         });
+
+        await promise;
       });
 
-      it('places lozenges after any initial lozenges', done => {
+      it('places lozenges after any initial lozenges', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         const template = `
             <div>
               <form data-ref="searchBarForm">
@@ -763,8 +814,10 @@ describe('SearchBarController', () => {
 
           assert.deepEqual(getLozengeValues(ctrl), ['seeded', 'foo']);
 
-          done();
+          resolve();
         });
+
+        await promise;
       });
     });
   });

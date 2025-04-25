@@ -99,7 +99,9 @@ describe('ShareWidgetController', () => {
     ctrl.beforeRemove();
   });
 
-  it('shows/hides widget on clicking', done => {
+  it('shows/hides widget on clicking', async () => {
+    const { resolve, promise } = Promise.withResolvers();
+
     assert.isFalse(widgetIsVisble(), 'not visible by default');
 
     const btns = getTriggers();
@@ -131,11 +133,14 @@ describe('ShareWidgetController', () => {
           widgetIsVisble(),
           'close widget when clicking on the currently open trigger again',
         );
-        done();
+        resolve();
       });
+
+    await promise;
   });
 
-  it('displays correctly for current share link', done => {
+  it('displays correctly for current share link', async () => {
+    const { resolve, promise } = Promise.withResolvers();
     const btns = getTriggers();
 
     syn
@@ -158,7 +163,9 @@ describe('ShareWidgetController', () => {
         checkURLs('http://url4.goes?here=alsotrue');
         assert.isTrue(privateMessageVisible());
         assert.isFalse(groupMessageVisible());
-        done();
+        resolve();
       });
+
+    await promise;
   });
 });

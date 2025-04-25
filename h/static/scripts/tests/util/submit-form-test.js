@@ -1,5 +1,4 @@
 import { submitForm } from '../../util/submit-form';
-import { unroll } from '../util';
 
 function createResponse(status, body) {
   let statusText;
@@ -24,9 +23,26 @@ describe('submitForm', () => {
     return form;
   }
 
-  unroll(
-    'submits the form data',
-    testCase => {
+  [
+    {
+      action: FORM_URL,
+      expectedSubmitUrl: FORM_URL,
+    },
+    {
+      // Setting "action" to an empty string is technically disallowed according
+      // to https://w3c.github.io/html/sec-forms.html#element-attrdef-form-action
+      // but in practice browsers treat it mostly the same way as a missing
+      // "action" attr.
+      action: '',
+      expectedSubmitUrl: document.location.href,
+    },
+    {
+      // Omit "action" attr.
+      action: null,
+      expectedSubmitUrl: document.location.href,
+    },
+  ].forEach(testCase => {
+    it('submits the form data', () => {
       const form = document.createElement('form');
       form.method = 'POST';
       form.innerHTML = '<input name="field" value="value">';
@@ -44,27 +60,8 @@ describe('submitForm', () => {
         const requestInit = fetchMock.getCall(0).args[1];
         assert.instanceOf(requestInit.body, FormData);
       });
-    },
-    [
-      {
-        action: FORM_URL,
-        expectedSubmitUrl: FORM_URL,
-      },
-      {
-        // Setting "action" to an empty string is technically disallowed according
-        // to https://w3c.github.io/html/sec-forms.html#element-attrdef-form-action
-        // but in practice browsers treat it mostly the same way as a missing
-        // "action" attr.
-        action: '',
-        expectedSubmitUrl: document.location.href,
-      },
-      {
-        // Omit "action" attr.
-        action: null,
-        expectedSubmitUrl: document.location.href,
-      },
-    ],
-  );
+    });
+  });
 
   it('returns the markup for the updated form if validation succeeds', () => {
     const form = createForm();
