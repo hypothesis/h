@@ -1,7 +1,6 @@
 import syn from 'syn';
 
 import { AutosuggestDropdownController } from '../../controllers/autosuggest-dropdown-controller';
-import { unroll } from '../util';
 
 // syn's move functionality does not fire
 // mouseenter and mouseleave events.
@@ -178,7 +177,8 @@ describe('AutosuggestDropdownController', () => {
       );
     });
 
-    it('opens and closes based on focus status', done => {
+    it('opens and closes based on focus status', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       new AutosuggestDropdownController(input, defaultConfig);
 
       assert.isFalse(isSuggestionContainerVisible(), 'basline is hidden');
@@ -188,13 +188,16 @@ describe('AutosuggestDropdownController', () => {
 
         syn.click(document.body, () => {
           assert.isFalse(isSuggestionContainerVisible(), 'blur should hide');
-          done();
+          resolve();
         });
       });
+
+      await promise;
     });
 
-    it('changes suggestion container and item visibility on matching input', done => {
+    it('changes suggestion container and item visibility on matching input', async () => {
       const reduceSpy = sinon.spy(defaultConfig, 'listFilter');
+      const { resolve, promise } = Promise.withResolvers();
 
       assert.equal(reduceSpy.callCount, 0);
 
@@ -237,11 +240,14 @@ describe('AutosuggestDropdownController', () => {
 
           assert.isTrue(isSuggestionContainerVisible(), 're match show');
 
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
-    it('allows click selection', done => {
+    it('allows click selection', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -269,12 +275,14 @@ describe('AutosuggestDropdownController', () => {
 
           assert.isFalse(isSuggestionContainerVisible(), 'post select hide');
 
-          done();
+          resolve();
         });
       });
+
+      await promise;
     });
 
-    const navigationExpectations = [
+    [
       { travel: '[down]', selectedIndex: 0 },
       { travel: '[up]', selectedIndex: 3 },
       { travel: '[down][up]', selectedIndex: -1 },
@@ -287,11 +295,9 @@ describe('AutosuggestDropdownController', () => {
         travel: '[up][down][up][down][down][down][down][up]',
         selectedIndex: 1,
       },
-    ];
-
-    unroll(
-      'allows keyboard navigation',
-      (done, fixture) => {
+    ].forEach(fixture => {
+      it('allows keyboard navigation', async () => {
+        const { resolve, promise } = Promise.withResolvers();
         new AutosuggestDropdownController(input, defaultConfig);
 
         const list = container.querySelector(
@@ -310,13 +316,15 @@ describe('AutosuggestDropdownController', () => {
             );
             assert.lengthOf(active, 1);
           }
-          done();
+          resolve();
         });
-      },
-      navigationExpectations,
-    );
 
-    it('persists active navigation through list filter', done => {
+        await promise;
+      });
+    });
+
+    it('persists active navigation through list filter', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -343,11 +351,14 @@ describe('AutosuggestDropdownController', () => {
             list.childNodes[0].querySelector('.a-title').textContent.trim(),
             defaultConfig.list[1].title,
           );
-          done();
+          resolve();
         });
+
+      await promise;
     });
 
-    it('allows keyboard selection', done => {
+    it('allows keyboard selection', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -371,11 +382,14 @@ describe('AutosuggestDropdownController', () => {
           'should not submit the form on enter',
         );
 
-        done();
+        resolve();
       });
+
+      await promise;
     });
 
-    it('can hover items', done => {
+    it('can hover items', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -402,11 +416,14 @@ describe('AutosuggestDropdownController', () => {
         mouseMove(center(input));
         assert.lengthOf(getCurrentActiveElements(), 0);
 
-        done();
+        resolve();
       });
+
+      await promise;
     });
 
-    it('correctly sets active elements when swapping between keyboard and mouse setting', done => {
+    it('correctly sets active elements when swapping between keyboard and mouse setting', async () => {
+      const { resolve, promise } = Promise.withResolvers();
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -447,8 +464,10 @@ describe('AutosuggestDropdownController', () => {
             ),
           );
 
-          done();
+          resolve();
         });
+
+      await promise;
     });
   });
 });
