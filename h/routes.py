@@ -165,6 +165,12 @@ def includeme(config):  # noqa: PLR0915
         "/api/groups/{pubid}/members/{userid}",
         factory="h.traversal.group_membership_api_factory",
     )
+    config.add_route(
+        "api.group_invites",
+        "/api/groups/{pubid}/invites",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
     config.add_route("api.search", "/api/search")
     config.add_route("api.users", "/api/users", factory="h.traversal.UserRoot")
     config.add_route(
@@ -218,6 +224,12 @@ def includeme(config):  # noqa: PLR0915
     config.add_route(
         "group_edit_members",
         "/groups/{pubid}/edit/members",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
+    config.add_route(
+        "group_edit_invites",
+        "/groups/{pubid}/edit/invites",
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )

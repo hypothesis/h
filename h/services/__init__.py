@@ -106,6 +106,9 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
         "h.services.group_members.group_members_factory", name="group_members"
     )
     config.register_service_factory(
+        "h.services.group_invites.factory", name="group_invites"
+    )
+    config.register_service_factory(
         "h.services.group_scope.group_scope_factory", name="group_scope"
     )
     config.register_service_factory(
