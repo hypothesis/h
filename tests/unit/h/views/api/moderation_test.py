@@ -1,10 +1,12 @@
+from datetime import UTC, datetime
 from unittest import mock
 
 import pytest
+from pyramid import httpexceptions
 from pyramid.httpexceptions import HTTPNoContent
-from webob.multidict import MultiDict
 
 from h.models import ModerationStatus
+from h.schemas.base import ValidationError
 from h.traversal import AnnotationContext
 from h.views.api import moderation as views
 
@@ -66,8 +68,9 @@ class TestChangeAnnotationModerationStatus:
         annotation_json_service,
         events,
         annotation,
+        valid_payload,
     ):
-        pyramid_request.params = MultiDict({"moderation_status": "SPAM"})
+        pyramid_request.json_body = valid_payload
 
         response = views.change_annotation_moderation_status(
             annotation_context, pyramid_request
@@ -87,10 +90,61 @@ class TestChangeAnnotationModerationStatus:
         )
         assert response == annotation_json_service.present_for_user.return_value
 
+    @pytest.mark.parametrize(
+        "annotation_updated,message",
+        [
+            (None, "annotation_updated: Required"),
+            ("BAD DATE", "annotation_updated: Invalid date"),
+        ],
+    )
+    def test_invalid_annotation_updated(
+        self,
+        valid_payload,
+        annotation_updated,
+        message,
+        annotation_context,
+        pyramid_request,
+    ):
+        valid_payload["annotation_updated"] = annotation_updated
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ValidationError) as excinfo:
+            views.change_annotation_moderation_status(
+                annotation_context, pyramid_request
+            )
+
+        assert str(excinfo.value) == message
+
+    def test_outdated(
+        self,
+        valid_payload,
+        annotation_context,
+        pyramid_request,
+    ):
+        valid_payload["annotation_updated"] = "2020-10-01T12:00:00Z"
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(httpexceptions.HTTPConflict) as excinfo:
+            views.change_annotation_moderation_status(
+                annotation_context, pyramid_request
+            )
+
+        assert (
+            str(excinfo.value)
+            == "The annotation has been updated since the moderation status was set."
+        )
+
+    @pytest.fixture
+    def valid_payload(self, annotation):
+        return {
+            "moderation_status": "SPAM",
+            "annotation_updated": annotation.updated.isoformat(),
+        }
+
 
 @pytest.fixture
 def annotation(factories):
-    return factories.Annotation()
+    return factories.Annotation(updated=datetime(2023, 10, 1, 12, 0, 0, tzinfo=UTC))
 
 
 @pytest.fixture
