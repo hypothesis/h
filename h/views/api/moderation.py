@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPNoContent
 
 from h import events
 from h.schemas.api.moderation import ChangeAnnotationModerationStatusSchema
-from h.schemas.util import validate_query_params
+from h.schemas.util import validate_json
 from h.security import Permission
 from h.services import AnnotationWriteService
 from h.views.api.config import api_config
@@ -52,8 +52,8 @@ def unhide(context, request):
     permission=Permission.Annotation.MODERATE,
 )
 def change_annotation_moderation_status(context, request):
-    params = validate_query_params(
-        ChangeAnnotationModerationStatusSchema(), request.params
+    params = validate_json(
+        ChangeAnnotationModerationStatusSchema(context.annotation), request
     )
     status = params["moderation_status"]
     request.find_service(name="annotation_moderation").set_status(

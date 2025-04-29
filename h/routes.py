@@ -132,6 +132,12 @@ def includeme(config):  # noqa: PLR0915
         factory="h.traversal:AnnotationRoot",
         traverse="/{id}",
     )
+    config.add_route(
+        "api.annotation_moderation",
+        "/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/moderation",
+        factory="h.traversal:AnnotationRoot",
+        traverse="/{id}",
+    )
 
     config.add_route("api.bulk.action", "/api/bulk", request_method="POST")
     config.add_route(
