@@ -49,8 +49,8 @@ class DocumentURI(Base, mixins.Timestamps):
     def claimant(self):
         return self._claimant
 
-    @claimant.setter
-    def claimant(self, value):
+    @claimant.inplace.setter
+    def _claimant_setter(self, value):
         self._claimant = value
         self._claimant_normalized = uri_normalize(value)
 
@@ -62,8 +62,8 @@ class DocumentURI(Base, mixins.Timestamps):
     def uri(self):
         return self._uri
 
-    @uri.setter
-    def uri(self, value):
+    @uri.inplace.setter
+    def _uri_setter(self, value):
         self._uri = value
         self._uri_normalized = uri_normalize(value)
 

@@ -3,6 +3,7 @@ import logging
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Mapped, mapped_column
 
 from h.db import Base, mixins
 from h.models.document._exceptions import ConcurrentUpdateError
@@ -27,7 +28,9 @@ class DocumentMeta(Base, mixins.Timestamps):
     )
 
     type = sa.Column(sa.UnicodeText, nullable=False)
-    value = sa.Column(pg.ARRAY(sa.UnicodeText, zero_indexes=True), nullable=False)
+    value: Mapped[list[str]] = mapped_column(
+        pg.ARRAY(sa.UnicodeText, zero_indexes=True)
+    )
 
     document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
 
@@ -35,8 +38,8 @@ class DocumentMeta(Base, mixins.Timestamps):
     def claimant(self):
         return self._claimant
 
-    @claimant.setter
-    def claimant(self, value):
+    @claimant.inplace.setter
+    def _claimant_setter(self, value):
         self._claimant = value
         self._claimant_normalized = uri_normalize(value)
 

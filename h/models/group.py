@@ -141,19 +141,19 @@ class Group(Base, mixins.Timestamps):
 
     #: Which type of user is allowed to join this group, possible values are:
     #: authority, None
-    joinable_by = sa.Column(
+    joinable_by: Mapped[JoinableBy] = mapped_column(
         sa.Enum(JoinableBy, name="group_joinable_by"), nullable=True
     )
 
     #: Which type of user is allowed to read annotations in this group,
     #: possible values are: authority, members, world
-    readable_by = sa.Column(
+    readable_by: Mapped[ReadableBy | None] = mapped_column(
         sa.Enum(ReadableBy, name="group_readable_by"), nullable=True, index=True
     )
 
     #: Which type of user is allowed to write to this group, possible values
     #: are: authority, members
-    writeable_by = sa.Column(
+    writeable_by: Mapped[WriteableBy | None] = mapped_column(
         sa.Enum(WriteableBy, name="group_writeable_by"), nullable=True
     )
 

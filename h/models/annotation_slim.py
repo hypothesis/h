@@ -31,9 +31,7 @@ class AnnotationSlim(Base):
     )
     """The value of annotation.id, named here pubid following the convention of group.pubid"""
 
-    annotation = sa.orm.relationship(
-        "Annotation", backref=sa.orm.backref("slim", uselist=False)
-    )
+    annotation = sa.orm.relationship("Annotation", back_populates="slim", uselist=False)
 
     created = sa.Column(
         sa.DateTime,

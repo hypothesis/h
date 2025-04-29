@@ -2,6 +2,7 @@ import enum
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.orm import Mapped, mapped_column
 
 from h.db import Base
 from h.db.mixins import Timestamps
@@ -97,13 +98,13 @@ class AuthClient(Base, Timestamps):
     authority = sa.Column(sa.UnicodeText, nullable=False)
 
     #: Grant type used by this client.
-    grant_type = sa.Column(
-        sa.Enum(GrantType, name="authclient_grant_type"), nullable=True
+    grant_type: Mapped[GrantType | None] = mapped_column(
+        sa.Enum(GrantType, name="authclient_grant_type")
     )
 
     #: Authorization response type used by this client.
-    response_type = sa.Column(
-        sa.Enum(ResponseType, name="authclient_response_type"), nullable=True
+    response_type: Mapped[ResponseType | None] = mapped_column(
+        sa.Enum(ResponseType, name="authclient_response_type")
     )
     #: Redirect URI for OAuth 2 authorization code grant type.
     redirect_uri = sa.Column(sa.UnicodeText, nullable=True)

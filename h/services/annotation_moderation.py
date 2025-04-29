@@ -33,7 +33,7 @@ class AnnotationModerationService:
                 ModerationLog(
                     annotation=annotation,
                     old_moderation_status=annotation.moderation_status,
-                    new_moderation_status=status.value,
+                    new_moderation_status=status,
                     moderator=user,
                 )
             )

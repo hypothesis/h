@@ -31,7 +31,7 @@ class EmailData:
 
     @property
     def message(self) -> pyramid_mailer.message.Message:
-        extra_headers = {"X-MC-Tags": self.tag}
+        extra_headers: dict[str, str] = {"X-MC-Tags": self.tag}
         if self.subaccount:
             extra_headers["X-MC-Subaccount"] = self.subaccount
         subject = " ".join(self.subject.splitlines())

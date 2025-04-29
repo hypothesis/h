@@ -32,7 +32,7 @@ class UserService:
         def flush_cache():
             self._cache = {}
 
-    def fetch(self, userid_or_username, authority=None):
+    def fetch(self, userid_or_username, authority=None) -> User | None:
         """
         Fetch a user by userid or by username and authority.
 
