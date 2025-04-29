@@ -33,7 +33,9 @@ certifi==2025.1.31
     #   -r requirements/prod.txt
     #   sentry-sdk
 cffi==1.17.1
-    # via -r requirements/prod.txt
+    # via
+    #   -r requirements/prod.txt
+    #   cryptography
 chameleon==4.6.0
     # via
     #   -r requirements/prod.txt
@@ -64,6 +66,10 @@ colander==2.0
     #   deform
 coverage[toml]==7.6.10
     # via pytest-cov
+cryptography==44.0.2
+    # via
+    #   -r requirements/prod.txt
+    #   pyjwt
 data-tasks==0.0.5
     # via -r requirements/prod.txt
 deform==2.0.15
@@ -216,7 +222,7 @@ pycparser==2.22
     #   cffi
 pycryptodomex==3.21.0
     # via -r requirements/prod.txt
-pyjwt==2.10.1
+pyjwt[crypto]==2.10.1
     # via -r requirements/prod.txt
 pyparsing==3.2.1
     # via -r requirements/prod.txt

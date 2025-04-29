@@ -34,7 +34,9 @@ certifi==2025.1.31
     #   -r requirements/prod.txt
     #   sentry-sdk
 cffi==1.17.1
-    # via -r requirements/prod.txt
+    # via
+    #   -r requirements/prod.txt
+    #   cryptography
 chameleon==4.6.0
     # via
     #   -r requirements/prod.txt
@@ -63,6 +65,10 @@ colander==2.0
     # via
     #   -r requirements/prod.txt
     #   deform
+cryptography==44.0.2
+    # via
+    #   -r requirements/prod.txt
+    #   pyjwt
 data-tasks==0.0.5
     # via -r requirements/prod.txt
 decorator==5.1.1
@@ -218,7 +224,7 @@ pycryptodomex==3.21.0
     # via -r requirements/prod.txt
 pygments==2.17.2
     # via ipython
-pyjwt==2.10.1
+pyjwt[crypto]==2.10.1
     # via -r requirements/prod.txt
 pyparsing==3.2.1
     # via -r requirements/prod.txt
