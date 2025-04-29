@@ -12,6 +12,10 @@ COOKIE_AUTHENTICATABLE_API_REQUESTS = [
     ("api.group_member", "PATCH"),  # Edit group membership.
     ("api.group_member", "DELETE"),  # Remove group member.
     ("api.group_annotations", "GET"),  # List of a group's annotations.
+    (
+        "api.annotation_moderation",
+        "PATCH",
+    ),  # Change the moderation status of an annotation.
 ]
 
 

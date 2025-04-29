@@ -2,6 +2,7 @@ import colander
 from webob.multidict import MultiDict
 
 from h.schemas.base import ValidationError
+from h.views.api.helpers.json_payload import json_payload
 
 
 def _colander_exception_msg(exc):
@@ -46,7 +47,7 @@ def _dict_to_multidict(dict_):
     return result
 
 
-def validate_query_params(schema, params):
+def validate_query_params(schema: colander.Schema, params: MultiDict) -> MultiDict:
     """
     Validate query parameters using a Colander schema.
 
@@ -55,10 +56,7 @@ def validate_query_params(schema, params):
     a sequence.
 
     :param schema: Colander schema to validate data with.
-    :type schema: colander.Schema
     :param params: Query parameter dict, usually `request.params`.
-    :type params: webob.multidict.MultiDict
-    :rtype: webob.multidict.MultiDict
     :raises ValidationError:
     """
     param_dict = _multidict_to_dict(schema, params)
@@ -69,3 +67,20 @@ def validate_query_params(schema, params):
         raise ValidationError(_colander_exception_msg(err)) from err
 
     return _dict_to_multidict(parsed)
+
+
+def validate_json(schema: colander.Schema, request) -> dict:
+    """
+    Validate JSON data using a Colander schema.
+
+    :param schema: Colander schema to validate data with.
+    :param data: JSON data to validate.
+    :raises ValidationError:
+    """
+    data = json_payload(request)
+    try:
+        parsed = schema.deserialize(data)
+    except colander.Invalid as err:
+        raise ValidationError(_colander_exception_msg(err)) from err
+
+    return parsed
