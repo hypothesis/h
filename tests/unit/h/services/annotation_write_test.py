@@ -44,7 +44,7 @@ class TestAnnotationWriteService:
             schedule_in=60,
         )
         mention_service.update_mentions.assert_called_once_with(anno)
-        moderation_service.update_status.assert_called_once_with(anno)
+        moderation_service.update_status.assert_called_once_with("create", anno)
 
         assert anno == Any.instance_of(Annotation).with_attrs(
             {
@@ -131,7 +131,7 @@ class TestAnnotationWriteService:
             {"uri": 1},
             updated=anno.updated,
         )
-        moderation_service.update_status.assert_called_once_with(anno)
+        moderation_service.update_status.assert_called_once_with("update", anno)
 
         queue_service.add_by_id.assert_called_once_with(
             "sync_annotation",
@@ -224,7 +224,7 @@ class TestAnnotationWriteService:
         svc.hide(annotation, user)
 
         moderation_service.set_status.assert_called_once_with(
-            annotation, user, Annotation.ModerationStatus.DENIED
+            annotation, Annotation.ModerationStatus.DENIED, user
         )
 
     def test_hide_does_not_modify_an_already_hidden_annotation(
@@ -240,7 +240,7 @@ class TestAnnotationWriteService:
         svc.unhide(annotation, user)
 
         moderation_service.set_status.assert_called_once_with(
-            annotation, user, Annotation.ModerationStatus.APPROVED
+            annotation, Annotation.ModerationStatus.APPROVED, user
         )
 
     def test_upsert_annotation_slim_with_deleted_group(self, annotation, svc):
