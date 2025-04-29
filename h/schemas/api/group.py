@@ -1,12 +1,14 @@
 """Schema for validating API group resources."""
 
+import colander
+
 from h.i18n import TranslationString as _
 from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
     GROUP_NAME_MAX_LENGTH,
     GROUP_NAME_MIN_LENGTH,
 )
-from h.schemas.api.moderation import ModerationStatusMixin
+from h.schemas.api.moderation import ModerationStatusNode
 from h.schemas.base import JSONSchema, ValidationError
 from h.util.group import GROUPID_PATTERN, split_groupid
 
@@ -23,8 +25,10 @@ GROUP_SCHEMA_PROPERTIES = {
 }
 
 
-class FilterGroupAnnotationsSchema(ModerationStatusMixin):
+class FilterGroupAnnotationsSchema(colander.Schema):
     """Schema for validating filter-group-annotations API data."""
+
+    moderation_status = ModerationStatusNode(missing=None)
 
 
 class GroupAPISchema(JSONSchema):
