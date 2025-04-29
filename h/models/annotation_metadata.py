@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.orm import Mapped, mapped_column
 
 from h.db import Base
 
@@ -18,9 +19,8 @@ class AnnotationMetadata(Base):
 
     annotation_slim = sa.orm.relationship("AnnotationSlim", back_populates="meta")
 
-    data = sa.Column(
-        MutableDict.as_mutable(pg.JSONB),
+    data: Mapped[dict | None] = mapped_column(
+        MutableDict.as_mutable(pg.JSONB()),
         default=dict,
         server_default=sa.func.jsonb("{}"),
-        nullable=True,
     )

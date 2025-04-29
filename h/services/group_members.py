@@ -62,7 +62,7 @@ class GroupMembersService:
 
         if roles:
             query = query.where(
-                or_(GroupMembership.roles.contains(role) for role in roles)
+                or_(GroupMembership.roles.contains(role) for role in roles)  # type: ignore[arg-type]
             )
 
         if offset is not None:

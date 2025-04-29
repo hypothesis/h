@@ -25,6 +25,7 @@ class MentionService:
         self._session.flush()
 
         mentioning_user = self._user_service.fetch(annotation.userid)
+        assert mentioning_user is not None, "User not found"  # noqa: S101
         # NIPSA users do not send mentions
         if mentioning_user.nipsa:
             return

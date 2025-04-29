@@ -59,7 +59,7 @@ class AuthTicketService:
 
         return self._ticket
 
-    def add_ticket(self, userid: str, ticket_id: str) -> None:
+    def add_ticket(self, userid: str, ticket_id: str) -> AuthTicket:
         """Add a new auth ticket for the given userid and token_id to the DB."""
 
         user = self._user_service.fetch(userid)

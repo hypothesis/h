@@ -1,7 +1,7 @@
 from sqlalchemy import exists, select
+from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import count
 
-from h.db import Session
 from h.models import Annotation, Notification, User
 from h.models.notification import NotificationType
 from h.services.user import UserService
@@ -32,14 +32,14 @@ class NotificationService:
                 Notification.recipient == recipient,
             )
         )
-        return self._session.execute(stmt).scalar()
+        return bool(self._session.execute(stmt).scalar())
 
     def _notification_count(self, annotation: Annotation) -> int:
         """Count the number of notifications for the given annotation."""
         stmt = select(count(Notification.id)).where(
             Notification.source_annotation == annotation
         )
-        return self._session.execute(stmt).scalar()
+        return self._session.execute(stmt).scalar() or 0
 
     def save_notification(
         self,

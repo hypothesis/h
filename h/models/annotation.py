@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -7,7 +7,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from h.db import Base, types
 from h.models.group import Group
@@ -27,9 +27,6 @@ class ModerationStatus(Enum):
 
 class Annotation(Base):
     """Model class representing a single annotation."""
-
-    # Expose the ModerationStatus directly here
-    ModerationStatus = ModerationStatus
 
     __tablename__ = "annotation"
     __table_args__ = (
@@ -51,24 +48,19 @@ class Annotation(Base):
 
     #: Annotation ID: these are stored as UUIDs in the database, and mapped
     #: transparently to a URL-safe Base64-encoded string.
-    id = sa.Column(
+
+    id: Mapped[str] = mapped_column(
         types.URLSafeUUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
     )
 
     #: The timestamp when the annotation was created.
-    created = sa.Column(
-        sa.DateTime,
-        default=datetime.datetime.utcnow,
-        server_default=sa.func.now(),
-        nullable=False,
+    created: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, server_default=sa.func.now()
     )
 
     #: The timestamp when the user edited the annotation last.
-    updated = sa.Column(
-        sa.DateTime,
-        server_default=sa.func.now(),
-        default=datetime.datetime.utcnow,
-        nullable=False,
+    updated: Mapped[datetime] = mapped_column(
+        server_default=sa.func.now(), default=datetime.utcnow
     )
 
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
@@ -121,18 +113,17 @@ class Annotation(Base):
     )
 
     #: An array of annotation IDs which are ancestors of this annotation.
-    references = sa.Column(
+    references: Mapped[list[str] | None] = mapped_column(
         pg.ARRAY(types.URLSafeUUID, zero_indexes=True),
         default=list,
         server_default=sa.text("ARRAY[]::uuid[]"),
     )
 
     #: Any additional serialisable data provided by the client.
-    extra = sa.Column(
-        MutableDict.as_mutable(pg.JSONB),
+    extra: Mapped[dict] = mapped_column(
+        MutableDict.as_mutable(pg.JSONB()),
         default=dict,
         server_default=sa.func.jsonb("{}"),
-        nullable=False,
     )
 
     #: Has the annotation been deleted?
@@ -152,6 +143,10 @@ class Annotation(Base):
         primaryjoin=(sa.orm.foreign(id) == sa.orm.remote(references[0])),
         viewonly=True,
         uselist=True,
+    )
+
+    slim = sa.orm.relationship(
+        "AnnotationSlim", uselist=False, back_populates="annotation"
     )
 
     mentions = relationship("Mention", back_populates="annotation")
@@ -182,8 +177,8 @@ class Annotation(Base):
     def target_uri(self):
         return self._target_uri
 
-    @target_uri.setter
-    def target_uri(self, value):
+    @target_uri.inplace.setter
+    def _target_uri_setter(self, value):
         self._target_uri = value
         self._target_uri_normalized = uri.normalize(value)
 
@@ -212,8 +207,8 @@ class Annotation(Base):
     def text(self):
         return self._text
 
-    @text.setter
-    def text(self, value):
+    @text.inplace.setter
+    def _text_setter(self, value):
         self._text = value
         # N.B. We MUST take care here of appropriately escaping the user
         # input. Code elsewhere will assume that the content of the

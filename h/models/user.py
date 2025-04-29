@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
+from sqlalchemy.orm import Mapped, mapped_column
 
 from h.db import Base
 from h.exceptions import InvalidUserId
@@ -14,7 +15,7 @@ from h.pubid import generate
 from h.util.user import format_userid, split_user
 
 if TYPE_CHECKING:
-    from models.group import Group
+    from h.models.group import Group
 
 
 USERNAME_MIN_LENGTH = 3
@@ -244,20 +245,22 @@ class User(Base):
     def username(self):
         return self._username
 
-    @username.setter
-    def username(self, value):
+    @username.inplace.setter
+    def _username_setter(self, value):
         self._username = value
 
-    @username.comparator
-    def username(cls):  # noqa: N805
+    @username.inplace.comparator
+    @classmethod
+    def _username_comparator(cls):
         return UsernameComparator(cls._username)
 
     @hybrid_property
     def userid(self):
         return format_userid(self.username, self.authority)
 
-    @userid.comparator
-    def userid(cls):  # noqa: N805
+    @userid.inplace.comparator
+    @classmethod
+    def _userid_comparator(cls):
         return UserIDComparator(cls.username, cls.authority)
 
     email = sa.Column(sa.UnicodeText())
@@ -304,10 +307,8 @@ class User(Base):
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
     #: Has this user been marked for deletion?
-    deleted = sa.Column(
-        sa.Boolean,
+    deleted: Mapped[bool] = mapped_column(
         default=False,
-        nullable=False,
         server_default=sa.sql.expression.false(),
     )
 

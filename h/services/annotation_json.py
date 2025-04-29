@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from pyramid.request import Request
 
-from h.models import Annotation, User
+from h.models import Annotation, ModerationStatus, User
 from h.presenters import DocumentJSONPresenter
 from h.presenters.mention_json import MentionJSONPresenter
 from h.security import Identity, identity_permits
@@ -57,7 +57,7 @@ class AnnotationJSONService:
         :param annotation: Annotation to present
         :return: A dict suitable for JSON serialisation
         """
-        model = deepcopy(annotation.extra) or {}
+        model: dict = deepcopy(annotation.extra) or {}
 
         model.update(
             {
@@ -209,7 +209,7 @@ class AnnotationJSONService:
                 return None
 
             # Otherwise it means that the moderation status hasn't been migrated yet to "APPROVED"
-            return Annotation.ModerationStatus.APPROVED.value
+            return ModerationStatus.APPROVED.value
 
         return annotation.moderation_status.value
 

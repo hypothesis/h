@@ -31,7 +31,7 @@ class TaskDoneService:
         task_done = TaskDone(data=asdict(task_data))
         self._session.add(task_done)
 
-    def sender_mention_count(self, sender_id: str, after: datetime) -> int:
+    def sender_mention_count(self, sender_id: int, after: datetime) -> int:
         stmt = select(count(TaskDone.id)).where(
             TaskDone.data["sender_id"].astext == str(sender_id),
             TaskDone.created >= after,

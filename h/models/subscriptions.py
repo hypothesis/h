@@ -1,6 +1,7 @@
 from enum import Enum
 
 import sqlalchemy as sa
+from sqlalchemy.orm import Mapped, mapped_column
 
 from h.db import Base
 
@@ -34,7 +35,7 @@ class Subscriptions(Base):
     Currently this can only be "reply".
     """
 
-    active = sa.Column(sa.Boolean, default=True, nullable=False)
+    active: Mapped[bool] = mapped_column(default=True)
     """Whether the subscription is active or not."""
 
     __table_args__ = (sa.Index("subs_uri_lower_idx_subscriptions", sa.func.lower(uri)),)

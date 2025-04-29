@@ -1,10 +1,10 @@
 from collections.abc import Iterable
 
 from sqlalchemy import Select, func, or_, select
-from sqlalchemy.orm import Query, Session, subqueryload
+from sqlalchemy.orm import Session, subqueryload
 
 from h.db.types import InvalidUUID
-from h.models import Annotation
+from h.models import Annotation, ModerationStatus
 
 
 class AnnotationReadService:
@@ -57,8 +57,8 @@ class AnnotationReadService:
         groupid: str | None = None,
         include_private: bool = False,
         include_deleted: bool = False,
-        moderation_status: Annotation.ModerationStatus | None = None,
-    ) -> Query:
+        moderation_status: ModerationStatus | None = None,
+    ) -> Select[tuple[Annotation]]:
         """Create a query for searching for annotations."""
 
         query = select(Annotation)
@@ -76,14 +76,13 @@ class AnnotationReadService:
             query = query.where(Annotation.groupid == groupid)
 
         if moderation_status:
-            if moderation_status == Annotation.ModerationStatus.APPROVED:
+            if moderation_status == ModerationStatus.APPROVED:
                 # We have not migrated all annotations to have a moderation status
                 # APPROVED is implicit when no moderation status is set
                 query = query.where(
                     or_(
                         Annotation.moderation_status.is_(None),
-                        Annotation.moderation_status
-                        == Annotation.ModerationStatus.APPROVED,
+                        Annotation.moderation_status == ModerationStatus.APPROVED,
                     )
                 )
             else:
@@ -95,7 +94,7 @@ class AnnotationReadService:
         return query
 
     @staticmethod
-    def count_query(query: Select[Annotation]) -> Select[int]:
+    def count_query(query: Select[tuple[Annotation]]) -> Select[tuple[int]]:
         """Convert an annotations query into a count of annotations."""
 
         return query.with_only_columns(func.count(Annotation.id))
