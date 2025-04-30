@@ -26,14 +26,14 @@ const getLozengeValues = ctrl => {
 describe('SearchBarController', () => {
   let lozengeTemplateEl;
 
-  before(() => {
+  beforeAll(() => {
     lozengeTemplateEl = document.createElement('template');
     lozengeTemplateEl.id = 'lozenge-template';
     lozengeTemplateEl.innerHTML = lozengeTemplate;
     document.body.appendChild(lozengeTemplateEl);
   });
 
-  after(() => {
+  afterAll(() => {
     lozengeTemplateEl.remove();
   });
 

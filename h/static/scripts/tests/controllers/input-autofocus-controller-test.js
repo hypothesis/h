@@ -20,12 +20,12 @@ describe('InputAutofocusController', () => {
   let ctrl;
   let otherInput;
 
-  before(() => {
+  beforeAll(() => {
     otherInput = document.createElement('input');
     document.body.appendChild(otherInput);
   });
 
-  after(() => {
+  afterAll(() => {
     otherInput.remove();
   });
 
