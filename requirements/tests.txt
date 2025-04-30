@@ -258,7 +258,7 @@ pytest==8.3.5
     #   pytest-factoryboy
     #   pytest-mock
     #   pytest-xdist
-pytest-cov==6.0.0
+pytest-cov==6.1.1
     # via -r requirements/tests.in
 pytest-factoryboy==2.7.0
     # via -r requirements/tests.in
