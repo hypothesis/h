@@ -90,6 +90,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -257,7 +258,7 @@ pytest==8.3.5
     #   pytest-factoryboy
     #   pytest-mock
     #   pytest-xdist
-pytest-cov==6.0.0
+pytest-cov==6.1.1
     # via -r requirements/tests.in
 pytest-factoryboy==2.7.0
     # via -r requirements/tests.in
