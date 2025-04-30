@@ -77,6 +77,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -134,7 +135,7 @@ markupsafe==2.1.5
     #   jinja2
     #   mako
     #   pyramid-jinja2
-mypy==1.14.1
+mypy==1.15.0
     # via -r requirements/typecheck.in
 mypy-extensions==1.0.0
     # via mypy
