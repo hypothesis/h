@@ -20,7 +20,7 @@
     "@hypothesis/frontend-build": "^3.2.1",
     "@hypothesis/frontend-shared": "^9.1.0",
     "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@sentry/browser": "^8.51.0",
