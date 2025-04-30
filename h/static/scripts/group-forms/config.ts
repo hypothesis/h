@@ -37,6 +37,7 @@ export type ConfigObject = {
   features: {
     group_members: boolean;
     group_type: boolean;
+    group_moderation: boolean;
   };
 };
 
