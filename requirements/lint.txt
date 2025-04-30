@@ -328,7 +328,7 @@ pyjwt==2.10.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
