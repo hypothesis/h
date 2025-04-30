@@ -6,6 +6,7 @@ import {
   LockFilledIcon,
   GlobeIcon,
   GlobeLockIcon,
+  Checkbox,
 } from '@hypothesis/frontend-shared';
 import { Config } from '../config';
 import type { Group } from '../config';
@@ -108,6 +109,9 @@ export default function CreateEditGroupForm({
   const [groupType, setGroupType] = useState<GroupType>(
     group?.type ?? 'private',
   );
+  const [preModerated, setPreModerated] = useState(
+    group?.pre_moderated ?? false,
+  );
 
   // Set when the user selects a new group type if confirmation is required.
   // Cleared after confirmation.
@@ -158,6 +162,7 @@ export default function CreateEditGroupForm({
         name,
         description,
         type: groupType,
+        pre_moderated: preModerated,
       };
 
       response = (await callAPI(config.api.createGroup.url, {
@@ -185,6 +190,7 @@ export default function CreateEditGroupForm({
         name,
         description,
         type: groupType,
+        pre_moderated: preModerated,
       };
 
       (await callAPI(config.api.updateGroup!.url, {
@@ -240,7 +246,7 @@ export default function CreateEditGroupForm({
       <form
         onSubmit={onSubmit}
         data-testid="form"
-        className="max-w-[530px] mx-auto"
+        className="max-w-[530px] mx-auto flex flex-col gap-y-4"
       >
         <TextField
           type="input"
@@ -262,7 +268,7 @@ export default function CreateEditGroupForm({
         />
 
         {config.features.group_type && (
-          <>
+          <div>
             <Label id={groupTypeLabel} text="Group type" />
             <RadioGroup
               aria-labelledby={groupTypeLabel}
@@ -290,10 +296,25 @@ export default function CreateEditGroupForm({
                 <GlobeIcon /> Open
               </RadioGroup.Radio>
             </RadioGroup>
-          </>
+          </div>
         )}
 
-        <div className="mt-2 pt-2 border-t border-t-text-grey-6 flex items-center gap-x-4">
+        {config.features.group_moderation && (
+          <fieldset>
+            <legend className="font-bold">Moderation</legend>
+            <Checkbox
+              data-testid="pre-moderation"
+              checked={preModerated}
+              onChange={e =>
+                setPreModerated((e.target as HTMLInputElement).checked)
+              }
+            >
+              Enable pre-moderation for this group.
+            </Checkbox>
+          </fieldset>
+        )}
+
+        <div className="pt-2 border-t border-t-text-grey-6 flex items-center gap-x-4">
           <span>
             {/* These are in a child span to avoid a gap between them. */}
             <Star />
