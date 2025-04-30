@@ -77,6 +77,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -191,7 +192,7 @@ pycryptodomex==3.21.0
     # via -r requirements/prod.txt
 pyjwt==2.10.1
     # via -r requirements/prod.txt
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via -r requirements/prod.txt
 pyproject-hooks==1.2.0
     # via

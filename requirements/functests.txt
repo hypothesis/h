@@ -85,6 +85,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -93,8 +94,8 @@ h-assets==1.0.7
     # via -r requirements/prod.txt
 h-matchers==1.2.17
     # via
-    #   -r requirements/prod.txt
     #   -r requirements/functests.in
+    #   -r requirements/prod.txt
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.txt
 h-testkit==1.0.1
@@ -209,7 +210,7 @@ pycryptodomex==3.21.0
     # via -r requirements/prod.txt
 pyjwt==2.10.1
     # via -r requirements/prod.txt
-pyparsing==3.2.1
+pyparsing==3.2.3
     # via -r requirements/prod.txt
 pyproject-hooks==1.0.0
     # via
