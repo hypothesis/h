@@ -20,7 +20,7 @@ bleach==6.2.0
     # via -r requirements/prod.in
 celery==5.4.0
     # via -r requirements/prod.in
-certifi==2025.1.31
+certifi==2025.4.26
     # via
     #   -r requirements/prod.in
     #   sentry-sdk
@@ -56,7 +56,9 @@ elasticsearch-dsl==6.4.0
 gevent==24.11.1
     # via -r requirements/prod.in
 greenlet==3.1.1
-    # via gevent
+    # via
+    #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.in
 h-api==1.1.1
