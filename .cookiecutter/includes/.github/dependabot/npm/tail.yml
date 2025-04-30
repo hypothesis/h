@@ -1,0 +1,5 @@
+groups:
+  vitest:
+    patterns:
+      - 'vitest'
+      - '@vitest/*'
