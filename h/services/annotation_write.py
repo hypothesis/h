@@ -80,7 +80,7 @@ class AnnotationWriteService:
             created=annotation.created,
             updated=annotation.updated,
         )
-        self._moderation_service.update_status(annotation)
+        self._moderation_service.update_status("create", annotation)
 
         self._db.add(annotation)
         self.upsert_annotation_slim(annotation)
@@ -144,7 +144,7 @@ class AnnotationWriteService:
                 document.get("document_uri_dicts", {}),
                 updated=annotation.updated,
             )
-        self._moderation_service.update_status(annotation)
+        self._moderation_service.update_status("update", annotation)
         self.upsert_annotation_slim(annotation)
 
         if annotation_metadata:
@@ -169,7 +169,7 @@ class AnnotationWriteService:
         """Hides  an annotation marking it it as "moderated"."""
         if not annotation.is_hidden:
             self._moderation_service.set_status(
-                annotation, user, Annotation.ModerationStatus.DENIED
+                annotation, Annotation.ModerationStatus.DENIED, user
             )
 
         self.upsert_annotation_slim(annotation)
@@ -177,7 +177,7 @@ class AnnotationWriteService:
     def unhide(self, annotation: Annotation, user: User):
         """Remove the moderation status of an annotation."""
         self._moderation_service.set_status(
-            annotation, user, Annotation.ModerationStatus.APPROVED
+            annotation, Annotation.ModerationStatus.APPROVED, user
         )
         self.upsert_annotation_slim(annotation)
 

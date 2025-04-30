@@ -1,5 +1,7 @@
 import pytest
 
+from h.models.annotation import ModerationStatus
+
 
 class TestGetAnnotation:
     def test_it_returns_annotation_if_shared(self, app, annotation):
@@ -168,6 +170,112 @@ class TestPatchAnnotation:
         assert res.json["text"] == "This is an updated annotation"
         assert res.status_code == 200
 
+    @pytest.mark.parametrize(
+        "pre_moderation_enabled,moderation_status,expected_moderation_status",
+        [
+            # Editing a private annotation and making it shared might change its annotation state, depending on the current state:
+            # If the group has pre-moderation disabled the annotation's moderation state becomes Approved.
+            (False, None, ModerationStatus.APPROVED),
+            # If the group has pre-moderation enabled the annotation's moderation state becomes Pending.
+            (True, None, ModerationStatus.PENDING),
+            # If a private annotation whose state is Denied is edited and made shared the state becomes Pending.
+            (True, ModerationStatus.DENIED, ModerationStatus.PENDING),
+            # If a private annotation whose state is Pending or Spam is edited and made shared the state doesn't change.
+            (True, ModerationStatus.PENDING, ModerationStatus.PENDING),
+            (True, ModerationStatus.SPAM, ModerationStatus.SPAM),
+        ],
+    )
+    def test_sharing_a_private_annotation(
+        self,
+        app,
+        user_with_token,
+        user_private_annotation,
+        db_session,
+        pre_moderation_enabled,
+        moderation_status,
+        expected_moderation_status,
+    ):
+        user, token = user_with_token
+        group = user_private_annotation.group
+        group.pre_moderated = pre_moderation_enabled
+        user_private_annotation.moderation_status = moderation_status
+        db_session.commit()
+
+        headers = {"Authorization": f"Bearer {token.value}"}
+        annotation_patch = {
+            "permissions": {
+                "read": [f"group:{group.pubid}"],
+                "admin": [user.userid],
+                "updated": [user.userid],
+                "deleted": [user.userid],
+            },
+            "text": "PRIVATE",
+        }
+
+        res = app.patch_json(
+            f"/api/annotations/{user_private_annotation.id}",
+            annotation_patch,
+            headers=headers,
+        )
+
+        assert res.status_code == 200
+        db_session.refresh(user_private_annotation)
+        assert user_private_annotation.shared
+        assert user_private_annotation.moderation_status == expected_moderation_status
+
+    @pytest.mark.parametrize(
+        "pre_moderation_enabled,moderation_status,expected_moderation_status",
+        # Private annotations don't always have the NULL state: if a shared annotation is edited and made private it retains its previous state from when it was shared
+        # (Pending, Approved, Denied, or Spam).
+        [
+            (True, ModerationStatus.PENDING, ModerationStatus.PENDING),
+            (True, ModerationStatus.APPROVED, ModerationStatus.APPROVED),
+            (True, ModerationStatus.SPAM, ModerationStatus.SPAM),
+            (True, ModerationStatus.DENIED, ModerationStatus.DENIED),
+            (False, ModerationStatus.APPROVED, ModerationStatus.APPROVED),
+            (False, ModerationStatus.SPAM, ModerationStatus.SPAM),
+            (False, ModerationStatus.DENIED, ModerationStatus.DENIED),
+            (False, ModerationStatus.PENDING, ModerationStatus.PENDING),
+        ],
+    )
+    def test_making_annotation_private(
+        self,
+        app,
+        user_with_token,
+        user_shared_annotation,
+        db_session,
+        pre_moderation_enabled,
+        moderation_status,
+        expected_moderation_status,
+    ):
+        user, token = user_with_token
+        group = user_shared_annotation.group
+        group.pre_moderated = pre_moderation_enabled
+        user_shared_annotation.moderation_status = moderation_status
+        db_session.commit()
+
+        headers = {"Authorization": f"Bearer {token.value}"}
+        annotation_patch = {
+            "permissions": {
+                "read": [user.userid],
+                "admin": [user.userid],
+                "updated": [user.userid],
+                "deleted": [user.userid],
+            },
+            "text": "PRIVATE",
+        }
+
+        res = app.patch_json(
+            f"/api/annotations/{user_shared_annotation.id}",
+            annotation_patch,
+            headers=headers,
+        )
+
+        assert res.status_code == 200
+        db_session.refresh(user_shared_annotation)
+        assert not user_shared_annotation.shared
+        assert user_shared_annotation.moderation_status == expected_moderation_status
+
     def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
         annotation_patch = {"text": "whatever"}
 
@@ -266,6 +374,22 @@ def user(db_session, factories):
 @pytest.fixture
 def user_annotation(db_session, user, factories):
     ann = factories.Annotation(userid=user.userid, groupid="__world__", shared=True)
+    db_session.commit()
+    return ann
+
+
+@pytest.fixture
+def user_shared_annotation(db_session, user, factories):
+    group = factories.OpenGroup()
+    ann = factories.Annotation(userid=user.userid, groupid=group.pubid, shared=True)
+    db_session.commit()
+    return ann
+
+
+@pytest.fixture
+def user_private_annotation(db_session, user, factories):
+    group = factories.OpenGroup()
+    ann = factories.Annotation(userid=user.userid, groupid=group.pubid, shared=False)
     db_session.commit()
     return ann
 
