@@ -85,6 +85,7 @@ parallel = true
 source = ["h", "tests/unit"]
 omit = [
     "*/h/__main__.py",
+    "*/h/_version.py",
     "*/h/scripts/init_db.py",
     "h/cli/*",
     "h/pshell.py",
