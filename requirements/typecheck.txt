@@ -25,7 +25,7 @@ bleach==6.2.0
     # via -r requirements/prod.txt
 build==1.2.2.post1
     # via pip-tools
-celery==5.4.0
+celery==5.5.2
     # via -r requirements/prod.txt
 certifi==2025.4.26
     # via
@@ -303,7 +303,6 @@ typing-extensions==4.9.0
 tzdata==2025.2
     # via
     #   -r requirements/prod.txt
-    #   celery
     #   kombu
 urllib3==2.3.0
     # via

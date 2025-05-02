@@ -18,7 +18,7 @@ billiard==4.2.1
     # via celery
 bleach==6.2.0
     # via -r requirements/prod.in
-celery==5.4.0
+celery==5.5.2
     # via -r requirements/prod.in
 certifi==2025.4.26
     # via
@@ -237,9 +237,7 @@ typing-extensions==4.9.0
     #   referencing
     #   sqlalchemy
 tzdata==2025.2
-    # via
-    #   celery
-    #   kombu
+    # via kombu
 urllib3==2.3.0
     # via
     #   elasticsearch
