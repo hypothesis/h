@@ -42,7 +42,7 @@ build==1.0.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pip-tools
-celery==5.4.0
+celery==5.5.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -513,7 +513,6 @@ tzdata==2025.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   celery
     #   kombu
 urllib3==2.3.0
     # via
