@@ -1,5 +1,6 @@
 """Factory classes for easily generating test objects."""
 
+from tests.common.factories import requests_ as requests
 from tests.common.factories.activation import Activation
 from tests.common.factories.annotation import Annotation
 from tests.common.factories.annotation_metadata import AnnotationMetadata

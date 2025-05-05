@@ -23,6 +23,7 @@ celery==5.5.2
 certifi==2025.4.26
     # via
     #   -r requirements/prod.in
+    #   requests
     #   sentry-sdk
 cffi==1.17.1
     # via
@@ -30,6 +31,8 @@ cffi==1.17.1
     #   cryptography
 chameleon==4.6.0
     # via deform
+charset-normalizer==3.4.2
+    # via requests
 click==8.1.8
     # via
     #   -r requirements/prod.in
@@ -60,9 +63,7 @@ elasticsearch-dsl==6.4.0
 gevent==24.11.1
     # via -r requirements/prod.in
 greenlet==3.1.1
-    # via
-    #   gevent
-    #   sqlalchemy
+    # via gevent
 gunicorn==23.0.0
     # via -r requirements/prod.in
 h-api==1.1.1
@@ -75,6 +76,8 @@ h-pyramid-sentry==1.2.4
     # via -r requirements/prod.in
 hupper==1.12
     # via pyramid
+idna==3.10
+    # via requests
 importlib-resources==6.5.2
     # via
     #   -r requirements/prod.in
@@ -190,6 +193,8 @@ referencing==0.36.1
     #   jsonschema-specifications
 repoze-sendmail==4.4.1
     # via pyramid-mailer
+requests==2.32.3
+    # via -r requirements/prod.in
 rfc3339-validator==0.1.4
     # via -r requirements/prod.in
 rpds-py==0.22.3
@@ -245,6 +250,7 @@ tzdata==2025.2
 urllib3==2.3.0
     # via
     #   elasticsearch
+    #   requests
     #   sentry-sdk
 venusian==3.1.1
     # via
