@@ -90,6 +90,21 @@ describe('CreateEditGroupForm', () => {
     };
   };
 
+  const preModerationCheckbox = wrapper =>
+    wrapper.find('Checkbox[data-testid="pre-moderation"]');
+
+  const isPreModerationEnabled = wrapper =>
+    preModerationCheckbox(wrapper).prop('checked');
+
+  const changePreModerationCheckbox = (wrapper, checked) => {
+    act(() =>
+      preModerationCheckbox(wrapper).props().onChange({
+        target: { checked },
+      }),
+    );
+    wrapper.update();
+  };
+
   const createWrapper = (props = {}) => {
     const wrapper = mount(
       <Config.Provider value={config}>
@@ -226,12 +241,6 @@ describe('CreateEditGroupForm', () => {
   });
 
   describe('pre-moderation', () => {
-    const preModerationCheckbox = wrapper =>
-      wrapper.find('Checkbox[data-testid="pre-moderation"]');
-
-    const isModerationEnabled = wrapper =>
-      preModerationCheckbox(wrapper).prop('checked');
-
     [true, false].forEach(moderationEnabled => {
       it('shows pre-moderation checkbox when group moderation is enabled', () => {
         config.features.group_moderation = moderationEnabled;
@@ -248,14 +257,9 @@ describe('CreateEditGroupForm', () => {
       config.features.group_moderation = true;
       const { wrapper } = createWrapper();
 
-      assert.isFalse(isModerationEnabled(wrapper));
-      preModerationCheckbox(wrapper)
-        .props()
-        .onChange({
-          target: { checked: true },
-        });
-      wrapper.update();
-      assert.isTrue(isModerationEnabled(wrapper));
+      assert.isFalse(isPreModerationEnabled(wrapper));
+      changePreModerationCheckbox(wrapper, true);
+      assert.isTrue(isPreModerationEnabled(wrapper));
     });
   });
 
@@ -466,6 +470,15 @@ describe('CreateEditGroupForm', () => {
       act(() => warning.prop('onConfirm')());
       wrapper.update();
       assert.isFalse(savedConfirmationShowing(wrapper));
+    });
+
+    it('marks form as unsaved if pre-moderation checkbox changes', () => {
+      config.features.group_moderation = true;
+      const { wrapper } = createWrapper();
+
+      assert.isFalse(navigateWarningActive());
+      changePreModerationCheckbox(wrapper, true);
+      assert.isTrue(navigateWarningActive());
     });
   });
 
