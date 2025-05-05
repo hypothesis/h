@@ -21,6 +21,7 @@ FEATURES = {
     "pdf_image_annotation": "Support image annotations in PDFs",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
     "at_mentions": "Allow mentioning other users in annotations",
+    "log_in_with_orcid": "Allow users to log in with ORCID",
 }
 
 
