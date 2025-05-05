@@ -2360,9 +2360,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-commonjs@npm:^28.0.2":
-  version: 28.0.2
-  resolution: "@rollup/plugin-commonjs@npm:28.0.2"
+"@rollup/plugin-commonjs@npm:^28.0.3":
+  version: 28.0.3
+  resolution: "@rollup/plugin-commonjs@npm:28.0.3"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     commondir: ^1.0.1
@@ -2376,7 +2376,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: b27a081a16df63f5f74d1aaa7f17a5ebb57ec73f5226f6e85044ec525b13023d8eb65349ddea415a5ef4ba093c71989c38df274e408cce4cb1c6f9aaea9d2de5
+  checksum: b5c5ae75215260d08aad34c2bc20246691ae7f21fcca6cb48f196cadf92b70f6332ae65679adce5b874060952b9e4688572758184ebdb3b75c8bf55d4a41dd3e
   languageName: node
   linkType: hard
 
@@ -6684,7 +6684,7 @@ __metadata:
     "@hypothesis/frontend-shared": ^9.1.0
     "@hypothesis/frontend-testing": ^1.6.0
     "@rollup/plugin-babel": ^6.0.4
-    "@rollup/plugin-commonjs": ^28.0.2
+    "@rollup/plugin-commonjs": ^28.0.3
     "@rollup/plugin-node-resolve": ^15.3.0
     "@rollup/plugin-terser": ^0.4.4
     "@sentry/browser": ^8.51.0
