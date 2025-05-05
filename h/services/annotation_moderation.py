@@ -29,10 +29,10 @@ class AnnotationModerationService:
         if status and status != annotation.moderation_status:
             self._session.add(
                 ModerationLog(
-                    annotation_id=annotation.id,
+                    annotation=annotation,
                     old_moderation_status=annotation.moderation_status,
                     new_moderation_status=status.value,
-                    moderator_id=user.id,
+                    moderator=user,
                 )
             )
             annotation.moderation_status = status
