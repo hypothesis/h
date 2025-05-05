@@ -109,9 +109,8 @@ export default function CreateEditGroupForm({
   const [groupType, setGroupType] = useState<GroupType>(
     group?.type ?? 'private',
   );
-  const [preModerated, setPreModerated] = useState(
-    group?.pre_moderated ?? false,
-  );
+  const initiallyPreModerated = group?.pre_moderated ?? false;
+  const [preModerated, setPreModerated] = useState(initiallyPreModerated);
 
   // Set when the user selects a new group type if confirmation is required.
   // Cleared after confirmation.
@@ -305,9 +304,10 @@ export default function CreateEditGroupForm({
             <Checkbox
               data-testid="pre-moderation"
               checked={preModerated}
-              onChange={e =>
-                setPreModerated((e.target as HTMLInputElement).checked)
-              }
+              onChange={e => {
+                setPreModerated((e.target as HTMLInputElement).checked);
+                setSaveState('unsaved');
+              }}
             >
               Enable pre-moderation for this group.
             </Checkbox>
