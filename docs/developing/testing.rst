@@ -72,7 +72,7 @@ For example:
 
     make gulp args=test
 
-When working on the front-end code, you can run the Karma test runner in
+When working on the front-end code, you can run the Vitest test runner in
 auto-watch mode which will re-run the tests whenever a change is made to the
 source code. To start the test runner in auto-watch mode, run:
 
@@ -81,13 +81,13 @@ source code. To start the test runner in auto-watch mode, run:
     make gulp args=test-watch
 
 To run only a subset of tests for front-end code, use the ``--grep``
-argument or mocha's `.only()`_ modifier.
+argument or Vitest's `.only()`_ modifier.
 
 .. code-block:: shell
 
     make gulp args=test-watch --grep <pattern>
 
-.. _.only(): http://jaketrent.com/post/run-single-mocha-test/
+.. _.only(): https://vitest.dev/guide/filtering.html#selecting-suites-and-tests-to-run
 
 Writing tests
 -------------

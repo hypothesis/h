@@ -1,4 +1,3 @@
-/* eslint-disable mocha/no-nested-tests */
 import syn from 'syn';
 
 import { LozengeController } from '../../controllers/lozenge-controller';

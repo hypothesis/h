@@ -129,7 +129,7 @@ gulp.task(
 
 gulp.task('test', () =>
   runTests({
-    bootstrapFile: './h/static/scripts/tests/bootstrap.js',
+    bootstrapFile: './h/static/scripts/test/bootstrap.js',
     vitestConfig: './vitest.config.js',
     rollupConfig: './rollup-tests.config.js',
     testsPattern: 'h/static/scripts/**/*-test.js',
