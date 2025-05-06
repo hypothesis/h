@@ -8,7 +8,10 @@ describe('GroupFormHeader', () => {
 
   beforeEach(() => {
     config = {
-      features: { group_members: true },
+      features: {
+        group_members: true,
+        group_moderation: true,
+      },
     };
   });
 
@@ -36,6 +39,7 @@ describe('GroupFormHeader', () => {
     assert.isFalse(getLink(header, 'activity-link').exists());
     assert.isFalse(getLink(header, 'settings-link').exists());
     assert.isFalse(getLink(header, 'members-link').exists());
+    assert.isFalse(getLink(header, 'moderation-link').exists());
   });
 
   it('renders group activity link and tabs if there is a group', () => {
@@ -49,6 +53,9 @@ describe('GroupFormHeader', () => {
 
     const membersLink = getLink(header, 'members-link');
     assert.equal(membersLink.prop('href'), '/groups/abc123/edit/members');
+
+    const moderationLink = getLink(header, 'moderation-link');
+    assert.equal(moderationLink.prop('href'), '/groups/abc123/moderate');
   });
 
   it('does not show tabs if the members flag is disabled', () => {
@@ -57,6 +64,12 @@ describe('GroupFormHeader', () => {
     assert.isTrue(getLink(header, 'activity-link').exists());
     assert.isFalse(getLink(header, 'settings-link').exists());
     assert.isFalse(getLink(header, 'members-link').exists());
+  });
+
+  it('does not show moderation link if the moderation flag is disabled', () => {
+    config.features.group_moderation = false;
+    const header = createHeader({ group });
+    assert.isFalse(getLink(header, 'moderation-link').exists());
   });
 
   it('should pass a11y checks', checkAccessibility({ content: createHeader }));

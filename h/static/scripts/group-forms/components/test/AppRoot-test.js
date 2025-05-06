@@ -24,6 +24,7 @@ describe('AppRoot', () => {
     $imports.$mock({
       './CreateEditGroupForm': mockComponent('CreateEditGroupForm'),
       './EditGroupMembersForm': mockComponent('EditGroupMembersForm'),
+      './GroupModeration': mockComponent('GroupModeration'),
     });
   });
 
@@ -95,6 +96,10 @@ describe('AppRoot', () => {
     {
       path: '/groups/1234/edit/members',
       selector: 'EditGroupMembersForm',
+    },
+    {
+      path: '/groups/1234/moderate',
+      selector: 'GroupModeration',
     },
     {
       path: '/unknown',

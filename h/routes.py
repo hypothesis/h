@@ -233,6 +233,12 @@ def includeme(config):  # noqa: PLR0915
         factory="h.traversal.GroupRequiredRoot",
         traverse="/{pubid}",
     )
+    config.add_route(
+        "group_moderation",
+        "/groups/{pubid}/moderate",
+        factory="h.traversal.GroupRequiredRoot",
+        traverse="/{pubid}",
+    )
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route(
         "group_read",
