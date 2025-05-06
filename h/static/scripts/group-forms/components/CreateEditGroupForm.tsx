@@ -6,7 +6,6 @@ import {
   LockFilledIcon,
   GlobeIcon,
   GlobeLockIcon,
-  Checkbox,
 } from '@hypothesis/frontend-shared';
 import { Config } from '../config';
 import type { Group } from '../config';
@@ -27,6 +26,7 @@ import TextField from './forms/TextField';
 import GroupFormHeader from './GroupFormHeader';
 import SaveStateIcon from './SaveStateIcon';
 import WarningDialog from './WarningDialog';
+import Checkbox from './forms/Checkbox';
 
 /**
  * Dialog that warns users about existing annotations in a group being exposed
@@ -308,6 +308,7 @@ export default function CreateEditGroupForm({
                 setPreModerated((e.target as HTMLInputElement).checked);
                 setSaveState('unsaved');
               }}
+              description="Moderators must approve new annotations before they are shown to group members."
             >
               Enable pre-moderation for this group.
             </Checkbox>
