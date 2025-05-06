@@ -43,16 +43,6 @@ class FakeInvalid:
         self.errors = errors
 
 
-def autopatcher(request, target, **kwargs):
-    """Patch and cleanup automatically. Wraps :py:func:`mock.patch`."""
-    options = {"autospec": True}
-    options.update(kwargs)
-    patcher = mock.patch(target, **options)
-    obj = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return obj
-
-
 @pytest.fixture
 def cli():
     runner = click.testing.CliRunner()
@@ -119,8 +109,8 @@ def notify(pyramid_config, request):
 
 
 @pytest.fixture
-def patch(request):
-    return functools.partial(autopatcher, request)
+def patch(mocker):
+    return functools.partial(mocker.patch, autospec=True)
 
 
 @pytest.fixture
