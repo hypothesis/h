@@ -197,6 +197,65 @@ class RegisterSchema(CSRFSchema):
     )
 
 
+@colander.deferred
+def deferred_orcid_default(node, _kw):
+    return node.bindings["orcid"]
+
+
+class RegisterORCIDSchema(CSRFSchema):
+    orcid = colander.SchemaNode(
+        colander.String(),
+        title=_("ORCID"),
+        validator=colander.Regex(
+            r"^\d{4}-\d{4}-\d{4}-\d{4}$",
+            msg=_("Must be a valid ORCID."),
+        ),
+        widget=deform.widget.TextInputWidget(readonly="readonly"),
+        default=deferred_orcid_default,
+    )
+
+    username = colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(
+            validators.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+            colander.Regex(
+                USERNAME_PATTERN,
+                msg=_(
+                    "Must have only letters, numbers, periods and underscores. May not start or end with period."
+                ),
+            ),
+            unique_username,
+            unblacklisted_username,
+        ),
+        title=_("Username"),
+        hint=_(
+            "Must be between {min} and {max} characters, containing only "
+            "letters, numbers, periods, and underscores."
+        ).format(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+        widget=deform.widget.TextInputWidget(autofocus=True),
+    )
+    email = email_node(title=_("Email address"))
+
+    privacy_accepted = colander.SchemaNode(
+        colander.Boolean(),
+        description=Markup(_privacy_accepted_message()),
+        validator=privacy_acceptance_validator,
+        widget=deform.widget.CheckboxWidget(
+            omit_label=True, css_class="form-checkbox--inline"
+        ),
+    )
+
+    comms_opt_in = colander.SchemaNode(
+        colander.Boolean(),
+        description=_("I would like to receive news about annotation and Hypothesis."),
+        widget=deform.widget.CheckboxWidget(
+            omit_label=True, css_class="form-checkbox--inline"
+        ),
+        missing=None,
+        default=False,
+    )
+
+
 class EmailChangeSchema(CSRFSchema):
     email = email_node(title=_("Email address"))
     # No validators: all validation is done on the email field
@@ -214,6 +273,15 @@ class EmailChangeSchema(CSRFSchema):
 
         if exc.children:
             raise exc
+
+
+class AddPasswordSchema(CSRFSchema):
+    email = colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(validators.Email()),
+        title=_("Email address"),
+        widget=deform.widget.TextInputWidget(template="emailinput", readonly=True),
+    )
 
 
 class PasswordChangeSchema(CSRFSchema):

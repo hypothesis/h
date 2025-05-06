@@ -6,6 +6,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import i18n
 from h.accounts import schemas
+from h.accounts.schemas import RegisterORCIDSchema
 from h.services.exceptions import ConflictError
 
 _ = i18n.TranslationString
@@ -19,10 +20,13 @@ def _login_redirect_url(request):
 class SignupController:
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.RegisterSchema().bind(request=self.request)
+        orcid = request.session.get("pending_orcid")
+        schema_cls = RegisterORCIDSchema if orcid else schemas.RegisterSchema
+        self.schema = schema_cls().bind(request=self.request, orcid=orcid)
+        title = "Sign up" if not orcid else "Create account"
         self.form = request.create_form(
             self.schema,
-            buttons=(deform.Button(title=_("Sign up")),),
+            buttons=(deform.Button(title=_(title)),),
             css_class="js-disable-on-submit",
         )
 
@@ -52,9 +56,10 @@ class SignupController:
         template_context = {"heading": _("Account registration successful")}
         try:
             signup_service.signup(
+                orcid=appstruct.get("orcid"),
                 username=appstruct["username"],
                 email=appstruct["email"],
-                password=appstruct["password"],
+                password=appstruct.get("password"),
                 privacy_accepted=datetime.datetime.utcnow(),  # noqa: DTZ003
                 comms_opt_in=appstruct["comms_opt_in"],
             )

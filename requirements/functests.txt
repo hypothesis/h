@@ -32,13 +32,20 @@ celery==5.4.0
 certifi==2025.4.26
     # via
     #   -r requirements/prod.txt
+    #   requests
     #   sentry-sdk
 cffi==1.17.1
-    # via -r requirements/prod.txt
+    # via
+    #   -r requirements/prod.txt
+    #   cryptography
 chameleon==4.6.0
     # via
     #   -r requirements/prod.txt
     #   deform
+charset-normalizer==3.4.1
+    # via
+    #   -r requirements/prod.txt
+    #   requests
 click==8.1.8
     # via
     #   -r requirements/prod.txt
@@ -63,6 +70,10 @@ colander==2.0
     # via
     #   -r requirements/prod.txt
     #   deform
+cryptography==44.0.2
+    # via
+    #   -r requirements/prod.txt
+    #   pyjwt
 data-tasks==0.0.5
     # via -r requirements/prod.txt
 deform==2.0.15
@@ -106,6 +117,10 @@ hupper==1.12
     # via
     #   -r requirements/prod.txt
     #   pyramid
+idna==3.10
+    # via
+    #   -r requirements/prod.txt
+    #   requests
 importlib-metadata==7.0.1
     # via pip-sync-faster
 importlib-resources==6.5.2
@@ -208,7 +223,7 @@ pycparser==2.22
     #   cffi
 pycryptodomex==3.21.0
     # via -r requirements/prod.txt
-pyjwt==2.10.1
+pyjwt[crypto]==2.10.1
     # via -r requirements/prod.txt
 pyparsing==3.2.3
     # via -r requirements/prod.txt
@@ -271,6 +286,8 @@ repoze-sendmail==4.4.1
     # via
     #   -r requirements/prod.txt
     #   pyramid-mailer
+requests==2.32.3
+    # via -r requirements/prod.txt
 rfc3339-validator==0.1.4
     # via -r requirements/prod.txt
 rpds-py==0.22.3
@@ -339,6 +356,7 @@ urllib3==2.3.0
     # via
     #   -r requirements/prod.txt
     #   elasticsearch
+    #   requests
     #   sentry-sdk
 venusian==3.1.1
     # via

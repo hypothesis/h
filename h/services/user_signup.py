@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from h.emails import signup
 from h.models import Activation, User, UserIdentity
+from h.models.user_identity import IdentityProvider
 from h.services import SubscriptionService
 from h.services.email import EmailTag, TaskData
 from h.services.exceptions import ConflictError
@@ -64,6 +65,7 @@ class UserSignupService:
         # Extract any passed identities for this new user
         identities = kwargs.pop("identities", [])
 
+        orcid = kwargs.get("orcid")
         user = User(**kwargs)
 
         # Add identity relations to this new user, if provided
@@ -75,6 +77,15 @@ class UserSignupService:
             )
             for i_args in identities
         ]
+
+        if orcid:
+            user.identities.append(
+                UserIdentity(
+                    user=user,
+                    provider=IdentityProvider.ORCID,
+                    provider_unique_id=str(orcid),
+                )
+            )
 
         self.session.add(user)
 

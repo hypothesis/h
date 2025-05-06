@@ -13,7 +13,7 @@ h-api
 h-assets
 data_tasks
 pyramid-sanity
-PyJWT
+PyJWT[crypto]
 bcrypt
 bleach
 celery
@@ -54,3 +54,4 @@ venusian
 wsaccel
 ws4py >= 0.4.0
 zope.interface
+requests

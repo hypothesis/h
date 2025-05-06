@@ -29,7 +29,7 @@ from h.schemas.forms.accounts import (
     ResetCode,
     ResetPasswordSchema,
 )
-from h.services import SubscriptionService
+from h.services import ORCIDClientService, SubscriptionService
 from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
@@ -203,7 +203,7 @@ class ForgotPasswordController:
             return {"form": self.form.render()}
 
         user = appstruct["user"]
-        self._send_forgot_password_email(user)
+        _send_forgot_password_email(self.request, user)
 
         return httpexceptions.HTTPFound(self.request.route_path("account_reset"))
 
@@ -211,12 +211,11 @@ class ForgotPasswordController:
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(self.request.route_path("index"))
 
-    def _send_forgot_password_email(self, user):
-        email_data = reset_password.generate(self.request, user)
-        task_data = TaskData(
-            tag=email_data.tag, sender_id=user.id, recipient_ids=[user.id]
-        )
-        email.send.delay(asdict(email_data), asdict(task_data))
+
+def _send_forgot_password_email(request, user):
+    email_data = reset_password.generate(request, user)
+    task_data = TaskData(tag=email_data.tag, sender_id=user.id, recipient_ids=[user.id])
+    email.send.delay(asdict(email_data), asdict(task_data))
 
 
 @view_defaults(
@@ -334,8 +333,8 @@ class ActivateController:
                     _(
                         "We didn't recognize that activation link. "
                         "Have you already activated your account? "
-                        "If so, try logging in using the username "
-                        "and password that you provided."
+                        "If so, try logging in using either the username "
+                        "and password that you provided or ORCID."
                     ),
                 ),
                 "error",
@@ -352,7 +351,7 @@ class ActivateController:
             Markup(
                 _(
                     "Your account has been activated! "
-                    "You can now log in using the password you provided."
+                    "You can now log in using either the password you provided or ORCID."
                 ),
             ),
             "success",
@@ -406,6 +405,7 @@ class AccountController:
         self.request = request
 
         email_schema = schemas.EmailChangeSchema().bind(request=request)
+        add_password_schema = schemas.AddPasswordSchema().bind(request=request)
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         # Ensure deform generates unique field IDs for each field in this
@@ -419,6 +419,12 @@ class AccountController:
                 formid="email",
                 counter=counter,
                 use_inline_editing=True,
+            ),
+            "add_password": request.create_form(
+                add_password_schema,
+                buttons=(_("Add password"),),
+                formid="add-password",
+                counter=counter,
             ),
             "password": request.create_form(
                 password_schema,
@@ -454,6 +460,13 @@ class AccountController:
             on_failure=self._template_data,
         )
 
+    @view_config(request_method="POST", request_param="__formid__=add-password")
+    def post_add_password_form(self):
+        _send_forgot_password_email(self.request, self.request.user)
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url("account_reset")
+        )
+
     def update_email_address(self, appstruct):
         self.request.user.email = appstruct["email"]
 
@@ -466,11 +479,26 @@ class AccountController:
         email = self.request.user.email or ""
         password_form = self.forms["password"].render()
         email_form = self.forms["email"].render({"email": email})
+        add_password_form = self.forms["add_password"].render({"email": email})
+        orcid_client = self.request.find_service(ORCIDClientService)
+        orcid_identity = orcid_client.get_identity(self.request.user)
+        orcid = orcid_identity.provider_unique_id if orcid_identity else None
+        orcid_url = orcid_client.orcid_url(orcid)
 
+        no_password = not self.request.user.password
+        if no_password:
+            return {
+                "email": email,
+                "add_password_form": add_password_form,
+                "orcid": orcid,
+                "orcid_url": orcid_url,
+            }
         return {
             "email": email,
             "email_form": email_form,
             "password_form": password_form,
+            "orcid": orcid,
+            "orcid_url": orcid_url,
         }
 
 
@@ -497,7 +525,6 @@ class EditProfileController:
                 "description": user.description or "",
                 "location": user.location or "",
                 "link": user.uri or "",
-                "orcid": user.orcid or "",
             }
         )
         return self._template_data()
@@ -520,7 +547,6 @@ class EditProfileController:
         user.description = appstruct["description"]
         user.location = appstruct["location"]
         user.uri = appstruct["link"]
-        user.orcid = appstruct["orcid"]
 
 
 @view_defaults(

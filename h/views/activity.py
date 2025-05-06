@@ -14,6 +14,7 @@ from h.paginator import paginate
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.search import parser
 from h.security import Permission
+from h.services import ORCIDClientService
 from h.util.datetime import utc_us_style_date
 from h.util.user import split_user
 from h.views.groups import check_slug
@@ -339,6 +340,10 @@ class UserSearchController(SearchController):
         annotation_count = self._get_total_user_annotations(result, self.request)
         result["stats"] = {"annotation_count": annotation_count}
 
+        orcid_client = self.request.find_service(ORCIDClientService)
+        orcid = orcid_client.get_identity(self.user).provider_unique_id
+        orcid_url = orcid_client.orcid_url(orcid)
+
         result["user"] = {
             "name": self.user.display_name or self.user.username,
             "description": self.user.description,
@@ -346,7 +351,8 @@ class UserSearchController(SearchController):
             "location": self.user.location,
             "uri": self.user.uri,
             "domain": domain(self.user),
-            "orcid": self.user.orcid,
+            "orcid": orcid,
+            "orcid_url": orcid_url,
         }
 
         if self.request.user == self.user:
