@@ -1947,29 +1947,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-build@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "@hypothesis/frontend-build@npm:3.2.1"
+"@hypothesis/frontend-build@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@hypothesis/frontend-build@npm:4.0.0"
   dependencies:
     commander: ^13.0.0
     fancy-log: ^2.0.0
     glob: ^11.0.0
   peerDependencies:
     autoprefixer: ^10.3.7
-    karma: ^6.3.4
     postcss: ^8.3.9
     rollup: ^4.0.2
     sass: ^1.43.2
     tailwindcss: ^3.0.11
     vitest: ^3.1.1
   peerDependenciesMeta:
-    karma:
+    autoprefixer:
+      optional: true
+    postcss:
+      optional: true
+    sass:
       optional: true
     tailwindcss:
       optional: true
-    vitest:
-      optional: true
-  checksum: b5740a314aafe2afbacbf75ed44f0a7f880bf7d55490032bf6e9f09d010f871cc5eb1252be0c99f3be0a4c8c35d6f0e49839859c8677bdd4d43c383aac0b5f2a
+  checksum: eeebc9a32a56e8352c526d5e9293523c1ce6ac47eae723f88e7e09c9c0da506d8c3377d4f867b8f7b8d1c99a6d31251fb2479d76e5a283b29ce11dbc7681e467
   languageName: node
   linkType: hard
 
@@ -5509,12 +5510,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-hypothesis@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "eslint-config-hypothesis@npm:3.1.0"
+"eslint-config-hypothesis@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "eslint-config-hypothesis@npm:3.3.1"
   peerDependencies:
+    "@vitest/eslint-plugin": ">=1.1.43"
     eslint-plugin-jsx-a11y: ">=6.10.0"
-    eslint-plugin-mocha: ">=10.4.0"
     eslint-plugin-react: ">=7.34.0"
     eslint-plugin-react-hooks: ">=5.0.0"
     globals: ">=15.11.0"
@@ -5528,7 +5529,7 @@ __metadata:
       optional: true
     typescript-eslint:
       optional: true
-  checksum: 12e17da643a306fec1c8121bf5f172f2132f816d85b2b6f626dc16d353f5cbac8bee0cce080a9df829c5eab3e4bcc007bb611ec6f5d9deebd627e530802c05f6
+  checksum: b67c85bb9f36f941ed47400208b799a8821e908b762c6096e81b88da10827c11bd95b5fb0dc9385e4723ef97181f8eeb33591b1928a40f272ff7b33efcb4d0ee
   languageName: node
   linkType: hard
 
@@ -5554,19 +5555,6 @@ __metadata:
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9
   checksum: 0cc861398fa26ada61ed5703eef5b335495fcb96253263dcd5e399488ff019a2636372021baacc040e3560d1a34bfcd5d5ad9f1754f44cd0509c956f7df94050
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-mocha@npm:^10.5.0":
-  version: 10.5.0
-  resolution: "eslint-plugin-mocha@npm:10.5.0"
-  dependencies:
-    eslint-utils: ^3.0.0
-    globals: ^13.24.0
-    rambda: ^7.4.0
-  peerDependencies:
-    eslint: ">=7.0.0"
-  checksum: 07fc975c7768b19de4d2883307177f10e94b6318a4971dbc3c52edcea01977a59a54b85fe564974e43b29b12b821b06afd48d95b631e84d203c44676778aa019
   languageName: node
   linkType: hard
 
@@ -5614,24 +5602,6 @@ __metadata:
     esrecurse: ^4.3.0
     estraverse: ^5.2.0
   checksum: 57a58b6716533e25d527089826c4add89a047aecf75e4a88fee05f113ef5a72b85392b304a69bf670646cc3e068354aec70361b9718c2453949a05fc4d9bfe73
-  languageName: node
-  linkType: hard
-
-"eslint-utils@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "eslint-utils@npm:3.0.0"
-  dependencies:
-    eslint-visitor-keys: ^2.0.0
-  peerDependencies:
-    eslint: ">=5"
-  checksum: 0668fe02f5adab2e5a367eee5089f4c39033af20499df88fe4e6aba2015c20720404d8c3d6349b6f716b08fdf91b9da4e5d5481f265049278099c4c836ccb619
-  languageName: node
-  linkType: hard
-
-"eslint-visitor-keys@npm:^2.0.0":
-  version: 2.1.0
-  resolution: "eslint-visitor-keys@npm:2.1.0"
-  checksum: e3081d7dd2611a35f0388bbdc2f5da60b3a3c5b8b6e928daffff7391146b434d691577aa95064c8b7faad0b8a680266bcda0a42439c18c717b80e6718d7e267d
   languageName: node
   linkType: hard
 
@@ -6538,15 +6508,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:^13.24.0":
-  version: 13.24.0
-  resolution: "globals@npm:13.24.0"
-  dependencies:
-    type-fest: ^0.20.2
-  checksum: 56066ef058f6867c04ff203b8a44c15b038346a62efbc3060052a1016be9f56f4cf0b2cd45b74b22b81e521a889fc7786c73691b0549c2f3a6e825b3d394f43c
-  languageName: node
-  linkType: hard
-
 "globals@npm:^14.0.0":
   version: 14.0.0
   resolution: "globals@npm:14.0.0"
@@ -6737,7 +6698,7 @@ __metadata:
     "@babel/preset-env": ^7.27.1
     "@babel/preset-react": ^7.26.3
     "@babel/preset-typescript": ^7.27.0
-    "@hypothesis/frontend-build": ^3.2.1
+    "@hypothesis/frontend-build": ^4.0.0
     "@hypothesis/frontend-shared": ^9.1.0
     "@hypothesis/frontend-testing": ^1.6.0
     "@rollup/plugin-babel": ^6.0.4
@@ -6759,9 +6720,8 @@ __metadata:
     enzyme-adapter-preact-pure: ^4.1.0
     escape-html: ^1.0.3
     eslint: ^9.25.1
-    eslint-config-hypothesis: ^3.1.0
+    eslint-config-hypothesis: ^3.3.1
     eslint-plugin-jsx-a11y: ^6.10.2
-    eslint-plugin-mocha: ^10.5.0
     eslint-plugin-react: ^7.37.5
     eslint-plugin-react-hooks: ^5.1.0
     globals: ^15.14.0
@@ -9361,13 +9321,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rambda@npm:^7.4.0":
-  version: 7.5.0
-  resolution: "rambda@npm:7.5.0"
-  checksum: ad608a9a4160d0b6b0921047cea1329276bf239ff58d439135288712dcdbbf0df47c76591843ad249d89e7c5a9109ce86fe099aa54aef0dc0aa92a9b4dd1b8eb
-  languageName: node
-  linkType: hard
-
 "randexp@npm:0.4.6":
   version: 0.4.6
   resolution: "randexp@npm:0.4.6"
@@ -11007,13 +10960,6 @@ __metadata:
   version: 4.1.0
   resolution: "type-detect@npm:4.1.0"
   checksum: 3b32f873cd02bc7001b00a61502b7ddc4b49278aabe68d652f732e1b5d768c072de0bc734b427abf59d0520a5f19a2e07309ab921ef02018fa1cb4af155cdb37
-  languageName: node
-  linkType: hard
-
-"type-fest@npm:^0.20.2":
-  version: 0.20.2
-  resolution: "type-fest@npm:0.20.2"
-  checksum: 4fb3272df21ad1c552486f8a2f8e115c09a521ad7a8db3d56d53718d0c907b62c6e9141ba5f584af3f6830d0872c521357e512381f24f7c44acae583ad517d73
   languageName: node
   linkType: hard
 
