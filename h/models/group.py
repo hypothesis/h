@@ -44,6 +44,15 @@ class GroupMembershipRoles(enum.StrEnum):
     OWNER = "owner"
 
 
+GROUP_MEMBERSHIP_ROLES_CHECK_CONSTRAINT = sa.CheckConstraint(
+    " OR ".join(
+        f"""(roles = '["{role}"]'::jsonb)"""
+        for role in ["member", "moderator", "admin", "owner"]
+    ),
+    name="validate_role_strings",
+)
+
+
 class GroupMembership(Base):
     __tablename__ = "user_group"
 
@@ -65,13 +74,7 @@ class GroupMembership(Base):
 
     roles = sa.Column(
         JSONB,
-        sa.CheckConstraint(
-            " OR ".join(
-                f"""(roles = '["{role}"]'::jsonb)"""
-                for role in ["member", "moderator", "admin", "owner"]
-            ),
-            name="validate_role_strings",
-        ),
+        GROUP_MEMBERSHIP_ROLES_CHECK_CONSTRAINT,
         server_default=sa.text("""'["member"]'::jsonb"""),
         nullable=False,
     )

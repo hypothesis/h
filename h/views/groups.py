@@ -39,6 +39,11 @@ class GroupCreateEditController:
         request_method="GET",
         permission=Permission.Group.EDIT,
     )
+    @view_config(
+        route_name="group_edit_invites",
+        request_method="GET",
+        permission=Permission.Group.EDIT,
+    )
     def edit(self):
         """Render the page for editing an existing group."""
         return {

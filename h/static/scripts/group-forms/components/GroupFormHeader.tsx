@@ -51,6 +51,9 @@ export default function GroupFormHeader({
   const editMembersLinks = group
     ? routes.groups.editMembers.replace(':pubid', group.pubid)
     : null;
+  const editInvitesLinks = group
+    ? routes.groups.editInvites.replace(':pubid', group.pubid)
+    : null;
 
   return (
     <div className="mb-4 pb-1 border-b border-b-text-grey-6">
@@ -79,6 +82,11 @@ export default function GroupFormHeader({
         {enableMembers && editMembersLinks && (
           <TabLink testId="members-link" href={editMembersLinks}>
             Members
+          </TabLink>
+        )}
+        {editInvitesLinks && (
+          <TabLink testId="invites-link" href={editInvitesLinks}>
+            Invites
           </TabLink>
         )}
       </div>
