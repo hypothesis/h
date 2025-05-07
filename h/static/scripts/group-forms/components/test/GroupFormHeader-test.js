@@ -1,7 +1,7 @@
 import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 
-import GroupFormHeader from '../GroupFormHeader';
 import { Config } from '../../config';
+import GroupFormHeader from '../GroupFormHeader';
 
 describe('GroupFormHeader', () => {
   let config;

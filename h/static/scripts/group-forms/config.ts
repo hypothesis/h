@@ -1,4 +1,5 @@
 import { createContext } from 'preact';
+
 import type { GroupType } from './utils/api';
 
 export type APIConfig = {

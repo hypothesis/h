@@ -1,5 +1,4 @@
 import { CharacterLimitController } from '../../controllers/character-limit-controller';
-
 import * as util from './util';
 
 describe('CharacterLimitController', () => {

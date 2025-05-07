@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@hypothesis/frontend-testing": "^1.6.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@vitest/browser": "^3.1.2",
     "@vitest/coverage-istanbul": "^3.1.2",
     "@vitest/eslint-plugin": "^1.1.43",
@@ -84,7 +85,14 @@
   "browserslist": "chrome 92, firefox 90, safari 14.1",
   "prettier": {
     "arrowParens": "avoid",
-    "singleQuote": true
+    "singleQuote": true,
+    "importOrder": [
+      "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "plugins": [
+      "@trivago/prettier-plugin-sort-imports"
+    ]
   },
   "packageManager": "yarn@3.6.1"
 }

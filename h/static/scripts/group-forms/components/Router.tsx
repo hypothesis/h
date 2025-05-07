@@ -1,10 +1,10 @@
-import { Router as BaseRouter } from 'wouter-preact';
-import { useBrowserLocation } from 'wouter-preact/use-browser-location';
 import type { ComponentChildren } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
+import { Router as BaseRouter } from 'wouter-preact';
+import { useBrowserLocation } from 'wouter-preact/use-browser-location';
 
-import WarningDialog from './WarningDialog';
 import { hasUnsavedChanges } from '../utils/unsaved-changes';
+import WarningDialog from './WarningDialog';
 
 export type RouterProps = {
   children: ComponentChildren;

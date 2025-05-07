@@ -4,7 +4,6 @@
  * Logging requires the Sentry DSN and Hypothesis version to be provided via the
  * app's settings object.
  */
-
 import * as Sentry from '@sentry/browser';
 
 export type SentryConfig = {

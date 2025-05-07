@@ -1,5 +1,4 @@
 import { DropdownMenuController } from '../../controllers/dropdown-menu-controller';
-
 import * as util from './util';
 
 const TEMPLATE = [

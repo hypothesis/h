@@ -1,17 +1,16 @@
-import { act } from 'preact/test-utils';
 import {
   checkAccessibility,
   delay,
   mount,
   waitForElement,
 } from '@hypothesis/frontend-testing';
+import { act } from 'preact/test-utils';
 
+import { Config } from '../../config';
 import {
   $imports,
   default as CreateEditGroupForm,
 } from '../CreateEditGroupForm';
-
-import { Config } from '../../config';
 
 describe('CreateEditGroupForm', () => {
   let config;

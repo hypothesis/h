@@ -13,10 +13,10 @@ import type { APIConfig, Group } from '../config';
 import type { GroupMember, GroupMembersResponse, Role } from '../utils/api';
 import { callAPI } from '../utils/api';
 import type { APIError } from '../utils/api';
-import FormContainer from './forms/FormContainer';
 import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
 import WarningDialog from './WarningDialog';
+import FormContainer from './forms/FormContainer';
 
 type TableColumn<Row> = {
   field: keyof Row;

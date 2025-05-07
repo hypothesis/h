@@ -1,5 +1,4 @@
 import { CopyButtonController } from '../../controllers/copy-button-controller';
-
 import { setupComponent } from './util';
 
 describe('CopyButtonController', () => {

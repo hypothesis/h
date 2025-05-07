@@ -1,5 +1,4 @@
 import { ListInputController } from '../../controllers/list-input-controller';
-
 import { setupComponent } from './util';
 
 describe('ListInputController', () => {

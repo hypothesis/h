@@ -1,3 +1,4 @@
+import { Select } from '@hypothesis/frontend-shared';
 import {
   checkAccessibility,
   delay,
@@ -5,11 +6,10 @@ import {
   waitFor,
   waitForElement,
 } from '@hypothesis/frontend-testing';
-import { Select } from '@hypothesis/frontend-shared';
 import { act } from 'preact/test-utils';
 
-import { APIError } from '../../utils/api';
 import { Config } from '../../config';
+import { APIError } from '../../utils/api';
 import {
   $imports,
   default as EditGroupMembersForm,

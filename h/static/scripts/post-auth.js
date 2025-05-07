@@ -5,7 +5,6 @@
  * It communicates the auth code back to the web app which initiated
  * authorization.
  */
-
 import { settings } from './base/settings';
 
 const appSettings = settings(document);

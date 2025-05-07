@@ -1,8 +1,8 @@
 import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 import { useContext } from 'preact/hooks';
 
-import { $imports, default as AppRoot } from '../AppRoot';
 import { Config } from '../../config';
+import { $imports, default as AppRoot } from '../AppRoot';
 
 describe('AppRoot', () => {
   let configContext;

@@ -1,5 +1,4 @@
 import { ConfirmSubmitController } from '../../controllers/confirm-submit-controller';
-
 import * as util from './util';
 
 describe('ConfirmSubmitController', () => {

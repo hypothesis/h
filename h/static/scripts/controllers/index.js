@@ -8,14 +8,13 @@
  * classes for "common" controls that are useful on both the admin and
  * user-facing sites.
  */
-
 import { CharacterLimitController } from './character-limit-controller';
-import { CopyButtonController } from './copy-button-controller';
 import { ConfirmSubmitController } from './confirm-submit-controller';
+import { CopyButtonController } from './copy-button-controller';
 import { DisableOnSubmitController } from './disable-on-submit-controller';
 import { DropdownMenuController } from './dropdown-menu-controller';
-import { FormController } from './form-controller';
 import { FormCancelController } from './form-cancel-controller';
+import { FormController } from './form-controller';
 import { FormInputController } from './form-input-controller';
 import { FormSelectOnFocusController } from './form-select-onfocus-controller';
 import { InputAutofocusController } from './input-autofocus-controller';

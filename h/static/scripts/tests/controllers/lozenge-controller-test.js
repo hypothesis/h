@@ -1,5 +1,4 @@
 import { LozengeController } from '../../controllers/lozenge-controller';
-
 import lozengeTemplate from './lozenge-template';
 import { setupComponent } from './util';
 
