@@ -216,6 +216,12 @@ def test_includeme():
             traverse="/{pubid}",
         ),
         call(
+            "group_moderation",
+            "/groups/{pubid}/moderate",
+            factory="h.traversal.GroupRequiredRoot",
+            traverse="/{pubid}",
+        ),
+        call(
             "group_read",
             "/groups/{pubid}/{slug:[^/]*}",
             factory="h.traversal.GroupRequiredRoot",

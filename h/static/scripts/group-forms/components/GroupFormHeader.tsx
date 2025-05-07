@@ -42,6 +42,7 @@ export default function GroupFormHeader({
 }: GroupFormHeaderProps) {
   const config = useContext(Config);
   const enableMembers = config?.features.group_members;
+  const enableModeration = config?.features.group_moderation;
 
   // This should be replaced with a proper URL generation function that handles
   // escaping etc.
@@ -50,6 +51,9 @@ export default function GroupFormHeader({
     : null;
   const editMembersLinks = group
     ? routes.groups.editMembers.replace(':pubid', group.pubid)
+    : null;
+  const moderationLinks = group
+    ? routes.groups.moderation.replace(':pubid', group.pubid)
     : null;
 
   return (
@@ -79,6 +83,11 @@ export default function GroupFormHeader({
         {enableMembers && editMembersLinks && (
           <TabLink testId="members-link" href={editMembersLinks}>
             Members
+          </TabLink>
+        )}
+        {enableModeration && moderationLinks && (
+          <TabLink testId="moderation-link" href={moderationLinks}>
+            Moderation
           </TabLink>
         )}
       </div>

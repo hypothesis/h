@@ -7,6 +7,7 @@ import Router from './Router';
 import type { ConfigObject } from '../config';
 import { Config } from '../config';
 import { routes } from '../routes';
+import GroupModeration from './GroupModeration';
 
 export type AppRootProps = {
   config: ConfigObject;
@@ -43,6 +44,9 @@ export default function AppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.groups.editMembers}>
               <EditGroupMembersForm group={group!} />
+            </Route>
+            <Route path={routes.groups.moderation}>
+              <GroupModeration group={group!} />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>
