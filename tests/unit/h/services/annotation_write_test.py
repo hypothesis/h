@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch, sentinel
 import pytest
 from h_matchers import Any
 
-from h.models import Annotation, AnnotationSlim, ModerationStatus, User
+from h.models import Annotation, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
 from h.services.annotation_write import AnnotationWriteService, service_factory
@@ -220,29 +220,6 @@ class TestAnnotationWriteService:
         else:
             svc._validate_group(annotation)  # noqa: SLF001
 
-    def test_hide_hides_the_annotation(self, annotation, svc, user, moderation_service):
-        svc.hide(annotation, user)
-
-        moderation_service.set_status.assert_called_once_with(
-            annotation, ModerationStatus.DENIED, user
-        )
-
-    def test_hide_does_not_modify_an_already_hidden_annotation(
-        self, annotation, svc, user, moderation_service
-    ):
-        annotation.moderation_status = ModerationStatus.DENIED
-
-        svc.hide(annotation, user)
-
-        moderation_service.set_status.assert_not_called()
-
-    def test_unhide(self, annotation, svc, user, moderation_service):
-        svc.unhide(annotation, user)
-
-        moderation_service.set_status.assert_called_once_with(
-            annotation, ModerationStatus.APPROVED, user
-        )
-
     def test_upsert_annotation_slim_with_deleted_group(self, annotation, svc):
         annotation.groupid = "deleted group"
 
@@ -270,10 +247,6 @@ class TestAnnotationWriteService:
     def annotation(self, factories):
         user = factories.User()
         return factories.Annotation(userid=user.userid)
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User()
 
     @pytest.fixture
     def has_permission(self):

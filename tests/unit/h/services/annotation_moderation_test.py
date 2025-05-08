@@ -37,8 +37,11 @@ class TestAnnotationModerationService:
         assert annotation.moderation_status is ModerationStatus.APPROVED
         assert annotation.moderation_log == []
 
-    def test_set_status(self, svc, annotation, user):
+    @pytest.mark.parametrize("with_slim", [False, True])
+    def test_set_status(self, svc, annotation, user, factories, with_slim):
         annotation.moderation_status = ModerationStatus.APPROVED
+        if with_slim:
+            annotation.slim = factories.AnnotationSlim()
 
         svc.set_status(annotation, ModerationStatus.DENIED, user)
 
@@ -53,6 +56,8 @@ class TestAnnotationModerationService:
             annotation.moderation_log[0].new_moderation_status
             == ModerationStatus.DENIED
         )
+        if with_slim:
+            assert annotation.slim.moderated == annotation.is_hidden
 
     @pytest.mark.parametrize("moderation_status", [None, ModerationStatus.APPROVED])
     @pytest.mark.parametrize("shared", [False, True])

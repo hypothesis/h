@@ -38,6 +38,10 @@ class AnnotationModerationService:
                 )
             )
             annotation.moderation_status = status
+            if annotation.slim:
+                # We only have to worry about AnnotationSlim if we already have one
+                # if we don't the process to create it will set the right value here
+                annotation.slim.moderated = annotation.is_hidden
 
     def update_status(self, action: AnnotationAction, annotation: Annotation) -> None:
         """Change the moderation status of an annotation based on the action taken."""
