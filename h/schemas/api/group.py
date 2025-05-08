@@ -28,7 +28,7 @@ GROUP_SCHEMA_PROPERTIES = {
 class FilterGroupAnnotationsSchema(colander.Schema):
     """Schema for validating filter-group-annotations API data."""
 
-    moderation_status = ModerationStatusNode(missing=None)
+    moderation_status = ModerationStatusNode(missing=None, default=None)
 
 
 class GroupAPISchema(JSONSchema):

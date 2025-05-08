@@ -1,7 +1,6 @@
 import pytest
 from webob.multidict import MultiDict
 
-from h.models.annotation import ModerationStatus
 from h.models.group import (
     AUTHORITY_PROVIDED_ID_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH,
@@ -203,7 +202,7 @@ class TestFilterGroupAnnotationsSchema:
 
         validated_data = validate_query_params(schema, data)
 
-        assert validated_data == {"moderation_status": ModerationStatus.PENDING}
+        assert validated_data == {"moderation_status": "PENDING"}
 
     def test_it_when_empty(self, schema):
         data = MultiDict({})

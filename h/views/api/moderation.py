@@ -52,7 +52,7 @@ def change_annotation_moderation_status(context, request):
     params = validate_json(
         ChangeAnnotationModerationStatusSchema(context.annotation), request
     )
-    status = params["moderation_status"]
+    status = ModerationStatus(params["moderation_status"])
     request.find_service(name="annotation_moderation").set_status(
         context.annotation, status, request.user
     )

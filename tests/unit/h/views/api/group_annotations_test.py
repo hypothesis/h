@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import func, select
 
 from h.models import Annotation
+from h.schemas.base import ValidationError
 from h.traversal import (
     GroupContext,
 )
@@ -39,6 +40,12 @@ class TestGroupAnnotations:
                 annotation_json_service.present_for_user.return_value,
             ],
         }
+
+    def test_it_with_wrong_filter(self, context, pyramid_request):
+        pyramid_request.params["moderation_status"] = "wrong"
+
+        with pytest.raises(ValidationError):
+            list_annotations(context, pyramid_request)
 
     @pytest.fixture
     def context(self, factories):
