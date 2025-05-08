@@ -7,6 +7,7 @@ from h.services import (
     MentionService,
     NotificationService,
     OpenIDClientService,
+    ORCIDClientService,
 )
 from h.services.analytics import AnalyticsService
 from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
@@ -89,6 +90,7 @@ __all__ = (
     "notification_service",
     "oauth_provider_service",
     "openid_client_service",
+    "orcid_client_service",
     "organization_service",
     "queue_service",
     "search_index",
@@ -364,3 +366,8 @@ def http_service(mock_service):
 @pytest.fixture
 def openid_client_service(mock_service):
     return mock_service(OpenIDClientService)
+
+
+@pytest.fixture
+def orcid_client_service(mock_service):
+    return mock_service(ORCIDClientService)
