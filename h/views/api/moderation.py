@@ -6,6 +6,7 @@ from h.schemas.api.moderation import ChangeAnnotationModerationStatusSchema
 from h.schemas.util import validate_json
 from h.security import Permission
 from h.services import AnnotationWriteService
+from h.tasks.moderation import send_moderation_email
 from h.views.api.config import api_config
 
 
@@ -19,8 +20,9 @@ from h.views.api.config import api_config
 )
 def hide(context, request):
     moderation_log = request.find_service(name="annotation_moderation").set_status(
-        context.annotation, request.user, ModerationStatus.APPROVED
+        context.annotation, ModerationStatus.DENIED, request.user
     )
+    print("moderation_log", moderation_log)
     if moderation_log:
         _notify_moderation_change(request, moderation_log)
 
@@ -36,12 +38,10 @@ def hide(context, request):
     permission=Permission.Annotation.MODERATE,
 )
 def unhide(context, request):
-    request.find_service(AnnotationWriteService).unhide(
-        context.annotation, request.user
-    )
     moderation_log = request.find_service(name="annotation_moderation").set_status(
-        context.annotation, request.user, ModerationStatus.DENIED
+        context.annotation, ModerationStatus.APPROVED, request.user
     )
+    print("moderation_log", moderation_log)
     if moderation_log:
         _notify_moderation_change(request, moderation_log)
 
@@ -75,3 +75,11 @@ def _notify_moderation_change(request, moderation_log):
 
     event = events.AnnotationEvent(request, annotation_id, "update")
     request.notify_after_commit(event)
+    request.db.flush()
+    send_moderation_email.apply_async(
+        kwargs={
+            "annotation_id": moderation_log.annotation_id,
+            "moderation_datetime_iso": moderation_log.created.isoformat(),
+        },
+        # countdown=60 * 3,
+    )

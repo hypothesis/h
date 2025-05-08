@@ -19,8 +19,8 @@ if TYPE_CHECKING:
 class ModerationLog(Base, AutoincrementingIntegerID, CreatedMixin, MappedAsDataclass):
     __tablename__ = "moderation_log"
 
-    moderator: Mapped[Optional["User"]] = relationship("User")
     annotation: Mapped["Annotation"] = relationship("Annotation")
+    moderator: Mapped[Optional["User"]] = relationship("User")
 
     old_moderation_status: Mapped[ModerationStatus | None] = mapped_column()
     new_moderation_status: Mapped[ModerationStatus] = mapped_column()
@@ -30,4 +30,11 @@ class ModerationLog(Base, AutoincrementingIntegerID, CreatedMixin, MappedAsDatac
     )
     annotation_id: Mapped[types.URLSafeUUID] = mapped_column(
         ForeignKey("annotation.id", ondelete="CASCADE"), index=True, default=None
+    )
+
+    notification: Mapped[Optional["Annotation"]] = relationship(
+        "Notification", default=None
+    )
+    notification_id: Mapped[int | None] = mapped_column(
+        ForeignKey("notification.id", ondelete="CASCADE"), default=None
     )

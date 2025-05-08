@@ -1,12 +1,11 @@
 from h.events import AnnotationAction
 from h.models import Annotation, ModerationLog, ModerationStatus, User
-from h.services.annotation_write import AnnotationWriteService
 
 
 class AnnotationModerationService:
-    def __init__(self, session, annotation_write: AnnotationWriteService):
+    def __init__(self, session):  # , annotation_write: AnnotationWriteService):
         self._session = session
-        self._annotation_write = annotation_write
+        # self._annotation_write = annotation_write
 
     def all_hidden(self, annotation_ids: str) -> set[str]:
         """
@@ -37,17 +36,12 @@ class AnnotationModerationService:
                 new_moderation_status=status,
                 moderator=user,
             )
-            self._session.add(
-                ModerationLog(
-                    annotation=annotation,
-                    old_moderation_status=annotation.moderation_status,
-                    new_moderation_status=status,
-                    moderator=user,
-                )
-            )
             annotation.moderation_status = status
-            self.annotation_write.upsert_annotation_slim(annotation)
-            return
+            self._session.add(moderation_log)
+            # self.annotation_write.upsert_annotation_slim(annotation)
+            return moderation_log
+
+        return None
 
     def update_status(self, action: AnnotationAction, annotation: Annotation) -> None:
         """Change the moderation status of an annotation based on the action taken."""
@@ -87,5 +81,5 @@ class AnnotationModerationService:
 
 def annotation_moderation_service_factory(_context, request):
     return AnnotationModerationService(
-        request.db, request.find_service(name="annotation_write")
+        request.db  # , request.find_service(AnnotationWriteService)
     )

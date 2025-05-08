@@ -46,13 +46,14 @@ class NotificationService:
         annotation: Annotation,
         recipient: User,
         notification_type: NotificationType,
-    ) -> None:
+    ) -> Notification:
         notification = Notification(
             source_annotation=annotation,
             recipient=recipient,
             notification_type=notification_type,
         )
         self._session.add(notification)
+        return notification
 
 
 def factory(_context, request) -> NotificationService:
