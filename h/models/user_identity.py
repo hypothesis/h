@@ -1,6 +1,12 @@
+from enum import StrEnum
+
 import sqlalchemy as sa
 
 from h.db import Base
+
+
+class ProviderHost(StrEnum):
+    ORCID = "orcid.org"
 
 
 class UserIdentity(Base):

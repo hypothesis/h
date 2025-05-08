@@ -2,7 +2,12 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from h.services import MentionService, NotificationService
+from h.services import (
+    HTTPService,
+    MentionService,
+    NotificationService,
+    OpenIDClientService,
+)
 from h.services.analytics import AnalyticsService
 from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_delete import AnnotationDeleteService
@@ -74,6 +79,7 @@ __all__ = (
     "group_members_service",
     "group_service",
     "group_update_service",
+    "http_service",
     "links_service",
     "list_organizations_service",
     "mention_service",
@@ -82,6 +88,7 @@ __all__ = (
     "nipsa_service",
     "notification_service",
     "oauth_provider_service",
+    "openid_client_service",
     "organization_service",
     "queue_service",
     "search_index",
@@ -347,3 +354,13 @@ def email_service(mock_service):
 @pytest.fixture
 def task_done_service(mock_service):
     return mock_service(TaskDoneService)
+
+
+@pytest.fixture
+def http_service(mock_service):
+    return mock_service(HTTPService)
+
+
+@pytest.fixture
+def openid_client_service(mock_service):
+    return mock_service(OpenIDClientService)
