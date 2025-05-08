@@ -32,7 +32,6 @@ class AnnotationWriteService:
         annotation_read_service: AnnotationReadService,
         annotation_metadata_service: AnnotationMetadataService,
         mention_service: MentionService,
-        moderation_service: AnnotationModerationService,
     ):
         self._db = db_session
         self._has_permission = has_permission
@@ -40,7 +39,6 @@ class AnnotationWriteService:
         self._annotation_read_service = annotation_read_service
         self._annotation_metadata_service = annotation_metadata_service
         self._mention_service = mention_service
-        self._moderation_service = moderation_service
 
     def create_annotation(self, data: dict) -> Annotation:
         """
@@ -273,5 +271,4 @@ def service_factory(_context, request) -> AnnotationWriteService:
         annotation_read_service=request.find_service(AnnotationReadService),
         annotation_metadata_service=request.find_service(AnnotationMetadataService),
         mention_service=request.find_service(MentionService),
-        moderation_service=request.find_service(name="annotation_moderation"),
     )

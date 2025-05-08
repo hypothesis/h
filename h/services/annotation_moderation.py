@@ -1,10 +1,12 @@
 from h.events import AnnotationAction
 from h.models import Annotation, ModerationLog, ModerationStatus, User
+from h.services.annotation_write import AnnotationWriteService
 
 
 class AnnotationModerationService:
-    def __init__(self, session):
+    def __init__(self, session, annotation_write: AnnotationWriteService):
         self._session = session
+        self._annotation_write = annotation_write
 
     def all_hidden(self, annotation_ids: str) -> set[str]:
         """

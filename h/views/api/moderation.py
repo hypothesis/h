@@ -75,9 +75,3 @@ def _notify_moderation_change(request, moderation_log):
 
     event = events.AnnotationEvent(request, annotation_id, "update")
     request.notify_after_commit(event)
-    tasks.moderation.send_moderation_email.apply_async(
-        kwargs={
-            "annotation_id": moderation_log.annotation_id,
-            "moderation_datetime": moderation_log.created,
-        }
-    )
