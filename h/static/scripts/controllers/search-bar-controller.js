@@ -4,7 +4,6 @@ import { Controller } from '../base/controller';
 import { cloneTemplate } from '../util/dom';
 import { getLozengeValues, shouldLozengify } from '../util/search-text-parser';
 import { stripMarks } from '../util/string';
-
 import { AutosuggestDropdownController } from './autosuggest-dropdown-controller';
 import { LozengeController } from './lozenge-controller';
 

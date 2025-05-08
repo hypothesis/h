@@ -1,7 +1,5 @@
 import { Controller } from '../base/controller';
-
 import { setElementState } from '../util/dom';
-
 import updateHelper from '../util/update-helpers.js';
 
 const ENTER = 13;

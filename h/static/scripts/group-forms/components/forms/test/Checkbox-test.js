@@ -1,4 +1,5 @@
 import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
+
 import Checkbox from '../Checkbox';
 
 describe('Checkbox', () => {

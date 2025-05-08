@@ -1,4 +1,5 @@
 import { mount } from '@hypothesis/frontend-testing';
+
 import GroupModeration from '../GroupModeration';
 
 describe('GroupModeration', () => {

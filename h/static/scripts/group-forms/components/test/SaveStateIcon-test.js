@@ -1,4 +1,5 @@
 import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
+
 import SaveStateIcon from '../SaveStateIcon';
 
 describe('SaveStateIcon', () => {

@@ -1,6 +1,6 @@
 import { mount } from '@hypothesis/frontend-testing';
-import { Link } from 'wouter-preact';
 import { act } from 'preact/test-utils';
+import { Link } from 'wouter-preact';
 
 import { $imports, default as Router } from '../Router';
 

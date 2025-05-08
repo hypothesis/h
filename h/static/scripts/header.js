@@ -2,7 +2,6 @@
 //
 // This should be a small script which does things like setting up flags to
 // indicate that scripting is active, send analytics events etc.
-
 import { EnvironmentFlags } from './base/environment-flags';
 
 window.envFlags = new EnvironmentFlags(document.documentElement);

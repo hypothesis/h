@@ -1,12 +1,12 @@
 import { Link } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import type { ComponentChildren } from 'preact';
+import { useContext } from 'preact/hooks';
 import { Link as RouterLink, useRoute } from 'wouter-preact';
 
 import type { Group } from '../config';
 import { Config } from '../config';
 import { routes } from '../routes';
-import { useContext } from 'preact/hooks';
 
 type TabLinkProps = {
   href: string;

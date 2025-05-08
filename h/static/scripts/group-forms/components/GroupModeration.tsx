@@ -1,5 +1,5 @@
-import GroupFormHeader from './GroupFormHeader';
 import type { Group } from '../config';
+import GroupFormHeader from './GroupFormHeader';
 import FormContainer from './forms/FormContainer';
 
 export type GroupModerationProps = {

@@ -1,5 +1,4 @@
 import { FormInputController } from '../../controllers/form-input-controller';
-
 import { setupComponent } from './util';
 
 describe('FormInputController', () => {

@@ -1,5 +1,4 @@
 import { SearchBucketController } from '../../controllers/search-bucket-controller';
-
 import * as util from './util';
 
 const TEMPLATE = `<div class="js-search-bucket">

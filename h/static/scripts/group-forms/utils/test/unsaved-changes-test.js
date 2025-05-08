@@ -1,4 +1,5 @@
 import { mount } from '@hypothesis/frontend-testing';
+
 import { useUnsavedChanges, hasUnsavedChanges } from '../unsaved-changes';
 
 function TestUseUnsavedChanges({ unsaved, fakeWindow }) {

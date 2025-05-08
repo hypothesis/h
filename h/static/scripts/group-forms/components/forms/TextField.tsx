@@ -1,5 +1,5 @@
-import { useId, useState } from 'preact/hooks';
 import { Input, Textarea } from '@hypothesis/frontend-shared';
+import { useId, useState } from 'preact/hooks';
 
 import Label from './Label';
 

@@ -1,5 +1,4 @@
 import { Controller } from '../base/controller';
-
 import { setElementState } from '../util/dom';
 
 /**

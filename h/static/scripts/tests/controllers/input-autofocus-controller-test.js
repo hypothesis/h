@@ -1,5 +1,4 @@
 import { InputAutofocusController } from '../../controllers/input-autofocus-controller';
-
 import { setupComponent } from './util';
 
 /**
