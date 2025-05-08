@@ -26,9 +26,15 @@ class AnnotationModerationService:
         annotation: Annotation,
         status: ModerationStatus | None,
         user: User | None = None,
-    ) -> None:
+    ) -> ModerationLog | None:
         """Set the moderation status for an annotation."""
         if status and status != annotation.moderation_status:
+            moderation_log = ModerationLog(
+                annotation=annotation,
+                old_moderation_status=annotation.moderation_status,
+                new_moderation_status=status,
+                moderator=user,
+            )
             self._session.add(
                 ModerationLog(
                     annotation=annotation,
@@ -38,6 +44,8 @@ class AnnotationModerationService:
                 )
             )
             annotation.moderation_status = status
+            self.annotation_write.upsert_annotation_slim(annotation)
+            return
 
     def update_status(self, action: AnnotationAction, annotation: Annotation) -> None:
         """Change the moderation status of an annotation based on the action taken."""
@@ -76,4 +84,6 @@ class AnnotationModerationService:
 
 
 def annotation_moderation_service_factory(_context, request):
-    return AnnotationModerationService(request.db)
+    return AnnotationModerationService(
+        request.db, request.find_service(name="annotation_write")
+    )
