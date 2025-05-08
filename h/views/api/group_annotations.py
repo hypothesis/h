@@ -15,7 +15,6 @@ from h.views.api.config import api_config
     link_name="group.annotations.read",
     description="Fetch a list of all annotations of a group",
     permission=Permission.Group.MODERATE,
-    request_param="page[number]",
 )
 def list_annotations(context: GroupContext, request):
     pagination = Pagination.from_params(request.params)
