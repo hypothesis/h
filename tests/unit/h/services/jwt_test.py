@@ -3,8 +3,7 @@ from unittest.mock import sentinel
 import pytest
 from jwt.exceptions import InvalidTokenError
 
-from h.schemas import ValidationError
-from h.services.jwt import JWK_CLIENT_TIMEOUT, JWTService
+from h.services.jwt import JWK_CLIENT_TIMEOUT, JWTService, TokenValidationError
 
 
 class TestJWTService:
@@ -30,19 +29,21 @@ class TestJWTService:
     def test_decode_token_with_no_kid(self, jwt):
         jwt.get_unverified_header.return_value = {"alg": "RS256"}
 
-        with pytest.raises(ValidationError, match="Missing 'kid' value in JWT header"):
+        with pytest.raises(
+            TokenValidationError, match="Missing 'kid' value in JWT header"
+        ):
             JWTService.decode_token(sentinel.token, sentinel.key_set_url)
 
     def test_decode_token_with_invalid_jwt_header(self, jwt):
         jwt.get_unverified_header.side_effect = InvalidTokenError()
 
-        with pytest.raises(ValidationError, match="Invalid JWT"):
+        with pytest.raises(TokenValidationError, match="Invalid JWT"):
             JWTService.decode_token(sentinel.token, sentinel.key_set_url)
 
     def test_decode_token_with_invalid_jwt(self, jwt):
         jwt.decode.side_effect = [{"aud": "AUD", "iss": "ISS"}, InvalidTokenError()]
 
-        with pytest.raises(ValidationError, match="Invalid JWT"):
+        with pytest.raises(TokenValidationError, match="Invalid JWT"):
             JWTService.decode_token(sentinel.token, sentinel.key_set_url)
 
     @pytest.fixture(autouse=True)

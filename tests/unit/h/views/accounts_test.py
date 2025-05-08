@@ -606,7 +606,9 @@ class TestActivateController:
         pyramid_config.add_route("logout", "/logout")
 
 
-@pytest.mark.usefixtures("routes", "user_password_service")
+@pytest.mark.usefixtures(
+    "routes", "user_password_service", "feature_service", "orcid_client_service"
+)
 class TestAccountController:
     def test_get_returns_email_if_set(self, pyramid_request):
         pyramid_request.user = mock.Mock()
@@ -625,6 +627,17 @@ class TestAccountController:
 
         result = views.AccountController(pyramid_request).get()
         assert not result["email"]
+
+    def test_get_returns_orcid_data(
+        self, pyramid_request, feature_service, orcid_client_service
+    ):
+        feature_service.enabled.return_value = True
+        orcid_identity = orcid_client_service.get_identity.return_value
+
+        result = views.AccountController(pyramid_request).get()
+
+        assert result["orcid"] == orcid_identity.provider_unique_id
+        assert result["orcid_url"] == orcid_client_service.orcid_url.return_value
 
     def test_post_email_form_with_valid_data_changes_email(
         self, form_validating_to, pyramid_request
@@ -659,6 +672,9 @@ class TestAccountController:
             "email": pyramid_request.user.email,
             "email_form": controller.forms["email"].render(),
             "password_form": controller.forms["password"].render(),
+            "log_in_with_orcid": False,
+            "orcid": None,
+            "orcid_url": None,
         }
 
     def test_post_password_form_with_valid_data_changes_password(
@@ -697,6 +713,9 @@ class TestAccountController:
             "email": pyramid_request.user.email,
             "email_form": controller.forms["email"].render(),
             "password_form": controller.forms["password"].render(),
+            "log_in_with_orcid": False,
+            "orcid": None,
+            "orcid_url": None,
         }
 
     @pytest.fixture
@@ -704,6 +723,11 @@ class TestAccountController:
         pyramid_request.POST = {}
         pyramid_request.user = factories.User()
         return pyramid_request
+
+    @pytest.fixture
+    def feature_service(self, feature_service):
+        feature_service.enabled.return_value = False
+        return feature_service
 
     @pytest.fixture
     def routes(self, pyramid_config):

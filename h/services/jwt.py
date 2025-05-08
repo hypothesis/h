@@ -6,9 +6,11 @@ import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import PyJWTError
 
-from h.schemas import ValidationError
-
 JWK_CLIENT_TIMEOUT = 10
+
+
+class TokenValidationError(Exception):
+    """Decoding or validating a JWT failed."""
 
 
 class JWTService:
@@ -21,11 +23,11 @@ class JWTService:
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
         except PyJWTError as err:
             msg = "Invalid JWT {err}"
-            raise ValidationError(msg) from err
+            raise TokenValidationError(msg) from err
 
         if not unverified_header.get("kid"):
             msg = "Missing 'kid' value in JWT header"
-            raise ValidationError(msg)
+            raise TokenValidationError(msg)
 
         alg = unverified_header["alg"]
         iss, aud = unverified_payload.get("iss"), unverified_payload.get("aud")
@@ -44,7 +46,7 @@ class JWTService:
             )
         except PyJWTError as err:
             msg = f"Invalid JWT for: {iss}, {aud}. {err}"
-            raise ValidationError(msg) from err
+            raise TokenValidationError(msg) from err
 
     @staticmethod
     @lru_cache(maxsize=256)

@@ -66,6 +66,7 @@ class TestExternalRequestError:
         assert err.reason is None
         assert err.response_body is None
         assert not err.is_timeout
+        assert not err.validation_errors
 
     @pytest.mark.parametrize(
         "message,request_,response,validation_errors,cause,expected",
