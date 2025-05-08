@@ -8,7 +8,7 @@ import {
   Select,
 } from '@hypothesis/frontend-shared';
 
-export type ModerationStatus = 'pending' | 'approved' | 'denied' | 'spam';
+export type ModerationStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'SPAM';
 
 export type ModerationStatusSelectProps = {
   selected?: ModerationStatus;
@@ -21,10 +21,10 @@ type Option = {
 };
 
 const options = new Map<ModerationStatus, Option>([
-  ['pending', { label: 'Pending', icon: DottedCircleIcon }],
-  ['approved', { label: 'Approved', icon: CheckAllIcon }],
-  ['denied', { label: 'Denied', icon: RestrictedIcon }],
-  ['spam', { label: 'Spam', icon: CautionIcon }],
+  ['PENDING', { label: 'Pending', icon: DottedCircleIcon }],
+  ['APPROVED', { label: 'Approved', icon: CheckAllIcon }],
+  ['DENIED', { label: 'Denied', icon: RestrictedIcon }],
+  ['SPAM', { label: 'Spam', icon: CautionIcon }],
 ]);
 
 export default function ModerationStatusSelect({

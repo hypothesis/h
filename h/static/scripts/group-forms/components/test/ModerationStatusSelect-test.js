@@ -22,10 +22,10 @@ describe('ModerationStatusSelect', () => {
 
   [
     { selected: undefined, expectedText: 'All' },
-    { selected: 'pending', expectedText: 'Pending' },
-    { selected: 'approved', expectedText: 'Approved' },
-    { selected: 'denied', expectedText: 'Denied' },
-    { selected: 'spam', expectedText: 'Spam' },
+    { selected: 'PENDING', expectedText: 'Pending' },
+    { selected: 'APPROVED', expectedText: 'Approved' },
+    { selected: 'DENIED', expectedText: 'Denied' },
+    { selected: 'SPAM', expectedText: 'Spam' },
   ].forEach(({ selected, expectedText }) => {
     it('shows selected option as button content', () => {
       const wrapper = createComponent(selected);

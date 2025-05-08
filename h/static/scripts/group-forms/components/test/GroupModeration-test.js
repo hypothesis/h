@@ -20,11 +20,11 @@ describe('GroupModeration', () => {
       const wrapper = createComponent();
       assert.equal(
         wrapper.find('ModerationStatusSelect').prop('selected'),
-        'pending',
+        'PENDING',
       );
     });
 
-    ['approved', 'denied', 'spam'].forEach(newStatus => {
+    ['APPROVED', 'DENIED', 'SPAM'].forEach(newStatus => {
       it('changes selected status on ModerationStatusSelect change', () => {
         const wrapper = createComponent();
 
