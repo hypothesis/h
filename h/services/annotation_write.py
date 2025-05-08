@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from h import i18n
-from h.models import Annotation, AnnotationSlim, ModerationStatus, User
+from h.models import Annotation, AnnotationSlim, User
 from h.models.document import update_document_metadata
 from h.schemas import ValidationError
 from h.security import Permission
@@ -164,20 +164,6 @@ class AnnotationWriteService:
         self._mention_service.update_mentions(annotation)
 
         return annotation
-
-    def hide(self, annotation: Annotation, user: User):
-        """Hides  an annotation marking it it as "moderated"."""
-        if not annotation.is_hidden:
-            self._moderation_service.set_status(
-                annotation, ModerationStatus.DENIED, user
-            )
-
-        self.upsert_annotation_slim(annotation)
-
-    def unhide(self, annotation: Annotation, user: User):
-        """Remove the moderation status of an annotation."""
-        self._moderation_service.set_status(annotation, ModerationStatus.APPROVED, user)
-        self.upsert_annotation_slim(annotation)
 
     @staticmethod
     def change_document(db, old_document_ids, new_document):

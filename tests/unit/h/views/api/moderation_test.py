@@ -16,14 +16,14 @@ class TestHide:
         self,
         pyramid_request,
         annotation_context,
-        annotation_write_service,
+        moderation_service,
         events,
         annotation,
     ):
         response = views.hide(annotation_context, pyramid_request)
 
-        annotation_write_service.hide.assert_called_once_with(
-            annotation_context.annotation, pyramid_request.user
+        moderation_service.set_status.assert_called_once_with(
+            annotation_context.annotation, ModerationStatus.DENIED, pyramid_request.user
         )
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
@@ -40,15 +40,18 @@ class TestUnhide:
         self,
         pyramid_request,
         annotation_context,
-        annotation_write_service,
+        moderation_service,
         events,
         annotation,
     ):
         response = views.unhide(annotation_context, pyramid_request)
 
-        annotation_write_service.unhide.assert_called_once_with(
-            annotation_context.annotation, pyramid_request.user
+        moderation_service.set_status.assert_called_once_with(
+            annotation_context.annotation,
+            ModerationStatus.APPROVED,
+            pyramid_request.user,
         )
+
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
         )
@@ -77,7 +80,7 @@ class TestChangeAnnotationModerationStatus:
         )
 
         moderation_service.set_status.assert_called_once_with(
-            annotation_context.annotation, pyramid_request.user, ModerationStatus.SPAM
+            annotation_context.annotation, ModerationStatus.SPAM, pyramid_request.user
         )
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"

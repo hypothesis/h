@@ -1,10 +1,10 @@
 from pyramid.httpexceptions import HTTPNoContent
 
 from h import events
+from h.models.annotation import ModerationStatus
 from h.schemas.api.moderation import ChangeAnnotationModerationStatusSchema
 from h.schemas.util import validate_json
 from h.security import Permission
-from h.services import AnnotationWriteService
 from h.views.api.config import api_config
 
 
@@ -17,10 +17,10 @@ from h.views.api.config import api_config
     permission=Permission.Annotation.MODERATE,
 )
 def hide(context, request):
-    request.find_service(AnnotationWriteService).hide(context.annotation, request.user)
-
-    event = events.AnnotationEvent(request, context.annotation.id, "update")
-    request.notify_after_commit(event)
+    request.find_service(name="annotation_moderation").set_status(
+        context.annotation, ModerationStatus.DENIED, request.user
+    )
+    _notify_moderation_change(request, context.annotation.id)
 
     return HTTPNoContent()
 
@@ -34,12 +34,10 @@ def hide(context, request):
     permission=Permission.Annotation.MODERATE,
 )
 def unhide(context, request):
-    request.find_service(AnnotationWriteService).unhide(
-        context.annotation, request.user
+    request.find_service(name="annotation_moderation").set_status(
+        context.annotation, ModerationStatus.APPROVED, request.user
     )
-
-    event = events.AnnotationEvent(request, context.annotation.id, "update")
-    request.notify_after_commit(event)
+    _notify_moderation_change(request, context.annotation.id)
 
     return HTTPNoContent()
 
@@ -56,11 +54,15 @@ def change_annotation_moderation_status(context, request):
     )
     status = params["moderation_status"]
     request.find_service(name="annotation_moderation").set_status(
-        context.annotation, request.user, status
+        context.annotation, status, request.user
     )
-    event = events.AnnotationEvent(request, context.annotation.id, "update")
-    request.notify_after_commit(event)
+    _notify_moderation_change(request, context.annotation.id)
 
     return request.find_service(name="annotation_json").present_for_user(
         annotation=context.annotation, user=request.user
     )
+
+
+def _notify_moderation_change(request, annotation_id):
+    event = events.AnnotationEvent(request, annotation_id, "update")
+    request.notify_after_commit(event)
