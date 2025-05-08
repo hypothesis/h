@@ -3,8 +3,9 @@ from h.models import Annotation, ModerationLog, ModerationStatus, User
 
 
 class AnnotationModerationService:
-    def __init__(self, session):
+    def __init__(self, session):  # , annotation_write: AnnotationWriteService):
         self._session = session
+        # self._annotation_write = annotation_write
 
     def all_hidden(self, annotation_ids: str) -> set[str]:
         """
@@ -26,18 +27,21 @@ class AnnotationModerationService:
         annotation: Annotation,
         status: ModerationStatus | None,
         user: User | None = None,
-    ) -> None:
+    ) -> ModerationLog | None:
         """Set the moderation status for an annotation."""
         if status and status != annotation.moderation_status:
-            self._session.add(
-                ModerationLog(
-                    annotation=annotation,
-                    old_moderation_status=annotation.moderation_status,
-                    new_moderation_status=status,
-                    moderator=user,
-                )
+            moderation_log = ModerationLog(
+                annotation=annotation,
+                old_moderation_status=annotation.moderation_status,
+                new_moderation_status=status,
+                moderator=user,
             )
             annotation.moderation_status = status
+            self._session.add(moderation_log)
+            # self.annotation_write.upsert_annotation_slim(annotation)
+            return moderation_log
+
+        return None
 
     def update_status(self, action: AnnotationAction, annotation: Annotation) -> None:
         """Change the moderation status of an annotation based on the action taken."""
@@ -76,4 +80,6 @@ class AnnotationModerationService:
 
 
 def annotation_moderation_service_factory(_context, request):
-    return AnnotationModerationService(request.db)
+    return AnnotationModerationService(
+        request.db  # , request.find_service(AnnotationWriteService)
+    )

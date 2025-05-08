@@ -10,3 +10,8 @@ class AnnotationEvent:
         self.request = request
         self.annotation_id = annotation_id
         self.action = action
+
+
+class ModerationEvent:
+    def __init__(self, request):
+        self.annotation_id = annotation_id

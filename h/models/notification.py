@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from h.db import Base, types
@@ -11,6 +11,7 @@ from h.models import helpers
 class NotificationType(StrEnum):
     MENTION = "mention"
     REPLY = "reply"
+    ANNOTATION_MODERATED = "annotation_moderated"
 
 
 class EmailTag(StrEnum):
@@ -50,10 +51,13 @@ class Notification(Base, Timestamps):  # pragma: no cover
 
     __table_args__ = (
         # Ensure that a recipient can only have one notification for a given source annotation
-        UniqueConstraint(
+        # for replies and notifications
+        Index(
+            "ix__notification__recipient_id__source_annotation_id",
             "recipient_id",
             "source_annotation_id",
-            name="uq__notification__recipient_id__source_annotation_id",
+            unique=True,
+            postgresql_where=text("notification_type IN ('reply', 'mention')"),
         ),
     )
 
