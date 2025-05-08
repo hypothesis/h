@@ -14,7 +14,7 @@ export type GroupModerationProps = {
 export default function GroupModeration({ group }: GroupModerationProps) {
   const [filterStatus, setFilterStatus] = useState<
     ModerationStatus | undefined
-  >('pending');
+  >('PENDING');
 
   return (
     <FormContainer>
