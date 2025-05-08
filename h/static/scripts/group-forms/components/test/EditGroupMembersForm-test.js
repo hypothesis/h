@@ -309,8 +309,10 @@ describe('EditGroupMembersForm', () => {
       fakeCallAPI,
       '/api/groups/1234/members',
       sinon.match({
-        pageNumber: 2,
-        pageSize: pageSize,
+        query: {
+          'page[number]': 2,
+          'page[size]': pageSize,
+        },
       }),
     );
 

@@ -10,9 +10,14 @@ import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
-import type { GroupMember, GroupMembersResponse, Role } from '../utils/api';
+import { paginationToParams } from '../utils/api';
 import { callAPI } from '../utils/api';
-import type { APIError } from '../utils/api';
+import type {
+  APIError,
+  GroupMember,
+  GroupMembersResponse,
+  Role,
+} from '../utils/api';
 import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
 import WarningDialog from './WarningDialog';
@@ -90,11 +95,11 @@ async function fetchMembers(
 ): Promise<{ total: number; members: MemberRow[] }> {
   const { pageNumber, pageSize, signal } = options;
   const { url, method, headers } = api;
+  const query = paginationToParams({ pageNumber, pageSize });
   const { meta, data }: GroupMembersResponse = await callAPI(url, {
     headers,
-    pageSize,
+    query,
     method,
-    pageNumber,
     signal,
   });
 
