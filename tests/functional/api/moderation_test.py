@@ -78,7 +78,7 @@ class TestDeleteHide:
         # The current user does not have moderation rights on the world group
         assert res.status_code == 404
 
-    def test_it_returns_http_404_if_no_authn(self, app, group_annotation):
+    def test_it_returns_http_404_if_no_auth(self, app, group_annotation):
         res = app.delete(
             f"/api/annotations/{group_annotation.id}/hide",
             expect_errors=True,

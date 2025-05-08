@@ -1,4 +1,5 @@
 from h.models import Annotation
+from h.models.annotation import ModerationStatus
 from h.schemas.api.group import FilterGroupAnnotationsSchema
 from h.schemas.pagination import Pagination
 from h.schemas.util import validate_query_params
@@ -23,7 +24,11 @@ def list_annotations(context: GroupContext, request):
     group = context.group
     annotation_json_service = request.find_service(name="annotation_json")
 
-    moderation_status_filter = params["moderation_status"]
+    moderation_status_filter = (
+        ModerationStatus(params["moderation_status"])
+        if params.get("moderation_status")
+        else None
+    )
     query = AnnotationReadService.annotation_search_query(
         groupid=group.pubid, moderation_status=moderation_status_filter
     )
