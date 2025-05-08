@@ -65,6 +65,20 @@ export type PaginatedResponse<Item> = {
  */
 export type GroupMembersResponse = PaginatedResponse<GroupMember>;
 
+/**
+ * Represents an annotation as returned by the h API.
+ * API docs: https://h.readthedocs.io/en/latest/api-reference/#tag/annotations
+ */
+export type APIAnnotationData = {
+  id?: string;
+  text: string;
+};
+
+/**
+ * Response to group annotations API
+ */
+export type GroupAnnotationsResponse = PaginatedResponse<APIAnnotationData>;
+
 /** An error response from the h API:
  * https://h.readthedocs.io/en/latest/api-reference/v2/#section/Hypothesis-API/Errors
  */

@@ -1,4 +1,4 @@
-import { callAPI, APIError, paginationToParams } from '../api';
+import { callAPI, APIError, paginationToParams } from '..';
 
 describe('callAPI', () => {
   const url = 'https://api.example.com/foo';
