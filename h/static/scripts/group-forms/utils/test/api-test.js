@@ -1,4 +1,4 @@
-import { callAPI, APIError } from '../api';
+import { callAPI, APIError, paginationToParams } from '../api';
 
 describe('callAPI', () => {
   const url = 'https://api.example.com/foo';
@@ -124,16 +124,18 @@ describe('callAPI', () => {
     assert.equal(error.json, null);
   });
 
-  it('adds pagination params to URL', async () => {
+  it('adds query params to URL', async () => {
     const paginatedURL = new URL(url);
     const pageNumber = 5;
     const pageSize = 10;
-    paginatedURL.searchParams.set('page[number]', pageNumber);
-    paginatedURL.searchParams.set('page[size]', pageSize);
+    paginatedURL.searchParams.set('pageNumber', pageNumber);
+    paginatedURL.searchParams.set('pageSize', pageSize);
     const response = new Response(JSON.stringify({}), { status: 200 });
     fakeFetch.resolves(response);
 
-    await callAPI(url, { pageNumber, pageSize });
+    await callAPI(url, {
+      query: { pageNumber, pageSize },
+    });
 
     assert.calledWith(fakeFetch, paginatedURL.toString());
   });
@@ -195,6 +197,34 @@ describe('callAPI', () => {
       assert.equal(error.cause, null);
       assert.equal(error.response, response);
       assert.deepEqual(error.json, json);
+    });
+  });
+});
+
+describe('paginationToParams', () => {
+  [
+    {
+      expectedQuery: {},
+    },
+    {
+      pageNumber: 1,
+      expectedQuery: { 'page[number]': 1 },
+    },
+    {
+      pageSize: 30,
+      expectedQuery: { 'page[size]': 30 },
+    },
+    {
+      pageNumber: 5,
+      pageSize: 10,
+      expectedQuery: { 'page[number]': 5, 'page[size]': 10 },
+    },
+  ].forEach(({ pageNumber, pageSize, expectedQuery }) => {
+    it('converts pagination values to query params', () => {
+      assert.deepEqual(
+        paginationToParams({ pageNumber, pageSize }),
+        expectedQuery,
+      );
     });
   });
 });

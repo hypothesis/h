@@ -110,14 +110,9 @@ export class APIError extends Error {
 export type APIOptions = {
   method?: string;
   json?: object | null;
+  query?: Record<string, string | number>;
   headers?: Record<PropertyKey, unknown>;
   signal?: AbortSignal;
-
-  /** 1-based number of first page to return in paginated APIs. */
-  pageNumber?: number;
-
-  /** Maximum number of items to return in response for a paginated API. */
-  pageSize?: number;
 };
 
 /** Make an API call and return the parsed JSON body or throw APIError. */
@@ -126,9 +121,8 @@ export async function callAPI<R = unknown>(
   {
     headers = {},
     json = null,
-    pageSize,
+    query = {},
     method = 'GET',
-    pageNumber,
     signal,
   }: APIOptions = {},
 ): Promise<R> {
@@ -145,16 +139,8 @@ export async function callAPI<R = unknown>(
     options.body = JSON.stringify(json);
   }
 
-  const queryParams: Record<string, string | number> = {};
-  if (typeof pageNumber === 'number') {
-    queryParams['page[number]'] = pageNumber;
-  }
-  if (typeof pageSize === 'number') {
-    queryParams['page[size]'] = pageSize;
-  }
-
   const requestURL = new URL(url);
-  for (const [param, value] of Object.entries(queryParams)) {
+  for (const [param, value] of Object.entries(query)) {
     requestURL.searchParams.set(param, value.toString());
   }
 
@@ -204,4 +190,31 @@ export async function callAPI<R = unknown>(
   }
 
   return responseJSON;
+}
+
+export type Pagination = {
+  /** 1-based number of first page to return in paginated APIs. */
+  pageNumber?: number;
+  /** Maximum number of items to return in response for a paginated API. */
+  pageSize?: number;
+};
+
+/**
+ * Convert pagination values into the raw record that callAPI expects as query
+ *
+ * @see {callAPI}
+ */
+export function paginationToParams({
+  pageSize,
+  pageNumber,
+}: Pagination): Record<string, number> {
+  const queryParams: Record<string, number> = {};
+  if (typeof pageNumber === 'number') {
+    queryParams['page[number]'] = pageNumber;
+  }
+  if (typeof pageSize === 'number') {
+    queryParams['page[size]'] = pageSize;
+  }
+
+  return queryParams;
 }
