@@ -17,7 +17,7 @@ class TestGenerate:
         pyramid_request,
         html_renderer,
         text_renderer,
-        links,
+        links_service,
     ):
         app_url = "https://example.com"
         pyramid_request.registry.settings.update(
@@ -28,14 +28,12 @@ class TestGenerate:
 
         generate(pyramid_request, notification)
 
-        links.incontext_link.assert_called_once_with(
-            pyramid_request, notification.annotation
-        )
+        links_service.incontext_link.assert_called_once_with(notification.annotation)
 
         expected_context = {
             "username": mentioning_user.username,
             "user_display_name": mentioning_user.display_name,
-            "annotation_url": links.incontext_link.return_value,
+            "annotation_url": links_service.incontext_link.return_value,
             "document_title": document.title,
             "document_url": annotation.target_uri,
             "annotation": notification.annotation,
@@ -52,9 +50,9 @@ class TestGenerate:
         pyramid_request,
         html_renderer,
         text_renderer,
-        links,
+        links_service,
     ):
-        links.incontext_link.return_value = None
+        links_service.incontext_link.return_value = None
 
         generate(pyramid_request, notification)
 
@@ -157,10 +155,6 @@ class TestGenerate:
             target_selectors=[{"type": "TextQuoteSelector", "exact": "quoted text"}],
             **common,
         )
-
-    @pytest.fixture(autouse=True)
-    def links(self, patch):
-        return patch("h.emails.mention_notification.links")
 
     @pytest.fixture(autouse=True)
     def html_renderer(self, pyramid_config):

@@ -113,10 +113,6 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     )
 
     # Other services
-    config.add_directive(
-        "add_annotation_link_generator",
-        "h.services.links.add_annotation_link_generator",
-    )
     config.register_service_factory("h.services.links.links_factory", name="links")
     config.register_service_factory(
         "h.services.list_organizations.list_organizations_factory",

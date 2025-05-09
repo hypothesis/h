@@ -1,12 +1,12 @@
 from pyramid.renderers import render
 from pyramid.request import Request
 
-from h import links
 from h.emails.util import email_subject
 from h.models import Subscriptions
 from h.notification.mention import MentionNotification
 from h.services import SubscriptionService
 from h.services.email import EmailData, EmailTag
+from h.services.links import incontext_link
 
 
 def generate(request: Request, notification: MentionNotification) -> EmailData:
@@ -20,7 +20,7 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
         "username": username,
         "user_display_name": notification.mentioning_user.display_name
         or f"@{username}",
-        "annotation_url": links.incontext_link(request, notification.annotation)
+        "annotation_url": incontext_link(notification.annotation)
         or request.route_url("annotation", id=notification.annotation.id),
         "document_title": notification.document.title
         or notification.annotation.target_uri,
