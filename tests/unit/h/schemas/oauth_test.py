@@ -31,12 +31,6 @@ class TestRetrieveOpenIDTokenSchema:
         ],
     )
     def test_validate_with_invalid_data(self, data, expected_error, schema):
-        data = {
-            "access_token": "test_access_token",
-            "refresh_token": "test_refresh_token",
-            "expires_in": 3600,
-        }
-
         with pytest.raises(ValidationError, match=expected_error):
             schema.validate(data)
 

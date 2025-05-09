@@ -18,6 +18,7 @@ from h.services.jwt import JWTService
 from h.services.mention import MentionService
 from h.services.notification import NotificationService
 from h.services.openid_client import OpenIDClientService
+from h.services.orcid_client import ORCIDClientService
 from h.services.subscription import SubscriptionService
 from h.services.task_done import TaskDoneService
 
@@ -186,4 +187,7 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     config.register_service_factory("h.services.http.factory", iface=HTTPService)
     config.register_service_factory(
         "h.services.openid_client.factory", iface=OpenIDClientService
+    )
+    config.register_service_factory(
+        "h.services.orcid_client.factory", iface=ORCIDClientService
     )
