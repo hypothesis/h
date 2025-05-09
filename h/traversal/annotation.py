@@ -18,7 +18,7 @@ class AnnotationContext:
 class AnnotationRoot:
     """Root factory for routes whose context is an `AnnotationContext`."""
 
-    def __init__(self, request):
+    def __init__(self, request) -> None:
         self._annotation_read_service: AnnotationReadService = request.find_service(
             AnnotationReadService
         )

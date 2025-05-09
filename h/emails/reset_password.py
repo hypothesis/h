@@ -30,7 +30,7 @@ def generate(request: Request, user: User) -> EmailData:
     )
 
     return EmailData(
-        recipients=[user.email],
+        recipients=[user.email],  # type: ignore[list-item]
         subject=subject,
         body=text,
         tag=EmailTag.RESET_PASSWORD,

@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime
 
 import sqlalchemy as sa
+from sqlalchemy.orm import Mapped, mapped_column
 
 from h.db import Base, types
 from h.models import helpers
@@ -33,18 +34,17 @@ class AnnotationSlim(Base):
 
     annotation = sa.orm.relationship("Annotation", back_populates="slim", uselist=False)
 
-    created = sa.Column(
+    created: Mapped[datetime] = mapped_column(
         sa.DateTime,
-        default=datetime.datetime.utcnow,
+        default=datetime.utcnow,
         server_default=sa.func.now(),
-        nullable=False,
         index=True,
     )
 
     updated = sa.Column(
         sa.DateTime,
         server_default=sa.func.now(),
-        default=datetime.datetime.utcnow,
+        default=datetime.utcnow,
         nullable=False,
         index=True,
     )

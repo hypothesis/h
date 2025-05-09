@@ -31,7 +31,7 @@ def authclient():
 )
 @click.option(
     "--grant-type",
-    type=click.Choice(GrantType.__members__),
+    type=click.Choice(list(GrantType.__members__)),
     prompt=False,
     help="An allowable grant type",
 )

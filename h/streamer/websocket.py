@@ -3,6 +3,7 @@ import json
 import logging
 import weakref
 from collections import namedtuple
+from typing import Self
 
 import jsonschema
 from gevent.queue import Full
@@ -38,7 +39,7 @@ class Message(namedtuple("Message", ["socket", "payload"])):  # noqa: PYI024, SL
 
 class WebSocket(_WebSocket):
     # All instances of WebSocket, allowing us to iterate over open websockets
-    instances = weakref.WeakSet()
+    instances: weakref.WeakSet[Self] = weakref.WeakSet()
 
     # Instance attributes
     client_id = None
@@ -226,4 +227,4 @@ def handle_unknown_message(message, session=None):  # noqa: ARG001
     )
 
 
-MESSAGE_HANDLERS[None] = handle_unknown_message
+MESSAGE_HANDLERS[None] = handle_unknown_message  # type: ignore[index]
