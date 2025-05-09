@@ -108,7 +108,7 @@ def users_activate(request):
     permission=Permission.AdminPage.LOW_RISK,
     require_csrf=True,
 )
-def users_rename(request):  # pragma: no cover
+def users_rename(request) -> httpexceptions.HTTPException:  # pragma: no cover
     user = _form_request_user(request)
 
     old_username = user.username

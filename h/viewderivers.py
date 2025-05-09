@@ -35,7 +35,7 @@ def csp_protected_view(view, info):
     return wrapper_view
 
 
-csp_protected_view.options = ("csp_insecure_optout",)
+csp_protected_view.options = ("csp_insecure_optout",)  # type: ignore[attr-defined]
 
 
 def includeme(config):  # pragma: nocover

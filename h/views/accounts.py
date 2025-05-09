@@ -529,7 +529,7 @@ class EditProfileController:
     is_authenticated=True,
 )
 class NotificationsController:
-    def __init__(self, request):
+    def __init__(self, request) -> None:
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
         self.subscription_svc: SubscriptionService = request.find_service(

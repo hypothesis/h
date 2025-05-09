@@ -33,6 +33,7 @@ LIST_MEMBERS_API_CONFIG = {
 @api_config(request_param=not_("page[number]"), **LIST_MEMBERS_API_CONFIG)
 def list_members_legacy(context: GroupContext, request):
     """Legacy version of the list-members API, maintained for backwards-compatibility."""
+    assert context.group is not None, "Group is required"  # noqa: S101
 
     log.info(
         "list_members_legacy() was called. User-Agent: %s, Referer: %s, pubid: %s",
@@ -150,7 +151,7 @@ def edit_member(context: EditGroupMembershipContext, request):
 
     if context.membership.roles != context.new_roles:
         old_roles = context.membership.roles
-        context.membership.roles = context.new_roles
+        context.membership.roles = context.new_roles  # type: ignore[assignment]
         log.info(
             "Changed group membership roles: %r (previous roles were: %r)",
             context.membership,

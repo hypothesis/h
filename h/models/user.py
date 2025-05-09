@@ -166,7 +166,7 @@ class User(Base):
             sa.Index("ix__user__email", sa.func.lower(cls.email)),
         )
 
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    id: Mapped[int] = mapped_column(sa.Integer, autoincrement=True, primary_key=True)
 
     #: A publicly visible unique identifier for the user
     pubid = sa.Column(
@@ -183,7 +183,7 @@ class User(Base):
     #: this user lives. By default, all users are created in the namespace
     #: corresponding to `request.domain`, but this can be overridden with the
     #: `h.authority` setting.
-    authority = sa.Column("authority", sa.UnicodeText(), nullable=False)
+    authority: Mapped[str] = mapped_column("authority", sa.UnicodeText())
 
     #: The display name which will be used when rendering an annotation.
     display_name = sa.Column(sa.UnicodeText())
@@ -201,19 +201,13 @@ class User(Base):
     orcid = sa.Column(sa.UnicodeText())
 
     #: Is this user an admin member?
-    admin = sa.Column(
-        sa.Boolean,
-        default=False,
-        nullable=False,
-        server_default=sa.sql.expression.false(),
+    admin: Mapped[bool] = mapped_column(
+        sa.Boolean, default=False, server_default=sa.sql.expression.false()
     )
 
     #: Is this user a staff member?
-    staff = sa.Column(
-        sa.Boolean,
-        nullable=False,
-        default=False,
-        server_default=sa.sql.expression.false(),
+    staff: Mapped[bool] = mapped_column(
+        sa.Boolean, default=False, server_default=sa.sql.expression.false()
     )
 
     #: Is this user flagged as "Not (Suitable) In Public Site Areas" (AKA
@@ -263,7 +257,7 @@ class User(Base):
     def _userid_comparator(cls):
         return UserIDComparator(cls.username, cls.authority)
 
-    email = sa.Column(sa.UnicodeText())
+    email: Mapped[str | None] = mapped_column(sa.UnicodeText())
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False), nullable=True)
     registered_date = sa.Column(

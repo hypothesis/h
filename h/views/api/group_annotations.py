@@ -18,6 +18,7 @@ from h.views.api.config import api_config
     permission=Permission.Group.MODERATE,
 )
 def list_annotations(context: GroupContext, request):
+    assert context.group is not None, "Group is required"  # noqa: S101
     pagination = Pagination.from_params(request.params)
     params = validate_query_params(FilterGroupAnnotationsSchema(), request.params)
 
