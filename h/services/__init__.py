@@ -12,9 +12,12 @@ from h.services.bulk_api import (
     BulkLMSStatsService,
 )
 from h.services.email import EmailService
+from h.services.http import HTTPService
 from h.services.job_queue import JobQueueService
+from h.services.jwt import JWTService
 from h.services.mention import MentionService
 from h.services.notification import NotificationService
+from h.services.openid_client import OpenIDClientService
 from h.services.subscription import SubscriptionService
 from h.services.task_done import TaskDoneService
 
@@ -177,4 +180,10 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     config.register_service_factory("h.services.email.factory", iface=EmailService)
     config.register_service_factory(
         "h.services.task_done.factory", iface=TaskDoneService
+    )
+
+    # Authentication-related services
+    config.register_service_factory("h.services.http.factory", iface=HTTPService)
+    config.register_service_factory(
+        "h.services.openid_client.factory", iface=OpenIDClientService
     )
