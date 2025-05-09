@@ -44,7 +44,7 @@ def generate(request: Request, notification: MentionNotification) -> EmailData:
     )
 
     return EmailData(
-        recipients=[notification.mentioned_user.email],
+        recipients=[notification.mentioned_user.email],  # type: ignore[list-item]
         subject=subject,
         body=text,
         tag=EmailTag.MENTION_NOTIFICATION,

@@ -1,9 +1,12 @@
+from datetime import datetime
+
 import sqlalchemy as sa
+from sqlalchemy.orm import InstrumentedAttribute
 
 from h.services.bulk_api.exceptions import BadDateFilter
 
 
-def date_match(column: sa.Column, spec: dict):
+def date_match(column: InstrumentedAttribute[datetime], spec: dict):
     """
     Get an SQL comparator for a date column based on dict spec.
 
