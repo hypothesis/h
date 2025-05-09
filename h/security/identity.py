@@ -1,7 +1,7 @@
 """Data classes used to represent authenticated users."""
 
 from dataclasses import dataclass, field
-from typing import Self
+from typing import Optional
 
 from h.models import AuthClient, Group, GroupMembershipRoles, User
 
@@ -60,7 +60,7 @@ class LongLivedUser:
             staff=user.staff,
         )
 
-        groups = {}
+        groups: dict[int, LongLivedGroup] = {}
 
         for membership in user.memberships:
             groups.setdefault(
@@ -109,7 +109,9 @@ class Identity:
     auth_client: LongLivedAuthClient | None = None
 
     @classmethod
-    def from_models(cls, user: User = None, auth_client: AuthClient = None):
+    def from_models(
+        cls, user: User | None = None, auth_client: AuthClient | None = None
+    ):
         """Create an `Identity` object from SQLAlchemy models."""
 
         return Identity(
@@ -120,20 +122,20 @@ class Identity:
         )
 
     @staticmethod
-    def authenticated_userid(identity: Self | None) -> str | None:
+    def authenticated_userid(identity: Optional["Identity"]) -> str | None:
         """Return the authenticated_userid from the given identity."""
         if identity and identity.user:
             return identity.user.userid
 
         return None
 
-    def get_roles(self, group) -> list[GroupMembershipRoles]:
+    def get_roles(self, group: Group) -> list[GroupMembershipRoles]:
         """Return this identity's roles in `group`."""
         if self.user is None:
             return []
 
         for membership in self.user.memberships:
             if membership.group.id == group.id:
-                return membership.roles
+                return membership.roles  # type: ignore[return-value]
 
         return []

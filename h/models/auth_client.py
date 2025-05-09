@@ -82,7 +82,7 @@ class AuthClient(Base, Timestamps):
     )
 
     #: Public client identifier
-    id = sa.Column(
+    id: Mapped[str] = mapped_column(
         postgresql.UUID(as_uuid=False),
         server_default=sa.func.uuid_generate_v1mc(),
         primary_key=True,
@@ -95,7 +95,7 @@ class AuthClient(Base, Timestamps):
     secret = sa.Column(sa.UnicodeText, nullable=True)
 
     #: Authority for which this client is allowed to authorize users.
-    authority = sa.Column(sa.UnicodeText, nullable=False)
+    authority: Mapped[str] = mapped_column(sa.UnicodeText)
 
     #: Grant type used by this client.
     grant_type: Mapped[GrantType | None] = mapped_column(

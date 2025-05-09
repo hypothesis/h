@@ -7,7 +7,7 @@ from h.models import Organization
 class OrganizationContext:
     """Context for organization-based views."""
 
-    organization: Organization = None
+    organization: Organization | None = None
 
 
 class OrganizationRoot:

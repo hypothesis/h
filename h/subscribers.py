@@ -76,7 +76,7 @@ def publish_annotation_event(event):
 
 
 @subscriber(AnnotationEvent)
-def send_reply_notifications(event):
+def send_reply_notifications(event) -> None:
     """Queue any reply notification emails triggered by an annotation event."""
     request = event.request
 
@@ -130,7 +130,7 @@ def send_reply_notifications(event):
 
 
 @subscriber(AnnotationEvent)
-def send_mention_notifications(event):
+def send_mention_notifications(event) -> None:
     """Send mention notifications triggered by a mention event."""
     request = event.request
 

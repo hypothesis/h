@@ -37,6 +37,7 @@ license distributed with the ws4py project. Such code remains copyright (c)
 
 import logging
 import weakref
+from typing import Self
 
 import psycogreen.gevent
 from gevent.pool import Pool
@@ -134,7 +135,7 @@ class WSGIServer(PyWSGIServer):
     # All instances of the server, allowing us to peek inside and see how many
     # greenlets we have running. This should really only ever have one value in
     # it
-    instances = weakref.WeakSet()
+    instances: weakref.WeakSet[Self] = weakref.WeakSet()
 
     def __init__(self, *args, **kwargs):  # pragma: no cover
         super().__init__(*args, **kwargs)
