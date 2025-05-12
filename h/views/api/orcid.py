@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def authorize(request):
     host = request.registry.settings["orcid_host"]
     client_id = request.registry.settings["orcid_client_id"]
-    state = ReadOAuthCallbackData(request).state_param()
+    state = RetrieveOAuthCallbackSchema(request).state_param()
 
     return HTTPFound(
         location=urlunparse(
