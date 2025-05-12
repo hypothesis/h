@@ -49,8 +49,8 @@ class TestFeatureRequestProperty:
 
 @pytest.mark.usefixtures("features")
 class TestFeatureService:
-    def test_enabled_true_if_overridden(self, db_session):
-        svc = FeatureService(session=db_session, overrides=["foo"])
+    def test_enable_feature_via_override(self, db_session):
+        svc = FeatureService(session=db_session, overrides={"foo": True})
 
         assert svc.enabled("foo") is True
 
@@ -63,6 +63,11 @@ class TestFeatureService:
         svc = FeatureService(session=db_session)
 
         assert svc.enabled("on-for-everyone") is True
+
+    def test_disable_feature_via_override(self, db_session):
+        svc = FeatureService(session=db_session, overrides={"on-for-everyone": False})
+
+        assert svc.enabled("on-for-everyone") is False
 
     def test_enabled_if_first_party(self, db_session, factories):
         user = factories.User(authority="foobar.com")
@@ -194,7 +199,29 @@ class TestFeatureServiceFactory:
 
         svc = feature_service_factory(None, pyramid_request)
 
-        assert sorted(svc.overrides) == sorted(["foo", "bar"])
+        assert svc.overrides == {"foo": True, "bar": True}
+
+    @pytest.mark.parametrize(
+        "feature,client_version,disabled",
+        [
+            # No or invalid Hypothesis-Client-Version header
+            ("pdf_image_annotation", "", False),
+            ("pdf_image_annotation", "not-valid", False),
+            # Old client version
+            ("pdf_image_annotation", "1.1623.0", True),
+            # New client version
+            ("pdf_image_annotation", "1.1633.0", False),
+            ("pdf_image_annotation", "1.1634.0", False),
+        ],
+    )
+    def test_disables_features_in_old_clients(
+        self, pyramid_request, feature, client_version, disabled
+    ):
+        pyramid_request.headers["Hypothesis-Client-Version"] = client_version
+        svc = feature_service_factory(None, pyramid_request)
+        expected = {feature: False} if disabled else {}
+
+        assert svc.overrides == expected
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
