@@ -20,6 +20,12 @@ class TestRetrieveOAuthCallbackSchema:
         with pytest.raises(ValidationError, match="Invalid oauth state"):
             schema.validate(data)
 
+    def test_validate_with_missing_state(self, schema):
+        data = {"state": "test-state"}
+
+        with pytest.raises(ValidationError, match="Invalid oauth state"):
+            schema.validate(data)
+
     def test_state_param_generates_token(self, pyramid_request, schema, secrets):
         state_token = "test-token"  # noqa: S105
         secrets.token_hex.return_value = state_token

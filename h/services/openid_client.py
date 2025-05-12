@@ -2,19 +2,9 @@ import logging
 from typing import Any
 
 from h.schemas.oauth import OpenIDTokenData, RetrieveOpenIDTokenSchema
-from h.services.http import ExternalRequestError, HTTPService
+from h.services.http import HTTPService
 
 logger = logging.getLogger(__name__)
-
-
-class OpenIDTokenError(ExternalRequestError):
-    """
-    A problem with an Open ID token for an external API.
-
-    This is raised when we don't have an access token for the current user or
-    when our access token doesn't work (e.g. because it's expired or been
-    revoked).
-    """
 
 
 class OpenIDClientService:

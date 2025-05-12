@@ -34,8 +34,9 @@ class RetrieveOAuthCallbackSchema:
         self._schema = OAuthCallbackSchema()
         self._request = request
 
-    def validate(self, data: dict) -> OAuthCallbackData:
-        if data.get("state") != self._request.session.pop("oauth2_state", None):
+    def validate(self, data: dict[str, Any]) -> OAuthCallbackData:
+        state = data.get("state")
+        if not state or state != self._request.session.pop("oauth2_state", None):
             msg = "Invalid oauth state"
             raise ValidationError(msg)
 
