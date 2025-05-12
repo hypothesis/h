@@ -1,5 +1,7 @@
 import re
 
+from packaging import version
+
 from h import models
 from h.util.db import lru_cache_in_transaction
 
@@ -41,11 +43,18 @@ class FeatureService:
 
     :param session: the database session
     :type session: sqlalchemy.orm.session.Session
-    :param overrides: the names of any overridden flags
-    :type overrides: list
+    :param overrides: map of feature flag name to on/off state. This overrides
+        the state based on the user's identity.
     """
 
-    def __init__(self, session, overrides=None, default_authority=None):
+    overrides: dict[str, bool] | None
+
+    def __init__(
+        self,
+        session,
+        overrides: dict[str, bool] | None = None,
+        default_authority=None,
+    ):
         self.default_authority = default_authority
         self.session = session
         self.overrides = overrides
@@ -76,9 +85,10 @@ class FeatureService:
         return models.Feature.all(self.session)
 
     def _state(self, feature, user=None):  # noqa: PLR0911
-        # Features that are explicitly overridden are on.
+        # Handle explicit overrides
         if self.overrides is not None and feature.name in self.overrides:
-            return True
+            return self.overrides[feature.name]
+
         # Features that are on for everyone are on.
         if feature.everyone:
             return True
@@ -106,17 +116,42 @@ def feature_service_factory(_context, request):
     )
 
 
-def _feature_overrides(request):
+MIN_CLIENT_VERSION = {"pdf_image_annotation": "1.1633.0"}
+"""
+Minimum client versions for certain feature flags.
+
+This can be used to disable feature flags in older clients which understand a
+flag, but have incomplete implementations.
+"""
+
+
+def _feature_overrides(request) -> dict[str, bool]:
     """
-    Get the list of manually-overridden features for the specified request.
+    Get the list of overridden features for the specified request.
 
     If "__feature__[<featurename>]" is in the query string, then the feature
     is overridden to on. This allows testing feature flags for logged-out
     users.
     """
-    overrides = []
+    overrides = {}
+
+    # Handle manual overrides via query params.
     for param in request.GET:
         match = PARAM_PATTERN.match(param)
         if match:
-            overrides.append(match.group("featurename"))
+            name = match.group("featurename")
+            overrides[name] = True
+
+    # Disable certain features in older clients.
+    client_version = None
+    try:
+        if header := request.headers.get("Hypothesis-Client-Version"):
+            client_version = version.parse(header)
+    except version.InvalidVersion:
+        pass
+    if client_version:
+        for feature_name, min_version in MIN_CLIENT_VERSION.items():
+            if client_version < version.parse(min_version):
+                overrides[feature_name] = False
+
     return overrides
