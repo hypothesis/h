@@ -8,7 +8,7 @@ from pyramid.view import exception_view_config, view_config
 
 from h import i18n
 from h.models.user_identity import IdentityProvider
-from h.schemas.oauth import ReadOAuthCallbackData, RetrieveOAuthCallbackSchema
+from h.schemas.oauth import RetrieveOAuthCallbackSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 
