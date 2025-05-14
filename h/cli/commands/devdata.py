@@ -54,6 +54,8 @@ class DevDataFactory:
                 self.upsert_open_group(data_dict)
             elif type_ == "restricted_group":
                 self.upsert_restricted_group(data_dict)
+            elif type_ == "private_group":
+                self.upsert_private_group(data_dict)
             else:
                 raise RuntimeError(f"Unrecognized type: {type_}")  # noqa: EM102, TRY003
 
@@ -100,36 +102,52 @@ class DevDataFactory:
         self.setattrs(user, user_data)
 
     def upsert_open_group(self, group_data):
-        return self.upsert_group(
-            group_data, self.group_create_service.create_open_group
-        )
+        return self.upsert_group(group_data, "open")
 
     def upsert_restricted_group(self, group_data):
-        return self.upsert_group(
-            group_data, self.group_create_service.create_restricted_group
-        )
+        return self.upsert_group(group_data, "restricted")
 
-    def upsert_group(self, group_data, group_create_method):
+    def upsert_private_group(self, group_data):
+        return self.upsert_group(group_data, "private")
+
+    def upsert_group(self, group_data, type_):
         creator = models.User.get_by_username(
             self.db, group_data.pop("creator_username"), group_data["authority"]
         )
         assert creator  # noqa: S101
 
-        organization = (
-            self.db.query(models.Organization)
-            .filter_by(pubid=group_data.pop("organization_pubid"))
-            .one()
-        )
+        if "organization_pubid" in group_data:
+            organization = (
+                self.db.query(models.Organization)
+                .filter_by(pubid=group_data.pop("organization_pubid"))
+                .one()
+            )
+        else:
+            organization = None
 
         group = self.group_service.fetch_by_pubid(group_data["pubid"])
 
         if not group:
-            group = group_create_method(group_data.pop("name"), creator.userid, [])
+            if type_ == "private":
+                group = self.group_create_service.create_private_group(
+                    group_data.pop("name"), creator.userid
+                )
+            elif type_ == "open":
+                group = self.group_create_service.create_open_group(
+                    group_data.pop("name"), creator.userid, []
+                )
+            elif type_ == "restricted":
+                group = self.group_create_service.create_restricted_group(
+                    group_data.pop("name"), creator.userid, []
+                )
+            else:
+                raise NotImplementedError
 
         group.creator = creator
-        group.organization = organization
+        if organization:
+            group.organization = organization
         group.scopes = [
-            models.GroupScope(scope=scope) for scope in group_data.pop("scopes")
+            models.GroupScope(scope=scope) for scope in group_data.pop("scopes", [])
         ]
 
         self.setattrs(group, group_data)
