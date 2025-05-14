@@ -18,7 +18,7 @@ from h.views.api.config import api_config
 )
 def hide(context, request):
     request.find_service(name="annotation_moderation").set_status(
-        context.annotation, ModerationStatus.DENIED, request.user
+        context.annotation, ModerationStatus.SPAM, request.user
     )
     _notify_moderation_change(request, context.annotation.id)
 

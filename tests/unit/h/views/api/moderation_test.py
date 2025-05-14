@@ -23,7 +23,7 @@ class TestHide:
         response = views.hide(annotation_context, pyramid_request)
 
         moderation_service.set_status.assert_called_once_with(
-            annotation_context.annotation, ModerationStatus.DENIED, pyramid_request.user
+            annotation_context.annotation, ModerationStatus.SPAM, pyramid_request.user
         )
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
