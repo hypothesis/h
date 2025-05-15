@@ -1,0 +1,42 @@
+
+.orcid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.orcid-header {
+    display: flex;
+    gap: 4px;
+    padding-left: 2px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #6a6a6a;
+    position: relative;
+}
+
+.orcid-connect {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #dbdbdb;
+    border-radius: 3px;
+    font-size: 14px;
+    color: inherit;
+}
+
+.external-icon {
+    margin-left: auto;
+    opacity: 0.6;
+}
+
+.check-icon {
+    border-radius: 50%;
+    background-color: #dff3ed;
+    padding: 2px;
+    width: 21px;
+    height: 21px;
+    margin-left: auto;
+}
