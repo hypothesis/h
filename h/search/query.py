@@ -351,7 +351,6 @@ class HiddenFilter:
     """Return an Elasticsearch filter for filtering out moderated or NIPSA'd annotations."""
 
     def __init__(self, request):
-        self.group_service = request.find_service(name="group")
         self.user = request.user
 
     def __call__(self, search, _):
