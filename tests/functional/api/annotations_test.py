@@ -2,6 +2,145 @@ import pytest
 
 from h.models.annotation import ModerationStatus
 
+pytestmark = pytest.mark.usefixtures("init_elasticsearch")
+
+
+class TestSearchAnnotations:
+    @pytest.mark.parametrize("author_is_nipsaed", [True, False])
+    @pytest.mark.parametrize("api_user_is_author", [True, False])
+    def test_hidden_and_nipsa(
+        self,
+        app,
+        make_annotation,
+        author_is_nipsaed,
+        api_user_is_author,
+        make_user,
+    ):
+        author = make_user(nipsa=author_is_nipsaed)
+        other_user = make_user()
+        anno_from_author = make_annotation(user=author)
+        private_anno_from_author = make_annotation(user=author, shared=False)
+        hidden_anno_from_author = make_annotation(
+            user=author, moderation_status=ModerationStatus.DENIED
+        )
+        annotation_from_user = make_annotation(user=other_user)
+
+        search_annotation_ids = self.search(
+            app, author if api_user_is_author else other_user
+        )
+
+        expected_ids = set()
+        not_expected_ids = set()
+        if api_user_is_author:
+            expected_ids = {
+                # We'd expect to see all our own annotations
+                anno_from_author.id,
+                private_anno_from_author.id,
+                hidden_anno_from_author.id,
+                # And the other user annotation
+                annotation_from_user.id,
+            }
+        else:
+            # We should always see our own annos
+            expected_ids = {annotation_from_user.id}
+            # And never see hidden or private annos from other users
+            not_expected_ids = {private_anno_from_author.id, hidden_anno_from_author.id}
+            if author_is_nipsaed:
+                # If another user is nipsaed we should not see any of their annotations
+                not_expected_ids.add(anno_from_author.id)
+            else:
+                # If the author is not nipsaed we should see their annotations if they are shared/not hidden
+                expected_ids.add(anno_from_author.id)
+
+        assert expected_ids.issubset(search_annotation_ids)
+        assert search_annotation_ids.isdisjoint(not_expected_ids)
+
+    @pytest.mark.parametrize("author_is_nipsaed", [True, False])
+    @pytest.mark.parametrize("api_user_is_author", [True, False])
+    def test_user_filter(
+        self,
+        app,
+        make_annotation,
+        author_is_nipsaed,
+        api_user_is_author,
+        make_user,
+    ):
+        author = make_user(nipsa=author_is_nipsaed)
+        other_user = make_user()
+        anno_from_author = make_annotation(user=author)
+        private_anno_from_author = make_annotation(user=author, shared=False)
+        hidden_anno_from_author = make_annotation(
+            user=author, moderation_status=ModerationStatus.DENIED
+        )
+        annotation_from_user = make_annotation(user=other_user)
+
+        # Filter by author.userid
+        search_annotation_ids = self.search(
+            app, author if api_user_is_author else other_user, user=author.userid
+        )
+
+        expected_ids = set()
+        not_expected_ids = set()
+        if api_user_is_author:
+            expected_ids = {
+                anno_from_author.id,
+                private_anno_from_author.id,
+                hidden_anno_from_author.id,
+            }
+            not_expected_ids = {annotation_from_user.id}
+        else:
+            # We are filtering by another user, we should see any of our own annotations
+            # But also any of the hidden annos of that user
+            not_expected_ids = {
+                private_anno_from_author.id,
+                hidden_anno_from_author.id,
+                annotation_from_user.id,
+            }
+            if author_is_nipsaed:
+                # If another user is nipsaed we should not see any of their annotations
+                not_expected_ids.add(anno_from_author.id)
+            else:
+                # If the author is not nipsaed we should see their annotations if they are shared/not hidden
+                expected_ids.add(anno_from_author.id)
+
+        assert expected_ids.issubset(search_annotation_ids)
+        assert search_annotation_ids.isdisjoint(not_expected_ids)
+
+    def search(self, app, api_user, **kwargs) -> set[str]:
+        token = api_user.tokens[0]
+        headers = {"Authorization": f"Bearer {token.value}"}
+        res = app.get("/api/search", headers=headers, params=kwargs)
+        return {a["id"] for a in res.json["rows"]}
+
+    @pytest.fixture
+    def make_annotation(self, app, factories, db_session):
+        def _make_annotation(user, groupid="__world__", shared=True, **kwargs):  # noqa: FBT002
+            api_token = user.tokens[0]
+            annotation = factories.Annotation(
+                shared=shared, userid=user.userid, groupid=groupid, **kwargs
+            )
+            db_session.commit()
+            headers = {"Authorization": f"Bearer {api_token.value}"}
+            res = app.post(
+                f"/api/annotations/{annotation.id}/reindex",
+                {},
+                headers=headers,
+            )
+
+            assert res.status_code == 200
+            return annotation
+
+        return _make_annotation
+
+    @pytest.fixture
+    def make_user(self, factories):
+        def _make_user(**kwargs):
+            user = factories.User(**kwargs)
+            factories.DeveloperToken(user=user)
+            return user
+
+        return _make_user
+
 
 class TestGetAnnotation:
     def test_it_returns_annotation_if_shared(self, app, annotation):

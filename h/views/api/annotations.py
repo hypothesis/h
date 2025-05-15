@@ -16,6 +16,7 @@ objects and Pyramid ACLs in :mod:`h.traversal`.
 """
 
 from pyramid import i18n
+from pyramid.httpexceptions import HTTPNotFound
 
 from h import search as search_lib
 from h.events import AnnotationEvent
@@ -182,6 +183,10 @@ def reindex(context, request):  # pragma: no cover
     the functional tests, which often need to make sure an annotation
     created in the DB is up to date in ES.
     """
+    if not request.registry.settings["h.dev"]:
+        # Don't allow reindexing in production
+        raise HTTPNotFound
+
     search_index = request.find_service(name="search_index")
     search_index.add_annotation(context.annotation, refresh=True)
 
