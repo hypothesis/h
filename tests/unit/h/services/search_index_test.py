@@ -83,7 +83,7 @@ class TestAddAnnotationById:
 
 
 class TestAddAnnotation:
-    def test_it_serialises(
+    def test_it(
         self,
         search_index,
         annotation,
@@ -91,30 +91,17 @@ class TestAddAnnotation:
         mock_es_client,
         AnnotationSearchIndexPresenter,
     ):
-        search_index.add_annotation(annotation)
+        search_index.add_annotation(annotation, sentinel.refresh)
 
         AnnotationSearchIndexPresenter.assert_called_once_with(
             annotation, pyramid_request
         )
         mock_es_client.conn.index.assert_called_once_with(
-            index=Any(),
-            doc_type=Any(),
-            body=AnnotationSearchIndexPresenter.return_value.asdict.return_value,
-            id=annotation.id,
-            refresh=Any(),
-        )
-
-    def test_it_calls_elasticsearch_as_expected(
-        self, search_index, annotation, mock_es_client
-    ):
-        search_index.add_annotation(annotation)
-
-        mock_es_client.conn.index.assert_called_once_with(
             index=mock_es_client.index,
             doc_type=mock_es_client.mapping_type,
-            body=Any(),
-            id=Any(),
-            refresh=False,
+            body=AnnotationSearchIndexPresenter.return_value.asdict.return_value,
+            id=annotation.id,
+            refresh=sentinel.refresh,
         )
 
     @pytest.mark.usefixtures("with_reindex_in_progress")

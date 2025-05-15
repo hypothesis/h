@@ -48,7 +48,7 @@ class SearchIndexService:
         if annotation.is_reply:
             self.add_annotation_by_id(annotation.thread_root_id)
 
-    def add_annotation(self, annotation):
+    def add_annotation(self, annotation, refresh=False):  # noqa: FBT002
         """
         Add an annotation into the search index.
 
@@ -63,7 +63,7 @@ class SearchIndexService:
 
         body = AnnotationSearchIndexPresenter(annotation, self._request).asdict()
 
-        self._index_annotation_body(annotation.id, body, refresh=False)
+        self._index_annotation_body(annotation.id, body, refresh=refresh)
 
     def delete_annotation_by_id(self, annotation_id, refresh=False):  # noqa: FBT002
         """
