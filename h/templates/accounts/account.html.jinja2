@@ -3,26 +3,47 @@
 {% set page_route = 'account' %}
 {% set page_title = 'Account' %}
 
+{% block styles %}
+  {{ super() }}
+  {% for url in asset_urls('orcid_css') %}
+    <link rel="stylesheet" href="{{ url }}">
+  {% endfor %}
+{% endblock %}
+
 {% block page_content %}
   <div class="form-vertical">
     {{ email_form }}
     {{ password_form }}
-  </div>
 
-  {% if log_in_with_orcid %}
-    {% if orcid %}
-      <h3>{% trans %} ORCiD connected{% endtrans %}: <a href="{{ orcid_url }}" target="_blank">{{ orcid }}</a></h3>
-    {% else %}
-      <a class="btn" style="display: inline-flex;" href="{{ request.route_path('orcid.oauth.authorize') }}">
-        {% trans %} Connect with ORCiD {% endtrans %}
-      </a>
-      <p class="text">
-        {% trans %}
-          Connecting your ORCiD enables you to log in to Hypothesis with ORCiD, instead of your Hypothesis password.
-        {% endtrans %}
-      </p>
+    {% if log_in_with_orcid %}
+      <div class="orcid-wrapper">
+        <div class="orcid-header">
+          <div style="position: relative;">
+            <div class="form-input__label js-tooltip"
+                 style="position: static;"
+                 aria-label="Connecting your ORCiD enables you to log in to Hypothesis with ORCiD, instead of your Hypothesis password.">
+              Connect your account
+              <i class="form-input__hint-icon">{{ svg_icon('info_icon') }}</i>
+            </div>
+          </div>
+        </div>
+
+        {% if orcid %}
+          <a href="{{ orcid_url }}" class="orcid-connect" target="_blank" rel="nofollow noopener">
+            {{ svg_icon('orcid') }}
+            <span>{% trans %} Connected: {% endtrans %}<strong>{{ orcid }}</strong></span>
+            {{ svg_icon('check', 'check-icon') }}
+          </a>
+        {% else %}
+          <a href="{{ request.route_path('orcid.oauth.authorize') }}" class="orcid-connect">
+            {{ svg_icon('orcid') }}
+            <span>{% trans %} Connect {% endtrans %}<strong>ORCiD</strong></span>
+            {{ svg_icon('external', 'external-icon') }}
+          </a>
+        {% endif %}
+      </div>
     {% endif %}
-  {% endif %}
+  </div>
 {% endblock page_content %}
 
 {% block form_footer_right %}
