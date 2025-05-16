@@ -292,3 +292,7 @@ def includeme(config):  # noqa: PLR0915
     config.add_route(
         "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
     )
+
+    # ORCID
+    config.add_route("orcid.oauth.authorize", "/orcid/oauth/authorize")
+    config.add_route("orcid.oauth.callback", "/orcid/oauth/callback")

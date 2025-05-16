@@ -41,6 +41,11 @@ class ExternalRequestError(Exception):
         return self._response
 
     @property
+    def validation_errors(self) -> dict[str, str] | None:
+        """Return the validation errors."""
+        return self._validation_errors
+
+    @property
     def url(self) -> str | None:
         """Return the request's URL."""
         return getattr(self._request, "url", None)
