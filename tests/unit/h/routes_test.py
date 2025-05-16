@@ -134,6 +134,12 @@ def test_includeme():
             factory="h.traversal:AnnotationRoot",
             traverse="/{id}",
         ),
+        call(
+            "api.annotation.reindex",
+            "/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/reindex",
+            factory="h.traversal:AnnotationRoot",
+            traverse="/{id}",
+        ),
         call("api.bulk.action", "/api/bulk", request_method="POST"),
         call("api.bulk.annotation", "/api/bulk/annotation", request_method="POST"),
         call("api.bulk.group", "/api/bulk/group", request_method="POST"),

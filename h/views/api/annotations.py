@@ -166,6 +166,28 @@ def delete(context, request):
     return {"id": context.annotation.id, "deleted": True}
 
 
+@api_config(
+    versions=["v1", "v2"],
+    route_name="api.annotation.reindex",
+    request_method="POST",
+    permission=Permission.Annotation.UPDATE,
+    link_name="annotation.reindex",
+    description="Reindex an annotation",
+)
+def reindex(context, request):  # pragma: no cover
+    """
+    Reindex one particular annotation.
+
+    The main motivation for this endpoint is to support
+    the functional tests, which often need to make sure an annotation
+    created in the DB is up to date in ES.
+    """
+    search_index = request.find_service(name="search_index")
+    search_index.add_annotation(context.annotation, refresh=True)
+
+    return {"id": context.annotation.id, "indexed": True}
+
+
 def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action."""
     event = AnnotationEvent(request, annotation.id, action)

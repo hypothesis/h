@@ -2,6 +2,87 @@ import pytest
 
 from h.models.annotation import ModerationStatus
 
+pytestmark = pytest.mark.usefixtures("init_elasticsearch")
+
+
+class TestSearchAnnotations:
+    @pytest.mark.parametrize("author_is_nipsaed", [True, False])
+    @pytest.mark.parametrize("api_user_is_author", [True, False])
+    def test_hidden_and_nipsa(
+        self,
+        app,
+        make_annotation,
+        factories,
+        user_with_token,
+        author_is_nipsaed,
+        api_user_is_author,
+    ):
+        author = factories.User(nipsa=author_is_nipsaed)
+        factories.DeveloperToken(user=author)
+        user, _ = user_with_token
+        anno_from_author = make_annotation(user=author, groupid="__world__")
+        private_anno_from_author = make_annotation(
+            user=author, groupid="__world__", shared=False
+        )
+        hidden_anno_from_author = make_annotation(
+            user=author, groupid="__world__", moderation_status=ModerationStatus.DENIED
+        )
+        annotation_from_user = make_annotation(user=user, groupid="__world__")
+
+        search_annotation_ids = self.search(app, author if api_user_is_author else user)
+
+        expected_ids = set()
+        not_expected_ids = set()
+        if api_user_is_author:
+            expected_ids = {
+                # We'd expect to see all our own annotations
+                anno_from_author.id,
+                private_anno_from_author.id,
+                hidden_anno_from_author.id,
+                # And the other user annotation
+                annotation_from_user.id,
+            }
+        else:
+            # We should always see our own annos
+            expected_ids = {annotation_from_user.id}
+            # And never see hidden or private annos from other users
+            not_expected_ids = {private_anno_from_author.id, hidden_anno_from_author.id}
+            if author_is_nipsaed:
+                # If another user is nipsaed we should not see any of their annotations
+                not_expected_ids.add(anno_from_author.id)
+            else:
+                # If the author is not nipsaed we should see their annotations if they are shared/not hidden
+                expected_ids.add(anno_from_author.id)
+
+        assert expected_ids.issubset(search_annotation_ids)
+        assert search_annotation_ids.isdisjoint(not_expected_ids)
+
+    def search(self, app, user) -> set[str]:
+        token = user.tokens[0]
+        headers = {"Authorization": f"Bearer {token.value}"}
+        res = app.get("/api/search", headers=headers)
+        return {a["id"] for a in res.json["rows"]}
+
+    @pytest.fixture
+    def make_annotation(self, app, factories, db_session):
+        def _make_annotation(user, shared=True, **kwargs):  # noqa: FBT002
+            api_token = user.tokens[0]
+            annotation = factories.Annotation(
+                shared=shared, userid=user.userid, **kwargs
+            )
+            db_session.commit()
+            headers = {"Authorization": f"Bearer {api_token.value}"}
+            res = app.post(
+                f"/api/annotations/{annotation.id}/reindex",
+                {},
+                headers=headers,
+            )
+
+            assert res.status_code == 200
+            return annotation
+
+        return _make_annotation
+
 
 class TestGetAnnotation:
     def test_it_returns_annotation_if_shared(self, app, annotation):
