@@ -40,6 +40,7 @@ TEST_ENVIRONMENT = {
     "H_API_AUTH_COOKIE_SECRET_KEY": TEST_SETTINGS["h_api_auth_cookie_secret_key"],
     "H_API_AUTH_COOKIE_SALT": TEST_SETTINGS["h_api_auth_cookie_salt"],
     "DATABASE_URL": TEST_SETTINGS["sqlalchemy.url"],
+    "DEV": "1",
 }
 
 

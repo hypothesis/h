@@ -23,7 +23,7 @@ class TestSearchAnnotations:
         hidden_anno_from_author = make_annotation(
             user=author, moderation_status=ModerationStatus.DENIED
         )
-        annotation_from_user = make_annotation(user=other_user)
+        annotation_from_other_user = make_annotation(user=other_user)
 
         search_annotation_ids = self.search(
             app, author if api_user_is_author else other_user
@@ -38,11 +38,11 @@ class TestSearchAnnotations:
                 private_anno_from_author.id,
                 hidden_anno_from_author.id,
                 # And the other user annotation
-                annotation_from_user.id,
+                annotation_from_other_user.id,
             }
         else:
             # We should always see our own annos
-            expected_ids = {annotation_from_user.id}
+            expected_ids = {annotation_from_other_user.id}
             # And never see hidden or private annos from other users
             not_expected_ids = {private_anno_from_author.id, hidden_anno_from_author.id}
             if author_is_nipsaed:

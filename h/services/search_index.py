@@ -48,7 +48,7 @@ class SearchIndexService:
         if annotation.is_reply:
             self.add_annotation_by_id(annotation.thread_root_id)
 
-    def add_annotation(self, annotation, refresh=False):  # noqa: FBT002
+    def add_annotation(self, annotation, *, refresh=False):
         """
         Add an annotation into the search index.
 
