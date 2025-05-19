@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from pyramid.httpexceptions import HTTPNotFound
 from webob.multidict import MultiDict, NestedMultiDict
 
 from h.search.core import SearchResult
@@ -262,6 +263,28 @@ class TestDelete:
         result = views.delete(context, pyramid_request)
 
         assert result == {"id": context.annotation.id, "deleted": True}
+
+
+@pytest.mark.usefixtures("search_index")
+class TestReindex:
+    def test_when_not_in_dev(self, pyramid_request):
+        pyramid_request.registry.settings["h.dev"] = False
+        context = mock.Mock()
+
+        with pytest.raises(HTTPNotFound):
+            views.reindex(context, pyramid_request)
+
+    def test_it(self, pyramid_request, search_index):
+        pyramid_request.registry.settings["h.dev"] = True
+        context = mock.Mock()
+
+        result = views.reindex(context, pyramid_request)
+
+        search_index.add_annotation.assert_called_once_with(
+            context.annotation, refresh=True
+        )
+
+        assert result == {"id": context.annotation.id, "indexed": True}
 
 
 @pytest.fixture

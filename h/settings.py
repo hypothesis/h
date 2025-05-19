@@ -40,12 +40,13 @@ class SettingsManager:
 
     def set(  # noqa: PLR0913
         self,
-        name,
-        envvar,
+        name: str,
+        envvar: str,
         type_=str,
-        required=False,  # noqa: FBT002
+        *,
+        required: bool = False,
         default=None,
-        deprecated_msg=None,
+        deprecated_msg: str | None = None,
     ):
         """
         Update `setting[name]`.
@@ -58,15 +59,11 @@ class SettingsManager:
         or coercing the setting using `type_` fails.
 
         :param name: the name of the pyramid config setting
-        :type name: str
         :param envvar: the environment variable name
-        :type envvar: str
         :param type_: callable that casts the setting value to the desired type
         :param required: True if the the pyramid config setting is required
-        :type required: bool
         :param default: a default value to use if the envvar isn't set
         :param deprecated_msg: a deprecated envvar setting message to display
-        :type deprecated_msg: str
         :raises SettingError: if required and not set
         :raises SettingError: if type casting fails
         """

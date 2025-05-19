@@ -175,7 +175,7 @@ def delete(context, request):
     link_name="annotation.reindex",
     description="Reindex an annotation",
 )
-def reindex(context, request):  # pragma: no cover
+def reindex(context, request):
     """
     Reindex one particular annotation.
 

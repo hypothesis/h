@@ -127,6 +127,9 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
     # Debug/development settings
     settings_manager.set("debug_query", "DEBUG_QUERY")
 
+    # Whether or not we are running in a development environment.
+    settings_manager.set("h.dev", "DEV", type_=asbool, default=False)
+
     if (
         "MANDRILL_USERNAME" in environ and "MANDRILL_APIKEY" in environ
     ):  # pragma: no cover

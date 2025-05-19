@@ -91,7 +91,7 @@ class TestAddAnnotation:
         mock_es_client,
         AnnotationSearchIndexPresenter,
     ):
-        search_index.add_annotation(annotation, sentinel.refresh)
+        search_index.add_annotation(annotation, refresh=sentinel.refresh)
 
         AnnotationSearchIndexPresenter.assert_called_once_with(
             annotation, pyramid_request
