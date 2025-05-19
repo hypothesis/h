@@ -63,7 +63,9 @@ elasticsearch-dsl==6.4.0
 gevent==24.11.1
     # via -r requirements/prod.in
 greenlet==3.1.1
-    # via gevent
+    # via
+    #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.in
 h-api==1.1.1
@@ -295,7 +297,7 @@ zope-sqlalchemy==3.1
     # via -r requirements/prod.in
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==75.8.0
+setuptools==78.1.1
     # via
     #   pyramid
     #   repoze-sendmail
