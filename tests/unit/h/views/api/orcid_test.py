@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, Mock, call, sentinel
 from urllib.parse import urlencode, urlunparse
 
 import pytest
-from pyramid.httpexceptions import HTTPFound, HTTPUnauthorized
+from pyramid.httpexceptions import HTTPFound
 
 import h.views.api.orcid as views
 from h.models.user_identity import IdentityProvider
@@ -39,8 +39,7 @@ class TestAuthorizeViews:
 
         result = views.AuthorizeViews(pyramid_request).notfound()
 
-        assert isinstance(result, HTTPUnauthorized)
-        assert result.location is None
+        assert result == {}
 
     @pytest.fixture(autouse=True)
     def RetrieveOAuthCallbackSchema(self, patch):
@@ -145,8 +144,7 @@ class TestCallbackViews:
     def test_notfound(self, pyramid_request):
         result = views.CallbackViews(pyramid_request).notfound()
 
-        assert isinstance(result, HTTPUnauthorized)
-        assert result.location is None
+        assert result == {}
 
     def test_invalid(self, pyramid_request):
         result = views.CallbackViews(pyramid_request).invalid()

@@ -3,7 +3,7 @@ from urllib.parse import urlencode, urlunparse
 
 import sentry_sdk
 from h_pyramid_sentry import report_exception
-from pyramid.httpexceptions import HTTPFound, HTTPUnauthorized
+from pyramid.httpexceptions import HTTPFound
 from pyramid.request import Request
 from pyramid.view import (
     exception_view_config,
@@ -56,9 +56,12 @@ class AuthorizeViews:
             )
         )
 
-    @notfound_view_config()
+    @notfound_view_config(
+        renderer="h:templates/notfound.html.jinja2", append_slash=True
+    )
     def notfound(self):
-        return HTTPUnauthorized()
+        self._request.response.status_int = 401
+        return {}
 
 
 class AccessDeniedError(Exception):
@@ -109,9 +112,12 @@ class CallbackViews:
         self._request.session.flash("ORCiD connected ✓", "success")
         return HTTPFound(location=self._request.route_url("account"))
 
-    @notfound_view_config()
+    @notfound_view_config(
+        renderer="h:templates/notfound.html.jinja2", append_slash=True
+    )
     def notfound(self):
-        return HTTPUnauthorized()
+        self._request.response.status_int = 401
+        return {}
 
     @exception_view_config(context=ValidationError)
     def invalid(self):
