@@ -100,6 +100,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -428,7 +429,7 @@ zope-sqlalchemy==3.1
 # The following packages are considered to be unsafe in a requirements file:
 pip==24.3.1
     # via pip-tools
-setuptools==75.8.0
+setuptools==78.1.1
     # via
     #   -r requirements/prod.txt
     #   pip-tools
