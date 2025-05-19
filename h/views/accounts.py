@@ -468,7 +468,9 @@ class AccountController:
         email_form = self.forms["email"].render({"email": email})
 
         feature_service = self.request.find_service(name="feature")
-        log_in_with_orcid = feature_service.enabled("log_in_with_orcid")
+        log_in_with_orcid = feature_service.enabled(
+            "log_in_with_orcid", self.request.user
+        )
         orcid = orcid_url = None
         if log_in_with_orcid:
             orcid_client = self.request.find_service(ORCIDClientService)
