@@ -347,8 +347,12 @@ class DeletedFilter:
         return search.exclude("exists", field="deleted")
 
 
-class HiddenFilter:
-    """Return an Elasticsearch filter for filtering out moderated or NIPSA'd annotations."""
+class NIPSAFilter:
+    """
+    A filter that only returns non-NIPSA'd annotations.
+
+    We'd still return NIPSA'd annotations if the user is the one who created them.
+    """
 
     def __init__(self, request):
         self.user = request.user
@@ -357,13 +361,29 @@ class HiddenFilter:
         """Filter out all hidden and NIPSA'd annotations except the current user's."""
         # If any one of these "should" clauses is true then the annotation will
         # get through the filter.
-        should_clauses = [
-            Q("bool", must_not=[Q("term", nipsa=True), Q("term", hidden=True)])
-        ]
+        should_clauses = [Q("bool", must_not=[Q("term", nipsa=True)])]
 
         if self.user is not None:
-            # Always show the logged-in user's annotations even if they have
-            # been hidden or the user has been NIPSA'd
+            # Always show the logged-in user's annotations even if the user has been NIPSA'd
+            should_clauses.append(Q("term", user=self.user.userid.lower()))
+
+        return search.filter(Q("bool", should=should_clauses))
+
+
+class HiddenFilter:
+    """Return an Elasticsearch filter for filtering out moderated annotations."""
+
+    def __init__(self, request):
+        self.user = request.user
+
+    def __call__(self, search, _):
+        """Filter out all hidden annotations except the current user's."""
+        # If any one of these "should" clauses is true then the annotation will
+        # get through the filter.
+        should_clauses = [Q("bool", must_not=[Q("term", hidden=True)])]
+
+        if self.user is not None:
+            # Always show the logged-in user's annotations even if they have been hidden.
             should_clauses.append(Q("term", user=self.user.userid.lower()))
 
         return search.filter(Q("bool", should=should_clauses))

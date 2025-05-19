@@ -52,6 +52,7 @@ class Search:
             query.AuthFilter(request),
             query.GroupFilter(request),
             query.UserFilter(),
+            query.NIPSAFilter(request),
             query.HiddenFilter(request),
             query.AnyMatcher(),
             query.TagsMatcher(),
