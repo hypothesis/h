@@ -106,9 +106,7 @@ class CallbackViews:
             # Let's go ahead and connect it to the user's account.
             self._orcid_client.add_identity(self._request.user, orcid)
 
-        self._request.session.flash(
-            "You can now use your ORCiD to log in to Hypothesis.", "success"
-        )
+        self._request.session.flash("ORCiD connected ✓", "success")
         return HTTPFound(location=self._request.route_url("account"))
 
     @notfound_view_config()
