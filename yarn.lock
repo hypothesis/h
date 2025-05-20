@@ -6753,7 +6753,6 @@ __metadata:
     bootstrap: ^4.6.2
     chai: ^5.1.2
     classnames: ^2.5.1
-    diff: ^7.0.0
     enzyme: ^3.11.0
     enzyme-adapter-preact-pure: ^4.1.0
     escape-html: ^1.0.3
