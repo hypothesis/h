@@ -81,7 +81,7 @@ class TestCallbackViews:
         )
         orcid_client_service.add_identity.assert_called_once_with(user, orcid)
         pyramid_request.session.flash.assert_called_once_with(
-            "You can now use your ORCiD to log in to Hypothesis.", "success"
+            "ORCiD connected ✓", "success"
         )
 
     def test_it_raises_validation_error(self, pyramid_request):
@@ -139,7 +139,7 @@ class TestCallbackViews:
         )
         orcid_client_service.add_identity.assert_not_called()
         pyramid_request.session.flash.assert_called_once_with(
-            "You can now use your ORCiD to log in to Hypothesis.", "success"
+            "ORCiD connected ✓", "success"
         )
 
     def test_notfound(self, pyramid_request):
