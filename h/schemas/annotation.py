@@ -92,7 +92,10 @@ class AnnotationSchema(JSONSchema):
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "properties": {"selector": copy.deepcopy(SELECTOR_SCHEMA)},
+                    "properties": {
+                        "description": {"type": "string", "maxLength": 250},
+                        "selector": copy.deepcopy(SELECTOR_SCHEMA),
+                    },
                 },
             },
             "text": {"type": "string"},
@@ -160,9 +163,9 @@ class CreateAnnotationSchema:
             new_appstruct["shared"] = False
 
         if "target" in appstruct:
-            new_appstruct["target_selectors"] = _target_selectors(
-                appstruct.pop("target")
-            )
+            targets = appstruct.pop("target")
+            new_appstruct["target_description"] = _target_description(targets)
+            new_appstruct["target_selectors"] = _target_selectors(targets)
 
         # Replies always get the same groupid as their parent. The parent's
         # groupid is added to the reply annotation later by the storage code.
@@ -215,9 +218,9 @@ class UpdateAnnotationSchema:
             )
 
         if "target" in appstruct:
-            new_appstruct["target_selectors"] = _target_selectors(
-                appstruct.pop("target")
-            )
+            targets = appstruct.pop("target")
+            new_appstruct["target_description"] = _target_description(targets)
+            new_appstruct["target_selectors"] = _target_selectors(targets)
 
         # Fields that are allowed to be updated and that have the same internal
         # and external name.
@@ -318,6 +321,13 @@ def _target_selectors(targets):
                     )
 
     return selectors
+
+
+def _target_description(targets) -> str | None:
+    if targets:
+        return targets[0].get("description", None)
+
+    return None
 
 
 class SearchParamsSchema(colander.Schema):

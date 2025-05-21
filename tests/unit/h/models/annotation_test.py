@@ -72,15 +72,30 @@ def test_thread_root_id_returns_first_reference_if_many_references():
 class TestTarget:
     def test_it(self, factories):
         annotation = factories.Annotation.build()
+        annotation.target_description = "test_description"
 
         assert annotation.target == [
-            {"source": annotation.target_uri, "selector": annotation.target_selectors}
+            {
+                "source": annotation.target_uri,
+                "description": "test_description",
+                "selector": annotation.target_selectors,
+            }
         ]
 
     def test_it_with_no_selectors(self, factories):
         annotation = factories.Annotation.build(target_selectors=[])
 
         assert "selector" not in annotation.target
+
+    def test_it_with_no_description(self, factories):
+        annotation = factories.Annotation.build()
+
+        assert annotation.target == [
+            {
+                "source": annotation.target_uri,
+                "selector": annotation.target_selectors,
+            }
+        ]
 
 
 def test_text_setter_renders_markdown(markdown_render):
