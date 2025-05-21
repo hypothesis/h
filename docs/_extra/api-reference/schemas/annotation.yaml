@@ -167,6 +167,13 @@ Annotation:
                       type: string
                     index: number
                     label: string
+          description:
+            type: string
+            description: >
+              An optional text description of the annotation's target.
+              For image annotations (where the annotation's target is a
+              selected area of an image) the Hypothesis client uses this
+              description as alt text for the thumbnail preview of the target.
     document:
       type: object
       required:

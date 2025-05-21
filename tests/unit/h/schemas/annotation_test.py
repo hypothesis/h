@@ -258,6 +258,35 @@ class TestCreateUpdateAnnotationSchema:
             {"type": "BarSelector"},
         ]
 
+    def test_target_description(self, pyramid_request, validate):
+        # The target[0].description string in the request gets pulled out into target_description.
+        appstruct = validate(
+            pyramid_request, {"target": [{"description": "test_description"}]}
+        )
+
+        assert appstruct["target_description"] == "test_description"
+
+    def test_target_description_missing(self, pyramid_request, validate):
+        # No target[0].description.
+        appstruct = validate(pyramid_request, {"target": [{}]})
+
+        assert appstruct["target_description"] is None
+
+    @pytest.mark.parametrize(
+        "target_description,expected_error_message",
+        [
+            (42, "42 is not of type 'string'"),
+            ("a" * 251, f"""'{"a" * 251}' is too long"""),
+        ],
+    )
+    def test_target_description_invalid(
+        self, pyramid_request, validate, target_description, expected_error_message
+    ):
+        with pytest.raises(ValidationError) as exc:
+            validate(pyramid_request, {"target": [{"description": target_description}]})
+
+        assert str(exc.value) == f"target.0.description: {expected_error_message}"
+
     @pytest.mark.parametrize(
         "payload,expected",
         [

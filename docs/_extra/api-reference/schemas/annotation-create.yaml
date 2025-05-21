@@ -78,6 +78,13 @@ Annotation:
               properties:
                 "type":
                   type: string
+          description:
+            type: string
+            description: >
+              An optional text description of the annotation's target.
+              For image annotations (where the annotation's target is a
+              selected area of an image) the Hypothesis client uses this
+              description as alt text for the thumbnail preview of the target.
     references:
       type: array
       description: Annotation IDs for any annotations this annotation references (e.g. is a reply to)

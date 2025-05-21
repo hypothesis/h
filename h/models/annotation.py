@@ -163,6 +163,9 @@ class Annotation(Base):
         "ModerationLog", back_populates="annotation"
     )
 
+    #: An optional text description of the annotation target.
+    target_description = sa.Column(sa.UnicodeText)
+
     @property
     def uuid(self):
         """
@@ -189,6 +192,10 @@ class Annotation(Base):
     @property
     def target(self):
         target = {"source": self.target_uri}
+
+        if self.target_description is not None:
+            target["description"] = self.target_description
+
         if self.target_selectors:
             target["selector"] = self.target_selectors
 
