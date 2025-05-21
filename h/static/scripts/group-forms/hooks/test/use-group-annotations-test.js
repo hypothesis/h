@@ -1,4 +1,5 @@
 import { mount, waitFor } from '@hypothesis/frontend-testing';
+import { useState } from 'preact/hooks';
 
 import { Config } from '../../config';
 import { useGroupAnnotations, $imports } from '../use-group-annotations';
@@ -14,7 +15,7 @@ describe('useGroupAnnotations', () => {
         groupAnnotations: {},
       },
     };
-    fakeFetchGroupAnnotations = sinon.stub().resolves([]);
+    fakeFetchGroupAnnotations = sinon.stub().resolves({ annotations: [] });
     lastGroupAnnotations = undefined;
 
     $imports.$mock({
@@ -24,14 +25,24 @@ describe('useGroupAnnotations', () => {
     });
   });
 
-  function TestComponent({ filterStatus }) {
+  function TestComponent({ initialFilterStatus }) {
+    const [filterStatus, setFilterStatus] = useState(initialFilterStatus);
     lastGroupAnnotations = useGroupAnnotations({ filterStatus });
+
+    return (
+      <button
+        data-testid="set-status-button"
+        onClick={() => setFilterStatus('APPROVED')}
+      >
+        Set status
+      </button>
+    );
   }
 
   function createComponent(filterStatus) {
-    mount(
+    return mount(
       <Config.Provider value={fakeConfig}>
-        <TestComponent filterStatus={filterStatus} />
+        <TestComponent initialFilterStatus={filterStatus} />
       </Config.Provider>,
     );
   }
@@ -74,14 +85,17 @@ describe('useGroupAnnotations', () => {
 
     // Loading is initially true, and eventually it is set to false
     assert.isTrue(lastGroupAnnotations.loading);
+    assert.isTrue(lastGroupAnnotations.loadingFirstPage);
+
     await waitFor(() => !lastGroupAnnotations.loading);
+    assert.isFalse(lastGroupAnnotations.loadingFirstPage);
   });
 
   const arrayOfSize = size => Array.from({ length: size }, () => ({}));
 
   [arrayOfSize(5), arrayOfSize(50), arrayOfSize(1)].forEach(annotations => {
     it('sets annotations as resolved by fetchGroupAnnotations', async () => {
-      fakeFetchGroupAnnotations.resolves(annotations);
+      fakeFetchGroupAnnotations.resolves({ annotations });
       createComponent();
 
       // The amount of annotations is initially 0, and then eventually changes
@@ -91,5 +105,66 @@ describe('useGroupAnnotations', () => {
         () => lastGroupAnnotations.annotations.length === annotations.length,
       );
     });
+  });
+
+  it('calls next page every time loadNextPage is called', async () => {
+    // A total of three items, with one item per page means we won't call this
+    // more than three times
+    fakeFetchGroupAnnotations.resolves({
+      annotations: [{}],
+      total: 3,
+    });
+
+    const invokeLoadNextPage = async () => {
+      // We have to wait for previous call to finish loading before invoking it
+      // again
+      await waitFor(() => !lastGroupAnnotations.loading);
+      lastGroupAnnotations.loadNextPage();
+    };
+
+    createComponent();
+
+    // First page is loaded automatically
+    assert.calledWith(
+      fakeFetchGroupAnnotations.lastCall,
+      {},
+      sinon.match({ pageNumber: 1 }),
+    );
+    assert.equal(fakeFetchGroupAnnotations.callCount, 1);
+
+    // Subsequent calls will increase the page number
+    await invokeLoadNextPage();
+    assert.calledWith(
+      fakeFetchGroupAnnotations.lastCall,
+      {},
+      sinon.match({ pageNumber: 2 }),
+    );
+    assert.equal(fakeFetchGroupAnnotations.callCount, 2);
+
+    await invokeLoadNextPage();
+    assert.calledWith(
+      fakeFetchGroupAnnotations.lastCall,
+      {},
+      sinon.match({ pageNumber: 3 }),
+    );
+    assert.equal(fakeFetchGroupAnnotations.callCount, 3);
+
+    // Once all pages have been loaded, calling loadNextPage has no effect
+    await invokeLoadNextPage();
+    assert.equal(fakeFetchGroupAnnotations.callCount, 3);
+    await invokeLoadNextPage();
+    assert.equal(fakeFetchGroupAnnotations.callCount, 3);
+  });
+
+  it('resets loaded annotations when the filter status changes', async () => {
+    const annotations = arrayOfSize(3);
+    fakeFetchGroupAnnotations.resolves({ annotations });
+
+    const wrapper = createComponent('PENDING');
+    await waitFor(() => !lastGroupAnnotations.loading);
+
+    assert.lengthOf(lastGroupAnnotations.annotations, annotations.length);
+    wrapper.find('[data-testid="set-status-button"]').simulate('click');
+    assert.lengthOf(lastGroupAnnotations.annotations, 0);
   });
 });
