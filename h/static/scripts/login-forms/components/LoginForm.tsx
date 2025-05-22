@@ -1,4 +1,5 @@
 import { Button } from '@hypothesis/frontend-shared';
+import classnames from 'classnames';
 import { useContext, useState } from 'preact/hooks';
 
 import FormContainer from '../../forms-common/components/FormContainer';
@@ -15,10 +16,14 @@ export default function LoginForm() {
   return (
     <FormContainer>
       <form
-        action={routes.login}
         method="POST"
         data-testid="form"
-        className="max-w-[530px] mx-auto flex flex-col gap-y-4"
+        className={classnames({
+          'max-w-[530px] mx-auto flex flex-col': true,
+          'gap-y-4': !config.forOAuth,
+          // Use a more compact layout in the OAuth popup window.
+          'gap-y-2': config.forOAuth,
+        })}
       >
         <input type="hidden" name="csrf_token" value={config.csrfToken} />
         <TextField
@@ -53,8 +58,18 @@ export default function LoginForm() {
           </a>
         </div>
         <div className="mb-8 pt-2 flex items-center gap-x-4">
+          {config.forOAuth && (
+            <Button
+              type="button"
+              variant="secondary"
+              data-testid="cancel-button"
+              onClick={() => window.close()}
+            >
+              Cancel
+            </Button>
+          )}
           <div className="grow" />
-          <Button type="submit" variant="primary" data-testid="button">
+          <Button type="submit" variant="primary" data-testid="submit-button">
             Log in
           </Button>
         </div>
