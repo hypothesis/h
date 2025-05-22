@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 __all__ = (
@@ -24,9 +26,14 @@ def login_user(db_session, app, user):
         db_session.commit()
 
         login_page = app.get("/login")
-        login_page.form["username"] = user.username
-        login_page.form["password"] = "pass"  # noqa: S105
-        login_page.form.submit()
+        js_config = json.loads(login_page.html.find("script", class_="js-config").text)
+
+        params = {
+            "username": user.username,
+            "password": "pass",
+            "csrf_token": js_config["csrfToken"],
+        }
+        app.post("/login", params=params)
 
     return login_user
 

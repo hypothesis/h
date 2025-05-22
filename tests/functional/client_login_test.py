@@ -84,12 +84,16 @@ class TestLoginFlow:
 
         return url.geturl(), query
 
-    @classmethod
     def login(cls, app, user):
         res = app.get("/login")
-        res.form["username"] = user.username
-        res.form["password"] = "pass"  # noqa: S105
-        res.form.submit()
+        js_config = json.loads(res.html.find("script", class_="js-config").text)
+
+        params = {
+            "username": user.username,
+            "password": "pass",
+            "csrf_token": js_config["csrfToken"],
+        }
+        app.post("/login", params=params)
 
     @pytest.fixture
     def params(self, authclient):

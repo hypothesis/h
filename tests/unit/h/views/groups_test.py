@@ -21,7 +21,7 @@ class TestGroupCreateEditController:
 
         result = controller.create()
 
-        assets_env.urls.assert_called_once_with("group_forms_css")
+        assets_env.urls.assert_called_once_with("forms_css")
         views.get_csrf_token.assert_called_once_with(pyramid_request)
         assert result == {
             "page_title": (
@@ -59,7 +59,7 @@ class TestGroupCreateEditController:
 
         result = controller.edit()
 
-        assets_env.urls.assert_called_once_with("group_forms_css")
+        assets_env.urls.assert_called_once_with("forms_css")
         views.get_csrf_token.assert_called_once_with(pyramid_request)
         annotation_stats_service.total_group_annotation_count.assert_called_once_with(
             group.pubid, unshared=False
