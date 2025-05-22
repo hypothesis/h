@@ -54,6 +54,7 @@ describe('LoginForm', () => {
     } = elements;
 
     assert.equal(form.prop('action'), routes.login);
+
     assert.equal(csrfInput.prop('value'), fakeConfig.csrfToken);
     assert.equal(usernameField.prop('value'), '');
     assert.equal(passwordField.prop('value'), '');
@@ -100,6 +101,7 @@ describe('LoginForm', () => {
       elements.usernameField.prop('onChangeValue')(username);
     });
     wrapper.update();
+
     const updatedElements = getElements(wrapper);
 
     assert.equal(updatedElements.usernameField.prop('value'), username);
@@ -113,6 +115,7 @@ describe('LoginForm', () => {
       elements.passwordField.prop('onChangeValue')(password);
     });
     wrapper.update();
+
     const updatedElements = getElements(wrapper);
 
     assert.equal(updatedElements.passwordField.prop('value'), password);
