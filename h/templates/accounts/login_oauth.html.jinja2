@@ -2,13 +2,22 @@
 
 {% block page_title %}Log in{% endblock %}
 
+{% block styles %}
+  {{ super() }}
+
+  {% for url in asset_urls('forms_css') %}
+    <link rel="stylesheet" href="{{ url }}">
+  {% endfor %}
+{% endblock %}
+
 {% block content %}
   <div class="form-container form-container--popup content">
-    <h1 class="form-header form-header--center">
+    <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+
+    <h1 class="form-header form-header--center" style="margin-bottom: 25px;">
       Log in with Hypothesis {{ svg_icon('logo', 'form-header__logo') }}
     </h1>
-
-    {{ form }}
+    <div id="login-form"></div>
   </div>
   {# In the context of OAuth, the login screen is often shown in a popup.
        Use a more compact footer and make the Sign Up link open in a
@@ -23,3 +32,11 @@
     </span>
   </footer>
 {% endblock content %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('login_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
+{% endblock %}

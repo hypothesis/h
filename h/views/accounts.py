@@ -91,24 +91,20 @@ def error_validation(error, request):  # pragma: no cover
 @view_defaults(route_name="login", renderer="h:templates/accounts/login.html.jinja2")
 class AuthController:
     def __init__(self, request):
-        form_footer = '<a class="link" href="{href}">{text}</a>'.format(
-            href=request.route_path("forgot_password"), text=_("Forgot your password?")
-        )
-
         self.request = request
         self.schema = LoginSchema().bind(request=self.request)
 
-        show_cancel_button = bool(request.params.get("for_oauth", False))
-        self.form = request.create_form(
-            self.schema,
-            buttons=(_("Log in"),),
-            footer=form_footer,
-            show_cancel_button=show_cancel_button,
-        )
+        # This form is used only for incoming data validation.
+        self.form = request.create_form(self.schema)
 
         self.logout_redirect = self.request.route_url("index")
 
     @view_config(request_method="GET")
+    @view_config(
+        request_method="GET",
+        request_param="for_oauth",
+        renderer="h:templates/accounts/login_oauth.html.jinja2",
+    )
     def get(self):
         self._redirect_if_logged_in()
 
@@ -116,26 +112,25 @@ class AuthController:
             "js_config": self._js_config(),
         }
 
-    @view_config(
-        request_method="GET",
-        request_param="for_oauth",
-        renderer="h:templates/accounts/login_oauth.html.jinja2",
-    )
-    def get_oauth(self):
-        """Render the login page for OAuth login."""
-        self._redirect_if_logged_in()
-
-        return {"form": self.form.render(LoginSchema.default_values(self.request))}
-
     def _js_config(self) -> dict[str, Any]:
         csrf_token = get_csrf_token(self.request)
 
-        return {
+        js_config = {
             "styles": self.request.registry["assets_env"].urls("forms_css"),
             "csrfToken": csrf_token,
         }
 
+        if for_oauth := self.request.params.get("for_oauth"):
+            js_config["forOAuth"] = bool(for_oauth)
+
+        return js_config
+
     @view_config(request_method="POST")
+    @view_config(
+        request_method="POST",
+        request_param="for_oauth",
+        renderer="h:templates/accounts/login_oauth.html.jinja2",
+    )
     def post(self):
         """Log the user in and redirect them."""
         self._redirect_if_logged_in()
@@ -152,26 +147,6 @@ class AuthController:
             return {
                 "js_config": js_config,
             }
-
-        user = appstruct["user"]
-        headers = self._login(user)
-        return httpexceptions.HTTPFound(
-            location=self._login_redirect(), headers=headers
-        )
-
-    @view_config(
-        request_method="POST",
-        request_param="for_oauth",
-        renderer="h:templates/accounts/login_oauth.html.jinja2",
-    )
-    def post_oauth(self):
-        """Log the user in and redirect them."""
-        self._redirect_if_logged_in()
-
-        try:
-            appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure:
-            return {"form": self.form.render()}
 
         user = appstruct["user"]
         headers = self._login(user)
