@@ -4,6 +4,7 @@ export type ConfigObject = {
   csrfToken: string;
   formErrors?: Record<string, string>;
   formData?: Record<string, string>;
+  forOAuth?: boolean;
 };
 
 /** Return the frontend config from the page's <script class="js-config">. */
