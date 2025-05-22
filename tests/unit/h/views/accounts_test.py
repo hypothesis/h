@@ -9,6 +9,7 @@ import pytest
 from h_matchers import Any
 from pyramid import httpexceptions
 
+from h.assets import Environment
 from h.models import Subscriptions
 from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
@@ -63,8 +64,44 @@ class TestBadCSRFTokenHTML:
 
 @pytest.mark.usefixtures("routes")
 class TestAuthController:
-    def test_get(self, pyramid_request, LoginSchema):
-        template_vars = views.AuthController(pyramid_request).get()
+    def test_get(self, pyramid_request, mocker, assets_env):
+        mocker.spy(views, "get_csrf_token")
+
+        result = views.AuthController(pyramid_request).get()
+
+        assets_env.urls.assert_called_once_with("forms_css")
+        views.get_csrf_token.assert_called_once_with(pyramid_request)
+        assert result == {
+            "js_config": {
+                "styles": assets_env.urls.return_value,
+                "csrfToken": views.get_csrf_token.spy_return,
+            }
+        }
+
+    def test_post_returns_form_when_validation_fails(
+        self, invalid_form, pyramid_config, pyramid_request, assets_env, mocker
+    ):
+        pyramid_request.POST = {"username": "jane", "password": "doe"}
+        pyramid_config.testing_securitypolicy(None)  # Logged out
+        mocker.spy(views, "get_csrf_token")
+        controller = views.AuthController(pyramid_request)
+        form_errors = {"username": "Invalid username"}
+        form = invalid_form(errors=form_errors)
+        controller.form = form
+
+        result = controller.post()
+
+        assert result == {
+            "js_config": {
+                "styles": assets_env.urls.return_value,
+                "csrfToken": views.get_csrf_token.spy_return,
+                "formErrors": form_errors,
+                "formData": pyramid_request.POST,
+            }
+        }
+
+    def test_get_oauth(self, pyramid_request, LoginSchema):
+        template_vars = views.AuthController(pyramid_request).get_oauth()
 
         # It initializes and binds the schema.
         LoginSchema.assert_called_once_with()
@@ -116,14 +153,14 @@ class TestAuthController:
 
         assert e.value.location == "/foo/bar"
 
-    def test_post_returns_form_when_validation_fails(
+    def test_post_oauth_returns_form_when_validation_fails(
         self, invalid_form, pyramid_config, pyramid_request
     ):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
         controller.form = invalid_form()
 
-        result = controller.post()
+        result = controller.post_oauth()
 
         assert result == {"form": "invalid form"}
 
@@ -135,7 +172,7 @@ class TestAuthController:
         controller = views.AuthController(pyramid_request)
         controller.form = invalid_form()
 
-        controller.post()
+        controller.post_oauth()
 
         assert not loginevent.called
         assert not notify.called
@@ -150,6 +187,19 @@ class TestAuthController:
         controller.form = form_validating_to({"user": user})
 
         result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+
+    def test_post_oauth_redirects_when_validation_succeeds(
+        self, factories, form_validating_to, pyramid_config, pyramid_request
+    ):
+        pyramid_config.testing_securitypolicy(None)  # Logged out
+        controller = views.AuthController(pyramid_request)
+        user = factories.User(username="cara")
+        pyramid_request.user = user
+        controller.form = form_validating_to({"user": user})
+
+        result = controller.post_oauth()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -219,6 +269,15 @@ class TestAuthController:
         result = views.AuthController(pyramid_request).logout()
 
         assert result.headers["x-erase-fingerprints"] == "on the hob"
+
+    @pytest.fixture
+    def assets_env(self):
+        return create_autospec(Environment, instance=True, spec_set=True)
+
+    @pytest.fixture(autouse=True)
+    def pyramid_config(self, pyramid_config, assets_env):
+        pyramid_config.registry["assets_env"] = assets_env
+        return pyramid_config
 
     @pytest.fixture
     def routes(self, pyramid_config):

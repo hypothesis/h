@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 
@@ -95,7 +97,12 @@ class TestAccountSettings:
     @pytest.fixture
     def app(self, app, user):
         res = app.get("/login")
-        res.form["username"] = user.username
-        res.form["password"] = "pass"  # noqa: S105
-        res.form.submit()
+        js_config = json.loads(res.html.find("script", class_="js-config").text)
+
+        params = {
+            "username": user.username,
+            "password": "pass",
+            "csrf_token": js_config["csrfToken"],
+        }
+        app.post("/login", params=params)
         return app

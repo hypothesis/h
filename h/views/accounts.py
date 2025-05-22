@@ -1,6 +1,7 @@
 import datetime
 import itertools
 from dataclasses import asdict
+from typing import Any
 from urllib.parse import urlparse
 
 import colander
@@ -8,6 +9,7 @@ import deform
 from markupsafe import Markup
 from pyramid import httpexceptions, security
 from pyramid.config import not_
+from pyramid.csrf import get_csrf_token
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 from sqlalchemy import func, select
@@ -107,24 +109,62 @@ class AuthController:
         self.logout_redirect = self.request.route_url("index")
 
     @view_config(request_method="GET")
+    def get(self):
+        self._redirect_if_logged_in()
+
+        return {
+            "js_config": self._js_config(),
+        }
+
     @view_config(
         request_method="GET",
         request_param="for_oauth",
         renderer="h:templates/accounts/login_oauth.html.jinja2",
     )
-    def get(self):
-        """Render the login page, including the login form."""
+    def get_oauth(self):
+        """Render the login page for OAuth login."""
         self._redirect_if_logged_in()
 
         return {"form": self.form.render(LoginSchema.default_values(self.request))}
 
+    def _js_config(self) -> dict[str, Any]:
+        csrf_token = get_csrf_token(self.request)
+
+        return {
+            "styles": self.request.registry["assets_env"].urls("forms_css"),
+            "csrfToken": csrf_token,
+        }
+
     @view_config(request_method="POST")
+    def post(self):
+        """Log the user in and redirect them."""
+        self._redirect_if_logged_in()
+
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure as e:
+            js_config = self._js_config()
+            js_config["formErrors"] = e.error.asdict()
+            js_config["formData"] = {
+                "username": self.request.POST.get("username", ""),
+                "password": self.request.POST.get("password", ""),
+            }
+            return {
+                "js_config": js_config,
+            }
+
+        user = appstruct["user"]
+        headers = self._login(user)
+        return httpexceptions.HTTPFound(
+            location=self._login_redirect(), headers=headers
+        )
+
     @view_config(
         request_method="POST",
         request_param="for_oauth",
         renderer="h:templates/accounts/login_oauth.html.jinja2",
     )
-    def post(self):
+    def post_oauth(self):
         """Log the user in and redirect them."""
         self._redirect_if_logged_in()
 

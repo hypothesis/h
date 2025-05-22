@@ -62,7 +62,7 @@ class GroupCreateEditController:
             }
 
         js_config = {
-            "styles": self.request.registry["assets_env"].urls("group_forms_css"),
+            "styles": self.request.registry["assets_env"].urls("forms_css"),
             "api": {
                 "createGroup": api_config("api.groups", "POST"),
             },

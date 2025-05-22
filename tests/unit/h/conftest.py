@@ -42,6 +42,9 @@ class FakeInvalid:
     def __init__(self, errors):
         self.errors = errors
 
+    def asdict(self):
+        return self.errors
+
 
 @pytest.fixture
 def cli():
