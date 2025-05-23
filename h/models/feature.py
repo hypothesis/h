@@ -17,6 +17,7 @@ FEATURES = {
     "group_moderation": "Allow users to moderate annotations in groups",
     "group_type": "Allow users to choose group type in new group forms",
     "html_image_annotation": "Support image annotations in HTML",
+    "image_descriptions": "Allow users to enter descriptions for image annotations",
     "pdf_custom_text_layer": "Use custom text layer in PDFs for improved text selection",
     "pdf_image_annotation": "Support image annotations in PDFs",
     "styled_highlight_clusters": "Style different clusters of highlights in the client",
