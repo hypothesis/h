@@ -1,14 +1,27 @@
 import { Spinner } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 
 import type { Group } from '../config';
+import type { GroupAnnotationsResult } from '../hooks/use-group-annotations';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
-import type { APIAnnotationData } from '../utils/api';
 import GroupFormHeader from './GroupFormHeader';
 import type { ModerationStatus } from './ModerationStatusSelect';
 import ModerationStatusSelect from './ModerationStatusSelect';
 import FormContainer from './forms/FormContainer';
+
+/**
+ * Checks if the Window's scroll is at the bottom.
+ *
+ * @param offset - Return true if the difference between the element's current
+ *                 and maximum scroll position is below this value.
+ *                 Defaults to 20.
+ */
+function windowScrollIsAtBottom(offset = 20): boolean {
+  const distanceToTop = window.scrollY + window.innerHeight;
+  const triggerPoint = document.body.clientHeight - offset;
+  return distanceToTop >= triggerPoint;
+}
 
 type AnnotationListProps = {
   filterStatus?: ModerationStatus;
@@ -16,30 +29,51 @@ type AnnotationListProps = {
 };
 
 function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
-  const { loading, annotations } = useGroupAnnotations({ filterStatus });
+  const { loadNextPage, ...groupAnnotationsResult } = useGroupAnnotations({
+    filterStatus,
+  });
+
+  const lastScrollPosition = useRef(0);
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    window.addEventListener(
+      'scroll',
+      () => {
+        const newScrollPosition = window.scrollY;
+        const isScrollingDown = newScrollPosition > lastScrollPosition.current;
+        lastScrollPosition.current = newScrollPosition;
+
+        if (isScrollingDown && windowScrollIsAtBottom()) {
+          loadNextPage();
+        }
+      },
+      { signal: abortController.signal },
+    );
+
+    return () => abortController.abort();
+  }, [loadNextPage]);
 
   return (
     <section className={classnames('flex flex-col gap-y-2', classes)}>
       <AnnotationListContent
-        loading={loading}
-        annotations={annotations}
         filterStatus={filterStatus}
+        {...groupAnnotationsResult}
       />
     </section>
   );
 }
 
-type AnnotationListContentProps = AnnotationListProps & {
-  loading: boolean;
-  annotations: APIAnnotationData[];
-};
+type AnnotationListContentProps = AnnotationListProps &
+  Omit<GroupAnnotationsResult, 'loadNextPage'>;
 
 function AnnotationListContent({
   loading,
+  loadingFirstPage,
   annotations,
   filterStatus,
 }: AnnotationListContentProps) {
-  if (loading) {
+  if (loadingFirstPage) {
     return (
       <div className="mx-auto">
         <Spinner size="md" />
@@ -60,11 +94,20 @@ function AnnotationListContent({
     );
   }
 
-  return annotations.map(anno => (
-    <article key={anno.id} className="border rounded p-2">
-      {anno.text}
-    </article>
-  ));
+  return (
+    <>
+      {annotations.map(anno => (
+        <article key={anno.id} className="border rounded p-2">
+          {anno.text}
+        </article>
+      ))}
+      {loading && (
+        <div className="text-center" data-testid="page-loading-indicator">
+          Loading more annotations…
+        </div>
+      )}
+    </>
+  );
 }
 
 export type GroupModerationProps = {

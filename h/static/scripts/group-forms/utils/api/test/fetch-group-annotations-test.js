@@ -4,7 +4,12 @@ describe('fetch-group-annotations', () => {
   let fakeCallAPI;
 
   beforeEach(() => {
-    fakeCallAPI = sinon.stub().resolves({ data: [] });
+    fakeCallAPI = sinon.stub().resolves({
+      data: [],
+      meta: {
+        page: { total: 0 },
+      },
+    });
 
     $imports.$mock({
       '.': {
