@@ -62,18 +62,28 @@ describe('GroupModeration', () => {
     });
 
     [
-      { status: 'PENDING', expectedFallbackMessage: 'You are all set!' },
+      {
+        status: undefined,
+        expectedFallbackMessage: 'There are no annotations in this group.',
+      },
+      {
+        status: 'PENDING',
+        expectedFallbackMessage:
+          'There are no Pending annotations in this group.',
+      },
       {
         status: 'APPROVED',
-        expectedFallbackMessage: 'No annotations found for selected status',
+        expectedFallbackMessage:
+          'There are no Approved annotations in this group.',
       },
       {
         status: 'DENIED',
-        expectedFallbackMessage: 'No annotations found for selected status',
+        expectedFallbackMessage:
+          'There are no Denied annotations in this group.',
       },
       {
         status: 'SPAM',
-        expectedFallbackMessage: 'No annotations found for selected status',
+        expectedFallbackMessage: 'There are no Spam annotations in this group.',
       },
     ].forEach(({ status, expectedFallbackMessage }) => {
       it('shows fallback message when no annotations exist', () => {

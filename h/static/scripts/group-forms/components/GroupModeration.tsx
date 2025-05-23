@@ -5,6 +5,7 @@ import { useState } from 'preact/hooks';
 import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData } from '../utils/api';
+import { moderationStatusToLabel } from '../utils/moderation-status';
 import GroupFormHeader from './GroupFormHeader';
 import type { ModerationStatus } from './ModerationStatusSelect';
 import ModerationStatusSelect from './ModerationStatusSelect';
@@ -53,9 +54,16 @@ function AnnotationListContent({
         className="border rounded p-2 text-center"
         data-testid="annotations-fallback-message"
       >
-        {filterStatus === 'PENDING'
-          ? 'You are all set!'
-          : 'No annotations found for selected status'}
+        {!filterStatus && 'There are no annotations in this group.'}
+        {filterStatus && (
+          <>
+            There are no{' '}
+            <span className="lowercase">
+              {moderationStatusToLabel[filterStatus]}
+            </span>{' '}
+            annotations in this group.
+          </>
+        )}
       </div>
     );
   }
