@@ -45,7 +45,7 @@
     "wouter-preact": "^3.3.5"
   },
   "devDependencies": {
-    "@hypothesis/frontend-testing": "^1.6.0",
+    "@hypothesis/frontend-testing": "^1.7.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@vitest/browser": "^3.1.2",
     "@vitest/coverage-istanbul": "^3.1.2",
