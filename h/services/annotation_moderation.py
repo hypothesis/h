@@ -26,22 +26,24 @@ class AnnotationModerationService:
         annotation: Annotation,
         status: ModerationStatus | None,
         user: User | None = None,
-    ) -> None:
+    ) -> ModerationLog | None:
         """Set the moderation status for an annotation."""
         if status and status != annotation.moderation_status:
-            self._session.add(
-                ModerationLog(
-                    annotation=annotation,
-                    old_moderation_status=annotation.moderation_status,
-                    new_moderation_status=status,
-                    moderator=user,
-                )
+            moderation_log = ModerationLog(
+                annotation=annotation,
+                old_moderation_status=annotation.moderation_status,
+                new_moderation_status=status,
+                moderator=user,
             )
+
+            self._session.add(moderation_log)
             annotation.moderation_status = status
             if annotation.slim:
                 # We only have to worry about AnnotationSlim if we already have one
                 # if we don't the process to create it will set the right value here
                 annotation.slim.moderated = annotation.is_hidden
+
+            return moderation_log
 
     def update_status(self, action: AnnotationAction, annotation: Annotation) -> None:
         """Change the moderation status of an annotation based on the action taken."""
