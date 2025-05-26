@@ -53,7 +53,7 @@ def change_annotation_moderation_status(context, request):
         ChangeAnnotationModerationStatusSchema(context.annotation), request
     )
     status = ModerationStatus(params["moderation_status"])
-    request.find_service(name="annotation_moderation").set_status(
+    moderation_log = request.find_service(name="annotation_moderation").set_status(
         context.annotation, status, request.user
     )
     _notify_moderation_change(request, context.annotation.id)
