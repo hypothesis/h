@@ -1,6 +1,9 @@
+from unittest.mock import Mock, sentinel
+
 import pytest
 
 from h.models.annotation import ModerationStatus
+from h.models.notification import EmailTag
 from h.services.annotation_moderation import (
     AnnotationModerationService,
     annotation_moderation_service_factory,
@@ -184,6 +187,168 @@ class TestAnnotationModerationService:
 
         assert annotation.moderation_status == expected_status
 
+    def test_queue_moderation_change_email_when_group_not_pre_moderated(
+        self, svc, factories, email, pyramid_request
+    ):
+        group = factories.Group(pre_moderated=False)
+        annotation = factories.Annotation(group=group)
+        moderation_log = factories.ModerationLog(annotation=annotation)
+
+        svc.queue_moderation_change_email(pyramid_request, moderation_log.id)
+
+        email.send.delay.assert_not_called()
+
+    def test_queue_moderation_change_email_when_no_email(
+        self,
+        svc,
+        factories,
+        email,
+        pyramid_request,
+        user_service,
+    ):
+        user_service.fetch.return_value = factories.User(email=None)
+        group = factories.Group(pre_moderated=True)
+        annotation = factories.Annotation(group=group)
+        moderation_log = factories.ModerationLog(annotation=annotation)
+
+        svc.queue_moderation_change_email(pyramid_request, moderation_log.id)
+
+        email.send.delay.assert_not_called()
+
+    def test_queue_moderation_change_email_when_no_subscription(
+        self,
+        svc,
+        factories,
+        email,
+        pyramid_request,
+        subscription_service,
+    ):
+        subscription_service.get_subscription.return_value = Mock(active=False)
+        group = factories.Group(pre_moderated=True)
+        annotation = factories.Annotation(group=group)
+        moderation_log = factories.ModerationLog(annotation=annotation)
+
+        svc.queue_moderation_change_email(pyramid_request, moderation_log.id)
+
+        email.send.delay.assert_not_called()
+
+    def test_queue_moderation_change_email_for_status_that_dont_trigger_emails(
+        self, svc, factories, email, pyramid_request
+    ):
+        group = factories.Group(pre_moderated=True)
+        annotation = factories.Annotation(group=group)
+        moderation_log = factories.ModerationLog(
+            annotation=annotation, new_moderation_status=ModerationStatus.SPAM
+        )
+
+        svc.queue_moderation_change_email(pyramid_request, moderation_log.id)
+
+        email.send.delay.assert_not_called()
+
+    def test_queue_moderation_change_email_sent(
+        self,
+        svc,
+        factories,
+        email,
+        pyramid_request,
+        user_service,
+        html_renderer,
+        text_renderer,
+        subscription_service,
+    ):
+        user = factories.User()
+        user_service.fetch.return_value = user
+        group = factories.Group(pre_moderated=True, name="GROUP NAME")
+        annotation = factories.Annotation(group=group)
+        moderation_log = factories.ModerationLog(
+            annotation=annotation,
+            old_moderation_status=ModerationStatus.PENDING,
+            new_moderation_status=ModerationStatus.APPROVED,
+        )
+
+        svc.queue_moderation_change_email(pyramid_request, moderation_log.id)
+
+        expected_context = {
+            "user_display_name": user.display_name,
+            "annotation_url": pyramid_request.route_url("annotation", id=annotation.id),
+            "annotation": annotation,
+            "annotation_quote": annotation.quote,
+            "unsubscribe_url": pyramid_request.route_url(
+                "unsubscribe",
+                token=subscription_service.get_unsubscribe_token.return_value,
+            ),
+            "status_change_description": "The following comment has been approved by the moderation team for GROUP NAME.\nIt's now visible to everyone viewing that group.",
+        }
+        html_renderer.assert_(**expected_context)  # noqa: PT009
+        text_renderer.assert_(**expected_context)  # noqa: PT009
+        email.send.delay.assert_called_once_with(
+            {
+                "recipients": [user.email],
+                "subject": "Your comment in GROUP NAME has been approved",
+                "body": "",
+                "tag": EmailTag.MODERATION,
+                "html": "",
+                "subaccount": sentinel.email_subaccount,
+            },
+            {
+                "tag": EmailTag.MODERATION,
+                "sender_id": user.id,
+                "recipient_ids": [user.id],
+                "extra": {"annotation_id": annotation.id},
+            },
+        )
+
+    @pytest.mark.parametrize(
+        "new_status,subject",
+        [
+            (ModerationStatus.APPROVED, "Your comment in GROUP NAME has been approved"),
+            (
+                ModerationStatus.PENDING,
+                "Your comment in GROUP NAME is pending approval",
+            ),
+            (ModerationStatus.DENIED, "Your comment in GROUP NAME has been declined"),
+        ],
+    )
+    def test_email_subject(self, new_status, subject, svc, factories):
+        group = factories.Group(name="GROUP NAME")
+        assert svc.email_subject(group.name, new_status) == subject
+
+    def test_email_subject_raises_value_error_for_unexpected_status(self, svc):
+        with pytest.raises(ValueError, match="Unexpected moderation status"):
+            svc.email_subject("GROUP NAME", ModerationStatus.SPAM)
+
+    @pytest.mark.parametrize(
+        "new_status,description",
+        [
+            (
+                ModerationStatus.APPROVED,
+                "The following comment has been approved by the moderation team for GROUP NAME.\nIt's now visible to everyone viewing that group.",
+            ),
+            (
+                ModerationStatus.PENDING,
+                "The following comment has been hidden by the moderation team for GROUP NAME and is only visible to that group's moderators and yourself.\nYou'll receive another email when your comment's moderation status changes.",
+            ),
+            (
+                ModerationStatus.DENIED,
+                "The following comment has been declined by the moderation team for GROUP NAME.\n"
+                "You can edit this comment and it will be reevaluated by that group's moderators.",
+            ),
+        ],
+    )
+    def test_email_description(self, new_status, description, svc, factories):
+        group = factories.Group(name="GROUP NAME")
+        assert (
+            svc.email_status_change_description(group.name, new_status) == description
+        )
+
+    def test_email_description_raises_value_error_for_unexpected_status(self, svc):
+        with pytest.raises(ValueError, match="Unexpected moderation status"):
+            svc.email_status_change_description("GROUP NAME", ModerationStatus.SPAM)
+
+    @pytest.fixture
+    def email(self, patch):
+        return patch("h.services.annotation_moderation.email")
+
     @pytest.fixture(autouse=True)
     def moderated_annotations(self, factories):
         return factories.Annotation.create_batch(
@@ -200,13 +365,39 @@ class TestAnnotationModerationService:
         db_session.flush()
         return user
 
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("annotation", "/ann/{id}")
+        pyramid_config.add_route("unsubscribe", "/unsub/{token}")
+        pyramid_config.add_route(
+            "account_notifications", "/account/settings/notifications"
+        )
+
+    @pytest.fixture(autouse=True)
+    def html_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer(
+            "h:templates/emails/annotation_moderation_notification.html.jinja2"
+        )
+
+    @pytest.fixture(autouse=True)
+    def text_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer(
+            "h:templates/emails/annotation_moderation_notification.txt.jinja2"
+        )
+
 
 @pytest.fixture
-def svc(db_session):
-    return AnnotationModerationService(db_session)
+def svc(db_session, user_service, subscription_service):
+    return AnnotationModerationService(
+        db_session,
+        user_service=user_service,
+        subscription_service=subscription_service,
+        email_subaccount=sentinel.email_subaccount,
+    )
 
 
 class TestAnnotationModerationServiceFactory:
+    @pytest.mark.usefixtures("user_service", "subscription_service")
     def test_it_returns_service(self, pyramid_request):
         svc = annotation_moderation_service_factory(None, pyramid_request)
         assert isinstance(svc, AnnotationModerationService)

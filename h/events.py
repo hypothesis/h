@@ -10,3 +10,11 @@ class AnnotationEvent:
         self.request = request
         self.annotation_id = annotation_id
         self.action = action
+
+
+class ModeratedAnnotationEvent:
+    """An event representing a moderation status change on an annotation."""
+
+    def __init__(self, request, moderation_log_id: int):
+        self.request = request
+        self.moderation_log_id = moderation_log_id

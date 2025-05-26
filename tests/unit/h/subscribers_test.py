@@ -6,7 +6,7 @@ from kombu.exceptions import OperationalError
 from transaction import TransactionManager
 
 from h import __version__, subscribers
-from h.events import AnnotationEvent
+from h.events import AnnotationEvent, ModeratedAnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 from h.models.notification import NotificationType
 from h.tasks import email
@@ -324,6 +324,17 @@ class TestPublishAnnotationEventForAuthority:
 
         annotations.publish_annotation_event_for_authority.delay.assert_called_once_with(
             event.action, event.annotation_id
+        )
+
+
+class TestSendModerationNotifications:
+    def test_it(self, pyramid_request, moderation_service):
+        event = ModeratedAnnotationEvent(pyramid_request, sentinel.moderation_log_id)
+
+        subscribers.send_moderation_notification(event)
+
+        moderation_service.queue_moderation_change_email.assert_called_once_with(
+            event.request, event.moderation_log_id
         )
 
 
