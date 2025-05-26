@@ -20,6 +20,7 @@ class EmailTag(StrEnum):
     RESET_PASSWORD = "reset_password"  # noqa: S105
     MENTION_NOTIFICATION = "mention_notification"
     TEST = "test"
+    MODERATION = "moderation"
 
 
 class Notification(Base, Timestamps):  # pragma: no cover

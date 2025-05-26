@@ -40,4 +40,15 @@
     </iframe>
   </div>
 
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title mb-0">Preview the moderated annotation Email Template</h3>
+    </div>
+    <iframe
+      class="card-body p-0"
+      style="height: 40em; border: none;"
+      src="{{ request.route_url("admin.email.preview.annotation_moderation_notification") }}"
+    >
+    </iframe>
+  </div>
 {% endblock %}

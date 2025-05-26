@@ -65,6 +65,10 @@ def test_includeme():
             "admin.email.preview.mention_notification",
             "/admin/email/preview/mention-notification",
         ),
+        call(
+            "admin.email.preview.annotation_moderation_notification",
+            "/admin/email/preview/annotation-moderation-notification",
+        ),
         call("admin.nipsa", "/admin/nipsa"),
         call("admin.oauthclients", "/admin/oauthclients"),
         call("admin.oauthclients_create", "/admin/oauthclients/new"),
