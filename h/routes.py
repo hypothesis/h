@@ -58,6 +58,10 @@ def includeme(config):  # noqa: PLR0915
         "admin.email.preview.mention_notification",
         "/admin/email/preview/mention-notification",
     )
+    config.add_route(
+        "admin.email.preview.moderated_annotation_notification",
+        "/admin/email/preview/moderated-annotation-notification",
+    )
     config.add_route("admin.nipsa", "/admin/nipsa")
     config.add_route("admin.oauthclients", "/admin/oauthclients")
     config.add_route("admin.oauthclients_create", "/admin/oauthclients/new")
