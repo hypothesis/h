@@ -1,3 +1,4 @@
+from unittest.mock import sentinel
 import pytest
 
 from h.models.annotation import ModerationStatus
@@ -202,11 +203,17 @@ class TestAnnotationModerationService:
 
 
 @pytest.fixture
-def svc(db_session):
-    return AnnotationModerationService(db_session)
+def svc(db_session, user_service, subscription_service):
+    return AnnotationModerationService(
+        db_session,
+        user_service=user_service,
+        subscription_service=subscription_service,
+        email_subaccount=sentinel.email_subaccount,
+    )
 
 
 class TestAnnotationModerationServiceFactory:
+    @pytest.mark.usefixtures("user_service", "subscription_service")
     def test_it_returns_service(self, pyramid_request):
         svc = annotation_moderation_service_factory(None, pyramid_request)
         assert isinstance(svc, AnnotationModerationService)
