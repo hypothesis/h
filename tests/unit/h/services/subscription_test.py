@@ -46,6 +46,7 @@ class TestSubscriptionService:
         mocks_subscriptions = [
             sentinel.reply_subscription,
             sentinel.mention_subscription,
+            sentinel.moderation_subscription,
         ]
         with patch.object(
             svc, "get_subscription", side_effect=mocks_subscriptions
@@ -55,6 +56,7 @@ class TestSubscriptionService:
             assert get_subscription.mock_calls == [
                 call(sentinel.user_id, Subscriptions.Type.REPLY),
                 call(sentinel.user_id, Subscriptions.Type.MENTION),
+                call(sentinel.user_id, Subscriptions.Type.MODERATION),
             ]
 
             assert subscriptions == mocks_subscriptions

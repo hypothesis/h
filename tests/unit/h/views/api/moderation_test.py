@@ -72,8 +72,10 @@ class TestChangeAnnotationModerationStatus:
         events,
         annotation,
         valid_payload,
+        factories,
     ):
         pyramid_request.json_body = valid_payload
+        moderation_service.set_status.return_value = factories.ModerationLog()
 
         response = views.change_annotation_moderation_status(
             annotation_context, pyramid_request
@@ -85,8 +87,14 @@ class TestChangeAnnotationModerationStatus:
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
         )
-        pyramid_request.notify_after_commit.assert_called_once_with(
-            events.AnnotationEvent.return_value
+        events.ModeratedAnnotationEvent.assert_called_once_with(
+            pyramid_request, moderation_service.set_status.return_value.id
+        )
+        pyramid_request.notify_after_commit.assert_has_calls(
+            [
+                mock.call(events.AnnotationEvent.return_value),
+                mock.call(events.ModeratedAnnotationEvent.return_value),
+            ]
         )
         annotation_json_service.present_for_user.assert_called_once_with(
             annotation=annotation, user=pyramid_request.user

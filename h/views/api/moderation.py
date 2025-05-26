@@ -56,13 +56,20 @@ def change_annotation_moderation_status(context, request):
     moderation_log = request.find_service(name="annotation_moderation").set_status(
         context.annotation, status, request.user
     )
-    _notify_moderation_change(request, context.annotation.id)
+
+    _notify_moderation_change(request, context.annotation.id, moderation_log)
 
     return request.find_service(name="annotation_json").present_for_user(
         annotation=context.annotation, user=request.user
     )
 
 
-def _notify_moderation_change(request, annotation_id):
+def _notify_moderation_change(request, annotation_id, moderation_log=None):
     event = events.AnnotationEvent(request, annotation_id, "update")
     request.notify_after_commit(event)
+
+    if moderation_log:
+        moderation_event = events.ModeratedAnnotationEvent(
+            request, moderation_log_id=moderation_log.id
+        )
+        request.notify_after_commit(moderation_event)
