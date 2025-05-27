@@ -39,6 +39,10 @@ export type ConfigObject = {
     group_members: boolean;
     group_type: boolean;
     group_moderation: boolean;
+
+    // TODO Populate and make mandatory
+    display_names_enabled?: boolean;
+    at_mentions?: boolean;
   };
 };
 

@@ -8,9 +8,8 @@ import {
   Select,
 } from '@hypothesis/frontend-shared';
 
+import type { ModerationStatus } from '../utils/api';
 import { moderationStatusToLabel } from '../utils/moderation-status';
-
-export type ModerationStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'SPAM';
 
 export type ModerationStatusSelectProps = {
   selected?: ModerationStatus;
