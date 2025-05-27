@@ -1,15 +1,15 @@
-import { Spinner } from '@hypothesis/frontend-shared';
-import classnames from 'classnames';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { Spinner } from "@hypothesis/frontend-shared";
+import classnames from "classnames";
+import { useEffect, useRef, useState } from "preact/hooks";
 
-import FormContainer from '../../forms-common/components/FormContainer';
-import type { Group } from '../config';
-import { useGroupAnnotations } from '../hooks/use-group-annotations';
-import type { APIAnnotationData } from '../utils/api';
-import { moderationStatusToLabel } from '../utils/moderation-status';
-import GroupFormHeader from './GroupFormHeader';
-import type { ModerationStatus } from './ModerationStatusSelect';
-import ModerationStatusSelect from './ModerationStatusSelect';
+import AnnotationCard from "../../annotation/components/AnnotationCard";
+import FormContainer from "../../forms-common/components/FormContainer";
+import type { Group } from "../config";
+import { useGroupAnnotations } from "../hooks/use-group-annotations";
+import type { APIAnnotationData, ModerationStatus } from "../utils/api";
+import { moderationStatusToLabel } from "../utils/moderation-status";
+import GroupFormHeader from "./GroupFormHeader";
+import ModerationStatusSelect from "./ModerationStatusSelect";
 
 /**
  * Checks if provided element's scroll is at the bottom.
@@ -38,7 +38,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
     const abortController = new AbortController();
 
     window.addEventListener(
-      'scroll',
+      "scroll",
       () => {
         const newScrollPosition = window.scrollY;
         const isScrollingDown = newScrollPosition > lastScrollPosition.current;
@@ -59,7 +59,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
   }, [loadNextPage]);
 
   return (
-    <section className={classnames('flex flex-col gap-y-2', classes)}>
+    <section className={classnames("flex flex-col gap-y-2", classes)}>
       <AnnotationListContent
         filterStatus={filterStatus}
         loading={loading}
@@ -86,13 +86,13 @@ function AnnotationListContent({
         className="border rounded p-2 text-center"
         data-testid="annotations-fallback-message"
       >
-        {!filterStatus && 'There are no annotations in this group.'}
+        {!filterStatus && "There are no annotations in this group."}
         {filterStatus && (
           <>
-            There are no{' '}
+            There are no{" "}
             <span className="lowercase">
               {moderationStatusToLabel[filterStatus]}
-            </span>{' '}
+            </span>{" "}
             annotations in this group.
           </>
         )}
@@ -102,9 +102,9 @@ function AnnotationListContent({
 
   return (
     <>
-      {annotations?.map(anno => (
-        <article key={anno.id} className="border rounded p-2">
-          {anno.text}
+      {annotations?.map((anno) => (
+        <article key={anno.id}>
+          <AnnotationCard annotation={anno} />
         </article>
       ))}
       {loading && (
@@ -124,7 +124,7 @@ export type GroupModerationProps = {
 export default function GroupModeration({ group }: GroupModerationProps) {
   const [filterStatus, setFilterStatus] = useState<
     ModerationStatus | undefined
-  >('PENDING');
+  >("PENDING");
   return (
     <FormContainer>
       <GroupFormHeader title="Moderate group" group={group} />

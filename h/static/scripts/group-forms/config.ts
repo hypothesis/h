@@ -1,6 +1,6 @@
-import { createContext } from 'preact';
+import { createContext } from "preact";
 
-import type { GroupType } from './utils/api';
+import type { GroupType } from "./utils/api";
 
 export type APIConfig = {
   method: string;
@@ -40,6 +40,10 @@ export type ConfigObject = {
     group_type: boolean;
     group_moderation: boolean;
     pre_moderation: boolean;
+
+    // TODO Populate and make mandatory
+    display_names_enabled?: boolean;
+    at_mentions?: boolean;
   };
 };
 

@@ -1,6 +1,9 @@
-import type { APIAnnotationData, GroupAnnotationsResponse } from '.';
+import type {
+  APIAnnotationData,
+  GroupAnnotationsResponse,
+  ModerationStatus,
+} from '.';
 import { callAPI, paginationToParams } from '.';
-import type { ModerationStatus } from '../../components/ModerationStatusSelect';
 import type { APIConfig } from '../../config';
 
 export type FetchGroupAnnotationsOptions = {
