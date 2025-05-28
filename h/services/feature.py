@@ -3,6 +3,7 @@ import re
 from packaging import version
 
 from h import models
+from h.models import User
 from h.util.db import lru_cache_in_transaction
 
 PARAM_PATTERN = re.compile(r"\A__feature__\[(?P<featurename>[A-Za-z0-9_-]+)\]\Z")
@@ -61,7 +62,7 @@ class FeatureService:
 
         self._cached_load = lru_cache_in_transaction(self.session)(self._load)
 
-    def enabled(self, name, user=None):
+    def enabled(self, name: str, user: User | None) -> bool:
         """
         Determine if the named feature is enabled for the specified `user`.
 
