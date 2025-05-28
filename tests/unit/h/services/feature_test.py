@@ -52,36 +52,36 @@ class TestFeatureService:
     def test_enable_feature_via_override(self, db_session):
         svc = FeatureService(session=db_session, overrides={"foo": True})
 
-        assert svc.enabled("foo") is True
+        assert svc.enabled("foo", user=None) is True
 
     def test_enabled_false_if_everyone_false(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert not svc.enabled("foo")
+        assert not svc.enabled("foo", user=None)
 
     def test_enabled_true_if_everyone_true(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert svc.enabled("on-for-everyone") is True
+        assert svc.enabled("on-for-everyone", user=None) is True
 
     def test_disable_feature_via_override(self, db_session):
         svc = FeatureService(session=db_session, overrides={"on-for-everyone": False})
 
-        assert svc.enabled("on-for-everyone") is False
+        assert svc.enabled("on-for-everyone", user=None) is False
 
     def test_enabled_if_first_party(self, db_session, factories):
         user = factories.User(authority="foobar.com")
         third_party_user = factories.User(authority="othersite.com")
         svc = FeatureService(session=db_session, default_authority=user.authority)
 
-        assert svc.enabled("on-for-first-party") is False
+        assert svc.enabled("on-for-first-party", user=None) is False
         assert svc.enabled("on-for-first-party", user) is True
         assert svc.enabled("on-for-first-party", third_party_user) is False
 
     def test_enabled_false_when_admins_true_no_user(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert not svc.enabled("on-for-admins")
+        assert not svc.enabled("on-for-admins", user=None)
 
     def test_enabled_false_when_admins_true_nonadmin_user(self, db_session, factories):
         svc = FeatureService(session=db_session)
@@ -98,7 +98,7 @@ class TestFeatureService:
     def test_enabled_false_when_staff_true_no_user(self, db_session):
         svc = FeatureService(session=db_session)
 
-        assert not svc.enabled("on-for-staff")
+        assert not svc.enabled("on-for-staff", user=None)
 
     def test_enabled_false_when_staff_true_nonstaff_user(self, db_session, factories):
         svc = FeatureService(session=db_session)
@@ -115,7 +115,7 @@ class TestFeatureService:
     def test_enabled_false_when_cohort_no_user(self, db_session):
         svc = FeatureService(db_session)
 
-        assert not svc.enabled("on-for-cohort")
+        assert not svc.enabled("on-for-cohort", user=None)
 
     def test_enabled_false_when_cohort_user_not_in_cohort(self, db_session, factories):
         svc = FeatureService(db_session)
@@ -135,7 +135,7 @@ class TestFeatureService:
         svc = FeatureService(session=db_session)
 
         with pytest.raises(UnknownFeatureError):
-            svc.enabled("wibble")
+            svc.enabled("wibble", user=None)
 
     def test_all_returns_feature_dictionary(self, db_session):
         svc = FeatureService(db_session)
