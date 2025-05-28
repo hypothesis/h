@@ -14,6 +14,7 @@ from tests.common.factories.feature import Feature
 from tests.common.factories.feature_cohort import FeatureCohort
 from tests.common.factories.flag import Flag
 from tests.common.factories.group import Group, OpenGroup, RestrictedGroup
+from tests.common.factories.group_membership import GroupMembership
 from tests.common.factories.group_scope import GroupScope
 from tests.common.factories.job import ExpungeUserJob, Job, SyncAnnotationJob
 from tests.common.factories.mention import Mention
