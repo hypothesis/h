@@ -1,4 +1,4 @@
-import type { ModerationStatus } from '../components/ModerationStatusSelect';
+import type { ModerationStatus } from './api';
 
 export const moderationStatusToLabel: Record<ModerationStatus, string> = {
   PENDING: 'Pending',

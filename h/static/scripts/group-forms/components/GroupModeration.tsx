@@ -2,12 +2,12 @@ import { Spinner } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
+import AnnotationCard from '../../annotation/components/AnnotationCard';
 import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
-import type { APIAnnotationData } from '../utils/api';
+import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import { moderationStatusToLabel } from '../utils/moderation-status';
 import GroupFormHeader from './GroupFormHeader';
-import type { ModerationStatus } from './ModerationStatusSelect';
 import ModerationStatusSelect from './ModerationStatusSelect';
 import FormContainer from './forms/FormContainer';
 
@@ -103,8 +103,8 @@ function AnnotationListContent({
   return (
     <>
       {annotations?.map(anno => (
-        <article key={anno.id} className="border rounded p-2">
-          {anno.text}
+        <article key={anno.id}>
+          <AnnotationCard annotation={anno} />
         </article>
       ))}
       {loading && (
