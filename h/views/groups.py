@@ -76,6 +76,7 @@ class GroupCreateEditController:
                 "group_members": self.request.feature("group_members"),
                 "group_type": self.request.feature("group_type"),
                 "group_moderation": self.request.feature("group_moderation"),
+                "pre_moderation": self.request.feature("pre_moderation"),
             },
         }
 

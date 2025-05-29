@@ -53,6 +53,7 @@ class TestCreate:
         views.create(pyramid_request)
 
         CreateGroupAPISchema.assert_called_once_with(
+            request=pyramid_request,
             default_authority=pyramid_request.default_authority,
             group_authority=sentinel.effective_authority,
         )
@@ -292,6 +293,7 @@ class TestUpdate:
         views.update(context, pyramid_request)
 
         UpdateGroupAPISchema.assert_called_once_with(
+            request=pyramid_request,
             default_authority=pyramid_request.default_authority,
             group_authority=sentinel.effective_authority,
         )
