@@ -4,9 +4,14 @@ import GroupModeration, { $imports } from '../GroupModeration';
 
 describe('GroupModeration', () => {
   let fakeUseGroupAnnotations;
+  let fakeLoadNextPage;
 
   beforeEach(() => {
-    fakeUseGroupAnnotations = sinon.stub().returns({ loading: true });
+    fakeLoadNextPage = sinon.stub();
+    fakeUseGroupAnnotations = sinon.stub().returns({
+      loading: true,
+      loadNextPage: fakeLoadNextPage,
+    });
 
     $imports.$mock({
       '../hooks/use-group-annotations': {
@@ -54,7 +59,7 @@ describe('GroupModeration', () => {
   describe('annotations list', () => {
     [true, false].forEach(loading => {
       it('shows loading indicator when loading', () => {
-        fakeUseGroupAnnotations.returns({ loading, annotations: [] });
+        fakeUseGroupAnnotations.returns({ loading });
         const wrapper = createComponent();
 
         assert.equal(wrapper.exists('Spinner'), loading);
@@ -116,6 +121,26 @@ describe('GroupModeration', () => {
       assert.lengthOf(annotationNodes, annotations.length);
       annotations.forEach((anno, index) => {
         assert.equal(annotationNodes.at(index).text(), anno.text);
+      });
+    });
+
+    [
+      {
+        scrollTop: 0,
+        shouldCallNextPage: false,
+      },
+      {
+        scrollTop: 2000,
+        shouldCallNextPage: true,
+      },
+    ].forEach(({ scrollTop, shouldCallNextPage }) => {
+      it('loads next page when scrolling down', () => {
+        createComponent();
+
+        window.scrollY = scrollTop;
+        window.dispatchEvent(new Event('scroll'));
+
+        assert.equal(fakeLoadNextPage.called, shouldCallNextPage);
       });
     });
   });

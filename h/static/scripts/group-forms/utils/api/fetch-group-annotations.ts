@@ -4,18 +4,29 @@ import type { ModerationStatus } from '../../components/ModerationStatusSelect';
 import type { APIConfig } from '../../config';
 
 export type FetchGroupAnnotationsOptions = {
-  signal: AbortSignal;
-  pageNumber?: number;
+  signal?: AbortSignal;
+  pageNumber: number;
+  pageSize: number;
   moderationStatus?: ModerationStatus;
+};
+
+export type FetchGroupAnnotationsResult = {
+  annotations: APIAnnotationData[];
+  total: number;
 };
 
 export async function fetchGroupAnnotations(
   { url, headers, method }: APIConfig,
-  { signal, pageNumber = 1, moderationStatus }: FetchGroupAnnotationsOptions,
-): Promise<APIAnnotationData[]> {
+  {
+    signal,
+    pageNumber,
+    pageSize,
+    moderationStatus,
+  }: FetchGroupAnnotationsOptions,
+): Promise<FetchGroupAnnotationsResult> {
   const query: Record<string, string | number> = paginationToParams({
     pageNumber,
-    pageSize: 20,
+    pageSize,
   });
   if (moderationStatus) {
     query.moderation_status = moderationStatus;
@@ -28,5 +39,8 @@ export async function fetchGroupAnnotations(
     signal,
   });
 
-  return resp.data;
+  return {
+    annotations: resp.data,
+    total: resp.meta.page.total,
+  };
 }

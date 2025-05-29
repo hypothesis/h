@@ -4,7 +4,12 @@ describe('fetch-group-annotations', () => {
   let fakeCallAPI;
 
   beforeEach(() => {
-    fakeCallAPI = sinon.stub().resolves({ data: [] });
+    fakeCallAPI = sinon.stub().resolves({
+      data: [],
+      meta: {
+        page: { total: 0 },
+      },
+    });
 
     $imports.$mock({
       '.': {
@@ -16,6 +21,7 @@ describe('fetch-group-annotations', () => {
   [
     {
       pageNumber: 10,
+      pageSize: 20,
       moderationStatus: 'APPROVED',
       expectedQuery: {
         'page[number]': 10,
@@ -33,9 +39,10 @@ describe('fetch-group-annotations', () => {
     },
     {
       pageNumber: 5,
+      pageSize: 6,
       expectedQuery: {
         'page[number]': 5,
-        'page[size]': 20,
+        'page[size]': 6,
       },
     },
     {
@@ -44,25 +51,27 @@ describe('fetch-group-annotations', () => {
         'page[size]': 20,
       },
     },
-  ].forEach(({ pageNumber = 1, moderationStatus, expectedQuery }) => {
-    it('calls API with expected parameters', async () => {
-      const { signal } = new AbortController();
+  ].forEach(
+    ({ pageNumber = 1, pageSize = 20, moderationStatus, expectedQuery }) => {
+      it('calls API with expected parameters', async () => {
+        const { signal } = new AbortController();
 
-      await fetchGroupAnnotations(
-        {
-          url: '/api/groups/abc123/annotations',
+        await fetchGroupAnnotations(
+          {
+            url: '/api/groups/abc123/annotations',
+            method: 'GET',
+            headers: {},
+          },
+          { signal, pageNumber, pageSize, moderationStatus },
+        );
+
+        assert.calledWith(fakeCallAPI, '/api/groups/abc123/annotations', {
+          signal,
+          query: expectedQuery,
           method: 'GET',
           headers: {},
-        },
-        { signal, pageNumber, moderationStatus },
-      );
-
-      assert.calledWith(fakeCallAPI, '/api/groups/abc123/annotations', {
-        signal,
-        query: expectedQuery,
-        method: 'GET',
-        headers: {},
+        });
       });
-    });
-  });
+    },
+  );
 });
