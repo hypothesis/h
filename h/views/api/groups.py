@@ -45,6 +45,7 @@ def groups(request):
 def create(request):
     """Create a group from the POST payload."""
     appstruct = CreateGroupAPISchema(
+        request=request,
         default_authority=request.default_authority,
         group_authority=request.effective_authority,
     ).validate(json_payload(request))
@@ -115,6 +116,7 @@ def read(context: GroupContext, request):
 def update(context: GroupContext, request):
     """Update a group from a PATCH payload."""
     appstruct = UpdateGroupAPISchema(
+        request=request,
         default_authority=request.default_authority,
         group_authority=request.effective_authority,
     ).validate(json_payload(request))

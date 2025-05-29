@@ -298,7 +298,7 @@ export default function CreateEditGroupForm({
           </div>
         )}
 
-        {config.features.group_moderation && (
+        {config.features.pre_moderation && (
           <fieldset>
             <legend className="font-bold">Moderation</legend>
             <Checkbox
