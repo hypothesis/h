@@ -130,7 +130,13 @@ export default function TextField({
         name={name}
         type={inputType}
       />
-      {fieldError && !hasCommitted && <ErrorNotice message={fieldError} />}
+      {typeof maxLength === 'number' && (
+        <CharacterCounter
+          value={[...value].length}
+          limit={maxLength}
+          error={Boolean(error)}
+        />
+      )}
       {fieldError && !hasCommitted && (
         <div className="mt-1">
           <ErrorNotice message={fieldError} />

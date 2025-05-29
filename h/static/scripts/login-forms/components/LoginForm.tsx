@@ -1,4 +1,5 @@
 import { Button } from '@hypothesis/frontend-shared';
+import classnames from 'classnames';
 import { useContext, useState } from 'preact/hooks';
 
 import FormContainer from '../../group-forms/components/forms/FormContainer';
@@ -12,13 +13,21 @@ export default function LoginForm() {
   const [username, setUsername] = useState(config.formData?.username ?? '');
   const [password, setPassword] = useState(config.formData?.password ?? '');
 
+  const formAction = new URL(routes.login, window.location.origin);
+  if (config.forOAuth) {
+    formAction.searchParams.set('for_oauth', 'true');
+  }
+
   return (
     <FormContainer>
       <form
-        action={routes.login}
+        action={formAction.toString()}
         method="POST"
         data-testid="form"
-        className="max-w-[530px] mx-auto flex flex-col gap-y-4"
+        className={classnames({
+          'max-w-[530px] mx-auto flex flex-col': true,
+          'gap-y-4': !config.forOAuth,
+        })}
       >
         <input type="hidden" name="csrf_token" value={config.csrfToken} />
         <TextField
@@ -53,8 +62,18 @@ export default function LoginForm() {
           </a>
         </div>
         <div className="mb-8 pt-2 flex items-center gap-x-4">
+          {config.forOAuth && (
+            <Button
+              type="button"
+              variant="secondary"
+              data-testid="cancel-button"
+              onClick={() => window.close()}
+            >
+              Cancel
+            </Button>
+          )}
           <div className="grow" />
-          <Button type="submit" variant="primary" data-testid="button">
+          <Button type="submit" variant="primary" data-testid="submit-button">
             Log in
           </Button>
         </div>
