@@ -717,7 +717,7 @@ paths:
           $ref: '#/components/responses/NoContent'
 
     # ----------------------------------------------------------
-    # DELETE annotations/{id}/hide - Unhide  an annotation
+    # DELETE annotations/{id}/hide - Unhide an annotation
     # ----------------------------------------------------------
     delete:
       tags:
@@ -734,6 +734,43 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
+
+    # ----------------------------------------------------------
+    # PATCH annotations/{id}/moderation - Update the moderation_status of an annotation
+    # ----------------------------------------------------------
+    patch:
+      tags:
+        - annotations
+      summary: Moderate an annotation
+      description: |
+        Change the moderation_status of an annotation. The authenticated user needs to have the
+        moderate permission for the group that contains the annotation—this
+        permission is granted to the user who created the group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+        - name: moderation_status
+          in: query
+          schema:
+            description: The new moderation status for the annotation.
+            type: string
+            enum: [APPROVED, PENDING, DENIED, SPAM]
+        - name: annotation_updated
+          in: query
+          description: |
+            The timestamp of the annotation's last update, in ISO 8601 format.
+            This is used to ensure that the annotation has not been modified since it was fetched.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
 
   # ---------------------------------------------------------------------------
   # Operations on Group collections
@@ -1031,6 +1068,55 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
+
+  # ---------------------------------------------------------------------------
+  # Group annotations
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # GET groups/{id}/annotations - List the annotations of group
+  # ---------------------------------------------------------------------------
+  /groups/{id}/annotations:
+    get:
+      tags:
+        - groups
+      summary: List annotations in a group
+      description: |
+        Get a paginated list of all annotations in a group.
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+        - name: moderation_status
+          in: query
+          description: |
+            Filter the annotations by their moderation status.
+            If not specified, all annotations are returned.
+          schema:
+            type: string
+            enum: [APPROVED, PENDING, DENIED, SPAM]
+      security:
+        - ApiKey: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/*json:
+              schema:
+                oneOf:
+                  - title: "Paginated"
+                    type: object
+                    properties:
+                      meta:
+                        description: "Metadata about this response."
+                        type: object
+                        properties:
+                          page:
+                            $ref: '#/components/schemas/PaginationMeta'
+                      data:
+                        description: "The list of annotations for the requested page."
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Annotation'
 
   # ---------------------------------------------------------------------------
   # Operations on the currently-authenticated user (Profile)
