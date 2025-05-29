@@ -6,7 +6,12 @@ from pyramid.httpexceptions import HTTPSeeOther
 
 from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
-from h.views.admin.email import email_index, email_test, preview_mention_notification
+from h.views.admin.email import (
+    email_index,
+    email_test,
+    preview_annotation_moderation_notification,
+    preview_mention_notification,
+)
 
 
 class TestEmailIndex:
@@ -85,6 +90,21 @@ class TestPreviewMentionNotification:
             "document_url": "https://example.com/document",
             "annotation": {
                 "text_rendered": 'Hello <a data-hyp-mention data-userid="acct:user@example.com">@user</a>, how are you?',
+            },
+            "annotation_quote": "This is a very important text",
+        }
+
+
+class TestPreviewModeratedAnnotationNotification:
+    def test_returns_dummy_data(self, pyramid_request):
+        result = preview_annotation_moderation_notification(pyramid_request)
+
+        assert result == {
+            "user_display_name": "Jane Doe",
+            "status_change_description": "The following comment has been approved by the moderation team for GROUP NAME.\nIt's now visible to everyone viewing that group.",
+            "annotation_url": "https://example.com/bouncer",
+            "annotation": {
+                "text_rendered": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tincidunt malesuada ex, id dictum risus posuere sed. Curabitur risus lectus, aliquam vel tempus ut, tempus non risus. Duis ac nibh lacinia, lacinia leo sit amet, lacinia tortor. Vestibulum dictum maximus lorem, nec lobortis augue ullamcorper nec. Ut ac viverra nisi. Nam congue neque eu mi viverra ultricies. Integer pretium odio nulla, at semper dolor tincidunt quis. Pellentesque suscipit magna nec nunc mollis, a interdum purus aliquam.",
             },
             "annotation_quote": "This is a very important text",
         }

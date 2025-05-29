@@ -18,6 +18,7 @@ class Subscriptions(Base):
 
         REPLY = "reply"
         MENTION = "mention"
+        MODERATION = "moderation"
 
     __tablename__ = "subscriptions"
 

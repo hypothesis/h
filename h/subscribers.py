@@ -6,7 +6,7 @@ from kombu.exceptions import OperationalError
 from pyramid.events import BeforeRender, subscriber
 
 from h import __version__, emails
-from h.events import AnnotationEvent
+from h.events import AnnotationEvent, ModeratedAnnotationEvent
 from h.exceptions import RealtimeMessageQueueError
 from h.models.notification import NotificationType
 from h.notification import mention, reply
@@ -178,3 +178,10 @@ def publish_annotation_event_for_authority(event):
     annotations.publish_annotation_event_for_authority.delay(
         event.action, event.annotation_id
     )
+
+
+@subscriber(ModeratedAnnotationEvent)
+def send_moderation_notification(event: ModeratedAnnotationEvent) -> None:
+    event.request.find_service(
+        name="annotation_moderation"
+    ).queue_moderation_change_email(event.request, event.moderation_log_id)
