@@ -2,7 +2,6 @@ import { createContext } from 'preact';
 
 export type ConfigObject = {
   /** The URLs of the app's CSS stylesheets. */
-  styles: string[];
   csrfToken: string;
   formErrors?: Record<string, string>;
   formData?: Record<string, string>;
