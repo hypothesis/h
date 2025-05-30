@@ -1,5 +1,5 @@
 import { Input, Textarea } from '@hypothesis/frontend-shared';
-import { useId, useState } from 'preact/hooks';
+import { useEffect, useId, useRef, useState } from 'preact/hooks';
 
 import Label from './Label';
 
@@ -97,17 +97,29 @@ export default function TextField({
 
   const InputComponent = type === 'input' ? Input : Textarea;
 
+  // Apply autofocus. We do this ourselves rather than use the input's
+  // `autofocus` attribute to work around an issue with autofocus not being
+  // applied to elements in Shadow DOM in Safari and Firefox.
+  // See https://github.com/hypothesis/h/pull/9596#issuecomment-2922175483.
+  const inputRef = useRef<HTMLElement>();
+  useEffect(() => {
+    if (autofocus) {
+      inputRef.current?.focus();
+    }
+    // This will also trigger if `autofocus` changes after mount. That's OK.
+  }, [autofocus]);
+
   return (
     <div>
       <Label htmlFor={id} text={label} required={required} />
       <InputComponent
         id={id}
+        elementRef={inputRef}
         onInput={handleInput}
         onChange={handleChange}
         error={error}
         value={value}
         classes={classes}
-        autofocus={autofocus}
         autocomplete="off"
         required={required}
       />

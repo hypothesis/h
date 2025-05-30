@@ -79,6 +79,13 @@ describe('TextField', () => {
     );
   });
 
+  it('focuses input field on mount if `autofocus` is set', () => {
+    const wrapper = mount(<TextField value="" autofocus />, {
+      connected: true,
+    });
+    assert.equal(document.activeElement, wrapper.find('input').getDOMNode());
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({
