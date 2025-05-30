@@ -1,4 +1,3 @@
-import { useMemo } from 'preact/hooks';
 import { Route, Switch } from 'wouter-preact';
 
 import Router from '../../group-forms/components/Router';
@@ -12,21 +11,8 @@ export type AppRootProps = {
 };
 
 export default function AppRoot({ config }: AppRootProps) {
-  const stylesheetLinks = useMemo(
-    () =>
-      config.styles.map((stylesheetURL, index) => (
-        <link
-          key={`${stylesheetURL}${index}`}
-          rel="stylesheet"
-          href={stylesheetURL}
-        />
-      )),
-    [config],
-  );
-
   return (
     <>
-      {stylesheetLinks}
       <Config.Provider value={config}>
         <Router>
           <Switch>
