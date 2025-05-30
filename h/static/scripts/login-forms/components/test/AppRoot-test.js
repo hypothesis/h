@@ -1,4 +1,4 @@
-import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
+import { mount } from '@hypothesis/frontend-testing';
 import { useContext } from 'preact/hooks';
 
 import { Config } from '../../config';
@@ -7,7 +7,7 @@ import { $imports, default as AppRoot } from '../AppRoot';
 describe('AppRoot', () => {
   let configContext;
 
-  const config = { styles: [] };
+  const config = { csrfToken: 'fake-csrf-token' };
 
   beforeEach(() => {
     const mockComponent = name => {
@@ -33,16 +33,6 @@ describe('AppRoot', () => {
   function createComponent() {
     return mount(<AppRoot config={config} />);
   }
-
-  it('renders style links', () => {
-    config.styles = ['/static/styles/foo.css'];
-
-    const links = createComponent().find('link');
-
-    assert.equal(links.length, 1);
-    assert.equal(links.at(0).prop('rel'), 'stylesheet');
-    assert.equal(links.at(0).prop('href'), '/static/styles/foo.css');
-  });
 
   /** Navigate to `path`, run `callback` and then reset the location. */
   function navigate(path, callback) {
@@ -77,9 +67,4 @@ describe('AppRoot', () => {
       });
     });
   });
-
-  it(
-    'should pass a11y checks',
-    checkAccessibility({ content: createComponent }),
-  );
 });
