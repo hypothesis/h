@@ -14,6 +14,7 @@ class TestGroupCreateEditController:
     def test_create(self, pyramid_request, assets_env, mocker, flag):
         pyramid_request.feature.flags["group_type"] = flag
         pyramid_request.feature.flags["group_moderation"] = flag
+        pyramid_request.feature.flags["pre_moderation"] = flag
 
         mocker.spy(views, "get_csrf_token")
 
@@ -44,6 +45,7 @@ class TestGroupCreateEditController:
                     "group_type": flag,
                     "group_members": pyramid_request.feature.flags["group_members"],
                     "group_moderation": flag,
+                    "pre_moderation": flag,
                 },
             },
         }
@@ -128,6 +130,7 @@ class TestGroupCreateEditController:
                     "group_moderation": pyramid_request.feature.flags[
                         "group_moderation"
                     ],
+                    "pre_moderation": pyramid_request.feature.flags["pre_moderation"],
                 },
             },
         }
@@ -147,6 +150,7 @@ class TestGroupCreateEditController:
         pyramid_request.feature.flags["group_type"] = True
         pyramid_request.feature.flags["group_members"] = True
         pyramid_request.feature.flags["group_moderation"] = True
+        pyramid_request.feature.flags["pre_moderation"] = True
         return pyramid_request
 
 

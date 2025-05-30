@@ -36,7 +36,7 @@ class GroupAPISchema(JSONSchema):
 
     schema = {"type": "object", "properties": GROUP_SCHEMA_PROPERTIES}  # noqa: RUF012
 
-    def __init__(self, group_authority=None, default_authority=None):
+    def __init__(self, request, group_authority=None, default_authority=None):
         """
         Initialize a new group schema instance.
 
@@ -49,6 +49,7 @@ class GroupAPISchema(JSONSchema):
 
         """
         super().__init__()
+        self.request = request
         self.group_authority = group_authority
         self.default_authority = default_authority
 
@@ -66,6 +67,12 @@ class GroupAPISchema(JSONSchema):
         appstruct = self._whitelisted_fields_only(appstruct)
         self._validate_name(appstruct)
         self._validate_groupid(appstruct)
+
+        # Only allow enabling pre-moderation if the feature flag is enabled
+        if appstruct.get("pre_moderated", False) and not self.request.feature(
+            "pre_moderation"
+        ):
+            appstruct["pre_moderated"] = False
 
         return appstruct
 

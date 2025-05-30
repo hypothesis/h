@@ -81,12 +81,28 @@ class TestGroupAPISchema:
             ),
         ],
     )
-    def test_valid(self, group_authority, data, expected_appstruct):
+    def test_valid(self, group_authority, data, expected_appstruct, pyramid_request):
         schema = GroupAPISchema(
-            group_authority=group_authority, default_authority=DEFAULT_AUTHORITY
+            request=pyramid_request,
+            group_authority=group_authority,
+            default_authority=DEFAULT_AUTHORITY,
         )
 
         assert schema.validate(data) == expected_appstruct
+
+    @pytest.mark.parametrize("flag", [True, False])
+    @pytest.mark.parametrize("request_value", [True, False])
+    def test_pre_moderation_flag(self, request_value, pyramid_request, flag):
+        pyramid_request.feature.flags["pre_moderation"] = flag
+
+        schema = GroupAPISchema(
+            request=pyramid_request,
+            default_authority=DEFAULT_AUTHORITY,
+        )
+
+        assert schema.validate({"pre_moderated": request_value}) == {
+            "pre_moderated": flag and request_value,
+        }
 
     @pytest.mark.parametrize(
         "group_authority,data,error_message",
@@ -179,17 +195,21 @@ class TestGroupAPISchema:
             ),
         ],
     )
-    def test_invalid(self, group_authority, data, error_message):
+    def test_invalid(self, group_authority, data, error_message, pyramid_request):
         schema = GroupAPISchema(
-            group_authority=group_authority, default_authority=DEFAULT_AUTHORITY
+            request=pyramid_request,
+            group_authority=group_authority,
+            default_authority=DEFAULT_AUTHORITY,
         )
 
         with pytest.raises(ValidationError, match=error_message):
             schema.validate(data)
 
-    def test_it_sets_authority_properties(self):
+    def test_it_sets_authority_properties(self, pyramid_request):
         schema = GroupAPISchema(
-            group_authority="thirdparty.com", default_authority=DEFAULT_AUTHORITY
+            request=pyramid_request,
+            group_authority="thirdparty.com",
+            default_authority=DEFAULT_AUTHORITY,
         )
 
         assert schema.group_authority == "thirdparty.com"
@@ -222,9 +242,11 @@ class TestCreateGroupAPISchema:
             schema.validate({})
 
     @pytest.fixture
-    def schema(self):
+    def schema(self, pyramid_request):
         schema = CreateGroupAPISchema(
-            group_authority=DEFAULT_AUTHORITY, default_authority=DEFAULT_AUTHORITY
+            request=pyramid_request,
+            group_authority=DEFAULT_AUTHORITY,
+            default_authority=DEFAULT_AUTHORITY,
         )
         return schema
 
@@ -236,8 +258,10 @@ class TestUpdateGroupAPISchema:
         assert appstruct == {}
 
     @pytest.fixture
-    def schema(self):
+    def schema(self, pyramid_request):
         schema = UpdateGroupAPISchema(
-            group_authority=DEFAULT_AUTHORITY, default_authority=DEFAULT_AUTHORITY
+            request=pyramid_request,
+            group_authority=DEFAULT_AUTHORITY,
+            default_authority=DEFAULT_AUTHORITY,
         )
         return schema

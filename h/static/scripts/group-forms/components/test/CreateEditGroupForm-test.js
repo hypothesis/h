@@ -240,20 +240,20 @@ describe('CreateEditGroupForm', () => {
   });
 
   describe('pre-moderation', () => {
-    [true, false].forEach(moderationEnabled => {
+    [true, false].forEach(preModerationEnabled => {
       it('shows pre-moderation checkbox when group moderation is enabled', () => {
-        config.features.group_moderation = moderationEnabled;
+        config.features.pre_moderation = preModerationEnabled;
         const { wrapper } = createWrapper();
 
         assert.equal(
           preModerationCheckbox(wrapper).exists(),
-          moderationEnabled,
+          preModerationEnabled,
         );
       });
     });
 
     it('toggles pre-moderation by clicking on it', () => {
-      config.features.group_moderation = true;
+      config.features.pre_moderation = true;
       const { wrapper } = createWrapper();
 
       assert.isFalse(isPreModerationEnabled(wrapper));
@@ -472,7 +472,7 @@ describe('CreateEditGroupForm', () => {
     });
 
     it('marks form as unsaved if pre-moderation checkbox changes', () => {
-      config.features.group_moderation = true;
+      config.features.pre_moderation = true;
       const { wrapper } = createWrapper();
 
       assert.isFalse(navigateWarningActive());

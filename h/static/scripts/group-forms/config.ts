@@ -39,6 +39,7 @@ export type ConfigObject = {
     group_members: boolean;
     group_type: boolean;
     group_moderation: boolean;
+    pre_moderation: boolean;
   };
 };
 

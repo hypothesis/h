@@ -15,6 +15,7 @@ FEATURES = {
     ),
     "group_members": "Allow users to manage group members in new group forms",
     "group_moderation": "Allow users to moderate annotations in groups",
+    "pre_moderation": "Allow users to enable pre moderated in groups, where all annotations require approval",
     "group_type": "Allow users to choose group type in new group forms",
     "html_image_annotation": "Support image annotations in HTML",
     "image_descriptions": "Allow users to enter descriptions for image annotations",
