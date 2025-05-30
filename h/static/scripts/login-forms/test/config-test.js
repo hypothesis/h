@@ -6,7 +6,7 @@ describe('readConfig', () => {
 
   beforeEach(() => {
     expectedConfig = {
-      styles: ['/static/foo.css'],
+      csrfToken: 'fake-csrf-token',
     };
     configEl = document.createElement('script');
     configEl.className = 'js-config';
