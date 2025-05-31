@@ -181,7 +181,7 @@ hupper==1.12
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.130.6
+hypothesis==6.132.0
     # via -r requirements/tests.txt
 idna==3.10
     # via
@@ -290,13 +290,13 @@ peppercorn==0.6
 pip-sync-faster==0.0.5
     # via
     #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
     #   -r requirements/lint.in
+    #   -r requirements/tests.txt
 pip-tools==7.4.1
     # via
     #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
     #   -r requirements/lint.in
+    #   -r requirements/tests.txt
     #   pip-sync-faster
 plaster==1.1.2
     # via

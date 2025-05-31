@@ -122,7 +122,7 @@ hupper==1.12
     # via
     #   -r requirements/prod.txt
     #   pyramid
-hypothesis==6.130.6
+hypothesis==6.132.0
     # via -r requirements/tests.in
 idna==3.10
     # via
