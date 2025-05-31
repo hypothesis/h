@@ -10,7 +10,7 @@ click==8.1.8
     # via pip-tools
 importlib-metadata==7.0.1
     # via pip-sync-faster
-packaging==24.2
+packaging==25.0
     # via build
 pip-sync-faster==0.0.5
     # via -r requirements/checkformatting.in

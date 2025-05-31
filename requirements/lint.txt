@@ -264,7 +264,7 @@ oauthlib==3.2.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-packaging==24.2
+packaging==25.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -290,13 +290,13 @@ peppercorn==0.6
 pip-sync-faster==0.0.5
     # via
     #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
     #   -r requirements/lint.in
+    #   -r requirements/tests.txt
 pip-tools==7.4.1
     # via
     #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
     #   -r requirements/lint.in
+    #   -r requirements/tests.txt
     #   pip-sync-faster
 plaster==1.1.2
     # via
