@@ -65,7 +65,7 @@
     "prettier": "^3.4.1",
     "sinon": "^20.0.0",
     "syn": "^0.2.2",
-    "typescript": "^5.7.2",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.16.0",
     "vitest": "^3.1.2"
   },
