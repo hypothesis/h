@@ -105,8 +105,8 @@ h-assets==1.0.7
     # via -r requirements/prod.txt
 h-matchers==1.2.17
     # via
-    #   -r requirements/prod.txt
     #   -r requirements/functests.in
+    #   -r requirements/prod.txt
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.txt
 h-testkit==1.0.1
@@ -172,7 +172,7 @@ newrelic==10.5.0
     # via -r requirements/prod.txt
 oauthlib==3.2.2
     # via -r requirements/prod.txt
-packaging==24.2
+packaging==25.0
     # via
     #   -r requirements/prod.txt
     #   build
