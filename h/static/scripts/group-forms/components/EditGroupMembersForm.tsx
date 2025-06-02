@@ -8,6 +8,8 @@ import {
 } from '@hypothesis/frontend-shared';
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
+import ErrorNotice from '../../forms-common/components/ErrorNotice';
+import FormContainer from '../../forms-common/components/FormContainer';
 import WarningDialog from '../../forms-common/components/WarningDialog';
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
@@ -19,9 +21,7 @@ import type {
   GroupMembersResponse,
   Role,
 } from '../utils/api';
-import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
-import FormContainer from './forms/FormContainer';
 
 type TableColumn<Row> = {
   field: keyof Row;

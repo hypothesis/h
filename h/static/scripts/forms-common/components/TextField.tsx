@@ -1,7 +1,7 @@
 import { Input, Textarea } from '@hypothesis/frontend-shared';
 import { useId, useState } from 'preact/hooks';
 
-import ErrorNotice from '../ErrorNotice';
+import ErrorNotice from './ErrorNotice';
 import Label from './Label';
 
 function CharacterCounter({

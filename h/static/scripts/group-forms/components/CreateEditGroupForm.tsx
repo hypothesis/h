@@ -7,6 +7,12 @@ import {
 } from '@hypothesis/frontend-shared';
 import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
+import Checkbox from '../../forms-common/components/Checkbox';
+import ErrorNotice from '../../forms-common/components/ErrorNotice';
+import FormContainer from '../../forms-common/components/FormContainer';
+import Label from '../../forms-common/components/Label';
+import Star from '../../forms-common/components/Star';
+import TextField from '../../forms-common/components/TextField';
 import WarningDialog from '../../forms-common/components/WarningDialog';
 import { useUnsavedChanges } from '../../forms-common/unsaved-changes';
 import { Config } from '../config';
@@ -19,14 +25,8 @@ import type {
 } from '../utils/api';
 import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
-import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
 import SaveStateIcon from './SaveStateIcon';
-import Checkbox from './forms/Checkbox';
-import FormContainer from './forms/FormContainer';
-import Label from './forms/Label';
-import Star from './forms/Star';
-import TextField from './forms/TextField';
 
 /**
  * Dialog that warns users about existing annotations in a group being exposed
