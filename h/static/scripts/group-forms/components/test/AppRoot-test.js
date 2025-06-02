@@ -36,14 +36,6 @@ describe('AppRoot', () => {
     return mount(<AppRoot config={config} />);
   }
 
-  it('renders style links', () => {
-    config.styles = ['/static/styles/foo.css'];
-    const links = createComponent().find('link');
-    assert.equal(links.length, 1);
-    assert.equal(links.at(0).prop('rel'), 'stylesheet');
-    assert.equal(links.at(0).prop('href'), '/static/styles/foo.css');
-  });
-
   /** Navigate to `path`, run `callback` and then reset the location. */
   function navigate(path, callback) {
     history.pushState({}, null, path);

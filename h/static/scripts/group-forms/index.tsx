@@ -5,10 +5,9 @@ import AppRoot from './components/AppRoot';
 import type { ConfigObject } from './config';
 
 function init() {
-  const shadowHost = document.querySelector('#group-form')!;
-  const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+  const container = document.querySelector('#group-form')!;
   const config = readConfig<ConfigObject>();
-  render(<AppRoot config={config} />, shadowRoot);
+  render(<AppRoot config={config} />, container);
 }
 
 init();
