@@ -349,6 +349,21 @@ class UserSearchController(SearchController):
             "orcid": self.user.orcid,
         }
 
+        if not self.request.user and (self.user.nipsa or annotation_count == 0):
+            # To avoid linking to potentially spammy or NIPSA'd user profiles
+            # we don't link to the user profile if the user is not logged in
+            # We redirect to the login page instead
+            return httpexceptions.HTTPSeeOther(
+                location=self.request.route_url(
+                    "login",
+                    _query={
+                        "next": self.request.route_url(
+                            "activity.user_search", username=self.user.username
+                        )
+                    },
+                )
+            )
+
         if self.request.user == self.user:
             result["user"]["edit_url"] = self.request.route_url("account_profile")
 
