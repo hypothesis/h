@@ -1,5 +1,6 @@
 import datetime
 from unittest import mock
+from urllib.parse import quote_plus
 
 import pytest
 from h_matchers import Any
@@ -1071,6 +1072,36 @@ class TestUserSearchController:
 
         assert result["zero_message"] == "__SHOW_GETTING_STARTED__"
 
+    def test_redirect_to_login_for_nipsaed_users(
+        self, controller, user, pyramid_request
+    ):
+        # No logged in user
+        pyramid_request.user = None
+        user.nipsa = True
+
+        result = controller.search()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert (
+            result.location
+            == f"http://example.com/login?next={quote_plus('http://example.com/users/' + user.username)}"
+        )
+
+    def test_redirect_to_login_for_zero_anno_users(
+        self, controller, pyramid_request, annotation_stats_service, user
+    ):
+        # No logged in user
+        pyramid_request.user = None
+        annotation_stats_service.user_annotation_count.return_value = 0
+
+        result = controller.search()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert (
+            result.location
+            == f"http://example.com/login?next={quote_plus('http://example.com/users/' + user.username)}"
+        )
+
     def test_back_redirects_to_user_search(self, controller, user, pyramid_request):
         """It should redirect and preserve the search query param."""
         pyramid_request.matched_route = mock.Mock()
@@ -1359,6 +1390,7 @@ def routes(pyramid_config):
     pyramid_config.add_route("group_read", "/groups/{pubid}/{slug}")
     pyramid_config.add_route("group_edit", "/groups/{pubid}/edit")
     pyramid_config.add_route("account_profile", "/account/profile")
+    pyramid_config.add_route("login", "/login")
 
 
 @pytest.fixture
