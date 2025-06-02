@@ -3,7 +3,7 @@ import { useCallback, useState } from 'preact/hooks';
 import { Router as BaseRouter } from 'wouter-preact';
 import { useBrowserLocation } from 'wouter-preact/use-browser-location';
 
-import { hasUnsavedChanges } from '../utils/unsaved-changes';
+import { hasUnsavedChanges } from '../unsaved-changes';
 import WarningDialog from './WarningDialog';
 
 export type RouterProps = {

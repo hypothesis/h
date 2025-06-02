@@ -8,6 +8,7 @@ import {
 } from '@hypothesis/frontend-shared';
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
+import WarningDialog from '../../forms-common/components/WarningDialog';
 import { Config } from '../config';
 import type { APIConfig, Group } from '../config';
 import { paginationToParams } from '../utils/api';
@@ -20,7 +21,6 @@ import type {
 } from '../utils/api';
 import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
-import WarningDialog from './WarningDialog';
 import FormContainer from './forms/FormContainer';
 
 type TableColumn<Row> = {

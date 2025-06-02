@@ -1,7 +1,7 @@
 import { render } from 'preact';
 
-import AppRoot from './components/AppRoot';
 import { readConfig } from '../forms-common/config';
+import AppRoot from './components/AppRoot';
 import type { ConfigObject } from './config';
 
 function init() {

@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'preact/hooks';
 import { Route, Switch } from 'wouter-preact';
 
+import Router from '../../forms-common/components/Router';
 import type { ConfigObject } from '../config';
 import { Config } from '../config';
 import { routes } from '../routes';
 import CreateEditGroupForm from './CreateEditGroupForm';
 import EditGroupMembersForm from './EditGroupMembersForm';
 import GroupModeration from './GroupModeration';
-import Router from './Router';
 
 export type AppRootProps = {
   config: ConfigObject;
