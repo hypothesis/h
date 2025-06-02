@@ -1,8 +1,8 @@
 import { Button } from '@hypothesis/frontend-shared';
 import { useContext, useState } from 'preact/hooks';
 
-import FormContainer from '../../group-forms/components/forms/FormContainer';
-import TextField from '../../group-forms/components/forms/TextField';
+import FormContainer from '../../forms-common/components/FormContainer';
+import TextField from '../../forms-common/components/TextField';
 import { Config } from '../config';
 import { routes } from '../routes';
 

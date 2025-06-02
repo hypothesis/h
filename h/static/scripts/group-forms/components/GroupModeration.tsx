@@ -2,6 +2,7 @@ import { Spinner } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
+import FormContainer from '../../forms-common/components/FormContainer';
 import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData } from '../utils/api';
@@ -9,7 +10,6 @@ import { moderationStatusToLabel } from '../utils/moderation-status';
 import GroupFormHeader from './GroupFormHeader';
 import type { ModerationStatus } from './ModerationStatusSelect';
 import ModerationStatusSelect from './ModerationStatusSelect';
-import FormContainer from './forms/FormContainer';
 
 /**
  * Checks if provided element's scroll is at the bottom.
