@@ -10,7 +10,7 @@
   {{ super() }}
 
   {% for url in asset_urls('forms_css') %}
-    <link rel="stylesheet" href={{ url }} as="style"/>
+    <link rel="stylesheet" href="{{ url }}">
   {% endfor %}
 {% endblock %}
 
