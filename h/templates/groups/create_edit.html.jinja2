@@ -3,10 +3,8 @@
 {% block styles %}
   {{ super() }}
 
-  {# Avoid a "flash of unstyled content" by preloading the stylesheets that
-     will be used by the Preact app within its Shadow DOM. #}
   {% for url in asset_urls('forms_css') %}
-    <link rel="preload" href={{ url }} as="style" />
+    <link rel="stylesheet" href="{{ url }}">
   {% endfor %}
 {% endblock %}
 
