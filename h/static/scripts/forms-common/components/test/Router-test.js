@@ -23,7 +23,7 @@ describe('Router', () => {
     initialHistoryLen = history.length;
 
     $imports.$mock({
-      '../utils/unsaved-changes': {
+      '../unsaved-changes': {
         hasUnsavedChanges: fakeHasUnsavedChanges,
       },
     });

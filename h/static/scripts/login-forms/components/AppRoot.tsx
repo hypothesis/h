@@ -1,6 +1,6 @@
 import { Route, Switch } from 'wouter-preact';
 
-import Router from '../../group-forms/components/Router';
+import Router from '../../forms-common/components/Router';
 import type { ConfigObject } from '../config';
 import { Config } from '../config';
 import { routes } from '../routes';

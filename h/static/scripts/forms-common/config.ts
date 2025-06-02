@@ -6,4 +6,3 @@ export function readConfig<T>(): T {
     throw new Error('Failed to parse frontend configuration');
   }
 }
-

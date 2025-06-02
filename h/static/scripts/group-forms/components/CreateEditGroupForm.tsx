@@ -7,6 +7,8 @@ import {
 } from '@hypothesis/frontend-shared';
 import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
+import WarningDialog from '../../forms-common/components/WarningDialog';
+import { useUnsavedChanges } from '../../forms-common/unsaved-changes';
 import { Config } from '../config';
 import type { Group } from '../config';
 import { callAPI } from '../utils/api';
@@ -17,11 +19,9 @@ import type {
 } from '../utils/api';
 import { pluralize } from '../utils/pluralize';
 import { setLocation } from '../utils/set-location';
-import { useUnsavedChanges } from '../utils/unsaved-changes';
 import ErrorNotice from './ErrorNotice';
 import GroupFormHeader from './GroupFormHeader';
 import SaveStateIcon from './SaveStateIcon';
-import WarningDialog from './WarningDialog';
 import Checkbox from './forms/Checkbox';
 import FormContainer from './forms/FormContainer';
 import Label from './forms/Label';
