@@ -10,15 +10,22 @@ $sans-font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande',
   sans-serif !default;
 $mono-font-family: Open Sans Mono, Menlo, DejaVu Sans Mono, monospace !default;
 
-// Standard font sizes
-$normal-font-size: 13px;
-$normal-line-height: 15px;
+// Standard font sizes. These align with Tailwind's font sizes for better
+// consistency with the Preact + Tailwind-based UI.
+//
+// See https://tailwindcss.com/docs/font-size.
 
-$big-font-size: 17px;
-$big-line-height: 22px;
+// Matches Tailwind's `text-sm`
+$normal-font-size: 0.875rem;
+$normal-line-height: calc(1.25 / 0.875);
 
-$small-font-size: 11px;
-$small-line-height: 12px;
+// Matches Tailwind's `text-base`
+$big-font-size: 1rem;
+$big-line-height: calc(1.5 / 1);
+
+// Matches Tailwind's `text-xs`
+$small-font-size: 0.75rem;
+$small-line-height: calc(1 / 0.75);
 
 $title-font-size: 19px;
 $subtitle-font-size: 15px;
@@ -36,14 +43,11 @@ $touch-input-font-size: 16px;
 @mixin font-small {
   font-size: $small-font-size;
   line-height: $small-line-height;
-  font-weight: 400;
-  letter-spacing: 0.2px;
 }
 
 @mixin font-normal {
   font-size: $normal-font-size;
   line-height: $normal-line-height;
-  font-weight: 400;
 }
 
 @mixin font-big {
