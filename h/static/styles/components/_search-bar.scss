@@ -11,6 +11,8 @@
   border-radius: 2px;
   display: flex;
   flex-wrap: wrap;
+  padding: 3px 7px;
+  align-items: center;
 
   // scope absolute positioned elements
   position: relative;
@@ -23,8 +25,8 @@
 
   // Add spacing to left of input field for search icon
   padding-left: 7px;
-  padding-top: 18px;
-  padding-bottom: 18px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   padding-right: 3px;
 
   // prevent the search input from being squashed
@@ -50,13 +52,11 @@
   width: calc(100% - 24px);
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .search-bar__icon {
   flex-shrink: 0;
-  height: 14px;
-  margin-left: 7px;
-  margin-top: 18px;
   color: color.$grey-5;
 }
 
