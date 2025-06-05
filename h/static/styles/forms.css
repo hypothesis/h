@@ -3,3 +3,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import '../scripts/annotations-ui/StyledText.css';

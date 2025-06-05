@@ -1,3 +1,5 @@
+import type { Mention } from '../../../annotations-ui';
+
 /**
  * Values for `type` field when creating or updating groups.
  */
@@ -65,6 +67,10 @@ export type PaginatedResponse<Item> = {
  */
 export type GroupMembersResponse = PaginatedResponse<GroupMember>;
 
+export type UserInfo = {
+  display_name: string | null;
+};
+
 /**
  * Represents an annotation as returned by the h API.
  * API docs: https://h.readthedocs.io/en/latest/api-reference/#tag/annotations
@@ -72,6 +78,14 @@ export type GroupMembersResponse = PaginatedResponse<GroupMember>;
 export type APIAnnotationData = {
   id?: string;
   text: string;
+
+  mentions: Mention[];
+
+  user: string;
+  user_info?: UserInfo;
+
+  created: string;
+  updated: string;
 };
 
 /**
