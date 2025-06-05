@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@hypothesis/frontend-shared';
+import classnames from 'classnames';
 import { useContext } from 'preact/hooks';
 
 import {
@@ -33,7 +34,13 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
   const config = useContext(Config)!;
 
   return (
-    <Card>
+    <Card
+      classes={classnames({
+        'border-red': annotation.moderation_status === 'DENIED',
+        'border-yellow': annotation.moderation_status === 'SPAM',
+        'border-green': annotation.moderation_status === 'APPROVED',
+      })}
+    >
       <CardContent>
         <header className="w-full">
           <div className="flex gap-x-1 items-center justify-between">

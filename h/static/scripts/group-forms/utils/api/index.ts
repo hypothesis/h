@@ -71,6 +71,8 @@ export type UserInfo = {
   display_name: string | null;
 };
 
+export type ModerationStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'SPAM';
+
 /**
  * Represents an annotation as returned by the h API.
  * API docs: https://h.readthedocs.io/en/latest/api-reference/#tag/annotations
@@ -86,6 +88,8 @@ export type APIAnnotationData = {
 
   created: string;
   updated: string;
+
+  moderation_status: ModerationStatus;
 };
 
 /**
