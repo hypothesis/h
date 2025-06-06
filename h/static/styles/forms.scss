@@ -1,0 +1,5 @@
+/* CSS entry point for the Preact apps. */
+@use 'tailwindcss/base';
+@use 'tailwindcss/components';
+@use '../scripts/annotations-ui/StyledText.css';
+@use 'tailwindcss/utilities';

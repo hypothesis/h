@@ -6,118 +6,118 @@
  * https://github.com/hypothesis/client/pull/4295
  */
 @layer components {
-    .StyledText {
-        @apply font-sans font-normal leading-snug;
+  .StyledText {
+    @apply font-sans font-normal leading-snug;
 
-        img,
-        pre,
-        blockquote,
-        ul,
-        ol {
-            @apply my-[1em];
-        }
-
-        p,
-        ul > li,
-        ol > li {
-            @apply my-[0.66667em];
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            @apply mt-[1.3333em] mb-[0.66667em];
-        }
-
-        h1 + *,
-        h2 + *,
-        h3 + *,
-        h4 + *,
-        h5 + *,
-        h6 + * {
-            @apply mt-0;
-        }
-
-        :first-child:not(ul > li, ol > li) {
-            @apply mt-0;
-        }
-
-        :last-child {
-            @apply mb-0;
-        }
-
-        /* https://type-scale.com/ -- Minor third */
-        h1 {
-            @apply text-[2.074em] font-semibold;
-        }
-
-        h2 {
-            @apply text-[1.728em] font-semibold;
-        }
-
-        h3 {
-            @apply text-[1.44em] font-semibold;
-        }
-
-        h4 {
-            @apply text-[1.2em] font-medium;
-        }
-
-        h5,
-        h6 {
-            @apply text-[1.2em] font-normal;
-        }
-
-        ul {
-            @apply list-outside list-disc ml-[1em];
-        }
-
-        ol {
-            @apply list-outside list-decimal ml-[1em];
-        }
-
-        ul > li,
-        ol > li {
-            @apply ml-[1em];
-        }
-
-        code {
-            @apply font-mono text-[0.875em];
-        }
-
-        pre code {
-            @apply block p-3 bg-grey-1 rounded overflow-auto;
-        }
-
-        a {
-            @apply underline;
-        }
-
-        blockquote {
-            @apply border-l-[3px] italic px-[1em] text-color-text-light;
-        }
-
-        /* Un-processed mentions look like plain text */
-        a[data-hyp-mention] {
-            @apply text-inherit no-underline;
-        }
-
-        /* Valid processed mention with link */
-        a[data-hyp-mention-type='link'] {
-            @apply text-brand font-bold underline focus-visible-ring;
-        }
-
-        /* Valid processed mention without link */
-        span[data-hyp-mention-type='no-link'] {
-            @apply text-brand font-bold;
-        }
-
-        /* Invalid processed mention */
-        span[data-hyp-mention-type='invalid'] {
-            @apply text-grey-6 font-bold underline decoration-wavy decoration-red-error;
-        }
+    img,
+    pre,
+    blockquote,
+    ul,
+    ol {
+      @apply my-[1em];
     }
+
+    p,
+    ul > li,
+    ol > li {
+      @apply my-[0.66667em];
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply mt-[1.3333em] mb-[0.66667em];
+    }
+
+    h1 + *,
+    h2 + *,
+    h3 + *,
+    h4 + *,
+    h5 + *,
+    h6 + * {
+      @apply mt-0;
+    }
+
+    :first-child:not(ul > li, ol > li) {
+      @apply mt-0;
+    }
+
+    :last-child {
+      @apply mb-0;
+    }
+
+    /* https://type-scale.com/ -- Minor third */
+    h1 {
+      @apply text-[2.074em] font-semibold;
+    }
+
+    h2 {
+      @apply text-[1.728em] font-semibold;
+    }
+
+    h3 {
+      @apply text-[1.44em] font-semibold;
+    }
+
+    h4 {
+      @apply text-[1.2em] font-medium;
+    }
+
+    h5,
+    h6 {
+      @apply text-[1.2em] font-normal;
+    }
+
+    ul {
+      @apply list-outside list-disc ml-[1em];
+    }
+
+    ol {
+      @apply list-outside list-decimal ml-[1em];
+    }
+
+    ul > li,
+    ol > li {
+      @apply ml-[1em];
+    }
+
+    code {
+      @apply font-mono text-[0.875em];
+    }
+
+    pre code {
+      @apply block p-3 bg-grey-1 rounded overflow-auto;
+    }
+
+    a {
+      @apply underline;
+    }
+
+    blockquote {
+      @apply border-l-[3px] italic px-[1em] text-color-text-light;
+    }
+
+    /* Un-processed mentions look like plain text */
+    a[data-hyp-mention] {
+      @apply text-inherit no-underline;
+    }
+
+    /* Valid processed mention with link */
+    a[data-hyp-mention-type='link'] {
+      @apply text-brand font-bold underline focus-visible-ring;
+    }
+
+    /* Valid processed mention without link */
+    span[data-hyp-mention-type='no-link'] {
+      @apply text-brand font-bold;
+    }
+
+    /* Invalid processed mention */
+    span[data-hyp-mention-type='invalid'] {
+      @apply text-grey-6 font-bold underline decoration-wavy decoration-red-error;
+    }
+  }
 }
