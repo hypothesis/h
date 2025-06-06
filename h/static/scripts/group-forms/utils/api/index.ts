@@ -82,6 +82,7 @@ export type APIAnnotationData = {
   text: string;
 
   mentions: Mention[];
+  tags: string[];
 
   user: string;
   user_info?: UserInfo;

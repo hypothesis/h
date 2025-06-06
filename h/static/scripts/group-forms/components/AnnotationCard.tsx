@@ -81,6 +81,22 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
           mentionMode="username"
           mentionsEnabled
         />
+
+        {annotation.tags.length > 0 && (
+          <ul className="flex flex-wrap gap-1 text-sm">
+            {annotation.tags.map(tag => (
+              <li
+                key={tag}
+                className={classnames(
+                  'px-1.5 py-0.5 rounded text-color-text-light',
+                  'border border-solid border-grey-3 bg-grey-0',
+                )}
+              >
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );
