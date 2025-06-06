@@ -6,6 +6,7 @@ filterwarnings = [
     "ignore:^FileFinder.find_loader\\(\\) is deprecated and slated for removal in Python 3.12; use find_spec\\(\\) instead$:DeprecationWarning:importlib",
     "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:pkg_resources",
     "ignore:^pkg_resources is deprecated as an API:DeprecationWarning:pyramid",
+    "ignore:^pkg_resources is deprecated as an API:UserWarning:pyramid",
     "ignore:^Deprecated call to .pkg_resources\\.declare_namespace\\('.*'\\).\\.:DeprecationWarning:pkg_resources",
     "ignore:^'cgi' is deprecated and slated for removal in Python 3\\.13$:DeprecationWarning:webob",
     "ignore:^datetime\\.datetime\\.utcnow\\(\\) is deprecated and scheduled for removal in a future version\\.:DeprecationWarning",
