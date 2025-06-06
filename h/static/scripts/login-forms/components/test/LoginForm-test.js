@@ -30,6 +30,7 @@ describe('LoginForm', () => {
       usernameField: wrapper.find('TextField[name="username"]'),
       passwordField: wrapper.find('TextField[name="password"]'),
       forgotPasswordLink: wrapper.find('a[data-testid="forgot-password-link"]'),
+      cancelButton: wrapper.find('Button[data-testid="cancel-button"]'),
     };
   };
 
@@ -51,13 +52,25 @@ describe('LoginForm', () => {
       usernameField,
       passwordField,
       forgotPasswordLink,
+      cancelButton,
     } = elements;
 
-    assert.equal(form.prop('action'), routes.login);
+    assert.isTrue(form.prop('action').endsWith(routes.login));
     assert.equal(csrfInput.prop('value'), fakeConfig.csrfToken);
     assert.equal(usernameField.prop('value'), '');
     assert.equal(passwordField.prop('value'), '');
     assert.equal(forgotPasswordLink.prop('href'), routes.forgotPassword);
+    assert.isFalse(cancelButton.exists());
+  });
+
+  it('renders the cancel button for oauth', () => {
+    fakeConfig.forOAuth = true;
+
+    const { elements } = createWrapper();
+    const { cancelButton, form } = elements;
+
+    assert.isTrue(form.prop('action').endsWith('/login?for_oauth=true'));
+    assert.isTrue(cancelButton.exists());
   });
 
   it('displays form errors', () => {
@@ -116,6 +129,23 @@ describe('LoginForm', () => {
     const updatedElements = getElements(wrapper);
 
     assert.equal(updatedElements.passwordField.prop('value'), password);
+  });
+
+  it('calls window close when cancel button is clicked', () => {
+    fakeConfig.forOAuth = true;
+    const { elements } = createWrapper();
+    const { cancelButton } = elements;
+    const stub = sinon.stub(window, 'close');
+
+    try {
+      act(() => {
+        cancelButton.prop('onClick')();
+      });
+
+      assert.calledOnce(stub);
+    } finally {
+      stub.restore();
+    }
   });
 
   it(

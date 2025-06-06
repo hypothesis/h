@@ -78,6 +78,13 @@ class TestAuthController:
             }
         }
 
+    def test_get_for_oauth(self, pyramid_request):
+        pyramid_request.params = {"for_oauth": "true"}
+
+        result = views.AuthController(pyramid_request).get()
+
+        assert result["js_config"]["forOAuth"]
+
     def test_post_returns_form_when_validation_fails(
         self, invalid_form, pyramid_config, pyramid_request, assets_env, mocker
     ):
@@ -99,29 +106,6 @@ class TestAuthController:
                 "formData": pyramid_request.POST,
             }
         }
-
-    def test_get_oauth(self, pyramid_request, LoginSchema):
-        template_vars = views.AuthController(pyramid_request).get_oauth()
-
-        # It initializes and binds the schema.
-        LoginSchema.assert_called_once_with()
-        schema = LoginSchema.return_value
-        schema.bind.assert_called_once_with(request=pyramid_request)
-        bound_schema = schema.bind.return_value
-
-        # It initializes the form.
-        pyramid_request.create_form.assert_called_once_with(
-            bound_schema,
-            buttons=("Log in",),
-            footer=Any.string.containing("Forgot your password?"),
-            show_cancel_button=False,
-        )
-        form = pyramid_request.create_form.return_value
-
-        # It returns the rendered form.
-        LoginSchema.default_values.assert_called_once_with(pyramid_request)
-        form.render.assert_called_once_with(LoginSchema.default_values.return_value)
-        assert template_vars == {"form": form.render.return_value}
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
@@ -153,17 +137,6 @@ class TestAuthController:
 
         assert e.value.location == "/foo/bar"
 
-    def test_post_oauth_returns_form_when_validation_fails(
-        self, invalid_form, pyramid_config, pyramid_request
-    ):
-        pyramid_config.testing_securitypolicy(None)  # Logged out
-        controller = views.AuthController(pyramid_request)
-        controller.form = invalid_form()
-
-        result = controller.post_oauth()
-
-        assert result == {"form": "invalid form"}
-
     @mock.patch("h.views.accounts.LoginEvent", autospec=True)
     def test_post_no_event_when_validation_fails(
         self, loginevent, invalid_form, notify, pyramid_config, pyramid_request
@@ -172,7 +145,7 @@ class TestAuthController:
         controller = views.AuthController(pyramid_request)
         controller.form = invalid_form()
 
-        controller.post_oauth()
+        controller.post()
 
         assert not loginevent.called
         assert not notify.called
@@ -187,19 +160,6 @@ class TestAuthController:
         controller.form = form_validating_to({"user": user})
 
         result = controller.post()
-
-        assert isinstance(result, httpexceptions.HTTPFound)
-
-    def test_post_oauth_redirects_when_validation_succeeds(
-        self, factories, form_validating_to, pyramid_config, pyramid_request
-    ):
-        pyramid_config.testing_securitypolicy(None)  # Logged out
-        controller = views.AuthController(pyramid_request)
-        user = factories.User(username="cara")
-        pyramid_request.user = user
-        controller.form = form_validating_to({"user": user})
-
-        result = controller.post_oauth()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
