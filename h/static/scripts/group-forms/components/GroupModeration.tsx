@@ -7,6 +7,7 @@ import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData } from '../utils/api';
 import { moderationStatusToLabel } from '../utils/moderation-status';
+import AnnotationCard from './AnnotationCard';
 import GroupFormHeader from './GroupFormHeader';
 import type { ModerationStatus } from './ModerationStatusSelect';
 import ModerationStatusSelect from './ModerationStatusSelect';
@@ -103,8 +104,8 @@ function AnnotationListContent({
   return (
     <>
       {annotations?.map(anno => (
-        <article key={anno.id} className="border rounded p-2">
-          {anno.text}
+        <article key={anno.id}>
+          <AnnotationCard annotation={anno} />
         </article>
       ))}
       {loading && (
