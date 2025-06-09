@@ -91,6 +91,16 @@ export type APIAnnotationData = {
   updated: string;
 
   moderation_status: ModerationStatus;
+
+  links: {
+    /**
+     * A "bouncer" URL that takes the user to see the annotation in context
+     */
+    incontext?: string;
+
+    /** URL to view the annotation by itself. */
+    html?: string;
+  };
 };
 
 /**
