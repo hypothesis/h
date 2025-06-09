@@ -6,7 +6,7 @@ import {
 } from '@hypothesis/frontend-shared';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 
-export type AnnotationTimestampProps = {
+export type AnnotationTimestampsProps = {
   annotationCreated: string;
   annotationUpdated: string;
   annotationURL?: string;
@@ -27,7 +27,7 @@ export default function AnnotationTimestamps({
   annotationUpdated,
   annotationURL,
   withEditedTimestamp,
-}: AnnotationTimestampProps) {
+}: AnnotationTimestampsProps) {
   // "Current" time, used when calculating the relative age of `timestamp`.
   const [now, setNow] = useState(() => new Date());
   const createdDate = useMemo(

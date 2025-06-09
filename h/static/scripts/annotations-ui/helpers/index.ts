@@ -1,2 +1,2 @@
-export * from './groups';
-export * from './mentions';
+export type { Group, GroupType } from './groups';
+export { processAndReplaceMentionElements } from './mentions';

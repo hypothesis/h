@@ -1,6 +1,6 @@
 import { Link } from '@hypothesis/frontend-shared';
 
-type AnnotationUserProps = {
+export type AnnotationUserProps = {
   authorLink?: string;
   displayName: string;
 };

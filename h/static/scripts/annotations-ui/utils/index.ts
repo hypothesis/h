@@ -1,1 +1,1 @@
-export * from './render-markdown';
+export { renderMathAndMarkdown } from './render-markdown';
