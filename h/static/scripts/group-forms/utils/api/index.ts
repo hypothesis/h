@@ -1,4 +1,4 @@
-import type { Mention } from '../../../annotations-ui';
+import type { Mention } from '@hypothesis/annotation-ui/lib/helpers/mentions';
 
 /**
  * Values for `type` field when creating or updating groups.

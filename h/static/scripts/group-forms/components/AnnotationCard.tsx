@@ -1,14 +1,14 @@
-import { Card, CardContent } from '@hypothesis/frontend-shared';
-import classnames from 'classnames';
-import { useContext } from 'preact/hooks';
-
 import {
   AnnotationGroupInfo,
   AnnotationTimestamps,
   AnnotationUser,
   MarkdownView,
   StyledText,
-} from '../../annotations-ui';
+} from '@hypothesis/annotation-ui';
+import { Card, CardContent } from '@hypothesis/frontend-shared';
+import classnames from 'classnames';
+import { useContext } from 'preact/hooks';
+
 import { Config } from '../config';
 import type { APIAnnotationData } from '../utils/api';
 
