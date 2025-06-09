@@ -16,48 +16,9 @@ import classnames from 'classnames';
 import { useContext } from 'preact/hooks';
 
 import { Config } from '../config';
+import { quote, username } from '../utils/annotation-metadata';
 import type { APIAnnotationData } from '../utils/api';
-
-function quote(annotation: any): string | null {
-  if (annotation.target.length === 0) {
-    return null;
-  }
-  const target = annotation.target[0];
-  if (!target.selector) {
-    return null;
-  }
-  const quoteSel = target.selector.find(
-    (s: any) => s.type === 'TextQuoteSelector',
-  );
-  return quoteSel ? quoteSel.exact : null;
-}
-
-/**
- * Parses H account names of the form 'acct:<username>@<provider>'
- * into a {username, provider} object or null if the input does not
- * match the expected form.
- */
-export function parseAccountID(user: string | null) {
-  if (!user) {
-    return null;
-  }
-  const match = user.match(/^acct:([^@]+)@(.+)/);
-  if (!match) {
-    return null;
-  }
-  return {
-    username: match[1],
-    provider: match[2],
-  };
-}
-
-/**
- * Returns the username part of an account ID or an empty string.
- */
-export function username(user: string | null) {
-  const account = parseAccountID(user);
-  return account?.username;
-}
+import AnnotationDocument from './AnnotationDocument';
 
 export type AnnotationCardProps = {
   annotation: APIAnnotationData;
@@ -98,6 +59,7 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
                   },
                 }}
               />
+              <AnnotationDocument annotation={annotation} />
             </div>
           )}
         </header>

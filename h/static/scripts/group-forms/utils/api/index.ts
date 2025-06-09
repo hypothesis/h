@@ -80,6 +80,7 @@ export type ModerationStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'SPAM';
 export type APIAnnotationData = {
   id?: string;
   text: string;
+  uri: string;
 
   mentions: Mention[];
   tags: string[];
@@ -100,6 +101,10 @@ export type APIAnnotationData = {
 
     /** URL to view the annotation by itself. */
     html?: string;
+  };
+
+  document: {
+    title: string;
   };
 };
 
