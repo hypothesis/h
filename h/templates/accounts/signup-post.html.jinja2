@@ -1,16 +1,53 @@
-{% extends "h:templates/accounts/base.html.jinja2" %}
+{% extends "h:templates/layouts/base.html.jinja2" %}
 
 {% block page_title %}{{ heading|default("Sign up for Hypothesis") }}{% endblock %}
 
-{% set form_message %}
-  {% if not form %}
-    {% if message %}<p>{{ message }}</p>{% endif %}
+{% block header %}
+  {% include "h:templates/includes/logo-header.html.jinja2" %}
+{% endblock %}
 
-    <p>Please check your email and open the link to activate your account.</p>
+{% block styles %}
+  {{ super() }}
 
-    <p>If you don't receive your activation link within a few minutes, send an
-    email to <a href="mailto:support@hypothes.is">support@hypothes.is</a></p>
-  {% endif %}
-{% endset %}
+  {% for url in asset_urls('forms_css') %}
+    <link rel="stylesheet" href="{{ url }}">
+  {% endfor %}
+{% endblock %}
 
-{% set login_message = "Already activated your account?" %}
+{% block content %}
+  <div class="form-container">
+    <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+
+    <h1 class="form-header">
+      {{ self.page_title() }}
+    </h1>
+    {% if not js_config.get("formData") %}
+      <div class="form-description">
+        {% if message %}<p>{{ message }}</p>{% endif %}
+
+        <p>Please check your email and open the link to activate your account.</p>
+
+        <p>If you don't receive your activation link within a few minutes, send an
+          email to <a href="mailto:support@hypothes.is">support@hypothes.is</a></p>
+      </div>
+    {% else %}
+      <div id="login-form"></div>
+    {% endif %}
+    <footer class="form-footer">
+      {% if not js_config.get("formData") %}
+        Already activated your account?
+      {% else %}
+        Already have an account?
+      {% endif %}
+      <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
+    </footer>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('login_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
+{% endblock %}
