@@ -5,10 +5,11 @@ import { useContext, useState } from 'preact/hooks';
 import FormContainer from '../../forms-common/components/FormContainer';
 import TextField from '../../forms-common/components/TextField';
 import { Config } from '../config';
+import type { LoginConfigObject } from '../config';
 import { routes } from '../routes';
 
 export default function LoginForm() {
-  const config = useContext(Config)!;
+  const config = useContext(Config) as LoginConfigObject;
 
   const [username, setUsername] = useState(config.formData?.username ?? '');
   const [password, setPassword] = useState(config.formData?.password ?? '');
