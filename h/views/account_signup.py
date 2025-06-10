@@ -1,7 +1,9 @@
 import datetime
+from typing import Any
 
 import deform
 from pyramid import httpexceptions
+from pyramid.csrf import get_csrf_token
 from pyramid.view import view_config, view_defaults
 
 from h import i18n
@@ -20,11 +22,7 @@ class SignupController:
     def __init__(self, request):
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
-        self.form = request.create_form(
-            self.schema,
-            buttons=(deform.Button(title=_("Sign up")),),
-            css_class="js-disable-on-submit",
-        )
+        self.form = request.create_form(self.schema)
 
     @view_config(
         request_method="GET", renderer="h:templates/accounts/signup.html.jinja2"
@@ -33,7 +31,17 @@ class SignupController:
         """Render the empty registration form."""
         self._redirect_if_logged_in()
 
-        return {"form": self.form.render()}
+        return {
+            "js_config": self._js_config(),
+        }
+
+    def _js_config(self) -> dict[str, Any]:
+        csrf_token = get_csrf_token(self.request)
+
+        return {
+            "styles": self.request.registry["assets_env"].urls("forms_css"),
+            "csrfToken": csrf_token,
+        }
 
     @view_config(
         request_method="POST", renderer="h:templates/accounts/signup-post.html.jinja2"
@@ -44,25 +52,43 @@ class SignupController:
 
         try:
             appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure:
-            return {"form": self.form.render()}
+        except deform.ValidationFailure as e:
+            js_config = self._js_config()
+            js_config["formErrors"] = e.error.asdict()
+            js_config["formData"] = {
+                "username": self.request.POST.get("username", ""),
+                "email": self.request.POST.get("email", ""),
+                "password": self.request.POST.get("password", ""),
+                "privacy_accepted": self.request.POST.get("privacy_accepted", "")
+                == "true",
+                "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
+            }
+            return {
+                "js_config": js_config,
+            }
 
         signup_service = self.request.find_service(name="user_signup")
 
-        template_context = {"heading": _("Account registration successful")}
+        js_config = self._js_config()
+        heading = _("Account registration successful")
+        message = None
         try:
             signup_service.signup(
                 username=appstruct["username"],
                 email=appstruct["email"],
                 password=appstruct["password"],
-                privacy_accepted=datetime.datetime.utcnow(),  # noqa: DTZ003
+                privacy_accepted=datetime.datetime.now(datetime.UTC),
                 comms_opt_in=appstruct["comms_opt_in"],
             )
         except ConflictError as exc:
-            template_context["heading"] = _("Account already registered")
-            template_context["message"] = _(f"{exc.args[0]}")  # noqa: INT001
+            heading = _("Account already registered")
+            message = _(f"{exc.args[0]}")  # noqa: INT001
 
-        return template_context
+        return {
+            "js_config": js_config,
+            "heading": heading,
+            "message": message,
+        }
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
