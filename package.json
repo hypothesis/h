@@ -51,10 +51,6 @@
   "devDependencies": {
     "@hypothesis/frontend-testing": "^1.7.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/dompurify": "^3.2.0",
-    "@types/escape-html": "^1.0.4",
-    "@types/katex": "^0.16.7",
-    "@types/showdown": "^2.0.6",
     "@vitest/browser": "^3.1.4",
     "@vitest/coverage-istanbul": "^3.1.4",
     "@vitest/eslint-plugin": "^1.2.1",

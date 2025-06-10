@@ -1,4 +1,8 @@
-import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
+import {
+  checkAccessibility,
+  mount,
+  mockImportedComponents,
+} from '@hypothesis/frontend-testing';
 
 import GroupModeration, { $imports } from '../GroupModeration';
 
@@ -13,6 +17,7 @@ describe('GroupModeration', () => {
       loadNextPage: fakeLoadNextPage,
     });
 
+    $imports.$mock(mockImportedComponents());
     $imports.$mock({
       '../hooks/use-group-annotations': {
         useGroupAnnotations: fakeUseGroupAnnotations,
@@ -116,11 +121,11 @@ describe('GroupModeration', () => {
       const wrapper = createComponent();
       const annotationNodes = wrapper
         .find('AnnotationListContent')
-        .find('article');
+        .find('AnnotationCard');
 
       assert.lengthOf(annotationNodes, annotations.length);
       annotations.forEach((anno, index) => {
-        assert.equal(annotationNodes.at(index).text(), anno.text);
+        assert.equal(annotationNodes.at(index).prop('annotation'), anno);
       });
     });
 

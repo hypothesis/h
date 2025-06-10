@@ -2895,22 +2895,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dompurify@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@types/dompurify@npm:3.2.0"
-  dependencies:
-    dompurify: "*"
-  checksum: 0194dd9024e76e856f3373e8b080c7a5ac9910543ac1ee85db45277efbbea820b2f27fe22c8a6f02bb51833e0a8540d732be0d11d156efd16cb0b97f88e41ebf
-  languageName: node
-  linkType: hard
-
-"@types/escape-html@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@types/escape-html@npm:1.0.4"
-  checksum: 61c1409df141268bdb2b40e511614193a9f2d3fed224788a14454ba9504787efa01bbd083826f163a6d33a97815b71e161ce1bdf6b77dd7b3569f3a885ad7722
-  languageName: node
-  linkType: hard
-
 "@types/estree@npm:*":
   version: 0.0.50
   resolution: "@types/estree@npm:0.0.50"
@@ -2953,13 +2937,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/katex@npm:^0.16.7":
-  version: 0.16.7
-  resolution: "@types/katex@npm:0.16.7"
-  checksum: 4fd15d93553be97c02c064e16be18d7ccbabf66ec72a9dc7fd5bfa47f0c7581da2f942f693c7cb59499de4c843c2189796e49c9647d336cbd52b777b6722a95a
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:*":
   version: 22.7.4
   resolution: "@types/node@npm:22.7.4"
@@ -2973,13 +2950,6 @@ __metadata:
   version: 1.20.2
   resolution: "@types/resolve@npm:1.20.2"
   checksum: 61c2cad2499ffc8eab36e3b773945d337d848d3ac6b7b0a87c805ba814bc838ef2f262fc0f109bfd8d2e0898ff8bd80ad1025f9ff64f1f71d3d4294c9f14e5f6
-  languageName: node
-  linkType: hard
-
-"@types/showdown@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "@types/showdown@npm:2.0.6"
-  checksum: c4c341e4a93061cabed6168f2c2eb7b83c08bc57284f5c14bc2e5d18c6b42b533cc2efc4fa3e4cd96e009520ae2fa8c40997be31e4409239aabf8a2cf37c1ada
   languageName: node
   linkType: hard
 
@@ -4930,7 +4900,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:*, dompurify@npm:^3.2.6":
+"dompurify@npm:^3.2.6":
   version: 3.2.6
   resolution: "dompurify@npm:3.2.6"
   dependencies:
@@ -6919,10 +6889,6 @@ __metadata:
     "@rollup/plugin-terser": ^0.4.4
     "@sentry/browser": ^9.24.0
     "@trivago/prettier-plugin-sort-imports": ^5.2.2
-    "@types/dompurify": ^3.2.0
-    "@types/escape-html": ^1.0.4
-    "@types/katex": ^0.16.7
-    "@types/showdown": ^2.0.6
     "@vitest/browser": ^3.1.4
     "@vitest/coverage-istanbul": ^3.1.4
     "@vitest/eslint-plugin": ^1.2.1
