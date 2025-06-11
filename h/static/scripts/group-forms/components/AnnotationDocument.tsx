@@ -1,6 +1,6 @@
 import { AnnotationDocumentInfo } from '@hypothesis/annotation-ui';
 
-import { domainAndTitle, pageLabel } from '../utils/annotation-metadata';
+import { pageLabel } from '../utils/annotation-metadata';
 import type { APIAnnotationData } from '../utils/api';
 
 export type AnnotationDocumentProps = {
@@ -10,26 +10,19 @@ export type AnnotationDocumentProps = {
 export default function AnnotationDocument({
   annotation,
 }: AnnotationDocumentProps) {
-  const documentInfo = domainAndTitle(annotation);
-  const annotationURL = annotation.links?.html || '';
-  const documentLink =
-    annotationURL && documentInfo.titleLink ? documentInfo.titleLink : '';
   const pageNumber = pageLabel(annotation);
 
   return (
-    <span className="flex">
-      {documentInfo.titleText && (
-        <AnnotationDocumentInfo
-          domain={documentInfo.domain}
-          link={documentLink}
-          title={documentInfo.titleText}
-        />
-      )}
+    <>
+      <span className="flex">
+        <AnnotationDocumentInfo annotation={annotation} />
+        {pageNumber && ', '}
+      </span>
       {pageNumber && (
         <span className="text-grey-6" data-testid="page-number">
-          {documentInfo.titleText && ', '}p. {pageNumber}
+          p. {pageNumber}
         </span>
       )}
-    </span>
+    </>
   );
 }

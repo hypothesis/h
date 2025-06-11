@@ -1,4 +1,5 @@
-import type { Mention } from '@hypothesis/annotation-ui/lib/helpers/mentions';
+import type { Mention } from '@hypothesis/annotation-ui';
+import type { Annotation } from '@hypothesis/annotation-ui/lib/helpers/annotation-metadata';
 
 /**
  * Values for `type` field when creating or updating groups.
@@ -77,10 +78,9 @@ export type ModerationStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'SPAM';
  * Represents an annotation as returned by the h API.
  * API docs: https://h.readthedocs.io/en/latest/api-reference/#tag/annotations
  */
-export type APIAnnotationData = {
+export type APIAnnotationData = Annotation & {
   id?: string;
   text: string;
-  uri: string;
 
   mentions: Mention[];
   tags: string[];
@@ -92,20 +92,6 @@ export type APIAnnotationData = {
   updated: string;
 
   moderation_status: ModerationStatus;
-
-  links: {
-    /**
-     * A "bouncer" URL that takes the user to see the annotation in context
-     */
-    incontext?: string;
-
-    /** URL to view the annotation by itself. */
-    html?: string;
-  };
-
-  document: {
-    title: string;
-  };
 };
 
 /**
