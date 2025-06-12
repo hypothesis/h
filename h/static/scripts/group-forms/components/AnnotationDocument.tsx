@@ -7,6 +7,11 @@ export type AnnotationDocumentProps = {
   annotation: APIAnnotationData;
 };
 
+/**
+ * Render some metadata about an annotation's document and link to it
+ * if a link is available.
+ * Additionally, show the page number for annotations where it is available.
+ */
 export default function AnnotationDocument({
   annotation,
 }: AnnotationDocumentProps) {

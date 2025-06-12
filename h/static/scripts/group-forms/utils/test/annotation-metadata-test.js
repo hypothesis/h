@@ -13,10 +13,6 @@ describe('quote', () => {
     assert.equal(quote(ann), 'expected quote');
   });
 
-  // FIXME - This currently happens when creating a new Page Note. Annotations
-  // from the API should always have a target.
-  //
-  // See https://github.com/hypothesis/client/issues/1290.
   it('returns `null` if annotation has an empty target array', () => {
     const ann = { target: [] };
     assert.equal(quote(ann), null);

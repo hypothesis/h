@@ -103,9 +103,7 @@ function AnnotationListContent({
   return (
     <>
       {annotations?.map(anno => (
-        <article key={anno.id}>
-          <AnnotationCard annotation={anno} />
-        </article>
+        <AnnotationCard key={anno.id} annotation={anno} />
       ))}
       {loading && (
         <div className="mx-auto mt-3">

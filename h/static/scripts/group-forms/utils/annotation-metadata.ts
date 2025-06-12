@@ -1,7 +1,9 @@
+import type { APIAnnotationData, PageSelector, TextQuoteSelector } from './api';
+
 /**
  * Return the text quote that an annotation refers to.
  */
-export function quote(annotation: any): string | null {
+export function quote(annotation: APIAnnotationData): string | null {
   if (annotation.target.length === 0) {
     return null;
   }
@@ -11,7 +13,7 @@ export function quote(annotation: any): string | null {
   }
   const quoteSel = target.selector.find(
     (s: any) => s.type === 'TextQuoteSelector',
-  );
+  ) as TextQuoteSelector | undefined;
   return quoteSel ? quoteSel.exact : null;
 }
 
@@ -20,10 +22,10 @@ export function quote(annotation: any): string | null {
  *
  * This is usually a 1-based page number, but can also be roman numerals etc.
  */
-export function pageLabel(annotation: any): string | undefined {
+export function pageLabel(annotation: APIAnnotationData): string | undefined {
   const pageSel = annotation.target[0]?.selector?.find(
     (s: any) => s.type === 'PageSelector',
-  );
+  ) as PageSelector | undefined;
   return pageSel?.label;
 }
 /**
