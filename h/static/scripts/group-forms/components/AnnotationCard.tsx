@@ -104,6 +104,7 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
               href={annotation.links.incontext}
               title="See in context"
               aria-label="See in context"
+              data-testid="context-link"
             >
               <ExternalIcon />
             </Link>

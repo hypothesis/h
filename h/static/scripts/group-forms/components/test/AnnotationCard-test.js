@@ -131,7 +131,7 @@ describe('AnnotationCard', () => {
     const wrapper = createComponent();
 
     assert.equal(
-      wrapper.find('Link').prop('href'),
+      wrapper.find('a[data-testid="context-link"]').prop('href'),
       fakeAnnotation.links.incontext,
     );
   });

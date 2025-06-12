@@ -6,9 +6,8 @@ import {
   useState,
 } from 'preact/hooks';
 
-import type { ModerationStatus } from '../components/ModerationStatusSelect';
 import { Config } from '../config';
-import type { APIAnnotationData } from '../utils/api';
+import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import { fetchGroupAnnotations } from '../utils/api/fetch-group-annotations';
 
 export type GroupAnnotationsOptions = {
