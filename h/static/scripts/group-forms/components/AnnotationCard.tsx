@@ -78,7 +78,10 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
         />
 
         {annotation.tags.length > 0 && (
-          <ul className="flex flex-wrap gap-1 text-sm">
+          <ul
+            className="flex flex-wrap gap-1 text-sm"
+            data-testid="tags-container"
+          >
             {annotation.tags.map(tag => (
               <li
                 key={tag}
