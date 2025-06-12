@@ -16,7 +16,11 @@ export default function AnnotationDocument({
     <>
       <span className="flex">
         <AnnotationDocumentInfo annotation={annotation} />
-        {pageNumber && ', '}
+        {pageNumber && (
+          <span className="text-grey-6" data-testid="comma-wrapper">
+            ,{' '}
+          </span>
+        )}
       </span>
       {pageNumber && (
         <span className="text-grey-6" data-testid="page-number">
