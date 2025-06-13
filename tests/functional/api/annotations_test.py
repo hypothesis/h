@@ -1,5 +1,6 @@
 import pytest
 
+from h.models import GroupMembershipRoles
 from h.models.annotation import ModerationStatus
 
 pytestmark = pytest.mark.usefixtures("init_elasticsearch")
@@ -102,6 +103,73 @@ class TestSearchAnnotations:
             else:
                 # If the author is not nipsaed we should see their annotations if they are shared/not hidden
                 expected_ids.add(anno_from_author.id)
+
+        assert expected_ids.issubset(search_annotation_ids)
+        assert search_annotation_ids.isdisjoint(not_expected_ids)
+
+    @pytest.mark.parametrize("api_user_is_moderator", [True, False])
+    def test_filter_by_group_where_moderator(
+        self,
+        app,
+        make_annotation,
+        api_user_is_moderator,
+        make_user,
+        factories,
+    ):
+        group = factories.Group()
+        group_moderator = make_user()
+        group_member = make_user()
+        factories.GroupMembership(
+            user=group_moderator,
+            group=group,
+            roles=[GroupMembershipRoles.OWNER],
+        )
+        factories.GroupMembership(
+            user=group_member, group=group, roles=[GroupMembershipRoles.MEMBER]
+        )
+
+        annotation_from_member = make_annotation(user=group_member, groupid=group.pubid)
+        hidden_annotation_from_member = make_annotation(
+            user=group_member,
+            groupid=group.pubid,
+            moderation_status=ModerationStatus.DENIED,
+        )
+        annotation_from_moderator = make_annotation(user=group_moderator, group=group)
+        hidden_annotation_from_moderator = make_annotation(
+            user=group_moderator,
+            groupid=group.pubid,
+            moderation_status=ModerationStatus.DENIED,
+        )
+        annotation_in_another_group = make_annotation(
+            user=group_moderator, groupid="__world__"
+        )
+
+        search_annotation_ids = self.search(
+            app,
+            group_moderator if api_user_is_moderator else group_member,
+            group=group.pubid,
+        )
+
+        expected_ids = set()
+        # We are filtering by group, so we should only see annotations on that group
+        not_expected_ids = set(annotation_in_another_group.id)
+        if api_user_is_moderator:
+            expected_ids = {
+                # As a moderator we see moderated annotations
+                annotation_from_member.id,
+                hidden_annotation_from_member.id,
+                annotation_from_moderator.id,
+                hidden_annotation_from_moderator.id,
+            }
+        else:
+            expected_ids = {
+                annotation_from_member.id,
+                annotation_from_moderator.id,
+                # We always see our own hidden annotations
+                hidden_annotation_from_member.id,
+            }
+            # If we are not a moderator we don't see hidden annotations form other users
+            not_expected_ids.add(hidden_annotation_from_moderator.id)
 
         assert expected_ids.issubset(search_annotation_ids)
         assert search_annotation_ids.isdisjoint(not_expected_ids)

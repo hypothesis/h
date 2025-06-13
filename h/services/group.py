@@ -1,7 +1,8 @@
 import sqlalchemy as sa
 from sqlalchemy import literal_column, select, union
+from sqlalchemy.orm import aliased
 
-from h.models import Group, GroupMembership
+from h.models import Group, GroupMembership, User
 from h.models.group import ReadableBy
 from h.util import group as group_util
 
@@ -76,9 +77,9 @@ class GroupService:
             .order_by(Group.created.desc())
         )
 
-    def groupids_readable_by(self, user, group_ids=None):
+    def groups_readable_by(self, user: User | None, group_ids=None) -> list[Group]:
         """
-        Return a list of pubids for which the user has read access.
+        Return a list of groups for which the user has read access.
 
         If the passed-in user is ``None``, this returns the list of
         world-readable groups.
@@ -86,18 +87,16 @@ class GroupService:
         If `group_ids` is specified, only the subset of groups from that list is
         returned. This is more efficient if the caller wants to know which
         groups from a specific list are readable by the user.
-
-        :type user: `h.models.user.User`
         """
         # Very few groups are readable by world, query those separately
-        readable_by_world_query = select(Group.pubid).where(
+        readable_by_world_query = select(Group).where(
             Group.readable_by == ReadableBy.world
         )
         query = readable_by_world_query
 
         if user is not None:
             user_is_member_query = (
-                select(Group.pubid)
+                select(Group)
                 .join(GroupMembership)
                 .where(
                     GroupMembership.user_id == user.id,
@@ -106,14 +105,22 @@ class GroupService:
             )
             # Union these with the world readable ones
             # We wrap a subquery around in case we need to apply the group_ids filter below
-            query = select(
-                union(readable_by_world_query, user_is_member_query).subquery()
-            )
+            union_groups = union(
+                readable_by_world_query, user_is_member_query
+            ).subquery()
+            # We explicitly alias the union to hint SQLAlchemy to fetch Group objects
+            group_alias = aliased(Group, union_groups)
+            query = select(group_alias)
 
         if group_ids:
             query = query.where(literal_column("pubid").in_(group_ids))
 
-        return self.session.scalars(query).all()
+        return self.session.scalars(query)
+
+    def groupids_readable_by(self, user, group_ids=None):
+        """Return a list of groupids for which the user has read access."""
+
+        return [g.pubid for g in self.groups_readable_by(user, group_ids)]
 
     def groupids_created_by(self, user):
         """
