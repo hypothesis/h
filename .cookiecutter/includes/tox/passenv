@@ -10,6 +10,9 @@ dev: USE_HTTPS
 dev: NEW_RELIC_APP_NAME
 dev: NODE_ENV
 dev: PROXY_AUTH
+dev: ORCID_HOST
+dev: ORCID_CLIENT_ID
+dev: ORCID_CLIENT_SECRET
 {tests,functests}: DATABASE_URL
 {tests,functests}: ELASTICSEARCH_URL
 functests: BROKER_URL
