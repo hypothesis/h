@@ -65,11 +65,11 @@ class AuthorizeViews:
 
 
 class AccessDeniedError(Exception):
-    """The user denied us access to their ORCID account."""
+    """The user denied us access to their ORCID record."""
 
 
 class UserConflictError(Exception):
-    """A different Hypothesis user is already connected to this ORCID."""
+    """A different Hypothesis user is already connected to this ORCID iD."""
 
 
 @view_defaults(request_method="GET", route_name="orcid.oauth.callback")
@@ -99,17 +99,17 @@ class CallbackViews:
             IdentityProvider.ORCID, orcid
         )
 
-        # Oops, this ORCID is already connected to a *different* Hypothesis
+        # Oops, this ORCID iD is already connected to a *different* Hypothesis
         # account.
         if already_connected_user and already_connected_user != self._request.user:
             raise UserConflictError
 
         if not already_connected_user:
-            # This ORCID isn't connected to a Hypothesis account yet.
+            # This ORCID iD isn't connected to a Hypothesis account yet.
             # Let's go ahead and connect it to the user's account.
             self._orcid_client.add_identity(self._request.user, orcid)
 
-        self._request.session.flash("ORCID connected ✓", "success")
+        self._request.session.flash("ORCID iD connected ✓", "success")
         return HTTPFound(location=self._request.route_url("account"))
 
     @notfound_view_config(
@@ -143,7 +143,8 @@ class CallbackViews:
     @exception_view_config(context=UserConflictError)
     def user_conflict_error(self):
         self._request.session.flash(
-            "A different Hypothesis user is already connected to this ORCID!", "error"
+            "A different Hypothesis user is already connected to this ORCID iD!",
+            "error",
         )
         return HTTPFound(location=self._request.route_url("account"))
 

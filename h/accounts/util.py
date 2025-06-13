@@ -38,16 +38,16 @@ def validate_orcid(orcid):
     Verify that an ORCID identifier conforms to the structure described at
     http://support.orcid.org/knowledgebase/articles/116780-structure-of-the-orcid-identifier
 
-    Returns the normalized ORCID if successfully parsed or raises a ValueError
+    Returns the normalized ORCID iD if successfully parsed or raises a ValueError
     otherwise.
     """
     orcid_regex = r"\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z"
 
     if not re.match(orcid_regex, orcid):
-        raise ValueError(f"The format of this ORCID is incorrect: {orcid}")  # noqa: EM102, TRY003
+        raise ValueError(f"The format of this ORCID iD is incorrect: {orcid}")  # noqa: EM102, TRY003
 
     if _orcid_checksum_digit(orcid[:-1]) != orcid[-1:]:
-        raise ValueError(f"{orcid} is not a valid ORCID")  # noqa: EM102, TRY003
+        raise ValueError(f"{orcid} is not a valid ORCID iD")  # noqa: EM102, TRY003
 
     return True
 
@@ -59,7 +59,7 @@ def _orcid_checksum_digit(orcid):
     Translated from the example ISO 7064 checksum implementation at
     http://support.orcid.org/knowledgebase/articles/116780-structure-of-the-orcid-identifier
 
-    :param orcid: ORCID ID consisting of hyphens and digits, assumed to be in
+    :param orcid: ORCID iD consisting of hyphens and digits, assumed to be in
                   the correct format.
     """
     total = 0

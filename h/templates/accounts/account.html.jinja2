@@ -21,7 +21,7 @@
           <div style="position: relative;">
             <div class="form-input__label js-tooltip"
                  style="position: static;"
-                 aria-label="Connecting your ORCID enables you to log in to Hypothesis with ORCID, instead of your Hypothesis password.">
+                 aria-label="Connecting your ORCID iD enables you to log in to Hypothesis with ORCID, instead of your Hypothesis password.">
               Connect your account
               <i class="form-input__hint-icon">{{ svg_icon('info_icon') }}</i>
             </div>
@@ -37,7 +37,7 @@
         {% else %}
           <a href="{{ request.route_path('orcid.oauth.authorize') }}" class="orcid-connect">
             {{ svg_icon('orcid') }}
-            <span>{% trans %} Connect {% endtrans %}<strong>ORCID</strong></span>
+            <span>{% trans %} Connect {% endtrans %}<strong>ORCID iD</strong></span>
             {{ svg_icon('external', 'external-icon') }}
           </a>
         {% endif %}
