@@ -381,7 +381,8 @@ class TestNotificationSchema:
     def test_it(self, schema, user, feature_service):
         schema.deserialize({"notifications": ["reply", "mention"]})
 
-        feature_service.enabled.assert_called_once_with("at_mentions", user)
+        feature_service.enabled.assert_any_call("at_mentions", user)
+        feature_service.enabled.assert_any_call("pre_moderation", user)
 
     @pytest.fixture
     def user(self, factories):

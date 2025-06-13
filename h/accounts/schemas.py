@@ -273,6 +273,11 @@ def deferred_notification_widget(node, kw):  # noqa: ARG001
             ("mention", _("Email me when someone mentions me in an annotation."))
         )
 
+    if feature_service.enabled("pre_moderation", request.user):  # pragma: no cover
+        types.append(
+            ("moderation", _("Email me when someone moderates one of my annotations."))
+        )
+
     return deform.widget.CheckboxChoiceWidget(omit_label=True, values=types)
 
 
