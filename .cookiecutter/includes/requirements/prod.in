@@ -5,7 +5,7 @@ h-api
 h-assets
 data_tasks
 pyramid-sanity
-PyJWT
+PyJWT[crypto]
 bcrypt
 bleach
 celery
