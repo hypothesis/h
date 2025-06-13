@@ -57,6 +57,10 @@ describe('AppRoot', () => {
       path: '/Login',
       selector: 'LoginForm',
     },
+    {
+      path: '/signup',
+      selector: 'SignupForm',
+    },
   ].forEach(({ path, selector }) => {
     it(`renders expected component for URL (${path})`, () => {
       navigate(path, () => {

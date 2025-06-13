@@ -1,6 +1,8 @@
 from unittest import mock
+from unittest.mock import create_autospec
 
 import pytest
+from h_assets import Environment
 from pyramid import httpexceptions
 
 from h.services.exceptions import ConflictError
@@ -11,15 +13,38 @@ from h.views import account_signup as views
 @pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")
 class TestSignupController:
     def test_post_returns_errors_when_validation_fails(
-        self, invalid_form, pyramid_request
+        self, invalid_form, pyramid_request, mocker, assets_env
     ):
+        pyramid_request.POST = {
+            "username": "jane",
+            "password": "doe",
+            "email": "jane@example.org",
+            "privacy_accepted": "true",
+            "comms_opt_in": "false",
+        }
+        mocker.spy(views, "get_csrf_token")
         controller = views.SignupController(pyramid_request)
         controller.form = invalid_form()
+        form_errors = {"username": "This username is already taken."}
+        form = invalid_form(errors=form_errors)
+        controller.form = form
 
         result = controller.post()
 
-        # invalid_form renders as "invalid form"
-        assert result == {"form": "invalid form"}
+        assert result == {
+            "js_config": {
+                "styles": assets_env.urls.return_value,
+                "csrfToken": views.get_csrf_token.spy_return,
+                "formErrors": form_errors,
+                "formData": {
+                    "username": "jane",
+                    "password": "doe",
+                    "email": "jane@example.org",
+                    "privacy_accepted": True,
+                    "comms_opt_in": False,
+                },
+            }
+        }
 
     def test_post_creates_user_from_form_data(
         self, form_validating_to, pyramid_request, user_signup_service, datetime
@@ -41,7 +66,7 @@ class TestSignupController:
             username="bob",
             email="bob@example.com",
             password="s3crets",  # noqa: S106
-            privacy_accepted=datetime.datetime.utcnow.return_value,
+            privacy_accepted=datetime.datetime.now(datetime.UTC),
             comms_opt_in=True,
         )
 
@@ -59,7 +84,7 @@ class TestSignupController:
         result = controller.post()
 
         assert result["heading"] == "Account registration successful"
-        assert "message" not in result
+        assert result["message"] is None
 
     def test_post_displays_heading_and_message_on_conflict_error(
         self, controller, user_signup_service
@@ -75,11 +100,19 @@ class TestSignupController:
             "The account bob@example.com is already registered."
         )
 
-    def test_get_renders_form_when_not_logged_in(self, pyramid_request):
+    def test_get_renders_form_when_not_logged_in(
+        self, pyramid_request, mocker, assets_env
+    ):
+        mocker.spy(views, "get_csrf_token")
         controller = views.SignupController(pyramid_request)
         controller.form.render = mock.Mock()
 
-        assert controller.get() == {"form": controller.form.render.return_value}
+        assert controller.get() == {
+            "js_config": {
+                "styles": assets_env.urls.return_value,
+                "csrfToken": views.get_csrf_token.spy_return,
+            }
+        }
 
     def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
@@ -102,6 +135,15 @@ class TestSignupController:
         )
 
         return controller
+
+    @pytest.fixture
+    def assets_env(self):
+        return create_autospec(Environment, instance=True, spec_set=True)
+
+    @pytest.fixture(autouse=True)
+    def pyramid_config(self, pyramid_config, assets_env):
+        pyramid_config.registry["assets_env"] = assets_env
+        return pyramid_config
 
 
 @pytest.fixture
