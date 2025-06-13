@@ -6,8 +6,6 @@ import AnnotationCard, { $imports } from '../AnnotationCard';
 describe('AnnotationCard', () => {
   let fakeConfig;
   let fakeAnnotation;
-  let fakeQuote;
-  let fakeUsername;
 
   beforeEach(() => {
     fakeConfig = {
@@ -16,17 +14,20 @@ describe('AnnotationCard', () => {
     fakeAnnotation = {
       tags: [],
       links: {},
+      target: [
+        {
+          selector: [
+            {
+              type: 'TextQuoteSelector',
+              exact: 'The quote',
+            },
+          ],
+        },
+      ],
     };
-
-    fakeQuote = sinon.stub().callsFake(anno => anno.quote);
-    fakeUsername = sinon.stub();
 
     $imports.$mock(mockImportedComponents());
     $imports.$mock({
-      '../utils/annotation-metadata': {
-        username: fakeUsername,
-        quote: fakeQuote,
-      },
       '@hypothesis/annotation-ui': {
         AnnotationTimestamps: () => null,
         AnnotationUser: () => null,
@@ -47,40 +48,34 @@ describe('AnnotationCard', () => {
   [
     {
       userInfo: undefined,
-      usernameResult: undefined,
       annotationUser: 'acct:foo@example.com',
-      expectedDisplayName: 'acct:foo@example.com',
+      expectedDisplayName: 'foo',
     },
     {
       userInfo: {
         display_name: 'Jane Doe',
       },
-      usernameResult: undefined,
       annotationUser: 'acct:foo@example.com',
       expectedDisplayName: 'Jane Doe',
     },
     {
       userInfo: undefined,
-      usernameResult: 'john',
-      annotationUser: 'acct:john@example.com',
-      expectedDisplayName: 'john',
+      annotationUser: 'invalid',
+      expectedDisplayName: 'invalid',
     },
-  ].forEach(
-    ({ userInfo, usernameResult, annotationUser, expectedDisplayName }) => {
-      it('renders expected username', () => {
-        fakeAnnotation.user_info = userInfo;
-        fakeAnnotation.user = annotationUser;
-        fakeUsername.returns(usernameResult);
+  ].forEach(({ userInfo, annotationUser, expectedDisplayName }) => {
+    it('renders expected username', () => {
+      fakeAnnotation.user_info = userInfo;
+      fakeAnnotation.user = annotationUser;
 
-        const wrapper = createComponent();
+      const wrapper = createComponent();
 
-        assert.equal(
-          wrapper.find('AnnotationUser').prop('displayName'),
-          expectedDisplayName,
-        );
-      });
-    },
-  );
+      assert.equal(
+        wrapper.find('AnnotationUser').prop('displayName'),
+        expectedDisplayName,
+      );
+    });
+  });
 
   [
     { group: null, shouldRenderGroupInfo: false },
@@ -100,7 +95,7 @@ describe('AnnotationCard', () => {
     });
   });
 
-  it('sets annotation dates in AnnotationTimestamps', () => {
+  it('renders annotation dates in AnnotationTimestamps', () => {
     fakeAnnotation.created = '2025-01-01';
     fakeAnnotation.updated = '2025-01-05';
 
@@ -134,5 +129,10 @@ describe('AnnotationCard', () => {
       wrapper.find('a[data-testid="context-link"]').prop('href'),
       fakeAnnotation.links.incontext,
     );
+  });
+
+  it('extract the annotation quote', () => {
+    const wrapper = createComponent();
+    assert.equal(wrapper.find('blockquote').text(), 'The quote');
   });
 });

@@ -28,6 +28,7 @@ export function pageLabel(annotation: APIAnnotationData): string | undefined {
   ) as PageSelector | undefined;
   return pageSel?.label;
 }
+
 /**
  * Parses H account names of the form 'acct:<username>@<provider>'
  * into a {username, provider} object or null if the input does not

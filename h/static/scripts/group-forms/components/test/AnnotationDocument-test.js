@@ -1,22 +1,22 @@
 import { mount } from '@hypothesis/frontend-testing';
 
-import AnnotationDocument, { $imports } from '../AnnotationDocument';
+import AnnotationDocument from '../AnnotationDocument';
 
 describe('AnnotationDocument', () => {
-  let fakePageLabel;
-
-  beforeEach(() => {
-    fakePageLabel = sinon.stub();
-
-    $imports.$mock({
-      '../utils/annotation-metadata': {
-        pageLabel: fakePageLabel,
-      },
-    });
-  });
-
-  function createComponent() {
-    return mount(<AnnotationDocument annotation={{}} />);
+  function createComponent(pageNumber) {
+    const fakeAnnotation = {
+      target: [
+        {
+          selector: [
+            {
+              type: 'PageSelector',
+              label: pageNumber,
+            },
+          ],
+        },
+      ],
+    };
+    return mount(<AnnotationDocument annotation={fakeAnnotation} />);
   }
 
   it('does not show page number it does not exist in annotation', () => {
@@ -28,9 +28,7 @@ describe('AnnotationDocument', () => {
 
   ['15', '100', '1'].forEach(pageNumber => {
     it('shows page number and comma if page number exists in annotation', () => {
-      fakePageLabel.returns(pageNumber);
-
-      const wrapper = createComponent();
+      const wrapper = createComponent(pageNumber);
 
       assert.isTrue(wrapper.exists('[data-testid="comma-wrapper"]'));
 
