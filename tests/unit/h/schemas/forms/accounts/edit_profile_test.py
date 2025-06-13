@@ -20,11 +20,11 @@ class TestEditProfileSchema:
         )
 
     def test_rejects_invalid_orcid(self, pyramid_csrf_request, validate_orcid):
-        validate_orcid.side_effect = ValueError("Invalid ORCID")
+        validate_orcid.side_effect = ValueError("Invalid ORCID iD")
         schema = EditProfileSchema().bind(request=pyramid_csrf_request)
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"orcid": "abcdef"})
-        assert exc.value.asdict()["orcid"] == "Invalid ORCID"
+        assert exc.value.asdict()["orcid"] == "Invalid ORCID iD"
 
     def test_rejects_invalid_url(self, pyramid_csrf_request, validate_url):
         validate_url.side_effect = ValueError("Invalid URL")

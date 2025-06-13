@@ -836,7 +836,7 @@ class TestEditProfileController:
         user = pyramid_request.user
         user.display_name = "Jim Smith"
         user.description = "Job Description"
-        user.orcid = "ORCID ID"
+        user.orcid = "ORCID iD"
         user.uri = "http://foo.org"
         user.location = "Paris"
 
@@ -846,7 +846,7 @@ class TestEditProfileController:
             "form": {
                 "display_name": "Jim Smith",
                 "description": "Job Description",
-                "orcid": "ORCID ID",
+                "orcid": "ORCID iD",
                 "link": "http://foo.org",
                 "location": "Paris",
             }
@@ -861,7 +861,7 @@ class TestEditProfileController:
             {
                 "display_name": "Jim Smith",
                 "description": "Job Description",
-                "orcid": "ORCID ID",
+                "orcid": "ORCID iD",
                 "link": "http://foo.org",
                 "location": "Paris",
             }
@@ -870,7 +870,7 @@ class TestEditProfileController:
 
         assert user.display_name == "Jim Smith"
         assert user.description == "Job Description"
-        assert user.orcid == "ORCID ID"
+        assert user.orcid == "ORCID iD"
         assert user.uri == "http://foo.org"
         assert user.location == "Paris"
 

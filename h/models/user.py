@@ -197,7 +197,7 @@ class User(Base):
     #: The user's URI/link on the web
     uri = sa.Column(sa.UnicodeText())
 
-    #: The user's ORCID ID
+    #: The user's ORCID iD
     orcid = sa.Column(sa.UnicodeText())
 
     #: Is this user an admin member?
