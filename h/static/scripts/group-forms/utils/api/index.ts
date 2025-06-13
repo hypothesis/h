@@ -1,3 +1,6 @@
+import type { Mention } from '@hypothesis/annotation-ui';
+import type { Annotation } from '@hypothesis/annotation-ui/lib/helpers/annotation-metadata';
+
 /**
  * Values for `type` field when creating or updating groups.
  */
@@ -65,13 +68,94 @@ export type PaginatedResponse<Item> = {
  */
 export type GroupMembersResponse = PaginatedResponse<GroupMember>;
 
+export type UserInfo = {
+  display_name: string | null;
+};
+
+export type ModerationStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'SPAM';
+
+/**
+ * Selector which identifies a document region using the selected text plus
+ * the surrounding context.
+ */
+export type TextQuoteSelector = {
+  type: 'TextQuoteSelector';
+  exact: string;
+  prefix?: string;
+  suffix?: string;
+};
+
+/**
+ * Selector which identifies the page of a document that an annotation was made
+ * on.
+ *
+ * This selector is only applicable for document types where the association of
+ * content and page numbers can be done in a way that is independent of the
+ * viewer and display settings. This includes inherently paginated documents
+ * such as PDFs, but also content such as EPUBs when they include information
+ * about the location of page breaks in printed versions of a book. It does
+ * not include ordinary web pages or EPUBs without page break information
+ * however.
+ */
+export type PageSelector = {
+  type: 'PageSelector';
+
+  /** The zero-based index of the page in the document's page sequence. */
+  index: number;
+
+  /**
+   * Either the page number that is displayed on the page, or the 1-based
+   * number of the page in the document's page sequence, if the pages do not
+   * have numbers on them.
+   */
+  label?: string;
+};
+
+/**
+ * Serialized representation of a region of a document which an annotation
+ * pertains to.
+ */
+export type Selector = TextQuoteSelector | PageSelector;
+
+/**
+ * An entry in the `target` field of an annotation which identifies the document
+ * and region of the document that it refers to.
+ */
+export type Target = {
+  /** URI of the document */
+  source: string;
+  /** Region of the document */
+  selector?: Selector[];
+  /** Text description of the selection, for when the selection itself is not text. */
+  description?: string;
+};
+
 /**
  * Represents an annotation as returned by the h API.
  * API docs: https://h.readthedocs.io/en/latest/api-reference/#tag/annotations
  */
-export type APIAnnotationData = {
+export type APIAnnotationData = Annotation & {
   id?: string;
   text: string;
+
+  mentions: Mention[];
+  tags: string[];
+
+  user: string;
+  user_info?: UserInfo;
+
+  created: string;
+  updated: string;
+
+  moderation_status: ModerationStatus;
+
+  /**
+   * The document and region this annotation refers to.
+   *
+   * The Hypothesis API structure allows for multiple targets, but the h
+   * server only supports one target per annotation.
+   */
+  target: Target[];
 };
 
 /**

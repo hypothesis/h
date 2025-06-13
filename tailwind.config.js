@@ -4,6 +4,7 @@ export default {
   presets: [tailwindConfig],
   content: [
     './h/static/scripts/**/*.{js,ts,tsx}',
+    './node_modules/@hypothesis/annotation-ui/lib/**/*.js',
     './node_modules/@hypothesis/frontend-shared/lib/**/*.js',
   ],
   theme: {

@@ -29,7 +29,7 @@ gulp.task('build-legacy-css', () =>
 );
 
 gulp.task('build-tailwind-css', () =>
-  buildCSS(['./h/static/styles/forms.css'], { tailwindConfig }),
+  buildCSS(['./h/static/styles/forms.scss'], { tailwindConfig }),
 );
 
 gulp.task('build-css', gulp.parallel('build-legacy-css', 'build-tailwind-css'));

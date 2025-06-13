@@ -1969,6 +1969,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hypothesis/annotation-ui@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@hypothesis/annotation-ui@npm:0.2.0"
+  peerDependencies:
+    "@hypothesis/frontend-shared": ^9.4.0
+    dompurify: ^3.0.0
+    escape-html: ^1.0.3
+    katex: ^0.16.0
+    showdown: ^2.0.0
+  checksum: b7418856c4af72c813a5d3a6ae0c4155b010c3b320606ed75369574222914a209de9f0ff6d1d2ff03cde9c79ad70348f49f3303c49a35637ac18eaa1a23e6b97
+  languageName: node
+  linkType: hard
+
 "@hypothesis/frontend-build@npm:^4.0.0":
   version: 4.0.0
   resolution: "@hypothesis/frontend-build@npm:4.0.0"
@@ -2937,6 +2950,13 @@ __metadata:
   version: 1.20.2
   resolution: "@types/resolve@npm:1.20.2"
   checksum: 61c2cad2499ffc8eab36e3b773945d337d848d3ac6b7b0a87c805ba814bc838ef2f262fc0f109bfd8d2e0898ff8bd80ad1025f9ff64f1f71d3d4294c9f14e5f6
+  languageName: node
+  linkType: hard
+
+"@types/trusted-types@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/trusted-types@npm:2.0.7"
+  checksum: 8e4202766a65877efcf5d5a41b7dd458480b36195e580a3b1085ad21e948bc417d55d6f8af1fd2a7ad008015d4117d5fdfe432731157da3c68678487174e4ba3
   languageName: node
   linkType: hard
 
@@ -4423,6 +4443,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^8.3.0":
+  version: 8.3.0
+  resolution: "commander@npm:8.3.0"
+  checksum: 0f82321821fc27b83bd409510bb9deeebcfa799ff0bf5d102128b500b7af22872c0c92cb6a0ebc5a4cf19c6b550fba9cedfa7329d18c6442a625f851377bacf0
+  languageName: node
+  linkType: hard
+
+"commander@npm:^9.0.0":
+  version: 9.5.0
+  resolution: "commander@npm:9.5.0"
+  checksum: c7a3e27aa59e913b54a1bafd366b88650bc41d6651f0cbe258d4ff09d43d6a7394232a4dadd0bf518b3e696fdf595db1028a0d82c785b88bd61f8a440cecfade
+  languageName: node
+  linkType: hard
+
 "commondir@npm:^1.0.1":
   version: 1.0.1
   resolution: "commondir@npm:1.0.1"
@@ -4863,6 +4897,18 @@ __metadata:
   dependencies:
     domelementtype: ^2.3.0
   checksum: 0f58f4a6af63e6f3a4320aa446d28b5790a009018707bce2859dcb1d21144c7876482b5188395a188dfa974238c019e0a1e610d2fc269a12b2c192ea2b0b131c
+  languageName: node
+  linkType: hard
+
+"dompurify@npm:^3.2.6":
+  version: 3.2.6
+  resolution: "dompurify@npm:3.2.6"
+  dependencies:
+    "@types/trusted-types": ^2.0.7
+  dependenciesMeta:
+    "@types/trusted-types":
+      optional: true
+  checksum: 4d002997dbae13f6bdf0e6be014384129c83b1ee8cd3fca9d96f95b9142d1e96256924466a2fc25e7ffb6ede54290e5c4a7d1bd10f9b14cfa07928dd799c3b42
   languageName: node
   linkType: hard
 
@@ -6833,6 +6879,7 @@ __metadata:
     "@babel/preset-env": ^7.27.1
     "@babel/preset-react": ^7.26.3
     "@babel/preset-typescript": ^7.27.0
+    "@hypothesis/annotation-ui": ^0.2.0
     "@hypothesis/frontend-build": ^4.0.0
     "@hypothesis/frontend-shared": ^9.4.0
     "@hypothesis/frontend-testing": ^1.7.1
@@ -6851,6 +6898,7 @@ __metadata:
     bootstrap: ^4.6.2
     chai: ^5.1.2
     classnames: ^2.5.1
+    dompurify: ^3.2.6
     enzyme: ^3.11.0
     enzyme-adapter-preact-pure: ^4.1.0
     escape-html: ^1.0.3
@@ -6866,6 +6914,7 @@ __metadata:
     gulp-if: ^3.0.0
     gulp-svgmin: ^4.1.0
     jquery: ^3.7.1
+    katex: ^0.16.22
     normalize.css: ^8.0.0
     playwright: ^1.52.0
     popper.js: ^1.16.1
@@ -6875,6 +6924,7 @@ __metadata:
     rollup: ^4.30.0
     sass: ^1.86.1
     scroll-into-view: ^1.16.2
+    showdown: ^2.1.0
     sinon: ^20.0.0
     syn: ^0.2.2
     tailwindcss: ^3.4.17
@@ -8018,6 +8068,17 @@ __metadata:
     object.assign: ^4.1.4
     object.values: ^1.1.6
   checksum: f4b05fa4d7b5234230c905cfa88d36dc8a58a6666975a3891429b1a8cdc8a140bca76c297225cb7a499fad25a2c052ac93934449a2c31a44fc9edd06c773780a
+  languageName: node
+  linkType: hard
+
+"katex@npm:^0.16.22":
+  version: 0.16.22
+  resolution: "katex@npm:0.16.22"
+  dependencies:
+    commander: ^8.3.0
+  bin:
+    katex: cli.js
+  checksum: 66a609b6f3e1a3e8634a03228dcd31cb88b7f39d057cfe5271417bc8eb64b85f256accdbd68f453b5714e4e9546192bad554f75c8b9adb91d6b0a7a93505376b
   languageName: node
   linkType: hard
 
@@ -10315,6 +10376,17 @@ __metadata:
   version: 3.0.0
   resolution: "shebang-regex@npm:3.0.0"
   checksum: 1a2bcae50de99034fcd92ad4212d8e01eedf52c7ec7830eedcf886622804fe36884278f2be8be0ea5fde3fd1c23911643a4e0f726c8685b61871c8908af01222
+  languageName: node
+  linkType: hard
+
+"showdown@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "showdown@npm:2.1.0"
+  dependencies:
+    commander: ^9.0.0
+  bin:
+    showdown: bin/showdown.js
+  checksum: 9e33607612c4465f9ef39de356e2cee512e248eb71d4725e1d4353cf3ab4bbe89a94601ce6bfbd8245000633693c8b90e7d85a9613dfeba7704a7422cee78282
   languageName: node
   linkType: hard
 
