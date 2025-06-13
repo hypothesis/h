@@ -21,7 +21,7 @@ click==8.1.8
     #   cookiecutter
     #   pip-tools
 cookiecutter==2.6.0
-    # via -r requirements/template.in
+    # via -r template.in
 idna==3.10
     # via requests
 importlib-metadata==8.6.1
@@ -37,10 +37,10 @@ mdurl==0.1.2
 packaging==25.0
     # via build
 pip-sync-faster==0.0.5
-    # via -r requirements/template.in
+    # via -r template.in
 pip-tools==7.4.1
     # via
-    #   -r requirements/template.in
+    #   -r template.in
     #   pip-sync-faster
 pygments==2.19.1
     # via rich
@@ -54,7 +54,7 @@ python-slugify==8.0.4
     # via cookiecutter
 pyyaml==6.0.2
     # via cookiecutter
-requests==2.32.3
+requests==2.32.4
     # via cookiecutter
 rich==13.9.4
     # via cookiecutter
