@@ -1,24 +1,32 @@
 import { Button } from '@hypothesis/frontend-shared';
-import { useContext, useState } from 'preact/hooks';
+import { useContext } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
 import FormContainer from '../../forms-common/components/FormContainer';
 import TextField from '../../forms-common/components/TextField';
+import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { SignupConfigObject } from '../config';
 
 export default function SignupForm() {
   const config = useContext(Config) as SignupConfigObject;
 
-  const [username, setUsername] = useState(config.formData?.username ?? '');
-  const [email, setEmail] = useState(config.formData?.email ?? '');
-  const [password, setPassword] = useState(config.formData?.password ?? '');
-  const [privacyAccepted, setPrivacyAccepted] = useState(
+  const username = useFormValue(config.formData?.username ?? '', {
+    initialError: config.formErrors?.username,
+  });
+  const email = useFormValue(config.formData?.email ?? '', {
+    initialError: config.formErrors?.email,
+  });
+  const password = useFormValue(config.formData?.password ?? '', {
+    initialError: config.formErrors?.password,
+  });
+  const privacyAccepted = useFormValue(
     config.formData?.privacy_accepted ?? false,
+    {
+      initialError: config.formErrors?.privacy_accepted,
+    },
   );
-  const [commsOptIn, setCommsOptIn] = useState(
-    config.formData?.comms_opt_in ?? false,
-  );
+  const commsOptIn = useFormValue(config.formData?.comms_opt_in ?? false);
 
   return (
     <FormContainer>
@@ -31,9 +39,9 @@ export default function SignupForm() {
         <TextField
           type="input"
           name="username"
-          value={username}
-          fieldError={config.formErrors?.username ?? ''}
-          onChangeValue={setUsername}
+          value={username.value}
+          fieldError={username.error}
+          onChangeValue={username.update}
           label="Username"
           minLength={3}
           maxLength={30}
@@ -44,9 +52,9 @@ export default function SignupForm() {
         <TextField
           type="input"
           name="email"
-          value={email}
-          fieldError={config.formErrors?.email ?? ''}
-          onChangeValue={setEmail}
+          value={email.value}
+          fieldError={email.error}
+          onChangeValue={email.update}
           label="Email address"
           required
           showRequired={false}
@@ -55,9 +63,9 @@ export default function SignupForm() {
           type="input"
           inputType="password"
           name="password"
-          value={password}
-          fieldError={config.formErrors?.password ?? ''}
-          onChangeValue={setPassword}
+          value={password.value}
+          fieldError={password.error}
+          onChangeValue={password.update}
           label="Password"
           minLength={8}
           required
@@ -65,15 +73,15 @@ export default function SignupForm() {
         />
         <Checkbox
           data-testid="privacy-accepted"
-          checked={privacyAccepted}
+          checked={privacyAccepted.value}
           name="privacy_accepted"
           // Backend form validation expects the string "true" rather than the
           // HTML form default of "on".
           value="true"
           onChange={e => {
-            setPrivacyAccepted((e.target as HTMLInputElement).checked);
+            privacyAccepted.update((e.target as HTMLInputElement).checked);
           }}
-          error={config.formErrors?.privacy_accepted ?? ''}
+          error={privacyAccepted.error}
           required
         >
           I have read and agree to the{' '}
@@ -95,13 +103,13 @@ export default function SignupForm() {
         </Checkbox>
         <Checkbox
           data-testid="comms-opt-in"
-          checked={commsOptIn}
+          checked={commsOptIn.value}
           name="comms_opt_in"
           // Backend form validation expects the string "true" rather than the
           // HTML form default of "on".
           value="true"
           onChange={e => {
-            setCommsOptIn((e.target as HTMLInputElement).checked);
+            commsOptIn.update((e.target as HTMLInputElement).checked);
           }}
         >
           I would like to receive news about annotation and Hypothesis.

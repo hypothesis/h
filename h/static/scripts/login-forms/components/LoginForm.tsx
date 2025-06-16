@@ -1,9 +1,10 @@
 import { Button } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useContext, useState } from 'preact/hooks';
+import { useContext } from 'preact/hooks';
 
 import FormContainer from '../../forms-common/components/FormContainer';
 import TextField from '../../forms-common/components/TextField';
+import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { LoginConfigObject } from '../config';
 import { routes } from '../routes';
@@ -11,8 +12,12 @@ import { routes } from '../routes';
 export default function LoginForm() {
   const config = useContext(Config) as LoginConfigObject;
 
-  const [username, setUsername] = useState(config.formData?.username ?? '');
-  const [password, setPassword] = useState(config.formData?.password ?? '');
+  const username = useFormValue(config.formData?.username ?? '', {
+    initialError: config.formErrors?.username,
+  });
+  const password = useFormValue(config.formData?.password ?? '', {
+    initialError: config.formErrors?.password,
+  });
 
   return (
     <FormContainer>
@@ -30,9 +35,9 @@ export default function LoginForm() {
         <TextField
           type="input"
           name="username"
-          value={username}
-          fieldError={config.formErrors?.username ?? ''}
-          onChangeValue={setUsername}
+          value={username.value}
+          fieldError={username.error}
+          onChangeValue={username.update}
           label="Username / email"
           autofocus
           required
@@ -42,9 +47,9 @@ export default function LoginForm() {
           type="input"
           inputType="password"
           name="password"
-          value={password}
-          fieldError={config.formErrors?.password ?? ''}
-          onChangeValue={setPassword}
+          value={password.value}
+          fieldError={password.error}
+          onChangeValue={password.update}
           label="Password"
           required
           showRequired={false}
