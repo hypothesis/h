@@ -137,7 +137,7 @@ export default function TextField({
           error={Boolean(error)}
         />
       )}
-      {fieldError && !hasCommitted && (
+      {fieldError && (
         <div className="mt-1">
           <ErrorNotice message={fieldError} />
         </div>
