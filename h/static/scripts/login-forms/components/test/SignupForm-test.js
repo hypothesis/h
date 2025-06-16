@@ -138,6 +138,29 @@ describe('SignupForm', () => {
     assert.equal(updatedElements.usernameField.prop('value'), username);
   });
 
+  [
+    {
+      username: 'testuser',
+      error: undefined,
+    },
+    {
+      username: 'foo@bar',
+      error: 'Must have only letters, numbers, periods and underscores.',
+    },
+  ].forEach(({ username, error }) => {
+    it('shows error if username contains invalid characters', () => {
+      const { wrapper, elements } = createWrapper();
+
+      act(() => {
+        elements.usernameField.prop('onChangeValue')(username);
+      });
+      wrapper.update();
+      const updatedElements = getElements(wrapper);
+
+      assert.equal(updatedElements.usernameField.prop('fieldError'), error);
+    });
+  });
+
   it('updates email when input changes', () => {
     const { wrapper, elements } = createWrapper();
     const email = 'test@example.com';

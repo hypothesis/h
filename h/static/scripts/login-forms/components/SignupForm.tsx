@@ -13,6 +13,12 @@ export default function SignupForm() {
 
   const username = useFormValue(config.formData?.username ?? '', {
     initialError: config.formErrors?.username,
+    validate: username => {
+      if (!username.match(/^[A-Za-z0-9_.]*$/)) {
+        return 'Must have only letters, numbers, periods and underscores.';
+      }
+      return undefined;
+    },
   });
   const email = useFormValue(config.formData?.email ?? '', {
     initialError: config.formErrors?.email,
