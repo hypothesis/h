@@ -737,6 +737,43 @@ paths:
         '204':
           $ref: '#/components/responses/NoContent'
 
+    # ----------------------------------------------------------
+    # PATCH annotations/{id}/moderation - Update the moderation_status of an annotation
+    # ----------------------------------------------------------
+    patch:
+      tags:
+        - annotations
+      summary: Moderate an annotation
+      description: |
+        Change the moderation_status of an annotation. The authenticated user needs to have the
+        moderate permission for the group that contains the annotation—this
+        permission is granted to the user who created the group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+        - name: moderation_status
+          in: query
+          schema:
+            description: The new moderation status for the annotation.
+            type: string
+            enum: [APPROVED, PENDING, DENIED, SPAM]
+        - name: annotation_updated
+          in: query
+          description: |
+            The timestamp of the annotation's last update, in ISO 8601 format.
+            This is used to ensure that the annotation has not been modified since it was fetched.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+
   # ---------------------------------------------------------------------------
   # Operations on Group collections
   # ---------------------------------------------------------------------------
