@@ -13,9 +13,12 @@ export default function SignupForm() {
 
   const username = useFormValue(config.formData?.username ?? '', {
     initialError: config.formErrors?.username,
-    validate: username => {
+    validate: (username, committed) => {
       if (!username.match(/^[A-Za-z0-9_.]*$/)) {
         return 'Must have only letters, numbers, periods and underscores.';
+      }
+      if (committed && (username.startsWith('.') || username.endsWith('.'))) {
+        return 'May not start or end with a period.';
       }
       return undefined;
     },
@@ -48,6 +51,7 @@ export default function SignupForm() {
           value={username.value}
           fieldError={username.error}
           onChangeValue={username.update}
+          onCommitValue={username.commit}
           label="Username"
           minLength={3}
           maxLength={30}

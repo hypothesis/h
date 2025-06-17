@@ -147,12 +147,24 @@ describe('SignupForm', () => {
       username: 'foo@bar',
       error: 'Must have only letters, numbers, periods and underscores.',
     },
-  ].forEach(({ username, error }) => {
+    {
+      username: 'foo.',
+      error: undefined,
+    },
+    {
+      username: 'foo.',
+      commit: true,
+      error: 'May not start or end with a period.',
+    },
+  ].forEach(({ username, error, commit }) => {
     it('shows error if username contains invalid characters', () => {
       const { wrapper, elements } = createWrapper();
 
       act(() => {
         elements.usernameField.prop('onChangeValue')(username);
+        if (commit) {
+          elements.usernameField.prop('onCommitValue')(username);
+        }
       });
       wrapper.update();
       const updatedElements = getElements(wrapper);
