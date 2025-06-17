@@ -14,6 +14,7 @@ Annotation:
     - document
     - links
     - hidden
+    - moderation_status
     - flagged
   properties:
     consumer:
@@ -189,6 +190,14 @@ Annotation:
     hidden:
       type: boolean
       description: Whether this annotation is hidden from public view
+    moderation_status:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - DENIED
+        - SPAM
+      description: This annotation's moderation status
     flagged:
       type: boolean
       description: Whether this annotation has one or more flags for moderation
