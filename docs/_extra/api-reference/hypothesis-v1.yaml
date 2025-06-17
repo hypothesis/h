@@ -1073,6 +1073,51 @@ paths:
           $ref: '#/components/responses/NoContent'
 
   # ---------------------------------------------------------------------------
+  # GET groups/{id}/annotations - List the annotations of group
+  # ---------------------------------------------------------------------------
+  /groups/{id}/annotations:
+    get:
+      tags:
+        - groups
+      summary: List annotations in a group
+      description: |
+        Get a paginated list of all annotations in a group.
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+        - name: moderation_status
+          in: query
+          description: |
+            Filter the annotations by their moderation status.
+            If not specified, all annotations are returned.
+          schema:
+            type: string
+            enum: [APPROVED, PENDING, DENIED, SPAM]
+      security:
+        - ApiKey: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/*json:
+              schema:
+                oneOf:
+                  - title: "Paginated"
+                    type: object
+                    properties:
+                      meta:
+                        description: "Metadata about this response."
+                        type: object
+                        properties:
+                          page:
+                            $ref: '#/components/schemas/PaginationMeta'
+                      data:
+                        description: "The list of annotations for the requested page."
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Annotation'
+
+  # ---------------------------------------------------------------------------
   # Operations on the currently-authenticated user (Profile)
   # ---------------------------------------------------------------------------
   /profile:
