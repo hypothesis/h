@@ -1,4 +1,4 @@
-import { Button } from '@hypothesis/frontend-shared';
+import { Button, Link } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useContext } from 'preact/hooks';
 
@@ -55,13 +55,14 @@ export default function LoginForm() {
           showRequired={false}
         />
         <div className="text-right">
-          <a
+          <Link
             href={routes.forgotPassword}
-            className="text-grey-5 text-sm underline"
+            underline="always"
+            variant="text-light"
             data-testid="forgot-password-link"
           >
             Forgot your password?
-          </a>
+          </Link>
         </div>
         <div className="mb-8 pt-2 flex items-center gap-x-4">
           {config.forOAuth && (
