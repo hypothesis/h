@@ -34,6 +34,25 @@ export type SignupConfigObject = ConfigBase & {
   };
 };
 
-export type ConfigObject = LoginConfigObject | SignupConfigObject;
+/** Data passed to frontend for profile form. */
+export type ProfileConfigObject = ConfigBase & {
+  formErrors?: {
+    display_name?: string;
+    description?: string;
+    location?: string;
+    link?: string;
+  };
+  formData?: {
+    display_name?: string;
+    description?: string;
+    location?: string;
+    link?: string;
+  };
+};
+
+export type ConfigObject =
+  | LoginConfigObject
+  | SignupConfigObject
+  | ProfileConfigObject;
 
 export const Config = createContext<ConfigObject | null>(null);

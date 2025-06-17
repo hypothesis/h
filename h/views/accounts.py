@@ -519,16 +519,6 @@ class EditProfileController:
     @view_config(request_method="GET")
     def get(self):
         """Render the 'Edit Profile' form."""
-        user = self.request.user
-        self.form.set_appstruct(
-            {
-                "display_name": user.display_name or "",
-                "description": user.description or "",
-                "location": user.location or "",
-                "link": user.uri or "",
-                "orcid": user.orcid or "",
-            }
-        )
         return self._template_data()
 
     @view_config(request_method="POST")
@@ -540,8 +530,27 @@ class EditProfileController:
             on_failure=self._template_data,
         )
 
-    def _template_data(self):
-        return {"form": self.form.render()}
+    def _template_data(self, errors=None, items=None):
+        user = self.request.user
+        csrf_token = get_csrf_token(self.request)
+        if errors is None:
+            errors = {}
+        if items is None:
+            items = {}
+        form_data = {
+            "display_name": items.get("display_name") or user.display_name or "",
+            "description": items.get("description") or user.description or "",
+            "location": items.get("location") or user.location or "",
+            "link": items.get("link") or user.uri or "",
+        }
+
+        return {
+            "js_config": {
+                "csrfToken": csrf_token,
+                "formData": form_data,
+                "formErrors": errors,
+            }
+        }
 
     def _update_user(self, appstruct):
         user = self.request.user
