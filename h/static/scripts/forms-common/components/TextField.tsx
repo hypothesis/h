@@ -42,6 +42,9 @@ export type TextFieldProps = {
   /** Callback invoked when the field's value is changed. */
   onChangeValue: (newValue: string) => void;
 
+  /** Callback invoked when the field's value is committed. */
+  onCommitValue?: (newValue: string) => void;
+
   /**
    * Minimum number of characters that this field must have.
    *
@@ -84,6 +87,7 @@ export default function TextField({
   inputType,
   value,
   onChangeValue,
+  onCommitValue,
   minLength = 0,
   maxLength,
   label,
@@ -96,14 +100,6 @@ export default function TextField({
 }: TextFieldProps) {
   const id = useId();
   const [hasCommitted, setHasCommitted] = useState(false);
-
-  const handleInput = (e: InputEvent) => {
-    onChangeValue((e.target as HTMLInputElement).value);
-  };
-
-  const handleChange = () => {
-    setHasCommitted(true);
-  };
 
   let error = '';
   if (typeof maxLength === 'number' && [...value].length > maxLength) {
@@ -119,8 +115,13 @@ export default function TextField({
       <Label htmlFor={id} text={label} required={showRequired} />
       <InputComponent
         id={id}
-        onInput={handleInput}
-        onChange={handleChange}
+        onInput={e => {
+          onChangeValue((e.target as HTMLInputElement).value);
+        }}
+        onChange={e => {
+          onCommitValue?.((e.target as HTMLInputElement).value);
+          setHasCommitted(true);
+        }}
         error={error}
         value={value}
         classes={classes}
