@@ -27,6 +27,34 @@ describe('useFormValue', () => {
     assert.isTrue(lastValue.changed);
   });
 
+  it('returns new value after commit', () => {
+    const wrapper = mount(<TestWidget initial="foo" />);
+
+    lastValue.commit('new-value');
+    wrapper.update(); // Flush render
+
+    assert.equal(lastValue.value, 'new-value');
+    assert.isUndefined(lastValue.error);
+    assert.isTrue(lastValue.changed);
+  });
+
+  it('updates committed state', () => {
+    const validate = sinon.stub();
+    const opts = { validate };
+    const wrapper = mount(<TestWidget initial="foo" opts={opts} />);
+    assert.isTrue(lastValue.committed);
+
+    lastValue.update('new-val');
+    wrapper.update();
+    assert.isFalse(lastValue.committed);
+    assert.calledWith(validate, 'new-val', false);
+
+    lastValue.commit('new-value');
+    wrapper.update();
+    assert.isTrue(lastValue.committed);
+    assert.calledWith(validate, 'new-value', true);
+  });
+
   it('returns form error', () => {
     const opts = {
       initialError: 'Server error',

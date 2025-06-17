@@ -64,6 +64,19 @@ describe('TextField', () => {
     assert.calledWith(onChange, 'foo');
   });
 
+  it('invokes callback when text is committed', () => {
+    const onChange = sinon.stub();
+    const onCommit = sinon.stub();
+    const wrapper = mount(
+      <TextField value="" onChangeValue={onChange} onCommitValue={onCommit} />,
+    );
+
+    wrapper.find('input').getDOMNode().value = 'foo';
+    wrapper.find('input').simulate('change');
+
+    assert.calledWith(onCommit, 'foo');
+  });
+
   it('defers checking for too few characters until first commit', () => {
     const wrapper = mount(<TextField value="" minLength={5} />);
 
