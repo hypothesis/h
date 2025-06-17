@@ -738,16 +738,15 @@ paths:
           $ref: '#/components/responses/NoContent'
 
     # ----------------------------------------------------------
-    # PATCH annotations/{id}/moderation - Update the moderation_status of an annotation
+    # PATCH annotations/{id}/moderation - Change the moderation_status of an annotation
     # ----------------------------------------------------------
     patch:
       tags:
         - annotations
       summary: Moderate an annotation
       description: |
-        Change the moderation_status of an annotation. The authenticated user needs to have the
-        moderate permission for the group that contains the annotation—this
-        permission is granted to the user who created the group.
+        Change the moderation status of an annotation.
+        The authenticated user must be a moderator, admin or owner of the annotation's group.
       security:
         - ApiKey: []
       parameters:
@@ -761,8 +760,10 @@ paths:
         - name: annotation_updated
           in: query
           description: |
-            The timestamp of the annotation's last update, in ISO 8601 format.
-            This is used to ensure that the annotation has not been modified since it was fetched.
+            The annotation's `updated` time as returned by the API when fetching this annotation.
+            If the optional `annotation_updated` parameter is included then the
+            moderation request will fail if the annotation's `updated` time
+            does not match the given `annotation_updated` time.
           schema:
             type: string
             format: date-time
