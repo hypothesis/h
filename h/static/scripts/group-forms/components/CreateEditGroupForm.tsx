@@ -9,6 +9,7 @@ import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
 import ErrorNotice from '../../forms-common/components/ErrorNotice';
+import Form from '../../forms-common/components/Form';
 import FormContainer from '../../forms-common/components/FormContainer';
 import Label from '../../forms-common/components/Label';
 import Star from '../../forms-common/components/Star';
@@ -242,11 +243,7 @@ export default function CreateEditGroupForm({
   return (
     <FormContainer>
       <GroupFormHeader group={group} title={heading} />
-      <form
-        onSubmit={onSubmit}
-        data-testid="form"
-        className="max-w-[530px] mx-auto flex flex-col gap-y-4"
-      >
+      <Form onSubmit={onSubmit} csrfToken={null}>
         <TextField
           type="input"
           value={name}
@@ -335,7 +332,7 @@ export default function CreateEditGroupForm({
             {group ? 'Save changes' : 'Create group'}
           </Button>
         </div>
-      </form>
+      </Form>
 
       {group && pendingGroupType && (
         <GroupTypeChangeWarning
