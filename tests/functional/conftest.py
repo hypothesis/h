@@ -92,8 +92,11 @@ def pyramid_app():
     return create_app(None, **TEST_SETTINGS)
 
 
-# Always unconditionally wipe the Elasticsearch index after every functional
-# test.
 @pytest.fixture(autouse=True)
-def always_delete_all_elasticsearch_documents():
-    pass
+def always_delete_all_elasticsearch_documents(
+    # The es_client fixture clears the search index as part of its fixture
+    # teardown, so this apparently unused dependency is what actually
+    # causes this fixture to clear the index.
+    es_client,  # noqa: F811
+):
+    """Wipe the Elasticsearch index after every functional test."""
