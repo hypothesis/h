@@ -1,5 +1,4 @@
 import { Button, Link } from '@hypothesis/frontend-shared';
-import classnames from 'classnames';
 import { useContext } from 'preact/hooks';
 
 import FormContainer from '../../forms-common/components/FormContainer';
@@ -24,12 +23,7 @@ export default function LoginForm() {
       <form
         method="POST"
         data-testid="form"
-        className={classnames({
-          'max-w-[530px] mx-auto flex flex-col': true,
-          'gap-y-4': !config.forOAuth,
-          // Use a more compact layout in the OAuth popup window.
-          'gap-y-2': config.forOAuth,
-        })}
+        className="max-w-[530px] mx-auto flex flex-col gap-y-4"
       >
         <input type="hidden" name="csrf_token" value={config.csrfToken} />
         <TextField
