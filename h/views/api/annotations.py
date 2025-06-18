@@ -171,7 +171,6 @@ def delete(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation.reindex",
     request_method="POST",
-    permission=Permission.Annotation.UPDATE,
     link_name="annotation.reindex",
     description="Reindex an annotation",
 )
