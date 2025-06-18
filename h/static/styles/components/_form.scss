@@ -55,9 +55,11 @@
 }
 
 .form-header--center {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
   margin-top: 30px;
   margin-bottom: 40px;
-  text-align: center;
 }
 
 .form-header__logo {
