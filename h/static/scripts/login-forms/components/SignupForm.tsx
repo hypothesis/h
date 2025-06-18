@@ -2,6 +2,7 @@ import { Button } from '@hypothesis/frontend-shared';
 import { useContext } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
+import Form from '../../forms-common/components/Form';
 import FormContainer from '../../forms-common/components/FormContainer';
 import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
@@ -39,12 +40,7 @@ export default function SignupForm() {
 
   return (
     <FormContainer>
-      <form
-        method="POST"
-        data-testid="form"
-        className="max-w-[530px] mx-auto flex flex-col gap-y-4"
-      >
-        <input type="hidden" name="csrf_token" value={config.csrfToken} />
+      <Form csrfToken={config.csrfToken}>
         <TextField
           type="input"
           name="username"
@@ -130,7 +126,7 @@ export default function SignupForm() {
             Sign up
           </Button>
         </div>
-      </form>
+      </Form>
     </FormContainer>
   );
 }
