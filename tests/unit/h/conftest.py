@@ -67,6 +67,12 @@ from h.services.user_update import UserUpdateService
 from tests.common import factories as common_factories
 
 
+@pytest.fixture
+def es_client(es_client, clear_search_index):
+    yield es_client
+    clear_search_index()
+
+
 class DummyFeature:
     """
     A dummy feature flag looker-upper.

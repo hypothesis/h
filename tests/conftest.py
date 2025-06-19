@@ -57,23 +57,34 @@ def db_session_replica(db_session):
 @pytest.fixture
 def es_client():
     client = _es_client()
-    yield client
-    # Push all changes to segments to make sure all annotations that were added get removed.
-    elasticsearch_dsl.Index(client.index, using=client.conn).refresh()
 
-    client.conn.delete_by_query(
-        index=client.index,
-        body={"query": {"match_all": {}}},
-        # This query occasionally fails with a version conflict.
-        # Forcing the deletion resolves the issue, but the exact
-        # cause of the version conflict has not been found yet.
-        conflicts="proceed",
-        # Add refresh to make deletion changes show up in search results.
-        refresh=True,
-    )
+    yield client
 
     # Close connection to ES server to avoid ResourceWarning about a leaked TCP socket.
     client.close()
+
+
+@pytest.fixture
+def clear_search_index(es_client):
+    """Return a function that deletes all documents from the search index."""
+
+    def clear_search_index():
+        """Delete all documents from the Elasticsearch index."""
+        # Push all changes to segments to make sure all annotations that were added get removed.
+        elasticsearch_dsl.Index(es_client.index, using=es_client.conn).refresh()
+
+        es_client.conn.delete_by_query(
+            index=es_client.index,
+            body={"query": {"match_all": {}}},
+            # This query occasionally fails with a version conflict.
+            # Forcing the deletion resolves the issue, but the exact
+            # cause of the version conflict has not been found yet.
+            conflicts="proceed",
+            # Add refresh to make deletion changes show up in search results.
+            refresh=True,
+        )
+
+    return clear_search_index
 
 
 @pytest.fixture
