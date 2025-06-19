@@ -5,7 +5,7 @@ import pytest
 from h.models import GroupMembership
 
 
-@pytest.mark.usefixtures("with_clean_db")
+@pytest.mark.usefixtures("with_clean_db_and_search_index")
 class TestBulkAnnotation:
     def test_it_requires_authentication(self, make_request):
         response = make_request(headers={"bad_auth": "BAD"}, expect_errors=True)

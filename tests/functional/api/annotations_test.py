@@ -1,8 +1,126 @@
 import pytest
 
+from h.models import GroupMembershipRoles
 from h.models.annotation import ModerationStatus
 
 pytestmark = pytest.mark.usefixtures("init_elasticsearch")
+
+
+class TestSearchAnnotationsAPI:
+    @pytest.mark.parametrize("user_is_nipsad", [True, False])
+    def test_users_can_see_their_own_annotations(
+        self, app, auth_header, db_session, factories, user, user_is_nipsad
+    ):
+        """Users can always see their own annotations.
+
+        Users can always see all their own annotations, including private and
+        hidden annotations, and regardless of whether the user is NIPSA'd or
+        not.
+        """
+        user.nipsa = user_is_nipsad
+        annotations = [
+            # Users can see their own annotations.
+            factories.Annotation(userid=user.userid),
+            # Users can see their own private annotations.
+            factories.Annotation(userid=user.userid, shared=False),
+            # Users can see their own hidden (by moderation) annotations.
+            factories.Annotation(
+                userid=user.userid, moderation_status=ModerationStatus.PENDING
+            ),
+            factories.Annotation(
+                userid=user.userid, moderation_status=ModerationStatus.DENIED
+            ),
+            factories.Annotation(
+                userid=user.userid, moderation_status=ModerationStatus.SPAM
+            ),
+        ]
+        db_session.commit()
+        self.index_annotations(app, annotations)
+
+        response = app.get("/api/search", headers={"Authorization": auth_header})
+
+        response_annotation_ids = [anno["id"] for anno in response.json["rows"]]
+        expected_annotation_ids = [anno.id for anno in annotations]
+        assert sorted(response_annotation_ids) == sorted(expected_annotation_ids)
+
+    def test_users_can_see_other_users_annotations(
+        self, app, auth_header, db_session, factories, other_user
+    ):
+        other_users_annotation = factories.Annotation(
+            userid=other_user.userid, shared=True
+        )
+        db_session.commit()
+        self.index_annotations(app, [other_users_annotation])
+
+        response = app.get("/api/search", headers={"Authorization": auth_header})
+
+        response_annotation_ids = [anno["id"] for anno in response.json["rows"]]
+        assert response_annotation_ids == [other_users_annotation.id]
+
+    def test_users_cannot_see_other_users_private_or_hidden_annotations(
+        self, app, auth_header, db_session, factories, other_user
+    ):
+        other_users_annotations = [
+            # You can't see other users private annotations.
+            factories.Annotation(userid=other_user.userid, shared=False),
+            # You can't see other users hidden (by moderation) annotations.
+            factories.Annotation(
+                userid=other_user.userid, moderation_status=ModerationStatus.PENDING
+            ),
+            factories.Annotation(
+                userid=other_user.userid, moderation_status=ModerationStatus.DENIED
+            ),
+            factories.Annotation(
+                userid=other_user.userid, moderation_status=ModerationStatus.SPAM
+            ),
+        ]
+        db_session.commit()
+        self.index_annotations(app, other_users_annotations)
+
+        response = app.get("/api/search", headers={"Authorization": auth_header})
+
+        assert response.json["rows"] == []
+
+    def test_users_cannot_see_other_nipsad_users_annotations(
+        self, app, auth_header, db_session, factories, other_user
+    ):
+        other_user.nipsa = True
+        other_users_annotation = factories.Annotation(
+            userid=other_user.userid, shared=True
+        )
+        db_session.commit()
+        self.index_annotations(app, [other_users_annotation])
+
+        response = app.get("/api/search", headers={"Authorization": auth_header})
+
+        assert response.json["rows"] == []
+
+    def index_annotations(self, app, annotations):
+        """Index the given annotations into Elasticsearch.
+
+        Normally when a new annotation is created by calling the API the
+        annotation is both committed to the DB and indexed into Elasticsearch.
+        But if tests have been creating annotations by writing to the DB
+        directly (e.g. by using test factories) rather than by calling the API,
+        those annotations will be in the DB but not in Elasticsearch.
+
+        This helper method indexes the given `annotations` into Elasticsearch
+        so that they'll show up in subsequent search API responses.
+        """
+        for anno in annotations:
+            app.post(f"/api/annotations/{anno.id}/reindex", {})
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def other_user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def auth_header(self, factories, user):
+        return f"Bearer {factories.DeveloperToken(user=user).value}"
 
 
 class TestSearchAnnotations:
@@ -102,6 +220,73 @@ class TestSearchAnnotations:
             else:
                 # If the author is not nipsaed we should see their annotations if they are shared/not hidden
                 expected_ids.add(anno_from_author.id)
+
+        assert expected_ids.issubset(search_annotation_ids)
+        assert search_annotation_ids.isdisjoint(not_expected_ids)
+
+    @pytest.mark.parametrize("api_user_is_moderator", [True, False])
+    def test_filter_by_group_where_moderator(
+        self,
+        app,
+        make_annotation,
+        api_user_is_moderator,
+        make_user,
+        factories,
+    ):
+        group = factories.Group()
+        group_moderator = make_user()
+        group_member = make_user()
+        factories.GroupMembership(
+            user=group_moderator,
+            group=group,
+            roles=[GroupMembershipRoles.OWNER],
+        )
+        factories.GroupMembership(
+            user=group_member, group=group, roles=[GroupMembershipRoles.MEMBER]
+        )
+
+        annotation_from_member = make_annotation(user=group_member, groupid=group.pubid)
+        hidden_annotation_from_member = make_annotation(
+            user=group_member,
+            groupid=group.pubid,
+            moderation_status=ModerationStatus.DENIED,
+        )
+        annotation_from_moderator = make_annotation(user=group_moderator, group=group)
+        hidden_annotation_from_moderator = make_annotation(
+            user=group_moderator,
+            groupid=group.pubid,
+            moderation_status=ModerationStatus.DENIED,
+        )
+        annotation_in_another_group = make_annotation(
+            user=group_moderator, groupid="__world__"
+        )
+
+        search_annotation_ids = self.search(
+            app,
+            group_moderator if api_user_is_moderator else group_member,
+            group=group.pubid,
+        )
+
+        expected_ids = set()
+        # We are filtering by group, so we should only see annotations on that group
+        not_expected_ids = set(annotation_in_another_group.id)
+        if api_user_is_moderator:
+            expected_ids = {
+                # As a moderator we see moderated annotations
+                annotation_from_member.id,
+                hidden_annotation_from_member.id,
+                annotation_from_moderator.id,
+                hidden_annotation_from_moderator.id,
+            }
+        else:
+            expected_ids = {
+                annotation_from_member.id,
+                annotation_from_moderator.id,
+                # We always see our own hidden annotations
+                hidden_annotation_from_member.id,
+            }
+            # If we are not a moderator we don't see hidden annotations form other users
+            not_expected_ids.add(hidden_annotation_from_moderator.id)
 
         assert expected_ids.issubset(search_annotation_ids)
         assert search_annotation_ids.isdisjoint(not_expected_ids)
