@@ -1,4 +1,5 @@
 import { Input, Textarea } from '@hypothesis/frontend-shared';
+import classnames from 'classnames';
 import { useId, useState } from 'preact/hooks';
 
 import ErrorNotice from './ErrorNotice';
@@ -76,6 +77,15 @@ export type TextFieldProps = {
 
   /** Optional error message for the field. */
   fieldError?: string;
+
+  /**
+   * Whether the status line, containing the character count, affects the layout
+   * size.
+   *
+   * This defaults to false, so that fields in a vertical layout have the same
+   * vertical spacing if some fields have a status line and some do not.
+   */
+  includeStatusLineInLayout?: boolean;
 };
 
 /**
@@ -97,6 +107,7 @@ export default function TextField({
   classes = '',
   name,
   fieldError = '',
+  includeStatusLineInLayout = false,
 }: TextFieldProps) {
   const id = useId();
   const [hasCommitted, setHasCommitted] = useState(false);
@@ -111,7 +122,7 @@ export default function TextField({
   const InputComponent = type === 'input' ? Input : Textarea;
 
   return (
-    <div>
+    <div className="relative">
       <Label htmlFor={id} text={label} required={showRequired} />
       <InputComponent
         id={id}
@@ -131,13 +142,21 @@ export default function TextField({
         name={name}
         type={inputType}
       />
-      {typeof maxLength === 'number' && (
-        <CharacterCounter
-          value={[...value].length}
-          limit={maxLength}
-          error={Boolean(error)}
-        />
-      )}
+      <div
+        className={classnames(
+          includeStatusLineInLayout ? 'relative' : 'absolute',
+          'w-full',
+        )}
+        data-testid="status-line"
+      >
+        {typeof maxLength === 'number' && (
+          <CharacterCounter
+            value={[...value].length}
+            limit={maxLength}
+            error={Boolean(error)}
+          />
+        )}
+      </div>
       {fieldError && (
         <div className="mt-1">
           <ErrorNotice message={fieldError} />

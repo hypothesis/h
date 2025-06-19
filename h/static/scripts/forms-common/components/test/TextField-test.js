@@ -92,6 +92,17 @@ describe('TextField', () => {
     );
   });
 
+  [true, false].forEach(include => {
+    it('includes status line in layout if `includeStatusLineInLayout` is set', () => {
+      const wrapper = mount(
+        <TextField value="" includeStatusLineInLayout={include} />,
+      );
+      const statusLine = wrapper.find('[data-testid="status-line"]');
+      assert.equal(statusLine.hasClass('relative'), include);
+      assert.equal(statusLine.hasClass('absolute'), !include);
+    });
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({
