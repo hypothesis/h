@@ -1,6 +1,7 @@
 import contextlib
 import os
 
+import elasticsearch.exceptions
 import pytest
 from sqlalchemy import text
 from webtest import TestApp
@@ -51,7 +52,18 @@ def reset_app(app):
 
 
 @pytest.fixture
-def with_clean_db(db_engine):
+def with_clean_db_and_search_index(db_engine, clear_search_index):
+    """Empty the DB and search index before running the test.
+
+    h doesn't normally reset the DB or search index before each functest
+    because doing so was taking too long, see:
+    https://github.com/hypothesis/h/pull/6845
+
+    This does mean that functests need to be robust against data from previous
+    tests still being in the DB and search index. Alternatively, a test can use
+    @pytest.mark.usefixtures("with_clean_db_and_search_index") to have the DB
+    and search index emptied before running the test.
+    """
     tables = reversed(db.Base.metadata.sorted_tables)
     with contextlib.closing(db_engine.connect()) as conn:
         tx = conn.begin()
@@ -64,6 +76,12 @@ def with_clean_db(db_engine):
     db.pre_create(db_engine)
     db.Base.metadata.create_all(db_engine)
     db.post_create(db_engine)
+
+    # A test may not use the search index but may nonetheless use this
+    # fixture because it wants a clean DB. In that case trying to clear the
+    # search index will get a NotFoundError. Just suppress it.
+    with contextlib.suppress(elasticsearch.exceptions.NotFoundError):
+        clear_search_index()
 
 
 @pytest.fixture
@@ -84,10 +102,3 @@ def factories(db_session):
 @pytest.fixture(scope="session")
 def pyramid_app():
     return create_app(None, **TEST_SETTINGS)
-
-
-# Always unconditionally wipe the Elasticsearch index after every functional
-# test.
-@pytest.fixture(autouse=True)
-def always_delete_all_elasticsearch_documents():
-    pass
