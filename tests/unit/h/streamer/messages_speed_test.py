@@ -1,4 +1,5 @@
 from _datetime import datetime
+from os import environ
 
 import pytest
 from pyramid import security
@@ -8,7 +9,6 @@ from h.streamer.app import create_app
 from h.streamer.contexts import request_context
 from h.streamer.messages import handle_annotation_event
 from h.streamer.websocket import WebSocket
-from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
 
 
 @pytest.mark.skip("Only of use during development")
@@ -59,8 +59,8 @@ class TestHandleAnnotationEventSpeed:  # pragma: no cover
     @pytest.fixture(scope="session")
     def registry(self):
         settings = {
-            "es.url": ELASTICSEARCH_URL,
-            "es.index": ELASTICSEARCH_INDEX,
+            "es.url": environ["ELASTICSEARCH_URL"],
+            "es.index": environ["ELASTICSEARCH_INDEX"],
             "h.app_url": "http://example.com",
             "h.authority": "example.com",
             "secret_key": "notasecret",

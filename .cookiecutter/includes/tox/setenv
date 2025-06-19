@@ -11,6 +11,7 @@ dev: H_API_AUTH_COOKIE_SECRET_KEY = {env:H_API_AUTH_COOKIE_SECRET_KEY:"dev_h_api
 dev: H_API_AUTH_COOKIE_SALT = {env:H_API_AUTH_COOKIE_SALT:"dev_h_api_auth_cookie_salt"}
 dev: REPLICA_DATABASE_URL = {env:DATABASE_URL:postgresql://postgres@localhost/postgres}
 dev: MAILCHIMP_USER_ACTIONS_SUBACCOUNT = {env:MAILCHIMP_USER_ACTIONS_SUBACCOUNT:devdata}
+tests,functests: ELASTICSEARCH_URL = {env:ELASTICSEARCH_URL:http://localhost:9200}
 tests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-tests}
 functests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-functests}
 {tests,functests}: AUTHORITY = {env:AUTHORITY:example.com}

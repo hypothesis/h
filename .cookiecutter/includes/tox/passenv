@@ -14,5 +14,4 @@ dev: ORCID_HOST
 dev: ORCID_CLIENT_ID
 dev: ORCID_CLIENT_SECRET
 {tests,functests}: DATABASE_URL
-{tests,functests}: ELASTICSEARCH_URL
 functests: BROKER_URL
