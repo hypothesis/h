@@ -95,7 +95,7 @@ sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
 starlette==0.40.0
     # via sphinx-autobuild
-urllib3==2.2.2
+urllib3==2.5.0
     # via requests
 uvicorn==0.29.0
     # via sphinx-autobuild

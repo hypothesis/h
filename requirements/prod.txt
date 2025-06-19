@@ -249,7 +249,7 @@ typing-extensions==4.13.2
     #   sqlalchemy
 tzdata==2025.2
     # via kombu
-urllib3==2.3.0
+urllib3==2.5.0
     # via
     #   elasticsearch
     #   requests
