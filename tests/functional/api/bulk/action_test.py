@@ -10,7 +10,7 @@ from h.models import Group, GroupMembership, User
 pytestmark = pytest.mark.usefixtures("init_elasticsearch")
 
 
-@pytest.mark.usefixtures("with_clean_db")
+@pytest.mark.usefixtures("with_clean_db_and_search_index")
 class TestBulk:
     AUTHORITY = "lms.hypothes.is"
 
