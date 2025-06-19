@@ -13,4 +13,5 @@ dev: REPLICA_DATABASE_URL = {env:DATABASE_URL:postgresql://postgres@localhost/po
 dev: MAILCHIMP_USER_ACTIONS_SUBACCOUNT = {env:MAILCHIMP_USER_ACTIONS_SUBACCOUNT:devdata}
 tests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-tests}
 functests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-functests}
+functests: PYTEST_ADDOPTS = {env:PYTEST_ADDOPTS:{tty::--reverse}}
 {tests,functests}: AUTHORITY = {env:AUTHORITY:example.com}
