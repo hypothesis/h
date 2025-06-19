@@ -8,18 +8,12 @@ from webtest import TestApp
 from h import db
 from h.app import create_app
 from tests.common import factories as factories_common
-from tests.common.fixtures.elasticsearch import (
-    ELASTICSEARCH_INDEX,
-    ELASTICSEARCH_URL,
-    es_client,  # noqa: F401
-    init_elasticsearch,  # noqa: F401
-)
 from tests.functional.fixtures.authentication import *  # noqa: F403
 from tests.functional.fixtures.groups import *  # noqa: F403
 
 TEST_SETTINGS = {
-    "es.url": ELASTICSEARCH_URL,
-    "es.index": ELASTICSEARCH_INDEX,
+    "es.url": os.environ["ELASTICSEARCH_URL"],
+    "es.index": os.environ["ELASTICSEARCH_INDEX"],
     "h.app_url": "http://example.com",
     "h.authority": "example.com",
     "h.sentry_dsn_frontend": "TEST_SENTRY_DSN_FRONTEND",
