@@ -1,5 +1,6 @@
 import {
   AnnotationGroupInfo,
+  AnnotationShareControl,
   AnnotationTimestamps,
   AnnotationUser,
   MarkdownView,
@@ -12,7 +13,7 @@ import {
   Link,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useContext } from 'preact/hooks';
+import { useContext, useMemo } from 'preact/hooks';
 
 import { Config } from '../config';
 import { quote, username } from '../utils/annotation-metadata';
@@ -29,6 +30,17 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
     annotation.user_info?.display_name ??
     username(annotation.user) ??
     annotation.user;
+  const group = useMemo(
+    () =>
+      config.context.group && {
+        type: config.context.group.type,
+        name: config.context.group.name,
+        links: {
+          html: config.context.group.link,
+        },
+      },
+    [config.context.group],
+  );
 
   return (
     <article>
@@ -48,17 +60,9 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
                 annotationUpdated={annotation.updated}
               />
             </div>
-            {config.context.group && (
+            {group && (
               <div className="flex gap-x-1 items-baseline flex-wrap-reverse">
-                <AnnotationGroupInfo
-                  group={{
-                    type: config.context.group.type,
-                    name: config.context.group.name,
-                    links: {
-                      html: config.context.group.link,
-                    },
-                  }}
-                />
+                <AnnotationGroupInfo group={group} />
                 <AnnotationDocument annotation={annotation} />
               </div>
             )}
@@ -98,7 +102,7 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
 
           <footer className="flex items-center justify-between">
             <div />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
               <Link
                 variant="text-light"
                 href={annotation.links.incontext}
@@ -109,6 +113,7 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
               >
                 <ExternalIcon />
               </Link>
+              <AnnotationShareControl annotation={annotation} group={group} />
             </div>
           </footer>
         </CardContent>
