@@ -8,6 +8,7 @@ $(call help,make help,print this help message)
 $(call help,make services,start the services that the app needs)
 services: args?=up -d --wait
 services: python
+	@docker network create dbs 2>/dev/null || true
 	@docker compose $(args)
 
 .PHONY: db
