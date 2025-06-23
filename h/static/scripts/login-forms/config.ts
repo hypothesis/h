@@ -90,9 +90,21 @@ export type AccountSettingsConfigObject = ConfigBase & {
   };
 };
 
+/** Configuration for Edit Profile form. */
+export type ProfileConfigObject = ConfigBase & {
+  form: FormFields<{
+    display_name: string;
+    description: string;
+    link: string;
+    location: string;
+    orcid: string;
+  }>;
+};
+
 export type ConfigObject =
   | LoginConfigObject
   | SignupConfigObject
-  | AccountSettingsConfigObject;
+  | AccountSettingsConfigObject
+  | ProfileConfigObject;
 
 export const Config = createContext<ConfigObject | null>(null);

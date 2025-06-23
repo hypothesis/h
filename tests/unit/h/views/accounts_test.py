@@ -20,16 +20,6 @@ from h.tasks import email
 from h.views import accounts as views
 
 
-class FakeForm:
-    appstruct = None
-
-    def set_appstruct(self, appstruct):
-        self.appstruct = appstruct
-
-    def render(self):
-        return self.appstruct
-
-
 class FakeSerializer:
     pass
 
@@ -1069,9 +1059,12 @@ class TestNotificationsController:
 
 @pytest.mark.usefixtures("pyramid_config")
 class TestEditProfileController:
-    def test_get_reads_user_properties(self, pyramid_request):
+    def test_get_reads_user_properties(self, pyramid_request, mocker):
+        mocker.spy(views, "get_csrf_token")
         pyramid_request.user = mock.Mock()
-        pyramid_request.create_form.return_value = FakeForm()
+        pyramid_request.create_form.return_value = create_autospec(
+            deform.Form, instance=True, spec_set=True
+        )
         user = pyramid_request.user
         user.display_name = "Jim Smith"
         user.description = "Job Description"
@@ -1081,13 +1074,21 @@ class TestEditProfileController:
 
         result = views.EditProfileController(pyramid_request).get()
 
+        views.get_csrf_token.assert_called_once_with(pyramid_request)
         assert result == {
-            "form": {
-                "display_name": "Jim Smith",
-                "description": "Job Description",
-                "orcid": "ORCID iD",
-                "link": "http://foo.org",
-                "location": "Paris",
+            "js_config": {
+                "csrfToken": views.get_csrf_token.spy_return,
+                "features": {},
+                "form": {
+                    "data": {
+                        "display_name": "Jim Smith",
+                        "description": "Job Description",
+                        "orcid": "ORCID iD",
+                        "link": "http://foo.org",
+                        "location": "Paris",
+                    },
+                    "errors": {},
+                },
             }
         }
 
@@ -1112,6 +1113,43 @@ class TestEditProfileController:
         assert user.orcid == "ORCID iD"
         assert user.uri == "http://foo.org"
         assert user.location == "Paris"
+
+    def test_post_returns_errors_on_validation_failure(
+        self, pyramid_request, invalid_form, mocker
+    ):
+        mocker.spy(views, "get_csrf_token")
+        pyramid_request.POST = {"display_name": "invalid", "description": "test"}
+
+        pyramid_request.user = mock.Mock()
+        user = pyramid_request.user
+        user.display_name = "Original Name"
+        user.description = "Original Description"
+        user.orcid = "Original ORCID"
+        user.uri = "http://original.com"
+        user.location = "Original Location"
+
+        ctrl = views.EditProfileController(pyramid_request)
+        ctrl.form = invalid_form({"display_name": "Display name is invalid"})
+
+        result = ctrl.post()
+
+        views.get_csrf_token.assert_called_once_with(pyramid_request)
+        assert result == {
+            "js_config": {
+                "csrfToken": views.get_csrf_token.spy_return,
+                "features": {},
+                "form": {
+                    "data": {
+                        "display_name": "invalid",
+                        "description": "test",
+                        "orcid": "Original ORCID",
+                        "link": "http://original.com",
+                        "location": "Original Location",
+                    },
+                    "errors": {"display_name": "Display name is invalid"},
+                },
+            }
+        }
 
 
 @pytest.mark.usefixtures("authenticated_userid", "developer_token_service")
