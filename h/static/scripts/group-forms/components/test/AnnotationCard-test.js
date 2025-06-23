@@ -33,6 +33,7 @@ describe('AnnotationCard', () => {
         AnnotationUser: () => null,
         AnnotationGroupInfo: () => null,
         MarkdownView: () => null,
+        AnnotationShareControl: () => null,
       },
     });
   });
