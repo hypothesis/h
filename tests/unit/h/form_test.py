@@ -178,7 +178,7 @@ class TestHandleFormSubmission:
             pyramid_request, invalid_form(), mock.sentinel.on_success, on_failure
         )
 
-        on_failure.assert_called_once_with()
+        on_failure.assert_called_once_with(errors={}, items=pyramid_request.POST)
 
     def test_if_validation_fails_it_calls_to_xhr_response(
         self, invalid_form, pyramid_request, to_xhr_response
@@ -358,7 +358,7 @@ class TestHandleFormSubmission:
         def form_callable_spec():
             """Spec for the callable_form mock."""
 
-        def on_failure_spec():
+        def on_failure_spec(errors, items):
             """Spec for the on_failure mock."""
 
         form1 = mock.create_autospec(Form, instance=True, spec_set=True)
@@ -369,15 +369,18 @@ class TestHandleFormSubmission:
         )
 
         on_failure = mock.create_autospec(on_failure_spec, spec_set=True)
+        errors = mock.Mock()
         form1.validate.side_effect = ValidationFailure(
-            mock.sentinel.field, mock.sentinel.cstruct, mock.sentinel.error
+            mock.sentinel.field, mock.sentinel.cstruct, errors
         )
 
         result = form.handle_form_submission(
             pyramid_request, form_callable, mock.sentinel.on_success, on_failure
         )
 
-        on_failure.assert_called_once_with()
+        on_failure.assert_called_once_with(
+            errors=errors.asdict.return_value, items=pyramid_request.POST
+        )
         to_xhr_response.assert_called_once_with(
             pyramid_request, on_failure.return_value, mock.sentinel.form2
         )

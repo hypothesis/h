@@ -581,23 +581,11 @@ class EditProfileController:
     def __init__(self, request):
         self.request = request
         self.schema = EditProfileSchema().bind(request=self.request)
-        self.form = request.create_form(
-            self.schema, buttons=(_("Save"),), use_inline_editing=True
-        )
+        self.form = request.create_form(self.schema)
 
     @view_config(request_method="GET")
     def get(self):
         """Render the 'Edit Profile' form."""
-        user = self.request.user
-        self.form.set_appstruct(
-            {
-                "display_name": user.display_name or "",
-                "description": user.description or "",
-                "location": user.location or "",
-                "link": user.uri or "",
-                "orcid": user.orcid or "",
-            }
-        )
         return self._template_data()
 
     @view_config(request_method="POST")
@@ -609,8 +597,31 @@ class EditProfileController:
             on_failure=self._template_data,
         )
 
-    def _template_data(self):
-        return {"form": self.form.render()}
+    def _template_data(self, errors=None, items=None):
+        if errors is None:
+            errors = {}
+        if items is None:
+            items = {}
+
+        user = self.request.user
+        form_data = {
+            "display_name": items.get("display_name", user.display_name or ""),
+            "description": items.get("description", user.description or ""),
+            "location": items.get("location", user.location or ""),
+            "link": items.get("link", user.uri or ""),
+            "orcid": items.get("orcid", user.orcid or ""),
+        }
+
+        return {
+            "js_config": {
+                "csrfToken": get_csrf_token(self.request),
+                "features": {},
+                "form": {
+                    "data": form_data,
+                    "errors": errors,
+                },
+            }
+        }
 
     def _update_user(self, appstruct):
         user = self.request.user
@@ -668,7 +679,12 @@ class NotificationsController:
         ):
             subscription.active = subscription.type in active_subscriptions
 
-    def _template_data(self):
+    def _template_data(self, errors=None, items=None):
+        if errors is None:
+            errors = {}
+        if items is None:
+            items = {}
+
         user_has_email_address = self.request.user and self.request.user.email
         data = {"user_has_email_address": user_has_email_address}
 
