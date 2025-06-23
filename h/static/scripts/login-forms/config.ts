@@ -43,6 +43,20 @@ export type SignupConfigObject = ConfigBase & {
   identity?: SocialLoginIdentity;
 };
 
-export type ConfigObject = LoginConfigObject | SignupConfigObject;
+/** Configuration for Edit Profile form. */
+export type ProfileConfigObject = ConfigBase & {
+  form: FormFields<{
+    display_name: string;
+    description: string;
+    link: string;
+    location: string;
+    orcid: string;
+  }>;
+};
+
+export type ConfigObject =
+  | LoginConfigObject
+  | SignupConfigObject
+  | ProfileConfigObject;
 
 export const Config = createContext<ConfigObject | null>(null);

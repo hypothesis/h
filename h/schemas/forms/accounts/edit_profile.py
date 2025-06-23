@@ -1,5 +1,4 @@
 import colander
-import deform
 
 from h import i18n
 from h.accounts import util
@@ -29,29 +28,24 @@ class EditProfileSchema(CSRFSchema):
         colander.String(),
         missing=None,
         validator=validators.Length(max=DISPLAY_NAME_MAX_LENGTH),
-        title=_("Display name"),
     )
 
     description = colander.SchemaNode(
         colander.String(),
         missing=None,
         validator=validators.Length(max=250),
-        widget=deform.widget.TextAreaWidget(max_length=250, rows=4),
-        title=_("Description"),
     )
 
     location = colander.SchemaNode(
         colander.String(),
         missing=None,
         validator=validators.Length(max=100),
-        title=_("Location"),
     )
 
     link = colander.SchemaNode(
         colander.String(),
         missing=None,
         validator=colander.All(validators.Length(max=250), validate_url),
-        title=_("Link"),
     )
 
     orcid = colander.SchemaNode(

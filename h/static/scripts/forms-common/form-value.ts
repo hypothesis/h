@@ -21,6 +21,12 @@ export type FormValueOptions<T> = {
   validate?: (value: T, committed: boolean) => string | undefined;
 };
 
+/**
+ * State for a form field value.
+ *
+ * This tracks the current value, the validation error (if any), whether the
+ * value has been committed and whether it has changed since the last submission.
+ */
 export type FormValue<T> = {
   /** Current form field value. */
   value: T;
