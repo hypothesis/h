@@ -13,9 +13,9 @@ describe('ModerationStatusSelect', () => {
     fakeOnChange = sinon.stub();
   });
 
-  function createComponent(selected) {
+  function createComponent(props = {}) {
     return mount(
-      <ModerationStatusSelect selected={selected} onChange={fakeOnChange} />,
+      <ModerationStatusSelect onChange={fakeOnChange} {...props} />,
       { connected: true },
     );
   }
@@ -28,7 +28,7 @@ describe('ModerationStatusSelect', () => {
     { selected: 'SPAM', expectedText: 'Spam' },
   ].forEach(({ selected, expectedText }) => {
     it('shows selected option as button content', () => {
-      const wrapper = createComponent(selected);
+      const wrapper = createComponent({ selected });
       assert.equal(wrapper.text(), expectedText);
     });
 
@@ -41,19 +41,37 @@ describe('ModerationStatusSelect', () => {
     });
   });
 
-  it('shows expected list of options', async () => {
-    const wrapper = createComponent();
+  const commonOptions = ['Pending', 'Approved', 'Denied', 'Spam'];
 
-    // Open listbox
-    wrapper.find('button').simulate('click');
-    const options = await waitForElement(wrapper, '[role="option"]');
+  [
+    { mode: 'filter', expectedOptions: ['All', ...commonOptions] },
+    { mode: 'select', expectedOptions: commonOptions },
+  ].forEach(({ mode, expectedOptions }) => {
+    it('shows expected list of options', async () => {
+      const wrapper = createComponent({ mode });
 
-    assert.lengthOf(options, 5);
-    assert.equal(options.at(0).text(), 'All');
-    assert.equal(options.at(1).text(), 'Pending');
-    assert.equal(options.at(2).text(), 'Approved');
-    assert.equal(options.at(3).text(), 'Denied');
-    assert.equal(options.at(4).text(), 'Spam');
+      // Open listbox
+      wrapper.find('button').simulate('click');
+      const options = await waitForElement(wrapper, '[role="option"]');
+
+      assert.lengthOf(options, expectedOptions.length);
+      expectedOptions.forEach((option, index) => {
+        assert.equal(options.at(index).text(), option);
+      });
+    });
+  });
+
+  [
+    { mode: 'filter', expectedIcon: 'FilterIcon' },
+    { mode: 'select', selected: 'PENDING', expectedIcon: 'DottedCircleIcon' },
+    { mode: 'select', selected: 'APPROVED', expectedIcon: 'CheckAllIcon' },
+    { mode: 'select', selected: 'DENIED', expectedIcon: 'RestrictedIcon' },
+    { mode: 'select', selected: 'SPAM', expectedIcon: 'CautionIcon' },
+  ].forEach(({ mode, selected, expectedIcon }) => {
+    it('shows expected icon in toggle button', () => {
+      const wrapper = createComponent({ mode, selected });
+      assert.isTrue(wrapper.exists(expectedIcon));
+    });
   });
 
   it(
