@@ -15,6 +15,7 @@ import { moderationStatusToLabel } from '../utils/moderation-status';
 
 export type ModerationStatusSelectProps = {
   alignListbox?: 'right' | 'left';
+  disabled?: boolean;
 } & (
   | {
       /** This select is used to filter a list of annotations by moderation status */
@@ -48,8 +49,9 @@ const options = new Map<ModerationStatus, Option>([
 export default function ModerationStatusSelect({
   selected,
   onChange,
-  alignListbox = 'right',
   mode,
+  alignListbox = 'right',
+  disabled,
 }: ModerationStatusSelectProps) {
   const selectedName = selected ? options.get(selected)!.label : undefined;
   const SelectedIcon = selected ? options.get(selected)!.icon : Fragment;
@@ -77,6 +79,7 @@ export default function ModerationStatusSelect({
           {selectedName ?? 'All'}
         </div>
       }
+      disabled={disabled}
     >
       {mode === 'filter' && (
         <Select.Option value={undefined} classes="text-grey-7">

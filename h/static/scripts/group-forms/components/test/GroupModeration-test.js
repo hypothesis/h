@@ -9,12 +9,15 @@ import GroupModeration, { $imports } from '../GroupModeration';
 describe('GroupModeration', () => {
   let fakeUseGroupAnnotations;
   let fakeLoadNextPage;
+  let fakeUpdateAnnotationStatus;
 
   beforeEach(() => {
     fakeLoadNextPage = sinon.stub();
+    fakeUpdateAnnotationStatus = sinon.stub();
     fakeUseGroupAnnotations = sinon.stub().returns({
       loading: true,
       loadNextPage: fakeLoadNextPage,
+      updateAnnotationStatus: fakeUpdateAnnotationStatus,
     });
 
     $imports.$mock(mockImportedComponents());
@@ -146,6 +149,32 @@ describe('GroupModeration', () => {
         window.dispatchEvent(new Event('scroll'));
 
         assert.equal(fakeLoadNextPage.called, shouldCallNextPage);
+      });
+    });
+
+    ['PENDING', 'APPROVED', 'DENIED', 'SPAM'].forEach(status => {
+      it('calls updateAnnotationStatus when onStatusChange is called', () => {
+        const annotations = [
+          { id: '1', text: 'First annotation' },
+          { id: '2', text: 'Second annotation' },
+        ];
+        fakeUseGroupAnnotations.returns({
+          loading: false,
+          annotations,
+          updateAnnotationStatus: fakeUpdateAnnotationStatus,
+        });
+
+        const wrapper = createComponent();
+        const annotationNodes = wrapper.find('AnnotationCard');
+
+        annotations.forEach((anno, index) => {
+          annotationNodes.at(index).props().onStatusChange(status);
+          assert.calledWith(
+            fakeUpdateAnnotationStatus.lastCall,
+            anno.id,
+            status,
+          );
+        });
       });
     });
   });
