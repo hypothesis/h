@@ -69,8 +69,8 @@ from tests.common import factories as common_factories
 
 @pytest.fixture
 def es_client(es_client, clear_search_index):
-    yield es_client
     clear_search_index()
+    return es_client
 
 
 class DummyFeature:
