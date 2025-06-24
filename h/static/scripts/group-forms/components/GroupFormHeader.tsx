@@ -1,35 +1,10 @@
 import { Link } from '@hypothesis/frontend-shared';
-import classnames from 'classnames';
-import type { ComponentChildren } from 'preact';
 import { useContext } from 'preact/hooks';
-import { Link as RouterLink, useRoute } from 'wouter-preact';
 
+import TabLinks from '../../forms-common/components/TabLinks';
 import type { Group } from '../config';
 import { Config } from '../config';
 import { routes } from '../routes';
-
-type TabLinkProps = {
-  href: string;
-  children: ComponentChildren;
-  testId?: string;
-};
-
-function TabLink({ children, href, testId }: TabLinkProps) {
-  const [selected] = useRoute(href);
-  return (
-    <RouterLink
-      href={href}
-      className={classnames({
-        'focus-visible-ring whitespace-nowrap flex items-center font-semibold rounded px-2 py-1 gap-x-2':
-          true,
-        'text-grey-1 bg-grey-7': selected,
-      })}
-      data-testid={testId}
-    >
-      {children}
-    </RouterLink>
-  );
-}
 
 export type GroupFormHeaderProps = {
   group: Group | null;
@@ -75,21 +50,23 @@ export default function GroupFormHeader({
           {title}
         </h1>
         <div className="grow" />
-        {enableMembers && editLink && (
-          <TabLink testId="settings-link" href={editLink}>
-            Settings
-          </TabLink>
-        )}
-        {enableMembers && editMembersLinks && (
-          <TabLink testId="members-link" href={editMembersLinks}>
-            Members
-          </TabLink>
-        )}
-        {enableModeration && moderationLinks && (
-          <TabLink testId="moderation-link" href={moderationLinks}>
-            Moderation
-          </TabLink>
-        )}
+        <TabLinks>
+          {enableMembers && editLink && (
+            <TabLinks.Link testId="settings-link" href={editLink}>
+              Settings
+            </TabLinks.Link>
+          )}
+          {enableMembers && editMembersLinks && (
+            <TabLinks.Link testId="members-link" href={editMembersLinks}>
+              Members
+            </TabLinks.Link>
+          )}
+          {enableModeration && moderationLinks && (
+            <TabLinks.Link testId="moderation-link" href={moderationLinks}>
+              Moderation
+            </TabLinks.Link>
+          )}
+        </TabLinks>
       </div>
     </div>
   );
