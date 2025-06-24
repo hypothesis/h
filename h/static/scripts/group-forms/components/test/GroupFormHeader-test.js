@@ -24,14 +24,26 @@ describe('GroupFormHeader', () => {
 
   const group = {
     pubid: 'abc123',
+    name: 'Group title',
     link: 'https://anno.co/groups/abc123',
   };
 
   const getLink = (wrapper, name) => wrapper.find(`a[data-testid="${name}"]`);
 
-  it('renders title', () => {
-    const header = createHeader({ title: 'Create a new group' });
-    assert.equal(header.find('h1').text(), 'Create a new group');
+  [
+    {
+      group: null,
+      title: 'Create a new group',
+      expected: 'Create a new group',
+    },
+
+    { group, title: 'Edit group', expected: group.name },
+  ].forEach(({ group, expected, title }) => {
+    it('renders title', () => {
+      const header = createHeader({ group, title });
+      const displayedTitle = header.find('h1').text();
+      assert.equal(displayedTitle, expected);
+    });
   });
 
   it('does not show activity link or tabs if no group', () => {
