@@ -19,6 +19,7 @@ import { Config } from '../config';
 import { quote, username } from '../utils/annotation-metadata';
 import type { APIAnnotationData } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
+import ModerationStatusSelect from './ModerationStatusSelect';
 
 export type AnnotationCardProps = {
   annotation: APIAnnotationData;
@@ -100,8 +101,13 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
             </ul>
           )}
 
-          <footer className="flex items-center justify-between">
-            <div />
+          <footer className="flex items-end justify-between">
+            <ModerationStatusSelect
+              onChange={/* istanbul ignore next */ () => {}}
+              selected={annotation.moderation_status}
+              mode="select"
+              alignListbox="left"
+            />
             <div className="flex items-center gap-1">
               <Link
                 variant="text-light"

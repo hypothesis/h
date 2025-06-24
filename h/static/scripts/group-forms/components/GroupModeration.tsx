@@ -130,6 +130,7 @@ export default function GroupModeration({ group }: GroupModerationProps) {
         <ModerationStatusSelect
           selected={filterStatus}
           onChange={setFilterStatus}
+          mode="filter"
         />
       </div>
       <AnnotationList filterStatus={filterStatus} classes="mt-4" />

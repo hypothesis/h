@@ -1,4 +1,8 @@
-import { mockImportedComponents, mount } from '@hypothesis/frontend-testing';
+import {
+  checkAccessibility,
+  mockImportedComponents,
+  mount,
+} from '@hypothesis/frontend-testing';
 
 import { Config } from '../../config';
 import AnnotationCard, { $imports } from '../AnnotationCard';
@@ -13,7 +17,9 @@ describe('AnnotationCard', () => {
     };
     fakeAnnotation = {
       tags: [],
-      links: {},
+      links: {
+        incontext: 'https://example.com',
+      },
       target: [
         {
           selector: [
@@ -136,4 +142,21 @@ describe('AnnotationCard', () => {
     const wrapper = createComponent();
     assert.equal(wrapper.find('blockquote').text(), 'The quote');
   });
+
+  ['PENDING', 'APPROVED', 'DENIED', 'SPAM'].forEach(status => {
+    it("renders ModerationStatusSelect with annotation's status", () => {
+      fakeAnnotation.moderation_status = status;
+      const wrapper = createComponent();
+
+      assert.equal(
+        wrapper.find('ModerationStatusSelect').prop('selected'),
+        status,
+      );
+    });
+  });
+
+  it(
+    'should pass a11y checks',
+    checkAccessibility({ content: () => createComponent() }),
+  );
 });
