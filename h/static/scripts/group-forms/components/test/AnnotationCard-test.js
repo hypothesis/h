@@ -10,6 +10,8 @@ import AnnotationCard, { $imports } from '../AnnotationCard';
 describe('AnnotationCard', () => {
   let fakeConfig;
   let fakeAnnotation;
+  let fakeOnStatusChange;
+  let fakeUseUpdateModerationStatus;
 
   beforeEach(() => {
     fakeConfig = {
@@ -32,6 +34,9 @@ describe('AnnotationCard', () => {
       ],
     };
 
+    fakeOnStatusChange = sinon.stub();
+    fakeUseUpdateModerationStatus = sinon.stub().returns({});
+
     $imports.$mock(mockImportedComponents());
     $imports.$mock({
       '@hypothesis/annotation-ui': {
@@ -41,13 +46,19 @@ describe('AnnotationCard', () => {
         MarkdownView: () => null,
         AnnotationShareControl: () => null,
       },
+      '../hooks/use-update-moderation-status': {
+        useUpdateModerationStatus: fakeUseUpdateModerationStatus,
+      },
     });
   });
 
   function createComponent() {
     return mount(
       <Config.Provider value={fakeConfig}>
-        <AnnotationCard annotation={fakeAnnotation} />
+        <AnnotationCard
+          annotation={fakeAnnotation}
+          onStatusChange={fakeOnStatusChange}
+        />
       </Config.Provider>,
     );
   }
@@ -151,6 +162,31 @@ describe('AnnotationCard', () => {
       assert.equal(
         wrapper.find('ModerationStatusSelect').prop('selected'),
         status,
+      );
+    });
+
+    it('changes moderation status when ModerationStatusSelect.onChange is called', async () => {
+      const fakeUpdateModerationStatus = sinon.stub();
+      fakeUseUpdateModerationStatus.returns({
+        updateModerationStatus: fakeUpdateModerationStatus,
+      });
+
+      const wrapper = createComponent();
+      await wrapper.find('ModerationStatusSelect').props().onChange(status);
+
+      assert.calledWith(fakeUpdateModerationStatus, status);
+      assert.calledWith(fakeOnStatusChange, status);
+    });
+  });
+
+  [true, false].forEach(updating => {
+    it('disables ModerationStatusSelect when updating moderation status', () => {
+      fakeUseUpdateModerationStatus.returns({ updating });
+      const wrapper = createComponent();
+
+      assert.equal(
+        wrapper.find('ModerationStatusSelect').prop('disabled'),
+        updating,
       );
     });
   });

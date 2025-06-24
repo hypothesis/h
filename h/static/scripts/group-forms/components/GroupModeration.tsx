@@ -29,9 +29,8 @@ type AnnotationListProps = {
 };
 
 function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
-  const { loadNextPage, annotations, loading } = useGroupAnnotations({
-    filterStatus,
-  });
+  const { loadNextPage, annotations, loading, updateAnnotationStatus } =
+    useGroupAnnotations({ filterStatus });
 
   const lastScrollPosition = useRef(0);
   useEffect(() => {
@@ -64,6 +63,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
         filterStatus={filterStatus}
         loading={loading}
         annotations={annotations}
+        onAnnotationStatusChange={updateAnnotationStatus}
       />
     </section>
   );
@@ -73,12 +73,17 @@ type AnnotationListContentProps = {
   filterStatus?: ModerationStatus;
   loading: boolean;
   annotations?: APIAnnotationData[];
+  onAnnotationStatusChange: (
+    annotationId: string,
+    moderationStatus: ModerationStatus,
+  ) => void;
 };
 
 function AnnotationListContent({
   loading,
   annotations,
   filterStatus,
+  onAnnotationStatusChange,
 }: AnnotationListContentProps) {
   if (annotations && annotations.length === 0) {
     return (
@@ -103,7 +108,15 @@ function AnnotationListContent({
   return (
     <>
       {annotations?.map(anno => (
-        <AnnotationCard key={anno.id} annotation={anno} />
+        <AnnotationCard
+          key={anno.id}
+          annotation={anno}
+          onStatusChange={moderationStatus => {
+            if (anno.id) {
+              onAnnotationStatusChange(anno.id, moderationStatus);
+            }
+          }}
+        />
       ))}
       {loading && (
         <div className="mx-auto mt-3">

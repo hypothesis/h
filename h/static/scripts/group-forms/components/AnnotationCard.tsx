@@ -16,16 +16,26 @@ import classnames from 'classnames';
 import { useContext, useMemo } from 'preact/hooks';
 
 import { Config } from '../config';
+import { useUpdateModerationStatus } from '../hooks/use-update-moderation-status';
 import { quote, username } from '../utils/annotation-metadata';
-import type { APIAnnotationData } from '../utils/api';
+import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
 import ModerationStatusSelect from './ModerationStatusSelect';
 
 export type AnnotationCardProps = {
   annotation: APIAnnotationData;
+
+  /**
+   * Invoked after successfully changing the moderation status for this
+   * annotation
+   */
+  onStatusChange: (moderationStatus: ModerationStatus) => void;
 };
 
-export default function AnnotationCard({ annotation }: AnnotationCardProps) {
+export default function AnnotationCard({
+  annotation,
+  onStatusChange,
+}: AnnotationCardProps) {
   const config = useContext(Config)!;
   const user =
     annotation.user_info?.display_name ??
@@ -42,6 +52,9 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
       },
     [config.context.group],
   );
+
+  const { updateModerationStatus, updating: updatingModerationStatus } =
+    useUpdateModerationStatus(annotation);
 
   return (
     <article>
@@ -103,7 +116,11 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
 
           <footer className="flex items-end justify-between">
             <ModerationStatusSelect
-              onChange={/* istanbul ignore next */ () => {}}
+              onChange={async status => {
+                await updateModerationStatus(status);
+                onStatusChange(status);
+              }}
+              disabled={updatingModerationStatus}
               selected={annotation.moderation_status}
               mode="select"
               alignListbox="left"
