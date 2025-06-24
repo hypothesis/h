@@ -14,17 +14,21 @@ import type { ModerationStatus } from '../utils/api';
 import { moderationStatusToLabel } from '../utils/moderation-status';
 
 export type ModerationStatusSelectProps = {
-  selected?: ModerationStatus;
-  onChange: (status?: ModerationStatus) => void;
   alignListbox?: 'right' | 'left';
-
-  /**
-   * Determines the behavior of this control:
-   *  - `filter`: Used to filter a list of annotations by moderation status.
-   *  - `select`: Used to set the moderation status of a specific annotation.
-   */
-  mode: 'filter' | 'select';
-};
+} & (
+  | {
+      /** This select is used to filter a list of annotations by moderation status */
+      mode: 'filter';
+      selected?: ModerationStatus;
+      onChange: (status?: ModerationStatus) => void;
+    }
+  | {
+      /** This select is used to set the moderation status of a specific annotation */
+      mode: 'select';
+      selected: ModerationStatus;
+      onChange: (status: ModerationStatus) => void;
+    }
+);
 
 type Option = {
   icon: IconComponent;
@@ -53,7 +57,10 @@ export default function ModerationStatusSelect({
   return (
     <Select
       value={selected}
-      onChange={onChange}
+      // Cast to bypass TS warning that callback does not accept `undefined`.
+      // We will only include `undefined` in the options if `mode == "filter"`
+      // and this is allowed.
+      onChange={onChange as (value: ModerationStatus | undefined) => void}
       alignListbox={alignListbox}
       containerClasses="!w-auto"
       buttonClasses={classnames(
