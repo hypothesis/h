@@ -33,6 +33,8 @@ function TabLink({ children, href, testId }: TabLinkProps) {
 
 export type GroupFormHeaderProps = {
   group: Group | null;
+
+  /** Fallback title used if there is no group. */
   title: string;
 };
 
@@ -72,7 +74,7 @@ export default function GroupFormHeader({
       )}
       <div className="flex gap-x-2 py-2 items-center">
         <h1 className="text-grey-7 text-xl/none" data-testid="header">
-          {title}
+          {group?.name ?? title}
         </h1>
         <div className="grow" />
         {enableMembers && editLink && (
