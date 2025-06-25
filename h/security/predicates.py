@@ -10,10 +10,15 @@ true when a user is present, a group is present and the user created that
 group.
 """
 
+from __future__ import annotations
+
 from itertools import chain
+from typing import TYPE_CHECKING
 
 from h.models.group import GroupMembershipRoles, JoinableBy, ReadableBy, WriteableBy
-from h.traversal import EditGroupMembershipContext, GroupMembershipContext
+
+if TYPE_CHECKING:
+    from h.traversal import EditGroupMembershipContext, GroupMembershipContext
 
 
 def requires(*parent_predicates):
