@@ -1,4 +1,4 @@
-import { mount, waitFor } from '@hypothesis/frontend-testing';
+import { delay, mount, waitFor } from '@hypothesis/frontend-testing';
 import { useState } from 'preact/hooks';
 
 import { Config } from '../../config';
@@ -165,5 +165,48 @@ describe('useGroupAnnotations', () => {
     assert.lengthOf(lastGroupAnnotations.annotations, annotations.length);
     wrapper.find('[data-testid="set-status-button"]').simulate('click');
     assert.isUndefined(lastGroupAnnotations.annotations);
+  });
+
+  it('updates annotation when updateAnnotationStatus is called and no filter status is set', async () => {
+    const annotations = [
+      { id: '123', moderation_status: 'PENDING' },
+      { id: '456', moderation_status: 'PENDING' },
+      { id: '789', moderation_status: 'DENIED' },
+    ];
+    fakeFetchGroupAnnotations.resolves({ annotations });
+
+    createComponent();
+    await waitFor(() => !lastGroupAnnotations.loading);
+
+    lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+
+    // Wait for next tick so that state changes are applied
+    await delay(0);
+    assert.deepEqual(
+      [
+        { id: '123', moderation_status: 'PENDING' },
+        { id: '456', moderation_status: 'APPROVED' },
+        { id: '789', moderation_status: 'DENIED' },
+      ],
+      lastGroupAnnotations.annotations,
+    );
+  });
+
+  it('removes annotation when updateAnnotationStatus is called and new status does not match filter status', async () => {
+    const annotations = [
+      { id: '123', moderation_status: 'PENDING' },
+      { id: '456', moderation_status: 'PENDING' },
+    ];
+    fakeFetchGroupAnnotations.resolves({ annotations });
+
+    createComponent('PENDING');
+    await waitFor(() => !lastGroupAnnotations.loading);
+
+    lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+    await waitFor(() => lastGroupAnnotations.annotations.length === 1);
+    assert.deepEqual(
+      [{ id: '123', moderation_status: 'PENDING' }],
+      lastGroupAnnotations.annotations,
+    );
   });
 });
