@@ -109,6 +109,13 @@ class TestGroupCreateEditController:
                         ),
                         "headers": {"X-CSRF-Token": views.get_csrf_token.spy_return},
                     },
+                    "annotationModeration": {
+                        "method": "PATCH",
+                        "url": pyramid_request.route_url(
+                            "api.annotation_moderation", id=":annotationId"
+                        ),
+                        "headers": {"X-CSRF-Token": views.get_csrf_token.spy_return},
+                    },
                 },
                 "context": {
                     "group": {
@@ -172,3 +179,6 @@ def routes(pyramid_config):
     pyramid_config.add_route("api.group_annotations", "/api/groups/{pubid}/annotations")
     pyramid_config.add_route("api.group_member", "/api/groups/{pubid}/members/{userid}")
     pyramid_config.add_route("api.groups", "/api/groups")
+    pyramid_config.add_route(
+        "api.annotation_moderation", "/api/annotations/{id}/moderation"
+    )
