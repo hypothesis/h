@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+from datetime import datetime
 
 from dateutil import tz
 from dateutil.parser import parse
@@ -142,7 +142,7 @@ class Sorter:
         except ValueError:
             try:
                 date = parse(str_value, default=DEFAULT_DATE)
-                return dt.timestamp(date) * 1000
+                return datetime.timestamp(date) * 1000
 
             except ValueError:
                 pass
