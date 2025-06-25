@@ -32,6 +32,18 @@ export type GroupAnnotationsResult = {
    * first chunk when invoked.
    */
   loadNextPage: () => void;
+
+  /**
+   * A callback to locally update the moderation status of one annotation from
+   * the list, without a server request.
+   *
+   * If the new status does not match current filter status, the annotation will
+   * be removed from the list.
+   */
+  updateAnnotationStatus: (
+    annotationId: string,
+    moderationStatus: ModerationStatus,
+  ) => void;
 };
 
 export function useGroupAnnotations({
@@ -42,6 +54,29 @@ export function useGroupAnnotations({
   const [totalAnnotations, setTotalAnnotations] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const updateAnnotationStatus = useCallback(
+    (annotationId: string, moderationStatus: ModerationStatus) => {
+      if (filterStatus === undefined) {
+        // If no filter status is set, simply change the annotation's status to
+        // the new one
+        setAnnotations(prev =>
+          prev?.reduce<APIAnnotationData[]>((annos, currentAnno) => {
+            annos.push(
+              currentAnno.id === annotationId
+                ? { ...currentAnno, moderation_status: moderationStatus }
+                : currentAnno,
+            );
+            return annos;
+          }, []),
+        );
+      } else if (filterStatus !== moderationStatus) {
+        // If the moderation status is different from filter one, remove
+        // the annotation from the list
+        setAnnotations(prev => prev?.filter(anno => anno.id !== annotationId));
+      }
+    },
+    [filterStatus],
+  );
 
   // Used to cancel currently in-flight request, whether it's the first one or
   // any subsequent page triggered by calling `loadNextPage`.
@@ -105,5 +140,6 @@ export function useGroupAnnotations({
     annotations,
     error,
     loadNextPage,
+    updateAnnotationStatus,
   };
 }
