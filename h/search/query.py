@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
-from dateutil import tz
 from dateutil.parser import parse
 from elasticsearch_dsl import Q
 from elasticsearch_dsl.query import SimpleQueryString
@@ -13,7 +12,7 @@ LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
 LIMIT_MAX = 200
 OFFSET_MAX = 9800
-DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())  # noqa: DTZ001
+DEFAULT_DATE = datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=UTC)
 
 
 def popall(multidict, key):
