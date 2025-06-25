@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import FormContainer from '../../forms-common/components/FormContainer';
 import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
+import { useUpdateModerationStatus } from '../hooks/use-update-moderation-status';
 import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import { moderationStatusToLabel } from '../utils/moderation-status';
 import AnnotationCard from './AnnotationCard';
@@ -29,8 +30,15 @@ type AnnotationListProps = {
 };
 
 function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
-  const { loadNextPage, annotations, loading, updateAnnotationStatus } =
-    useGroupAnnotations({ filterStatus });
+  const {
+    loadNextPage,
+    annotations,
+    loading,
+    removingAnnotations,
+    lastAction,
+    updateAnnotationStatus,
+    undoLastAction,
+  } = useGroupAnnotations({ filterStatus });
 
   const lastScrollPosition = useRef(0);
   useEffect(() => {
@@ -57,12 +65,57 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
     return () => abortController.abort();
   }, [loadNextPage]);
 
+  const {
+    updateModerationStatus: updateModerationStatusAPI,
+    updating: updatingUndo,
+  } = useUpdateModerationStatus(
+    lastAction?.annotation || ({} as APIAnnotationData),
+  );
+
+  const handleUndo = async () => {
+    if (!lastAction) {
+      return;
+    }
+
+    try {
+      // First update the API with the previous status
+      await updateModerationStatusAPI(lastAction.previousStatus);
+      // Then update the local state
+      undoLastAction();
+    } catch (error) {
+      // If API call fails, we could add error handling here
+      console.error('Failed to undo moderation status change:', error);
+    }
+  };
+
   return (
     <section className={classnames('flex flex-col gap-y-2', classes)}>
+      {lastAction && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded p-3 flex items-center justify-between">
+          <span className="text-sm text-yellow-800">
+            Changed annotation status from{' '}
+            <strong>{lastAction.previousStatus.toLowerCase()}</strong> to{' '}
+            <strong>{lastAction.newStatus.toLowerCase()}</strong>
+          </span>
+          <button
+            onClick={handleUndo}
+            disabled={updatingUndo}
+            className={classnames(
+              'text-sm underline font-medium',
+              updatingUndo
+                ? 'text-yellow-600 cursor-not-allowed'
+                : 'text-yellow-800 hover:text-yellow-900',
+            )}
+          >
+            {updatingUndo ? 'Undoing...' : 'Undo'}
+          </button>
+        </div>
+      )}
       <AnnotationListContent
         filterStatus={filterStatus}
         loading={loading}
         annotations={annotations}
+        removingAnnotations={removingAnnotations}
         onAnnotationStatusChange={updateAnnotationStatus}
       />
     </section>
@@ -73,6 +126,7 @@ type AnnotationListContentProps = {
   filterStatus?: ModerationStatus;
   loading: boolean;
   annotations?: APIAnnotationData[];
+  removingAnnotations: Set<string>;
   onAnnotationStatusChange: (
     annotationId: string,
     moderationStatus: ModerationStatus,
@@ -83,6 +137,7 @@ function AnnotationListContent({
   loading,
   annotations,
   filterStatus,
+  removingAnnotations,
   onAnnotationStatusChange,
 }: AnnotationListContentProps) {
   if (annotations && annotations.length === 0) {
@@ -107,17 +162,30 @@ function AnnotationListContent({
 
   return (
     <>
-      {annotations?.map(anno => (
-        <AnnotationCard
-          key={anno.id}
-          annotation={anno}
-          onStatusChange={moderationStatus => {
-            if (anno.id) {
-              onAnnotationStatusChange(anno.id, moderationStatus);
-            }
-          }}
-        />
-      ))}
+      {annotations?.map(anno => {
+        const isRemoving = anno.id && removingAnnotations.has(anno.id);
+        return (
+          <div
+            key={anno.id}
+            className={classnames(
+              'transition-all duration-500 overflow-hidden',
+              {
+                'opacity-0 max-h-0 -mb-2': isRemoving,
+              },
+            )}
+            style={!isRemoving ? { maxHeight: '1000px' } : undefined}
+          >
+            <AnnotationCard
+              annotation={anno}
+              onStatusChange={moderationStatus => {
+                if (anno.id) {
+                  onAnnotationStatusChange(anno.id, moderationStatus);
+                }
+              }}
+            />
+          </div>
+        );
+      })}
       {loading && (
         <div className="mx-auto mt-3">
           <Spinner size="md" />

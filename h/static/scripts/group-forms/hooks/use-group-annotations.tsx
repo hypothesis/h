@@ -14,6 +14,13 @@ export type GroupAnnotationsOptions = {
   filterStatus?: ModerationStatus;
 };
 
+export type UndoAction = {
+  annotationId: string;
+  previousStatus: ModerationStatus;
+  newStatus: ModerationStatus;
+  annotation: APIAnnotationData;
+};
+
 export type GroupAnnotationsResult = {
   /** Whether there's data being currently loaded */
   loading: boolean;
@@ -25,6 +32,16 @@ export type GroupAnnotationsResult = {
    * It will be undefined while loading the first page of data.
    */
   annotations?: APIAnnotationData[];
+
+  /**
+   * Set of annotation IDs that are currently being removed (animating out)
+   */
+  removingAnnotations: Set<string>;
+
+  /**
+   * The last moderation action that can be undone
+   */
+  lastAction?: UndoAction;
 
   /**
    * A callback to load the next chunk of annotations, if any.
@@ -44,6 +61,11 @@ export type GroupAnnotationsResult = {
     annotationId: string,
     moderationStatus: ModerationStatus,
   ) => void;
+
+  /**
+   * A callback to undo the last moderation status change
+   */
+  undoLastAction: () => void;
 };
 
 export function useGroupAnnotations({
@@ -54,29 +76,111 @@ export function useGroupAnnotations({
   const [totalAnnotations, setTotalAnnotations] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const [removingAnnotations, setRemovingAnnotations] = useState<Set<string>>(
+    new Set(),
+  );
+  const [lastAction, setLastAction] = useState<UndoAction>();
   const updateAnnotationStatus = useCallback(
     (annotationId: string, moderationStatus: ModerationStatus) => {
-      if (filterStatus === undefined) {
-        // If no filter status is set, simply change the annotation's status to
-        // the new one
-        setAnnotations(prev =>
-          prev?.reduce<APIAnnotationData[]>((annos, currentAnno) => {
-            annos.push(
-              currentAnno.id === annotationId
-                ? { ...currentAnno, moderation_status: moderationStatus }
-                : currentAnno,
-            );
-            return annos;
-          }, []),
-        );
-      } else if (filterStatus !== moderationStatus) {
-        // If the moderation status is different from filter one, remove
-        // the annotation from the list
-        setAnnotations(prev => prev?.filter(anno => anno.id !== annotationId));
+      // Find the annotation to track its previous status
+      const currentAnnotation = annotations?.find(
+        anno => anno.id === annotationId,
+      );
+      if (!currentAnnotation) {
+        return;
+      }
+
+      // Store the action for undo
+      setLastAction({
+        annotationId,
+        previousStatus: currentAnnotation.moderation_status,
+        newStatus: moderationStatus,
+        annotation: currentAnnotation,
+      });
+
+      // Always update the annotation status optimistically first
+      setAnnotations(prev =>
+        prev?.reduce<APIAnnotationData[]>((annos, currentAnno) => {
+          annos.push(
+            currentAnno.id === annotationId
+              ? { ...currentAnno, moderation_status: moderationStatus }
+              : currentAnno,
+          );
+          return annos;
+        }, []),
+      );
+
+      // If the new status doesn't match the filter, start removal animation
+      if (filterStatus !== undefined && filterStatus !== moderationStatus) {
+        // Start the removal animation after a brief delay to show the status change
+        setTimeout(() => {
+          setRemovingAnnotations(prev => new Set([...prev, annotationId]));
+        }, 100);
+
+        // Remove the annotation from the list after animation completes
+        setTimeout(() => {
+          setAnnotations(prev =>
+            prev?.filter(anno => anno.id !== annotationId),
+          );
+          setRemovingAnnotations(prev => {
+            const updated = new Set(prev);
+            updated.delete(annotationId);
+            return updated;
+          });
+        }, 600); // 100ms delay + 500ms animation
       }
     },
-    [filterStatus],
+    [filterStatus, annotations],
   );
+
+  const undoLastAction = useCallback(() => {
+    if (!lastAction) {
+      return;
+    }
+
+    const { annotationId, previousStatus, annotation } = lastAction;
+
+    // If the annotation was removed and we're undoing to bring it back
+    if (
+      filterStatus !== undefined &&
+      filterStatus !== lastAction.newStatus &&
+      filterStatus === previousStatus
+    ) {
+      // Re-add the annotation to the list
+      setAnnotations(prev => {
+        if (prev?.some(anno => anno.id === annotationId)) {
+          // If annotation is already in the list, just update its status
+          return prev.map(anno =>
+            anno.id === annotationId
+              ? { ...anno, moderation_status: previousStatus }
+              : anno,
+          );
+        } else {
+          // If annotation was removed, add it back with the previous status
+          return prev
+            ? [...prev, { ...annotation, moderation_status: previousStatus }]
+            : [{ ...annotation, moderation_status: previousStatus }];
+        }
+      });
+    } else {
+      // If the annotation is still in the list, just update its status
+      setAnnotations(prev =>
+        prev?.map(anno =>
+          anno.id === annotationId
+            ? { ...anno, moderation_status: previousStatus }
+            : anno,
+        ),
+      );
+    }
+
+    // Clear the undo action and any removing state
+    setLastAction(undefined);
+    setRemovingAnnotations(prev => {
+      const updated = new Set(prev);
+      updated.delete(annotationId);
+      return updated;
+    });
+  }, [lastAction, filterStatus]);
 
   // Used to cancel currently in-flight request, whether it's the first one or
   // any subsequent page triggered by calling `loadNextPage`.
@@ -119,8 +223,11 @@ export function useGroupAnnotations({
   const prevFilterStatus = useRef(filterStatus);
   useEffect(() => {
     // Every time the filter status changes, discard previous list of annotations
+    // and clear any pending removals and undo actions
     if (prevFilterStatus.current !== filterStatus) {
       setAnnotations(undefined);
+      setRemovingAnnotations(new Set());
+      setLastAction(undefined);
     }
 
     prevFilterStatus.current = filterStatus;
@@ -139,7 +246,10 @@ export function useGroupAnnotations({
     loading,
     annotations,
     error,
+    removingAnnotations,
+    lastAction,
     loadNextPage,
     updateAnnotationStatus,
+    undoLastAction,
   };
 }
