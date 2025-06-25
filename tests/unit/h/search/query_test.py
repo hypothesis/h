@@ -2,7 +2,7 @@ import datetime
 
 import elasticsearch_dsl
 import pytest
-import webob
+from webob.multidict import MultiDict
 
 from h.models.annotation import ModerationStatus
 from h.search import Search, query
@@ -31,7 +31,7 @@ class TestLimiter:
             Annotation(updated=dt(2017, 1, 1)).id,
         ]
 
-        params = webob.multidict.MultiDict([("offset", 1), ("limit", 2)])
+        params = MultiDict([("offset", 1), ("limit", 2)])
         result = search.run(params)
 
         assert sorted(result.annotation_ids) == sorted(ann_ids[1:3])
@@ -59,9 +59,9 @@ class TestLimiter:
     def test_offset(self, es_dsl_search, offset, from_):
         limiter = query.Limiter()
 
-        params = webob.multidict.MultiDict({"offset": offset})
+        params = MultiDict({"offset": offset})
         if offset is MISSING:
-            params = webob.multidict.MultiDict({})
+            params = MultiDict({})
 
         q = limiter(es_dsl_search, params).to_dict()
 
@@ -83,9 +83,7 @@ class TestLimiter:
         """Given any string input, output should be in the allowed range."""
         limiter = query.Limiter()
 
-        q = limiter(
-            es_dsl_search, webob.multidict.MultiDict({"limit": limit})
-        ).to_dict()
+        q = limiter(es_dsl_search, MultiDict({"limit": limit})).to_dict()
 
         assert isinstance(q["size"], int)
         assert q["size"] == expected
@@ -93,7 +91,7 @@ class TestLimiter:
     def test_limit_set_to_default_when_missing(self, es_dsl_search):
         limiter = query.Limiter()
 
-        q = limiter(es_dsl_search, webob.multidict.MultiDict({})).to_dict()
+        q = limiter(es_dsl_search, MultiDict({})).to_dict()
 
         assert q["size"] == LIMIT_DEFAULT
 
@@ -109,9 +107,7 @@ class TestKeyValueMatcher:
         reply1 = Annotation(references=[ann_ids[0]]).id
         reply2 = Annotation(references=[ann_ids[0], reply1]).id
 
-        params = webob.multidict.MultiDict(
-            [("references", ann_ids[0]), ("references", reply1)]
-        )
+        params = MultiDict([("references", ann_ids[0]), ("references", reply1)])
         result = search.run(params)
 
         assert result.annotation_ids == [reply2]
@@ -171,7 +167,7 @@ class TestSorter:
             ).id,
         ]
 
-        params = webob.multidict.MultiDict({})
+        params = MultiDict({})
         if sort_key:
             params["sort"] = sort_key
         if order:
@@ -193,7 +189,7 @@ class TestSorter:
         assert q["search_after"] == [1514764800000.0]
 
     def test_it_ignores_unknown_sort_fields(self, search):
-        search.run(webob.multidict.MultiDict({"sort": "no_such_field"}))
+        search.run(MultiDict({"sort": "no_such_field"}))
 
     @pytest.mark.parametrize(
         "date,expected",
@@ -221,9 +217,7 @@ class TestSorter:
             Annotation(updated=dt(2016, 1, 1), created=dt(2018, 1, 1)).id,
         ]
 
-        result = search.run(
-            webob.multidict.MultiDict({"search_after": date, "order": "asc"})
-        )
+        result = search.run(MultiDict({"search_after": date, "order": "asc"}))
 
         assert sorted(result.annotation_ids) == sorted(
             [ann_ids[idx] for idx in expected]
@@ -239,9 +233,7 @@ class TestSorter:
         )
 
         result = search.run(
-            webob.multidict.MultiDict(
-                {"search_after": ann_ids[1], "sort": "id", "order": "asc"}
-            )
+            MultiDict({"search_after": ann_ids[1], "sort": "id", "order": "asc"})
         )
 
         assert result.annotation_ids == [ann_ids[2]]
@@ -255,9 +247,7 @@ class TestSorter:
             Annotation(updated=dt(2018, 1, 1, 2, 26, 1), created=dt(2016, 1, 1)).id,
         ]
 
-        result = search.run(
-            webob.multidict.MultiDict({"search_after": "invalid_date", "order": "asc"})
-        )
+        result = search.run(MultiDict({"search_after": "invalid_date", "order": "asc"}))
 
         assert result.annotation_ids == ann_ids
 
@@ -267,7 +257,7 @@ class TestTopLevelAnnotationsFilter:
         annotation = Annotation()
         Annotation(references=[annotation.id])
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert [annotation.id] == result.annotation_ids
 
@@ -287,7 +277,7 @@ class TestAuthorityFilter:
         Annotation(userid="acct:bat@auth2")
         Annotation(userid="acct:bar@auth3")
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(annotations_auth1)
 
@@ -302,14 +292,14 @@ class TestAuthFilter:
         Annotation()
         Annotation()
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert not result.annotation_ids
 
     def test_logged_out_user_can_see_shared_annotations(self, search, Annotation):
         shared_ids = [Annotation(shared=True).id, Annotation(shared=True).id]
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(shared_ids)
 
@@ -322,7 +312,7 @@ class TestAuthFilter:
         _ = Annotation(userid="acct:foo@auth2").id
         users_private_ids = [Annotation(userid=userid).id, Annotation(userid=userid).id]
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(users_private_ids)
 
@@ -336,7 +326,7 @@ class TestAuthFilter:
             Annotation(userid=userid, shared=True).id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(shared_ids)
 
@@ -357,7 +347,7 @@ class TestSharedAnnotationsFilter:
         Annotation(shared=False)
         Annotation(shared=False, userid=userid)
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(
             [annotation.id for annotation in shared_annotations]
@@ -378,9 +368,7 @@ class TestGroupFilter:
         Annotation(groupid="other_group")
         annotation_ids = [Annotation(groupid=pubid).id for pubid in group_pubids]
 
-        result = search.run(
-            webob.multidict.MultiDict(("group", pubid) for pubid in group_pubids)
-        )
+        result = search.run(MultiDict(("group", pubid) for pubid in group_pubids))
 
         group_service.groupids_readable_by.assert_called_with(
             pyramid_request.user, group_ids=group_pubids
@@ -397,7 +385,7 @@ class TestGroupFilter:
             Annotation(groupid="readable_group").id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(annotation_ids)
 
@@ -416,14 +404,14 @@ class TestUserFilter:
         Annotation(userid="acct:foo@auth2", shared=True)
         expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id]
 
-        result = search.run(webob.multidict.MultiDict({"user": "bar"}))
+        result = search.run(MultiDict({"user": "bar"}))
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_filter_is_case_insensitive(self, search, Annotation):
         ann_id = Annotation(userid="acct:bob@example", shared=True).id
 
-        result = search.run(webob.multidict.MultiDict({"user": "BOB"}))
+        result = search.run(MultiDict({"user": "BOB"}))
 
         assert result.annotation_ids == [ann_id]
 
@@ -434,7 +422,7 @@ class TestUserFilter:
             Annotation(userid="acct:baz@auth2", shared=True).id,
         ]
 
-        params = webob.multidict.MultiDict()
+        params = MultiDict()
         params.add("user", "bar")
         params.add("user", "baz")
         result = search.run(params)
@@ -445,7 +433,7 @@ class TestUserFilter:
         Annotation(userid="acct:foo@auth2", shared=True)
         expected_ids = [Annotation(userid="acct:foo@auth3", shared=True).id]
 
-        result = search.run(webob.multidict.MultiDict({"user": "foo@auth3"}))
+        result = search.run(MultiDict({"user": "foo@auth3"}))
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
@@ -465,7 +453,7 @@ class TestUriCombinedWildcardFilter:
         Annotation(target_uri="https://foo.com")
         expected_ids = [Annotation(target_uri="https://bar.com").id]
 
-        result = search.run(webob.multidict.MultiDict({field: "https://bar.com"}))
+        result = search.run(MultiDict({field: "https://bar.com"}))
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
@@ -477,7 +465,7 @@ class TestUriCombinedWildcardFilter:
             Annotation(target_uri="http://bar.com/").id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"url": "http://bar.com"}))
+        result = search.run(MultiDict({"url": "http://bar.com"}))
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
@@ -488,7 +476,7 @@ class TestUriCombinedWildcardFilter:
             Annotation(target_uri="https://bar.com").id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"url": "http://bar.com"}))
+        result = search.run(MultiDict({"url": "http://bar.com"}))
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
@@ -512,7 +500,7 @@ class TestUriCombinedWildcardFilter:
             Annotation(target_uri="file:///Users/june/article.pdf").id,
         ]
 
-        params = webob.multidict.MultiDict()
+        params = MultiDict()
         params.add("url", "urn:x-pdf:1234")
         result = search.run(params)
 
@@ -529,7 +517,7 @@ class TestUriCombinedWildcardFilter:
             Annotation(target_uri="https://foo.com/bar").id,
         ]
 
-        params = webob.multidict.MultiDict()
+        params = MultiDict()
         params.add("uri", "http://bat.com")
         params.add("uri", "https://bar.com")
         params.add("url", "http://foo.com")
@@ -544,12 +532,12 @@ class TestUriCombinedWildcardFilter:
             # Test with separate_keys = True
             # (aka uri/url are exact match & wildcard_uri is wildcard match.)
             (
-                webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz_45")]),
+                MultiDict([("wildcard_uri", "http://bar.com/baz_45")]),
                 [2, 3],
                 True,
             ),
             (
-                webob.multidict.MultiDict(
+                MultiDict(
                     [
                         ("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
                         ("wildcard_uri", "http://bar.com/baz*45"),
@@ -559,7 +547,7 @@ class TestUriCombinedWildcardFilter:
                 True,
             ),
             (
-                webob.multidict.MultiDict(
+                MultiDict(
                     [
                         ("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
                         ("url", "http://bar.com/baz*45"),
@@ -570,17 +558,17 @@ class TestUriCombinedWildcardFilter:
             ),
             # Test with separate_keys = False (aka uri/url contain both exact &  wildcard matches.)
             (
-                webob.multidict.MultiDict([("uri", "http://bar.com/baz-45_")]),
+                MultiDict([("uri", "http://bar.com/baz-45_")]),
                 [1],
                 False,
             ),
             (
-                webob.multidict.MultiDict([("uri", "http://bar.com/*")]),
+                MultiDict([("uri", "http://bar.com/*")]),
                 [0, 1, 2, 3, 4],
                 False,
             ),
             (
-                webob.multidict.MultiDict(
+                MultiDict(
                     [
                         ("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
                         ("uri", "http://bar.com/baz*45"),
@@ -615,8 +603,8 @@ class TestUriCombinedWildcardFilter:
     @pytest.mark.parametrize(
         "params,separate_keys",
         [
-            (webob.multidict.MultiDict([("wildcard_uri", "http_://bar.com")]), True),
-            (webob.multidict.MultiDict([("url", "ur*n:x-pdf:*")]), False),
+            (MultiDict([("wildcard_uri", "http_://bar.com")]), True),
+            (MultiDict([("url", "ur*n:x-pdf:*")]), False),
         ],
     )
     def test_ignores_urls_with_wildcards_at_invalid_locations(
@@ -632,7 +620,7 @@ class TestUriCombinedWildcardFilter:
         "params,separate_keys",
         [
             (
-                webob.multidict.MultiDict(
+                MultiDict(
                     [
                         ("wildcard_uri", "http_://bar.com"),
                         ("uri", "http://bar.com"),
@@ -642,9 +630,7 @@ class TestUriCombinedWildcardFilter:
                 True,
             ),
             (
-                webob.multidict.MultiDict(
-                    [("uri", "http_://bar.com"), ("url", "http://baz.com")]
-                ),
+                MultiDict([("uri", "http_://bar.com"), ("url", "http://baz.com")]),
                 False,
             ),
         ],
@@ -682,7 +668,7 @@ class TestDeletedFilter:
         for id_ in deleted_ids:
             search_index.delete_annotation_by_id(id_, refresh=True)
 
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(not_deleted_ids)
 
@@ -815,7 +801,7 @@ class TestAnyMatcher:
             Annotation(target_uri="http://foo.com/bar").id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"any": "foo"}))
+        result = search.run(MultiDict({"any": "foo"}))
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
@@ -826,7 +812,7 @@ class TestAnyMatcher:
             Annotation(target_selectors=[{"exact": "selected foo bar text"}]).id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"any": "foo"}))
+        result = search.run(MultiDict({"any": "foo"}))
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
@@ -837,7 +823,7 @@ class TestAnyMatcher:
             Annotation(text="foo is bar's friend").id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"any": "foo"}))
+        result = search.run(MultiDict({"any": "foo"}))
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
@@ -845,7 +831,7 @@ class TestAnyMatcher:
         Annotation(tags=["bar"])
         matched_ids = [Annotation(tags=["foo"]).id, Annotation(tags=["foo", "bar"]).id]
 
-        result = search.run(webob.multidict.MultiDict({"any": "foo"}))
+        result = search.run(MultiDict({"any": "foo"}))
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
@@ -860,7 +846,7 @@ class TestAnyMatcher:
             Annotation(tags=["foo bar"]).id,
         ]
 
-        params = webob.multidict.MultiDict()
+        params = MultiDict()
         params.add("any", "foo")
         params.add("any", "bar")
         # Any is expected to match all of quote, text, uri.parts, and tags
@@ -899,7 +885,7 @@ class TestTagsMatcher:
             Annotation(shared=True, tags=["foo", "bar"]).id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"tag": "foo"}))
+        result = search.run(MultiDict({"tag": "foo"}))
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
@@ -911,7 +897,7 @@ class TestTagsMatcher:
             Annotation(shared=True, tags=["foo", "bar"]).id,
         ]
 
-        result = search.run(webob.multidict.MultiDict({"tags": "foo"}))
+        result = search.run(MultiDict({"tags": "foo"}))
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
@@ -925,7 +911,7 @@ class TestTagsMatcher:
             Annotation(shared=True, tags=["foo", "baz", "fie", "boo", "bar"]).id,
         ]
 
-        params = webob.multidict.MultiDict()
+        params = MultiDict()
         params.add("tags", "foo")
         params.add("tags", "boo")
         params.add("tag", "fie")
@@ -958,7 +944,7 @@ class TestRepliesMatcher:
 
         ann_ids = [ann1.id, ann2.id]
         search.append_modifier(query.RepliesMatcher(ann_ids))
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
 
@@ -972,7 +958,7 @@ class TestRepliesMatcher:
 
         ann_ids = [ann1.id]
         search.append_modifier(query.RepliesMatcher(ann_ids))
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
 
@@ -999,7 +985,7 @@ class TestTagsAggregation:
         Annotation(tags=["tag_b"])
 
         search.append_aggregation(query.TagsAggregation(limit=limit))
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert result.aggregations["tags"] == expected
 
@@ -1026,7 +1012,7 @@ class TestUsersAggregation:
             Annotation(userid="acct:b@example.com")
 
         search.append_aggregation(query.UsersAggregation(limit=limit))
-        result = search.run(webob.multidict.MultiDict({}))
+        result = search.run(MultiDict({}))
 
         assert result.aggregations["users"] == expected
 
