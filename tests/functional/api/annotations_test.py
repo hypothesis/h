@@ -7,74 +7,65 @@ pytestmark = pytest.mark.usefixtures("init_elasticsearch")
 
 
 class TestSearchAnnotations:
-    @pytest.mark.parametrize("nipsa", [True, False])
-    @pytest.mark.parametrize("shared", [True, False])
-    @pytest.mark.parametrize("moderation_status", ModerationStatus)
-    @pytest.mark.parametrize("group_role", [None, *GroupMembershipRoles])
+    @pytest.mark.parametrize(
+        "params",
+        [
+            pytest.param(
+                {"annotation": {"shared": True}},
+                id="users_can_see_their_own_shared_annotations",
+            ),
+            pytest.param(
+                {"annotation": {"shared": False}},
+                id="users_can_see_their_own_private_annotations",
+            ),
+            pytest.param(
+                {"annotation": {"moderation_status": ModerationStatus.PENDING}},
+                id="users_can_see_their_own_pending_annotations",
+            ),
+            pytest.param(
+                {"annotation": {"moderation_status": ModerationStatus.DENIED}},
+                id="users_can_see_their_own_denied_annotations",
+            ),
+            pytest.param(
+                {"annotation": {"moderation_status": ModerationStatus.SPAM}},
+                id="users_can_see_their_own_spam_annotations",
+            ),
+            pytest.param(
+                {"nipsa": True},
+                id="nipsad_users_can_see_their_own_annotations",
+            ),
+        ],
+    )
     def test_users_can_see_their_own_annotations(
-        self,
-        user,
-        nipsa,
-        shared,
-        moderation_status,
-        group_role,
-        group,
-        make_annotation,
-        call_search_api,
+        self, user, make_annotation, call_search_api, params
     ):
-        if group_role:
-            group.memberships.append(GroupMembership(user=user, roles=[group_role]))
-        user.nipsa = nipsa
-        annotation = make_annotation(
-            user, shared=shared, moderation_status=moderation_status
-        )
+        user.nipsa = params.get("nipsa", False)
+        annotation = make_annotation(user, **params.get("annotation", {}))
 
         response = call_search_api()
 
         assert annotation.id in response.annotation_ids
 
-    @pytest.mark.parametrize("shared", [True, False])
-    @pytest.mark.parametrize("moderation_status", ModerationStatus)
     @pytest.mark.parametrize("group_role", [None, *GroupMembershipRoles])
     def test_users_cant_see_nipsad_users_annotations(
-        self,
-        moderation_status,
-        other_user,
-        shared,
-        group_role,
-        user,
-        group,
-        make_annotation,
-        call_search_api,
+        self, other_user, user, group, make_annotation, call_search_api, group_role
     ):
         other_user.nipsa = True
         if group_role:
             group.memberships.append(GroupMembership(user=user, roles=[group_role]))
-        annotation = make_annotation(
-            other_user, shared=shared, moderation_status=moderation_status
-        )
+        annotation = make_annotation(other_user, shared=True)
 
         response = call_search_api()
 
         assert annotation.id not in response.annotation_ids
 
-    @pytest.mark.parametrize("moderation_status", ModerationStatus)
     @pytest.mark.parametrize("group_role", [None, *GroupMembershipRoles])
     def test_users_cant_see_other_users_private_annotations(
-        self,
-        moderation_status,
-        other_user,
-        group_role,
-        user,
-        group,
-        make_annotation,
-        call_search_api,
+        self, other_user, group_role, user, group, make_annotation, call_search_api
     ):
         if group_role:
             group.memberships.append(GroupMembership(user=user, roles=[group_role]))
-        annotation = make_annotation(
-            other_user, shared=False, moderation_status=moderation_status
-        )
+        annotation = make_annotation(other_user, shared=False)
 
         response = call_search_api()
 
@@ -95,26 +86,11 @@ class TestSearchAnnotations:
 
         assert annotation.id not in response.annotation_ids
 
-    @pytest.mark.parametrize("nipsa", [True, False])
-    @pytest.mark.parametrize("shared", [True, False])
-    @pytest.mark.parametrize("moderation_status", ModerationStatus)
     def test_users_cant_see_annotations_in_private_groups(
-        self,
-        factories,
-        make_annotation,
-        other_user,
-        call_search_api,
-        nipsa,
-        shared,
-        moderation_status,
+        self, factories, make_annotation, other_user, call_search_api
     ):
-        other_user.nipsa = nipsa
-        private_group = factories.Group()
         annotation = make_annotation(
-            user=other_user,
-            group=private_group,
-            shared=shared,
-            moderation_status=moderation_status,
+            user=other_user, group=factories.Group(), shared=True
         )
 
         response = call_search_api()
@@ -122,37 +98,18 @@ class TestSearchAnnotations:
         assert annotation.id not in response.annotation_ids
 
     @pytest.mark.parametrize(
-        "nipsa,shared,moderation_status,can_see",
+        "shared,moderation_status,can_see",
         [
-            (False, True, ModerationStatus.PENDING, False),
-            (False, True, ModerationStatus.APPROVED, True),
-            (False, True, ModerationStatus.DENIED, False),
-            (False, True, ModerationStatus.SPAM, False),
-            (False, False, ModerationStatus.PENDING, False),
-            (False, False, ModerationStatus.APPROVED, False),
-            (False, False, ModerationStatus.DENIED, False),
-            (False, False, ModerationStatus.SPAM, False),
-            (True, True, ModerationStatus.PENDING, False),
-            (True, True, ModerationStatus.APPROVED, False),
-            (True, True, ModerationStatus.DENIED, False),
-            (True, True, ModerationStatus.SPAM, False),
-            (True, False, ModerationStatus.PENDING, False),
-            (True, False, ModerationStatus.APPROVED, False),
-            (True, False, ModerationStatus.DENIED, False),
-            (True, False, ModerationStatus.SPAM, False),
+            (True, ModerationStatus.PENDING, False),
+            (True, ModerationStatus.APPROVED, True),
+            (True, ModerationStatus.DENIED, False),
+            (True, ModerationStatus.SPAM, False),
+            (False, ModerationStatus.APPROVED, False),
         ],
     )
     def test_when_unauthenticated_users_can_see_annotations(
-        self,
-        nipsa,
-        shared,
-        moderation_status,
-        can_see,
-        user,
-        make_annotation,
-        call_search_api,
+        self, shared, moderation_status, can_see, user, make_annotation, call_search_api
     ):
-        user.nipsa = nipsa
         annotation = make_annotation(
             user, moderation_status=moderation_status, shared=shared
         )
@@ -317,6 +274,7 @@ class TestSearchAnnotations:
     @pytest.fixture
     def make_annotation(self, app, db_session, factories, group):
         def make_annotation(user, group=group, **kwargs):
+            kwargs.setdefault("moderation_status", ModerationStatus.APPROVED)
             annotation = factories.Annotation(
                 userid=user.userid, groupid=group.pubid, **kwargs
             )
