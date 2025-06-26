@@ -80,6 +80,7 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
             mentions={annotation.mentions}
             mentionMode="username"
             mentionsEnabled
+            classes="text-color-text"
           />
 
           {annotation.tags.length > 0 && (
