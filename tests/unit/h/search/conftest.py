@@ -2,14 +2,20 @@ from unittest import mock
 
 import pytest
 
+from h.models import Group
 from h.services.group import GroupService
 from h.services.search_index import SearchIndexService
 
 
 @pytest.fixture
-def group_service(pyramid_config):
+def world_group(db_session):
+    return db_session.query(Group).filter_by(pubid="__world__").one()
+
+
+@pytest.fixture
+def group_service(pyramid_config, world_group):
     group_service = mock.create_autospec(GroupService, instance=True, spec_set=True)
-    group_service.groupids_readable_by.return_value = ["__world__"]
+    group_service.groups_readable_by.return_value = [world_group]
     pyramid_config.register_service(group_service, name="group")
     return group_service
 
