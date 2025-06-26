@@ -135,7 +135,7 @@ export type Target = {
  * API docs: https://h.readthedocs.io/en/latest/api-reference/#tag/annotations
  */
 export type APIAnnotationData = Annotation & {
-  id?: string;
+  id: string;
   text: string;
 
   mentions: Mention[];

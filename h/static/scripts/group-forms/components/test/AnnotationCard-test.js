@@ -10,6 +10,8 @@ import AnnotationCard, { $imports } from '../AnnotationCard';
 describe('AnnotationCard', () => {
   let fakeConfig;
   let fakeAnnotation;
+  let fakeOnStatusChange;
+  let fakeUseUpdateModerationStatus;
 
   beforeEach(() => {
     fakeConfig = {
@@ -32,6 +34,9 @@ describe('AnnotationCard', () => {
       ],
     };
 
+    fakeOnStatusChange = sinon.stub();
+    fakeUseUpdateModerationStatus = sinon.stub().returns(sinon.stub());
+
     $imports.$mock(mockImportedComponents());
     $imports.$mock({
       '@hypothesis/annotation-ui': {
@@ -41,13 +46,19 @@ describe('AnnotationCard', () => {
         MarkdownView: () => null,
         AnnotationShareControl: () => null,
       },
+      '../hooks/use-update-moderation-status': {
+        useUpdateModerationStatus: fakeUseUpdateModerationStatus,
+      },
     });
   });
 
   function createComponent() {
     return mount(
       <Config.Provider value={fakeConfig}>
-        <AnnotationCard annotation={fakeAnnotation} />
+        <AnnotationCard
+          annotation={fakeAnnotation}
+          onStatusChange={fakeOnStatusChange}
+        />
       </Config.Provider>,
     );
   }
@@ -153,6 +164,44 @@ describe('AnnotationCard', () => {
         status,
       );
     });
+
+    it('changes moderation status when ModerationStatusSelect.onChange is called', async () => {
+      const fakeUpdateModerationStatus = sinon.stub();
+      fakeUseUpdateModerationStatus.returns(fakeUpdateModerationStatus);
+
+      const wrapper = createComponent();
+      await wrapper.find('ModerationStatusSelect').props().onChange(status);
+
+      assert.calledWith(fakeUpdateModerationStatus, status);
+      assert.calledWith(fakeOnStatusChange, status);
+    });
+  });
+
+  it('disables ModerationStatusSelect while updating moderation status', async () => {
+    const { promise, resolve } = Promise.withResolvers();
+    fakeUseUpdateModerationStatus.returns(sinon.stub().returns(promise));
+    const wrapper = createComponent();
+
+    assert.isFalse(wrapper.find('ModerationStatusSelect').prop('disabled'));
+    wrapper.find('ModerationStatusSelect').props().onChange('APPROVED');
+    wrapper.update();
+    assert.isTrue(wrapper.find('ModerationStatusSelect').prop('disabled'));
+
+    resolve(undefined);
+    await promise;
+  });
+
+  it('shows errors produced while changing status', () => {
+    fakeUseUpdateModerationStatus.returns(sinon.stub().throws(new Error('')));
+    const wrapper = createComponent();
+
+    wrapper.find('ModerationStatusSelect').props().onChange('APPROVED');
+    wrapper.update();
+
+    assert.equal(
+      wrapper.find('[data-testid="update-error"]').text(),
+      'An error occurred updating the moderation status',
+    );
   });
 
   it(

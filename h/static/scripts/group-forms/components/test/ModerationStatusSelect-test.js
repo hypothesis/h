@@ -74,6 +74,13 @@ describe('ModerationStatusSelect', () => {
     });
   });
 
+  [true, false].forEach(disabled => {
+    it('can be disabled', () => {
+      const wrapper = createComponent({ disabled });
+      assert.equal(wrapper.find('Select').prop('disabled'), disabled);
+    });
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({ content: () => createComponent() }),

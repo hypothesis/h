@@ -13,19 +13,34 @@ import {
   Link,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useContext, useMemo } from 'preact/hooks';
+import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
 
 import { Config } from '../config';
+import { useUpdateModerationStatus } from '../hooks/use-update-moderation-status';
 import { quote, username } from '../utils/annotation-metadata';
-import type { APIAnnotationData } from '../utils/api';
+import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
 import ModerationStatusSelect from './ModerationStatusSelect';
 
 export type AnnotationCardProps = {
   annotation: APIAnnotationData;
+
+  /**
+   * Invoked after successfully changing the moderation status for this
+   * annotation
+   */
+  onStatusChange: (moderationStatus: ModerationStatus) => void;
 };
 
-export default function AnnotationCard({ annotation }: AnnotationCardProps) {
+type SaveState =
+  | { type: 'saved' }
+  | { type: 'saving' }
+  | { type: 'error'; error: string };
+
+export default function AnnotationCard({
+  annotation,
+  onStatusChange,
+}: AnnotationCardProps) {
   const config = useContext(Config)!;
   const user =
     annotation.user_info?.display_name ??
@@ -41,6 +56,29 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
         },
       },
     [config.context.group],
+  );
+
+  const updateModerationStatus = useUpdateModerationStatus(annotation);
+  const [moderationSaveState, setModerationSaveState] = useState<SaveState>({
+    type: 'saved',
+  });
+  const onModerationStatusChange = useCallback(
+    async (status: ModerationStatus) => {
+      try {
+        setModerationSaveState({ type: 'saving' });
+        await updateModerationStatus(status);
+        onStatusChange(status);
+        setModerationSaveState({ type: 'saved' });
+      } catch {
+        // TODO Catching all errors generally for now, but we need to explicitly
+        //      handle conflict errors
+        setModerationSaveState({
+          type: 'error',
+          error: 'An error occurred updating the moderation status',
+        });
+      }
+    },
+    [onStatusChange, updateModerationStatus],
   );
 
   return (
@@ -102,26 +140,34 @@ export default function AnnotationCard({ annotation }: AnnotationCardProps) {
             </ul>
           )}
 
-          <footer className="flex items-end justify-between">
-            <ModerationStatusSelect
-              onChange={/* istanbul ignore next */ () => {}}
-              selected={annotation.moderation_status}
-              mode="select"
-              alignListbox="left"
-            />
-            <div className="flex items-center gap-1">
-              <Link
-                variant="text-light"
-                href={annotation.links.incontext}
-                target="_blank"
-                title="See in context"
-                aria-label="See in context"
-                data-testid="context-link"
-              >
-                <ExternalIcon />
-              </Link>
-              <AnnotationShareControl annotation={annotation} group={group} />
+          <footer className="flex flex-col gap-2">
+            <div className="flex items-end justify-between">
+              <ModerationStatusSelect
+                onChange={onModerationStatusChange}
+                disabled={moderationSaveState.type === 'saving'}
+                selected={annotation.moderation_status}
+                mode="select"
+                alignListbox="left"
+              />
+              <div className="flex items-center gap-1">
+                <Link
+                  variant="text-light"
+                  href={annotation.links.incontext}
+                  target="_blank"
+                  title="See in context"
+                  aria-label="See in context"
+                  data-testid="context-link"
+                >
+                  <ExternalIcon />
+                </Link>
+                <AnnotationShareControl annotation={annotation} group={group} />
+              </div>
             </div>
+            {moderationSaveState.type === 'error' && (
+              <div data-testid="update-error" className="text-red-error">
+                {moderationSaveState.error}
+              </div>
+            )}
           </footer>
         </CardContent>
       </Card>
