@@ -219,10 +219,13 @@ class GroupFilter:
         self.group_service = request.find_service(name="group")
 
     def __call__(self, search, params):
-        # Remove parameter if passed, preventing it being passed to default query
-        group_ids = popall(params, "group") or None
-        groups = self.group_service.groupids_readable_by(self.user, group_ids)
-        return search.filter("terms", group=groups)
+        # Remove parameter if passed, preventing it being passed to default query.
+        groupids = popall(params, "group") or None
+
+        user_readable_groupids = [
+            g.pubid for g in self.group_service.groups_readable_by(self.user, groupids)
+        ]
+        return search.filter("terms", group=user_readable_groupids)
 
 
 class UriCombinedWildcardFilter:

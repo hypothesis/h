@@ -364,25 +364,26 @@ class TestGroupFilter:
         self, search, Annotation, groups, group_service, pyramid_request
     ):
         group_pubids = [group.pubid for group in groups]
-        group_service.groupids_readable_by.return_value = group_pubids
+        group_service.groups_readable_by.return_value = groups
         Annotation(groupid="other_group")
         annotation_ids = [Annotation(groupid=pubid).id for pubid in group_pubids]
 
         result = search.run(MultiDict(("group", pubid) for pubid in group_pubids))
 
-        group_service.groupids_readable_by.assert_called_with(
+        group_service.groups_readable_by.assert_called_with(
             pyramid_request.user, group_ids=group_pubids
         )
         assert sorted(result.annotation_ids) == sorted(annotation_ids)
 
     def test_matches_only_annotations_in_groups_readable_by_user(
-        self, search, Annotation, group_service
+        self, search, Annotation, group_service, factories
     ):
-        group_service.groupids_readable_by.return_value = ["readable_group"]
+        readable_group = factories.Group()
+        group_service.groups_readable_by.return_value = [readable_group]
         Annotation(groupid="unreadable_group", shared=True)
         annotation_ids = [
-            Annotation(groupid="readable_group").id,
-            Annotation(groupid="readable_group").id,
+            Annotation(groupid=readable_group.pubid).id,
+            Annotation(groupid=readable_group.pubid).id,
         ]
 
         result = search.run(MultiDict({}))

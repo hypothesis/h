@@ -117,11 +117,6 @@ class GroupService:
 
         return self.session.scalars(query)
 
-    def groupids_readable_by(self, user, group_ids=None):
-        """Return a list of groupids for which the user has read access."""
-
-        return [g.pubid for g in self.groups_readable_by(user, group_ids)]
-
     def groupids_created_by(self, user):
         """
         Return a list of pubids which the user created.

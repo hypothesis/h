@@ -107,7 +107,7 @@ class TestGroupServiceGroupIds:
     """
     Unit tests for methods related to group IDs.
 
-    - :py:meth:`GroupService.groupids_readable_by`
+    - :py:meth:`GroupService.groups_readable_by`
     - :py:meth:`GroupService.groupids_created_by`
     """
 
@@ -118,7 +118,9 @@ class TestGroupServiceGroupIds:
             user = factories.User()
             db_session.flush()
 
-        assert "__world__" in svc.groupids_readable_by(user)
+        groups = svc.groups_readable_by(user)
+
+        assert "__world__" in [g.pubid for g in groups]
 
     @pytest.mark.parametrize("with_user", [True, False])
     def test_readable_by_includes_world_readable_groups(
@@ -128,36 +130,36 @@ class TestGroupServiceGroupIds:
         factories.Group(readable_by=ReadableBy.members)
         # group readable by everyone
         group = factories.Group(readable_by=ReadableBy.world)
-
         user = None
         if with_user:
             user = factories.User()
             db_session.flush()
 
-        assert group.pubid in svc.groupids_readable_by(user)
+        groups = svc.groups_readable_by(user)
+
+        assert group in groups
 
     def test_readable_by_includes_memberships(self, svc, db_session, factories):
         user = factories.User()
-
         group = factories.Group(readable_by=ReadableBy.members)
         group.memberships.append(GroupMembership(user=user))
-
         db_session.flush()
 
-        assert group.pubid in svc.groupids_readable_by(user)
+        groups = svc.groups_readable_by(user)
+
+        assert group in groups
 
     def test_readable_by_applies_filter(self, svc, db_session, factories):
         user = factories.User()
-
         factories.Group(
             readable_by=ReadableBy.world
         )  # Group that shouldn't be returned
         group = factories.Group(readable_by=ReadableBy.world)
-
         db_session.flush()
 
-        pubids = [group.pubid, "doesnotexist"]
-        assert svc.groupids_readable_by(user, group_ids=pubids) == [group.pubid]
+        groups = svc.groups_readable_by(user, group_ids=[group.pubid, "doesnotexist"])
+
+        assert list(groups) == [group]
 
     def test_created_by_includes_created_groups(self, svc, factories):
         user = factories.User()
