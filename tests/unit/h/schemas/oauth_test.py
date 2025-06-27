@@ -10,19 +10,27 @@ from h.schemas.oauth import (
 
 class TestRetrieveOAuthCallbackSchema:
     @pytest.mark.parametrize(
-        "data",
+        "input_data,expected_output_data",
         [
-            {"code": "test_code", "state": "test_state"},
-            # Additional unknown properties are passed though unvalidated.
-            {"code": "test_code", "state": "test_state", "foo": "bar"},
+            (
+                {"code": "test_code", "state": "test_state"},
+                {"code": "test_code", "state": "test_state"},
+            ),
+            (
+                # Additional unknown properties are allowed but filtered out.
+                {"code": "test_code", "state": "test_state", "foo": "bar"},
+                {"code": "test_code", "state": "test_state"},
+            ),
         ],
     )
-    def test_validate(self, pyramid_request, schema, data):
-        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = data["state"]
+    def test_validate(self, pyramid_request, schema, input_data, expected_output_data):
+        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = input_data[
+            "state"
+        ]
 
-        result = schema.validate(data)
+        output_data = schema.validate(input_data)
 
-        assert result == data
+        assert output_data == expected_output_data
 
     @pytest.mark.parametrize(
         "data,message",
