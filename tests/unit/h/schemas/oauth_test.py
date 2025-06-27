@@ -1,39 +1,83 @@
 import pytest
 
 from h.schemas import ValidationError
-from h.schemas.oauth import RetrieveOAuthCallbackSchema, RetrieveOpenIDTokenSchema
+from h.schemas.oauth import (
+    InvalidOAuthStateError,
+    RetrieveOAuthCallbackSchema,
+    RetrieveOpenIDTokenSchema,
+)
 
 
 class TestRetrieveOAuthCallbackSchema:
-    def test_validate(self, pyramid_request, schema):
-        data = {"code": "test-code", "state": "test-state"}
-        pyramid_request.session["oauth2_state"] = data["state"]
+    @pytest.mark.parametrize(
+        "input_data,expected_output_data",
+        [
+            (
+                {"code": "test_code", "state": "test_state"},
+                {"code": "test_code", "state": "test_state"},
+            ),
+            (
+                # Additional unknown properties are allowed but filtered out.
+                {"code": "test_code", "state": "test_state", "foo": "bar"},
+                {"code": "test_code", "state": "test_state"},
+            ),
+        ],
+    )
+    def test_validate(self, pyramid_request, schema, input_data, expected_output_data):
+        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = input_data[
+            "state"
+        ]
 
-        result = schema.validate(data)
+        output_data = schema.validate(input_data)
 
-        assert result == data
+        assert output_data == expected_output_data
 
-    def test_validate_with_invalid_state(self, pyramid_request, schema):
-        data = {"code": "test-code", "state": "test-state"}
-        pyramid_request.session["oauth2_state"] = "different-test-state"
+    @pytest.mark.parametrize(
+        "data,message",
+        [
+            ([1, 2, 3], r"\[1, 2, 3\] is not of type 'object'"),
+            ({}, "'code' is a required property, 'state' is a required property"),
+            ({"code": "test_code"}, "'state' is a required property"),
+            ({"state": "test_state"}, "'code' is a required property"),
+            ({"code": 42, "state": "test_state"}, "code: 42 is not of type 'string'"),
+            ({"code": "test_code", "state": 26}, "state: 26 is not of type 'string'"),
+            (
+                {"code": 32, "state": 17},
+                "code: 32 is not of type 'string', state: 17 is not of type 'string'",
+            ),
+        ],
+    )
+    def test_invalid(self, pyramid_request, schema, data, message):
+        if "state" in data:
+            pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = data[
+                "state"
+            ]
 
-        with pytest.raises(ValidationError, match="Invalid oauth state"):
+        with pytest.raises(ValidationError, match=message):
             schema.validate(data)
 
-    def test_validate_with_missing_state(self, schema):
-        data = {"state": "test-state"}
+    def test_with_state_mismatch(self, pyramid_request, schema):
+        data = {"code": "test_code", "state": "test_state"}
+        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = (
+            "different_test_state"
+        )
 
-        with pytest.raises(ValidationError, match="Invalid oauth state"):
+        with pytest.raises(InvalidOAuthStateError):
             schema.validate(data)
 
-    def test_state_param_generates_token(self, pyramid_request, schema, secrets):
-        state_token = "test-token"  # noqa: S105
-        secrets.token_hex.return_value = state_token
+    def test_with_no_state_in_session(self, schema):
+        data = {"code": "test_code", "state": "test_state"}
 
+        with pytest.raises(InvalidOAuthStateError):
+            schema.validate(data)
+
+    def test_state_param(self, pyramid_request, schema, secrets):
         result = schema.state_param()
 
-        assert result == state_token
-        assert pyramid_request.session["oauth2_state"] == state_token
+        assert result == secrets.token_hex.return_value
+        assert (
+            pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] == result
+        )
 
     @pytest.fixture
     def schema(self, pyramid_request):

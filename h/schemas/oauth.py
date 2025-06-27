@@ -12,39 +12,45 @@ logger = logging.getLogger(__name__)
 class OAuthCallbackSchema(JSONSchema):
     schema: ClassVar = {  # type: ignore[misc]
         "type": "object",
-        "required": ["code"],
+        "required": ["code", "state"],
         "properties": {
             "code": {"type": "string"},
             "state": {"type": "string"},
-            "error": {"type": "string"},
-            "error_description": {"type": "string"},
         },
     }
 
 
 class OAuthCallbackData(TypedDict):
     code: str
-    state: str | None
-    error: str | None
-    error_description: str | None
+    state: str
+
+
+class InvalidOAuthStateError(ValidationError):
+    def __init__(self):
+        super().__init__("Invalid OAuth state")
 
 
 class RetrieveOAuthCallbackSchema:
+    SESSION_KEY = "oauth2_state"
+
     def __init__(self, request: Request) -> None:
         self._schema = OAuthCallbackSchema()
         self._request = request
 
     def validate(self, data: dict[str, Any]) -> OAuthCallbackData:
-        state = data.get("state")
-        if not state or state != self._request.session.pop("oauth2_state", None):
-            msg = "Invalid oauth state"
-            raise ValidationError(msg)
+        validated_data = self._schema.validate(data)
 
-        return self._schema.validate(data)
+        if validated_data["state"] != self._request.session.pop(self.SESSION_KEY, None):
+            raise InvalidOAuthStateError
+
+        # Return only known keys from the data to make sure that code can't
+        # make use of any unknown keys. The OAuth 2 spec requires that clients
+        # ignore any unrecognised authorization response parameters.
+        return {"code": validated_data["code"], "state": validated_data["state"]}
 
     def state_param(self) -> str:
         state = secrets.token_hex()
-        self._request.session["oauth2_state"] = state
+        self._request.session[self.SESSION_KEY] = state
         return state
 
 
