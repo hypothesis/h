@@ -18,7 +18,7 @@ class TestRetrieveOAuthCallbackSchema:
         ],
     )
     def test_validate(self, pyramid_request, schema, data):
-        pyramid_request.session["oauth2_state"] = data["state"]
+        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = data["state"]
 
         result = schema.validate(data)
 
@@ -41,14 +41,18 @@ class TestRetrieveOAuthCallbackSchema:
     )
     def test_invalid(self, pyramid_request, schema, data, message):
         if "state" in data:
-            pyramid_request.session["oauth2_state"] = data["state"]
+            pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = data[
+                "state"
+            ]
 
         with pytest.raises(ValidationError, match=message):
             schema.validate(data)
 
     def test_with_state_mismatch(self, pyramid_request, schema):
         data = {"code": "test_code", "state": "test_state"}
-        pyramid_request.session["oauth2_state"] = "different_test_state"
+        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = (
+            "different_test_state"
+        )
 
         with pytest.raises(InvalidOAuthStateError):
             schema.validate(data)
@@ -63,7 +67,9 @@ class TestRetrieveOAuthCallbackSchema:
         result = schema.state_param()
 
         assert result == secrets.token_hex.return_value
-        assert pyramid_request.session["oauth2_state"] == result
+        assert (
+            pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] == result
+        )
 
     @pytest.fixture
     def schema(self, pyramid_request):
