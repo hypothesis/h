@@ -5,35 +5,61 @@ from h.schemas.oauth import RetrieveOAuthCallbackSchema, RetrieveOpenIDTokenSche
 
 
 class TestRetrieveOAuthCallbackSchema:
-    def test_validate(self, pyramid_request, schema):
-        data = {"code": "test-code", "state": "test-state"}
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {"code": "test_code", "state": "test_state"},
+            # Additional unknown properties are passed though unvalidated.
+            {"code": "test_code", "state": "test_state", "foo": "bar"},
+        ],
+    )
+    def test_validate(self, pyramid_request, schema, data):
         pyramid_request.session["oauth2_state"] = data["state"]
 
         result = schema.validate(data)
 
         assert result == data
 
-    def test_validate_with_invalid_state(self, pyramid_request, schema):
-        data = {"code": "test-code", "state": "test-state"}
-        pyramid_request.session["oauth2_state"] = "different-test-state"
+    @pytest.mark.parametrize(
+        "data,message",
+        [
+            ([1, 2, 3], r"\[1, 2, 3\] is not of type 'object'"),
+            ({}, "'code' is a required property, 'state' is a required property"),
+            ({"code": "test_code"}, "'state' is a required property"),
+            ({"state": "test_state"}, "'code' is a required property"),
+            ({"code": 42, "state": "test_state"}, "code: 42 is not of type 'string'"),
+            ({"code": "test_code", "state": 26}, "state: 26 is not of type 'string'"),
+            (
+                {"code": 32, "state": 17},
+                "code: 32 is not of type 'string', state: 17 is not of type 'string'",
+            ),
+        ],
+    )
+    def test_invalid(self, pyramid_request, schema, data, message):
+        if "state" in data:
+            pyramid_request.session["oauth2_state"] = data["state"]
+
+        with pytest.raises(ValidationError, match=message):
+            schema.validate(data)
+
+    def test_with_state_mismatch(self, pyramid_request, schema):
+        data = {"code": "test_code", "state": "test_state"}
+        pyramid_request.session["oauth2_state"] = "different_test_state"
 
         with pytest.raises(ValidationError, match="Invalid oauth state"):
             schema.validate(data)
 
-    def test_validate_with_missing_state(self, schema):
+    def test_with_no_state_in_session(self, schema):
         data = {"code": "test_code", "state": "test_state"}
 
         with pytest.raises(ValidationError, match="Invalid oauth state"):
             schema.validate(data)
 
-    def test_state_param_generates_token(self, pyramid_request, schema, secrets):
-        state_token = "test-token"  # noqa: S105
-        secrets.token_hex.return_value = state_token
-
+    def test_state_param(self, pyramid_request, schema, secrets):
         result = schema.state_param()
 
-        assert result == state_token
-        assert pyramid_request.session["oauth2_state"] == state_token
+        assert result == secrets.token_hex.return_value
+        assert pyramid_request.session["oauth2_state"] == result
 
     @pytest.fixture
     def schema(self, pyramid_request):
