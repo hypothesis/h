@@ -31,6 +31,8 @@ class InvalidOAuthStateError(ValidationError):
 
 
 class RetrieveOAuthCallbackSchema:
+    SESSION_KEY = "oauth2_state"
+
     def __init__(self, request: Request) -> None:
         self._schema = OAuthCallbackSchema()
         self._request = request
@@ -40,14 +42,14 @@ class RetrieveOAuthCallbackSchema:
 
         state = validated_data["state"]
 
-        if state != self._request.session.pop("oauth2_state", None):
+        if state != self._request.session.pop(self.SESSION_KEY, None):
             raise InvalidOAuthStateError
 
         return validated_data
 
     def state_param(self) -> str:
         state = secrets.token_hex()
-        self._request.session["oauth2_state"] = state
+        self._request.session[self.SESSION_KEY] = state
         return state
 
 
