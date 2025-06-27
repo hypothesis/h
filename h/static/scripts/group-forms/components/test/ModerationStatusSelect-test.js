@@ -24,7 +24,7 @@ describe('ModerationStatusSelect', () => {
     { selected: undefined, expectedText: 'All' },
     { selected: 'PENDING', expectedText: 'Pending' },
     { selected: 'APPROVED', expectedText: 'Approved' },
-    { selected: 'DENIED', expectedText: 'Denied' },
+    { selected: 'DENIED', expectedText: 'Declined' },
     { selected: 'SPAM', expectedText: 'Spam' },
   ].forEach(({ selected, expectedText }) => {
     it('shows selected option as button content', () => {
@@ -41,7 +41,7 @@ describe('ModerationStatusSelect', () => {
     });
   });
 
-  const commonOptions = ['Pending', 'Approved', 'Denied', 'Spam'];
+  const commonOptions = ['Pending', 'Approved', 'Declined', 'Spam'];
 
   [
     { mode: 'filter', expectedOptions: ['All', ...commonOptions] },

@@ -92,7 +92,7 @@ describe('GroupModeration', () => {
       {
         status: 'DENIED',
         expectedFallbackMessage:
-          'There are no Denied annotations in this group.',
+          'There are no Declined annotations in this group.',
       },
       {
         status: 'SPAM',
