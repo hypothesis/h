@@ -28,7 +28,7 @@ class AuthorizeViews:
     def authorize(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
-        state = OAuth2RedirectSchema(self._request).state_param()
+        state = OAuth2RedirectSchema(self._request, "orcid.oidc").state_param()
 
         params = {
             "client_id": client_id,
@@ -76,7 +76,7 @@ class CallbackViews:
     @view_config(is_authenticated=True)
     def callback(self):
         try:
-            callback_data = OAuth2RedirectSchema(self._request).validate(
+            callback_data = OAuth2RedirectSchema(self._request, "orcid.oidc").validate(
                 dict(self._request.params)
             )
         except ValidationError as err:
