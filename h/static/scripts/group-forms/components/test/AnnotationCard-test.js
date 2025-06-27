@@ -219,6 +219,22 @@ describe('AnnotationCard', () => {
     );
   });
 
+  [
+    { references: undefined, showsReplyIndicator: false },
+    { references: [], showsReplyIndicator: false },
+    { references: ['1', '2'], showsReplyIndicator: true },
+  ].forEach(({ references, showsReplyIndicator }) => {
+    it('adds reply indicator for annotations that are replies', () => {
+      fakeAnnotation.references = references;
+      const wrapper = createComponent();
+
+      assert.equal(
+        wrapper.exists('[data-testid="reply-indicator"]'),
+        showsReplyIndicator,
+      );
+    });
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({ content: () => createComponent() }),

@@ -11,6 +11,7 @@ import {
   CardContent,
   ExternalIcon,
   Link,
+  ReplyIcon,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
@@ -57,6 +58,7 @@ export default function AnnotationCard({
       },
     [config.context.group],
   );
+  const isReply = (annotation.references ?? []).length > 0;
 
   const updateModerationStatus = useUpdateModerationStatus(annotation);
   const [moderationSaveState, setModerationSaveState] = useState<SaveState>({
@@ -100,12 +102,22 @@ export default function AnnotationCard({
                 withEditedTimestamp={annotation.updated !== annotation.created}
               />
             </div>
-            {group && (
-              <div className="flex gap-x-1 items-baseline flex-wrap-reverse">
-                <AnnotationGroupInfo group={group} />
-                <AnnotationDocument annotation={annotation} />
-              </div>
-            )}
+            <div className="flex gap-x-1 items-baseline flex-wrap-reverse">
+              {group && (
+                <>
+                  <AnnotationGroupInfo group={group} />
+                  <AnnotationDocument annotation={annotation} />
+                </>
+              )}
+              {isReply && (
+                <div
+                  className="ml-auto flex items-center gap-x-1"
+                  data-testid="reply-indicator"
+                >
+                  <ReplyIcon /> This is a reply
+                </div>
+              )}
+            </div>
           </header>
 
           <StyledText>
