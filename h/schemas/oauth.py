@@ -25,6 +25,11 @@ class OAuthCallbackData(TypedDict):
     state: str
 
 
+class InvalidOAuthStateError(ValidationError):
+    def __init__(self):
+        super().__init__("Invalid OAuth state")
+
+
 class RetrieveOAuthCallbackSchema:
     def __init__(self, request: Request) -> None:
         self._schema = OAuthCallbackSchema()
@@ -36,8 +41,7 @@ class RetrieveOAuthCallbackSchema:
         state = validated_data["state"]
 
         if state != self._request.session.pop("oauth2_state", None):
-            msg = "Invalid oauth state"
-            raise ValidationError(msg)
+            raise InvalidOAuthStateError
 
         return validated_data
 
