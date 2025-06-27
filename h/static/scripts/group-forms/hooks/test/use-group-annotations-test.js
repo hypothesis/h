@@ -167,46 +167,130 @@ describe('useGroupAnnotations', () => {
     assert.isUndefined(lastGroupAnnotations.annotations);
   });
 
-  it('updates annotation when updateAnnotationStatus is called and no filter status is set', async () => {
-    const annotations = [
-      { id: '123', moderation_status: 'PENDING' },
-      { id: '456', moderation_status: 'PENDING' },
-      { id: '789', moderation_status: 'DENIED' },
-    ];
-    fakeFetchGroupAnnotations.resolves({ annotations });
-
-    createComponent();
-    await waitFor(() => !lastGroupAnnotations.loading);
-
-    lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
-
-    // Wait for next tick so that state changes are applied
-    await delay(0);
-    assert.deepEqual(
-      [
+  context('when moderation status is changed', () => {
+    it('updates annotation status when no filter status is set', async () => {
+      const annotations = [
         { id: '123', moderation_status: 'PENDING' },
-        { id: '456', moderation_status: 'APPROVED' },
+        { id: '456', moderation_status: 'PENDING' },
         { id: '789', moderation_status: 'DENIED' },
-      ],
-      lastGroupAnnotations.annotations,
-    );
+      ];
+      fakeFetchGroupAnnotations.resolves({ annotations });
+
+      createComponent();
+      await waitFor(() => !lastGroupAnnotations.loading);
+
+      lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+
+      // Wait for next tick so that state changes are applied
+      await delay(0);
+      assert.deepEqual(
+        [
+          { id: '123', moderation_status: 'PENDING' },
+          { id: '456', moderation_status: 'APPROVED' },
+          { id: '789', moderation_status: 'DENIED' },
+        ],
+        lastGroupAnnotations.annotations,
+      );
+    });
+
+    it('updates annotation status and keeps it in list when status does not match filter', async () => {
+      const annotations = [
+        { id: '123', moderation_status: 'PENDING' },
+        { id: '456', moderation_status: 'PENDING' },
+      ];
+      fakeFetchGroupAnnotations.resolves({ annotations });
+
+      createComponent('PENDING');
+      await waitFor(() => !lastGroupAnnotations.loading);
+
+      lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+      await delay(0);
+
+      // Annotation should still be in the list but with updated status
+      assert.deepEqual(
+        [
+          { id: '123', moderation_status: 'PENDING' },
+          { id: '456', moderation_status: 'APPROVED' },
+        ],
+        lastGroupAnnotations.annotations,
+      );
+    });
+
+    it('marks annotation as removed when new status does not match filter', async () => {
+      const annotations = [
+        { id: '123', moderation_status: 'PENDING' },
+        { id: '456', moderation_status: 'PENDING' },
+      ];
+      fakeFetchGroupAnnotations.resolves({ annotations });
+
+      createComponent('PENDING');
+      await waitFor(() => !lastGroupAnnotations.loading);
+
+      lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+
+      await delay(0);
+
+      assert.isTrue(lastGroupAnnotations.removedAnnotations.has('456'));
+      assert.isFalse(lastGroupAnnotations.removedAnnotations.has('123'));
+    });
+
+    it('does not mark annotation as removed when new status matches filter', async () => {
+      const annotations = [
+        { id: '123', moderation_status: 'PENDING' },
+        { id: '456', moderation_status: 'PENDING' },
+      ];
+      fakeFetchGroupAnnotations.resolves({ annotations });
+
+      createComponent('PENDING');
+      await waitFor(() => !lastGroupAnnotations.loading);
+
+      // Change status to same as filter
+      lastGroupAnnotations.updateAnnotationStatus('456', 'PENDING');
+      await delay(0);
+
+      // Annotation should not be marked as removed
+      assert.equal(lastGroupAnnotations.removedAnnotations.size, 0);
+    });
+
+    it('does not mark annotation as removed when no filter is set', async () => {
+      const annotations = [
+        { id: '123', moderation_status: 'PENDING' },
+        { id: '456', moderation_status: 'PENDING' },
+      ];
+      fakeFetchGroupAnnotations.resolves({ annotations });
+
+      createComponent(); // No filter status
+      await waitFor(() => !lastGroupAnnotations.loading);
+
+      lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+      await delay(0);
+
+      assert.equal(lastGroupAnnotations.removedAnnotations.size, 0);
+    });
   });
 
-  it('removes annotation when updateAnnotationStatus is called and new status does not match filter status', async () => {
+  it('returns empty `removedAnnotations` set if no annotations have been removed', async () => {
+    createComponent();
+    assert.equal(lastGroupAnnotations.removedAnnotations.size, 0);
+  });
+
+  it('clears `removedAnnotations` when filter status changes', async () => {
     const annotations = [
       { id: '123', moderation_status: 'PENDING' },
       { id: '456', moderation_status: 'PENDING' },
     ];
     fakeFetchGroupAnnotations.resolves({ annotations });
 
-    createComponent('PENDING');
+    const wrapper = createComponent('PENDING');
     await waitFor(() => !lastGroupAnnotations.loading);
 
     lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
-    await waitFor(() => lastGroupAnnotations.annotations.length === 1);
-    assert.deepEqual(
-      [{ id: '123', moderation_status: 'PENDING' }],
-      lastGroupAnnotations.annotations,
-    );
+    await delay(0);
+    assert.isTrue(lastGroupAnnotations.removedAnnotations.has('456'));
+
+    // Change filter status
+    wrapper.find('[data-testid="set-status-button"]').simulate('click');
+
+    assert.equal(lastGroupAnnotations.removedAnnotations.size, 0);
   });
 });
