@@ -16,8 +16,6 @@ class OAuthCallbackSchema(JSONSchema):
         "properties": {
             "code": {"type": "string"},
             "state": {"type": "string"},
-            "error": {"type": "string"},
-            "error_description": {"type": "string"},
         },
     }
 
@@ -25,8 +23,6 @@ class OAuthCallbackSchema(JSONSchema):
 class OAuthCallbackData(TypedDict):
     code: str
     state: str | None
-    error: str | None
-    error_description: str | None
 
 
 class RetrieveOAuthCallbackSchema:
