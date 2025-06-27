@@ -1,7 +1,11 @@
 import pytest
 
 from h.schemas import ValidationError
-from h.schemas.oauth import RetrieveOAuthCallbackSchema, RetrieveOpenIDTokenSchema
+from h.schemas.oauth import (
+    InvalidOAuthStateError,
+    RetrieveOAuthCallbackSchema,
+    RetrieveOpenIDTokenSchema,
+)
 
 
 class TestRetrieveOAuthCallbackSchema:
@@ -46,13 +50,13 @@ class TestRetrieveOAuthCallbackSchema:
         data = {"code": "test_code", "state": "test_state"}
         pyramid_request.session["oauth2_state"] = "different_test_state"
 
-        with pytest.raises(ValidationError, match="Invalid oauth state"):
+        with pytest.raises(InvalidOAuthStateError):
             schema.validate(data)
 
     def test_with_no_state_in_session(self, schema):
         data = {"code": "test_code", "state": "test_state"}
 
-        with pytest.raises(ValidationError, match="Invalid oauth state"):
+        with pytest.raises(InvalidOAuthStateError):
             schema.validate(data)
 
     def test_state_param(self, pyramid_request, schema, secrets):
