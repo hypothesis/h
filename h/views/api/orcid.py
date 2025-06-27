@@ -15,7 +15,7 @@ from pyramid.view import (
 from h import i18n
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
-from h.schemas.oauth import RetrieveOAuthCallbackSchema
+from h.schemas.oauth import OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
@@ -34,7 +34,7 @@ class AuthorizeViews:
     def authorize(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
-        state = RetrieveOAuthCallbackSchema(self._request).state_param()
+        state = OAuth2RedirectSchema(self._request).state_param()
 
         params = {
             "client_id": client_id,
@@ -82,7 +82,7 @@ class CallbackViews:
     @view_config(is_authenticated=True)
     def callback(self):
         try:
-            callback_data = RetrieveOAuthCallbackSchema(self._request).validate(
+            callback_data = OAuth2RedirectSchema(self._request).validate(
                 dict(self._request.params)
             )
         except ValidationError as err:
