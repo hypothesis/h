@@ -113,15 +113,30 @@ describe('AnnotationCard', () => {
     });
   });
 
-  it('renders annotation dates in AnnotationTimestamps', () => {
-    fakeAnnotation.created = '2025-01-01';
-    fakeAnnotation.updated = '2025-01-05';
+  [
+    { created: '2025-01-01', updated: '2025-01-01' },
+    { created: '2025-01-01', updated: '2025-01-05' },
+  ].forEach(({ created, updated }) => {
+    it('renders annotation dates in AnnotationTimestamps', () => {
+      fakeAnnotation.created = created;
+      fakeAnnotation.updated = updated;
 
-    const wrapper = createComponent();
-    const timestamps = wrapper.find('AnnotationTimestamps');
+      const wrapper = createComponent();
+      const timestamps = wrapper.find('AnnotationTimestamps');
 
-    assert.equal(timestamps.prop('annotationCreated'), fakeAnnotation.created);
-    assert.equal(timestamps.prop('annotationUpdated'), fakeAnnotation.updated);
+      assert.equal(
+        timestamps.prop('annotationCreated'),
+        fakeAnnotation.created,
+      );
+      assert.equal(
+        timestamps.prop('annotationUpdated'),
+        fakeAnnotation.updated,
+      );
+      assert.equal(
+        timestamps.prop('withEditedTimestamp'),
+        fakeAnnotation.created !== fakeAnnotation.updated,
+      );
+    });
   });
 
   [{ tags: [] }, { tags: ['foo', 'bar', 'baz'] }].forEach(({ tags }) => {
@@ -202,6 +217,22 @@ describe('AnnotationCard', () => {
       wrapper.find('[data-testid="update-error"]').text(),
       'An error occurred updating the moderation status',
     );
+  });
+
+  [
+    { references: undefined, showsReplyIndicator: false },
+    { references: [], showsReplyIndicator: false },
+    { references: ['1', '2'], showsReplyIndicator: true },
+  ].forEach(({ references, showsReplyIndicator }) => {
+    it('adds reply indicator for annotations that are replies', () => {
+      fakeAnnotation.references = references;
+      const wrapper = createComponent();
+
+      assert.equal(
+        wrapper.exists('[data-testid="reply-indicator"]'),
+        showsReplyIndicator,
+      );
+    });
   });
 
   it(

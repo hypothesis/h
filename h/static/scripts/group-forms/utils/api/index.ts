@@ -138,6 +138,7 @@ export type APIAnnotationData = Annotation & {
   id: string;
   text: string;
 
+  references?: string[];
   mentions: Mention[];
   tags: string[];
 
