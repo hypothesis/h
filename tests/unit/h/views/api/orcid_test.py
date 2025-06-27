@@ -41,12 +41,6 @@ class TestAuthorizeViews:
 
         assert result == {}
 
-    @pytest.fixture(autouse=True)
-    def OAuth2RedirectSchema(self, patch):
-        mock = patch("h.views.api.orcid.OAuth2RedirectSchema")
-        mock.return_value.state_param.return_value = sentinel.state_param
-        return mock
-
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
         pyramid_request.user = factories.User()
@@ -75,21 +69,21 @@ class TestCallbackViews:
 
         assert isinstance(result, HTTPFound)
         assert result.location == pyramid_request.route_url("account")
-        orcid_client_service.get_orcid.assert_called_once_with(
-            pyramid_request.params["code"]
-        )
+        orcid_client_service.get_orcid.assert_called_once_with(sentinel.code)
         orcid_client_service.add_identity.assert_called_once_with(user, orcid)
         pyramid_request.session.flash.assert_called_once_with(
             "ORCID iD connected ✓", "success"
         )
 
-    def test_it_raises_validation_error(self, pyramid_request):
+    def test_it_raises_validation_error(self, pyramid_request, OAuth2RedirectSchema):
+        OAuth2RedirectSchema.return_value.validate.side_effect = ValidationError()
         pyramid_request.params = {}
 
         with pytest.raises(ValidationError):
             views.CallbackViews(pyramid_request).callback()
 
-    def test_it_raises_access_denied_error(self, pyramid_request):
+    def test_it_raises_access_denied_error(self, pyramid_request, OAuth2RedirectSchema):
+        OAuth2RedirectSchema.return_value.validate.side_effect = ValidationError()
         pyramid_request.params = {"error": "access_denied"}
 
         with pytest.raises(views.AccessDeniedError):
@@ -133,9 +127,7 @@ class TestCallbackViews:
 
         assert isinstance(result, HTTPFound)
         assert result.location == pyramid_request.route_url("account")
-        orcid_client_service.get_orcid.assert_called_once_with(
-            pyramid_request.params["code"]
-        )
+        orcid_client_service.get_orcid.assert_called_once_with(sentinel.code)
         orcid_client_service.add_identity.assert_not_called()
         pyramid_request.session.flash.assert_called_once_with(
             "ORCID iD connected ✓", "success"
@@ -203,9 +195,6 @@ class TestCallbackViews:
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
         pyramid_request.user = user
-        state = "test_state"
-        pyramid_request.params = {"code": "test_code", "state": state}
-        pyramid_request.session["oauth2_state"] = state
         pyramid_request.session.flash = Mock()
         return pyramid_request
 
@@ -278,6 +267,20 @@ class TestHandleExternalRequestError:
             call("validation_errors", exception.validation_errors),
         ]
 
-    @pytest.fixture(autouse=True)
-    def sentry_sdk(self, patch):
-        return patch("h.views.api.orcid.sentry_sdk")
+
+@pytest.fixture(autouse=True)
+def sentry_sdk(patch):
+    return patch("h.views.api.orcid.sentry_sdk")
+
+
+@pytest.fixture(autouse=True)
+def report_exception(patch):
+    return patch("h.views.api.orcid.report_exception")
+
+
+@pytest.fixture(autouse=True)
+def OAuth2RedirectSchema(patch):
+    OAuth2RedirectSchema = patch("h.views.api.orcid.OAuth2RedirectSchema")
+    OAuth2RedirectSchema.return_value.validate.return_value = {"code": sentinel.code}
+    OAuth2RedirectSchema.return_value.state_param.return_value = sentinel.state_param
+    return OAuth2RedirectSchema
