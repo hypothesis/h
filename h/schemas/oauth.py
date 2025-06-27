@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class OAuthCallbackSchema(JSONSchema):
     schema: ClassVar = {  # type: ignore[misc]
         "type": "object",
-        "required": ["code"],
+        "required": ["code", "state"],
         "properties": {
             "code": {"type": "string"},
             "state": {"type": "string"},
@@ -22,7 +22,7 @@ class OAuthCallbackSchema(JSONSchema):
 
 class OAuthCallbackData(TypedDict):
     code: str
-    state: str | None
+    state: str
 
 
 class RetrieveOAuthCallbackSchema:
@@ -31,8 +31,8 @@ class RetrieveOAuthCallbackSchema:
         self._request = request
 
     def validate(self, data: dict[str, Any]) -> OAuthCallbackData:
-        state = data.get("state")
-        if not state or state != self._request.session.pop("oauth2_state", None):
+        state = data["state"]
+        if state != self._request.session.pop("oauth2_state", None):
             msg = "Invalid oauth state"
             raise ValidationError(msg)
 
