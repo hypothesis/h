@@ -18,6 +18,7 @@ describe('GroupModeration', () => {
       loading: true,
       loadNextPage: fakeLoadNextPage,
       updateAnnotationStatus: fakeUpdateAnnotationStatus,
+      removedAnnotations: new Set(),
     });
 
     $imports.$mock(mockImportedComponents());
@@ -119,7 +120,11 @@ describe('GroupModeration', () => {
         { id: '2', text: 'Second annotation' },
         { id: '3', text: 'Third annotation' },
       ];
-      fakeUseGroupAnnotations.returns({ loading: false, annotations });
+      fakeUseGroupAnnotations.returns({
+        loading: false,
+        annotations,
+        removedAnnotations: new Set(),
+      });
 
       const wrapper = createComponent();
       const annotationNodes = wrapper
@@ -162,6 +167,7 @@ describe('GroupModeration', () => {
           loading: false,
           annotations,
           updateAnnotationStatus: fakeUpdateAnnotationStatus,
+          removedAnnotations: new Set(),
         });
 
         const wrapper = createComponent();
@@ -176,6 +182,33 @@ describe('GroupModeration', () => {
           );
         });
       });
+    });
+
+    it('wraps annotations in Slider components to animate removal', () => {
+      const annotations = [
+        { id: '1', text: 'First annotation' },
+        { id: '2', text: 'Second annotation' },
+      ];
+      const removedAnnotations = new Set(['2']);
+      fakeUseGroupAnnotations.returns({
+        loading: false,
+        annotations,
+        removedAnnotations,
+        updateAnnotationStatus: fakeUpdateAnnotationStatus,
+      });
+
+      const wrapper = createComponent();
+      const sliders = wrapper.find('Slider');
+
+      assert.lengthOf(sliders, annotations.length);
+
+      // First annotation should have 'in' direction (not removed)
+      assert.equal(sliders.at(0).prop('direction'), 'in');
+      assert.equal(sliders.at(0).prop('delay'), '0.5s');
+
+      // Second annotation should have 'out' direction (removed)
+      assert.equal(sliders.at(1).prop('direction'), 'out');
+      assert.equal(sliders.at(1).prop('delay'), '0.5s');
     });
   });
 

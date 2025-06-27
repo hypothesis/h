@@ -11,6 +11,12 @@ import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import { fetchGroupAnnotations } from '../utils/api/fetch-group-annotations';
 
 export type GroupAnnotationsOptions = {
+  /**
+   * Filter annotations to include only those where the moderation status
+   * matches `filterStatus`.
+   *
+   * If `undefined`, all annotations are included.
+   */
   filterStatus?: ModerationStatus;
 };
 
@@ -22,9 +28,21 @@ export type GroupAnnotationsResult = {
 
   /**
    * The current list of annotations.
-   * It will be undefined while loading the first page of data.
+   *
+   * This will be undefined while loading the first page of data.
    */
   annotations?: APIAnnotationData[];
+
+  /**
+   * Annotations that have been marked as removed from {@link
+   * GroupAnnotationsResult.annotations}.
+   *
+   * When an annotation's moderation status is changed and it no longer matches
+   * the current filter, the annotation is marked as removed. It is marked as
+   * removed rather than actually removed so the UI can perform an exit
+   * transition.
+   */
+  removedAnnotations: Set<string>;
 
   /**
    * A callback to load the next chunk of annotations, if any.
@@ -38,7 +56,7 @@ export type GroupAnnotationsResult = {
    * the list, without a server request.
    *
    * If the new status does not match current filter status, the annotation will
-   * be removed from the list.
+   * be marked as removed.
    */
   updateAnnotationStatus: (
     annotationId: string,
@@ -54,25 +72,32 @@ export function useGroupAnnotations({
   const [totalAnnotations, setTotalAnnotations] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const [removedAnnotations, setRemovedAnnotations] = useState(
+    new Set<string>(),
+  );
+
   const updateAnnotationStatus = useCallback(
     (annotationId: string, moderationStatus: ModerationStatus) => {
-      if (filterStatus === undefined) {
-        // If no filter status is set, simply change the annotation's status to
-        // the new one
-        setAnnotations(prev =>
-          prev?.reduce<APIAnnotationData[]>((annos, currentAnno) => {
-            annos.push(
-              currentAnno.id === annotationId
-                ? { ...currentAnno, moderation_status: moderationStatus }
-                : currentAnno,
-            );
-            return annos;
-          }, []),
-        );
-      } else if (filterStatus !== moderationStatus) {
-        // If the moderation status is different from filter one, remove
-        // the annotation from the list
-        setAnnotations(prev => prev?.filter(anno => anno.id !== annotationId));
+      // Update moderation status for annotation.
+      setAnnotations(prev =>
+        prev?.reduce<APIAnnotationData[]>((annos, currentAnno) => {
+          annos.push(
+            currentAnno.id === annotationId
+              ? { ...currentAnno, moderation_status: moderationStatus }
+              : currentAnno,
+          );
+          return annos;
+        }, []),
+      );
+
+      // Mark this annotation as removed if it doesn't match the current filter.
+      // The UI will hide it with a transition.
+      if (filterStatus !== undefined && filterStatus !== moderationStatus) {
+        setRemovedAnnotations(oldRemoved => {
+          const newRemoved = new Set(oldRemoved);
+          newRemoved.add(annotationId);
+          return newRemoved;
+        });
       }
     },
     [filterStatus],
@@ -121,6 +146,7 @@ export function useGroupAnnotations({
     // Every time the filter status changes, discard previous list of annotations
     if (prevFilterStatus.current !== filterStatus) {
       setAnnotations(undefined);
+      setRemovedAnnotations(new Set());
     }
 
     prevFilterStatus.current = filterStatus;
@@ -141,5 +167,6 @@ export function useGroupAnnotations({
     error,
     loadNextPage,
     updateAnnotationStatus,
+    removedAnnotations,
   };
 }

@@ -1,4 +1,4 @@
-import { Spinner } from '@hypothesis/frontend-shared';
+import { Slider, Spinner } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
@@ -29,8 +29,13 @@ type AnnotationListProps = {
 };
 
 function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
-  const { loadNextPage, annotations, loading, updateAnnotationStatus } =
-    useGroupAnnotations({ filterStatus });
+  const {
+    loadNextPage,
+    annotations,
+    loading,
+    removedAnnotations,
+    updateAnnotationStatus,
+  } = useGroupAnnotations({ filterStatus });
 
   const lastScrollPosition = useRef(0);
   useEffect(() => {
@@ -64,6 +69,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
         loading={loading}
         annotations={annotations}
         onAnnotationStatusChange={updateAnnotationStatus}
+        removedAnnotations={removedAnnotations}
       />
     </section>
   );
@@ -77,6 +83,7 @@ type AnnotationListContentProps = {
     annotationId: string,
     moderationStatus: ModerationStatus,
   ) => void;
+  removedAnnotations: Set<string>;
 };
 
 function AnnotationListContent({
@@ -84,6 +91,7 @@ function AnnotationListContent({
   annotations,
   filterStatus,
   onAnnotationStatusChange,
+  removedAnnotations,
 }: AnnotationListContentProps) {
   if (annotations && annotations.length === 0) {
     return (
@@ -108,15 +116,18 @@ function AnnotationListContent({
   return (
     <>
       {annotations?.map(anno => (
-        <AnnotationCard
+        <Slider
           key={anno.id}
-          annotation={anno}
-          onStatusChange={moderationStatus => {
-            if (anno.id) {
+          direction={removedAnnotations.has(anno.id) ? 'out' : 'in'}
+          delay="0.5s"
+        >
+          <AnnotationCard
+            annotation={anno}
+            onStatusChange={moderationStatus => {
               onAnnotationStatusChange(anno.id, moderationStatus);
-            }
-          }}
-        />
+            }}
+          />
+        </Slider>
       ))}
       {loading && (
         <div className="mx-auto mt-3">
