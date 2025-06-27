@@ -40,9 +40,7 @@ class RetrieveOAuthCallbackSchema:
     def validate(self, data: dict[str, Any]) -> OAuthCallbackData:
         validated_data = self._schema.validate(data)
 
-        state = validated_data["state"]
-
-        if state != self._request.session.pop(self.SESSION_KEY, None):
+        if validated_data["state"] != self._request.session.pop(self.SESSION_KEY, None):
             raise InvalidOAuthStateError
 
         # Return only known keys from the data to make sure that code can't
