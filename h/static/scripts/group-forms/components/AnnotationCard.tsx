@@ -97,6 +97,7 @@ export default function AnnotationCard({
               <AnnotationTimestamps
                 annotationCreated={annotation.created}
                 annotationUpdated={annotation.updated}
+                withEditedTimestamp={annotation.updated !== annotation.created}
               />
             </div>
             {group && (
