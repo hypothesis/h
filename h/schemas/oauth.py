@@ -25,10 +25,9 @@ class InvalidOAuth2StateParamError(ValidationError):
 class OAuth2RedirectSchema:
     """Schema for validating OAuth 2 authorization redirect requests."""
 
-    SESSION_KEY = "oauth2_state"
-
-    def __init__(self, request: Request) -> None:
+    def __init__(self, request: Request, session_key: str) -> None:
         self._request = request
+        self.state_session_key = f"{session_key}.state"
 
     class OAuth2RedirectData(TypedDict):
         """Return type for OAuth2RedirectSchema.validate()."""
@@ -56,7 +55,9 @@ class OAuth2RedirectSchema:
 
         validated_data = Schema().validate(data)
 
-        if validated_data["state"] != self._request.session.pop(self.SESSION_KEY, None):
+        if validated_data["state"] != self._request.session.pop(
+            self.state_session_key, None
+        ):
             raise InvalidOAuth2StateParamError
 
         # Return only known keys from the data to make sure that code can't
@@ -72,5 +73,5 @@ class OAuth2RedirectSchema:
         be overwritten.
         """
         state = secrets.token_hex()
-        self._request.session[self.SESSION_KEY] = state
+        self._request.session[self.state_session_key] = state
         return state

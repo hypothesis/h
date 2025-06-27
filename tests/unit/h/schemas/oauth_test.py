@@ -20,7 +20,7 @@ class TestOAuth2RedirectSchema:
         ],
     )
     def test_validate(self, pyramid_request, schema, input_data, expected_output_data):
-        pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] = input_data["state"]
+        pyramid_request.session[schema.state_session_key] = input_data["state"]
 
         output_data = schema.validate(input_data)
 
@@ -43,16 +43,14 @@ class TestOAuth2RedirectSchema:
     )
     def test_invalid(self, pyramid_request, schema, data, message):
         if "state" in data:
-            pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] = data["state"]
+            pyramid_request.session[schema.state_session_key] = data["state"]
 
         with pytest.raises(ValidationError, match=message):
             schema.validate(data)
 
     def test_with_state_mismatch(self, pyramid_request, schema):
         data = {"code": "test_code", "state": "test_state"}
-        pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] = (
-            "different_test_state"
-        )
+        pyramid_request.session[schema.state_session_key] = "different_test_state"
 
         with pytest.raises(InvalidOAuth2StateParamError):
             schema.validate(data)
@@ -67,11 +65,11 @@ class TestOAuth2RedirectSchema:
         result = schema.state_param()
 
         assert result == secrets.token_hex.return_value
-        assert pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] == result
+        assert pyramid_request.session[schema.state_session_key] == result
 
     @pytest.fixture
     def schema(self, pyramid_request):
-        return OAuth2RedirectSchema(pyramid_request)
+        return OAuth2RedirectSchema(pyramid_request, "test_session_key")
 
     @pytest.fixture(autouse=True)
     def secrets(self, patch):
