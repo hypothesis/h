@@ -21,7 +21,7 @@ class TestRetrieveOAuthCallbackSchema:
             schema.validate(data)
 
     def test_validate_with_missing_state(self, schema):
-        data = {"state": "test-state"}
+        data = {"code": "test_code", "state": "test_state"}
 
         with pytest.raises(ValidationError, match="Invalid oauth state"):
             schema.validate(data)
