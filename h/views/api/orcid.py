@@ -1,4 +1,3 @@
-import logging
 from urllib.parse import urlencode, urlunparse
 
 import sentry_sdk
@@ -12,17 +11,12 @@ from pyramid.view import (
     view_defaults,
 )
 
-from h import i18n
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
-
-_ = i18n.TranslationString
-
-logger = logging.getLogger(__name__)
 
 
 @view_defaults(request_method="GET", route_name="orcid.oauth.authorize")
