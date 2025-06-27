@@ -45,7 +45,13 @@ class RetrieveOAuthCallbackSchema:
         if state != self._request.session.pop(self.SESSION_KEY, None):
             raise InvalidOAuthStateError
 
-        return validated_data
+        # Return only known keys from the data to make sure that code can't
+        # make use of any unknown keys. The OAuth 2 spec requires that clients
+        # ignore any unrecognised authorization response parameters.
+        return {
+            "code": validated_data["code"],
+            "state": validated_data["state"],
+        }
 
     def state_param(self) -> str:
         state = secrets.token_hex()
