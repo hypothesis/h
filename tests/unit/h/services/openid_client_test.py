@@ -8,11 +8,11 @@ from h.services.openid_client import OpenIDClientService, factory
 
 class TestOpenIDClientService:
     def test_get_id_token(
-        self, svc, http_service, passed_args, RetrieveOpenIDTokenSchema, id_token_data
+        self, svc, http_service, passed_args, OIDCTokenResponseSchema, id_token_data
     ):
         http_response = http_service.post.return_value
         http_response.json.return_value = id_token_data
-        RetrieveOpenIDTokenSchema.return_value.validate.return_value = id_token_data
+        OIDCTokenResponseSchema.return_value.validate.return_value = id_token_data
 
         result = svc.get_id_token(**passed_args)
 
@@ -25,7 +25,7 @@ class TestOpenIDClientService:
             },
             auth=passed_args["auth"],
         )
-        RetrieveOpenIDTokenSchema.return_value.validate.assert_called_once_with(
+        OIDCTokenResponseSchema.return_value.validate.assert_called_once_with(
             http_response.json.return_value
         )
         assert result == id_token_data["id_token"]
@@ -66,8 +66,8 @@ class TestOpenIDClientService:
         return OpenIDClientService(http_service)
 
     @pytest.fixture(autouse=True)
-    def RetrieveOpenIDTokenSchema(self, patch):
-        return patch("h.services.openid_client.RetrieveOpenIDTokenSchema")
+    def OIDCTokenResponseSchema(self, patch):
+        return patch("h.services.openid_client.OIDCTokenResponseSchema")
 
 
 class TestFactory:

@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from h.schemas.oauth import OpenIDTokenData, RetrieveOpenIDTokenSchema
+from h.schemas.oidc import OIDCTokenResponseSchema
 from h.services.http import HTTPService
 
 logger = logging.getLogger(__name__)
@@ -31,10 +31,10 @@ class OpenIDClientService:
 
     def _request_openid_data(
         self, token_url: str, data: dict[str, Any], auth: tuple[str, str]
-    ) -> OpenIDTokenData:
+    ) -> OIDCTokenResponseSchema.OIDCTokenResponseData:
         response = self._http_service.post(token_url, data=data, auth=auth)
 
-        return RetrieveOpenIDTokenSchema().validate(response.json())
+        return OIDCTokenResponseSchema().validate(response.json())
 
 
 def factory(_context, request) -> OpenIDClientService:
