@@ -42,8 +42,8 @@ class TestAuthorizeViews:
         assert result == {}
 
     @pytest.fixture(autouse=True)
-    def RetrieveOAuthCallbackSchema(self, patch):
-        mock = patch("h.views.api.orcid.RetrieveOAuthCallbackSchema")
+    def OAuth2RedirectSchema(self, patch):
+        mock = patch("h.views.api.orcid.OAuth2RedirectSchema")
         mock.return_value.state_param.return_value = sentinel.state_param
         return mock
 
