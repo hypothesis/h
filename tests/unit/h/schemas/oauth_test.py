@@ -2,13 +2,13 @@ import pytest
 
 from h.schemas import ValidationError
 from h.schemas.oauth import (
-    InvalidOAuthStateError,
-    RetrieveOAuthCallbackSchema,
+    InvalidOAuth2StateParamError,
+    OAuth2RedirectSchema,
     RetrieveOpenIDTokenSchema,
 )
 
 
-class TestRetrieveOAuthCallbackSchema:
+class TestOAuth2RedirectSchema:
     @pytest.mark.parametrize(
         "input_data,expected_output_data",
         [
@@ -24,9 +24,7 @@ class TestRetrieveOAuthCallbackSchema:
         ],
     )
     def test_validate(self, pyramid_request, schema, input_data, expected_output_data):
-        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = input_data[
-            "state"
-        ]
+        pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] = input_data["state"]
 
         output_data = schema.validate(input_data)
 
@@ -49,39 +47,35 @@ class TestRetrieveOAuthCallbackSchema:
     )
     def test_invalid(self, pyramid_request, schema, data, message):
         if "state" in data:
-            pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = data[
-                "state"
-            ]
+            pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] = data["state"]
 
         with pytest.raises(ValidationError, match=message):
             schema.validate(data)
 
     def test_with_state_mismatch(self, pyramid_request, schema):
         data = {"code": "test_code", "state": "test_state"}
-        pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] = (
+        pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] = (
             "different_test_state"
         )
 
-        with pytest.raises(InvalidOAuthStateError):
+        with pytest.raises(InvalidOAuth2StateParamError):
             schema.validate(data)
 
     def test_with_no_state_in_session(self, schema):
         data = {"code": "test_code", "state": "test_state"}
 
-        with pytest.raises(InvalidOAuthStateError):
+        with pytest.raises(InvalidOAuth2StateParamError):
             schema.validate(data)
 
     def test_state_param(self, pyramid_request, schema, secrets):
         result = schema.state_param()
 
         assert result == secrets.token_hex.return_value
-        assert (
-            pyramid_request.session[RetrieveOAuthCallbackSchema.SESSION_KEY] == result
-        )
+        assert pyramid_request.session[OAuth2RedirectSchema.SESSION_KEY] == result
 
     @pytest.fixture
     def schema(self, pyramid_request):
-        return RetrieveOAuthCallbackSchema(pyramid_request)
+        return OAuth2RedirectSchema(pyramid_request)
 
     @pytest.fixture(autouse=True)
     def secrets(self, patch):
