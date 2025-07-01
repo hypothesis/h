@@ -54,13 +54,13 @@ def register_link(link, versions, registry):
         registry.api_links[version].append(link)
 
 
-def format_nested_links(api_links, templater):
+def format_nested_links(api_links, route_url_template):
     """Format API link metadata as nested dicts for V1 variant of API index."""
     formatted_links = {}
     for link in api_links:
         method_info = {
             "method": link.primary_method(),
-            "url": templater.route_template(link.route_name),
+            "url": route_url_template(link.route_name),
             "desc": link.description,
         }
         _set_at_path(formatted_links, link.name.split("."), method_info)

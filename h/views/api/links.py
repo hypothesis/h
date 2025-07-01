@@ -1,5 +1,5 @@
 from h.views.api.config import api_config
-from h.views.api.helpers.angular import AngularRouteTemplater
+from h.views.api.helpers.url_template import route_url_template
 
 
 @api_config(
@@ -13,8 +13,6 @@ from h.views.api.helpers.angular import AngularRouteTemplater
     http_cache=(60 * 5, {"public": True}),
 )
 def links(_context, request):
-    templater = AngularRouteTemplater(request.route_url, params=["user"])
-
     tag_search_url = request.route_url("activity.search", _query={"q": 'tag:"__tag__"'})
     tag_search_url = tag_search_url.replace("__tag__", ":tag")
 
@@ -32,6 +30,6 @@ def links(_context, request):
         "oauth.revoke": oauth_revoke_url,
         "search.tag": tag_search_url,
         "signup": request.route_url("signup"),
-        "user": templater.route_template("stream.user_query"),
+        "user": route_url_template(request, "stream.user_query"),
         "websocket": websocket_url,
     }
