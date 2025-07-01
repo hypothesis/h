@@ -18,7 +18,7 @@ import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
 
 import { Config } from '../config';
 import { useUpdateModerationStatus } from '../hooks/use-update-moderation-status';
-import { quote, username } from '../utils/annotation-metadata';
+import { quote, username as getUsername } from '../utils/annotation-metadata';
 import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
 import ModerationStatusSelect from './ModerationStatusSelect';
@@ -43,10 +43,9 @@ export default function AnnotationCard({
   onStatusChange,
 }: AnnotationCardProps) {
   const config = useContext(Config)!;
+  const username = getUsername(annotation.user);
   const user =
-    annotation.user_info?.display_name ??
-    username(annotation.user) ??
-    annotation.user;
+    annotation.user_info?.display_name ?? username ?? annotation.user;
   const group = useMemo(
     () =>
       config.context.group && {
@@ -83,6 +82,10 @@ export default function AnnotationCard({
     [onStatusChange, updateModerationStatus],
   );
 
+  const userLink = username
+    ? config.routes['activity.user_search'].replace(':username', username)
+    : undefined;
+
   return useMemo(
     () => (
       <article>
@@ -96,7 +99,7 @@ export default function AnnotationCard({
           <CardContent>
             <header className="w-full">
               <div className="flex gap-x-1 items-center justify-between">
-                <AnnotationUser displayName={user} />
+                <AnnotationUser displayName={user} authorLink={userLink} />
                 <AnnotationTimestamps
                   annotationCreated={annotation.created}
                   annotationUpdated={annotation.updated}
@@ -199,6 +202,7 @@ export default function AnnotationCard({
       moderationSaveState,
       onModerationStatusChange,
       user,
+      userLink,
     ],
   );
 }
