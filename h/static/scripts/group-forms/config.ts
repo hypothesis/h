@@ -42,6 +42,9 @@ export type ConfigObject = {
     group_moderation: boolean;
     pre_moderation: boolean;
   };
+  routes: {
+    'activity.user_search': string;
+  };
 };
 
 export const Config = createContext<ConfigObject | null>(null);

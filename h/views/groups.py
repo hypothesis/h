@@ -4,6 +4,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import i18n
 from h.security import Permission
+from h.views.api.helpers.url_template import route_url_template
 
 _ = i18n.TranslationString
 
@@ -77,6 +78,11 @@ class GroupCreateEditController:
                 "group_type": self.request.feature("group_type"),
                 "group_moderation": self.request.feature("group_moderation"),
                 "pre_moderation": self.request.feature("pre_moderation"),
+            },
+            "routes": {
+                "activity.user_search": route_url_template(
+                    self.request, "activity.user_search"
+                ),
             },
         }
 

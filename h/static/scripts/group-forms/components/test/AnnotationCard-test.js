@@ -16,6 +16,9 @@ describe('AnnotationCard', () => {
   beforeEach(() => {
     fakeConfig = {
       context: {},
+      routes: {
+        'activity.user_search': 'https://example.com/users/:username',
+      },
     };
     fakeAnnotation = {
       tags: [],
@@ -68,6 +71,7 @@ describe('AnnotationCard', () => {
       userInfo: undefined,
       annotationUser: 'acct:foo@example.com',
       expectedDisplayName: 'foo',
+      expectedLink: 'https://example.com/users/foo',
     },
     {
       userInfo: {
@@ -75,25 +79,28 @@ describe('AnnotationCard', () => {
       },
       annotationUser: 'acct:foo@example.com',
       expectedDisplayName: 'Jane Doe',
+      expectedLink: 'https://example.com/users/foo',
     },
     {
       userInfo: undefined,
       annotationUser: 'invalid',
       expectedDisplayName: 'invalid',
+      expectedLink: undefined,
     },
-  ].forEach(({ userInfo, annotationUser, expectedDisplayName }) => {
-    it('renders expected username', () => {
-      fakeAnnotation.user_info = userInfo;
-      fakeAnnotation.user = annotationUser;
+  ].forEach(
+    ({ userInfo, annotationUser, expectedDisplayName, expectedLink }) => {
+      it('renders expected username and profile link', () => {
+        fakeAnnotation.user_info = userInfo;
+        fakeAnnotation.user = annotationUser;
 
-      const wrapper = createComponent();
+        const wrapper = createComponent();
 
-      assert.equal(
-        wrapper.find('AnnotationUser').prop('displayName'),
-        expectedDisplayName,
-      );
-    });
-  });
+        const userHeader = wrapper.find('AnnotationUser');
+        assert.equal(userHeader.prop('displayName'), expectedDisplayName);
+        assert.equal(userHeader.prop('authorLink'), expectedLink);
+      });
+    },
+  );
 
   [
     { group: null, shouldRenderGroupInfo: false },

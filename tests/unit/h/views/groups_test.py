@@ -11,7 +11,9 @@ from h.views import groups as views
 @pytest.mark.usefixtures("annotation_stats_service")
 class TestGroupCreateEditController:
     @pytest.mark.parametrize("flag", [True, False])
-    def test_create(self, pyramid_request, assets_env, mocker, flag):
+    def test_create(
+        self, pyramid_request, assets_env, mocker, flag, route_url_template
+    ):
         pyramid_request.feature.flags["group_type"] = flag
         pyramid_request.feature.flags["group_moderation"] = flag
         pyramid_request.feature.flags["pre_moderation"] = flag
@@ -47,12 +49,23 @@ class TestGroupCreateEditController:
                     "group_moderation": flag,
                     "pre_moderation": flag,
                 },
+                "routes": {
+                    "activity.user_search": route_url_template(
+                        pyramid_request, "activity.user_search"
+                    ),
+                },
             },
         }
 
     @pytest.mark.usefixtures("routes")
     def test_edit(
-        self, factories, pyramid_request, assets_env, mocker, annotation_stats_service
+        self,
+        factories,
+        pyramid_request,
+        assets_env,
+        mocker,
+        annotation_stats_service,
+        route_url_template,
     ):
         mocker.spy(views, "get_csrf_token")
         group = factories.Group()
@@ -139,6 +152,11 @@ class TestGroupCreateEditController:
                     ],
                     "pre_moderation": pyramid_request.feature.flags["pre_moderation"],
                 },
+                "routes": {
+                    "activity.user_search": route_url_template(
+                        pyramid_request, "activity.user_search"
+                    ),
+                },
             },
         }
 
@@ -182,3 +200,13 @@ def routes(pyramid_config):
     pyramid_config.add_route(
         "api.annotation_moderation", "/api/annotations/{id}/moderation"
     )
+
+
+@pytest.fixture(autouse=True)
+def route_url_template(patch):
+    def url_template(request, route_name):  # noqa: ARG001
+        return f"https://example.com/{route_name}"
+
+    mock = patch("h.views.groups.route_url_template")
+    mock.side_effect = url_template
+    return mock
