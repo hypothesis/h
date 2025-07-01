@@ -1,5 +1,7 @@
+import secrets
 from urllib.parse import urlencode, urlunparse
 
+import jwt
 import sentry_sdk
 from h_pyramid_sentry import report_exception
 from pyramid.httpexceptions import HTTPFound
@@ -18,6 +20,19 @@ from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
 
+STATE_SESSION_KEY = "oidc.state.{provider}"
+KEY = "not_a_secret"
+
+
+def encode_oauth2_state_param(action, key):
+    return jwt.encode(
+        {"rfp": secrets.token_hex(), "action": action}, key, algorithm="HS256"
+    )
+
+
+def decode_oauth2_state_param(state_param, key):
+    return jwt.decode(state_param, key, algorithms=["HS256"])
+
 
 @view_defaults(request_method="GET", route_name="orcid.oauth.authorize")
 class AuthorizeViews:
@@ -26,9 +41,12 @@ class AuthorizeViews:
 
     @view_config(is_authenticated=True)
     def authorize(self):
+        action = self._request.params["action"]
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
-        state = OAuth2RedirectSchema(self._request, "orcid.oidc").state_param()
+
+        state = encode_oauth2_state_param(action, KEY)
+        self._request.session[STATE_SESSION_KEY.format(provider="orcid")] = state
 
         params = {
             "client_id": client_id,
@@ -75,9 +93,13 @@ class CallbackViews:
 
     @view_config(is_authenticated=True)
     def callback(self):
+        expected_state = self._request.session.pop(
+            STATE_SESSION_KEY.format(provider="orcid"), None
+        )
+
         try:
-            callback_data = OAuth2RedirectSchema(self._request, "orcid.oidc").validate(
-                dict(self._request.params)
+            callback_data = OAuth2RedirectSchema.validate(
+                dict(self._request.params), expected_state
             )
         except ValidationError as err:
             if self._request.params.get("error") == "access_denied":
@@ -87,24 +109,29 @@ class CallbackViews:
             # We received an invalid or unexpected redirect from ORCID.
             raise
 
-        orcid = self._orcid_client.get_orcid(callback_data["code"])
+        decoded_state = decode_oauth2_state_param(callback_data["state"], KEY)
 
-        already_connected_user = self._user_service.fetch_by_identity(
-            IdentityProvider.ORCID, orcid
-        )
+        if decoded_state["action"] == "connect":
+            orcid = self._orcid_client.get_orcid(callback_data["code"])
 
-        # Oops, this ORCID iD is already connected to a *different* Hypothesis
-        # account.
-        if already_connected_user and already_connected_user != self._request.user:
-            raise UserConflictError
+            already_connected_user = self._user_service.fetch_by_identity(
+                IdentityProvider.ORCID, orcid
+            )
 
-        if not already_connected_user:
-            # This ORCID iD isn't connected to a Hypothesis account yet.
-            # Let's go ahead and connect it to the user's account.
-            self._orcid_client.add_identity(self._request.user, orcid)
+            # Oops, this ORCID iD is already connected to a *different* Hypothesis
+            # account.
+            if already_connected_user and already_connected_user != self._request.user:
+                raise UserConflictError
 
-        self._request.session.flash("ORCID iD connected ✓", "success")
-        return HTTPFound(location=self._request.route_url("account"))
+            if not already_connected_user:
+                # This ORCID iD isn't connected to a Hypothesis account yet.
+                # Let's go ahead and connect it to the user's account.
+                self._orcid_client.add_identity(self._request.user, orcid)
+
+            self._request.session.flash("ORCID iD connected ✓", "success")
+            return HTTPFound(location=self._request.route_url("account"))
+
+        raise RuntimeError
 
     @notfound_view_config(
         renderer="h:templates/notfound.html.jinja2", append_slash=True

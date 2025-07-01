@@ -35,7 +35,7 @@
             {{ svg_icon('check', 'check-icon') }}
           </a>
         {% else %}
-          <a href="{{ request.route_path('orcid.oauth.authorize') }}" class="orcid-connect">
+          <a href="{{ request.route_path('orcid.oauth.authorize', _query={"action": "connect"}) }}" class="orcid-connect">
             {{ svg_icon('orcid') }}
             <span>{% trans %} Connect {% endtrans %}<strong>ORCID iD</strong></span>
             {{ svg_icon('external', 'external-icon') }}
