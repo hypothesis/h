@@ -39,7 +39,7 @@
     "katex": "^0.16.22",
     "normalize.css": "^8.0.0",
     "popper.js": "^1.16.1",
-    "postcss": "^8.5.4",
+    "postcss": "^8.5.6",
     "preact": "^10.25.4",
     "rollup": "^4.30.0",
     "sass": "^1.86.1",
