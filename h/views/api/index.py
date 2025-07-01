@@ -1,6 +1,8 @@
+from functools import partial
+
 from h.views.api.config import api_config
 from h.views.api.helpers import links as link_helpers
-from h.views.api.helpers.angular import AngularRouteTemplater
+from h.views.api.helpers.url_template import route_url_template
 
 
 @api_config(
@@ -18,16 +20,9 @@ def index(_context, request):
     """
 
     api_links = request.registry.api_links["v1"]
+    url_template = partial(route_url_template, request)
 
-    # We currently need to keep a list of the parameter names we use in our API
-    # paths and pass these explicitly into the templater. As and when new
-    # parameter names are added, we'll need to add them here, or this view will
-    # break (and get caught by the `test_api_index` functional test).
-    templater = AngularRouteTemplater(
-        request.route_url, params=["id", "pubid", "user", "userid", "username"]
-    )
-
-    return {"links": link_helpers.format_nested_links(api_links, templater)}
+    return {"links": link_helpers.format_nested_links(api_links, url_template)}
 
 
 @api_config(
@@ -46,9 +41,6 @@ def index_v2(_context, request):
     """
 
     api_links = request.registry.api_links["v2"]
+    url_template = partial(route_url_template, request)
 
-    templater = AngularRouteTemplater(
-        request.route_url, params=["id", "pubid", "user", "userid", "username"]
-    )
-
-    return {"links": link_helpers.format_nested_links(api_links, templater)}
+    return {"links": link_helpers.format_nested_links(api_links, url_template)}
