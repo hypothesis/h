@@ -23,7 +23,7 @@ class TestORCIDClientService:
             authorization_code=sentinel.authorization_code,
         )
         JWTService.decode_token.assert_called_once_with(
-            sentinel.id_token, service.key_set_url
+            sentinel.id_token, service.key_set_url, ["RS256"]
         )
 
     def test_get_orcid_returns_none_if_sub_missing(

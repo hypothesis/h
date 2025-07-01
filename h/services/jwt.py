@@ -17,7 +17,9 @@ class JWTService:
     LEEWAY = datetime.timedelta(seconds=10)
 
     @classmethod
-    def decode_token(cls, token: str, key_set_url: str) -> dict[str, Any]:
+    def decode_token(
+        cls, token: str, key_set_url: str, algorithms: list[str]
+    ) -> dict[str, Any]:
         try:
             unverified_header = jwt.get_unverified_header(token)
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
@@ -29,7 +31,6 @@ class JWTService:
             msg = "Missing 'kid' value in JWT header"
             raise TokenValidationError(msg)
 
-        alg = unverified_header["alg"]
         iss, aud = unverified_payload.get("iss"), unverified_payload.get("aud")
 
         try:
@@ -41,7 +42,7 @@ class JWTService:
                 token,
                 key=signing_key.key,
                 audience=aud,
-                algorithms=[alg],
+                algorithms=algorithms,
                 leeway=cls.LEEWAY,
             )
         except PyJWTError as err:

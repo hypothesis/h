@@ -12,6 +12,19 @@ from h.services.user import UserService
 logger = logging.getLogger(__name__)
 
 
+# The list of algorithms that we allow authorization servers to use to
+# digitally sign and/or encrypt OpenID Connect ID tokens.
+#
+# The JWT spec leaves it up to the application (us) to specify the list of
+# acceptable algorithms when decoding a JWT. You don't (for example) read the
+# algorithm from the JWT's `alg` header as this would allow an attacker to
+# inject the "None" algorithm or get up to other mischief.
+#
+# The OpenID Connect spec says that ID tokens SHOULD be signed and/or encrypted
+# with RS256.
+OIDC_ALLOWED_JWT_ALGORITHMS = ["RS256"]
+
+
 class ORCIDClientService:
     def __init__(  # noqa: PLR0913
         self,
@@ -41,7 +54,9 @@ class ORCIDClientService:
 
     def get_orcid(self, authorization_code: str) -> str | None:
         id_token = self._get_id_token(authorization_code)
-        decoded_id_token = JWTService.decode_token(id_token, self.key_set_url)
+        decoded_id_token = JWTService.decode_token(
+            id_token, self.key_set_url, OIDC_ALLOWED_JWT_ALGORITHMS
+        )
         return decoded_id_token.get("sub")
 
     def add_identity(self, user: User, orcid: str) -> None:
