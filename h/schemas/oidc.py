@@ -1,4 +1,8 @@
-"""Validation schemas used in our implementation of OpenID Connect (OIDC)."""
+"""
+Validation schemas used in our implementation of OpenID Connect (OIDC).
+
+https://openid.net/specs/openid-connect-core-1_0.html
+"""
 
 from typing import Any, ClassVar, TypedDict
 

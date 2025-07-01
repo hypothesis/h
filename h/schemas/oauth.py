@@ -1,4 +1,8 @@
-"""Validation schemas used in our implementation of OAuth 2.0."""
+"""
+Validation schemas used in our implementation of OAuth 2.0.
+
+https://datatracker.ietf.org/doc/html/rfc6749
+"""
 
 import logging
 import secrets
