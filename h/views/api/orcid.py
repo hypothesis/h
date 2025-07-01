@@ -18,6 +18,16 @@ from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
 
+# The key that we used to store the OIDC action in the Pyramid session.
+#
+# For example when connecting an ORCID iD to an existing Hypothesis account
+# we'll store request.session["oidc.action.orcid"] = "connect", whereas when
+# logging in to Hypothesis via ORCID we'll store "login".
+#
+# This action string is how our OAuth/OIDC redirect view later knows what to do
+# after successfully authenticating the user's ORCID iD.
+ACTION_SESSION_KEY = "oidc.action.{provider}"
+
 
 @view_defaults(request_method="GET", route_name="orcid.oauth.authorize")
 class AuthorizeViews:
@@ -26,9 +36,13 @@ class AuthorizeViews:
 
     @view_config(is_authenticated=True)
     def authorize(self):
+        action = self._request.params["action"]
+
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
+
         state = OAuth2RedirectSchema(self._request, "orcid.oidc").state_param()
+        self._request.session[ACTION_SESSION_KEY.format("orcid")] = action
 
         params = {
             "client_id": client_id,
@@ -87,24 +101,29 @@ class CallbackViews:
             # We received an invalid or unexpected redirect from ORCID.
             raise
 
-        orcid = self._orcid_client.get_orcid(callback_data["code"])
+        action = self._request.session[ACTION_SESSION_KEY.format("orcid")]
 
-        already_connected_user = self._user_service.fetch_by_identity(
-            IdentityProvider.ORCID, orcid
-        )
+        if action == "connect":
+            orcid = self._orcid_client.get_orcid(callback_data["code"])
 
-        # Oops, this ORCID iD is already connected to a *different* Hypothesis
-        # account.
-        if already_connected_user and already_connected_user != self._request.user:
-            raise UserConflictError
+            already_connected_user = self._user_service.fetch_by_identity(
+                IdentityProvider.ORCID, orcid
+            )
 
-        if not already_connected_user:
-            # This ORCID iD isn't connected to a Hypothesis account yet.
-            # Let's go ahead and connect it to the user's account.
-            self._orcid_client.add_identity(self._request.user, orcid)
+            # Oops, this ORCID iD is already connected to a *different* Hypothesis
+            # account.
+            if already_connected_user and already_connected_user != self._request.user:
+                raise UserConflictError
 
-        self._request.session.flash("ORCID iD connected ✓", "success")
-        return HTTPFound(location=self._request.route_url("account"))
+            if not already_connected_user:
+                # This ORCID iD isn't connected to a Hypothesis account yet.
+                # Let's go ahead and connect it to the user's account.
+                self._orcid_client.add_identity(self._request.user, orcid)
+
+            self._request.session.flash("ORCID iD connected ✓", "success")
+            return HTTPFound(location=self._request.route_url("account"))
+
+        raise RuntimeError("Unrecognised action")
 
     @notfound_view_config(
         renderer="h:templates/notfound.html.jinja2", append_slash=True
