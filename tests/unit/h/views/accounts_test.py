@@ -75,6 +75,7 @@ class TestAuthController:
             "js_config": {
                 "styles": assets_env.urls.return_value,
                 "csrfToken": views.get_csrf_token.spy_return,
+                "features": {"log_in_with_orcid": True},
             }
         }
 
@@ -104,6 +105,7 @@ class TestAuthController:
                 "csrfToken": views.get_csrf_token.spy_return,
                 "formErrors": form_errors,
                 "formData": pyramid_request.POST,
+                "features": {"log_in_with_orcid": True},
             }
         }
 
@@ -137,31 +139,24 @@ class TestAuthController:
 
         assert e.value.location == "/foo/bar"
 
-    @mock.patch("h.views.accounts.LoginEvent", autospec=True)
-    def test_post_no_event_when_validation_fails(
-        self, loginevent, invalid_form, notify, pyramid_config, pyramid_request
-    ):
-        pyramid_config.testing_securitypolicy(None)  # Logged out
-        controller = views.AuthController(pyramid_request)
-        controller.form = invalid_form()
-
-        controller.post()
-
-        assert not loginevent.called
-        assert not notify.called
-
     def test_post_redirects_when_validation_succeeds(
-        self, factories, form_validating_to, pyramid_config, pyramid_request
+        self, factories, form_validating_to, pyramid_config, pyramid_request, login
     ):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
         user = factories.User(username="cara")
         pyramid_request.user = user
         controller.form = form_validating_to({"user": user})
+        login.return_value = [
+            ("headername1", "headervalue1"),
+            ("headername2", "headervalue2"),
+        ]
 
         result = controller.post()
 
         assert isinstance(result, httpexceptions.HTTPFound)
+        login.assert_called_once_with(user, pyramid_request)
+        assert all(header in result.headerlist for header in login.return_value)
 
     def test_post_redirects_to_next_param_when_validation_succeeds(
         self, factories, form_validating_to, pyramid_config, pyramid_request
@@ -177,27 +172,6 @@ class TestAuthController:
 
         assert isinstance(result, httpexceptions.HTTPFound)
         assert result.location == "/foo/bar"
-
-    @mock.patch("h.views.accounts.LoginEvent", autospec=True)
-    def test_post_event_when_validation_succeeds(
-        self,
-        loginevent,
-        factories,
-        form_validating_to,
-        notify,
-        pyramid_config,
-        pyramid_request,
-    ):
-        pyramid_config.testing_securitypolicy(None)  # Logged out
-        elephant = factories.User(username="avocado")
-        controller = views.AuthController(pyramid_request)
-        pyramid_request.user = elephant
-        controller.form = form_validating_to({"user": elephant})
-
-        controller.post()
-
-        loginevent.assert_called_with(pyramid_request, elephant)
-        notify.assert_called_with(loginevent.return_value)
 
     @mock.patch("h.views.accounts.LogoutEvent", autospec=True)
     def test_logout_event(self, logoutevent, notify, pyramid_config, pyramid_request):
@@ -1102,3 +1076,8 @@ def LoginSchema(patch):
 @pytest.fixture(autouse=True)
 def schemas(patch):
     return patch("h.views.accounts.schemas")
+
+
+@pytest.fixture(autouse=True)
+def login(patch):
+    return patch("h.views.accounts.login")

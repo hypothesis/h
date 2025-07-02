@@ -23,10 +23,11 @@ from pyramid.view import (
 
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
-from h.schemas.oauth import OAuth2RedirectSchema
+from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
+from h.views.helpers import login
 
 if TYPE_CHECKING:
     from pyramid.request import Request
@@ -70,20 +71,24 @@ def _decode_oauth2_state_param(state_param, key):
     return jwt.decode(state_param, key, algorithms=["HS256"])
 
 
-@view_defaults(request_method="GET", route_name="oidc.connect.orcid")
-class ORCIDConnectViews:
+@view_defaults(request_method="GET")
+class ORCIDConnectAndLoginViews:
     def __init__(self, request: Request) -> None:
         self._request = request
 
-    @view_config(is_authenticated=True)
-    def connect(self):
+    @view_config(is_authenticated=True, route_name="oidc.connect.orcid")
+    @view_config(is_authenticated=False, route_name="oidc.login.orcid")
+    def connect_or_login(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
         state_signing_key = self._request.registry.settings[
             "orcid_oidc_state_signing_key"
         ]
 
-        state = _encode_oauth2_state_param("connect", state_signing_key)
+        actions = {"oidc.connect.orcid": "connect", "oidc.login.orcid": "login"}
+        action = actions[self._request.matched_route.name]
+
+        state = _encode_oauth2_state_param(action, state_signing_key)
         self._request.session[ORCID_STATE_SESSION_KEY] = state
 
         params = {
@@ -107,7 +112,14 @@ class ORCIDConnectViews:
         )
 
     @notfound_view_config(
-        renderer="h:templates/notfound.html.jinja2", append_slash=True
+        renderer="h:templates/notfound.html.jinja2",
+        append_slash=True,
+        route_name="oidc.connect.orcid",
+    )
+    @notfound_view_config(
+        renderer="h:templates/notfound.html.jinja2",
+        append_slash=True,
+        route_name="oidc.login.orcid",
     )
     def notfound(self):
         self._request.response.status_int = 401
@@ -121,9 +133,13 @@ class ORCIDRedirectViews:
         self._orcid_client = request.find_service(ORCIDClientService)
         self._user_service = request.find_service(name="user")
 
-    @view_config(is_authenticated=True)
+    @view_config()
     def redirect(self):
-        expected_state = self._request.session.pop(ORCID_STATE_SESSION_KEY, None)
+        try:
+            expected_state = self._request.session.pop(ORCID_STATE_SESSION_KEY)
+        except KeyError as err:
+            raise InvalidOAuth2StateParamError from err
+
         state_signing_key = self._request.registry.settings[
             "orcid_oidc_state_signing_key"
         ]
@@ -149,35 +165,48 @@ class ORCIDRedirectViews:
 
         # Get the existing Hypothesis account that's already connected to this
         # ORCID iD, if any.
-        connected_user = self._user_service.fetch_by_identity(
-            IdentityProvider.ORCID, orcid_id
-        )
+        user = self._user_service.fetch_by_identity(IdentityProvider.ORCID, orcid_id)
 
         actions = {
             "connect": self.connect_orcid_id,
+            "login": self.log_in_with_orcid,
         }
         action_str = decoded_state["action"]
         action_method = actions[action_str]
-        return action_method(orcid_id, connected_user)
+        return action_method(orcid_id, user)
 
-    def connect_orcid_id(self, orcid_id: str, connected_user: User | None):
+    def connect_orcid_id(self, orcid_id: str, user: User | None):
         """Connect the user's ORCID iD to their Hypothesis account.
 
-        Do nothing if `orcid_id` is already connected to `connected_user`.
+        Do nothing if `orcid_id` is already connected to `user`.
 
         """
-        if connected_user and connected_user != self._request.user:
+        if user and user != self._request.user:
             # Oops, this ORCID iD is already connected to a different
             # Hypothesis account.
             raise UserConflictError
 
-        if not connected_user:
+        if not user:
             # This ORCID iD isn't connected to a Hypothesis account yet.
             # Let's go ahead and connect it to the user's account.
             self._orcid_client.add_identity(self._request.user, orcid_id)
 
         self._request.session.flash("ORCID iD connected ✓", "success")
-        return HTTPFound(location=self._request.route_url("account"))
+        return HTTPFound(self._request.route_url("account"))
+
+    def log_in_with_orcid(self, orcid_id: str, user):
+        if not user:
+            msg = "Not implemented yet"
+            raise RuntimeError(msg)
+
+        del orcid_id
+
+        headers = login(user, self._request)
+
+        return HTTPFound(
+            self._request.route_url("activity.user_search", username=user.username),
+            headers=headers,
+        )
 
     @notfound_view_config(
         renderer="h:templates/notfound.html.jinja2", append_slash=True
