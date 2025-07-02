@@ -83,107 +83,122 @@ export default function AnnotationCard({
     [onStatusChange, updateModerationStatus],
   );
 
-  return (
-    <article>
-      <Card
-        classes={classnames({
-          'border-red': annotation.moderation_status === 'DENIED',
-          'border-yellow': annotation.moderation_status === 'SPAM',
-          'border-green': annotation.moderation_status === 'APPROVED',
-        })}
-      >
-        <CardContent>
-          <header className="w-full">
-            <div className="flex gap-x-1 items-center justify-between">
-              <AnnotationUser displayName={user} />
-              <AnnotationTimestamps
-                annotationCreated={annotation.created}
-                annotationUpdated={annotation.updated}
-                withEditedTimestamp={annotation.updated !== annotation.created}
-              />
-            </div>
-            <div className="flex gap-x-1 items-baseline flex-wrap-reverse">
-              {group && (
-                <>
-                  <AnnotationGroupInfo group={group} />
-                  <AnnotationDocument annotation={annotation} />
-                </>
-              )}
-              {isReply && (
-                <div
-                  className="ml-auto flex items-center gap-x-1"
-                  data-testid="reply-indicator"
-                >
-                  <ReplyIcon /> This is a reply
+  return useMemo(
+    () => (
+      <article>
+        <Card
+          classes={classnames({
+            'border-red': annotation.moderation_status === 'DENIED',
+            'border-yellow': annotation.moderation_status === 'SPAM',
+            'border-green': annotation.moderation_status === 'APPROVED',
+          })}
+        >
+          <CardContent>
+            <header className="w-full">
+              <div className="flex gap-x-1 items-center justify-between">
+                <AnnotationUser displayName={user} />
+                <AnnotationTimestamps
+                  annotationCreated={annotation.created}
+                  annotationUpdated={annotation.updated}
+                  withEditedTimestamp={
+                    annotation.updated !== annotation.created
+                  }
+                />
+              </div>
+              <div className="flex gap-x-1 items-baseline flex-wrap-reverse">
+                {group && (
+                  <>
+                    <AnnotationGroupInfo group={group} />
+                    <AnnotationDocument annotation={annotation} />
+                  </>
+                )}
+                {isReply && (
+                  <div
+                    className="ml-auto flex items-center gap-x-1"
+                    data-testid="reply-indicator"
+                  >
+                    <ReplyIcon /> This is a reply
+                  </div>
+                )}
+              </div>
+            </header>
+
+            <StyledText>
+              <blockquote className="hover:border-l-blue-quote">
+                {quote(annotation)}
+              </blockquote>
+            </StyledText>
+
+            <MarkdownView
+              markdown={annotation.text}
+              mentions={annotation.mentions}
+              mentionMode="username"
+              mentionsEnabled
+              classes="text-color-text"
+            />
+
+            {annotation.tags.length > 0 && (
+              <ul
+                className="flex flex-wrap gap-1 text-sm"
+                data-testid="tags-container"
+              >
+                {annotation.tags.map(tag => (
+                  <li
+                    key={tag}
+                    className={classnames(
+                      'px-1.5 py-0.5 rounded text-color-text-light',
+                      'border border-solid border-grey-3 bg-grey-0',
+                    )}
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <footer className="flex flex-col gap-2">
+              <div className="flex items-end justify-between">
+                <ModerationStatusSelect
+                  onChange={onModerationStatusChange}
+                  disabled={moderationSaveState.type === 'saving'}
+                  selected={annotation.moderation_status}
+                  mode="select"
+                  alignListbox="left"
+                />
+                <div className="flex items-center gap-1">
+                  <Link
+                    variant="text-light"
+                    href={annotation.links.incontext}
+                    target="_blank"
+                    title="See in context"
+                    aria-label="See in context"
+                    data-testid="context-link"
+                  >
+                    <ExternalIcon />
+                  </Link>
+                  <AnnotationShareControl
+                    annotation={annotation}
+                    group={group}
+                  />
+                </div>
+              </div>
+              {moderationSaveState.type === 'error' && (
+                <div data-testid="update-error" className="text-red-error">
+                  {moderationSaveState.error}
                 </div>
               )}
-            </div>
-          </header>
-
-          <StyledText>
-            <blockquote className="hover:border-l-blue-quote">
-              {quote(annotation)}
-            </blockquote>
-          </StyledText>
-
-          <MarkdownView
-            markdown={annotation.text}
-            mentions={annotation.mentions}
-            mentionMode="username"
-            mentionsEnabled
-            classes="text-color-text"
-          />
-
-          {annotation.tags.length > 0 && (
-            <ul
-              className="flex flex-wrap gap-1 text-sm"
-              data-testid="tags-container"
-            >
-              {annotation.tags.map(tag => (
-                <li
-                  key={tag}
-                  className={classnames(
-                    'px-1.5 py-0.5 rounded text-color-text-light',
-                    'border border-solid border-grey-3 bg-grey-0',
-                  )}
-                >
-                  {tag}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <footer className="flex flex-col gap-2">
-            <div className="flex items-end justify-between">
-              <ModerationStatusSelect
-                onChange={onModerationStatusChange}
-                disabled={moderationSaveState.type === 'saving'}
-                selected={annotation.moderation_status}
-                mode="select"
-                alignListbox="left"
-              />
-              <div className="flex items-center gap-1">
-                <Link
-                  variant="text-light"
-                  href={annotation.links.incontext}
-                  target="_blank"
-                  title="See in context"
-                  aria-label="See in context"
-                  data-testid="context-link"
-                >
-                  <ExternalIcon />
-                </Link>
-                <AnnotationShareControl annotation={annotation} group={group} />
-              </div>
-            </div>
-            {moderationSaveState.type === 'error' && (
-              <div data-testid="update-error" className="text-red-error">
-                {moderationSaveState.error}
-              </div>
-            )}
-          </footer>
-        </CardContent>
-      </Card>
-    </article>
+            </footer>
+          </CardContent>
+        </Card>
+      </article>
+    ),
+    [
+      annotation,
+      group,
+      isReply,
+      moderationSaveState,
+      onModerationStatusChange,
+      user,
+    ],
   );
 }

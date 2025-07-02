@@ -1,6 +1,10 @@
-import { Slider, Spinner } from '@hypothesis/frontend-shared';
+import {
+  useStableCallback,
+  Slider,
+  Spinner,
+} from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 import FormContainer from '../../forms-common/components/FormContainer';
 import type { Group } from '../config';
@@ -93,6 +97,28 @@ function AnnotationListContent({
   onAnnotationStatusChange,
   removedAnnotations,
 }: AnnotationListContentProps) {
+  const onAnnotationStatusChangeStable = useStableCallback(
+    onAnnotationStatusChange,
+  );
+  const cards = useMemo(
+    () =>
+      annotations?.map(anno => (
+        <Slider
+          key={anno.id}
+          direction={removedAnnotations.has(anno.id) ? 'out' : 'in'}
+          delay="0.5s"
+        >
+          <AnnotationCard
+            annotation={anno}
+            onStatusChange={moderationStatus => {
+              onAnnotationStatusChangeStable(anno.id, moderationStatus);
+            }}
+          />
+        </Slider>
+      )),
+    [annotations, removedAnnotations, onAnnotationStatusChangeStable],
+  );
+
   if (annotations && annotations.length === 0) {
     return (
       <div
@@ -115,20 +141,7 @@ function AnnotationListContent({
 
   return (
     <>
-      {annotations?.map(anno => (
-        <Slider
-          key={anno.id}
-          direction={removedAnnotations.has(anno.id) ? 'out' : 'in'}
-          delay="0.5s"
-        >
-          <AnnotationCard
-            annotation={anno}
-            onStatusChange={moderationStatus => {
-              onAnnotationStatusChange(anno.id, moderationStatus);
-            }}
-          />
-        </Slider>
-      ))}
+      {cards}
       {loading && (
         <div className="mx-auto mt-3">
           <Spinner size="md" />
