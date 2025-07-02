@@ -70,13 +70,13 @@ def _decode_oauth2_state_param(state_param, key):
     return jwt.decode(state_param, key, algorithms=["HS256"])
 
 
-@view_defaults(request_method="GET", route_name="oidc.authorize.orcid")
-class ORCIDAuthorizeViews:
+@view_defaults(request_method="GET", route_name="oidc.connect.orcid")
+class ORCIDConnectViews:
     def __init__(self, request: Request) -> None:
         self._request = request
 
     @view_config(is_authenticated=True)
-    def authorize(self):
+    def connect(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
         state_signing_key = self._request.registry.settings[
