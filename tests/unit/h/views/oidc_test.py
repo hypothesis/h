@@ -9,27 +9,36 @@ from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
+from h.views.oidc import ORCID_STATE_SESSION_KEY
 
 
 class TestORCIDAuthorizeViews:
-    def test_authorize(self, pyramid_request):
+    def test_authorize(self, pyramid_request, secrets):
         result = views.ORCIDAuthorizeViews(pyramid_request).authorize()
 
+        assert (
+            pyramid_request.session[ORCID_STATE_SESSION_KEY]
+            == secrets.token_hex.return_value
+        )
         assert isinstance(result, HTTPFound)
-        params = {
-            "client_id": sentinel.client_id,
-            "response_type": "code",
-            "redirect_uri": pyramid_request.route_url("oidc.redirect.orcid"),
-            "state": sentinel.state_param,
-            "scope": "openid",
-        }
+
         assert result.location == urlunparse(
             (
                 "https",
                 IdentityProvider.ORCID,
                 "oauth/authorize",
                 "",
-                urlencode(params),
+                urlencode(
+                    {
+                        "client_id": sentinel.client_id,
+                        "response_type": "code",
+                        "redirect_uri": pyramid_request.route_url(
+                            "oidc.redirect.orcid"
+                        ),
+                        "state": secrets.token_hex.return_value,
+                        "scope": "openid",
+                    }
+                ),
                 "",
             )
         )
@@ -61,81 +70,104 @@ class TestORCIDAuthorizeViews:
 
 @pytest.mark.usefixtures("orcid_client_service", "user_service")
 class TestORCIDRedirectViews:
-    def test_it(self, pyramid_request, orcid_client_service, user_service, user):
-        orcid = orcid_client_service.get_orcid.return_value
+    def test_when_account_not_yet_connected(
+        self,
+        pyramid_request,
+        orcid_client_service,
+        user_service,
+        user,
+        OAuth2RedirectSchema,
+    ):
+        pyramid_request.session[ORCID_STATE_SESSION_KEY] = sentinel.state
         user_service.fetch_by_identity.return_value = None
 
         result = views.ORCIDRedirectViews(pyramid_request).redirect()
 
-        assert isinstance(result, HTTPFound)
-        assert result.location == pyramid_request.route_url("account")
+        assert ORCID_STATE_SESSION_KEY not in pyramid_request.session
+        OAuth2RedirectSchema.validate.assert_called_once_with(
+            dict(pyramid_request.params), sentinel.state
+        )
         orcid_client_service.get_orcid.assert_called_once_with(sentinel.code)
-        orcid_client_service.add_identity.assert_called_once_with(user, orcid)
+        user_service.fetch_by_identity.assert_called_once_with(
+            IdentityProvider.ORCID, sentinel.orcid_id
+        )
+        orcid_client_service.add_identity.assert_called_once_with(
+            user, sentinel.orcid_id
+        )
         pyramid_request.session.flash.assert_called_once_with(
             "ORCID iD connected ✓", "success"
         )
+        assert isinstance(result, HTTPFound)
+        assert result.location == pyramid_request.route_url("account")
 
-    def test_it_raises_validation_error(self, pyramid_request, OAuth2RedirectSchema):
-        OAuth2RedirectSchema.return_value.validate.side_effect = ValidationError()
-        pyramid_request.params = {}
-
-        with pytest.raises(ValidationError):
-            views.ORCIDRedirectViews(pyramid_request).redirect()
-
-    def test_it_raises_access_denied_error(self, pyramid_request, OAuth2RedirectSchema):
-        OAuth2RedirectSchema.return_value.validate.side_effect = ValidationError()
-        pyramid_request.params = {"error": "access_denied"}
-
-        with pytest.raises(views.AccessDeniedError):
-            views.ORCIDRedirectViews(pyramid_request).redirect()
-
-    def test_it_raises_token_validation_error(
-        self, pyramid_request, orcid_client_service
+    def test_when_account_already_connected(
+        self, pyramid_request, orcid_client_service, user_service
     ):
-        orcid_client_service.get_orcid.side_effect = TokenValidationError(
-            "Invalid token"
-        )
-
-        with pytest.raises(TokenValidationError):
-            views.ORCIDRedirectViews(pyramid_request).redirect()
-
-    def test_it_raises_external_request_error(
-        self, pyramid_request, orcid_client_service
-    ):
-        orcid_client_service.get_orcid.side_effect = ExternalRequestError(
-            "External request failed"
-        )
-
-        with pytest.raises(ExternalRequestError):
-            views.ORCIDRedirectViews(pyramid_request).redirect()
-
-    def test_it_raises_user_conflict_error(
-        self, pyramid_request, user_service, factories
-    ):
-        other_user = factories.User()
-        user_service.fetch_by_identity.return_value = other_user
-
-        with pytest.raises(views.UserConflictError):
-            views.ORCIDRedirectViews(pyramid_request).redirect()
-
-    def test_it_is_already_connected(
-        self, pyramid_request, orcid_client_service, user_service, user
-    ):
-        user_service.fetch_by_identity.return_value = user
+        user_service.fetch_by_identity.return_value = pyramid_request.user
 
         result = views.ORCIDRedirectViews(pyramid_request).redirect()
 
-        assert isinstance(result, HTTPFound)
-        assert result.location == pyramid_request.route_url("account")
-        orcid_client_service.get_orcid.assert_called_once_with(sentinel.code)
         orcid_client_service.add_identity.assert_not_called()
         pyramid_request.session.flash.assert_called_once_with(
             "ORCID iD connected ✓", "success"
         )
+        assert isinstance(result, HTTPFound)
+        assert result.location == pyramid_request.route_url("account")
+
+    def test_when_already_connected_to_a_different_account(
+        self, pyramid_request, orcid_client_service, user_service
+    ):
+        pyramid_request.session[ORCID_STATE_SESSION_KEY] = sentinel.state
+        user_service.fetch_by_identity.return_value = sentinel.other_user
+
+        with pytest.raises(views.UserConflictError):
+            views.ORCIDRedirectViews(pyramid_request).redirect()
+
+        orcid_client_service.add_identity.assert_not_called()
+
+    def test_when_schema_raises_access_denied_error(
+        self, pyramid_request, orcid_client_service, OAuth2RedirectSchema
+    ):
+        OAuth2RedirectSchema.validate.side_effect = ValidationError()
+        pyramid_request.params = {"error": "access_denied"}
+
+        with pytest.raises(views.AccessDeniedError) as exc_info:
+            views.ORCIDRedirectViews(pyramid_request).redirect()
+
+        orcid_client_service.add_identity.assert_not_called()
+        assert exc_info.value.__cause__ == OAuth2RedirectSchema.validate.side_effect
+
+    def test_when_schema_raises_other_validation_error(
+        self, pyramid_request, orcid_client_service, OAuth2RedirectSchema
+    ):
+        OAuth2RedirectSchema.validate.side_effect = ValidationError()
+
+        with pytest.raises(views.ValidationError) as exc_info:
+            views.ORCIDRedirectViews(pyramid_request).redirect()
+
+        orcid_client_service.add_identity.assert_not_called()
+        assert exc_info.value == OAuth2RedirectSchema.validate.side_effect
+
+    def test_when_token_validation_error(self, pyramid_request, orcid_client_service):
+        orcid_client_service.get_orcid.side_effect = TokenValidationError
+
+        with pytest.raises(TokenValidationError):
+            views.ORCIDRedirectViews(pyramid_request).redirect()
+
+        orcid_client_service.add_identity.assert_not_called()
+
+    def test_when_external_request_error(self, pyramid_request, orcid_client_service):
+        orcid_client_service.get_orcid.side_effect = ExternalRequestError
+
+        with pytest.raises(ExternalRequestError):
+            views.ORCIDRedirectViews(pyramid_request).redirect()
+
+        orcid_client_service.add_identity.assert_not_called()
 
     def test_notfound(self, pyramid_request):
         result = views.ORCIDRedirectViews(pyramid_request).notfound()
 
+        assert pyramid_request.response.status_int == 401
         assert result == {}
 
     def test_invalid(self, pyramid_request):
@@ -206,6 +238,11 @@ class TestORCIDRedirectViews:
     @pytest.fixture(autouse=True)
     def handle_external_request_error(self, patch):
         return patch("h.views.oidc.handle_external_request_error")
+
+    @pytest.fixture
+    def orcid_client_service(self, orcid_client_service):
+        orcid_client_service.get_orcid.return_value = sentinel.orcid_id
+        return orcid_client_service
 
 
 class TestHandleExternalRequestError:
@@ -281,6 +318,10 @@ def report_exception(patch):
 @pytest.fixture(autouse=True)
 def OAuth2RedirectSchema(patch):
     OAuth2RedirectSchema = patch("h.views.oidc.OAuth2RedirectSchema")
-    OAuth2RedirectSchema.return_value.validate.return_value = {"code": sentinel.code}
-    OAuth2RedirectSchema.return_value.state_param.return_value = sentinel.state_param
+    OAuth2RedirectSchema.validate.return_value = {"code": sentinel.code}
     return OAuth2RedirectSchema
+
+
+@pytest.fixture(autouse=True)
+def secrets(patch):
+    return patch("h.views.oidc.secrets")
