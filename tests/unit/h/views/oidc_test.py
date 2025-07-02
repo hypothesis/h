@@ -13,13 +13,13 @@ from h.services.jwt import TokenValidationError
 from h.views.oidc import ORCID_STATE_SESSION_KEY
 
 
-class TestORCIDAuthorizeViews:
-    def test_authorize(self, pyramid_request, secrets, signing_key):
+class TestORCIDConnectViews:
+    def test_connect(self, pyramid_request, secrets, signing_key):
         # This just needs to be a string (not a mock) so that it's
         # JSON-serializable, the tests don't care about the actual value.
         secrets.token_hex.return_value = "test_rfp"
 
-        result = views.ORCIDAuthorizeViews(pyramid_request).authorize()
+        result = views.ORCIDConnectViews(pyramid_request).connect()
 
         expected_state = jwt.encode(
             {"action": "connect", "rfp": secrets.token_hex.return_value},
@@ -52,7 +52,7 @@ class TestORCIDAuthorizeViews:
     def test_notfound(self, pyramid_request):
         pyramid_request.user = None
 
-        result = views.ORCIDAuthorizeViews(pyramid_request).notfound()
+        result = views.ORCIDConnectViews(pyramid_request).notfound()
 
         assert result == {}
 
@@ -71,7 +71,7 @@ class TestORCIDAuthorizeViews:
 
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
-        pyramid_config.add_route("oidc.authorize.orcid", "/oidc/authorize/orcid")
+        pyramid_config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
         pyramid_config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
 
 

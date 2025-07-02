@@ -304,5 +304,5 @@ def includeme(config):  # noqa: PLR0915
     )
 
     # ORCID
-    config.add_route("oidc.authorize.orcid", "/oidc/authorize/orcid")
+    config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
     config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
