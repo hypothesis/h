@@ -4,13 +4,16 @@ Views used in our implementation of OpenID Connect (OIDC).
 https://openid.net/specs/openid-connect-core-1_0.html
 """
 
+from __future__ import annotations
+
 import secrets
+from typing import TYPE_CHECKING
 from urllib.parse import urlencode, urlunparse
 
+import jwt
 import sentry_sdk
 from h_pyramid_sentry import report_exception
 from pyramid.httpexceptions import HTTPFound
-from pyramid.request import Request
 from pyramid.view import (
     exception_view_config,
     notfound_view_config,
@@ -25,6 +28,12 @@ from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
 
+if TYPE_CHECKING:
+    from pyramid.request import Request
+
+    from h.models import User
+
+
 ORCID_STATE_SESSION_KEY = "oidc.state.orcid"
 
 
@@ -36,6 +45,31 @@ class UserConflictError(Exception):
     """A different Hypothesis user is already connected to this identity."""
 
 
+def _encode_oauth2_state_param(action, key):
+    """
+    Return `action` encoded in a JWT signed with `key`.
+
+    While this JWT is signed to prevent tampering it is *not* encrypted so
+    shouldn't contain any sensitive data.
+
+    """
+    return jwt.encode(
+        {
+            "action": action,
+            # Add a Request Forgery Protection (RFP) token to protect against
+            # CSRF attacks. The key name "rfp" is compatible with
+            # https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09
+            "rfp": secrets.token_hex(),
+        },
+        key,
+        algorithm="HS256",
+    )
+
+
+def _decode_oauth2_state_param(state_param, key):
+    return jwt.decode(state_param, key, algorithms=["HS256"])
+
+
 @view_defaults(request_method="GET", route_name="oidc.authorize.orcid")
 class ORCIDAuthorizeViews:
     def __init__(self, request: Request) -> None:
@@ -45,8 +79,11 @@ class ORCIDAuthorizeViews:
     def authorize(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
+        state_signing_key = self._request.registry.settings[
+            "orcid_oidc_state_signing_key"
+        ]
 
-        state = secrets.token_hex()
+        state = _encode_oauth2_state_param("connect", state_signing_key)
         self._request.session[ORCID_STATE_SESSION_KEY] = state
 
         params = {
@@ -87,6 +124,9 @@ class ORCIDRedirectViews:
     @view_config(is_authenticated=True)
     def redirect(self):
         expected_state = self._request.session.pop(ORCID_STATE_SESSION_KEY, None)
+        state_signing_key = self._request.registry.settings[
+            "orcid_oidc_state_signing_key"
+        ]
 
         try:
             validated_params = OAuth2RedirectSchema.validate(
@@ -100,21 +140,41 @@ class ORCIDRedirectViews:
             # We received an invalid or unexpected redirect from ORCID.
             raise
 
-        orcid = self._orcid_client.get_orcid(validated_params["code"])
-
-        already_connected_user = self._user_service.fetch_by_identity(
-            IdentityProvider.ORCID, orcid
+        decoded_state = _decode_oauth2_state_param(
+            validated_params["state"], state_signing_key
         )
 
-        # Oops, this ORCID iD is already connected to a *different* Hypothesis
-        # account.
-        if already_connected_user and already_connected_user != self._request.user:
+        # Get the user's ORCID iD from ORCID.
+        orcid_id = self._orcid_client.get_orcid(validated_params["code"])
+
+        # Get the existing Hypothesis account that's already connected to this
+        # ORCID iD, if any.
+        connected_user = self._user_service.fetch_by_identity(
+            IdentityProvider.ORCID, orcid_id
+        )
+
+        actions = {
+            "connect": self.connect_orcid_id,
+        }
+        action_str = decoded_state["action"]
+        action_method = actions[action_str]
+        return action_method(orcid_id, connected_user)
+
+    def connect_orcid_id(self, orcid_id: str, connected_user: User | None):
+        """Connect the user's ORCID iD to their Hypothesis account.
+
+        Do nothing if `orcid_id` is already connected to `connected_user`.
+
+        """
+        if connected_user and connected_user != self._request.user:
+            # Oops, this ORCID iD is already connected to a different
+            # Hypothesis account.
             raise UserConflictError
 
-        if not already_connected_user:
+        if not connected_user:
             # This ORCID iD isn't connected to a Hypothesis account yet.
             # Let's go ahead and connect it to the user's account.
-            self._orcid_client.add_identity(self._request.user, orcid)
+            self._orcid_client.add_identity(self._request.user, orcid_id)
 
         self._request.session.flash("ORCID iD connected ✓", "success")
         return HTTPFound(location=self._request.route_url("account"))
