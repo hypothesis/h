@@ -273,7 +273,7 @@ def test_includeme():
         call(
             "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
         ),
-        call("oidc.authorize.orcid", "/oidc/authorize/orcid"),
+        call("oidc.connect.orcid", "/oidc/connect/orcid"),
         call("oidc.redirect.orcid", "/oidc/redirect/orcid"),
     ]
 
