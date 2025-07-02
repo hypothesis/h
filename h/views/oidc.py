@@ -4,6 +4,7 @@ Views used in our implementation of OpenID Connect (OIDC).
 https://openid.net/specs/openid-connect-core-1_0.html
 """
 
+import secrets
 from urllib.parse import urlencode, urlunparse
 
 import sentry_sdk
@@ -24,6 +25,8 @@ from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
 
+ORCID_STATE_SESSION_KEY = "oidc.state.orcid"
+
 
 class AccessDeniedError(Exception):
     """The user denied us access to their identity."""
@@ -42,7 +45,9 @@ class ORCIDAuthorizeViews:
     def authorize(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
-        state = OAuth2RedirectSchema(self._request, "orcid.oidc").state_param()
+
+        state = secrets.token_hex()
+        self._request.session[ORCID_STATE_SESSION_KEY] = state
 
         params = {
             "client_id": client_id,
@@ -81,10 +86,12 @@ class ORCIDRedirectViews:
 
     @view_config(is_authenticated=True)
     def redirect(self):
+        expected_state = self._request.session.pop(ORCID_STATE_SESSION_KEY, None)
+
         try:
-            validated_params = OAuth2RedirectSchema(
-                self._request, "orcid.oidc"
-            ).validate(dict(self._request.params))
+            validated_params = OAuth2RedirectSchema.validate(
+                dict(self._request.params), expected_state
+            )
         except ValidationError as err:
             if self._request.params.get("error") == "access_denied":
                 # The user clicked the deny button on ORCID's page.
