@@ -15,3 +15,4 @@ tests,functests: ELASTICSEARCH_URL = {env:ELASTICSEARCH_URL:http://localhost:920
 tests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-tests}
 functests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-functests}
 {tests,functests}: AUTHORITY = {env:AUTHORITY:example.com}
+{dev,tests,functests}: ORCID_OIDC_STATE_SIGNING_KEY=dev_orcid_oidc_state_signing_key
