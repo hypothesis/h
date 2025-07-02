@@ -39,6 +39,16 @@ function bundleConfig(name, entryFile) {
       commonjs(),
       ...prodPlugins,
     ],
+
+    treeshake: {
+      // Assume that modules do not have side effects and can be safely removed
+      // from a bundle if unused.
+      //
+      // This is important when importing small pieces of functionality from
+      // packages like @hypothesis/annotation-ui with a large total footprint
+      // (including dependencies). See https://github.com/hypothesis/h/issues/9709.
+      moduleSideEffects: false,
+    },
   };
 }
 
