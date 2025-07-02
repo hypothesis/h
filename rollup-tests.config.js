@@ -18,6 +18,9 @@ export default {
     file: 'build/scripts/tests.bundle.js',
     format: 'es',
     sourcemap: true,
+
+    // Simplify build output by putting all code in one bundle.
+    inlineDynamicImports: true,
   },
   treeshake: false,
   // Suppress a warning (https://rollupjs.org/guide/en/#error-this-is-undefined)
