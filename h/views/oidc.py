@@ -1,3 +1,9 @@
+"""
+Views used in our implementation of OpenID Connect (OIDC).
+
+https://openid.net/specs/openid-connect-core-1_0.html
+"""
+
 from urllib.parse import urlencode, urlunparse
 
 import sentry_sdk
@@ -19,8 +25,16 @@ from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
 
 
-@view_defaults(request_method="GET", route_name="orcid.oauth.authorize")
-class AuthorizeViews:
+class AccessDeniedError(Exception):
+    """The user denied us access to their ORCID record."""
+
+
+class UserConflictError(Exception):
+    """A different Hypothesis user is already connected to this ORCID iD."""
+
+
+@view_defaults(request_method="GET", route_name="oidc.authorize.orcid")
+class ORCIDAuthorizeViews:
     def __init__(self, request: Request) -> None:
         self._request = request
 
@@ -33,7 +47,7 @@ class AuthorizeViews:
         params = {
             "client_id": client_id,
             "response_type": "code",
-            "redirect_uri": self._request.route_url("orcid.oauth.callback"),
+            "redirect_uri": self._request.route_url("oidc.redirect.orcid"),
             "state": state,
             "scope": "openid",
         }
@@ -58,27 +72,19 @@ class AuthorizeViews:
         return {}
 
 
-class AccessDeniedError(Exception):
-    """The user denied us access to their ORCID record."""
-
-
-class UserConflictError(Exception):
-    """A different Hypothesis user is already connected to this ORCID iD."""
-
-
-@view_defaults(request_method="GET", route_name="orcid.oauth.callback")
-class CallbackViews:
+@view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
+class ORCIDRedirectViews:
     def __init__(self, request: Request) -> None:
         self._request = request
         self._orcid_client = request.find_service(ORCIDClientService)
         self._user_service = request.find_service(name="user")
 
     @view_config(is_authenticated=True)
-    def callback(self):
+    def redirect(self):
         try:
-            callback_data = OAuth2RedirectSchema(self._request, "orcid.oidc").validate(
-                dict(self._request.params)
-            )
+            validated_params = OAuth2RedirectSchema(
+                self._request, "orcid.oidc"
+            ).validate(dict(self._request.params))
         except ValidationError as err:
             if self._request.params.get("error") == "access_denied":
                 # The user clicked the deny button on ORCID's page.
@@ -87,7 +93,7 @@ class CallbackViews:
             # We received an invalid or unexpected redirect from ORCID.
             raise
 
-        orcid = self._orcid_client.get_orcid(callback_data["code"])
+        orcid = self._orcid_client.get_orcid(validated_params["code"])
 
         already_connected_user = self._user_service.fetch_by_identity(
             IdentityProvider.ORCID, orcid
