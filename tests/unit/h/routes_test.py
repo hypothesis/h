@@ -273,8 +273,8 @@ def test_includeme():
         call(
             "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
         ),
-        call("orcid.oauth.authorize", "/orcid/oauth/authorize"),
-        call("orcid.oauth.callback", "/orcid/oauth/callback"),
+        call("oidc.authorize.orcid", "/oidc/authorize/orcid"),
+        call("oidc.redirect.orcid", "/oidc/redirect/orcid"),
     ]
 
     # Test each one one at a time to make it a bit easier to spot which one
