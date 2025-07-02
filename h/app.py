@@ -105,9 +105,12 @@ def includeme(config):  # pragma: no cover
 
 
 def _configure_jinja2_assets(config):
+    assets_env = config.registry["assets_env"]
+
     jinja2_env = config.get_jinja2_environment()
-    jinja2_env.globals["asset_url"] = config.registry["assets_env"].url
-    jinja2_env.globals["asset_urls"] = config.registry["assets_env"].urls
+    jinja2_env.globals["asset_url"] = assets_env.url
+    jinja2_env.globals["asset_urls"] = assets_env.urls
+    jinja2_env.globals["asset_import_map"] = assets_env.import_map
 
 
 def _configure_sentry(config):
