@@ -97,7 +97,7 @@ def factory(_context, request) -> ORCIDClientService:
         host=settings["orcid_host"],
         client_id=settings["orcid_client_id"],
         client_secret=settings["orcid_client_secret"],
-        redirect_uri=request.route_url("orcid.oauth.callback"),
+        redirect_uri=request.route_url("oidc.redirect.orcid"),
         openid_client_service=request.find_service(OpenIDClientService),
         user_service=request.find_service(name="user"),
     )
