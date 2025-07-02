@@ -8,4 +8,5 @@ export const routes = {
   login: '/login',
   forgotPassword: '/forgot-password',
   signup: '/signup',
+  loginWithORCID: '/oidc/login/orcid',
 };

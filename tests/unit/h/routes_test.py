@@ -274,6 +274,7 @@ def test_includeme():
             "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
         ),
         call("oidc.connect.orcid", "/oidc/connect/orcid"),
+        call("oidc.login.orcid", "/oidc/login/orcid"),
         call("oidc.redirect.orcid", "/oidc/redirect/orcid"),
     ]
 
