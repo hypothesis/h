@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, Mock, call, sentinel
 from urllib.parse import urlencode, urlunparse
 
+import jwt
 import pytest
 from pyramid.httpexceptions import HTTPFound
 
@@ -13,15 +14,20 @@ from h.views.oidc import ORCID_STATE_SESSION_KEY
 
 
 class TestORCIDAuthorizeViews:
-    def test_authorize(self, pyramid_request, secrets):
+    def test_authorize(self, pyramid_request, secrets, signing_key):
+        # This just needs to be a string (not a mock) so that it's
+        # JSON-serializable, the tests don't care about the actual value.
+        secrets.token_hex.return_value = "test_rfp"
+
         result = views.ORCIDAuthorizeViews(pyramid_request).authorize()
 
-        assert (
-            pyramid_request.session[ORCID_STATE_SESSION_KEY]
-            == secrets.token_hex.return_value
+        expected_state = jwt.encode(
+            {"action": "connect", "rfp": secrets.token_hex.return_value},
+            signing_key,
+            algorithm="HS256",
         )
-        assert isinstance(result, HTTPFound)
 
+        assert pyramid_request.session[ORCID_STATE_SESSION_KEY] == expected_state
         assert result.location == urlunparse(
             (
                 "https",
@@ -35,7 +41,7 @@ class TestORCIDAuthorizeViews:
                         "redirect_uri": pyramid_request.route_url(
                             "oidc.redirect.orcid"
                         ),
-                        "state": secrets.token_hex.return_value,
+                        "state": expected_state,
                         "scope": "openid",
                     }
                 ),
@@ -51,13 +57,14 @@ class TestORCIDAuthorizeViews:
         assert result == {}
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, factories):
+    def pyramid_request(self, pyramid_request, factories, signing_key):
         pyramid_request.user = factories.User()
         pyramid_request.registry.settings.update(
             {
                 "orcid_host": IdentityProvider.ORCID,
                 "orcid_client_id": sentinel.client_id,
                 "orcid_client_secret": sentinel.client_secret,
+                "orcid_oidc_state_signing_key": signing_key,
             }
         )
         return pyramid_request
@@ -225,9 +232,12 @@ class TestORCIDRedirectViews:
         return factories.User()
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, user):
+    def pyramid_request(self, pyramid_request, user, signing_key):
         pyramid_request.user = user
         pyramid_request.session.flash = Mock()
+        pyramid_request.registry.settings.update(
+            {"orcid_oidc_state_signing_key": signing_key}
+        )
         return pyramid_request
 
     @pytest.fixture(autouse=True)
@@ -243,6 +253,14 @@ class TestORCIDRedirectViews:
     def orcid_client_service(self, orcid_client_service):
         orcid_client_service.get_orcid.return_value = sentinel.orcid_id
         return orcid_client_service
+
+    @pytest.fixture(autouse=True)
+    def OAuth2RedirectSchema(self, OAuth2RedirectSchema, signing_key):
+        OAuth2RedirectSchema.validate.return_value = {
+            "code": sentinel.code,
+            "state": jwt.encode({"action": "connect"}, signing_key, algorithm="HS256"),
+        }
+        return OAuth2RedirectSchema
 
 
 class TestHandleExternalRequestError:
@@ -305,6 +323,11 @@ class TestHandleExternalRequestError:
         ]
 
 
+@pytest.fixture
+def signing_key():
+    return "orcid_oidc_state_signing_key"
+
+
 @pytest.fixture(autouse=True)
 def sentry_sdk(patch):
     return patch("h.views.oidc.sentry_sdk")
@@ -317,9 +340,7 @@ def report_exception(patch):
 
 @pytest.fixture(autouse=True)
 def OAuth2RedirectSchema(patch):
-    OAuth2RedirectSchema = patch("h.views.oidc.OAuth2RedirectSchema")
-    OAuth2RedirectSchema.validate.return_value = {"code": sentinel.code}
-    return OAuth2RedirectSchema
+    return patch("h.views.oidc.OAuth2RedirectSchema")
 
 
 @pytest.fixture(autouse=True)
