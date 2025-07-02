@@ -1,4 +1,3 @@
-import datetime
 import itertools
 from dataclasses import asdict
 from typing import Any
@@ -16,12 +15,7 @@ from sqlalchemy import func, select
 
 from h import accounts, form, i18n, models, session
 from h.accounts import schemas
-from h.accounts.events import (
-    ActivationEvent,
-    LoginEvent,
-    LogoutEvent,
-    PasswordResetEvent,
-)
+from h.accounts.events import ActivationEvent, LogoutEvent, PasswordResetEvent
 from h.emails import reset_password
 from h.models import Annotation
 from h.schemas.forms.accounts import (
@@ -35,6 +29,7 @@ from h.services import ORCIDClientService, SubscriptionService
 from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
+from h.views.helpers import login
 
 _ = i18n.TranslationString
 
@@ -118,6 +113,9 @@ class AuthController:
         js_config = {
             "styles": self.request.registry["assets_env"].urls("forms_css"),
             "csrfToken": csrf_token,
+            "features": {
+                "log_in_with_orcid": self.request.feature("log_in_with_orcid"),
+            },
         }
 
         if for_oauth := self.request.params.get("for_oauth"):
@@ -149,7 +147,7 @@ class AuthController:
             }
 
         user = appstruct["user"]
-        headers = self._login(user)
+        headers = login(user, self.request)
         return httpexceptions.HTTPFound(
             location=self._login_redirect(), headers=headers
         )
@@ -166,12 +164,6 @@ class AuthController:
 
     def _login_redirect(self):
         return self.request.params.get("next", _login_redirect_url(self.request))
-
-    def _login(self, user):
-        user.last_login_date = datetime.datetime.utcnow()  # noqa: DTZ003
-        self.request.registry.notify(LoginEvent(self.request, user))
-        headers = security.remember(self.request, user.userid)
-        return headers
 
     def _logout(self):
         if self.request.authenticated_userid is not None:
