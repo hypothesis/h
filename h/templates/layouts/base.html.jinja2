@@ -57,6 +57,12 @@
 
     {% include 'h:templates/includes/settings.html.jinja2' %}
 
+    {# Import map must be placed before any module script tags. Firefox will
+       fail to load it otherwise. #}
+    {% block importmap %}
+    <script type="importmap">{{ asset_import_map() | tojson }}</script>
+    {% endblock %}
+
     {% for url in asset_urls("header_js") %}
     <script type="module" src="{{ url }}"></script>
     {% endfor %}

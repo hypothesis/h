@@ -3,7 +3,6 @@ import {
   AnnotationShareControl,
   AnnotationTimestamps,
   AnnotationUser,
-  MarkdownView,
   StyledText,
 } from '@hypothesis/annotation-ui';
 import {
@@ -12,6 +11,7 @@ import {
   ExternalIcon,
   Link,
   ReplyIcon,
+  lazy,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
@@ -37,6 +37,15 @@ type SaveState =
   | { type: 'saved' }
   | { type: 'saving' }
   | { type: 'error'; error: string };
+
+const MarkdownView = lazy(
+  'MarkdownView',
+  () => import('@hypothesis/annotation-ui').then(mod => mod.MarkdownView),
+  {
+    fallback: ({ markdown }) => markdown,
+    errorFallback: /* istanbul ignore next */ ({ markdown }) => markdown,
+  },
+);
 
 export default function AnnotationCard({
   annotation,
