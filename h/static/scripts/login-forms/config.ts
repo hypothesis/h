@@ -15,6 +15,9 @@ export type LoginConfigObject = ConfigBase & {
     password?: string;
   };
   forOAuth?: boolean;
+  features: {
+    log_in_with_orcid: boolean;
+  };
 };
 
 /** Data passed to frontend for signup form. */

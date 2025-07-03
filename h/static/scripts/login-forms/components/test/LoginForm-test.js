@@ -16,6 +16,9 @@ describe('LoginForm', () => {
         password: '',
       },
       formErrors: {},
+      features: {
+        log_in_with_orcid: true,
+      },
     };
   });
 
