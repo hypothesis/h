@@ -14,4 +14,5 @@ dev: MAILCHIMP_USER_ACTIONS_SUBACCOUNT = {env:MAILCHIMP_USER_ACTIONS_SUBACCOUNT:
 tests,functests: ELASTICSEARCH_URL = {env:ELASTICSEARCH_URL:http://localhost:9200}
 tests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-tests}
 functests: ELASTICSEARCH_INDEX = {env:ELASTICSEARCH_INDEX:hypothesis-functests}
+functests: PYTEST_ADDOPTS = {env:PYTEST_ADDOPTS:{tty::--reverse}}
 {tests,functests}: AUTHORITY = {env:AUTHORITY:example.com}
