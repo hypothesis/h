@@ -20,7 +20,7 @@ attrs==24.3.0
     #   hypothesis
     #   jsonschema
     #   referencing
-bcrypt==4.2.1
+bcrypt==4.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
