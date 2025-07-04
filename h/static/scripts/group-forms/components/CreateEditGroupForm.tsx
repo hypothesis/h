@@ -185,12 +185,16 @@ export default function CreateEditGroupForm({
     setSaveState('saving');
 
     try {
-      const body: CreateUpdateGroupAPIRequest = {
-        id: group!.pubid,
+      const updates = {
         name,
         description,
         type: groupType,
         pre_moderated: preModerated,
+      };
+
+      const body: CreateUpdateGroupAPIRequest = {
+        id: group!.pubid,
+        ...updates,
       };
 
       (await callAPI(config.api.updateGroup!.url, {
@@ -202,7 +206,10 @@ export default function CreateEditGroupForm({
       // Mark form as saved, unless user edited it while saving.
       setSaveState(state => (state === 'saving' ? 'saved' : state));
 
-      onUpdateGroup?.({ ...group!, name, description, type: groupType });
+      onUpdateGroup?.({
+        ...group!,
+        ...updates,
+      });
     } catch (apiError) {
       setSaveState('unsaved');
       setErrorMessage(apiError.message);
