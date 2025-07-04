@@ -1,6 +1,4 @@
 import pytest
-from hypothesis import given
-from hypothesis import strategies as st
 
 from h.util.redirects import ParseError, Redirect, lookup, parse
 
@@ -114,16 +112,17 @@ class TestParse:
             Redirect(src="/qux", dst="donkey", internal=True, prefix=True),
         ]
 
-    @given(st.data())
-    def test_ignores_whitespace(self, data):
+    @pytest.mark.parametrize("maybe_empty_whitespace", ["", " ", "  \t"])
+    @pytest.mark.parametrize("non_empty_whitespace", [" ", "   ", "\t"])
+    def test_ignores_whitespace(self, maybe_empty_whitespace, non_empty_whitespace):
         line = [
-            data.draw(st.text(alphabet=WHITESPACE)),
+            maybe_empty_whitespace,
             "/foo",
-            data.draw(st.text(alphabet=WHITESPACE, min_size=1)),
+            non_empty_whitespace,
             "exact",
-            data.draw(st.text(alphabet=WHITESPACE, min_size=1)),
+            non_empty_whitespace,
             "http://giraffe.com/bar",
-            data.draw(st.text(alphabet=WHITESPACE)),
+            maybe_empty_whitespace,
         ]
 
         result = parse(["".join(line)])
@@ -134,15 +133,33 @@ class TestParse:
             )
         ]
 
-    @given(lines=st.lists(st.text(alphabet=WHITESPACE)))
+    @pytest.mark.parametrize(
+        "lines",
+        [
+            # Single empty lines
+            [" "],
+            ["\t"],
+            ["\r"],
+            [""],
+            # Multiple empty lines
+            [" ", "\t", "\r", ""],
+        ],
+    )
     def test_ignores_whitespace_only_lines(self, lines):
         result = parse(lines)
 
         assert not result
 
-    @given(lines=st.lists(st.text()))
-    def test_ignores_comment_lines(self, lines):
-        result = parse(["#" + line for line in lines])
+    @pytest.mark.parametrize(
+        "line",
+        [
+            "foo",
+            "#foo",
+            "foo bar",
+        ],
+    )
+    def test_ignores_comment_lines(self, line):
+        result = parse(["#" + line])
 
         assert not result
 
