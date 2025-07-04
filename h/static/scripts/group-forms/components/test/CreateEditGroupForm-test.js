@@ -347,10 +347,12 @@ describe('CreateEditGroupForm', () => {
     });
 
     it('updates the group', async () => {
+      config.features.pre_moderation = true;
       const onUpdateGroup = sinon.stub();
       const { wrapper, elements } = createWrapper({ onUpdateGroup });
       const { nameField, descriptionField } = elements;
 
+      // Modify all group properties.
       const name = 'Edited Group Name';
       const description = 'Edited group description';
       const newGroupType = 'restricted';
@@ -360,9 +362,11 @@ describe('CreateEditGroupForm', () => {
         descriptionField.prop('onChangeValue')(description);
       });
       wrapper.find(`[data-value="${newGroupType}"]`).simulate('click');
+      changePreModerationCheckbox(wrapper, true);
 
       wrapper.find('form[data-testid="form"]').simulate('submit');
 
+      // Check all updated properties were sent in API request.
       assert.isTrue(
         fakeCallAPI.calledOnceWithExactly(config.api.updateGroup.url, {
           method: config.api.updateGroup.method,
@@ -372,12 +376,12 @@ describe('CreateEditGroupForm', () => {
             name,
             description,
             type: newGroupType,
-            pre_moderated: false,
+            pre_moderated: true,
           },
         }),
       );
 
-      // Once changes are saved, the edited group details should be persisted.
+      // Check all updated properties were persisted via `onUpdateGroup` callback.
       await assertInLoadingState(wrapper, false);
       assert.calledWith(
         onUpdateGroup,
@@ -386,6 +390,7 @@ describe('CreateEditGroupForm', () => {
           name,
           description,
           type: newGroupType,
+          pre_moderated: true,
         }),
       );
     });
