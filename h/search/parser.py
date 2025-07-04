@@ -48,7 +48,7 @@ whitespace = {
 Match = namedtuple("Match", ["key", "value"])  # noqa: PYI024
 
 
-def parse(query):
+def parse(query) -> MultiDict:
     """
     Parse a free text, Lucene-like, query string into a MultiDict.
 

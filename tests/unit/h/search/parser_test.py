@@ -1,6 +1,6 @@
+import string
+
 import pytest
-from hypothesis import given, settings
-from hypothesis import strategies as st
 from webob.multidict import MultiDict
 
 from h.search import parser
@@ -127,26 +127,24 @@ def test_parse_with_odd_quotes_combinations(query_in, query_out):
     assert parser.parse(query_in) == query_out
 
 
-@given(st.text())
-@settings(max_examples=30)
-def test_parse_always_return_a_multidict(text):
-    """Given any string input, output should always be a MultiDict."""
-    result = parser.parse(text)
-    assert isinstance(result, MultiDict)
+# Quotes are tested separately, so we cover other non-whitespace chars here.
+all_chars_except_quotes = "".join(
+    c for c in string.printable if c not in "'\"" and not c.isspace()
+)
 
 
-# Combinations of strings containing any number of quotes are already tested
-# separately.
-char_blacklist = parser.whitespace.union(set("'\""))
-nonwhitespace_chars = st.characters(blacklist_characters=char_blacklist)
-nonwhitespace_text = st.text(alphabet=nonwhitespace_chars, min_size=1)
+@pytest.mark.parametrize("field", parser.named_fields)
+@pytest.mark.parametrize("value", ["a", "abcd", "123", all_chars_except_quotes])
+def test_parse_all_fields_with_non_whitespace_value(field, value):
+    result = parser.parse(f"{field}:{value}")
+    assert result == MultiDict([(field, value)])
 
 
-@given(kw=st.sampled_from(parser.named_fields), value=nonwhitespace_text)
-@settings(max_examples=30)
-def test_parse_with_any_nonwhitespace_text(kw, value):
-    result = parser.parse(kw + ":" + value)
-    assert result.get(kw) == value
+@pytest.mark.parametrize("field", parser.named_fields)
+@pytest.mark.parametrize("value", ["", " ", "\t"])
+def test_parse_all_fields_with_whitespace_value(field, value):
+    result = parser.parse(f"{field}:{value}")
+    assert result == MultiDict([("any", f"{field}:")])
 
 
 @pytest.mark.parametrize(
