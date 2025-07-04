@@ -321,7 +321,7 @@ tzdata==2025.2
     # via
     #   -r prod.txt
     #   kombu
-urllib3==2.3.0
+urllib3==2.5.0
     # via
     #   -r prod.txt
     #   elasticsearch
