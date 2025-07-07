@@ -1,29 +1,22 @@
-import string
 from binascii import hexlify, unhexlify
+from functools import partial
+from random import randrange
+from secrets import token_bytes, token_hex
 
 import pytest
-from hypothesis import assume, given
-from hypothesis import strategies as st
 from passlib.context import CryptContext
 
 from h.security.encryption import derive_key, password_context, token_urlsafe
 
-REASONABLE_INFO = st.text(alphabet=string.printable)
-REASONABLE_KEY_MATERIAL = st.binary(min_size=8, max_size=128)
-REASONABLE_SALT = st.binary(min_size=64, max_size=64)
-
 
 class TestDeriveKey:
-    @given(
-        info_a=REASONABLE_INFO,
-        info_b=REASONABLE_INFO,
-        key=REASONABLE_KEY_MATERIAL,
-        salt=REASONABLE_SALT,
-    )
-    def test_different_info_different_output(self, info_a, info_b, key, salt):
-        # For fixed key material and salt, derive_key should give different output
-        # for differing info parameters.
-        assume(info_a != info_b)
+    # For fixed key material and salt, derive_key should give different output
+    # for differing info parameters.
+    def test_different_info_different_output(self, gen_key, gen_salt, gen_info):
+        info_a = gen_info()
+        info_b = gen_info()
+        key = gen_key()
+        salt = gen_salt()
 
         info_a_bytes = info_a.encode("utf-8")
         info_b_bytes = info_b.encode("utf-8")
@@ -33,16 +26,12 @@ class TestDeriveKey:
 
         assert derived_a != derived_b
 
-    @given(
-        info=REASONABLE_INFO,
-        key_a=REASONABLE_KEY_MATERIAL,
-        key_b=REASONABLE_KEY_MATERIAL,
-        salt=REASONABLE_SALT,
-    )
-    def test_different_key_different_output(self, info, key_a, key_b, salt):
+    def test_different_key_different_output(self, gen_key, gen_salt, gen_info):
         """If the key is rotated, the output should change."""
-        assume(key_a != key_b)
-
+        key_a = gen_key()
+        key_b = gen_key()
+        salt = gen_salt()
+        info = gen_info()
         info_bytes = info.encode("utf-8")
 
         derived_a = derive_key(key_a, salt, info_bytes)
@@ -50,15 +39,13 @@ class TestDeriveKey:
 
         assert derived_a != derived_b
 
-    @given(
-        info=REASONABLE_INFO,
-        key=REASONABLE_KEY_MATERIAL,
-        salt_a=REASONABLE_SALT,
-        salt_b=REASONABLE_SALT,
-    )
-    def test_different_salt_different_output(self, info, key, salt_a, salt_b):
+    def test_different_salt_different_output(self, gen_key, gen_salt, gen_info):
         """If the salt is changed, the output should change."""
-        assume(salt_a != salt_b)
+
+        info = gen_info()
+        salt_a = gen_salt()
+        salt_b = gen_salt()
+        key = gen_key()
 
         info_bytes = info.encode("utf-8")
 
@@ -67,9 +54,11 @@ class TestDeriveKey:
 
         assert derived_a != derived_b
 
-    @given(info=REASONABLE_INFO, key=REASONABLE_KEY_MATERIAL, salt=REASONABLE_SALT)
-    def test_consistent_output(self, info, key, salt):
+    def test_consistent_output(self, gen_key, gen_salt, gen_info):
         """For fixed key, salt, info, the output should be constant."""
+        key = gen_key()
+        salt = gen_salt()
+        info = gen_info()
         info_bytes = info.encode("utf-8")
 
         derived_a = derive_key(key, salt, info_bytes)
@@ -77,8 +66,10 @@ class TestDeriveKey:
 
         assert derived_a == derived_b
 
-    @given(info=REASONABLE_INFO, key=REASONABLE_KEY_MATERIAL, salt=REASONABLE_SALT)
-    def test_output(self, info, key, salt):
+    def test_output(self, gen_key, gen_salt, gen_info):
+        key = gen_key()
+        salt = gen_salt()
+        info = gen_info()
         info_bytes = info.encode("utf-8")
 
         derived = derive_key(key, salt, info_bytes)
@@ -130,20 +121,39 @@ class TestDeriveKey:
         compare_len = min(len(expected), 64 * 2)
         assert hexlify(derived)[:compare_len] == expected[:compare_len].encode()
 
+    @pytest.fixture
+    def gen_key(self):
+        """Generate a suitable `key` value for `derive_key`."""
+        # HKDF docs don't specify an ideal length for the key, but they do
+        # specify that it should be a strong / high-entropy secret.
+        key_len = randrange(8, 128)  # noqa: S311
+        return partial(token_bytes, key_len)
+
+    @pytest.fixture
+    def gen_salt(self):
+        """Generate a suitable `salt` value for `derive_key`."""
+        # HKDF docs don't specify an ideal length for the key, but they do
+        # Length here is 64 bytes to match SHA-512 digest length.
+        return partial(token_bytes, 64)
+
+    @pytest.fixture
+    def gen_info(self):
+        """Generate an `info` value for `derive_key`."""
+        # Length is not important here. This is an identifier for the key.
+        info_len = randrange(4, 16)  # noqa: S311
+        return partial(token_hex, info_len)
+
 
 def test_password_context():
     assert isinstance(password_context, CryptContext)
     assert len(password_context.schemes()) > 0
 
 
-@given(nbytes=st.integers(min_value=1, max_value=64))
-def test_token_urlsafe(nbytes):
-    tok = token_urlsafe(nbytes)
-
-    # Should be text
-    assert isinstance(tok, str)
-    # Always at least nbytes of data
-    assert len(tok) > nbytes
+def test_token_urlsafe():
+    for nbytes in range(1, 64):
+        tok = token_urlsafe(nbytes)
+        # Always at least nbytes of data
+        assert len(tok) > nbytes
 
 
 def test_token_urlsafe_no_args():
