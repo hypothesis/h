@@ -17,7 +17,6 @@ attrs==24.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   hypothesis
     #   jsonschema
     #   referencing
 bcrypt==4.2.1
@@ -181,8 +180,6 @@ hupper==1.12
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pyramid
-hypothesis==6.135.20
-    # via -r requirements/tests.txt
 idna==3.10
     # via
     #   -r requirements/functests.txt
@@ -473,10 +470,6 @@ six==1.17.0
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
-sortedcontainers==2.4.0
-    # via
-    #   -r requirements/tests.txt
-    #   hypothesis
 soupsieve==2.5
     # via
     #   -r requirements/functests.txt
