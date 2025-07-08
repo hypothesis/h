@@ -3,6 +3,7 @@ from urllib.parse import urlencode, urlunparse
 
 import jwt
 import pytest
+from pyramid.httpexceptions import HTTPForbidden
 
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
@@ -167,6 +168,34 @@ class TestORCIDRedirectViews:
         # from the authentication server matches the copy that we stashed in
         # the session, so the state should always decode without errors.
         with pytest.raises(jwt.exceptions.DecodeError):
+            views.redirect()
+
+    @pytest.mark.usefixtures(
+        "assert_state_removed_from_session",
+        "assert_no_success_message_was_flashed",
+        "assert_no_account_connection_was_added",
+        "assert_user_was_not_logged_in",
+    )
+    def test_redirect_if_action_is_connect_and_user_not_authenticated(
+        self, set_action, views
+    ):
+        set_action("connect", authenticate_user=False)
+
+        with pytest.raises(HTTPForbidden):
+            views.redirect()
+
+    @pytest.mark.usefixtures(
+        "assert_state_removed_from_session",
+        "assert_no_success_message_was_flashed",
+        "assert_no_account_connection_was_added",
+        "assert_user_was_not_logged_in",
+    )
+    def test_redirect_if_action_is_login_and_user_authenticated(
+        self, set_action, views
+    ):
+        set_action("login", authenticate_user=True)
+
+        with pytest.raises(HTTPForbidden):
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")
@@ -342,8 +371,7 @@ class TestORCIDRedirectViews:
         return factories.User()
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, user, signing_key):
-        pyramid_request.user = user
+    def pyramid_request(self, pyramid_request, signing_key):
         pyramid_request.session[ORCID_STATE_SESSION_KEY] = sentinel.state
         pyramid_request.registry.settings.update(
             {"orcid_oidc_state_signing_key": signing_key}
@@ -390,13 +418,33 @@ class TestORCIDRedirectViews:
         set_action("login")
 
     @pytest.fixture
-    def set_action(self, OAuth2RedirectSchema, signing_key):
-        def set_action(action: str):
+    def set_action(
+        self, OAuth2RedirectSchema, signing_key, pyramid_config, pyramid_request, user
+    ):
+        def set_action(action: str, authenticate_user=None):
             """Set the `action` string in the JWT `state` param to `action`."""
             OAuth2RedirectSchema.validate.return_value = {
                 "code": sentinel.code,
                 "state": jwt.encode({"action": action}, signing_key, algorithm="HS256"),
             }
+
+            if authenticate_user is None:
+                if action == "connect":
+                    # You have to be logged in to use the "connect" action, so
+                    # most tests that use the "connect" action should have a
+                    # logged-in user.
+                    authenticate_user = True
+                else:
+                    # You must be logged out to use the "login" action, so most
+                    # tests that use the "login" action should *not* have a
+                    # logged-in user.
+                    assert action == "login"
+                    authenticate_user = False
+
+            if authenticate_user:
+                # Set up a logged-in user.
+                pyramid_config.testing_securitypolicy(userid=user.userid)
+                pyramid_request.user = user
 
         return set_action
 

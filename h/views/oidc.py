@@ -13,7 +13,7 @@ from urllib.parse import urlencode, urlunparse
 import jwt
 import sentry_sdk
 from h_pyramid_sentry import report_exception
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 from pyramid.view import (
     exception_view_config,
     notfound_view_config,
@@ -160,6 +160,17 @@ class ORCIDRedirectViews:
             validated_params["state"], state_signing_key
         )
 
+        action_str = decoded_state["action"]
+
+        if action_str == "connect" and not self._request.is_authenticated:
+            # You must be logged in to connect an identity to your existing
+            # Hypothesis account.
+            raise HTTPForbidden
+
+        if action_str == "login" and self._request.is_authenticated:
+            # You must be logged out in order to log in.
+            raise HTTPForbidden
+
         # Get the user's ORCID iD from ORCID.
         orcid_id = self._orcid_client.get_orcid(validated_params["code"])
 
@@ -171,7 +182,6 @@ class ORCIDRedirectViews:
             "connect": self.connect_orcid_id,
             "login": self.log_in_with_orcid,
         }
-        action_str = decoded_state["action"]
         action_method = actions[action_str]
         return action_method(orcid_id, user)
 
