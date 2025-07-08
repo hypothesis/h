@@ -41,13 +41,21 @@ function bundleConfig(name, entryFile) {
     ],
 
     treeshake: {
-      // Assume that modules do not have side effects and can be safely removed
-      // from a bundle if unused.
+      // Assume that modules, except for listed exceptions, do not have side
+      // effects and can be removed from a bundle if unused.
       //
       // This is important when importing small pieces of functionality from
       // packages like @hypothesis/annotation-ui with a large total footprint
       // (including dependencies). See https://github.com/hypothesis/h/issues/9709.
-      moduleSideEffects: false,
+      moduleSideEffects: id => {
+        // `id` here is the resolved module path.
+        return [
+          // Bootstrap and its dependencies. Used in admin site.
+          'bootstrap',
+          'jquery',
+          'popper.js',
+        ].some(mod => id.includes(mod));
+      },
     },
   };
 }
