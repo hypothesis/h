@@ -26,11 +26,11 @@ from h.services.jwt import TokenValidationError
 
 
 class AccessDeniedError(Exception):
-    """The user denied us access to their ORCID record."""
+    """The user denied us access to their identity."""
 
 
 class UserConflictError(Exception):
-    """A different Hypothesis user is already connected to this ORCID iD."""
+    """A different Hypothesis user is already connected to this identity."""
 
 
 @view_defaults(request_method="GET", route_name="oidc.authorize.orcid")
