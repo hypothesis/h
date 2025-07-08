@@ -96,7 +96,7 @@ jinja2==3.1.6
     #   -r requirements/prod.in
     #   data-tasks
     #   pyramid-jinja2
-jsonschema==4.23.0
+jsonschema==4.24.0
     # via
     #   -r requirements/prod.in
     #   h-api
