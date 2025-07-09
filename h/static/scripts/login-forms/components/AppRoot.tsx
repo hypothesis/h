@@ -6,6 +6,7 @@ import { Config } from '../config';
 import { routes } from '../routes';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
+import SignupWithORCIDForm from './SignupWithORCIDForm';
 
 export type AppRootProps = {
   config: ConfigObject;
@@ -22,6 +23,9 @@ export default function AppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.signup}>
               <SignupForm />
+            </Route>
+            <Route path={routes.signupWithORCID}>
+              <SignupWithORCIDForm />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>

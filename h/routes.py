@@ -303,7 +303,7 @@ def includeme(config):  # noqa: PLR0915
         "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
     )
 
-    # ORCID
+    config.add_route("oidc.signup.orcid", "/oidc/signup/orcid")
     config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
     config.add_route("oidc.login.orcid", "/oidc/login/orcid")
     config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")

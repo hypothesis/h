@@ -206,8 +206,16 @@ class ORCIDRedirectViews:
 
     def log_in_with_orcid(self, orcid_id: str, user):
         if not user:
-            msg = "Not implemented yet"
-            raise RuntimeError(msg)
+            return HTTPFound(
+                self._request.route_url(
+                    "oidc.signup.orcid",
+                    _query={
+                        "auth": jwt.encode(
+                            {"orcid_id": orcid_id}, "secret_key", algorithm="HS256"
+                        )
+                    },
+                )
+            )
 
         del orcid_id
 

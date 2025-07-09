@@ -1,0 +1,38 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Sign up for Hypothesis{% endblock %}
+
+{% block header %}
+  {% include "h:templates/includes/logo-header.html.jinja2" %}
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+
+  {% for url in asset_urls('forms_css') %}
+    <link rel="stylesheet" href="{{ url }}">
+  {% endfor %}
+{% endblock %}
+
+{% block content %}
+  <div class="form-container">
+    <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+
+    <h1 class="form-header">Sign up for Hypothesis</h1>
+    <div id="login-form"></div>
+    <footer class="form-footer">
+      <span>
+        Already have an account?
+        <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
+      </span>
+    </footer>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('login_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
+{% endblock %}

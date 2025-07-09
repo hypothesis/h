@@ -72,7 +72,7 @@ export default function LoginForm() {
         </div>
       </Form>
       {config.features.log_in_with_orcid && (
-        <a href={routes.loginWithORCID}>Continue with ORCID</a>
+        <a href={routes.loginWithORCID}>Log in with ORCID</a>
       )}
     </FormContainer>
   );

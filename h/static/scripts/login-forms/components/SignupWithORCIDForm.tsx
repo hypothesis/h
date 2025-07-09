@@ -1,5 +1,5 @@
 import { Button } from '@hypothesis/frontend-shared';
-import { useContext } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
 import Form from '../../forms-common/components/Form';
@@ -7,11 +7,12 @@ import FormContainer from '../../forms-common/components/FormContainer';
 import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
-import type { SignupConfigObject } from '../config';
-import { routes } from '../routes';
+import type { SignupWithORCIDConfigObject } from '../config';
 
-export default function SignupForm() {
-  const config = useContext(Config) as SignupConfigObject;
+export default function SignupWithORCIDForm() {
+  const config = useContext(Config) as SignupWithORCIDConfigObject;
+  const orcidId = config.oidc.orcidId;
+  const [authJWT, setAuthJWT] = useState<string>();
 
   const username = useFormValue(config.formData?.username ?? '', {
     initialError: config.formErrors?.username,
@@ -25,23 +26,43 @@ export default function SignupForm() {
       return undefined;
     },
   });
+
   const email = useFormValue(config.formData?.email ?? '', {
     initialError: config.formErrors?.email,
   });
-  const password = useFormValue(config.formData?.password ?? '', {
-    initialError: config.formErrors?.password,
-  });
+
   const privacyAccepted = useFormValue(
     config.formData?.privacy_accepted ?? false,
     {
       initialError: config.formErrors?.privacy_accepted,
     },
   );
+
   const commsOptIn = useFormValue(config.formData?.comms_opt_in ?? false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authQueryParam = urlParams.get('auth');
+
+    if (authQueryParam) {
+      setAuthJWT(authQueryParam);
+
+      urlParams.delete('auth');
+      const newUrl =
+        window.location.pathname +
+        (urlParams.toString() ? '?' + urlParams.toString() : '') +
+        window.location.hash;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
 
   return (
     <FormContainer>
+      <p>
+        Connected: <b>{orcidId}</b>
+      </p>
       <Form csrfToken={config.csrfToken}>
+        <input type="hidden" name="auth" value={authJWT} />
         <TextField
           type="input"
           name="username"
@@ -66,24 +87,10 @@ export default function SignupForm() {
           required
           showRequired={false}
         />
-        <TextField
-          type="input"
-          inputType="password"
-          name="password"
-          value={password.value}
-          fieldError={password.error}
-          onChangeValue={password.update}
-          label="Password"
-          minLength={8}
-          required
-          showRequired={false}
-        />
         <Checkbox
           data-testid="privacy-accepted"
           checked={privacyAccepted.value}
           name="privacy_accepted"
-          // Backend form validation expects the string "true" rather than the
-          // HTML form default of "on".
           value="true"
           onChange={e => {
             privacyAccepted.update((e.target as HTMLInputElement).checked);
@@ -112,8 +119,6 @@ export default function SignupForm() {
           data-testid="comms-opt-in"
           checked={commsOptIn.value}
           name="comms_opt_in"
-          // Backend form validation expects the string "true" rather than the
-          // HTML form default of "on".
           value="true"
           onChange={e => {
             commsOptIn.update((e.target as HTMLInputElement).checked);
@@ -128,9 +133,6 @@ export default function SignupForm() {
           </Button>
         </div>
       </Form>
-      {config.features.log_in_with_orcid && (
-        <a href={routes.loginWithORCID}>Continue with ORCID</a>
-      )}
     </FormContainer>
   );
 }

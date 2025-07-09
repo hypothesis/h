@@ -41,6 +41,11 @@ class SignupController:
         return {
             "styles": self.request.registry["assets_env"].urls("forms_css"),
             "csrfToken": csrf_token,
+            "features": {
+                "log_in_with_orcid": self.request.find_service(name="feature").enabled(
+                    "log_in_with_orcid", None
+                )
+            },
         }
 
     @view_config(
