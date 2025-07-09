@@ -12,7 +12,7 @@ attrs==24.3.0
     # via
     #   jsonschema
     #   referencing
-bcrypt==4.2.1
+bcrypt==4.3.0
     # via -r requirements/prod.in
 billiard==4.2.1
     # via celery
