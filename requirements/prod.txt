@@ -5,7 +5,7 @@
 #    pip-compile --allow-unsafe requirements/prod.in
 #
 alembic==1.16.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 amqp==5.3.1
     # via kombu
 attrs==24.3.0
@@ -13,21 +13,21 @@ attrs==24.3.0
     #   jsonschema
     #   referencing
 bcrypt==4.2.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 billiard==4.2.1
     # via celery
 bleach==6.2.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 celery==5.5.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 certifi==2025.4.26
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   requests
     #   sentry-sdk
 cffi==1.17.1
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   cryptography
 chameleon==4.6.0
     # via deform
@@ -35,7 +35,7 @@ charset-normalizer==3.4.2
     # via requests
 click==8.1.8
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -51,36 +51,38 @@ colander==2.0
 cryptography==44.0.2
     # via pyjwt
 data-tasks==0.0.5
-    # via -r requirements/prod.in
+    # via -r prod.in
 deform==2.0.15
-    # via -r requirements/prod.in
+    # via -r prod.in
 elasticsearch==6.8.2
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 gevent==24.11.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 greenlet==3.1.1
-    # via gevent
+    # via
+    #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-api==1.1.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-assets==1.1.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-matchers==1.2.17
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-pyramid-sentry==1.2.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 hupper==1.12
     # via pyramid
 idna==3.10
     # via requests
 importlib-resources==6.5.2
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   data-tasks
     #   h-api
 iso8601==2.1.0
@@ -88,43 +90,43 @@ iso8601==2.1.0
     #   colander
     #   deform
 itsdangerous==2.2.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 jinja2==3.1.6
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   data-tasks
     #   pyramid-jinja2
 jsonschema==4.23.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   h-api
 jsonschema-specifications==2024.10.1
     # via jsonschema
 kombu==5.5.2
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   celery
 mako==1.3.0
     # via alembic
 markdown==3.7
-    # via -r requirements/prod.in
+    # via -r prod.in
 markupsafe==2.1.5
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   jinja2
     #   mako
     #   pyramid-jinja2
 newrelic==10.5.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 oauthlib==3.2.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 packaging==25.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   gunicorn
     #   zope-sqlalchemy
 passlib==1.7.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 pastedeploy==3.1.0
     # via plaster-pastedeploy
 peppercorn==0.6
@@ -138,22 +140,22 @@ plaster-pastedeploy==1.0.1
 prompt-toolkit==3.0.50
     # via click-repl
 psycogreen==1.0.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 psycopg2==2.9.10
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   data-tasks
 pycparser==2.22
     # via cffi
 pycryptodomex==3.21.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyjwt[crypto]==2.10.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyparsing==3.2.3
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid==2.0.2
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   h-assets
     #   h-pyramid-sentry
     #   pyramid-exclog
@@ -164,28 +166,28 @@ pyramid==2.0.2
     #   pyramid-services
     #   pyramid-tm
 pyramid-exclog==1.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-jinja2==2.10.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-mailer==0.15.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-retry==2.1.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-sanity==1.0.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-services==2.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-tm==2.6
-    # via -r requirements/prod.in
+    # via -r prod.in
 python-dateutil==2.9.0.post0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   celery
     #   elasticsearch-dsl
 python-slugify==8.0.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 pytz==2025.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 referencing==0.36.1
     # via
     #   h-api
@@ -194,16 +196,16 @@ referencing==0.36.1
 repoze-sendmail==4.4.1
     # via pyramid-mailer
 requests==2.32.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 rfc3339-validator==0.1.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 rpds-py==0.22.3
     # via
     #   jsonschema
     #   referencing
 sentry-sdk==2.22.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   h-pyramid-sentry
 six==1.17.0
     # via
@@ -212,25 +214,25 @@ six==1.17.0
     #   rfc3339-validator
 sqlalchemy==2.0.25
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   alembic
     #   data-tasks
     #   zope-sqlalchemy
 sqlparse==0.5.3
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   data-tasks
 supervisor==4.2.5
-    # via -r requirements/prod.in
+    # via -r prod.in
 tabulate==0.9.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   data-tasks
 text-unidecode==1.3
     # via python-slugify
 transaction==5.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   pyramid-mailer
     #   pyramid-tm
     #   repoze-sendmail
@@ -247,14 +249,14 @@ typing-extensions==4.13.2
     #   sqlalchemy
 tzdata==2025.2
     # via kombu
-urllib3==2.3.0
+urllib3==2.5.0
     # via
     #   elasticsearch
     #   requests
     #   sentry-sdk
 venusian==3.1.1
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   pyramid
 vine==5.1.0
     # via
@@ -270,9 +272,9 @@ webob==1.8.8
 wired==0.4
     # via pyramid-services
 ws4py==0.6.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 wsaccel==0.6.7
-    # via -r requirements/prod.in
+    # via -r prod.in
 zope-deprecation==5.0
     # via
     #   deform
@@ -282,7 +284,7 @@ zope-event==5.0
     # via gevent
 zope-interface==7.2
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   gevent
     #   pyramid
     #   pyramid-retry
@@ -292,7 +294,7 @@ zope-interface==7.2
     #   wired
     #   zope-sqlalchemy
 zope-sqlalchemy==3.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==78.1.1
