@@ -131,6 +131,8 @@ export default function SignupForm() {
       {config.features.log_in_with_orcid && (
         <a href={routes.loginWithORCID}>Continue with ORCID</a>
       )}
+      <p><a href="/oidc/login/google">Continue with Google</a></p>
+      <p><a href="/oidc/login/facebook">Continue with Facebook</a></p>
     </FormContainer>
   );
 }

@@ -74,6 +74,8 @@ export default function LoginForm() {
       {config.features.log_in_with_orcid && (
         <a href={routes.loginWithORCID}>Log in with ORCID</a>
       )}
+      <p><a href="/oidc/login/google">Log in with Google</a></p>
+      <p><a href="/oidc/login/facebook">Log in with Facebook</a></p>
     </FormContainer>
   );
 }

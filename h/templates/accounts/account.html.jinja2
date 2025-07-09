@@ -40,6 +40,16 @@
             <span>{% trans %} Connect {% endtrans %}<strong>ORCID iD</strong></span>
             {{ svg_icon('external', 'external-icon') }}
           </a>
+
+          <a href="{{ request.route_path('oidc.connect.google') }}" class="orcid-connect">
+            <span>Connect <strong>Google account</strong></span>
+            {{ svg_icon('external', 'external-icon') }}
+          </a>
+
+          <a href="{{ request.route_path('oidc.connect.facebook') }}" class="orcid-connect">
+            <span>Connect <strong>Facebook account</strong></span>
+            {{ svg_icon('external', 'external-icon') }}
+          </a>
         {% endif %}
       </div>
     {% endif %}

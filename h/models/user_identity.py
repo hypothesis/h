@@ -7,6 +7,8 @@ from h.db import Base
 
 class IdentityProvider(StrEnum):
     ORCID = "orcid.org"
+    GOOGLE = "google"
+    FACEBOOK = "facebook"
 
 
 class UserIdentity(Base):
