@@ -146,7 +146,6 @@ greenlet==3.1.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   gevent
-    #   sqlalchemy
 gunicorn==23.0.0
     # via
     #   -r requirements/functests.txt
@@ -155,7 +154,7 @@ h-api==1.1.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-assets==1.0.7
+h-assets==1.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -287,13 +286,13 @@ peppercorn==0.6
 pip-sync-faster==0.0.5
     # via
     #   -r requirements/functests.txt
-    #   -r requirements/lint.in
     #   -r requirements/tests.txt
+    #   -r requirements/lint.in
 pip-tools==7.4.1
     # via
     #   -r requirements/functests.txt
-    #   -r requirements/lint.in
     #   -r requirements/tests.txt
+    #   -r requirements/lint.in
     #   pip-sync-faster
 plaster==1.1.2
     # via

@@ -100,12 +100,11 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
-    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
     # via -r requirements/prod.txt
-h-assets==1.0.7
+h-assets==1.1.0
     # via -r requirements/prod.txt
 h-matchers==1.2.17
     # via -r requirements/prod.txt
@@ -325,8 +324,8 @@ stack-data==0.6.3
     # via ipython
 supervisor==4.2.5
     # via
-    #   -r requirements/dev.in
     #   -r requirements/prod.txt
+    #   -r requirements/dev.in
 tabulate==0.9.0
     # via
     #   -r requirements/prod.txt
