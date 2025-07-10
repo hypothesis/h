@@ -1,6 +1,8 @@
+from datetime import UTC
 from unittest import mock
 
 import pytest
+from freezegun import freeze_time
 from pyramid import httpexceptions
 
 from h.services.exceptions import ConflictError
@@ -42,7 +44,7 @@ class TestSignupController:
         }
 
     def test_post_creates_user_from_form_data(
-        self, form_validating_to, pyramid_request, user_signup_service, datetime
+        self, form_validating_to, pyramid_request, user_signup_service, frozen_time
     ):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to(
@@ -61,7 +63,7 @@ class TestSignupController:
             username="bob",
             email="bob@example.com",
             password="s3crets",  # noqa: S106
-            privacy_accepted=datetime.datetime.now(datetime.UTC),
+            privacy_accepted=frozen_time.astimezone(UTC),
             comms_opt_in=True,
         )
 
@@ -125,6 +127,11 @@ class TestSignupController:
 
         return controller
 
+    @pytest.fixture
+    def frozen_time(self):
+        with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
+            yield frozen_time_factory()
+
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
         pyramid_config.add_route("activity.user_search", "/users/{username}")
@@ -134,8 +141,3 @@ class TestSignupController:
 @pytest.fixture(autouse=True)
 def get_csrf_token(patch):
     return patch("h.views.account_signup.get_csrf_token")
-
-
-@pytest.fixture
-def datetime(patch):
-    return patch("h.views.account_signup.datetime")
