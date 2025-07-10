@@ -27,12 +27,7 @@ class SignupViews:
         """Render the empty registration form."""
         self.redirect_if_logged_in()
 
-        return {"js_config": self._js_config()}
-
-    def _js_config(self) -> dict[str, Any]:
-        csrf_token = get_csrf_token(self.request)
-
-        return {"csrfToken": csrf_token}
+        return {"js_config": self.js_config}
 
     @view_config(
         request_method="POST", renderer="h:templates/accounts/signup-post.html.jinja2"
@@ -44,7 +39,7 @@ class SignupViews:
         try:
             appstruct = self.form.validate(self.request.POST.items())
         except ValidationFailure as e:
-            js_config = self._js_config()
+            js_config = self.js_config
             js_config["formErrors"] = e.error.asdict()
             js_config["formData"] = {
                 "username": self.request.POST.get("username", ""),
@@ -60,7 +55,7 @@ class SignupViews:
 
         signup_service = self.request.find_service(name="user_signup")
 
-        js_config = self._js_config()
+        js_config = self.js_config
         heading = _("Account registration successful")
         message = None
         try:
@@ -80,6 +75,12 @@ class SignupViews:
             "heading": heading,
             "message": message,
         }
+
+    @property
+    def js_config(self) -> dict[str, Any]:
+        csrf_token = get_csrf_token(self.request)
+
+        return {"csrfToken": csrf_token}
 
     def redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
