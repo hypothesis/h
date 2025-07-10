@@ -4,7 +4,6 @@ import pytest
 from pyramid import httpexceptions
 
 from h.services.exceptions import ConflictError
-from h.services.user_signup import UserSignupService
 from h.views import account_signup as views
 
 
@@ -133,13 +132,6 @@ class TestSignupController:
 def routes(pyramid_config):
     pyramid_config.add_route("activity.user_search", "/users/{username}")
     pyramid_config.add_route("index", "/index")
-
-
-@pytest.fixture
-def user_signup_service(pyramid_config):
-    service = mock.create_autospec(UserSignupService, spec_set=True, instance=True)
-    pyramid_config.register_service(service, name="user_signup")
-    return service
 
 
 @pytest.fixture
