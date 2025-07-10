@@ -27,9 +27,7 @@ class SignupViews:
         """Render the empty registration form."""
         self._redirect_if_logged_in()
 
-        return {
-            "js_config": self._js_config(),
-        }
+        return {"js_config": self._js_config()}
 
     def _js_config(self) -> dict[str, Any]:
         csrf_token = get_csrf_token(self.request)
