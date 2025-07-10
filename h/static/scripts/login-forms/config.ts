@@ -35,6 +35,27 @@ export type SignupConfigObject = ConfigBase & {
     privacy_accepted: boolean;
     comms_opt_in: boolean;
   };
+  features: {
+    log_in_with_orcid: boolean;
+  };
+};
+
+export type SignupWithORCIDConfigObject = ConfigBase & {
+  identity: { 'orcid.org': { id: string } };
+  features: {
+    log_in_with_orcid: boolean;
+  };
+  formErrors?: {
+    username?: string;
+    email?: string;
+    privacy_accepted?: string;
+  };
+  formData?: {
+    username: string;
+    email: string;
+    privacy_accepted: boolean;
+    comms_opt_in: boolean;
+  };
 };
 
 export type ConfigObject = LoginConfigObject | SignupConfigObject;

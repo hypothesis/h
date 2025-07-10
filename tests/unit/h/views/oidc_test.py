@@ -3,7 +3,7 @@ from urllib.parse import urlencode, urlunparse
 
 import jwt
 import pytest
-from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
@@ -28,7 +28,7 @@ class TestORCIDAndLoginViews:
         ],
     )
     def test_connect_or_login(
-        self, pyramid_request, secrets, signing_key, route_name, expected_action
+        self, pyramid_request, secrets, state_signing_key, route_name, expected_action
     ):
         pyramid_request.matched_route.name = route_name
 
@@ -36,7 +36,7 @@ class TestORCIDAndLoginViews:
 
         expected_state = jwt.encode(
             {"action": expected_action, "rfp": secrets.token_hex.return_value},
-            signing_key,
+            state_signing_key,
             algorithm="HS256",
         )
 
@@ -70,14 +70,14 @@ class TestORCIDAndLoginViews:
         assert result == {}
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, factories, signing_key):
+    def pyramid_request(self, pyramid_request, factories, state_signing_key):
         pyramid_request.user = factories.User()
         pyramid_request.registry.settings.update(
             {
                 "orcid_host": IdentityProvider.ORCID,
                 "orcid_client_id": sentinel.client_id,
                 "orcid_client_secret": sentinel.client_secret,
-                "orcid_oidc_state_signing_key": signing_key,
+                "orcid_oidc_state_signing_key": state_signing_key,
             }
         )
         return pyramid_request
@@ -221,11 +221,11 @@ class TestORCIDRedirectViews:
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")
-    def test_redirect_fetches_the_hypothesis_uiser(self, views, user_service):
+    def test_redirect_fetches_the_hypothesis_uiser(self, views, user_service, orcid_id):
         views.redirect()
 
         user_service.fetch_by_identity.assert_called_once_with(
-            IdentityProvider.ORCID, sentinel.orcid_id
+            IdentityProvider.ORCID, orcid_id
         )
 
     @pytest.mark.usefixtures(
@@ -250,15 +250,20 @@ class TestORCIDRedirectViews:
         "assert_user_was_not_logged_in",
     )
     def test_redirect_when_action_connect_and_account_not_yet_connected(
-        self, pyramid_request, orcid_client_service, user_service, user, views, matchers
+        self,
+        pyramid_request,
+        orcid_client_service,
+        user_service,
+        user,
+        views,
+        matchers,
+        orcid_id,
     ):
         user_service.fetch_by_identity.return_value = None
 
         result = views.redirect()
 
-        orcid_client_service.add_identity.assert_called_once_with(
-            user, sentinel.orcid_id
-        )
+        orcid_client_service.add_identity.assert_called_once_with(user, orcid_id)
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
 
     @pytest.mark.usefixtures(
@@ -285,12 +290,23 @@ class TestORCIDRedirectViews:
         "assert_no_success_message_was_flashed",
     )
     def test_redirect_when_action_login_and_no_connected_user_exists(
-        self, views, user_service
+        self, views, user_service, authjwt_signing_key, pyramid_request, orcid_id
     ):
         user_service.fetch_by_identity.return_value = None
 
-        with pytest.raises(RuntimeError):
-            views.redirect()
+        response = views.redirect()
+
+        assert isinstance(response, HTTPFound)
+        assert response.location == pyramid_request.route_url(
+            "signup.orcid",
+            _query={
+                "auth": jwt.encode(
+                    {"identity": {"orcid.org": {"id": orcid_id}}},
+                    authjwt_signing_key,
+                    algorithm="HS256",
+                )
+            },
+        )
 
     @pytest.mark.usefixtures(
         "with_login_action",
@@ -371,10 +387,13 @@ class TestORCIDRedirectViews:
         return factories.User()
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, signing_key):
+    def pyramid_request(self, pyramid_request, authjwt_signing_key, state_signing_key):
         pyramid_request.session[ORCID_STATE_SESSION_KEY] = sentinel.state
         pyramid_request.registry.settings.update(
-            {"orcid_oidc_state_signing_key": signing_key}
+            {
+                "orcid_oidc_state_signing_key": state_signing_key,
+                "orcid_oidc_authjwt_signing_key": authjwt_signing_key,
+            }
         )
         return pyramid_request
 
@@ -419,13 +438,20 @@ class TestORCIDRedirectViews:
 
     @pytest.fixture
     def set_action(
-        self, OAuth2RedirectSchema, signing_key, pyramid_config, pyramid_request, user
+        self,
+        OAuth2RedirectSchema,
+        state_signing_key,
+        pyramid_config,
+        pyramid_request,
+        user,
     ):
         def set_action(action: str, authenticate_user=None):
             """Set the `action` string in the JWT `state` param to `action`."""
             OAuth2RedirectSchema.validate.return_value = {
                 "code": sentinel.code,
-                "state": jwt.encode({"action": action}, signing_key, algorithm="HS256"),
+                "state": jwt.encode(
+                    {"action": action}, state_signing_key, algorithm="HS256"
+                ),
             }
 
             if authenticate_user is None:
@@ -461,8 +487,12 @@ class TestORCIDRedirectViews:
         login.assert_not_called()
 
     @pytest.fixture
-    def orcid_client_service(self, orcid_client_service):
-        orcid_client_service.get_orcid.return_value = sentinel.orcid_id
+    def orcid_id(self):
+        return "test_orcid_id"
+
+    @pytest.fixture
+    def orcid_client_service(self, orcid_client_service, orcid_id):
+        orcid_client_service.get_orcid.return_value = orcid_id
         return orcid_client_service
 
     @pytest.fixture
@@ -474,6 +504,7 @@ class TestORCIDRedirectViews:
     def routes(self, pyramid_config):
         pyramid_config.add_route("activity.user_search", "/users/{username}")
         pyramid_config.add_route("account", "/account/settings")
+        pyramid_config.add_route("signup.orcid", "/signup/orcid")
 
     @pytest.fixture(autouse=True)
     def handle_external_request_error(self, patch):
@@ -541,7 +572,12 @@ class TestHandleExternalRequestError:
 
 
 @pytest.fixture
-def signing_key():
+def authjwt_signing_key():
+    return "orcid_oidc_authjwt_signing_key"
+
+
+@pytest.fixture
+def state_signing_key():
     return "orcid_oidc_state_signing_key"
 
 

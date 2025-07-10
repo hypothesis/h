@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
 
 ORCID_STATE_SESSION_KEY = "oidc.state.orcid"
+JWT_SIGNING_ALGORITHM = "HS256"
 
 
 class AccessDeniedError(Exception):
@@ -63,12 +64,12 @@ def _encode_oauth2_state_param(action, key):
             "rfp": secrets.token_hex(),
         },
         key,
-        algorithm="HS256",
+        algorithm=JWT_SIGNING_ALGORITHM,
     )
 
 
 def _decode_oauth2_state_param(state_param, key):
-    return jwt.decode(state_param, key, algorithms=["HS256"])
+    return jwt.decode(state_param, key, algorithms=[JWT_SIGNING_ALGORITHM])
 
 
 @view_defaults(request_method="GET")
@@ -206,10 +207,24 @@ class ORCIDRedirectViews:
 
     def log_in_with_orcid(self, orcid_id: str, user):
         if not user:
-            msg = "Not implemented yet"
-            raise RuntimeError(msg)
+            # There's no Hypothesis account for this ORCID iD yet.
 
-        del orcid_id
+            # First create a JWT that will be used to securely communicate the
+            # connected ORCID iD when we redirect to the signup page below.
+            authjwt_signing_key = self._request.registry.settings[
+                "orcid_oidc_authjwt_signing_key"
+            ]
+            authjwt = jwt.encode(
+                {"identity": {str(IdentityProvider.ORCID): {"id": orcid_id}}},
+                authjwt_signing_key,
+                algorithm=JWT_SIGNING_ALGORITHM,
+            )
+
+            # Redirect to the "Sign up to Hypothesis with ORCID" page to create
+            # a new account.
+            return HTTPFound(
+                self._request.route_url("signup.orcid", _query={"auth": authjwt})
+            )
 
         headers = login(user, self._request)
 
