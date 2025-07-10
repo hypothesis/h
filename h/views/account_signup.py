@@ -7,7 +7,7 @@ from pyramid.csrf import get_csrf_token
 from pyramid.view import view_config, view_defaults
 
 from h import i18n
-from h.accounts import schemas
+from h.accounts.schemas import RegisterSchema
 from h.services.exceptions import ConflictError
 
 _ = i18n.TranslationString
@@ -17,7 +17,7 @@ _ = i18n.TranslationString
 class SignupViews:
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.RegisterSchema().bind(request=self.request)
+        self.schema = RegisterSchema().bind(request=self.request)
         self.form = request.create_form(self.schema)
 
     @view_config(
