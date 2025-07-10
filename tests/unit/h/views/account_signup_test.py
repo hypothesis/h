@@ -1,143 +1,217 @@
 from datetime import UTC
-from unittest import mock
+from unittest.mock import ANY, create_autospec, sentinel
 
 import pytest
+from colander import Invalid
+from deform import ValidationFailure
 from freezegun import freeze_time
-from pyramid import httpexceptions
+from pyramid.httpexceptions import HTTPFound
 
+from h import i18n
 from h.services.exceptions import ConflictError
-from h.views import account_signup as views
+from h.views.account_signup import SignupViews
+
+_ = i18n.TranslationString
 
 
-@pytest.mark.usefixtures("pyramid_config", "user_signup_service")
+@pytest.mark.usefixtures("user_signup_service")
 class TestSignupViews:
-    def test_post_returns_errors_when_validation_fails(
-        self, invalid_form, pyramid_request, get_csrf_token
+    def test_get(self, views, get_csrf_token, pyramid_request):
+        response = views.get()
+
+        get_csrf_token.assert_called_once_with(pyramid_request)
+        assert response == {"js_config": {"csrfToken": get_csrf_token.return_value}}
+
+    def test_get_redirects_if_logged_in(
+        self, pyramid_request, views, authenticated_user
     ):
-        pyramid_request.POST = {
-            "username": "jane",
-            "password": "doe",
-            "email": "jane@example.org",
-            "privacy_accepted": "true",
-            "comms_opt_in": "false",
+        with pytest.raises(HTTPFound) as exc_info:
+            views.get()
+
+        assert exc_info.value.location == pyramid_request.route_url(
+            "activity.user_search", username=authenticated_user.username
+        )
+
+    def test_post(
+        self,
+        views,
+        RegisterSchema,
+        pyramid_request,
+        user_signup_service,
+        frozen_time,
+        get_csrf_token,
+    ):
+        response = views.post()
+
+        RegisterSchema.assert_called_once_with()
+        RegisterSchema.return_value.bind.assert_called_once_with(
+            request=pyramid_request
+        )
+        pyramid_request.create_form.assert_called_once_with(
+            RegisterSchema.return_value.bind.return_value
+        )
+        pyramid_request.create_form.return_value.validate.assert_called_once_with(ANY)
+        assert list(
+            pyramid_request.create_form.return_value.validate.call_args[0][0]
+        ) == list(pyramid_request.POST.items())
+        user_signup_service.signup.assert_called_once_with(
+            username=sentinel.username,
+            email=sentinel.email,
+            password=sentinel.password,
+            privacy_accepted=frozen_time.astimezone(UTC),
+            comms_opt_in=sentinel.comms_opt_in,
+        )
+        get_csrf_token.assert_called_once_with(pyramid_request)
+        assert response == {
+            "js_config": {"csrfToken": get_csrf_token.return_value},
+            "heading": _("Account registration successful"),
+            "message": None,
         }
-        signup_views = views.SignupViews(pyramid_request)
-        signup_views.form = invalid_form()
-        form_errors = {"username": "This username is already taken."}
-        form = invalid_form(errors=form_errors)
-        signup_views.form = form
 
-        result = signup_views.post()
+    def test_post_redirects_if_logged_in(
+        self, pyramid_request, views, user_signup_service, authenticated_user
+    ):
+        with pytest.raises(HTTPFound) as exc_info:
+            views.post()
 
-        assert result == {
-            "js_config": {
-                "csrfToken": get_csrf_token.return_value,
-                "formErrors": form_errors,
-                "formData": {
-                    "username": "jane",
-                    "password": "doe",
-                    "email": "jane@example.org",
+        assert exc_info.value.location == pyramid_request.route_url(
+            "activity.user_search", username=authenticated_user.username
+        )
+        user_signup_service.signup.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "post_params,expected_form_data",
+        [
+            # It copies the submitted form fields into the returned form data
+            # when re-rendering the page.
+            (
+                {
+                    "username": sentinel.username,
+                    "email": sentinel.email,
+                    "password": sentinel.password,
+                    "privacy_accepted": "true",
+                    "comms_opt_in": "true",
+                },
+                {
+                    "username": sentinel.username,
+                    "email": sentinel.email,
+                    "password": sentinel.password,
                     "privacy_accepted": True,
+                    "comms_opt_in": True,
+                },
+            ),
+            # If privacy_accepted and comms_opt_in are not "true" in the post
+            # params then they're False in the returned form data.
+            (
+                {
+                    "username": sentinel.username,
+                    "email": sentinel.email,
+                    "password": sentinel.password,
+                    "privacy_accepted": "false",
+                    "comms_opt_in": "false",
+                },
+                {
+                    "username": sentinel.username,
+                    "email": sentinel.email,
+                    "password": sentinel.password,
+                    "privacy_accepted": False,
                     "comms_opt_in": False,
                 },
+            ),
+            # If post params are missing from the request the returned form
+            # data is empty.
+            (
+                {},
+                {
+                    "username": "",
+                    "email": "",
+                    "password": "",
+                    "privacy_accepted": False,
+                    "comms_opt_in": False,
+                },
+            ),
+        ],
+    )
+    def test_post_when_validation_failure(
+        self,
+        pyramid_request,
+        get_csrf_token,
+        views,
+        post_params,
+        expected_form_data,
+        user_signup_service,
+    ):
+        exception = pyramid_request.create_form.return_value.validate.side_effect = (
+            ValidationFailure(
+                sentinel.field,
+                sentinel.cstruct,
+                error=create_autospec(Invalid, instance=True, spec_set=True),
+            )
+        )
+        pyramid_request.POST = post_params
+
+        response = views.post()
+
+        get_csrf_token.assert_called_once_with(pyramid_request)
+        assert response == {
+            "js_config": {
+                "csrfToken": get_csrf_token.return_value,
+                "formErrors": exception.error.asdict.return_value,
+                "formData": expected_form_data,
             }
         }
+        user_signup_service.signup.assert_not_called()
 
-    def test_post_creates_user_from_form_data(
-        self, form_validating_to, pyramid_request, user_signup_service, frozen_time
+    def test_post_when_signup_conflict(
+        self, user_signup_service, get_csrf_token, views, pyramid_request
     ):
-        signup_views = views.SignupViews(pyramid_request)
-        signup_views.form = form_validating_to(
-            {
-                "username": "bob",
-                "email": "bob@example.com",
-                "password": "s3crets",
-                "random_other_field": "something else",
-                "comms_opt_in": True,
-            }
-        )
+        user_signup_service.signup.side_effect = ConflictError("Test error message")
 
-        signup_views.post()
+        response = views.post()
 
-        user_signup_service.signup.assert_called_with(
-            username="bob",
-            email="bob@example.com",
-            password="s3crets",  # noqa: S106
-            privacy_accepted=frozen_time.astimezone(UTC),
-            comms_opt_in=True,
-        )
-
-    def test_post_does_not_create_user_when_validation_fails(
-        self, invalid_form, pyramid_request, user_signup_service
-    ):
-        signup_views = views.SignupViews(pyramid_request)
-        signup_views.form = invalid_form()
-
-        signup_views.post()
-
-        assert not user_signup_service.signup.called
-
-    def test_post_displays_heading_and_message_on_success(self, signup_views):
-        result = signup_views.post()
-
-        assert result["heading"] == "Account registration successful"
-        assert result["message"] is None
-
-    def test_post_displays_heading_and_message_on_conflict_error(
-        self, signup_views, user_signup_service
-    ):
-        user_signup_service.signup.side_effect = ConflictError(
-            "The account bob@example.com is already registered."
-        )
-
-        result = signup_views.post()
-
-        assert result["heading"] == "Account already registered"
-        assert result["message"] == (
-            "The account bob@example.com is already registered."
-        )
-
-    def test_get_renders_form_when_not_logged_in(self, pyramid_request, get_csrf_token):
-        signup_views = views.SignupViews(pyramid_request)
-        signup_views.form.render = mock.Mock()
-
-        assert signup_views.get() == {
-            "js_config": {"csrfToken": get_csrf_token.return_value}
+        get_csrf_token.assert_called_once_with(pyramid_request)
+        assert response == {
+            "js_config": {"csrfToken": get_csrf_token.return_value},
+            "heading": _("Account already registered"),
+            "message": _("Test error message"),
         }
-
-    def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
-        pyramid_config.testing_securitypolicy("acct:jane@doe.org")
-        pyramid_request.user = mock.Mock(username="janedoe")
-        signup_views = views.SignupViews(pyramid_request)
-
-        with pytest.raises(httpexceptions.HTTPRedirection):
-            signup_views.get()
 
     @pytest.fixture
-    def signup_views(self, form_validating_to, pyramid_request):
-        signup_views = views.SignupViews(pyramid_request)
-        signup_views.form = form_validating_to(
-            {
-                "username": "bob",
-                "email": "bob@example.com",
-                "password": "s3crets",
-                "comms_opt_in": True,
-            }
-        )
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.create_form.return_value.validate.return_value = {
+            "username": sentinel.username,
+            "email": sentinel.email,
+            "password": sentinel.password,
+            "comms_opt_in": sentinel.comms_opt_in,
+        }
+        return pyramid_request
 
-        return signup_views
+    @pytest.fixture
+    def views(self, pyramid_request):
+        return SignupViews(pyramid_request)
+
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("activity.user_search", "/users/{username}")
 
     @pytest.fixture
     def frozen_time(self):
         with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
             yield frozen_time_factory()
 
-    @pytest.fixture(autouse=True)
-    def routes(self, pyramid_config):
-        pyramid_config.add_route("activity.user_search", "/users/{username}")
-        pyramid_config.add_route("index", "/index")
+    @pytest.fixture
+    def authenticated_user(self, factories, pyramid_config, pyramid_request):
+        user = factories.User()
+        pyramid_request.user = user
+        pyramid_config.testing_securitypolicy(userid=user.userid)
+        return user
 
 
 @pytest.fixture(autouse=True)
 def get_csrf_token(patch):
     return patch("h.views.account_signup.get_csrf_token")
+
+
+@pytest.fixture(autouse=True)
+def RegisterSchema(patch):
+    return patch("h.views.account_signup.RegisterSchema")
