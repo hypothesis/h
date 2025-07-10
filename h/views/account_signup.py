@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
 
-import deform
+from deform import ValidationFailure
 from pyramid import httpexceptions
 from pyramid.csrf import get_csrf_token
 from pyramid.view import view_config, view_defaults
@@ -45,7 +45,7 @@ class SignupController:
 
         try:
             appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure as e:
+        except ValidationFailure as e:
             js_config = self._js_config()
             js_config["formErrors"] = e.error.asdict()
             js_config["formData"] = {
