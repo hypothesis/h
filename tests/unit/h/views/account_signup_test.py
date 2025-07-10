@@ -7,7 +7,7 @@ from h.services.exceptions import ConflictError
 from h.views import account_signup as views
 
 
-@pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")
+@pytest.mark.usefixtures("pyramid_config", "user_signup_service")
 class TestSignupController:
     def test_post_returns_errors_when_validation_fails(
         self, invalid_form, pyramid_request, get_csrf_token
@@ -125,16 +125,15 @@ class TestSignupController:
 
         return controller
 
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("activity.user_search", "/users/{username}")
+        pyramid_config.add_route("index", "/index")
+
 
 @pytest.fixture(autouse=True)
 def get_csrf_token(patch):
     return patch("h.views.account_signup.get_csrf_token")
-
-
-@pytest.fixture
-def routes(pyramid_config):
-    pyramid_config.add_route("activity.user_search", "/users/{username}")
-    pyramid_config.add_route("index", "/index")
 
 
 @pytest.fixture
