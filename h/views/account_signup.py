@@ -49,9 +49,7 @@ class SignupViews:
                 == "true",
                 "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
             }
-            return {
-                "js_config": js_config,
-            }
+            return {"js_config": js_config}
 
         signup_service = self.request.find_service(name="user_signup")
 
