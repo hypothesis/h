@@ -13,10 +13,6 @@ from h.services.exceptions import ConflictError
 _ = i18n.TranslationString
 
 
-def _login_redirect_url(request):
-    return request.route_url("activity.user_search", username=request.user.username)
-
-
 @view_defaults(route_name="signup")
 class SignupController:
     def __init__(self, request):
@@ -89,4 +85,8 @@ class SignupController:
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(_login_redirect_url(self.request))
+            raise httpexceptions.HTTPFound(
+                self.request.route_url(
+                    "activity.user_search", username=self.request.user.username
+                )
+            )
