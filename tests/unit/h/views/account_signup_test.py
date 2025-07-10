@@ -10,7 +10,7 @@ from h.views import account_signup as views
 @pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")
 class TestSignupController:
     def test_post_returns_errors_when_validation_fails(
-        self, invalid_form, pyramid_request, mocker
+        self, invalid_form, pyramid_request, get_csrf_token
     ):
         pyramid_request.POST = {
             "username": "jane",
@@ -19,7 +19,6 @@ class TestSignupController:
             "privacy_accepted": "true",
             "comms_opt_in": "false",
         }
-        mocker.spy(views, "get_csrf_token")
         controller = views.SignupController(pyramid_request)
         controller.form = invalid_form()
         form_errors = {"username": "This username is already taken."}
@@ -30,7 +29,7 @@ class TestSignupController:
 
         assert result == {
             "js_config": {
-                "csrfToken": views.get_csrf_token.spy_return,
+                "csrfToken": get_csrf_token.return_value,
                 "formErrors": form_errors,
                 "formData": {
                     "username": "jane",
@@ -96,13 +95,12 @@ class TestSignupController:
             "The account bob@example.com is already registered."
         )
 
-    def test_get_renders_form_when_not_logged_in(self, pyramid_request, mocker):
-        mocker.spy(views, "get_csrf_token")
+    def test_get_renders_form_when_not_logged_in(self, pyramid_request, get_csrf_token):
         controller = views.SignupController(pyramid_request)
         controller.form.render = mock.Mock()
 
         assert controller.get() == {
-            "js_config": {"csrfToken": views.get_csrf_token.spy_return}
+            "js_config": {"csrfToken": get_csrf_token.return_value}
         }
 
     def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
@@ -126,6 +124,11 @@ class TestSignupController:
         )
 
         return controller
+
+
+@pytest.fixture(autouse=True)
+def get_csrf_token(patch):
+    return patch("h.views.account_signup.get_csrf_token")
 
 
 @pytest.fixture
