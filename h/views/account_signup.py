@@ -25,7 +25,7 @@ class SignupViews:
     )
     def get(self):
         """Render the empty registration form."""
-        self._redirect_if_logged_in()
+        self.redirect_if_logged_in()
 
         return {"js_config": self._js_config()}
 
@@ -39,7 +39,7 @@ class SignupViews:
     )
     def post(self):
         """Handle submission of the new user registration form."""
-        self._redirect_if_logged_in()
+        self.redirect_if_logged_in()
 
         try:
             appstruct = self.form.validate(self.request.POST.items())
@@ -81,7 +81,7 @@ class SignupViews:
             "message": message,
         }
 
-    def _redirect_if_logged_in(self):
+    def redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(
                 self.request.route_url(
