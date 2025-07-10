@@ -38,10 +38,7 @@ class SignupController:
     def _js_config(self) -> dict[str, Any]:
         csrf_token = get_csrf_token(self.request)
 
-        return {
-            "styles": self.request.registry["assets_env"].urls("forms_css"),
-            "csrfToken": csrf_token,
-        }
+        return {"csrfToken": csrf_token}
 
     @view_config(
         request_method="POST", renderer="h:templates/accounts/signup-post.html.jinja2"

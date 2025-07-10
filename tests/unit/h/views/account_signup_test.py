@@ -1,8 +1,6 @@
 from unittest import mock
-from unittest.mock import create_autospec
 
 import pytest
-from h_assets import Environment
 from pyramid import httpexceptions
 
 from h.services.exceptions import ConflictError
@@ -13,7 +11,7 @@ from h.views import account_signup as views
 @pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")
 class TestSignupController:
     def test_post_returns_errors_when_validation_fails(
-        self, invalid_form, pyramid_request, mocker, assets_env
+        self, invalid_form, pyramid_request, mocker
     ):
         pyramid_request.POST = {
             "username": "jane",
@@ -33,7 +31,6 @@ class TestSignupController:
 
         assert result == {
             "js_config": {
-                "styles": assets_env.urls.return_value,
                 "csrfToken": views.get_csrf_token.spy_return,
                 "formErrors": form_errors,
                 "formData": {
@@ -100,18 +97,13 @@ class TestSignupController:
             "The account bob@example.com is already registered."
         )
 
-    def test_get_renders_form_when_not_logged_in(
-        self, pyramid_request, mocker, assets_env
-    ):
+    def test_get_renders_form_when_not_logged_in(self, pyramid_request, mocker):
         mocker.spy(views, "get_csrf_token")
         controller = views.SignupController(pyramid_request)
         controller.form.render = mock.Mock()
 
         assert controller.get() == {
-            "js_config": {
-                "styles": assets_env.urls.return_value,
-                "csrfToken": views.get_csrf_token.spy_return,
-            }
+            "js_config": {"csrfToken": views.get_csrf_token.spy_return}
         }
 
     def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
@@ -135,15 +127,6 @@ class TestSignupController:
         )
 
         return controller
-
-    @pytest.fixture
-    def assets_env(self):
-        return create_autospec(Environment, instance=True, spec_set=True)
-
-    @pytest.fixture(autouse=True)
-    def pyramid_config(self, pyramid_config, assets_env):
-        pyramid_config.registry["assets_env"] = assets_env
-        return pyramid_config
 
 
 @pytest.fixture
