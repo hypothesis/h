@@ -68,11 +68,7 @@ class SignupViews:
             heading = _("Account already registered")
             message = _(f"{exc.args[0]}")  # noqa: INT001
 
-        return {
-            "js_config": js_config,
-            "heading": heading,
-            "message": message,
-        }
+        return {"js_config": js_config, "heading": heading, "message": message}
 
     @property
     def js_config(self) -> dict[str, Any]:
