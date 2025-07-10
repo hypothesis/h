@@ -76,9 +76,7 @@ class SignupViews:
 
     @property
     def js_config(self) -> dict[str, Any]:
-        csrf_token = get_csrf_token(self.request)
-
-        return {"csrfToken": csrf_token}
+        return {"csrfToken": get_csrf_token(self.request)}
 
     def redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
