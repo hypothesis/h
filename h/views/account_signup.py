@@ -14,7 +14,7 @@ _ = i18n.TranslationString
 
 
 @view_defaults(route_name="signup")
-class SignupController:
+class SignupViews:
     def __init__(self, request):
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
