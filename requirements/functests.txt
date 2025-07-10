@@ -96,6 +96,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -104,8 +105,8 @@ h-assets==1.1.0
     # via -r requirements/prod.txt
 h-matchers==1.2.17
     # via
-    #   -r requirements/prod.txt
     #   -r requirements/functests.in
+    #   -r requirements/prod.txt
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.txt
 h-testkit==1.0.1
@@ -169,7 +170,7 @@ markupsafe==2.1.5
     #   pyramid-jinja2
 newrelic==10.5.0
     # via -r requirements/prod.txt
-oauthlib==3.2.2
+oauthlib==3.3.1
     # via -r requirements/prod.txt
 packaging==25.0
     # via

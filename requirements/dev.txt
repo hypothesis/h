@@ -100,6 +100,7 @@ greenlet==3.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-api==1.1.1
@@ -173,7 +174,7 @@ matplotlib-inline==0.1.6
     # via ipython
 newrelic==10.5.0
     # via -r requirements/prod.txt
-oauthlib==3.2.2
+oauthlib==3.3.1
     # via -r requirements/prod.txt
 packaging==25.0
     # via
@@ -324,8 +325,8 @@ stack-data==0.6.3
     # via ipython
 supervisor==4.2.5
     # via
-    #   -r requirements/prod.txt
     #   -r requirements/dev.in
+    #   -r requirements/prod.txt
 tabulate==0.9.0
     # via
     #   -r requirements/prod.txt
