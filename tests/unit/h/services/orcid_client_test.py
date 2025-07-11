@@ -9,9 +9,9 @@ from h.services.orcid_client import ORCIDClientService, factory
 
 
 class TestORCIDClientService:
-    def test_get_orcid(self, service, openid_client_service, JWTService):
+    def test_get_orcid(self, service, openid_client_service, jwt_service):
         openid_client_service.get_id_token.return_value = sentinel.id_token
-        JWTService.decode_token.return_value = {"sub": sentinel.orcid}
+        jwt_service.decode_token.return_value = {"sub": sentinel.orcid}
 
         orcid = service.get_orcid(sentinel.authorization_code)
 
@@ -22,15 +22,15 @@ class TestORCIDClientService:
             auth=(sentinel.client_id, sentinel.client_secret),
             authorization_code=sentinel.authorization_code,
         )
-        JWTService.decode_token.assert_called_once_with(
+        jwt_service.decode_token.assert_called_once_with(
             sentinel.id_token, service.key_set_url, ["RS256"]
         )
 
     def test_get_orcid_returns_none_if_sub_missing(
-        self, service, openid_client_service, JWTService
+        self, service, openid_client_service, jwt_service
     ):
         openid_client_service.get_id_token.return_value = sentinel.id_token
-        JWTService.decode_token.return_value = {}
+        jwt_service.decode_token.return_value = {}
 
         assert service.get_orcid(sentinel.authorization_code) is None
 
@@ -73,7 +73,7 @@ class TestORCIDClientService:
         return identity
 
     @pytest.fixture
-    def service(self, db_session, openid_client_service, user_service):
+    def service(self, db_session, openid_client_service, user_service, jwt_service):
         return ORCIDClientService(
             db=db_session,
             host=IdentityProvider.ORCID,
@@ -82,16 +82,18 @@ class TestORCIDClientService:
             redirect_uri=sentinel.redirect_uri,
             openid_client_service=openid_client_service,
             user_service=user_service,
+            jwt_service=jwt_service,
         )
-
-    @pytest.fixture(autouse=True)
-    def JWTService(self, patch):
-        return patch("h.services.orcid_client.JWTService")
 
 
 class TestFactory:
     def test_it(
-        self, pyramid_request, ORCIDClientService, openid_client_service, user_service
+        self,
+        pyramid_request,
+        ORCIDClientService,
+        openid_client_service,
+        user_service,
+        jwt_service,
     ):
         service = factory(sentinel.context, pyramid_request)
 
@@ -103,6 +105,7 @@ class TestFactory:
             redirect_uri=sentinel.redirect_uri,
             openid_client_service=openid_client_service,
             user_service=user_service,
+            jwt_service=jwt_service,
         )
         assert service == ORCIDClientService.return_value
 

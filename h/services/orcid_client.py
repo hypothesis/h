@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from h.models import User, UserIdentity
 from h.models.user_identity import IdentityProvider
-from h.services.jwt import JWTService
 from h.services.openid_client import OpenIDClientService
-from h.services.user import UserService
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+    from h.services import JWTService, UserService
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +40,7 @@ class ORCIDClientService:
         redirect_uri: str,
         openid_client_service: OpenIDClientService,
         user_service: UserService,
+        jwt_service: JWTService,
     ) -> None:
         self._db = db
         self._host = host
@@ -43,6 +49,7 @@ class ORCIDClientService:
         self._redirect_uri = redirect_uri
         self._openid_client_service = openid_client_service
         self._user_service = user_service
+        self._jwt_service = jwt_service
 
     def _get_id_token(self, authorization_code: str) -> str:
         return self._openid_client_service.get_id_token(
@@ -54,7 +61,7 @@ class ORCIDClientService:
 
     def get_orcid(self, authorization_code: str) -> str | None:
         id_token = self._get_id_token(authorization_code)
-        decoded_id_token = JWTService.decode_token(
+        decoded_id_token = self._jwt_service.decode_token(
             id_token, self.key_set_url, OIDC_ALLOWED_JWT_ALGORITHMS
         )
         return decoded_id_token.get("sub")
@@ -100,4 +107,5 @@ def factory(_context, request) -> ORCIDClientService:
         redirect_uri=request.route_url("oidc.redirect.orcid"),
         openid_client_service=request.find_service(OpenIDClientService),
         user_service=request.find_service(name="user"),
+        jwt_service=request.find_service(name="jwt"),
     )
