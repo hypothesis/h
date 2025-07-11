@@ -77,6 +77,32 @@ class TestSignupViews:
         )
         user_signup_service.signup.assert_not_called()
 
+    def test_post_when_validation_failure(
+        self, pyramid_request, views, user_signup_service
+    ):
+        pyramid_request.create_form.return_value.validate.side_effect = (
+            ValidationFailure(sentinel.field, sentinel.cstruct, error=sentinel.error)
+        )
+
+        with pytest.raises(ValidationFailure):
+            views.post()
+
+        user_signup_service.signup.assert_not_called()
+
+    def test_post_when_signup_conflict(
+        self, user_signup_service, get_csrf_token, views, pyramid_request
+    ):
+        user_signup_service.signup.side_effect = ConflictError("Test error message")
+
+        response = views.post()
+
+        get_csrf_token.assert_called_once_with(pyramid_request)
+        assert response == {
+            "js_config": {"csrfToken": get_csrf_token.return_value},
+            "heading": _("Account already registered"),
+            "message": _("Test error message"),
+        }
+
     @pytest.mark.parametrize(
         "post_params,expected_form_data",
         [
@@ -130,48 +156,25 @@ class TestSignupViews:
             ),
         ],
     )
-    def test_post_when_validation_failure(
-        self,
-        pyramid_request,
-        get_csrf_token,
-        views,
-        post_params,
-        expected_form_data,
-        user_signup_service,
+    def test_validation_failure(
+        self, views, post_params, expected_form_data, get_csrf_token, pyramid_request
     ):
-        exception = pyramid_request.create_form.return_value.validate.side_effect = (
-            ValidationFailure(
-                sentinel.field,
-                sentinel.cstruct,
-                error=create_autospec(Invalid, instance=True, spec_set=True),
-            )
+        views.context = ValidationFailure(
+            sentinel.field,
+            sentinel.cstruct,
+            error=create_autospec(Invalid, instance=True, spec_set=True),
         )
         pyramid_request.POST = post_params
 
-        response = views.post()
+        response = views.validation_failure()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "formErrors": exception.error.asdict.return_value,
+                "formErrors": views.context.error.asdict.return_value,
                 "formData": expected_form_data,
             }
-        }
-        user_signup_service.signup.assert_not_called()
-
-    def test_post_when_signup_conflict(
-        self, user_signup_service, get_csrf_token, views, pyramid_request
-    ):
-        user_signup_service.signup.side_effect = ConflictError("Test error message")
-
-        response = views.post()
-
-        get_csrf_token.assert_called_once_with(pyramid_request)
-        assert response == {
-            "js_config": {"csrfToken": get_csrf_token.return_value},
-            "heading": _("Account already registered"),
-            "message": _("Test error message"),
         }
 
     @pytest.fixture
@@ -186,7 +189,7 @@ class TestSignupViews:
 
     @pytest.fixture
     def views(self, pyramid_request):
-        return SignupViews(pyramid_request)
+        return SignupViews(sentinel.context, pyramid_request)
 
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
