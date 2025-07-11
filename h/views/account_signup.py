@@ -4,7 +4,7 @@ from typing import Any
 from deform import ValidationFailure
 from pyramid import httpexceptions
 from pyramid.csrf import get_csrf_token
-from pyramid.view import view_config, view_defaults
+from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
 from h.accounts.schemas import SignupSchema
@@ -15,7 +15,8 @@ _ = i18n.TranslationString
 
 @view_defaults(route_name="signup")
 class SignupViews:
-    def __init__(self, request):
+    def __init__(self, context, request):
+        self.context = context
         self.request = request
 
     @view_config(
@@ -36,20 +37,7 @@ class SignupViews:
 
         form = self.request.create_form(SignupSchema().bind(request=self.request))
 
-        try:
-            appstruct = form.validate(self.request.POST.items())
-        except ValidationFailure as e:
-            js_config = self.js_config
-            js_config["formErrors"] = e.error.asdict()
-            js_config["formData"] = {
-                "username": self.request.POST.get("username", ""),
-                "email": self.request.POST.get("email", ""),
-                "password": self.request.POST.get("password", ""),
-                "privacy_accepted": self.request.POST.get("privacy_accepted", "")
-                == "true",
-                "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
-            }
-            return {"js_config": js_config}
+        appstruct = form.validate(self.request.POST.items())
 
         signup_service = self.request.find_service(name="user_signup")
 
@@ -68,6 +56,27 @@ class SignupViews:
             message = _(f"{exc.args[0]}")  # noqa: INT001
 
         return {"js_config": self.js_config, "heading": heading, "message": message}
+
+    @exception_view_config(
+        ValidationFailure,
+        request_method="POST",
+        renderer="h:templates/accounts/signup-post.html.jinja2",
+    )
+    def validation_failure(self):
+        return {
+            "js_config": {
+                "formErrors": self.context.error.asdict(),
+                "formData": {
+                    "username": self.request.POST.get("username", ""),
+                    "email": self.request.POST.get("email", ""),
+                    "password": self.request.POST.get("password", ""),
+                    "privacy_accepted": self.request.POST.get("privacy_accepted", "")
+                    == "true",
+                    "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
+                },
+                **self.js_config,
+            }
+        }
 
     @property
     def js_config(self) -> dict[str, Any]:
