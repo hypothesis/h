@@ -153,7 +153,7 @@ def _privacy_accepted_message():
     return privacy_msg
 
 
-class RegisterSchema(CSRFSchema):
+class SignupSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
         validator=colander.All(
