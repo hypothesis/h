@@ -35,7 +35,7 @@ class TestSignupViews:
     def test_post(
         self,
         views,
-        RegisterSchema,
+        SignupSchema,
         pyramid_request,
         user_signup_service,
         frozen_time,
@@ -43,12 +43,10 @@ class TestSignupViews:
     ):
         response = views.post()
 
-        RegisterSchema.assert_called_once_with()
-        RegisterSchema.return_value.bind.assert_called_once_with(
-            request=pyramid_request
-        )
+        SignupSchema.assert_called_once_with()
+        SignupSchema.return_value.bind.assert_called_once_with(request=pyramid_request)
         pyramid_request.create_form.assert_called_once_with(
-            RegisterSchema.return_value.bind.return_value
+            SignupSchema.return_value.bind.return_value
         )
         pyramid_request.create_form.return_value.validate.assert_called_once_with(ANY)
         assert list(
@@ -213,5 +211,5 @@ def get_csrf_token(patch):
 
 
 @pytest.fixture(autouse=True)
-def RegisterSchema(patch):
-    return patch("h.views.account_signup.RegisterSchema")
+def SignupSchema(patch):
+    return patch("h.views.account_signup.SignupSchema")
