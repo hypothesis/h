@@ -58,3 +58,9 @@ class JWTService:
         We want to keep the clients around with `lru_cache` to reuse that internal cache.
         """
         return PyJWKClient(jwk_url, cache_keys=True, timeout=JWK_CLIENT_TIMEOUT)
+
+
+def factory(context, request):
+    del context, request
+
+    return JWTService()
