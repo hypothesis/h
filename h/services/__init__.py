@@ -21,6 +21,7 @@ from h.services.openid_client import OpenIDClientService
 from h.services.orcid_client import ORCIDClientService
 from h.services.subscription import SubscriptionService
 from h.services.task_done import TaskDoneService
+from h.services.user import UserService
 
 
 def includeme(config):  # pragma: no cover  # noqa: PLR0915
@@ -132,6 +133,7 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     config.register_service_factory(
         "h.services.job_queue.factory", iface=JobQueueService, name="queue_service"
     )
+    config.register_service_factory("h.services.jwt.factory", name="jwt")
 
     config.register_service_factory("h.services.nipsa.nipsa_factory", name="nipsa")
     config.register_service_factory(
