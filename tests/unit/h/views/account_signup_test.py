@@ -1,11 +1,10 @@
 from datetime import UTC
 from unittest.mock import ANY, create_autospec, sentinel
 
-import jwt
 import pytest
 from colander import Invalid
 from deform import ValidationFailure
-from freezegun import freeze_time
+from jwt import InvalidTokenError
 from pyramid.httpexceptions import HTTPFound
 
 from h import i18n
@@ -16,6 +15,7 @@ from h.views.account_signup import (
     InvalidAuthJWTPayloadError,
     ORCIDSignupViews,
     SignupViews,
+    is_authenticated,
 )
 
 _ = i18n.TranslationString
@@ -34,16 +34,6 @@ class TestSignupViews:
                 "features": {"log_in_with_orcid": feature_service.enabled.return_value},
             }
         }
-
-    def test_get_redirects_if_logged_in(
-        self, pyramid_request, views, authenticated_user
-    ):
-        with pytest.raises(HTTPFound) as exc_info:
-            views.get()
-
-        assert exc_info.value.location == pyramid_request.route_url(
-            "activity.user_search", username=authenticated_user.username
-        )
 
     def test_post(
         self,
@@ -70,7 +60,7 @@ class TestSignupViews:
             username=sentinel.username,
             email=sentinel.email,
             password=sentinel.password,
-            privacy_accepted=frozen_time.astimezone(UTC),
+            privacy_accepted=frozen_time().astimezone(UTC),
             comms_opt_in=sentinel.comms_opt_in,
         )
         get_csrf_token.assert_called_once_with(pyramid_request)
@@ -84,17 +74,6 @@ class TestSignupViews:
             "message": None,
         }
 
-    def test_post_redirects_if_logged_in(
-        self, pyramid_request, views, user_signup_service, authenticated_user
-    ):
-        with pytest.raises(HTTPFound) as exc_info:
-            views.post()
-
-        assert exc_info.value.location == pyramid_request.route_url(
-            "activity.user_search", username=authenticated_user.username
-        )
-        user_signup_service.signup.assert_not_called()
-
     def test_post_when_validation_failure(
         self, pyramid_request, views, user_signup_service
     ):
@@ -106,20 +85,6 @@ class TestSignupViews:
             views.post()
 
         user_signup_service.signup.assert_not_called()
-
-    def test_post_when_signup_conflict(
-        self, user_signup_service, get_csrf_token, views, pyramid_request
-    ):
-        user_signup_service.signup.side_effect = ConflictError("Test error message")
-
-        response = views.post()
-
-        get_csrf_token.assert_called_once_with(pyramid_request)
-        assert response == {
-            "js_config": {"csrfToken": get_csrf_token.return_value},
-            "heading": _("Account already registered"),
-            "message": _("Test error message"),
-        }
 
     @pytest.mark.parametrize(
         "post_params,expected_form_data",
@@ -175,7 +140,13 @@ class TestSignupViews:
         ],
     )
     def test_validation_failure(
-        self, views, post_params, expected_form_data, get_csrf_token, pyramid_request, feature_service
+        self,
+        views,
+        post_params,
+        expected_form_data,
+        get_csrf_token,
+        pyramid_request,
+        feature_service,
     ):
         views.context = ValidationFailure(
             sentinel.field,
@@ -234,32 +205,30 @@ class TestSignupViews:
     def views(self, pyramid_request):
         return SignupViews(sentinel.context, pyramid_request)
 
-    @pytest.fixture
-    def authenticated_user(self, factories, pyramid_config, pyramid_request):
-        user = factories.User()
-        pyramid_request.user = user
-        pyramid_config.testing_securitypolicy(userid=user.userid)
-        return user
 
-
-@pytest.mark.usefixtures("user_signup_service")
+@pytest.mark.usefixtures("user_signup_service", "jwt_service", "feature_service")
 class TestORCIDSignupViews:
-    def test_get(self, views, get_csrf_token, pyramid_request, orcid_id):
+    def test_get(
+        self, views, get_csrf_token, pyramid_request, orcid_id, feature_service
+    ):
         response = views.get()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
+        feature_service.enabled.assert_called_once_with("log_in_with_orcid", None)
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "identity": {"orcid.org": {"id": orcid_id}},
+                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "identity": {"orcid": {"id": orcid_id}},
             }
         }
 
     @pytest.mark.parametrize(
         "appstruct,expected_signup_args",
         [
-            ({"comms_opt_in": "yes"}, {"comms_opt_in": True}),
-            ({"comms_opt_in": "no"}, {"comms_opt_in": False}),
+            ({"comms_opt_in": True}, {"comms_opt_in": True}),
+            ({"comms_opt_in": False}, {"comms_opt_in": False}),
+            ({"comms_opt_in": None}, {"comms_opt_in": False}),
             ({}, {"comms_opt_in": False}),
         ],
     )
@@ -297,7 +266,7 @@ class TestORCIDSignupViews:
             username=sentinel.username,
             email=None,
             password=None,
-            privacy_accepted=frozen_time.astimezone(UTC),
+            privacy_accepted=frozen_time().astimezone(UTC),
             require_activation=False,
             identities=[
                 {"provider": IdentityProvider.ORCID, "provider_unique_id": orcid_id}
@@ -328,31 +297,107 @@ class TestORCIDSignupViews:
             views.post()
 
     @pytest.mark.parametrize("view_method", ["get", "post"])
-    def test_when_jwt_is_invalid(self, views, pyramid_request, view_method):
-        pyramid_request.params["auth"] = "invalid"
+    def test_when_jwt_is_invalid(self, views, view_method, jwt_service):
+        jwt_service.decode_idinfo.side_effect = InvalidTokenError
 
         with pytest.raises(AuthJWTDecodeError):
             getattr(views, view_method)()
 
-    @pytest.mark.parametrize(
-        "payload",
-        [
-            {"invalid": True},
-            {"identity": {"foo": {"id": "bar"}}},
-            {"identity": {"orcid.org": {"id": 42}}},
-            {"identity": {"orcid.org": {"id": ""}}},
-        ],
-    )
+    @pytest.mark.parametrize("payload", [{}, {"id": 42}, {"id": ""}])
     @pytest.mark.parametrize("view_method", ["get", "post"])
     def test_when_jwt_payload_is_invalid(
-        self, views, payload, authjwt_signing_key, pyramid_request, view_method
+        self, views, payload, view_method, jwt_service
     ):
-        pyramid_request.params["auth"] = jwt.encode(
-            payload, authjwt_signing_key, algorithm="HS256"
-        )
+        jwt_service.decode_idinfo.return_value = payload
 
         with pytest.raises(InvalidAuthJWTPayloadError):
             getattr(views, view_method)()
+
+    def test_auth_jwt_decode_error(self, views, report_exception, pyramid_request):
+        response = views.auth_jwt_decode_error()
+
+        report_exception.assert_called_once_with(sentinel.context)
+        assert pyramid_request.response.status_int == 403
+        assert response == {"error": "Decoding auth JWT failed."}
+
+    @pytest.mark.parametrize(
+        "post_params,expected_form_data",
+        [
+            # It copies the submitted form fields into the returned form data
+            # when re-rendering the page.
+            (
+                {
+                    "username": sentinel.username,
+                    "privacy_accepted": "true",
+                    "comms_opt_in": "true",
+                },
+                {
+                    "username": sentinel.username,
+                    "privacy_accepted": True,
+                    "comms_opt_in": True,
+                },
+            ),
+            # If privacy_accepted and comms_opt_in are not "true" in the post
+            # params then they're False in the returned form data.
+            (
+                {
+                    "username": sentinel.username,
+                    "privacy_accepted": "false",
+                    "comms_opt_in": "false",
+                },
+                {
+                    "username": sentinel.username,
+                    "privacy_accepted": False,
+                    "comms_opt_in": False,
+                },
+            ),
+            # If post params are missing from the request the returned form
+            # data is empty.
+            (
+                {},
+                {
+                    "username": "",
+                    "privacy_accepted": False,
+                    "comms_opt_in": False,
+                },
+            ),
+        ],
+    )
+    def test_validation_failure(
+        self,
+        views,
+        post_params,
+        expected_form_data,
+        get_csrf_token,
+        pyramid_request,
+        feature_service,
+        jwt_service,
+        orcid_id,
+    ):
+        views.context = ValidationFailure(
+            sentinel.field,
+            sentinel.cstruct,
+            error=create_autospec(Invalid, instance=True, spec_set=True),
+        )
+        pyramid_request.POST = post_params
+
+        response = views.validation_failure()
+
+        get_csrf_token.assert_called_once_with(pyramid_request)
+        feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
+        jwt_service.encode_idinfo.assert_called_once_with("orcid", {"id": orcid_id})
+        assert response == {
+            "js_config": {
+                "csrfToken": get_csrf_token.return_value,
+                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "identity": {"orcid": {"id": orcid_id}},
+                "formErrors": views.context.error.asdict.return_value,
+                "formData": {
+                    "auth": jwt_service.encode_idinfo.return_value,
+                    **expected_form_data,
+                },
+            }
+        }
 
     # Username already taken, can delete.
     # Username already taken, cannot delete.
@@ -369,23 +414,8 @@ class TestORCIDSignupViews:
         return "test_orcid_id"
 
     @pytest.fixture
-    def authjwt_signing_key(self):
-        return "test_authjwt_signing_key"
-
-    @pytest.fixture
-    def authjwt(self, orcid_id, authjwt_signing_key):
-        return jwt.encode(
-            {"identity": {"orcid.org": {"id": orcid_id}}},
-            authjwt_signing_key,
-            algorithm="HS256",
-        )
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request, authjwt_signing_key, authjwt):
-        pyramid_request.registry.settings.update(
-            {"orcid_oidc_authjwt_signing_key": authjwt_signing_key}
-        )
-        pyramid_request.params["auth"] = authjwt
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.params["auth"] = sentinel.auth
         return pyramid_request
 
     @pytest.fixture
@@ -404,6 +434,22 @@ class TestORCIDSignupViews:
     @pytest.fixture
     def views(self, pyramid_request):
         return ORCIDSignupViews(sentinel.context, pyramid_request)
+
+    @pytest.fixture
+    def jwt_service(self, jwt_service, orcid_id):
+        jwt_service.decode_idinfo.return_value = {"id": orcid_id}
+        return jwt_service
+
+
+def test_is_authenticated(matchers, pyramid_request, authenticated_user):
+    response = is_authenticated(pyramid_request)
+
+    assert pyramid_request.session.peek_flash("error") == ["You're already logged in."]
+    assert response == matchers.Redirect302To(
+        pyramid_request.route_url(
+            "activity.user_search", username=authenticated_user.username
+        )
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -437,6 +483,8 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def frozen_time():
-    with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
-        yield frozen_time_factory()
+def authenticated_user(factories, pyramid_config, pyramid_request):
+    user = factories.User()
+    pyramid_request.user = user
+    pyramid_config.testing_securitypolicy(userid=user.userid)
+    return user

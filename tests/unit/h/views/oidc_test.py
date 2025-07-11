@@ -19,7 +19,7 @@ from h.views.oidc import (
 )
 
 
-class TestORCIDAndLoginViews:
+class TestORCIDConnectAndLoginViews:
     @pytest.mark.parametrize(
         "route_name,expected_action",
         [
@@ -69,6 +69,20 @@ class TestORCIDAndLoginViews:
 
         assert result == {}
 
+    def test_login_already_authenticated(self, pyramid_request, matchers):
+        response = ORCIDConnectAndLoginViews(
+            pyramid_request
+        ).login_already_authenticated()
+
+        assert pyramid_request.session.peek_flash("error") == [
+            "You're already logged in."
+        ]
+        assert response == matchers.Redirect302To(
+            pyramid_request.route_url(
+                "activity.user_search", username=pyramid_request.user.username
+            )
+        )
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories, state_signing_key):
         pyramid_request.user = factories.User()
@@ -86,6 +100,7 @@ class TestORCIDAndLoginViews:
     def routes(self, pyramid_config):
         pyramid_config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
         pyramid_config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
+        pyramid_config.add_route("activity.user_search", "/users/{username}")
 
     @pytest.fixture(autouse=True)
     def secrets(self, secrets):
@@ -95,7 +110,7 @@ class TestORCIDAndLoginViews:
         return secrets
 
 
-@pytest.mark.usefixtures("orcid_client_service", "user_service")
+@pytest.mark.usefixtures("orcid_client_service", "user_service", "jwt_service")
 class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
@@ -290,22 +305,23 @@ class TestORCIDRedirectViews:
         "assert_no_success_message_was_flashed",
     )
     def test_redirect_when_action_login_and_no_connected_user_exists(
-        self, views, user_service, authjwt_signing_key, pyramid_request, orcid_id
+        self,
+        views,
+        user_service,
+        pyramid_request,
+        orcid_id,
+        ORCIDSignupViews,
+        jwt_service,
     ):
         user_service.fetch_by_identity.return_value = None
 
         response = views.redirect()
 
+        ORCIDSignupViews.encode_idinfo.assert_called_once_with(jwt_service, orcid_id)
         assert isinstance(response, HTTPFound)
         assert response.location == pyramid_request.route_url(
             "signup.orcid",
-            _query={
-                "auth": jwt.encode(
-                    {"identity": {"orcid.org": {"id": orcid_id}}},
-                    authjwt_signing_key,
-                    algorithm="HS256",
-                )
-            },
+            _query={"auth": ORCIDSignupViews.encode_idinfo.return_value},
         )
 
     @pytest.mark.usefixtures(
@@ -604,3 +620,8 @@ def secrets(patch):
 @pytest.fixture(autouse=True)
 def login(patch):
     return patch("h.views.oidc.login")
+
+
+@pytest.fixture(autouse=True)
+def ORCIDSignupViews(patch):
+    return patch("h.views.oidc.ORCIDSignupViews")

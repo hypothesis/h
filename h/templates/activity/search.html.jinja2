@@ -377,6 +377,7 @@
 {% endblock %}
 
 {% block content %}
+  {% include "h:templates/includes/flash-messages.html.jinja2" %}
   <div class="search-result-container">
     {% if group %}
       {{ search_result_nav(group.name) }}

@@ -11,7 +11,7 @@ import type { SignupWithORCIDConfigObject } from '../config';
 
 export default function SignupWithORCIDForm() {
   const config = useContext(Config) as SignupWithORCIDConfigObject;
-  const orcidId = config.identity['orcid.org'].id;
+  const orcidId = config.identity.orcid.id;
   const [authJWT, setAuthJWT] = useState<string>();
 
   const username = useFormValue(config.formData?.username ?? '', {
@@ -49,6 +49,8 @@ export default function SignupWithORCIDForm() {
         (urlParams.toString() ? '?' + urlParams.toString() : '') +
         window.location.hash;
       window.history.replaceState({}, '', newUrl);
+    } else {
+      setAuthJWT(config.formData.auth);
     }
   }, []);
 

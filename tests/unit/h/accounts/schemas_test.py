@@ -193,18 +193,14 @@ class TestORCIDSignupSchema:
     )
     def test_valid(self, schema, params, expected_appstruct):
         result = schema.deserialize(
-            {
-                "username": "test_username",
-                "privacy_accepted": "yes",
-                **params
-            }
+            {"username": "test_username", "privacy_accepted": "yes", **params}
         )
 
         assert result == {
             "username": "test_username",
             "privacy_accepted": True,
             "csrf_token": None,
-            **expected_appstruct
+            **expected_appstruct,
         }
 
     @pytest.mark.parametrize(
@@ -212,10 +208,7 @@ class TestORCIDSignupSchema:
         [
             (
                 {},
-                {
-                    "username": "Required",
-                    "privacy_accepted": "Required"
-                },
+                {"username": "Required", "privacy_accepted": "Required"},
             ),
             (
                 {"username": "a", "privacy_accepted": "yes"},
@@ -226,7 +219,7 @@ class TestORCIDSignupSchema:
             (
                 {
                     "username": "a" * (USERNAME_MAX_LENGTH + 1),
-                    "privacy_accepted": "yes"
+                    "privacy_accepted": "yes",
                 },
                 {"username": "Must be 30 characters or less."},
             ),
@@ -239,7 +232,7 @@ class TestORCIDSignupSchema:
             (
                 {
                     "username": "support",  # Blacklisted username.
-                    "privacy_accepted": "yes"
+                    "privacy_accepted": "yes",
                 },
                 {
                     "username": "Sorry, an account with this username already exists. Please enter another one."
@@ -257,12 +250,7 @@ class TestORCIDSignupSchema:
         user = factories.User()
 
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize(
-                {
-                    "username": user.username,
-                    "privacy_accepted": "yes"
-                }
-            )
+            schema.deserialize({"username": user.username, "privacy_accepted": "yes"})
 
         assert exc.value.asdict() == {"username": "This username is already taken."}
 

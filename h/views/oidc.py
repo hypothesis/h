@@ -21,12 +21,14 @@ from pyramid.view import (
     view_defaults,
 )
 
+from h import i18n
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import TokenValidationError
+from h.views.account_signup import ORCIDSignupViews
 from h.views.helpers import login
 
 if TYPE_CHECKING:
@@ -34,6 +36,7 @@ if TYPE_CHECKING:
 
     from h.models import User
 
+_ = i18n.TranslationString
 
 ORCID_STATE_SESSION_KEY = "oidc.state.orcid"
 JWT_SIGNING_ALGORITHM = "HS256"
@@ -117,14 +120,22 @@ class ORCIDConnectAndLoginViews:
         append_slash=True,
         route_name="oidc.connect.orcid",
     )
-    @notfound_view_config(
-        renderer="h:templates/notfound.html.jinja2",
-        append_slash=True,
-        route_name="oidc.login.orcid",
-    )
     def notfound(self):
         self._request.response.status_int = 401
         return {}
+
+    # It's possible to try to log in while already logged in. For example: open
+    # the /login or /signup page but don't click anything yet, then open a new
+    # tab and log in, then return to the first tab and try to start a login
+    # flow. This view is called in these cases.
+    @view_config(is_authenticated=True, route_name="oidc.login.orcid")
+    def login_already_authenticated(self):
+        self._request.session.flash(_("You're already logged in."), "error")
+        return HTTPFound(
+            self._request.route_url(
+                "activity.user_search", username=self._request.user.username
+            )
+        )
 
 
 @view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
@@ -133,6 +144,7 @@ class ORCIDRedirectViews:
         self._request = request
         self._orcid_client = request.find_service(ORCIDClientService)
         self._user_service = request.find_service(name="user")
+        self._jwt_service = request.find_service(name="jwt")
 
     @view_config()
     def redirect(self):
@@ -208,22 +220,17 @@ class ORCIDRedirectViews:
     def log_in_with_orcid(self, orcid_id: str, user):
         if not user:
             # There's no Hypothesis account for this ORCID iD yet.
-
-            # First create a JWT that will be used to securely communicate the
-            # connected ORCID iD when we redirect to the signup page below.
-            authjwt_signing_key = self._request.registry.settings[
-                "orcid_oidc_authjwt_signing_key"
-            ]
-            authjwt = jwt.encode(
-                {"identity": {str(IdentityProvider.ORCID): {"id": orcid_id}}},
-                authjwt_signing_key,
-                algorithm=JWT_SIGNING_ALGORITHM,
-            )
-
             # Redirect to the "Sign up to Hypothesis with ORCID" page to create
             # a new account.
             return HTTPFound(
-                self._request.route_url("signup.orcid", _query={"auth": authjwt})
+                self._request.route_url(
+                    "signup.orcid",
+                    _query={
+                        "auth": ORCIDSignupViews.encode_idinfo(
+                            self._jwt_service, orcid_id
+                        )
+                    },
+                )
             )
 
         headers = login(user, self._request)

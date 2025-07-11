@@ -41,7 +41,7 @@ export type SignupConfigObject = ConfigBase & {
 };
 
 export type SignupWithORCIDConfigObject = ConfigBase & {
-  identity: { 'orcid.org': { id: string } };
+  identity: { orcid: { id: string } };
   features: {
     log_in_with_orcid: boolean;
   };
@@ -51,6 +51,7 @@ export type SignupWithORCIDConfigObject = ConfigBase & {
     privacy_accepted?: string;
   };
   formData?: {
+    auth?: string;
     username: string;
     email: string;
     privacy_accepted: boolean;

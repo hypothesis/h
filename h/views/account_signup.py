@@ -1,8 +1,6 @@
 import datetime
-from dataclasses import dataclass
 from typing import Any
 
-import jwt
 from deform import ValidationFailure
 from h_pyramid_sentry import report_exception
 from jwt import InvalidTokenError
@@ -15,12 +13,11 @@ from h.accounts.schemas import ORCIDSignupSchema, SignupSchema
 from h.models.user_identity import IdentityProvider
 from h.services.exceptions import ConflictError
 from h.views.helpers import login
-from h.views.oidc import JWT_SIGNING_ALGORITHM
 
 _ = i18n.TranslationString
 
 
-@view_defaults(route_name="signup")
+@view_defaults(route_name="signup", is_authenticated=False)
 class SignupViews:
     def __init__(self, context, request):
         self.context = context
@@ -31,8 +28,6 @@ class SignupViews:
     )
     def get(self):
         """Render the empty registration form."""
-        self.redirect_if_logged_in()
-
         return {"js_config": self.js_config}
 
     @view_config(
@@ -40,8 +35,6 @@ class SignupViews:
     )
     def post(self):
         """Handle submission of the new user registration form."""
-        self.redirect_if_logged_in()
-
         form = self.request.create_form(SignupSchema().bind(request=self.request))
 
         appstruct = form.validate(self.request.POST.items())
@@ -98,14 +91,6 @@ class SignupViews:
             },
         }
 
-    def redirect_if_logged_in(self):
-        if self.request.authenticated_userid is not None:
-            raise HTTPFound(
-                self.request.route_url(
-                    "activity.user_search", username=self.request.user.username
-                )
-            )
-
 
 class AuthJWTDecodeError(Exception):
     """Decoding the `auth` JWT query param failed."""
@@ -113,11 +98,6 @@ class AuthJWTDecodeError(Exception):
 
 class InvalidAuthJWTPayloadError(Exception):
     """The `auth` JWT query param decoded to an unexpected payload."""
-
-
-@dataclass
-class AuthJWTPayload:
-    orcid_id: str
 
 
 @view_defaults(
@@ -130,20 +110,17 @@ class ORCIDSignupViews:
     def __init__(self, context, request):
         self.context = context
         self.request = request
+        self.jwt_service = request.find_service(name="jwt")
 
     @view_config(request_method="GET")
     def get(self):
-        # Do this first so that if decoding the auth JWT fails we fail right
-        # away, before the view potentially does anything else.
-        auth = self.decode_authjwt()
+        self.orcid_id = self.decode_orcid_id()
 
-        return {"js_config": self.js_config(auth)}
+        return {"js_config": self.js_config}
 
     @view_config(request_method="POST")
     def post(self):
-        # Do this first so that if decoding the auth JWT fails we fail right
-        # away, before the view potentially does anything else.
-        auth = self.decode_authjwt()
+        self.orcid_id = self.decode_orcid_id()
 
         form = self.request.create_form(ORCIDSignupSchema().bind(request=self.request))
 
@@ -156,12 +133,12 @@ class ORCIDSignupViews:
             email=None,
             password=None,
             privacy_accepted=datetime.datetime.now(datetime.UTC),
-            comms_opt_in=appstruct.get("comms_opt_in", None) == "yes",
+            comms_opt_in=bool(appstruct.get("comms_opt_in", False)),
             require_activation=False,
             identities=[
                 {
                     "provider": IdentityProvider.ORCID,
-                    "provider_unique_id": auth.orcid_id,
+                    "provider_unique_id": self.orcid_id,
                 }
             ],
         )
@@ -180,8 +157,10 @@ class ORCIDSignupViews:
         return {"error": "Decoding auth JWT failed."}
 
     @exception_view_config(context=ValidationFailure)
-    def form_validation_error(self):
+    def validation_failure(self):
+        self.orcid_id = self.decode_orcid_id()
         self.request.response.status_int = 400
+
         return {
             "js_config": {
                 "formErrors": self.context.error.asdict(),
@@ -190,32 +169,37 @@ class ORCIDSignupViews:
                     "privacy_accepted": self.request.POST.get("privacy_accepted", "")
                     == "true",
                     "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
+                    # When reloading the page replace the auth token with a fresh one.
+                    "auth": self.encode_idinfo(self.jwt_service, self.orcid_id),
                 },
-                **self.js_config(self.decode_authjwt()),
+                **self.js_config,
             }
         }
 
-    def js_config(self, auth):
+    @property
+    def js_config(self):
+        feature_service = self.request.find_service(name="feature")
+
         return {
             "csrfToken": get_csrf_token(self.request),
-            "identity": {str(IdentityProvider.ORCID): {"id": auth.orcid_id}},
+            "features": {
+                "log_in_with_orcid": feature_service.enabled(
+                    "log_in_with_orcid", user=None
+                )
+            },
+            "identity": {"orcid": {"id": self.orcid_id}},
         }
 
-    def decode_authjwt(self) -> AuthJWTPayload:
-        authjwt = self.request.params["auth"]
-        authjwt_signing_key = self.request.registry.settings[
-            "orcid_oidc_authjwt_signing_key"
-        ]
-
+    def decode_orcid_id(self):
         try:
-            decoded_auth_jwt = jwt.decode(
-                authjwt, authjwt_signing_key, algorithms=[JWT_SIGNING_ALGORITHM]
+            idinfo = self.jwt_service.decode_idinfo(
+                "orcid", self.request.params["auth"]
             )
         except InvalidTokenError as err:
             raise AuthJWTDecodeError from err
 
         try:
-            orcid_id = decoded_auth_jwt["identity"][str(IdentityProvider.ORCID)]["id"]
+            orcid_id = idinfo["id"]
         except (KeyError, TypeError) as err:
             raise InvalidAuthJWTPayloadError from err
 
@@ -225,4 +209,21 @@ class ORCIDSignupViews:
         if orcid_id == "":
             raise InvalidAuthJWTPayloadError
 
-        return AuthJWTPayload(orcid_id)
+        return orcid_id
+
+    @staticmethod
+    def encode_idinfo(jwt_service, orcid_id):
+        return jwt_service.encode_idinfo("orcid", {"id": orcid_id})
+
+
+# It's possible to try to sign up while already logged in. For example: start
+# to signup but don't submit the final form, then open a new tab and log in,
+# then return to the first tab and submit the signup form. This view is called
+# in these cases.
+@view_config(route_name="signup", is_authenticated=True)
+@view_config(route_name="signup.orcid", is_authenticated=True)
+def is_authenticated(request):
+    request.session.flash(_("You're already logged in."), "error")
+    return HTTPFound(
+        request.route_url("activity.user_search", username=request.user.username)
+    )
