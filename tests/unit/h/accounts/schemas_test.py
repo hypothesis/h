@@ -74,30 +74,30 @@ class TestUniqueEmail:
         schemas.unique_email(dummy_node, "elliot@bar.com")
 
 
-class TestRegisterSchema:
+class TestSignupSchema:
     def test_it_is_invalid_when_password_too_short(self, pyramid_request):
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"password": "a"})
         assert exc.value.asdict()["password"] == ("Must be 8 characters or more.")  # noqa: S105
 
     def test_it_is_invalid_when_username_too_short(self, pyramid_request):
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "ab"})
         assert "Must be 3 characters or more." in exc.value.asdict()["username"]
 
     def test_it_is_invalid_when_username_too_long(self, pyramid_request):
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "a" * 500})
         assert exc.value.asdict()["username"] == ("Must be 30 characters or less.")
 
     def test_it_is_invalid_with_invalid_characters_in_username(self, pyramid_request):
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "Fred Flintstone"})
@@ -106,7 +106,7 @@ class TestRegisterSchema:
         )
 
     def test_it_is_invalid_with_false_privacy_accepted(self, pyramid_request):
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"privacy_accepted": "false"})
@@ -117,7 +117,7 @@ class TestRegisterSchema:
         )
 
     def test_it_is_invalid_when_privacy_accepted_missing(self, pyramid_request):
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({})
@@ -128,7 +128,7 @@ class TestRegisterSchema:
         self, factories, pyramid_request, valid_params
     ):
         """If an account with the same username was recently deleted it should be invalid."""
-        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_request)
         factories.UserDeletion(
             userid=format_userid(
                 username=valid_params["username"],
@@ -144,7 +144,7 @@ class TestRegisterSchema:
     def test_it_validates_with_valid_payload(
         self, pyramid_csrf_request, valid_params, factories
     ):
-        schema = schemas.RegisterSchema().bind(request=pyramid_csrf_request)
+        schema = schemas.SignupSchema().bind(request=pyramid_csrf_request)
         # A user with the same username was deleted over a month ago.
         # This should not prevent registration.
         factories.UserDeletion(

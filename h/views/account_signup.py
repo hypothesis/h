@@ -7,7 +7,7 @@ from pyramid.csrf import get_csrf_token
 from pyramid.view import view_config, view_defaults
 
 from h import i18n
-from h.accounts.schemas import RegisterSchema
+from h.accounts.schemas import SignupSchema
 from h.services.exceptions import ConflictError
 
 _ = i18n.TranslationString
@@ -34,7 +34,7 @@ class SignupViews:
         """Handle submission of the new user registration form."""
         self.redirect_if_logged_in()
 
-        form = self.request.create_form(RegisterSchema().bind(request=self.request))
+        form = self.request.create_form(SignupSchema().bind(request=self.request))
 
         try:
             appstruct = form.validate(self.request.POST.items())
