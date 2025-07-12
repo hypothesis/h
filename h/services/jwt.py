@@ -1,4 +1,4 @@
-import datetime
+from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from typing import Any
 
@@ -14,7 +14,10 @@ class TokenValidationError(Exception):
 
 
 class JWTService:
-    LEEWAY = datetime.timedelta(seconds=10)
+    LEEWAY = timedelta(seconds=10)
+
+    def __init__(self, settings):
+        self._settings = settings
 
     @classmethod
     def decode_token(
@@ -49,6 +52,26 @@ class JWTService:
             msg = f"Invalid JWT for: {iss}, {aud}. {err}"
             raise TokenValidationError(msg) from err
 
+    def encode_idinfo(self, provider: str, info):
+        """Return a signed token containing the given provider identity info."""
+
+        provider = str(provider)
+        key = self._settings[f"idinfo_signingkey_{provider}"]
+        expiry_time = datetime.now(tz=UTC) + timedelta(hours=1)
+        return jwt.encode(
+            {"exp": expiry_time, "identity": {provider: info}}, key, algorithm="HS256"
+        )
+
+    def decode_idinfo(self, provider: str, encoded_info: str):
+        """Return the provider identity info from the given token."""
+
+        provider = str(provider)
+        key = self._settings[f"idinfo_signingkey_{provider}"]
+        payload = jwt.decode(
+            encoded_info, key, options={"require": ["exp"]}, algorithms=["HS256"]
+        )
+        return payload["identity"][provider]
+
     @staticmethod
     @lru_cache(maxsize=256)
     def _get_jwk_client(jwk_url: str) -> PyJWKClient:
@@ -61,6 +84,5 @@ class JWTService:
 
 
 def factory(context, request):
-    del context, request
-
-    return JWTService()
+    del context
+    return JWTService(settings=request.registry.settings)

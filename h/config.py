@@ -150,6 +150,7 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
     settings_manager.set("orcid_client_id", "ORCID_CLIENT_ID")
     settings_manager.set("orcid_client_secret", "ORCID_CLIENT_SECRET")
     settings_manager.set("orcid_oidc_state_signing_key", "ORCID_OIDC_STATE_SIGNING_KEY")
+    settings_manager.set("idinfo_signingkey_orcid", "IDINFO_SIGNINGKEY_ORCID")
 
     settings_manager.set(
         "h_api_auth_cookie_secret_key",

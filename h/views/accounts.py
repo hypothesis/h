@@ -159,6 +159,7 @@ class AuthController:
         return httpexceptions.HTTPFound(location=self.logout_redirect, headers=headers)
 
     def _redirect_if_logged_in(self):
+        self.request.session.flash(_("You're already logged in."), "error")
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(location=self._login_redirect())
 
