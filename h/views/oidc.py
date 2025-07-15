@@ -116,14 +116,21 @@ class ORCIDConnectAndLoginViews:
         append_slash=True,
         route_name="oidc.connect.orcid",
     )
-    @notfound_view_config(
-        renderer="h:templates/notfound.html.jinja2",
-        append_slash=True,
-        route_name="oidc.login.orcid",
-    )
     def notfound(self):
         self._request.response.status_int = 401
         return {}
+
+    # It's possible to try to log in while already logged in. For example: open
+    # the /login or /signup page but don't click anything yet, then open a new
+    # tab and log in, then return to the first tab and try to start a login
+    # flow. This view is called in these cases.
+    @view_config(route_name="oidc.login.orcid", is_authenticated=True)
+    def login_already_authenticated(self):
+        return HTTPFound(
+            self._request.route_url(
+                "activity.user_search", username=self._request.user.username
+            )
+        )
 
 
 @view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
