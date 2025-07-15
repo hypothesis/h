@@ -2,8 +2,8 @@ import datetime
 from typing import Any
 
 from deform import ValidationFailure
+from pyramid import httpexceptions
 from pyramid.csrf import get_csrf_token
-from pyramid.httpexceptions import HTTPFound
 from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
@@ -13,7 +13,7 @@ from h.services.exceptions import ConflictError
 _ = i18n.TranslationString
 
 
-@view_defaults(route_name="signup", is_authenticated=False)
+@view_defaults(route_name="signup")
 class SignupViews:
     def __init__(self, context, request):
         self.context = context
@@ -24,6 +24,8 @@ class SignupViews:
     )
     def get(self):
         """Render the empty registration form."""
+        self.redirect_if_logged_in()
+
         return {"js_config": self.js_config}
 
     @view_config(
@@ -31,6 +33,8 @@ class SignupViews:
     )
     def post(self):
         """Handle submission of the new user registration form."""
+        self.redirect_if_logged_in()
+
         form = self.request.create_form(SignupSchema().bind(request=self.request))
 
         appstruct = form.validate(self.request.POST.items())
@@ -78,13 +82,10 @@ class SignupViews:
     def js_config(self) -> dict[str, Any]:
         return {"csrfToken": get_csrf_token(self.request)}
 
-
-# It's possible to try to sign up while already logged in. For example: start
-# to signup but don't submit the final form, then open a new tab and log in,
-# then return to the first tab and submit the signup form. This view is called
-# in these cases.
-@view_config(route_name="signup", is_authenticated=True)
-def is_authenticated(request):
-    return HTTPFound(
-        request.route_url("activity.user_search", username=request.user.username)
-    )
+    def redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(
+                self.request.route_url(
+                    "activity.user_search", username=self.request.user.username
+                )
+            )

@@ -5,10 +5,11 @@ import pytest
 from colander import Invalid
 from deform import ValidationFailure
 from freezegun import freeze_time
+from pyramid.httpexceptions import HTTPFound
 
 from h import i18n
 from h.services.exceptions import ConflictError
-from h.views.account_signup import SignupViews, is_authenticated
+from h.views.account_signup import SignupViews
 
 _ = i18n.TranslationString
 
@@ -20,6 +21,16 @@ class TestSignupViews:
 
         get_csrf_token.assert_called_once_with(pyramid_request)
         assert response == {"js_config": {"csrfToken": get_csrf_token.return_value}}
+
+    def test_get_redirects_if_logged_in(
+        self, pyramid_request, views, authenticated_user
+    ):
+        with pytest.raises(HTTPFound) as exc_info:
+            views.get()
+
+        assert exc_info.value.location == pyramid_request.route_url(
+            "activity.user_search", username=authenticated_user.username
+        )
 
     def test_post(
         self,
@@ -54,6 +65,17 @@ class TestSignupViews:
             "heading": _("Account registration successful"),
             "message": None,
         }
+
+    def test_post_redirects_if_logged_in(
+        self, pyramid_request, views, user_signup_service, authenticated_user
+    ):
+        with pytest.raises(HTTPFound) as exc_info:
+            views.post()
+
+        assert exc_info.value.location == pyramid_request.route_url(
+            "activity.user_search", username=authenticated_user.username
+        )
+        user_signup_service.signup.assert_not_called()
 
     def test_post_when_validation_failure(
         self, pyramid_request, views, user_signup_service
@@ -169,33 +191,21 @@ class TestSignupViews:
     def views(self, pyramid_request):
         return SignupViews(sentinel.context, pyramid_request)
 
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("activity.user_search", "/users/{username}")
+
     @pytest.fixture
     def frozen_time(self):
         with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
             yield frozen_time_factory()
 
-
-def test_is_authenticated(matchers, pyramid_request, authenticated_user):
-    response = is_authenticated(pyramid_request)
-
-    assert response == matchers.Redirect302To(
-        pyramid_request.route_url(
-            "activity.user_search", username=authenticated_user.username
-        )
-    )
-
-
-@pytest.fixture
-def authenticated_user(factories, pyramid_config, pyramid_request):
-    user = factories.User()
-    pyramid_request.user = user
-    pyramid_config.testing_securitypolicy(userid=user.userid)
-    return user
-
-
-@pytest.fixture(autouse=True)
-def routes(pyramid_config):
-    pyramid_config.add_route("activity.user_search", "/users/{username}")
+    @pytest.fixture
+    def authenticated_user(self, factories, pyramid_config, pyramid_request):
+        user = factories.User()
+        pyramid_request.user = user
+        pyramid_config.testing_securitypolicy(userid=user.userid)
+        return user
 
 
 @pytest.fixture(autouse=True)
