@@ -19,7 +19,7 @@ from h.views.oidc import (
 )
 
 
-class TestORCIDAndLoginViews:
+class TestORCIDConnectAndLoginViews:
     @pytest.mark.parametrize(
         "route_name,expected_action",
         [
@@ -69,6 +69,17 @@ class TestORCIDAndLoginViews:
 
         assert result == {}
 
+    def test_login_already_authenticated(self, pyramid_request, matchers):
+        response = ORCIDConnectAndLoginViews(
+            pyramid_request
+        ).login_already_authenticated()
+
+        assert response == matchers.Redirect302To(
+            pyramid_request.route_url(
+                "activity.user_search", username=pyramid_request.user.username
+            )
+        )
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories, signing_key):
         pyramid_request.user = factories.User()
@@ -86,6 +97,7 @@ class TestORCIDAndLoginViews:
     def routes(self, pyramid_config):
         pyramid_config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
         pyramid_config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
+        pyramid_config.add_route("activity.user_search", "/users/{username}")
 
     @pytest.fixture(autouse=True)
     def secrets(self, secrets):
