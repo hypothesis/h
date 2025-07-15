@@ -1,6 +1,7 @@
 import { Link } from '@hypothesis/frontend-shared';
 import { useContext } from 'preact/hooks';
 
+import FormHeader from '../../forms-common/components/FormHeader';
 import TabLinks from '../../forms-common/components/TabLinks';
 import type { Group } from '../config';
 import { Config } from '../config';
@@ -48,9 +49,9 @@ export default function GroupFormHeader({
         </div>
       )}
       <div className="flex gap-x-2 py-2 items-center">
-        <h1 className="text-grey-7 text-xl/none" data-testid="header">
+        <FormHeader variant="compact" data-testid="header">
           {group?.name ?? title}
-        </h1>
+        </FormHeader>
         <div className="grow" />
         <TabLinks>
           {enableMembers && editLink && (

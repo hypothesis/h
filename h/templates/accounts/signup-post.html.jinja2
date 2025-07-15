@@ -18,10 +18,10 @@
   <div class="form-container">
     <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
 
-    <h1 class="form-header">
-      {{ self.page_title() }}
-    </h1>
     {% if not js_config.get("formData") %}
+      <h1 class="form-header">
+        {{ self.page_title() }}
+      </h1>
       <div class="form-description">
         {% if message %}<p>{{ message }}</p>{% endif %}
 
