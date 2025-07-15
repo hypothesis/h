@@ -64,6 +64,17 @@ describe('LoginForm', () => {
     assert.isFalse(cancelButton.exists());
   });
 
+  [
+    { forOAuth: false, expected: 'Log in' },
+    { forOAuth: true, expected: 'Log in with Hypothesis' },
+  ].forEach(({ forOAuth, expected }) => {
+    it('renders expected title', () => {
+      fakeConfig.forOAuth = forOAuth;
+      const { wrapper } = createWrapper();
+      assert.equal(wrapper.find('h1').text().trim(), expected);
+    });
+  });
+
   it('renders the cancel button in the OAuth popup window', () => {
     fakeConfig.forOAuth = true;
 
