@@ -53,6 +53,21 @@ class TestCSPProtectedView:
         )
         assert response.headers["Content-Security-Policy"] == expected
 
+    def test_it_generates_nonce(self, pyramid_request, derive_view, token_hex):
+        pyramid_request.registry.settings.update(
+            {"csp.enabled": True, "csp": {"script-src": ["'nonce-NONCE_VALUE'"]}}
+        )
+        view = derive_view(_dummy_view)
+
+        response = view(None, pyramid_request)
+
+        nonce_value = token_hex()
+        assert pyramid_request.csp_nonce == nonce_value
+        assert (
+            response.headers["Content-Security-Policy"]
+            == f"script-src 'nonce-{nonce_value}'"
+        )
+
     def test_report_only(self, pyramid_request, derive_view):
         pyramid_request.registry.settings.update(
             {
@@ -98,3 +113,10 @@ class TestCSPProtectedView:
 
 def _dummy_view(request):
     return request.response
+
+
+@pytest.fixture(autouse=True)
+def token_hex(patch):
+    mock = patch("h.viewderivers.token_hex")
+    mock.return_value = "RANDOM-HEX-VALUE"
+    return mock
