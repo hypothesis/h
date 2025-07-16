@@ -7,7 +7,7 @@ def csp_protected_view(view, info):
     Individual views can opt out of CSP altogether by specifying a view option
     ``csp_insecure_optout=True``. This is not recommended.
     """
-    if not info.registry.settings.get("csp.enabled", False):
+    if not info.registry.settings.get("csp.enabled", True):
         return view
 
     # Views can set ``csp_insecure_optout=True`` in their view options to

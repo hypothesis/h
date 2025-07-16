@@ -4,7 +4,15 @@ from h.viewderivers import csp_protected_view
 
 
 class TestCSPProtectedView:
-    def test_noop_by_default(self, pyramid_request, derive_view):
+    def test_enabled_by_default(self, pyramid_request, derive_view):
+        view = derive_view(_dummy_view)
+
+        response = view(None, pyramid_request)
+
+        assert "Content-Security-Policy" in response.headers
+
+    def test_disable_csp(self, pyramid_request, derive_view):
+        pyramid_request.registry.settings.update({"csp.enabled": False})
         view = derive_view(_dummy_view)
 
         response = view(None, pyramid_request)
