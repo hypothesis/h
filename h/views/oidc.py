@@ -135,7 +135,8 @@ class ORCIDConnectAndLoginViews:
 
 @view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
 class ORCIDRedirectViews:
-    def __init__(self, request: Request) -> None:
+    def __init__(self, context, request: Request) -> None:
+        self._context = context
         self._request = request
         self._orcid_client = request.find_service(ORCIDClientService)
         self._user_service = request.find_service(name="user")
@@ -234,11 +235,13 @@ class ORCIDRedirectViews:
 
     @exception_view_config(context=ValidationError)
     def invalid(self):
+        report_exception(self._context)
         self._request.session.flash("Received an invalid redirect from ORCID!", "error")
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=TokenValidationError)
     def invalid_token(self):
+        report_exception(self._context)
         self._request.session.flash("Received an invalid token from ORCID!", "error")
         return HTTPFound(location=self._request.route_url("account"))
 
@@ -249,7 +252,7 @@ class ORCIDRedirectViews:
 
     @exception_view_config(context=ExternalRequestError)
     def external_request(self):
-        handle_external_request_error(self._request.exception)
+        handle_external_request_error(self._context)
         self._request.session.flash("Request to ORCID failed!", "error")
         return HTTPFound(location=self._request.route_url("account"))
 
@@ -282,4 +285,4 @@ def handle_external_request_error(exception: ExternalRequestError) -> None:
     if exception.validation_errors:
         sentry_sdk.set_context("validation_errors", exception.validation_errors)
 
-    report_exception()
+    report_exception(exception)
