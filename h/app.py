@@ -150,9 +150,17 @@ def _configure_csp(config):
     # Define the global default Content Security Policy
     client_url = settings.get("h.client_url", DEFAULT_CLIENT_URL)
     client_host = urlparse(client_url).netloc
+
+    # References to `NONCE_VALUE` are replaced with a per-request value when
+    # the Content-Security-Policy header is generated.
     settings["csp"] = {
         "font-src": ["'self'", "fonts.gstatic.com", client_host],
-        "script-src": ["'self'", client_host, "www.googletagmanager.com"],
+        "script-src": [
+            "'self'",
+            client_host,
+            "www.googletagmanager.com",
+            "'nonce-NONCE_VALUE'",
+        ],
         # Allow inline styles until https://github.com/hypothesis/client/issues/293
         # is resolved as otherwise our own tool would break on the site,
         # including on /docs/help.

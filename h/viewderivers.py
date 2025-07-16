@@ -1,3 +1,6 @@
+from secrets import token_hex
+
+
 def csp_protected_view(view, info):
     """
     Add Content-Security-Policy headers to responses.
@@ -28,8 +31,14 @@ def csp_protected_view(view, info):
         header_name = "Content-Security-Policy"
 
     def wrapper_view(context, request):
+        # Spec recommends nonce should be 128 bits (16 bytes) before encoding:
+        # https://www.w3.org/TR/CSP3/#security-nonces.
+        request.csp_nonce = token_hex(16)
+
         resp = view(context, request)
-        resp.headers[header_name] = header_value
+        resp.headers[header_name] = header_value.replace(
+            "NONCE_VALUE", request.csp_nonce
+        )
         return resp
 
     return wrapper_view
