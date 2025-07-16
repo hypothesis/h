@@ -60,7 +60,7 @@
     {# Import map must be placed before any module script tags. Firefox will
        fail to load it otherwise. #}
     {% block importmap %}
-    <script type="importmap">{{ asset_import_map() | tojson }}</script>
+    <script type="importmap" nonce="{{ request.csp_nonce }}">{{ asset_import_map() | tojson }}</script>
     {% endblock %}
 
     {% for url in asset_urls("header_js") %}
