@@ -328,17 +328,19 @@ class TestORCIDRedirectViews:
         assert pyramid_request.response.status_int == 401
         assert result == {}
 
-    def test_invalid(self, pyramid_request, views, matchers):
+    def test_invalid(self, pyramid_request, views, matchers, report_exception):
         result = views.invalid()
 
+        report_exception.assert_called_once_with(sentinel.context)
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
         assert pyramid_request.session.peek_flash("error") == [
             "Received an invalid redirect from ORCID!"
         ]
 
-    def test_invalid_token(self, pyramid_request, views, matchers):
+    def test_invalid_token(self, pyramid_request, views, matchers, report_exception):
         result = views.invalid_token()
 
+        report_exception.assert_called_once_with(sentinel.context)
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
         assert pyramid_request.session.peek_flash("error") == [
             "Received an invalid token from ORCID!"
@@ -355,16 +357,17 @@ class TestORCIDRedirectViews:
     def test_external_request(
         self, pyramid_request, handle_external_request_error, views, matchers
     ):
-        pyramid_request.exception = ExternalRequestError(
+        exception = views._context = ExternalRequestError(  # noqa: SLF001
             "External request failed", validation_errors={"foo": ["bar"]}
         )
+
         result = views.external_request()
 
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
         assert pyramid_request.session.peek_flash("error") == [
             "Request to ORCID failed!"
         ]
-        handle_external_request_error.assert_called_once_with(pyramid_request.exception)
+        handle_external_request_error.assert_called_once_with(exception)
 
     def test_user_conflict_error(self, pyramid_request, views, matchers):
         result = views.user_conflict_error()
@@ -376,7 +379,7 @@ class TestORCIDRedirectViews:
 
     @pytest.fixture
     def views(self, pyramid_request):
-        return ORCIDRedirectViews(pyramid_request)
+        return ORCIDRedirectViews(sentinel.context, pyramid_request)
 
     @pytest.fixture
     def user(self, factories):
@@ -493,7 +496,7 @@ class TestORCIDRedirectViews:
 
 
 class TestHandleExternalRequestError:
-    def test_it(self, sentry_sdk):
+    def test_it(self, sentry_sdk, report_exception):
         exception = ExternalRequestError(
             message="External request failed",
             request=MagicMock(),
@@ -520,6 +523,7 @@ class TestHandleExternalRequestError:
                 },
             ),
         ]
+        report_exception.assert_called_once_with(exception)
 
     def test_it_with_validation_errors(self, sentry_sdk):
         exception = ExternalRequestError(
