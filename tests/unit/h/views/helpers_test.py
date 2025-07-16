@@ -2,7 +2,6 @@ from datetime import UTC, datetime
 from unittest.mock import create_autospec, sentinel
 
 import pytest
-from freezegun import freeze_time
 
 from h.accounts.events import LoginEvent
 from h.views import helpers
@@ -25,7 +24,7 @@ class TestLogin:
 
         headers = login(user, pyramid_request)
 
-        assert user.last_login_date == frozen_time.astimezone(UTC)
+        assert user.last_login_date == frozen_time().astimezone(UTC)
         login_event_subscriber.assert_called_once_with(
             self.LoginEventMatcher(pyramid_request, user)
         )
@@ -56,8 +55,3 @@ class TestLogin:
         pyramid_config.add_subscriber(login_event_subscriber, LoginEvent)
 
         return login_event_subscriber
-
-    @pytest.fixture
-    def frozen_time(self):
-        with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
-            yield frozen_time_factory()

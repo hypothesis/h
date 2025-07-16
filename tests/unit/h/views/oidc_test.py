@@ -1,7 +1,7 @@
+from datetime import UTC, timedelta
 from unittest.mock import MagicMock, call, sentinel
 from urllib.parse import urlencode, urlunparse
 
-import jwt
 import pytest
 from pyramid.httpexceptions import HTTPForbidden
 
@@ -9,9 +9,13 @@ from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError
 from h.services.exceptions import ExternalRequestError
+from h.services.jwt import JWTDecodeError
 from h.views.oidc import (
     ORCID_STATE_SESSION_KEY,
     AccessDeniedError,
+    JWTAudiences,
+    JWTIssuers,
+    OIDCState,
     ORCIDConnectAndLoginViews,
     ORCIDRedirectViews,
     UserConflictError,
@@ -19,7 +23,8 @@ from h.views.oidc import (
 )
 
 
-class TestORCIDConnectAndLoginViews:
+@pytest.mark.usefixtures("jwt_service")
+class TestORCIDConnectAndAndLoginViews:
     @pytest.mark.parametrize(
         "route_name,expected_action",
         [
@@ -28,19 +33,29 @@ class TestORCIDConnectAndLoginViews:
         ],
     )
     def test_connect_or_login(
-        self, pyramid_request, secrets, signing_key, route_name, expected_action
+        self,
+        pyramid_request,
+        route_name,
+        expected_action,
+        jwt_service,
+        frozen_time,
+        secrets,
     ):
         pyramid_request.matched_route.name = route_name
 
         result = ORCIDConnectAndLoginViews(pyramid_request).connect_or_login()
 
-        expected_state = jwt.encode(
-            {"action": expected_action, "rfp": secrets.token_hex.return_value},
-            signing_key,
-            algorithm="HS256",
+        secrets.token_hex.assert_called_once_with()
+        jwt_service.encode_symmetric.assert_called_once_with(
+            OIDCState(action=expected_action, rfp=secrets.token_hex.return_value),
+            expiration_time=frozen_time().astimezone(UTC) + timedelta(hours=1),
+            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
+            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
         )
-
-        assert pyramid_request.session[ORCID_STATE_SESSION_KEY] == expected_state
+        assert (
+            pyramid_request.session[ORCID_STATE_SESSION_KEY]
+            == jwt_service.encode_symmetric.return_value
+        )
         assert result.location == urlunparse(
             (
                 "https",
@@ -54,7 +69,7 @@ class TestORCIDConnectAndLoginViews:
                         "redirect_uri": pyramid_request.route_url(
                             "oidc.redirect.orcid"
                         ),
-                        "state": expected_state,
+                        "state": jwt_service.encode_symmetric.return_value,
                         "scope": "openid",
                     }
                 ),
@@ -81,14 +96,13 @@ class TestORCIDConnectAndLoginViews:
         )
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, factories, signing_key):
+    def pyramid_request(self, pyramid_request, factories):
         pyramid_request.user = factories.User()
         pyramid_request.registry.settings.update(
             {
                 "orcid_host": IdentityProvider.ORCID,
                 "orcid_client_id": sentinel.client_id,
                 "orcid_client_secret": sentinel.client_secret,
-                "orcid_oidc_state_signing_key": signing_key,
             }
         )
         return pyramid_request
@@ -99,15 +113,8 @@ class TestORCIDConnectAndLoginViews:
         pyramid_config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
         pyramid_config.add_route("activity.user_search", "/users/{username}")
 
-    @pytest.fixture(autouse=True)
-    def secrets(self, secrets):
-        # This just needs to be a string (not a mock) so that it's
-        # JSON-serializable, the tests don't care about the actual value.
-        secrets.token_hex.return_value = "test_rfp"
-        return secrets
 
-
-@pytest.mark.usefixtures("orcid_client_service", "user_service")
+@pytest.mark.usefixtures("orcid_client_service", "user_service", "jwt_service")
 class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
@@ -168,22 +175,21 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
         "assert_no_success_message_was_flashed",
     )
-    def test_redirect_if_state_jwt_fails_to_decode(self, OAuth2RedirectSchema, views):
-        OAuth2RedirectSchema.validate.return_value["state"] = "not_a_jwt"
+    def test_redirect_if_state_jwt_fails_to_decode(self, views, jwt_service):
+        jwt_service.decode_symmetric.side_effect = JWTDecodeError
 
-        # This is deliberately not handled because it should never happen: the
-        # code has already tested that the `state` query param that we received
-        # from the authentication server matches the copy that we stashed in
-        # the session, so the state should always decode without errors.
-        with pytest.raises(jwt.exceptions.DecodeError):
+        with pytest.raises(JWTDecodeError):
             views.redirect()
 
     @pytest.mark.usefixtures(
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
+        "assert_no_account_connection_was_added",
         "assert_no_success_message_was_flashed",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
@@ -198,6 +204,7 @@ class TestORCIDRedirectViews:
 
     @pytest.mark.usefixtures(
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_no_success_message_was_flashed",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
@@ -219,6 +226,7 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
         "assert_no_success_message_was_flashed",
@@ -243,6 +251,7 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_connect_action",
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
         "assert_no_success_message_was_flashed",
@@ -258,6 +267,7 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures("with_connect_action")
     @pytest.mark.usefixtures(
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_success_message_was_flashed",
         "assert_user_was_not_logged_in",
     )
@@ -276,6 +286,7 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_connect_action",
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_success_message_was_flashed",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
@@ -292,6 +303,7 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_login_action",
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_no_account_connection_was_added",
         "assert_user_was_not_logged_in",
         "assert_no_success_message_was_flashed",
@@ -307,6 +319,7 @@ class TestORCIDRedirectViews:
     @pytest.mark.usefixtures(
         "with_login_action",
         "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
         "assert_no_account_connection_was_added",
         "assert_no_success_message_was_flashed",
     )
@@ -386,11 +399,8 @@ class TestORCIDRedirectViews:
         return factories.User()
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, signing_key):
+    def pyramid_request(self, pyramid_request):
         pyramid_request.session[ORCID_STATE_SESSION_KEY] = sentinel.state
-        pyramid_request.registry.settings.update(
-            {"orcid_oidc_state_signing_key": signing_key}
-        )
         return pyramid_request
 
     @pytest.fixture
@@ -402,6 +412,16 @@ class TestORCIDRedirectViews:
         """
         yield
         assert ORCID_STATE_SESSION_KEY not in pyramid_request.session
+
+    @pytest.fixture
+    def assert_state_param_decoded_correctly(self, jwt_service, OAuth2RedirectSchema):
+        yield
+        jwt_service.decode_symmetric.assert_called_once_with(
+            OAuth2RedirectSchema.validate.return_value["state"],
+            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
+            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+            payload_class=OIDCState,
+        )
 
     @pytest.fixture
     def assert_success_message_was_flashed(self, pyramid_request):
@@ -434,14 +454,15 @@ class TestORCIDRedirectViews:
 
     @pytest.fixture
     def set_action(
-        self, OAuth2RedirectSchema, signing_key, pyramid_config, pyramid_request, user
+        self, OAuth2RedirectSchema, pyramid_config, pyramid_request, user, jwt_service
     ):
         def set_action(action: str, authenticate_user=None):
             """Set the `action` string in the JWT `state` param to `action`."""
             OAuth2RedirectSchema.validate.return_value = {
                 "code": sentinel.code,
-                "state": jwt.encode({"action": action}, signing_key, algorithm="HS256"),
+                "state": sentinel.state,
             }
+            jwt_service.decode_symmetric.return_value = OIDCState.make(action)
 
             if authenticate_user is None:
                 if action == "connect":
@@ -556,11 +577,6 @@ class TestHandleExternalRequestError:
         ]
 
 
-@pytest.fixture
-def signing_key():
-    return "orcid_oidc_state_signing_key"
-
-
 @pytest.fixture(autouse=True)
 def sentry_sdk(patch):
     return patch("h.views.oidc.sentry_sdk")
@@ -577,10 +593,10 @@ def OAuth2RedirectSchema(patch):
 
 
 @pytest.fixture(autouse=True)
-def secrets(patch):
-    return patch("h.views.oidc.secrets")
+def login(patch):
+    return patch("h.views.oidc.login")
 
 
 @pytest.fixture(autouse=True)
-def login(patch):
-    return patch("h.views.oidc.login")
+def secrets(patch):
+    return patch("h.views.oidc.secrets")
