@@ -7,10 +7,12 @@ https://openid.net/specs/openid-connect-core-1_0.html
 from __future__ import annotations
 
 import secrets
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from enum import StrEnum
+from typing import TYPE_CHECKING, Literal
 from urllib.parse import urlencode, urlunparse
 
-import jwt
 import sentry_sdk
 from h_pyramid_sentry import report_exception
 from pyramid.httpexceptions import HTTPForbidden, HTTPFound
@@ -26,7 +28,7 @@ from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
-from h.services.jwt import TokenValidationError
+from h.services.jwt import JWTDecodeError
 from h.views.helpers import login
 
 if TYPE_CHECKING:
@@ -46,49 +48,66 @@ class UserConflictError(Exception):
     """A different Hypothesis user is already connected to this identity."""
 
 
-def _encode_oauth2_state_param(action, key):
+class JWTIssuers(StrEnum):
+    """Strings for use in the `iss` claim when encoding JWTs."""
+
+    OIDC_CONNECT_OR_LOGIN_ORCID = "hak-sax-plix"
+
+
+class JWTAudiences(StrEnum):
+    """Strings for use in the `aud` claim when encoding JWTs."""
+
+    OIDC_REDIRECT_ORCID = "knop-gih-mip"
+
+
+ActionType = Literal["connect", "login"]
+
+
+@dataclass
+class OIDCState:
+    """The JWT payload of an OpenID Connect `state` param."""
+
+    action: ActionType
+    """The action that triggered the OIDC flow.
+
+    For example "connect" when connecting an ORCID iD to an existing Hypothesis
+    account, or "login" when using ORCID to log in to Hypothesis
     """
-    Return `action` encoded in a JWT signed with `key`.
 
-    While this JWT is signed to prevent tampering it is *not* encrypted so
-    shouldn't contain any sensitive data.
+    rfp: str
+    """A Request Forgery Protection (RFP) token to protect against CSRF attacks.
 
+    The claim name "rfp" is compatible with
+    https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09
     """
-    return jwt.encode(
-        {
-            "action": action,
-            # Add a Request Forgery Protection (RFP) token to protect against
-            # CSRF attacks. The key name "rfp" is compatible with
-            # https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09
-            "rfp": secrets.token_hex(),
-        },
-        key,
-        algorithm="HS256",
-    )
 
-
-def _decode_oauth2_state_param(state_param, key):
-    return jwt.decode(state_param, key, algorithms=["HS256"])
+    @classmethod
+    def make(cls, action: ActionType):
+        """Return a new OIDCState with the given `action` and a random `rfp`."""
+        return cls(action, secrets.token_hex())
 
 
 @view_defaults(request_method="GET")
 class ORCIDConnectAndLoginViews:
     def __init__(self, request: Request) -> None:
         self._request = request
+        self._jwt_service = request.find_service(name="jwt")
 
     @view_config(is_authenticated=True, route_name="oidc.connect.orcid")
     @view_config(is_authenticated=False, route_name="oidc.login.orcid")
     def connect_or_login(self):
         host = self._request.registry.settings["orcid_host"]
         client_id = self._request.registry.settings["orcid_client_id"]
-        state_signing_key = self._request.registry.settings[
-            "orcid_oidc_state_signing_key"
-        ]
 
         actions = {"oidc.connect.orcid": "connect", "oidc.login.orcid": "login"}
         action = actions[self._request.matched_route.name]
 
-        state = _encode_oauth2_state_param(action, state_signing_key)
+        state = self._jwt_service.encode_symmetric(
+            OIDCState.make(action),
+            expiration_time=datetime.now(tz=UTC) + timedelta(hours=1),
+            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
+            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+        )
         self._request.session[ORCID_STATE_SESSION_KEY] = state
 
         params = {
@@ -140,6 +159,7 @@ class ORCIDRedirectViews:
         self._request = request
         self._orcid_client = request.find_service(ORCIDClientService)
         self._user_service = request.find_service(name="user")
+        self._jwt_service = request.find_service(name="jwt")
 
     @view_config()
     def redirect(self):
@@ -147,10 +167,6 @@ class ORCIDRedirectViews:
             expected_state = self._request.session.pop(ORCID_STATE_SESSION_KEY)
         except KeyError as err:
             raise InvalidOAuth2StateParamError from err
-
-        state_signing_key = self._request.registry.settings[
-            "orcid_oidc_state_signing_key"
-        ]
 
         try:
             validated_params = OAuth2RedirectSchema.validate(
@@ -164,18 +180,19 @@ class ORCIDRedirectViews:
             # We received an invalid or unexpected redirect from ORCID.
             raise
 
-        decoded_state = _decode_oauth2_state_param(
-            validated_params["state"], state_signing_key
+        decoded_state = self._jwt_service.decode_symmetric(
+            validated_params["state"],
+            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
+            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+            payload_class=OIDCState,
         )
 
-        action_str = decoded_state["action"]
-
-        if action_str == "connect" and not self._request.is_authenticated:
+        if decoded_state.action == "connect" and not self._request.is_authenticated:
             # You must be logged in to connect an identity to your existing
             # Hypothesis account.
             raise HTTPForbidden
 
-        if action_str == "login" and self._request.is_authenticated:
+        if decoded_state.action == "login" and self._request.is_authenticated:
             # You must be logged out in order to log in.
             raise HTTPForbidden
 
@@ -190,7 +207,7 @@ class ORCIDRedirectViews:
             "connect": self.connect_orcid_id,
             "login": self.log_in_with_orcid,
         }
-        action_method = actions[action_str]
+        action_method = actions[decoded_state.action]
         return action_method(orcid_id, user)
 
     def connect_orcid_id(self, orcid_id: str, user: User | None):
@@ -239,7 +256,7 @@ class ORCIDRedirectViews:
         self._request.session.flash("Received an invalid redirect from ORCID!", "error")
         return HTTPFound(location=self._request.route_url("account"))
 
-    @exception_view_config(context=TokenValidationError)
+    @exception_view_config(context=JWTDecodeError)
     def invalid_token(self):
         report_exception(self._context)
         self._request.session.flash("Received an invalid token from ORCID!", "error")

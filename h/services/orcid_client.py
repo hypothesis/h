@@ -61,7 +61,7 @@ class ORCIDClientService:
 
     def get_orcid(self, authorization_code: str) -> str | None:
         id_token = self._get_id_token(authorization_code)
-        decoded_id_token = self._jwt_service.decode_token(
+        decoded_id_token = self._jwt_service.decode_oidc_idtoken(
             id_token, self.key_set_url, OIDC_ALLOWED_JWT_ALGORITHMS
         )
         return decoded_id_token.get("sub")

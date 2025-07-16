@@ -145,11 +145,12 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
         "mailchimp_user_actions_subaccount", "MAILCHIMP_USER_ACTIONS_SUBACCOUNT"
     )
 
+    settings_manager.set("jwt_signing_key", "JWT_SIGNING_KEY")
+
     # ORCID settings
     settings_manager.set("orcid_host", "ORCID_HOST")
     settings_manager.set("orcid_client_id", "ORCID_CLIENT_ID")
     settings_manager.set("orcid_client_secret", "ORCID_CLIENT_SECRET")
-    settings_manager.set("orcid_oidc_state_signing_key", "ORCID_OIDC_STATE_SIGNING_KEY")
 
     settings_manager.set(
         "h_api_auth_cookie_secret_key",

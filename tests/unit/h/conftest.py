@@ -6,6 +6,7 @@ from unittest.mock import create_autospec
 import click.testing
 import deform
 import pytest
+from freezegun import freeze_time
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 from webob.multidict import MultiDict
@@ -238,6 +239,12 @@ def with_auth_client(auth_client, pyramid_config):
     pyramid_config.testing_securitypolicy(
         identity=Identity.from_models(auth_client=auth_client)
     )
+
+
+@pytest.fixture
+def frozen_time():
+    with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
+        yield frozen_time_factory
 
 
 @pytest.fixture

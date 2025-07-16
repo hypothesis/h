@@ -4,7 +4,6 @@ from unittest.mock import ANY, create_autospec, sentinel
 import pytest
 from colander import Invalid
 from deform import ValidationFailure
-from freezegun import freeze_time
 
 from h import i18n
 from h.services.exceptions import ConflictError
@@ -168,11 +167,6 @@ class TestSignupViews:
     @pytest.fixture
     def views(self, pyramid_request):
         return SignupViews(sentinel.context, pyramid_request)
-
-    @pytest.fixture
-    def frozen_time(self):
-        with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
-            yield frozen_time_factory()
 
 
 def test_is_authenticated(matchers, pyramid_request, authenticated_user):

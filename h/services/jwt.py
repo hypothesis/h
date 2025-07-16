@@ -1,35 +1,44 @@
-import datetime
+from dataclasses import asdict
+from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Any
+from typing import Any, TypeVar
 
 import jwt
 from jwt import PyJWKClient
-from jwt.exceptions import PyJWTError
+from jwt.exceptions import InvalidTokenError, PyJWTError
 
 JWK_CLIENT_TIMEOUT = 10
 
 
-class TokenValidationError(Exception):
+class JWTDecodeError(Exception):
     """Decoding or validating a JWT failed."""
 
 
+class JWTPayloadError(JWTDecodeError):
+    """A JWT decoded successfully but the payload wasn't what we expected."""
+
+
 class JWTService:
-    LEEWAY = datetime.timedelta(seconds=10)
+    LEEWAY = timedelta(seconds=10)
+
+    def __init__(self, jwt_signing_key):
+        self.jwt_signing_key = jwt_signing_key
 
     @classmethod
-    def decode_token(
+    def decode_oidc_idtoken(
         cls, token: str, key_set_url: str, algorithms: list[str]
     ) -> dict[str, Any]:
+        """Decode the given OpenID Connect (OIDC) ID token and return the payload."""
         try:
             unverified_header = jwt.get_unverified_header(token)
             unverified_payload = jwt.decode(token, options={"verify_signature": False})
         except PyJWTError as err:
             msg = "Invalid JWT {err}"
-            raise TokenValidationError(msg) from err
+            raise JWTDecodeError(msg) from err
 
         if not unverified_header.get("kid"):
             msg = "Missing 'kid' value in JWT header"
-            raise TokenValidationError(msg)
+            raise JWTDecodeError(msg)
 
         iss, aud = unverified_payload.get("iss"), unverified_payload.get("aud")
 
@@ -47,7 +56,154 @@ class JWTService:
             )
         except PyJWTError as err:
             msg = f"Invalid JWT for: {iss}, {aud}. {err}"
-            raise TokenValidationError(msg) from err
+            raise JWTDecodeError(msg) from err
+
+    def encode_symmetric(
+        self,
+        payload,
+        *,
+        expiration_time: datetime | int,
+        issuer: str,
+        audience: str,
+        # Test seams to allow unittests to create invalid tokens.
+        _algorithm: str = "HS256",
+        _signing_key: str | None = None,
+    ) -> str:
+        """Return a signed (not encrypted) JWT with the given `payload` as its payload.
+
+        :return: a JWT that can be decoded with the decode_symmetric() method
+            below to recover the originally given `payload` object.
+
+            The returned JWT is signed to prevent tampering but is *not*
+            encrypted so shouldn't contain any sensitive data.
+
+            Signing is done with a symmetric key that is managed by JWTService.
+
+        :type payload: an instance of any dataclass
+
+        :arg issuer: a string that identifies the specific subsystem of the app
+            (e.g. route, or possibly route+use-case if a single route issues
+            more than one JWT) that issued the JWT. This provides debugging
+            information (if decoding JWTs and inspecting their contents while
+            debugging).
+
+        :arg audience: a string that identifies the specific subsystem of the
+            app (e.g. route, or possibly route+use-case if a single route
+            consumes more than one JWT) that is intended to decode the JWT and
+            make use of its payload. This prevents substitution attacks or
+            confusions where a JWT meant for one part of the app is
+            unintentionally used in another part of the app, and also provides
+            debugging information (if decoding JWTs and inspecting their
+            contents while debugging).
+
+        It's recommended to use short, unique, meaningless, but recognisable
+        strings for `issuer` and `audience`, for example:
+
+        MY_ISSUER = "meas-did-bluk"
+        MY_AUDIENCE = "tro-cel-ferd"
+
+        This allows the constants to be renamed when refactoring code, without
+        desiring to change the actual string values (which would invalidate
+        JWTs in the wild). These strings aren't secret so they can just be
+        hardcoded in the source code. Anyone inspecting the contents of a JWT
+        for debugging can look up the strings in the source code, this
+        inconvenience is judged worth the benefit of easier renaming and
+        refactoring (inspecting JWT contents is rare).
+
+        encode_symmetric() and decode_symmetric() intend to provide a reusable
+        method for encoding JWTs that is general enough to be applicable in
+        many contexts (whenever it would be appropriate to use a
+        symmetrically-signed but not encrypted JWT with an expiration time,
+        issuer and audience) and that uses good practices, for example:
+
+        * Requiring the JWT to have an expiration time, issuer and audience and
+          always verifying these when decoding.
+        * Signing all JWTs using a single key that is managed by JWTService, to
+          avoid a proliferation of different JWT signing keys in envvars or
+          databases. The convenience of a single key is judged worth the
+          potential loss of security.
+        * Using dataclasses to define the expected payload formats,
+          and handling exceptions when invalid payloads are encountered.
+        * Having thorough documentation, type annotations, and unittests.
+        * Providing a simple, easy to use, and easy to test interface for any
+          code that wants to encode or decode JWTs.
+
+        """
+        payload_dict = asdict(payload)
+
+        if _algorithm == "none":
+            signing_key = None
+        elif _signing_key:
+            signing_key = _signing_key
+        else:
+            signing_key = self.jwt_signing_key
+
+        # This is deliberately not mentioned in the docstring or type
+        # annotations above because it's not intended to be part of the public
+        # interface:
+        # If falsey values (e.g. None) are passed for expiration_time, issuer
+        # or audience they will be omitted. The resulting JWT will fail to
+        # decode with the decode_symmetric() method below.
+        # This is to allow unittests to generate invalid JWTs.
+        if expiration_time:
+            payload_dict["exp"] = expiration_time
+        if issuer:
+            payload_dict["iss"] = issuer
+        if audience:
+            payload_dict["aud"] = audience
+
+        return jwt.encode(
+            payload_dict,
+            key=signing_key,  # type: ignore[arg-type]
+                              # PyJWT's type annotation is wrong: it's actually
+                              # possible and documented (and sometimes even
+                              # required) to pass key=None but the type
+                              # annotation doesn't allow it.
+            algorithm=_algorithm,
+        )  # fmt: skip
+
+    # The type of the payload_class argument below is any dataclass and the
+    # return type of the decode_symmetric() function is an instance of whatever
+    # dataclass was passed as the payload_class argument.
+    # Use a TypeVar in order to correctly annotate these.
+    ANY_DATACLASS = TypeVar("ANY_DATACLASS")
+
+    def decode_symmetric(
+        self,
+        token: str,
+        *,
+        issuer: str,
+        audience: str,
+        payload_class: type[ANY_DATACLASS],
+    ) -> ANY_DATACLASS:
+        """Decode the given `token` and return the original payload.
+
+        Decodes tokens from the JWTService.encode_symmetric() method above.
+
+        :raise JWTDecodeError: if decoding the JWT fails for any reason, for
+            example: because the JWT is invalid, because the signature is
+            invalid or missing or uses the wrong signing algorithm, because the
+            timeout, issuer or audience is missing or invalid, or because the
+            payload is invalid.
+        """
+        try:
+            payload_dict = jwt.decode(
+                token,
+                self.jwt_signing_key,
+                algorithms=["HS256"],
+                options={"require": ["exp", "iss", "aud"]},
+                issuer=issuer,
+                audience=audience,
+            )
+        except InvalidTokenError as err:
+            raise JWTDecodeError from err
+
+        del payload_dict["exp"], payload_dict["iss"], payload_dict["aud"]
+
+        try:
+            return payload_class(**payload_dict)
+        except TypeError as err:
+            raise JWTPayloadError from err
 
     @staticmethod
     @lru_cache(maxsize=256)
@@ -61,6 +217,7 @@ class JWTService:
 
 
 def factory(context, request):
-    del context, request
+    del context
+    settings = request.registry.settings
 
-    return JWTService()
+    return JWTService(jwt_signing_key=settings["jwt_signing_key"])
