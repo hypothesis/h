@@ -11,7 +11,7 @@ from h.services.orcid_client import ORCIDClientService, factory
 class TestORCIDClientService:
     def test_get_orcid(self, service, openid_client_service, jwt_service):
         openid_client_service.get_id_token.return_value = sentinel.id_token
-        jwt_service.decode_token.return_value = {"sub": sentinel.orcid}
+        jwt_service.decode_oidc_idtoken.return_value = {"sub": sentinel.orcid}
 
         orcid = service.get_orcid(sentinel.authorization_code)
 
@@ -22,7 +22,7 @@ class TestORCIDClientService:
             auth=(sentinel.client_id, sentinel.client_secret),
             authorization_code=sentinel.authorization_code,
         )
-        jwt_service.decode_token.assert_called_once_with(
+        jwt_service.decode_oidc_idtoken.assert_called_once_with(
             sentinel.id_token, service.key_set_url, ["RS256"]
         )
 
@@ -30,7 +30,7 @@ class TestORCIDClientService:
         self, service, openid_client_service, jwt_service
     ):
         openid_client_service.get_id_token.return_value = sentinel.id_token
-        jwt_service.decode_token.return_value = {}
+        jwt_service.decode_oidc_idtoken.return_value = {}
 
         assert service.get_orcid(sentinel.authorization_code) is None
 
