@@ -46,8 +46,14 @@ describe('AnnotationCard', () => {
         AnnotationTimestamps: () => null,
         AnnotationUser: () => null,
         AnnotationGroupInfo: () => null,
-        MarkdownView: () => null,
         AnnotationShareControl: () => null,
+      },
+      '@hypothesis/frontend-shared': {
+        lazy: displayName => {
+          const DummyComponent = () => null;
+          DummyComponent.displayName = displayName;
+          return DummyComponent;
+        },
       },
       '../hooks/use-update-moderation-status': {
         useUpdateModerationStatus: fakeUseUpdateModerationStatus,
