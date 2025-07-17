@@ -110,12 +110,20 @@ class AuthController:
     def _js_config(self) -> dict[str, Any]:
         csrf_token = get_csrf_token(self.request)
 
+        flash_messages: list[dict] = []
+        for queue in ["success", "error"]:
+            flash_messages.extend(
+                {"type": queue, "message": msg}
+                for msg in self.request.session.pop_flash(queue)
+            )
+
         js_config = {
             "styles": self.request.registry["assets_env"].urls("forms_css"),
             "csrfToken": csrf_token,
             "features": {
                 "log_in_with_orcid": self.request.feature("log_in_with_orcid"),
             },
+            "flashMessages": flash_messages,
         }
 
         if for_oauth := self.request.params.get("for_oauth"):
