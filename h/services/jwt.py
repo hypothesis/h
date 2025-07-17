@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from dataclasses import asdict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from functools import lru_cache
 from typing import Any, TypeVar
@@ -95,7 +95,7 @@ class JWTService:
         self,
         payload,
         *,
-        expiration_time: datetime | int,
+        expires_in: timedelta,
         issuer: JWTIssuers,
         audience: JWTAudiences,
         # Test seams to allow unittests to create invalid tokens.
@@ -164,12 +164,12 @@ class JWTService:
         # This is deliberately not mentioned in the docstring or type
         # annotations above because it's not intended to be part of the public
         # interface:
-        # If falsey values (e.g. None) are passed for expiration_time, issuer
+        # If falsey values (e.g. None) are passed for expires_in, issuer
         # or audience they will be omitted. The resulting JWT will fail to
         # decode with the decode_symmetric() method below.
         # This is to allow unittests to generate invalid JWTs.
-        if expiration_time:
-            payload_dict["exp"] = expiration_time
+        if expires_in:
+            payload_dict["exp"] = datetime.now(tz=UTC) + expires_in
         if issuer:
             payload_dict["iss"] = issuer
         if audience:

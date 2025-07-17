@@ -1,4 +1,4 @@
-from datetime import UTC, timedelta
+from datetime import timedelta
 from unittest.mock import MagicMock, call, sentinel
 from urllib.parse import urlencode, urlunparse
 
@@ -31,13 +31,7 @@ class TestORCIDConnectAndAndLoginViews:
         ],
     )
     def test_connect_or_login(
-        self,
-        pyramid_request,
-        route_name,
-        expected_action,
-        jwt_service,
-        frozen_time,
-        secrets,
+        self, pyramid_request, route_name, expected_action, jwt_service, secrets
     ):
         pyramid_request.matched_route.name = route_name
 
@@ -46,7 +40,7 @@ class TestORCIDConnectAndAndLoginViews:
         secrets.token_hex.assert_called_once_with()
         jwt_service.encode_symmetric.assert_called_once_with(
             OIDCState(action=expected_action, rfp=secrets.token_hex.return_value),
-            expiration_time=frozen_time().astimezone(UTC) + timedelta(hours=1),
+            expires_in=timedelta(hours=1),
             issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
             audience=JWTAudiences.OIDC_REDIRECT_ORCID,
         )
