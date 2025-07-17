@@ -76,6 +76,7 @@ class TestAuthController:
                 "styles": assets_env.urls.return_value,
                 "csrfToken": views.get_csrf_token.spy_return,
                 "features": {"log_in_with_orcid": True},
+                "flashMessages": [],
             }
         }
 
@@ -85,6 +86,26 @@ class TestAuthController:
         result = views.AuthController(pyramid_request).get()
 
         assert result["js_config"]["forOAuth"]
+
+    def test_get_with_flash_messages(self, pyramid_request, mocker):
+        mocker.spy(views, "get_csrf_token")
+        pyramid_request.session.flash("Login successful!", "success")
+        pyramid_request.session.flash("Invalid password", "error")
+
+        result = views.AuthController(pyramid_request).get()
+
+        expected_flash_messages = [
+            {"type": "success", "message": "Login successful!"},
+            {"type": "error", "message": "Invalid password"},
+        ]
+        assert result["js_config"]["flashMessages"] == expected_flash_messages
+
+    def test_get_flash_messages_consumed_after_get(self, pyramid_request):
+        pyramid_request.session.flash("Test message", "success")
+
+        views.AuthController(pyramid_request).get()
+
+        assert pyramid_request.session.peek_flash("success") == []
 
     def test_post_returns_form_when_validation_fails(
         self, invalid_form, pyramid_config, pyramid_request, assets_env, mocker
@@ -106,6 +127,7 @@ class TestAuthController:
                 "formErrors": form_errors,
                 "formData": pyramid_request.POST,
                 "features": {"log_in_with_orcid": True},
+                "flashMessages": [],
             }
         }
 
