@@ -9,12 +9,10 @@ from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError
 from h.services.exceptions import ExternalRequestError
-from h.services.jwt import JWTDecodeError
+from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.oidc import (
     ORCID_STATE_SESSION_KEY,
     AccessDeniedError,
-    JWTAudiences,
-    JWTIssuers,
     OIDCState,
     ORCIDConnectAndLoginViews,
     ORCIDRedirectViews,
