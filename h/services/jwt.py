@@ -114,20 +114,17 @@ class JWTService:
 
         :type payload: an instance of any dataclass
 
-        :arg issuer: a string that identifies the specific subsystem of the app
-            (e.g. route, or possibly route+use-case if a single route issues
-            more than one JWT) that issued the JWT. This provides debugging
+        :arg issuer: a string that identifies the specific component of the app
+            (e.g. view or service) that issued the JWT. This provides debugging
             information (if decoding JWTs and inspecting their contents while
             debugging).
 
-        :arg audience: a string that identifies the specific subsystem of the
-            app (e.g. route, or possibly route+use-case if a single route
-            consumes more than one JWT) that is intended to decode the JWT and
-            make use of its payload. This prevents substitution attacks or
-            confusions where a JWT meant for one part of the app is
-            unintentionally used in another part of the app, and also provides
-            debugging information (if decoding JWTs and inspecting their
-            contents while debugging).
+        :arg audience: a string that identifies the specific component of the
+            app (e.g. view or service) that is intended to consume the JWT.
+            This prevents substitution attacks or confusions where a JWT meant
+            for one part of the app is unintentionally used in another part of
+            the app, and also provides debugging information (if decoding JWTs
+            and inspecting their contents while debugging).
 
             If `audience` is an iterable of strings then the token will decode
             successfully if its `aud` claim matches any one of the given
