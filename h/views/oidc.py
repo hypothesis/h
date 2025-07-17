@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import secrets
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from typing import TYPE_CHECKING, Literal
 from urllib.parse import urlencode, urlunparse
 
@@ -91,7 +91,7 @@ class ORCIDConnectAndLoginViews:
 
         state = self._jwt_service.encode_symmetric(
             OIDCState.make(action),
-            expiration_time=datetime.now(tz=UTC) + timedelta(hours=1),
+            expires_in=timedelta(hours=1),
             issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
             audience=JWTAudiences.OIDC_REDIRECT_ORCID,
         )
