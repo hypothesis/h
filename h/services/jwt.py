@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from dataclasses import asdict
 from datetime import datetime, timedelta
 from functools import lru_cache
@@ -96,6 +97,10 @@ class JWTService:
             debugging information (if decoding JWTs and inspecting their
             contents while debugging).
 
+            If `audience` is an iterable of strings then the token will decode
+            successfully if its `aud` claim matches any one of the given
+            strings.
+
         It's recommended to use short, unique, meaningless, but recognisable
         strings for `issuer` and `audience`, for example:
 
@@ -173,7 +178,7 @@ class JWTService:
         token: str,
         *,
         issuer: str,
-        audience: str,
+        audience: str | Iterable[str],
         payload_class: type[ANY_DATACLASS],
     ) -> ANY_DATACLASS:
         """Decode the given `token` and return the original payload.
