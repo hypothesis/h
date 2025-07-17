@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import UTC, timedelta
+from datetime import timedelta
 from unittest.mock import sentinel
 
 import pytest
@@ -72,10 +72,10 @@ class TestJWTService:
     class JWTPayload:
         foo: str
 
-    def test_encode_decode_symmetric(self, service, payload, one_hour_from_now):
+    def test_encode_decode_symmetric(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="test_audience",
         )
@@ -88,20 +88,18 @@ class TestJWTService:
         assert decoded_payload == payload
 
     def test_encode_symmetric_required_kwargs(self, service, payload):
-        # The expiration_time, issuer and audience arguments are required:
+        # The expires_in, issuer and audience arguments are required:
         # encode_symmetric() doesn't support encoding JWTs without these
         # security and debugging features, and decode_symmetric() wouldn't
         # decode one.
         with pytest.raises(
             TypeError,
-            match=r"^JWTService\.encode_symmetric\(\) missing 3 required keyword-only arguments: 'expiration_time', 'issuer', and 'audience'$",
+            match=r"^JWTService\.encode_symmetric\(\) missing 3 required keyword-only arguments: 'expires_in', 'issuer', and 'audience'$",
         ):
             service.encode_symmetric(payload)
 
-    def test_encode_symmetric_keyword_only_args(
-        self, service, payload, one_hour_from_now
-    ):
-        # To prevent any confusion or mixups expiration_time, issuer and
+    def test_encode_symmetric_keyword_only_args(self, service, payload):
+        # To prevent any confusion or mixups expires_in, issuer and
         # audience are keyword-only arguments (payload is the only positional
         # argument).
         with pytest.raises(
@@ -110,7 +108,7 @@ class TestJWTService:
         ):
             service.encode_symmetric(
                 payload,
-                one_hour_from_now,
+                timedelta(hours=1),
                 "test_issuer",
                 "test_audience",
             )
@@ -148,12 +146,10 @@ class TestJWTService:
 
         assert isinstance(exc_info.value.__cause__, DecodeError)
 
-    def test_decode_symmetric_with_expired_token(
-        self, service, payload, one_hour_from_now, frozen_time
-    ):
+    def test_decode_symmetric_with_expired_token(self, service, payload, frozen_time):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="test_audience",
         )
@@ -171,7 +167,7 @@ class TestJWTService:
     def test_decode_symmetric_with_no_expiry_time(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=None,
+            expires_in=None,
             issuer="test_issuer",
             audience="test_audience",
         )
@@ -186,12 +182,10 @@ class TestJWTService:
         assert isinstance(exc_info.value.__cause__, MissingRequiredClaimError)
         assert exc_info.value.__cause__.claim == "exp"
 
-    def test_decode_symmetric_with_wrong_algorithm(
-        self, service, payload, one_hour_from_now
-    ):
+    def test_decode_symmetric_with_wrong_algorithm(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="test_audience",
             _algorithm="none",
@@ -206,12 +200,10 @@ class TestJWTService:
 
         assert isinstance(exc_info.value.__cause__, InvalidAlgorithmError)
 
-    def test_decode_symmetric_with_invalid_key(
-        self, service, payload, one_hour_from_now
-    ):
+    def test_decode_symmetric_with_invalid_key(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="test_audience",
             _signing_key="invalid_key",
@@ -226,10 +218,10 @@ class TestJWTService:
 
         assert isinstance(exc_info.value.__cause__, InvalidSignatureError)
 
-    def test_decode_symmetric_with_no_issuer(self, service, payload, one_hour_from_now):
+    def test_decode_symmetric_with_no_issuer(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer=None,
             audience="test_audience",
         )
@@ -244,12 +236,10 @@ class TestJWTService:
         assert isinstance(exc_info.value.__cause__, MissingRequiredClaimError)
         assert exc_info.value.__cause__.claim == "iss"
 
-    def test_decode_symmetric_with_wrong_audience(
-        self, service, payload, one_hour_from_now
-    ):
+    def test_decode_symmetric_with_wrong_audience(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="wrong",
         )
@@ -263,12 +253,10 @@ class TestJWTService:
 
         assert isinstance(exc_info.value.__cause__, InvalidAudienceError)
 
-    def test_decode_symmetric_with_no_audience(
-        self, service, payload, one_hour_from_now
-    ):
+    def test_decode_symmetric_with_no_audience(self, service, payload):
         token = service.encode_symmetric(
             payload,
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience=None,
         )
@@ -283,14 +271,14 @@ class TestJWTService:
         assert isinstance(exc_info.value.__cause__, MissingRequiredClaimError)
         assert exc_info.value.__cause__.claim == "aud"
 
-    def test_decode_symmetric_with_invalid_payload(self, service, one_hour_from_now):
+    def test_decode_symmetric_with_invalid_payload(self, service):
         @dataclass
         class InvalidPayload:
             bar: str
 
         token = service.encode_symmetric(
             InvalidPayload("bar"),
-            expiration_time=one_hour_from_now,
+            expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="test_audience",
         )
@@ -306,10 +294,6 @@ class TestJWTService:
     def payload(self):
         """Return a payload for testing {encode,decode}_symmetric()."""
         return TestJWTService.JWTPayload("test")
-
-    @pytest.fixture
-    def one_hour_from_now(self, frozen_time):
-        return frozen_time().astimezone(UTC) + timedelta(hours=1)
 
     @pytest.fixture(autouse=True)
     def clear_jwk_cache(self, service):
