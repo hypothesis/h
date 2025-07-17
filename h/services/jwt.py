@@ -177,7 +177,6 @@ class JWTService:
         self,
         token: str,
         *,
-        issuer: str,
         audience: str | Iterable[str],
         payload_class: type[ANY_DATACLASS],
     ) -> ANY_DATACLASS:
@@ -197,7 +196,6 @@ class JWTService:
                 self.jwt_signing_key,
                 algorithms=["HS256"],
                 options={"require": ["exp", "iss", "aud"]},
-                issuer=issuer,
                 audience=audience,
             )
         except InvalidTokenError as err:

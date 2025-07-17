@@ -8,7 +8,6 @@ from jwt.exceptions import (
     ExpiredSignatureError,
     InvalidAlgorithmError,
     InvalidAudienceError,
-    InvalidIssuerError,
     InvalidSignatureError,
     InvalidTokenError,
     MissingRequiredClaimError,
@@ -82,7 +81,6 @@ class TestJWTService:
         )
         decoded_payload = service.decode_symmetric(
             token,
-            issuer="test_issuer",
             audience="test_audience",
             payload_class=TestJWTService.JWTPayload,
         )
@@ -123,7 +121,7 @@ class TestJWTService:
         # security, debugging and code design features.
         with pytest.raises(
             TypeError,
-            match=r"^JWTService\.decode_symmetric\(\) missing 3 required keyword-only arguments: 'issuer', 'audience', and 'payload_class'$",
+            match=r"^JWTService\.decode_symmetric\(\) missing 2 required keyword-only arguments: 'audience' and 'payload_class'$",
         ):
             service.decode_symmetric("token")
 
@@ -132,11 +130,10 @@ class TestJWTService:
         # are keyword-only arguments (token is the only positional argument).
         with pytest.raises(
             TypeError,
-            match=r"^JWTService\.decode_symmetric\(\) takes 2 positional arguments but 5 were given$",
+            match=r"^JWTService\.decode_symmetric\(\) takes 2 positional arguments but 4 were given$",
         ):
             service.decode_symmetric(
                 "token",
-                "issuer",
                 "audience",
                 TestJWTService.JWTPayload,
             )
@@ -145,7 +142,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 "invalid_jwt",
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -166,7 +162,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -184,7 +179,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -206,7 +200,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -227,32 +220,11 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
 
         assert isinstance(exc_info.value.__cause__, InvalidSignatureError)
-
-    def test_decode_symmetric_with_wrong_issuer(
-        self, service, payload, one_hour_from_now
-    ):
-        token = service.encode_symmetric(
-            payload,
-            expiration_time=one_hour_from_now,
-            issuer="wrong",
-            audience="test_audience",
-        )
-
-        with pytest.raises(JWTDecodeError) as exc_info:
-            service.decode_symmetric(
-                token,
-                issuer="test_issuer",
-                audience="test_audience",
-                payload_class=TestJWTService.JWTPayload,
-            )
-
-        assert isinstance(exc_info.value.__cause__, InvalidIssuerError)
 
     def test_decode_symmetric_with_no_issuer(self, service, payload, one_hour_from_now):
         token = service.encode_symmetric(
@@ -265,7 +237,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issue",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -286,7 +257,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -306,7 +276,6 @@ class TestJWTService:
         with pytest.raises(JWTDecodeError) as exc_info:
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
@@ -329,7 +298,6 @@ class TestJWTService:
         with pytest.raises(JWTPayloadError):
             service.decode_symmetric(
                 token,
-                issuer="test_issuer",
                 audience="test_audience",
                 payload_class=TestJWTService.JWTPayload,
             )
