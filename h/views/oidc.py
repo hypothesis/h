@@ -182,7 +182,6 @@ class ORCIDRedirectViews:
 
         decoded_state = self._jwt_service.decode_symmetric(
             validated_params["state"],
-            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
             audience=JWTAudiences.OIDC_REDIRECT_ORCID,
             payload_class=OIDCState,
         )
