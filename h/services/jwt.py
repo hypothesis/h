@@ -38,7 +38,7 @@ class JWTAudiences(StrEnum):
 
     """
 
-    OIDC_REDIRECT_ORCID = "knop-gih-mip"
+    OIDC_REDIRECT_ORCID = "knop"
 
 
 class JWTIssuers(StrEnum):
@@ -48,7 +48,7 @@ class JWTIssuers(StrEnum):
 
     """
 
-    OIDC_CONNECT_OR_LOGIN_ORCID = "hak-sax-plix"
+    OIDC_CONNECT_OR_LOGIN_ORCID = "hak"
 
 
 class JWTService:
