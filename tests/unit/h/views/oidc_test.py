@@ -418,7 +418,6 @@ class TestORCIDRedirectViews:
         yield
         jwt_service.decode_symmetric.assert_called_once_with(
             OAuth2RedirectSchema.validate.return_value["state"],
-            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
             audience=JWTAudiences.OIDC_REDIRECT_ORCID,
             payload_class=OIDCState,
         )
