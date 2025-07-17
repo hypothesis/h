@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from dataclasses import asdict
 from datetime import datetime, timedelta
+from enum import StrEnum
 from functools import lru_cache
 from typing import Any, TypeVar
 
@@ -17,6 +18,37 @@ class JWTDecodeError(Exception):
 
 class JWTPayloadError(JWTDecodeError):
     """A JWT decoded successfully but the payload wasn't what we expected."""
+
+
+class JWTAudiences(StrEnum):
+    """Strings for use in the `aud` claim when encoding JWTs.
+
+    Use short, unique, meaningless, but recognisable strings for audiences,
+    for example:
+
+    MY_AUDIENCE = "meas-did-bluk"
+
+    This allows the constants to be renamed when refactoring code, without
+    desiring to change the actual string values (which would invalidate JWTs in
+    the wild). These strings aren't secret so they can just be hardcoded in the
+    source code. Anyone inspecting the contents of a JWT for debugging can look
+    up the strings in the source code, this inconvenience is judged worth the
+    benefit of easier renaming and refactoring (inspecting JWT contents is
+    rare).
+
+    """
+
+    OIDC_REDIRECT_ORCID = "knop-gih-mip"
+
+
+class JWTIssuers(StrEnum):
+    """Strings for use in the `iss` claim when encoding JWTs.
+
+    As with audiences (see above) use meaningless strings for issuers.
+
+    """
+
+    OIDC_CONNECT_OR_LOGIN_ORCID = "hak-sax-plix"
 
 
 class JWTService:
@@ -100,20 +132,6 @@ class JWTService:
             If `audience` is an iterable of strings then the token will decode
             successfully if its `aud` claim matches any one of the given
             strings.
-
-        It's recommended to use short, unique, meaningless, but recognisable
-        strings for `issuer` and `audience`, for example:
-
-        MY_ISSUER = "meas-did-bluk"
-        MY_AUDIENCE = "tro-cel-ferd"
-
-        This allows the constants to be renamed when refactoring code, without
-        desiring to change the actual string values (which would invalidate
-        JWTs in the wild). These strings aren't secret so they can just be
-        hardcoded in the source code. Anyone inspecting the contents of a JWT
-        for debugging can look up the strings in the source code, this
-        inconvenience is judged worth the benefit of easier renaming and
-        refactoring (inspecting JWT contents is rare).
 
         encode_symmetric() and decode_symmetric() intend to provide a reusable
         method for encoding JWTs that is general enough to be applicable in
