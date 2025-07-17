@@ -1,7 +1,13 @@
 import { createContext } from 'preact';
 
+export type FlashMessage = {
+  type: 'success' | 'error';
+  message: string;
+};
+
 export type ConfigBase = {
   csrfToken: string;
+  flashMessages?: FlashMessage[];
 };
 
 /** Data passed to frontend for login form. */
