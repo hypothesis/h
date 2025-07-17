@@ -9,7 +9,6 @@ from __future__ import annotations
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from enum import StrEnum
 from typing import TYPE_CHECKING, Literal
 from urllib.parse import urlencode, urlunparse
 
@@ -28,7 +27,7 @@ from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
-from h.services.jwt import JWTDecodeError
+from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.helpers import login
 
 if TYPE_CHECKING:
@@ -46,18 +45,6 @@ class AccessDeniedError(Exception):
 
 class UserConflictError(Exception):
     """A different Hypothesis user is already connected to this identity."""
-
-
-class JWTIssuers(StrEnum):
-    """Strings for use in the `iss` claim when encoding JWTs."""
-
-    OIDC_CONNECT_OR_LOGIN_ORCID = "hak-sax-plix"
-
-
-class JWTAudiences(StrEnum):
-    """Strings for use in the `aud` claim when encoding JWTs."""
-
-    OIDC_REDIRECT_ORCID = "knop-gih-mip"
 
 
 ActionType = Literal["connect", "login"]
