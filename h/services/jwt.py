@@ -96,8 +96,8 @@ class JWTService:
         payload,
         *,
         expiration_time: datetime | int,
-        issuer: str,
-        audience: str,
+        issuer: JWTIssuers,
+        audience: JWTAudiences,
         # Test seams to allow unittests to create invalid tokens.
         _algorithm: str = "HS256",
         _signing_key: str | None = None,
@@ -195,7 +195,7 @@ class JWTService:
         self,
         token: str,
         *,
-        audience: str | Iterable[str],
+        audience: JWTAudiences | Iterable[JWTAudiences],
         payload_class: type[ANY_DATACLASS],
     ) -> ANY_DATACLASS:
         """Decode the given `token` and return the original payload.
