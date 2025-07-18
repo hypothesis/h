@@ -129,6 +129,13 @@ class TestGroupCreateEditController:
                         ),
                         "headers": {"X-CSRF-Token": views.get_csrf_token.spy_return},
                     },
+                    "annotationDetail": {
+                        "method": "GET",
+                        "url": pyramid_request.route_url(
+                            "api.annotation", id=":annotationId"
+                        ),
+                        "headers": {"X-CSRF-Token": views.get_csrf_token.spy_return},
+                    },
                 },
                 "context": {
                     "group": {
@@ -200,6 +207,7 @@ def routes(pyramid_config):
     pyramid_config.add_route(
         "api.annotation_moderation", "/api/annotations/{id}/moderation"
     )
+    pyramid_config.add_route("api.annotation", "/api/annotations/{id}")
 
 
 @pytest.fixture(autouse=True)
