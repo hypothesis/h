@@ -5,6 +5,7 @@ import {
 } from '@hypothesis/frontend-testing';
 
 import { Config } from '../../config';
+import { APIError } from '../../utils/api';
 import AnnotationCard, { $imports } from '../AnnotationCard';
 
 describe('AnnotationCard', () => {
@@ -219,17 +220,30 @@ describe('AnnotationCard', () => {
     await promise;
   });
 
-  it('shows errors produced while changing status', () => {
-    fakeUseUpdateModerationStatus.returns(sinon.stub().throws(new Error('')));
-    const wrapper = createComponent();
+  [
+    {
+      error: new Error(''),
+      expectedMessage: 'An error occurred updating the moderation status',
+    },
+    {
+      error: new APIError('', {
+        response: new Response(null, { status: 409 }),
+      }),
+      expectedMessage: 'The annotation has been updated by its author',
+    },
+  ].forEach(({ error, expectedMessage }) => {
+    it('shows errors produced while changing status', () => {
+      fakeUseUpdateModerationStatus.returns(sinon.stub().throws(error));
+      const wrapper = createComponent();
 
-    wrapper.find('ModerationStatusSelect').props().onChange('APPROVED');
-    wrapper.update();
+      wrapper.find('ModerationStatusSelect').props().onChange('APPROVED');
+      wrapper.update();
 
-    assert.equal(
-      wrapper.find('[data-testid="update-error"]').text(),
-      'An error occurred updating the moderation status',
-    );
+      assert.equal(
+        wrapper.find('[data-testid="update-error"]').text(),
+        expectedMessage,
+      );
+    });
   });
 
   [
