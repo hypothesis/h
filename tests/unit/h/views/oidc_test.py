@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, call, sentinel
 from urllib.parse import urlencode, urlunparse
 
 import pytest
-from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
@@ -22,7 +22,7 @@ from h.views.oidc import (
 
 
 @pytest.mark.usefixtures("jwt_service")
-class TestORCIDConnectAndAndLoginViews:
+class TestORCIDConnectAndLoginViews:
     @pytest.mark.parametrize(
         "route_name,expected_action",
         [
@@ -233,11 +233,11 @@ class TestORCIDRedirectViews:
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")
-    def test_redirect_fetches_the_hypothesis_uiser(self, views, user_service):
+    def test_redirect_fetches_the_hypothesis_uiser(self, views, user_service, orcid_id):
         views.redirect()
 
         user_service.fetch_by_identity.assert_called_once_with(
-            IdentityProvider.ORCID, sentinel.orcid_id
+            IdentityProvider.ORCID, orcid_id
         )
 
     @pytest.mark.usefixtures(
@@ -264,15 +264,20 @@ class TestORCIDRedirectViews:
         "assert_user_was_not_logged_in",
     )
     def test_redirect_when_action_connect_and_account_not_yet_connected(
-        self, pyramid_request, orcid_client_service, user_service, user, views, matchers
+        self,
+        pyramid_request,
+        orcid_client_service,
+        user_service,
+        user,
+        views,
+        matchers,
+        orcid_id,
     ):
         user_service.fetch_by_identity.return_value = None
 
         result = views.redirect()
 
-        orcid_client_service.add_identity.assert_called_once_with(
-            user, sentinel.orcid_id
-        )
+        orcid_client_service.add_identity.assert_called_once_with(user, orcid_id)
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
 
     @pytest.mark.usefixtures(
@@ -301,12 +306,25 @@ class TestORCIDRedirectViews:
         "assert_no_success_message_was_flashed",
     )
     def test_redirect_when_action_login_and_no_connected_user_exists(
-        self, views, user_service
+        self,
+        views,
+        user_service,
+        pyramid_request,
+        orcid_id,
+        jwt_service,
+        encode_idinfo_token,
     ):
         user_service.fetch_by_identity.return_value = None
 
-        with pytest.raises(RuntimeError):
-            views.redirect()
+        response = views.redirect()
+
+        encode_idinfo_token.assert_called_once_with(
+            jwt_service, orcid_id, JWTIssuers.OIDC_REDIRECT_ORCID
+        )
+        assert isinstance(response, HTTPFound)
+        assert response.location == pyramid_request.route_url(
+            "signup.orcid", _query=encode_idinfo_token.return_value
+        )
 
     @pytest.mark.usefixtures(
         "with_login_action",
@@ -488,8 +506,12 @@ class TestORCIDRedirectViews:
         login.assert_not_called()
 
     @pytest.fixture
-    def orcid_client_service(self, orcid_client_service):
-        orcid_client_service.get_orcid.return_value = sentinel.orcid_id
+    def orcid_id(self):
+        return "test_orcid_id"
+
+    @pytest.fixture
+    def orcid_client_service(self, orcid_client_service, orcid_id):
+        orcid_client_service.get_orcid.return_value = orcid_id
         return orcid_client_service
 
     @pytest.fixture
@@ -501,6 +523,7 @@ class TestORCIDRedirectViews:
     def routes(self, pyramid_config):
         pyramid_config.add_route("activity.user_search", "/users/{username}")
         pyramid_config.add_route("account", "/account/settings")
+        pyramid_config.add_route("signup.orcid", "/signup/orcid")
 
     @pytest.fixture(autouse=True)
     def handle_external_request_error(self, patch):
@@ -591,3 +614,8 @@ def login(patch):
 @pytest.fixture(autouse=True)
 def secrets(patch):
     return patch("h.views.oidc.secrets")
+
+
+@pytest.fixture(autouse=True)
+def encode_idinfo_token(patch):
+    return patch("h.views.oidc.encode_idinfo_token")
