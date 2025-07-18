@@ -20,6 +20,7 @@ import { Config } from '../config';
 import { useUpdateModerationStatus } from '../hooks/use-update-moderation-status';
 import { quote, username as getUsername } from '../utils/annotation-metadata';
 import type { APIAnnotationData, ModerationStatus } from '../utils/api';
+import { APIError } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
 import ModerationStatusSelect from './ModerationStatusSelect';
 
@@ -81,13 +82,14 @@ export default function AnnotationCard({
         await updateModerationStatus(status);
         onStatusChange(status);
         setModerationSaveState({ type: 'saved' });
-      } catch {
-        // TODO Catching all errors generally for now, but we need to explicitly
-        //      handle conflict errors
-        setModerationSaveState({
-          type: 'error',
-          error: 'An error occurred updating the moderation status',
-        });
+      } catch (e) {
+        const isConflictError =
+          e instanceof APIError && e.response?.status === 409;
+        const error = isConflictError
+          ? 'The annotation has been updated since this page was loaded'
+          : 'An error occurred updating the moderation status';
+
+        setModerationSaveState({ type: 'error', error });
       }
     },
     [onStatusChange, updateModerationStatus],
