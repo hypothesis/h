@@ -6,6 +6,7 @@ import pytest
 from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas
+from h.models.user import USERNAME_MAX_LENGTH
 from h.services.user_password import UserPasswordService
 from h.util.user import format_userid
 
@@ -168,6 +169,93 @@ class TestSignupSchema:
             "password": "sdlkfjlk3j3iuei",
             "privacy_accepted": "true",
         }
+
+
+class TestORCIDSignupSchema:
+    @pytest.mark.parametrize(
+        "params,expected_appstruct",
+        [
+            (
+                {
+                    "comms_opt_in": "yes",
+                },
+                {
+                    "comms_opt_in": True,
+                },
+            ),
+            (
+                {},
+                {
+                    "comms_opt_in": None,
+                },
+            ),
+        ],
+    )
+    def test_valid(self, schema, params, expected_appstruct):
+        result = schema.deserialize(
+            {"username": "test_username", "privacy_accepted": "yes", **params}
+        )
+
+        assert result == {
+            "username": "test_username",
+            "privacy_accepted": True,
+            **expected_appstruct,
+        }
+
+    @pytest.mark.parametrize(
+        "params,expected_errors",
+        [
+            (
+                {},
+                {"username": "Required", "privacy_accepted": "Required"},
+            ),
+            (
+                {"username": "a", "privacy_accepted": "yes"},
+                {
+                    "username": "Must be 3 characters or more.; Must have only letters, numbers, periods and underscores. May not start or end with period."
+                },
+            ),
+            (
+                {
+                    "username": "a" * (USERNAME_MAX_LENGTH + 1),
+                    "privacy_accepted": "yes",
+                },
+                {"username": "Must be 30 characters or less."},
+            ),
+            (
+                {"username": "@@@", "privacy_accepted": "yes"},
+                {
+                    "username": "Must have only letters, numbers, periods and underscores. May not start or end with period."
+                },
+            ),
+            (
+                {
+                    "username": "support",  # Blacklisted username.
+                    "privacy_accepted": "yes",
+                },
+                {
+                    "username": "Sorry, an account with this username already exists. Please enter another one."
+                },
+            ),
+        ],
+    )
+    def test_invalid(self, schema, params, expected_errors):
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize(params)
+
+        assert exc.value.asdict() == expected_errors
+
+    def test_username_already_taken(self, schema, factories):
+        user = factories.User()
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({"username": user.username, "privacy_accepted": "yes"})
+
+        assert exc.value.asdict() == {"username": "This username is already taken."}
+
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return schemas.ORCIDSignupSchema().bind(request=pyramid_csrf_request)
 
 
 @pytest.mark.usefixtures("models", "user_password_service")

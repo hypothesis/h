@@ -28,6 +28,7 @@ from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import ORCIDClientService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
+from h.views.account_signup import encode_idinfo_token
 from h.views.helpers import login
 
 if TYPE_CHECKING:
@@ -217,10 +218,17 @@ class ORCIDRedirectViews:
 
     def log_in_with_orcid(self, orcid_id: str, user):
         if not user:
-            msg = "Not implemented yet"
-            raise RuntimeError(msg)
-
-        del orcid_id
+            # There's no Hypothesis account for this ORCID iD yet.
+            # Redirect to the "Sign up to Hypothesis with ORCID" page to create
+            # a new account.
+            return HTTPFound(
+                self._request.route_url(
+                    "signup.orcid",
+                    _query=encode_idinfo_token(
+                        self._jwt_service, orcid_id, JWTIssuers.OIDC_REDIRECT_ORCID
+                    ),
+                )
+            )
 
         headers = login(user, self._request)
 

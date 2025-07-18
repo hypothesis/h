@@ -39,6 +39,7 @@ class JWTAudiences(StrEnum):
     """
 
     OIDC_REDIRECT_ORCID = "knop"
+    SIGNUP_ORCID = "visk"
 
 
 class JWTIssuers(StrEnum):
@@ -49,6 +50,8 @@ class JWTIssuers(StrEnum):
     """
 
     OIDC_CONNECT_OR_LOGIN_ORCID = "hak"
+    OIDC_REDIRECT_ORCID = "tir"
+    SIGNUP_VALIDATION_FAILURE_ORCID = "stol"
 
 
 class JWTService:

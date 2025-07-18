@@ -307,3 +307,4 @@ def includeme(config):  # noqa: PLR0915
     config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
     config.add_route("oidc.login.orcid", "/oidc/login/orcid")
     config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
+    config.add_route("signup.orcid", "/signup/orcid")

@@ -1,0 +1,15 @@
+{% extends "layouts/base.html.jinja2" %}
+
+{% block title %}Something went wrong{% endblock %}
+
+{% block content %}
+  {% include 'h:templates/includes/logo-header.html.jinja2' %}
+  <div class="form-container">
+    <h1 class="form-header">Something went wrong</h1>
+    <p>{{ error }}</p>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {% include "h:templates/includes/footer.html.jinja2" %}
+{% endblock %}

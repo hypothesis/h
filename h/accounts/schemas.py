@@ -73,6 +73,29 @@ def unique_username(node, value):
         raise exc
 
 
+def username_node():
+    return colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(
+            validators.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+            colander.Regex(
+                USERNAME_PATTERN,
+                msg=_(
+                    "Must have only letters, numbers, periods and underscores. May not start or end with period."
+                ),
+            ),
+            unique_username,
+            unblacklisted_username,
+        ),
+        title=_("Username"),
+        hint=_(
+            "Must be between {min} and {max} characters, containing only "
+            "letters, numbers, periods, and underscores."
+        ).format(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+        widget=deform.widget.TextInputWidget(autofocus=True),
+    )
+
+
 def email_node(**kwargs):
     """Return a Colander schema node for a new user email."""
     return colander.SchemaNode(
@@ -153,31 +176,8 @@ def _privacy_accepted_message():
     return privacy_msg
 
 
-class SignupSchema(CSRFSchema):
-    username = colander.SchemaNode(
-        colander.String(),
-        validator=colander.All(
-            validators.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
-            colander.Regex(
-                USERNAME_PATTERN,
-                msg=_(
-                    "Must have only letters, numbers, periods and underscores. May not start or end with period."
-                ),
-            ),
-            unique_username,
-            unblacklisted_username,
-        ),
-        title=_("Username"),
-        hint=_(
-            "Must be between {min} and {max} characters, containing only "
-            "letters, numbers, periods, and underscores."
-        ).format(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
-        widget=deform.widget.TextInputWidget(autofocus=True),
-    )
-    email = email_node(title=_("Email address"))
-    password = new_password_node(title=_("Password"))
-
-    privacy_accepted = colander.SchemaNode(
+def privacy_accepted_node():
+    return colander.SchemaNode(
         colander.Boolean(),
         description=Markup(_privacy_accepted_message()),
         validator=privacy_acceptance_validator,
@@ -186,7 +186,9 @@ class SignupSchema(CSRFSchema):
         ),
     )
 
-    comms_opt_in = colander.SchemaNode(
+
+def comms_opt_in_node():
+    return colander.SchemaNode(
         colander.Boolean(),
         description=_("I would like to receive news about annotation and Hypothesis."),
         widget=deform.widget.CheckboxWidget(
@@ -195,6 +197,20 @@ class SignupSchema(CSRFSchema):
         missing=None,
         default=False,
     )
+
+
+class SignupSchema(CSRFSchema):
+    username = username_node()
+    email = email_node(title=_("Email address"))
+    password = new_password_node(title=_("Password"))
+    privacy_accepted = privacy_accepted_node()
+    comms_opt_in = comms_opt_in_node()
+
+
+class ORCIDSignupSchema(colander.Schema):
+    username = username_node()
+    privacy_accepted = privacy_accepted_node()
+    comms_opt_in = comms_opt_in_node()
 
 
 class EmailChangeSchema(CSRFSchema):

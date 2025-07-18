@@ -276,6 +276,7 @@ def test_includeme():
         call("oidc.connect.orcid", "/oidc/connect/orcid"),
         call("oidc.login.orcid", "/oidc/login/orcid"),
         call("oidc.redirect.orcid", "/oidc/redirect/orcid"),
+        call("signup.orcid", "/signup/orcid"),
     ]
 
     # Test each one one at a time to make it a bit easier to spot which one
