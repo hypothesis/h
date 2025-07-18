@@ -9,6 +9,7 @@ import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { SignupConfigObject } from '../config';
+import { routes } from '../routes';
 
 export default function SignupForm() {
   const config = useContext(Config) as SignupConfigObject;
@@ -133,6 +134,9 @@ export default function SignupForm() {
             </Button>
           </div>
         </Form>
+        {config.features.log_in_with_orcid && (
+          <a href={routes.loginWithORCID}>Continue with ORCID</a>
+        )}
       </FormContainer>
     </>
   );
