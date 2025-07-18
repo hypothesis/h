@@ -1,4 +1,4 @@
-from datetime import UTC
+from datetime import UTC, datetime
 from unittest.mock import ANY, create_autospec, sentinel
 
 import pytest
@@ -21,13 +21,13 @@ class TestSignupViews:
         get_csrf_token.assert_called_once_with(pyramid_request)
         assert response == {"js_config": {"csrfToken": get_csrf_token.return_value}}
 
+    @pytest.mark.usefixtures("frozen_time")
     def test_post(
         self,
         views,
         SignupSchema,
         pyramid_request,
         user_signup_service,
-        frozen_time,
         get_csrf_token,
     ):
         response = views.post()
@@ -45,7 +45,7 @@ class TestSignupViews:
             username=sentinel.username,
             email=sentinel.email,
             password=sentinel.password,
-            privacy_accepted=frozen_time.astimezone(UTC),
+            privacy_accepted=datetime.now(UTC),
             comms_opt_in=sentinel.comms_opt_in,
         )
         get_csrf_token.assert_called_once_with(pyramid_request)

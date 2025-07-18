@@ -10,10 +10,10 @@ from h.views.helpers import login
 
 
 class TestLogin:
+    @pytest.mark.usefixtures("frozen_time")
     def test_login(
         self,
         factories,
-        frozen_time,
         login_event_subscriber,
         mocker,
         pyramid_config,
@@ -25,7 +25,7 @@ class TestLogin:
 
         headers = login(user, pyramid_request)
 
-        assert user.last_login_date == frozen_time.astimezone(UTC)
+        assert user.last_login_date == datetime.now(UTC)
         login_event_subscriber.assert_called_once_with(
             self.LoginEventMatcher(pyramid_request, user)
         )
