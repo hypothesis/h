@@ -45,6 +45,7 @@ class JWTAudiences(StrEnum):
     """
 
     OIDC_REDIRECT_ORCID = "bram-brik-dull"
+    SIGNUP_ORCID = "hund-firs-croh"
 
 
 class JWTIssuers(StrEnum):
@@ -55,6 +56,8 @@ class JWTIssuers(StrEnum):
     """
 
     OIDC_CONNECT_OR_LOGIN_ORCID = "neaf-jook-nosm"
+    OIDC_REDIRECT_ORCID = "zaut-graw-belk"
+    SIGNUP_VALIDATION_FAILURE_ORCID = "psax-folt-oung"
 
 
 class JWTService:
