@@ -2,6 +2,8 @@ import {
   checkAccessibility,
   mockImportedComponents,
   mount,
+  waitFor,
+  waitForElement,
 } from '@hypothesis/frontend-testing';
 
 import { Config } from '../../config';
@@ -12,11 +14,16 @@ describe('AnnotationCard', () => {
   let fakeConfig;
   let fakeAnnotation;
   let fakeOnStatusChange;
+  let fakeOnAnnotationReloaded;
   let fakeUseUpdateModerationStatus;
+  let fakeCallAPI;
 
   beforeEach(() => {
     fakeConfig = {
       context: {},
+      api: {
+        annotationDetail: { url: '/api/annotations/:annotationId' },
+      },
       routes: {
         'activity.user_search': 'https://example.com/users/:username',
       },
@@ -39,7 +46,9 @@ describe('AnnotationCard', () => {
     };
 
     fakeOnStatusChange = sinon.stub();
+    fakeOnAnnotationReloaded = sinon.stub();
     fakeUseUpdateModerationStatus = sinon.stub().returns(sinon.stub());
+    fakeCallAPI = sinon.stub();
 
     $imports.$mock(mockImportedComponents());
     $imports.$mock({
@@ -59,6 +68,9 @@ describe('AnnotationCard', () => {
       '../hooks/use-update-moderation-status': {
         useUpdateModerationStatus: fakeUseUpdateModerationStatus,
       },
+      '../utils/api': {
+        callAPI: fakeCallAPI,
+      },
     });
   });
 
@@ -68,6 +80,7 @@ describe('AnnotationCard', () => {
         <AnnotationCard
           annotation={fakeAnnotation}
           onStatusChange={fakeOnStatusChange}
+          onAnnotationReloaded={fakeOnAnnotationReloaded}
         />
       </Config.Provider>,
     );
@@ -223,28 +236,59 @@ describe('AnnotationCard', () => {
   [
     {
       error: new Error(''),
-      expectedMessage: 'An error occurred updating the moderation status',
+      expectedMessage: 'An error occurred updating the moderation status.',
     },
     {
       error: new APIError('', {
         response: new Response(null, { status: 409 }),
       }),
+      callAPIShouldFail: false,
       expectedMessage:
-        'The annotation has been updated since this page was loaded',
+        'The annotation has been updated since this page was loaded. Review this new version and try again.',
     },
-  ].forEach(({ error, expectedMessage }) => {
-    it('shows errors produced while changing status', () => {
+    {
+      error: new APIError('', {
+        response: new Response(null, { status: 409 }),
+      }),
+      callAPIShouldFail: true,
+      expectedMessage:
+        'The annotation has been updated since this page was loaded.',
+    },
+  ].forEach(({ error, callAPIShouldFail, expectedMessage }) => {
+    it('shows errors produced while changing status', async () => {
       fakeUseUpdateModerationStatus.returns(sinon.stub().throws(error));
+      if (callAPIShouldFail) {
+        fakeCallAPI.rejects(new Error(''));
+      }
+
       const wrapper = createComponent();
 
       wrapper.find('ModerationStatusSelect').props().onChange('APPROVED');
       wrapper.update();
 
-      assert.equal(
-        wrapper.find('[data-testid="update-error"]').text(),
-        expectedMessage,
+      const errorElement = await waitForElement(
+        wrapper,
+        '[data-testid="update-error"]',
       );
+      assert.equal(errorElement.text(), expectedMessage);
     });
+  });
+
+  it('reloads annotation when a conflict occurs while changing status', async () => {
+    const newAnnotationData = { text: 'New annotation' };
+    fakeCallAPI.resolves(newAnnotationData);
+    fakeUseUpdateModerationStatus.returns(
+      sinon.stub().throws(
+        new APIError('', {
+          response: new Response(null, { status: 409 }),
+        }),
+      ),
+    );
+
+    const wrapper = createComponent();
+    wrapper.find('ModerationStatusSelect').props().onChange('APPROVED');
+
+    await waitFor(() => fakeOnAnnotationReloaded.calledWith(newAnnotationData));
   });
 
   [

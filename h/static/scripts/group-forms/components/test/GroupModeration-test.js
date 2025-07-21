@@ -10,15 +10,18 @@ describe('GroupModeration', () => {
   let fakeUseGroupAnnotations;
   let fakeLoadNextPage;
   let fakeUpdateAnnotationStatus;
+  let fakeUpdateAnnotation;
 
   beforeEach(() => {
     fakeLoadNextPage = sinon.stub();
     fakeUpdateAnnotationStatus = sinon.stub();
+    fakeUpdateAnnotation = sinon.stub();
     fakeUseGroupAnnotations = sinon.stub().returns({
       loading: true,
+      removedAnnotations: new Set(),
       loadNextPage: fakeLoadNextPage,
       updateAnnotationStatus: fakeUpdateAnnotationStatus,
-      removedAnnotations: new Set(),
+      updateAnnotation: fakeUpdateAnnotation,
     });
 
     $imports.$mock(mockImportedComponents());
@@ -180,6 +183,32 @@ describe('GroupModeration', () => {
             anno.id,
             status,
           );
+        });
+      });
+    });
+
+    it('calls updateAnnotation when onAnnotationReloaded is called', () => {
+      const annotations = [
+        { id: '1', text: 'First annotation' },
+        { id: '2', text: 'Second annotation' },
+      ];
+      fakeUseGroupAnnotations.returns({
+        loading: false,
+        annotations,
+        removedAnnotations: new Set(),
+        updateAnnotation: fakeUpdateAnnotation,
+      });
+
+      const wrapper = createComponent();
+      const annotationNodes = wrapper.find('AnnotationCard');
+
+      annotations.forEach((anno, index) => {
+        annotationNodes
+          .at(index)
+          .props()
+          .onAnnotationReloaded({ text: 'updated annotation' });
+        assert.calledWith(fakeUpdateAnnotation.lastCall, anno.id, {
+          text: 'updated annotation',
         });
       });
     });

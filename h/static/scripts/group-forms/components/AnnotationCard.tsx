@@ -20,6 +20,7 @@ import { Config } from '../config';
 import { useUpdateModerationStatus } from '../hooks/use-update-moderation-status';
 import { quote, username as getUsername } from '../utils/annotation-metadata';
 import type { APIAnnotationData, ModerationStatus } from '../utils/api';
+import { callAPI } from '../utils/api';
 import { APIError } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
 import ModerationStatusSelect from './ModerationStatusSelect';
@@ -32,6 +33,11 @@ export type AnnotationCardProps = {
    * annotation
    */
   onStatusChange: (moderationStatus: ModerationStatus) => void;
+
+  /**
+   * Invoked when the annotation is reloaded, with the new annotation data
+   */
+  onAnnotationReloaded: (newAnnotationData: APIAnnotationData) => void;
 };
 
 type SaveState =
@@ -53,6 +59,7 @@ const MarkdownView = lazy(
 export default function AnnotationCard({
   annotation,
   onStatusChange,
+  onAnnotationReloaded,
 }: AnnotationCardProps) {
   const config = useContext(Config)!;
   const username = getUsername(annotation.user);
@@ -70,6 +77,15 @@ export default function AnnotationCard({
     [config.context.group],
   );
   const isReply = (annotation.references ?? []).length > 0;
+  const reloadAnnotation = useCallback(async () => {
+    const { url: urlTemplate, ...rest } = config.api.annotationDetail!;
+    const newAnnotationData = await callAPI<APIAnnotationData>(
+      urlTemplate.replace(':annotationId', annotation.id),
+      rest,
+    );
+
+    onAnnotationReloaded(newAnnotationData);
+  }, [annotation, config.api?.annotationDetail, onAnnotationReloaded]);
 
   const updateModerationStatus = useUpdateModerationStatus(annotation);
   const [moderationSaveState, setModerationSaveState] = useState<SaveState>({
@@ -85,14 +101,25 @@ export default function AnnotationCard({
       } catch (e) {
         const isConflictError =
           e instanceof APIError && e.response?.status === 409;
-        const error = isConflictError
-          ? 'The annotation has been updated since this page was loaded'
-          : 'An error occurred updating the moderation status';
+        let error = isConflictError
+          ? 'The annotation has been updated since this page was loaded. Review this new version and try again.'
+          : 'An error occurred updating the moderation status.';
+
+        // If there was a conflict, reload the annotation before reporting the
+        // error
+        if (isConflictError) {
+          await reloadAnnotation().catch(() => {
+            // If reloading the annotation fails, the error message should not
+            // make users think they are seeing up-to-date information
+            error =
+              'The annotation has been updated since this page was loaded.';
+          });
+        }
 
         setModerationSaveState({ type: 'error', error });
       }
     },
-    [onStatusChange, updateModerationStatus],
+    [onStatusChange, reloadAnnotation, updateModerationStatus],
   );
 
   const userLink = username
