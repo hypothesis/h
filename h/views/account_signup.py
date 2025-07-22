@@ -12,7 +12,7 @@ from h import i18n
 from h.accounts.schemas import ORCIDSignupSchema, SignupSchema
 from h.models.user_identity import IdentityProvider
 from h.services.exceptions import ConflictError
-from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
+from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers, JWTService
 from h.views.helpers import login
 
 _ = i18n.TranslationString
@@ -241,7 +241,7 @@ def is_authenticated(request):
     )
 
 
-def encode_idinfo_token(jwt_service, orcid_id, issuer):
+def encode_idinfo_token(jwt_service: JWTService, orcid_id: str, issuer: JWTIssuers):
     return {
         "idinfo": jwt_service.encode_symmetric(
             IDInfo(orcid_id),
