@@ -9,7 +9,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
-from h.accounts.schemas import ORCIDSignupSchema, SignupSchema
+from h.accounts.schemas import SignupSchema, SSOSignupSchema
 from h.models.user_identity import IdentityProvider
 from h.services.exceptions import ConflictError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers, JWTService
@@ -142,7 +142,7 @@ class ORCIDSignupViews:
         # view hasn't already done anything else.
         orcid_id = self.decode_orcid_id()
 
-        form = self.request.create_form(ORCIDSignupSchema().bind(request=self.request))
+        form = self.request.create_form(SSOSignupSchema().bind(request=self.request))
 
         appstruct = form.validate(self.request.POST.items())
 
