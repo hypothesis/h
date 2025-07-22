@@ -14,13 +14,7 @@ from webob.multidict import MultiDict
 from h.models import Organization
 from h.models.auth_client import GrantType
 from h.security import Identity
-from h.services import (
-    HTTPService,
-    MentionService,
-    NotificationService,
-    OpenIDClientService,
-    ORCIDClientService,
-)
+from h.services import HTTPService, MentionService, NotificationService, OIDCClient
 from h.services.analytics import AnalyticsService
 from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_delete import AnnotationDeleteService
@@ -502,10 +496,5 @@ def http_service(mock_service):
 
 
 @pytest.fixture
-def openid_client_service(mock_service):
-    return mock_service(OpenIDClientService)
-
-
-@pytest.fixture
-def orcid_client_service(mock_service):
-    return mock_service(ORCIDClientService)
+def oidc_client(mock_service):
+    return mock_service(OIDCClient)

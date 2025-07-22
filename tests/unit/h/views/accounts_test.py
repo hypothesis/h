@@ -632,7 +632,7 @@ class TestActivateController:
 
 
 @pytest.mark.usefixtures(
-    "routes", "user_password_service", "feature_service", "orcid_client_service"
+    "routes", "user_password_service", "feature_service", "oidc_client"
 )
 class TestAccountController:
     def test_get_returns_email_if_set(self, pyramid_request):
@@ -654,15 +654,20 @@ class TestAccountController:
         assert not result["email"]
 
     def test_get_returns_orcid_data(
-        self, pyramid_request, feature_service, orcid_client_service
+        self, pyramid_request, feature_service, oidc_client
     ):
+        pyramid_request.registry.settings["orcid_host"] = "https://sandbox.orcid.org"
+        oidc_client.get_identity.return_value.provider_unique_id = (
+            "test_provider_unique_id"
+        )
         feature_service.enabled.return_value = True
-        orcid_identity = orcid_client_service.get_identity.return_value
 
         result = views.AccountController(pyramid_request).get()
 
-        assert result["orcid"] == orcid_identity.provider_unique_id
-        assert result["orcid_url"] == orcid_client_service.orcid_url.return_value
+        assert result["orcid"] == "test_provider_unique_id"
+        assert (
+            result["orcid_url"] == "https://sandbox.orcid.org/test_provider_unique_id"
+        )
 
     def test_post_email_form_with_valid_data_changes_email(
         self, form_validating_to, pyramid_request

@@ -68,7 +68,7 @@ class JWTService:
 
     @classmethod
     def decode_oidc_idtoken(
-        cls, token: str, key_set_url: str, algorithms: list[str]
+        cls, token: str, keyset_url: str, algorithms: list[str]
     ) -> dict[str, Any]:
         """Decode the given OpenID Connect (OIDC) ID token and return the payload."""
         try:
@@ -85,7 +85,7 @@ class JWTService:
         iss, aud = unverified_payload.get("iss"), unverified_payload.get("aud")
 
         try:
-            signing_key = cls._get_jwk_client(key_set_url).get_signing_key_from_jwt(
+            signing_key = cls._get_jwk_client(keyset_url).get_signing_key_from_jwt(
                 token
             )
 

@@ -25,7 +25,7 @@ from pyramid.view import (
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
-from h.services import ORCIDClientService
+from h.services import OIDCClient
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.account_signup import encode_idinfo_token
@@ -145,7 +145,7 @@ class ORCIDRedirectViews:
     def __init__(self, context, request: Request) -> None:
         self._context = context
         self._request = request
-        self._orcid_client = request.find_service(ORCIDClientService)
+        self._oidc_client = request.find_service(OIDCClient)
         self._user_service = request.find_service(name="user")
         self._jwt_service = request.find_service(name="jwt")
 
@@ -184,7 +184,9 @@ class ORCIDRedirectViews:
             raise HTTPForbidden
 
         # Get the user's ORCID iD from ORCID.
-        orcid_id = self._orcid_client.get_orcid(validated_params["code"])
+        orcid_id = self._oidc_client.get_provider_unique_id(
+            IdentityProvider.ORCID, validated_params["code"]
+        )
 
         # Get the existing Hypothesis account that's already connected to this
         # ORCID iD, if any.
@@ -211,7 +213,9 @@ class ORCIDRedirectViews:
         if not user:
             # This ORCID iD isn't connected to a Hypothesis account yet.
             # Let's go ahead and connect it to the user's account.
-            self._orcid_client.add_identity(self._request.user, orcid_id)
+            self._oidc_client.add_identity(
+                self._request.user, IdentityProvider.ORCID, orcid_id
+            )
 
         self._request.session.flash("ORCID iD connected ✓", "success")
         return HTTPFound(self._request.route_url("account"))
