@@ -171,7 +171,7 @@ class TestSignupSchema:
         }
 
 
-class TestORCIDSignupSchema:
+class TestSSOSignupSchema:
     @pytest.mark.parametrize(
         "params,expected_appstruct",
         [
@@ -255,7 +255,7 @@ class TestORCIDSignupSchema:
 
     @pytest.fixture
     def schema(self, pyramid_csrf_request):
-        return schemas.ORCIDSignupSchema().bind(request=pyramid_csrf_request)
+        return schemas.SSOSignupSchema().bind(request=pyramid_csrf_request)
 
 
 @pytest.mark.usefixtures("models", "user_password_service")

@@ -244,7 +244,7 @@ class TestORCIDSignupViews:
         login,
         appstruct,
         expected_signup_args,
-        ORCIDSignupSchema,
+        SSOSignupSchema,
     ):
         pyramid_request.create_form.return_value.validate.return_value = {
             "username": sentinel.username,
@@ -253,12 +253,12 @@ class TestORCIDSignupViews:
 
         response = views.post()
 
-        ORCIDSignupSchema.assert_called_once_with()
-        ORCIDSignupSchema.return_value.bind.assert_called_once_with(
+        SSOSignupSchema.assert_called_once_with()
+        SSOSignupSchema.return_value.bind.assert_called_once_with(
             request=pyramid_request
         )
         pyramid_request.create_form.assert_called_once_with(
-            ORCIDSignupSchema.return_value.bind.return_value
+            SSOSignupSchema.return_value.bind.return_value
         )
         pyramid_request.create_form.return_value.validate.assert_called_once_with(ANY)
         assert list(
@@ -449,8 +449,8 @@ def SignupSchema(patch):
 
 
 @pytest.fixture(autouse=True)
-def ORCIDSignupSchema(patch):
-    return patch("h.views.account_signup.ORCIDSignupSchema")
+def SSOSignupSchema(patch):
+    return patch("h.views.account_signup.SSOSignupSchema")
 
 
 @pytest.fixture(autouse=True)
