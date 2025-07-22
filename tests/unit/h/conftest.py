@@ -242,8 +242,8 @@ def with_auth_client(auth_client, pyramid_config):
 
 
 @pytest.fixture
-def frozen_time():
-    with freeze_time("2012-01-14 03:21:34") as frozen_time_factory:
+def frozen_time(faker):
+    with freeze_time(faker.date_time()) as frozen_time_factory:
         yield frozen_time_factory
 
 
