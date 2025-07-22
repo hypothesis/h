@@ -28,12 +28,12 @@ class TestJWTService:
         jwt.get_unverified_header.return_value = {"kid": "KID"}
 
         payload = service.decode_oidc_idtoken(
-            sentinel.token, sentinel.key_set_url, sentinel.algorithms
+            sentinel.token, sentinel.keyset_url, sentinel.algorithms
         )
 
         jwt.get_unverified_header.assert_called_once_with(sentinel.token)
         PyJWKClient.assert_called_once_with(
-            sentinel.key_set_url, cache_keys=True, timeout=JWK_CLIENT_TIMEOUT
+            sentinel.keyset_url, cache_keys=True, timeout=JWK_CLIENT_TIMEOUT
         )
         jwt.decode.assert_called_with(
             sentinel.token,
@@ -49,7 +49,7 @@ class TestJWTService:
 
         with pytest.raises(JWTDecodeError, match="Missing 'kid' value in JWT header"):
             service.decode_oidc_idtoken(
-                sentinel.token, sentinel.key_set_url, sentinel.algorithms
+                sentinel.token, sentinel.keyset_url, sentinel.algorithms
             )
 
     def test_decode_oidc_idtoken_with_invalid_jwt_header(self, service, jwt):
@@ -57,7 +57,7 @@ class TestJWTService:
 
         with pytest.raises(JWTDecodeError, match="Invalid JWT"):
             service.decode_oidc_idtoken(
-                sentinel.token, sentinel.key_set_url, sentinel.algorithms
+                sentinel.token, sentinel.keyset_url, sentinel.algorithms
             )
 
     def test_decode_oidc_idtoken_with_invalid_jwt(self, service, jwt):
@@ -65,7 +65,7 @@ class TestJWTService:
 
         with pytest.raises(JWTDecodeError, match="Invalid JWT"):
             service.decode_oidc_idtoken(
-                sentinel.token, sentinel.key_set_url, sentinel.algorightms
+                sentinel.token, sentinel.keyset_url, sentinel.algorightms
             )
 
     @dataclass
