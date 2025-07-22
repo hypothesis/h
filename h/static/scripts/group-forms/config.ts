@@ -29,6 +29,7 @@ export type ConfigObject = {
     removeGroupMember?: APIConfig;
     groupAnnotations?: APIConfig;
     annotationModeration?: APIConfig;
+    annotationDetail?: APIConfig;
   };
   context: {
     group: Group | null;

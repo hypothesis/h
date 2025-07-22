@@ -16,6 +16,7 @@ COOKIE_AUTHENTICATABLE_API_REQUESTS = [
         "api.annotation_moderation",
         "PATCH",
     ),  # Change the moderation status of an annotation.
+    ("api.annotation", "GET"),  # Get the details of an annotation
 ]
 
 
