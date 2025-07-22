@@ -28,13 +28,19 @@ class JWTAudiences(StrEnum):
 
     MY_AUDIENCE = "meas-did-bluk"
 
-    This allows the constants to be renamed when refactoring code, without
+    This allows the constants to be renamed when refactoring code without
     desiring to change the actual string values (which would invalidate JWTs in
-    the wild). These strings aren't secret so they can just be hardcoded in the
+    the wild) and without leaving potentially confusing outdated strings in
+    place. These strings aren't secret so they can just be hardcoded in the
     source code. Anyone inspecting the contents of a JWT for debugging can look
     up the strings in the source code, this inconvenience is judged worth the
     benefit of easier renaming and refactoring (inspecting JWT contents is
-    rare).
+    expected to be rare).
+
+    Even though we're not using these as passwords, 1password's online password
+    generator is one tool that can be used to generate these kinds of IDs
+    (choose the "memorable" password type, a length of 3 "characters", and
+    un-check "use full words"): https://1password.com/password-generator.
 
     """
 
