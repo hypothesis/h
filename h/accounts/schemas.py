@@ -92,7 +92,6 @@ def username_node():
             "Must be between {min} and {max} characters, containing only "
             "letters, numbers, periods, and underscores."
         ).format(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
-        widget=deform.widget.TextInputWidget(autofocus=True),
     )
 
 
@@ -102,9 +101,6 @@ def email_node(**kwargs):
         colander.String(),
         validator=colander.All(
             validators.Length(max=EMAIL_MAX_LENGTH), validators.Email(), unique_email
-        ),
-        widget=deform.widget.TextInputWidget(
-            template="emailinput", autocomplete="username"
         ),
         **kwargs,
     )
@@ -181,9 +177,6 @@ def privacy_accepted_node():
         colander.Boolean(),
         description=Markup(_privacy_accepted_message()),
         validator=privacy_acceptance_validator,
-        widget=deform.widget.CheckboxWidget(
-            omit_label=True, css_class="form-checkbox--inline"
-        ),
     )
 
 
@@ -191,9 +184,6 @@ def comms_opt_in_node():
     return colander.SchemaNode(
         colander.Boolean(),
         description=_("I would like to receive news about annotation and Hypothesis."),
-        widget=deform.widget.CheckboxWidget(
-            omit_label=True, css_class="form-checkbox--inline"
-        ),
         missing=None,
         default=False,
     )
