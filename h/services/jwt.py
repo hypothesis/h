@@ -150,7 +150,9 @@ class JWTService:
           potential loss of security.
         * Using dataclasses to define the expected payload formats,
           and handling exceptions when invalid payloads are encountered.
-        * Having thorough documentation, type annotations, and unittests.
+        * Having documentation, type annotations, and unittests:
+          with a single pair of reusable methods it's more practical to do all
+          this thoroughly just once.
         * Providing a simple, easy to use, and easy to test interface for any
           code that wants to encode or decode JWTs.
 
