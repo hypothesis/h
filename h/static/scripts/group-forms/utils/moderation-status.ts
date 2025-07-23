@@ -8,3 +8,9 @@ export const moderationStatusToLabel: Record<ModerationStatus, string> = {
 } as const;
 
 Object.freeze(moderationStatusToLabel);
+
+const moderationStatuses = Object.keys(moderationStatusToLabel);
+
+export const isModerationStatus = (
+  status: string,
+): status is ModerationStatus => moderationStatuses.includes(status);

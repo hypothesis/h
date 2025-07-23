@@ -45,12 +45,31 @@ describe('GroupModeration', () => {
   });
 
   describe('moderation status filter', () => {
-    it('shows pending status initially', () => {
-      const wrapper = createComponent();
-      assert.equal(
-        wrapper.find('ModerationStatusSelect').prop('selected'),
-        'PENDING',
-      );
+    [
+      { queryParamStatus: undefined, expectedSelectedStatus: 'PENDING' },
+      { queryParamStatus: 'invalid', expectedSelectedStatus: 'PENDING' },
+      { queryParamStatus: 'ALL', expectedSelectedStatus: undefined },
+      { queryParamStatus: 'APPROVED', expectedSelectedStatus: 'APPROVED' },
+      { queryParamStatus: 'DENIED', expectedSelectedStatus: 'DENIED' },
+      { queryParamStatus: 'SPAM', expectedSelectedStatus: 'SPAM' },
+      { queryParamStatus: 'PENDING', expectedSelectedStatus: 'PENDING' },
+    ].forEach(({ queryParamStatus, expectedSelectedStatus }) => {
+      it('shows expected initial status', () => {
+        if (queryParamStatus) {
+          history.replaceState(
+            null,
+            '',
+            `?moderation_status=${queryParamStatus}`,
+          );
+        }
+
+        const wrapper = createComponent();
+
+        assert.equal(
+          wrapper.find('ModerationStatusSelect').prop('selected'),
+          expectedSelectedStatus,
+        );
+      });
     });
 
     ['APPROVED', 'DENIED', 'SPAM'].forEach(newStatus => {
@@ -64,6 +83,7 @@ describe('GroupModeration', () => {
           wrapper.find('ModerationStatusSelect').prop('selected'),
           newStatus,
         );
+        assert.equal(location.search, `?moderation_status=${newStatus}`);
       });
     });
   });
