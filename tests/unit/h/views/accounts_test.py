@@ -77,8 +77,18 @@ class TestAuthController:
                 "csrfToken": views.get_csrf_token.spy_return,
                 "features": {"log_in_with_orcid": True},
                 "flashMessages": [],
+                "formData": {
+                    "username": None,
+                },
             }
         }
+
+    def test_get_with_prefilled_username(self, pyramid_request):
+        pyramid_request.GET.add("username", "johnsmith")
+
+        result = views.AuthController(pyramid_request).get()
+
+        assert result["js_config"]["formData"]["username"] == "johnsmith"
 
     def test_get_for_oauth(self, pyramid_request):
         pyramid_request.params = {"for_oauth": "true"}

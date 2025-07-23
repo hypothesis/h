@@ -124,6 +124,12 @@ class AuthController:
                 "log_in_with_orcid": self.request.feature("log_in_with_orcid"),
             },
             "flashMessages": flash_messages,
+            # Prefill username from query params. This supports a flow where
+            # the user is redirected to the login form with the username
+            # pre-filled after activating their account.
+            "formData": {
+                "username": self.request.GET.get("username"),
+            },
         }
 
         if for_oauth := self.request.params.get("for_oauth"):
