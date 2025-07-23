@@ -10,7 +10,7 @@ import secrets
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import TYPE_CHECKING, Literal
-from urllib.parse import urlencode, urlunparse
+from urllib.parse import urlencode, urlparse, urlunparse
 
 import sentry_sdk
 from h_pyramid_sentry import report_exception
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from h.models import User
 
 
-ORCID_STATE_SESSION_KEY = "oidc.state.orcid"
+STATE_SESSION_KEY_FMT = "oidc.state.{provider}"
 
 
 class AccessDeniedError(Exception):
@@ -58,8 +58,9 @@ class OIDCState:
     action: ActionType
     """The action that triggered the OIDC flow.
 
-    For example "connect" when connecting an ORCID iD to an existing Hypothesis
-    account, or "login" when using ORCID to log in to Hypothesis
+    For example "connect" when connecting a provider unique ID to an existing
+    Hypothesis account, or "login" when using a provider to log in to
+    Hypothesis
     """
 
     rfp: str
@@ -75,45 +76,80 @@ class OIDCState:
         return cls(action, secrets.token_hex())
 
 
+@dataclass
+class SSOConnectAndLoginViewsSettings:
+    """Per-route settings for SSOConnectAndLoginViews."""
+
+    state_session_key: str
+    issuer: JWTIssuers
+    audience: JWTAudiences
+    client_id: str
+    authorization_url: str
+    redirect_uri: str
+    action: str
+
+
 @view_defaults(request_method="GET")
-class ORCIDConnectAndLoginViews:
+class SSOConnectAndLoginViews:
     def __init__(self, request: Request) -> None:
         self._request = request
         self._jwt_service = request.find_service(name="jwt")
 
+    @property
+    def settings(self):
+        """Return the per-route SSOConnectAndLoginViewsSettings for the current request."""
+
+        route_name = self._request.matched_route.name
+
+        match route_name:
+            case "oidc.connect.orcid":
+                action = "connect"
+            case "oidc.login.orcid":
+                action = "login"
+            case _:  # pragma: no cover
+                error_message = f"Unexpected route name: {route_name}"
+                raise ValueError(error_message)
+
+        settings = self._request.registry.settings
+
+        match route_name:
+            case "oidc.connect.orcid" | "oidc.login.orcid":
+                return SSOConnectAndLoginViewsSettings(
+                    state_session_key=STATE_SESSION_KEY_FMT.format(provider="orcid"),
+                    issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
+                    audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+                    client_id=settings["oidc_clientid_orcid"],
+                    authorization_url=settings["oidc_authorizationurl_orcid"],
+                    redirect_uri=self._request.route_url("oidc.redirect.orcid"),
+                    action=action,
+                )
+            case _:  # pragma: nocover
+                error_message = f"Unexpected route name: {route_name}"
+                raise ValueError(error_message)
+
     @view_config(is_authenticated=True, route_name="oidc.connect.orcid")
     @view_config(is_authenticated=False, route_name="oidc.login.orcid")
     def connect_or_login(self):
-        host = self._request.registry.settings["orcid_host"]
-        client_id = self._request.registry.settings["orcid_client_id"]
-
-        actions = {"oidc.connect.orcid": "connect", "oidc.login.orcid": "login"}
-        action = actions[self._request.matched_route.name]
-
         state = self._jwt_service.encode_symmetric(
-            OIDCState.make(action),
+            OIDCState.make(self.settings.action),
             expires_in=timedelta(hours=1),
-            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
-            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+            issuer=self.settings.issuer,
+            audience=self.settings.audience,
         )
-        self._request.session[ORCID_STATE_SESSION_KEY] = state
+        self._request.session[self.settings.state_session_key] = state
 
-        params = {
-            "client_id": client_id,
-            "response_type": "code",
-            "redirect_uri": self._request.route_url("oidc.redirect.orcid"),
-            "state": state,
-            "scope": "openid",
-        }
         return HTTPFound(
             location=urlunparse(
-                (
-                    "https",
-                    host,
-                    "oauth/authorize",
-                    "",
-                    urlencode(params),
-                    "",
+                urlparse(self.settings.authorization_url)._replace(
+                    query=urlencode(
+                        {
+                            "client_id": self.settings.client_id,
+                            "response_type": "code",
+                            "redirect_uri": self.settings.redirect_uri,
+                            "state": state,
+                            "scope": "openid",
+                        }
+                    )
                 )
             )
         )
@@ -140,8 +176,21 @@ class ORCIDConnectAndLoginViews:
         )
 
 
+@dataclass
+class SSORedirectViewsSettings:
+    """Per-route settings for SSORedirectViews."""
+
+    provider_name: str
+    state_session_key: str
+    issuer: JWTIssuers
+    audience: JWTAudiences
+    provider: IdentityProvider
+    success_message: str
+    signup_route: str
+
+
 @view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
-class ORCIDRedirectViews:
+class SSORedirectViews:
     def __init__(self, context, request: Request) -> None:
         self._context = context
         self._request = request
@@ -149,10 +198,31 @@ class ORCIDRedirectViews:
         self._user_service = request.find_service(name="user")
         self._jwt_service = request.find_service(name="jwt")
 
+    @property
+    def settings(self):
+        """Return the per-route SSOConnectAndLoginViewsSettings for the current request."""
+
+        route_name = self._request.matched_route.name
+
+        match route_name:
+            case "oidc.redirect.orcid":
+                return SSORedirectViewsSettings(
+                    provider_name="ORCID",
+                    state_session_key=STATE_SESSION_KEY_FMT.format(provider="orcid"),
+                    issuer=JWTIssuers.OIDC_REDIRECT_ORCID,
+                    audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+                    provider=IdentityProvider.ORCID,
+                    success_message="ORCID iD connected ✓",
+                    signup_route="signup.orcid",
+                )
+            case _:  # pragma: nocover
+                error_message = f"Unexpected route name: {route_name}"
+                raise ValueError(error_message)
+
     @view_config()
     def redirect(self):
         try:
-            expected_state = self._request.session.pop(ORCID_STATE_SESSION_KEY)
+            expected_state = self._request.session.pop(self.settings.state_session_key)
         except KeyError as err:
             raise InvalidOAuth2StateParamError from err
 
@@ -162,15 +232,15 @@ class ORCIDRedirectViews:
             )
         except ValidationError as err:
             if self._request.params.get("error") == "access_denied":
-                # The user clicked the deny button on ORCID's page.
+                # The user clicked the deny button on the provider's page.
                 raise AccessDeniedError from err
 
-            # We received an invalid or unexpected redirect from ORCID.
+            # We received an invalid or unexpected redirect from the provider.
             raise
 
         decoded_state = self._jwt_service.decode_symmetric(
             validated_params["state"],
-            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+            audience=self.settings.audience,
             payload_class=OIDCState,
         )
 
@@ -183,53 +253,59 @@ class ORCIDRedirectViews:
             # You must be logged out in order to log in.
             raise HTTPForbidden
 
-        # Get the user's ORCID iD from ORCID.
-        orcid_id = self._oidc_client.get_provider_unique_id(
-            IdentityProvider.ORCID, validated_params["code"]
+        # Get the user's provider unique ID from the provider.
+        provider_unique_id = self._oidc_client.get_provider_unique_id(
+            self.settings.provider, validated_params["code"]
         )
 
         # Get the existing Hypothesis account that's already connected to this
-        # ORCID iD, if any.
-        user = self._user_service.fetch_by_identity(IdentityProvider.ORCID, orcid_id)
+        # provider unique ID, if any.
+        user = self._user_service.fetch_by_identity(
+            self.settings.provider, provider_unique_id
+        )
 
-        actions = {
-            "connect": self.connect_orcid_id,
-            "login": self.log_in_with_orcid,
-        }
-        action_method = actions[decoded_state.action]
-        return action_method(orcid_id, user)
+        action = decoded_state.action
 
-    def connect_orcid_id(self, orcid_id: str, user: User | None):
-        """Connect the user's ORCID iD to their Hypothesis account.
+        match action:
+            case "connect":
+                return self.connect_provider_unique_id(provider_unique_id, user)
+            case "login":
+                return self.log_in_with_provider(provider_unique_id, user)
+            case _:  # pragma: no cover
+                error_message = f"Unexpected action: {action}"
+                raise ValueError(error_message)
 
-        Do nothing if `orcid_id` is already connected to `user`.
+    def connect_provider_unique_id(self, provider_unique_id: str, user: User | None):
+        """Connect the user's provider unique ID to their Hypothesis account.
+
+        Do nothing if `provider_unique_id` is already connected to `user`.
 
         """
         if user and user != self._request.user:
-            # Oops, this ORCID iD is already connected to a different
+            # Oops, this provider_unique_id is already connected to a different
             # Hypothesis account.
             raise UserConflictError
 
         if not user:
-            # This ORCID iD isn't connected to a Hypothesis account yet.
-            # Let's go ahead and connect it to the user's account.
+            # This provider unique ID isn't connected to a Hypothesis account
+            # yet. Let's go ahead and connect it to the user's account.
             self._oidc_client.add_identity(
-                self._request.user, IdentityProvider.ORCID, orcid_id
+                self._request.user, self.settings.provider, provider_unique_id
             )
 
-        self._request.session.flash("ORCID iD connected ✓", "success")
+        self._request.session.flash(self.settings.success_message, "success")
         return HTTPFound(self._request.route_url("account"))
 
-    def log_in_with_orcid(self, orcid_id: str, user):
+    def log_in_with_provider(self, provider_unique_id: str, user):
         if not user:
-            # There's no Hypothesis account for this ORCID iD yet.
-            # Redirect to the "Sign up to Hypothesis with ORCID" page to create
-            # a new account.
+            # There's no Hypothesis account for this provider unique ID yet.
+            # Redirect to the "Sign up to Hypothesis with <PROVIDER>" page to
+            # create a new account.
             return HTTPFound(
                 self._request.route_url(
-                    "signup.orcid",
+                    self.settings.signup_route,
                     _query=encode_idinfo_token(
-                        self._jwt_service, orcid_id, JWTIssuers.OIDC_REDIRECT_ORCID
+                        self._jwt_service, provider_unique_id, self.settings.issuer
                     ),
                 )
             )
@@ -251,13 +327,17 @@ class ORCIDRedirectViews:
     @exception_view_config(context=ValidationError)
     def invalid(self):
         report_exception(self._context)
-        self._request.session.flash("Received an invalid redirect from ORCID!", "error")
+        self._request.session.flash(
+            f"Received an invalid redirect from {self.settings.provider_name}!", "error"
+        )
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=JWTDecodeError)
     def invalid_token(self):
         report_exception(self._context)
-        self._request.session.flash("Received an invalid token from ORCID!", "error")
+        self._request.session.flash(
+            f"Received an invalid token from {self.settings.provider_name}!", "error"
+        )
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=AccessDeniedError)
@@ -268,13 +348,15 @@ class ORCIDRedirectViews:
     @exception_view_config(context=ExternalRequestError)
     def external_request(self):
         handle_external_request_error(self._context)
-        self._request.session.flash("Request to ORCID failed!", "error")
+        self._request.session.flash(
+            f"Request to {self.settings.provider_name} failed!", "error"
+        )
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=UserConflictError)
     def user_conflict_error(self):
         self._request.session.flash(
-            "A different Hypothesis user is already connected to this ORCID iD!",
+            f"A different Hypothesis user is already connected to this {self.settings.provider_name} account!",
             "error",
         )
         return HTTPFound(location=self._request.route_url("account"))
