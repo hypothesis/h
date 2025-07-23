@@ -147,10 +147,15 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
 
     settings_manager.set("jwt_signing_key", "JWT_SIGNING_KEY")
 
-    # ORCID settings
+    # ORCID settings.
     settings_manager.set("orcid_host", "ORCID_HOST")
-    settings_manager.set("orcid_client_id", "ORCID_CLIENT_ID")
-    settings_manager.set("orcid_client_secret", "ORCID_CLIENT_SECRET")
+
+    # OIDC settings.
+    settings_manager.set("oidc_clientid_orcid", "OIDC_CLIENTID_ORCID")
+    settings_manager.set("oidc_clientsecret_orcid", "OIDC_CLIENTSECRET_ORCID")
+    settings_manager.set("oidc_authorizationurl_orcid", "OIDC_AUTHORIZATIONURL_ORCID")
+    settings_manager.set("oidc_tokenurl_orcid", "OIDC_TOKENURL_ORCID")
+    settings_manager.set("oidc_keyseturl_orcid", "OIDC_KEYSETURL_ORCID")
 
     settings_manager.set(
         "h_api_auth_cookie_secret_key",
