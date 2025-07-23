@@ -11,18 +11,18 @@ from h.schemas.oauth import InvalidOAuth2StateParamError
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.oidc import (
-    ORCID_STATE_SESSION_KEY,
+    STATE_SESSION_KEY_FMT,
     AccessDeniedError,
     OIDCState,
-    ORCIDConnectAndLoginViews,
-    ORCIDRedirectViews,
+    SSOConnectAndLoginViews,
+    SSORedirectViews,
     UserConflictError,
     handle_external_request_error,
 )
 
 
 @pytest.mark.usefixtures("jwt_service")
-class TestORCIDConnectAndLoginViews:
+class TestSSOConnectAndLoginViews:
     @pytest.mark.parametrize(
         "route_name,expected_action",
         [
@@ -35,7 +35,7 @@ class TestORCIDConnectAndLoginViews:
     ):
         pyramid_request.matched_route.name = route_name
 
-        result = ORCIDConnectAndLoginViews(pyramid_request).connect_or_login()
+        result = SSOConnectAndLoginViews(pyramid_request).connect_or_login()
 
         secrets.token_hex.assert_called_once_with()
         jwt_service.encode_symmetric.assert_called_once_with(
@@ -45,14 +45,14 @@ class TestORCIDConnectAndLoginViews:
             audience=JWTAudiences.OIDC_REDIRECT_ORCID,
         )
         assert (
-            pyramid_request.session[ORCID_STATE_SESSION_KEY]
+            pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")]
             == jwt_service.encode_symmetric.return_value
         )
         assert result.location == urlunparse(
             (
                 "https",
-                IdentityProvider.ORCID,
-                "oauth/authorize",
+                "sandbox.orcid.org",
+                "/authorize",
                 "",
                 urlencode(
                     {
@@ -72,12 +72,12 @@ class TestORCIDConnectAndLoginViews:
     def test_notfound(self, pyramid_request):
         pyramid_request.user = None
 
-        result = ORCIDConnectAndLoginViews(pyramid_request).notfound()
+        result = SSOConnectAndLoginViews(pyramid_request).notfound()
 
         assert result == {}
 
     def test_login_already_authenticated(self, pyramid_request, matchers):
-        response = ORCIDConnectAndLoginViews(
+        response = SSOConnectAndLoginViews(
             pyramid_request
         ).login_already_authenticated()
 
@@ -93,8 +93,9 @@ class TestORCIDConnectAndLoginViews:
         pyramid_request.registry.settings.update(
             {
                 "orcid_host": IdentityProvider.ORCID,
-                "orcid_client_id": sentinel.client_id,
-                "orcid_client_secret": sentinel.client_secret,
+                "oidc_clientid_orcid": sentinel.client_id,
+                "oidc_clientsecret_orcid": sentinel.client_secret,
+                "oidc_authorizationurl_orcid": "https://sandbox.orcid.org/authorize",
             }
         )
         return pyramid_request
@@ -107,7 +108,7 @@ class TestORCIDConnectAndLoginViews:
 
 
 @pytest.mark.usefixtures("oidc_client", "user_service", "jwt_service")
-class TestORCIDRedirectViews:
+class TestSSORedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
         "assert_no_account_connection_was_added",
@@ -115,7 +116,7 @@ class TestORCIDRedirectViews:
         "assert_no_success_message_was_flashed",
     )
     def test_redirect_when_theres_no_state_in_the_session(self, pyramid_request, views):
-        del pyramid_request.session[ORCID_STATE_SESSION_KEY]
+        del pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")]
 
         with pytest.raises(InvalidOAuth2StateParamError):
             views.redirect()
@@ -401,12 +402,12 @@ class TestORCIDRedirectViews:
 
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
         assert pyramid_request.session.peek_flash("error") == [
-            "A different Hypothesis user is already connected to this ORCID iD!"
+            "A different Hypothesis user is already connected to this ORCID account!"
         ]
 
     @pytest.fixture
     def views(self, pyramid_request):
-        return ORCIDRedirectViews(sentinel.context, pyramid_request)
+        return SSORedirectViews(sentinel.context, pyramid_request)
 
     @pytest.fixture
     def user(self, factories):
@@ -414,7 +415,10 @@ class TestORCIDRedirectViews:
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.session[ORCID_STATE_SESSION_KEY] = sentinel.state
+        pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")] = (
+            sentinel.state
+        )
+        pyramid_request.matched_route.name = "oidc.redirect.orcid"
         return pyramid_request
 
     @pytest.fixture
@@ -425,7 +429,10 @@ class TestORCIDRedirectViews:
         the browser session.
         """
         yield
-        assert ORCID_STATE_SESSION_KEY not in pyramid_request.session
+        assert (
+            STATE_SESSION_KEY_FMT.format(provider="orcid")
+            not in pyramid_request.session
+        )
 
     @pytest.fixture
     def assert_state_param_decoded_correctly(self, jwt_service, OAuth2RedirectSchema):
