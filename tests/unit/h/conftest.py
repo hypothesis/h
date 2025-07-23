@@ -157,7 +157,7 @@ def invalid_form():
 
 @pytest.fixture
 def matchers():
-    from tests.common import matchers
+    from tests import matchers
 
     return matchers
 
