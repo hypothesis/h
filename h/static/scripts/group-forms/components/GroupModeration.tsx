@@ -4,13 +4,22 @@ import {
   Spinner,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'preact/hooks';
 
 import FormContainer from '../../forms-common/components/FormContainer';
 import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData, ModerationStatus } from '../utils/api';
-import { moderationStatusToLabel } from '../utils/moderation-status';
+import {
+  isModerationStatus,
+  moderationStatusToLabel,
+} from '../utils/moderation-status';
 import AnnotationCard from './AnnotationCard';
 import GroupFormHeader from './GroupFormHeader';
 import ModerationStatusSelect from './ModerationStatusSelect';
@@ -171,17 +180,57 @@ export type GroupModerationProps = {
   group: Group;
 };
 
+const MODERATION_STATUS_QUERY_PARAM = 'moderation_status';
+
+/**
+ * Determines the initial moderation status, based on the optional presence of
+ * the `moderation_status` query param:
+ * - `PENDING` as the default value if no `moderation_status` query param is set,
+ *   or it is set with an invalid value.
+ * - `undefined` if the `moderation_status` query param is set to `ALL`.
+ * - Any other valid moderation status set in `moderation_status` query param is
+ *   returned as is.
+ */
+function getInitialFilterStatus(): ModerationStatus | undefined {
+  const query = new URLSearchParams(window.location.search);
+  if (!query.has(MODERATION_STATUS_QUERY_PARAM)) {
+    return 'PENDING';
+  }
+
+  const statusFromQuery = query.get(MODERATION_STATUS_QUERY_PARAM)!;
+  if (statusFromQuery === 'ALL') {
+    return undefined;
+  }
+
+  // If an invalid moderation status is set, we fall back to PENDING, as if the
+  // param was not set at all
+  return isModerationStatus(statusFromQuery) ? statusFromQuery : 'PENDING';
+}
+
+/**
+ * Sets provided moderation status in the query string.
+ * If the status is `undefined`, the value `ALL` is set as a placeholder.
+ */
+function setFilterStatusInQuery(status?: ModerationStatus) {
+  const url = new URL(window.location.href);
+  url.searchParams.set(MODERATION_STATUS_QUERY_PARAM, status ?? 'ALL');
+  history.replaceState(null, '', url);
+}
+
 export default function GroupModeration({ group }: GroupModerationProps) {
-  const [filterStatus, setFilterStatus] = useState<
-    ModerationStatus | undefined
-  >('PENDING');
+  const [filterStatus, setFilterStatus] = useState(getInitialFilterStatus);
+  const updateFilterStatus = useCallback((status?: ModerationStatus) => {
+    setFilterStatus(status);
+    setFilterStatusInQuery(status);
+  }, []);
+
   return (
     <FormContainer>
       <GroupFormHeader title="Moderate group" group={group} />
       <div className="flex justify-end">
         <ModerationStatusSelect
           selected={filterStatus}
-          onChange={setFilterStatus}
+          onChange={updateFilterStatus}
           mode="filter"
         />
       </div>
