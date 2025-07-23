@@ -120,27 +120,53 @@ class IDInfo:
     sub: str
 
 
+@dataclass
+class SSOSignupViewsSettings:
+    """Per-route settings for SSOSignupViews."""
+
+    provider: IdentityProvider
+    issuer: JWTIssuers
+    audience: JWTAudiences
+
+
 @view_defaults(
     route_name="signup.orcid",
     is_authenticated=False,
     request_param="idinfo",
     renderer="h:templates/accounts/signup.html.jinja2",
 )
-class ORCIDSignupViews:
+class SSOSignupViews:
     def __init__(self, context, request):
         self.context = context
         self.request = request
         self.jwt_service = request.find_service(name="jwt")
 
+    @property
+    def settings(self) -> SSOSignupViewsSettings:
+        """Return the per-route SSOSignupViewsSettings for the current request."""
+
+        route_name = self.request.matched_route.name
+
+        match route_name:
+            case "signup.orcid":
+                return SSOSignupViewsSettings(
+                    provider=IdentityProvider.ORCID,
+                    issuer=JWTIssuers.SIGNUP_VALIDATION_FAILURE_ORCID,
+                    audience=JWTAudiences.SIGNUP_ORCID,
+                )
+            case _:  # pragma: nocover
+                error_message = f"Unexpected route name: {route_name}"
+                raise ValueError(error_message)
+
     @view_config(request_method="GET")
     def get(self):
-        return {"js_config": self.js_config(self.decode_orcid_id())}
+        return {"js_config": self.js_config(self.decode_provider_unique_id())}
 
     @view_config(request_method="POST", require_csrf=True)
     def post(self):
-        # Decode the user's ORCID iD first so that if decoding this fails the
-        # view hasn't already done anything else.
-        orcid_id = self.decode_orcid_id()
+        # Decode the user's provider unique ID first so that if decoding this
+        # fails the view hasn't already done anything else.
+        provider_unique_id = self.decode_provider_unique_id()
 
         form = self.request.create_form(SSOSignupSchema().bind(request=self.request))
 
@@ -157,8 +183,8 @@ class ORCIDSignupViews:
             require_activation=False,
             identities=[
                 {
-                    "provider": IdentityProvider.ORCID,
-                    "provider_unique_id": orcid_id,
+                    "provider": self.settings.provider,
+                    "provider_unique_id": provider_unique_id,
                 }
             ],
         )
@@ -178,7 +204,7 @@ class ORCIDSignupViews:
 
     @exception_view_config(context=ValidationFailure)
     def validation_failure(self):
-        orcid_id = self.decode_orcid_id()
+        provider_unique_id = self.decode_provider_unique_id()
         self.request.response.status_int = 400
 
         # When reloading the page prefill the form with the previously submitted values.
@@ -191,7 +217,7 @@ class ORCIDSignupViews:
         # When reloading the page replace the idinfo token with a fresh one.
         form_data.update(
             encode_idinfo_token(
-                self.jwt_service, orcid_id, JWTIssuers.SIGNUP_VALIDATION_FAILURE_ORCID
+                self.jwt_service, provider_unique_id, self.settings.issuer
             )
         )
 
@@ -199,11 +225,11 @@ class ORCIDSignupViews:
             "js_config": {
                 "formErrors": self.context.error.asdict(),
                 "formData": form_data,
-                **self.js_config(orcid_id),
+                **self.js_config(provider_unique_id),
             }
         }
 
-    def js_config(self, orcid_id):
+    def js_config(self, provider_unique_id):
         feature_service = self.request.find_service(name="feature")
 
         return {
@@ -213,14 +239,14 @@ class ORCIDSignupViews:
                     "log_in_with_orcid", user=None
                 )
             },
-            "identity": {"orcid": {"id": orcid_id}},
+            "identity": {"provider_unique_id": provider_unique_id},
         }
 
-    def decode_orcid_id(self):
+    def decode_provider_unique_id(self):
         try:
             idinfo = self.jwt_service.decode_symmetric(
                 self.request.params["idinfo"],
-                audience=JWTAudiences.SIGNUP_ORCID,
+                audience=self.settings.audience,
                 payload_class=IDInfo,
             )
         except JWTDecodeError as err:
@@ -241,10 +267,12 @@ def is_authenticated(request):
     )
 
 
-def encode_idinfo_token(jwt_service: JWTService, orcid_id: str, issuer: JWTIssuers):
+def encode_idinfo_token(
+    jwt_service: JWTService, provider_unique_id: str, issuer: JWTIssuers
+):
     return {
         "idinfo": jwt_service.encode_symmetric(
-            IDInfo(orcid_id),
+            IDInfo(provider_unique_id),
             expires_in=timedelta(hours=1),
             issuer=issuer,
             audience=JWTAudiences.SIGNUP_ORCID,
