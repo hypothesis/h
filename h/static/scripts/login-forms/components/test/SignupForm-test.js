@@ -225,6 +225,22 @@ describe('SignupForm', () => {
     assert.isTrue(updatedElements.commsCheckbox.prop('checked'));
   });
 
+  it('disables submit button when form is submitted', () => {
+    const { wrapper, elements } = createWrapper();
+    const { form, submitButton } = elements;
+
+    assert.isFalse(submitButton.getDOMNode().disabled);
+
+    // Simulate submitting the form.
+    //
+    // To really submit the form we would have to populate all fields with
+    // valid values and then use `HTMLFormElement.requestSubmit`.
+    form.getDOMNode().dispatchEvent(new Event('submit'));
+    wrapper.update();
+
+    assert.isTrue(submitButton.getDOMNode().disabled);
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({ content: () => createWrapper().wrapper }),
