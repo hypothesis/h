@@ -116,6 +116,44 @@ describe('LoginForm', () => {
     assert.equal(passwordField.prop('value'), fakeConfig.formData.password);
   });
 
+  [
+    // Normal login page
+    {
+      prefillUsername: false,
+      usernameError: false,
+      autofocusUsername: true,
+    },
+    // Login page with prefilled username
+    {
+      prefillUsername: true,
+      usernameError: false,
+      autofocusUsername: false,
+    },
+    // Login page after login failure due to username issue
+    {
+      prefillUsername: true,
+      usernameError: true,
+      autofocusUsername: true,
+    },
+  ].forEach(({ prefillUsername, usernameError, autofocusUsername }) => {
+    it('auto-focuses expected field', () => {
+      fakeConfig.formData = {
+        username: prefillUsername ? 'johnsmith' : null,
+      };
+      if (usernameError) {
+        fakeConfig.formErrors = {
+          username: 'invalid username',
+        };
+      }
+
+      const { elements } = createWrapper();
+      const { usernameField, passwordField } = elements;
+
+      assert.equal(usernameField.prop('autofocus'), autofocusUsername);
+      assert.equal(passwordField.prop('autofocus'), !autofocusUsername);
+    });
+  });
+
   it('updates username when input changes', () => {
     const { wrapper, elements } = createWrapper();
     const username = 'testuser';

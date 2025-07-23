@@ -32,6 +32,11 @@ export default function LoginForm() {
     'Log in'
   );
 
+  // Auto-focus the username, unless it was pre-filled (eg. as a result of
+  // following an activation link).
+  const autofocusUsername =
+    Boolean(username.error) || username.value.length === 0;
+
   return (
     <>
       <FormHeader classes={config.forOAuth ? 'text-center' : undefined}>
@@ -46,7 +51,7 @@ export default function LoginForm() {
             fieldError={username.error}
             onChangeValue={username.update}
             label="Username / email"
-            autofocus
+            autofocus={autofocusUsername}
             required
             showRequired={false}
           />
@@ -58,6 +63,7 @@ export default function LoginForm() {
             fieldError={password.error}
             onChangeValue={password.update}
             label="Password"
+            autofocus={!autofocusUsername}
             required
             showRequired={false}
           />
