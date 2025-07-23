@@ -1,5 +1,5 @@
 import { Button } from '@hypothesis/frontend-shared';
-import { useContext } from 'preact/hooks';
+import { useContext, useState } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
 import Form from '../../forms-common/components/Form';
@@ -12,6 +12,7 @@ import type { SignupConfigObject } from '../config';
 
 export default function SignupForm() {
   const config = useContext(Config) as SignupConfigObject;
+  const [submitted, setSubmitted] = useState(false);
 
   const username = useFormValue(config.formData?.username ?? '', {
     initialError: config.formErrors?.username,
@@ -43,7 +44,7 @@ export default function SignupForm() {
     <>
       <FormHeader>Sign up for Hypothesis</FormHeader>
       <FormContainer>
-        <Form csrfToken={config.csrfToken}>
+        <Form csrfToken={config.csrfToken} onSubmit={() => setSubmitted(true)}>
           <TextField
             type="input"
             name="username"
@@ -128,7 +129,14 @@ export default function SignupForm() {
           </Checkbox>
           <div className="pt-2 flex items-center gap-x-4">
             <div className="grow" />
-            <Button type="submit" variant="primary" data-testid="submit-button">
+            <Button
+              type="submit"
+              variant="primary"
+              data-testid="submit-button"
+              // Prevent duplicate signup attempts.
+              // See https://github.com/hypothesis/h/pull/3851
+              disabled={submitted}
+            >
               Sign up
             </Button>
           </div>
