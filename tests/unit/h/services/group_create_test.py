@@ -7,7 +7,7 @@ from sqlalchemy import select
 from h.models import Group, GroupMembership, GroupScope, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.services.group_create import GroupCreateService, group_create_factory
-from tests.common.matchers import Matcher
+from tests.matchers import Matcher
 
 
 class TestCreatePrivateGroup:
@@ -547,8 +547,10 @@ def creator(factories):
 class GroupScopeWithOrigin(Matcher):
     """Matches any GroupScope with the given origin."""
 
+    repr_attrs = ("origin",)
+
     def __init__(self, origin):
-        super().__init__(
-            f"* any group with origin: {origin} *",
-            lambda other: isinstance(other, GroupScope) and other.origin == origin,
-        )
+        self.origin = origin
+
+    def __eq__(self, other):
+        return isinstance(other, GroupScope) and other.origin == self.origin

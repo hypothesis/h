@@ -6,6 +6,7 @@ import pytest
 from h.accounts.events import LoginEvent
 from h.views import helpers
 from h.views.helpers import login
+from tests.matchers import Matcher
 
 
 class TestLogin:
@@ -31,7 +32,9 @@ class TestLogin:
         helpers.remember.assert_called_once_with(pyramid_request, user.userid)
         assert headers == sentinel.headers
 
-    class LoginEventMatcher:
+    class LoginEventMatcher(Matcher):
+        repr_attrs = ("request", "user")
+
         def __init__(self, request, user):
             self.request = request
             self.user = user
