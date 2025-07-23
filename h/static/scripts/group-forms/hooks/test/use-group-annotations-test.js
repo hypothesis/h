@@ -267,6 +267,22 @@ describe('useGroupAnnotations', () => {
 
       assert.equal(lastGroupAnnotations.removedAnnotations.size, 0);
     });
+
+    it('does not update any annotations when an unknown ID is provided', async () => {
+      const annotations = [
+        { id: '123', moderation_status: 'PENDING' },
+        { id: '456', moderation_status: 'PENDING' },
+      ];
+      fakeFetchGroupAnnotations.resolves({ annotations });
+
+      createComponent(); // No filter status
+      await waitFor(() => !lastGroupAnnotations.loading);
+
+      lastGroupAnnotations.updateAnnotationStatus('unknown-id', 'APPROVED');
+      await delay(0);
+
+      assert.deepEqual(lastGroupAnnotations.annotations, annotations);
+    });
   });
 
   it('returns empty `removedAnnotations` set if no annotations have been removed', async () => {

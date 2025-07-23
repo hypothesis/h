@@ -39,6 +39,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
     loading,
     removedAnnotations,
     updateAnnotationStatus,
+    updateAnnotation,
   } = useGroupAnnotations({ filterStatus });
 
   const lastScrollPosition = useRef(0);
@@ -72,8 +73,9 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
         filterStatus={filterStatus}
         loading={loading}
         annotations={annotations}
-        onAnnotationStatusChange={updateAnnotationStatus}
         removedAnnotations={removedAnnotations}
+        onAnnotationStatusChange={updateAnnotationStatus}
+        onAnnotationReloaded={updateAnnotation}
       />
     </section>
   );
@@ -83,19 +85,24 @@ type AnnotationListContentProps = {
   filterStatus?: ModerationStatus;
   loading: boolean;
   annotations?: APIAnnotationData[];
+  removedAnnotations: Set<string>;
   onAnnotationStatusChange: (
     annotationId: string,
     moderationStatus: ModerationStatus,
   ) => void;
-  removedAnnotations: Set<string>;
+  onAnnotationReloaded: (
+    annotationId: string,
+    annotation: APIAnnotationData,
+  ) => void;
 };
 
 function AnnotationListContent({
   loading,
   annotations,
+  removedAnnotations,
   filterStatus,
   onAnnotationStatusChange,
-  removedAnnotations,
+  onAnnotationReloaded,
 }: AnnotationListContentProps) {
   const onAnnotationStatusChangeStable = useStableCallback(
     onAnnotationStatusChange,
@@ -113,10 +120,18 @@ function AnnotationListContent({
             onStatusChange={moderationStatus => {
               onAnnotationStatusChangeStable(anno.id, moderationStatus);
             }}
+            onAnnotationReloaded={newAnnotationData =>
+              onAnnotationReloaded(anno.id, newAnnotationData)
+            }
           />
         </Slider>
       )),
-    [annotations, removedAnnotations, onAnnotationStatusChangeStable],
+    [
+      annotations,
+      removedAnnotations,
+      onAnnotationStatusChangeStable,
+      onAnnotationReloaded,
+    ],
   );
 
   if (annotations && annotations.length === 0) {

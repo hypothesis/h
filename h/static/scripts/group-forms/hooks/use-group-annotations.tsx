@@ -62,6 +62,15 @@ export type GroupAnnotationsResult = {
     annotationId: string,
     moderationStatus: ModerationStatus,
   ) => void;
+
+  /**
+   * A callback to locally update the information of an annotation from the
+   * list, without a server request.
+   */
+  updateAnnotation: (
+    annotationId: string,
+    annotation: APIAnnotationData,
+  ) => void;
 };
 
 export function useGroupAnnotations({
@@ -76,19 +85,34 @@ export function useGroupAnnotations({
     new Set<string>(),
   );
 
-  const updateAnnotationStatus = useCallback(
-    (annotationId: string, moderationStatus: ModerationStatus) => {
-      // Update moderation status for annotation.
+  const updateAnnotation = useCallback(
+    (annotationId: string, newAnnotationData: APIAnnotationData) => {
       setAnnotations(prev =>
         prev?.reduce<APIAnnotationData[]>((annos, currentAnno) => {
           annos.push(
-            currentAnno.id === annotationId
-              ? { ...currentAnno, moderation_status: moderationStatus }
-              : currentAnno,
+            currentAnno.id === annotationId ? newAnnotationData : currentAnno,
           );
           return annos;
         }, []),
       );
+    },
+    [],
+  );
+
+  const updateAnnotationStatus = useCallback(
+    (annotationId: string, moderationStatus: ModerationStatus) => {
+      const annotationToUpdate = annotations?.find(
+        anno => anno.id === annotationId,
+      );
+      if (!annotationToUpdate) {
+        return;
+      }
+
+      // Update moderation status for annotation.
+      updateAnnotation(annotationId, {
+        ...annotationToUpdate,
+        moderation_status: moderationStatus,
+      });
 
       // Mark this annotation as removed if it doesn't match the current filter.
       // The UI will hide it with a transition.
@@ -100,7 +124,7 @@ export function useGroupAnnotations({
         });
       }
     },
-    [filterStatus],
+    [annotations, filterStatus, updateAnnotation],
   );
 
   // Used to cancel currently in-flight request, whether it's the first one or
@@ -164,9 +188,10 @@ export function useGroupAnnotations({
   return {
     loading,
     annotations,
+    removedAnnotations,
     error,
     loadNextPage,
     updateAnnotationStatus,
-    removedAnnotations,
+    updateAnnotation,
   };
 }
