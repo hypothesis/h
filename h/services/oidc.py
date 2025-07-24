@@ -36,7 +36,7 @@ class OIDCClient:
     def __init__(
         self,
         db: Session,
-        settings: dict[str, OIDCClientSettings],
+        settings: dict[IdentityProvider, OIDCClientSettings],
         http_service: HTTPService,
         user_service: UserService,
         jwt_service: JWTService,
