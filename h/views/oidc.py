@@ -78,8 +78,8 @@ class OIDCState:
 
 
 @dataclass
-class SSOConnectAndLoginViewsSettings:
-    """Per-route settings for SSOConnectAndLoginViews."""
+class OIDCConnectAndLoginViewsSettings:
+    """Per-route settings for OIDCConnectAndLoginViews."""
 
     state_session_key: str
     issuer: JWTIssuers
@@ -91,14 +91,14 @@ class SSOConnectAndLoginViewsSettings:
 
 
 @view_defaults(request_method="GET")
-class SSOConnectAndLoginViews:
+class OIDCConnectAndLoginViews:
     def __init__(self, request: Request) -> None:
         self._request = request
         self._jwt_service = request.find_service(name="jwt")
 
     @property
     def settings(self):
-        """Return the per-route SSOConnectAndLoginViewsSettings for the current request."""
+        """Return the per-route OIDCConnectAndLoginViewsSettings for the current request."""
 
         route_name = self._request.matched_route.name
 
@@ -114,7 +114,7 @@ class SSOConnectAndLoginViews:
 
         match route_name:
             case "oidc.connect.orcid" | "oidc.login.orcid":
-                return SSOConnectAndLoginViewsSettings(
+                return OIDCConnectAndLoginViewsSettings(
                     state_session_key=STATE_SESSION_KEY_FMT.format(provider="orcid"),
                     issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
                     audience=JWTAudiences.OIDC_REDIRECT_ORCID,
@@ -206,7 +206,7 @@ class SSORedirectViews:
 
     @property
     def settings(self):
-        """Return the per-route SSOConnectAndLoginViewsSettings for the current request."""
+        """Return the per-route OIDCConnectAndLoginViewsSettings for the current request."""
 
         route_name = self._request.matched_route.name
 
