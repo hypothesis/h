@@ -188,6 +188,13 @@ class SSORedirectViewsSettings:
     signup_route: str
 
 
+class UnexpectedActionError(Exception):
+    def __init__(self, action):
+        super().__init__(
+            f"Received a JWT state param with an unexpected action: {action}"
+        )
+
+
 @view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
 class SSORedirectViews:
     def __init__(self, context, request: Request) -> None:
@@ -270,8 +277,7 @@ class SSORedirectViews:
             case "login":
                 return self.log_in_with_provider(provider_unique_id, user)
             case _:  # pragma: no cover
-                error_message = f"Unexpected action: {action}"
-                raise ValueError(error_message)
+                raise UnexpectedActionError(action)
 
     def connect_provider_unique_id(self, provider_unique_id: str, user: User | None):
         """Connect the user's provider unique ID to their Hypothesis account.
