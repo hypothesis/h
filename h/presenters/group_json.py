@@ -22,6 +22,7 @@ class GroupJSONPresenter:
             # DEPRECATED: TODO: remove from client
             "scoped": bool(self.group.scopes),
             "type": self.group.type,
+            "pre_moderated": bool(self.group.pre_moderated),
         }
 
         if expand:

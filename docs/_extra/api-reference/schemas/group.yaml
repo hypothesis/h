@@ -9,6 +9,7 @@ Group:
     - public
     - scoped
     - type
+    - pre_moderated
   properties:
     id:
       type: string
@@ -82,3 +83,6 @@ Group:
         - private
         - open
         - restricted
+    pre_moderated:
+      type: boolean
+      description: Whether this group is pre-moderated or not
