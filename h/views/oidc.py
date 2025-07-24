@@ -29,6 +29,7 @@ from h.services import OIDCClient
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.account_signup import encode_idinfo_token
+from h.views.exceptions import UnexpectedRouteError
 from h.views.helpers import login
 
 if TYPE_CHECKING:
@@ -107,8 +108,7 @@ class SSOConnectAndLoginViews:
             case "oidc.login.orcid":
                 action = "login"
             case _:  # pragma: no cover
-                error_message = f"Unexpected route name: {route_name}"
-                raise ValueError(error_message)
+                raise UnexpectedRouteError(route_name)
 
         settings = self._request.registry.settings
 
@@ -124,8 +124,7 @@ class SSOConnectAndLoginViews:
                     action=action,
                 )
             case _:  # pragma: nocover
-                error_message = f"Unexpected route name: {route_name}"
-                raise ValueError(error_message)
+                raise UnexpectedRouteError(route_name)
 
     @view_config(is_authenticated=True, route_name="oidc.connect.orcid")
     @view_config(is_authenticated=False, route_name="oidc.login.orcid")
@@ -216,8 +215,7 @@ class SSORedirectViews:
                     signup_route="signup.orcid",
                 )
             case _:  # pragma: nocover
-                error_message = f"Unexpected route name: {route_name}"
-                raise ValueError(error_message)
+                raise UnexpectedRouteError(route_name)
 
     @view_config()
     def redirect(self):
