@@ -22,19 +22,21 @@ class TestLoginFlow:
         assert next_url == "http://localhost/oauth/authorize"
         assert query == params
 
-    def test_authorisation_presents_form_if_logged_in(self, app, user, params):
+    def test_authorisation_presents_form_if_logged_in(
+        self, app, user, params, matchers
+    ):
         self.login(app, user)
         response = app.get("/oauth/authorize", params=params, status=200)
 
         js_settings = self._approve_authorize_request(response)
 
         assert js_settings == {
-            "code": Any.string(),
+            "code": matchers.InstanceOf(str),
             "origin": "http://localhost:5000",
             "state": params["state"],
         }
 
-    def test_the_code_from_auth_can_be_exchanged(self, app, user, params):
+    def test_the_code_from_auth_can_be_exchanged(self, app, user, params, matchers):
         self.login(app, user)
         response = app.get("/oauth/authorize", params=params, status=200)
         js_settings = self._approve_authorize_request(response)
@@ -56,8 +58,8 @@ class TestLoginFlow:
         assert response.json == Any.dict.containing(
             {
                 "token_type": "Bearer",
-                "access_token": Any.string(),
-                "refresh_token": Any.string(),
+                "access_token": matchers.InstanceOf(str),
+                "refresh_token": matchers.InstanceOf(str),
             }
         )
 

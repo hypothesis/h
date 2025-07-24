@@ -3,7 +3,6 @@ from unittest.mock import Mock
 
 import pytest
 import sqlalchemy as sa
-from h_matchers import Any
 
 from h.models import Document, DocumentMeta
 from h.models.document import ConcurrentUpdateError, create_or_update_document_meta
@@ -21,7 +20,7 @@ class TestDocumentMeta:
 
 class TestCreateOrUpdateDocumentMeta:
     def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(
-        self, db_session, meta_attrs
+        self, db_session, meta_attrs, matchers
     ):
         # Add one non-matching DocumentMeta to the database to be ignored.
         db_session.add(DocumentMeta(**dict(meta_attrs, type="noise")))
@@ -29,7 +28,7 @@ class TestCreateOrUpdateDocumentMeta:
         create_or_update_document_meta(session=db_session, **meta_attrs)
 
         document_meta = db_session.query(DocumentMeta).all()[-1]
-        assert document_meta == Any.object.with_attrs(meta_attrs)
+        assert document_meta == matchers.InstanceOf(object, **meta_attrs)
 
     @pytest.mark.parametrize("correct_document", (True, False))
     def test_it_updates_an_existing_DocumentMeta_if_there_is_one(

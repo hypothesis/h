@@ -24,6 +24,7 @@ class TestAnnotationWriteService:
         _validate_group,  # noqa: PT019
         db_session,
         moderation_service,
+        matchers,
     ):
         root_annotation = factories.Annotation()
         annotation_read_service.get_annotation_by_id.return_value = root_annotation
@@ -46,14 +47,13 @@ class TestAnnotationWriteService:
         mention_service.update_mentions.assert_called_once_with(anno)
         moderation_service.update_status.assert_called_once_with("create", anno)
 
-        assert anno == Any.instance_of(Annotation).with_attrs(
-            {
-                "userid": create_data["userid"],
-                "groupid": root_annotation.groupid,
-                "target_uri": create_data["target_uri"],
-                "references": create_data["references"],
-                "document": update_document_metadata.return_value,
-            }
+        assert anno == matchers.InstanceOf(
+            Annotation,
+            userid=create_data["userid"],
+            groupid=root_annotation.groupid,
+            target_uri=create_data["target_uri"],
+            references=create_data["references"],
+            document=update_document_metadata.return_value,
         )
         self.assert_annotation_slim(db_session, anno)
 

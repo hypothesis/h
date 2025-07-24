@@ -38,14 +38,16 @@ class UserMatcher(AnyObject):
 
 
 class TestBulkUserUpsert:
-    def test_it_can_insert_new_records(self, db_session, commands):
+    def test_it_can_insert_new_records(self, db_session, commands, matchers):
         reports = UserUpsertAction(db_session).execute(commands)
 
-        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+        assert reports == Any.iterable.comprised_of(
+            matchers.InstanceOf(Report)
+        ).of_size(3)
 
         self.assert_users_match_commands(db_session, commands)
 
-    def test_it_can_update_records(self, db_session, commands):
+    def test_it_can_update_records(self, db_session, commands, matchers):
         update_commands = [
             upsert_user_command(i, display_name=f"changed_{i}") for i in range(3)
         ]
@@ -54,7 +56,9 @@ class TestBulkUserUpsert:
         action.execute(commands)
         reports = action.execute(update_commands)
 
-        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+        assert reports == Any.iterable.comprised_of(
+            matchers.InstanceOf(Report)
+        ).of_size(3)
 
         self.assert_users_match_commands(db_session, update_commands)
 
@@ -126,17 +130,19 @@ class TestBulkUserUpsert:
 
 
 class TestBulkGroupUpsert:
-    def test_it_can_insert_new_records(self, db_session, commands, user):
+    def test_it_can_insert_new_records(self, db_session, commands, user, matchers):
         reports = GroupUpsertAction(db_session).execute(
             commands, effective_user_id=user.id
         )
 
-        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+        assert reports == Any.iterable.comprised_of(
+            matchers.InstanceOf(Report)
+        ).of_size(3)
 
         self.assert_groups_match_commands(db_session, commands)
         self.assert_groups_are_private_and_owned_by_user(db_session, user)
 
-    def test_it_can_update_records(self, db_session, commands, user):
+    def test_it_can_update_records(self, db_session, commands, user, matchers):
         update_commands = [
             group_upsert_command(i, name=f"changed_{i}") for i in range(3)
         ]
@@ -146,7 +152,9 @@ class TestBulkGroupUpsert:
             update_commands, effective_user_id=user.id
         )
 
-        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+        assert reports == Any.iterable.comprised_of(
+            matchers.InstanceOf(Report)
+        ).of_size(3)
 
         self.assert_groups_match_commands(db_session, update_commands)
         self.assert_groups_are_private_and_owned_by_user(db_session, user)
@@ -242,20 +250,26 @@ class TestBulkGroupUpsert:
 
 
 class TestBulkGroupMembershipCreate:
-    def test_it_can_insert_new_records(self, db_session, commands):
+    def test_it_can_insert_new_records(self, db_session, commands, matchers):
         reports = GroupMembershipCreateAction(db_session).execute(commands)
 
-        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+        assert reports == Any.iterable.comprised_of(
+            matchers.InstanceOf(Report)
+        ).of_size(3)
 
         self.assert_membership_matches_commands(db_session, commands)
 
-    def test_it_can_continue_with_existing_records(self, db_session, commands):
+    def test_it_can_continue_with_existing_records(
+        self, db_session, commands, matchers
+    ):
         GroupMembershipCreateAction(db_session).execute(commands)
         reports = GroupMembershipCreateAction(db_session).execute(
             commands, on_duplicate="continue"
         )
 
-        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+        assert reports == Any.iterable.comprised_of(
+            matchers.InstanceOf(Report)
+        ).of_size(3)
 
         self.assert_membership_matches_commands(db_session, commands)
 

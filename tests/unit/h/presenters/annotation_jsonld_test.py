@@ -1,13 +1,12 @@
 import datetime
 
 import pytest
-from h_matchers import Any
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
 
 
 class TestAnnotationJSONLDPresenter:
-    def test_it(self, presenter, annotation, links_service):
+    def test_it(self, presenter, annotation, links_service, matchers):
         annotation.created = datetime.datetime(2016, 2, 24, 18, 3, 25, 768)  # noqa: DTZ001
         annotation.updated = datetime.datetime(2016, 2, 29, 10, 24, 5, 564)  # noqa: DTZ001
 
@@ -18,11 +17,11 @@ class TestAnnotationJSONLDPresenter:
             "created": "2016-02-24T18:03:25.000768+00:00",
             "modified": "2016-02-29T10:24:05.000564+00:00",
             "creator": annotation.userid,
-            "body": Any.list(),
+            "body": matchers.InstanceOf(list),
             "target": [
                 {
                     "source": annotation.target_uri,
-                    "selector": Any.list(),
+                    "selector": matchers.InstanceOf(list),
                 }
             ],
         }

@@ -960,7 +960,13 @@ class TestDeveloperController:
 
 class TestDeleteController:
     def test_get(
-        self, authenticated_user, controller, factories, pyramid_request, schemas
+        self,
+        authenticated_user,
+        controller,
+        factories,
+        pyramid_request,
+        schemas,
+        matchers,
     ):
         oldest_annotation = factories.Annotation(
             userid=authenticated_user.userid,
@@ -987,11 +993,11 @@ class TestDeleteController:
         )
         pyramid_request.create_form.assert_called_once_with(
             schemas.DeleteAccountSchema.return_value.bind.return_value,
-            buttons=Any.iterable.comprised_of(Any.instance_of(deform.Button)),
+            buttons=Any.iterable.comprised_of(matchers.InstanceOf(deform.Button)),
             formid="delete",
             back_link={
                 "href": "http://example.com/account/settings",
-                "text": Any.string(),
+                "text": matchers.InstanceOf(str),
             },
         )
         pyramid_request.create_form.return_value.render.assert_called_once_with()
@@ -1013,7 +1019,7 @@ class TestDeleteController:
             "form": pyramid_request.create_form.return_value.render.return_value,
         }
 
-    def test_post(self, controller, form, pyramid_request, schemas):
+    def test_post(self, controller, form, pyramid_request, schemas, matchers):
         result = controller.post()
 
         schemas.DeleteAccountSchema.assert_called_once_with()
@@ -1022,11 +1028,11 @@ class TestDeleteController:
         )
         pyramid_request.create_form.assert_called_once_with(
             schemas.DeleteAccountSchema.return_value.bind.return_value,
-            buttons=Any.iterable.comprised_of(Any.instance_of(deform.Button)),
+            buttons=Any.iterable.comprised_of(matchers.InstanceOf(deform.Button)),
             formid="delete",
             back_link={
                 "href": "http://example.com/account/settings",
-                "text": Any.string(),
+                "text": matchers.InstanceOf(str),
             },
         )
         form.handle_form_submission.assert_called_once_with(
@@ -1039,7 +1045,12 @@ class TestDeleteController:
         assert result == form.handle_form_submission.return_value
 
     def test_delete_user(
-        self, authenticated_user, controller, pyramid_request, user_delete_service
+        self,
+        authenticated_user,
+        controller,
+        pyramid_request,
+        user_delete_service,
+        matchers,
     ):
         response = controller.delete_user(mock.sentinel.appstruct)
 
@@ -1048,8 +1059,9 @@ class TestDeleteController:
             requested_by=authenticated_user,
             tag=pyramid_request.matched_route.name,
         )
-        assert response == Any.instance_of(httpexceptions.HTTPFound).with_attrs(
-            {"location": "http://example.com/account/deleted"}
+        assert response == matchers.InstanceOf(
+            httpexceptions.HTTPFound,
+            location="http://example.com/account/deleted",
         )
 
     @pytest.fixture(autouse=True)

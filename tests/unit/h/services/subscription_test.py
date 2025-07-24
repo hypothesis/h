@@ -1,7 +1,6 @@
 from unittest.mock import call, patch, sentinel
 
 import pytest
-from h_matchers import Any
 
 from h.models import Subscriptions
 from h.services import SubscriptionService
@@ -29,17 +28,16 @@ class TestSubscriptionService:
         assert result == reply_subscription
         assert result.active == reply_subscription.active
 
-    def test_get_subscription_with_a_missing_subscription(self, svc):
+    def test_get_subscription_with_a_missing_subscription(self, svc, matchers):
         result = svc.get_subscription(
             user_id="acct:new_user@example.com", type_=Subscriptions.Type.REPLY
         )
 
-        assert result == Any.instance_of(Subscriptions).with_attrs(
-            {
-                "uri": "acct:new_user@example.com",
-                "type": Subscriptions.Type.REPLY.value,
-                "active": True,
-            }
+        assert result == matchers.InstanceOf(
+            Subscriptions,
+            uri="acct:new_user@example.com",
+            type=Subscriptions.Type.REPLY.value,
+            active=True,
         )
 
     def test_get_all_subscriptions(self, svc):

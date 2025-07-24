@@ -9,14 +9,14 @@ from h.util.redirects import Redirect
 
 
 class TestRedirectTween:
-    def test_it_loads_redirects(self, patch):
+    def test_it_loads_redirects(self, patch, matchers):
         parse_redirects = patch("h.tweens.parse_redirects")
 
         tweens.redirect_tween_factory(handler=None, registry=None)
 
         parse_redirects.assert_called_once_with(
             # Check parse_redirects is called with a file like object
-            Any.object.with_attrs({"readlines": Any.callable()})
+            matchers.InstanceOf(object, readlines=Any.callable())
         )
 
     def test_it_loads_successfully(self):

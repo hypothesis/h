@@ -1,5 +1,4 @@
 import pytest
-from h_matchers import Any
 
 from h import models
 from h.services.developer_token import (
@@ -31,7 +30,7 @@ class TestDeveloperTokenService:
         user_service.fetch.assert_called_once_with(user.userid)
 
     def test_create_creates_new_developer_token_for_userid(
-        self, svc, db_session, user, user_service
+        self, svc, db_session, user, user_service, matchers
     ):
         assert not db_session.query(models.Token).count()
         user_service.fetch.return_value = user
@@ -40,7 +39,7 @@ class TestDeveloperTokenService:
 
         user_service.fetch.assert_called_once_with(user.userid)
         assert db_session.query(models.Token).all() == [
-            Any.instance_of(models.Token).with_attrs({"user": user})
+            matchers.InstanceOf(models.Token, user=user)
         ]
 
     def test_create_returns_new_developer_token_for_userid(

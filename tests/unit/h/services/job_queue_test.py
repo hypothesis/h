@@ -38,7 +38,7 @@ class TestQueueService:
         assert len(jobs) == limit
 
     @freeze_time("2023-01-01")
-    def test_add_where(self, factories, db_session, svc):
+    def test_add_where(self, factories, db_session, svc, matchers):
         now = datetime.utcnow()  # noqa: DTZ003
         matching = [
             factories.Annotation(shared=True),
@@ -59,17 +59,16 @@ class TestQueueService:
             db_session.query(Job).all()
             == Any.list.containing(
                 [
-                    Any.instance_of(Job).with_attrs(
-                        {
-                            "enqueued_at": Any.instance_of(datetime),
-                            "scheduled_at": now + ONE_WEEK,
-                            "tag": "test_tag",
-                            "priority": 1234,
-                            "kwargs": {
-                                "annotation_id": self.database_id(annotation),
-                                "force": False,
-                            },
-                        }
+                    matchers.InstanceOf(
+                        Job,
+                        enqueued_at=matchers.InstanceOf(datetime),
+                        scheduled_at=now + ONE_WEEK,
+                        tag="test_tag",
+                        priority=1234,
+                        kwargs={
+                            "annotation_id": self.database_id(annotation),
+                            "force": False,
+                        },
                     )
                     for annotation in matching
                 ]
@@ -100,7 +99,7 @@ class TestQueueService:
 
         assert db_session.query(Job).one().kwargs["force"] == expected_force
 
-    def test_add_by_id(self, svc, add_where):
+    def test_add_by_id(self, svc, add_where, matchers):
         svc.add_by_id(
             sentinel.name,
             sentinel.annotation_id,
@@ -111,7 +110,7 @@ class TestQueueService:
 
         add_where.assert_called_once_with(
             sentinel.name,
-            [Any.instance_of(BinaryExpression)],
+            [matchers.InstanceOf(BinaryExpression)],
             sentinel.tag,
             Priority.SINGLE_ITEM,
             sentinel.force,
@@ -121,7 +120,7 @@ class TestQueueService:
         where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.id == sentinel.annotation_id)
 
-    def test_add_annotations_by_ids(self, svc, add_where):
+    def test_add_annotations_by_ids(self, svc, add_where, matchers):
         svc.add_by_ids(
             sentinel.name,
             [sentinel.id_1, sentinel.id_2],
@@ -132,7 +131,7 @@ class TestQueueService:
 
         add_where.assert_called_once_with(
             sentinel.name,
-            [Any.instance_of(BinaryExpression)],
+            [matchers.InstanceOf(BinaryExpression)],
             sentinel.tag,
             Priority.BY_IDS,
             force=sentinel.force,
@@ -142,7 +141,7 @@ class TestQueueService:
         where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.id.in_([sentinel.id_1, sentinel.id_2]))
 
-    def test_add_annotations_between_times(self, svc, add_where):
+    def test_add_annotations_between_times(self, svc, add_where, matchers):
         svc.add_between_times(
             sentinel.name,
             sentinel.start_time,
@@ -153,7 +152,7 @@ class TestQueueService:
 
         add_where.assert_called_once_with(
             sentinel.name,
-            [Any.instance_of(BinaryExpression)] * 2,
+            [matchers.InstanceOf(BinaryExpression)] * 2,
             sentinel.tag,
             Priority.BETWEEN_TIMES,
             sentinel.force,
@@ -163,7 +162,7 @@ class TestQueueService:
         assert where[0].compare(Annotation.updated >= sentinel.start_time)
         assert where[1].compare(Annotation.updated <= sentinel.end_time)
 
-    def test_add_users_annotations(self, svc, add_where):
+    def test_add_users_annotations(self, svc, add_where, matchers):
         svc.add_by_user(
             sentinel.name,
             sentinel.userid,
@@ -174,7 +173,7 @@ class TestQueueService:
 
         add_where.assert_called_once_with(
             sentinel.name,
-            [Any.instance_of(BinaryExpression)],
+            [matchers.InstanceOf(BinaryExpression)],
             sentinel.tag,
             Priority.SINGLE_USER,
             sentinel.force,
@@ -184,7 +183,7 @@ class TestQueueService:
         where = add_where.call_args[0][1]
         assert where[0].compare(Annotation.userid == sentinel.userid)
 
-    def test_add_group_annotations(self, svc, add_where):
+    def test_add_group_annotations(self, svc, add_where, matchers):
         svc.add_by_group(
             sentinel.name,
             sentinel.groupid,
@@ -195,7 +194,7 @@ class TestQueueService:
 
         add_where.assert_called_once_with(
             sentinel.name,
-            [Any.instance_of(BinaryExpression)],
+            [matchers.InstanceOf(BinaryExpression)],
             sentinel.tag,
             Priority.SINGLE_GROUP,
             sentinel.force,

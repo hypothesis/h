@@ -44,6 +44,39 @@ class Matcher:
         return repr_(self, self.repr_attrs)
 
 
+class InstanceOf(Matcher):
+    """Matches any instance of the given class with the given attrs.
+
+    As with Python's builtin isinstance() `class_` can be either a single class
+    or a tuple of classes (in which case the matcher will match instances of
+    *any* of the classes in the tuple).
+
+    If no kwargs are given then the matcher will match instances of the given
+    class(es) without checking any of the instance's attributes.
+    """
+
+    def __init__(self, class_, **kwargs):
+        self.class_ = class_
+        self.with_attrs = kwargs
+
+    @property
+    def repr_attrs(self):
+        if self.with_attrs:
+            return ("class_", "with_attrs")
+
+        return ("class_",)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.class_):
+            return False
+
+        for name, value in self.with_attrs.items():
+            if not getattr(other, name) == value:
+                return False
+
+        return True
+
+
 class Redirect302To(Matcher):
     """Matches any HTTPFound redirect to the given URL."""
 

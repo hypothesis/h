@@ -2,7 +2,6 @@ import datetime
 from unittest import mock
 
 import pytest
-from h_matchers import Any
 
 from h.models import Group, GroupMembership
 from h.models.group import ReadableBy
@@ -60,13 +59,11 @@ class TestGroupServiceFetchByGroupid:
 
 @pytest.mark.usefixtures("groups")
 class TestFilterByName:
-    def test_it_filters_by_name(self, svc):
+    def test_it_filters_by_name(self, svc, matchers):
         filtered_groups = svc.filter_by_name(name="Hello")
 
         assert len(filtered_groups.all()) == 1
-        assert filtered_groups.all() == [
-            Any.instance_of(Group).with_attrs({"name": "Hello"})
-        ]
+        assert filtered_groups.all() == [matchers.InstanceOf(Group, name="Hello")]
 
     def test_it_returns_all_groups_if_name_is_None(self, svc, groups):
         filtered_groups = svc.filter_by_name()
@@ -84,12 +81,12 @@ class TestFilterByName:
 
         assert len(filtered_groups.all()) == 2
 
-    def test_results_sorted_by_created_desc(self, svc):
+    def test_results_sorted_by_created_desc(self, svc, matchers):
         filtered_groups = svc.filter_by_name("Finger")
 
         assert filtered_groups.all() == [
-            Any.instance_of(Group).with_attrs({"name": "Fingers"}),
-            Any.instance_of(Group).with_attrs({"name": "Finger"}),
+            matchers.InstanceOf(Group, name="Fingers"),
+            matchers.InstanceOf(Group, name="Finger"),
         ]
 
     @pytest.fixture

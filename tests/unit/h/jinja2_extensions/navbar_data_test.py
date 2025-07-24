@@ -8,7 +8,7 @@ from h.models import GroupMembership
 
 
 class TestNavbarData:
-    def test_it(self, pyramid_request, user):
+    def test_it(self, pyramid_request, user, matchers):
         pyramid_request.matched_route = None
         pyramid_request.params["q"] = "tag:question"
         pyramid_request.user = user
@@ -36,7 +36,7 @@ class TestNavbarData:
                 for group in user.groups
             ],
             "q": "tag:question",
-            "search_url": Any.string(),
+            "search_url": matchers.InstanceOf(str),
             "settings_menu_items": [
                 {"link": "http://example.com/account", "title": "Account details"},
                 {"link": "http://example.com/account/profile", "title": "Edit profile"},
