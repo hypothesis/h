@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from unittest.mock import ANY, create_autospec, sentinel
+from unittest.mock import ANY, call, create_autospec, sentinel
 
 import pytest
 from colander import Invalid
@@ -25,14 +25,24 @@ _ = i18n.TranslationString
 @pytest.mark.usefixtures("user_signup_service", "feature_service")
 class TestSignupViews:
     def test_get(self, views, get_csrf_token, pyramid_request, feature_service):
+        feature_service.enabled.side_effect = [
+            sentinel.orcid_enabled,
+            sentinel.google_enabled,
+        ]
         response = views.get()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
-        feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
+        assert feature_service.enabled.call_args_list == [
+            call("log_in_with_orcid", user=None),
+            call("log_in_with_google", user=None),
+        ]
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "features": {
+                    "log_in_with_orcid": sentinel.orcid_enabled,
+                    "log_in_with_google": sentinel.google_enabled,
+                },
             }
         }
 
@@ -46,6 +56,11 @@ class TestSignupViews:
         get_csrf_token,
         feature_service,
     ):
+        feature_service.enabled.side_effect = [
+            sentinel.orcid_enabled,
+            sentinel.google_enabled,
+        ]
+
         response = views.post()
 
         SignupSchema.assert_called_once_with()
@@ -65,11 +80,17 @@ class TestSignupViews:
             comms_opt_in=sentinel.comms_opt_in,
         )
         get_csrf_token.assert_called_once_with(pyramid_request)
-        feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
+        assert feature_service.enabled.call_args_list == [
+            call("log_in_with_orcid", user=None),
+            call("log_in_with_google", user=None),
+        ]
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "features": {
+                    "log_in_with_orcid": sentinel.orcid_enabled,
+                    "log_in_with_google": sentinel.google_enabled,
+                },
             },
             "heading": _("Account registration successful"),
             "message": None,
@@ -149,6 +170,10 @@ class TestSignupViews:
         pyramid_request,
         feature_service,
     ):
+        feature_service.enabled.side_effect = [
+            sentinel.orcid_enabled,
+            sentinel.google_enabled,
+        ]
         views.context = ValidationFailure(
             sentinel.field,
             sentinel.cstruct,
@@ -159,13 +184,19 @@ class TestSignupViews:
         response = views.validation_failure()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
-        feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
+        assert feature_service.enabled.call_args_list == [
+            call("log_in_with_orcid", user=None),
+            call("log_in_with_google", user=None),
+        ]
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
                 "formErrors": views.context.error.asdict.return_value,
                 "formData": expected_form_data,
-                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "features": {
+                    "log_in_with_orcid": sentinel.orcid_enabled,
+                    "log_in_with_google": sentinel.google_enabled,
+                },
             }
         }
 
@@ -178,15 +209,25 @@ class TestSignupViews:
         feature_service,
     ):
         user_signup_service.signup.side_effect = ConflictError("Test error message")
+        feature_service.enabled.side_effect = [
+            sentinel.orcid_enabled,
+            sentinel.google_enabled,
+        ]
 
         response = views.post()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
-        feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
+        assert feature_service.enabled.call_args_list == [
+            call("log_in_with_orcid", user=None),
+            call("log_in_with_google", user=None),
+        ]
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "features": {
+                    "log_in_with_orcid": sentinel.orcid_enabled,
+                    "log_in_with_google": sentinel.google_enabled,
+                },
             },
             "heading": _("Account already registered"),
             "message": _("Test error message"),
@@ -212,14 +253,25 @@ class TestSocialLoginSignupViews:
     def test_get(
         self, views, get_csrf_token, pyramid_request, orcid_id, feature_service
     ):
+        feature_service.enabled.side_effect = [
+            sentinel.orcid_enabled,
+            sentinel.google_enabled,
+        ]
+
         response = views.get()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
-        feature_service.enabled.assert_called_once_with("log_in_with_orcid", None)
+        assert feature_service.enabled.call_args_list == [
+            call("log_in_with_orcid", user=None),
+            call("log_in_with_google", user=None),
+        ]
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "features": {
+                    "log_in_with_orcid": sentinel.orcid_enabled,
+                    "log_in_with_google": sentinel.google_enabled,
+                },
                 "identity": {"provider_unique_id": orcid_id},
             }
         }
@@ -370,15 +422,25 @@ class TestSocialLoginSignupViews:
             error=create_autospec(Invalid, instance=True, spec_set=True),
         )
         pyramid_request.POST = post_params
+        feature_service.enabled.side_effect = [
+            sentinel.orcid_enabled,
+            sentinel.google_enabled,
+        ]
 
         response = views.validation_failure()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
-        feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
+        assert feature_service.enabled.call_args_list == [
+            call("log_in_with_orcid", user=None),
+            call("log_in_with_google", user=None),
+        ]
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "features": {"log_in_with_orcid": feature_service.enabled.return_value},
+                "features": {
+                    "log_in_with_orcid": sentinel.orcid_enabled,
+                    "log_in_with_google": sentinel.google_enabled,
+                },
                 "identity": {"provider_unique_id": orcid_id},
                 "formErrors": views.context.error.asdict.return_value,
                 "formData": expected_form_data,

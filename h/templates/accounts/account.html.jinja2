@@ -15,7 +15,7 @@
     {{ email_form }}
     {{ password_form }}
 
-    {% if log_in_with_orcid %}
+    {% if log_in_with_orcid or log_in_with_google %}
       <div class="sociallogin-wrapper">
         <div class="sociallogin-header">
           <div style="position: relative;">
@@ -28,6 +28,7 @@
           </div>
         </div>
 
+        {% if log_in_with_orcid %}
         {% if orcid %}
           <a href="{{ orcid_url }}" class="sociallogin-connect" target="_blank" rel="nofollow noopener">
             {{ svg_icon('orcid') }}
@@ -40,6 +41,23 @@
             <span>{% trans %} Connect {% endtrans %}<strong>ORCID iD</strong></span>
             {{ svg_icon('external', 'external-icon') }}
           </a>
+        {% endif %}
+        {% endif %}
+
+        {% if log_in_with_google %}
+        {% if google_id %}
+          <a class="sociallogin-connect" target="_blank" rel="nofollow noopener">
+            {{ svg_icon('google') }}
+            <span>{% trans %} Connected: {% endtrans %}<strong>{{ google_id }}</strong></span>
+            {{ svg_icon('check', 'check-icon') }}
+          </a>
+        {% else %}
+          <a href="{{ request.route_path('oidc.connect.google') }}" class="sociallogin-connect">
+            {{ svg_icon('google') }}
+            <span>{% trans %} Connect {% endtrans %}<strong>Google account</strong></span>
+            {{ svg_icon('external', 'external-icon') }}
+          </a>
+        {% endif %}
         {% endif %}
       </div>
     {% endif %}

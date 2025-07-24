@@ -150,9 +150,9 @@ class OIDCConnectAndLoginViews:
         route_name = self._request.matched_route.name
 
         match route_name:
-            case "oidc.connect.orcid":
+            case "oidc.connect.orcid" | "oidc.connect.google":
                 action = "connect"
-            case "oidc.login.orcid":
+            case "oidc.login.orcid" | "oidc.login.google":
                 action = "login"
             case _:
                 raise UnexpectedRouteError(route_name)
@@ -170,11 +170,23 @@ class OIDCConnectAndLoginViews:
                     redirect_uri=self._request.route_url("oidc.redirect.orcid"),
                     action=action,
                 )
+            case "oidc.connect.google" | "oidc.login.google":  # pragma: no cover
+                return OIDCConnectAndLoginViewsSettings(
+                    state_sessionkey=STATE_SESSIONKEY_FMT.format(provider="google"),
+                    issuer=JWTIssuer.OIDC_CONNECT_OR_LOGIN_GOOGLE,
+                    audience=JWTAudience.OIDC_REDIRECT_GOOGLE,
+                    client_id=settings["oidc_clientid_google"],
+                    authorization_url=settings["oidc_authorizationurl_google"],
+                    redirect_uri=self._request.route_url("oidc.redirect.google"),
+                    action=action,
+                )
             case _:  # pragma: nocover
                 raise UnexpectedRouteError(route_name)
 
     @view_config(is_authenticated=True, route_name="oidc.connect.orcid")
+    @view_config(is_authenticated=True, route_name="oidc.connect.google")
     @view_config(is_authenticated=False, route_name="oidc.login.orcid")
+    @view_config(is_authenticated=False, route_name="oidc.login.google")
     def connect_or_login(self):
         state = self._jwt_service.encode_symmetric(
             OIDCState.make(self.settings.action),
@@ -205,6 +217,11 @@ class OIDCConnectAndLoginViews:
         append_slash=True,
         route_name="oidc.connect.orcid",
     )
+    @notfound_view_config(
+        renderer="h:templates/notfound.html.jinja2",
+        append_slash=True,
+        route_name="oidc.connect.google",
+    )
     def notfound(self):
         self._request.response.status_int = 401
         return {}
@@ -214,6 +231,7 @@ class OIDCConnectAndLoginViews:
     # tab and log in, then return to the first tab and try to start a login
     # flow. This view is called in these cases.
     @view_config(route_name="oidc.login.orcid", is_authenticated=True)
+    @view_config(route_name="oidc.login.google", is_authenticated=True)
     def login_already_authenticated(self):
         return HTTPFound(
             self._request.route_url(
@@ -270,10 +288,22 @@ class OIDCRedirectViews:
                     success_message="ORCID iD connected ✓",
                     signup_route_name="signup.orcid",
                 )
+            case "oidc.redirect.google":  # pragma: no cover
+                return OIDCRedirectViewsSettings(
+                    provider_name="Google",
+                    jwt_issuer=JWTIssuer.OIDC_REDIRECT_GOOGLE,
+                    state_sessionkey=STATE_SESSIONKEY_FMT.format(provider="google"),
+                    state_jwtaudience=JWTAudience.OIDC_REDIRECT_GOOGLE,
+                    idinfo_jwtaudience=JWTAudience.SIGNUP_GOOGLE,
+                    provider=IdentityProvider.GOOGLE,
+                    success_message="Google account connected ✓",
+                    signup_route_name="signup.google",
+                )
             case _:
                 raise UnexpectedRouteError(route_name)
 
     @view_config(route_name="oidc.redirect.orcid")
+    @view_config(route_name="oidc.redirect.google")
     def redirect(self):
         try:
             expected_state = self._request.session.pop(self.settings.state_sessionkey)
@@ -378,11 +408,17 @@ class OIDCRedirectViews:
         append_slash=True,
         route_name="oidc.redirect.orcid",
     )
+    @notfound_view_config(
+        renderer="h:templates/notfound.html.jinja2",
+        append_slash=True,
+        route_name="oidc.redirect.google",
+    )
     def notfound(self):
         self._request.response.status_int = 401
         return {}
 
     @exception_view_config(context=ValidationError, route_name="oidc.redirect.orcid")
+    @exception_view_config(context=ValidationError, route_name="oidc.redirect.google")
     def invalid(self):
         report_exception(self._context)
         self._request.session.flash(
@@ -391,6 +427,7 @@ class OIDCRedirectViews:
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=JWTDecodeError, route_name="oidc.redirect.orcid")
+    @exception_view_config(context=JWTDecodeError, route_name="oidc.redirect.google")
     def invalid_token(self):
         report_exception(self._context)
         self._request.session.flash(
@@ -399,12 +436,16 @@ class OIDCRedirectViews:
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=AccessDeniedError, route_name="oidc.redirect.orcid")
+    @exception_view_config(context=AccessDeniedError, route_name="oidc.redirect.google")
     def denied(self):
         self._request.session.flash("The user clicked the deny button!", "error")
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(
         context=ExternalRequestError, route_name="oidc.redirect.orcid"
+    )
+    @exception_view_config(
+        context=ExternalRequestError, route_name="oidc.redirect.google"
     )
     def external_request(self):
         handle_external_request_error(self._context)
@@ -414,6 +455,7 @@ class OIDCRedirectViews:
         return HTTPFound(location=self._request.route_url("account"))
 
     @exception_view_config(context=UserConflictError, route_name="oidc.redirect.orcid")
+    @exception_view_config(context=UserConflictError, route_name="oidc.redirect.google")
     def user_conflict_error(self):
         self._request.session.flash(
             f"A different Hypothesis user is already connected to this {self.settings.provider_name} account!",

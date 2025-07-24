@@ -156,6 +156,23 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
     settings_manager.set("oidc_authorizationurl_orcid", "OIDC_AUTHORIZATIONURL_ORCID")
     settings_manager.set("oidc_tokenurl_orcid", "OIDC_TOKENURL_ORCID")
     settings_manager.set("oidc_keyseturl_orcid", "OIDC_KEYSETURL_ORCID")
+    settings_manager.set("oidc_clientid_google", "OIDC_CLIENTID_GOOGLE")
+    settings_manager.set("oidc_clientsecret_google", "OIDC_CLIENTSECRET_GOOGLE")
+    settings_manager.set(
+        "oidc_authorizationurl_google",
+        "OIDC_AUTHORIZATIONURL_GOOGLE",
+        default="https://accounts.google.com/o/oauth2/v2/auth",
+    )
+    settings_manager.set(
+        "oidc_tokenurl_google",
+        "OIDC_TOKENURL_GOOGLE",
+        default="https://oauth2.googleapis.com/token",
+    )
+    settings_manager.set(
+        "oidc_keyseturl_google",
+        "OIDC_KEYSETURL_GOOGLE",
+        default="https://www.googleapis.com/oauth2/v3/certs",
+    )
 
     settings_manager.set(
         "h_api_auth_cookie_secret_key",
