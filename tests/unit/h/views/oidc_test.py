@@ -14,8 +14,8 @@ from h.views.exceptions import UnexpectedRouteError
 from h.views.oidc import (
     STATE_SESSION_KEY_FMT,
     AccessDeniedError,
+    OIDCConnectAndLoginViews,
     OIDCState,
-    SSOConnectAndLoginViews,
     SSORedirectViews,
     UnexpectedActionError,
     UserConflictError,
@@ -24,7 +24,7 @@ from h.views.oidc import (
 
 
 @pytest.mark.usefixtures("jwt_service")
-class TestSSOConnectAndLoginViews:
+class TestOIDCConnectAndLoginViews:
     @pytest.mark.parametrize(
         "route_name,expected_action",
         [
@@ -37,7 +37,7 @@ class TestSSOConnectAndLoginViews:
     ):
         pyramid_request.matched_route.name = route_name
 
-        result = SSOConnectAndLoginViews(pyramid_request).connect_or_login()
+        result = OIDCConnectAndLoginViews(pyramid_request).connect_or_login()
 
         secrets.token_hex.assert_called_once_with()
         jwt_service.encode_symmetric.assert_called_once_with(
@@ -75,17 +75,17 @@ class TestSSOConnectAndLoginViews:
         pyramid_request.matched_route.name = "unexpected"
 
         with pytest.raises(UnexpectedRouteError, match="^unexpected$"):
-            SSOConnectAndLoginViews(pyramid_request).connect_or_login()
+            OIDCConnectAndLoginViews(pyramid_request).connect_or_login()
 
     def test_notfound(self, pyramid_request):
         pyramid_request.user = None
 
-        result = SSOConnectAndLoginViews(pyramid_request).notfound()
+        result = OIDCConnectAndLoginViews(pyramid_request).notfound()
 
         assert result == {}
 
     def test_login_already_authenticated(self, pyramid_request, matchers):
-        response = SSOConnectAndLoginViews(
+        response = OIDCConnectAndLoginViews(
             pyramid_request
         ).login_already_authenticated()
 
