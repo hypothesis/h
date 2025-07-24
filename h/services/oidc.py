@@ -58,25 +58,22 @@ class OIDCClient:
         ID for the user.
         """
         settings = self._settings[provider]
-        token_url = settings.token_url
-        redirect_uri = settings.redirect_uri
-        client_id = settings.client_id
-        client_secret = settings.client_secret
-        keyset_url = settings.keyset_url
 
         token_response = self._http_service.post(
-            token_url,
+            settings.token_url,
             data={
-                "redirect_uri": redirect_uri,
+                "redirect_uri": settings.redirect_uri,
                 "grant_type": "authorization_code",
                 "code": authorization_code,
             },
-            auth=(client_id, client_secret),
+            auth=(settings.client_id, settings.client_secret),
         )
 
         id_token = OIDCTokenResponseSchema().validate(token_response.json())["id_token"]
 
-        decoded_id_token = self._jwt_service.decode_oidc_idtoken(id_token, keyset_url)
+        decoded_id_token = self._jwt_service.decode_oidc_idtoken(
+            id_token, settings.keyset_url
+        )
 
         try:
             return decoded_id_token["sub"]
