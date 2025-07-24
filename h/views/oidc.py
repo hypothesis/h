@@ -176,8 +176,8 @@ class OIDCConnectAndLoginViews:
 
 
 @dataclass
-class SSORedirectViewsSettings:
-    """Per-route settings for SSORedirectViews."""
+class OIDCRedirectViewsSettings:
+    """Per-route settings for OIDCRedirectViews."""
 
     provider_name: str
     state_session_key: str
@@ -196,7 +196,7 @@ class UnexpectedActionError(Exception):
 
 
 @view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
-class SSORedirectViews:
+class OIDCRedirectViews:
     def __init__(self, context, request: Request) -> None:
         self._context = context
         self._request = request
@@ -212,7 +212,7 @@ class SSORedirectViews:
 
         match route_name:
             case "oidc.redirect.orcid":
-                return SSORedirectViewsSettings(
+                return OIDCRedirectViewsSettings(
                     provider_name="ORCID",
                     state_session_key=STATE_SESSION_KEY_FMT.format(provider="orcid"),
                     issuer=JWTIssuers.OIDC_REDIRECT_ORCID,
