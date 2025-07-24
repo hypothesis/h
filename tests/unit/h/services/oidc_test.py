@@ -36,7 +36,7 @@ class TestOIDCClient:
             http_service.post.return_value.json.return_value
         )
         jwt_service.decode_oidc_idtoken.assert_called_once_with(
-            sentinel.id_token, sentinel.orcid_keyset_url, ["RS256"]
+            sentinel.id_token, sentinel.orcid_keyset_url
         )
         assert provider_unique_id == sentinel.provider_unique_id
 

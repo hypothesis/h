@@ -12,6 +12,19 @@ from jwt.exceptions import InvalidTokenError, PyJWTError
 JWK_CLIENT_TIMEOUT = 10
 
 
+# The list of algorithms that we allow authorization servers to use to
+# digitally sign and/or encrypt OpenID Connect ID tokens.
+#
+# The JWT spec leaves it up to the application (us) to specify the list of
+# acceptable algorithms when decoding a JWT. You don't (for example) read the
+# algorithm from the JWT's `alg` header as this would allow an attacker to
+# inject the "None" algorithm or get up to other mischief.
+#
+# The OpenID Connect spec says that ID tokens SHOULD be signed and/or encrypted
+# with RS256.
+OIDC_ALLOWED_JWT_ALGORITHMS = ["RS256"]
+
+
 class JWTDecodeError(Exception):
     """Decoding or validating a JWT failed."""
 
@@ -67,9 +80,7 @@ class JWTService:
         self.jwt_signing_key = jwt_signing_key
 
     @classmethod
-    def decode_oidc_idtoken(
-        cls, token: str, keyset_url: str, algorithms: list[str]
-    ) -> dict[str, Any]:
+    def decode_oidc_idtoken(cls, token: str, keyset_url: str) -> dict[str, Any]:
         """Decode the given OpenID Connect (OIDC) ID token and return the payload."""
         try:
             unverified_header = jwt.get_unverified_header(token)
@@ -93,7 +104,7 @@ class JWTService:
                 token,
                 key=signing_key.key,
                 audience=aud,
-                algorithms=algorithms,
+                algorithms=OIDC_ALLOWED_JWT_ALGORITHMS,
                 leeway=cls.LEEWAY,
             )
         except PyJWTError as err:

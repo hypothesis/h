@@ -16,19 +16,6 @@ if TYPE_CHECKING:
     from h.services import JWTService, UserService
 
 
-# The list of algorithms that we allow authorization servers to use to
-# digitally sign and/or encrypt OpenID Connect ID tokens.
-#
-# The JWT spec leaves it up to the application (us) to specify the list of
-# acceptable algorithms when decoding a JWT. You don't (for example) read the
-# algorithm from the JWT's `alg` header as this would allow an attacker to
-# inject the "None" algorithm or get up to other mischief.
-#
-# The OpenID Connect spec says that ID tokens SHOULD be signed and/or encrypted
-# with RS256.
-OIDC_ALLOWED_JWT_ALGORITHMS = ["RS256"]
-
-
 @dataclass
 class OIDCClientSettings:
     client_id: str
@@ -89,9 +76,7 @@ class OIDCClient:
 
         id_token = OIDCTokenResponseSchema().validate(token_response.json())["id_token"]
 
-        decoded_id_token = self._jwt_service.decode_oidc_idtoken(
-            id_token, keyset_url, OIDC_ALLOWED_JWT_ALGORITHMS
-        )
+        decoded_id_token = self._jwt_service.decode_oidc_idtoken(id_token, keyset_url)
 
         try:
             return decoded_id_token["sub"]
