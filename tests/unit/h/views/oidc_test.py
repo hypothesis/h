@@ -10,12 +10,14 @@ from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
+from h.views.exceptions import UnexpectedRouteError
 from h.views.oidc import (
     STATE_SESSION_KEY_FMT,
     AccessDeniedError,
     OIDCState,
     SSOConnectAndLoginViews,
     SSORedirectViews,
+    UnexpectedActionError,
     UserConflictError,
     handle_external_request_error,
 )
@@ -69,6 +71,12 @@ class TestSSOConnectAndLoginViews:
             )
         )
 
+    def test_connect_or_login_with_unexpected_route_name(self, pyramid_request):
+        pyramid_request.matched_route.name = "unexpected"
+
+        with pytest.raises(UnexpectedRouteError, match="^unexpected$"):
+            SSOConnectAndLoginViews(pyramid_request).connect_or_login()
+
     def test_notfound(self, pyramid_request):
         pyramid_request.user = None
 
@@ -119,6 +127,18 @@ class TestSSORedirectViews:
         del pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")]
 
         with pytest.raises(InvalidOAuth2StateParamError):
+            views.redirect()
+
+    @pytest.mark.usefixtures(
+        "with_both_connect_and_login_actions",
+        "assert_no_account_connection_was_added",
+        "assert_user_was_not_logged_in",
+        "assert_no_success_message_was_flashed",
+    )
+    def test_redirect_with_unexpected_route_name(self, pyramid_request, views):
+        pyramid_request.matched_route.name = "unexpected"
+
+        with pytest.raises(UnexpectedRouteError, match="^unexpected$"):
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")
@@ -242,6 +262,17 @@ class TestSSORedirectViews:
         user_service.fetch_by_identity.assert_called_once_with(
             IdentityProvider.ORCID, orcid_id
         )
+
+    @pytest.mark.usefixtures(
+        "assert_no_account_connection_was_added",
+        "assert_user_was_not_logged_in",
+        "assert_no_success_message_was_flashed",
+    )
+    def test_redirect_with_unexpected_action(self, views, set_action):
+        set_action("unexpected")
+
+        with pytest.raises(UnexpectedActionError):
+            views.redirect()
 
     @pytest.mark.usefixtures(
         "with_connect_action",
@@ -490,11 +521,10 @@ class TestSSORedirectViews:
                     # most tests that use the "connect" action should have a
                     # logged-in user.
                     authenticate_user = True
-                else:
+                elif action == "login":
                     # You must be logged out to use the "login" action, so most
                     # tests that use the "login" action should *not* have a
                     # logged-in user.
-                    assert action == "login"
                     authenticate_user = False
 
             if authenticate_user:
