@@ -237,6 +237,7 @@ describe('AnnotationCard', () => {
     {
       error: new Error(''),
       expectedMessage: 'An error occurred updating the moderation status.',
+      errorElementId: 'update-error',
     },
     {
       error: new APIError('', {
@@ -245,6 +246,7 @@ describe('AnnotationCard', () => {
       callAPIShouldFail: false,
       expectedMessage:
         'The annotation has been updated since this page was loaded. Review this new version and try again.',
+      errorElementId: 'update-warning',
     },
     {
       error: new APIError('', {
@@ -253,8 +255,9 @@ describe('AnnotationCard', () => {
       callAPIShouldFail: true,
       expectedMessage:
         'The annotation has been updated since this page was loaded.',
+      errorElementId: 'update-error',
     },
-  ].forEach(({ error, callAPIShouldFail, expectedMessage }) => {
+  ].forEach(({ error, callAPIShouldFail, expectedMessage, errorElementId }) => {
     it('shows errors produced while changing status', async () => {
       fakeUseUpdateModerationStatus.returns(sinon.stub().throws(error));
       if (callAPIShouldFail) {
@@ -268,7 +271,7 @@ describe('AnnotationCard', () => {
 
       const errorElement = await waitForElement(
         wrapper,
-        '[data-testid="update-error"]',
+        `Callout[data-testid="${errorElementId}"]`,
       );
       assert.equal(errorElement.text(), expectedMessage);
     });

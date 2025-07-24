@@ -6,6 +6,7 @@ import {
   StyledText,
 } from '@hypothesis/annotation-ui';
 import {
+  Callout,
   Card,
   CardContent,
   ExternalIcon,
@@ -43,7 +44,8 @@ export type AnnotationCardProps = {
 type SaveState =
   | { type: 'saved' }
   | { type: 'saving' }
-  | { type: 'error'; error: string };
+  | { type: 'error'; message: string }
+  | { type: 'warning'; message: string };
 
 // Lazily load the MarkdownView as it has heavy dependencies such as Showdown,
 // KaTeX and DOMPurify.
@@ -101,9 +103,10 @@ export default function AnnotationCard({
       } catch (e) {
         const isConflictError =
           e instanceof APIError && e.response?.status === 409;
-        let error = isConflictError
+        let message = isConflictError
           ? 'The annotation has been updated since this page was loaded. Review this new version and try again.'
           : 'An error occurred updating the moderation status.';
+        let type: 'warning' | 'error' = isConflictError ? 'warning' : 'error';
 
         // If there was a conflict, reload the annotation before reporting the
         // error
@@ -111,12 +114,13 @@ export default function AnnotationCard({
           await reloadAnnotation().catch(() => {
             // If reloading the annotation fails, the error message should not
             // make users think they are seeing up-to-date information
-            error =
+            message =
               'The annotation has been updated since this page was loaded.';
+            type = 'error';
           });
         }
 
-        setModerationSaveState({ type: 'error', error });
+        setModerationSaveState({ type, message });
       }
     },
     [onStatusChange, reloadAnnotation, updateModerationStatus],
@@ -199,7 +203,7 @@ export default function AnnotationCard({
               </ul>
             )}
 
-            <footer className="flex flex-col gap-2">
+            <footer className="flex flex-col">
               <div className="flex items-end justify-between">
                 <ModerationStatusSelect
                   onChange={onModerationStatusChange}
@@ -225,11 +229,24 @@ export default function AnnotationCard({
                   />
                 </div>
               </div>
-              {moderationSaveState.type === 'error' && (
-                <div data-testid="update-error" className="text-red-error">
-                  {moderationSaveState.error}
-                </div>
-              )}
+              <div
+                role="status"
+                className={classnames(
+                  ['error', 'warning'].includes(moderationSaveState.type) &&
+                    'mt-2',
+                )}
+              >
+                {moderationSaveState.type === 'error' && (
+                  <Callout data-testid="update-error" status="error">
+                    {moderationSaveState.message}
+                  </Callout>
+                )}
+                {moderationSaveState.type === 'warning' && (
+                  <Callout data-testid="update-warning" status="notice">
+                    {moderationSaveState.message}
+                  </Callout>
+                )}
+              </div>
             </footer>
           </CardContent>
         </Card>
