@@ -77,13 +77,15 @@ class TestCreateForm:
 
         assert result == Form.return_value
 
-    def test_passes_args_including_renderer_to_form_ctor(self, Form, pyramid_request):
+    def test_passes_args_including_renderer_to_form_ctor(
+        self, Form, pyramid_request, matchers
+    ):
         form.create_form(pyramid_request, mock.sentinel.schema, foo="bar")
 
         Form.assert_called_once_with(
             mock.sentinel.schema,
             foo="bar",
-            renderer=Any.instance_of(form.Jinja2Renderer),
+            renderer=matchers.InstanceOf(form.Jinja2Renderer),
         )
 
     def test_adds_feature_client_to_system_context(self, patch, pyramid_request):

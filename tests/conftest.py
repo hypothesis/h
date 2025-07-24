@@ -10,6 +10,13 @@ from sqlalchemy.orm import sessionmaker
 from h import search
 
 
+@pytest.fixture
+def matchers():
+    from tests import matchers
+
+    return matchers
+
+
 @pytest.fixture(scope="session")
 def db_engine():
     return create_engine(environ["DATABASE_URL"])

@@ -156,13 +156,6 @@ def invalid_form():
 
 
 @pytest.fixture
-def matchers():
-    from tests import matchers
-
-    return matchers
-
-
-@pytest.fixture
 def notify(pyramid_config, request):
     patcher = mock.patch.object(pyramid_config.registry, "notify", autospec=True)
     request.addfinalizer(patcher.stop)  # noqa: PT021

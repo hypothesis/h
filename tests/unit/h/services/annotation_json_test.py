@@ -158,7 +158,7 @@ class TestAnnotationJSONService:
         )
 
     def test_present_for_user_only_shows_moderation_to_moderators(
-        self, service, annotation, user, identity_permits, Identity
+        self, service, annotation, user, identity_permits, Identity, matchers
     ):
         identity_permits.return_value = False
 
@@ -167,9 +167,7 @@ class TestAnnotationJSONService:
         Identity.from_models.assert_called_once_with(user=user)
         identity_permits.assert_called_once_with(
             identity=Identity.from_models.return_value,
-            context=Any.instance_of(AnnotationContext).with_attrs(
-                {"annotation": annotation}
-            ),
+            context=matchers.InstanceOf(AnnotationContext, annotation=annotation),
             permission=Permission.Annotation.MODERATE,
         )
 

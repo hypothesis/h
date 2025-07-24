@@ -2,7 +2,6 @@ from unittest import mock
 
 import kombu
 import pytest
-from h_matchers import Any
 from kombu.exceptions import LimitExceeded, OperationalError
 
 from h import realtime
@@ -168,11 +167,11 @@ class TestGetConnection:
         realtime.get_connection({"broker_url": broker_url})
         Connection.assert_called_once_with(broker_url)
 
-    def test_it_adds_timeout_options_for_failfast(self, Connection):
+    def test_it_adds_timeout_options_for_failfast(self, Connection, matchers):
         realtime.get_connection({}, fail_fast=True)
 
         Connection.assert_called_once_with(
-            Any.string(), transport_options=RETRY_POLICY_QUICK
+            matchers.InstanceOf(str), transport_options=RETRY_POLICY_QUICK
         )
 
     @pytest.fixture

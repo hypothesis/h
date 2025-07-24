@@ -64,7 +64,7 @@ class TestProcessMessages:
 
 
 class TestHandleMessage:
-    def test_calls_handler_with_list_of_sockets(self, websocket, registry):
+    def test_calls_handler_with_list_of_sockets(self, websocket, registry, matchers):
         handler = Mock(return_value=None)
         session = sentinel.db_session
         message = messages.Message(topic="foo", payload={"foo": "bar"})
@@ -77,7 +77,7 @@ class TestHandleMessage:
         handler.assert_called_once_with(
             message.payload,
             websocket.instances,
-            Any.object.of_type(Request).with_attrs({"registry": registry}),
+            matchers.InstanceOf(Request, registry=registry),
             session,
         )
 

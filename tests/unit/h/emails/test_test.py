@@ -1,5 +1,4 @@
 import pytest
-from h_matchers import Any
 
 from h import __version__
 from h.emails.test import generate
@@ -8,14 +7,14 @@ from h.services.email import EmailData, EmailTag
 
 class TestGenerate:
     def test_calls_renderers_with_appropriate_context(
-        self, pyramid_request, html_renderer, text_renderer
+        self, pyramid_request, html_renderer, text_renderer, matchers
     ):
         generate(pyramid_request, "meerkat@example.com")
 
         expected_context = {
-            "time": Any.string(),
-            "hostname": Any.string(),
-            "python_version": Any.string(),
+            "time": matchers.InstanceOf(str),
+            "hostname": matchers.InstanceOf(str),
+            "python_version": matchers.InstanceOf(str),
             "version": __version__,
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009

@@ -3,7 +3,6 @@ from unittest.mock import Mock
 
 import pytest
 import sqlalchemy as sa
-from h_matchers import Any
 
 from h.models.document import ConcurrentUpdateError, create_or_update_document_uri
 from h.models.document._document import Document
@@ -103,7 +102,7 @@ class TestCreateOrUpdateDocumentURI:
         )
 
     def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(
-        self, db_session, doc_uri_attrs
+        self, db_session, doc_uri_attrs, matchers
     ):
         original_attrs = doc_uri_attrs
         updated_attrs = dict(
@@ -119,7 +118,7 @@ class TestCreateOrUpdateDocumentURI:
         document_uri = (
             db_session.query(DocumentURI).order_by(DocumentURI.created.desc()).first()
         )
-        assert document_uri == Any.object.with_attrs(updated_attrs)
+        assert document_uri == matchers.InstanceOf(object, **updated_attrs)
 
     def test_it_skips_denormalizing_http_uris_to_document(
         self, db_session, doc_uri_attrs

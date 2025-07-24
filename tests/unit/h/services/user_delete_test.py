@@ -220,7 +220,7 @@ class TestUserDeleteService:
 
 class TestUserPurger:
     def test_delete_authtickets(
-        self, worker, purger, factories, user, db_session, log_deleted_rows
+        self, worker, purger, factories, user, db_session, log_deleted_rows, matchers
     ):
         authtickets = factories.AuthTicket.create_batch(2, user=user)
         # An AuthTicket belonging to another user. This shouldn't get deleted.
@@ -228,7 +228,7 @@ class TestUserPurger:
 
         purger.delete_authtickets(user)
 
-        worker.delete.assert_called_once_with(AuthTicket, Any.instance_of(Select))
+        worker.delete.assert_called_once_with(AuthTicket, matchers.InstanceOf(Select))
         assert db_session.scalars(select(AuthTicket)).all() == [other_ticket]
         log_deleted_rows.assert_called_once_with(
             user,
@@ -238,7 +238,7 @@ class TestUserPurger:
         )
 
     def test_delete_tokens(
-        self, worker, purger, factories, user, db_session, log_deleted_rows
+        self, worker, purger, factories, user, db_session, log_deleted_rows, matchers
     ):
         tokens = [factories.DeveloperToken(user=user), factories.OAuth2Token(user=user)]
         # Tokens belonging to other users. These shouldn't get deleted.
@@ -246,7 +246,7 @@ class TestUserPurger:
 
         purger.delete_tokens(user)
 
-        worker.delete.assert_called_once_with(Token, Any.instance_of(Select))
+        worker.delete.assert_called_once_with(Token, matchers.InstanceOf(Select))
         assert (
             db_session.scalars(select(Token)).all()
             == Any.list.containing(other_tokens).only()
@@ -256,7 +256,7 @@ class TestUserPurger:
         )
 
     def test_delete_flags(
-        self, worker, purger, factories, user, db_session, log_deleted_rows
+        self, worker, purger, factories, user, db_session, log_deleted_rows, matchers
     ):
         flags = factories.Flag.create_batch(2, user=user)
         # A flag created by another user. This shouldn't get deleted.
@@ -264,14 +264,14 @@ class TestUserPurger:
 
         purger.delete_flags(user)
 
-        worker.delete.assert_called_once_with(Flag, Any.instance_of(Select))
+        worker.delete.assert_called_once_with(Flag, matchers.InstanceOf(Select))
         assert db_session.scalars(select(Flag)).all() == [other_flag]
         log_deleted_rows.assert_called_once_with(
             user, Flag, sorted(flag.id for flag in flags)
         )
 
     def test_delete_featurecohort_memberships(
-        self, worker, purger, user, factories, db_session, log_deleted_rows
+        self, worker, purger, user, factories, db_session, log_deleted_rows, matchers
     ):
         cohorts = factories.FeatureCohort.create_batch(2)
         db_session.flush()
@@ -288,11 +288,13 @@ class TestUserPurger:
         purger.delete_featurecohort_memberships(user)
 
         worker.delete.assert_called_once_with(
-            FeatureCohortUser, Any.instance_of(Select)
+            FeatureCohortUser, matchers.InstanceOf(Select)
         )
         assert db_session.scalars(select(FeatureCohortUser)).all() == [
-            Any.instance_of(FeatureCohortUser).with_attrs(
-                {"cohort_id": cohorts[0].id, "user_id": other_user.id}
+            matchers.InstanceOf(
+                FeatureCohortUser,
+                cohort_id=cohorts[0].id,
+                user_id=other_user.id,
             )
         ]
         log_deleted_rows.assert_called_once_with(
@@ -300,7 +302,7 @@ class TestUserPurger:
         )
 
     def test_delete_annotations(
-        self, worker, purger, user, factories, queue_service, log_updated_rows
+        self, worker, purger, user, factories, queue_service, log_updated_rows, matchers
     ):
         annotations = factories.Annotation.create_batch(2, userid=user.userid)
         annotation_slims = [
@@ -315,8 +317,8 @@ class TestUserPurger:
 
         worker.update.assert_called_once_with(
             Annotation,
-            Any.instance_of(Select),
-            {"deleted": True, "updated": Any.instance_of(datetime)},
+            matchers.InstanceOf(Select),
+            {"deleted": True, "updated": matchers.InstanceOf(datetime)},
         )
         for annotation in annotations:
             assert annotation.deleted is True
@@ -351,7 +353,9 @@ class TestUserPurger:
         queue_service.add_by_id.assert_not_called()
         assert caplog.messages == []
 
-    def test_delete_groups(self, user, worker, factories, purger, log_deleted_rows):
+    def test_delete_groups(
+        self, user, worker, factories, purger, log_deleted_rows, matchers
+    ):
         def make_group(name, owner=user):
             """Create and return a group that `owner` is the only owner of."""
             return factories.Group(
@@ -414,7 +418,7 @@ class TestUserPurger:
 
         purger.delete_groups(user)
 
-        worker.delete.assert_called_once_with(Group, Any.instance_of(Select))
+        worker.delete.assert_called_once_with(Group, matchers.InstanceOf(Select))
         for group in should_not_be_deleted:
             assert not inspect(group).deleted
         for group in should_be_deleted:
@@ -424,7 +428,7 @@ class TestUserPurger:
         )
 
     def test_delete_group_memberships(
-        self, user, factories, purger, worker, db_session, log_deleted_rows
+        self, user, factories, purger, worker, db_session, log_deleted_rows, matchers
     ):
         other_user = factories.User()
         groups = [
@@ -450,7 +454,9 @@ class TestUserPurger:
 
         purger.delete_group_memberships(user)
 
-        worker.delete.assert_called_once_with(GroupMembership, Any.instance_of(Select))
+        worker.delete.assert_called_once_with(
+            GroupMembership, matchers.InstanceOf(Select)
+        )
         # It deletes the given user's group memberships.
         assert (
             db_session.scalars(
@@ -465,8 +471,10 @@ class TestUserPurger:
             ).all()
             == Any.list.containing(
                 [
-                    Any.instance_of(GroupMembership).with_attrs(
-                        {"group_id": group.id, "user_id": other_user.id}
+                    matchers.InstanceOf(
+                        GroupMembership,
+                        group_id=group.id,
+                        user_id=other_user.id,
                     )
                     for group in groups
                 ]
@@ -475,7 +483,7 @@ class TestUserPurger:
         log_deleted_rows.assert_called_once_with(user, GroupMembership, membership_ids)
 
     def test_delete_group_creators(
-        self, user, factories, purger, worker, log_updated_rows
+        self, user, factories, purger, worker, log_updated_rows, matchers
     ):
         groups = factories.Group.create_batch(2, creator=user)
         other_group = factories.Group()
@@ -483,7 +491,7 @@ class TestUserPurger:
         purger.delete_group_creators(user)
 
         worker.update.assert_called_once_with(
-            Group, Any.instance_of(Select), {"creator_id": None}
+            Group, matchers.InstanceOf(Select), {"creator_id": None}
         )
         for group in groups:
             assert group.creator_id is None
