@@ -107,7 +107,7 @@ class SSOConnectAndLoginViews:
                 action = "connect"
             case "oidc.login.orcid":
                 action = "login"
-            case _:  # pragma: no cover
+            case _:
                 raise UnexpectedRouteError(route_name)
 
         settings = self._request.registry.settings
@@ -221,7 +221,7 @@ class SSORedirectViews:
                     success_message="ORCID iD connected ✓",
                     signup_route="signup.orcid",
                 )
-            case _:  # pragma: nocover
+            case _:
                 raise UnexpectedRouteError(route_name)
 
     @view_config()
@@ -276,7 +276,7 @@ class SSORedirectViews:
                 return self.connect_provider_unique_id(provider_unique_id, user)
             case "login":
                 return self.log_in_with_provider(provider_unique_id, user)
-            case _:  # pragma: no cover
+            case _:
                 raise UnexpectedActionError(action)
 
     def connect_provider_unique_id(self, provider_unique_id: str, user: User | None):
