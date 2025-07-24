@@ -13,6 +13,7 @@ from h.accounts.schemas import SignupSchema, SSOSignupSchema
 from h.models.user_identity import IdentityProvider
 from h.services.exceptions import ConflictError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers, JWTService
+from h.views.exceptions import UnexpectedRouteError
 from h.views.helpers import login
 
 _ = i18n.TranslationString
@@ -155,8 +156,7 @@ class SSOSignupViews:
                     audience=JWTAudiences.SIGNUP_ORCID,
                 )
             case _:  # pragma: nocover
-                error_message = f"Unexpected route name: {route_name}"
-                raise ValueError(error_message)
+                raise UnexpectedRouteError(route_name)
 
     @view_config(request_method="GET")
     def get(self):
