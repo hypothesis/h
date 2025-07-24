@@ -15,8 +15,8 @@ from h.views.oidc import (
     STATE_SESSION_KEY_FMT,
     AccessDeniedError,
     OIDCConnectAndLoginViews,
+    OIDCRedirectViews,
     OIDCState,
-    SSORedirectViews,
     UnexpectedActionError,
     UserConflictError,
     handle_external_request_error,
@@ -116,7 +116,7 @@ class TestOIDCConnectAndLoginViews:
 
 
 @pytest.mark.usefixtures("oidc_service", "user_service", "jwt_service")
-class TestSSORedirectViews:
+class TestOIDCRedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
         "assert_no_account_connection_was_added",
@@ -438,7 +438,7 @@ class TestSSORedirectViews:
 
     @pytest.fixture
     def views(self, pyramid_request):
-        return SSORedirectViews(sentinel.context, pyramid_request)
+        return OIDCRedirectViews(sentinel.context, pyramid_request)
 
     @pytest.fixture
     def user(self, factories):
