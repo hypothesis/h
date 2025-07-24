@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class OIDCClientSettings:
-    """Per-provider settings for OIDCClient."""
+class OIDCServiceSettings:
+    """Per-provider settings for OIDCService."""
 
     client_id: str
     client_secret: str
@@ -32,11 +32,11 @@ class MissingSubError(Exception):
         super().__init__("Received an OIDC ID token with no 'sub'.")
 
 
-class OIDCClient:
+class OIDCService:
     def __init__(
         self,
         db: Session,
-        settings: dict[IdentityProvider, OIDCClientSettings],
+        settings: dict[IdentityProvider, OIDCServiceSettings],
         http_service: HTTPService,
         user_service: UserService,
         jwt_service: JWTService,
@@ -102,13 +102,13 @@ class OIDCClient:
         ).scalar()
 
 
-def factory(_context, request) -> OIDCClient:
+def factory(_context, request) -> OIDCService:
     settings = request.registry.settings
 
-    return OIDCClient(
+    return OIDCService(
         db=request.db,
         settings={
-            IdentityProvider.ORCID: OIDCClientSettings(
+            IdentityProvider.ORCID: OIDCServiceSettings(
                 client_id=settings["oidc_clientid_orcid"],
                 client_secret=settings["oidc_clientsecret_orcid"],
                 redirect_uri=request.route_url("oidc.redirect.orcid"),

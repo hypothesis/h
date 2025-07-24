@@ -26,7 +26,7 @@ from h.schemas.forms.accounts import (
     ResetCode,
     ResetPasswordSchema,
 )
-from h.services import OIDCClient, SubscriptionService
+from h.services import OIDCService, SubscriptionService
 from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
@@ -496,8 +496,8 @@ class AccountController:
         orcid_id = orcid_url = None
         if log_in_with_orcid:
             orcid_host = self.request.registry.settings["orcid_host"]
-            oidc_client = self.request.find_service(OIDCClient)
-            orcid_identity = oidc_client.get_identity(
+            oidc_service = self.request.find_service(OIDCService)
+            orcid_identity = oidc_service.get_identity(
                 self.request.user, IdentityProvider.ORCID
             )
             orcid_id = orcid_identity.provider_unique_id if orcid_identity else None
