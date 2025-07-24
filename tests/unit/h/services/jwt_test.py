@@ -27,9 +27,7 @@ class TestJWTService:
         jwt.decode.return_value = {"aud": "AUD", "iss": "ISS"}
         jwt.get_unverified_header.return_value = {"kid": "KID"}
 
-        payload = service.decode_oidc_idtoken(
-            sentinel.token, sentinel.keyset_url, sentinel.algorithms
-        )
+        payload = service.decode_oidc_idtoken(sentinel.token, sentinel.keyset_url)
 
         jwt.get_unverified_header.assert_called_once_with(sentinel.token)
         PyJWKClient.assert_called_once_with(
@@ -39,7 +37,7 @@ class TestJWTService:
             sentinel.token,
             key=PyJWKClient.return_value.get_signing_key_from_jwt.return_value.key,
             audience="AUD",
-            algorithms=sentinel.algorithms,
+            algorithms=["RS256"],
             leeway=service.LEEWAY,
         )
         assert payload == jwt.decode.return_value
@@ -48,25 +46,19 @@ class TestJWTService:
         jwt.get_unverified_header.return_value = {}
 
         with pytest.raises(JWTDecodeError, match="Missing 'kid' value in JWT header"):
-            service.decode_oidc_idtoken(
-                sentinel.token, sentinel.keyset_url, sentinel.algorithms
-            )
+            service.decode_oidc_idtoken(sentinel.token, sentinel.keyset_url)
 
     def test_decode_oidc_idtoken_with_invalid_jwt_header(self, service, jwt):
         jwt.get_unverified_header.side_effect = InvalidTokenError()
 
         with pytest.raises(JWTDecodeError, match="Invalid JWT"):
-            service.decode_oidc_idtoken(
-                sentinel.token, sentinel.keyset_url, sentinel.algorithms
-            )
+            service.decode_oidc_idtoken(sentinel.token, sentinel.keyset_url)
 
     def test_decode_oidc_idtoken_with_invalid_jwt(self, service, jwt):
         jwt.decode.side_effect = [{"aud": "AUD", "iss": "ISS"}, InvalidTokenError()]
 
         with pytest.raises(JWTDecodeError, match="Invalid JWT"):
-            service.decode_oidc_idtoken(
-                sentinel.token, sentinel.keyset_url, sentinel.algorightms
-            )
+            service.decode_oidc_idtoken(sentinel.token, sentinel.keyset_url)
 
     @dataclass
     class JWTPayload:
