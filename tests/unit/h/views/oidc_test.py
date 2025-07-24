@@ -256,7 +256,7 @@ class TestSSORedirectViews:
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")
-    def test_redirect_fetches_the_hypothesis_uiser(self, views, user_service, orcid_id):
+    def test_redirect_fetches_the_hypothesis_user(self, views, user_service, orcid_id):
         views.redirect()
 
         user_service.fetch_by_identity.assert_called_once_with(
