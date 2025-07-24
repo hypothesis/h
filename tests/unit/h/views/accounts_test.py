@@ -632,7 +632,7 @@ class TestActivateController:
 
 
 @pytest.mark.usefixtures(
-    "routes", "user_password_service", "feature_service", "oidc_client"
+    "routes", "user_password_service", "feature_service", "oidc_service"
 )
 class TestAccountController:
     def test_get_returns_email_if_set(self, pyramid_request):
@@ -654,10 +654,10 @@ class TestAccountController:
         assert not result["email"]
 
     def test_get_returns_orcid_data(
-        self, pyramid_request, feature_service, oidc_client
+        self, pyramid_request, feature_service, oidc_service
     ):
         pyramid_request.registry.settings["orcid_host"] = "https://sandbox.orcid.org"
-        oidc_client.get_identity.return_value.provider_unique_id = (
+        oidc_service.get_identity.return_value.provider_unique_id = (
             "test_provider_unique_id"
         )
         feature_service.enabled.return_value = True

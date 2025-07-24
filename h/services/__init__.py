@@ -17,7 +17,7 @@ from h.services.job_queue import JobQueueService
 from h.services.jwt import JWTService
 from h.services.mention import MentionService
 from h.services.notification import NotificationService
-from h.services.oidc import OIDCClient
+from h.services.oidc import OIDCService
 from h.services.subscription import SubscriptionService
 from h.services.task_done import TaskDoneService
 from h.services.user import UserService
@@ -186,4 +186,4 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
 
     # Authentication-related services
     config.register_service_factory("h.services.http.factory", iface=HTTPService)
-    config.register_service_factory("h.services.oidc.factory", iface=OIDCClient)
+    config.register_service_factory("h.services.oidc.factory", iface=OIDCService)

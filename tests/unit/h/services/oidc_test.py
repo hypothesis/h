@@ -5,10 +5,10 @@ from sqlalchemy import select
 
 from h.models import UserIdentity
 from h.models.user_identity import IdentityProvider
-from h.services.oidc import MissingSubError, OIDCClient, OIDCClientSettings, factory
+from h.services.oidc import MissingSubError, OIDCService, OIDCServiceSettings, factory
 
 
-class TestOIDCClient:
+class TestOIDCService:
     def test_get_provider_unique_id(
         self, client, http_service, jwt_service, OIDCTokenResponseSchema
     ):
@@ -80,10 +80,10 @@ class TestOIDCClient:
 
     @pytest.fixture
     def client(self, db_session, http_service, user_service, jwt_service):
-        return OIDCClient(
+        return OIDCService(
             db_session,
             settings={
-                IdentityProvider.ORCID: OIDCClientSettings(
+                IdentityProvider.ORCID: OIDCServiceSettings(
                     client_id=sentinel.orcid_client_id,
                     client_secret=sentinel.orcid_client_secret,
                     redirect_uri=sentinel.orcid_redirect_uri,
@@ -106,7 +106,7 @@ class TestFactory:
         self,
         db_session,
         pyramid_request,
-        OIDCClient,
+        OIDCService,
         http_service,
         user_service,
         jwt_service,
@@ -119,10 +119,10 @@ class TestFactory:
 
         result = factory(sentinel.context, pyramid_request)
 
-        OIDCClient.assert_called_once_with(
+        OIDCService.assert_called_once_with(
             db=db_session,
             settings={
-                IdentityProvider.ORCID: OIDCClientSettings(
+                IdentityProvider.ORCID: OIDCServiceSettings(
                     client_id=sentinel.orcid_client_id,
                     client_secret=sentinel.orcid_client_secret,
                     redirect_uri=pyramid_request.route_url("oidc.redirect.orcid"),
@@ -134,11 +134,11 @@ class TestFactory:
             user_service=user_service,
             jwt_service=jwt_service,
         )
-        assert result == OIDCClient.return_value
+        assert result == OIDCService.return_value
 
     @pytest.fixture(autouse=True)
-    def OIDCClient(self, patch):
-        return patch("h.services.oidc.OIDCClient")
+    def OIDCService(self, patch):
+        return patch("h.services.oidc.OIDCService")
 
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):

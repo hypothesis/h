@@ -107,7 +107,7 @@ class TestSSOConnectAndLoginViews:
         pyramid_config.add_route("activity.user_search", "/users/{username}")
 
 
-@pytest.mark.usefixtures("oidc_client", "user_service", "jwt_service")
+@pytest.mark.usefixtures("oidc_service", "user_service", "jwt_service")
 class TestSSORedirectViews:
     @pytest.mark.usefixtures(
         "with_both_connect_and_login_actions",
@@ -211,10 +211,10 @@ class TestSSORedirectViews:
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")
-    def test_redirect_gets_the_users_orcid_id(self, views, oidc_client):
+    def test_redirect_gets_the_users_orcid_id(self, views, oidc_service):
         views.redirect()
 
-        oidc_client.get_provider_unique_id.assert_called_once_with(
+        oidc_service.get_provider_unique_id.assert_called_once_with(
             IdentityProvider.ORCID, sentinel.code
         )
 
@@ -226,11 +226,11 @@ class TestSSORedirectViews:
         "assert_user_was_not_logged_in",
         "assert_no_success_message_was_flashed",
     )
-    def test_redirect_when_getting_orcid_id_fails(self, views, oidc_client):
+    def test_redirect_when_getting_orcid_id_fails(self, views, oidc_service):
         class TestError(Exception):
             pass
 
-        oidc_client.get_provider_unique_id.side_effect = TestError
+        oidc_service.get_provider_unique_id.side_effect = TestError
 
         with pytest.raises(TestError):
             views.redirect()
@@ -269,7 +269,7 @@ class TestSSORedirectViews:
     def test_redirect_when_action_connect_and_account_not_yet_connected(
         self,
         pyramid_request,
-        oidc_client,
+        oidc_service,
         user_service,
         user,
         views,
@@ -280,7 +280,7 @@ class TestSSORedirectViews:
 
         result = views.redirect()
 
-        oidc_client.add_identity.assert_called_once_with(
+        oidc_service.add_identity.assert_called_once_with(
             user, IdentityProvider.ORCID, orcid_id
         )
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
@@ -505,10 +505,10 @@ class TestSSORedirectViews:
         return set_action
 
     @pytest.fixture
-    def assert_no_account_connection_was_added(self, oidc_client):
+    def assert_no_account_connection_was_added(self, oidc_service):
         """Assert that no ORCID iD->Hypothesis account connection was added."""
         yield
-        oidc_client.add_identity.assert_not_called()
+        oidc_service.add_identity.assert_not_called()
 
     @pytest.fixture
     def assert_user_was_not_logged_in(self, login):
@@ -521,9 +521,9 @@ class TestSSORedirectViews:
         return "test_orcid_id"
 
     @pytest.fixture
-    def oidc_client(self, oidc_client, orcid_id):
-        oidc_client.get_provider_unique_id.return_value = orcid_id
-        return oidc_client
+    def oidc_service(self, oidc_service, orcid_id):
+        oidc_service.get_provider_unique_id.return_value = orcid_id
+        return oidc_service
 
     @pytest.fixture
     def user_service(self, user_service, user):

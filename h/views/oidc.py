@@ -25,7 +25,7 @@ from pyramid.view import (
 from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
-from h.services import OIDCClient
+from h.services import OIDCService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.account_signup import encode_idinfo_token
@@ -200,7 +200,7 @@ class SSORedirectViews:
     def __init__(self, context, request: Request) -> None:
         self._context = context
         self._request = request
-        self._oidc_client = request.find_service(OIDCClient)
+        self._oidc_service = request.find_service(OIDCService)
         self._user_service = request.find_service(name="user")
         self._jwt_service = request.find_service(name="jwt")
 
@@ -259,7 +259,7 @@ class SSORedirectViews:
             raise HTTPForbidden
 
         # Get the user's provider unique ID from the provider.
-        provider_unique_id = self._oidc_client.get_provider_unique_id(
+        provider_unique_id = self._oidc_service.get_provider_unique_id(
             self.settings.provider, validated_params["code"]
         )
 
@@ -293,7 +293,7 @@ class SSORedirectViews:
         if not user:
             # This provider unique ID isn't connected to a Hypothesis account
             # yet. Let's go ahead and connect it to the user's account.
-            self._oidc_client.add_identity(
+            self._oidc_service.add_identity(
                 self._request.user, self.settings.provider, provider_unique_id
             )
 
