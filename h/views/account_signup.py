@@ -89,7 +89,10 @@ class SignupViews:
             "features": {
                 "log_in_with_orcid": feature_service.enabled(
                     "log_in_with_orcid", user=None
-                )
+                ),
+                "log_in_with_google": feature_service.enabled(
+                    "log_in_with_google", user=None
+                ),
             },
         }
 
@@ -154,14 +157,22 @@ class SocialLoginSignupViews:
                     issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_ORCID,
                     audience=JWTAudience.SIGNUP_ORCID,
                 )
+            case "signup.google":  # pragma: no cover
+                return SocialLoginSignupViewsSettings(
+                    provider=IdentityProvider.GOOGLE,
+                    issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_GOOGLE,
+                    audience=JWTAudience.SIGNUP_GOOGLE,
+                )
             case _:  # pragma: nocover
                 raise UnexpectedRouteError(route_name)
 
     @view_config(request_method="GET", route_name="signup.orcid")
+    @view_config(request_method="GET", route_name="signup.google")
     def get(self):
         return {"js_config": self.js_config(self.decode_provider_unique_id())}
 
     @view_config(request_method="POST", require_csrf=True, route_name="signup.orcid")
+    @view_config(request_method="POST", require_csrf=True, route_name="signup.google")
     def post(self):
         # Decode the user's provider unique ID first so that if decoding this
         # fails the view hasn't already done anything else.
@@ -200,12 +211,18 @@ class SocialLoginSignupViews:
         renderer="h:templates/error.html.jinja2",
         route_name="signup.orcid",
     )
+    @exception_view_config(
+        context=IDInfoJWTDecodeError,
+        renderer="h:templates/error.html.jinja2",
+        route_name="signup.google",
+    )
     def idinfo_jwt_decode_error(self):
         report_exception(self.context)
         self.request.response.status_int = 403
         return {"error": "Decoding idinfo JWT failed."}
 
     @exception_view_config(context=ValidationFailure, route_name="signup.orcid")
+    @exception_view_config(context=ValidationFailure, route_name="signup.google")
     def validation_failure(self):
         provider_unique_id = self.decode_provider_unique_id()
         self.request.response.status_int = 400
@@ -233,7 +250,10 @@ class SocialLoginSignupViews:
             "features": {
                 "log_in_with_orcid": feature_service.enabled(
                     "log_in_with_orcid", user=None
-                )
+                ),
+                "log_in_with_google": feature_service.enabled(
+                    "log_in_with_google", user=None
+                ),
             },
             "identity": {"provider_unique_id": provider_unique_id},
         }
@@ -257,6 +277,7 @@ class SocialLoginSignupViews:
 # in these cases.
 @view_config(route_name="signup", is_authenticated=True)
 @view_config(route_name="signup.orcid", is_authenticated=True)
+@view_config(route_name="signup.google", is_authenticated=True)
 def is_authenticated(request):
     return HTTPFound(
         request.route_url("activity.user_search", username=request.user.username)
