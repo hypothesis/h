@@ -1,7 +1,7 @@
 import itertools
 from dataclasses import asdict
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 import colander
 import deform
@@ -502,9 +502,12 @@ class AccountController:
             )
             orcid_id = orcid_identity.provider_unique_id if orcid_identity else None
 
-            # The URL to the user's public ORCID profile page
-            # (for example: https://orcid.org/0000-0002-6373-1308).
-            orcid_url = f"{orcid_host}/{orcid_id}"
+            if orcid_id:
+                # The URL to the user's public ORCID profile page
+                # (for example: https://orcid.org/0000-0002-6373-1308).
+                orcid_url = urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
+            else:
+                pass  # pragma: no cover
 
         return {
             "email": email,
