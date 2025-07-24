@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class OIDCClientSettings:
+    """Per-provider settings for OIDCClient."""
+
     client_id: str
     client_secret: str
     redirect_uri: str
