@@ -16,7 +16,7 @@ from h.views.account_signup import (
     JWTAudiences,
     JWTIssuers,
     SignupViews,
-    SSOSignupViews,
+    SocialLoginSignupViews,
     is_authenticated,
 )
 
@@ -209,7 +209,7 @@ class TestSignupViews:
 
 
 @pytest.mark.usefixtures("user_signup_service", "jwt_service", "feature_service")
-class TestSSOSignupViews:
+class TestSocialLoginSignupViews:
     def test_get(
         self, views, get_csrf_token, pyramid_request, orcid_id, feature_service
     ):
@@ -421,7 +421,7 @@ class TestSSOSignupViews:
 
     @pytest.fixture
     def views(self, pyramid_request):
-        return SSOSignupViews(sentinel.context, pyramid_request)
+        return SocialLoginSignupViews(sentinel.context, pyramid_request)
 
     @pytest.fixture
     def jwt_service(self, jwt_service, orcid_id):

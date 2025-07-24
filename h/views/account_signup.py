@@ -122,8 +122,8 @@ class IDInfo:
 
 
 @dataclass
-class SSOSignupViewsSettings:
-    """Per-route settings for SSOSignupViews."""
+class SocialLoginSignupViewsSettings:
+    """Per-route settings for SocialLoginSignupViews."""
 
     provider: IdentityProvider
     issuer: JWTIssuers
@@ -136,21 +136,21 @@ class SSOSignupViewsSettings:
     request_param="idinfo",
     renderer="h:templates/accounts/signup.html.jinja2",
 )
-class SSOSignupViews:
+class SocialLoginSignupViews:
     def __init__(self, context, request):
         self.context = context
         self.request = request
         self.jwt_service = request.find_service(name="jwt")
 
     @property
-    def settings(self) -> SSOSignupViewsSettings:
-        """Return the per-route SSOSignupViewsSettings for the current request."""
+    def settings(self) -> SocialLoginSignupViewsSettings:
+        """Return the per-route SocialLoginSignupViewsSettings for the current request."""
 
         route_name = self.request.matched_route.name
 
         match route_name:
             case "signup.orcid":
-                return SSOSignupViewsSettings(
+                return SocialLoginSignupViewsSettings(
                     provider=IdentityProvider.ORCID,
                     issuer=JWTIssuers.SIGNUP_VALIDATION_FAILURE_ORCID,
                     audience=JWTAudiences.SIGNUP_ORCID,
