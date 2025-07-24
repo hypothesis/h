@@ -274,9 +274,13 @@ def test_includeme():
             "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
         ),
         call("oidc.connect.orcid", "/oidc/connect/orcid"),
+        call("oidc.connect.google", "/oidc/connect/google"),
         call("oidc.login.orcid", "/oidc/login/orcid"),
+        call("oidc.login.google", "/oidc/login/google"),
         call("oidc.redirect.orcid", "/oidc/redirect/orcid"),
+        call("oidc.redirect.google", "/oidc/redirect/google"),
         call("signup.orcid", "/signup/orcid"),
+        call("signup.google", "/signup/google"),
     ]
 
     # Test each one one at a time to make it a bit easier to spot which one

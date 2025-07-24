@@ -23,6 +23,7 @@ export type LoginConfigObject = ConfigBase & {
   forOAuth?: boolean;
   features: {
     log_in_with_orcid: boolean;
+    log_in_with_google: boolean;
   };
 };
 

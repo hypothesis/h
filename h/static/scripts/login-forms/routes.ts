@@ -9,4 +9,5 @@ export const routes = {
   forgotPassword: '/forgot-password',
   signup: '/signup',
   loginWithORCID: '/oidc/login/orcid',
+  loginWithGoogle: '/oidc/login/google',
 };

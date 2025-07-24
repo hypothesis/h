@@ -95,7 +95,14 @@ export default function LoginForm() {
           </div>
         </Form>
         {config.features.log_in_with_orcid && (
-          <a href={routes.loginWithORCID}>Continue with ORCID</a>
+          <p>
+            <a href={routes.loginWithORCID}>Continue with ORCID</a>
+          </p>
+        )}
+        {config.features.log_in_with_google && (
+          <p>
+            <a href={routes.loginWithGoogle}>Continue with Google</a>
+          </p>
         )}
       </FormContainer>
     </>
