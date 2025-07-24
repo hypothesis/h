@@ -9,7 +9,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
-from h.accounts.schemas import SignupSchema, SSOSignupSchema
+from h.accounts.schemas import SignupSchema, SocialLoginSignupSchema
 from h.models.user_identity import IdentityProvider
 from h.services.exceptions import ConflictError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers, JWTService
@@ -168,7 +168,9 @@ class SSOSignupViews:
         # fails the view hasn't already done anything else.
         provider_unique_id = self.decode_provider_unique_id()
 
-        form = self.request.create_form(SSOSignupSchema().bind(request=self.request))
+        form = self.request.create_form(
+            SocialLoginSignupSchema().bind(request=self.request)
+        )
 
         appstruct = form.validate(self.request.POST.items())
 

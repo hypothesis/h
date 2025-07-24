@@ -244,7 +244,7 @@ class TestSSOSignupViews:
         login,
         appstruct,
         expected_signup_args,
-        SSOSignupSchema,
+        SocialLoginSignupSchema,
     ):
         pyramid_request.create_form.return_value.validate.return_value = {
             "username": sentinel.username,
@@ -253,12 +253,12 @@ class TestSSOSignupViews:
 
         response = views.post()
 
-        SSOSignupSchema.assert_called_once_with()
-        SSOSignupSchema.return_value.bind.assert_called_once_with(
+        SocialLoginSignupSchema.assert_called_once_with()
+        SocialLoginSignupSchema.return_value.bind.assert_called_once_with(
             request=pyramid_request
         )
         pyramid_request.create_form.assert_called_once_with(
-            SSOSignupSchema.return_value.bind.return_value
+            SocialLoginSignupSchema.return_value.bind.return_value
         )
         pyramid_request.create_form.return_value.validate.assert_called_once_with(ANY)
         assert list(
@@ -450,8 +450,8 @@ def SignupSchema(patch):
 
 
 @pytest.fixture(autouse=True)
-def SSOSignupSchema(patch):
-    return patch("h.views.account_signup.SSOSignupSchema")
+def SocialLoginSignupSchema(patch):
+    return patch("h.views.account_signup.SocialLoginSignupSchema")
 
 
 @pytest.fixture(autouse=True)

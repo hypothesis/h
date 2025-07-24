@@ -197,7 +197,7 @@ class SignupSchema(CSRFSchema):
     comms_opt_in = comms_opt_in_node()
 
 
-class SSOSignupSchema(colander.Schema):
+class SocialLoginSignupSchema(colander.Schema):
     username = username_node()
     privacy_accepted = privacy_accepted_node()
     comms_opt_in = comms_opt_in_node()
