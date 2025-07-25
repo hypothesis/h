@@ -1,4 +1,9 @@
 import {
+  isModerationStatus,
+  moderationStatusInfo,
+  ModerationStatusSelect,
+} from '@hypothesis/annotation-ui';
+import {
   useStableCallback,
   Slider,
   Spinner,
@@ -16,13 +21,8 @@ import FormContainer from '../../forms-common/components/FormContainer';
 import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData, ModerationStatus } from '../utils/api';
-import {
-  isModerationStatus,
-  moderationStatusToLabel,
-} from '../utils/moderation-status';
 import AnnotationCard from './AnnotationCard';
 import GroupFormHeader from './GroupFormHeader';
-import ModerationStatusSelect from './ModerationStatusSelect';
 
 /**
  * Checks if provided element's scroll is at the bottom.
@@ -154,7 +154,7 @@ function AnnotationListContent({
           <>
             There are no{' '}
             <span className="lowercase">
-              {moderationStatusToLabel[filterStatus]}
+              {moderationStatusInfo[filterStatus].label}
             </span>{' '}
             annotations in this group.
           </>

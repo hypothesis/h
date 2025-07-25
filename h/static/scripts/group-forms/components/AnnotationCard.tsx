@@ -3,6 +3,7 @@ import {
   AnnotationShareControl,
   AnnotationTimestamps,
   AnnotationUser,
+  ModerationStatusSelect,
   StyledText,
 } from '@hypothesis/annotation-ui';
 import {
@@ -24,7 +25,6 @@ import type { APIAnnotationData, ModerationStatus } from '../utils/api';
 import { callAPI } from '../utils/api';
 import { APIError } from '../utils/api';
 import AnnotationDocument from './AnnotationDocument';
-import ModerationStatusSelect from './ModerationStatusSelect';
 
 export type AnnotationCardProps = {
   annotation: APIAnnotationData;
