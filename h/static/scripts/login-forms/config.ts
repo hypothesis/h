@@ -29,6 +29,10 @@ export type LoginConfigObject = ConfigBase & {
 
 /** Data passed to frontend for signup form. */
 export type SignupConfigObject = ConfigBase & {
+  features: {
+    log_in_with_orcid: boolean;
+    log_in_with_google: boolean;
+  };
   formErrors?: {
     username?: string;
     password?: string;
@@ -38,6 +42,44 @@ export type SignupConfigObject = ConfigBase & {
   formData?: {
     username: string;
     password: string;
+    email: string;
+    privacy_accepted: boolean;
+    comms_opt_in: boolean;
+  };
+};
+
+export type SignupWithORCIDConfigObject = ConfigBase & {
+  identity: { provider_unique_id: string };
+  features: {
+    log_in_with_orcid: boolean;
+  };
+  formErrors?: {
+    username?: string;
+    email?: string;
+    privacy_accepted?: string;
+  };
+  formData?: {
+    idinfo?: string;
+    username: string;
+    email: string;
+    privacy_accepted: boolean;
+    comms_opt_in: boolean;
+  };
+};
+
+export type SignupWithGoogleConfigObject = ConfigBase & {
+  identity: { provider_unique_id: string };
+  features: {
+    log_in_with_google: boolean;
+  };
+  formErrors?: {
+    username?: string;
+    email?: string;
+    privacy_accepted?: string;
+  };
+  formData?: {
+    idinfo?: string;
+    username: string;
     email: string;
     privacy_accepted: boolean;
     comms_opt_in: boolean;
