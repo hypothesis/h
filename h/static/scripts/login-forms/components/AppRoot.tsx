@@ -9,6 +9,8 @@ import { Config } from '../config';
 import { routes } from '../routes';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
+import SignupWithGoogleForm from './SignupWithGoogleForm';
+import SignupWithORCIDForm from './SignupWithORCIDForm';
 
 function toastMessagesFromConfig(config: ConfigObject): ToastMessageData[] {
   const flashMessages = config.flashMessages ?? [];
@@ -41,6 +43,12 @@ export default function AppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.signup}>
               <SignupForm />
+            </Route>
+            <Route path={routes.signupWithORCID}>
+              <SignupWithORCIDForm />
+            </Route>
+            <Route path={routes.signupWithGoogle}>
+              <SignupWithGoogleForm />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>
