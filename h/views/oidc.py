@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from h.models import User
 
 
-STATE_SESSION_KEY_FMT = "oidc.state.{provider}"
+STATE_SESSIONKEY_FMT = "oidc.state.{provider}"
 
 
 class AccessDeniedError(Exception):
@@ -81,7 +81,7 @@ class OIDCState:
 class OIDCConnectAndLoginViewsSettings:
     """Per-route settings for OIDCConnectAndLoginViews."""
 
-    state_session_key: str
+    state_sessionkey: str
     issuer: JWTIssuers
     audience: JWTAudiences
     client_id: str
@@ -115,7 +115,7 @@ class OIDCConnectAndLoginViews:
         match route_name:
             case "oidc.connect.orcid" | "oidc.login.orcid":
                 return OIDCConnectAndLoginViewsSettings(
-                    state_session_key=STATE_SESSION_KEY_FMT.format(provider="orcid"),
+                    state_sessionkey=STATE_SESSIONKEY_FMT.format(provider="orcid"),
                     issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
                     audience=JWTAudiences.OIDC_REDIRECT_ORCID,
                     client_id=settings["oidc_clientid_orcid"],
@@ -135,7 +135,7 @@ class OIDCConnectAndLoginViews:
             issuer=self.settings.issuer,
             audience=self.settings.audience,
         )
-        self._request.session[self.settings.state_session_key] = state
+        self._request.session[self.settings.state_sessionkey] = state
 
         return HTTPFound(
             location=urlunparse(
@@ -180,9 +180,10 @@ class OIDCRedirectViewsSettings:
     """Per-route settings for OIDCRedirectViews."""
 
     provider_name: str
-    state_session_key: str
-    issuer: JWTIssuers
-    audience: JWTAudiences
+    jwt_issuer: JWTIssuers
+    state_sessionkey: str
+    state_jwtaudience: JWTAudiences
+    idinfo_jwtaudience: JWTAudiences
     provider: IdentityProvider
     success_message: str
     signup_route: str
@@ -214,9 +215,10 @@ class OIDCRedirectViews:
             case "oidc.redirect.orcid":
                 return OIDCRedirectViewsSettings(
                     provider_name="ORCID",
-                    state_session_key=STATE_SESSION_KEY_FMT.format(provider="orcid"),
-                    issuer=JWTIssuers.OIDC_REDIRECT_ORCID,
-                    audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+                    jwt_issuer=JWTIssuers.OIDC_REDIRECT_ORCID,
+                    state_sessionkey=STATE_SESSIONKEY_FMT.format(provider="orcid"),
+                    state_jwtaudience=JWTAudiences.OIDC_REDIRECT_ORCID,
+                    idinfo_jwtaudience=JWTAudiences.SIGNUP_ORCID,
                     provider=IdentityProvider.ORCID,
                     success_message="ORCID iD connected ✓",
                     signup_route="signup.orcid",
@@ -227,7 +229,7 @@ class OIDCRedirectViews:
     @view_config(route_name="oidc.redirect.orcid")
     def redirect(self):
         try:
-            expected_state = self._request.session.pop(self.settings.state_session_key)
+            expected_state = self._request.session.pop(self.settings.state_sessionkey)
         except KeyError as err:
             raise InvalidOAuth2StateParamError from err
 
@@ -245,7 +247,7 @@ class OIDCRedirectViews:
 
         decoded_state = self._jwt_service.decode_symmetric(
             validated_params["state"],
-            audience=self.settings.audience,
+            audience=self.settings.state_jwtaudience,
             payload_class=OIDCState,
         )
 
@@ -309,7 +311,10 @@ class OIDCRedirectViews:
                 self._request.route_url(
                     self.settings.signup_route,
                     _query=encode_idinfo_token(
-                        self._jwt_service, provider_unique_id, self.settings.issuer
+                        self._jwt_service,
+                        provider_unique_id,
+                        self.settings.jwt_issuer,
+                        self.settings.idinfo_jwtaudience,
                     ),
                 )
             )
