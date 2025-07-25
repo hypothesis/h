@@ -123,6 +123,7 @@ class AuthController:
             "csrfToken": csrf_token,
             "features": {
                 "log_in_with_orcid": self.request.feature("log_in_with_orcid"),
+                "log_in_with_google": self.request.feature("log_in_with_google"),
             },
             "flashMessages": flash_messages,
             # Prefill username from query params. This supports a flow where
@@ -509,6 +510,17 @@ class AccountController:
             else:
                 pass  # pragma: no cover
 
+        log_in_with_google = feature_service.enabled(
+            "log_in_with_google", self.request.user
+        )
+        google_id = None
+        if log_in_with_google:
+            oidc_service = self.request.find_service(OIDCService)
+            google_identity = oidc_service.get_identity(
+                self.request.user, IdentityProvider.GOOGLE
+            )
+            google_id = google_identity.provider_unique_id if google_identity else None
+
         return {
             "email": email,
             "email_form": email_form,
@@ -516,6 +528,8 @@ class AccountController:
             "log_in_with_orcid": log_in_with_orcid,
             "orcid": orcid_id,
             "orcid_url": orcid_url,
+            "log_in_with_google": log_in_with_google,
+            "google_id": google_id,
         }
 
 

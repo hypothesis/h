@@ -113,9 +113,13 @@ class TestFactory:
     ):
         settings = pyramid_request.registry.settings
         settings["oidc_clientid_orcid"] = sentinel.orcid_client_id
+        settings["oidc_clientid_google"] = sentinel.google_client_id
         settings["oidc_clientsecret_orcid"] = sentinel.orcid_client_secret
+        settings["oidc_clientsecret_google"] = sentinel.google_client_secret
         settings["oidc_tokenurl_orcid"] = sentinel.orcid_token_url
+        settings["oidc_tokenurl_google"] = sentinel.google_token_url
         settings["oidc_keyseturl_orcid"] = sentinel.orcid_keyset_url
+        settings["oidc_keyseturl_google"] = sentinel.google_keyset_url
 
         result = factory(sentinel.context, pyramid_request)
 
@@ -128,7 +132,14 @@ class TestFactory:
                     redirect_uri=pyramid_request.route_url("oidc.redirect.orcid"),
                     token_url=sentinel.orcid_token_url,
                     keyset_url=sentinel.orcid_keyset_url,
-                )
+                ),
+                IdentityProvider.GOOGLE: OIDCServiceSettings(
+                    client_id=sentinel.google_client_id,
+                    client_secret=sentinel.google_client_secret,
+                    redirect_uri=pyramid_request.route_url("oidc.redirect.google"),
+                    token_url=sentinel.google_token_url,
+                    keyset_url=sentinel.google_keyset_url,
+                ),
             },
             http_service=http_service,
             user_service=user_service,
@@ -143,6 +154,7 @@ class TestFactory:
     @pytest.fixture(autouse=True)
     def routes(self, pyramid_config):
         pyramid_config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
+        pyramid_config.add_route("oidc.redirect.google", "/oidc/redirect/google")
 
 
 @pytest.fixture(autouse=True)

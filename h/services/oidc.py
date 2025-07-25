@@ -115,6 +115,13 @@ def factory(_context, request) -> OIDCService:
                 token_url=settings["oidc_tokenurl_orcid"],
                 keyset_url=settings["oidc_keyseturl_orcid"],
             ),
+            IdentityProvider.GOOGLE: OIDCServiceSettings(
+                client_id=settings["oidc_clientid_google"],
+                client_secret=settings["oidc_clientsecret_google"],
+                redirect_uri=request.route_url("oidc.redirect.google"),
+                token_url=settings["oidc_tokenurl_google"],
+                keyset_url=settings["oidc_keyseturl_google"],
+            ),
         },
         http_service=request.find_service(HTTPService),
         user_service=request.find_service(name="user"),

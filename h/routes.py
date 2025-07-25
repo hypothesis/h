@@ -303,8 +303,12 @@ def includeme(config):  # noqa: PLR0915
         "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
     )
 
-    # ORCID
+    # OpenID Connect (OIDC).
     config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
+    config.add_route("oidc.connect.google", "/oidc/connect/google")
     config.add_route("oidc.login.orcid", "/oidc/login/orcid")
+    config.add_route("oidc.login.google", "/oidc/login/google")
     config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
+    config.add_route("oidc.redirect.google", "/oidc/redirect/google")
     config.add_route("signup.orcid", "/signup/orcid")
+    config.add_route("signup.google", "/signup/google")
