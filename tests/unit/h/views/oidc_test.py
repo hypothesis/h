@@ -12,7 +12,7 @@ from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
 from h.views.exceptions import UnexpectedRouteError
 from h.views.oidc import (
-    STATE_SESSION_KEY_FMT,
+    STATE_SESSIONKEY_FMT,
     AccessDeniedError,
     OIDCConnectAndLoginViews,
     OIDCRedirectViews,
@@ -47,7 +47,7 @@ class TestOIDCConnectAndLoginViews:
             audience=JWTAudiences.OIDC_REDIRECT_ORCID,
         )
         assert (
-            pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")]
+            pyramid_request.session[STATE_SESSIONKEY_FMT.format(provider="orcid")]
             == jwt_service.encode_symmetric.return_value
         )
         assert result.location == urlunparse(
@@ -124,7 +124,7 @@ class TestOIDCRedirectViews:
         "assert_no_success_message_was_flashed",
     )
     def test_redirect_when_theres_no_state_in_the_session(self, pyramid_request, views):
-        del pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")]
+        del pyramid_request.session[STATE_SESSIONKEY_FMT.format(provider="orcid")]
 
         with pytest.raises(InvalidOAuth2StateParamError):
             views.redirect()
@@ -355,7 +355,10 @@ class TestOIDCRedirectViews:
         response = views.redirect()
 
         encode_idinfo_token.assert_called_once_with(
-            jwt_service, orcid_id, JWTIssuers.OIDC_REDIRECT_ORCID
+            jwt_service,
+            orcid_id,
+            JWTIssuers.OIDC_REDIRECT_ORCID,
+            JWTAudiences.SIGNUP_ORCID,
         )
         assert isinstance(response, HTTPFound)
         assert response.location == pyramid_request.route_url(
@@ -446,7 +449,7 @@ class TestOIDCRedirectViews:
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.session[STATE_SESSION_KEY_FMT.format(provider="orcid")] = (
+        pyramid_request.session[STATE_SESSIONKEY_FMT.format(provider="orcid")] = (
             sentinel.state
         )
         pyramid_request.matched_route.name = "oidc.redirect.orcid"
@@ -461,8 +464,7 @@ class TestOIDCRedirectViews:
         """
         yield
         assert (
-            STATE_SESSION_KEY_FMT.format(provider="orcid")
-            not in pyramid_request.session
+            STATE_SESSIONKEY_FMT.format(provider="orcid") not in pyramid_request.session
         )
 
     @pytest.fixture

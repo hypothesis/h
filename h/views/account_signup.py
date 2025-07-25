@@ -220,7 +220,10 @@ class SocialLoginSignupViews:
         # When reloading the page replace the idinfo token with a fresh one.
         form_data.update(
             encode_idinfo_token(
-                self.jwt_service, provider_unique_id, self.settings.issuer
+                self.jwt_service,
+                provider_unique_id,
+                self.settings.issuer,
+                self.settings.audience,
             )
         )
 
@@ -271,13 +274,16 @@ def is_authenticated(request):
 
 
 def encode_idinfo_token(
-    jwt_service: JWTService, provider_unique_id: str, issuer: JWTIssuers
+    jwt_service: JWTService,
+    provider_unique_id: str,
+    issuer: JWTIssuers,
+    audience: JWTAudiences,
 ):
     return {
         "idinfo": jwt_service.encode_symmetric(
             IDInfo(provider_unique_id),
             expires_in=timedelta(hours=1),
             issuer=issuer,
-            audience=JWTAudiences.SIGNUP_ORCID,
+            audience=audience,
         ),
     }
