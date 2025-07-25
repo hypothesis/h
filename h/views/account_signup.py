@@ -131,7 +131,6 @@ class SocialLoginSignupViewsSettings:
 
 
 @view_defaults(
-    route_name="signup.orcid",
     is_authenticated=False,
     request_param="idinfo",
     renderer="h:templates/accounts/signup.html.jinja2",
@@ -158,11 +157,11 @@ class SocialLoginSignupViews:
             case _:  # pragma: nocover
                 raise UnexpectedRouteError(route_name)
 
-    @view_config(request_method="GET")
+    @view_config(request_method="GET", route_name="signup.orcid")
     def get(self):
         return {"js_config": self.js_config(self.decode_provider_unique_id())}
 
-    @view_config(request_method="POST", require_csrf=True)
+    @view_config(request_method="POST", require_csrf=True, route_name="signup.orcid")
     def post(self):
         # Decode the user's provider unique ID first so that if decoding this
         # fails the view hasn't already done anything else.
@@ -197,14 +196,16 @@ class SocialLoginSignupViews:
         )
 
     @exception_view_config(
-        context=IDInfoJWTDecodeError, renderer="h:templates/error.html.jinja2"
+        context=IDInfoJWTDecodeError,
+        renderer="h:templates/error.html.jinja2",
+        route_name="signup.orcid",
     )
     def idinfo_jwt_decode_error(self):
         report_exception(self.context)
         self.request.response.status_int = 403
         return {"error": "Decoding idinfo JWT failed."}
 
-    @exception_view_config(context=ValidationFailure)
+    @exception_view_config(context=ValidationFailure, route_name="signup.orcid")
     def validation_failure(self):
         provider_unique_id = self.decode_provider_unique_id()
         self.request.response.status_int = 400

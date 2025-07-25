@@ -195,7 +195,7 @@ class UnexpectedActionError(Exception):
         )
 
 
-@view_defaults(request_method="GET", route_name="oidc.redirect.orcid")
+@view_defaults(request_method="GET")
 class OIDCRedirectViews:
     def __init__(self, context, request: Request) -> None:
         self._context = context
@@ -224,7 +224,7 @@ class OIDCRedirectViews:
             case _:
                 raise UnexpectedRouteError(route_name)
 
-    @view_config()
+    @view_config(route_name="oidc.redirect.orcid")
     def redirect(self):
         try:
             expected_state = self._request.session.pop(self.settings.state_session_key)
@@ -322,13 +322,15 @@ class OIDCRedirectViews:
         )
 
     @notfound_view_config(
-        renderer="h:templates/notfound.html.jinja2", append_slash=True
+        renderer="h:templates/notfound.html.jinja2",
+        append_slash=True,
+        route_name="oidc.redirect.orcid",
     )
     def notfound(self):
         self._request.response.status_int = 401
         return {}
 
-    @exception_view_config(context=ValidationError)
+    @exception_view_config(context=ValidationError, route_name="oidc.redirect.orcid")
     def invalid(self):
         report_exception(self._context)
         self._request.session.flash(
@@ -336,7 +338,7 @@ class OIDCRedirectViews:
         )
         return HTTPFound(location=self._request.route_url("account"))
 
-    @exception_view_config(context=JWTDecodeError)
+    @exception_view_config(context=JWTDecodeError, route_name="oidc.redirect.orcid")
     def invalid_token(self):
         report_exception(self._context)
         self._request.session.flash(
@@ -344,12 +346,14 @@ class OIDCRedirectViews:
         )
         return HTTPFound(location=self._request.route_url("account"))
 
-    @exception_view_config(context=AccessDeniedError)
+    @exception_view_config(context=AccessDeniedError, route_name="oidc.redirect.orcid")
     def denied(self):
         self._request.session.flash("The user clicked the deny button!", "error")
         return HTTPFound(location=self._request.route_url("account"))
 
-    @exception_view_config(context=ExternalRequestError)
+    @exception_view_config(
+        context=ExternalRequestError, route_name="oidc.redirect.orcid"
+    )
     def external_request(self):
         handle_external_request_error(self._context)
         self._request.session.flash(
@@ -357,7 +361,7 @@ class OIDCRedirectViews:
         )
         return HTTPFound(location=self._request.route_url("account"))
 
-    @exception_view_config(context=UserConflictError)
+    @exception_view_config(context=UserConflictError, route_name="oidc.redirect.orcid")
     def user_conflict_error(self):
         self._request.session.flash(
             f"A different Hypothesis user is already connected to this {self.settings.provider_name} account!",
