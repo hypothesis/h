@@ -15,8 +15,8 @@ from h.views.account_signup import (
     IDInfoJWTDecodeError,
     JWTAudiences,
     JWTIssuers,
-    ORCIDSignupViews,
     SignupViews,
+    SocialLoginSignupViews,
     is_authenticated,
 )
 
@@ -209,7 +209,7 @@ class TestSignupViews:
 
 
 @pytest.mark.usefixtures("user_signup_service", "jwt_service", "feature_service")
-class TestORCIDSignupViews:
+class TestSocialLoginSignupViews:
     def test_get(
         self, views, get_csrf_token, pyramid_request, orcid_id, feature_service
     ):
@@ -221,7 +221,7 @@ class TestORCIDSignupViews:
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
                 "features": {"log_in_with_orcid": feature_service.enabled.return_value},
-                "identity": {"orcid": {"id": orcid_id}},
+                "identity": {"provider_unique_id": orcid_id},
             }
         }
 
@@ -244,7 +244,7 @@ class TestORCIDSignupViews:
         login,
         appstruct,
         expected_signup_args,
-        ORCIDSignupSchema,
+        SocialLoginSignupSchema,
     ):
         pyramid_request.create_form.return_value.validate.return_value = {
             "username": sentinel.username,
@@ -253,12 +253,12 @@ class TestORCIDSignupViews:
 
         response = views.post()
 
-        ORCIDSignupSchema.assert_called_once_with()
-        ORCIDSignupSchema.return_value.bind.assert_called_once_with(
+        SocialLoginSignupSchema.assert_called_once_with()
+        SocialLoginSignupSchema.return_value.bind.assert_called_once_with(
             request=pyramid_request
         )
         pyramid_request.create_form.assert_called_once_with(
-            ORCIDSignupSchema.return_value.bind.return_value
+            SocialLoginSignupSchema.return_value.bind.return_value
         )
         pyramid_request.create_form.return_value.validate.assert_called_once_with(ANY)
         assert list(
@@ -387,7 +387,7 @@ class TestORCIDSignupViews:
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
                 "features": {"log_in_with_orcid": feature_service.enabled.return_value},
-                "identity": {"orcid": {"id": orcid_id}},
+                "identity": {"provider_unique_id": orcid_id},
                 "formErrors": views.context.error.asdict.return_value,
                 "formData": {
                     "idinfo": jwt_service.encode_symmetric.return_value,
@@ -403,6 +403,7 @@ class TestORCIDSignupViews:
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.params["idinfo"] = sentinel.idinfo
+        pyramid_request.matched_route.name = "signup.orcid"
         return pyramid_request
 
     @pytest.fixture
@@ -420,7 +421,7 @@ class TestORCIDSignupViews:
 
     @pytest.fixture
     def views(self, pyramid_request):
-        return ORCIDSignupViews(sentinel.context, pyramid_request)
+        return SocialLoginSignupViews(sentinel.context, pyramid_request)
 
     @pytest.fixture
     def jwt_service(self, jwt_service, orcid_id):
@@ -449,8 +450,8 @@ def SignupSchema(patch):
 
 
 @pytest.fixture(autouse=True)
-def ORCIDSignupSchema(patch):
-    return patch("h.views.account_signup.ORCIDSignupSchema")
+def SocialLoginSignupSchema(patch):
+    return patch("h.views.account_signup.SocialLoginSignupSchema")
 
 
 @pytest.fixture(autouse=True)

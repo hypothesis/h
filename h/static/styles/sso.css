@@ -1,11 +1,11 @@
 
-.orcid-wrapper {
+.sso-wrapper {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.orcid-header {
+.sso-header {
     display: flex;
     gap: 4px;
     padding-left: 2px;
@@ -16,7 +16,7 @@
     position: relative;
 }
 
-.orcid-connect {
+.sso-connect {
     display: flex;
     align-items: center;
     gap: 8px;

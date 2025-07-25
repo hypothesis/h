@@ -1,7 +1,7 @@
 import itertools
 from dataclasses import asdict
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 import colander
 import deform
@@ -18,6 +18,7 @@ from h.accounts import schemas
 from h.accounts.events import ActivationEvent, LogoutEvent, PasswordResetEvent
 from h.emails import reset_password
 from h.models import Annotation
+from h.models.user_identity import IdentityProvider
 from h.schemas.forms.accounts import (
     EditProfileSchema,
     ForgotPasswordSchema,
@@ -25,7 +26,7 @@ from h.schemas.forms.accounts import (
     ResetCode,
     ResetPasswordSchema,
 )
-from h.services import ORCIDClientService, SubscriptionService
+from h.services import OIDCService, SubscriptionService
 from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
@@ -492,19 +493,28 @@ class AccountController:
         log_in_with_orcid = feature_service.enabled(
             "log_in_with_orcid", self.request.user
         )
-        orcid = orcid_url = None
+        orcid_id = orcid_url = None
         if log_in_with_orcid:
-            orcid_client = self.request.find_service(ORCIDClientService)
-            orcid_identity = orcid_client.get_identity(self.request.user)
-            orcid = orcid_identity.provider_unique_id if orcid_identity else None
-            orcid_url = orcid_client.orcid_url(orcid)
+            orcid_host = self.request.registry.settings["orcid_host"]
+            oidc_service = self.request.find_service(OIDCService)
+            orcid_identity = oidc_service.get_identity(
+                self.request.user, IdentityProvider.ORCID
+            )
+            orcid_id = orcid_identity.provider_unique_id if orcid_identity else None
+
+            if orcid_id:
+                # The URL to the user's public ORCID profile page
+                # (for example: https://orcid.org/0000-0002-6373-1308).
+                orcid_url = urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
+            else:
+                pass  # pragma: no cover
 
         return {
             "email": email,
             "email_form": email_form,
             "password_form": password_form,
             "log_in_with_orcid": log_in_with_orcid,
-            "orcid": orcid,
+            "orcid": orcid_id,
             "orcid_url": orcid_url,
         }
 

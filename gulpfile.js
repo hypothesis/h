@@ -24,7 +24,7 @@ gulp.task('build-legacy-css', () =>
     './h/static/styles/help-page.scss',
     './h/static/styles/site.scss',
     './h/static/styles/vendor/icomoon.css',
-    './h/static/styles/orcid.css',
+    './h/static/styles/sso.css',
   ]),
 );
 
