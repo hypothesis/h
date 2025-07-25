@@ -13,12 +13,24 @@ pytestmark = [
 
 @pytest.mark.usefixtures("group_links_service")
 class TestGroupJSONPresenter:
-    def test_it(self, factories, pyramid_request, group_links_service):
+    @pytest.mark.parametrize(
+        "pre_moderated,expected_pre_moderated",
+        ((True, True), (False, False), (None, False)),
+    )
+    def test_it(
+        self,
+        factories,
+        pyramid_request,
+        group_links_service,
+        pre_moderated,
+        expected_pre_moderated,
+    ):
         group = factories.Group(
             name="My Group",
             pubid="mygroup",
             authority_provided_id="abc123",
             organization=factories.Organization(),
+            pre_moderated=pre_moderated,
         )
 
         results = GroupJSONPresenter(group, pyramid_request).asdict()
@@ -31,6 +43,7 @@ class TestGroupJSONPresenter:
                 "organization": group.organization.pubid,
                 "links": group_links_service.get_all.return_value,
                 "scoped": False,
+                "pre_moderated": expected_pre_moderated,
             }
         )
 
