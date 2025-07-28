@@ -27,6 +27,11 @@ export type LoginConfigObject = ConfigBase & {
   };
 };
 
+/** Identity information if signing up with an identity provider such as Google. */
+export type SocialLoginIdentity = {
+  provider_unique_id: string;
+};
+
 /** Data passed to frontend for signup form. */
 export type SignupConfigObject = ConfigBase & {
   formErrors?: {
@@ -42,6 +47,7 @@ export type SignupConfigObject = ConfigBase & {
     privacy_accepted: boolean;
     comms_opt_in: boolean;
   };
+  identity?: SocialLoginIdentity;
 };
 
 export type ConfigObject = LoginConfigObject | SignupConfigObject;

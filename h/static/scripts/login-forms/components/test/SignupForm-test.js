@@ -241,6 +241,73 @@ describe('SignupForm', () => {
     assert.isTrue(submitButton.getDOMNode().disabled);
   });
 
+  context('when using social login', () => {
+    function createSignupFormWithIdProvider({
+      idProvider = 'orcid',
+      idInfo = 'fake-jwt-token',
+    } = {}) {
+      fakeConfig.identity = {
+        provider_unique_id: '0000-0000-0000-0001',
+      };
+
+      const mockURL = new URL('http://example.com/signup');
+      if (idInfo) {
+        mockURL.searchParams.set('idinfo', idInfo);
+      }
+      const mockLocation = {
+        href: mockURL.toString(),
+      };
+
+      const wrapper = mount(
+        <Config.Provider value={fakeConfig}>
+          <SignupForm idProvider={idProvider} location_={mockLocation} />
+        </Config.Provider>,
+      );
+
+      return { wrapper };
+    }
+
+    it('displays connected identity', () => {
+      const { wrapper } = createSignupFormWithIdProvider();
+
+      const idBadge = wrapper.find('[data-testid="id-badge"]');
+      assert.isTrue(idBadge.exists());
+      assert.isTrue(idBadge.find('ORCIDIcon').exists());
+
+      const connectedId = wrapper.find('[data-testid="connected-id"]');
+      assert.equal(connectedId.text(), '0000-0000-0000-0001');
+    });
+
+    it('renders "idinfo" hidden input field', () => {
+      const { wrapper } = createSignupFormWithIdProvider({
+        idInfo: 'test-jwt-token',
+      });
+      const idInfoInput = wrapper.find('input[name="idinfo"]');
+      assert.equal(idInfoInput.prop('value'), 'test-jwt-token');
+    });
+
+    it('does not display email field', () => {
+      const { wrapper } = createSignupFormWithIdProvider();
+      assert.isFalse(wrapper.exists('TextField[name="email"]'));
+    });
+
+    it('does not display password field', () => {
+      const { wrapper } = createSignupFormWithIdProvider();
+      assert.isFalse(wrapper.exists('TextField[name="password"]'));
+    });
+
+    it('displays an error if "idinfo" query param is missing', () => {
+      const { wrapper } = createSignupFormWithIdProvider({ idInfo: null });
+
+      const errorDiv = wrapper.find('[data-testid="error"]');
+
+      assert.equal(
+        errorDiv.text(),
+        'Social login identity missing. Please try again.',
+      );
+    });
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({ content: () => createWrapper().wrapper }),
