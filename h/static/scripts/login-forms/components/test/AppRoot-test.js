@@ -23,6 +23,7 @@ describe('AppRoot', () => {
 
     $imports.$mock({
       './LoginForm': mockComponent('LoginForm'),
+      './SignupForm': mockComponent('SignupForm'),
     });
   });
 
@@ -134,13 +135,24 @@ describe('AppRoot', () => {
       path: '/signup',
       selector: 'SignupForm',
     },
-  ].forEach(({ path, selector }) => {
+    {
+      path: '/signup/orcid',
+      selector: 'SignupForm',
+      props: {
+        idProvider: 'orcid',
+      },
+    },
+  ].forEach(({ path, selector, props = {} }) => {
     it(`renders expected component for URL (${path})`, () => {
       navigate(path, () => {
         const wrapper = createComponent();
         const component = wrapper.find(selector);
 
         assert.isTrue(component.exists());
+
+        const actualProps = component.props();
+        delete actualProps.children;
+        assert.deepEqual(actualProps, props);
       });
     });
   });

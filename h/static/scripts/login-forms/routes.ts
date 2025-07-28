@@ -5,9 +5,10 @@
  * These must be synchronized with h/routes.py.
  */
 export const routes = {
-  login: '/login',
   forgotPassword: '/forgot-password',
-  signup: '/signup',
+  login: '/login',
   loginWithORCID: '/oidc/login/orcid',
   loginWithGoogle: '/oidc/login/google',
+  signup: '/signup',
+  signupWithORCID: '/signup/orcid',
 };

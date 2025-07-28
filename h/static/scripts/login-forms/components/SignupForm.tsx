@@ -1,5 +1,5 @@
 import { Button } from '@hypothesis/frontend-shared';
-import { useContext, useState } from 'preact/hooks';
+import { useContext, useLayoutEffect, useState } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
 import Form from '../../forms-common/components/Form';
@@ -9,10 +9,52 @@ import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { SignupConfigObject } from '../config';
+import ORCIDIcon from './ORCIDIcon';
 
-export default function SignupForm() {
+type IdProviderBadgeProps = {
+  provider: 'orcid';
+  identity: string;
+};
+
+/**
+ * Box indicating the OIDC / social login identity being associated with a
+ * Hypothesis account.
+ */
+function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
+  return (
+    <div data-testid="id-badge">
+      {provider === 'orcid' && (
+        <a href="https://orcid.org" target="_blank" rel="noreferrer">
+          <ORCIDIcon className="inline" aria-label="ORCID icon" />
+        </a>
+      )}{' '}
+      connected: <b data-testid="connected-id">{identity}</b>
+    </div>
+  );
+}
+
+export type SignupFormProps = {
+  /**
+   * Identity provider if using OIDC / social login.
+   *
+   * When this prop is set there should also be:
+   *
+   *  - An `identity` field in the config for the page
+   *  - An `idinfo` query parameter
+   */
+  idProvider?: 'orcid';
+
+  // Test seams
+  location_?: Location;
+};
+
+export default function SignupForm({
+  idProvider,
+  location_ = location,
+}: SignupFormProps) {
   const config = useContext(Config) as SignupConfigObject;
   const [submitted, setSubmitted] = useState(false);
+  const [idInfoJWT, setIdInfoJWT] = useState<string | null>(null);
 
   const username = useFormValue(config.formData?.username ?? '', {
     initialError: config.formErrors?.username,
@@ -40,11 +82,38 @@ export default function SignupForm() {
   );
   const commsOptIn = useFormValue(config.formData?.comms_opt_in ?? false);
 
+  useLayoutEffect(() => {
+    const url = new URL(location_.href);
+    const idInfo = url.searchParams.get('idinfo');
+    if (!idInfo) {
+      return;
+    }
+    setIdInfoJWT(idInfo);
+  }, [location_]);
+
+  // When visiting social login signup page the server should ensure the "idinfo"
+  // JWT is always present, so the user should never see this. Show a unique
+  // error to aid debugging in case it does ever happen.
+  if (idProvider && !idInfoJWT) {
+    return (
+      <div data-testid="error">
+        Social login identity missing. Please try again.
+      </div>
+    );
+  }
+
   return (
     <>
       <FormHeader>Sign up for Hypothesis</FormHeader>
       <FormContainer>
         <Form csrfToken={config.csrfToken} onSubmit={() => setSubmitted(true)}>
+          {idProvider && config.identity && (
+            <IdProviderBadge
+              provider={idProvider}
+              identity={config.identity.provider_unique_id}
+            />
+          )}
+          {idInfoJWT && <input type="hidden" name="idinfo" value={idInfoJWT} />}
           <TextField
             type="input"
             name="username"
@@ -59,28 +128,38 @@ export default function SignupForm() {
             required
             showRequired={false}
           />
-          <TextField
-            type="input"
-            name="email"
-            value={email.value}
-            fieldError={email.error}
-            onChangeValue={email.update}
-            label="Email address"
-            required
-            showRequired={false}
-          />
-          <TextField
-            type="input"
-            inputType="password"
-            name="password"
-            value={password.value}
-            fieldError={password.error}
-            onChangeValue={password.update}
-            label="Password"
-            minLength={8}
-            required
-            showRequired={false}
-          />
+          {!idProvider && (
+            <TextField
+              type="input"
+              name="email"
+              value={email.value}
+              fieldError={email.error}
+              onChangeValue={email.update}
+              label="Email address"
+              required
+              showRequired={false}
+            />
+          )}
+          {!idProvider && (
+            <TextField
+              type="input"
+              inputType="password"
+              name="password"
+              value={password.value}
+              fieldError={password.error}
+              onChangeValue={password.update}
+              label="Password"
+              minLength={8}
+              required
+              showRequired={false}
+            />
+          )}
+          {
+            // When using social login, the username field is the last input.
+            // This has a character counter below it. Add a margin between the
+            // counter and the next line.
+            idProvider && <div className="mt-3" />
+          }
           <Checkbox
             data-testid="privacy-accepted"
             checked={privacyAccepted.value}
