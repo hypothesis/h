@@ -21,10 +21,28 @@ class OIDCServiceSettings:
     """Per-provider settings for OIDCService."""
 
     client_id: str
+    """Our OAuth/OIDC client_id for this provider."""
+
     client_secret: str
+    """Our OAuth/OIDC client_id for this provider."""
+
     redirect_uri: str
+    """Our OAuth/OIDC redirect_uri for this provider."""
+
     token_url: str
+    """The URL of the provider's OIDC token endpoint.
+
+    This is the endpoint that we make a server-to-server request to in order to
+    get the ID token (JWT) that contains the provider's unique ID and other
+    information about the user.
+    """
+
     keyset_url: str
+    """The provider's JWKS keyset URL.
+
+    This is the URL from which we fetch the provider's public key which we use
+    to verify the provider's signature on the ID token.
+    """
 
 
 class MissingSubError(Exception):
