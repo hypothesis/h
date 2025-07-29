@@ -82,12 +82,59 @@ class OIDCConnectAndLoginViewsSettings:
     """Per-route settings for OIDCConnectAndLoginViews."""
 
     state_sessionkey: str
+    """The key that we use for storing the OAuth/OIDC state in the session.
+
+    When we pass a `state` query param to an OAuth/OIDC authorization service
+    we also store a copy of that state param in the browser's session cookie
+    for request forgery protection: when the authorization server sends the
+    `state` param back to us we check that it matches the copy in the session.
+
+    state_sessionkey is the key that we use for the state in Pyramid's session
+    dict.  We use a different state_sessionkey for each identity provider to
+    avoid any crossed wires between different providers.
+
+    """
+
     issuer: JWTIssuer
+    """The `issuer` string for the OAuth/OIDC state JWT.
+
+    We use a different JWT issuer for each identity provider. This is useful
+    for debugging and also allows the code consuming the JWT to potentially
+    change its behaviour depending on the provider.
+
+    """
+
     audience: JWTAudience
+    """The `audience` string for OAuth/OIDC state JWTs.
+
+    We use a different JWT audience for each identity provider to prevent JWT
+    meant for one provider getting used for another provider.
+
+    """
+
     client_id: str
+    """Our OAuth/OIDC client_id for this provider."""
+
     authorization_url: str
+    """The URL of the provider's OIDC authorization endpoint.
+
+    This is the URL that we redirect the browser to in order to kick off the
+    OAuth/OIDC authorization flow.
+    """
     redirect_uri: str
+    """Our OAuth/OIDC redirect_uri for this provider.
+
+    This is the URL that the provider's authorization server redirects the
+    browser back to after the user authorizes us to access their account.
+    """
+
     action: ActionType
+    """The action that triggered the OIDC flow.
+
+    For example "connect" when connecting a provider unique ID to an existing
+    Hypothesis account, or "login" when using a provider to log in to
+    Hypothesis
+    """
 
 
 @view_defaults(request_method="GET")
