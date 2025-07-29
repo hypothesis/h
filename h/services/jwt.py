@@ -33,7 +33,7 @@ class JWTPayloadError(JWTDecodeError):
     """A JWT decoded successfully but the payload wasn't what we expected."""
 
 
-class JWTAudiences(StrEnum):
+class JWTAudience(StrEnum):
     """Strings for use in the `aud` claim when encoding JWTs.
 
     Use short, unique, meaningless, but recognisable strings for audiences,
@@ -61,7 +61,7 @@ class JWTAudiences(StrEnum):
     SIGNUP_ORCID = "hund-firs-croh"
 
 
-class JWTIssuers(StrEnum):
+class JWTIssuer(StrEnum):
     """Strings for use in the `iss` claim when encoding JWTs.
 
     As with audiences (see above) use meaningless strings for issuers.
@@ -116,8 +116,8 @@ class JWTService:
         payload,
         *,
         expires_in: timedelta,
-        issuer: JWTIssuers,
-        audience: JWTAudiences,
+        issuer: JWTIssuer,
+        audience: JWTAudience,
         # Test seams to allow unittests to create invalid tokens.
         _algorithm: str = "HS256",
         _signing_key: str | None = None,
@@ -214,7 +214,7 @@ class JWTService:
         self,
         token: str,
         *,
-        audience: JWTAudiences | Iterable[JWTAudiences],
+        audience: JWTAudience | Iterable[JWTAudience],
         payload_class: type[ANY_DATACLASS],
     ) -> ANY_DATACLASS:
         """Decode the given `token` and return the original payload.

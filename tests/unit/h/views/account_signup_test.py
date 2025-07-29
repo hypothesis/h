@@ -13,8 +13,8 @@ from h.services.jwt import JWTDecodeError
 from h.views.account_signup import (
     IDInfo,
     IDInfoJWTDecodeError,
-    JWTAudiences,
-    JWTIssuers,
+    JWTAudience,
+    JWTIssuer,
     SignupViews,
     SocialLoginSignupViews,
     is_authenticated,
@@ -380,8 +380,8 @@ class TestSocialLoginSignupViews:
         jwt_service.encode_symmetric.assert_called_once_with(
             IDInfo(orcid_id),
             expires_in=timedelta(hours=1),
-            issuer=JWTIssuers.SIGNUP_VALIDATION_FAILURE_ORCID,
-            audience=JWTAudiences.SIGNUP_ORCID,
+            issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_ORCID,
+            audience=JWTAudience.SIGNUP_ORCID,
         )
         assert response == {
             "js_config": {

@@ -27,7 +27,7 @@ from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import OIDCService
 from h.services.exceptions import ExternalRequestError
-from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
+from h.services.jwt import JWTAudience, JWTDecodeError, JWTIssuer
 from h.views.account_signup import encode_idinfo_token
 from h.views.exceptions import UnexpectedRouteError
 from h.views.helpers import login
@@ -82,8 +82,8 @@ class OIDCConnectAndLoginViewsSettings:
     """Per-route settings for OIDCConnectAndLoginViews."""
 
     state_sessionkey: str
-    issuer: JWTIssuers
-    audience: JWTAudiences
+    issuer: JWTIssuer
+    audience: JWTAudience
     client_id: str
     authorization_url: str
     redirect_uri: str
@@ -116,8 +116,8 @@ class OIDCConnectAndLoginViews:
             case "oidc.connect.orcid" | "oidc.login.orcid":
                 return OIDCConnectAndLoginViewsSettings(
                     state_sessionkey=STATE_SESSIONKEY_FMT.format(provider="orcid"),
-                    issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
-                    audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+                    issuer=JWTIssuer.OIDC_CONNECT_OR_LOGIN_ORCID,
+                    audience=JWTAudience.OIDC_REDIRECT_ORCID,
                     client_id=settings["oidc_clientid_orcid"],
                     authorization_url=settings["oidc_authorizationurl_orcid"],
                     redirect_uri=self._request.route_url("oidc.redirect.orcid"),
@@ -180,10 +180,10 @@ class OIDCRedirectViewsSettings:
     """Per-route settings for OIDCRedirectViews."""
 
     provider_name: str
-    jwt_issuer: JWTIssuers
+    jwt_issuer: JWTIssuer
     state_sessionkey: str
-    state_jwtaudience: JWTAudiences
-    idinfo_jwtaudience: JWTAudiences
+    state_jwtaudience: JWTAudience
+    idinfo_jwtaudience: JWTAudience
     provider: IdentityProvider
     success_message: str
     signup_route: str
@@ -215,10 +215,10 @@ class OIDCRedirectViews:
             case "oidc.redirect.orcid":
                 return OIDCRedirectViewsSettings(
                     provider_name="ORCID",
-                    jwt_issuer=JWTIssuers.OIDC_REDIRECT_ORCID,
+                    jwt_issuer=JWTIssuer.OIDC_REDIRECT_ORCID,
                     state_sessionkey=STATE_SESSIONKEY_FMT.format(provider="orcid"),
-                    state_jwtaudience=JWTAudiences.OIDC_REDIRECT_ORCID,
-                    idinfo_jwtaudience=JWTAudiences.SIGNUP_ORCID,
+                    state_jwtaudience=JWTAudience.OIDC_REDIRECT_ORCID,
+                    idinfo_jwtaudience=JWTAudience.SIGNUP_ORCID,
                     provider=IdentityProvider.ORCID,
                     success_message="ORCID iD connected ✓",
                     signup_route="signup.orcid",

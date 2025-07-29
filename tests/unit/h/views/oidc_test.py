@@ -9,7 +9,7 @@ from h.models.user_identity import IdentityProvider
 from h.schemas import ValidationError
 from h.schemas.oauth import InvalidOAuth2StateParamError
 from h.services.exceptions import ExternalRequestError
-from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers
+from h.services.jwt import JWTAudience, JWTDecodeError, JWTIssuer
 from h.views.exceptions import UnexpectedRouteError
 from h.views.oidc import (
     STATE_SESSIONKEY_FMT,
@@ -43,8 +43,8 @@ class TestOIDCConnectAndLoginViews:
         jwt_service.encode_symmetric.assert_called_once_with(
             OIDCState(action=expected_action, rfp=secrets.token_hex.return_value),
             expires_in=timedelta(hours=1),
-            issuer=JWTIssuers.OIDC_CONNECT_OR_LOGIN_ORCID,
-            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+            issuer=JWTIssuer.OIDC_CONNECT_OR_LOGIN_ORCID,
+            audience=JWTAudience.OIDC_REDIRECT_ORCID,
         )
         assert (
             pyramid_request.session[STATE_SESSIONKEY_FMT.format(provider="orcid")]
@@ -357,8 +357,8 @@ class TestOIDCRedirectViews:
         encode_idinfo_token.assert_called_once_with(
             jwt_service,
             orcid_id,
-            JWTIssuers.OIDC_REDIRECT_ORCID,
-            JWTAudiences.SIGNUP_ORCID,
+            JWTIssuer.OIDC_REDIRECT_ORCID,
+            JWTAudience.SIGNUP_ORCID,
         )
         assert isinstance(response, HTTPFound)
         assert response.location == pyramid_request.route_url(
@@ -472,7 +472,7 @@ class TestOIDCRedirectViews:
         yield
         jwt_service.decode_symmetric.assert_called_once_with(
             OAuth2RedirectSchema.validate.return_value["state"],
-            audience=JWTAudiences.OIDC_REDIRECT_ORCID,
+            audience=JWTAudience.OIDC_REDIRECT_ORCID,
             payload_class=OIDCState,
         )
 
