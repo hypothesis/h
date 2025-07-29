@@ -19,21 +19,37 @@ from h.views.helpers import login
 _ = i18n.TranslationString
 
 
-@view_defaults(route_name="signup", is_authenticated=False)
+@view_defaults(is_authenticated=False)
 class SignupViews:
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
     @view_config(
-        request_method="GET", renderer="h:templates/accounts/signup.html.jinja2"
+        route_name="signup",
+        request_method="GET",
+        renderer="h:templates/accounts/signup.html.jinja2",
+    )
+    @view_config(
+        route_name="signup.email",
+        request_method="GET",
+        renderer="h:templates/accounts/signup.html.jinja2",
     )
     def get(self):
         """Render the empty registration form."""
         return {"js_config": self.js_config}
 
+    # "signup" route needed here in case social sign up flags are disabled.
+    # This can be removed once the `log_in_with_orcid` flag is removed.
     @view_config(
-        request_method="POST", renderer="h:templates/accounts/signup-post.html.jinja2"
+        route_name="signup",
+        request_method="POST",
+        renderer="h:templates/accounts/signup-post.html.jinja2",
+    )
+    @view_config(
+        route_name="signup.email",
+        request_method="POST",
+        renderer="h:templates/accounts/signup-post.html.jinja2",
     )
     def post(self):
         """Handle submission of the new user registration form."""
@@ -59,8 +75,16 @@ class SignupViews:
 
         return {"js_config": self.js_config, "heading": heading, "message": message}
 
+    # For "signup" route, see note in `post` method.
     @exception_view_config(
         ValidationFailure,
+        route_name="signup",
+        request_method="POST",
+        renderer="h:templates/accounts/signup-post.html.jinja2",
+    )
+    @exception_view_config(
+        ValidationFailure,
+        route_name="signup.email",
         request_method="POST",
         renderer="h:templates/accounts/signup-post.html.jinja2",
     )

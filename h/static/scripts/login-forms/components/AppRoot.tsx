@@ -9,6 +9,7 @@ import { Config } from '../config';
 import { routes } from '../routes';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
+import SignupSelectForm from './SignupSelectForm';
 
 function toastMessagesFromConfig(config: ConfigObject): ToastMessageData[] {
   const flashMessages = config.flashMessages ?? [];
@@ -27,6 +28,9 @@ export default function AppRoot({ config }: AppRootProps) {
   const { toastMessages, dismissToastMessage } =
     useToastMessages(initialToasts);
 
+  const enableSocialLogin =
+    config.features.log_in_with_orcid || config.features.log_in_with_google;
+
   return (
     <div>
       <ToastMessages
@@ -40,6 +44,10 @@ export default function AppRoot({ config }: AppRootProps) {
               <LoginForm />
             </Route>
             <Route path={routes.signup}>
+              {enableSocialLogin && <SignupSelectForm />}
+              {!enableSocialLogin && <SignupForm />}
+            </Route>
+            <Route path={routes.signupWithEmail}>
               <SignupForm />
             </Route>
             <Route path={routes.signupWithGoogle}>

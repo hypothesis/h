@@ -8,6 +8,10 @@ export type FlashMessage = {
 export type ConfigBase = {
   csrfToken: string;
   flashMessages?: FlashMessage[];
+  features: {
+    log_in_with_google: boolean;
+    log_in_with_orcid: boolean;
+  };
 };
 
 /** Data passed to frontend for login form. */
@@ -21,10 +25,6 @@ export type LoginConfigObject = ConfigBase & {
     password?: string;
   };
   forOAuth?: boolean;
-  features: {
-    log_in_with_orcid: boolean;
-    log_in_with_google: boolean;
-  };
 };
 
 /** Identity information if signing up with an identity provider such as Google. */

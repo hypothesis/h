@@ -5,9 +5,8 @@ import { Config } from '../../config';
 import { $imports, default as AppRoot } from '../AppRoot';
 
 describe('AppRoot', () => {
+  let config;
   let configContext;
-
-  const config = { csrfToken: 'fake-csrf-token' };
 
   beforeEach(() => {
     const mockComponent = name => {
@@ -21,9 +20,12 @@ describe('AppRoot', () => {
 
     configContext = null;
 
+    config = { csrfToken: 'fake-csrf-token', features: {} };
+
     $imports.$mock({
       './LoginForm': mockComponent('LoginForm'),
       './SignupForm': mockComponent('SignupForm'),
+      './SignupSelectForm': mockComponent('SignupSelectForm'),
     });
   });
 
@@ -131,8 +133,28 @@ describe('AppRoot', () => {
       path: '/Login',
       selector: 'LoginForm',
     },
+    // "/signup" shows email signup form if all social logins are disabled
     {
       path: '/signup',
+      selector: 'SignupForm',
+    },
+    // "/signup" shows signup provider form if any social logins are enabled
+    {
+      path: '/signup',
+      features: {
+        log_in_with_orcid: true,
+      },
+      selector: 'SignupSelectForm',
+    },
+    {
+      path: '/signup',
+      features: {
+        log_in_with_google: true,
+      },
+      selector: 'SignupSelectForm',
+    },
+    {
+      path: '/signup/email',
       selector: 'SignupForm',
     },
     {
@@ -149,8 +171,10 @@ describe('AppRoot', () => {
         idProvider: 'google',
       },
     },
-  ].forEach(({ path, selector, props = {} }) => {
+  ].forEach(({ path, selector, features = {}, props = {} }) => {
     it(`renders expected component for URL (${path})`, () => {
+      config.features = features;
+
       navigate(path, () => {
         const wrapper = createComponent();
         const component = wrapper.find(selector);
