@@ -310,5 +310,6 @@ def includeme(config):  # noqa: PLR0915
     config.add_route("oidc.login.google", "/oidc/login/google")
     config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
     config.add_route("oidc.redirect.google", "/oidc/redirect/google")
+    config.add_route("signup.email", "/signup/email")
     config.add_route("signup.orcid", "/signup/orcid")
     config.add_route("signup.google", "/signup/google")

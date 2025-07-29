@@ -10,6 +10,7 @@ export const routes = {
   loginWithORCID: '/oidc/login/orcid',
   loginWithGoogle: '/oidc/login/google',
   signup: '/signup',
+  signupWithEmail: '/signup/email',
   signupWithGoogle: '/signup/google',
   signupWithORCID: '/signup/orcid',
 };

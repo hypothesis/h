@@ -279,6 +279,7 @@ def test_includeme():
         call("oidc.login.google", "/oidc/login/google"),
         call("oidc.redirect.orcid", "/oidc/redirect/orcid"),
         call("oidc.redirect.google", "/oidc/redirect/google"),
+        call("signup.email", "/signup/email"),
         call("signup.orcid", "/signup/orcid"),
         call("signup.google", "/signup/google"),
     ]
