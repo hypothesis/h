@@ -13,10 +13,9 @@ from h.services.jwt import JWTDecodeError
 from h.views.account_signup import (
     IDInfo,
     IDInfoJWTDecodeError,
-    JWTAudience,
-    JWTIssuer,
     SignupViews,
     SocialLoginSignupViews,
+    encode_idinfo_token,
     is_authenticated,
 )
 
@@ -363,7 +362,6 @@ class TestSocialLoginSignupViews:
         get_csrf_token,
         pyramid_request,
         feature_service,
-        jwt_service,
         orcid_id,
     ):
         views.context = ValidationFailure(
@@ -377,22 +375,13 @@ class TestSocialLoginSignupViews:
 
         get_csrf_token.assert_called_once_with(pyramid_request)
         feature_service.enabled.assert_called_once_with("log_in_with_orcid", user=None)
-        jwt_service.encode_symmetric.assert_called_once_with(
-            IDInfo(orcid_id),
-            expires_in=timedelta(hours=1),
-            issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_ORCID,
-            audience=JWTAudience.SIGNUP_ORCID,
-        )
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
                 "features": {"log_in_with_orcid": feature_service.enabled.return_value},
                 "identity": {"provider_unique_id": orcid_id},
                 "formErrors": views.context.error.asdict.return_value,
-                "formData": {
-                    "idinfo": jwt_service.encode_symmetric.return_value,
-                    **expected_form_data,
-                },
+                "formData": expected_form_data,
             }
         }
 
@@ -437,6 +426,20 @@ def test_is_authenticated(matchers, pyramid_request, authenticated_user):
             "activity.user_search", username=authenticated_user.username
         )
     )
+
+
+def test_encode_idinfo_token(jwt_service):
+    token = encode_idinfo_token(
+        jwt_service, sentinel.provider_unique_id, sentinel.issuer, sentinel.audience
+    )
+
+    jwt_service.encode_symmetric.assert_called_once_with(
+        IDInfo(sentinel.provider_unique_id),
+        expires_in=timedelta(hours=1),
+        issuer=sentinel.issuer,
+        audience=sentinel.audience,
+    )
+    assert token == {"idinfo": jwt_service.encode_symmetric.return_value}
 
 
 @pytest.fixture(autouse=True)

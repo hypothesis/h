@@ -217,16 +217,6 @@ class SocialLoginSignupViews:
             "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
         }
 
-        # When reloading the page replace the idinfo token with a fresh one.
-        form_data.update(
-            encode_idinfo_token(
-                self.jwt_service,
-                provider_unique_id,
-                self.settings.issuer,
-                self.settings.audience,
-            )
-        )
-
         return {
             "js_config": {
                 "formErrors": self.context.error.asdict(),
