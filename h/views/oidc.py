@@ -87,7 +87,7 @@ class OIDCConnectAndLoginViewsSettings:
     client_id: str
     authorization_url: str
     redirect_uri: str
-    action: str
+    action: ActionType
 
 
 @view_defaults(request_method="GET")
