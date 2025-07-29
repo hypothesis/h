@@ -233,7 +233,7 @@ class OIDCRedirectViewsSettings:
     idinfo_jwtaudience: JWTAudience
     provider: IdentityProvider
     success_message: str
-    signup_route: str
+    signup_route_name: str
 
 
 class UnexpectedActionError(Exception):
@@ -268,7 +268,7 @@ class OIDCRedirectViews:
                     idinfo_jwtaudience=JWTAudience.SIGNUP_ORCID,
                     provider=IdentityProvider.ORCID,
                     success_message="ORCID iD connected ✓",
-                    signup_route="signup.orcid",
+                    signup_route_name="signup.orcid",
                 )
             case _:
                 raise UnexpectedRouteError(route_name)
@@ -356,7 +356,7 @@ class OIDCRedirectViews:
             # create a new account.
             return HTTPFound(
                 self._request.route_url(
-                    self.settings.signup_route,
+                    self.settings.signup_route_name,
                     _query=encode_idinfo_token(
                         self._jwt_service,
                         provider_unique_id,
