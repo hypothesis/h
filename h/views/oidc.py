@@ -90,7 +90,7 @@ class OIDCConnectAndLoginViewsSettings:
     `state` param back to us we check that it matches the copy in the session.
 
     state_sessionkey is the key that we use for the state in Pyramid's session
-    dict.  We use a different state_sessionkey for each identity provider to
+    dict. We use a different state_sessionkey for each identity provider to
     avoid any crossed wires between different providers.
 
     """
