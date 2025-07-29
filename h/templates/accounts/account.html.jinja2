@@ -5,7 +5,7 @@
 
 {% block styles %}
   {{ super() }}
-  {% for url in asset_urls('sso_css') %}
+  {% for url in asset_urls('sociallogin_css') %}
     <link rel="stylesheet" href="{{ url }}">
   {% endfor %}
 {% endblock %}
@@ -16,8 +16,8 @@
     {{ password_form }}
 
     {% if log_in_with_orcid %}
-      <div class="sso-wrapper">
-        <div class="sso-header">
+      <div class="sociallogin-wrapper">
+        <div class="sociallogin-header">
           <div style="position: relative;">
             <div class="form-input__label js-tooltip"
                  style="position: static;"
@@ -29,13 +29,13 @@
         </div>
 
         {% if orcid %}
-          <a href="{{ orcid_url }}" class="sso-connect" target="_blank" rel="nofollow noopener">
+          <a href="{{ orcid_url }}" class="sociallogin-connect" target="_blank" rel="nofollow noopener">
             {{ svg_icon('orcid') }}
             <span>{% trans %} Connected: {% endtrans %}<strong>{{ orcid }}</strong></span>
             {{ svg_icon('check', 'check-icon') }}
           </a>
         {% else %}
-          <a href="{{ request.route_path('oidc.connect.orcid') }}" class="sso-connect">
+          <a href="{{ request.route_path('oidc.connect.orcid') }}" class="sociallogin-connect">
             {{ svg_icon('orcid') }}
             <span>{% trans %} Connect {% endtrans %}<strong>ORCID iD</strong></span>
             {{ svg_icon('external', 'external-icon') }}

@@ -1,11 +1,11 @@
 
-.sso-wrapper {
+.sociallogin-wrapper {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.sso-header {
+.sociallogin-header {
     display: flex;
     gap: 4px;
     padding-left: 2px;
@@ -16,7 +16,7 @@
     position: relative;
 }
 
-.sso-connect {
+.sociallogin-connect {
     display: flex;
     align-items: center;
     gap: 8px;
