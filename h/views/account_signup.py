@@ -12,7 +12,7 @@ from h import i18n
 from h.accounts.schemas import SignupSchema, SocialLoginSignupSchema
 from h.models.user_identity import IdentityProvider
 from h.services.exceptions import ConflictError
-from h.services.jwt import JWTAudiences, JWTDecodeError, JWTIssuers, JWTService
+from h.services.jwt import JWTAudience, JWTDecodeError, JWTIssuer, JWTService
 from h.views.exceptions import UnexpectedRouteError
 from h.views.helpers import login
 
@@ -126,8 +126,8 @@ class SocialLoginSignupViewsSettings:
     """Per-route settings for SocialLoginSignupViews."""
 
     provider: IdentityProvider
-    issuer: JWTIssuers
-    audience: JWTAudiences
+    issuer: JWTIssuer
+    audience: JWTAudience
 
 
 @view_defaults(
@@ -151,8 +151,8 @@ class SocialLoginSignupViews:
             case "signup.orcid":
                 return SocialLoginSignupViewsSettings(
                     provider=IdentityProvider.ORCID,
-                    issuer=JWTIssuers.SIGNUP_VALIDATION_FAILURE_ORCID,
-                    audience=JWTAudiences.SIGNUP_ORCID,
+                    issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_ORCID,
+                    audience=JWTAudience.SIGNUP_ORCID,
                 )
             case _:  # pragma: nocover
                 raise UnexpectedRouteError(route_name)
@@ -276,8 +276,8 @@ def is_authenticated(request):
 def encode_idinfo_token(
     jwt_service: JWTService,
     provider_unique_id: str,
-    issuer: JWTIssuers,
-    audience: JWTAudiences,
+    issuer: JWTIssuer,
+    audience: JWTAudience,
 ):
     return {
         "idinfo": jwt_service.encode_symmetric(
