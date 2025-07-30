@@ -59,6 +59,22 @@
           </a>
         {% endif %}
         {% endif %}
+
+        {% if log_in_with_facebook %}
+        {% if facebook_id %}
+          <a class="sociallogin-connect" target="_blank" rel="nofollow noopener">
+            {{ svg_icon('facebook-sociallogin') }}
+            <span>{% trans %} Connected: {% endtrans %}<strong>{{ facebook_id }}</strong></span>
+            {{ svg_icon('check', 'check-icon') }}
+          </a>
+        {% else %}
+          <a href="{{ request.route_path('oidc.connect.facebook') }}" class="sociallogin-connect">
+            {{ svg_icon('facebook-sociallogin') }}
+            <span>{% trans %} Connect {% endtrans %}<strong>Facebook account</strong></span>
+            {{ svg_icon('external', 'external-icon') }}
+          </a>
+        {% endif %}
+        {% endif %}
       </div>
     {% endif %}
   </div>

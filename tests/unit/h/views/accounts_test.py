@@ -75,7 +75,11 @@ class TestAuthController:
             "js_config": {
                 "styles": assets_env.urls.return_value,
                 "csrfToken": views.get_csrf_token.spy_return,
-                "features": {"log_in_with_orcid": True, "log_in_with_google": True},
+                "features": {
+                    "log_in_with_orcid": True,
+                    "log_in_with_google": True,
+                    "log_in_with_facebook": True,
+                },
                 "flashMessages": [],
                 "formData": {
                     "username": None,
@@ -136,7 +140,11 @@ class TestAuthController:
                 "csrfToken": views.get_csrf_token.spy_return,
                 "formErrors": form_errors,
                 "formData": pyramid_request.POST,
-                "features": {"log_in_with_orcid": True, "log_in_with_google": True},
+                "features": {
+                    "log_in_with_orcid": True,
+                    "log_in_with_google": True,
+                    "log_in_with_facebook": True,
+                },
                 "flashMessages": [],
             }
         }
@@ -707,6 +715,8 @@ class TestAccountController:
             "orcid_url": None,
             "log_in_with_google": False,
             "google_id": None,
+            "log_in_with_facebook": False,
+            "facebook_id": None,
         }
 
     def test_post_password_form_with_valid_data_changes_password(
@@ -750,6 +760,8 @@ class TestAccountController:
             "orcid_url": None,
             "log_in_with_google": False,
             "google_id": None,
+            "log_in_with_facebook": False,
+            "facebook_id": None,
         }
 
     @pytest.fixture

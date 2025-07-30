@@ -28,6 +28,7 @@ class TestSignupViews:
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
+            sentinel.facebook_enabled,
         ]
         response = views.get()
 
@@ -35,6 +36,7 @@ class TestSignupViews:
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
             call("log_in_with_google", user=None),
+            call("log_in_with_facebook", user=None),
         ]
         assert response == {
             "js_config": {
@@ -42,6 +44,7 @@ class TestSignupViews:
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
+                    "log_in_with_facebook": sentinel.facebook_enabled,
                 },
             }
         }
@@ -59,6 +62,7 @@ class TestSignupViews:
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
+            sentinel.facebook_enabled,
         ]
 
         response = views.post()
@@ -83,6 +87,7 @@ class TestSignupViews:
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
             call("log_in_with_google", user=None),
+            call("log_in_with_facebook", user=None),
         ]
         assert response == {
             "js_config": {
@@ -90,6 +95,7 @@ class TestSignupViews:
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
+                    "log_in_with_facebook": sentinel.facebook_enabled,
                 },
             },
             "heading": _("Account registration successful"),
@@ -173,6 +179,7 @@ class TestSignupViews:
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
+            sentinel.facebook_enabled,
         ]
         views.context = ValidationFailure(
             sentinel.field,
@@ -187,6 +194,7 @@ class TestSignupViews:
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
             call("log_in_with_google", user=None),
+            call("log_in_with_facebook", user=None),
         ]
         assert response == {
             "js_config": {
@@ -196,6 +204,7 @@ class TestSignupViews:
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
+                    "log_in_with_facebook": sentinel.facebook_enabled,
                 },
             }
         }
@@ -212,6 +221,7 @@ class TestSignupViews:
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
+            sentinel.facebook_enabled,
         ]
 
         response = views.post()
@@ -220,6 +230,7 @@ class TestSignupViews:
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
             call("log_in_with_google", user=None),
+            call("log_in_with_facebook", user=None),
         ]
         assert response == {
             "js_config": {
@@ -227,6 +238,7 @@ class TestSignupViews:
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
+                    "log_in_with_facebook": sentinel.facebook_enabled,
                 },
             },
             "heading": _("Account already registered"),
@@ -256,6 +268,7 @@ class TestSocialLoginSignupViews:
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
+            sentinel.facebook_enabled,
         ]
 
         response = views.get()
@@ -264,6 +277,7 @@ class TestSocialLoginSignupViews:
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
             call("log_in_with_google", user=None),
+            call("log_in_with_facebook", user=None),
         ]
         assert response == {
             "js_config": {
@@ -271,6 +285,7 @@ class TestSocialLoginSignupViews:
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
+                    "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "identity": {"provider_unique_id": orcid_id},
             }
@@ -425,6 +440,7 @@ class TestSocialLoginSignupViews:
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
+            sentinel.facebook_enabled,
         ]
 
         response = views.validation_failure()
@@ -433,6 +449,7 @@ class TestSocialLoginSignupViews:
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
             call("log_in_with_google", user=None),
+            call("log_in_with_facebook", user=None),
         ]
         assert response == {
             "js_config": {
@@ -440,6 +457,7 @@ class TestSocialLoginSignupViews:
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
+                    "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "identity": {"provider_unique_id": orcid_id},
                 "formErrors": views.context.error.asdict.return_value,
