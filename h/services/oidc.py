@@ -140,6 +140,13 @@ def factory(_context, request) -> OIDCService:
                 token_url=settings["oidc_tokenurl_google"],
                 keyset_url=settings["oidc_keyseturl_google"],
             ),
+            IdentityProvider.FACEBOOK: OIDCServiceSettings(
+                client_id=settings["oidc_clientid_facebook"],
+                client_secret=settings["oidc_clientsecret_facebook"],
+                redirect_uri=request.route_url("oidc.redirect.facebook"),
+                token_url=settings["oidc_tokenurl_facebook"],
+                keyset_url=settings["oidc_keyseturl_facebook"],
+            ),
         },
         http_service=request.find_service(HTTPService),
         user_service=request.find_service(name="user"),

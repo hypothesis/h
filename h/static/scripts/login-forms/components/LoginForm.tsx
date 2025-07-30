@@ -104,6 +104,11 @@ export default function LoginForm() {
             <a href={routes.loginWithGoogle}>Continue with Google</a>
           </p>
         )}
+        {config.features.log_in_with_facebook && (
+          <p>
+            <a href={routes.loginWithFacebook}>Continue with Facebook</a>
+          </p>
+        )}
       </FormContainer>
     </>
   );

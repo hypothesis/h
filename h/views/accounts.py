@@ -124,6 +124,7 @@ class AuthController:
             "features": {
                 "log_in_with_orcid": self.request.feature("log_in_with_orcid"),
                 "log_in_with_google": self.request.feature("log_in_with_google"),
+                "log_in_with_facebook": self.request.feature("log_in_with_facebook"),
             },
             "flashMessages": flash_messages,
             # Prefill username from query params. This supports a flow where
@@ -521,6 +522,19 @@ class AccountController:
             )
             google_id = google_identity.provider_unique_id if google_identity else None
 
+        log_in_with_facebook = feature_service.enabled(
+            "log_in_with_facebook", self.request.user
+        )
+        facebook_id = None
+        if log_in_with_facebook:
+            oidc_service = self.request.find_service(OIDCService)
+            facebook_identity = oidc_service.get_identity(
+                self.request.user, IdentityProvider.FACEBOOK
+            )
+            facebook_id = (
+                facebook_identity.provider_unique_id if facebook_identity else None
+            )
+
         return {
             "email": email,
             "email_form": email_form,
@@ -530,6 +544,8 @@ class AccountController:
             "orcid_url": orcid_url,
             "log_in_with_google": log_in_with_google,
             "google_id": google_id,
+            "log_in_with_facebook": log_in_with_facebook,
+            "facebook_id": facebook_id,
         }
 
 

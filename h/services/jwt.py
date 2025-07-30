@@ -59,8 +59,10 @@ class JWTAudience(StrEnum):
 
     OIDC_REDIRECT_ORCID = "bram-brik-dull"
     OIDC_REDIRECT_GOOGLE = "kir-pigh-blir"
+    OIDC_REDIRECT_FACEBOOK = "kers-rook-cin"
     SIGNUP_ORCID = "hund-firs-croh"
     SIGNUP_GOOGLE = "sau-wesh-vap"
+    SIGNUP_FACEBOOK = "jaip-coff-veag"
 
 
 class JWTIssuer(StrEnum):
@@ -72,10 +74,13 @@ class JWTIssuer(StrEnum):
 
     OIDC_CONNECT_OR_LOGIN_ORCID = "neaf-jook-nosm"
     OIDC_CONNECT_OR_LOGIN_GOOGLE = "our-gro-root"
+    OIDC_CONNECT_OR_LOGIN_FACEBOOK = "fun-bug-braw"
     OIDC_REDIRECT_ORCID = "zaut-graw-belk"
     OIDC_REDIRECT_GOOGLE = "spax-zux-mink"
+    OIDC_REDIRECT_FACEBOOK = "ploo-frur-twis"
     SIGNUP_VALIDATION_FAILURE_ORCID = "psax-folt-oung"
     SIGNUP_VALIDATION_FAILURE_GOOGLE = "hil-ploc-es"
+    SIGNUP_VALIDATION_FAILURE_FACEBOOK = "wick-zot-rosh"
 
 
 class JWTService:

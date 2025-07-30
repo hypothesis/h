@@ -173,6 +173,23 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
         "OIDC_KEYSETURL_GOOGLE",
         default="https://www.googleapis.com/oauth2/v3/certs",
     )
+    settings_manager.set("oidc_clientid_facebook", "OIDC_CLIENTID_FACEBOOK")
+    settings_manager.set("oidc_clientsecret_facebook", "OIDC_CLIENTSECRET_FACEBOOK")
+    settings_manager.set(
+        "oidc_authorizationurl_facebook",
+        "OIDC_AUTHORIZATIONURL_FACEBOOK",
+        default="https://www.facebook.com/v11.0/dialog/oauth",
+    )
+    settings_manager.set(
+        "oidc_tokenurl_facebook",
+        "OIDC_TOKENURL_FACEBOOK",
+        default="https://graph.facebook.com/v11.0/oauth/access_token",
+    )
+    settings_manager.set(
+        "oidc_keyseturl_facebook",
+        "OIDC_KEYSETURL_FACEBOOK",
+        default="https://limited.facebook.com/.well-known/oauth/openid/jwks/",
+    )
 
     settings_manager.set(
         "h_api_auth_cookie_secret_key",

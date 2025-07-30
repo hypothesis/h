@@ -114,12 +114,16 @@ class TestFactory:
         settings = pyramid_request.registry.settings
         settings["oidc_clientid_orcid"] = sentinel.orcid_client_id
         settings["oidc_clientid_google"] = sentinel.google_client_id
+        settings["oidc_clientid_facebook"] = sentinel.facebook_client_id
         settings["oidc_clientsecret_orcid"] = sentinel.orcid_client_secret
         settings["oidc_clientsecret_google"] = sentinel.google_client_secret
+        settings["oidc_clientsecret_facebook"] = sentinel.facebook_client_secret
         settings["oidc_tokenurl_orcid"] = sentinel.orcid_token_url
         settings["oidc_tokenurl_google"] = sentinel.google_token_url
+        settings["oidc_tokenurl_facebook"] = sentinel.facebook_token_url
         settings["oidc_keyseturl_orcid"] = sentinel.orcid_keyset_url
         settings["oidc_keyseturl_google"] = sentinel.google_keyset_url
+        settings["oidc_keyseturl_facebook"] = sentinel.facebook_keyset_url
 
         result = factory(sentinel.context, pyramid_request)
 
@@ -140,6 +144,13 @@ class TestFactory:
                     token_url=sentinel.google_token_url,
                     keyset_url=sentinel.google_keyset_url,
                 ),
+                IdentityProvider.FACEBOOK: OIDCServiceSettings(
+                    client_id=sentinel.facebook_client_id,
+                    client_secret=sentinel.facebook_client_secret,
+                    redirect_uri=pyramid_request.route_url("oidc.redirect.facebook"),
+                    token_url=sentinel.facebook_token_url,
+                    keyset_url=sentinel.facebook_keyset_url,
+                ),
             },
             http_service=http_service,
             user_service=user_service,
@@ -155,6 +166,7 @@ class TestFactory:
     def routes(self, pyramid_config):
         pyramid_config.add_route("oidc.redirect.orcid", "/oidc/redirect/orcid")
         pyramid_config.add_route("oidc.redirect.google", "/oidc/redirect/google")
+        pyramid_config.add_route("oidc.redirect.facebook", "/oidc/redirect/facebook")
 
 
 @pytest.fixture(autouse=True)

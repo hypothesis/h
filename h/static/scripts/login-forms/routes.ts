@@ -9,8 +9,10 @@ export const routes = {
   login: '/login',
   loginWithORCID: '/oidc/login/orcid',
   loginWithGoogle: '/oidc/login/google',
+  loginWithFacebook: '/oidc/login/facebook',
   signup: '/signup',
   signupWithEmail: '/signup/email',
   signupWithGoogle: '/signup/google',
   signupWithORCID: '/signup/orcid',
+  signupWithFacebook: '/signup/facebook',
 };
