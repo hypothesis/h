@@ -9,10 +9,11 @@ import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { SignupConfigObject } from '../config';
+import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
 
 type IdProviderBadgeProps = {
-  provider: 'orcid';
+  provider: 'google' | 'orcid';
   identity: string;
 };
 
@@ -23,6 +24,11 @@ type IdProviderBadgeProps = {
 function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
   return (
     <div data-testid="id-badge">
+      {provider === 'google' && (
+        <a href="https://myaccount.google.com" target="_blank" rel="noreferrer">
+          <GoogleIcon className="inline" aria-label="Google icon" />
+        </a>
+      )}
       {provider === 'orcid' && (
         <a href="https://orcid.org" target="_blank" rel="noreferrer">
           <ORCIDIcon className="inline" aria-label="ORCID icon" />
@@ -42,7 +48,7 @@ export type SignupFormProps = {
    *  - An `identity` field in the config for the page
    *  - An `idinfo` query parameter
    */
-  idProvider?: 'orcid';
+  idProvider?: 'google' | 'orcid';
 
   // Test seams
   location_?: Location;

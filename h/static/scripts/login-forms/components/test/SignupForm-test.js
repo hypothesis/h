@@ -247,6 +247,8 @@ describe('SignupForm', () => {
       idInfo = 'fake-jwt-token',
     } = {}) {
       fakeConfig.identity = {
+        // This example matches the format of ORCID IDs, but the frontend
+        // doesn't care about the format for any provider.
         provider_unique_id: '0000-0000-0000-0001',
       };
 
@@ -273,6 +275,19 @@ describe('SignupForm', () => {
       const idBadge = wrapper.find('[data-testid="id-badge"]');
       assert.isTrue(idBadge.exists());
       assert.isTrue(idBadge.find('ORCIDIcon').exists());
+
+      const connectedId = wrapper.find('[data-testid="connected-id"]');
+      assert.equal(connectedId.text(), '0000-0000-0000-0001');
+    });
+
+    it('displays Google identity when using Google provider', () => {
+      const { wrapper } = createSignupFormWithIdProvider({
+        idProvider: 'google',
+      });
+
+      const idBadge = wrapper.find('[data-testid="id-badge"]');
+      assert.isTrue(idBadge.exists());
+      assert.isTrue(idBadge.find('GoogleIcon').exists());
 
       const connectedId = wrapper.find('[data-testid="connected-id"]');
       assert.equal(connectedId.text(), '0000-0000-0000-0001');

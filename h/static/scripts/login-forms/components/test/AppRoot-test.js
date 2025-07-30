@@ -142,6 +142,13 @@ describe('AppRoot', () => {
         idProvider: 'orcid',
       },
     },
+    {
+      path: '/signup/google',
+      selector: 'SignupForm',
+      props: {
+        idProvider: 'google',
+      },
+    },
   ].forEach(({ path, selector, props = {} }) => {
     it(`renders expected component for URL (${path})`, () => {
       navigate(path, () => {

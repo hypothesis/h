@@ -42,6 +42,9 @@ export default function AppRoot({ config }: AppRootProps) {
             <Route path={routes.signup}>
               <SignupForm />
             </Route>
+            <Route path={routes.signupWithGoogle}>
+              <SignupForm idProvider="google" />
+            </Route>
             <Route path={routes.signupWithORCID}>
               <SignupForm idProvider="orcid" />
             </Route>
