@@ -25,9 +25,7 @@ function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
   return (
     <div data-testid="id-badge">
       {provider === 'google' && (
-        <a href="https://myaccount.google.com" target="_blank" rel="noreferrer">
-          <GoogleIcon className="inline" aria-label="Google icon" />
-        </a>
+        <GoogleIcon className="inline" aria-label="Google icon" />
       )}
       {provider === 'orcid' && (
         <a href="https://orcid.org" target="_blank" rel="noreferrer">
