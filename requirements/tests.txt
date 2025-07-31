@@ -274,7 +274,7 @@ pytest-cov==6.1.1
     # via -r requirements/tests.in
 pytest-factoryboy==2.7.0
     # via -r requirements/tests.in
-pytest-mock==3.14.0
+pytest-mock==3.14.1
     # via -r requirements/tests.in
 pytest-xdist[psutil]==3.6.1
     # via -r requirements/tests.in
