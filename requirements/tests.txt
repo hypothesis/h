@@ -27,7 +27,7 @@ build==1.0.3
     # via pip-tools
 celery==5.5.2
     # via -r requirements/prod.txt
-certifi==2025.4.26
+certifi==2025.7.14
     # via
     #   -r requirements/prod.txt
     #   requests
