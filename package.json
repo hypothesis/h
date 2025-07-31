@@ -30,7 +30,7 @@
     "classnames": "^2.5.1",
     "dompurify": "^3.2.6",
     "escape-html": "^1.0.3",
-    "gulp": "^5.0.0",
+    "gulp": "^5.0.1",
     "gulp-changed": "^5.0.2",
     "gulp-cli": "^3.0.0",
     "gulp-if": "^3.0.0",
