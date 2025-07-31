@@ -293,6 +293,19 @@ describe('SignupForm', () => {
       assert.equal(connectedId.text(), '0000-0000-0000-0001');
     });
 
+    it('displays Facebook identity when using Facebook provider', () => {
+      const { wrapper } = createSignupFormWithIdProvider({
+        idProvider: 'facebook',
+      });
+
+      const idBadge = wrapper.find('[data-testid="id-badge"]');
+      assert.isTrue(idBadge.exists());
+      assert.isTrue(idBadge.find('FacebookIcon').exists());
+
+      const connectedId = wrapper.find('[data-testid="connected-id"]');
+      assert.equal(connectedId.text(), '0000-0000-0000-0001');
+    });
+
     it('renders "idinfo" hidden input field', () => {
       const { wrapper } = createSignupFormWithIdProvider({
         idInfo: 'test-jwt-token',

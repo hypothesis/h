@@ -9,11 +9,12 @@ import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { SignupConfigObject } from '../config';
+import FacebookIcon from './FacebookIcon';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
 
 type IdProviderBadgeProps = {
-  provider: 'google' | 'orcid';
+  provider: IdProvider;
   identity: string;
 };
 
@@ -24,6 +25,9 @@ type IdProviderBadgeProps = {
 function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
   return (
     <div data-testid="id-badge">
+      {provider === 'facebook' && (
+        <FacebookIcon className="inline" aria-label="Facebook icon" />
+      )}
       {provider === 'google' && (
         <GoogleIcon className="inline" aria-label="Google icon" />
       )}
@@ -37,6 +41,9 @@ function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
   );
 }
 
+/** Supported ID providers for OIDC-based login. */
+export type IdProvider = 'facebook' | 'google' | 'orcid';
+
 export type SignupFormProps = {
   /**
    * Identity provider if using OIDC / social login.
@@ -46,7 +53,7 @@ export type SignupFormProps = {
    *  - An `identity` field in the config for the page
    *  - An `idinfo` query parameter
    */
-  idProvider?: 'google' | 'orcid';
+  idProvider?: IdProvider;
 
   // Test seams
   location_?: Location;
