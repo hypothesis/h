@@ -6586,9 +6586,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob-stream@npm:^8.0.0":
-  version: 8.0.1
-  resolution: "glob-stream@npm:8.0.1"
+"glob-stream@npm:^8.0.3":
+  version: 8.0.3
+  resolution: "glob-stream@npm:8.0.3"
   dependencies:
     "@gulpjs/to-absolute-glob": ^4.0.0
     anymatch: ^3.1.3
@@ -6597,9 +6597,8 @@ __metadata:
     is-glob: ^4.0.3
     is-negated-glob: ^1.0.0
     normalize-path: ^3.0.0
-    now-and-later: ^3.0.0
     streamx: ^2.12.5
-  checksum: 0d57efdc07400c778fbd9adda9f29c97557a6ac96d508689ff22e15b95027c678dc8217d0475aa8739a8be7da8c31284b9d7ecc8e447fc923cc87cf9cafa3f50
+  checksum: 9e5bfd59f215d194a686ebce65b12d1cb63aacdb1662f408714dea487ac30482681757ac70933a6b1ce29240bae258bf998da8b6bff9b9a06b5e642139204ce7
   languageName: node
   linkType: hard
 
@@ -6852,6 +6851,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gulp-cli@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "gulp-cli@npm:3.1.0"
+  dependencies:
+    "@gulpjs/messages": ^1.1.0
+    chalk: ^4.1.2
+    copy-props: ^4.0.0
+    gulplog: ^2.2.0
+    interpret: ^3.1.1
+    liftoff: ^5.0.1
+    mute-stdout: ^2.0.0
+    replace-homedir: ^2.0.0
+    semver-greatest-satisfied-range: ^2.0.0
+    string-width: ^4.2.3
+    v8flags: ^4.0.0
+    yargs: ^16.2.0
+  bin:
+    gulp: bin/gulp.js
+  checksum: 6cb26653ac8e57d7e69dc1155aabbd5cfd67749c8e392eac6eba58c7774b2bc90f3c350f71faabf820854d126f42e5672401869ef3a97924c01561db4483d45f
+  languageName: node
+  linkType: hard
+
 "gulp-if@npm:^3.0.0":
   version: 3.0.0
   resolution: "gulp-if@npm:3.0.0"
@@ -6894,17 +6915,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gulp@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "gulp@npm:5.0.0"
+"gulp@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "gulp@npm:5.0.1"
   dependencies:
     glob-watcher: ^6.0.0
-    gulp-cli: ^3.0.0
+    gulp-cli: ^3.1.0
     undertaker: ^2.0.0
-    vinyl-fs: ^4.0.0
+    vinyl-fs: ^4.0.2
   bin:
     gulp: bin/gulp.js
-  checksum: f5f45699f5c59078583d811fa8da70e030ace34744801765b3972403ec5ffee9702b8f2a65aeb945bf448f8b1a66c090ca66812bbd839ad712ecebb1b39e27c4
+  checksum: 374248efd4d0d7412d6176572285555c108bc34ae35a1141f0e8b9990ca312c922dc8f18f38b7f22c02ef5e2378ccadd37441e8e166c1abd9c3281f00ff11dab
   languageName: node
   linkType: hard
 
@@ -6954,7 +6975,7 @@ __metadata:
     eslint-plugin-react: ^7.37.5
     eslint-plugin-react-hooks: ^5.2.0
     globals: ^15.14.0
-    gulp: ^5.0.0
+    gulp: ^5.0.1
     gulp-changed: ^5.0.2
     gulp-cli: ^3.0.0
     gulp-if: ^3.0.0
@@ -8196,6 +8217,21 @@ __metadata:
     rechoir: ^0.8.0
     resolve: ^1.20.0
   checksum: ae6a1f3b734fbf0b8b5b7ca189e00fe04fa9966e436313c7e20e3444cec5ae9e4f472666aa02ac23557e412610f111d9d56ef78854cae1580d297d5e365738a8
+  languageName: node
+  linkType: hard
+
+"liftoff@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "liftoff@npm:5.0.1"
+  dependencies:
+    extend: ^3.0.2
+    findup-sync: ^5.0.0
+    fined: ^2.0.0
+    flagged-respawn: ^2.0.0
+    is-plain-object: ^5.0.0
+    rechoir: ^0.8.0
+    resolve: ^1.20.0
+  checksum: 3adb6167fb04d1b2add302dd6589af61774c52b87cadd3b158a6e91fef576d7bf673fd3da4fa88ee81776b2a6fe09caf25c34ccc0fb07023194e2196bf570234
   languageName: node
   linkType: hard
 
@@ -11662,12 +11698,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vinyl-fs@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "vinyl-fs@npm:4.0.0"
+"vinyl-fs@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "vinyl-fs@npm:4.0.2"
   dependencies:
     fs-mkdirp-stream: ^2.0.1
-    glob-stream: ^8.0.0
+    glob-stream: ^8.0.3
     graceful-fs: ^4.2.11
     iconv-lite: ^0.6.3
     is-valid-glob: ^1.0.0
@@ -11678,9 +11714,9 @@ __metadata:
     streamx: ^2.14.0
     to-through: ^3.0.0
     value-or-function: ^4.0.0
-    vinyl: ^3.0.0
+    vinyl: ^3.0.1
     vinyl-sourcemap: ^2.0.0
-  checksum: 4cf83dea5123ac1f99e43e0710f22f5cb7524e6e13568cbac434a51015ae1d97965210feb9ff0787c4fa1cd79eb5f8538d86210cdafb76fd64c19bc3e755802a
+  checksum: e5a7da6c30ca89e522fbb31df1220c11ca1f1a46d249384d49c0a448d2c18ac49eed858109471f9836aa5c7953ea0233b6db67834398172530bdd318792789c9
   languageName: node
   linkType: hard
 
@@ -11708,6 +11744,18 @@ __metadata:
     replace-ext: ^2.0.0
     teex: ^1.0.1
   checksum: 29c563d6a027d49ec216bc8259b494bd048d1f9df39103aea6877e02af1d0a6956b11ad977206b5a807b331ef5431bed9f6b8890de5e55188389d31cf7af7fbe
+  languageName: node
+  linkType: hard
+
+"vinyl@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "vinyl@npm:3.0.1"
+  dependencies:
+    clone: ^2.1.2
+    remove-trailing-separator: ^1.1.0
+    replace-ext: ^2.0.0
+    teex: ^1.0.1
+  checksum: d3ced776ea78b0479d54788abcf9db3275384a0e5053d1dff57f520a0a3bc8a008daa45eaa0015dd6ea88a165ddc488bb583bad11f8a17d51bcaa6bf47d5d0ea
   languageName: node
   linkType: hard
 
