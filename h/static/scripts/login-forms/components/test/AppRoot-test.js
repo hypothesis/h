@@ -154,6 +154,13 @@ describe('AppRoot', () => {
       selector: 'SignupSelectForm',
     },
     {
+      path: '/signup',
+      features: {
+        log_in_with_facebook: true,
+      },
+      selector: 'SignupSelectForm',
+    },
+    {
       path: '/signup/email',
       selector: 'SignupForm',
     },
@@ -169,6 +176,13 @@ describe('AppRoot', () => {
       selector: 'SignupForm',
       props: {
         idProvider: 'google',
+      },
+    },
+    {
+      path: '/signup/facebook',
+      selector: 'SignupForm',
+      props: {
+        idProvider: 'facebook',
       },
     },
   ].forEach(({ path, selector, features = {}, props = {} }) => {

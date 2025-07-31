@@ -10,6 +10,7 @@ import { Link as RouterLink } from 'wouter-preact';
 import FormHeader from '../../forms-common/components/FormHeader';
 import { Config } from '../config';
 import { routes } from '../routes';
+import FacebookIcon from './FacebookIcon';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
 
@@ -55,6 +56,8 @@ function SignupLink({
 export default function SignupSelectForm() {
   const config = useContext(Config)!;
 
+  // nb. Options for social login are listed in descending order of expected
+  // usage rather than alphabetically.
   return (
     <div className="flex flex-col text-md">
       <FormHeader>Sign up for Hypothesis</FormHeader>
@@ -80,6 +83,14 @@ export default function SignupSelectForm() {
             providerIcon={<GoogleIcon className="inline" />}
           >
             Continue with <b>Google</b>
+          </SignupLink>
+        )}
+        {config.features.log_in_with_facebook && (
+          <SignupLink
+            href={routes.loginWithFacebook}
+            providerIcon={<FacebookIcon className="inline" />}
+          >
+            Continue with <b>Facebook</b>
           </SignupLink>
         )}
         {config.features.log_in_with_orcid && (

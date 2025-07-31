@@ -18,6 +18,7 @@ describe('SignupSelectForm', () => {
   beforeEach(() => {
     fakeConfig = {
       features: {
+        log_in_with_facebook: false,
         log_in_with_google: false,
         log_in_with_orcid: false,
       },
@@ -36,6 +37,14 @@ describe('SignupSelectForm', () => {
       text: 'Continue with Google',
       features: {
         log_in_with_google: true,
+      },
+    },
+    {
+      provider: 'Facebook',
+      link: routes.loginWithFacebook,
+      text: 'Continue with Facebook',
+      features: {
+        log_in_with_facebook: true,
       },
     },
     {

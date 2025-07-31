@@ -29,7 +29,9 @@ export default function AppRoot({ config }: AppRootProps) {
     useToastMessages(initialToasts);
 
   const enableSocialLogin =
-    config.features.log_in_with_orcid || config.features.log_in_with_google;
+    config.features.log_in_with_orcid ||
+    config.features.log_in_with_google ||
+    config.features.log_in_with_facebook;
 
   return (
     <div>
@@ -49,6 +51,9 @@ export default function AppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.signupWithEmail}>
               <SignupForm />
+            </Route>
+            <Route path={routes.signupWithFacebook}>
+              <SignupForm idProvider="facebook" />
             </Route>
             <Route path={routes.signupWithGoogle}>
               <SignupForm idProvider="google" />
