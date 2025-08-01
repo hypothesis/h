@@ -82,6 +82,7 @@ class AnnotationJSONService:
                 "target": annotation.target,
                 "document": DocumentJSONPresenter(annotation.document).asdict(),
                 "links": self._links_service.get_all(annotation),
+                "actions": [],
             }
         )
 
@@ -97,6 +98,11 @@ class AnnotationJSONService:
 
         if with_metadata and annotation.slim.meta:
             model["metadata"] = annotation.slim.meta.data
+
+        if self._request.has_permission(
+            Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
+        ):
+            model["actions"].append("moderate")
 
         return model
 

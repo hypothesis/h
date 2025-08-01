@@ -49,6 +49,7 @@ class TestAnnotationJSONService:
             "user_info": {"display_name": user_service.fetch.return_value.display_name},
             "mentions": [],
             "moderation_status": None,
+            "actions": ["moderate"],
         }
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
@@ -73,6 +74,15 @@ class TestAnnotationJSONService:
         result = service.present(annotation)
 
         assert "references" not in result
+
+    def test_present_without_moderation_permission(
+        self, service, annotation, pyramid_config
+    ):
+        pyramid_config.testing_securitypolicy(permissive=False)
+
+        result = service.present(annotation)
+
+        assert result["actions"] == []
 
     def test_present_extra_inherits_correctly(self, service, annotation):
         annotation.extra = {"id": "DIFFERENT"}

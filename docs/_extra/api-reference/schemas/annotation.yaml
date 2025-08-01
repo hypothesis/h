@@ -16,6 +16,7 @@ Annotation:
     - hidden
     - moderation_status
     - flagged
+    - actions
   properties:
     consumer:
       type: string
@@ -246,3 +247,11 @@ Annotation:
             format: date-time
             description: When the user joined
       description: An array of user mentions the annotation text
+    actions:
+      type: array
+      items:
+        type: string
+        enum:
+          - moderate
+      description: List of actions the current user can perform on this annotation
+      example: ["moderate"]
