@@ -129,7 +129,7 @@ def fake_feature():
 @pytest.fixture
 def form_validating_to():
     def form_validating_to(appstruct):
-        form = mock.MagicMock()
+        form = mock.NonCallableMagicMock()
         form.validate.return_value = appstruct
         form.render.return_value = "valid form"
         return form
@@ -141,7 +141,7 @@ def form_validating_to():
 def invalid_form():
     def invalid_form(errors=None):
         invalid = FakeInvalid(errors or {})
-        form = mock.MagicMock()
+        form = mock.NonCallableMagicMock()
         form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
         form.render.return_value = "invalid form"
         return form

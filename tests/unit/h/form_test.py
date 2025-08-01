@@ -1,6 +1,8 @@
 from unittest import mock
 
 import pytest
+from deform import ValidationFailure
+from deform.form import Form
 from h_matchers import Any
 
 from h import form
@@ -94,7 +96,8 @@ class TestCreateForm:
         form.create_form(pyramid_request, mock.sentinel.schema)
 
         Jinja2Renderer.assert_called_once_with(
-            mock.sentinel.jinja2_env, {"feature": pyramid_request.feature}
+            mock.sentinel.jinja2_env,
+            {"request": pyramid_request, "feature": pyramid_request.feature},
         )
 
     @pytest.fixture(autouse=True)
@@ -142,6 +145,7 @@ class TestToXHRResponse:
             pyramid_request, mock.sentinel.non_xhr_result, form_
         )
 
+        form_.render.assert_called_once_with()
         assert result == form_.render.return_value
 
     def test_does_not_show_flash_message_if_xhr(self, pyramid_request):
@@ -156,7 +160,7 @@ class TestToXHRResponse:
 @pytest.mark.usefixtures("to_xhr_response")
 class TestHandleFormSubmission:
     def test_it_calls_validate(self, pyramid_request):
-        form_ = mock.Mock(spec_set=["validate"])
+        form_ = mock.NonCallableMock(spec_set=["validate"])
 
         form.handle_form_submission(
             pyramid_request, form_, mock_callable(), mock.sentinel.on_failure
@@ -308,6 +312,75 @@ class TestHandleFormSubmission:
             mock.sentinel.on_failure,
         )
 
+        assert result == to_xhr_response.return_value
+
+    def test_successful_validation_with_form_callable(
+        self, pyramid_request, to_xhr_response
+    ):
+        def form_callable_spec():
+            """Spec for the callable_form mock."""
+
+        def on_success_spec(appstruct):
+            """Spec for the on_success mock."""
+
+        form1 = mock.create_autospec(Form, instance=True, spec_set=True)
+        form_callable = mock.create_autospec(
+            form_callable_spec,
+            spec_set=True,
+            side_effect=[form1, mock.sentinel.form2],
+        )
+        on_success = mock.create_autospec(on_success_spec, spec_set=True)
+
+        result = form.handle_form_submission(
+            pyramid_request,
+            form_callable,
+            on_success,
+            mock.sentinel.on_failure,
+        )
+
+        class PostItemsMatcher:
+            """Matches any iterable equal to request.POST.items()."""
+
+            def __eq__(self, other):
+                return list(other) == list(pyramid_request.POST.items())
+
+        assert form_callable.call_args_list == [mock.call(), mock.call()]
+        form1.validate.assert_called_once_with(PostItemsMatcher())
+        on_success.assert_called_once_with(form1.validate.return_value)
+        to_xhr_response.assert_called_once_with(
+            pyramid_request, on_success.return_value, mock.sentinel.form2
+        )
+        assert result == to_xhr_response.return_value
+
+    def test_validation_failure_with_form_callable(
+        self, pyramid_request, to_xhr_response
+    ):
+        def form_callable_spec():
+            """Spec for the callable_form mock."""
+
+        def on_failure_spec():
+            """Spec for the on_failure mock."""
+
+        form1 = mock.create_autospec(Form, instance=True, spec_set=True)
+        form_callable = mock.create_autospec(
+            form_callable_spec,
+            spec_set=True,
+            side_effect=[form1, mock.sentinel.form2],
+        )
+
+        on_failure = mock.create_autospec(on_failure_spec, spec_set=True)
+        form1.validate.side_effect = ValidationFailure(
+            mock.sentinel.field, mock.sentinel.cstruct, mock.sentinel.error
+        )
+
+        result = form.handle_form_submission(
+            pyramid_request, form_callable, mock.sentinel.on_success, on_failure
+        )
+
+        on_failure.assert_called_once_with()
+        to_xhr_response.assert_called_once_with(
+            pyramid_request, on_failure.return_value, mock.sentinel.form2
+        )
         assert result == to_xhr_response.return_value
 
     @pytest.fixture

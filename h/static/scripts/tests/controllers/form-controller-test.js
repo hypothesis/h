@@ -24,10 +24,13 @@ function dataAttrs(data) {
 function fieldTemplate(field) {
   const dataAttr = dataAttrs(field.data);
   const typeAttr = field.type ? `type="${field.type}"` : '';
+  const hasPasswordAttr = field.hasPassword
+    ? `data-has-password="${field.hasPassword}"`
+    : '';
 
   return `<div class="js-form-input" data-ref="${field.fieldRef}" ${dataAttr}>
     <label data-ref="label ${field.labelRef}">Label</label>
-    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} value="${field.value}">
+    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} ${hasPasswordAttr} value="${field.value}">
   </div>`;
 }
 
@@ -465,6 +468,7 @@ describe('FormController', () => {
           {
             ref: 'password',
             type: 'password',
+            hasPassword: 'true',
           },
         ]),
       );
@@ -477,6 +481,20 @@ describe('FormController', () => {
     it('clears the placeholder when the password field is focused', () => {
       ctrl.refs.password.focus();
       assert.equal(ctrl.refs.password.getAttribute('placeholder'), '');
+    });
+
+    it('doesnt add a placeholder if the user has no password', () => {
+      initForm(
+        formTemplate([
+          {
+            ref: 'password',
+            type: 'password',
+            hasPassword: 'False',
+          },
+        ]),
+      );
+
+      assert.equal(ctrl.refs.password.getAttribute('placeholder'), null);
     });
   });
 });

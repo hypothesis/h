@@ -5,11 +5,14 @@ Sets up the form handling and rendering library, deform, to use our own custom
 form templates in preference to the defaults.
 """
 
+from collections.abc import Callable
+
 import deform
 import pyramid_jinja2
 from markupsafe import Markup
 from pyramid import httpexceptions
 from pyramid.path import AssetResolver
+from pyramid.request import Request
 
 from h import i18n
 
@@ -75,7 +78,7 @@ def create_form(request, *args, **kwargs):
     default) will use the renderer configured in the :py:mod:`h.form` module.
     """
     env = request.registry[ENVIRONMENT_KEY]
-    renderer = Jinja2Renderer(env, {"feature": request.feature})
+    renderer = Jinja2Renderer(env, {"request": request, "feature": request.feature})
     kwargs.setdefault("renderer", renderer)
 
     return deform.Form(*args, **kwargs)
@@ -87,14 +90,33 @@ def configure_environment(config):  # pragma: no cover
     config.registry[ENVIRONMENT_KEY] = create_environment(base)
 
 
-def handle_form_submission(request, form, on_success, on_failure, flash_success=True):  # noqa: FBT002
+def handle_form_submission(
+    request: Request,
+    form: deform.form.Form | Callable[[], deform.form.Form],
+    on_success: Callable,
+    on_failure: Callable,
+    flash_success: bool = True,  # noqa: FBT001,FBT002
+):
     """
     Handle the submission of the given form in a standard way.
 
     :param request: the Pyramid request
 
-    :param form: the form that was submitted
-    :type form: deform.form.Form
+    :param form:
+        The form that was submitted or a callable that returns the form.
+
+        If `form` is a callable then it will be called twice:
+        the first time to return the form that was submitted (for validation
+        purposes), the second time to return the form that should be used to
+        render the response if the submission was successful.
+
+        This is useful in certain cases when the user submits one form and we
+        want the server to respond with another form. An example is the
+        add-password form for adding a password to an account that doesn't yet
+        have one: once the password has been successfully added the server
+        should respond with the change-password form (for changing the password
+        of an account that already has a password) rather than with the
+        add-password form again.
 
     :param on_success:
         A callback function to be called if the form validates successfully.
@@ -106,22 +128,23 @@ def handle_form_submission(request, form, on_success, on_failure, flash_success=
 
         If on_success() returns ``None`` then ``handle_form_submission()``
         will return ``HTTPFound(location=request.url)`` by default.
-    :type on_success: callable
 
     :param on_failure:
         A callback function that will be called if form validation fails in
         order to get the view callable result that should be returned if this is
         not an XHR request.
-    :type on_failure: callable
 
     :param flash_success:
         Whether to show a "success" flash message if handling the form succeeds.
         Applies to non-XHR form submissions only.
-    :type flash_success: bool
 
     """
+
+    def get_form():
+        return form() if callable(form) else form
+
     try:
-        appstruct = form.validate(request.POST.items())
+        appstruct = get_form().validate(request.POST.items())
     except deform.ValidationFailure:
         result = on_failure()
         request.response.status_int = 400
@@ -134,7 +157,7 @@ def handle_form_submission(request, form, on_success, on_failure, flash_success=
         if (not request.is_xhr) and flash_success:
             request.session.flash(_("Success. We've saved your changes."), "success")
 
-    return to_xhr_response(request, result, form)
+    return to_xhr_response(request, result, get_form())
 
 
 def to_xhr_response(request, non_xhr_result, form):

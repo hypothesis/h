@@ -374,43 +374,140 @@ class TestEmailChangeSchema:
         return models
 
 
+class TestPasswordAddSchema:
+    def test_valid(self, schema, valid_data):
+        appstruct = schema.deserialize(valid_data)
+
+        assert appstruct == {"csrf_token": None, **valid_data}
+
+    def test_invalid_csrf_token(self, schema, valid_data, pyramid_request):
+        del pyramid_request.headers["X-CSRF-Token"]
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize(valid_data)
+
+    @pytest.mark.parametrize(
+        "data,expected_error_dict",
+        [
+            pytest.param(
+                {"new_password": "pass", "new_password_confirm": "pass"},
+                {"new_password": "Must be 8 characters or more."},
+                id="password_too_short",
+            ),
+            pytest.param(
+                {
+                    "new_password": "valid_password",
+                    "new_password_confirm": "doesnt_match",
+                },
+                {"new_password_confirm": "The passwords must match."},
+                id="passwords_dont_match",
+            ),
+            pytest.param(
+                {"new_password": "foo", "new_password_confirm": "bar"},
+                {
+                    "new_password": "Must be 8 characters or more.",
+                },
+                id="password_too_short_and_passwords_dont_match",
+            ),
+        ],
+    )
+    def test_invalid(self, schema, data, expected_error_dict):
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize(data)
+
+        assert exc_info.value.asdict() == expected_error_dict
+
+    @pytest.fixture
+    def valid_data(self):
+        return {
+            "new_password": "valid_password",
+            "new_password_confirm": "valid_password",
+        }
+
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return schemas.PasswordAddSchema().bind(request=pyramid_csrf_request)
+
+
 @pytest.mark.usefixtures("user_password_service")
 class TestPasswordChangeSchema:
-    def test_it_is_invalid_if_passwords_dont_match(self, pyramid_csrf_request):
-        user = Mock()
-        pyramid_csrf_request.user = user
-        schema = schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
+    def test_valid(self, schema, valid_data, user, user_password_service):
+        appstruct = schema.deserialize(valid_data)
 
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize(
-                {
-                    "new_password": "foo-bar-baz",
-                    "new_password_confirm": "foo-bar-buzz",
-                    "password": "flibble",
-                }
-            )
+        user_password_service.check_password.assert_called_once_with(
+            user, "current_password"
+        )
+        assert appstruct == {"csrf_token": None, **valid_data}
 
-        assert "new_password_confirm" in exc.value.asdict()
-
-    def test_it_is_invalid_if_current_password_is_wrong(
-        self, pyramid_csrf_request, user_password_service
-    ):
-        user = Mock()
-        pyramid_csrf_request.user = user
-        schema = schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
+    def test_invalid_current_password(self, schema, valid_data, user_password_service):
         user_password_service.check_password.return_value = False
 
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize(
-                {
-                    "new_password": "foo-bar-baz",
-                    "new_password_confirm": "foo-bar-baz",
-                    "password": "flibble",
-                }
-            )
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize(valid_data)
 
-        user_password_service.check_password.assert_called_once_with(user, "flibble")
-        assert "password" in exc.value.asdict()
+        assert exc_info.value.asdict() == {"password": "Wrong password."}
+
+    def test_invalid_csrf_token(self, schema, valid_data, pyramid_request):
+        del pyramid_request.headers["X-CSRF-Token"]
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize(valid_data)
+
+    @pytest.mark.parametrize(
+        "data,expected_error_dict",
+        [
+            pytest.param(
+                {
+                    "password": "current_password",
+                    "new_password": "pass",
+                    "new_password_confirm": "pass",
+                },
+                {"new_password": "Must be 8 characters or more."},
+                id="password_too_short",
+            ),
+            pytest.param(
+                {
+                    "password": "current_password",
+                    "new_password": "valid_password",
+                    "new_password_confirm": "doesnt_match",
+                },
+                {"new_password_confirm": "The passwords must match."},
+                id="passwords_dont_match",
+            ),
+            pytest.param(
+                {
+                    "password": "current_password",
+                    "new_password": "foo",
+                    "new_password_confirm": "bar",
+                },
+                {
+                    "new_password": "Must be 8 characters or more.",
+                },
+                id="password_too_short_and_passwords_dont_match",
+            ),
+        ],
+    )
+    def test_invalid(self, schema, data, expected_error_dict):
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize(data)
+
+        assert exc_info.value.asdict() == expected_error_dict
+
+    @pytest.fixture
+    def user(self, pyramid_csrf_request):
+        return pyramid_csrf_request.user
+
+    @pytest.fixture
+    def valid_data(self):
+        return {
+            "password": "current_password",
+            "new_password": "valid_password",
+            "new_password_confirm": "valid_password",
+        }
+
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
 
 
 @pytest.mark.usefixtures("user_password_service")

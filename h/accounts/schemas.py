@@ -222,19 +222,47 @@ class EmailChangeSchema(CSRFSchema):
             raise exc
 
 
-class PasswordChangeSchema(CSRFSchema):
-    password = password_node(title=_("Current password"), inactive_label=_("Password"))
-    new_password = new_password_node(
-        title=_("New password"), hide_until_form_active=True
-    )
-    # No validators: all validation is done on the new_password field and we
-    # merely assert that the confirmation field is the same.
-    new_password_confirm = colander.SchemaNode(
+def new_password_confirm_node():
+    """Return a 'Confirm new password' node.
+
+    On forms for setting or changing a user's password this adds a 'Confirm new
+    password' field to get the user to enter the new password a second time for
+    confirmation.
+
+    """
+    # No validators: all validation is done on the schema's 'New password'
+    # field and then it's up to the schema to validate that this node's value
+    # matches the value of the 'New password' field.
+    return colander.SchemaNode(
         colander.String(),
         title=_("Confirm new password"),
         widget=deform.widget.PasswordWidget(autocomplete="new-password"),
         hide_until_form_active=True,
     )
+
+
+class PasswordAddSchema(CSRFSchema):
+    new_password = new_password_node(title=_("Add password"))
+    new_password_confirm = new_password_confirm_node()
+
+    def validator(self, node, value):
+        super().validator(node, value)
+
+        exc = colander.Invalid(node)
+
+        if value.get("new_password") != value.get("new_password_confirm"):
+            exc["new_password_confirm"] = _("The passwords must match.")
+
+        if exc.children:
+            raise exc
+
+
+class PasswordChangeSchema(CSRFSchema):
+    password = password_node(title=_("Current password"), inactive_label=_("Password"))
+    new_password = new_password_node(
+        title=_("New password"), hide_until_form_active=True
+    )
+    new_password_confirm = new_password_confirm_node()
 
     def validator(self, node, value):  # pragma: no cover
         super().validator(node, value)
@@ -244,7 +272,7 @@ class PasswordChangeSchema(CSRFSchema):
         user = request.user
 
         if value.get("new_password") != value.get("new_password_confirm"):
-            exc["new_password_confirm"] = _("The passwords must match")
+            exc["new_password_confirm"] = _("The passwords must match.")
 
         if not svc.check_password(user, value.get("password")):
             exc["password"] = _("Wrong password.")
