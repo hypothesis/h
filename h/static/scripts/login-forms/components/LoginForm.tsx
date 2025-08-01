@@ -9,8 +9,13 @@ import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { LoginConfigObject } from '../config';
 import { routes } from '../routes';
+import SocialLoginLink from './SocialLoginLink';
 
-export default function LoginForm() {
+export type LoginFormProps = {
+  enableSocialLogin: boolean;
+};
+
+export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
   const config = useContext(Config) as LoginConfigObject;
 
   const username = useFormValue(config.formData?.username ?? '', {
@@ -25,7 +30,7 @@ export default function LoginForm() {
   // when visiting the website directly.
   const title = config.forOAuth ? (
     <>
-      Log in with Hypothesis{' '}
+      Log in to Hypothesis{' '}
       <LogoIcon className="inline ml-1 w-[28px] h-[28px]" />
     </>
   ) : (
@@ -42,15 +47,25 @@ export default function LoginForm() {
       <FormHeader classes={config.forOAuth ? 'text-center' : undefined}>
         {title}
       </FormHeader>
-      <FormContainer>
-        <Form csrfToken={config.csrfToken}>
+      <FormContainer
+        // The max width here and item gap should match SignupSelectForm.
+        //
+        // This keeps the positioning of items consistent if the user navigates
+        // from the login page to the signup page.
+        classes="mx-auto max-w-[400px] flex flex-col gap-y-3 items-stretch"
+      >
+        <Form
+          csrfToken={config.csrfToken}
+          // Remove `mx-auto` from this form since it is applied to the parent.
+          center={false}
+        >
           <TextField
             type="input"
             name="username"
             value={username.value}
             fieldError={username.error}
             onChangeValue={username.update}
-            label="Username / email"
+            label="Username or email"
             autofocus={autofocusUsername}
             required
             showRequired={false}
@@ -67,7 +82,7 @@ export default function LoginForm() {
             required
             showRequired={false}
           />
-          <div className="text-right">
+          <div className="pt-2 flex flex-row items-center">
             <Link
               href={routes.forgotPassword}
               underline="always"
@@ -76,38 +91,25 @@ export default function LoginForm() {
             >
               Forgot your password?
             </Link>
-          </div>
-          <div className="mb-8 pt-2 flex items-center gap-x-4">
-            {config.forOAuth && (
-              <Button
-                type="button"
-                variant="secondary"
-                data-testid="cancel-button"
-                onClick={() => window.close()}
-              >
-                Cancel
-              </Button>
-            )}
             <div className="grow" />
             <Button type="submit" variant="primary" data-testid="submit-button">
               Log in
             </Button>
           </div>
         </Form>
-        {config.features.log_in_with_orcid && (
-          <p>
-            <a href={routes.loginWithORCID}>Continue with ORCID</a>
-          </p>
-        )}
-        {config.features.log_in_with_google && (
-          <p>
-            <a href={routes.loginWithGoogle}>Continue with Google</a>
-          </p>
-        )}
-        {config.features.log_in_with_facebook && (
-          <p>
-            <a href={routes.loginWithFacebook}>Continue with Facebook</a>
-          </p>
+        {enableSocialLogin && (
+          <>
+            <div className="self-center uppercase">or</div>
+            {config.features.log_in_with_google && (
+              <SocialLoginLink provider="google" />
+            )}
+            {config.features.log_in_with_facebook && (
+              <SocialLoginLink provider="facebook" />
+            )}
+            {config.features.log_in_with_orcid && (
+              <SocialLoginLink provider="orcid" />
+            )}
+          </>
         )}
       </FormContainer>
     </>

@@ -1,53 +1,11 @@
-import {
-  ArrowRightIcon,
-  EmailFilledIcon,
-  ExternalIcon,
-} from '@hypothesis/frontend-shared';
-import type { ComponentChildren } from 'preact';
+import { EmailFilledIcon } from '@hypothesis/frontend-shared';
 import { useContext } from 'preact/hooks';
-import { Link as RouterLink } from 'wouter-preact';
 
 import FormHeader from '../../forms-common/components/FormHeader';
 import { Config } from '../config';
 import { routes } from '../routes';
-import FacebookIcon from './FacebookIcon';
-import GoogleIcon from './GoogleIcon';
-import ORCIDIcon from './ORCIDIcon';
-
-type SocialSignupLinkProps = {
-  /** True if this navigation is handled client-side. */
-  routerLink?: boolean;
-
-  /** Target URL for the link. */
-  href: string;
-
-  /** Icon for the identity provider. */
-  providerIcon: ComponentChildren;
-
-  /** Text for the link. */
-  children: ComponentChildren;
-};
-
-function SignupLink({
-  routerLink,
-  href,
-  providerIcon,
-  children,
-}: SocialSignupLinkProps) {
-  const LinkType = routerLink ? RouterLink : 'a';
-  const NavigateIcon = routerLink ? ArrowRightIcon : ExternalIcon;
-
-  return (
-    <LinkType
-      href={href}
-      className="border rounded-md p-3 flex flex-row items-center gap-x-3"
-    >
-      {providerIcon}
-      <span className="grow">{children}</span>
-      <NavigateIcon className="w-[20px] h-[20px]" />
-    </LinkType>
-  );
-}
+import LoginLink from './LoginLink';
+import SocialLoginLink from './SocialLoginLink';
 
 /**
  * Form for the first page of the signup flow which gives users a list of
@@ -66,7 +24,7 @@ export default function SignupSelectForm() {
         // provider list.
         className="mt-[40px] self-center flex flex-col gap-y-3 text-grey-7 w-[400px]"
       >
-        <SignupLink
+        <LoginLink
           routerLink={true}
           href={routes.signupWithEmail}
           providerIcon={
@@ -75,31 +33,16 @@ export default function SignupSelectForm() {
           }
         >
           Sign up with <b>email</b>
-        </SignupLink>
+        </LoginLink>
         <div className="self-center uppercase">or</div>
         {config.features.log_in_with_google && (
-          <SignupLink
-            href={routes.loginWithGoogle}
-            providerIcon={<GoogleIcon className="inline" />}
-          >
-            Continue with <b>Google</b>
-          </SignupLink>
+          <SocialLoginLink provider="google" />
         )}
         {config.features.log_in_with_facebook && (
-          <SignupLink
-            href={routes.loginWithFacebook}
-            providerIcon={<FacebookIcon className="inline" />}
-          >
-            Continue with <b>Facebook</b>
-          </SignupLink>
+          <SocialLoginLink provider="facebook" />
         )}
         {config.features.log_in_with_orcid && (
-          <SignupLink
-            href={routes.loginWithORCID}
-            providerIcon={<ORCIDIcon className="inline" />}
-          >
-            Continue with <b>ORCID</b>
-          </SignupLink>
+          <SocialLoginLink provider="orcid" />
         )}
       </div>
     </div>

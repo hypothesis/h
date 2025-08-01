@@ -132,6 +132,19 @@ describe('AppRoot', () => {
     {
       path: '/Login',
       selector: 'LoginForm',
+      props: {
+        enableSocialLogin: false,
+      },
+    },
+    {
+      path: '/Login',
+      selector: 'LoginForm',
+      features: {
+        log_in_with_google: true,
+      },
+      props: {
+        enableSocialLogin: true,
+      },
     },
     // "/signup" shows email signup form if all social logins are disabled
     {

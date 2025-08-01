@@ -6,7 +6,9 @@ export type FormContainerProps = {
   classes?: string;
 };
 
-/** A container for a form with a title. */
+/**
+ * Container that sets default styles for a form.
+ */
 export default function FormContainer({
   children,
   classes,

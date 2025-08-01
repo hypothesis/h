@@ -25,45 +25,41 @@ describe('SignupSelectForm', () => {
     };
   });
 
+  it('renders email signup link', () => {
+    const wrapper = createComponent();
+    const emailLink = wrapper.find(`a[href="${routes.signupWithEmail}"]`);
+    assert.isTrue(emailLink.exists());
+    assert.include(emailLink.text(), 'Sign up with email');
+  });
+
   [
     {
-      provider: 'email',
-      link: routes.signupWithEmail,
-      text: 'Sign up with email',
-    },
-    {
-      provider: 'Google',
-      link: routes.loginWithGoogle,
-      text: 'Continue with Google',
+      provider: 'google',
       features: {
         log_in_with_google: true,
       },
     },
     {
-      provider: 'Facebook',
-      link: routes.loginWithFacebook,
-      text: 'Continue with Facebook',
+      provider: 'facebook',
       features: {
         log_in_with_facebook: true,
       },
     },
     {
-      provider: 'ORCID',
-      link: routes.loginWithORCID,
-      text: 'Continue with ORCID',
+      provider: 'orcid',
       features: {
         log_in_with_orcid: true,
       },
     },
-  ].forEach(({ provider, link, text, features = {} }) => {
-    it(`renders ${provider} signup link with correct href`, () => {
+  ].forEach(({ provider, features = {} }) => {
+    it(`renders ${provider} signup link if feature enabled`, () => {
       fakeConfig.features = features;
 
       const wrapper = createComponent();
 
-      const emailLink = wrapper.find(`a[href="${link}"]`);
-      assert.isTrue(emailLink.exists());
-      assert.include(emailLink.text(), text);
+      const link = wrapper.find('SocialLoginLink');
+      assert.isTrue(link.exists());
+      assert.equal(link.prop('provider'), provider);
     });
   });
 });

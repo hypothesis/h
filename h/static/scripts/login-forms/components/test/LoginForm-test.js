@@ -37,10 +37,10 @@ describe('LoginForm', () => {
     };
   };
 
-  const createWrapper = () => {
+  const createWrapper = (props = {}) => {
     const wrapper = mount(
       <Config.Provider value={fakeConfig}>
-        <LoginForm />
+        <LoginForm {...props} />
       </Config.Provider>,
     );
     const elements = getElements(wrapper);
@@ -66,22 +66,13 @@ describe('LoginForm', () => {
 
   [
     { forOAuth: false, expected: 'Log in' },
-    { forOAuth: true, expected: 'Log in with Hypothesis' },
+    { forOAuth: true, expected: 'Log in to Hypothesis' },
   ].forEach(({ forOAuth, expected }) => {
     it('renders expected title', () => {
       fakeConfig.forOAuth = forOAuth;
       const { wrapper } = createWrapper();
       assert.equal(wrapper.find('h1').text().trim(), expected);
     });
-  });
-
-  it('renders the cancel button in the OAuth popup window', () => {
-    fakeConfig.forOAuth = true;
-
-    const { elements } = createWrapper();
-    const { cancelButton } = elements;
-
-    assert.isTrue(cancelButton.exists());
   });
 
   it('displays form errors', () => {
@@ -180,21 +171,36 @@ describe('LoginForm', () => {
     assert.equal(updatedElements.passwordField.prop('value'), password);
   });
 
-  it('calls window close when cancel button is clicked', () => {
-    fakeConfig.forOAuth = true;
-    const { elements } = createWrapper();
-    const { cancelButton } = elements;
-    const stub = sinon.stub(window, 'close');
+  it('hides social login options if `enableSocialLogin` is false', () => {
+    fakeConfig.features = {
+      log_in_with_google: true,
+      log_in_with_orcid: true,
+      log_in_with_facebook: true,
+    };
+    const { wrapper } = createWrapper();
+    assert.isFalse(wrapper.exists('SocialLoginLink'));
+  });
 
-    try {
-      act(() => {
-        cancelButton.prop('onClick')();
-      });
-
-      assert.calledOnce(stub);
-    } finally {
-      stub.restore();
-    }
+  [
+    {
+      feature: 'log_in_with_google',
+      provider: 'google',
+    },
+    {
+      feature: 'log_in_with_facebook',
+      provider: 'facebook',
+    },
+    {
+      feature: 'log_in_with_orcid',
+      provider: 'orcid',
+    },
+  ].forEach(({ feature, provider }) => {
+    it('shows enabled social login options', () => {
+      fakeConfig.features = { [feature]: true };
+      const { wrapper } = createWrapper({ enableSocialLogin: true });
+      const login = wrapper.find('SocialLoginLink');
+      assert.equal(login.prop('provider'), provider);
+    });
   });
 
   it(
