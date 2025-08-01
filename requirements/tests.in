@@ -10,4 +10,5 @@ h-matchers
 h-testkit
 httpretty
 freezegun
+hypothesis
 pytest-mock
