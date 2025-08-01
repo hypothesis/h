@@ -75,7 +75,7 @@ def create_form(request, *args, **kwargs):
     default) will use the renderer configured in the :py:mod:`h.form` module.
     """
     env = request.registry[ENVIRONMENT_KEY]
-    renderer = Jinja2Renderer(env, {"feature": request.feature})
+    renderer = Jinja2Renderer(env, {"request": request, "feature": request.feature})
     kwargs.setdefault("renderer", renderer)
 
     return deform.Form(*args, **kwargs)
@@ -120,8 +120,12 @@ def handle_form_submission(request, form, on_success, on_failure, flash_success=
     :type flash_success: bool
 
     """
+
+    def get_form():
+        return form() if callable(form) else form
+
     try:
-        appstruct = form.validate(request.POST.items())
+        appstruct = get_form().validate(request.POST.items())
     except deform.ValidationFailure:
         result = on_failure()
         request.response.status_int = 400
@@ -134,7 +138,7 @@ def handle_form_submission(request, form, on_success, on_failure, flash_success=
         if (not request.is_xhr) and flash_success:
             request.session.flash(_("Success. We've saved your changes."), "success")
 
-    return to_xhr_response(request, result, form)
+    return to_xhr_response(request, result, get_form())
 
 
 def to_xhr_response(request, non_xhr_result, form):
