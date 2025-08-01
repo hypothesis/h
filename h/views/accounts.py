@@ -433,29 +433,38 @@ class AccountController:
     def __init__(self, request):
         self.request = request
 
-        email_schema = schemas.EmailChangeSchema().bind(request=request)
-        password_schema = schemas.PasswordChangeSchema().bind(request=request)
-
         # Ensure deform generates unique field IDs for each field in this
         # multiple-form page.
         counter = itertools.count()
 
-        self.forms = {
-            "email": request.create_form(
-                email_schema,
-                buttons=(_("Save"),),
-                formid="email",
-                counter=counter,
-                use_inline_editing=True,
-            ),
-            "password": request.create_form(
-                password_schema,
-                buttons=(_("Save"),),
-                formid="password",
-                counter=counter,
-                use_inline_editing=True,
-            ),
-        }
+        self.email_form = request.create_form(
+            schemas.EmailChangeSchema().bind(request=request),
+            buttons=(_("Save"),),
+            formid="email",
+            counter=counter,
+            use_inline_editing=True,
+        )
+        self.addpassword_form = request.create_form(
+            schemas.PasswordAddSchema().bind(request=request),
+            buttons=(_("Save"),),
+            formid="password",
+            counter=counter,
+            use_inline_editing=True,
+        )
+        self.changepassword_form = request.create_form(
+            schemas.PasswordChangeSchema().bind(request=request),
+            buttons=(_("Save"),),
+            formid="password",
+            counter=counter,
+            use_inline_editing=True,
+        )
+
+    @property
+    def password_form(self):
+        if self.request.user.password:
+            return self.changepassword_form
+
+        return self.addpassword_form
 
     @view_config(request_method="GET")
     def get(self):
@@ -467,7 +476,7 @@ class AccountController:
         # Called by Pyramid when the change email form is submitted.
         return form.handle_form_submission(
             self.request,
-            self.forms["email"],
+            self.email_form,
             on_success=self.update_email_address,
             on_failure=self._template_data,
         )
@@ -477,7 +486,7 @@ class AccountController:
         # Called by Pyramid when the change password form is submitted.
         return form.handle_form_submission(
             self.request,
-            self.forms["password"],
+            lambda: self.password_form,
             on_success=self.update_password,
             on_failure=self._template_data,
         )
@@ -492,8 +501,8 @@ class AccountController:
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""
         email = self.request.user.email or ""
-        password_form = self.forms["password"].render()
-        email_form = self.forms["email"].render({"email": email})
+        password_form = self.password_form.render()
+        email_form = self.email_form.render({"email": email})
 
         feature_service = self.request.find_service(name="feature")
         log_in_with_orcid = feature_service.enabled(

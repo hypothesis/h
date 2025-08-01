@@ -195,7 +195,10 @@ export class FormController extends Controller {
       // The UA may or may not autofill password fields.
       // Set a dummy password as a placeholder when the field is not being edited
       // so that it appears non-empty if the UA doesn't autofill it.
-      if (field.input.type === 'password') {
+      if (
+        field.input.type === 'password' &&
+        field.input.dataset.hasPassword === 'true'
+      ) {
         field.input.setAttribute('placeholder', !isEditing ? '••••••••' : '');
       }
     });
