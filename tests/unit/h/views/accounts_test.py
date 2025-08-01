@@ -681,7 +681,7 @@ class TestAccountController:
         self, form_validating_to, pyramid_request
     ):
         controller = views.AccountController(pyramid_request)
-        controller.forms["email"] = form_validating_to({"email": "new_email_address"})
+        controller.email_form = form_validating_to({"email": "new_email_address"})
 
         controller.post_email_form()
 
@@ -691,7 +691,7 @@ class TestAccountController:
         self, invalid_form, pyramid_request
     ):
         controller = views.AccountController(pyramid_request)
-        controller.forms["email"] = invalid_form()
+        controller.email_form = invalid_form()
         original_email = pyramid_request.user.email
 
         controller.post_email_form()
@@ -702,14 +702,14 @@ class TestAccountController:
         self, invalid_form, pyramid_request
     ):
         controller = views.AccountController(pyramid_request)
-        controller.forms["email"] = invalid_form()
+        controller.email_form = invalid_form()
 
         result = controller.post_email_form()
 
         assert result == {
             "email": pyramid_request.user.email,
-            "email_form": controller.forms["email"].render(),
-            "password_form": controller.forms["password"].render(),
+            "email_form": controller.email_form.render(),
+            "password_form": controller.password_form.render(),
             "log_in_with_orcid": False,
             "orcid": None,
             "orcid_url": None,
@@ -723,7 +723,7 @@ class TestAccountController:
         self, form_validating_to, pyramid_request, user_password_service
     ):
         controller = views.AccountController(pyramid_request)
-        controller.forms["password"] = form_validating_to(
+        controller.addpassword_form = form_validating_to(
             {"new_password": "my_new_password"}
         )
 
@@ -737,7 +737,7 @@ class TestAccountController:
         self, invalid_form, pyramid_request, user_password_service
     ):
         controller = views.AccountController(pyramid_request)
-        controller.forms["password"] = invalid_form()
+        controller.addpassword_form = invalid_form()
 
         controller.post_password_form()
 
@@ -747,14 +747,14 @@ class TestAccountController:
         self, invalid_form, pyramid_request
     ):
         controller = views.AccountController(pyramid_request)
-        controller.forms["password"] = invalid_form()
+        controller.addpassword_form = invalid_form()
 
         result = controller.post_password_form()
 
         assert result == {
             "email": pyramid_request.user.email,
-            "email_form": controller.forms["email"].render(),
-            "password_form": controller.forms["password"].render(),
+            "email_form": controller.email_form.render(),
+            "password_form": controller.addpassword_form.render(),
             "log_in_with_orcid": False,
             "orcid": None,
             "orcid_url": None,
