@@ -28,10 +28,11 @@ export default function AppRoot({ config }: AppRootProps) {
   const { toastMessages, dismissToastMessage } =
     useToastMessages(initialToasts);
 
-  const enableSocialLogin =
+  const enableSocialLogin = Boolean(
     config.features.log_in_with_orcid ||
-    config.features.log_in_with_google ||
-    config.features.log_in_with_facebook;
+      config.features.log_in_with_google ||
+      config.features.log_in_with_facebook,
+  );
 
   return (
     <div>
@@ -43,7 +44,7 @@ export default function AppRoot({ config }: AppRootProps) {
         <Router>
           <Switch>
             <Route path={routes.login}>
-              <LoginForm />
+              <LoginForm enableSocialLogin={enableSocialLogin} />
             </Route>
             <Route path={routes.signup}>
               {enableSocialLogin && <SignupSelectForm />}

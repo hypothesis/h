@@ -1,3 +1,4 @@
+import classnames from 'classnames';
 import type { ComponentChildren } from 'preact';
 import type { JSX } from 'preact';
 
@@ -12,18 +13,29 @@ export type FormProps = JSX.FormHTMLAttributes & {
    */
   csrfToken: string | null;
 
+  /** Center form in parent container. Defaults to true. */
+  center?: boolean;
+
   children: ComponentChildren;
 };
 
 /**
  * Wrapper around an HTML form which adds standard styling, CSRF token etc.
  */
-export default function Form({ children, csrfToken, ...formAttrs }: FormProps) {
+export default function Form({
+  center = true,
+  children,
+  csrfToken,
+  ...formAttrs
+}: FormProps) {
   return (
     <form
       method="POST"
       data-testid="form"
-      className="max-w-[530px] mx-auto flex flex-col gap-y-4"
+      className={classnames(
+        'max-w-[530px] flex flex-col gap-y-4',
+        center && 'mx-auto',
+      )}
       {...formAttrs}
     >
       {csrfToken && <input type="hidden" name="csrf_token" value={csrfToken} />}
