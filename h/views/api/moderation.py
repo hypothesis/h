@@ -46,7 +46,8 @@ def unhide(context, request):
     versions=["v1", "v2"],
     route_name="api.annotation_moderation",
     request_method="PATCH",
-    link_name="annotation_moderation",
+    link_name="annotation.moderate",
+    permission=Permission.Annotation.MODERATE,
 )
 def change_annotation_moderation_status(context, request):
     params = validate_json(
