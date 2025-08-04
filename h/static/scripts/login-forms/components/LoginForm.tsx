@@ -19,12 +19,8 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
   const config = useContext(Config) as LoginConfigObject;
   const form = config.form;
 
-  const username = useFormValue(form.data?.username ?? '', {
-    initialError: form.errors?.username,
-  });
-  const password = useFormValue(form.data?.password ?? '', {
-    initialError: form.errors?.password,
-  });
+  const username = useFormValue(form, 'username', '');
+  const password = useFormValue(form, 'password', '');
 
   // In the OAuth window we include "with Hypothesis" and a logo to make it
   // more obvious which credentials are expected, as this is less obvious than

@@ -4,20 +4,32 @@ import { useFormValue } from '../form-value';
 
 describe('useFormValue', () => {
   let lastValue;
-  function TestWidget({ initial, opts }) {
-    lastValue = useFormValue(initial, opts);
+
+  const form = {
+    data: { text_field: 'foo' },
+  };
+
+  const formWithError = {
+    ...form,
+    errors: {
+      text_field: 'Server error',
+    },
+  };
+
+  function TestWidget({ form, field, defaultValue = '', opts = {} }) {
+    lastValue = useFormValue(form, field, defaultValue, opts);
     return <div />;
   }
 
   it('returns initial value', () => {
-    mount(<TestWidget initial="foo" />);
+    mount(<TestWidget form={form} field="text_field" />);
     assert.equal(lastValue.value, 'foo');
     assert.isUndefined(lastValue.error);
     assert.isFalse(lastValue.changed);
   });
 
   it('returns new value after update', () => {
-    const wrapper = mount(<TestWidget initial="foo" />);
+    const wrapper = mount(<TestWidget form={form} field="text_field" />);
 
     lastValue.update('new-value');
     wrapper.update(); // Flush render
@@ -28,7 +40,7 @@ describe('useFormValue', () => {
   });
 
   it('returns new value after commit', () => {
-    const wrapper = mount(<TestWidget initial="foo" />);
+    const wrapper = mount(<TestWidget form={form} field="text_field" />);
 
     lastValue.commit('new-value');
     wrapper.update(); // Flush render
@@ -41,7 +53,9 @@ describe('useFormValue', () => {
   it('updates committed state', () => {
     const validate = sinon.stub();
     const opts = { validate };
-    const wrapper = mount(<TestWidget initial="foo" opts={opts} />);
+    const wrapper = mount(
+      <TestWidget form={form} field="text_field" opts={opts} />,
+    );
     assert.isTrue(lastValue.committed);
 
     lastValue.update('new-val');
@@ -57,10 +71,11 @@ describe('useFormValue', () => {
 
   it('returns form error', () => {
     const opts = {
-      initialError: 'Server error',
       validate: value => (value === 'invalid' ? 'Client error' : undefined),
     };
-    const wrapper = mount(<TestWidget initial="foo" opts={opts} />);
+    const wrapper = mount(
+      <TestWidget form={formWithError} field="text_field" opts={opts} />,
+    );
     assert.equal(lastValue.error, 'Server error');
 
     lastValue.update('invalid');
