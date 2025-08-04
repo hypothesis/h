@@ -19,8 +19,6 @@ export type Group = {
 };
 
 export type ConfigObject = {
-  /** The URLs of the app's CSS stylesheets. */
-  styles: string[];
   api: {
     createGroup: APIConfig;
     updateGroup?: APIConfig;
