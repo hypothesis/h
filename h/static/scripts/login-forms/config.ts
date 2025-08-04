@@ -1,5 +1,7 @@
 import { createContext } from 'preact';
 
+import type { FormFields } from '../forms-common/config';
+
 export type FlashMessage = {
   type: 'success' | 'error';
   message: string;
@@ -17,14 +19,10 @@ export type ConfigBase = {
 
 /** Data passed to frontend for login form. */
 export type LoginConfigObject = ConfigBase & {
-  formErrors?: {
-    username?: string;
-    password?: string;
-  };
-  formData?: {
-    username?: string;
-    password?: string;
-  };
+  form: FormFields<{
+    username: string;
+    password: string;
+  }>;
   forOAuth?: boolean;
 };
 
@@ -35,19 +33,13 @@ export type SocialLoginIdentity = {
 
 /** Data passed to frontend for signup form. */
 export type SignupConfigObject = ConfigBase & {
-  formErrors?: {
-    username?: string;
-    password?: string;
-    email?: string;
-    privacy_accepted?: string;
-  };
-  formData?: {
+  form: FormFields<{
     username: string;
     password: string;
     email: string;
     privacy_accepted: boolean;
     comms_opt_in: boolean;
-  };
+  }>;
   identity?: SocialLoginIdentity;
 };
 

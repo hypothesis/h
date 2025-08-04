@@ -130,8 +130,10 @@ class AuthController:
             # Prefill username from query params. This supports a flow where
             # the user is redirected to the login form with the username
             # pre-filled after activating their account.
-            "formData": {
-                "username": self.request.GET.get("username"),
+            "form": {
+                "data": {
+                    "username": self.request.GET.get("username"),
+                },
             },
         }
 
@@ -154,10 +156,12 @@ class AuthController:
             appstruct = self.form.validate(self.request.POST.items())
         except deform.ValidationFailure as e:
             js_config = self._js_config()
-            js_config["formErrors"] = e.error.asdict()
-            js_config["formData"] = {
-                "username": self.request.POST.get("username", ""),
-                "password": self.request.POST.get("password", ""),
+            js_config["form"] = {
+                "errors": e.error.asdict(),
+                "data": {
+                    "username": self.request.POST.get("username", ""),
+                    "password": self.request.POST.get("password", ""),
+                },
             }
             return {
                 "js_config": js_config,

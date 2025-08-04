@@ -17,12 +17,13 @@ export type LoginFormProps = {
 
 export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
   const config = useContext(Config) as LoginConfigObject;
+  const form = config.form;
 
-  const username = useFormValue(config.formData?.username ?? '', {
-    initialError: config.formErrors?.username,
+  const username = useFormValue(form.data?.username ?? '', {
+    initialError: form.errors?.username,
   });
-  const password = useFormValue(config.formData?.password ?? '', {
-    initialError: config.formErrors?.password,
+  const password = useFormValue(form.data?.password ?? '', {
+    initialError: form.errors?.password,
   });
 
   // In the OAuth window we include "with Hypothesis" and a logo to make it

@@ -18,7 +18,8 @@
   <div class="form-container">
     <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
 
-    {% if not js_config.get("formData") %}
+    {# An empty "form" means signup was successful. Otherwise there were errors. #}
+    {% if not js_config.get("form") %}
       <h1 class="form-header">
         {{ self.page_title() }}
       </h1>
@@ -34,7 +35,8 @@
       <div id="login-form"></div>
     {% endif %}
     <footer class="form-footer">
-      {% if not js_config.get("formData") %}
+      {# An empty "form" means signup was successful. Otherwise there were errors. #}
+      {% if not js_config.get("form") %}
         Already activated your account?
       {% else %}
         Already have an account?

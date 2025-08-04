@@ -10,14 +10,15 @@ describe('SignupForm', () => {
   beforeEach(() => {
     fakeConfig = {
       csrfToken: 'fake-csrf-token',
-      formData: {
-        username: '',
-        email: '',
-        password: '',
-        privacy_accepted: false,
-        comms_opt_in: false,
+      form: {
+        data: {
+          username: '',
+          email: '',
+          password: '',
+          privacy_accepted: false,
+          comms_opt_in: false,
+        },
       },
-      formErrors: {},
     };
   });
 
@@ -68,7 +69,7 @@ describe('SignupForm', () => {
   });
 
   it('displays form errors', () => {
-    fakeConfig.formErrors = {
+    fakeConfig.form.errors = {
       username: 'Invalid username',
       email: 'Invalid email',
       password: 'Invalid password',
@@ -81,21 +82,21 @@ describe('SignupForm', () => {
 
     assert.equal(
       usernameField.prop('fieldError'),
-      fakeConfig.formErrors.username,
+      fakeConfig.form.errors.username,
     );
-    assert.equal(emailField.prop('fieldError'), fakeConfig.formErrors.email);
+    assert.equal(emailField.prop('fieldError'), fakeConfig.form.errors.email);
     assert.equal(
       passwordField.prop('fieldError'),
-      fakeConfig.formErrors.password,
+      fakeConfig.form.errors.password,
     );
     assert.equal(
       privacyCheckbox.prop('error'),
-      fakeConfig.formErrors.privacy_accepted,
+      fakeConfig.form.errors.privacy_accepted,
     );
   });
 
-  it('pre-fills form fields from formData', () => {
-    fakeConfig.formData = {
+  it('pre-fills form fields from form data', () => {
+    fakeConfig.form.data = {
       username: 'testuser',
       email: 'test@example.com',
       password: 'testpassword',
@@ -112,16 +113,16 @@ describe('SignupForm', () => {
       commsCheckbox,
     } = elements;
 
-    assert.equal(usernameField.prop('value'), fakeConfig.formData.username);
-    assert.equal(emailField.prop('value'), fakeConfig.formData.email);
-    assert.equal(passwordField.prop('value'), fakeConfig.formData.password);
+    assert.equal(usernameField.prop('value'), fakeConfig.form.data.username);
+    assert.equal(emailField.prop('value'), fakeConfig.form.data.email);
+    assert.equal(passwordField.prop('value'), fakeConfig.form.data.password);
     assert.equal(
       privacyCheckbox.prop('checked'),
-      fakeConfig.formData.privacy_accepted,
+      fakeConfig.form.data.privacy_accepted,
     );
     assert.equal(
       commsCheckbox.prop('checked'),
-      fakeConfig.formData.comms_opt_in,
+      fakeConfig.form.data.comms_opt_in,
     );
   });
 
