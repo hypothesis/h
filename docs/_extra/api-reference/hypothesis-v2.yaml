@@ -735,6 +735,10 @@ paths:
         '204':
           $ref: '#/components/responses/NoContent'
 
+  # ---------------------------------------------------------------------------
+  # Annotation Moderation Operations: Change status
+  # ---------------------------------------------------------------------------
+  /annotations/{id}/moderation:
     # ----------------------------------------------------------
     # PATCH annotations/{id}/moderation - Change the moderation_status of an annotation
     # ----------------------------------------------------------
