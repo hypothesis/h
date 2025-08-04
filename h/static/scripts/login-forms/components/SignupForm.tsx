@@ -68,8 +68,7 @@ export default function SignupForm({
   const [idInfoJWT, setIdInfoJWT] = useState<string | null>(null);
   const form = config.form;
 
-  const username = useFormValue(form.data?.username ?? '', {
-    initialError: form.errors?.username,
+  const username = useFormValue(form, 'username', '', {
     validate: (username, committed) => {
       if (!username.match(/^[A-Za-z0-9_.]*$/)) {
         return 'Must have only letters, numbers, periods and underscores.';
@@ -80,16 +79,10 @@ export default function SignupForm({
       return undefined;
     },
   });
-  const email = useFormValue(form.data?.email ?? '', {
-    initialError: form.errors?.email,
-  });
-  const password = useFormValue(form.data?.password ?? '', {
-    initialError: form.errors?.password,
-  });
-  const privacyAccepted = useFormValue(form.data?.privacy_accepted ?? false, {
-    initialError: form.errors?.privacy_accepted,
-  });
-  const commsOptIn = useFormValue(form.data?.comms_opt_in ?? false);
+  const email = useFormValue(form, 'email', '');
+  const password = useFormValue(form, 'password', '');
+  const privacyAccepted = useFormValue(form, 'privacy_accepted', false);
+  const commsOptIn = useFormValue(form, 'comms_opt_in', false);
 
   useLayoutEffect(() => {
     const url = new URL(location_.href);

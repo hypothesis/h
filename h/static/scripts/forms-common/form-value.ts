@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'preact/hooks';
 
+import type { FormFields } from './config';
+
 export type FormValueOptions<T> = {
   /**
    * Validate a form value. The callback returns undefined if the form is
@@ -17,13 +19,6 @@ export type FormValueOptions<T> = {
    *   user signals they have finished editing the field).
    */
   validate?: (value: T, committed: boolean) => string | undefined;
-
-  /**
-   * The error from when the form was last submitted.
-   *
-   * This is used if the form value has not been changed since it was submitted.
-   */
-  initialError?: string;
 };
 
 export type FormValue<T> = {
@@ -74,22 +69,29 @@ export type FormValue<T> = {
  *  - Whether the value has changed since the form was last submitted
  *  - The validation error for the field, which may come from a submission, or
  *    local validation.
+ *
+ * @param fields - Initial values and validation errors for the fields
+ * @param field - Name of form field
+ * @param defaultValue - Default value if no initial value is present in `fields`
  */
-export function useFormValue<T>(
-  initial: T,
-  opts: FormValueOptions<T> = {},
-): FormValue<T> {
-  const [value, setValue] = useState(initial);
+export function useFormValue<Fields, F extends keyof Fields>(
+  fields: FormFields<Fields>,
+  field: F,
+  defaultValue: Fields[F],
+  opts: FormValueOptions<Fields[F]> = {},
+): FormValue<Fields[F]> {
+  const initialValue = fields.data?.[field] ?? defaultValue;
+  const [value, setValue] = useState(initialValue);
   const [changed, setChanged] = useState(false);
   const [committed, setCommitted] = useState(true);
 
-  const update = useCallback((value: T) => {
+  const update = useCallback((value: Fields[F]) => {
     setValue(value);
     setCommitted(false);
     setChanged(true);
   }, []);
 
-  const commit = useCallback((value: T) => {
+  const commit = useCallback((value: Fields[F]) => {
     setValue(value);
     setCommitted(true);
     setChanged(true);
@@ -99,7 +101,7 @@ export function useFormValue<T>(
   if (changed) {
     error = opts.validate?.(value, committed);
   } else {
-    error = opts.initialError;
+    error = fields.errors?.[field];
   }
 
   return { value, update, commit, changed, committed, error };
