@@ -1,3 +1,12 @@
+/** Data for an HTML form. */
+export type FormFields<Fields> = {
+  /** Initial values for the form fields. */
+  data?: Fields;
+
+  /** Validation errors associated with individual fields. */
+  errors?: Record<keyof Fields, string>;
+};
+
 /** Return the frontend config from the page's <script class="js-config">. */
 export function readConfig<T>(): T {
   try {

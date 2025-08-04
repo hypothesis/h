@@ -11,11 +11,13 @@ describe('LoginForm', () => {
   beforeEach(() => {
     fakeConfig = {
       csrfToken: 'fake-csrf-token',
-      formData: {
-        username: '',
-        password: '',
+      form: {
+        data: {
+          username: '',
+          password: '',
+        },
+        errors: {},
       },
-      formErrors: {},
       features: {
         log_in_with_orcid: true,
       },
@@ -76,7 +78,7 @@ describe('LoginForm', () => {
   });
 
   it('displays form errors', () => {
-    fakeConfig.formErrors = {
+    fakeConfig.form.errors = {
       username: 'Invalid username',
       password: 'Invalid password',
     };
@@ -86,16 +88,16 @@ describe('LoginForm', () => {
 
     assert.equal(
       usernameField.prop('fieldError'),
-      fakeConfig.formErrors.username,
+      fakeConfig.form.errors.username,
     );
     assert.equal(
       passwordField.prop('fieldError'),
-      fakeConfig.formErrors.password,
+      fakeConfig.form.errors.password,
     );
   });
 
-  it('pre-fills form fields from formData', () => {
-    fakeConfig.formData = {
+  it('pre-fills form fields from form data', () => {
+    fakeConfig.form.data = {
       username: 'testuser',
       password: 'testpassword',
     };
@@ -103,8 +105,8 @@ describe('LoginForm', () => {
     const { elements } = createWrapper();
     const { usernameField, passwordField } = elements;
 
-    assert.equal(usernameField.prop('value'), fakeConfig.formData.username);
-    assert.equal(passwordField.prop('value'), fakeConfig.formData.password);
+    assert.equal(usernameField.prop('value'), fakeConfig.form.data.username);
+    assert.equal(passwordField.prop('value'), fakeConfig.form.data.password);
   });
 
   [
@@ -128,11 +130,11 @@ describe('LoginForm', () => {
     },
   ].forEach(({ prefillUsername, usernameError, autofocusUsername }) => {
     it('auto-focuses expected field', () => {
-      fakeConfig.formData = {
+      fakeConfig.form.data = {
         username: prefillUsername ? 'johnsmith' : null,
       };
       if (usernameError) {
-        fakeConfig.formErrors = {
+        fakeConfig.form.errors = {
           username: 'invalid username',
         };
       }

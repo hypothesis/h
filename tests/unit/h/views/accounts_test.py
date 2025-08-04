@@ -81,8 +81,10 @@ class TestAuthController:
                     "log_in_with_facebook": True,
                 },
                 "flashMessages": [],
-                "formData": {
-                    "username": None,
+                "form": {
+                    "data": {
+                        "username": None,
+                    }
                 },
             }
         }
@@ -92,7 +94,7 @@ class TestAuthController:
 
         result = views.AuthController(pyramid_request).get()
 
-        assert result["js_config"]["formData"]["username"] == "johnsmith"
+        assert result["js_config"]["form"]["data"]["username"] == "johnsmith"
 
     def test_get_for_oauth(self, pyramid_request):
         pyramid_request.params = {"for_oauth": "true"}
@@ -138,8 +140,10 @@ class TestAuthController:
             "js_config": {
                 "styles": assets_env.urls.return_value,
                 "csrfToken": views.get_csrf_token.spy_return,
-                "formErrors": form_errors,
-                "formData": pyramid_request.POST,
+                "form": {
+                    "data": pyramid_request.POST,
+                    "errors": form_errors,
+                },
                 "features": {
                     "log_in_with_orcid": True,
                     "log_in_with_google": True,

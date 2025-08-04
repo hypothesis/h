@@ -46,6 +46,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "form": {},
             }
         }
 
@@ -97,6 +98,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "form": {},
             },
             "heading": _("Account registration successful"),
             "message": None,
@@ -199,8 +201,10 @@ class TestSignupViews:
         assert response == {
             "js_config": {
                 "csrfToken": get_csrf_token.return_value,
-                "formErrors": views.context.error.asdict.return_value,
-                "formData": expected_form_data,
+                "form": {
+                    "data": expected_form_data,
+                    "errors": views.context.error.asdict.return_value,
+                },
                 "features": {
                     "log_in_with_orcid": sentinel.orcid_enabled,
                     "log_in_with_google": sentinel.google_enabled,
@@ -240,6 +244,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "form": {},
             },
             "heading": _("Account already registered"),
             "message": _("Test error message"),
@@ -287,6 +292,7 @@ class TestSocialLoginSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "form": {},
                 "identity": {"provider_unique_id": orcid_id},
             }
         }
@@ -460,8 +466,10 @@ class TestSocialLoginSignupViews:
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "identity": {"provider_unique_id": orcid_id},
-                "formErrors": views.context.error.asdict.return_value,
-                "formData": expected_form_data,
+                "form": {
+                    "data": expected_form_data,
+                    "errors": views.context.error.asdict.return_value,
+                },
             }
         }
 

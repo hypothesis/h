@@ -91,16 +91,21 @@ class SignupViews:
     def validation_failure(self):
         return {
             "js_config": {
-                "formErrors": self.context.error.asdict(),
-                "formData": {
-                    "username": self.request.POST.get("username", ""),
-                    "email": self.request.POST.get("email", ""),
-                    "password": self.request.POST.get("password", ""),
-                    "privacy_accepted": self.request.POST.get("privacy_accepted", "")
-                    == "true",
-                    "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
-                },
                 **self.js_config,
+                "form": {
+                    "errors": self.context.error.asdict(),
+                    "data": {
+                        "username": self.request.POST.get("username", ""),
+                        "email": self.request.POST.get("email", ""),
+                        "password": self.request.POST.get("password", ""),
+                        "privacy_accepted": self.request.POST.get(
+                            "privacy_accepted", ""
+                        )
+                        == "true",
+                        "comms_opt_in": self.request.POST.get("comms_opt_in", "")
+                        == "true",
+                    },
+                },
             }
         }
 
@@ -121,6 +126,7 @@ class SignupViews:
                     "log_in_with_facebook", user=None
                 ),
             },
+            "form": {},
         }
 
 
@@ -277,9 +283,11 @@ class SocialLoginSignupViews:
 
         return {
             "js_config": {
-                "formErrors": self.context.error.asdict(),
-                "formData": form_data,
                 **self.js_config(provider_unique_id),
+                "form": {
+                    "errors": self.context.error.asdict(),
+                    "data": form_data,
+                },
             }
         }
 
@@ -299,6 +307,7 @@ class SocialLoginSignupViews:
                     "log_in_with_facebook", user=None
                 ),
             },
+            "form": {},
             "identity": {"provider_unique_id": provider_unique_id},
         }
 
