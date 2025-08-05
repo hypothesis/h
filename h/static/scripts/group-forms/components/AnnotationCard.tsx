@@ -49,14 +49,10 @@ type SaveState =
 
 // Lazily load the MarkdownView as it has heavy dependencies such as Showdown,
 // KaTeX and DOMPurify.
-const MarkdownView = lazy(
-  'MarkdownView',
-  () => import('./MarkdownView').then(mod => mod.default),
-  {
-    fallback: ({ markdown }) => markdown,
-    errorFallback: /* istanbul ignore next */ ({ markdown }) => markdown,
-  },
-);
+const MarkdownView = lazy('MarkdownView', () => import('./MarkdownView'), {
+  fallback: ({ markdown }) => markdown,
+  errorFallback: /* istanbul ignore next */ ({ markdown }) => markdown,
+});
 
 export default function AnnotationCard({
   annotation,
