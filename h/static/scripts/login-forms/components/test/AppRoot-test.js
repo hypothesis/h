@@ -130,14 +130,14 @@ describe('AppRoot', () => {
 
   [
     {
-      path: '/Login',
+      path: '/login',
       selector: 'LoginForm',
       props: {
         enableSocialLogin: false,
       },
     },
     {
-      path: '/Login',
+      path: '/login',
       selector: 'LoginForm',
       features: {
         log_in_with_google: true,
