@@ -47,10 +47,10 @@ packaging==25.0
     #   build
     #   sphinx
 pip-sync-faster==0.0.5
-    # via -r requirements/docs.in
+    # via -r docs.in
 pip-tools==7.4.1
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   pip-sync-faster
 pygments==2.17.2
     # via sphinx
@@ -68,7 +68,7 @@ snowballstemmer==2.2.0
     # via sphinx
 sphinx==8.2.3
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
     #   sphinxcontrib-applehelp
@@ -76,9 +76,9 @@ sphinx==8.2.3
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
 sphinx-autobuild==2024.10.3
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinx-rtd-theme==3.0.2
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinxcontrib-applehelp==1.0.7
     # via sphinx
 sphinxcontrib-devhelp==2.0.0
@@ -93,8 +93,10 @@ sphinxcontrib-qthelp==1.0.6
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
-starlette==0.40.0
+starlette==0.47.2
     # via sphinx-autobuild
+typing-extensions==4.14.1
+    # via starlette
 urllib3==2.2.2
     # via requests
 uvicorn==0.29.0
