@@ -145,12 +145,36 @@ class TestChangeAnnotationModerationStatus:
             == "The annotation has been updated since the moderation status was set."
         )
 
+    def test_conflicting_prev_status(
+        self,
+        valid_payload_with_prev_status,
+        annotation_context,
+        pyramid_request,
+    ):
+        annotation_context.annotation.moderation_status = ModerationStatus.DENIED
+        pyramid_request.json_body = valid_payload_with_prev_status
+
+        with pytest.raises(httpexceptions.HTTPConflict) as excinfo:
+            views.change_annotation_moderation_status(
+                annotation_context, pyramid_request
+            )
+
+        assert (
+            str(excinfo.value)
+            == "The annotation has been moderated since it was loaded."
+        )
+
     @pytest.fixture
     def valid_payload(self, annotation):
         return {
             "moderation_status": "SPAM",
             "annotation_updated": annotation.updated.isoformat(),
         }
+
+    @pytest.fixture
+    def valid_payload_with_prev_status(self, valid_payload):
+        valid_payload["current_moderation_status"] = "APPROVED"
+        return valid_payload
 
 
 @pytest.fixture
