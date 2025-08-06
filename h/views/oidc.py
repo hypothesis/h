@@ -28,7 +28,7 @@ from h.schemas.oauth import InvalidOAuth2StateParamError, OAuth2RedirectSchema
 from h.services import OIDCService
 from h.services.exceptions import ExternalRequestError
 from h.services.jwt import JWTAudience, JWTDecodeError, JWTIssuer
-from h.views.account_signup import encode_idinfo_token
+from h.views.account_signup import encode_idinfo_token, redirect_url
 from h.views.exceptions import UnexpectedRouteError
 from h.views.helpers import login
 
@@ -71,10 +71,13 @@ class OIDCState:
     https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09
     """
 
+    next_url: str | None
+    """The URL to redirect the browser to after successfully logging in."""
+
     @classmethod
-    def make(cls, action: ActionType):
+    def make(cls, action: ActionType, next_url: str | None = None):
         """Return a new OIDCState with the given `action` and a random `rfp`."""
-        return cls(action, secrets.token_hex())
+        return cls(action, secrets.token_hex(), next_url)
 
 
 @dataclass
@@ -201,7 +204,7 @@ class OIDCConnectAndLoginViews:
     @view_config(is_authenticated=False, route_name="oidc.login.facebook")
     def connect_or_login(self):
         state = self._jwt_service.encode_symmetric(
-            OIDCState.make(self.settings.action),
+            OIDCState.make(self.settings.action, self._request.params.get("next")),
             expires_in=timedelta(hours=1),
             issuer=self.settings.issuer,
             audience=self.settings.audience,
@@ -384,7 +387,9 @@ class OIDCRedirectViews:
             case "connect":
                 return self.connect_provider_unique_id(provider_unique_id, user)
             case "login":
-                return self.log_in_with_provider(provider_unique_id, user)
+                return self.log_in_with_provider(
+                    provider_unique_id, user, decoded_state.next_url
+                )
             case _:
                 raise UnexpectedActionError(action)
 
@@ -409,7 +414,7 @@ class OIDCRedirectViews:
         self._request.session.flash(self.settings.success_message, "success")
         return HTTPFound(self._request.route_url("account"))
 
-    def log_in_with_provider(self, provider_unique_id: str, user):
+    def log_in_with_provider(self, provider_unique_id: str, user, next_url: str):
         if not user:
             # There's no Hypothesis account for this provider unique ID yet.
             # Redirect to the "Sign up to Hypothesis with <PROVIDER>" page to
@@ -422,16 +427,14 @@ class OIDCRedirectViews:
                         provider_unique_id,
                         self.settings.jwt_issuer,
                         self.settings.idinfo_jwtaudience,
+                        next_url,
                     ),
                 )
             )
 
         headers = login(user, self._request)
 
-        return HTTPFound(
-            self._request.route_url("activity.user_search", username=user.username),
-            headers=headers,
-        )
+        return HTTPFound(redirect_url(self._request, user, next_url), headers=headers)
 
     @notfound_view_config(
         renderer="h:templates/notfound.html.jinja2",

@@ -21,6 +21,13 @@ describe('LoginForm', () => {
       features: {
         log_in_with_orcid: true,
       },
+      urls: {
+        login: {
+          facebook: '/oidc/login/facebook',
+          google: '/oidc/login/google',
+          orcid: '/oidc/login/orcid',
+        },
+      },
     };
   });
 

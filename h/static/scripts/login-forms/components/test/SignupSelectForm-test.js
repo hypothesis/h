@@ -22,6 +22,13 @@ describe('SignupSelectForm', () => {
         log_in_with_google: false,
         log_in_with_orcid: false,
       },
+      urls: {
+        login: {
+          facebook: '/oidc/login/facebook',
+          google: '/oidc/login/google',
+          orcid: '/oidc/login/orcid',
+        },
+      },
     };
   });
 
