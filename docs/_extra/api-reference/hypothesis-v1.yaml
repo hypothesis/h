@@ -761,6 +761,15 @@ paths:
             description: The new moderation status for the annotation.
             type: string
             enum: [APPROVED, PENDING, DENIED, SPAM]
+        - name: current_moderation_status
+          in: query
+          schema:
+            description: |
+              The annotation's `moderation_status` as returned by the API when fetching this annotation.
+              If this optional parameter is included then the moderation request will fail if the annotation's 
+              `moderation_status` does not match the given `current_moderation_status`.
+            type: string
+            enum: [APPROVED, PENDING, DENIED, SPAM]
         - name: annotation_updated
           in: query
           description: |
