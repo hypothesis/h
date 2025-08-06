@@ -86,8 +86,29 @@ class TestAuthController:
                         "username": None,
                     }
                 },
+                "urls": {
+                    "login": {
+                        provider: pyramid_request.route_url(f"oidc.login.{provider}")
+                        for provider in ("facebook", "google", "orcid")
+                    }
+                },
             }
         }
+
+    def test_get_with_feature_flags_disabled(self, pyramid_request):
+        pyramid_request.feature.flags["log_in_with_facebook"] = False
+        pyramid_request.feature.flags["log_in_with_google"] = False
+        pyramid_request.feature.flags["log_in_with_orcid"] = False
+
+        result = views.AuthController(pyramid_request).get()
+
+        assert result["js_config"]["features"] == {
+            "log_in_with_orcid": False,
+            "log_in_with_google": False,
+            "log_in_with_facebook": False,
+        }
+        for provider in ("facebook", "google", "orcid"):
+            assert provider not in result.get("urls", {}).get("login", {})
 
     def test_get_with_prefilled_username(self, pyramid_request):
         pyramid_request.GET.add("username", "johnsmith")
@@ -123,6 +144,19 @@ class TestAuthController:
 
         assert pyramid_request.session.peek_flash("success") == []
 
+    def test_get_copies_next_query_param_onto_social_login_urls(self, pyramid_request):
+        pyramid_request.params["next"] = "https://example.com/oauth/authorize"
+
+        result = views.AuthController(pyramid_request).get()
+
+        assert result["js_config"]["urls"]["login"] == {
+            provider: pyramid_request.route_url(
+                f"oidc.login.{provider}",
+                _query={"next": pyramid_request.params["next"]},
+            )
+            for provider in ("facebook", "google", "orcid")
+        }
+
     def test_post_returns_form_when_validation_fails(
         self, invalid_form, pyramid_config, pyramid_request, assets_env, mocker
     ):
@@ -150,7 +184,47 @@ class TestAuthController:
                     "log_in_with_facebook": True,
                 },
                 "flashMessages": [],
+                "urls": {
+                    "login": {
+                        provider: pyramid_request.route_url(f"oidc.login.{provider}")
+                        for provider in ("facebook", "google", "orcid")
+                    }
+                },
             }
+        }
+
+    def test_post_when_feature_flags_disabled(self, invalid_form, pyramid_request):
+        controller = views.AuthController(pyramid_request)
+        controller.form = invalid_form(errors={"username": "Invalid username"})
+        pyramid_request.feature.flags["log_in_with_facebook"] = False
+        pyramid_request.feature.flags["log_in_with_google"] = False
+        pyramid_request.feature.flags["log_in_with_orcid"] = False
+
+        result = controller.post()
+
+        assert result["js_config"]["features"] == {
+            "log_in_with_orcid": False,
+            "log_in_with_google": False,
+            "log_in_with_facebook": False,
+        }
+        for provider in ("facebook", "google", "orcid"):
+            assert provider not in result.get("urls", {}).get("login", {})
+
+    def test_post_copies_next_query_param_onto_social_login_urls(
+        self, invalid_form, pyramid_request
+    ):
+        pyramid_request.params["next"] = "https://example.com/oauth/authorize"
+        controller = views.AuthController(pyramid_request)
+        controller.form = invalid_form(errors={"username": "Invalid username"})
+
+        result = controller.post()
+
+        assert result["js_config"]["urls"]["login"] == {
+            provider: pyramid_request.route_url(
+                f"oidc.login.{provider}",
+                _query={"next": pyramid_request.params["next"]},
+            )
+            for provider in ("facebook", "google", "orcid")
         }
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
@@ -264,6 +338,10 @@ class TestAuthController:
         pyramid_config.add_route("forgot_password", "/forgot")
         pyramid_config.add_route("index", "/index")
         pyramid_config.add_route("stream", "/stream")
+        pyramid_config.add_route("oidc.login.facebook", "/oidc/login/facebook")
+        pyramid_config.add_route("oidc.login.google", "/oidc/login/google")
+        pyramid_config.add_route("oidc.login.orcid", "/oidc/login/orcid")
+        pyramid_config.add_route("oauth_authorize", "/oauth/authorize")
 
 
 @pytest.mark.usefixtures(

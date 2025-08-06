@@ -32,16 +32,29 @@ class TestOIDCConnectAndLoginViews:
             ("oidc.login.orcid", "login"),
         ],
     )
+    @pytest.mark.parametrize("next_url", [None, sentinel.next_url])
     def test_connect_or_login(
-        self, pyramid_request, route_name, expected_action, jwt_service, secrets
+        self,
+        pyramid_request,
+        route_name,
+        expected_action,
+        jwt_service,
+        secrets,
+        next_url,
     ):
         pyramid_request.matched_route.name = route_name
+        if next_url:
+            pyramid_request.params["next"] = next_url
 
         result = OIDCConnectAndLoginViews(pyramid_request).connect_or_login()
 
         secrets.token_hex.assert_called_once_with()
         jwt_service.encode_symmetric.assert_called_once_with(
-            OIDCState(action=expected_action, rfp=secrets.token_hex.return_value),
+            OIDCState(
+                action=expected_action,
+                rfp=secrets.token_hex.return_value,
+                next_url=next_url,
+            ),
             expires_in=timedelta(hours=1),
             issuer=JWTIssuer.OIDC_CONNECT_OR_LOGIN_ORCID,
             audience=JWTAudience.OIDC_REDIRECT_ORCID,
@@ -359,6 +372,7 @@ class TestOIDCRedirectViews:
             orcid_id,
             JWTIssuer.OIDC_REDIRECT_ORCID,
             JWTAudience.SIGNUP_ORCID,
+            jwt_service.decode_symmetric.return_value.next_url,
         )
         assert isinstance(response, HTTPFound)
         assert response.location == pyramid_request.route_url(
@@ -373,16 +387,42 @@ class TestOIDCRedirectViews:
         "assert_no_success_message_was_flashed",
     )
     def test_redirect_when_action_login_and_connected_user_exists(
-        self, views, login, user, pyramid_request
+        self, views, login, user, pyramid_request, matchers, jwt_service
     ):
+        jwt_service.decode_symmetric.return_value.next_url = (
+            "http://example.com/oauth/authorize"
+        )
         login.return_value = [
             ("headername1", "headervalue1"),
             ("headername2", "headervalue2"),
         ]
+
         response = views.redirect()
 
         login.assert_called_once_with(user, pyramid_request)
         assert all(header in response.headerlist for header in login.return_value)
+        assert response == matchers.Redirect302To("http://example.com/oauth/authorize")
+
+    @pytest.mark.usefixtures(
+        "with_login_action",
+        "assert_state_removed_from_session",
+        "assert_state_param_decoded_correctly",
+        "assert_no_account_connection_was_added",
+        "assert_no_success_message_was_flashed",
+    )
+    @pytest.mark.parametrize(
+        "next_url", [None, "http://example.com/unknown", "https//evil.com"]
+    )
+    def test_redirect_when_next_url_missing_or_unknown(
+        self, views, user, pyramid_request, matchers, jwt_service, next_url
+    ):
+        jwt_service.decode_symmetric.return_value.next_url = next_url
+
+        response = views.redirect()
+
+        assert response == matchers.Redirect302To(
+            pyramid_request.route_url("activity.user_search", username=user.username)
+        )
 
     def test_notfound(self, pyramid_request, views):
         result = views.notfound()
@@ -567,6 +607,7 @@ class TestOIDCRedirectViews:
         pyramid_config.add_route("activity.user_search", "/users/{username}")
         pyramid_config.add_route("account", "/account/settings")
         pyramid_config.add_route("signup.orcid", "/signup/orcid")
+        pyramid_config.add_route("oauth_authorize", "/oauth/authorize")
 
     @pytest.fixture(autouse=True)
     def handle_external_request_error(self, patch):

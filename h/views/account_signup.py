@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from urllib.parse import urlparse, urlunparse
 
 from deform import ValidationFailure
 from h_pyramid_sentry import report_exception
@@ -113,7 +114,7 @@ class SignupViews:
     def js_config(self) -> dict[str, Any]:
         feature_service = self.request.find_service(name="feature")
 
-        return {
+        js_config = {
             "csrfToken": get_csrf_token(self.request),
             "features": {
                 "log_in_with_orcid": feature_service.enabled(
@@ -128,6 +129,10 @@ class SignupViews:
             },
             "form": {},
         }
+
+        inject_login_urls(self.request, js_config)
+
+        return js_config
 
 
 class IDInfoJWTDecodeError(Exception):
@@ -155,6 +160,7 @@ class IDInfo:
     """
 
     sub: str
+    next_url: str | None = None
 
 
 @dataclass
@@ -209,7 +215,7 @@ class SocialLoginSignupViews:
     @view_config(request_method="GET", route_name="signup.google")
     @view_config(request_method="GET", route_name="signup.facebook")
     def get(self):
-        return {"js_config": self.js_config(self.decode_provider_unique_id())}
+        return {"js_config": self.js_config(self.decode_idinfo().sub)}
 
     @view_config(request_method="POST", require_csrf=True, route_name="signup.orcid")
     @view_config(request_method="POST", require_csrf=True, route_name="signup.google")
@@ -217,7 +223,7 @@ class SocialLoginSignupViews:
     def post(self):
         # Decode the user's provider unique ID first so that if decoding this
         # fails the view hasn't already done anything else.
-        provider_unique_id = self.decode_provider_unique_id()
+        idinfo = self.decode_idinfo()
 
         form = self.request.create_form(
             SocialLoginSignupSchema().bind(request=self.request)
@@ -237,13 +243,13 @@ class SocialLoginSignupViews:
             identities=[
                 {
                     "provider": self.settings.provider,
-                    "provider_unique_id": provider_unique_id,
+                    "provider_unique_id": idinfo.sub,
                 }
             ],
         )
 
         return HTTPFound(
-            self.request.route_url("activity.user_search", username=user.username),
+            redirect_url(self.request, user, idinfo.next_url),
             headers=login(user, self.request),
         )
 
@@ -271,7 +277,7 @@ class SocialLoginSignupViews:
     @exception_view_config(context=ValidationFailure, route_name="signup.google")
     @exception_view_config(context=ValidationFailure, route_name="signup.facebook")
     def validation_failure(self):
-        provider_unique_id = self.decode_provider_unique_id()
+        provider_unique_id = self.decode_idinfo().sub
         self.request.response.status_int = 400
 
         # When reloading the page prefill the form with the previously submitted values.
@@ -311,7 +317,7 @@ class SocialLoginSignupViews:
             "identity": {"provider_unique_id": provider_unique_id},
         }
 
-    def decode_provider_unique_id(self):
+    def decode_idinfo(self):
         try:
             idinfo = self.jwt_service.decode_symmetric(
                 self.request.params["idinfo"],
@@ -321,7 +327,7 @@ class SocialLoginSignupViews:
         except JWTDecodeError as err:
             raise IDInfoJWTDecodeError from err
 
-        return idinfo.sub
+        return idinfo
 
 
 # It's possible to try to sign up while already logged in. For example: start
@@ -343,12 +349,47 @@ def encode_idinfo_token(
     provider_unique_id: str,
     issuer: JWTIssuer,
     audience: JWTAudience,
+    next_url: str,
 ):
     return {
         "idinfo": jwt_service.encode_symmetric(
-            IDInfo(provider_unique_id),
+            IDInfo(provider_unique_id, next_url=next_url),
             expires_in=timedelta(hours=1),
             issuer=issuer,
             audience=audience,
         ),
     }
+
+
+def redirect_url(request, user, url):
+    default_url = request.route_url("activity.user_search", username=user.username)
+
+    if not url:
+        return default_url
+
+    url_without_query_or_fragment = urlunparse(
+        urlparse(url)._replace(query=None, fragment=None)
+    )
+
+    if url_without_query_or_fragment in [
+        request.route_url("oauth_authorize"),
+    ]:
+        return url
+
+    return default_url
+
+
+def inject_login_urls(request, js_config):
+    enabled_providers = [
+        value.name.lower()
+        for value in IdentityProvider
+        if request.feature(f"log_in_with_{value.name.lower()}")
+    ]
+
+    if enabled_providers:
+        next_url = request.params.get("next")
+        query = {"next": next_url} if next_url else {}
+        js_config.setdefault("urls", {})["login"] = {
+            provider: request.route_url(f"oidc.login.{provider}", _query=query)
+            for provider in enabled_providers
+        }
