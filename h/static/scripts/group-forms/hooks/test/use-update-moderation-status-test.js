@@ -17,6 +17,7 @@ describe('useUpdateModerationStatus', () => {
     fakeAnnotation = {
       id: '1',
       updated: '2025-06-24T08:43:50.914807+00:00',
+      moderation_status: 'PENDING',
     };
 
     fakeCallAPI = sinon.stub();
@@ -64,6 +65,7 @@ describe('useUpdateModerationStatus', () => {
         sinon.match({
           json: {
             annotation_updated: fakeAnnotation.updated,
+            current_moderation_status: fakeAnnotation.moderation_status,
             moderation_status: moderationStatus,
           },
         }),

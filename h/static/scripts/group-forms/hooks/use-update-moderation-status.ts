@@ -35,11 +35,17 @@ export function useUpdateModerationStatus(annotation: APIAnnotationData) {
           signal: abortCtrlRef.current.signal,
           json: {
             annotation_updated: annotation.updated,
+            current_moderation_status: annotation.moderation_status,
             moderation_status: moderationStatus,
           },
         },
       );
     },
-    [annotation.id, annotation.updated, config?.api.annotationModeration],
+    [
+      annotation.id,
+      annotation.moderation_status,
+      annotation.updated,
+      config?.api.annotationModeration,
+    ],
   );
 }
