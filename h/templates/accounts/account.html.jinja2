@@ -5,81 +5,25 @@
 
 {% block styles %}
   {{ super() }}
-  {% for url in asset_urls('sociallogin_css') %}
+
+  {% for url in asset_urls('forms_css')  %}
     <link rel="stylesheet" href="{{ url }}">
   {% endfor %}
 {% endblock %}
 
 {% block page_content %}
-  <div class="form-vertical">
-    {{ email_form }}
-    {{ password_form }}
-
-    {% if log_in_with_orcid or log_in_with_google %}
-      <div class="sociallogin-wrapper">
-        <div class="sociallogin-header">
-          <div style="position: relative;">
-            <div class="form-input__label js-tooltip"
-                 style="position: static;"
-                 aria-label="Connecting an account enables you to log in to Hypothesis without your Hypothesis password.">
-              Connect your account
-              <i class="form-input__hint-icon">{{ svg_icon('info_icon') }}</i>
-            </div>
-          </div>
-        </div>
-
-        {% if log_in_with_orcid %}
-        {% if orcid %}
-          <a href="{{ orcid_url }}" class="sociallogin-connect" target="_blank" rel="nofollow noopener">
-            {{ svg_icon('orcid') }}
-            <span>{% trans %} Connected: {% endtrans %}<strong>{{ orcid }}</strong></span>
-            {{ svg_icon('check', 'check-icon') }}
-          </a>
-        {% else %}
-          <a href="{{ request.route_path('oidc.connect.orcid') }}" class="sociallogin-connect">
-            {{ svg_icon('orcid') }}
-            <span>{% trans %} Connect {% endtrans %}<strong>ORCID iD</strong></span>
-            {{ svg_icon('external', 'external-icon') }}
-          </a>
-        {% endif %}
-        {% endif %}
-
-        {% if log_in_with_google %}
-        {% if google_id %}
-          <a class="sociallogin-connect" target="_blank" rel="nofollow noopener">
-            {{ svg_icon('google') }}
-            <span>{% trans %} Connected: {% endtrans %}<strong>{{ google_id }}</strong></span>
-            {{ svg_icon('check', 'check-icon') }}
-          </a>
-        {% else %}
-          <a href="{{ request.route_path('oidc.connect.google') }}" class="sociallogin-connect">
-            {{ svg_icon('google') }}
-            <span>{% trans %} Connect {% endtrans %}<strong>Google account</strong></span>
-            {{ svg_icon('external', 'external-icon') }}
-          </a>
-        {% endif %}
-        {% endif %}
-
-        {% if log_in_with_facebook %}
-        {% if facebook_id %}
-          <a class="sociallogin-connect" target="_blank" rel="nofollow noopener">
-            {{ svg_icon('facebook-sociallogin') }}
-            <span>{% trans %} Connected: {% endtrans %}<strong>{{ facebook_id }}</strong></span>
-            {{ svg_icon('check', 'check-icon') }}
-          </a>
-        {% else %}
-          <a href="{{ request.route_path('oidc.connect.facebook') }}" class="sociallogin-connect">
-            {{ svg_icon('facebook-sociallogin') }}
-            <span>{% trans %} Connect {% endtrans %}<strong>Facebook account</strong></span>
-            {{ svg_icon('external', 'external-icon') }}
-          </a>
-        {% endif %}
-        {% endif %}
-      </div>
-    {% endif %}
-  </div>
+  <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+  <div id="login-form"></div>
 {% endblock page_content %}
 
 {% block form_footer_right %}
 <a class="link--footer" href="{{ request.route_path('account_delete') }}">{% trans %}Delete your account{% endtrans %}</a>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('login_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
 {% endblock %}

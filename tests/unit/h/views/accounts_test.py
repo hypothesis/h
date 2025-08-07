@@ -1,16 +1,20 @@
 from dataclasses import asdict
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 from unittest import mock
-from unittest.mock import create_autospec
+from unittest.mock import call, create_autospec, sentinel
 
 import colander
 import deform
 import pytest
+from deform import ValidationFailure
 from h_matchers import Any
 from pyramid import httpexceptions
+from pyramid.csrf import get_csrf_token
 
 from h.assets import Environment
 from h.models import Subscriptions
+from h.models.user_identity import IdentityProvider
 from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
 from h.views import accounts as views
@@ -721,145 +725,271 @@ class TestActivateController:
         pyramid_config.add_route("logout", "/logout")
 
 
-@pytest.mark.usefixtures(
-    "routes", "user_password_service", "feature_service", "oidc_service"
-)
+@pytest.mark.usefixtures("user_password_service", "oidc_service")
 class TestAccountController:
-    def test_get_returns_email_if_set(self, pyramid_request):
-        pyramid_request.user = mock.Mock()
-        pyramid_request.create_form.return_value = mock.Mock()
-        user = pyramid_request.user
-        user.email = "jims@example.com"
-
-        result = views.AccountController(pyramid_request).get()
-        assert result["email"] == "jims@example.com"
-
-    def test_get_returns_empty_string_if_email_not_set(self, pyramid_request):
-        pyramid_request.user = mock.Mock()
-        pyramid_request.create_form.return_value = mock.Mock()
-        user = pyramid_request.user
-        user.email = None
-
-        result = views.AccountController(pyramid_request).get()
-        assert not result["email"]
-
-    def test_get_returns_orcid_data(
-        self, pyramid_request, feature_service, oidc_service
+    @pytest.mark.parametrize("current_email_address", [None, "test_email@example.com"])
+    @pytest.mark.parametrize("user_has_password", [True, False])
+    def test_get(
+        self,
+        controller,
+        pyramid_request,
+        user,
+        current_email_address,
+        user_has_password,
     ):
-        pyramid_request.registry.settings["orcid_host"] = "https://sandbox.orcid.org"
-        oidc_service.get_identity.return_value.provider_unique_id = (
-            "test_provider_unique_id"
-        )
-        feature_service.enabled.return_value = True
+        user.email = current_email_address
+        if user_has_password:
+            user.password = "password"  # noqa: S105
+        else:
+            user.password = None
 
-        result = views.AccountController(pyramid_request).get()
+        response = controller.get()
 
-        assert result["orcid"] == "test_provider_unique_id"
-        assert (
-            result["orcid_url"] == "https://sandbox.orcid.org/test_provider_unique_id"
-        )
-
-    def test_post_email_form_with_valid_data_changes_email(
-        self, form_validating_to, pyramid_request
-    ):
-        controller = views.AccountController(pyramid_request)
-        controller.email_form = form_validating_to({"email": "new_email_address"})
-
-        controller.post_email_form()
-
-        assert pyramid_request.user.email == "new_email_address"
-
-    def test_post_email_form_with_invalid_data_does_not_change_email(
-        self, invalid_form, pyramid_request
-    ):
-        controller = views.AccountController(pyramid_request)
-        controller.email_form = invalid_form()
-        original_email = pyramid_request.user.email
-
-        controller.post_email_form()
-
-        assert pyramid_request.user.email == original_email
-
-    def test_post_email_form_with_invalid_data_returns_template_data(
-        self, invalid_form, pyramid_request
-    ):
-        controller = views.AccountController(pyramid_request)
-        controller.email_form = invalid_form()
-
-        result = controller.post_email_form()
-
-        assert result == {
-            "email": pyramid_request.user.email,
-            "email_form": controller.email_form.render(),
-            "password_form": controller.password_form.render(),
-            "log_in_with_orcid": False,
-            "orcid": None,
-            "orcid_url": None,
-            "log_in_with_google": False,
-            "google_id": None,
-            "log_in_with_facebook": False,
-            "facebook_id": None,
+        assert response == {
+            "js_config": {
+                "context": {
+                    "identities": {
+                        "facebook": {"connected": False},
+                        "google": {"connected": False},
+                        "orcid": {"connected": False},
+                    },
+                    "user": {
+                        "email": current_email_address,
+                        "has_password": user_has_password,
+                    },
+                },
+                "csrfToken": get_csrf_token(pyramid_request),
+                "features": {
+                    "log_in_with_facebook": True,
+                    "log_in_with_google": True,
+                    "log_in_with_orcid": True,
+                },
+                "forms": {
+                    "email": {"data": {}, "errors": {}},
+                    "password": {"data": {}, "errors": {}},
+                },
+                "routes": {
+                    "oidc.connect.facebook": "http://example.com/oidc/connect/facebook",
+                    "oidc.connect.google": "http://example.com/oidc/connect/google",
+                    "oidc.connect.orcid": "http://example.com/oidc/connect/orcid",
+                },
+            }
         }
 
-    def test_post_password_form_with_valid_data_changes_password(
-        self, form_validating_to, pyramid_request, user_password_service
-    ):
-        controller = views.AccountController(pyramid_request)
-        controller.addpassword_form = form_validating_to(
-            {"new_password": "my_new_password"}
-        )
+    def test_get_with_feature_flags_disabled(self, controller, pyramid_request):
+        pyramid_request.feature.flags["log_in_with_google"] = False
+        pyramid_request.feature.flags["log_in_with_facebook"] = False
+        pyramid_request.feature.flags["log_in_with_orcid"] = False
 
-        controller.post_password_form()
+        response = controller.get()
 
-        user_password_service.update_password.assert_called_once_with(
-            pyramid_request.user, "my_new_password"
-        )
-
-    def test_post_password_form_with_invalid_data_does_not_change_password(
-        self, invalid_form, pyramid_request, user_password_service
-    ):
-        controller = views.AccountController(pyramid_request)
-        controller.addpassword_form = invalid_form()
-
-        controller.post_password_form()
-
-        assert not user_password_service.update_password.called
-
-    def test_post_password_form_with_invalid_data_returns_template_data(
-        self, invalid_form, pyramid_request
-    ):
-        controller = views.AccountController(pyramid_request)
-        controller.addpassword_form = invalid_form()
-
-        result = controller.post_password_form()
-
-        assert result == {
-            "email": pyramid_request.user.email,
-            "email_form": controller.email_form.render(),
-            "password_form": controller.addpassword_form.render(),
-            "log_in_with_orcid": False,
-            "orcid": None,
-            "orcid_url": None,
-            "log_in_with_google": False,
-            "google_id": None,
+        assert response["js_config"]["features"] == {
             "log_in_with_facebook": False,
-            "facebook_id": None,
+            "log_in_with_google": False,
+            "log_in_with_orcid": False,
+        }
+        assert "identities" not in response["js_config"]["context"]
+        for route in [
+            f"oidc.connect.{provider.name.lower()}" for provider in IdentityProvider
+        ]:
+            assert route not in response["js_config"].get("routes", {})
+
+    def test_get_when_provider_accounts_connected(
+        self, controller, oidc_service, pyramid_request, factories, user, db_session
+    ):
+        db_session.flush()
+        identities = {}
+        for provider in IdentityProvider:
+            identities[provider] = factories.UserIdentity(
+                user_id=user.id, provider=provider
+            )
+        oidc_service.get_identity.side_effect = identities.values()
+
+        response = controller.get()
+
+        assert oidc_service.get_identity.call_args_list == [
+            call(user, provider) for provider in IdentityProvider
+        ]
+        expected_identities = {}
+        for provider in IdentityProvider:
+            expected_identity = {
+                "connected": True,
+                "provider_unique_id": identities[provider].provider_unique_id,
+            }
+            if provider == IdentityProvider.ORCID:
+                expected_identity["url"] = (
+                    f"https://sandbox.orcid.org/{identities[IdentityProvider.ORCID].provider_unique_id}"
+                )
+            expected_identities[provider.name.lower()] = expected_identity
+        assert response["js_config"]["context"]["identities"] == expected_identities
+        assert response["js_config"]["routes"] == {
+            f"oidc.connect.{provider.name.lower()}": pyramid_request.route_url(
+                f"oidc.connect.{provider.name.lower()}"
+            )
+            for provider in IdentityProvider
+        }
+
+    @pytest.mark.parametrize(
+        "user_has_password,schema",
+        [
+            (False, "EmailAddSchema"),
+            (True, "EmailChangeSchema"),
+        ],
+    )
+    def test_post_email_form_valid(
+        self,
+        controller,
+        pyramid_request,
+        schemas,
+        matchers,
+        user_has_password,
+        user,
+        schema,
+    ):
+        if user_has_password:
+            user.password = "pass"  # noqa: S105
+        else:
+            user.password = None
+        pyramid_request.create_form.return_value.validate.return_value = {
+            "email": "new_email@example.com"
+        }
+
+        response = controller.post_email_form()
+
+        schema = getattr(schemas, schema)
+        schema.assert_called_once_with()
+        schema.return_value.bind.assert_called_once_with(request=pyramid_request)
+        pyramid_request.create_form.assert_called_once_with(
+            schema.return_value.bind.return_value
+        )
+        pyramid_request.create_form.return_value.validate.assert_called_once_with(
+            PostItemsMatcher(pyramid_request.POST.items())
+        )
+        assert pyramid_request.user.email == "new_email@example.com"
+        assert pyramid_request.session.peek_flash("success") == [
+            "Email address changed ✓"
+        ]
+        assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
+
+    def test_post_email_form_invalid(self, controller, pyramid_request):
+        exception = pyramid_request.create_form.return_value.validate.side_effect = (
+            ValidationFailure(sentinel.field, sentinel.cstruct, sentinel.error)
+        )
+
+        with pytest.raises(ValidationFailure) as exc_info:
+            controller.post_email_form()
+
+        assert exc_info.value == exception
+
+    @pytest.mark.parametrize(
+        "user_has_password,schema",
+        [
+            (False, "PasswordAddSchema"),
+            (True, "PasswordChangeSchema"),
+        ],
+    )
+    def test_post_password_form_valid(
+        self,
+        controller,
+        pyramid_request,
+        schemas,
+        matchers,
+        user,
+        user_password_service,
+        user_has_password,
+        schema,
+    ):
+        if user_has_password:
+            user.password = "password"  # noqa: S105
+        else:
+            user.password = None
+        pyramid_request.create_form.return_value.validate.return_value = {
+            "new_password": "test_new_password"
+        }
+
+        response = controller.post_password_form()
+
+        schema = getattr(schemas, schema)
+        schema.assert_called_once_with()
+        schema.return_value.bind.assert_called_once_with(request=pyramid_request)
+        pyramid_request.create_form.assert_called_once_with(
+            schema.return_value.bind.return_value
+        )
+        pyramid_request.create_form.return_value.validate.assert_called_once_with(
+            PostItemsMatcher(pyramid_request.POST.items())
+        )
+        user_password_service.update_password.assert_called_once_with(
+            user, "test_new_password"
+        )
+        assert pyramid_request.session.peek_flash("success") == ["Password changed ✓"]
+        assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
+
+    def test_post_password_form_invalid(self, controller, pyramid_request):
+        exception = pyramid_request.create_form.return_value.validate.side_effect = (
+            ValidationFailure(sentinel.field, sentinel.cstruct, sentinel.error)
+        )
+
+        with pytest.raises(ValidationFailure) as exc_info:
+            controller.post_password_form()
+
+        assert exc_info.value == exception
+
+    @pytest.mark.parametrize("formid", ["email", "password"])
+    def test_validation_failure(self, controller, pyramid_request, formid):
+        pyramid_request.params = {
+            "__formid__": formid,
+            "email": "invalid_email",
+            "password": "pass",
+            "new_password": "new_pass",
+            "new_password_confirm": "new_pass_confirm",
+        }
+        errors = {
+            "email": "invalid email address",
+            "password": "wrong password",
+            "new_password": "invalid password",
+            "new_pass_confirm": "password don't match",
+        }
+        controller.context = SimpleNamespace(
+            error=SimpleNamespace(asdict=lambda: errors)
+        )
+
+        response = controller.validation_failure()
+
+        assert pyramid_request.response.status_int == 400
+        assert response["js_config"]["forms"][formid] == {
+            "data": {"email": "invalid_email"},
+            "errors": errors,
         }
 
     @pytest.fixture
-    def pyramid_request(self, factories, pyramid_request):
-        pyramid_request.POST = {}
-        pyramid_request.user = factories.User()
+    def controller(self, pyramid_request):
+        return views.AccountController(sentinel.context, pyramid_request)
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
         return pyramid_request
 
-    @pytest.fixture
-    def feature_service(self, feature_service):
-        feature_service.enabled.return_value = False
-        return feature_service
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("oidc.connect.google", "/oidc/connect/google")
+        pyramid_config.add_route("oidc.connect.facebook", "/oidc/connect/facebook")
+        pyramid_config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
+        pyramid_config.add_route("account", "/account/settings")
+
+    @pytest.fixture(autouse=True)
+    def pyramid_settings(self, pyramid_settings):
+        pyramid_settings["orcid_host"] = "https://sandbox.orcid.org"
+        return pyramid_settings
 
     @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route("account", "/my/account")
+    def oidc_service(self, oidc_service):
+        oidc_service.get_identity.return_value = None
+        return oidc_service
 
 
 class TestNotificationsController:
@@ -1228,3 +1358,11 @@ def schemas(patch):
 @pytest.fixture(autouse=True)
 def login(patch):
     return patch("h.views.accounts.login")
+
+
+class PostItemsMatcher:
+    def __init__(self, items):
+        self.items = items
+
+    def __eq__(self, other):
+        return list(other) == list(self.items)

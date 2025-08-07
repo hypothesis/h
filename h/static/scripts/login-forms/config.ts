@@ -50,6 +50,49 @@ export type SignupConfigObject = ConfigBase & {
   identity?: SocialLoginIdentity;
 };
 
-export type ConfigObject = LoginConfigObject | SignupConfigObject;
+/** Configuration for the 'Account settings' forms. */
+export type AccountSettingsConfigObject = ConfigBase & {
+  forms: {
+    email: FormFields<{
+      email: string;
+      password: string;
+    }>;
+    password: FormFields<{
+      password: string;
+      new_password: string;
+      new_password_confirm: string;
+    }>;
+  };
+  context: {
+    user: { email: string; has_password: boolean };
+    identities?: {
+      google: {
+        connected: boolean;
+        provider_unique_id?: string;
+        url?: string;
+      };
+      facebook: {
+        connected: boolean;
+        provider_unique_id?: string;
+        url?: string;
+      };
+      orcid: {
+        connected: boolean;
+        provider_unique_id?: string;
+        url?: string;
+      };
+    };
+  };
+  routes?: {
+    'oidc.connect.google'?: string;
+    'oidc.connect.facebook'?: string;
+    'oidc.connect.orcid'?: string;
+  };
+};
+
+export type ConfigObject =
+  | LoginConfigObject
+  | SignupConfigObject
+  | AccountSettingsConfigObject;
 
 export const Config = createContext<ConfigObject | null>(null);

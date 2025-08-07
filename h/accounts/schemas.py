@@ -203,13 +203,15 @@ class SocialLoginSignupSchema(colander.Schema):
     comms_opt_in = comms_opt_in_node()
 
 
-class EmailChangeSchema(CSRFSchema):
-    email = email_node(title=_("Email address"))
-    # No validators: all validation is done on the email field
-    password = password_node(title=_("Confirm password"), hide_until_form_active=True)
+class EmailAddSchema(colander.Schema):
+    email = email_node()
+
+
+class EmailChangeSchema(colander.Schema):
+    email = email_node()
+    password = password_node()
 
     def validator(self, node, value):
-        super().validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")
@@ -241,13 +243,11 @@ def new_password_confirm_node():
     )
 
 
-class PasswordAddSchema(CSRFSchema):
-    new_password = new_password_node(title=_("Add password"))
+class PasswordAddSchema(colander.Schema):
+    new_password = new_password_node()
     new_password_confirm = new_password_confirm_node()
 
     def validator(self, node, value):
-        super().validator(node, value)
-
         exc = colander.Invalid(node)
 
         if value.get("new_password") != value.get("new_password_confirm"):
@@ -257,15 +257,12 @@ class PasswordAddSchema(CSRFSchema):
             raise exc
 
 
-class PasswordChangeSchema(CSRFSchema):
-    password = password_node(title=_("Current password"), inactive_label=_("Password"))
-    new_password = new_password_node(
-        title=_("New password"), hide_until_form_active=True
-    )
+class PasswordChangeSchema(colander.Schema):
+    password = password_node()
+    new_password = new_password_node()
     new_password_confirm = new_password_confirm_node()
 
-    def validator(self, node, value):  # pragma: no cover
-        super().validator(node, value)
+    def validator(self, node, value):
         exc = colander.Invalid(node)
         request = node.bindings["request"]
         svc = request.find_service(name="user_password")

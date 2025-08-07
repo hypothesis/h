@@ -1,4 +1,3 @@
-import itertools
 from dataclasses import asdict
 from typing import Any
 from urllib.parse import urlparse, urlunparse
@@ -10,7 +9,7 @@ from pyramid import httpexceptions, security
 from pyramid.config import not_
 from pyramid.csrf import get_csrf_token
 from pyramid.exceptions import BadCSRFToken
-from pyramid.view import view_config, view_defaults
+from pyramid.view import exception_view_config, view_config, view_defaults
 from sqlalchemy import func, select
 
 from h import accounts, form, i18n, models, session
@@ -433,136 +432,144 @@ class ActivateController:
     is_authenticated=True,
 )
 class AccountController:
-    def __init__(self, request):
+    def __init__(self, context, request):
+        self.context = context
         self.request = request
-
-        # Ensure deform generates unique field IDs for each field in this
-        # multiple-form page.
-        counter = itertools.count()
-
-        self.email_form = request.create_form(
-            schemas.EmailChangeSchema().bind(request=request),
-            buttons=(_("Save"),),
-            formid="email",
-            counter=counter,
-            use_inline_editing=True,
-        )
-        self.addpassword_form = request.create_form(
-            schemas.PasswordAddSchema().bind(request=request),
-            buttons=(_("Save"),),
-            formid="password",
-            counter=counter,
-            use_inline_editing=True,
-        )
-        self.changepassword_form = request.create_form(
-            schemas.PasswordChangeSchema().bind(request=request),
-            buttons=(_("Save"),),
-            formid="password",
-            counter=counter,
-            use_inline_editing=True,
-        )
-
-    @property
-    def password_form(self):
-        if self.request.user.password:
-            return self.changepassword_form
-
-        return self.addpassword_form
 
     @view_config(request_method="GET")
     def get(self):
-        """Show the user's account."""
         return self._template_data()
 
-    @view_config(request_method="POST", request_param="__formid__=email")
+    @view_config(
+        request_method="POST", request_param="__formid__=email", require_csrf=True
+    )
     def post_email_form(self):
-        # Called by Pyramid when the change email form is submitted.
-        return form.handle_form_submission(
-            self.request,
-            self.email_form,
-            on_success=self.update_email_address,
-            on_failure=self._template_data,
-        )
+        if self.request.user.password:
+            schema = schemas.EmailChangeSchema()
+        else:
+            schema = schemas.EmailAddSchema()
 
-    @view_config(request_method="POST", request_param="__formid__=password")
-    def post_password_form(self):
-        # Called by Pyramid when the change password form is submitted.
-        return form.handle_form_submission(
-            self.request,
-            lambda: self.password_form,
-            on_success=self.update_password,
-            on_failure=self._template_data,
-        )
+        appstruct = self.request.create_form(
+            schema.bind(request=self.request)
+        ).validate(self.request.POST.items())
 
-    def update_email_address(self, appstruct):
         self.request.user.email = appstruct["email"]
 
-    def update_password(self, appstruct):
-        svc = self.request.find_service(name="user_password")
-        svc.update_password(self.request.user, appstruct["new_password"])
+        self.request.session.flash("Email address changed ✓", "success")
+        return httpexceptions.HTTPFound(location=self.request.route_url("account"))
 
-    def _template_data(self):
-        """Return the data needed to render accounts.html.jinja2."""
-        email = self.request.user.email or ""
-        password_form = self.password_form.render()
-        email_form = self.email_form.render({"email": email})
+    @view_config(
+        request_method="POST", request_param="__formid__=password", require_csrf=True
+    )
+    def post_password_form(self):
+        if self.request.user.password:
+            schema = schemas.PasswordChangeSchema()
+        else:
+            schema = schemas.PasswordAddSchema()
 
-        feature_service = self.request.find_service(name="feature")
-        log_in_with_orcid = feature_service.enabled(
-            "log_in_with_orcid", self.request.user
+        appstruct = self.request.create_form(
+            schema.bind(request=self.request)
+        ).validate(self.request.POST.items())
+
+        self.request.find_service(name="user_password").update_password(
+            self.request.user, appstruct["new_password"]
         )
-        orcid_id = orcid_url = None
-        if log_in_with_orcid:
+
+        self.request.session.flash("Password changed ✓", "success")
+        return httpexceptions.HTTPFound(location=self.request.route_url("account"))
+
+    @exception_view_config(
+        context=deform.ValidationFailure, request_param="__formid__=email"
+    )
+    @exception_view_config(
+        context=deform.ValidationFailure, request_param="__formid__=password"
+    )
+    def validation_failure(self):
+        self.request.response.status_int = 400
+
+        formid = self.request.params["__formid__"]
+
+        data = {}
+
+        # Form fields that're safe to copy from the request into the response
+        # (so that the form doesn't lose the text the user entered) when
+        # responding with a validation error.
+        # Fields containing passwords are omitted for security.
+        safe_fields = ["email"]
+
+        for field in safe_fields:
+            if field in self.request.params:
+                data[field] = self.request.params[field]
+            else:  # pragma: nocover
+                pass
+
+        return self._template_data(
+            js_config={
+                "forms": {formid: {"data": data, "errors": self.context.error.asdict()}}
+            }
+        )
+
+    def _template_data(self, js_config=None):
+        js_config = js_config or {}
+        js_config.setdefault("csrfToken", get_csrf_token(self.request))
+        js_config.setdefault("forms", {})
+        js_config["forms"].setdefault("email", {})
+        js_config["forms"]["email"].setdefault("data", {})
+        js_config["forms"]["email"].setdefault("errors", {})
+        js_config["forms"].setdefault("password", {})
+        js_config["forms"]["password"].setdefault("data", {})
+        js_config["forms"]["password"].setdefault("errors", {})
+        js_config.setdefault("features", {})
+        for provider in IdentityProvider:
+            js_config["features"].setdefault(
+                f"log_in_with_{provider.name.lower()}",
+                self.request.feature(f"log_in_with_{provider.name.lower()}"),
+            )
+        js_config.setdefault("context", {})
+        js_config["context"].setdefault("user", {})
+        js_config["context"]["user"].setdefault(
+            "email", self.request.user.email or None
+        )
+        js_config["context"]["user"].setdefault(
+            "has_password", bool(self.request.user.password)
+        )
+
+        oidc_svc = self.request.find_service(OIDCService)
+
+        for provider in IdentityProvider:
+            if js_config["features"][f"log_in_with_{provider.name.lower()}"]:
+                provider_config = {}
+                identity = oidc_svc.get_identity(self.request.user, provider)
+
+                if identity:
+                    provider_config["connected"] = True
+                    provider_config["provider_unique_id"] = identity.provider_unique_id
+                else:
+                    provider_config["connected"] = False
+
+                js_config["context"].setdefault("identities", {})
+                js_config["context"]["identities"].setdefault(provider.name.lower(), {})
+                for key, value in provider_config.items():
+                    js_config["context"]["identities"][
+                        provider.name.lower()
+                    ].setdefault(key, value)
+
+                route_name = f"oidc.connect.{provider.name.lower()}"
+                js_config.setdefault("routes", {})
+                js_config["routes"].setdefault(
+                    route_name, self.request.route_url(route_name)
+                )
+
+        orcid_config = js_config["context"].get("identities", {}).get("orcid", {})
+        if orcid_id := orcid_config.get("provider_unique_id"):
             orcid_host = self.request.registry.settings["orcid_host"]
-            oidc_service = self.request.find_service(OIDCService)
-            orcid_identity = oidc_service.get_identity(
-                self.request.user, IdentityProvider.ORCID
-            )
-            orcid_id = orcid_identity.provider_unique_id if orcid_identity else None
-
-            if orcid_id:
-                # The URL to the user's public ORCID profile page
-                # (for example: https://orcid.org/0000-0002-6373-1308).
-                orcid_url = urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
-            else:
-                pass  # pragma: no cover
-
-        log_in_with_google = feature_service.enabled(
-            "log_in_with_google", self.request.user
-        )
-        google_id = None
-        if log_in_with_google:
-            oidc_service = self.request.find_service(OIDCService)
-            google_identity = oidc_service.get_identity(
-                self.request.user, IdentityProvider.GOOGLE
-            )
-            google_id = google_identity.provider_unique_id if google_identity else None
-
-        log_in_with_facebook = feature_service.enabled(
-            "log_in_with_facebook", self.request.user
-        )
-        facebook_id = None
-        if log_in_with_facebook:
-            oidc_service = self.request.find_service(OIDCService)
-            facebook_identity = oidc_service.get_identity(
-                self.request.user, IdentityProvider.FACEBOOK
-            )
-            facebook_id = (
-                facebook_identity.provider_unique_id if facebook_identity else None
+            # The URL to the user's public ORCID profile page
+            # (for example: https://orcid.org/0000-0002-6373-1308).
+            orcid_config.setdefault(
+                "url", urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
             )
 
-        return {
-            "email": email,
-            "email_form": email_form,
-            "password_form": password_form,
-            "log_in_with_orcid": log_in_with_orcid,
-            "orcid": orcid_id,
-            "orcid_url": orcid_url,
-            "log_in_with_google": log_in_with_google,
-            "google_id": google_id,
-            "log_in_with_facebook": log_in_with_facebook,
-            "facebook_id": facebook_id,
-        }
+        return {"js_config": js_config}
 
 
 @view_defaults(
