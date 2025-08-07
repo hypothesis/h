@@ -32,11 +32,21 @@ class ChangeAnnotationModerationStatusSchema(colander.Schema):
         self._annotation = annotation
 
     def validator(self, _node, cstruct):
-        if (
-            cstruct["current_moderation_status"]
-            and cstruct["current_moderation_status"]
-            != self._annotation.moderation_status.value
+        current_anno_status = self._annotation.moderation_status.value
+        if all(
+            [
+                current_status_param := cstruct["current_moderation_status"],
+                current_status_param != current_anno_status,
+                cstruct["moderation_status"] != current_anno_status,
+            ]
         ):
+            # If provided, the current_moderation_status param must match the
+            # annotation's current moderation status. This is to prevent moderating
+            # annotations based on an outdated representation of the annotation.
+            #
+            # If instead the moderation_status param matches the annotation's
+            # current moderation status then allow the request to succeed (even if
+            # current_moderation_status doesn't match) because it's a no-op.
             raise httpexceptions.HTTPConflict(
                 detail="The annotation has been moderated since it was loaded."
             )
