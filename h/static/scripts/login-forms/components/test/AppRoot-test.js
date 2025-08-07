@@ -23,6 +23,7 @@ describe('AppRoot', () => {
     config = { csrfToken: 'fake-csrf-token', features: {} };
 
     $imports.$mock({
+      './AccountSettingsForms': mockComponent('AccountSettingsForms'),
       './LoginForm': mockComponent('LoginForm'),
       './SignupForm': mockComponent('SignupForm'),
       './SignupSelectForm': mockComponent('SignupSelectForm'),
@@ -129,6 +130,11 @@ describe('AppRoot', () => {
   });
 
   [
+    {
+      path: '/account/settings',
+      selector: 'AccountSettingsForms',
+      props: {},
+    },
     {
       path: '/login',
       selector: 'LoginForm',

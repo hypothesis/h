@@ -23,6 +23,18 @@ TEST_SETTINGS = {
     "h_api_auth_cookie_secret_key": b"test_h_api_auth_cookie_secret_key",
     "h_api_auth_cookie_salt": b"test_h_api_auth_cookie_salt",
     "sqlalchemy.url": os.environ["DATABASE_URL"],
+    "oidc_clientid_orcid": "test_oidcclientid_orcid",
+    "oidc_clientsecret_orcid": "test_oidcclientid_orcid",
+    "oidc_tokenurl_orcid": "test_oidc_tokenurl_orcid",
+    "oidc_keyseturl_orcid": "test_oidc_keyseturl_orcid",
+    "oidc_clientid_google": "test_oidcclientid_google",
+    "oidc_clientsecret_google": "test_oidcclientid_google",
+    "oidc_tokenurl_google": "test_oidc_tokenurl_google",
+    "oidc_keyseturl_google": "test_oidc_keyseturl_google",
+    "oidc_clientid_facebook": "test_oidcclientid_facebook",
+    "oidc_clientsecret_facebook": "test_oidcclientid_facebook",
+    "oidc_tokenurl_facebook": "test_oidc_tokenurl_facebook",
+    "oidc_keyseturl_facebook": "test_oidc_keyseturl_facebook",
 }
 
 TEST_ENVIRONMENT = {

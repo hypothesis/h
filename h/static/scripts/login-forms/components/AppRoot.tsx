@@ -7,6 +7,7 @@ import Router from '../../forms-common/components/Router';
 import type { ConfigObject } from '../config';
 import { Config } from '../config';
 import { routes } from '../routes';
+import AccountSettingsForms from './AccountSettingsForms';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import SignupSelectForm from './SignupSelectForm';
@@ -61,6 +62,9 @@ export default function AppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.signupWithORCID}>
               <SignupForm idProvider="orcid" />
+            </Route>
+            <Route path={routes.accountSettings}>
+              <AccountSettingsForms />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>
