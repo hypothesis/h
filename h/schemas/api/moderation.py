@@ -4,6 +4,7 @@ import colander
 from pyramid import httpexceptions
 
 from h.models import Annotation
+from h.models.annotation import ModerationStatus
 
 
 class ModerationStatusNode(colander.SchemaNode):
@@ -32,7 +33,9 @@ class ChangeAnnotationModerationStatusSchema(colander.Schema):
         self._annotation = annotation
 
     def validator(self, _node, cstruct):
-        current_anno_status = self._annotation.moderation_status.value
+        current_anno_status = (
+            self._annotation.moderation_status or ModerationStatus.APPROVED
+        ).value
         if all(
             [
                 current_status_param := cstruct["current_moderation_status"],
