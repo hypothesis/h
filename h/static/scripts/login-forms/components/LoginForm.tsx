@@ -1,11 +1,12 @@
 import { Button, Link, LogoIcon } from '@hypothesis/frontend-shared';
-import { useContext } from 'preact/hooks';
+import { useContext, useEffect } from 'preact/hooks';
 
 import Form from '../../forms-common/components/Form';
 import FormContainer from '../../forms-common/components/FormContainer';
 import FormHeader from '../../forms-common/components/FormHeader';
 import TextField from '../../forms-common/components/TextField';
 import { useFormValue } from '../../forms-common/form-value';
+import { listenForAuthStatusChange } from '../../util/login-status';
 import { Config } from '../config';
 import type { LoginConfigObject } from '../config';
 import { routes } from '../routes';
@@ -38,6 +39,17 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
   // following an activation link).
   const autofocusUsername =
     Boolean(username.error) || username.value.length === 0;
+
+  // Reload the page if user logs in, in another tab.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    listenForAuthStatusChange(status => {
+      if (status === 'logged-in') {
+        location.reload();
+      }
+    }, ctrl.signal);
+    return () => ctrl.abort();
+  }, []);
 
   return (
     <>

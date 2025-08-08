@@ -63,6 +63,10 @@
     <script type="importmap" nonce="{{ request.csp_nonce }}">{{ asset_import_map() | tojson }}</script>
     {% endblock %}
 
+    {% if request.user %}
+    <meta name="userid" content="{{ request.user.userid }}">
+    {% endif %}
+
     {% for url in asset_urls("header_js") %}
     <script type="module" src="{{ url }}"></script>
     {% endfor %}
