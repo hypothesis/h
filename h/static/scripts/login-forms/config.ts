@@ -15,6 +15,13 @@ export type ConfigBase = {
     log_in_with_google: boolean;
     log_in_with_orcid: boolean;
   };
+  urls: {
+    login: {
+      facebook: string;
+      google: string;
+      orcid: string;
+    };
+  };
 };
 
 /** Data passed to frontend for login form. */

@@ -30,6 +30,7 @@ class TestSignupViews:
             sentinel.google_enabled,
             sentinel.facebook_enabled,
         ]
+
         response = views.get()
 
         get_csrf_token.assert_called_once_with(pyramid_request)
@@ -47,7 +48,50 @@ class TestSignupViews:
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "form": {},
+                "urls": {
+                    "login": {
+                        provider: pyramid_request.route_url(f"oidc.login.{provider}")
+                        for provider in ("facebook", "google", "orcid")
+                    }
+                },
             }
+        }
+
+    def test_get_when_feature_flags_disabled(
+        self, views, pyramid_request, feature_service
+    ):
+        feature_service.enabled.return_value = False
+        pyramid_request.feature.flags = {
+            "log_in_with_facebook": False,
+            "log_in_with_google": False,
+            "log_in_with_orcid": False,
+        }
+
+        response = views.get()
+
+        assert response["js_config"]["features"] == {
+            "log_in_with_facebook": False,
+            "log_in_with_google": False,
+            "log_in_with_orcid": False,
+        }
+        for provider in ("facebook", "google", "orcid"):
+            assert provider not in response["js_config"].get("urls", {}).get(
+                "login", {}
+            )
+
+    def test_get_copies_next_query_param_onto_social_login_urls(
+        self, views, pyramid_request
+    ):
+        pyramid_request.params["next"] = "http://example.com/oauth/authorize"
+
+        response = views.get()
+
+        assert response["js_config"]["urls"]["login"] == {
+            provider: pyramid_request.route_url(
+                f"oidc.login.{provider}",
+                _query={"next": "http://example.com/oauth/authorize"},
+            )
+            for provider in ("facebook", "google", "orcid")
         }
 
     @pytest.mark.usefixtures("frozen_time")
@@ -99,9 +143,53 @@ class TestSignupViews:
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "form": {},
+                "urls": {
+                    "login": {
+                        "facebook": pyramid_request.route_url("oidc.login.facebook"),
+                        "google": pyramid_request.route_url("oidc.login.google"),
+                        "orcid": pyramid_request.route_url("oidc.login.orcid"),
+                    }
+                },
             },
             "heading": _("Account registration successful"),
             "message": None,
+        }
+
+    def test_post_when_feature_flags_disabled(
+        self, views, pyramid_request, feature_service
+    ):
+        feature_service.enabled.return_value = False
+        pyramid_request.feature.flags = {
+            "log_in_with_facebook": False,
+            "log_in_with_google": False,
+            "log_in_with_orcid": False,
+        }
+
+        response = views.post()
+
+        assert response["js_config"]["features"] == {
+            "log_in_with_orcid": False,
+            "log_in_with_google": False,
+            "log_in_with_facebook": False,
+        }
+        for provider in ("facebook", "google", "orcid"):
+            assert provider not in response["js_config"].get("urls", {}).get(
+                "login", {}
+            )
+
+    def test_post_copies_next_query_param_onto_social_login_urls(
+        self, pyramid_request, views
+    ):
+        pyramid_request.params["next"] = "http://example.com/oauth/authorize"
+
+        response = views.post()
+
+        assert response["js_config"]["urls"]["login"] == {
+            provider: pyramid_request.route_url(
+                f"oidc.login.{provider}",
+                _query={"next": "http://example.com/oauth/authorize"},
+            )
+            for provider in ("facebook", "google", "orcid")
         }
 
     def test_post_when_validation_failure(
@@ -210,7 +298,64 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "urls": {
+                    "login": {
+                        "facebook": pyramid_request.route_url("oidc.login.facebook"),
+                        "google": pyramid_request.route_url("oidc.login.google"),
+                        "orcid": pyramid_request.route_url("oidc.login.orcid"),
+                    }
+                },
             }
+        }
+
+    def test_validation_failure_when_feature_flags_disabled(
+        self,
+        views,
+        pyramid_request,
+        feature_service,
+    ):
+        feature_service.enabled.return_value = False
+        pyramid_request.feature.flags = {
+            "log_in_with_facebook": False,
+            "log_in_with_google": False,
+            "log_in_with_orcid": False,
+        }
+        views.context = ValidationFailure(
+            sentinel.field,
+            sentinel.cstruct,
+            error=create_autospec(Invalid, instance=True, spec_set=True),
+        )
+
+        response = views.validation_failure()
+
+        assert response["js_config"]["features"] == {
+            "log_in_with_orcid": False,
+            "log_in_with_google": False,
+            "log_in_with_facebook": False,
+        }
+        for provider in ("facebook", "google", "orcid"):
+            assert provider not in response["js_config"].get("urls", {}).get(
+                "login", {}
+            )
+
+    def test_validation_failure_copies_next_query_param_onto_social_login_urls(
+        self, pyramid_request, views
+    ):
+        pyramid_request.params["next"] = "http://example.com/oauth/authorize"
+        views.context = ValidationFailure(
+            sentinel.field,
+            sentinel.cstruct,
+            error=create_autospec(Invalid, instance=True, spec_set=True),
+        )
+
+        response = views.validation_failure()
+
+        assert response["js_config"]["urls"]["login"] == {
+            provider: pyramid_request.route_url(
+                f"oidc.login.{provider}",
+                _query={"next": "http://example.com/oauth/authorize"},
+            )
+            for provider in ("facebook", "google", "orcid")
         }
 
     def test_post_when_signup_conflict(
@@ -245,6 +390,13 @@ class TestSignupViews:
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "form": {},
+                "urls": {
+                    "login": {
+                        "facebook": pyramid_request.route_url("oidc.login.facebook"),
+                        "google": pyramid_request.route_url("oidc.login.google"),
+                        "orcid": pyramid_request.route_url("oidc.login.orcid"),
+                    }
+                },
             },
             "heading": _("Account already registered"),
             "message": _("Test error message"),
@@ -357,6 +509,46 @@ class TestSocialLoginSignupViews:
         )
         for header in login.return_value:
             assert header in response.headerlist
+
+    def test_post_when_next_url_in_idinfo_token(
+        self, views, jwt_service, pyramid_request, matchers
+    ):
+        pyramid_request.create_form.return_value.validate.return_value = {
+            "username": sentinel.username
+        }
+        jwt_service.decode_symmetric.return_value.next_url = (
+            "http://example.com/oauth/authorize"
+        )
+
+        response = views.post()
+
+        assert response == matchers.Redirect302To("http://example.com/oauth/authorize")
+
+    @pytest.mark.parametrize(
+        "next_url", [None, "http://example.com/unknown", "https://evil.com"]
+    )
+    def test_post_when_next_url_missing_or_unknown(
+        self,
+        views,
+        jwt_service,
+        pyramid_request,
+        matchers,
+        next_url,
+        user_signup_service,
+    ):
+        pyramid_request.create_form.return_value.validate.return_value = {
+            "username": sentinel.username
+        }
+        jwt_service.decode_symmetric.return_value.next_url = next_url
+
+        response = views.post()
+
+        assert response == matchers.Redirect302To(
+            pyramid_request.route_url(
+                "activity.user_search",
+                username=user_signup_service.signup.return_value.username,
+            )
+        )
 
     def test_post_when_form_submission_invalid(self, pyramid_request, views):
         pyramid_request.create_form.return_value.validate.side_effect = (
@@ -518,11 +710,15 @@ def test_is_authenticated(matchers, pyramid_request, authenticated_user):
 
 def test_encode_idinfo_token(jwt_service):
     token = encode_idinfo_token(
-        jwt_service, sentinel.provider_unique_id, sentinel.issuer, sentinel.audience
+        jwt_service,
+        sentinel.provider_unique_id,
+        sentinel.issuer,
+        sentinel.audience,
+        sentinel.next_url,
     )
 
     jwt_service.encode_symmetric.assert_called_once_with(
-        IDInfo(sentinel.provider_unique_id),
+        IDInfo(sentinel.provider_unique_id, sentinel.next_url),
         expires_in=timedelta(hours=1),
         issuer=sentinel.issuer,
         audience=sentinel.audience,
@@ -558,6 +754,10 @@ def report_exception(patch):
 @pytest.fixture(autouse=True)
 def routes(pyramid_config):
     pyramid_config.add_route("activity.user_search", "/users/{username}")
+    pyramid_config.add_route("oauth_authorize", "/oauth/authorize")
+    pyramid_config.add_route("oidc.login.facebook", "/oidc/login/facebook")
+    pyramid_config.add_route("oidc.login.google", "/oidc/login/google")
+    pyramid_config.add_route("oidc.login.orcid", "/oidc/login/orcid")
 
 
 @pytest.fixture

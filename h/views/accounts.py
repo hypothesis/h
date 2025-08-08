@@ -30,6 +30,7 @@ from h.services import OIDCService, SubscriptionService
 from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
+from h.views.account_signup import inject_login_urls
 from h.views.helpers import login
 
 _ = i18n.TranslationString
@@ -136,6 +137,8 @@ class AuthController:
                 },
             },
         }
+
+        inject_login_urls(self.request, js_config)
 
         if for_oauth := self.request.params.get("for_oauth"):
             js_config["forOAuth"] = bool(for_oauth)
