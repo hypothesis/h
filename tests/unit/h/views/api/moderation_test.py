@@ -63,26 +63,50 @@ class TestUnhide:
 
 
 class TestChangeAnnotationModerationStatus:
+    @pytest.mark.parametrize(
+        "moderation_status,current_moderation_status",
+        [
+            (None, None),
+            #  When current_moderation_status is not provided, we can set any moderation status safely
+            (ModerationStatus.APPROVED, None),
+            #  When current_moderation_status is provided, it needs to match current annotation's status
+            (ModerationStatus.APPROVED, ModerationStatus.DENIED),
+            #  If current_moderation_status does not match the actual current value, but the one we want to set does,
+            #  that is also considered valid
+            (ModerationStatus.DENIED, ModerationStatus.PENDING),
+        ],
+    )
     def test_it(
         self,
         pyramid_request,
-        annotation_context,
+        moderated_annotation_context,
         moderation_service,
         annotation_json_service,
         events,
         annotation,
         valid_payload,
         factories,
+        moderation_status,
+        current_moderation_status,
     ):
+        if moderation_status is not None:
+            valid_payload["moderation_status"] = moderation_status.value
+        if current_moderation_status is not None:
+            valid_payload["current_moderation_status"] = current_moderation_status.value
+
         pyramid_request.json_body = valid_payload
         moderation_service.set_status.return_value = factories.ModerationLog()
 
         response = views.change_annotation_moderation_status(
-            annotation_context, pyramid_request
+            moderated_annotation_context, pyramid_request
         )
 
         moderation_service.set_status.assert_called_once_with(
-            annotation_context.annotation, ModerationStatus.SPAM, pyramid_request.user
+            moderated_annotation_context.annotation,
+            moderation_status
+            if moderation_status is not None
+            else ModerationStatus.SPAM,
+            pyramid_request.user,
         )
         events.AnnotationEvent.assert_called_once_with(
             pyramid_request, annotation.id, "update"
@@ -113,7 +137,7 @@ class TestChangeAnnotationModerationStatus:
         valid_payload,
         annotation_updated,
         message,
-        annotation_context,
+        moderated_annotation_context,
         pyramid_request,
     ):
         valid_payload["annotation_updated"] = annotation_updated
@@ -121,7 +145,7 @@ class TestChangeAnnotationModerationStatus:
 
         with pytest.raises(ValidationError) as excinfo:
             views.change_annotation_moderation_status(
-                annotation_context, pyramid_request
+                moderated_annotation_context, pyramid_request
             )
 
         assert str(excinfo.value) == message
@@ -129,7 +153,7 @@ class TestChangeAnnotationModerationStatus:
     def test_outdated(
         self,
         valid_payload,
-        annotation_context,
+        moderated_annotation_context,
         pyramid_request,
     ):
         valid_payload["annotation_updated"] = "2020-10-01T12:00:00Z"
@@ -137,7 +161,7 @@ class TestChangeAnnotationModerationStatus:
 
         with pytest.raises(httpexceptions.HTTPConflict) as excinfo:
             views.change_annotation_moderation_status(
-                annotation_context, pyramid_request
+                moderated_annotation_context, pyramid_request
             )
 
         assert (
@@ -148,15 +172,14 @@ class TestChangeAnnotationModerationStatus:
     def test_conflicting_prev_status(
         self,
         valid_payload_with_prev_status,
-        annotation_context,
+        moderated_annotation_context,
         pyramid_request,
     ):
-        annotation_context.annotation.moderation_status = ModerationStatus.DENIED
         pyramid_request.json_body = valid_payload_with_prev_status
 
         with pytest.raises(httpexceptions.HTTPConflict) as excinfo:
             views.change_annotation_moderation_status(
-                annotation_context, pyramid_request
+                moderated_annotation_context, pyramid_request
             )
 
         assert (
@@ -175,6 +198,11 @@ class TestChangeAnnotationModerationStatus:
     def valid_payload_with_prev_status(self, valid_payload):
         valid_payload["current_moderation_status"] = "APPROVED"
         return valid_payload
+
+    @pytest.fixture
+    def moderated_annotation_context(self, annotation_context):
+        annotation_context.annotation.moderation_status = ModerationStatus.DENIED
+        return annotation_context
 
 
 @pytest.fixture
