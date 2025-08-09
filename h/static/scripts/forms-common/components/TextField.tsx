@@ -40,6 +40,9 @@ export type TextFieldProps = {
   /** Current value of the input. */
   value: string;
 
+  /** Placeholder text for the input. */
+  placeholder?: string;
+
   /** Callback invoked when the field's value is changed. */
   onChangeValue: (newValue: string) => void;
 
@@ -96,6 +99,7 @@ export default function TextField({
   type = 'input',
   inputType,
   value,
+  placeholder,
   onChangeValue,
   onCommitValue,
   minLength = 0,
@@ -135,6 +139,7 @@ export default function TextField({
         }}
         error={error}
         value={value}
+        placeholder={placeholder}
         classes={classes}
         autofocus={autofocus}
         autocomplete="off"

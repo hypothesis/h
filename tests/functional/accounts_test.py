@@ -2,107 +2,235 @@ import json
 
 import pytest
 
+from h.models import User
+from h.models.user_identity import IdentityProvider
+
 
 class TestAccountSettings:
     """Tests for the /account/settings page."""
 
-    def test_submit_email_form_without_xhr_returns_full_html_page(self, app):
-        res = app.get("/account/settings")
+    @pytest.mark.usefixtures("logged_in")
+    def test_get(self, app, user, matchers):
+        response = app.get("/account/settings", status=200)
 
-        email_form = res.forms["email"]
-        email_form["email"] = "new_email1@example.com"
-        email_form["password"] = "pass"  # noqa: S105
+        assert js_config_from(response) == {
+            "context": {"user": {"email": user.email, "has_password": True}},
+            "csrfToken": matchers.InstanceOf(str),
+            "features": {
+                f"log_in_with_{provider.name.lower()}": False
+                for provider in IdentityProvider
+            },
+            "forms": {
+                "email": {"data": {}, "errors": {}},
+                "password": {"data": {}, "errors": {}},
+            },
+        }
 
-        res = email_form.submit().follow()
+    def test_get_not_logged_in(self, app):
+        app.get("/account/settings", status=404)
 
-        assert res.text.startswith("<!DOCTYPE html>")
+    @pytest.mark.usefixtures("logged_in")
+    def test_change_email(self, app, user, db_session, change_email, password):
+        response = app.get("/account/settings")
+        csrf_token = js_config_from(response)["csrfToken"]
 
-    def test_submit_email_form_with_xhr_returns_partial_html_snippet(self, app):
-        res = app.get("/account/settings")
+        response = change_email(
+            {
+                "email": "zirk-kaic-vuft@example.com",
+                "password": password,
+                "csrf_token": csrf_token,
+            }
+        )
 
-        email_form = res.forms["email"]
-        email_form["email"] = "new_email2@example.com"
-        email_form["password"] = "pass"  # noqa: S105
+        db_session.expire(user)
+        assert (
+            db_session.get(
+                User,
+                user.id,
+            ).email
+            == "zirk-kaic-vuft@example.com"
+        )
+        assert response.status_int == 302
+        assert response.location == "http://localhost/account/settings"
 
-        res = email_form.submit(xhr=True, status=200)
+    @pytest.mark.usefixtures("logged_in")
+    @pytest.mark.parametrize(
+        "params,data,errors",
+        [
+            (
+                {"email": "invalid", "password": "pass"},
+                {"email": "invalid"},
+                {"email": "Invalid email address."},
+            ),
+            (
+                {"email": "uh-pond-vaid@example.com", "password": "wrong"},
+                {"email": "uh-pond-vaid@example.com"},
+                {"password": "Wrong password."},
+            ),
+        ],
+    )
+    def test_change_email_invalid(self, app, change_email, params, data, errors):
+        response = app.get("/account/settings")
+        params["csrf_token"] = js_config_from(response)["csrfToken"]
 
-        assert res.text.strip("\n").startswith("<form")
+        response = change_email(params, status=400)
 
-    def test_submit_email_form_with_xhr_returns_plain_text(self, app):
-        res = app.get("/account/settings")
+        assert js_config_from(response)["forms"]["email"] == {
+            "data": data,
+            "errors": errors,
+        }
 
-        email_form = res.forms["email"]
-        email_form["email"] = "new_email3@example.com"
-        email_form["password"] = "pass"  # noqa: S105
+    @pytest.mark.usefixtures("logged_in")
+    def test_change_email_no_csrf_token(self, change_email, password):
+        change_email(
+            {
+                "email": "gu-prek-chud@example.com",
+                "password": password,
+            },
+            status=403,
+        )
 
-        res = email_form.submit(xhr=True)
+    @pytest.mark.usefixtures("logged_in")
+    def test_change_email_not_logged_in(self, app, change_email, password):
+        response = app.get("/account/settings")
+        csrf_token = js_config_from(response)["csrfToken"]
+        app.get("/logout")
 
-        assert res.content_type == "text/plain"
+        change_email(
+            {
+                "email": "yoft-skib-zoc@example.com",
+                "password": password,
+                "csrf_token": csrf_token,
+            },
+            status=404,
+        )
 
-    def test_submit_password_form_without_xhr_returns_full_html_page(self, app):
-        res = app.get("/account/settings")
+    @pytest.mark.usefixtures("logged_in")
+    def test_change_password(self, app, change_password, password):
+        response = app.get("/account/settings")
+        csrf_token = js_config_from(response)["csrfToken"]
 
-        password_form = res.forms["password"]
-        password_form["password"] = "pass"  # noqa: S105
-        password_form["new_password"] = "new_password"  # noqa: S105
-        password_form["new_password_confirm"] = "new_password"  # noqa: S105
+        response = change_password(
+            {
+                "password": password,
+                "new_password": "new_password",
+                "new_password_confirm": "new_password",
+                "csrf_token": csrf_token,
+            }
+        )
 
-        res = password_form.submit().follow()
+        assert response.status_int == 302
+        assert response.location == "http://localhost/account/settings"
 
-        assert res.text.startswith("<!DOCTYPE html>")
+    @pytest.mark.usefixtures("logged_in")
+    @pytest.mark.parametrize(
+        "params,errors",
+        [
+            (
+                {
+                    "password": "wrong",
+                    "new_password": "new_password",
+                    "new_password_confirm": "new_password",
+                },
+                {"password": "Wrong password."},
+            ),
+            (
+                {
+                    "password": "pass",
+                    "new_password": "pass",
+                    "new_password_confirm": "pass",
+                },
+                {"new_password": "Must be 8 characters or more."},
+            ),
+            (
+                {
+                    "password": "pass",
+                    "new_password": "new_password",
+                    "new_password_confirm": "different",
+                },
+                {"new_password_confirm": "The passwords must match."},
+            ),
+        ],
+    )
+    def test_change_password_invalid(self, app, change_password, params, errors):
+        response = app.get("/account/settings")
+        params["csrf_token"] = js_config_from(response)["csrfToken"]
 
-    def test_submit_password_form_with_xhr_returns_partial_html_snippet(self, app):
-        res = app.get("/account/settings")
+        response = change_password(params, status=400)
 
-        password_form = res.forms["password"]
-        password_form["password"] = "pass"  # noqa: S105
-        password_form["new_password"] = "new_password"  # noqa: S105
-        password_form["new_password_confirm"] = "new_password"  # noqa: S105
+        assert js_config_from(response)["forms"]["password"] == {
+            "data": {},
+            "errors": errors,
+        }
 
-        res = password_form.submit(xhr=True)
+    @pytest.mark.usefixtures("logged_in")
+    def test_change_password_no_csrf_token(self, change_password, password):
+        change_password(
+            {
+                "password": password,
+                "new_password": "new_password",
+                "new_password_confirm": "new_password",
+            },
+            status=403,
+        )
 
-        assert res.text.strip("\n").startswith("<form")
+    @pytest.mark.usefixtures("logged_in")
+    def test_change_password_not_logged_in(self, app, change_password, password):
+        response = app.get("/account/settings")
+        csrf_token = js_config_from(response)["csrfToken"]
+        app.get("/logout")
 
-    def test_submit_password_form_with_xhr_returns_plain_text(self, app):
-        res = app.get("/account/settings")
+        change_password(
+            {
+                "password": password,
+                "new_password": "new_password",
+                "new_password_confirm": "new_password",
+                "csrf_token": csrf_token,
+            },
+            status=404,
+        )
 
-        password_form = res.forms["password"]
-        password_form["password"] = "pass"  # noqa: S105
-        password_form["new_password"] = "new_password"  # noqa: S105
-        password_form["new_password_confirm"] = "new_password"  # noqa: S105
+    @pytest.fixture
+    def change_email(self, app):
+        def change_email(params, status=None):
+            params["__formid__"] = "email"
+            return app.post("/account/settings", params=params, status=status)
 
-        res = password_form.submit(xhr=True)
+        return change_email
 
-        assert res.content_type == "text/plain"
+    @pytest.fixture
+    def change_password(self, app):
+        def change_password(params, status=None):
+            params["__formid__"] = "password"
+            return app.post("/account/settings", params=params, status=status)
 
-    def test_submit_invalid_password_form_with_xhr_returns_400(self, app):
-        res = app.get("/account/settings")
+        return change_password
 
-        password_form = res.forms["password"]
-        password_form["password"] = "pass"  # noqa: S105
-        password_form["new_password"] = "new_password"  # noqa: S105
-        password_form["new_password_confirm"] = "WRONG"  # noqa: S105
-
-        password_form.submit(xhr=True, status=400)
+    @pytest.fixture
+    def password(self):
+        return "pass"
 
     @pytest.fixture
     def user(self, db_session, factories):
         # Password is 'pass'
         user = factories.User(
+            # This is `password` (above) encrypted.
             password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"  # noqa: S106
         )
         db_session.commit()
         return user
 
     @pytest.fixture
-    def app(self, app, user):
-        res = app.get("/login")
-        js_config = json.loads(res.html.find("script", class_="js-config").text)
+    def logged_in(self, app, user, password):
+        app.post(
+            "/login",
+            params={
+                "username": user.username,
+                "password": password,
+                "csrf_token": js_config_from(app.get("/login"))["csrfToken"],
+            },
+        )
 
-        params = {
-            "username": user.username,
-            "password": "pass",
-            "csrf_token": js_config["csrfToken"],
-        }
-        app.post("/login", params=params)
-        return app
+
+def js_config_from(response):
+    return json.loads(response.html.find("script", class_="js-config").text)

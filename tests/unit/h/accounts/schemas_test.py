@@ -3,7 +3,6 @@ from unittest.mock import Mock
 
 import colander
 import pytest
-from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas
 from h.models.user import USERNAME_MAX_LENGTH
@@ -258,6 +257,43 @@ class TestSocialLoginSignupSchema:
         return schemas.SocialLoginSignupSchema().bind(request=pyramid_csrf_request)
 
 
+class TestEmailAddSchema:
+    def test_valid(self, schema):
+        appstruct = schema.deserialize({"email": "new_email@example.com"})
+
+        assert appstruct == {"email": "new_email@example.com"}
+
+    @pytest.mark.parametrize(
+        "data,expected_error_dict",
+        [
+            pytest.param(
+                {"email": "invalid"},
+                {"email": "Invalid email address."},
+                id="invalid_email_address",
+            ),
+        ],
+    )
+    def test_invalid(self, schema, data, expected_error_dict):
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize(data)
+
+        assert exc_info.value.asdict() == expected_error_dict
+
+    def test_email_already_taken(self, schema, factories):
+        other_user = factories.User()
+
+        with pytest.raises(colander.Invalid) as exc_info:
+            schema.deserialize({"email": other_user.email})
+
+        assert exc_info.value.asdict() == {
+            "email": "Sorry, an account with this email address already exists."
+        }
+
+    @pytest.fixture
+    def schema(self, pyramid_request):
+        return schemas.EmailAddSchema().bind(request=pyramid_request)
+
+
 @pytest.mark.usefixtures("models", "user_password_service")
 class TestEmailChangeSchema:
     def test_it_returns_the_new_email_when_valid(self, schema):
@@ -281,18 +317,6 @@ class TestEmailChangeSchema:
         pyramid_config.testing_securitypolicy(user.userid)
 
         schema.deserialize({"email": user.email, "password": "flibble"})
-
-    def test_it_is_invalid_if_csrf_token_missing(self, pyramid_request, schema):
-        del pyramid_request.headers["X-CSRF-Token"]
-
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize({"email": "foo@bar.com", "password": "flibble"})
-
-    def test_it_is_invalid_if_csrf_token_wrong(self, pyramid_request, schema):
-        pyramid_request.headers["X-CSRF-Token"] = "WRONG"
-
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize({"email": "foo@bar.com", "password": "flibble"})
 
     def test_it_is_invalid_if_password_wrong(self, schema, user_password_service):
         user_password_service.check_password.return_value = False
@@ -351,9 +375,9 @@ class TestEmailChangeSchema:
         }
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_csrf_request, user):
-        pyramid_csrf_request.user = user
-        return pyramid_csrf_request
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        return pyramid_request
 
     @pytest.fixture
     def schema(self, pyramid_request):
@@ -378,13 +402,7 @@ class TestPasswordAddSchema:
     def test_valid(self, schema, valid_data):
         appstruct = schema.deserialize(valid_data)
 
-        assert appstruct == {"csrf_token": None, **valid_data}
-
-    def test_invalid_csrf_token(self, schema, valid_data, pyramid_request):
-        del pyramid_request.headers["X-CSRF-Token"]
-
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize(valid_data)
+        assert appstruct == valid_data
 
     @pytest.mark.parametrize(
         "data,expected_error_dict",
@@ -425,8 +443,8 @@ class TestPasswordAddSchema:
         }
 
     @pytest.fixture
-    def schema(self, pyramid_csrf_request):
-        return schemas.PasswordAddSchema().bind(request=pyramid_csrf_request)
+    def schema(self, pyramid_request):
+        return schemas.PasswordAddSchema().bind(request=pyramid_request)
 
 
 @pytest.mark.usefixtures("user_password_service")
@@ -437,7 +455,7 @@ class TestPasswordChangeSchema:
         user_password_service.check_password.assert_called_once_with(
             user, "current_password"
         )
-        assert appstruct == {"csrf_token": None, **valid_data}
+        assert appstruct == valid_data
 
     def test_invalid_current_password(self, schema, valid_data, user_password_service):
         user_password_service.check_password.return_value = False
@@ -446,12 +464,6 @@ class TestPasswordChangeSchema:
             schema.deserialize(valid_data)
 
         assert exc_info.value.asdict() == {"password": "Wrong password."}
-
-    def test_invalid_csrf_token(self, schema, valid_data, pyramid_request):
-        del pyramid_request.headers["X-CSRF-Token"]
-
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize(valid_data)
 
     @pytest.mark.parametrize(
         "data,expected_error_dict",
@@ -494,8 +506,8 @@ class TestPasswordChangeSchema:
         assert exc_info.value.asdict() == expected_error_dict
 
     @pytest.fixture
-    def user(self, pyramid_csrf_request):
-        return pyramid_csrf_request.user
+    def user(self, pyramid_request):
+        return pyramid_request.user
 
     @pytest.fixture
     def valid_data(self):
@@ -506,8 +518,8 @@ class TestPasswordChangeSchema:
         }
 
     @pytest.fixture
-    def schema(self, pyramid_csrf_request):
-        return schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
+    def schema(self, pyramid_request):
+        return schemas.PasswordChangeSchema().bind(request=pyramid_request)
 
 
 @pytest.mark.usefixtures("user_password_service")

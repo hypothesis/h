@@ -15,4 +15,5 @@ export const routes = {
   signupWithGoogle: '/signup/google',
   signupWithORCID: '/signup/orcid',
   signupWithFacebook: '/signup/facebook',
+  accountSettings: '/account/settings',
 };
