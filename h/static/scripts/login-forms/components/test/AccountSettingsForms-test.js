@@ -34,6 +34,7 @@ describe('AccountSettingsForms', () => {
         'oidc.connect.google': 'https://example.com/oidc/connect/google',
         'oidc.connect.facebook': 'https://example.com/oidc/connect/facebook',
         'oidc.connect.orcid': 'https://example.com/oidc/connect/orcid',
+        identity_delete: 'https://example.com/account/settings/identity',
       },
     };
   });
@@ -90,6 +91,55 @@ describe('AccountSettingsForms', () => {
         google: wrapper.find('[data-testid="connect-account-link-google"]'),
         facebook: wrapper.find('[data-testid="connect-account-link-facebook"]'),
         orcid: wrapper.find('[data-testid="connect-account-link-orcid"]'),
+      },
+      removeAccountForms: {
+        google: {
+          form: wrapper.find('[data-testid="remove-account-form-google"] form'),
+          csrfInput: wrapper.find(
+            '[data-testid="remove-account-form-google"] input[name="csrf_token"]',
+          ),
+          providerInput: wrapper.find(
+            '[data-testid="remove-account-form-google"] input[name="provider"]',
+          ),
+          providerUniqueIdInput: wrapper.find(
+            '[data-testid="remove-account-form-google"] input[name="provider_unique_id"]',
+          ),
+          submitButton: wrapper.find(
+            '[data-testid="remove-account-form-google"] Button[type="submit"]',
+          ),
+        },
+        facebook: {
+          form: wrapper.find(
+            '[data-testid="remove-account-form-facebook"] form',
+          ),
+          csrfInput: wrapper.find(
+            '[data-testid="remove-account-form-facebook"] input[name="csrf_token"]',
+          ),
+          providerInput: wrapper.find(
+            '[data-testid="remove-account-form-facebook"] input[name="provider"]',
+          ),
+          providerUniqueIdInput: wrapper.find(
+            '[data-testid="remove-account-form-facebook"] input[name="provider_unique_id"]',
+          ),
+          submitButton: wrapper.find(
+            '[data-testid="remove-account-form-facebook"] Button[type="submit"]',
+          ),
+        },
+        orcid: {
+          form: wrapper.find('[data-testid="remove-account-form-orcid"] form'),
+          csrfInput: wrapper.find(
+            '[data-testid="remove-account-form-orcid"] input[name="csrf_token"]',
+          ),
+          providerInput: wrapper.find(
+            '[data-testid="remove-account-form-orcid"] input[name="provider"]',
+          ),
+          providerUniqueIdInput: wrapper.find(
+            '[data-testid="remove-account-form-orcid"] input[name="provider_unique_id"]',
+          ),
+          submitButton: wrapper.find(
+            '[data-testid="remove-account-form-orcid"] Button[type="submit"]',
+          ),
+        },
       },
     };
   };
@@ -258,6 +308,8 @@ describe('AccountSettingsForms', () => {
 
   it('indicates when social accounts are already connected', () => {
     fakeConfig.context.identities.google.connected = true;
+    fakeConfig.context.identities.google.provider_unique_id =
+      'google_provider_unique_id';
     fakeConfig.context.identities.facebook.connected = true;
     fakeConfig.context.identities.orcid.connected = true;
     fakeConfig.context.identities.orcid.url =
@@ -271,6 +323,31 @@ describe('AccountSettingsForms', () => {
       elements.connectAccountLinks.orcid.prop('href'),
       'https://orcid.org/0000-0002-6373-1308',
     );
+
+    ['google', 'facebook', 'orcid'].forEach(provider => {
+      assert.equal(
+        elements.removeAccountForms[provider].form.prop('action'),
+        fakeConfig.routes.identity_delete,
+      );
+      assert.equal(
+        elements.removeAccountForms[provider].csrfInput.prop('value'),
+        fakeConfig.csrfToken,
+      );
+      assert.equal(
+        elements.removeAccountForms[provider].providerInput.prop('value'),
+        provider,
+      );
+      assert.equal(
+        elements.removeAccountForms[provider].providerUniqueIdInput.prop(
+          'value',
+        ),
+        fakeConfig.context.identities[provider].provider_unique_id,
+      );
+      assert.equal(
+        elements.removeAccountForms[provider].submitButton.text(),
+        'Remove',
+      );
+    });
   });
 
   it('omits the social account links when the features are disabled', () => {

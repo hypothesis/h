@@ -83,10 +83,11 @@ export type AccountSettingsConfigObject = ConfigBase & {
       };
     };
   };
-  routes?: {
+  routes: {
     'oidc.connect.google'?: string;
     'oidc.connect.facebook'?: string;
     'oidc.connect.orcid'?: string;
+    identity_delete: string;
   };
 };
 

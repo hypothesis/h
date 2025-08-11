@@ -16,7 +16,7 @@ from h import accounts, form, i18n, models, session
 from h.accounts import schemas
 from h.accounts.events import ActivationEvent, LogoutEvent, PasswordResetEvent
 from h.emails import reset_password
-from h.models import Annotation
+from h.models import Annotation, UserIdentity
 from h.models.user_identity import IdentityProvider
 from h.schemas.forms.accounts import (
     EditProfileSchema,
@@ -560,6 +560,10 @@ class AccountController:
                     route_name, self.request.route_url(route_name)
                 )
 
+        js_config.setdefault("routes", {})["identity_delete"] = self.request.route_url(
+            "account_identity"
+        )
+
         orcid_config = js_config["context"].get("identities", {}).get("orcid", {})
         if orcid_id := orcid_config.get("provider_unique_id"):
             orcid_host = self.request.registry.settings["orcid_host"]
@@ -570,6 +574,67 @@ class AccountController:
             )
 
         return {"js_config": js_config}
+
+
+@view_config(
+    route_name="account_identity",
+    is_authenticated=True,
+    request_method="POST",
+    require_csrf=True,
+    request_param=("provider", "provider_unique_id"),
+)
+def delete_identity(request):
+    user = request.user
+    db = request.db
+    flash = request.session.flash
+    params = request.params
+    route_url = request.route_url
+
+    try:
+        given_provider = IdentityProvider[params["provider"].upper()]
+    except KeyError as err:
+        raise httpexceptions.HTTPNotFound from err
+
+    given_provider_unique_id = params["provider_unique_id"]
+
+    identities = db.scalars(select(UserIdentity).where(UserIdentity.user_id == user.id))
+
+    matching_identity = None
+    other_identities = []
+    for identity in identities:
+        if (
+            identity.provider == given_provider
+            and identity.provider_unique_id == given_provider_unique_id
+        ):
+            assert matching_identity is None  # noqa:S101
+            matching_identity = identity
+        else:
+            other_identities.append(identity)
+
+    if not matching_identity:
+        flash(
+            _(
+                "{provider} not connected. Did you already disconnect this provider in another tab?"
+            ).format(provider=given_provider),
+            "error",
+        )
+    elif any((user.password, other_identities)):
+        db.delete(matching_identity)
+        flash(
+            _("{provider} disconnected ✓").format(provider=matching_identity.provider),
+            "success",
+        )
+    else:
+        flash(
+            _(
+                "Can't disconnect account:"
+                " {provider} is currently the only way to log in to your Hypothesis account."
+                " Connect another account or add a password first."
+            ).format(provider=matching_identity.provider),
+            "error",
+        )
+
+    return httpexceptions.HTTPFound(location=route_url("account"))
 
 
 @view_defaults(

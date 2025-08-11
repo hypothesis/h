@@ -18,6 +18,7 @@ def includeme(config):  # noqa: PLR0915
     config.add_route("account_developer", "/account/developer")
     config.add_route("account_delete", "/account/delete")
     config.add_route("account_deleted", "/account/deleted")
+    config.add_route("account_identity", "/account/settings/identity")
     config.add_route("claim_account_legacy", "/claim_account/{token}")
     config.add_route("dismiss_sidebar_tutorial", "/app/dismiss_sidebar_tutorial")
 

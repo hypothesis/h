@@ -29,6 +29,7 @@ def test_includeme():
         call("account_developer", "/account/developer"),
         call("account_delete", "/account/delete"),
         call("account_deleted", "/account/deleted"),
+        call("account_identity", "/account/settings/identity"),
         call("claim_account_legacy", "/claim_account/{token}"),
         call("dismiss_sidebar_tutorial", "/app/dismiss_sidebar_tutorial"),
         call("activity.search", "/search"),

@@ -1,5 +1,5 @@
 import { Button } from '@hypothesis/frontend-shared';
-import { ExternalIcon, CheckIcon } from '@hypothesis/frontend-shared';
+import { ExternalIcon } from '@hypothesis/frontend-shared';
 import { useContext } from 'preact/hooks';
 
 import Form from '../../forms-common/components/Form';
@@ -173,17 +173,34 @@ function ConnectAccountButton({
   return (
     <>
       {connected ? (
-        <a
-          href={providerURL}
-          className="border rounded-md p-3 flex flex-row items-center gap-x-3"
-          data-testid={`connect-account-link-${provider}`}
-        >
+        <div className="border rounded-md px-3 py-2 flex flex-row items-center gap-x-3">
           <Icon />
           <span className="grow">
-            Connected: <b>{providerUniqueID}</b>
+            Connected:{' '}
+            <a
+              class="font-bold"
+              href={providerURL}
+              data-testid={`connect-account-link-${provider}`}
+            >
+              {providerUniqueID}
+            </a>
           </span>
-          <CheckIcon className="w-[20px] h-[20px]" />
-        </a>
+          <Form
+            csrfToken={config.csrfToken}
+            action={config.routes.identity_delete}
+            data-testid={`remove-account-form-${provider}`}
+          >
+            <input type="hidden" name="provider" value={provider} />
+            <input
+              type="hidden"
+              name="provider_unique_id"
+              value={providerUniqueID}
+            />
+            <Button type="submit" size="sm">
+              Remove
+            </Button>
+          </Form>
+        </div>
       ) : (
         <a
           href={connectURL}
