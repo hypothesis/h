@@ -11,9 +11,10 @@ from deform import ValidationFailure
 from h_matchers import Any
 from pyramid import httpexceptions
 from pyramid.csrf import get_csrf_token
+from sqlalchemy import select
 
 from h.assets import Environment
-from h.models import Subscriptions
+from h.models import Subscriptions, UserIdentity
 from h.models.user_identity import IdentityProvider
 from h.services.email import EmailData, EmailTag, TaskData
 from h.tasks import email
@@ -769,9 +770,16 @@ class TestAccountController:
                     "password": {"data": {}, "errors": {}},
                 },
                 "routes": {
-                    "oidc.connect.facebook": "http://example.com/oidc/connect/facebook",
-                    "oidc.connect.google": "http://example.com/oidc/connect/google",
-                    "oidc.connect.orcid": "http://example.com/oidc/connect/orcid",
+                    "oidc.connect.facebook": pyramid_request.route_url(
+                        "oidc.connect.facebook"
+                    ),
+                    "oidc.connect.google": pyramid_request.route_url(
+                        "oidc.connect.google"
+                    ),
+                    "oidc.connect.orcid": pyramid_request.route_url(
+                        "oidc.connect.orcid"
+                    ),
+                    "identity_delete": pyramid_request.route_url("account_identity"),
                 },
             }
         }
@@ -823,10 +831,13 @@ class TestAccountController:
             expected_identities[provider.name.lower()] = expected_identity
         assert response["js_config"]["context"]["identities"] == expected_identities
         assert response["js_config"]["routes"] == {
-            f"oidc.connect.{provider.name.lower()}": pyramid_request.route_url(
-                f"oidc.connect.{provider.name.lower()}"
-            )
-            for provider in IdentityProvider
+            "identity_delete": pyramid_request.route_url("account_identity"),
+            **{
+                f"oidc.connect.{provider.name.lower()}": pyramid_request.route_url(
+                    f"oidc.connect.{provider.name.lower()}"
+                )
+                for provider in IdentityProvider
+            },
         }
 
     @pytest.mark.parametrize(
@@ -980,6 +991,7 @@ class TestAccountController:
         pyramid_config.add_route("oidc.connect.facebook", "/oidc/connect/facebook")
         pyramid_config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
         pyramid_config.add_route("account", "/account/settings")
+        pyramid_config.add_route("account_identity", "/account/settings/identity")
 
     @pytest.fixture(autouse=True)
     def pyramid_settings(self, pyramid_settings):
@@ -990,6 +1002,96 @@ class TestAccountController:
     def oidc_service(self, oidc_service):
         oidc_service.get_identity.return_value = None
         return oidc_service
+
+
+class TestDeleteIdentity:
+    def test_it(self, db_session, user, pyramid_request, factories, matchers):
+        db_session.flush()
+        google_identity = factories.UserIdentity(
+            provider=IdentityProvider.GOOGLE, user_id=user.id
+        )
+        facebook_identity = factories.UserIdentity(
+            provider=IdentityProvider.FACEBOOK, user_id=user.id
+        )
+        orcid_identity = factories.UserIdentity(
+            provider=IdentityProvider.ORCID, user_id=user.id
+        )
+        pyramid_request.params = {
+            "provider": "google",
+            "provider_unique_id": google_identity.provider_unique_id,
+        }
+
+        response = views.delete_identity(pyramid_request)
+
+        assert set(
+            db_session.scalars(
+                select(UserIdentity).where(UserIdentity.user_id == user.id)
+            )
+        ) == {facebook_identity, orcid_identity}
+        assert pyramid_request.session.peek_flash("success") == [
+            f"{google_identity.provider} disconnected ✓"
+        ]
+        assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
+
+    def test_unknown_provider(self, pyramid_request):
+        pyramid_request.params = {
+            "provider": "unknown_provider",
+            "provider_unique_id": "unknown_provider_unique_id",
+        }
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.delete_identity(pyramid_request)
+
+    def test_provider_not_connected(self, pyramid_request, matchers):
+        pyramid_request.params = {"provider": "google", "provider_unique_id": "123"}
+
+        response = views.delete_identity(pyramid_request)
+
+        assert pyramid_request.session.peek_flash("error") == [
+            "google.com not connected. Did you already disconnect this provider in another tab?"
+        ]
+        assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
+
+    def test_no_other_login_methods(
+        self, pyramid_request, user, matchers, db_session, factories
+    ):
+        user.password = None
+        db_session.flush()
+        google_identity = factories.UserIdentity(
+            provider=IdentityProvider.GOOGLE, user_id=user.id
+        )
+        pyramid_request.params = {
+            "provider": "google",
+            "provider_unique_id": google_identity.provider_unique_id,
+        }
+
+        response = views.delete_identity(pyramid_request)
+
+        assert (
+            db_session.scalars(
+                select(UserIdentity).where(UserIdentity.user_id == user.id)
+            ).one()
+            == google_identity
+        )
+        assert pyramid_request.session.peek_flash("error") == [
+            "Can't disconnect account:"
+            f" {google_identity.provider} is currently the only way to log in to your Hypothesis account."
+            " Connect another account or add a password first."
+        ]
+        assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        return pyramid_request
+
+    @pytest.fixture(autouse=True)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route("account", "/account/settings")
 
 
 class TestNotificationsController:

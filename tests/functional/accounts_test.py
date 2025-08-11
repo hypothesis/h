@@ -1,8 +1,9 @@
 import json
 
 import pytest
+from sqlalchemy import select
 
-from h.models import User
+from h.models import User, UserIdentity
 from h.models.user_identity import IdentityProvider
 
 
@@ -23,6 +24,9 @@ class TestAccountSettings:
             "forms": {
                 "email": {"data": {}, "errors": {}},
                 "password": {"data": {}, "errors": {}},
+            },
+            "routes": {
+                "identity_delete": "http://localhost/account/settings/identity",
             },
         }
 
@@ -212,7 +216,6 @@ class TestAccountSettings:
 
     @pytest.fixture
     def user(self, db_session, factories):
-        # Password is 'pass'
         user = factories.User(
             # This is `password` (above) encrypted.
             password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"  # noqa: S106
@@ -227,6 +230,132 @@ class TestAccountSettings:
             params={
                 "username": user.username,
                 "password": password,
+                "csrf_token": js_config_from(app.get("/login"))["csrfToken"],
+            },
+        )
+
+
+class TestDeleteIdentity:
+    def test_it(
+        self,
+        app,
+        delete_params,
+        db_session,
+        user,
+        google_identity,
+        facebook_identity,
+        orcid_identity,
+    ):
+        app.post("/account/settings/identity", delete_params(google_identity))
+
+        assert set(
+            db_session.scalars(
+                select(UserIdentity).where(UserIdentity.user_id == user.id)
+            )
+        ) == {facebook_identity, orcid_identity}
+
+    def test_unknown_provider(self, app, delete_params, google_identity):
+        params = delete_params(google_identity)
+        params["provider"] = "unknown"
+
+        app.post("/account/settings/identity", params, status=404)
+
+    def test_no_csrf_token(self, app, delete_params, google_identity):
+        params = delete_params(google_identity)
+        del params["csrf_token"]
+
+        app.post("/account/settings/identity", params, status=403)
+
+    def test_invalid_csrf_token(self, app, delete_params, google_identity):
+        params = delete_params(google_identity)
+        params["csrf_token"] = "invalid"  # noqa: S105
+
+        app.post("/account/settings/identity", params, status=403)
+
+    def test_not_logged_in(self, app, delete_params, google_identity):
+        app.get("/logout")
+
+        app.post(
+            "/account/settings/identity", delete_params(google_identity), status=404
+        )
+
+    def test_only_login_method(
+        self,
+        app,
+        db_session,
+        user,
+        delete_params,
+        google_identity,
+        facebook_identity,
+        orcid_identity,
+    ):
+        user.password = None
+        db_session.delete(facebook_identity)
+        db_session.delete(orcid_identity)
+        db_session.commit()
+
+        app.post("/account/settings/identity", delete_params(google_identity))
+
+        assert (
+            db_session.scalars(
+                select(UserIdentity).where(UserIdentity.id == google_identity.id)
+            ).one_or_none()
+            == google_identity
+        )
+
+    @pytest.fixture
+    def delete_params(self, csrf_token):
+        def delete_params(identity):
+            """Return the correct POST params to delete `identity`."""
+            return {
+                "csrf_token": csrf_token,
+                "provider": identity.provider.split(".")[0],
+                "provider_unique_id": identity.provider_unique_id,
+            }
+
+        return delete_params
+
+    @pytest.fixture
+    def google_identity(self, add_identity):
+        return add_identity(IdentityProvider.GOOGLE)
+
+    @pytest.fixture
+    def facebook_identity(self, add_identity):
+        return add_identity(IdentityProvider.FACEBOOK)
+
+    @pytest.fixture
+    def orcid_identity(self, add_identity):
+        return add_identity(IdentityProvider.ORCID)
+
+    @pytest.fixture
+    def add_identity(self, db_session, user, factories):
+        def add_identity(provider):
+            identity = factories.UserIdentity(provider=provider, user_id=user.id)
+            db_session.commit()
+            return identity
+
+        return add_identity
+
+    @pytest.fixture
+    def csrf_token(self, app):
+        return js_config_from(app.get("/account/settings"))["csrfToken"]
+
+    @pytest.fixture
+    def user(self, db_session, factories):
+        user = factories.User(
+            # Password is "pass".
+            password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"  # noqa: S106
+        )
+        db_session.commit()
+        return user
+
+    @pytest.fixture(autouse=True)
+    def log_in(self, app, user):
+        app.post(
+            "/login",
+            params={
+                "username": user.username,
+                "password": "pass",
                 "csrf_token": js_config_from(app.get("/login"))["csrfToken"],
             },
         )
