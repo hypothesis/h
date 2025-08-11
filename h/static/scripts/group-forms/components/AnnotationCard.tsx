@@ -3,6 +3,7 @@ import {
   AnnotationShareControl,
   AnnotationTimestamps,
   AnnotationUser,
+  Excerpt,
   ModerationStatusSelect,
   StyledText,
 } from '@hypothesis/annotation-ui';
@@ -126,6 +127,8 @@ export default function AnnotationCard({
     ? config.routes['activity.user_search'].replace(':username', username)
     : undefined;
 
+  const annoQuote = quote(annotation);
+
   return useMemo(
     () => (
       <article>
@@ -166,19 +169,25 @@ export default function AnnotationCard({
               </div>
             </header>
 
-            <StyledText>
-              <blockquote className="hover:border-l-blue-quote">
-                {quote(annotation)}
-              </blockquote>
-            </StyledText>
+            {annoQuote && (
+              <Excerpt collapsedHeight={40} overflowThreshold={20}>
+                <StyledText>
+                  <blockquote className="hover:border-l-blue-quote">
+                    {annoQuote}
+                  </blockquote>
+                </StyledText>
+              </Excerpt>
+            )}
 
-            <MarkdownView
-              markdown={annotation.text}
-              mentions={annotation.mentions}
-              mentionMode="username"
-              mentionsEnabled
-              classes="text-color-text"
-            />
+            <Excerpt collapsedHeight={194} overflowThreshold={20}>
+              <MarkdownView
+                markdown={annotation.text}
+                mentions={annotation.mentions}
+                mentionMode="username"
+                mentionsEnabled
+                classes="text-color-text"
+              />
+            </Excerpt>
 
             {annotation.tags.length > 0 && (
               <ul
@@ -249,6 +258,7 @@ export default function AnnotationCard({
       </article>
     ),
     [
+      annoQuote,
       annotation,
       group,
       isReply,
