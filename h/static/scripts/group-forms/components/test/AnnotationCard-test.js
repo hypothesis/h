@@ -191,9 +191,16 @@ describe('AnnotationCard', () => {
     );
   });
 
-  it('extract the annotation quote', () => {
+  it('extracts the annotation quote', () => {
     const wrapper = createComponent();
     assert.equal(wrapper.find('blockquote').text(), 'The quote');
+  });
+
+  it('does not render quote elements for quoteless annotations', () => {
+    fakeAnnotation.target[0].selector = [];
+    const wrapper = createComponent();
+
+    assert.isFalse(wrapper.exists('blockquote'));
   });
 
   ['PENDING', 'APPROVED', 'DENIED', 'SPAM'].forEach(status => {
