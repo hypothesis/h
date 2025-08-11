@@ -185,7 +185,7 @@ export default function AnnotationCard({
                 mentions={annotation.mentions}
                 mentionMode="username"
                 mentionsEnabled
-                classes="text-color-text"
+                classes="text-color-text hyp-wrap-anywhere"
               />
             </Excerpt>
 
