@@ -1129,18 +1129,20 @@ class TestNotificationsController:
         subscription_service.get_all_subscriptions.assert_called_once_with(
             user_id=authenticated_user.userid
         )
-        controller.form.set_appstruct.assert_called_once_with(
-            {"notifications": {"reply"}}
-        )
-        assert "form" in result
-        assert result["user_has_email_address"] == authenticated_user.email
+
+        assert "js_config" in result
+        assert result["js_config"]["hasEmail"] is True
+        assert result["js_config"]["form"]["data"]["reply"] is True
+        assert result["js_config"]["form"]["data"]["mention"] is False
+        assert result["js_config"]["form"]["data"]["moderation"] is False
 
     def test_get_if_user_has_no_email_address(self, controller, authenticated_user):
         authenticated_user.email = None
 
         result = controller.get()
 
-        assert result == {"user_has_email_address": None}
+        assert "js_config" in result
+        assert result["js_config"]["hasEmail"] is False
 
     @pytest.mark.parametrize("set_active", (True, False))
     def test_post(
@@ -1153,9 +1155,7 @@ class TestNotificationsController:
     ):
         subscription = subscription_service.get_all_subscriptions.return_value[0]
         subscription.active = not set_active
-        controller.form = form_validating_to(
-            {"notifications": {"reply"} if set_active else set()}
-        )
+        controller.form = form_validating_to({"reply": set_active})
 
         result = controller.post()
 
@@ -1172,7 +1172,8 @@ class TestNotificationsController:
 
         result = controller.post()
 
-        assert result == {"user_has_email_address": None}
+        assert "js_config" in result
+        assert result["js_config"]["hasEmail"] is False
 
     @pytest.fixture
     def controller(self, pyramid_request, form_validating_to):
@@ -1192,7 +1193,11 @@ class TestNotificationsController:
     @pytest.fixture(autouse=True)
     def subscription_service(self, subscription_service, factories):
         subscription_service.get_all_subscriptions.return_value = [
-            factories.Subscriptions(type=Subscriptions.Type.REPLY.value, active=True)
+            factories.Subscriptions(type=Subscriptions.Type.REPLY.value, active=True),
+            factories.Subscriptions(
+                type=Subscriptions.Type.MENTION.value, active=False
+            ),
+            # MODERATION subscription is missing, so implicitly false.
         ]
         return subscription_service
 

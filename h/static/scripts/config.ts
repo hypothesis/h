@@ -165,16 +165,28 @@ export type ProfileConfigObject = LoginFormsConfigBase & {
   }>;
 };
 
+/** Configuration for developer settings form. */
 export type DeveloperConfigObject = LoginFormsConfigBase & {
   token?: string;
+};
+
+/** Configuration for notification settings form. */
+export type NotificationsConfigObject = LoginFormsConfigBase & {
+  hasEmail: boolean;
+  form: FormFields<{
+    reply: boolean;
+    mention: boolean;
+    moderation: boolean;
+  }>;
 };
 
 export type LoginFormsConfigObject =
   | LoginConfigObject
   | SignupConfigObject
   | AccountSettingsConfigObject
-  | ProfileConfigObject
-  | DeveloperConfigObject;
+  | DeveloperConfigObject
+  | NotificationsConfigObject
+  | ProfileConfigObject;
 
 export const LoginFormsConfig = createContext<LoginFormsConfigObject | null>(
   null,

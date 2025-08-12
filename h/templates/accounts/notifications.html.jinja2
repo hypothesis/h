@@ -3,11 +3,23 @@
 {% set page_route = 'account_notifications' %}
 {% set page_title = 'Notifications' %}
 
+{% block styles %}
+  {{ super() }}
+
+  {% for url in asset_urls('forms_css') %}
+    <link rel="stylesheet" href="{{ url }}">
+  {% endfor %}
+{% endblock %}
+
 {% block page_content %}
-  {% if user_has_email_address %}
-    {{ form }}
-  {% else %}
-    Want notifications? We'll need your email address for that. You can add an email address in your
-    <a href="{{ request.route_path('account') }}">Account Settings</a>.
-  {% endif %}
+  <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+  <div id="login-form"></div>
 {% endblock page_content %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('login_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
+{% endblock %}
