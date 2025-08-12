@@ -97,14 +97,23 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
         {enableSocialLogin && (
           <>
             <div className="self-center uppercase">or</div>
-            {config.features.log_in_with_google && (
-              <SocialLoginLink provider="google" />
+            {config.urls.login.google && (
+              <SocialLoginLink
+                provider="google"
+                href={config.urls.login.google}
+              />
             )}
-            {config.features.log_in_with_facebook && (
-              <SocialLoginLink provider="facebook" />
+            {config.urls.login.facebook && (
+              <SocialLoginLink
+                provider="facebook"
+                href={config.urls.login.facebook}
+              />
             )}
-            {config.features.log_in_with_orcid && (
-              <SocialLoginLink provider="orcid" />
+            {config.urls.login.orcid && (
+              <SocialLoginLink
+                provider="orcid"
+                href={config.urls.login.orcid}
+              />
             )}
           </>
         )}

@@ -190,22 +190,11 @@ describe('LoginForm', () => {
     assert.isFalse(wrapper.exists('SocialLoginLink'));
   });
 
-  [
-    {
-      feature: 'log_in_with_google',
-      provider: 'google',
-    },
-    {
-      feature: 'log_in_with_facebook',
-      provider: 'facebook',
-    },
-    {
-      feature: 'log_in_with_orcid',
-      provider: 'orcid',
-    },
-  ].forEach(({ feature, provider }) => {
+  ['google', 'facebook', 'orcid'].forEach(provider => {
     it('shows enabled social login options', () => {
-      fakeConfig.features = { [feature]: true };
+      fakeConfig.urls.login = {
+        [provider]: `https://example.com/oidc/login/${provider}`,
+      };
       const { wrapper } = createWrapper({ enableSocialLogin: true });
       const login = wrapper.find('SocialLoginLink');
       assert.equal(login.prop('provider'), provider);
