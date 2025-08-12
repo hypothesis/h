@@ -546,9 +546,9 @@ class AccountController:
                 js_config_["context"].setdefault("identities", {})
                 js_config_["context"]["identities"][provider.name.lower()] = {}
                 for key, value in provider_config.items():
-                    js_config_["context"]["identities"][provider.name.lower()][
-                        key
-                    ] = value
+                    js_config_["context"]["identities"][provider.name.lower()][key] = (
+                        value
+                    )
 
                 route_name = f"oidc.connect.{provider.name.lower()}"
                 js_config_.setdefault("routes", {})
