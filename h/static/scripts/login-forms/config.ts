@@ -17,9 +17,9 @@ export type ConfigBase = {
   };
   urls: {
     login: {
-      facebook: string;
-      google: string;
-      orcid: string;
+      facebook?: string;
+      google?: string;
+      orcid?: string;
     };
   };
 };

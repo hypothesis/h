@@ -39,34 +39,19 @@ describe('SignupSelectForm', () => {
     assert.include(emailLink.text(), 'Sign up with email');
   });
 
-  [
-    {
-      provider: 'google',
-      features: {
-        log_in_with_google: true,
-      },
-    },
-    {
-      provider: 'facebook',
-      features: {
-        log_in_with_facebook: true,
-      },
-    },
-    {
-      provider: 'orcid',
-      features: {
-        log_in_with_orcid: true,
-      },
-    },
-  ].forEach(({ provider, features = {} }) => {
+  ['google', 'facebook', 'orcid'].forEach(provider => {
     it(`renders ${provider} signup link if feature enabled`, () => {
-      fakeConfig.features = features;
+      const href = `https://example.com/oidc/login/${provider}`;
+      fakeConfig.urls.login = {
+        [provider]: href,
+      };
 
       const wrapper = createComponent();
 
       const link = wrapper.find('SocialLoginLink');
       assert.isTrue(link.exists());
       assert.equal(link.prop('provider'), provider);
+      assert.equal(link.prop('href'), href);
     });
   });
 });

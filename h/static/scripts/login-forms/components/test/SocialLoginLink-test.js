@@ -33,13 +33,14 @@ describe('SocialLoginLink', () => {
     },
   ].forEach(({ provider, text }) => {
     it(`renders ${provider} signup link with correct href`, () => {
+      const href = fakeConfig.urls.login[provider];
       const wrapper = mount(
         <Config.Provider value={fakeConfig}>
-          <SocialLoginLink provider={provider} />
+          <SocialLoginLink provider={provider} href={href} />
         </Config.Provider>,
       );
 
-      const link = wrapper.find(`a[href="${fakeConfig.urls.login[provider]}"]`);
+      const link = wrapper.find(`a[href="${href}"]`);
       assert.isTrue(link.exists());
       assert.include(link.text(), text);
     });

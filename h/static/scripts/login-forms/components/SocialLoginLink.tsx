@@ -1,6 +1,3 @@
-import { useContext } from 'preact/hooks';
-
-import { Config } from '../config';
 import FacebookIcon from './FacebookIcon';
 import GoogleIcon from './GoogleIcon';
 import LoginLink from './LoginLink';
@@ -35,17 +32,17 @@ const providerInfo = {
 
 export type SocialLoginLinkProps = {
   provider: 'google' | 'facebook' | 'orcid';
+  href: string;
 };
 
 /** Sign-up / login link for an external identity provider. */
-export default function SocialLoginLink({ provider }: SocialLoginLinkProps) {
+export default function SocialLoginLink({
+  provider,
+  href,
+}: SocialLoginLinkProps) {
   const info = providerInfo[provider];
-  const config = useContext(Config)!;
   return (
-    <LoginLink
-      href={config.urls.login[provider]}
-      providerIcon={<info.Icon className="inline" />}
-    >
+    <LoginLink href={href} providerIcon={<info.Icon className="inline" />}>
       {info.text}
     </LoginLink>
   );
