@@ -51,6 +51,7 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
         <input type="hidden" name="__formid__" value="email" />
         <TextField
           name="email"
+          inputType="email"
           label="Email address"
           placeholder={config.context.user?.email}
           required={true}
