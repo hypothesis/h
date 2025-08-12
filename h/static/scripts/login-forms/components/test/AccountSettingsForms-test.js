@@ -125,7 +125,7 @@ describe('AccountSettingsForms', () => {
     const { elements } = createWrapper();
 
     assert.equal(elements.emailForm.emailField.prop('value'), '');
-    assert.isTrue(elements.emailForm.currentEmail.isEmpty());
+    assert.isFalse(elements.emailForm.currentEmail.exists());
     assert.equal(elements.emailForm.emailField.prop('fieldError'), undefined);
     assert.equal(elements.emailForm.passwordField.prop('value'), '');
     assert.equal(
@@ -200,8 +200,8 @@ describe('AccountSettingsForms', () => {
 
     const { elements } = createWrapper();
 
-    assert.isTrue(elements.emailForm.passwordField.isEmpty());
-    assert.isTrue(elements.passwordForm.currentPasswordField.isEmpty());
+    assert.isFalse(elements.emailForm.passwordField.exists());
+    assert.isFalse(elements.passwordForm.currentPasswordField.exists());
   });
 
   it('renders per-field error messages from js-config', () => {
@@ -280,10 +280,10 @@ describe('AccountSettingsForms', () => {
 
     const { elements } = createWrapper();
 
-    assert.isTrue(elements.connectAccountEl.isEmpty());
-    assert.isTrue(elements.connectAccountLinks.google.isEmpty());
-    assert.isTrue(elements.connectAccountLinks.facebook.isEmpty());
-    assert.isTrue(elements.connectAccountLinks.orcid.isEmpty());
+    assert.isFalse(elements.connectAccountEl.exists());
+    assert.isFalse(elements.connectAccountLinks.google.exists());
+    assert.isFalse(elements.connectAccountLinks.facebook.exists());
+    assert.isFalse(elements.connectAccountLinks.orcid.exists());
   });
 
   it(
