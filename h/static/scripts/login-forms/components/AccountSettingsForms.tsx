@@ -124,6 +124,9 @@ function ChangePasswordForm({
   );
 }
 
+// <ConnectAccountButton/> is similar to <SocialLoginLink/> but with some
+// differences: it has two modes and can either indicate an already-connected
+// account or can act as a button for connecting an account.
 function ConnectAccountButton({
   config,
   provider,
