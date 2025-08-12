@@ -38,14 +38,13 @@ function FormSubmitButton() {
 function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
   const email = useFormValue(config.forms.email, 'email', '');
   const password = useFormValue(config.forms.email, 'password', '');
+  const heading = config.context.user.email
+    ? 'Change your email address'
+    : 'Add an email address';
 
   return (
     <FormContainer>
-      {config.context.user.email ? (
-        <Heading text="Change your email address" />
-      ) : (
-        <Heading text="Add an email address" />
-      )}
+      <Heading text={heading} />
 
       <Form csrfToken={config.csrfToken} data-testid="email-form">
         <input type="hidden" name="__formid__" value="email" />
