@@ -5,6 +5,7 @@
  * These must be synchronized with h/routes.py.
  */
 export const routes = {
+  accountNotifications: '/account/settings/notifications',
   accountSettings: '/account/settings',
   forgotPassword: '/forgot-password',
   groups: {

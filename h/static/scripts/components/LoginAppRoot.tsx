@@ -9,6 +9,7 @@ import { routes } from '../routes';
 import AccountSettingsForms from './AccountSettingsForms';
 import AppContainer from './AppContainer';
 import LoginForm from './LoginForm';
+import NotificationsForm from './NotificationsForm';
 import ProfileForm from './ProfileForm';
 import Router from './Router';
 import SignupForm from './SignupForm';
@@ -72,6 +73,9 @@ export default function LoginAppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.profile}>
               <ProfileForm />
+            </Route>
+            <Route path={routes.accountNotifications}>
+              <NotificationsForm />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>
