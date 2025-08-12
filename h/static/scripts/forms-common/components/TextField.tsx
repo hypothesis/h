@@ -32,7 +32,7 @@ export type TextFieldProps = {
   type?: 'input' | 'textarea';
 
   /** The type of input element, e.g., "text", "password", etc. */
-  inputType?: 'text' | 'password';
+  inputType?: 'text' | 'password' | 'email';
 
   /** Name of the input field. */
   name?: string;
