@@ -611,13 +611,15 @@ class TestDeleteAccountSchemaNoPassword:
         )
 
 
-@pytest.mark.usefixtures("feature_service")
 class TestNotificationSchema:
-    def test_it(self, schema, user, feature_service):
-        schema.deserialize({"notifications": ["reply", "mention"]})
+    def test_it(self, schema):
+        result = schema.deserialize(
+            {"reply": True, "mention": True, "moderation": False}
+        )
 
-        feature_service.enabled.assert_any_call("at_mentions", user)
-        feature_service.enabled.assert_any_call("pre_moderation", user)
+        assert result["reply"] is True
+        assert result["mention"] is True
+        assert result["moderation"] is False
 
     @pytest.fixture
     def user(self, factories):

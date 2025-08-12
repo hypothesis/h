@@ -6,6 +6,7 @@
  */
 export const routes = {
   accountDeveloper: '/account/developer',
+  accountNotifications: '/account/settings/notifications',
   accountSettings: '/account/settings',
   forgotPassword: '/forgot-password',
   groups: {

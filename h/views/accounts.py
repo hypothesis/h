@@ -698,22 +698,12 @@ class NotificationsController:
         self.subscription_svc: SubscriptionService = request.find_service(
             SubscriptionService
         )
-        self.form = request.create_form(
-            self.schema, buttons=(_("Save"),), use_inline_editing=True
-        )
+        self.form = request.create_form(self.schema)
 
     @view_config(request_method="GET")
     def get(self):
         """Render the notifications form."""
-        active_subscriptions = {
-            subscription.type
-            for subscription in self.subscription_svc.get_all_subscriptions(
-                user_id=self.request.authenticated_userid
-            )
-            if subscription.active
-        }
 
-        self.form.set_appstruct({"notifications": active_subscriptions})
         return self._template_data()
 
     @view_config(request_method="POST")
@@ -726,12 +716,16 @@ class NotificationsController:
             on_failure=self._template_data,
         )
 
-    def _update_notifications(self, appstruct):
-        active_subscriptions = set(appstruct["notifications"])
-        for subscription in self.subscription_svc.get_all_subscriptions(
+    def _get_subscriptions(self):
+        return self.subscription_svc.get_all_subscriptions(
             user_id=self.request.authenticated_userid
-        ):
-            subscription.active = subscription.type in active_subscriptions
+        )
+
+    def _update_notifications(self, appstruct):
+        for subscription in self._get_subscriptions():
+            enabled = appstruct.get(subscription.type)
+            if enabled is not None:
+                subscription.active = enabled
 
     def _template_data(self, errors=None, items=None):
         if errors is None:
@@ -739,13 +733,34 @@ class NotificationsController:
         if items is None:
             items = {}
 
-        user_has_email_address = self.request.user and self.request.user.email
-        data = {"user_has_email_address": user_has_email_address}
+        active_subscriptions = {
+            subscription.type
+            for subscription in self._get_subscriptions()
+            if subscription.active
+        }
 
-        if user_has_email_address:
-            data["form"] = self.form.render()
+        user_has_email_address = bool(self.request.user and self.request.user.email)
 
-        return data
+        return {
+            "js_config": {
+                "csrfToken": get_csrf_token(self.request),
+                "features": {},
+                "flashMessages": _pop_flash_messages(self.request),
+                "hasEmail": user_has_email_address,
+                "form": {
+                    "data": {
+                        "reply": items.get("reply", "reply" in active_subscriptions),
+                        "mention": items.get(
+                            "mention", "mention" in active_subscriptions
+                        ),
+                        "moderation": items.get(
+                            "moderation", "moderation" in active_subscriptions
+                        ),
+                    },
+                    "errors": errors,
+                },
+            }
+        }
 
 
 @view_defaults(
