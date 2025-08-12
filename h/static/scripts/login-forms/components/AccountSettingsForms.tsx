@@ -48,11 +48,19 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
 
       <Form csrfToken={config.csrfToken} data-testid="email-form">
         <input type="hidden" name="__formid__" value="email" />
+
+        {config.context.user.email && (
+          <p>
+            Current email address:{' '}
+            <b data-testid="current-email">{config.context.user.email}</b>
+          </p>
+        )}
         <TextField
           name="email"
           inputType="email"
-          label="Email address"
-          placeholder={config.context.user?.email}
+          label={
+            config.context.user.email ? 'New email address' : 'Email address'
+          }
           required={true}
           {...textFieldProps(email)}
         />

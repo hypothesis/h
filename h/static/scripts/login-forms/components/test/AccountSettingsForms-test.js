@@ -51,6 +51,9 @@ describe('AccountSettingsForms', () => {
         formIdInput: wrapper.find(
           `${emailFormSelector} input[name="__formid__"]`,
         ),
+        currentEmail: wrapper.find(
+          `${emailFormSelector} [data-testid="current-email"]`,
+        ),
         emailField: wrapper.find(
           `${emailFormSelector} TextField[name="email"]`,
         ),
@@ -122,7 +125,7 @@ describe('AccountSettingsForms', () => {
     const { elements } = createWrapper();
 
     assert.equal(elements.emailForm.emailField.prop('value'), '');
-    assert.equal(elements.emailForm.emailField.prop('placeholder'), undefined);
+    assert.isTrue(elements.emailForm.currentEmail.isEmpty());
     assert.equal(elements.emailForm.emailField.prop('fieldError'), undefined);
     assert.equal(elements.emailForm.passwordField.prop('value'), '');
     assert.equal(
@@ -184,15 +187,12 @@ describe('AccountSettingsForms', () => {
     );
   });
 
-  it('adds placeholder text to the email field', () => {
+  it('shows the current email address', () => {
     fakeConfig.context.user = { email: 'current_email' };
 
     const { elements } = createWrapper();
 
-    assert.equal(
-      elements.emailForm.emailField.prop('placeholder'),
-      'current_email',
-    );
+    assert.equal(elements.emailForm.currentEmail.text(), 'current_email');
   });
 
   it('omits confirm password fields if the user has no password', () => {
