@@ -160,7 +160,10 @@ class IDInfo:
     """
 
     sub: str
+    """The user's unique ID from the third-party provider."""
+
     next_url: str | None = None
+    """The URL to redirect to after successfully logging in."""
 
 
 @dataclass
@@ -362,6 +365,18 @@ def encode_idinfo_token(
 
 
 def redirect_url(request, user, url):
+    """Return the URL to redirect to after successfully logged in.
+
+    The `url` argument is a URL that (ultimately) comes from a `?next=<URL>`
+    query param and therefore can't be trusted: we don't want attackers
+    crafting URLs with query params that cause us to redirect users to
+    malicious websites.
+
+    This function therefore follows the given `url` only if it matches one of
+    an allow-list of known-safe URLs.  Otherwise it returns a default URL
+    instead.
+
+    """
     default_url = request.route_url("activity.user_search", username=user.username)
 
     if not url:
