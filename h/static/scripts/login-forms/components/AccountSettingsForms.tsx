@@ -178,6 +178,8 @@ function ConnectAccountButton({
           <span className="grow">
             Connected:{' '}
             <a
+              target="_blank"
+              rel="noreferrer"
               class="font-bold"
               href={providerURL}
               data-testid={`connect-account-link-${provider}`}
