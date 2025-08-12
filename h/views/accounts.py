@@ -510,34 +510,30 @@ class AccountController:
         )
 
     def _template_data(self, js_config=None):
-        js_config = js_config or {}
-        js_config.setdefault("csrfToken", get_csrf_token(self.request))
-        js_config.setdefault("forms", {})
-        js_config["forms"].setdefault("email", {})
-        js_config["forms"]["email"].setdefault("data", {})
-        js_config["forms"]["email"].setdefault("errors", {})
-        js_config["forms"].setdefault("password", {})
-        js_config["forms"]["password"].setdefault("data", {})
-        js_config["forms"]["password"].setdefault("errors", {})
-        js_config.setdefault("features", {})
-        for provider in IdentityProvider:
-            js_config["features"].setdefault(
-                f"log_in_with_{provider.name.lower()}",
-                self.request.feature(f"log_in_with_{provider.name.lower()}"),
-            )
-        js_config.setdefault("context", {})
-        js_config["context"].setdefault("user", {})
-        js_config["context"]["user"].setdefault(
-            "email", self.request.user.email or None
-        )
-        js_config["context"]["user"].setdefault(
-            "has_password", bool(self.request.user.password)
-        )
+        js_config_ = {
+            "csrfToken": get_csrf_token(self.request),
+            "forms": {
+                "email": {"data": {}, "errors": {}},
+                "password": {"data": {}, "errors": {}},
+            },
+            "features": {
+                f"log_in_with_{provider.name.lower()}": self.request.feature(
+                    f"log_in_with_{provider.name.lower()}"
+                )
+                for provider in IdentityProvider
+            },
+            "context": {
+                "user": {
+                    "email": self.request.user.email or None,
+                    "has_password": bool(self.request.user.password),
+                },
+            },
+        }
 
         oidc_svc = self.request.find_service(OIDCService)
 
         for provider in IdentityProvider:
-            if js_config["features"][f"log_in_with_{provider.name.lower()}"]:
+            if js_config_["features"][f"log_in_with_{provider.name.lower()}"]:
                 provider_config = {}
                 identity = oidc_svc.get_identity(self.request.user, provider)
 
@@ -547,29 +543,29 @@ class AccountController:
                 else:
                     provider_config["connected"] = False
 
-                js_config["context"].setdefault("identities", {})
-                js_config["context"]["identities"].setdefault(provider.name.lower(), {})
+                js_config_["context"].setdefault("identities", {})
+                js_config_["context"]["identities"][provider.name.lower()] = {}
                 for key, value in provider_config.items():
-                    js_config["context"]["identities"][
-                        provider.name.lower()
-                    ].setdefault(key, value)
+                    js_config_["context"]["identities"][provider.name.lower()][
+                        key
+                    ] = value
 
                 route_name = f"oidc.connect.{provider.name.lower()}"
-                js_config.setdefault("routes", {})
-                js_config["routes"].setdefault(
-                    route_name, self.request.route_url(route_name)
-                )
+                js_config_.setdefault("routes", {})
+                js_config_["routes"][route_name] = self.request.route_url(route_name)
 
-        orcid_config = js_config["context"].get("identities", {}).get("orcid", {})
+        orcid_config = js_config_["context"].get("identities", {}).get("orcid", {})
         if orcid_id := orcid_config.get("provider_unique_id"):
             orcid_host = self.request.registry.settings["orcid_host"]
             # The URL to the user's public ORCID profile page
             # (for example: https://orcid.org/0000-0002-6373-1308).
-            orcid_config.setdefault(
-                "url", urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
+            orcid_config["url"] = urlunparse(
+                urlparse(orcid_host)._replace(path=orcid_id)
             )
 
-        return {"js_config": js_config}
+        js_config_.update(js_config or {})
+
+        return {"js_config": js_config_}
 
 
 @view_defaults(
