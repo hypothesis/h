@@ -204,7 +204,7 @@ function ConnectAccountButtons({
   }
 
   return (
-    <div class="text-grey-6 text-sm/relaxed" data-testid="connect-your-account">
+    <FormContainer>
       <Heading text="Connect your account" />
 
       <p className="mb-9">
@@ -223,7 +223,7 @@ function ConnectAccountButtons({
           <ConnectAccountButton config={config} provider="orcid" />
         )}
       </div>
-    </div>
+    </FormContainer>
   );
 }
 
