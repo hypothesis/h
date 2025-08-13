@@ -127,9 +127,14 @@ class OAuthAuthorizeController:
             ) from err
 
         if self.request.authenticated_userid is None:
+            # The `action` param is a hint indicating whether the user clicked
+            # a "Sign up" or "Log in" link in the client.
+            action = self.request.params.get("action", "login")
+            route_name = "signup" if action == "signup" else "login"
+
             raise HTTPFound(
                 self.request.route_url(
-                    "login", _query={"next": self.request.url, "for_oauth": True}
+                    route_name, _query={"next": self.request.url, "for_oauth": True}
                 )
             )
 
