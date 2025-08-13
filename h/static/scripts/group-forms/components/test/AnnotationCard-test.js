@@ -317,6 +317,29 @@ describe('AnnotationCard', () => {
     });
   });
 
+  context('when annotation body is collapsible', () => {
+    it('shows an excerpt toggle button', () => {
+      const wrapper = createComponent();
+      const getBodyExcerpt = () =>
+        wrapper.find('Excerpt[data-testid="anno-body-excerpt"]');
+      const getToggleButton = () =>
+        wrapper.find('button[data-testid="toggle-anno-body"]');
+
+      getBodyExcerpt().props().onCollapsibleChanged(true);
+      wrapper.update();
+
+      const toggleButton = getToggleButton();
+      assert.isTrue(toggleButton.exists());
+      assert.equal(toggleButton.text(), 'Show more');
+      assert.isTrue(getBodyExcerpt().prop('collapsed'));
+
+      toggleButton.simulate('click');
+
+      assert.isFalse(getBodyExcerpt().prop('collapsed'));
+      assert.equal(getToggleButton().text(), 'Show less');
+    });
+  });
+
   it(
     'should pass a11y checks',
     checkAccessibility({ content: () => createComponent() }),
