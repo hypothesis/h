@@ -15,9 +15,12 @@ export type ConfigBase = {
     log_in_with_google: boolean;
     log_in_with_orcid: boolean;
   };
-  urls: {
+
+  // URLs for social login. These are present on the login and initial signup
+  // page but missing on the `/signup/{provider}` page.
+  urls?: {
     signup?: string;
-    login: {
+    login?: {
       username_or_email?: string;
       facebook?: string;
       google?: string;
