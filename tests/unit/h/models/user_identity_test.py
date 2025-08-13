@@ -143,6 +143,32 @@ class TestUserIdentity:
 
         assert not db_session.query(models.UserIdentity).count()
 
+    @pytest.mark.parametrize(
+        "name,given_name,family_name,display_name",
+        [
+            # By default `display_name` is `None`.
+            (None, None, None, None),
+            # If present `name` is used for `display_name`.
+            ("Vannevar Bush", None, None, "Vannevar Bush"),
+            # `name` overrides `given_name` and `family_name`.
+            ("Vannevar Bush", "given_name", "family_name", "Vannevar Bush"),
+            # If there's no name then "{given_name} {family_name}" is used for display_name.
+            (None, "Vannevar", "Bush", "Vannevar Bush"),
+            # If there's a given_name but no name or family_name then given_name is used for display_name.
+            (None, "Vannevar", None, "Vannevar"),
+        ],
+    )
+    def test_display_name(self, name, given_name, family_name, display_name):
+        user_identity = models.UserIdentity(
+            provider="provider",
+            provider_unique_id="provider_unique_id",
+            name=name,
+            given_name=given_name,
+            family_name=family_name,
+        )
+
+        assert user_identity.display_name == display_name
+
     def test_repr(self):
         user_identity = models.UserIdentity(
             provider="provider_1", provider_unique_id="1"
