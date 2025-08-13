@@ -40,6 +40,7 @@ export type SocialLoginIdentity = {
 
 /** Data passed to frontend for signup form. */
 export type SignupConfigObject = ConfigBase & {
+  forOAuth?: boolean;
   form: FormFields<{
     username: string;
     password: string;

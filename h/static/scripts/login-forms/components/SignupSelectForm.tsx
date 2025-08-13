@@ -3,6 +3,7 @@ import { useContext } from 'preact/hooks';
 
 import FormHeader from '../../forms-common/components/FormHeader';
 import { Config } from '../config';
+import type { SignupConfigObject } from '../config';
 import { routes } from '../routes';
 import LoginLink from './LoginLink';
 import SocialLoginLink from './SocialLoginLink';
@@ -12,13 +13,13 @@ import SocialLoginLink from './SocialLoginLink';
  * identity providers to choose from.
  */
 export default function SignupSelectForm() {
-  const config = useContext(Config)!;
+  const config = useContext(Config) as SignupConfigObject;
 
   // nb. Options for social login are listed in descending order of expected
   // usage rather than alphabetically.
   return (
     <div className="flex flex-col text-md">
-      <FormHeader>Sign up for Hypothesis</FormHeader>
+      <FormHeader center={config.forOAuth}>Sign up for Hypothesis</FormHeader>
       <div
         // Top margin intended to give roughly even spacing above and below the
         // provider list.
