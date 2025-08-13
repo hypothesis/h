@@ -8,8 +8,12 @@ from pyramid.httpexceptions import HTTPFound
 
 from h import i18n
 from h.models.user_identity import IdentityProvider
-from h.services.exceptions import ConflictError
-from h.services.jwt import JWTDecodeError
+from h.services.jwt import JWTAudience, JWTDecodeError
+from h.services.user_signup import (
+    EmailConflictError,
+    IdentityConflictError,
+    UsernameConflictError,
+)
 from h.views.account_signup import (
     IDInfo,
     IDInfoJWTDecodeError,
@@ -386,6 +390,13 @@ class TestSignupViews:
             },
         }
 
+    @pytest.mark.parametrize(
+        "exception_class,heading,message",
+        [
+            (UsernameConflictError, "Username already registered", sentinel.username),
+            (EmailConflictError, "Email address already registered", sentinel.email),
+        ],
+    )
     def test_post_when_signup_conflict(
         self,
         user_signup_service,
@@ -393,8 +404,11 @@ class TestSignupViews:
         views,
         pyramid_request,
         feature_service,
+        exception_class,
+        heading,
+        message,
     ):
-        user_signup_service.signup.side_effect = ConflictError("Test error message")
+        user_signup_service.signup.side_effect = exception_class
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
             sentinel.google_enabled,
@@ -429,8 +443,8 @@ class TestSignupViews:
                     "signup": pyramid_request.route_url("signup"),
                 },
             },
-            "heading": _("Account already registered"),
-            "message": _("Test error message"),
+            "heading": heading,
+            "message": message,
         }
 
     @pytest.fixture
@@ -448,10 +462,45 @@ class TestSignupViews:
         return SignupViews(sentinel.context, pyramid_request)
 
 
-@pytest.mark.usefixtures("user_signup_service", "jwt_service", "feature_service")
+class TestIDInfo:
+    @pytest.mark.parametrize(
+        "name,given_name,family_name,display_name",
+        [
+            # By default `display_name` is `None`.
+            (None, None, None, None),
+            # If present `name` is used for `display_name`.
+            ("Vannevar Bush", None, None, "Vannevar Bush"),
+            # `name` overrides `given_name` and `family_name`.
+            ("Vannevar Bush", "given_name", "family_name", "Vannevar Bush"),
+            # If there's no name then "{given_name} {family_name}" is used for display_name.
+            (None, "Vannevar", "Bush", "Vannevar Bush"),
+            # If there's a given_name but no name or family_name then given_name is used for display_name.
+            (None, "Vannevar", None, "Vannevar"),
+        ],
+    )
+    def test_display_name(self, name, given_name, family_name, display_name):
+        idinfo = IDInfo(
+            sub=sentinel.sub,
+            name=name,
+            given_name=given_name,
+            family_name=family_name,
+        )
+
+        assert idinfo.display_name == display_name
+
+
+@pytest.mark.usefixtures(
+    "user_service", "user_signup_service", "jwt_service", "feature_service"
+)
 class TestSocialLoginSignupViews:
     def test_get(
-        self, views, get_csrf_token, pyramid_request, orcid_id, feature_service
+        self,
+        views,
+        get_csrf_token,
+        pyramid_request,
+        orcid_id,
+        feature_service,
+        jwt_service,
     ):
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
@@ -461,6 +510,11 @@ class TestSocialLoginSignupViews:
 
         response = views.get()
 
+        jwt_service.decode_symmetric.assert_called_once_with(
+            sentinel.idinfo,
+            audience=JWTAudience.SIGNUP_ORCID,
+            payload_class=IDInfo,
+        )
         get_csrf_token.assert_called_once_with(pyramid_request)
         assert feature_service.enabled.call_args_list == [
             call("log_in_with_orcid", user=None),
@@ -476,9 +530,26 @@ class TestSocialLoginSignupViews:
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
                 "form": {},
-                "identity": {"provider_unique_id": orcid_id},
+                "identity": {"provider_unique_id": orcid_id, "email": None},
             }
         }
+
+    def test_get_when_theres_an_identity_conflict(self, views, user_service, idinfo):
+        user_service.fetch_by_identity.return_value = sentinel.conflicting_user
+
+        with pytest.raises(IdentityConflictError):
+            views.get()
+
+        user_service.fetch_by_identity.assert_called_once_with(
+            IdentityProvider.ORCID, idinfo.sub
+        )
+
+    def test_get_when_theres_an_email_conflict(self, views, factories, idinfo):
+        conflicting_user = factories.User()
+        idinfo.email = conflicting_user.email
+
+        with pytest.raises(EmailConflictError):
+            views.get()
 
     @pytest.mark.parametrize(
         "appstruct,expected_signup_args",
@@ -522,11 +593,19 @@ class TestSocialLoginSignupViews:
         user_signup_service.signup.assert_called_once_with(
             username=sentinel.username,
             email=None,
+            display_name=None,
             password=None,
             privacy_accepted=frozen_time().astimezone(UTC),
             require_activation=False,
             identities=[
-                {"provider": IdentityProvider.ORCID, "provider_unique_id": orcid_id}
+                {
+                    "provider": IdentityProvider.ORCID,
+                    "provider_unique_id": orcid_id,
+                    "email": None,
+                    "name": None,
+                    "given_name": None,
+                    "family_name": None,
+                }
             ],
             **expected_signup_args,
         )
@@ -542,14 +621,12 @@ class TestSocialLoginSignupViews:
             assert header in response.headerlist
 
     def test_post_when_next_url_in_idinfo_token(
-        self, views, jwt_service, pyramid_request, matchers
+        self, views, idinfo, pyramid_request, matchers
     ):
         pyramid_request.create_form.return_value.validate.return_value = {
             "username": sentinel.username
         }
-        jwt_service.decode_symmetric.return_value.next_url = (
-            "http://example.com/oauth/authorize"
-        )
+        idinfo.next_url = "http://example.com/oauth/authorize"
 
         response = views.post()
 
@@ -561,7 +638,7 @@ class TestSocialLoginSignupViews:
     def test_post_when_next_url_missing_or_unknown(
         self,
         views,
-        jwt_service,
+        idinfo,
         pyramid_request,
         matchers,
         next_url,
@@ -570,7 +647,7 @@ class TestSocialLoginSignupViews:
         pyramid_request.create_form.return_value.validate.return_value = {
             "username": sentinel.username
         }
-        jwt_service.decode_symmetric.return_value.next_url = next_url
+        idinfo.next_url = next_url
 
         response = views.post()
 
@@ -599,6 +676,60 @@ class TestSocialLoginSignupViews:
 
         with pytest.raises(IDInfoJWTDecodeError):
             getattr(views, view_method)()
+
+    @pytest.mark.parametrize(
+        "route_name,provider",
+        [
+            ("signup.orcid", "ORCID"),
+            ("signup.google", "Google"),
+            ("signup.facebook", "Facebook"),
+        ],
+    )
+    def test_email_conflict_error(
+        self, views, route_name, provider, pyramid_request, matchers, idinfo, logout
+    ):
+        pyramid_request.matched_route.name = route_name
+        idinfo.email = sentinel.email
+
+        response = views.email_conflict_error()
+
+        assert pyramid_request.session.peek_flash("error") == [
+            f"There's already a Hypothesis account with your {provider} email address."
+            " Try logging in or resetting your password."
+            f" Once logged in you can connect {provider} in your account settings.",
+        ]
+        assert (
+            matchers.Redirect302To(
+                pyramid_request.route_url("login", _query={"username": idinfo.email})
+            )
+            == response
+        )
+        logout.assert_called_once_with(pyramid_request)
+        for header in logout.return_value:
+            assert header in response.headers.items()
+
+    @pytest.mark.parametrize(
+        "route_name,provider",
+        [
+            ("signup.orcid", "ORCID"),
+            ("signup.google", "Google"),
+            ("signup.facebook", "Facebook"),
+        ],
+    )
+    def test_identity_conflict_error(
+        self, views, route_name, provider, pyramid_request, matchers, logout
+    ):
+        pyramid_request.matched_route.name = route_name
+
+        response = views.identity_conflict_error()
+
+        assert pyramid_request.session.peek_flash("error") == [
+            f"There's already a Hypothesis account connected to your {provider} account. Try logging in.",
+        ]
+        assert matchers.Redirect302To(pyramid_request.route_url("login")) == response
+        logout.assert_called_once_with(pyramid_request)
+        for header in logout.return_value:
+            assert header in response.headers.items()
 
     def test_idinfo_jwt_decode_error(self, views, report_exception, pyramid_request):
         response = views.idinfo_jwt_decode_error()
@@ -688,12 +819,21 @@ class TestSocialLoginSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
-                "identity": {"provider_unique_id": orcid_id},
+                "identity": {"provider_unique_id": orcid_id, "email": None},
                 "form": {
                     "data": expected_form_data,
                     "errors": views.context.error.asdict.return_value,
                 },
             }
+        }
+
+    def test_validation_failure_with_username_conflict_error(self, views):
+        views.context = UsernameConflictError()
+
+        response = views.validation_failure()
+
+        assert response["js_config"]["form"]["errors"] == {
+            "username": "This username is already taken."
         }
 
     @pytest.fixture
@@ -705,6 +845,11 @@ class TestSocialLoginSignupViews:
         pyramid_request.params["idinfo"] = sentinel.idinfo
         pyramid_request.matched_route.name = "signup.orcid"
         return pyramid_request
+
+    @pytest.fixture
+    def user_service(self, user_service):
+        user_service.fetch_by_identity.return_value = None
+        return user_service
 
     @pytest.fixture
     def user_signup_service(self, user_signup_service, factories):
@@ -724,8 +869,12 @@ class TestSocialLoginSignupViews:
         return SocialLoginSignupViews(sentinel.context, pyramid_request)
 
     @pytest.fixture
-    def jwt_service(self, jwt_service, orcid_id):
-        jwt_service.decode_symmetric.return_value = IDInfo(orcid_id)
+    def idinfo(self, orcid_id):
+        return IDInfo(orcid_id)
+
+    @pytest.fixture
+    def jwt_service(self, jwt_service, idinfo):
+        jwt_service.decode_symmetric.return_value = idinfo
         return jwt_service
 
 
@@ -743,13 +892,24 @@ def test_encode_idinfo_token(jwt_service):
     token = encode_idinfo_token(
         jwt_service,
         sentinel.provider_unique_id,
+        sentinel.email,
+        sentinel.name,
+        sentinel.given_name,
+        sentinel.family_name,
         sentinel.issuer,
         sentinel.audience,
         sentinel.next_url,
     )
 
     jwt_service.encode_symmetric.assert_called_once_with(
-        IDInfo(sentinel.provider_unique_id, sentinel.next_url),
+        IDInfo(
+            sentinel.provider_unique_id,
+            sentinel.email,
+            sentinel.name,
+            sentinel.given_name,
+            sentinel.family_name,
+            sentinel.next_url,
+        ),
         expires_in=timedelta(hours=1),
         issuer=sentinel.issuer,
         audience=sentinel.audience,
@@ -783,10 +943,21 @@ def report_exception(patch):
 
 
 @pytest.fixture(autouse=True)
+def logout(patch):
+    logout = patch("h.views.account_signup.logout")
+    logout.return_value = [
+        ("logout_headername1", "logout_headervalue1"),
+        ("logout_headername2", "logout_headervalue2"),
+    ]
+    return logout
+
+
+@pytest.fixture(autouse=True)
 def routes(pyramid_config):
     pyramid_config.add_route("activity.user_search", "/users/{username}")
     pyramid_config.add_route("login", "/login")
     pyramid_config.add_route("signup", "/signup")
+    pyramid_config.add_route("forgot_password", "/forgot-password")
     pyramid_config.add_route("oauth_authorize", "/oauth/authorize")
     pyramid_config.add_route("oidc.login.facebook", "/oidc/login/facebook")
     pyramid_config.add_route("oidc.login.google", "/oidc/login/google")

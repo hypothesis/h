@@ -90,3 +90,13 @@ class Redirect302To(Matcher):
             return False
 
         return other.location == self.location
+
+
+class StringStartingWith(Matcher):
+    repr_attrs = ("starting_with",)
+
+    def __init__(self, starting_with):
+        self.starting_with = starting_with
+
+    def __eq__(self, other):
+        return other.startswith(self.starting_with)

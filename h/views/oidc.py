@@ -211,6 +211,19 @@ class OIDCConnectAndLoginViews:
         )
         self._request.session[self.settings.state_sessionkey] = state
 
+        if self._request.matched_route.name in (
+            "oidc.connect.facebook",
+            "oidc.login.facebook",
+        ):
+            # Facebook doesn't require the `profile` scope: it sends us the
+            # user's name without it. If you do send the `profile` scope to
+            # Facebook it errors out.
+            scope = "openid email"  # pragma: no cover
+        else:
+            # Other providers require the `profile` scope otherwise they don't
+            # send us the user's name.
+            scope = "openid email profile"
+
         return HTTPFound(
             location=urlunparse(
                 urlparse(self.settings.authorization_url)._replace(
@@ -220,7 +233,7 @@ class OIDCConnectAndLoginViews:
                             "response_type": "code",
                             "redirect_uri": self.settings.redirect_uri,
                             "state": state,
-                            "scope": "openid profile email",
+                            "scope": scope,
                         }
                     )
                 )
@@ -371,50 +384,57 @@ class OIDCRedirectViews:
             raise HTTPForbidden
 
         # Get the user's provider unique ID from the provider.
-        provider_unique_id = self._oidc_service.get_decoded_idtoken(
+        decoded_idtoken = self._oidc_service.get_decoded_idtoken(
             self.settings.provider, validated_params["code"]
-        )["sub"]
+        )
 
         # Get the existing Hypothesis account that's already connected to this
         # provider unique ID, if any.
         user = self._user_service.fetch_by_identity(
-            self.settings.provider, provider_unique_id
+            self.settings.provider, provider_unique_id=decoded_idtoken["sub"]
         )
 
         action = decoded_state.action
 
         match action:
             case "connect":
-                return self.connect_provider_unique_id(provider_unique_id, user)
+                return self.connect_identity(decoded_idtoken, user)
             case "login":
-                return self.log_in_with_provider(
-                    provider_unique_id, user, decoded_state.next_url
+                return self.log_in_with_identity(
+                    decoded_idtoken, user, decoded_state.next_url
                 )
             case _:
                 raise UnexpectedActionError(action)
 
-    def connect_provider_unique_id(self, provider_unique_id: str, user: User | None):
-        """Connect the user's provider unique ID to their Hypothesis account.
+    def connect_identity(self, decoded_idtoken: dict, user: User | None):
+        """Connect the user's third-party identity to their Hypothesis account.
 
-        Do nothing if `provider_unique_id` is already connected to `user`.
+        Do nothing if the third-party identity (represented by the given
+        `decoded_idtoken`) is already connected to `user`.
 
         """
         if user and user != self._request.user:
-            # Oops, this provider_unique_id is already connected to a different
+            # Oops, this identity is already connected to a different
             # Hypothesis account.
             raise UserConflictError
 
         if not user:
-            # This provider unique ID isn't connected to a Hypothesis account
-            # yet. Let's go ahead and connect it to the user's account.
+            # This identity isn't connected to a Hypothesis account yet. Let's
+            # go ahead and connect it to the user's account.
             self._oidc_service.add_identity(
-                self._request.user, self.settings.provider, provider_unique_id
+                self._request.user,
+                self.settings.provider,
+                provider_unique_id=decoded_idtoken["sub"],
+                email=decoded_idtoken.get("email"),
+                name=decoded_idtoken.get("name"),
+                given_name=decoded_idtoken.get("given_name"),
+                family_name=decoded_idtoken.get("family_name"),
             )
 
         self._request.session.flash(self.settings.success_message, "success")
         return HTTPFound(self._request.route_url("account"))
 
-    def log_in_with_provider(self, provider_unique_id: str, user, next_url: str):
+    def log_in_with_identity(self, decoded_idtoken: dict, user, next_url: str):
         if not user:
             # There's no Hypothesis account for this provider unique ID yet.
             # Redirect to the "Sign up to Hypothesis with <PROVIDER>" page to
@@ -424,7 +444,11 @@ class OIDCRedirectViews:
                     self.settings.signup_route_name,
                     _query=encode_idinfo_token(
                         self._jwt_service,
-                        provider_unique_id,
+                        decoded_idtoken["sub"],
+                        decoded_idtoken.get("email"),
+                        decoded_idtoken.get("name"),
+                        decoded_idtoken.get("given_name"),
+                        decoded_idtoken.get("family_name"),
                         self.settings.jwt_issuer,
                         self.settings.idinfo_jwtaudience,
                         next_url,
