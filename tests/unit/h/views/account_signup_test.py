@@ -47,6 +47,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "forOAuth": False,
                 "form": {},
                 "urls": {
                     "login": {
@@ -142,6 +143,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "forOAuth": False,
                 "form": {},
                 "urls": {
                     "login": {
@@ -298,6 +300,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "forOAuth": False,
                 "urls": {
                     "login": {
                         "facebook": pyramid_request.route_url("oidc.login.facebook"),
@@ -389,6 +392,7 @@ class TestSignupViews:
                     "log_in_with_google": sentinel.google_enabled,
                     "log_in_with_facebook": sentinel.facebook_enabled,
                 },
+                "forOAuth": False,
                 "form": {},
                 "urls": {
                     "login": {

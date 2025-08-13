@@ -41,9 +41,7 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
 
   return (
     <>
-      <FormHeader classes={config.forOAuth ? 'text-center' : undefined}>
-        {title}
-      </FormHeader>
+      <FormHeader center={config.forOAuth}>{title}</FormHeader>
       <FormContainer
         // The max width here and item gap should match SignupSelectForm.
         //

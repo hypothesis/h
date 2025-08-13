@@ -106,7 +106,7 @@ export default function SignupForm({
 
   return (
     <>
-      <FormHeader>Sign up for Hypothesis</FormHeader>
+      <FormHeader center={config.forOAuth}>Sign up for Hypothesis</FormHeader>
       <FormContainer>
         <Form csrfToken={config.csrfToken} onSubmit={() => setSubmitted(true)}>
           {idProvider && config.identity && (

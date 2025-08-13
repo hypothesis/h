@@ -127,6 +127,7 @@ class SignupViews:
                     "log_in_with_facebook", user=None
                 ),
             },
+            "forOAuth": bool(self.request.params.get("for_oauth")),
             "form": {},
         }
 
