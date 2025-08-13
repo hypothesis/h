@@ -38,16 +38,27 @@ class TestOAuthAuthorizeController:
 
         assert exc.value.detail == "boom!"
 
+    @pytest.mark.parametrize(
+        "action,expected_path",
+        [
+            (None, "/login"),
+            ("login", "/login"),
+            ("signup", "/signup"),
+        ],
+    )
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
-    def test_get_redirects_to_login_when_not_authenticated(
-        self, controller, pyramid_request, view_name
+    def test_get_redirects_when_not_authenticated(
+        self, controller, pyramid_request, view_name, action, expected_path
     ):
+        if action is not None:
+            pyramid_request.params = {"action": action}
+
         with pytest.raises(httpexceptions.HTTPFound) as exc:  # noqa: PT012
             view = getattr(controller, view_name)
             view()
 
         parsed_url = urlparse(exc.value.location)
-        assert parsed_url.path == "/login"
+        assert parsed_url.path == expected_path
         assert parse_qs(parsed_url.query) == {
             "next": [pyramid_request.url],
             "for_oauth": ["True"],
@@ -260,6 +271,7 @@ class TestOAuthAuthorizeController:
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route("login", "/login")
+        pyramid_config.add_route("signup", "/signup")
 
 
 @pytest.mark.usefixtures("oauth_provider")
