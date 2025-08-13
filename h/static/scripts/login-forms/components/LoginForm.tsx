@@ -9,6 +9,7 @@ import { useFormValue } from '../../forms-common/form-value';
 import { Config } from '../config';
 import type { LoginConfigObject } from '../config';
 import { routes } from '../routes';
+import SignupFooter from './SignupFooter';
 import SocialLoginLink from './SocialLoginLink';
 
 export type LoginFormProps = {
@@ -116,6 +117,7 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
           </>
         )}
       </FormContainer>
+      <SignupFooter action="signup" />
     </>
   );
 }

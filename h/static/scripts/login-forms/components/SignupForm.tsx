@@ -12,6 +12,7 @@ import type { SignupConfigObject } from '../config';
 import FacebookIcon from './FacebookIcon';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
+import SignupFooter from './SignupFooter';
 
 type IdProviderBadgeProps = {
   provider: IdProvider;
@@ -223,6 +224,7 @@ export default function SignupForm({
           </div>
         </Form>
       </FormContainer>
+      <SignupFooter action="login" />
     </>
   );
 }

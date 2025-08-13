@@ -16,7 +16,9 @@ export type ConfigBase = {
     log_in_with_orcid: boolean;
   };
   urls: {
+    signup?: string;
     login: {
+      username_or_email?: string;
       facebook?: string;
       google?: string;
       orcid?: string;
