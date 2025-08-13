@@ -396,6 +396,16 @@ def redirect_url(request, user, url):
 
 
 def inject_login_urls(request, js_config):
+    next_url = request.params.get("next")
+    query = {"next": next_url} if next_url else {}
+
+    if request.params.get("for_oauth"):
+        query["for_oauth"] = True
+
+    login_links = {
+        "username_or_email": request.route_url("login", _query=query),
+    }
+
     enabled_providers = [
         value.name.lower()
         for value in IdentityProvider
@@ -403,9 +413,11 @@ def inject_login_urls(request, js_config):
     ]
 
     if enabled_providers:
-        next_url = request.params.get("next")
-        query = {"next": next_url} if next_url else {}
-        js_config.setdefault("urls", {})["login"] = {
-            provider: request.route_url(f"oidc.login.{provider}", _query=query)
-            for provider in enabled_providers
-        }
+        for provider in enabled_providers:
+            login_links[provider] = request.route_url(
+                f"oidc.login.{provider}", _query=query
+            )
+
+    urls = js_config.setdefault("urls", {})
+    urls["login"] = login_links
+    urls["signup"] = request.route_url("signup", _query=query)

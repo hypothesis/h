@@ -20,6 +20,10 @@ describe('SignupForm', () => {
         },
       },
     };
+
+    $imports.$mock({
+      './SignupFooter': () => null,
+    });
   });
 
   afterEach(() => {

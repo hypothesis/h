@@ -16,18 +16,6 @@
 
     <div id="login-form"></div>
   </div>
-  {# In the context of OAuth, the login screen is often shown in a popup.
-       Use a more compact footer and make the Sign Up link open in a
-       new window where there is more space and so the user can continue the
-       OAuth flow after they sign up. #}
-  <footer class="form-footer--popup">
-    <span>
-      Don't have a Hypothesis account?
-      <a class="link--footer"
-         href="{{ request.route_path('signup') }}"
-         target="blank">Sign up</a>
-    </span>
-  </footer>
 {% endblock content %}
 
 {% block scripts %}

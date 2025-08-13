@@ -55,6 +55,7 @@ class TestBadCSRFTokenHTML:
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route("login", "/login")
+        pyramid_config.add_route("signup", "/signup")
 
 
 @pytest.mark.usefixtures("routes")
@@ -83,9 +84,15 @@ class TestAuthController:
                 },
                 "urls": {
                     "login": {
-                        provider: pyramid_request.route_url(f"oidc.login.{provider}")
-                        for provider in ("facebook", "google", "orcid")
-                    }
+                        "username_or_email": pyramid_request.route_url("login"),
+                        **{
+                            provider: pyramid_request.route_url(
+                                f"oidc.login.{provider}"
+                            )
+                            for provider in ("facebook", "google", "orcid")
+                        },
+                    },
+                    "signup": pyramid_request.route_url("signup"),
                 },
             }
         }
@@ -145,11 +152,16 @@ class TestAuthController:
         result = views.AuthController(pyramid_request).get()
 
         assert result["js_config"]["urls"]["login"] == {
-            provider: pyramid_request.route_url(
-                f"oidc.login.{provider}",
-                _query={"next": pyramid_request.params["next"]},
-            )
-            for provider in ("facebook", "google", "orcid")
+            "username_or_email": pyramid_request.route_url(
+                "login", _query={"next": pyramid_request.params["next"]}
+            ),
+            **{
+                provider: pyramid_request.route_url(
+                    f"oidc.login.{provider}",
+                    _query={"next": pyramid_request.params["next"]},
+                )
+                for provider in ("facebook", "google", "orcid")
+            },
         }
 
     def test_post_returns_form_when_validation_fails(
@@ -181,9 +193,15 @@ class TestAuthController:
                 "flashMessages": [],
                 "urls": {
                     "login": {
-                        provider: pyramid_request.route_url(f"oidc.login.{provider}")
-                        for provider in ("facebook", "google", "orcid")
-                    }
+                        "username_or_email": pyramid_request.route_url("login"),
+                        **{
+                            provider: pyramid_request.route_url(
+                                f"oidc.login.{provider}"
+                            )
+                            for provider in ("facebook", "google", "orcid")
+                        },
+                    },
+                    "signup": pyramid_request.route_url("signup"),
                 },
             }
         }
@@ -215,11 +233,16 @@ class TestAuthController:
         result = controller.post()
 
         assert result["js_config"]["urls"]["login"] == {
-            provider: pyramid_request.route_url(
-                f"oidc.login.{provider}",
-                _query={"next": pyramid_request.params["next"]},
-            )
-            for provider in ("facebook", "google", "orcid")
+            "username_or_email": pyramid_request.route_url(
+                "login", _query={"next": pyramid_request.params["next"]}
+            ),
+            **{
+                provider: pyramid_request.route_url(
+                    f"oidc.login.{provider}",
+                    _query={"next": pyramid_request.params["next"]},
+                )
+                for provider in ("facebook", "google", "orcid")
+            },
         }
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
@@ -332,6 +355,8 @@ class TestAuthController:
         pyramid_config.add_route("activity.user_search", "/users/{username}")
         pyramid_config.add_route("forgot_password", "/forgot")
         pyramid_config.add_route("index", "/index")
+        pyramid_config.add_route("login", "/login")
+        pyramid_config.add_route("signup", "/signup")
         pyramid_config.add_route("stream", "/stream")
         pyramid_config.add_route("oidc.login.facebook", "/oidc/login/facebook")
         pyramid_config.add_route("oidc.login.google", "/oidc/login/google")

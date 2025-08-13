@@ -51,9 +51,15 @@ class TestSignupViews:
                 "form": {},
                 "urls": {
                     "login": {
-                        provider: pyramid_request.route_url(f"oidc.login.{provider}")
-                        for provider in ("facebook", "google", "orcid")
-                    }
+                        "username_or_email": pyramid_request.route_url("login"),
+                        **{
+                            provider: pyramid_request.route_url(
+                                f"oidc.login.{provider}"
+                            )
+                            for provider in ("facebook", "google", "orcid")
+                        },
+                    },
+                    "signup": pyramid_request.route_url("signup"),
                 },
             }
         }
@@ -88,11 +94,16 @@ class TestSignupViews:
         response = views.get()
 
         assert response["js_config"]["urls"]["login"] == {
-            provider: pyramid_request.route_url(
-                f"oidc.login.{provider}",
-                _query={"next": "http://example.com/oauth/authorize"},
-            )
-            for provider in ("facebook", "google", "orcid")
+            "username_or_email": pyramid_request.route_url(
+                "login", _query={"next": "http://example.com/oauth/authorize"}
+            ),
+            **{
+                provider: pyramid_request.route_url(
+                    f"oidc.login.{provider}",
+                    _query={"next": "http://example.com/oauth/authorize"},
+                )
+                for provider in ("facebook", "google", "orcid")
+            },
         }
 
     @pytest.mark.usefixtures("frozen_time")
@@ -147,10 +158,12 @@ class TestSignupViews:
                 "form": {},
                 "urls": {
                     "login": {
+                        "username_or_email": pyramid_request.route_url("login"),
                         "facebook": pyramid_request.route_url("oidc.login.facebook"),
                         "google": pyramid_request.route_url("oidc.login.google"),
                         "orcid": pyramid_request.route_url("oidc.login.orcid"),
-                    }
+                    },
+                    "signup": pyramid_request.route_url("signup"),
                 },
             },
             "heading": _("Account registration successful"),
@@ -187,11 +200,16 @@ class TestSignupViews:
         response = views.post()
 
         assert response["js_config"]["urls"]["login"] == {
-            provider: pyramid_request.route_url(
-                f"oidc.login.{provider}",
-                _query={"next": "http://example.com/oauth/authorize"},
-            )
-            for provider in ("facebook", "google", "orcid")
+            "username_or_email": pyramid_request.route_url(
+                "login", _query={"next": "http://example.com/oauth/authorize"}
+            ),
+            **{
+                provider: pyramid_request.route_url(
+                    f"oidc.login.{provider}",
+                    _query={"next": "http://example.com/oauth/authorize"},
+                )
+                for provider in ("facebook", "google", "orcid")
+            },
         }
 
     def test_post_when_validation_failure(
@@ -303,10 +321,12 @@ class TestSignupViews:
                 "forOAuth": False,
                 "urls": {
                     "login": {
+                        "username_or_email": pyramid_request.route_url("login"),
                         "facebook": pyramid_request.route_url("oidc.login.facebook"),
                         "google": pyramid_request.route_url("oidc.login.google"),
                         "orcid": pyramid_request.route_url("oidc.login.orcid"),
-                    }
+                    },
+                    "signup": pyramid_request.route_url("signup"),
                 },
             }
         }
@@ -354,11 +374,16 @@ class TestSignupViews:
         response = views.validation_failure()
 
         assert response["js_config"]["urls"]["login"] == {
-            provider: pyramid_request.route_url(
-                f"oidc.login.{provider}",
-                _query={"next": "http://example.com/oauth/authorize"},
-            )
-            for provider in ("facebook", "google", "orcid")
+            "username_or_email": pyramid_request.route_url(
+                "login", _query={"next": "http://example.com/oauth/authorize"}
+            ),
+            **{
+                provider: pyramid_request.route_url(
+                    f"oidc.login.{provider}",
+                    _query={"next": "http://example.com/oauth/authorize"},
+                )
+                for provider in ("facebook", "google", "orcid")
+            },
         }
 
     def test_post_when_signup_conflict(
@@ -396,10 +421,12 @@ class TestSignupViews:
                 "form": {},
                 "urls": {
                     "login": {
+                        "username_or_email": pyramid_request.route_url("login"),
                         "facebook": pyramid_request.route_url("oidc.login.facebook"),
                         "google": pyramid_request.route_url("oidc.login.google"),
                         "orcid": pyramid_request.route_url("oidc.login.orcid"),
-                    }
+                    },
+                    "signup": pyramid_request.route_url("signup"),
                 },
             },
             "heading": _("Account already registered"),
@@ -758,6 +785,8 @@ def report_exception(patch):
 @pytest.fixture(autouse=True)
 def routes(pyramid_config):
     pyramid_config.add_route("activity.user_search", "/users/{username}")
+    pyramid_config.add_route("login", "/login")
+    pyramid_config.add_route("signup", "/signup")
     pyramid_config.add_route("oauth_authorize", "/oauth/authorize")
     pyramid_config.add_route("oidc.login.facebook", "/oidc/login/facebook")
     pyramid_config.add_route("oidc.login.google", "/oidc/login/google")
