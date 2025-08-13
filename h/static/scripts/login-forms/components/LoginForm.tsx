@@ -93,7 +93,7 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
             </Button>
           </div>
         </Form>
-        {enableSocialLogin && (
+        {enableSocialLogin && config.urls?.login && (
           <>
             <div className="self-center uppercase">or</div>
             {config.urls.login.google && (

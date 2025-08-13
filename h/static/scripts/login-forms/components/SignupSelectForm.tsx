@@ -16,6 +16,8 @@ import SocialLoginLink from './SocialLoginLink';
 export default function SignupSelectForm() {
   const config = useContext(Config) as SignupConfigObject;
 
+  const loginURLs = config.urls?.login;
+
   // nb. Options for social login are listed in descending order of expected
   // usage rather than alphabetically.
   return (
@@ -37,21 +39,22 @@ export default function SignupSelectForm() {
           >
             Sign up with <b>email</b>
           </LoginLink>
-          <div className="self-center uppercase">or</div>
-          {config.urls.login.google && (
-            <SocialLoginLink
-              provider="google"
-              href={config.urls.login.google}
-            />
-          )}
-          {config.urls.login.facebook && (
-            <SocialLoginLink
-              provider="facebook"
-              href={config.urls.login.facebook}
-            />
-          )}
-          {config.urls.login.orcid && (
-            <SocialLoginLink provider="orcid" href={config.urls.login.orcid} />
+          {loginURLs && (
+            <>
+              <div className="self-center uppercase">or</div>
+              {loginURLs.google && (
+                <SocialLoginLink provider="google" href={loginURLs.google} />
+              )}
+              {loginURLs.facebook && (
+                <SocialLoginLink
+                  provider="facebook"
+                  href={loginURLs.facebook}
+                />
+              )}
+              {loginURLs.orcid && (
+                <SocialLoginLink provider="orcid" href={loginURLs.orcid} />
+              )}
+            </>
           )}
         </div>
       </div>

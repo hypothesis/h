@@ -18,6 +18,9 @@ export type SignupFooterProps = {
  */
 export default function SignupFooter({ action }: SignupFooterProps) {
   const config = useContext(Config) as SignupConfigObject;
+  if (!config.urls?.login) {
+    return null;
+  }
 
   return (
     <footer

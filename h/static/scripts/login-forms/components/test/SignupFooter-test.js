@@ -26,6 +26,17 @@ describe('SignupFooter', () => {
     };
   });
 
+  it('renders footer if login URL is present', () => {
+    const wrapper = createComponent({ action: 'login' });
+    assert.isTrue(wrapper.exists('footer'));
+  });
+
+  it('renders nothing if login URL is missing', () => {
+    delete fakeConfig.urls;
+    const wrapper = createComponent({ action: 'login' });
+    assert.isFalse(wrapper.exists('footer'));
+  });
+
   describe('when action is "login"', () => {
     it('renders login link with correct href', () => {
       const wrapper = createComponent({ action: 'login' });
