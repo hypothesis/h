@@ -15,3 +15,19 @@ export function readConfig<T>(): T {
     throw new Error('Failed to parse frontend configuration');
   }
 }
+
+/**
+ * Find the DOM container element for a Preact application or throw an error.
+ *
+ * The purpose of this utility is to generate a more helpful error if the
+ * container element is missing.
+ */
+export function findContainer(selector: string): Element {
+  const container = document.querySelector(selector);
+  if (!container) {
+    throw new Error(
+      `Unable to render UI because container "${selector}" was not found`,
+    );
+  }
+  return container;
+}
