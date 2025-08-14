@@ -66,6 +66,13 @@ describe('InputAutofocusController', () => {
       sendKey('c', { metaKey: true });
       assert.notEqual(document.activeElement, ctrl.element);
     });
+
+    it('should not focus if "keydown" event does not have a `key`', () => {
+      document.activeElement.dispatchEvent(
+        new Event('keydown', { bubbles: true }),
+      );
+      assert.notEqual(document.activeElement, ctrl.element);
+    });
   });
 
   context('when another element has focus', () => {
