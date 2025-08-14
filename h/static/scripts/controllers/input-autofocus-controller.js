@@ -1,8 +1,13 @@
 import { Controller } from '../base/controller';
 
 function isWordChar(event) {
+  // `event.key` should always be a string, but we've seen users (bots?) trigger
+  // the global "keydown" handler with an an event where `key` is undefined.
   return (
-    event.key.match(/^\w$/) && !event.ctrlKey && !event.altKey && !event.metaKey
+    event.key?.match(/^\w$/) &&
+    !event.ctrlKey &&
+    !event.altKey &&
+    !event.metaKey
   );
 }
 
