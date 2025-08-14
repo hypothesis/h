@@ -49,7 +49,10 @@
 {% block scripts %}
   {{ super() }}
 
-  {% for url in asset_urls('login_forms_js') %}
+  {# Client-rendered frontend is only used if signup was not successful. #}
+  {% if js_config.get("form") %}
+    {% for url in asset_urls('login_forms_js') %}
     <script type="module" src="{{ url }}"></script>
-  {% endfor %}
+    {% endfor %}
+  {% endif %}
 {% endblock %}
