@@ -71,16 +71,7 @@
   .form-input__character-counter {
     @include typography.font-normal;
 
-    // Show fallback "counter" if loading js times out.
-    .env-js-timeout & {
-      display: block;
-    }
-
-    // Immediately hide counter if js capable - prevents momentary flash of
-    // unenhanced fallback counter before js kicks in.
-    .env-js-capable & {
-      display: none;
-    }
+    display: none;
 
     // The js controller adds this class when it's ready - show the now
     // enhanced counter.
@@ -106,33 +97,18 @@
   }
 
   .form-input__hint-icon {
-    display: none;
+    display: block;
     margin-left: 6px;
     margin-top: 1px;
     position: relative;
-
-    .env-js-capable & {
-      display: block;
-    }
-
-    .env-js-timeout & {
-      display: none;
-    }
   }
 
   .form-input__hint {
     @include typography.font-normal;
 
+    display: none;
     color: color.$grey-5;
     margin-top: -10px;
-
-    .env-js-capable & {
-      display: none;
-    }
-
-    .env-js-timeout & {
-      display: block;
-    }
   }
 
   // The actual <input> element for the field
@@ -172,9 +148,7 @@
   }
 
   .form-input__input.has-hint {
-    .env-js-capable & {
-      padding-top: $top-padding;
-    }
+    padding-top: $top-padding;
   }
 
   .form-input__input:hover {

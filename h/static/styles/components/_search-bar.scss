@@ -32,13 +32,7 @@
   // prevent the search input from being squashed
   min-width:30%;
 
-  .env-js-capable & {
-    visibility: hidden;
-  }
-
-  .env-js-timeout & {
-    visibility: visible;
-  }
+  visibility: hidden;
 }
 
 .search-bar__input:hover,

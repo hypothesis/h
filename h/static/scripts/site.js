@@ -22,11 +22,4 @@ const controllers = Object.assign(
   sharedControllers,
 );
 
-if (window.envFlags && window.envFlags.get('js-capable')) {
-  upgradeElements(document.body, controllers);
-  window.envFlags.ready();
-} else {
-  // Environment flags not initialized. The header script may have been missed
-  // in the page or may have failed to load.
-  console.warn('EnvironmentFlags not initialized. Skipping element upgrades');
-}
+upgradeElements(document.body, controllers);

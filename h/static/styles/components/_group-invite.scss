@@ -31,14 +31,7 @@
   right: 0;
   top: 5px;
   margin-right: 5px;
-
-  display: none;
-  .env-js-capable & {
-    display: block;
-  }
-  .env-js-timeout & {
-    display: none;
-  }
+  display: block;
 }
 
 .group-invite__clipboard-button:focus {

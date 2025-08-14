@@ -8,7 +8,7 @@
     border-bottom: 1px solid rgba(0,0,0,0.20);
     border-right: 1px solid rgba(0,0,0,0.20);
     content: "";
-    display: none;
+    display: block;
     height: 6px;
     left: 0;
     margin-left: auto;
@@ -17,14 +17,6 @@
     right: 0;
     transform: rotate($rotation);
     width: 6px;
-  }
-
-  .env-js-capable & {
-    display: block;
-  }
-
-  .env-js-timeout & {
-    display: none;
   }
 }
 
@@ -38,7 +30,7 @@
   border-radius: 2px;
   background-color: color.$grey-7;
   color: white;
-  display: none;
+  display: block;
   font-style: normal;
   padding-left: 5px;
   padding-right: 5px;
@@ -48,14 +40,6 @@
   left: calc(100% - 12px);
   width: 220px;
   z-index: layout.$zindex-tooltip;
-
-  .env-js-capable & {
-    display: block;
-  }
-
-  .env-js-timeout & {
-    display: none;
-  }
 }
 
 // Arrow at the bottom of the tooltip pointing down at the target element.

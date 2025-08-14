@@ -5,8 +5,6 @@ import { setElementState } from '../util/dom';
 
 /**
  * @typedef Options
- * @property {EnvironmentFlags} [envFlags] - Environment flags. Provided as a
- *           test seam.
  * @property {Function} [scrollTo] - A function that scrolls a given element
  *           into view. Provided as a test seam.
  */
@@ -46,10 +44,8 @@ export class SearchBucketController extends Controller {
       this.setState({ expanded: !this.state.expanded });
     });
 
-    const envFlags = this.options.envFlags || window.envFlags;
-
     this.setState({
-      expanded: !!envFlags.get('js-timeout'),
+      expanded: false,
     });
   }
 
