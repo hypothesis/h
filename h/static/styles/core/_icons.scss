@@ -32,6 +32,10 @@
 // ----------------------------------------------------------------------------
 
 .svg-icon {
+  // Tailwind sets SVG display to block level by default. This undoes that.
+  // See https://tailwindcss.com/docs/preflight#images-are-block-level.
+  display: inline;
+
   // This apparently no-op transform triggers snapping of the <svg> element to
   // the nearest pixel, resulting in sharper rendering of icons, assuming that
   // the icon itself has been pixel-fitted.
