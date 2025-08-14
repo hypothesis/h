@@ -77,24 +77,4 @@ describe('SearchBucketController', () => {
   it('collapses search results on initial load', () => {
     assert.isFalse(ctrl.state.expanded);
   });
-
-  context('when initial load times out', () => {
-    let scrollTo;
-
-    beforeEach(() => {
-      scrollTo = sinon.stub();
-      ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController, {
-        scrollTo: scrollTo,
-        envFlags: new FakeEnvFlags(['js-timeout']),
-      });
-    });
-
-    it('does not scroll page on initial load', () => {
-      assert.notCalled(scrollTo);
-    });
-
-    it('expands bucket on initial load', () => {
-      assert.isTrue(ctrl.state.expanded);
-    });
-  });
 });

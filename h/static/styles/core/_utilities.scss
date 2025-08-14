@@ -25,9 +25,7 @@
  *   }
  */
 @mixin js {
-  .env-js-capable:not(.env-js-timeout) {
-    @content;
-  }
+  @content;
 }
 
 // See http://compass-style.org/reference/compass/utilities/general/clearfix/#mixin-pie-clearfix

@@ -1,11 +1,7 @@
 // Header script which is included inline at the top of every page on the site.
 //
-// This should be a small script which does things like setting up flags to
-// indicate that scripting is active, send analytics events etc.
-import { EnvironmentFlags } from './base/environment-flags';
-
-window.envFlags = new EnvironmentFlags(document.documentElement);
-window.envFlags.init();
+// This should be a small script which does things like sending analytics
+// events.
 
 // See https://developers.google.com/analytics/devguides/migration/ua/analyticsjs-to-gtagjs
 const gaMeasurementId = document.querySelector(

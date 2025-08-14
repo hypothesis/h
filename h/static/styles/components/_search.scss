@@ -113,15 +113,11 @@
 
 // A group of search results
 .search-result-bucket {
-  background-color: color.$grey-2;
-  border-bottom: 1px solid color.$grey-3;
-
-  .env-js-capable & {
-    background-color: white;
-    &:hover, &.is-expanded {
-      background-color: color.$grey-2;
-    }
+  background-color: white;
+  &:hover, &.is-expanded {
+    background-color: color.$grey-2;
   }
+  border-bottom: 1px solid color.$grey-3;
 }
 
 .search-result-bucket__header {
@@ -213,13 +209,9 @@
 // expanded.
 .search-result-bucket__annotation-cards-container {
   padding-left: 130px;
-
-  display: flex;
-  .env-js-capable & {
-    display: none;
-    &.is-expanded {
-      display: flex;
-    }
+  display: none;
+  &.is-expanded {
+    display: flex;
   }
 }
 
