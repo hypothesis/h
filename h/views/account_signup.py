@@ -535,6 +535,9 @@ def is_authenticated(request):
     )
 
 
+IDINFO_RFP_SESSIONKEY_FMT = "idinfo.rfp.{audience}"
+
+
 def encode_idinfo_token(  # noqa: PLR0913
     jwt_service: JWTService,
     provider_unique_id: str,
@@ -547,9 +550,9 @@ def encode_idinfo_token(  # noqa: PLR0913
     next_url: str,
     session: ISession,
 ):
-    del session
-
     rfp = secrets.token_hex()
+
+    session[IDINFO_RFP_SESSIONKEY_FMT.format(audience=audience)] = rfp
 
     return {
         "idinfo": jwt_service.encode_symmetric(
