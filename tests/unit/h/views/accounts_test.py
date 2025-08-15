@@ -1408,6 +1408,27 @@ class TestDeleteController:
             "form": pyramid_request.create_form.return_value.render.return_value,
         }
 
+    def test_get_when_user_has_no_password(
+        self, authenticated_user, controller, pyramid_request, schemas, matchers
+    ):
+        authenticated_user.password = None
+
+        controller.get()
+
+        schemas.DeleteAccountSchemaNoPassword.assert_called_once_with()
+        schemas.DeleteAccountSchemaNoPassword.return_value.bind.assert_called_with(
+            request=pyramid_request
+        )
+        pyramid_request.create_form.assert_called_once_with(
+            schemas.DeleteAccountSchemaNoPassword.return_value.bind.return_value,
+            buttons=Any.iterable.comprised_of(matchers.InstanceOf(deform.Button)),
+            formid="delete",
+            back_link={
+                "href": "http://example.com/account/settings",
+                "text": matchers.InstanceOf(str),
+            },
+        )
+
     def test_get_when_user_has_no_annotations(self, controller, pyramid_request):
         template_vars = controller.get()
 
@@ -1443,6 +1464,27 @@ class TestDeleteController:
         )
         assert result == form.handle_form_submission.return_value
 
+    def test_post_when_user_has_no_password(
+        self, controller, pyramid_request, schemas, matchers, authenticated_user
+    ):
+        authenticated_user.password = None
+
+        controller.post()
+
+        schemas.DeleteAccountSchemaNoPassword.assert_called_once_with()
+        schemas.DeleteAccountSchemaNoPassword.return_value.bind.assert_called_with(
+            request=pyramid_request
+        )
+        pyramid_request.create_form.assert_called_once_with(
+            schemas.DeleteAccountSchemaNoPassword.return_value.bind.return_value,
+            buttons=Any.iterable.comprised_of(matchers.InstanceOf(deform.Button)),
+            formid="delete",
+            back_link={
+                "href": "http://example.com/account/settings",
+                "text": matchers.InstanceOf(str),
+            },
+        )
+
     def test_delete_user(
         self,
         authenticated_user,
@@ -1465,7 +1507,7 @@ class TestDeleteController:
 
     @pytest.fixture(autouse=True)
     def authenticated_user(self, factories, pyramid_config, pyramid_request):
-        authenticated_user = factories.User.build()
+        authenticated_user = factories.User.build(password="pass")  # noqa: S106
         pyramid_config.testing_securitypolicy(authenticated_user.userid)
         pyramid_request.user = authenticated_user
         return authenticated_user
