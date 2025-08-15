@@ -383,6 +383,7 @@ class TestOIDCRedirectViews:
             JWTIssuer.OIDC_REDIRECT_ORCID,
             JWTAudience.SIGNUP_ORCID,
             jwt_service.decode_symmetric.return_value.next_url,
+            pyramid_request.session,
         )
         assert isinstance(response, HTTPFound)
         assert response.location == pyramid_request.route_url(

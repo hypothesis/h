@@ -452,6 +452,7 @@ class OIDCRedirectViews:
                         self.settings.jwt_issuer,
                         self.settings.idinfo_jwtaudience,
                         next_url,
+                        self._request.session,
                     ),
                 )
             )
