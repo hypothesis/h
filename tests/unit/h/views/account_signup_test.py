@@ -869,6 +869,7 @@ def test_encode_idinfo_token(jwt_service, matchers):
         sentinel.issuer,
         sentinel.audience,
         sentinel.next_url,
+        sentinel.session,
     )
 
     jwt_service.encode_symmetric.assert_called_once_with(
