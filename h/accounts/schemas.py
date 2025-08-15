@@ -293,6 +293,22 @@ class DeleteAccountSchema(CSRFSchema):
             raise exc
 
 
+class DeleteAccountSchemaNoPassword(CSRFSchema):
+    username = colander.SchemaNode(
+        colander.String(), title=_("Confirm your username to delete your account")
+    )
+
+    def validator(self, node, value):
+        super().validator(node, value)
+
+        request = node.bindings["request"]
+
+        if value.get("username") != request.user.username:
+            exc = colander.Invalid(node)
+            exc["username"] = _("Wrong username.")
+            raise exc
+
+
 @colander.deferred
 def deferred_notification_widget(node, kw):  # noqa: ARG001
     types = [("reply", _("Email me when someone replies to one of my annotations."))]
