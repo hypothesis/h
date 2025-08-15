@@ -804,10 +804,19 @@ class DeveloperController:
 class DeleteController:
     def __init__(self, request):
         self.request = request
+        self._form = None
 
-        schema = schemas.DeleteAccountSchema().bind(request=self.request)
+    @property
+    def form(self):
+        if self._form:  # pragma: no cover
+            return self._form
 
-        self.form = self.request.create_form(
+        if self.request.user.password:
+            schema = schemas.DeleteAccountSchema().bind(request=self.request)
+        else:
+            schema = schemas.DeleteAccountSchemaNoPassword().bind(request=self.request)
+
+        self._form = self.request.create_form(
             schema,
             buttons=(deform.Button(_("Delete your account"), css_class="btn--danger"),),
             formid="delete",
@@ -816,6 +825,8 @@ class DeleteController:
                 "text": _("Back to safety"),
             },
         )
+
+        return self._form
 
     @view_config(request_method="GET")
     def get(self):
@@ -842,7 +853,9 @@ class DeleteController:
             location=self.request.route_url("account_deleted")
         )
 
-    def template_data(self):
+    def template_data(self, errors=None, items=None):
+        del errors, items
+
         def query(column):
             return (
                 select(column)
