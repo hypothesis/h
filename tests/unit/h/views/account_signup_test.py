@@ -890,7 +890,9 @@ def test_encode_idinfo_token(jwt_service, matchers, pyramid_request):
 
 
 def test_decode_idinfo_token_valid(jwt_service):
-    result = decode_idinfo_token(jwt_service, sentinel.idinfo_token, sentinel.audience)
+    result = decode_idinfo_token(
+        jwt_service, sentinel.idinfo_token, sentinel.audience, sentinel.session
+    )
 
     jwt_service.decode_symmetric.assert_called_once_with(
         sentinel.idinfo_token, audience=sentinel.audience, payload_class=IDInfo
@@ -902,7 +904,9 @@ def test_decode_idinfo_token_invalid(jwt_service):
     exception = jwt_service.decode_symmetric.side_effect = JWTDecodeError()
 
     with pytest.raises(IDInfoJWTDecodeError) as exc_info:
-        decode_idinfo_token(jwt_service, sentinel.idinfo_token, sentinel.audience)
+        decode_idinfo_token(
+            jwt_service, sentinel.idinfo_token, sentinel.audience, sentinel.session
+        )
 
     assert exc_info.value.__cause__ == exception
 

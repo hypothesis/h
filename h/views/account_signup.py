@@ -518,6 +518,7 @@ class SocialLoginSignupViews:
             self.jwt_service,
             self.request.params["idinfo"],
             audience=self.settings.audience,
+            session=self.request.session,
         )
 
 
@@ -576,7 +577,10 @@ def decode_idinfo_token(
     jwt_service: JWTService,
     idinfo_token: str,
     audience: JWTAudience,
+    session: ISession,
 ):
+    del session
+
     try:
         idinfo = jwt_service.decode_symmetric(
             idinfo_token,
