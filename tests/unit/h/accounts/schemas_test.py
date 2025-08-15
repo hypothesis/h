@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 import colander
 import pytest
+from pyramid.csrf import BadCSRFToken
 
 from h.accounts import schemas
 from h.models.user import USERNAME_MAX_LENGTH
@@ -559,6 +560,12 @@ class TestDeleteAccountSchema:
 
         assert exc_info.value.asdict() == {"password": "Required"}
 
+    def test_it_with_no_csrf_token(self, schema, pyramid_csrf_request):
+        del pyramid_csrf_request.headers["X-CSRF-Token"]
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({"password": "test_password"})
+
     @pytest.fixture
     def user(self, factories):
         return factories.User()
@@ -571,6 +578,37 @@ class TestDeleteAccountSchema:
     @pytest.fixture
     def schema(self, pyramid_csrf_request):
         return schemas.DeleteAccountSchema().bind(request=pyramid_csrf_request)
+
+
+class TestDeleteAccountSchemaNoPassword:
+    def test_valid(self, schema, user):
+        schema.deserialize({"username": user.username})
+
+    @pytest.mark.parametrize("params", [{"username": "wrong"}, {}])
+    def test_invalid(self, schema, params):
+        with pytest.raises(colander.Invalid):
+            schema.deserialize(params)
+
+    def test_it_with_no_csrf_token(self, schema, user, pyramid_csrf_request):
+        del pyramid_csrf_request.headers["X-CSRF-Token"]
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({"username": user.username})
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User()
+
+    @pytest.fixture
+    def pyramid_csrf_request(self, pyramid_csrf_request, user):
+        pyramid_csrf_request.user = user
+        return pyramid_csrf_request
+
+    @pytest.fixture
+    def schema(self, pyramid_csrf_request):
+        return schemas.DeleteAccountSchemaNoPassword().bind(
+            request=pyramid_csrf_request
+        )
 
 
 @pytest.mark.usefixtures("feature_service")
