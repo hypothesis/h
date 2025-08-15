@@ -1,3 +1,4 @@
+import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -162,6 +163,13 @@ class IDInfo:
 
     sub: str
     """The user's unique ID from the third-party provider."""
+
+    rfp: str
+    """A Request Forgery Protection (RFP) token to protect against CSRF attacks.
+
+    The claim name "rfp" is compatible with
+    https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09
+    """
 
     next_url: str | None = None
     """The URL to redirect to after successfully logging in."""
@@ -350,9 +358,11 @@ def encode_idinfo_token(
     audience: JWTAudience,
     next_url: str,
 ):
+    rfp = secrets.token_hex()
+
     return {
         "idinfo": jwt_service.encode_symmetric(
-            IDInfo(provider_unique_id, next_url=next_url),
+            IDInfo(provider_unique_id, rfp, next_url=next_url),
             expires_in=timedelta(hours=1),
             issuer=issuer,
             audience=audience,
