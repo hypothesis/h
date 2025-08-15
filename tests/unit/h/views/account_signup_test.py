@@ -740,14 +740,14 @@ def test_is_authenticated(matchers, pyramid_request, authenticated_user):
     )
 
 
-def test_encode_idinfo_token(jwt_service, matchers):
+def test_encode_idinfo_token(jwt_service, matchers, pyramid_request):
     token = encode_idinfo_token(
         jwt_service,
         sentinel.provider_unique_id,
         sentinel.issuer,
         sentinel.audience,
         sentinel.next_url,
-        sentinel.session,
+        pyramid_request.session,
     )
 
     jwt_service.encode_symmetric.assert_called_once_with(
