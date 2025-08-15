@@ -8,6 +8,7 @@ from deform import ValidationFailure
 from h_pyramid_sentry import report_exception
 from pyramid.csrf import get_csrf_token
 from pyramid.httpexceptions import HTTPFound
+from pyramid.interfaces import ISession
 from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
@@ -351,13 +352,16 @@ def is_authenticated(request):
     )
 
 
-def encode_idinfo_token(
+def encode_idinfo_token(  # noqa: PLR0913
     jwt_service: JWTService,
     provider_unique_id: str,
     issuer: JWTIssuer,
     audience: JWTAudience,
     next_url: str,
+    session: ISession,
 ):
+    del session
+
     rfp = secrets.token_hex()
 
     return {
