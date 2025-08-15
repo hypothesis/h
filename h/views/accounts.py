@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urlunparse
 import colander
 import deform
 from markupsafe import Markup
-from pyramid import httpexceptions, security
+from pyramid import httpexceptions
 from pyramid.config import not_
 from pyramid.csrf import get_csrf_token
 from pyramid.exceptions import BadCSRFToken
@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 
 from h import accounts, form, i18n, models, session
 from h.accounts import schemas
-from h.accounts.events import ActivationEvent, LogoutEvent, PasswordResetEvent
+from h.accounts.events import ActivationEvent, PasswordResetEvent
 from h.emails import reset_password
 from h.models import Annotation, UserIdentity
 from h.models.user_identity import IdentityProvider
@@ -30,7 +30,7 @@ from h.services.email import TaskData
 from h.tasks import email
 from h.util.view import json_view
 from h.views.account_signup import inject_login_urls
-from h.views.helpers import login
+from h.views.helpers import login, logout
 
 _ = i18n.TranslationString
 
@@ -178,7 +178,7 @@ class AuthController:
     @view_config(route_name="logout", renderer=None, request_method="GET")
     def logout(self):
         """Log the user out."""
-        headers = self._logout()
+        headers = logout(self.request)
         return httpexceptions.HTTPFound(location=self.logout_redirect, headers=headers)
 
     def _redirect_if_logged_in(self):
@@ -187,13 +187,6 @@ class AuthController:
 
     def _login_redirect(self):
         return self.request.params.get("next", _login_redirect_url(self.request))
-
-    def _logout(self):
-        if self.request.authenticated_userid is not None:
-            self.request.registry.notify(LogoutEvent(self.request))
-            self.request.session.invalidate()
-        headers = security.forget(self.request)
-        return headers
 
 
 @view_defaults(
@@ -544,6 +537,7 @@ class AccountController:
                 if identity:
                     provider_config["connected"] = True
                     provider_config["provider_unique_id"] = identity.provider_unique_id
+                    provider_config["email"] = identity.email
                 else:
                     provider_config["connected"] = False
 

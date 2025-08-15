@@ -65,17 +65,21 @@ class OIDCService:
         self._user_service = user_service
         self._jwt_service = jwt_service
 
-    def get_provider_unique_id(
+    def get_decoded_idtoken(
         self, provider: IdentityProvider, authorization_code: str
-    ) -> str:
-        """Return the provider unique ID associated with `authorization_code`.
+    ) -> dict:
+        """Fetch an ID token and return the decoded and verified payload.
+
+        Fetch an ID token for the user associated with the given `provider` and
+        `authorization_code`, decode and verify the token, and return the
+        decoded payload.
 
         This happens during the OIDC authorization flow after the user
         authorizes us to access their account with the provider and the
         provider redirects the browser to us with an authorization_code. This
         method makes a server-to-server request to the provider's authorization
-        server to exchange the given authorization_code for provider's unique
-        ID for the user.
+        server to exchange the given authorization_code for an ID token
+        representing the user's account with the provider.
         """
         settings = self._settings[provider]
 
@@ -91,21 +95,36 @@ class OIDCService:
 
         id_token = OIDCTokenResponseSchema().validate(token_response.json())["id_token"]
 
-        decoded_id_token = self._jwt_service.decode_oidc_idtoken(
+        decoded_idtoken = self._jwt_service.decode_oidc_idtoken(
             id_token, settings.keyset_url
         )
 
         try:
-            return decoded_id_token["sub"]
+            decoded_idtoken["sub"]
         except KeyError as err:
             raise MissingSubError from err
 
-    def add_identity(
-        self, user: User, provider: IdentityProvider, provider_unique_id: str
+        return decoded_idtoken
+
+    def add_identity(  # noqa: PLR0913
+        self,
+        user: User,
+        provider: IdentityProvider,
+        provider_unique_id: str,
+        email: str | None = None,
+        name: str | None = None,
+        given_name: str | None = None,
+        family_name: str | None = None,
     ) -> None:
         self._db.add(
             UserIdentity(
-                user=user, provider=provider, provider_unique_id=provider_unique_id
+                user=user,
+                provider=provider,
+                provider_unique_id=provider_unique_id,
+                email=email,
+                name=name,
+                given_name=given_name,
+                family_name=family_name,
             )
         )
 

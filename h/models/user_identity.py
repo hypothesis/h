@@ -18,6 +18,13 @@ class UserIdentity(Base):
     id = sa.Column(sa.Integer(), autoincrement=True, primary_key=True)
     provider = sa.Column(sa.UnicodeText(), nullable=False)
     provider_unique_id = sa.Column(sa.UnicodeText(), nullable=False)
+
+    email = sa.Column(sa.UnicodeText())
+
+    name = sa.Column(sa.UnicodeText())
+    given_name = sa.Column(sa.UnicodeText())
+    family_name = sa.Column(sa.UnicodeText())
+
     user_id = sa.Column(
         sa.Integer(), sa.ForeignKey("user.id", ondelete="cascade"), nullable=False
     )

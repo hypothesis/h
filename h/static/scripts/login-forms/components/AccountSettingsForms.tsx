@@ -145,6 +145,7 @@ function ConnectAccountButton({
   const providerConfig = config.context.identities?.[provider];
   const connected = providerConfig?.connected;
   const providerUniqueID = providerConfig?.provider_unique_id;
+  const email = providerConfig?.email;
   const providerURL = providerConfig?.url;
   const connectURL = config.routes?.[`oidc.connect.${provider}`];
   const Icon = {
@@ -184,7 +185,7 @@ function ConnectAccountButton({
               href={providerURL}
               data-testid={`connect-account-link-${provider}`}
             >
-              {providerUniqueID}
+              {email || providerUniqueID}
             </a>
           </span>
           <Form
