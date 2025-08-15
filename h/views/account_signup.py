@@ -505,16 +505,11 @@ class SocialLoginSignupViews:
         }
 
     def decode_idinfo(self):
-        try:
-            idinfo = self.jwt_service.decode_symmetric(
-                self.request.params["idinfo"],
-                audience=self.settings.audience,
-                payload_class=IDInfo,
-            )
-        except JWTDecodeError as err:
-            raise IDInfoJWTDecodeError from err
-
-        return idinfo
+        return decode_idinfo_token(
+            self.jwt_service,
+            self.request.params["idinfo"],
+            audience=self.settings.audience,
+        )
 
 
 # It's possible to try to sign up while already logged in. For example: start
@@ -557,6 +552,23 @@ def encode_idinfo_token(  # noqa: PLR0913
             audience=audience,
         ),
     }
+
+
+def decode_idinfo_token(
+    jwt_service: JWTService,
+    idinfo_token: str,
+    audience: JWTAudience,
+):
+    try:
+        idinfo = jwt_service.decode_symmetric(
+            idinfo_token,
+            audience=audience,
+            payload_class=IDInfo,
+        )
+    except JWTDecodeError as err:
+        raise IDInfoJWTDecodeError from err
+
+    return idinfo
 
 
 def redirect_url(request, user, url):

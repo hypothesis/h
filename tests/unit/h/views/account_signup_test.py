@@ -19,6 +19,7 @@ from h.views.account_signup import (
     IDInfoJWTDecodeError,
     SignupViews,
     SocialLoginSignupViews,
+    decode_idinfo_token,
     encode_idinfo_token,
     is_authenticated,
 )
@@ -884,6 +885,24 @@ def test_encode_idinfo_token(jwt_service):
         audience=sentinel.audience,
     )
     assert token == {"idinfo": jwt_service.encode_symmetric.return_value}
+
+
+def test_decode_idinfo_token_valid(jwt_service):
+    result = decode_idinfo_token(jwt_service, sentinel.idinfo_token, sentinel.audience)
+
+    jwt_service.decode_symmetric.assert_called_once_with(
+        sentinel.idinfo_token, audience=sentinel.audience, payload_class=IDInfo
+    )
+    assert result == jwt_service.decode_symmetric.return_value
+
+
+def test_decode_idinfo_token_invalid(jwt_service):
+    exception = jwt_service.decode_symmetric.side_effect = JWTDecodeError()
+
+    with pytest.raises(IDInfoJWTDecodeError) as exc_info:
+        decode_idinfo_token(jwt_service, sentinel.idinfo_token, sentinel.audience)
+
+    assert exc_info.value.__cause__ == exception
 
 
 @pytest.fixture(autouse=True)
