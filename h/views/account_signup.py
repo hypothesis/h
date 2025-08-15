@@ -1,3 +1,4 @@
+import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -7,6 +8,7 @@ from deform import ValidationFailure
 from h_pyramid_sentry import report_exception
 from pyramid.csrf import get_csrf_token
 from pyramid.httpexceptions import HTTPFound
+from pyramid.interfaces import ISession
 from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
@@ -162,6 +164,13 @@ class IDInfo:
 
     sub: str
     """The user's unique ID from the third-party provider."""
+
+    rfp: str
+    """A Request Forgery Protection (RFP) token to protect against CSRF attacks.
+
+    The claim name "rfp" is compatible with
+    https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09
+    """
 
     next_url: str | None = None
     """The URL to redirect to after successfully logging in."""
@@ -322,16 +331,12 @@ class SocialLoginSignupViews:
         }
 
     def decode_idinfo(self):
-        try:
-            idinfo = self.jwt_service.decode_symmetric(
-                self.request.params["idinfo"],
-                audience=self.settings.audience,
-                payload_class=IDInfo,
-            )
-        except JWTDecodeError as err:
-            raise IDInfoJWTDecodeError from err
-
-        return idinfo
+        return decode_idinfo_token(
+            self.jwt_service,
+            self.request.params["idinfo"],
+            audience=self.settings.audience,
+            session=self.request.session,
+        )
 
 
 # It's possible to try to sign up while already logged in. For example: start
@@ -348,21 +353,55 @@ def is_authenticated(request):
     )
 
 
-def encode_idinfo_token(
+IDINFO_RFP_SESSIONKEY_FMT = "idinfo.rfp.{audience}"
+
+
+def encode_idinfo_token(  # noqa: PLR0913
     jwt_service: JWTService,
     provider_unique_id: str,
     issuer: JWTIssuer,
     audience: JWTAudience,
     next_url: str,
+    session: ISession,
 ):
+    rfp = secrets.token_hex()
+
+    session[IDINFO_RFP_SESSIONKEY_FMT.format(audience=audience)] = rfp
+
     return {
         "idinfo": jwt_service.encode_symmetric(
-            IDInfo(provider_unique_id, next_url=next_url),
+            IDInfo(provider_unique_id, rfp, next_url=next_url),
             expires_in=timedelta(hours=1),
             issuer=issuer,
             audience=audience,
         ),
     }
+
+
+def decode_idinfo_token(
+    jwt_service: JWTService,
+    idinfo_token: str,
+    audience: JWTAudience,
+    session: ISession,
+):
+    try:
+        expected_rfp = session[IDINFO_RFP_SESSIONKEY_FMT.format(audience=audience)]
+    except KeyError as err:
+        raise IDInfoJWTDecodeError from err
+
+    try:
+        idinfo = jwt_service.decode_symmetric(
+            idinfo_token,
+            audience=audience,
+            payload_class=IDInfo,
+        )
+    except JWTDecodeError as err:
+        raise IDInfoJWTDecodeError from err
+
+    if idinfo.rfp != expected_rfp:
+        raise IDInfoJWTDecodeError
+
+    return idinfo
 
 
 def redirect_url(request, user, url):
