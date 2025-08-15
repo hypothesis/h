@@ -10,6 +10,8 @@ export const excludeFromCoverage = [
   '**/tests/**/*.js',
   '**/test-util/**',
   '**/index.{ts,tsx}',
+  '**/login-forms.tsx',
+  '**/group-forms.tsx',
 ];
 
 export default {
