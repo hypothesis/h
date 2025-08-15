@@ -8,6 +8,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from h import i18n
 from h.models.user_identity import IdentityProvider
+from h.services.exceptions import ConflictError
 from h.services.jwt import JWTAudience, JWTDecodeError
 from h.services.user_signup import (
     EmailConflictError,
@@ -15,6 +16,7 @@ from h.services.user_signup import (
     UsernameConflictError,
 )
 from h.views.account_signup import (
+    IDINFO_RFP_SESSIONKEY_FMT,
     IDInfo,
     IDInfoJWTDecodeError,
     SignupViews,
@@ -814,6 +816,9 @@ class TestSocialLoginSignupViews:
     def pyramid_request(self, pyramid_request):
         pyramid_request.params["idinfo"] = sentinel.idinfo
         pyramid_request.matched_route.name = "signup.orcid"
+        pyramid_request.session[
+            IDINFO_RFP_SESSIONKEY_FMT.format(audience=JWTAudience.SIGNUP_ORCID)
+        ] = sentinel.rfp
         return pyramid_request
 
     @pytest.fixture
@@ -887,28 +892,80 @@ def test_encode_idinfo_token(jwt_service, matchers, pyramid_request):
         audience=sentinel.audience,
     )
     assert token == {"idinfo": jwt_service.encode_symmetric.return_value}
+    assert f"idinfo.rfp.{sentinel.audience}" in pyramid_request.session
 
 
-def test_decode_idinfo_token_valid(jwt_service):
-    result = decode_idinfo_token(
-        jwt_service, sentinel.idinfo_token, sentinel.audience, sentinel.session
-    )
-
-    jwt_service.decode_symmetric.assert_called_once_with(
-        sentinel.idinfo_token, audience=sentinel.audience, payload_class=IDInfo
-    )
-    assert result == jwt_service.decode_symmetric.return_value
-
-
-def test_decode_idinfo_token_invalid(jwt_service):
-    exception = jwt_service.decode_symmetric.side_effect = JWTDecodeError()
-
-    with pytest.raises(IDInfoJWTDecodeError) as exc_info:
-        decode_idinfo_token(
-            jwt_service, sentinel.idinfo_token, sentinel.audience, sentinel.session
+class TestDecodeIDInfoToken:
+    def test_with_valid_jwt(self, jwt_service, pyramid_request):
+        result = decode_idinfo_token(
+            jwt_service,
+            sentinel.idinfo_token,
+            sentinel.audience,
+            pyramid_request.session,
         )
 
-    assert exc_info.value.__cause__ == exception
+        jwt_service.decode_symmetric.assert_called_once_with(
+            sentinel.idinfo_token, audience=sentinel.audience, payload_class=IDInfo
+        )
+        assert result == jwt_service.decode_symmetric.return_value
+
+    def test_with_no_rfp(self, jwt_service, pyramid_request, matchers):
+        del pyramid_request.session[
+            IDINFO_RFP_SESSIONKEY_FMT.format(audience=sentinel.audience)
+        ]
+
+        with pytest.raises(IDInfoJWTDecodeError) as exc_info:
+            decode_idinfo_token(
+                jwt_service,
+                sentinel.idinfo_token,
+                sentinel.audience,
+                pyramid_request.session,
+            )
+
+        assert (
+            matchers.InstanceOf(KeyError, args=(f"idinfo.rfp.{sentinel.audience}",))
+            == exc_info.value.__cause__
+        )
+
+    def test_with_invalid_rfp(self, jwt_service, pyramid_request):
+        pyramid_request.session[
+            IDINFO_RFP_SESSIONKEY_FMT.format(audience=sentinel.audience)
+        ] = "invalid"
+
+        with pytest.raises(IDInfoJWTDecodeError) as exc_info:
+            decode_idinfo_token(
+                jwt_service,
+                sentinel.idinfo_token,
+                sentinel.audience,
+                pyramid_request.session,
+            )
+
+        assert not exc_info.value.__cause__
+
+    def test_with_invalid_jwt(self, jwt_service, pyramid_request):
+        exception = jwt_service.decode_symmetric.side_effect = JWTDecodeError()
+
+        with pytest.raises(IDInfoJWTDecodeError) as exc_info:
+            decode_idinfo_token(
+                jwt_service,
+                sentinel.idinfo_token,
+                sentinel.audience,
+                pyramid_request.session,
+            )
+
+        assert exc_info.value.__cause__ == exception
+
+    @pytest.fixture(autouse=True)
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.session[
+            IDINFO_RFP_SESSIONKEY_FMT.format(audience=sentinel.audience)
+        ] = sentinel.rfp
+        return pyramid_request
+
+    @pytest.fixture(autouse=True)
+    def jwt_service(self, jwt_service):
+        jwt_service.decode_symmetric.return_value = IDInfo(sentinel.sub, sentinel.rfp)
+        return jwt_service
 
 
 @pytest.fixture(autouse=True)

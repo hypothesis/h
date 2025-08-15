@@ -579,7 +579,10 @@ def decode_idinfo_token(
     audience: JWTAudience,
     session: ISession,
 ):
-    del session
+    try:
+        expected_rfp = session[IDINFO_RFP_SESSIONKEY_FMT.format(audience=audience)]
+    except KeyError as err:
+        raise IDInfoJWTDecodeError from err
 
     try:
         idinfo = jwt_service.decode_symmetric(
@@ -589,6 +592,9 @@ def decode_idinfo_token(
         )
     except JWTDecodeError as err:
         raise IDInfoJWTDecodeError from err
+
+    if idinfo.rfp != expected_rfp:
+        raise IDInfoJWTDecodeError
 
     return idinfo
 
