@@ -64,9 +64,9 @@ export default [
   // Public-facing website
   bundleConfig('site', 'h/static/scripts/site.js'),
   // Preact app for creating new private groups.
-  bundleConfig('group-forms', 'h/static/scripts/group-forms/index.tsx'),
+  bundleConfig('group-forms', 'h/static/scripts/group-forms.tsx'),
   // Preact app for the login pages.
-  bundleConfig('login-forms', 'h/static/scripts/login-forms/index.tsx'),
+  bundleConfig('login-forms', 'h/static/scripts/login-forms.tsx'),
   // Admin areas of the site
   bundleConfig('admin-site', 'h/static/scripts/admin-site.js'),
   // Header script inserted inline at the top of the page
