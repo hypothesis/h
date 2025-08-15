@@ -25,7 +25,10 @@ type IdProviderBadgeProps = {
  */
 function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
   return (
-    <div data-testid="id-badge">
+    <div
+      data-testid="id-badge"
+      className="border rounded-md p-3 flex flex-row items-center gap-x-3 max-w-[400px] mx-auto"
+    >
       {provider === 'facebook' && (
         <FacebookIcon className="inline" aria-label="Facebook icon" />
       )}
@@ -37,7 +40,7 @@ function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
           <ORCIDIcon className="inline" aria-label="ORCID icon" />
         </a>
       )}{' '}
-      connected: <b data-testid="connected-id">{identity}</b>
+      Connected: <b data-testid="connected-id">{identity}</b>
     </div>
   );
 }
