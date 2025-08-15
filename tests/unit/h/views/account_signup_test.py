@@ -840,7 +840,7 @@ class TestSocialLoginSignupViews:
 
     @pytest.fixture
     def idinfo(self, orcid_id):
-        return IDInfo(orcid_id)
+        return IDInfo(orcid_id, sentinel.rfp)
 
     @pytest.fixture
     def jwt_service(self, jwt_service, idinfo):
@@ -858,7 +858,7 @@ def test_is_authenticated(matchers, pyramid_request, authenticated_user):
     )
 
 
-def test_encode_idinfo_token(jwt_service):
+def test_encode_idinfo_token(jwt_service, matchers):
     token = encode_idinfo_token(
         jwt_service,
         sentinel.provider_unique_id,
@@ -874,6 +874,7 @@ def test_encode_idinfo_token(jwt_service):
     jwt_service.encode_symmetric.assert_called_once_with(
         IDInfo(
             sentinel.provider_unique_id,
+            matchers.InstanceOf(str),
             sentinel.email,
             sentinel.name,
             sentinel.given_name,
