@@ -452,6 +452,7 @@ class TestIDInfo:
     def test_display_name(self, name, given_name, family_name, display_name):
         idinfo = IDInfo(
             sub=sentinel.sub,
+            rfp=sentinel.rfp,
             name=name,
             given_name=given_name,
             family_name=family_name,
@@ -472,6 +473,7 @@ class TestSocialLoginSignupViews:
         orcid_id,
         feature_service,
         jwt_service,
+        idinfo,
     ):
         feature_service.enabled.side_effect = [
             sentinel.orcid_enabled,
@@ -482,9 +484,7 @@ class TestSocialLoginSignupViews:
         response = views.get()
 
         jwt_service.decode_symmetric.assert_called_once_with(
-            sentinel.idinfo,
-            audience=JWTAudience.SIGNUP_ORCID,
-            payload_class=IDInfo,
+            idinfo, audience=JWTAudience.SIGNUP_ORCID, payload_class=IDInfo
         )
         get_csrf_token.assert_called_once_with(pyramid_request)
         assert feature_service.enabled.call_args_list == [
@@ -649,17 +649,28 @@ class TestSocialLoginSignupViews:
             getattr(views, view_method)()
 
     @pytest.mark.parametrize(
-        "route_name,provider",
+        "route_name,provider,audience",
         [
-            ("signup.orcid", "ORCID"),
-            ("signup.google", "Google"),
-            ("signup.facebook", "Facebook"),
+            ("signup.orcid", "ORCID", JWTAudience.SIGNUP_ORCID),
+            ("signup.google", "Google", JWTAudience.SIGNUP_GOOGLE),
+            ("signup.facebook", "Facebook", JWTAudience.SIGNUP_FACEBOOK),
         ],
     )
     def test_email_conflict_error(
-        self, views, route_name, provider, pyramid_request, matchers, idinfo, logout
+        self,
+        views,
+        route_name,
+        provider,
+        pyramid_request,
+        matchers,
+        idinfo,
+        logout,
+        audience,
     ):
         pyramid_request.matched_route.name = route_name
+        pyramid_request.session[IDINFO_RFP_SESSIONKEY_FMT.format(audience=audience)] = (
+            idinfo.rfp
+        )
         idinfo.email = sentinel.email
 
         response = views.email_conflict_error()
@@ -812,12 +823,16 @@ class TestSocialLoginSignupViews:
         return "test_orcid_id"
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.params["idinfo"] = sentinel.idinfo
+    def idinfo(self, orcid_id):
+        return IDInfo(orcid_id, sentinel.rfp)
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, idinfo):
+        pyramid_request.params["idinfo"] = idinfo
         pyramid_request.matched_route.name = "signup.orcid"
         pyramid_request.session[
             IDINFO_RFP_SESSIONKEY_FMT.format(audience=JWTAudience.SIGNUP_ORCID)
-        ] = sentinel.rfp
+        ] = idinfo.rfp
         return pyramid_request
 
     @pytest.fixture
@@ -841,10 +856,6 @@ class TestSocialLoginSignupViews:
     @pytest.fixture
     def views(self, pyramid_request):
         return SocialLoginSignupViews(sentinel.context, pyramid_request)
-
-    @pytest.fixture
-    def idinfo(self, orcid_id):
-        return IDInfo(orcid_id, sentinel.rfp)
 
     @pytest.fixture
     def jwt_service(self, jwt_service, idinfo):
