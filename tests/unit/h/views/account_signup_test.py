@@ -8,7 +8,6 @@ from pyramid.httpexceptions import HTTPFound
 
 from h import i18n
 from h.models.user_identity import IdentityProvider
-from h.services.exceptions import ConflictError
 from h.services.jwt import JWTAudience, JWTDecodeError
 from h.services.user_signup import (
     EmailConflictError,
