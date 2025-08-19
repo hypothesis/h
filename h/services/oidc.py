@@ -106,25 +106,12 @@ class OIDCService:
 
         return decoded_idtoken
 
-    def add_identity(  # noqa: PLR0913
-        self,
-        user: User,
-        provider: IdentityProvider,
-        provider_unique_id: str,
-        email: str | None = None,
-        name: str | None = None,
-        given_name: str | None = None,
-        family_name: str | None = None,
+    def add_identity(
+        self, user: User, provider: IdentityProvider, provider_unique_id: str
     ) -> None:
         self._db.add(
             UserIdentity(
-                user=user,
-                provider=provider,
-                provider_unique_id=provider_unique_id,
-                email=email,
-                name=name,
-                given_name=given_name,
-                family_name=family_name,
+                user=user, provider=provider, provider_unique_id=provider_unique_id
             )
         )
 

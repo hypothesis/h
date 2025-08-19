@@ -2,15 +2,11 @@ import datetime
 from unittest.mock import call, create_autospec, sentinel
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from h.models import Activation, User
-from h.services.user_signup import (
-    EmailConflictError,
-    IdentityConflictError,
-    UsernameConflictError,
-    UserSignupService,
-    user_signup_service_factory,
-)
+from h.services.exceptions import ConflictError
+from h.services.user_signup import UserSignupService, user_signup_service_factory
 from h.tasks import email
 
 
@@ -79,6 +75,17 @@ class TestUserSignupService:
 
         assert len(user.identities) == 2
 
+    def test_signup_raises_with_invalid_identities(self, svc):
+        dupe_identity = {"provider": "a", "provider_unique_id": 1}
+        with pytest.raises(
+            IntegrityError, match="violates unique constraint.*identity"
+        ):
+            svc.signup(
+                username="foo",
+                email="foo@bar.com",
+                identities=[dupe_identity, dupe_identity],
+            )
+
     def test_signup_sets_password_using_password_service(
         self, svc, user_password_service
     ):
@@ -125,140 +132,44 @@ class TestUserSignupService:
         )
         assert subscription.active
 
+    def test_signup_logs_conflict_error_when_account_with_email_already_exists(
+        self, svc, patch
+    ):
+        log = patch("h.services.user_signup.log")
+
+        with pytest.raises(ConflictError):  # noqa: PT012
+            svc.signup(username="foo", email="foo@bar.com")
+            svc.signup(username="foo", email="foo@bar.com")
+
+        assert (
+            "concurrent account signup conflict error occurred during user signup"
+            in log.warning.call_args[0][0]
+        )
+
     @pytest.mark.parametrize(
-        "first_account,second_account,exception_class",
+        "username,email",
         [
-            pytest.param(
-                {"username": "foo"},
-                {"username": "foo"},
-                UsernameConflictError,
-                id="conflicting_username",
-            ),
-            pytest.param(
-                {"username": "foo", "email": "foo@foo.com"},
-                {"username": "bar", "email": "foo@foo.com"},
-                EmailConflictError,
-                id="conflicting_email",
-            ),
-            pytest.param(
-                {"username": "foo", "email": "foo@foo.com"},
-                {"username": "foo", "email": "foo@foo.com"},
-                # If both the username and the email address conflict the DB
-                # seems to complain about the email address only.
-                EmailConflictError,
-                id="conflicting_username_and_email",
-            ),
-            pytest.param(
-                {
-                    "username": "foo",
-                    "email": "foo@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                {
-                    "username": "bar",
-                    "email": "bar@bar.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                IdentityConflictError,
-                id="conflicting_identity",
-            ),
-            pytest.param(
-                {
-                    "username": "foo",
-                    "email": "foo@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                {
-                    "username": "foo",
-                    "email": "foo2@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                # If both the username and the identity are in conflict the DB
-                # seems to complain about the username only.
-                UsernameConflictError,
-                id="conflicting_username_and_identity",
-            ),
-            pytest.param(
-                {
-                    "username": "foo",
-                    "email": "foo@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                {
-                    "username": "bar",
-                    "email": "foo@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                # If both the email and the identity are in conflict the DB
-                # seems to complain about the email only.
-                EmailConflictError,
-                id="conflicting_email_and_identity",
-            ),
-            pytest.param(
-                {
-                    "username": "foo",
-                    "email": "foo@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                {
-                    "username": "foo",
-                    "email": "foo@foo.com",
-                    "identities": [
-                        {
-                            "provider": "google.com",
-                            "provider_unique_id": "123",
-                        }
-                    ],
-                },
-                # If all three of the username, email and identity are in
-                # conflict the DB seems to complain about the email only.
-                EmailConflictError,
-                id="conflicting_username_and_email_and_identity",
-            ),
+            # In the real world these values would be identical to the first signup but
+            # since we need to force one to error before the other, only the email or
+            # only the username matches. Assume that when one of these happens it means
+            # the user issued identical signup requests concurrently.
+            # Catches Integrity error on identical email.
+            ("bar", "foo@bar.com"),
+            # Catches Integrity error on identical username.
+            ("foo", "foo1@bar.com"),
         ],
     )
-    def test_signup_conflicts(
-        self, svc, first_account, second_account, exception_class
+    def test_signup_raises_conflict_error_when_account_already_exists(
+        self, svc, username, email
     ):
-        svc.signup(**first_account)
-
-        with pytest.raises(exception_class):
-            svc.signup(**second_account)
+        # This happens when two or more identical
+        # concurrent signup requests race each other to the db.
+        with pytest.raises(  # noqa: PT012
+            ConflictError,
+            match=f"The email address {email} has already been registered.",
+        ):
+            svc.signup(username="foo", email="foo@bar.com")
+            svc.signup(username=username, email=email)
 
     @pytest.fixture
     def svc(self, pyramid_request, user_password_service, subscription_service):

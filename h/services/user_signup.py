@@ -8,22 +8,11 @@ from h.emails import signup
 from h.models import Activation, User, UserIdentity
 from h.services import SubscriptionService
 from h.services.email import EmailTag, TaskData
+from h.services.exceptions import ConflictError
 from h.services.user_password import UserPasswordService
 from h.tasks import email
 
 log = logging.getLogger(__name__)
-
-
-class UsernameConflictError(Exception):
-    """Signup failed because the username is already taken."""
-
-
-class EmailConflictError(Exception):
-    """Signup failed because the email address is already taken."""
-
-
-class IdentityConflictError(Exception):
-    """Signup failed because the identity is already taken."""
 
 
 class UserSignupService:
@@ -83,66 +72,38 @@ class UserSignupService:
                 user=user,
                 provider=i_args["provider"],
                 provider_unique_id=str(i_args["provider_unique_id"]),
-                email=i_args.get("email"),
-                name=i_args.get("name"),
-                given_name=i_args.get("given_name"),
-                family_name=i_args.get("family_name"),
             )
             for i_args in identities
         ]
 
         self.session.add(user)
-        try:
-            self.session.flush()
-        except IntegrityError as err:
-            # Concurrent, conflicting signup requests can all pass validation
-            # (each request finding that no matching user exists in the DB)
-            # and go on to try to insert conflicting users. When this happens
-            # one of the requests successfully inserts a user and the others
-            # fail here with an IntegrityError.
-            #
-            # Raise different exceptions depending on which column was in
-            # conflict because this is of interest to exception handlers in the
-            # calling code.
-            #
-            # But note that if this code raises an exception about one column
-            # being in conflict that doesn't mean that other columns were not
-            # *also* in conflict: two requests can try to insert users with the
-            # same email address, username *and* identity.
-            #
-            # As soon as the first integrity check fails Postgres raises an
-            # error. It doesn't continue to process other constraints to see
-            # what other checks would have also failed.
-            if (
-                'duplicate key value violates unique constraint "uq__user__email"'
-                in err.args[0]
-            ):
-                raise EmailConflictError from err
-
-            if (
-                'duplicate key value violates unique constraint "ix__user__userid"'
-                in err.args[0]
-            ):
-                raise UsernameConflictError from err
-
-            if (
-                'duplicate key value violates unique constraint "uq__user_identity__provider"'
-                in err.args[0]
-            ):
-                raise IdentityConflictError from err
-
-            # We should never get here: AFAIK no other types of IntegrityError
-            # are possible here.
-            # This `raise` is just here so that if an unexpected IntegrityError
-            # somehow does happen we don't silence it.
-            raise  # pragma: no cover
 
         if password is not None:
             self.password_service.update_password(user, password)
 
         # Create a new activation for the user
         if require_activation:
-            self._require_activation(user)
+            try:
+                self._require_activation(user)
+            except IntegrityError as err:
+                # When identical signup requests get issued at nearly the same time, they
+                # race each other to the database and result in unique contraint integrity
+                # errors on the user's email or username within the authority.
+                if (
+                    'duplicate key value violates unique constraint "uq__user__email"'
+                    in err.args[0]
+                    or 'duplicate key value violates unique constraint "ix__user__userid"'
+                    in err.args[0]
+                ):
+                    log.warning(
+                        "concurrent account signup conflict error occurred during user signup %s",
+                        err.args[0],
+                    )
+                    raise ConflictError(  # noqa: TRY003
+                        f"The email address {user.email} has already been registered."  # noqa: EM102
+                    ) from err
+                # If the exception is not related to the email or username, re-raise it.
+                raise
 
         # FIXME: this is horrible, but is needed until the  # noqa: FIX001, TD001, TD002, TD003
         # notification/subscription system is made opt-out rather than opt-in

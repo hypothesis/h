@@ -41,7 +41,6 @@ export type LoginConfigObject = ConfigBase & {
 /** Identity information if signing up with an identity provider such as Google. */
 export type SocialLoginIdentity = {
   provider_unique_id: string;
-  email?: string;
 };
 
 /** Data passed to frontend for signup form. */
@@ -76,19 +75,16 @@ export type AccountSettingsConfigObject = ConfigBase & {
       google: {
         connected: boolean;
         provider_unique_id?: string;
-        email?: string;
         url?: string;
       };
       facebook: {
         connected: boolean;
         provider_unique_id?: string;
-        email?: string;
         url?: string;
       };
       orcid: {
         connected: boolean;
         provider_unique_id?: string;
-        email?: string;
         url?: string;
       };
     };

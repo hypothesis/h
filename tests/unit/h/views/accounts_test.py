@@ -309,7 +309,7 @@ class TestAuthController:
         assert isinstance(result, httpexceptions.HTTPFound)
         assert result.location == "/foo/bar"
 
-    @mock.patch("h.views.helpers.LogoutEvent", autospec=True)
+    @mock.patch("h.views.accounts.LogoutEvent", autospec=True)
     def test_logout_event(self, logoutevent, notify, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
 
@@ -838,7 +838,6 @@ class TestAccountController:
             expected_identity = {
                 "connected": True,
                 "provider_unique_id": identities[provider].provider_unique_id,
-                "email": identities[provider].email,
             }
             if provider == IdentityProvider.ORCID:
                 expected_identity["url"] = (

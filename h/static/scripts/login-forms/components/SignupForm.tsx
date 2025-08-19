@@ -113,9 +113,7 @@ export default function SignupForm({
           {idProvider && config.identity && (
             <IdProviderBadge
               provider={idProvider}
-              identity={
-                config.identity.email || config.identity.provider_unique_id
-              }
+              identity={config.identity.provider_unique_id}
             />
           )}
           {idInfoJWT && <input type="hidden" name="idinfo" value={idInfoJWT} />}
