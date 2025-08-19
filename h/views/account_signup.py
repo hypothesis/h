@@ -65,18 +65,24 @@ class SignupViews:
 
         signup_service = self.request.find_service(name="user_signup")
 
-        signup_service.signup(
-            username=appstruct["username"],
-            email=appstruct["email"],
-            password=appstruct["password"],
-            privacy_accepted=datetime.now(UTC),
-            comms_opt_in=appstruct["comms_opt_in"],
-        )
+        heading = _("Account registration successful")
+        message = None
+        try:
+            signup_service.signup(
+                username=appstruct["username"],
+                email=appstruct["email"],
+                password=appstruct["password"],
+                privacy_accepted=datetime.now(UTC),
+                comms_opt_in=appstruct["comms_opt_in"],
+            )
+        except UsernameConflictError:
+            heading = _("Username already registered")
+            message = appstruct["username"]
+        except EmailConflictError:
+            heading = _("Email address already registered")
+            message = appstruct["email"]
 
-        return {
-            "js_config": self.js_config,
-            "heading": _("Account registration successful"),
-        }
+        return {"js_config": self.js_config, "heading": heading, "message": message}
 
     # For "signup" route, see note in `post` method.
     @exception_view_config(
@@ -91,48 +97,12 @@ class SignupViews:
         request_method="POST",
         renderer="h:templates/accounts/signup-post.html.jinja2",
     )
-    @exception_view_config(
-        UsernameConflictError,
-        route_name="signup.email",
-        request_method="POST",
-        renderer="h:templates/accounts/signup-post.html.jinja2",
-    )
-    @exception_view_config(
-        EmailConflictError,
-        route_name="signup.email",
-        request_method="POST",
-        renderer="h:templates/accounts/signup-post.html.jinja2",
-    )
     def validation_failure(self):
-        self.request.response.status_int = 400
-
-        # A username or email conflict can happen *after* request validation,
-        # at the database level when trying to create the new user account.
-        #
-        # This can happen when multiple simultaneous requests try to create an
-        # account with the same username or email address: at validation time
-        # the username and email address are not taken so the request continues
-        # and tries to add a new user to the DB, but by the time we try to
-        # flush the DB session a simultaneous request has already created a
-        # user with the same username or email address.
-        #
-        # Set `errors` to the same errors dict that self.context.error.asdict()
-        # returns if self.context is a ValidationFailure due to the username or
-        # email address already being taken.
-        # This will produce the same error response as if the username or email
-        # address already been taken at request validation time.
-        if isinstance(self.context, UsernameConflictError):
-            errors = {"username": "This username is already taken."}
-        elif isinstance(self.context, EmailConflictError):
-            errors = {"email": "This email address is already taken."}
-        else:
-            errors = self.context.error.asdict()
-
         return {
             "js_config": {
                 **self.js_config,
                 "form": {
-                    "errors": errors,
+                    "errors": self.context.error.asdict(),
                     "data": {
                         "username": self.request.POST.get("username", ""),
                         "email": self.request.POST.get("email", ""),
