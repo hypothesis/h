@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from pyramid.security import remember
+from pyramid.security import forget, remember
 
-from h.accounts.events import LoginEvent
+from h.accounts.events import LoginEvent, LogoutEvent
 
 if TYPE_CHECKING:
     from pyramid.request import Request
@@ -33,4 +33,25 @@ def login(user: User, request: Request):
     user.last_login_date = datetime.now(tz=UTC)  # type: ignore[assignment]
     request.registry.notify(LoginEvent(request, user))
     headers = remember(request, user.userid)
+    return headers
+
+
+def logout(request: Request):
+    """Log the user out.
+
+    The headers this method returns must be included in the response headers,
+    for example:
+
+        return HTTPFound(
+            location=request.route_url("index"),
+            headers=logout(request)
+        )
+
+    """
+    if request.authenticated_userid is not None:
+        request.registry.notify(LogoutEvent(request))
+        request.session.invalidate()
+
+    headers = forget(request)
+
     return headers
