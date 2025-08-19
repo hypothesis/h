@@ -15,6 +15,9 @@ import {
   Link,
   ReplyIcon,
   lazy,
+  Button,
+  ExpandIcon,
+  CollapseIcon,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
@@ -129,6 +132,13 @@ export default function AnnotationCard({
 
   const annoQuote = quote(annotation);
 
+  // Should the annotation body be rendered in a collapsed state, assuming it is
+  // collapsible (exceeds allotted collapsed space)?
+  const [bodyCollapsed, setBodyCollapsed] = useState(true);
+  // Does the annotation body take up enough vertical space that
+  // collapsing/expanding is relevant?
+  const [bodyCollapsible, setBodyCollapsible] = useState(false);
+
   return useMemo(
     () => (
       <article>
@@ -170,7 +180,11 @@ export default function AnnotationCard({
             </header>
 
             {annoQuote && (
-              <Excerpt collapsedHeight={40} overflowThreshold={20}>
+              <Excerpt
+                inlineControl
+                collapsedHeight={40}
+                overflowThreshold={20}
+              >
                 <StyledText>
                   <blockquote className="hover:border-l-blue-quote">
                     {annoQuote}
@@ -179,7 +193,15 @@ export default function AnnotationCard({
               </Excerpt>
             )}
 
-            <Excerpt collapsedHeight={194} overflowThreshold={20}>
+            <Excerpt
+              inlineControl={false}
+              collapsedHeight={194}
+              overflowThreshold={20}
+              collapsed={bodyCollapsed}
+              onToggleCollapsed={setBodyCollapsed}
+              onCollapsibleChanged={setBodyCollapsible}
+              data-testid="anno-body-excerpt"
+            >
               <MarkdownView
                 markdown={annotation.text}
                 mentions={annotation.mentions}
@@ -188,6 +210,19 @@ export default function AnnotationCard({
                 classes="text-color-text hyp-wrap-anywhere"
               />
             </Excerpt>
+            {bodyCollapsible && (
+              <div className="flex justify-end !mt-1">
+                <Button
+                  classes="font-normal"
+                  onClick={() => setBodyCollapsed(prev => !prev)}
+                  data-testid="toggle-anno-body"
+                  expanded={!bodyCollapsed}
+                >
+                  {bodyCollapsed ? <ExpandIcon /> : <CollapseIcon />}
+                  Show {bodyCollapsed ? 'more' : 'less'}
+                </Button>
+              </div>
+            )}
 
             {annotation.tags.length > 0 && (
               <ul
@@ -258,6 +293,8 @@ export default function AnnotationCard({
       </article>
     ),
     [
+      bodyCollapsed,
+      bodyCollapsible,
       annoQuote,
       annotation,
       group,
