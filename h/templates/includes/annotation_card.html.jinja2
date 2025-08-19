@@ -14,7 +14,8 @@
 
 {% macro annotation_card(presented_annotation, request, tag_link) -%}
 <li class="annotation-card">
-  <div class="annotation-card__header">
+  <article>
+  <header class="annotation-card__header">
     <div class="annotation-card__username-timestamp">
       <a title="username" href="{{ request.route_url('activity.user_search', username=presented_annotation.annotation.username) }}"
         class="annotation-card__username">
@@ -45,15 +46,15 @@
         </span>
       {% endif %}
     </div>
-  </div>
+  </header>
   {% if presented_annotation.annotation.quote %}
     <blockquote title="Annotation quote" class="annotation-card__quote">
       {{ presented_annotation.annotation.quote }}
     </blockquote>
   {% endif %}
-  <div class="annotation-card__text">
+  <section class="annotation-card__text">
     {{ presented_annotation.annotation.text_rendered }}
-  </div>
+  </section>
   <div title="Tags" class="annotation-card__tags">
     {% for tag in presented_annotation.annotation.tags%}
       <a class="annotation-card__tag" href="{{ tag_link(tag) }}">
@@ -80,5 +81,6 @@
       </a>
     {% endif %}
   </footer>
+  </article>
 </li>
 {%- endmacro %}
