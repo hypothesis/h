@@ -379,6 +379,12 @@ class SocialLoginSignupViews:
         renderer="h:templates/error.html.jinja2",
     )
     def email_conflict_error(self):
+        # Decode the idinfo *before* generating the logout headers because
+        # calling logout() invalidates the session which removes the idinfo
+        # token's rfp (request forgery protection) token from the session
+        # meaning trying to decode the idinfo token will now fail.
+        idinfo = self.decode_idinfo()
+
         # Generate the logout headers *before* setting the flash message
         # because calling logout() invalidates the session which deletes any
         # flash messages.
@@ -392,9 +398,7 @@ class SocialLoginSignupViews:
         )
 
         return HTTPFound(
-            self.request.route_url(
-                "login", _query={"username": self.decode_idinfo().email}
-            ),
+            self.request.route_url("login", _query={"username": idinfo.email}),
             headers=headers,
         )
 
