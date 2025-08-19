@@ -19,4 +19,3 @@ const controllers = Object.assign(
   sharedControllers,
 );
 upgradeElements(document.body, controllers);
-window.envFlags.ready();
