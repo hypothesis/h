@@ -9,7 +9,7 @@ from h.services.oidc import MissingSubError, OIDCService, OIDCServiceSettings, f
 
 
 class TestOIDCService:
-    def test_get_provider_unique_id(
+    def test_get_decoded_idtoken(
         self, client, http_service, jwt_service, OIDCTokenResponseSchema
     ):
         jwt_service.decode_oidc_idtoken.return_value = {
@@ -19,7 +19,7 @@ class TestOIDCService:
             "id_token": sentinel.id_token
         }
 
-        provider_unique_id = client.get_provider_unique_id(
+        decoded_idtoken = client.get_decoded_idtoken(
             IdentityProvider.ORCID, sentinel.authorization_code
         )
 
@@ -38,13 +38,13 @@ class TestOIDCService:
         jwt_service.decode_oidc_idtoken.assert_called_once_with(
             sentinel.id_token, sentinel.orcid_keyset_url
         )
-        assert provider_unique_id == sentinel.provider_unique_id
+        assert decoded_idtoken == jwt_service.decode_oidc_idtoken.return_value
 
-    def test_get_provider_unique_id_missing_sub(self, client, jwt_service):
+    def test_get_decoded_idtoken_missing_sub(self, client, jwt_service):
         jwt_service.decode_oidc_idtoken.return_value = {}
 
         with pytest.raises(MissingSubError):
-            client.get_provider_unique_id(
+            client.get_decoded_idtoken(
                 IdentityProvider.ORCID, sentinel.authorization_code
             )
 
