@@ -65,21 +65,17 @@ class OIDCService:
         self._user_service = user_service
         self._jwt_service = jwt_service
 
-    def get_decoded_idtoken(
+    def get_provider_unique_id(
         self, provider: IdentityProvider, authorization_code: str
-    ) -> dict:
-        """Fetch an ID token and return the decoded and verified payload.
-
-        Fetch an ID token for the user associated with the given `provider` and
-        `authorization_code`, decode and verify the token, and return the
-        decoded payload.
+    ) -> str:
+        """Return the provider unique ID associated with `authorization_code`.
 
         This happens during the OIDC authorization flow after the user
         authorizes us to access their account with the provider and the
         provider redirects the browser to us with an authorization_code. This
         method makes a server-to-server request to the provider's authorization
-        server to exchange the given authorization_code for an ID token
-        representing the user's account with the provider.
+        server to exchange the given authorization_code for provider's unique
+        ID for the user.
         """
         settings = self._settings[provider]
 
@@ -95,16 +91,14 @@ class OIDCService:
 
         id_token = OIDCTokenResponseSchema().validate(token_response.json())["id_token"]
 
-        decoded_idtoken = self._jwt_service.decode_oidc_idtoken(
+        decoded_id_token = self._jwt_service.decode_oidc_idtoken(
             id_token, settings.keyset_url
         )
 
         try:
-            decoded_idtoken["sub"]
+            return decoded_id_token["sub"]
         except KeyError as err:
             raise MissingSubError from err
-
-        return decoded_idtoken
 
     def add_identity(
         self, user: User, provider: IdentityProvider, provider_unique_id: str

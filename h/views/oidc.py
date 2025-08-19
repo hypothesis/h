@@ -220,7 +220,7 @@ class OIDCConnectAndLoginViews:
                             "response_type": "code",
                             "redirect_uri": self.settings.redirect_uri,
                             "state": state,
-                            "scope": "openid profile email",
+                            "scope": "openid",
                         }
                     )
                 )
@@ -371,9 +371,9 @@ class OIDCRedirectViews:
             raise HTTPForbidden
 
         # Get the user's provider unique ID from the provider.
-        provider_unique_id = self._oidc_service.get_decoded_idtoken(
+        provider_unique_id = self._oidc_service.get_provider_unique_id(
             self.settings.provider, validated_params["code"]
-        )["sub"]
+        )
 
         # Get the existing Hypothesis account that's already connected to this
         # provider unique ID, if any.
