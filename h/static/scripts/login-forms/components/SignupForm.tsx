@@ -1,4 +1,4 @@
-import { Button, ExternalIcon } from '@hypothesis/frontend-shared';
+import { Button, CheckIcon } from '@hypothesis/frontend-shared';
 import { useContext, useLayoutEffect, useState } from 'preact/hooks';
 
 import Checkbox from '../../forms-common/components/Checkbox';
@@ -43,7 +43,7 @@ function IdProviderBadge({ provider, identity }: IdProviderBadgeProps) {
       <span className="grow">
         Connected: <b data-testid="connected-id">{identity}</b>
       </span>
-      <ExternalIcon className="w-[20px] h-[20px]" />
+      <CheckIcon className="w-[20px] h-[20px]" />
     </div>
   );
 }
