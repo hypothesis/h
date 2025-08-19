@@ -77,7 +77,7 @@ class TestOIDCConnectAndLoginViews:
                             "oidc.redirect.orcid"
                         ),
                         "state": jwt_service.encode_symmetric.return_value,
-                        "scope": "openid email profile",
+                        "scope": "openid profile email",
                     }
                 ),
                 "",
@@ -325,13 +325,7 @@ class TestOIDCRedirectViews:
         result = views.redirect()
 
         oidc_service.add_identity.assert_called_once_with(
-            user,
-            IdentityProvider.ORCID,
-            provider_unique_id=orcid_id,
-            email=None,
-            name=None,
-            given_name=None,
-            family_name=None,
+            user, IdentityProvider.ORCID, orcid_id
         )
         assert result == matchers.Redirect302To(pyramid_request.route_url("account"))
 
@@ -376,10 +370,6 @@ class TestOIDCRedirectViews:
         encode_idinfo_token.assert_called_once_with(
             jwt_service,
             orcid_id,
-            None,
-            None,
-            None,
-            None,
             JWTIssuer.OIDC_REDIRECT_ORCID,
             JWTAudience.SIGNUP_ORCID,
             jwt_service.decode_symmetric.return_value.next_url,

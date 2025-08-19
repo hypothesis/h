@@ -11,16 +11,11 @@ from pyramid.view import exception_view_config, view_config, view_defaults
 
 from h import i18n
 from h.accounts.schemas import SignupSchema, SocialLoginSignupSchema
-from h.models import User
 from h.models.user_identity import IdentityProvider
+from h.services.exceptions import ConflictError
 from h.services.jwt import JWTAudience, JWTDecodeError, JWTIssuer, JWTService
-from h.services.user_signup import (
-    EmailConflictError,
-    IdentityConflictError,
-    UsernameConflictError,
-)
 from h.views.exceptions import UnexpectedRouteError
-from h.views.helpers import login, logout
+from h.views.helpers import login
 
 _ = i18n.TranslationString
 
@@ -75,12 +70,9 @@ class SignupViews:
                 privacy_accepted=datetime.now(UTC),
                 comms_opt_in=appstruct["comms_opt_in"],
             )
-        except UsernameConflictError:
-            heading = _("Username already registered")
-            message = appstruct["username"]
-        except EmailConflictError:
-            heading = _("Email address already registered")
-            message = appstruct["email"]
+        except ConflictError as exc:
+            heading = _("Account already registered")
+            message = _(f"{exc.args[0]}")  # noqa: INT001
 
         return {"js_config": self.js_config, "heading": heading, "message": message}
 
@@ -171,26 +163,8 @@ class IDInfo:
     sub: str
     """The user's unique ID from the third-party provider."""
 
-    email: str | None = None
-    name: str | None = None
-    given_name: str | None = None
-    family_name: str | None = None
-
     next_url: str | None = None
     """The URL to redirect to after successfully logging in."""
-
-    @property
-    def display_name(self):
-        if self.name:
-            return self.name
-
-        if self.given_name and self.family_name:
-            return f"{self.given_name} {self.family_name}"
-
-        if self.given_name:
-            return self.given_name
-
-        return None
 
 
 @dataclass
@@ -198,7 +172,6 @@ class SocialLoginSignupViewsSettings:
     """Per-route settings for SocialLoginSignupViews."""
 
     provider: IdentityProvider
-    provider_name: str
     issuer: JWTIssuer
     audience: JWTAudience
 
@@ -213,7 +186,6 @@ class SocialLoginSignupViews:
         self.context = context
         self.request = request
         self.jwt_service = request.find_service(name="jwt")
-        self.user_service = request.find_service(name="user")
 
     @property
     def settings(self) -> SocialLoginSignupViewsSettings:
@@ -225,21 +197,18 @@ class SocialLoginSignupViews:
             case "signup.orcid":
                 return SocialLoginSignupViewsSettings(
                     provider=IdentityProvider.ORCID,
-                    provider_name="ORCID",
                     issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_ORCID,
                     audience=JWTAudience.SIGNUP_ORCID,
                 )
             case "signup.google":  # pragma: no cover
                 return SocialLoginSignupViewsSettings(
                     provider=IdentityProvider.GOOGLE,
-                    provider_name="Google",
                     issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_GOOGLE,
                     audience=JWTAudience.SIGNUP_GOOGLE,
                 )
             case "signup.facebook":  # pragma: no cover
                 return SocialLoginSignupViewsSettings(
                     provider=IdentityProvider.FACEBOOK,
-                    provider_name="Facebook",
                     issuer=JWTIssuer.SIGNUP_VALIDATION_FAILURE_FACEBOOK,
                     audience=JWTAudience.SIGNUP_FACEBOOK,
                 )
@@ -250,38 +219,7 @@ class SocialLoginSignupViews:
     @view_config(request_method="GET", route_name="signup.google")
     @view_config(request_method="GET", route_name="signup.facebook")
     def get(self):
-        idinfo = self.decode_idinfo()
-
-        # If we get to this view there normally won't be an existing account
-        # already connected to the user's third-party identity: if such an
-        # account existed the user would have been logged into it rather than
-        # being redirected to this signup page.
-        #
-        # But concurrent signup requests can mean that we get here and find
-        # that a connected account already exists in the DB.
-        #
-        # We *could* log the user in to the existing account at this point. But
-        # I think this case is going to be pretty rare so for simplicity's sake
-        # I'm just going to raise an error.
-        if self.user_service.fetch_by_identity(
-            self.settings.provider, provider_unique_id=idinfo.sub
-        ):
-            raise IdentityConflictError
-
-        # Error if there's already a Hypothesis account with the same email
-        # address as the user's third-party identity.
-        #
-        # This can happen if the user manually creates an account with the same
-        # email address as they use with their third-party identity, and then
-        # later tries to log in or sign up with that third-party identity.
-        #
-        # It can also happen if there are concurrent signup requests.
-        if User.get_by_email(
-            self.request.db, idinfo.email, self.request.default_authority
-        ):
-            raise EmailConflictError
-
-        return {"js_config": self.js_config(idinfo.sub, idinfo.email)}
+        return {"js_config": self.js_config(self.decode_idinfo().sub)}
 
     @view_config(request_method="POST", require_csrf=True, route_name="signup.orcid")
     @view_config(request_method="POST", require_csrf=True, route_name="signup.google")
@@ -301,8 +239,7 @@ class SocialLoginSignupViews:
 
         user = signup_service.signup(
             username=appstruct["username"],
-            email=idinfo.email,
-            display_name=idinfo.display_name,
+            email=None,
             password=None,
             privacy_accepted=datetime.now(UTC),
             comms_opt_in=bool(appstruct.get("comms_opt_in", False)),
@@ -311,10 +248,6 @@ class SocialLoginSignupViews:
                 {
                     "provider": self.settings.provider,
                     "provider_unique_id": idinfo.sub,
-                    "email": idinfo.email,
-                    "name": idinfo.name,
-                    "given_name": idinfo.given_name,
-                    "family_name": idinfo.family_name,
                 }
             ],
         )
@@ -323,69 +256,6 @@ class SocialLoginSignupViews:
             redirect_url(self.request, user, idinfo.next_url),
             headers=login(user, self.request),
         )
-
-    @exception_view_config(
-        context=EmailConflictError,
-        route_name="signup.orcid",
-        renderer="h:templates/error.html.jinja2",
-    )
-    @exception_view_config(
-        context=EmailConflictError,
-        route_name="signup.google",
-        renderer="h:templates/error.html.jinja2",
-    )
-    @exception_view_config(
-        context=EmailConflictError,
-        route_name="signup.facebook",
-        renderer="h:templates/error.html.jinja2",
-    )
-    def email_conflict_error(self):
-        # Generate the logout headers *before* setting the flash message
-        # because calling logout() invalidates the session which deletes any
-        # flash messages.
-        headers = logout(self.request)
-
-        self.request.session.flash(
-            f"There's already a Hypothesis account with your {self.settings.provider_name} email address."
-            " Try logging in or resetting your password."
-            f" Once logged in you can connect {self.settings.provider_name} in your account settings.",
-            "error",
-        )
-
-        return HTTPFound(
-            self.request.route_url(
-                "login", _query={"username": self.decode_idinfo().email}
-            ),
-            headers=headers,
-        )
-
-    @exception_view_config(
-        context=IdentityConflictError,
-        route_name="signup.orcid",
-        renderer="h:templates/error.html.jinja2",
-    )
-    @exception_view_config(
-        context=IdentityConflictError,
-        route_name="signup.google",
-        renderer="h:templates/error.html.jinja2",
-    )
-    @exception_view_config(
-        context=IdentityConflictError,
-        route_name="signup.facebook",
-        renderer="h:templates/error.html.jinja2",
-    )
-    def identity_conflict_error(self):
-        # Generate the logout headers *before* setting the flash message
-        # because calling logout() invalidates the session which deletes any
-        # flash messages.
-        headers = logout(self.request)
-
-        self.request.session.flash(
-            f"There's already a Hypothesis account connected to your {self.settings.provider_name} account. Try logging in.",
-            "error",
-        )
-
-        return HTTPFound(self.request.route_url("login"), headers=headers)
 
     @exception_view_config(
         context=IDInfoJWTDecodeError,
@@ -410,11 +280,8 @@ class SocialLoginSignupViews:
     @exception_view_config(context=ValidationFailure, route_name="signup.orcid")
     @exception_view_config(context=ValidationFailure, route_name="signup.google")
     @exception_view_config(context=ValidationFailure, route_name="signup.facebook")
-    @exception_view_config(context=UsernameConflictError, route_name="signup.orcid")
-    @exception_view_config(context=UsernameConflictError, route_name="signup.google")
-    @exception_view_config(context=UsernameConflictError, route_name="signup.facebook")
     def validation_failure(self):
-        idinfo = self.decode_idinfo()
+        provider_unique_id = self.decode_idinfo().sub
         self.request.response.status_int = 400
 
         # When reloading the page prefill the form with the previously submitted values.
@@ -424,34 +291,17 @@ class SocialLoginSignupViews:
             "comms_opt_in": self.request.POST.get("comms_opt_in", "") == "true",
         }
 
-        if isinstance(self.context, UsernameConflictError):
-            # A username conflict happened *after* request validation, at the
-            # database level when trying to create the new user account.
-            #
-            # This can happen when multiple simultaneous requests try to create
-            # an account with the same username--at validation time the
-            # username is not taken so the request continues and tries to add a
-            # new user to the DB, but by the time we try to flush the DB
-            # session a simultaneous request has already created a user with
-            # the same username.
-            #
-            # Set `errors` to the same errors dict that
-            # self.context.error.asdict() returns if self.context is a
-            # ValidationFailure due to the username already being taken.
-            # This will produce the same error response as if the username had
-            # already been taken at request validation time.
-            errors = {"username": "This username is already taken."}
-        else:
-            errors = self.context.error.asdict()
-
         return {
             "js_config": {
-                **self.js_config(idinfo.sub, idinfo.email),
-                "form": {"errors": errors, "data": form_data},
+                **self.js_config(provider_unique_id),
+                "form": {
+                    "errors": self.context.error.asdict(),
+                    "data": form_data,
+                },
             }
         }
 
-    def js_config(self, provider_unique_id, email):
+    def js_config(self, provider_unique_id):
         feature_service = self.request.find_service(name="feature")
 
         return {
@@ -468,10 +318,7 @@ class SocialLoginSignupViews:
                 ),
             },
             "form": {},
-            "identity": {
-                "provider_unique_id": provider_unique_id,
-                "email": email,
-            },
+            "identity": {"provider_unique_id": provider_unique_id},
         }
 
     def decode_idinfo(self):
@@ -501,27 +348,16 @@ def is_authenticated(request):
     )
 
 
-def encode_idinfo_token(  # noqa: PLR0913
+def encode_idinfo_token(
     jwt_service: JWTService,
     provider_unique_id: str,
-    email: str | None,
-    name: str | None,
-    given_name: str | None,
-    family_name: str | None,
     issuer: JWTIssuer,
     audience: JWTAudience,
     next_url: str,
 ):
     return {
         "idinfo": jwt_service.encode_symmetric(
-            IDInfo(
-                provider_unique_id,
-                email,
-                name,
-                given_name,
-                family_name,
-                next_url=next_url,
-            ),
+            IDInfo(provider_unique_id, next_url=next_url),
             expires_in=timedelta(hours=1),
             issuer=issuer,
             audience=audience,
