@@ -77,7 +77,7 @@ class TestOIDCConnectAndLoginViews:
                             "oidc.redirect.orcid"
                         ),
                         "state": jwt_service.encode_symmetric.return_value,
-                        "scope": "openid profile email",
+                        "scope": "openid",
                     }
                 ),
                 "",
@@ -247,7 +247,7 @@ class TestOIDCRedirectViews:
     def test_redirect_gets_the_users_orcid_id(self, views, oidc_service):
         views.redirect()
 
-        oidc_service.get_decoded_idtoken.assert_called_once_with(
+        oidc_service.get_provider_unique_id.assert_called_once_with(
             IdentityProvider.ORCID, sentinel.code
         )
 
@@ -263,7 +263,7 @@ class TestOIDCRedirectViews:
         class TestError(Exception):
             pass
 
-        oidc_service.get_decoded_idtoken.side_effect = TestError
+        oidc_service.get_provider_unique_id.side_effect = TestError
 
         with pytest.raises(TestError):
             views.redirect()
@@ -594,7 +594,7 @@ class TestOIDCRedirectViews:
 
     @pytest.fixture
     def oidc_service(self, oidc_service, orcid_id):
-        oidc_service.get_decoded_idtoken.return_value = {"sub": orcid_id}
+        oidc_service.get_provider_unique_id.return_value = orcid_id
         return oidc_service
 
     @pytest.fixture
