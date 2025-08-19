@@ -1,7 +1,6 @@
 import logging
 from dataclasses import asdict
 
-from psycopg2.errors import UniqueViolation
 from pyramid.request import Request
 from sqlalchemy.exc import IntegrityError
 
@@ -115,20 +114,20 @@ class UserSignupService:
             # error. It doesn't continue to process other constraints to see
             # what other checks would have also failed.
             if (
-                isinstance(err.orig, UniqueViolation)
-                and err.orig.diag.constraint_name == "uq__user__email"
+                'duplicate key value violates unique constraint "uq__user__email"'
+                in err.args[0]
             ):
                 raise EmailConflictError from err
 
             if (
-                isinstance(err.orig, UniqueViolation)
-                and err.orig.diag.constraint_name == "ix__user__userid"
+                'duplicate key value violates unique constraint "ix__user__userid"'
+                in err.args[0]
             ):
                 raise UsernameConflictError from err
 
             if (
-                isinstance(err.orig, UniqueViolation)
-                and err.orig.diag.constraint_name == "uq__user_identity__provider"
+                'duplicate key value violates unique constraint "uq__user_identity__provider"'
+                in err.args[0]
             ):
                 raise IdentityConflictError from err
 
