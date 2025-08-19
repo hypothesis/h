@@ -171,7 +171,6 @@ class TestSignupViews:
                 },
             },
             "heading": _("Account registration successful"),
-            "message": None,
         }
 
     def test_post_when_feature_flags_disabled(
@@ -391,61 +390,31 @@ class TestSignupViews:
         }
 
     @pytest.mark.parametrize(
-        "exception_class,heading,message",
+        "exception_class,errors",
         [
-            (UsernameConflictError, "Username already registered", sentinel.username),
-            (EmailConflictError, "Email address already registered", sentinel.email),
+            (UsernameConflictError, {"username": "This username is already taken."}),
+            (EmailConflictError, {"email": "This email address is already taken."}),
         ],
     )
+    def test_validation_failure_with_conflict_error(
+        self, views, exception_class, errors
+    ):
+        views.context = exception_class()
+
+        response = views.validation_failure()
+
+        assert response["js_config"]["form"]["errors"] == errors
+
+    @pytest.mark.parametrize(
+        "exception_class", [UsernameConflictError, EmailConflictError]
+    )
     def test_post_when_signup_conflict(
-        self,
-        user_signup_service,
-        get_csrf_token,
-        views,
-        pyramid_request,
-        feature_service,
-        exception_class,
-        heading,
-        message,
+        self, user_signup_service, views, exception_class
     ):
         user_signup_service.signup.side_effect = exception_class
-        feature_service.enabled.side_effect = [
-            sentinel.orcid_enabled,
-            sentinel.google_enabled,
-            sentinel.facebook_enabled,
-        ]
 
-        response = views.post()
-
-        get_csrf_token.assert_called_once_with(pyramid_request)
-        assert feature_service.enabled.call_args_list == [
-            call("log_in_with_orcid", user=None),
-            call("log_in_with_google", user=None),
-            call("log_in_with_facebook", user=None),
-        ]
-        assert response == {
-            "js_config": {
-                "csrfToken": get_csrf_token.return_value,
-                "features": {
-                    "log_in_with_orcid": sentinel.orcid_enabled,
-                    "log_in_with_google": sentinel.google_enabled,
-                    "log_in_with_facebook": sentinel.facebook_enabled,
-                },
-                "forOAuth": False,
-                "form": {},
-                "urls": {
-                    "login": {
-                        "username_or_email": pyramid_request.route_url("login"),
-                        "facebook": pyramid_request.route_url("oidc.login.facebook"),
-                        "google": pyramid_request.route_url("oidc.login.google"),
-                        "orcid": pyramid_request.route_url("oidc.login.orcid"),
-                    },
-                    "signup": pyramid_request.route_url("signup"),
-                },
-            },
-            "heading": heading,
-            "message": message,
-        }
+        with pytest.raises(exception_class):
+            views.post()
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
