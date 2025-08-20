@@ -1,4 +1,4 @@
-import { Button, CheckIcon } from '@hypothesis/frontend-shared';
+import { CheckIcon } from '@hypothesis/frontend-shared';
 import { useContext, useLayoutEffect, useState } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
@@ -8,6 +8,7 @@ import Checkbox from './Checkbox';
 import FacebookIcon from './FacebookIcon';
 import Form from './Form';
 import FormContainer from './FormContainer';
+import FormFooter from './FormFooter';
 import FormHeader from './FormHeader';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
@@ -217,19 +218,12 @@ export default function SignupForm({
           >
             I would like to receive news about annotation and Hypothesis.
           </Checkbox>
-          <div className="pt-2 flex items-center gap-x-4">
-            <div className="grow" />
-            <Button
-              type="submit"
-              variant="primary"
-              data-testid="submit-button"
-              // Prevent duplicate signup attempts.
-              // See https://github.com/hypothesis/h/pull/3851
-              disabled={submitted}
-            >
-              Sign up
-            </Button>
-          </div>
+          <FormFooter
+            // Prevent duplicate signup attempts.
+            // See https://github.com/hypothesis/h/pull/3851
+            disableSubmit={submitted}
+            submitLabel="Sign up"
+          />
         </Form>
       </FormContainer>
       <SignupFooter action="login" />

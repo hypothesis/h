@@ -1,4 +1,3 @@
-import { Button } from '@hypothesis/frontend-shared';
 import { useContext } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
@@ -7,6 +6,7 @@ import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
 import Form from './Form';
 import FormContainer from './FormContainer';
+import FormFooter from './FormFooter';
 import TextField from './TextField';
 
 export default function ProfileForm() {
@@ -53,12 +53,7 @@ export default function ProfileForm() {
           label="ORCID Identifier"
           {...textFieldProps(orcid)}
         />
-        <div className="mb-8 pt-2 flex items-center gap-x-4">
-          <div className="grow" />
-          <Button type="submit" variant="primary" data-testid="submit-button">
-            Save
-          </Button>
-        </div>
+        <FormFooter />
       </Form>
     </FormContainer>
   );
