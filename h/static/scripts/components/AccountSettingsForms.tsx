@@ -9,6 +9,7 @@ import type { FormValue } from '../util/form-value';
 import FacebookIcon from './FacebookIcon';
 import Form from './Form';
 import FormContainer from './FormContainer';
+import FormFooter from './FormFooter';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
 import TextField from './TextField';
@@ -22,17 +23,6 @@ const textFieldProps = (field: FormValue<string>) => ({
 
 function Heading({ text }: { text: string }) {
   return <h1 class="text-lg mb-4">{text}</h1>;
-}
-
-function FormSubmitButton() {
-  return (
-    <div className="mb-8 pt-2 flex items-center gap-x-4">
-      <div className="grow" />
-      <Button type="submit" variant="primary" data-testid="submit-button">
-        Save
-      </Button>
-    </div>
-  );
 }
 
 function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
@@ -73,7 +63,7 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
             {...textFieldProps(password)}
           />
         )}
-        <FormSubmitButton />
+        <FormFooter />
       </Form>
     </FormContainer>
   );
@@ -126,7 +116,7 @@ function ChangePasswordForm({
           required={true}
           {...textFieldProps(newPasswordConfirm)}
         />
-        <FormSubmitButton />
+        <FormFooter />
       </Form>
     </FormContainer>
   );
