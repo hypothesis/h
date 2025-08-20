@@ -158,6 +158,8 @@ export default function AnnotationCard({
                   annotationUpdated={annotation.updated}
                   withEditedTimestamp={
                     annotation.updated !== annotation.created
+                      ? 'prominent'
+                      : false
                   }
                 />
               </div>
