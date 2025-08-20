@@ -18,10 +18,10 @@ import {
 } from 'preact/hooks';
 
 import type { Group } from '../config';
-import FormContainer from '../forms-common/components/FormContainer';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData, ModerationStatus } from '../util/api';
 import AnnotationCard from './AnnotationCard';
+import FormContainer from './FormContainer';
 import GroupFormHeader from './GroupFormHeader';
 
 /**

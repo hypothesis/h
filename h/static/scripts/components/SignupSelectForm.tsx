@@ -3,8 +3,8 @@ import { useContext } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { SignupConfigObject } from '../config';
-import FormHeader from '../forms-common/components/FormHeader';
 import { routes } from '../routes';
+import FormHeader from './FormHeader';
 import LoginLink from './LoginLink';
 import SignupFooter from './SignupFooter';
 import SocialLoginLink from './SocialLoginLink';

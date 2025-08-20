@@ -5,11 +5,11 @@ import { Route, Switch } from 'wouter-preact';
 
 import type { LoginFormsConfigObject } from '../config';
 import { LoginFormsConfig } from '../config';
-import Router from '../forms-common/components/Router';
 import { routes } from '../routes';
 import AccountSettingsForms from './AccountSettingsForms';
 import LoginForm from './LoginForm';
 import ProfileForm from './ProfileForm';
+import Router from './Router';
 import SignupForm from './SignupForm';
 import SignupSelectForm from './SignupSelectForm';
 

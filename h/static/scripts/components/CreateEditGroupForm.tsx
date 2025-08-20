@@ -9,15 +9,6 @@ import { useContext, useEffect, useId, useState } from 'preact/hooks';
 
 import { GroupFormsConfig } from '../config';
 import type { Group } from '../config';
-import Checkbox from '../forms-common/components/Checkbox';
-import ErrorNotice from '../forms-common/components/ErrorNotice';
-import Form from '../forms-common/components/Form';
-import FormContainer from '../forms-common/components/FormContainer';
-import Label from '../forms-common/components/Label';
-import Star from '../forms-common/components/Star';
-import TextField from '../forms-common/components/TextField';
-import WarningDialog from '../forms-common/components/WarningDialog';
-import { useUnsavedChanges } from '../forms-common/unsaved-changes';
 import { callAPI } from '../util/api';
 import type {
   CreateUpdateGroupAPIRequest,
@@ -26,8 +17,17 @@ import type {
 } from '../util/api';
 import { pluralize } from '../util/pluralize';
 import { setLocation } from '../util/set-location';
+import { useUnsavedChanges } from '../util/unsaved-changes';
+import Checkbox from './Checkbox';
+import ErrorNotice from './ErrorNotice';
+import Form from './Form';
+import FormContainer from './FormContainer';
 import GroupFormHeader from './GroupFormHeader';
+import Label from './Label';
 import SaveStateIcon from './SaveStateIcon';
+import Star from './Star';
+import TextField from './TextField';
+import WarningDialog from './WarningDialog';
 
 /**
  * Dialog that warns users about existing annotations in a group being exposed

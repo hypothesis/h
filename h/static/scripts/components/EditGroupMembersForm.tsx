@@ -10,9 +10,6 @@ import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 import { GroupFormsConfig } from '../config';
 import type { APIConfig, Group } from '../config';
-import ErrorNotice from '../forms-common/components/ErrorNotice';
-import FormContainer from '../forms-common/components/FormContainer';
-import WarningDialog from '../forms-common/components/WarningDialog';
 import { paginationToParams } from '../util/api';
 import { callAPI } from '../util/api';
 import type {
@@ -21,7 +18,10 @@ import type {
   GroupMembersResponse,
   Role,
 } from '../util/api';
+import ErrorNotice from './ErrorNotice';
+import FormContainer from './FormContainer';
 import GroupFormHeader from './GroupFormHeader';
+import WarningDialog from './WarningDialog';
 
 type TableColumn<Row> = {
   field: keyof Row;

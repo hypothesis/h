@@ -2,7 +2,7 @@ import { render } from 'preact';
 
 import GroupFormsAppRoot from './components/GroupFormsAppRoot';
 import type { GroupFormsConfigObject } from './config';
-import { findContainer, readConfig } from './forms-common/config';
+import { findContainer, readConfig } from './util/config';
 
 function init() {
   const container = findContainer('#group-form');
