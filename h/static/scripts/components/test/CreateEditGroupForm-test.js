@@ -46,7 +46,7 @@ describe('CreateEditGroupForm', () => {
       '../util/api': {
         callAPI: fakeCallAPI,
       },
-      '../forms-common/unsaved-changes': {
+      '../util/unsaved-changes': {
         useUnsavedChanges: fakeUseUnsavedChanges,
       },
       '../util/set-location': {

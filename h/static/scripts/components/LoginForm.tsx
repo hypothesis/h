@@ -3,14 +3,14 @@ import { useContext } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { LoginConfigObject } from '../config';
-import Form from '../forms-common/components/Form';
-import FormContainer from '../forms-common/components/FormContainer';
-import FormHeader from '../forms-common/components/FormHeader';
-import TextField from '../forms-common/components/TextField';
-import { useFormValue } from '../forms-common/form-value';
 import { routes } from '../routes';
+import { useFormValue } from '../util/form-value';
+import Form from './Form';
+import FormContainer from './FormContainer';
+import FormHeader from './FormHeader';
 import SignupFooter from './SignupFooter';
 import SocialLoginLink from './SocialLoginLink';
+import TextField from './TextField';
 
 export type LoginFormProps = {
   enableSocialLogin: boolean;

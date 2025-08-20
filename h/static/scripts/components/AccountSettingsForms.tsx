@@ -4,14 +4,14 @@ import { useContext } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { AccountSettingsConfigObject } from '../config';
-import Form from '../forms-common/components/Form';
-import FormContainer from '../forms-common/components/FormContainer';
-import TextField from '../forms-common/components/TextField';
-import { useFormValue } from '../forms-common/form-value';
-import type { FormValue } from '../forms-common/form-value';
+import { useFormValue } from '../util/form-value';
+import type { FormValue } from '../util/form-value';
 import FacebookIcon from './FacebookIcon';
+import Form from './Form';
+import FormContainer from './FormContainer';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
+import TextField from './TextField';
 
 const textFieldProps = (field: FormValue<string>) => ({
   value: field.value,

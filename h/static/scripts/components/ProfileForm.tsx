@@ -3,11 +3,11 @@ import { useContext } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { ProfileConfigObject } from '../config';
-import Form from '../forms-common/components/Form';
-import FormContainer from '../forms-common/components/FormContainer';
-import TextField from '../forms-common/components/TextField';
-import { useFormValue } from '../forms-common/form-value';
-import type { FormValue } from '../forms-common/form-value';
+import { useFormValue } from '../util/form-value';
+import type { FormValue } from '../util/form-value';
+import Form from './Form';
+import FormContainer from './FormContainer';
+import TextField from './TextField';
 
 export default function ProfileForm() {
   const config = useContext(LoginFormsConfig) as ProfileConfigObject;

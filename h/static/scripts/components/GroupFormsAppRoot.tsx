@@ -3,11 +3,11 @@ import { Route, Switch } from 'wouter-preact';
 
 import type { GroupFormsConfigObject } from '../config';
 import { GroupFormsConfig } from '../config';
-import Router from '../forms-common/components/Router';
 import { routes } from '../routes';
 import CreateEditGroupForm from './CreateEditGroupForm';
 import EditGroupMembersForm from './EditGroupMembersForm';
 import GroupModeration from './GroupModeration';
+import Router from './Router';
 
 export type GroupFormsAppRootProps = {
   config: GroupFormsConfigObject;

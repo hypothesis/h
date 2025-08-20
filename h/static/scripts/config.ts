@@ -2,8 +2,8 @@
 // to the frontend in the page HTML as a JSON object.
 import { createContext } from 'preact';
 
-import type { FormFields } from './forms-common/config';
 import type { GroupType } from './util/api';
+import type { FormFields } from './util/config';
 
 export type APIConfig = {
   method: string;

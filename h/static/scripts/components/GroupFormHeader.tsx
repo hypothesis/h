@@ -3,9 +3,9 @@ import { useContext } from 'preact/hooks';
 
 import type { Group } from '../config';
 import { GroupFormsConfig } from '../config';
-import FormHeader from '../forms-common/components/FormHeader';
-import TabLinks from '../forms-common/components/TabLinks';
 import { routes } from '../routes';
+import FormHeader from './FormHeader';
+import TabLinks from './TabLinks';
 
 export type GroupFormHeaderProps = {
   group: Group | null;

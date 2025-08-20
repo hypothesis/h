@@ -3,16 +3,16 @@ import { useContext, useLayoutEffect, useState } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { SignupConfigObject } from '../config';
-import Checkbox from '../forms-common/components/Checkbox';
-import Form from '../forms-common/components/Form';
-import FormContainer from '../forms-common/components/FormContainer';
-import FormHeader from '../forms-common/components/FormHeader';
-import TextField from '../forms-common/components/TextField';
-import { useFormValue } from '../forms-common/form-value';
+import { useFormValue } from '../util/form-value';
+import Checkbox from './Checkbox';
 import FacebookIcon from './FacebookIcon';
+import Form from './Form';
+import FormContainer from './FormContainer';
+import FormHeader from './FormHeader';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
 import SignupFooter from './SignupFooter';
+import TextField from './TextField';
 
 type IdProviderBadgeProps = {
   provider: IdProvider;
