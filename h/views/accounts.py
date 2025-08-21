@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Any
+from typing import Any, TypedDict
 from urllib.parse import urlparse, urlunparse
 
 import colander
@@ -111,13 +111,6 @@ class AuthController:
     def _js_config(self) -> dict[str, Any]:
         csrf_token = get_csrf_token(self.request)
 
-        flash_messages: list[dict] = []
-        for queue in ["success", "error"]:
-            flash_messages.extend(
-                {"type": queue, "message": msg}
-                for msg in self.request.session.pop_flash(queue)
-            )
-
         js_config = {
             "styles": self.request.registry["assets_env"].urls("forms_css"),
             "csrfToken": csrf_token,
@@ -126,7 +119,7 @@ class AuthController:
                 "log_in_with_google": self.request.feature("log_in_with_google"),
                 "log_in_with_facebook": self.request.feature("log_in_with_facebook"),
             },
-            "flashMessages": flash_messages,
+            "flashMessages": _pop_flash_messages(self.request),
             # Prefill username from query params. This supports a flow where
             # the user is redirected to the login form with the username
             # pre-filled after activating their account.
@@ -448,7 +441,7 @@ class AccountController:
 
         self.request.user.email = appstruct["email"]
 
-        self.request.session.flash("Email address changed ✓", "success")
+        self.request.session.flash("Email address changed", "success")
         return httpexceptions.HTTPFound(location=self.request.route_url("account"))
 
     @view_config(
@@ -468,7 +461,7 @@ class AccountController:
             self.request.user, appstruct["new_password"]
         )
 
-        self.request.session.flash("Password changed ✓", "success")
+        self.request.session.flash("Password changed", "success")
         return httpexceptions.HTTPFound(location=self.request.route_url("account"))
 
     @exception_view_config(
@@ -505,6 +498,7 @@ class AccountController:
     def _template_data(self, js_config=None):
         js_config = js_config or {}
         js_config.setdefault("csrfToken", get_csrf_token(self.request))
+        js_config.setdefault("flashMessages", _pop_flash_messages(self.request))
         js_config.setdefault("forms", {})
         js_config["forms"].setdefault("email", {})
         js_config["forms"]["email"].setdefault("data", {})
@@ -615,7 +609,7 @@ def delete_identity(request):
     elif any((user.password, other_identities)):
         db.delete(matching_identity)
         flash(
-            _("{provider} disconnected ✓").format(provider=matching_identity.provider),
+            _("{provider} disconnected").format(provider=matching_identity.provider),
             "success",
         )
     else:
@@ -907,3 +901,22 @@ def dismiss_sidebar_tutorial(request):  # pragma: no cover
 )
 def account_deleted(_request):
     return {}
+
+
+class FlashMessage(TypedDict):
+    type: str
+    message: str
+
+
+def _pop_flash_messages(request) -> list[FlashMessage]:
+    """
+    Extract flash messages to a JSON-serializable dict.
+
+    The returned dict should be passed to the frontend for display.
+    """
+    flash_messages: list[FlashMessage] = []
+    for queue in ["success", "error"]:
+        flash_messages.extend(
+            {"type": queue, "message": msg} for msg in request.session.pop_flash(queue)
+        )
+    return flash_messages
