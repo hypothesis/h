@@ -780,6 +780,7 @@ class TestAccountController:
                     "log_in_with_google": True,
                     "log_in_with_orcid": True,
                 },
+                "flashMessages": [],
                 "forms": {
                     "email": {"data": {}, "errors": {}},
                     "password": {"data": {}, "errors": {}},
@@ -798,6 +799,17 @@ class TestAccountController:
                 },
             }
         }
+
+    def test_get_with_flash_messages(self, controller, pyramid_request):
+        pyramid_request.session.flash("Something was successful", "success")
+        pyramid_request.session.flash("Something failed", "error")
+
+        response = controller.get()
+
+        assert response["js_config"]["flashMessages"] == [
+            {"type": "success", "message": "Something was successful"},
+            {"type": "error", "message": "Something failed"},
+        ]
 
     def test_get_with_feature_flags_disabled(self, controller, pyramid_request):
         pyramid_request.feature.flags["log_in_with_google"] = False
@@ -894,7 +906,7 @@ class TestAccountController:
         )
         assert pyramid_request.user.email == "new_email@example.com"
         assert pyramid_request.session.peek_flash("success") == [
-            "Email address changed ✓"
+            "Email address changed"
         ]
         assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
 
@@ -948,7 +960,7 @@ class TestAccountController:
         user_password_service.update_password.assert_called_once_with(
             user, "test_new_password"
         )
-        assert pyramid_request.session.peek_flash("success") == ["Password changed ✓"]
+        assert pyramid_request.session.peek_flash("success") == ["Password changed"]
         assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
 
     def test_post_password_form_invalid(self, controller, pyramid_request):
@@ -1045,7 +1057,7 @@ class TestDeleteIdentity:
             )
         ) == {facebook_identity, orcid_identity}
         assert pyramid_request.session.peek_flash("success") == [
-            f"{google_identity.provider} disconnected ✓"
+            f"{google_identity.provider} disconnected"
         ]
         assert matchers.Redirect302To(pyramid_request.route_url("account")) == response
 

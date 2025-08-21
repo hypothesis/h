@@ -21,6 +21,7 @@ class TestAccountSettings:
                 f"log_in_with_{provider.name.lower()}": False
                 for provider in IdentityProvider
             },
+            "flashMessages": [],
             "forms": {
                 "email": {"data": {}, "errors": {}},
                 "password": {"data": {}, "errors": {}},
