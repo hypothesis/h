@@ -8,7 +8,6 @@ import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
 import FacebookIcon from './FacebookIcon';
 import Form from './Form';
-import FormContainer from './FormContainer';
 import FormFooter from './FormFooter';
 import GoogleIcon from './GoogleIcon';
 import ORCIDIcon from './ORCIDIcon';
@@ -33,7 +32,7 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
     : 'Add an email address';
 
   return (
-    <FormContainer>
+    <>
       <Heading text={heading} />
 
       <Form csrfToken={config.csrfToken} data-testid="email-form">
@@ -65,7 +64,7 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
         )}
         <FormFooter />
       </Form>
-    </FormContainer>
+    </>
   );
 }
 
@@ -83,7 +82,7 @@ function ChangePasswordForm({
   );
 
   return (
-    <FormContainer>
+    <>
       {config.context.user.has_password ? (
         <Heading text="Change your password" />
       ) : (
@@ -118,7 +117,7 @@ function ChangePasswordForm({
         />
         <FormFooter />
       </Form>
-    </FormContainer>
+    </>
   );
 }
 
@@ -225,7 +224,7 @@ function ConnectAccountButtons({
   }
 
   return (
-    <FormContainer>
+    <>
       <Heading text="Connect your account" />
 
       <p className="mb-9">
@@ -244,7 +243,7 @@ function ConnectAccountButtons({
           <ConnectAccountButton config={config} provider="orcid" />
         )}
       </div>
-    </FormContainer>
+    </>
   );
 }
 

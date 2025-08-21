@@ -7,6 +7,7 @@ import type { LoginFormsConfigObject } from '../config';
 import { LoginFormsConfig } from '../config';
 import { routes } from '../routes';
 import AccountSettingsForms from './AccountSettingsForms';
+import AppContainer from './AppContainer';
 import LoginForm from './LoginForm';
 import ProfileForm from './ProfileForm';
 import Router from './Router';
@@ -39,7 +40,7 @@ export default function LoginAppRoot({ config }: AppRootProps) {
   );
 
   return (
-    <div>
+    <AppContainer>
       <ToastMessages
         messages={toastMessages}
         onMessageDismiss={dismissToastMessage}
@@ -78,6 +79,6 @@ export default function LoginAppRoot({ config }: AppRootProps) {
           </Switch>
         </Router>
       </LoginFormsConfig.Provider>
-    </div>
+    </AppContainer>
   );
 }

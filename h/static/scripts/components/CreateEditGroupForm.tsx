@@ -21,7 +21,6 @@ import { useUnsavedChanges } from '../util/unsaved-changes';
 import Checkbox from './Checkbox';
 import ErrorNotice from './ErrorNotice';
 import Form from './Form';
-import FormContainer from './FormContainer';
 import GroupFormHeader from './GroupFormHeader';
 import Label from './Label';
 import SaveStateIcon from './SaveStateIcon';
@@ -248,7 +247,7 @@ export default function CreateEditGroupForm({
   };
 
   return (
-    <FormContainer>
+    <>
       <GroupFormHeader group={group} title={heading} />
       <Form onSubmit={onSubmit} csrfToken={null}>
         <TextField
@@ -354,6 +353,6 @@ export default function CreateEditGroupForm({
           }}
         />
       )}
-    </FormContainer>
+    </>
   );
 }

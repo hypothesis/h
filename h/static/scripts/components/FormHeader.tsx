@@ -18,7 +18,7 @@ export default function FormHeader({
   return (
     <h1
       className={classnames(
-        'text-grey-7 text-xl/none',
+        'text-xl/none',
         center && 'text-center',
         variant === 'default' && 'my-8',
         classes,
