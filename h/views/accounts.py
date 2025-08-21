@@ -669,6 +669,7 @@ class EditProfileController:
             "js_config": {
                 "csrfToken": get_csrf_token(self.request),
                 "features": {},
+                "flashMessages": _pop_flash_messages(self.request),
                 "form": {
                     "data": form_data,
                     "errors": errors,

@@ -1219,6 +1219,7 @@ class TestEditProfileController:
             "js_config": {
                 "csrfToken": views.get_csrf_token.spy_return,
                 "features": {},
+                "flashMessages": [],
                 "form": {
                     "data": {
                         "display_name": "Jim Smith",
@@ -1278,6 +1279,7 @@ class TestEditProfileController:
             "js_config": {
                 "csrfToken": views.get_csrf_token.spy_return,
                 "features": {},
+                "flashMessages": [],
                 "form": {
                     "data": {
                         "display_name": "invalid",
