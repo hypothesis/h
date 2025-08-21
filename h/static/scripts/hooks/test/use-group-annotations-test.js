@@ -216,22 +216,64 @@ describe('useGroupAnnotations', () => {
       );
     });
 
-    it('marks annotation as removed when new status does not match filter', async () => {
-      const annotations = [
-        { id: '123', moderation_status: 'PENDING' },
-        { id: '456', moderation_status: 'PENDING' },
-      ];
-      fakeFetchGroupAnnotations.resolves({ annotations });
+    context('when new status does not match filter', () => {
+      it('marks annotation as removed', async () => {
+        const annotations = [
+          { id: '123', moderation_status: 'PENDING' },
+          { id: '456', moderation_status: 'PENDING' },
+        ];
+        fakeFetchGroupAnnotations.resolves({ annotations });
 
-      createComponent('PENDING');
-      await waitFor(() => !lastGroupAnnotations.loading);
+        createComponent('PENDING');
+        await waitFor(() => !lastGroupAnnotations.loading);
 
-      lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+        lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
 
-      await delay(0);
+        await delay(0);
 
-      assert.isTrue(lastGroupAnnotations.removedAnnotations.has('456'));
-      assert.isFalse(lastGroupAnnotations.removedAnnotations.has('123'));
+        assert.isTrue(lastGroupAnnotations.removedAnnotations.has('456'));
+        assert.isFalse(lastGroupAnnotations.removedAnnotations.has('123'));
+      });
+
+      it('loads one more annotation at the bottom if more annotations can be loaded', async () => {
+        const annotations = [
+          { id: '123', moderation_status: 'PENDING' },
+          { id: '456', moderation_status: 'PENDING' },
+        ];
+        fakeFetchGroupAnnotations.onCall(0).resolves({ annotations, total: 3 });
+        fakeFetchGroupAnnotations.onCall(1).resolves({
+          annotations: [{ id: '789', moderation_status: 'PENDING' }],
+          total: 3,
+        });
+
+        createComponent('PENDING');
+        await waitFor(() => !lastGroupAnnotations.loading);
+
+        lastGroupAnnotations.updateAnnotationStatus('456', 'APPROVED');
+
+        await delay(0);
+
+        // There should have been two annotation fetches, the initial one and
+        // another one to load the last annotation
+        assert.calledWith(
+          fakeFetchGroupAnnotations.firstCall,
+          sinon.match.any,
+          sinon.match({ pageNumber: 1, pageSize: 20 }),
+        );
+        assert.calledWith(
+          fakeFetchGroupAnnotations.secondCall,
+          sinon.match.any,
+          sinon.match({ pageNumber: 2, pageSize: 1 }),
+        );
+        assert.deepEqual(
+          [
+            { id: '123', moderation_status: 'PENDING' },
+            { id: '456', moderation_status: 'APPROVED' },
+            { id: '789', moderation_status: 'PENDING' },
+          ],
+          lastGroupAnnotations.annotations,
+        );
+      });
     });
 
     it('does not mark annotation as removed when new status matches filter', async () => {

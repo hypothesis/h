@@ -7,7 +7,11 @@ import {
 } from 'preact/hooks';
 
 import { GroupFormsConfig } from '../config';
-import type { APIAnnotationData, ModerationStatus } from '../util/api';
+import type {
+  APIAnnotationData,
+  ModerationStatus,
+  Pagination,
+} from '../util/api';
 import { fetchGroupAnnotations } from '../util/api/fetch-group-annotations';
 
 export type GroupAnnotationsOptions = {
@@ -97,6 +101,12 @@ export function useGroupAnnotations({
     ? annotations.length - removedAnnotations.size
     : 0;
 
+  // We can continue loading annotations if no annotations have been loaded at
+  // all yet, or we have loaded less than the total number of annotations in
+  // the group.
+  const canLoadMoreAnnotations =
+    !annotations || visibleAnnotations < totalAnnotations;
+
   const updateAnnotation = useCallback(
     (annotationId: string, newAnnotationData: APIAnnotationData) => {
       setAnnotations(prev =>
@@ -109,6 +119,46 @@ export function useGroupAnnotations({
       );
     },
     [],
+  );
+
+  // Used to cancel currently in-flight request when this is unmounted
+  const abortController = useRef<AbortController | null>(null);
+
+  const loadAnnotationsForPage = useCallback(
+    (pagination: Required<Pagination>) => {
+      if (!config?.api.groupAnnotations) {
+        throw new Error('groupAnnotations API config missing');
+      }
+
+      // We only want one request to be in flight at a time. If a second one is
+      // attempted, ignore it.
+      // istanbul ignore next
+      if (abortController.current) {
+        console.warn(
+          'Ignored annotations loading request, since another one is already in progress',
+        );
+        return;
+      }
+      abortController.current = new AbortController();
+
+      setLoading(true);
+      fetchGroupAnnotations(config.api.groupAnnotations, {
+        signal: abortController.current.signal,
+        moderationStatus: filterStatus,
+        ...pagination,
+      })
+        .then(({ annotations, total }) => {
+          // Append annotations from the page to current list
+          setAnnotations((prev = []) => [...prev, ...annotations]);
+          setTotalAnnotations(total);
+        })
+        .catch((e: any) => setError(e.message))
+        .finally(() => {
+          abortController.current = null;
+          setLoading(false);
+        });
+    },
+    [config?.api.groupAnnotations, filterStatus],
   );
 
   const updateAnnotationStatus = useCallback(
@@ -126,56 +176,52 @@ export function useGroupAnnotations({
         moderation_status: moderationStatus,
       });
 
+      if (filterStatus === undefined || filterStatus === moderationStatus) {
+        return;
+      }
+
       // Mark this annotation as removed if it doesn't match the current filter.
       // The UI will hide it with a transition.
-      if (filterStatus !== undefined && filterStatus !== moderationStatus) {
-        setRemovedAnnotations(oldRemoved => {
-          const newRemoved = new Set(oldRemoved);
-          newRemoved.add(annotationId);
-          return newRemoved;
+      setRemovedAnnotations(oldRemoved => {
+        const newRemoved = new Set(oldRemoved);
+        newRemoved.add(annotationId);
+        return newRemoved;
+      });
+
+      // Since the annotation no longer matches current filter, load one more
+      // annotation at the "bottom" to keep pagination consistency
+      if (canLoadMoreAnnotations) {
+        loadAnnotationsForPage({
+          pageNumber: visibleAnnotations,
+          pageSize: 1,
         });
       }
     },
-    [annotations, filterStatus, updateAnnotation],
+    [
+      annotations,
+      canLoadMoreAnnotations,
+      filterStatus,
+      loadAnnotationsForPage,
+      updateAnnotation,
+      visibleAnnotations,
+    ],
   );
 
-  // Used to cancel currently in-flight request, whether it's the first one or
-  // any subsequent page triggered by calling `loadNextPage`.
-  const requestController = useRef<AbortController>();
-
   const loadAnnotationsForCurrentPage = useCallback(() => {
-    if (!config?.api.groupAnnotations) {
-      throw new Error('groupAnnotations API config missing');
-    }
-
     // Calculate the next page that needs to be loaded, based on the amount of
     // annotations already loaded and a fixed page size
     const pageSize = 20;
     const pageIndex = annotations?.length ? annotations.length / pageSize : 0;
     const pageNumber = pageIndex + 1;
 
-    setLoading(true);
-    fetchGroupAnnotations(config.api.groupAnnotations, {
-      signal: requestController.current?.signal,
-      pageNumber,
-      pageSize,
-      moderationStatus: filterStatus,
-    })
-      .then(({ annotations, total }) => {
-        // Append annotations from the page to current list
-        setAnnotations((prev = []) => [...prev, ...annotations]);
-        setTotalAnnotations(total);
-      })
-      .catch((e: any) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [annotations?.length, config?.api.groupAnnotations, filterStatus]);
+    loadAnnotationsForPage({ pageNumber, pageSize });
+  }, [annotations?.length, loadAnnotationsForPage]);
 
   const loadNextPage = useCallback(() => {
-    if (!loading && (!annotations || annotations.length < totalAnnotations)) {
-      requestController.current = new AbortController();
+    if (!loading && canLoadMoreAnnotations) {
       loadAnnotationsForCurrentPage();
     }
-  }, [annotations, loadAnnotationsForCurrentPage, loading, totalAnnotations]);
+  }, [canLoadMoreAnnotations, loadAnnotationsForCurrentPage, loading]);
 
   const prevFilterStatus = useRef(filterStatus);
   useEffect(() => {
@@ -190,12 +236,14 @@ export function useGroupAnnotations({
 
   // When annotations is not defined, trigger first load
   useEffect(() => {
-    requestController.current = new AbortController();
     if (annotations === undefined) {
       loadAnnotationsForCurrentPage();
     }
-    return () => requestController.current?.abort();
   }, [annotations, loadAnnotationsForCurrentPage]);
+
+  useEffect(() => {
+    return () => abortController.current?.abort();
+  }, []);
 
   return {
     loading,
