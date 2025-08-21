@@ -27,7 +27,7 @@ export default function SignupFooter({ action }: SignupFooterProps) {
       className={classnames({
         'fixed bottom-0 left-0 right-0 p-4': config.forOAuth,
         'my-8 py-4': !config.forOAuth,
-        'border-t border-t-text-grey-6 text-grey-7': true,
+        'border-t border-t-text-grey-6': true,
       })}
     >
       {action === 'login' && (

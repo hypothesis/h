@@ -19,7 +19,6 @@ import type {
   Role,
 } from '../util/api';
 import ErrorNotice from './ErrorNotice';
-import FormContainer from './FormContainer';
 import GroupFormHeader from './GroupFormHeader';
 import WarningDialog from './WarningDialog';
 
@@ -386,32 +385,30 @@ export default function EditGroupMembersForm({
 
   return (
     <>
-      <FormContainer>
-        <GroupFormHeader title="Edit group members" group={group} />
-        <ErrorNotice message={errorMessage} />
-        <div className="w-full">
-          <Scroll>
-            <DataTable
-              grid
-              striped={false}
-              title="Group members"
-              rows={members ?? []}
-              columns={columns}
-              renderItem={renderRow}
-              loading={!members}
-            />
-          </Scroll>
+      <GroupFormHeader title="Edit group members" group={group} />
+      <ErrorNotice message={errorMessage} />
+      <div className="w-full">
+        <Scroll>
+          <DataTable
+            grid
+            striped={false}
+            title="Group members"
+            rows={members ?? []}
+            columns={columns}
+            renderItem={renderRow}
+            loading={!members}
+          />
+        </Scroll>
+      </div>
+      {typeof totalPages === 'number' && totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            currentPage={pageNumber}
+            onChangePage={setPageNumber}
+            totalPages={totalPages}
+          />
         </div>
-        {typeof totalPages === 'number' && totalPages > 1 && (
-          <div className="mt-4 flex justify-center">
-            <Pagination
-              currentPage={pageNumber}
-              onChangePage={setPageNumber}
-              totalPages={totalPages}
-            />
-          </div>
-        )}
-      </FormContainer>
+      )}
       {pendingRemoval && (
         <WarningDialog
           title="Remove member?"

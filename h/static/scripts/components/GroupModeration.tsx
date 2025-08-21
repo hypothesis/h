@@ -21,7 +21,6 @@ import type { Group } from '../config';
 import { useGroupAnnotations } from '../hooks/use-group-annotations';
 import type { APIAnnotationData, ModerationStatus } from '../util/api';
 import AnnotationCard from './AnnotationCard';
-import FormContainer from './FormContainer';
 import GroupFormHeader from './GroupFormHeader';
 
 /**
@@ -225,7 +224,7 @@ export default function GroupModeration({ group }: GroupModerationProps) {
   }, []);
 
   return (
-    <FormContainer>
+    <>
       <GroupFormHeader title="Moderate group" group={group} />
       <div className="flex justify-end">
         <ModerationStatusSelect
@@ -235,6 +234,6 @@ export default function GroupModeration({ group }: GroupModerationProps) {
         />
       </div>
       <AnnotationList filterStatus={filterStatus} classes="mt-4" />
-    </FormContainer>
+    </>
   );
 }

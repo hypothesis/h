@@ -6,7 +6,6 @@ import type { LoginConfigObject } from '../config';
 import { routes } from '../routes';
 import { useFormValue } from '../util/form-value';
 import Form from './Form';
-import FormContainer from './FormContainer';
 import FormHeader from './FormHeader';
 import SignupFooter from './SignupFooter';
 import SocialLoginLink from './SocialLoginLink';
@@ -43,12 +42,12 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
   return (
     <>
       <FormHeader center={config.forOAuth}>{title}</FormHeader>
-      <FormContainer
+      <div
         // The max width here and item gap should match SignupSelectForm.
         //
         // This keeps the positioning of items consistent if the user navigates
         // from the login page to the signup page.
-        classes="mx-auto max-w-[400px] flex flex-col gap-y-3 items-stretch"
+        className="mx-auto max-w-[400px] flex flex-col gap-y-3 items-stretch"
       >
         <Form
           csrfToken={config.csrfToken}
@@ -116,7 +115,7 @@ export default function LoginForm({ enableSocialLogin }: LoginFormProps) {
             )}
           </>
         )}
-      </FormContainer>
+      </div>
       <SignupFooter action="signup" />
     </>
   );

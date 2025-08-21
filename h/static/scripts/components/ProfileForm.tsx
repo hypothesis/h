@@ -5,7 +5,6 @@ import type { ProfileConfigObject } from '../config';
 import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
 import Form from './Form';
-import FormContainer from './FormContainer';
 import FormFooter from './FormFooter';
 import TextField from './TextField';
 
@@ -27,7 +26,7 @@ export default function ProfileForm() {
   });
 
   return (
-    <FormContainer>
+    <>
       <Form csrfToken={config.csrfToken}>
         <TextField
           name="display_name"
@@ -55,6 +54,6 @@ export default function ProfileForm() {
         />
         <FormFooter />
       </Form>
-    </FormContainer>
+    </>
   );
 }

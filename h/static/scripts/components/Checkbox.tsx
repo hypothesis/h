@@ -32,7 +32,7 @@ export default function Checkbox({
         {...checkboxProps}
         aria-describedby={description ? descriptionId : undefined}
       >
-        <span className="text-grey-7">{children}</span>
+        {children}
       </BaseCheckbox>
       {description && (
         <div

@@ -7,7 +7,6 @@ import { useFormValue } from '../util/form-value';
 import Checkbox from './Checkbox';
 import FacebookIcon from './FacebookIcon';
 import Form from './Form';
-import FormContainer from './FormContainer';
 import FormFooter from './FormFooter';
 import FormHeader from './FormHeader';
 import GoogleIcon from './GoogleIcon';
@@ -115,117 +114,112 @@ export default function SignupForm({
   return (
     <>
       <FormHeader center={config.forOAuth}>Sign up for Hypothesis</FormHeader>
-      <FormContainer>
-        <Form csrfToken={config.csrfToken} onSubmit={() => setSubmitted(true)}>
-          {idProvider && config.identity && (
-            <IdProviderBadge
-              provider={idProvider}
-              identity={
-                config.identity.email || config.identity.provider_unique_id
-              }
-            />
-          )}
-          {idInfoJWT && <input type="hidden" name="idinfo" value={idInfoJWT} />}
+      <Form csrfToken={config.csrfToken} onSubmit={() => setSubmitted(true)}>
+        {idProvider && config.identity && (
+          <IdProviderBadge
+            provider={idProvider}
+            identity={
+              config.identity.email || config.identity.provider_unique_id
+            }
+          />
+        )}
+        {idInfoJWT && <input type="hidden" name="idinfo" value={idInfoJWT} />}
+        <TextField
+          type="input"
+          name="username"
+          value={username.value}
+          fieldError={username.error}
+          onChangeValue={username.update}
+          onCommitValue={username.commit}
+          label="Username"
+          minLength={3}
+          maxLength={30}
+          autofocus
+          required
+          showRequired={false}
+        />
+        {!idProvider && (
           <TextField
             type="input"
-            name="username"
-            value={username.value}
-            fieldError={username.error}
-            onChangeValue={username.update}
-            onCommitValue={username.commit}
-            label="Username"
-            minLength={3}
-            maxLength={30}
-            autofocus
+            name="email"
+            value={email.value}
+            fieldError={email.error}
+            onChangeValue={email.update}
+            label="Email address"
             required
             showRequired={false}
           />
-          {!idProvider && (
-            <TextField
-              type="input"
-              name="email"
-              value={email.value}
-              fieldError={email.error}
-              onChangeValue={email.update}
-              label="Email address"
-              required
-              showRequired={false}
-            />
-          )}
-          {!idProvider && (
-            <TextField
-              type="input"
-              inputType="password"
-              name="password"
-              value={password.value}
-              fieldError={password.error}
-              onChangeValue={password.update}
-              label="Password"
-              minLength={8}
-              required
-              showRequired={false}
-            />
-          )}
-          {
-            // When using social login, the username field is the last input.
-            // This has a character counter below it. Add a margin between the
-            // counter and the next line.
-            idProvider && <div className="mt-3" />
-          }
-          <Checkbox
-            data-testid="privacy-accepted"
-            checked={privacyAccepted.value}
-            name="privacy_accepted"
-            // Backend form validation expects the string "true" rather than the
-            // HTML form default of "on".
-            value="true"
-            onChange={e => {
-              privacyAccepted.update((e.target as HTMLInputElement).checked);
-            }}
-            error={privacyAccepted.error}
+        )}
+        {!idProvider && (
+          <TextField
+            type="input"
+            inputType="password"
+            name="password"
+            value={password.value}
+            fieldError={password.error}
+            onChangeValue={password.update}
+            label="Password"
+            minLength={8}
             required
-          >
-            I have read and agree to the{' '}
-            <a className="link" href="https://web.hypothes.is/privacy/">
-              privacy policy
-            </a>
-            ,{' '}
-            <a
-              className="link"
-              href="https://web.hypothes.is/terms-of-service/"
-            >
-              terms of service
-            </a>
-            , and{' '}
-            <a
-              className="link"
-              href="https://web.hypothes.is/community-guidelines/"
-            >
-              community guidelines
-            </a>
-            .
-          </Checkbox>
-          <Checkbox
-            data-testid="comms-opt-in"
-            checked={commsOptIn.value}
-            name="comms_opt_in"
-            // Backend form validation expects the string "true" rather than the
-            // HTML form default of "on".
-            value="true"
-            onChange={e => {
-              commsOptIn.update((e.target as HTMLInputElement).checked);
-            }}
-          >
-            I would like to receive news about annotation and Hypothesis.
-          </Checkbox>
-          <FormFooter
-            // Prevent duplicate signup attempts.
-            // See https://github.com/hypothesis/h/pull/3851
-            disableSubmit={submitted}
-            submitLabel="Sign up"
+            showRequired={false}
           />
-        </Form>
-      </FormContainer>
+        )}
+        {
+          // When using social login, the username field is the last input.
+          // This has a character counter below it. Add a margin between the
+          // counter and the next line.
+          idProvider && <div className="mt-3" />
+        }
+        <Checkbox
+          data-testid="privacy-accepted"
+          checked={privacyAccepted.value}
+          name="privacy_accepted"
+          // Backend form validation expects the string "true" rather than the
+          // HTML form default of "on".
+          value="true"
+          onChange={e => {
+            privacyAccepted.update((e.target as HTMLInputElement).checked);
+          }}
+          error={privacyAccepted.error}
+          required
+        >
+          I have read and agree to the{' '}
+          <a className="link" href="https://web.hypothes.is/privacy/">
+            privacy policy
+          </a>
+          ,{' '}
+          <a className="link" href="https://web.hypothes.is/terms-of-service/">
+            terms of service
+          </a>
+          , and{' '}
+          <a
+            className="link"
+            href="https://web.hypothes.is/community-guidelines/"
+          >
+            community guidelines
+          </a>
+          .
+        </Checkbox>
+        <Checkbox
+          data-testid="comms-opt-in"
+          checked={commsOptIn.value}
+          name="comms_opt_in"
+          // Backend form validation expects the string "true" rather than the
+          // HTML form default of "on".
+          value="true"
+          onChange={e => {
+            commsOptIn.update((e.target as HTMLInputElement).checked);
+          }}
+        >
+          I would like to receive news about annotation and Hypothesis.
+        </Checkbox>
+        <FormFooter
+          // Prevent duplicate signup attempts.
+          // See https://github.com/hypothesis/h/pull/3851
+          disableSubmit={submitted}
+          submitLabel="Sign up"
+        />
+      </Form>
       <SignupFooter action="login" />
     </>
   );

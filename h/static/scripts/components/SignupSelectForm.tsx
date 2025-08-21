@@ -27,7 +27,7 @@ export default function SignupSelectForm() {
         <div
           // Top margin intended to give roughly even spacing above and below the
           // provider list.
-          className="mt-[40px] self-center flex flex-col gap-y-3 text-grey-7 w-[400px]"
+          className="mt-[40px] self-center flex flex-col gap-y-3 w-[400px]"
         >
           <LoginLink
             routerLink={true}

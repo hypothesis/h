@@ -39,10 +39,10 @@ export default function GroupFormHeader({
       {group && (
         <div className="mb-4">
           <Link
-            classes="text-grey-7"
             href={group.link}
             underline="always"
             data-testid="activity-link"
+            variant="text"
           >
             View group activity
           </Link>
