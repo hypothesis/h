@@ -28,6 +28,9 @@ export type FormValueOptions<T> = {
  * value has been committed and whether it has changed since the last submission.
  */
 export type FormValue<T> = {
+  /** Name of the form field. */
+  name: string;
+
   /** Current form field value. */
   value: T;
 
@@ -80,7 +83,7 @@ export type FormValue<T> = {
  * @param field - Name of form field
  * @param defaultValue - Default value if no initial value is present in `fields`
  */
-export function useFormValue<Fields, F extends keyof Fields>(
+export function useFormValue<Fields, F extends keyof Fields & string>(
   fields: FormFields<Fields>,
   field: F,
   defaultValue: Fields[F],
@@ -110,5 +113,5 @@ export function useFormValue<Fields, F extends keyof Fields>(
     error = fields.errors?.[field];
   }
 
-  return { value, update, commit, changed, committed, error };
+  return { name: field, value, update, commit, changed, committed, error };
 }

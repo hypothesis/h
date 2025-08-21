@@ -14,6 +14,7 @@ import ORCIDIcon from './ORCIDIcon';
 import TextField from './TextField';
 
 const textFieldProps = (field: FormValue<string>) => ({
+  name: field.name,
   value: field.value,
   fieldError: field.error,
   onChangeValue: field.update,
@@ -45,7 +46,6 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
           </p>
         )}
         <TextField
-          name="email"
           inputType="email"
           label={
             config.context.user.email ? 'New email address' : 'Email address'
@@ -55,7 +55,6 @@ function ChangeEmailForm({ config }: { config: AccountSettingsConfigObject }) {
         />
         {config.context.user.has_password && (
           <TextField
-            name="password"
             label="Confirm password"
             inputType="password"
             required={true}
@@ -93,7 +92,6 @@ function ChangePasswordForm({
         <input type="hidden" name="__formid__" value="password" />
         {config.context.user.has_password && (
           <TextField
-            name="password"
             label="Current password"
             inputType="password"
             required={true}
@@ -101,7 +99,6 @@ function ChangePasswordForm({
           />
         )}
         <TextField
-          name="new_password"
           label="New password"
           inputType="password"
           required={true}
@@ -109,7 +106,6 @@ function ChangePasswordForm({
           {...textFieldProps(newPassword)}
         />
         <TextField
-          name="new_password_confirm"
           label="Confirm new password"
           inputType="password"
           required={true}

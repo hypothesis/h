@@ -19,6 +19,7 @@ export default function ProfileForm() {
   const orcid = useFormValue(form, 'orcid', '');
 
   const textFieldProps = (field: FormValue<string>) => ({
+    name: field.name,
     value: field.value,
     fieldError: field.error,
     onChangeValue: field.update,
@@ -29,29 +30,19 @@ export default function ProfileForm() {
     <>
       <Form csrfToken={config.csrfToken}>
         <TextField
-          name="display_name"
           label="Display name"
           maxLength={30}
           {...textFieldProps(displayName)}
         />
         <TextField
-          name="description"
           type="textarea"
           label="Description"
           maxLength={250}
           {...textFieldProps(description)}
         />
-        <TextField
-          name="location"
-          label="Location"
-          {...textFieldProps(location)}
-        />
-        <TextField name="link" label="Link" {...textFieldProps(link)} />
-        <TextField
-          name="orcid"
-          label="ORCID Identifier"
-          {...textFieldProps(orcid)}
-        />
+        <TextField label="Location" {...textFieldProps(location)} />
+        <TextField label="Link" {...textFieldProps(link)} />
+        <TextField label="ORCID Identifier" {...textFieldProps(orcid)} />
         <FormFooter />
       </Form>
     </>
