@@ -32,8 +32,7 @@ export default function Checkbox({
         {...checkboxProps}
         aria-describedby={description ? descriptionId : undefined}
       >
-        {/* Unstyled span needed to put children in a single flex item. */}
-        <span>{children}</span>
+        {children}
       </BaseCheckbox>
       {description && (
         <div
