@@ -330,7 +330,7 @@ class OIDCRedirectViews:
                     state_jwtaudience=JWTAudience.OIDC_REDIRECT_GOOGLE,
                     idinfo_jwtaudience=JWTAudience.SIGNUP_GOOGLE,
                     provider=IdentityProvider.GOOGLE,
-                    success_message="Google account connected ✓",
+                    success_message="Google account connected",
                     signup_route_name="signup.google",
                 )
             case "oidc.redirect.facebook":  # pragma: no cover
@@ -341,7 +341,7 @@ class OIDCRedirectViews:
                     state_jwtaudience=JWTAudience.OIDC_REDIRECT_FACEBOOK,
                     idinfo_jwtaudience=JWTAudience.SIGNUP_FACEBOOK,
                     provider=IdentityProvider.FACEBOOK,
-                    success_message="Facebook account connected ✓",
+                    success_message="Facebook account connected",
                     signup_route_name="signup.facebook",
                 )
             case _:
