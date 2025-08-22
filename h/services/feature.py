@@ -55,13 +55,10 @@ class FeatureService:
         session,
         overrides: dict[str, bool] | None = None,
         default_authority=None,
-        *,
-        facebook_enabled_by_query_param=False,
     ):
         self.default_authority = default_authority
         self.session = session
         self.overrides = overrides
-        self.facebook_enabled_by_query_param = facebook_enabled_by_query_param
 
         self._cached_load = lru_cache_in_transaction(self.session)(self._load)
 
@@ -89,15 +86,6 @@ class FeatureService:
         return models.Feature.all(self.session)
 
     def _state(self, feature, user=None):  # noqa: PLR0911
-        # This is a temporary hack to allow log-in-with-Facebook to be tested
-        # on production without exposing all users to it.  This should be
-        # removed after log-in-with-Facebook has been released.
-        if (
-            feature.name == "log_in_with_facebook"
-            and self.facebook_enabled_by_query_param
-        ):  # pragma: no cover
-            return True
-
         # Handle explicit overrides
         if self.overrides is not None and feature.name in self.overrides:
             return self.overrides[feature.name]
@@ -126,7 +114,6 @@ def feature_service_factory(_context, request):
         session=request.db,
         overrides=_feature_overrides(request),
         default_authority=request.default_authority,
-        facebook_enabled_by_query_param="facebook" in request.GET,
     )
 
 
