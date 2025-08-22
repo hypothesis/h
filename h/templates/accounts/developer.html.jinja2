@@ -3,40 +3,23 @@
 {% set page_route = 'account_developer' %}
 {% set page_title = 'Developer' %}
 
-{% block page_content %}
-  <div class="form-vertical">
-    {% if token %}
-      <p class="form-help-text">
-      <label for="token">{% trans %}Your API token is:{% endtrans %}</label>
-      </p>
-      <input id="token"
-             type="text"
-             value="{{ token }}"
-             readonly="readonly"
-             class="api-token">
-      <p class="form-help-text">
-        Please keep your API token safe as it can be used to access your account.
-      </p>
-    {% endif %}
+{% block styles %}
+  {{ super() }}
 
-      <form method="post" class="js-disable-on-submit">
-        {% if token %}
-          <button type="submit" class="btn"
-                  title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
-            Regenerate your API token
-          </button>
-        {% else %}
-          <button type="submit" class="btn btn-primary">
-            {% trans %}Generate your API token{% endtrans %}
-          </button>
-        {% endif %}
-      </form>
-  </div>
+  {% for url in asset_urls('forms_css') %}
+    <link rel="stylesheet" href="{{ url }}">
+  {% endfor %}
+{% endblock %}
+
+{% block page_content %}
+  <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+  <div id="login-form"></div>
 {% endblock page_content %}
 
-{% block form_footer_left %}
-  <p>
-    You can learn more about the Hypothesis API at
-    <a class="link--footer" href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>
-  </p>
+{% block scripts %}
+  {{ super() }}
+
+  {% for url in asset_urls('login_forms_js') %}
+    <script type="module" src="{{ url }}"></script>
+  {% endfor %}
 {% endblock %}

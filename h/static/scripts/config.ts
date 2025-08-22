@@ -165,11 +165,16 @@ export type ProfileConfigObject = LoginFormsConfigBase & {
   }>;
 };
 
+export type DeveloperConfigObject = LoginFormsConfigBase & {
+  token?: string;
+};
+
 export type LoginFormsConfigObject =
   | LoginConfigObject
   | SignupConfigObject
   | AccountSettingsConfigObject
-  | ProfileConfigObject;
+  | ProfileConfigObject
+  | DeveloperConfigObject;
 
 export const LoginFormsConfig = createContext<LoginFormsConfigObject | null>(
   null,
