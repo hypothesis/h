@@ -8,6 +8,7 @@ import { LoginFormsConfig } from '../config';
 import { routes } from '../routes';
 import AccountSettingsForms from './AccountSettingsForms';
 import AppContainer from './AppContainer';
+import DeveloperForm from './DeveloperForm';
 import LoginForm from './LoginForm';
 import ProfileForm from './ProfileForm';
 import Router from './Router';
@@ -72,6 +73,9 @@ export default function LoginAppRoot({ config }: AppRootProps) {
             </Route>
             <Route path={routes.profile}>
               <ProfileForm />
+            </Route>
+            <Route path={routes.accountDeveloper}>
+              <DeveloperForm />
             </Route>
             <Route>
               <h1 data-testid="unknown-route">Page not found</h1>
