@@ -16,6 +16,9 @@ export type FormProps = JSX.FormHTMLAttributes & {
   /** Center form in parent container. Defaults to true. */
   center?: boolean;
 
+  /** Additional CSS classes for the form element. */
+  classes?: string;
+
   children: ComponentChildren;
 };
 
@@ -24,6 +27,7 @@ export type FormProps = JSX.FormHTMLAttributes & {
  */
 export default function Form({
   center = true,
+  classes,
   children,
   csrfToken,
   ...formAttrs
@@ -35,6 +39,7 @@ export default function Form({
       className={classnames(
         'max-w-[530px] flex flex-col gap-y-4',
         center && 'mx-auto',
+        classes,
       )}
       {...formAttrs}
     >

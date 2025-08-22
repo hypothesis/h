@@ -5,6 +5,7 @@
  * These must be synchronized with h/routes.py.
  */
 export const routes = {
+  accountDeveloper: '/account/developer',
   accountSettings: '/account/settings',
   forgotPassword: '/forgot-password',
   groups: {

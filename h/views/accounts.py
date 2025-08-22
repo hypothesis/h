@@ -764,11 +764,7 @@ class DeveloperController:
     def get(self):
         """Render the developer page, including the form."""
         token = self.svc.fetch(self.userid)
-
-        if token:
-            return {"token": token.value}
-
-        return {}
+        return {"js_config": self._js_config(token)}
 
     @view_config(request_method="POST")
     def post(self):
@@ -782,7 +778,13 @@ class DeveloperController:
             # The user doesn't have an API token yet, generate one for them.
             token = self.svc.create(self.userid)
 
-        return {"token": token.value}
+        return {"js_config": self._js_config(token)}
+
+    def _js_config(self, token):
+        config = {"features": {}}
+        if token:
+            config["token"] = token.value
+        return config
 
 
 @view_defaults(
