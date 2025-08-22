@@ -165,10 +165,21 @@ export type ProfileConfigObject = LoginFormsConfigBase & {
   }>;
 };
 
+/** Configuration for notification settings form. */
+export type NotificationsConfigObject = LoginFormsConfigBase & {
+  hasEmail: boolean;
+  form: FormFields<{
+    reply: boolean;
+    mention: boolean;
+    moderation: boolean;
+  }>;
+};
+
 export type LoginFormsConfigObject =
   | LoginConfigObject
   | SignupConfigObject
   | AccountSettingsConfigObject
+  | NotificationsConfigObject
   | ProfileConfigObject;
 
 export const LoginFormsConfig = createContext<LoginFormsConfigObject | null>(

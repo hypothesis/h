@@ -309,30 +309,10 @@ class DeleteAccountSchemaNoPassword(CSRFSchema):
             raise exc
 
 
-@colander.deferred
-def deferred_notification_widget(node, kw):  # noqa: ARG001
-    types = [("reply", _("Email me when someone replies to one of my annotations."))]
-
-    request = node.bindings["request"]
-    feature_service = request.find_service(name="feature")
-    if feature_service.enabled("at_mentions", request.user):  # pragma: no cover
-        types.append(
-            ("mention", _("Email me when someone mentions me in an annotation."))
-        )
-
-    if feature_service.enabled("pre_moderation", request.user):  # pragma: no cover
-        types.append(
-            ("moderation", _("Email me when someone moderates one of my annotations."))
-        )
-
-    return deform.widget.CheckboxChoiceWidget(omit_label=True, values=types)
-
-
 class NotificationsSchema(CSRFSchema):
-    notifications = colander.SchemaNode(
-        colander.Set(),
-        widget=deferred_notification_widget,
-    )
+    reply = colander.SchemaNode(colander.Boolean())
+    mention = colander.SchemaNode(colander.Boolean())
+    moderation = colander.SchemaNode(colander.Boolean())
 
 
 def includeme(_config):  # pragma: no cover
