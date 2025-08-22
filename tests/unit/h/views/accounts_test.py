@@ -1307,7 +1307,10 @@ class TestDeveloperController:
         self, controller, developer_token_service
     ):
         assert controller.get() == {
-            "token": developer_token_service.fetch.return_value.value
+            "js_config": {
+                "features": {},
+                "token": developer_token_service.fetch.return_value.value,
+            }
         }
 
     def test_get_returns_empty_context_for_missing_token(
@@ -1315,7 +1318,7 @@ class TestDeveloperController:
     ):
         developer_token_service.fetch.return_value = None
 
-        assert controller.get() == {}
+        assert controller.get() == {"js_config": {"features": {}}}
 
     def test_post_fetches_token(
         self, controller, developer_token_service, authenticated_userid
@@ -1339,7 +1342,10 @@ class TestDeveloperController:
         result = controller.post()
 
         assert result == {
-            "token": developer_token_service.regenerate.return_value.value
+            "js_config": {
+                "features": {},
+                "token": developer_token_service.regenerate.return_value.value,
+            }
         }
 
     def test_post_creates_new_token_when_not_found(
@@ -1358,7 +1364,12 @@ class TestDeveloperController:
 
         result = controller.post()
 
-        assert result == {"token": developer_token_service.create.return_value.value}
+        assert result == {
+            "js_config": {
+                "features": {},
+                "token": developer_token_service.create.return_value.value,
+            }
+        }
 
     @pytest.fixture
     def controller(self, pyramid_request):

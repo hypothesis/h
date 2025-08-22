@@ -24,6 +24,7 @@ describe('LoginAppRoot', () => {
 
     $imports.$mock({
       './AccountSettingsForms': mockComponent('AccountSettingsForms'),
+      './DeveloperForm': mockComponent('DeveloperForm'),
       './LoginForm': mockComponent('LoginForm'),
       './ProfileForm': mockComponent('ProfileForm'),
       './SignupForm': mockComponent('SignupForm'),
@@ -132,6 +133,14 @@ describe('LoginAppRoot', () => {
 
   [
     {
+      path: '/account/developer',
+      selector: 'DeveloperForm',
+    },
+    {
+      path: '/account/profile',
+      selector: 'ProfileForm',
+    },
+    {
       path: '/account/settings',
       selector: 'AccountSettingsForms',
       props: {},
@@ -152,10 +161,6 @@ describe('LoginAppRoot', () => {
       props: {
         enableSocialLogin: true,
       },
-    },
-    {
-      path: '/account/profile',
-      selector: 'ProfileForm',
     },
     // "/signup" shows email signup form if all social logins are disabled
     {
