@@ -123,8 +123,12 @@ describe('GroupModeration', () => {
         expectedFallbackMessage: 'There are no Spam annotations in this group.',
       },
     ].forEach(({ status, expectedFallbackMessage }) => {
-      it('shows fallback message when no annotations exist', () => {
-        fakeUseGroupAnnotations.returns({ loading: false, annotations: [] });
+      it('shows fallback message when no visible annotations exist', () => {
+        fakeUseGroupAnnotations.returns({
+          loading: false,
+          annotations: [],
+          visibleAnnotations: 0,
+        });
         const wrapper = createComponent();
 
         wrapper.find('ModerationStatusSelect').props().onChange(status);

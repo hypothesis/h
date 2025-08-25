@@ -45,6 +45,12 @@ export type GroupAnnotationsResult = {
   removedAnnotations: Set<string>;
 
   /**
+   * Number of annotations in the `annotations` list which are not in the
+   * `removedAnnotations` set.
+   */
+  visibleAnnotations: number;
+
+  /**
    * A callback to load the next chunk of annotations, if any.
    * Useful to progressively load more annotations, as this hook only loads the
    * first chunk when invoked.
@@ -84,6 +90,12 @@ export function useGroupAnnotations({
   const [removedAnnotations, setRemovedAnnotations] = useState(
     new Set<string>(),
   );
+
+  // We are assuming `removedAnnotations` will only include annotations that
+  // have been previously loaded and therefore are part of `annotations`.
+  const visibleAnnotations = annotations
+    ? annotations.length - removedAnnotations.size
+    : 0;
 
   const updateAnnotation = useCallback(
     (annotationId: string, newAnnotationData: APIAnnotationData) => {
@@ -193,5 +205,6 @@ export function useGroupAnnotations({
     loadNextPage,
     updateAnnotationStatus,
     updateAnnotation,
+    visibleAnnotations,
   };
 }

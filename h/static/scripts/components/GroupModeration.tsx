@@ -48,6 +48,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
     removedAnnotations,
     updateAnnotationStatus,
     updateAnnotation,
+    visibleAnnotations,
   } = useGroupAnnotations({ filterStatus });
 
   const lastScrollPosition = useRef(0);
@@ -82,6 +83,7 @@ function AnnotationList({ filterStatus, classes }: AnnotationListProps) {
         loading={loading}
         annotations={annotations}
         removedAnnotations={removedAnnotations}
+        visibleAnnotations={visibleAnnotations}
         onAnnotationStatusChange={updateAnnotationStatus}
         onAnnotationReloaded={updateAnnotation}
       />
@@ -94,6 +96,7 @@ type AnnotationListContentProps = {
   loading: boolean;
   annotations?: APIAnnotationData[];
   removedAnnotations: Set<string>;
+  visibleAnnotations: number;
   onAnnotationStatusChange: (
     annotationId: string,
     moderationStatus: ModerationStatus,
@@ -108,6 +111,7 @@ function AnnotationListContent({
   loading,
   annotations,
   removedAnnotations,
+  visibleAnnotations,
   filterStatus,
   onAnnotationStatusChange,
   onAnnotationReloaded,
@@ -141,30 +145,33 @@ function AnnotationListContent({
       onAnnotationReloaded,
     ],
   );
-
-  if (annotations && annotations.length === 0) {
-    return (
-      <div
-        className="border rounded p-2 text-center"
-        data-testid="annotations-fallback-message"
-      >
-        {!filterStatus && 'There are no annotations in this group.'}
-        {filterStatus && (
-          <>
-            There are no{' '}
-            <span className="lowercase">
-              {moderationStatusInfo[filterStatus].label}
-            </span>{' '}
-            annotations in this group.
-          </>
-        )}
-      </div>
-    );
-  }
+  const fallbackMessage = useMemo(
+    () =>
+      annotations &&
+      visibleAnnotations === 0 && (
+        <div
+          className="border rounded p-2 text-center"
+          data-testid="annotations-fallback-message"
+        >
+          {!filterStatus && 'There are no annotations in this group.'}
+          {filterStatus && (
+            <>
+              There are no{' '}
+              <span className="lowercase">
+                {moderationStatusInfo[filterStatus].label}
+              </span>{' '}
+              annotations in this group.
+            </>
+          )}
+        </div>
+      ),
+    [annotations, filterStatus, visibleAnnotations],
+  );
 
   return (
     <>
       {cards}
+      {fallbackMessage}
       {loading && (
         <div className="mx-auto mt-3">
           <Spinner size="md" />
