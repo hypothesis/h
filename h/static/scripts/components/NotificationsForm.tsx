@@ -6,6 +6,7 @@ import type { NotificationsConfigObject } from '../config';
 import { routes } from '../routes';
 import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
+import AccountFormHeader from './AccountFormHeader';
 import Checkbox from './Checkbox';
 import Form from './Form';
 import FormFooter from './FormFooter';
@@ -45,21 +46,24 @@ export default function NotificationsForm() {
   }
 
   return (
-    <Form csrfToken={config.csrfToken}>
-      <p>Email me when someone:</p>
-      <Checkbox data-testid="reply-checkbox" {...checkboxProps(reply)}>
-        Replies to my annotations
-      </Checkbox>
-      <Checkbox data-testid="mention-checkbox" {...checkboxProps(mention)}>
-        Mentions me in an annotation
-      </Checkbox>
-      <Checkbox
-        data-testid="moderation-checkbox"
-        {...checkboxProps(moderation)}
-      >
-        Moderates my annotations
-      </Checkbox>
-      <FormFooter />
-    </Form>
+    <>
+      <AccountFormHeader />
+      <Form csrfToken={config.csrfToken}>
+        <p>Email me when someone:</p>
+        <Checkbox data-testid="reply-checkbox" {...checkboxProps(reply)}>
+          Replies to my annotations
+        </Checkbox>
+        <Checkbox data-testid="mention-checkbox" {...checkboxProps(mention)}>
+          Mentions me in an annotation
+        </Checkbox>
+        <Checkbox
+          data-testid="moderation-checkbox"
+          {...checkboxProps(moderation)}
+        >
+          Moderates my annotations
+        </Checkbox>
+        <FormFooter />
+      </Form>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { useContext, useId } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { DeveloperConfigObject } from '../config';
+import AccountFormHeader from './AccountFormHeader';
 import CopyButton from './CopyButton';
 import Form from './Form';
 import FormFooter from './FormFooter';
@@ -17,6 +18,7 @@ export default function DeveloperForm() {
 
   return (
     <>
+      <AccountFormHeader />
       <Text>
         API tokens can be used to access your data via the{' '}
         <Link

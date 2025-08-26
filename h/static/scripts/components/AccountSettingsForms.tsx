@@ -6,6 +6,7 @@ import { LoginFormsConfig } from '../config';
 import type { AccountSettingsConfigObject } from '../config';
 import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
+import AccountFormHeader from './AccountFormHeader';
 import FacebookIcon from './FacebookIcon';
 import Form from './Form';
 import FormFooter from './FormFooter';
@@ -248,6 +249,7 @@ export default function AccountSettingsForms() {
 
   return (
     <>
+      <AccountFormHeader />
       <ChangeEmailForm config={config} />
       <ChangePasswordForm config={config} />
       <ConnectAccountButtons config={config} />
