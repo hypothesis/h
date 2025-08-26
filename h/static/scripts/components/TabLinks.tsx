@@ -6,12 +6,21 @@ export type TabLinkProps = {
   href: string;
   children: ComponentChildren;
   testId?: string;
+
+  /**
+   * If true, use a server-side navigation for this link.
+   *
+   * Defaults to false.
+   */
+  server?: boolean;
 };
 
-function TabLink({ children, href, testId }: TabLinkProps) {
+function TabLink({ children, href, testId, server = false }: TabLinkProps) {
   const [selected] = useRoute(href);
+  const Component = server ? 'a' : RouterLink;
+
   return (
-    <RouterLink
+    <Component
       href={href}
       className={classnames({
         'focus-visible-ring whitespace-nowrap flex items-center font-semibold rounded px-2 py-1 gap-x-2':
@@ -23,7 +32,7 @@ function TabLink({ children, href, testId }: TabLinkProps) {
       role="listitem"
     >
       {children}
-    </RouterLink>
+    </Component>
   );
 }
 

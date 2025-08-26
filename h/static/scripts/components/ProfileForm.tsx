@@ -4,6 +4,7 @@ import { LoginFormsConfig } from '../config';
 import type { ProfileConfigObject } from '../config';
 import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
+import AccountFormHeader from './AccountFormHeader';
 import Form from './Form';
 import FormFooter from './FormFooter';
 import TextField from './TextField';
@@ -28,6 +29,7 @@ export default function ProfileForm() {
 
   return (
     <>
+      <AccountFormHeader />
       <Form csrfToken={config.csrfToken}>
         <TextField
           label="Display name"

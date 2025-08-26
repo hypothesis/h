@@ -17,20 +17,6 @@
 {% block content %}
   <div class="content paper">
     <div class="form-container">
-      {% block tabs %}
-      <nav class="tabs">
-        <ul>
-          {% for route, title in nav_pages %}
-            <li class="tabs__item">
-                <a href="{{ request.route_url(route) }}"
-                   class="tabs__link{% if route == page_route %} is-active{% endif %}">
-                  {{ title }}
-                </a>
-            </li>
-          {% endfor %}
-        </ul>
-      </nav>
-      {% endblock tabs %}
       {% include "h:templates/includes/flash-messages.html.jinja2" %}
       {{ self.page_content() }}
 
