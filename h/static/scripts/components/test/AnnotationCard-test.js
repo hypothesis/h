@@ -74,13 +74,15 @@ describe('AnnotationCard', () => {
     });
   });
 
-  function createComponent() {
+  function createComponent(props = {}) {
     return mount(
       <GroupFormsConfig.Provider value={fakeConfig}>
         <AnnotationCard
           annotation={fakeAnnotation}
+          disableModeration={false}
           onStatusChange={fakeOnStatusChange}
           onAnnotationReloaded={fakeOnAnnotationReloaded}
+          {...props}
         />
       </GroupFormsConfig.Provider>,
     );
@@ -222,7 +224,12 @@ describe('AnnotationCard', () => {
       await wrapper.find('ModerationStatusSelect').props().onChange(status);
 
       assert.calledWith(fakeUpdateModerationStatus, status);
-      assert.calledWith(fakeOnStatusChange, status);
+
+      assert.calledWith(fakeOnStatusChange.firstCall, { saveState: 'saving' });
+      assert.calledWith(fakeOnStatusChange.secondCall, {
+        saveState: 'saved',
+        newModerationStatus: status,
+      });
     });
   });
 
@@ -238,6 +245,16 @@ describe('AnnotationCard', () => {
 
     resolve(undefined);
     await promise;
+  });
+
+  [true, false].forEach(disableModeration => {
+    it('disables ModerationStatusSelect while disableModeration is `true`', () => {
+      const wrapper = createComponent({ disableModeration });
+      assert.equal(
+        wrapper.find('ModerationStatusSelect').prop('disabled'),
+        disableModeration,
+      );
+    });
   });
 
   [
