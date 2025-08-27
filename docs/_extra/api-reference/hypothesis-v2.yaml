@@ -130,6 +130,14 @@ components:
         type: int
         default: 1
         minimum: 1
+    PageAfter:
+      name: "page[after]"
+      in: query
+      required: false
+      description: Get only annotations older than this date
+      schema:
+        type: string
+        format: date-time
     PageSize:
       name: "page[size]"
       in: query
@@ -1098,7 +1106,7 @@ paths:
       description: |
         Get a paginated list of all annotations in a group.
       parameters:
-        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageAfter'
         - $ref: '#/components/parameters/PageSize'
         - name: moderation_status
           in: query

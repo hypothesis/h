@@ -3,6 +3,5 @@ PaginationMeta:
   type: object
   properties:
     total:
-      description: "The total number of memberships in the group (across all pages)."
       type: integer
       example: 42
