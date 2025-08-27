@@ -184,7 +184,7 @@ describe('GroupModeration', () => {
       });
     });
 
-    ['PENDING', 'APPROVED', 'DENIED', 'SPAM'].forEach(status => {
+    ['PENDING', 'APPROVED', 'DENIED', 'SPAM'].forEach(newModerationStatus => {
       it('calls updateAnnotationStatus when onStatusChange is called', () => {
         const annotations = [
           { id: '1', text: 'First annotation' },
@@ -201,13 +201,39 @@ describe('GroupModeration', () => {
         const annotationNodes = wrapper.find('AnnotationCard');
 
         annotations.forEach((anno, index) => {
-          annotationNodes.at(index).props().onStatusChange(status);
+          annotationNodes
+            .at(index)
+            .props()
+            .onStatusChange({ saveState: 'saved', newModerationStatus });
           assert.calledWith(
             fakeUpdateAnnotationStatus.lastCall,
             anno.id,
-            status,
+            newModerationStatus,
           );
         });
+      });
+    });
+
+    it('sets `disableModeration` prop for all annotations when one is being moderated', () => {
+      const annotations = [
+        { id: '1', text: 'First annotation' },
+        { id: '2', text: 'Second annotation' },
+      ];
+      fakeUseGroupAnnotations.returns({
+        loading: false,
+        annotations,
+        updateAnnotationStatus: fakeUpdateAnnotationStatus,
+        removedAnnotations: new Set(),
+      });
+
+      const wrapper = createComponent();
+      const annotationNodes = () => wrapper.find('AnnotationCard');
+
+      annotationNodes().first().props().onStatusChange({ saveState: 'saving' });
+      wrapper.update();
+
+      annotationNodes().forEach(anno => {
+        assert.isTrue(anno.prop('disableModeration'));
       });
     });
 

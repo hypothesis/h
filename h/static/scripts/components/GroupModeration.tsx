@@ -119,6 +119,11 @@ function AnnotationListContent({
   const onAnnotationStatusChangeStable = useStableCallback(
     onAnnotationStatusChange,
   );
+  // Whether one of the annotations is being currently moderated.
+  // We use this to disable moderation selects while an annotation is being
+  // moderated, avoiding more than one parallel moderation, that could cause
+  // pagination inconsistencies.
+  const [moderationInProgress, setModerationInProgress] = useState(false);
   const cards = useMemo(
     () =>
       annotations?.map(anno => (
@@ -129,8 +134,15 @@ function AnnotationListContent({
         >
           <AnnotationCard
             annotation={anno}
-            onStatusChange={moderationStatus => {
-              onAnnotationStatusChangeStable(anno.id, moderationStatus);
+            disableModeration={loading || moderationInProgress}
+            onStatusChange={result => {
+              setModerationInProgress(result.saveState === 'saving');
+              if (result.saveState === 'saved') {
+                onAnnotationStatusChangeStable(
+                  anno.id,
+                  result.newModerationStatus,
+                );
+              }
             }}
             onAnnotationReloaded={newAnnotationData =>
               onAnnotationReloaded(anno.id, newAnnotationData)
@@ -141,6 +153,8 @@ function AnnotationListContent({
     [
       annotations,
       removedAnnotations,
+      loading,
+      moderationInProgress,
       onAnnotationStatusChangeStable,
       onAnnotationReloaded,
     ],

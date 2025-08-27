@@ -30,14 +30,31 @@ import { callAPI } from '../util/api';
 import { APIError } from '../util/api';
 import AnnotationDocument from './AnnotationDocument';
 
+export type StatusChangeResult =
+  | {
+      saveState: 'saving';
+    }
+  | {
+      saveState: 'saved';
+      newModerationStatus: ModerationStatus;
+    }
+  | {
+      saveState: 'error';
+      error: Error;
+    };
+
 export type AnnotationCardProps = {
   annotation: APIAnnotationData;
+  /** Whether the moderation select should be disabled or not */
+  disableModeration: boolean;
 
   /**
-   * Invoked after successfully changing the moderation status for this
-   * annotation
+   * Invoked when changing the moderation status for this annotation.
+   *
+   * It is invoked when started and then again when finished, indicating if it
+   * succeeded or not.
    */
-  onStatusChange: (moderationStatus: ModerationStatus) => void;
+  onStatusChange: (result: StatusChangeResult) => void;
 
   /**
    * Invoked when the annotation is reloaded, with the new annotation data
@@ -60,6 +77,7 @@ const MarkdownView = lazy('MarkdownView', () => import('./MarkdownView'), {
 
 export default function AnnotationCard({
   annotation,
+  disableModeration,
   onStatusChange,
   onAnnotationReloaded,
 }: AnnotationCardProps) {
@@ -97,8 +115,9 @@ export default function AnnotationCard({
     async (status: ModerationStatus) => {
       try {
         setModerationSaveState({ type: 'saving' });
+        onStatusChange({ saveState: 'saving' });
         await updateModerationStatus(status);
-        onStatusChange(status);
+        onStatusChange({ saveState: 'saved', newModerationStatus: status });
         setModerationSaveState({ type: 'saved' });
       } catch (e) {
         const isConflictError =
@@ -120,6 +139,7 @@ export default function AnnotationCard({
           });
         }
 
+        onStatusChange({ saveState: 'error', error: e });
         setModerationSaveState({ type, message });
       }
     },
@@ -249,7 +269,9 @@ export default function AnnotationCard({
               <div className="flex items-end justify-between">
                 <ModerationStatusSelect
                   onChange={onModerationStatusChange}
-                  disabled={moderationSaveState.type === 'saving'}
+                  disabled={
+                    moderationSaveState.type === 'saving' || disableModeration
+                  }
                   selected={annotation.moderation_status}
                   mode="select"
                   alignListbox="left"
@@ -299,6 +321,7 @@ export default function AnnotationCard({
       bodyCollapsible,
       annoQuote,
       annotation,
+      disableModeration,
       group,
       isReply,
       moderationSaveState,
