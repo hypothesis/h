@@ -7,11 +7,7 @@ import {
 } from 'preact/hooks';
 
 import { GroupFormsConfig } from '../config';
-import type {
-  APIAnnotationData,
-  ModerationStatus,
-  Pagination,
-} from '../util/api';
+import type { APIAnnotationData, ModerationStatus } from '../util/api';
 import { fetchGroupAnnotations } from '../util/api/fetch-group-annotations';
 
 export type GroupAnnotationsOptions = {
@@ -124,8 +120,8 @@ export function useGroupAnnotations({
   // Used to cancel currently in-flight request when this is unmounted
   const abortController = useRef<AbortController | null>(null);
 
-  const loadAnnotationsForPage = useCallback(
-    (pagination: Required<Pagination>) => {
+  const loadAnnotations = useCallback(
+    (pageSize: number) => {
       if (!config?.api.groupAnnotations) {
         throw new Error('groupAnnotations API config missing');
       }
@@ -141,11 +137,16 @@ export function useGroupAnnotations({
       }
       abortController.current = new AbortController();
 
+      // Calculate the cursor for the next page, based on the oldest annotation
+      // already loaded
+      const after = annotations?.[annotations.length - 1].created;
+
       setLoading(true);
       fetchGroupAnnotations(config.api.groupAnnotations, {
         signal: abortController.current.signal,
         moderationStatus: filterStatus,
-        ...pagination,
+        after,
+        pageSize,
       })
         .then(({ annotations, total }) => {
           // Append annotations from the page to current list
@@ -158,7 +159,7 @@ export function useGroupAnnotations({
           setLoading(false);
         });
     },
-    [config?.api.groupAnnotations, filterStatus],
+    [annotations, config?.api.groupAnnotations, filterStatus],
   );
 
   const updateAnnotationStatus = useCallback(
@@ -191,37 +192,28 @@ export function useGroupAnnotations({
       // Since the annotation no longer matches current filter, load one more
       // annotation at the "bottom" to keep pagination consistency
       if (canLoadMoreAnnotations) {
-        loadAnnotationsForPage({
-          pageNumber: visibleAnnotations,
-          pageSize: 1,
-        });
+        loadAnnotations(1);
       }
     },
     [
       annotations,
       canLoadMoreAnnotations,
       filterStatus,
-      loadAnnotationsForPage,
+      loadAnnotations,
       updateAnnotation,
-      visibleAnnotations,
     ],
   );
 
-  const loadAnnotationsForCurrentPage = useCallback(() => {
-    // Calculate the next page that needs to be loaded, based on the amount of
-    // annotations already loaded and a fixed page size
-    const pageSize = 20;
-    const pageIndex = annotations?.length ? annotations.length / pageSize : 0;
-    const pageNumber = pageIndex + 1;
-
-    loadAnnotationsForPage({ pageNumber, pageSize });
-  }, [annotations?.length, loadAnnotationsForPage]);
+  const loadFullAnnotationsPage = useCallback(
+    () => loadAnnotations(20),
+    [loadAnnotations],
+  );
 
   const loadNextPage = useCallback(() => {
     if (!loading && canLoadMoreAnnotations) {
-      loadAnnotationsForCurrentPage();
+      loadFullAnnotationsPage();
     }
-  }, [canLoadMoreAnnotations, loadAnnotationsForCurrentPage, loading]);
+  }, [canLoadMoreAnnotations, loadFullAnnotationsPage, loading]);
 
   const prevFilterStatus = useRef(filterStatus);
   useEffect(() => {
@@ -237,9 +229,9 @@ export function useGroupAnnotations({
   // When annotations is not defined, trigger first load
   useEffect(() => {
     if (annotations === undefined) {
-      loadAnnotationsForCurrentPage();
+      loadFullAnnotationsPage();
     }
-  }, [annotations, loadAnnotationsForCurrentPage]);
+  }, [annotations, loadFullAnnotationsPage]);
 
   useEffect(() => {
     return () => abortController.current?.abort();
