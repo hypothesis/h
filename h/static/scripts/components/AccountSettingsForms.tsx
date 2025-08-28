@@ -1,9 +1,10 @@
-import { Button } from '@hypothesis/frontend-shared';
+import { Button, Link } from '@hypothesis/frontend-shared';
 import { ExternalIcon } from '@hypothesis/frontend-shared';
 import { useContext } from 'preact/hooks';
 
 import { LoginFormsConfig } from '../config';
 import type { AccountSettingsConfigObject } from '../config';
+import { routes } from '../routes';
 import { useFormValue } from '../util/form-value';
 import type { FormValue } from '../util/form-value';
 import AccountFormHeader from './AccountFormHeader';
@@ -253,6 +254,11 @@ export default function AccountSettingsForms() {
       <ChangeEmailForm config={config} />
       <ChangePasswordForm config={config} />
       <ConnectAccountButtons config={config} />
+      <div className="border-t mt-8 py-2 flex flex-row justify-end">
+        <Link href={routes.accountDelete} underline="always" variant="text">
+          Delete your account
+        </Link>
+      </div>
     </>
   );
 }

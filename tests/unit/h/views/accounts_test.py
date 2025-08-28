@@ -762,6 +762,7 @@ class TestAccountController:
         response = controller.get()
 
         assert response == {
+            "page_title": "Account",
             "js_config": {
                 "context": {
                     "identities": {
@@ -797,7 +798,7 @@ class TestAccountController:
                     ),
                     "identity_delete": pyramid_request.route_url("account_identity"),
                 },
-            }
+            },
         }
 
     def test_get_with_flash_messages(self, controller, pyramid_request):
@@ -1221,6 +1222,7 @@ class TestEditProfileController:
 
         views.get_csrf_token.assert_called_once_with(pyramid_request)
         assert result == {
+            "page_title": "Edit profile",
             "js_config": {
                 "csrfToken": views.get_csrf_token.spy_return,
                 "features": {},
@@ -1235,7 +1237,7 @@ class TestEditProfileController:
                     },
                     "errors": {},
                 },
-            }
+            },
         }
 
     def test_post_sets_user_properties(self, form_validating_to, pyramid_request):
@@ -1281,6 +1283,7 @@ class TestEditProfileController:
 
         views.get_csrf_token.assert_called_once_with(pyramid_request)
         assert result == {
+            "page_title": "Edit profile",
             "js_config": {
                 "csrfToken": views.get_csrf_token.spy_return,
                 "features": {},
@@ -1295,7 +1298,7 @@ class TestEditProfileController:
                     },
                     "errors": {"display_name": "Display name is invalid"},
                 },
-            }
+            },
         }
 
 
@@ -1312,10 +1315,11 @@ class TestDeveloperController:
         self, controller, developer_token_service
     ):
         assert controller.get() == {
+            "page_title": "Developer",
             "js_config": {
                 "features": {},
                 "token": developer_token_service.fetch.return_value.value,
-            }
+            },
         }
 
     def test_get_returns_empty_context_for_missing_token(
@@ -1323,7 +1327,10 @@ class TestDeveloperController:
     ):
         developer_token_service.fetch.return_value = None
 
-        assert controller.get() == {"js_config": {"features": {}}}
+        assert controller.get() == {
+            "page_title": "Developer",
+            "js_config": {"features": {}},
+        }
 
     def test_post_fetches_token(
         self, controller, developer_token_service, authenticated_userid
@@ -1347,10 +1354,11 @@ class TestDeveloperController:
         result = controller.post()
 
         assert result == {
+            "page_title": "Developer",
             "js_config": {
                 "features": {},
                 "token": developer_token_service.regenerate.return_value.value,
-            }
+            },
         }
 
     def test_post_creates_new_token_when_not_found(
@@ -1370,10 +1378,11 @@ class TestDeveloperController:
         result = controller.post()
 
         assert result == {
+            "page_title": "Developer",
             "js_config": {
                 "features": {},
                 "token": developer_token_service.create.return_value.value,
-            }
+            },
         }
 
     @pytest.fixture

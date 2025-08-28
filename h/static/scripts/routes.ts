@@ -5,6 +5,7 @@
  * These must be synchronized with h/routes.py.
  */
 export const routes = {
+  accountDelete: '/account/delete',
   accountDeveloper: '/account/developer',
   accountNotifications: '/account/settings/notifications',
   accountSettings: '/account/settings',
