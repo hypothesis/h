@@ -561,7 +561,7 @@ class AccountController:
                 "url", urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
             )
 
-        return {"js_config": js_config}
+        return {"page_title": "Account", "js_config": js_config}
 
 
 @view_config(
@@ -627,7 +627,7 @@ def delete_identity(request):
 
 @view_defaults(
     route_name="account_profile",
-    renderer="h:templates/accounts/profile.html.jinja2",
+    renderer="h:templates/accounts/account.html.jinja2",
     is_authenticated=True,
 )
 class EditProfileController:
@@ -666,6 +666,7 @@ class EditProfileController:
         }
 
         return {
+            "page_title": "Edit profile",
             "js_config": {
                 "csrfToken": get_csrf_token(self.request),
                 "features": {},
@@ -674,7 +675,7 @@ class EditProfileController:
                     "data": form_data,
                     "errors": errors,
                 },
-            }
+            },
         }
 
     def _update_user(self, appstruct):
@@ -688,7 +689,7 @@ class EditProfileController:
 
 @view_defaults(
     route_name="account_notifications",
-    renderer="h:templates/accounts/notifications.html.jinja2",
+    renderer="h:templates/accounts/account.html.jinja2",
     is_authenticated=True,
 )
 class NotificationsController:
@@ -742,6 +743,7 @@ class NotificationsController:
         user_has_email_address = bool(self.request.user and self.request.user.email)
 
         return {
+            "page_title": "Notifications",
             "js_config": {
                 "csrfToken": get_csrf_token(self.request),
                 "features": {},
@@ -759,13 +761,13 @@ class NotificationsController:
                     },
                     "errors": errors,
                 },
-            }
+            },
         }
 
 
 @view_defaults(
     route_name="account_developer",
-    renderer="h:templates/accounts/developer.html.jinja2",
+    renderer="h:templates/accounts/account.html.jinja2",
     is_authenticated=True,
 )
 class DeveloperController:
@@ -779,7 +781,7 @@ class DeveloperController:
     def get(self):
         """Render the developer page, including the form."""
         token = self.svc.fetch(self.userid)
-        return {"js_config": self._js_config(token)}
+        return self._template_data(token)
 
     @view_config(request_method="POST")
     def post(self):
@@ -793,13 +795,13 @@ class DeveloperController:
             # The user doesn't have an API token yet, generate one for them.
             token = self.svc.create(self.userid)
 
-        return {"js_config": self._js_config(token)}
+        return self._template_data(token)
 
-    def _js_config(self, token):
+    def _template_data(self, token):
         config = {"features": {}}
         if token:
             config["token"] = token.value
-        return config
+        return {"page_title": "Developer", "js_config": config}
 
 
 @view_defaults(

@@ -1,8 +1,5 @@
 {% extends "h:templates/layouts/account.html.jinja2" %}
 
-{% set page_route = 'account' %}
-{% set page_title = 'Account' %}
-
 {% block styles %}
   {{ super() }}
 
@@ -15,10 +12,6 @@
   <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
   <div id="login-form"></div>
 {% endblock page_content %}
-
-{% block form_footer_right %}
-<a class="link--footer" href="{{ request.route_path('account_delete') }}">{% trans %}Delete your account{% endtrans %}</a>
-{% endblock %}
 
 {% block scripts %}
   {{ super() }}
