@@ -219,10 +219,28 @@ describe('paginationToParams', () => {
       pageSize: 10,
       expectedQuery: { 'page[number]': 5, 'page[size]': 10 },
     },
-  ].forEach(({ pageNumber, pageSize, expectedQuery }) => {
+    {
+      after: '2025-05-02T10:00:00.000001+00:00',
+      expectedQuery: { 'page[after]': '2025-05-02T10:00:00.000001+00:00' },
+    },
+    {
+      after: '2025-05-01T10:00:00.000001+00:00',
+      pageSize: 10,
+      expectedQuery: {
+        'page[after]': '2025-05-01T10:00:00.000001+00:00',
+        'page[size]': 10,
+      },
+    },
+    // `after` should be ignored when provided with an empty value
+    {
+      after: '',
+      pageSize: 10,
+      expectedQuery: { 'page[size]': 10 },
+    },
+  ].forEach(({ after, pageNumber, pageSize, expectedQuery }) => {
     it('converts pagination values to query params', () => {
       assert.deepEqual(
-        paginationToParams({ pageNumber, pageSize }),
+        paginationToParams({ pageNumber, after, pageSize }),
         expectedQuery,
       );
     });

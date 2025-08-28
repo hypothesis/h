@@ -88,7 +88,8 @@ describe('useGroupAnnotations', () => {
     await waitFor(() => !lastGroupAnnotations.loading);
   });
 
-  const arrayOfSize = size => Array.from({ length: size }, () => ({}));
+  const arrayOfSize = (size, mapFn = () => ({})) =>
+    Array.from({ length: size }, mapFn);
 
   [arrayOfSize(5), arrayOfSize(50), arrayOfSize(1)].forEach(annotations => {
     it('sets annotations as resolved by fetchGroupAnnotations', async () => {
@@ -107,10 +108,26 @@ describe('useGroupAnnotations', () => {
   });
 
   it('fetches next page every time loadNextPage is called', async () => {
+    const monthDay = day => `${day}`.padStart(2, '0');
+
     // A total of 60 items, with 20 items per page, means we won't call this
     // more than three times
-    fakeFetchGroupAnnotations.resolves({
-      annotations: arrayOfSize(20),
+    fakeFetchGroupAnnotations.onCall(0).resolves({
+      annotations: arrayOfSize(20, (_, index) => ({
+        created: `2025-05-${monthDay(index + 1)}T10:00:00.000001+00:00`,
+      })),
+      total: 60,
+    });
+    fakeFetchGroupAnnotations.onCall(1).resolves({
+      annotations: arrayOfSize(20, (_, index) => ({
+        created: `2025-06-${monthDay(index + 1)}T10:00:00.000001+00:00`,
+      })),
+      total: 60,
+    });
+    fakeFetchGroupAnnotations.onCall(2).resolves({
+      annotations: arrayOfSize(20, (_, index) => ({
+        created: `2025-07-${monthDay(index + 1)}T10:00:00.000001+00:00`,
+      })),
       total: 60,
     });
 
@@ -127,16 +144,16 @@ describe('useGroupAnnotations', () => {
     assert.calledWith(
       fakeFetchGroupAnnotations.lastCall,
       {},
-      sinon.match({ pageNumber: 1 }),
+      sinon.match({ after: undefined }),
     );
     assert.equal(fakeFetchGroupAnnotations.callCount, 1);
 
-    // Subsequent calls will increase the page number
+    // Subsequent calls will update the cursor
     await invokeLoadNextPage();
     assert.calledWith(
       fakeFetchGroupAnnotations.lastCall,
       {},
-      sinon.match({ pageNumber: 2 }),
+      sinon.match({ after: '2025-05-20T10:00:00.000001+00:00' }),
     );
     assert.equal(fakeFetchGroupAnnotations.callCount, 2);
 
@@ -144,7 +161,7 @@ describe('useGroupAnnotations', () => {
     assert.calledWith(
       fakeFetchGroupAnnotations.lastCall,
       {},
-      sinon.match({ pageNumber: 3 }),
+      sinon.match({ after: '2025-06-20T10:00:00.000001+00:00' }),
     );
     assert.equal(fakeFetchGroupAnnotations.callCount, 3);
 
@@ -237,12 +254,26 @@ describe('useGroupAnnotations', () => {
 
       it('loads one more annotation at the bottom if more annotations can be loaded', async () => {
         const annotations = [
-          { id: '123', moderation_status: 'PENDING' },
-          { id: '456', moderation_status: 'PENDING' },
+          {
+            id: '123',
+            moderation_status: 'PENDING',
+            created: '2025-05-03T10:00:00.000001+00:00',
+          },
+          {
+            id: '456',
+            moderation_status: 'PENDING',
+            created: '2025-05-02T10:00:00.000001+00:00',
+          },
         ];
         fakeFetchGroupAnnotations.onCall(0).resolves({ annotations, total: 3 });
         fakeFetchGroupAnnotations.onCall(1).resolves({
-          annotations: [{ id: '789', moderation_status: 'PENDING' }],
+          annotations: [
+            {
+              id: '789',
+              moderation_status: 'PENDING',
+              created: '2025-05-01T10:00:00.000001+00:00',
+            },
+          ],
           total: 3,
         });
 
@@ -258,18 +289,33 @@ describe('useGroupAnnotations', () => {
         assert.calledWith(
           fakeFetchGroupAnnotations.firstCall,
           sinon.match.any,
-          sinon.match({ pageNumber: 1, pageSize: 20 }),
+          sinon.match({ after: undefined, pageSize: 20 }),
         );
         assert.calledWith(
           fakeFetchGroupAnnotations.secondCall,
           sinon.match.any,
-          sinon.match({ pageNumber: 2, pageSize: 1 }),
+          sinon.match({
+            after: annotations[1].created,
+            pageSize: 1,
+          }),
         );
         assert.deepEqual(
           [
-            { id: '123', moderation_status: 'PENDING' },
-            { id: '456', moderation_status: 'APPROVED' },
-            { id: '789', moderation_status: 'PENDING' },
+            {
+              id: '123',
+              moderation_status: 'PENDING',
+              created: '2025-05-03T10:00:00.000001+00:00',
+            },
+            {
+              id: '456',
+              moderation_status: 'APPROVED',
+              created: '2025-05-02T10:00:00.000001+00:00',
+            },
+            {
+              id: '789',
+              moderation_status: 'PENDING',
+              created: '2025-05-01T10:00:00.000001+00:00',
+            },
           ],
           lastGroupAnnotations.annotations,
         );

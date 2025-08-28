@@ -1,7 +1,7 @@
 from h.models import Annotation
 from h.models.annotation import ModerationStatus
 from h.schemas.api.group import FilterGroupAnnotationsSchema
-from h.schemas.pagination import Pagination
+from h.schemas.pagination import CursorPagination
 from h.schemas.util import validate_query_params
 from h.security import Permission
 from h.services.annotation_read import AnnotationReadService
@@ -19,7 +19,8 @@ from h.views.api.config import api_config
 )
 def list_annotations(context: GroupContext, request):
     assert context.group is not None, "Group is required"  # noqa: S101
-    pagination = Pagination.from_params(request.params)
+
+    pagination = CursorPagination.from_params(request.params)
     params = validate_query_params(FilterGroupAnnotationsSchema(), request.params)
 
     group = context.group
@@ -35,11 +36,13 @@ def list_annotations(context: GroupContext, request):
     )
 
     total = request.db.execute(AnnotationReadService.count_query(query)).scalar_one()
-    annotations = request.db.scalars(
-        query.order_by(Annotation.created.desc())
-        .offset(pagination.offset)
-        .limit(pagination.limit)
-    )
+
+    query = query.order_by(Annotation.created.desc()).limit(pagination.size)
+
+    if pagination.after:
+        query = query.where(Annotation.created < pagination.after)
+
+    annotations = request.db.scalars(query)
 
     annotations_dicts = [
         annotation_json_service.present_for_user(annotation, request.user)
