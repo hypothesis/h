@@ -298,6 +298,13 @@ export type Pagination = {
   pageSize?: number;
 };
 
+export type CursorPagination = {
+  /** Return paginated items after this cursor */
+  after?: string;
+  /** Maximum number of items to return in response for a paginated API. */
+  pageSize?: number;
+};
+
 /**
  * Convert pagination values into the raw record that callAPI expects as query
  *
@@ -305,11 +312,14 @@ export type Pagination = {
  */
 export function paginationToParams({
   pageSize,
-  pageNumber,
-}: Pagination): Record<string, number> {
-  const queryParams: Record<string, number> = {};
-  if (typeof pageNumber === 'number') {
-    queryParams['page[number]'] = pageNumber;
+  ...rest
+}: Pagination | CursorPagination): Record<string, string | number> {
+  const queryParams: Record<string, string | number> = {};
+  if ('after' in rest && rest.after) {
+    queryParams['page[after]'] = rest.after;
+  }
+  if ('pageNumber' in rest && typeof rest.pageNumber === 'number') {
+    queryParams['page[number]'] = rest.pageNumber;
   }
   if (typeof pageSize === 'number') {
     queryParams['page[size]'] = pageSize;

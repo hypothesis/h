@@ -20,11 +20,11 @@ describe('fetch-group-annotations', () => {
 
   [
     {
-      pageNumber: 10,
+      after: '2025-05-21T14:02:07.509098+00:00',
       pageSize: 20,
       moderationStatus: 'APPROVED',
       expectedQuery: {
-        'page[number]': 10,
+        'page[after]': '2025-05-21T14:02:07.509098+00:00',
         'page[size]': 20,
         moderation_status: 'APPROVED',
       },
@@ -32,46 +32,42 @@ describe('fetch-group-annotations', () => {
     {
       moderationStatus: 'SPAM',
       expectedQuery: {
-        'page[number]': 1,
         'page[size]': 20,
         moderation_status: 'SPAM',
       },
     },
     {
-      pageNumber: 5,
+      after: '2025-05-01T14:02:07.509098+00:00',
       pageSize: 6,
       expectedQuery: {
-        'page[number]': 5,
+        'page[after]': '2025-05-01T14:02:07.509098+00:00',
         'page[size]': 6,
       },
     },
     {
       expectedQuery: {
-        'page[number]': 1,
         'page[size]': 20,
       },
     },
-  ].forEach(
-    ({ pageNumber = 1, pageSize = 20, moderationStatus, expectedQuery }) => {
-      it('calls API with expected parameters', async () => {
-        const { signal } = new AbortController();
+  ].forEach(({ after, pageSize = 20, moderationStatus, expectedQuery }) => {
+    it('calls API with expected parameters', async () => {
+      const { signal } = new AbortController();
 
-        await fetchGroupAnnotations(
-          {
-            url: '/api/groups/abc123/annotations',
-            method: 'GET',
-            headers: {},
-          },
-          { signal, pageNumber, pageSize, moderationStatus },
-        );
-
-        assert.calledWith(fakeCallAPI, '/api/groups/abc123/annotations', {
-          signal,
-          query: expectedQuery,
+      await fetchGroupAnnotations(
+        {
+          url: '/api/groups/abc123/annotations',
           method: 'GET',
           headers: {},
-        });
+        },
+        { signal, after, pageSize, moderationStatus },
+      );
+
+      assert.calledWith(fakeCallAPI, '/api/groups/abc123/annotations', {
+        signal,
+        query: expectedQuery,
+        method: 'GET',
+        headers: {},
       });
-    },
-  );
+    });
+  });
 });

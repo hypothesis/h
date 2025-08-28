@@ -8,7 +8,7 @@ import type { APIConfig } from '../../config';
 
 export type FetchGroupAnnotationsOptions = {
   signal?: AbortSignal;
-  pageNumber: number;
+  after?: string;
   pageSize: number;
   moderationStatus?: ModerationStatus;
 };
@@ -20,15 +20,10 @@ export type FetchGroupAnnotationsResult = {
 
 export async function fetchGroupAnnotations(
   { url, headers, method }: APIConfig,
-  {
-    signal,
-    pageNumber,
-    pageSize,
-    moderationStatus,
-  }: FetchGroupAnnotationsOptions,
+  { signal, after, pageSize, moderationStatus }: FetchGroupAnnotationsOptions,
 ): Promise<FetchGroupAnnotationsResult> {
   const query: Record<string, string | number> = paginationToParams({
-    pageNumber,
+    after,
     pageSize,
   });
   if (moderationStatus) {
