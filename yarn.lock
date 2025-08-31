@@ -3067,6 +3067,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/scope-manager@npm:^8.41.0":
+  version: 8.41.0
+  resolution: "@typescript-eslint/scope-manager@npm:8.41.0"
+  dependencies:
+    "@typescript-eslint/types": 8.41.0
+    "@typescript-eslint/visitor-keys": 8.41.0
+  checksum: 6acadc661e124c81444518819a895d841ea9c85a519b3e27249844c7e1362dd4b42f617e1b5c4812dc3b210ccbdaf7e9fca18c4de49eff9d6120c66fc7b249fc
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/tsconfig-utils@npm:8.36.0, @typescript-eslint/tsconfig-utils@npm:^8.36.0":
   version: 8.36.0
   resolution: "@typescript-eslint/tsconfig-utils@npm:8.36.0"
@@ -3104,6 +3114,13 @@ __metadata:
   version: 8.36.0
   resolution: "@typescript-eslint/types@npm:8.36.0"
   checksum: cf1ef4ff0d9df9f37328d6a4c15a006d574ad162448a68e16fba6864a65150edd16ad3e0278771a5311570712a23642242ecc49f13b231287a9becf739dd32fc
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/types@npm:8.41.0":
+  version: 8.41.0
+  resolution: "@typescript-eslint/types@npm:8.41.0"
+  checksum: fec264738c7ee6c79352efb30620c544e47db7ba43523518547cabb08ff14406436b1fbf521606b319a3037ab663a694e91363554f8757e021b87a4cd18e1373
   languageName: node
   linkType: hard
 
@@ -3198,6 +3215,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/visitor-keys@npm:8.41.0":
+  version: 8.41.0
+  resolution: "@typescript-eslint/visitor-keys@npm:8.41.0"
+  dependencies:
+    "@typescript-eslint/types": 8.41.0
+    eslint-visitor-keys: ^4.2.1
+  checksum: 002bc638a1fd20293c4d69076c6e2925d712e47899dd35aa0ca4428815a08e59f6c16581dfd421abf5a65a29a5ad3a1c6fcc791b7f42b0e5f8c306e35aee0e50
+  languageName: node
+  linkType: hard
+
 "@vitest/browser@npm:^3.2.4":
   version: 3.2.4
   resolution: "@vitest/browser@npm:3.2.4"
@@ -3245,10 +3272,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/eslint-plugin@npm:^1.3.4":
-  version: 1.3.4
-  resolution: "@vitest/eslint-plugin@npm:1.3.4"
+"@vitest/eslint-plugin@npm:^1.3.5":
+  version: 1.3.5
+  resolution: "@vitest/eslint-plugin@npm:1.3.5"
   dependencies:
+    "@typescript-eslint/scope-manager": ^8.41.0
     "@typescript-eslint/utils": ^8.24.1
   peerDependencies:
     eslint: ">= 8.57.0"
@@ -3259,7 +3287,7 @@ __metadata:
       optional: true
     vitest:
       optional: true
-  checksum: 9cd8afc3a27ee247e3ebe9455f7c9df334824115459d640f38086121fd67142ee0523d9b30e55ce8dda7504d9c5cabaf80f351238fc64f33fc53ef92a59bba68
+  checksum: 7c15291ff819b5a09089800e29fb1723d5f0e2f596756afbcb10af6ac1ac2707801f3d55bc5d46852289cb02e5e1c40225bd128bdd2dc532dd9cb3b41c602375
   languageName: node
   linkType: hard
 
@@ -6958,7 +6986,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": ^5.2.2
     "@vitest/browser": ^3.2.4
     "@vitest/coverage-istanbul": ^3.2.4
-    "@vitest/eslint-plugin": ^1.3.4
+    "@vitest/eslint-plugin": ^1.3.5
     autoprefixer: ^10.4.20
     babel-plugin-istanbul: ^7.0.0
     babel-plugin-mockable-imports: ^2.0.1
