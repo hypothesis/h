@@ -92,7 +92,7 @@ factory-boy==3.3.3
     #   pytest-factoryboy
 faker==22.2.0
     # via factory-boy
-freezegun==1.5.1
+freezegun==1.5.5
     # via -r requirements/tests.in
 gevent==24.11.1
     # via -r requirements/prod.txt

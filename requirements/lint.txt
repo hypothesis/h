@@ -135,7 +135,7 @@ faker==22.2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
-freezegun==1.5.1
+freezegun==1.5.5
     # via -r requirements/tests.txt
 gevent==24.11.1
     # via
