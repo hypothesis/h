@@ -229,6 +229,8 @@ pycparser==2.22
     #   cffi
 pycryptodomex==3.21.0
     # via -r requirements/prod.txt
+pygments==2.19.2
+    # via pytest
 pyjwt[crypto]==2.10.1
     # via -r requirements/prod.txt
 pyparsing==3.2.3
@@ -263,7 +265,7 @@ pyramid-services==2.2
     # via -r requirements/prod.txt
 pyramid-tm==2.6
     # via -r requirements/prod.txt
-pytest==8.3.5
+pytest==8.4.1
     # via
     #   -r requirements/tests.in
     #   pytest-cov

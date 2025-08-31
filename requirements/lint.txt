@@ -338,6 +338,11 @@ pycryptodomex==3.21.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+pygments==2.19.2
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   pytest
 pyjwt[crypto]==2.10.1
     # via
     #   -r requirements/functests.txt
@@ -393,7 +398,7 @@ pyramid-tm==2.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytest==8.3.5
+pytest==8.4.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
