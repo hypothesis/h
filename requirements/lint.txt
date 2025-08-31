@@ -409,7 +409,7 @@ pytest==8.4.1
     #   pytest-xdist
 pytest-cov==6.1.1
     # via -r requirements/tests.txt
-pytest-factoryboy==2.7.0
+pytest-factoryboy==2.8.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
