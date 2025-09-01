@@ -5,7 +5,6 @@ from functools import cache
 
 import colander
 import deform
-from markupsafe import Markup
 from sqlalchemy import select
 
 from h import i18n, models
@@ -88,10 +87,6 @@ def username_node():
             unblacklisted_username,
         ),
         title=_("Username"),
-        hint=_(
-            "Must be between {min} and {max} characters, containing only "
-            "letters, numbers, periods, and underscores."
-        ).format(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
     )
 
 
@@ -147,35 +142,9 @@ def new_password_node(**kwargs):
     )
 
 
-def _privacy_accepted_message():
-    terms_links = {
-        "privacy_policy": '<a class="link" href="{href}">{text}</a>'.format(
-            href="https://web.hypothes.is/privacy/", text=_("privacy policy")
-        ),
-        "terms_of_service": '<a class="link" href="{href}">{text}</a>'.format(
-            href="https://web.hypothes.is/terms-of-service/", text=_("terms of service")
-        ),
-        "community_guidelines": '<a class="link" href="{href}">{text}</a>'.format(
-            href="https://web.hypothes.is/community-guidelines/",
-            text=_("community guidelines"),
-        ),
-    }
-
-    privacy_msg = _(
-        "I have read and agree to the {privacy}, {tos}, and {community}."
-    ).format(
-        privacy=terms_links["privacy_policy"],
-        tos=terms_links["terms_of_service"],
-        community=terms_links["community_guidelines"],
-    )
-
-    return privacy_msg
-
-
 def privacy_accepted_node():
     return colander.SchemaNode(
         colander.Boolean(),
-        description=Markup(_privacy_accepted_message()),
         validator=privacy_acceptance_validator,
     )
 
@@ -183,7 +152,6 @@ def privacy_accepted_node():
 def comms_opt_in_node():
     return colander.SchemaNode(
         colander.Boolean(),
-        description=_("I would like to receive news about annotation and Hypothesis."),
         missing=None,
         default=False,
     )
@@ -239,7 +207,6 @@ def new_password_confirm_node():
         colander.String(),
         title=_("Confirm new password"),
         widget=deform.widget.PasswordWidget(autocomplete="new-password"),
-        hide_until_form_active=True,
     )
 
 
