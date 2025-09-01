@@ -5,11 +5,8 @@
       method="{{ field.method }}"
       enctype="multipart/form-data"
       accept-charset="utf-8"
-      class="form {{ field.css_class or '' }}
-             {%- if field.use_inline_editing %} js-form {% endif %}">
+      class="form {{ field.css_class or '' }}">
   <input type="hidden" name="__formid__" value="{{ field.formid }}" />
-
-  <div class="form__backdrop" data-ref="formBackdrop"></div>
 
   {%- for f in field.children -%}
     {{ field.renderer(field.widget.item_template, field=f, cstruct=cstruct.get(f.name, null)) }}
@@ -21,20 +18,7 @@
   </div>
   {% endif %}
 
-  <div class="form-actions {% if field.use_inline_editing %} is-hidden-when-loading {% endif %}"
-       data-ref="formActions">
-    <div class="form__submit-error" data-ref="formSubmitError">
-      <span>{% trans %}Unable to save changes: {% endtrans %}</span>
-      <span data-ref="formSubmitErrorMessage"></span>
-    </div>
-    {% if field.use_inline_editing %}
-    <button type="button"
-            class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
-    {% endif %}
-    {% if field.show_cancel_button %}
-    <button type="button"
-            class="btn btn--cancel js-form-cancel">Cancel</button>
-    {% endif %}
+  <div class="form-actions">
     {% if field.back_link %}
     <a class="btn btn--cancel"
        href="{{ field.back_link.href }}">{{ field.back_link.text }}</a>

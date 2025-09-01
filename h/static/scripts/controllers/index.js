@@ -11,10 +11,8 @@
 import { CharacterLimitController } from './character-limit-controller';
 import { ConfirmSubmitController } from './confirm-submit-controller';
 import { CopyButtonController } from './copy-button-controller';
-import { DisableOnSubmitController } from './disable-on-submit-controller';
 import { DropdownMenuController } from './dropdown-menu-controller';
 import { FormCancelController } from './form-cancel-controller';
-import { FormController } from './form-controller';
 import { FormInputController } from './form-input-controller';
 import { FormSelectOnFocusController } from './form-select-onfocus-controller';
 import { InputAutofocusController } from './input-autofocus-controller';
@@ -25,9 +23,7 @@ export const sharedControllers = {
   '.js-character-limit': CharacterLimitController,
   '.js-copy-button': CopyButtonController,
   '.js-confirm-submit': ConfirmSubmitController,
-  '.js-disable-on-submit': DisableOnSubmitController,
   '.js-dropdown-menu': DropdownMenuController,
-  '.js-form': FormController,
   '.js-form-cancel': FormCancelController,
   '.js-form-input': FormInputController,
   '.js-input-autofocus': InputAutofocusController,
