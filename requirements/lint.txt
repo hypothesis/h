@@ -461,7 +461,7 @@ rpds-py==0.22.3
     #   -r requirements/tests.txt
     #   jsonschema
     #   referencing
-ruff==0.9.9
+ruff==0.12.11
     # via -r requirements/lint.in
 sentry-sdk==2.22.0
     # via
