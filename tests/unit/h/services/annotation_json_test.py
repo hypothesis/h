@@ -49,7 +49,7 @@ class TestAnnotationJSONService:
             "user_info": {"display_name": user_service.fetch.return_value.display_name},
             "mentions": [],
             "moderation_status": None,
-            "actions": ["moderate"],
+            "actions": [],
         }
 
         DocumentJSONPresenter.assert_called_once_with(annotation.document)
@@ -164,6 +164,7 @@ class TestAnnotationJSONService:
                 "hidden": False,
                 "flagged": flag_service.flagged.return_value,
                 "moderation": {"flagCount": flag_service.flag_count.return_value},
+                "actions": ["moderate"],
             }
         )
 

@@ -99,11 +99,6 @@ class AnnotationJSONService:
         if with_metadata and annotation.slim.meta:
             model["metadata"] = annotation.slim.meta.data
 
-        if self._request.has_permission(
-            Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
-        ):
-            model["actions"].append("moderate")
-
         return model
 
     def present_for_user(
@@ -129,16 +124,17 @@ class AnnotationJSONService:
         # The flagged value depends on whether this particular user has flagged
         model["flagged"] = self._flag_service.flagged(user=user, annotation=annotation)
 
-        # Only moderators see the full flag count
         user_is_moderator = identity_permits(
             identity=Identity.from_models(user=user),
             context=AnnotationContext(annotation),
             permission=Permission.Annotation.MODERATE,
         )
         if user_is_moderator:
+            # Only moderators see the full flag count
             model["moderation"] = {
                 "flagCount": self._flag_service.flag_count(annotation)
             }
+            model["actions"].append("moderate")
 
         # The hidden value depends on whether you are the author
         user_is_author = user and user.userid == annotation.userid
