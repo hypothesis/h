@@ -5,7 +5,7 @@ import type { LoginFormsConfigObject } from './config';
 import { findContainer, readConfig } from './util/config';
 
 function init() {
-  const container = findContainer('#login-form');
+  const container = findContainer('#js-app-container');
   const config = readConfig<LoginFormsConfigObject>();
   render(<LoginAppRoot config={config} />, container);
 }

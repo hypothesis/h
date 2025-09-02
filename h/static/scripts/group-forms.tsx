@@ -5,7 +5,7 @@ import type { GroupFormsConfigObject } from './config';
 import { findContainer, readConfig } from './util/config';
 
 function init() {
-  const container = findContainer('#group-form');
+  const container = findContainer('#js-app-container');
   const config = readConfig<GroupFormsConfigObject>();
   render(<GroupFormsAppRoot config={config} />, container);
 }

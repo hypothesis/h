@@ -1,24 +1,18 @@
 {% extends "h:templates/layouts/group.html.jinja2" %}
+{% from "h:templates/includes/js_app.html.jinja2" import css_bundle, js_app_container, js_bundle %}
 
 {% block styles %}
   {{ super() }}
-
-  {% for url in asset_urls('forms_css') %}
-    <link rel="stylesheet" href="{{ url }}">
-  {% endfor %}
+  {{ css_bundle('forms_css') }}
 {% endblock %}
 
 {% block page_content %}
 <div class="form-container form-container--wide">
-  <div id="group-form"></div>
-  <script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+  {{ js_app_container(js_config) }}
 </div>
 {% endblock %}
 
 {% block scripts %}
   {{ super() }}
-
-  {% for url in asset_urls('group_forms_js') %}
-    <script type="module" src="{{ url }}"></script>
-  {% endfor %}
+  {{ js_bundle('group_forms_js') }}
 {% endblock %}

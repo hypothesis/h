@@ -1,0 +1,24 @@
+{#
+  Render the main container element for a client-rendered application.
+
+  :param js_config:
+    JSON-serializable value containing the configuration for the JS application.
+#}
+{% macro js_app_container(js_config) %}
+<script type="application/json" class="js-config">{{ js_config|tojson }}</script>
+<div id="js-app-container"></div>
+{% endmacro %}
+
+{# Render the `<script>` tags for a JS bundle defined in h/assets.ini. #}
+{% macro js_bundle(bundle_name) %}
+{% for url in asset_urls(bundle_name) %}
+<script type="module" src="{{ url }}"></script>
+{% endfor %}
+{% endmacro %}
+
+{# Render the `<style>` tags for a CSS bundle defined in h/assets.ini. #}
+{% macro css_bundle(bundle_name) %}
+{% for url in asset_urls(bundle_name)  %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
+{% endmacro %}
