@@ -110,6 +110,22 @@ export type SignupConfigObject = LoginFormsConfigBase & {
   identity?: SocialLoginIdentity;
 };
 
+/** Configuration for the 'Forgot password' form. */
+export type ForgotPasswordConfigObject = LoginFormsConfigBase & {
+  form: FormFields<{
+    email: string;
+  }>;
+};
+
+/** Configuration for the 'New password' form. */
+export type ResetPasswordConfigObject = LoginFormsConfigBase & {
+  form: FormFields<{
+    /** The reset code. See ResetPasswordSchema in backend for name rationale. */
+    user: string;
+    password: string;
+  }>;
+};
+
 /** Configuration for the 'Account settings' forms. */
 export type AccountSettingsConfigObject = LoginFormsConfigBase & {
   forms: {
@@ -182,11 +198,13 @@ export type NotificationsConfigObject = LoginFormsConfigBase & {
 
 export type LoginFormsConfigObject =
   | LoginConfigObject
+  | ForgotPasswordConfigObject
   | SignupConfigObject
   | AccountSettingsConfigObject
   | DeveloperConfigObject
   | NotificationsConfigObject
-  | ProfileConfigObject;
+  | ProfileConfigObject
+  | ResetPasswordConfigObject;
 
 export const LoginFormsConfig = createContext<LoginFormsConfigObject | null>(
   null,

@@ -368,19 +368,42 @@ class TestAuthController:
     "activation_model", "tasks_email", "reset_password_email", "routes"
 )
 class TestForgotPasswordController:
-    def test_post_returns_form_when_validation_fails(
-        self, invalid_form, pyramid_request
+    def test_post_returns_form_config_when_validation_fails(
+        self, invalid_form, pyramid_request, pyramid_config, mocker
     ):
+        mocker.patch("h.views.accounts.get_csrf_token", return_value="test-csrf")
+        pyramid_request.POST = {"email": "invalid@example.com"}
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = invalid_form()
+        form_errors = {"email": "Invalid email"}
+        controller.form = invalid_form(errors=form_errors)
 
         result = controller.post()
 
-        assert result == {"form": "invalid form"}
+        expected = {
+            "js_config": {
+                "csrfToken": "test-csrf",
+                "features": {},
+                "form": {
+                    "data": {
+                        "email": "invalid@example.com",
+                    },
+                    "errors": {
+                        "email": "Invalid email",
+                    },
+                },
+                "urls": {
+                    "login": {
+                        "username_or_email": "http://example.com/login",
+                    },
+                },
+            }
+        }
+        assert result == expected
 
     def test_post_creates_no_activations_when_validation_fails(
-        self, activation_model, invalid_form, pyramid_request
+        self, activation_model, invalid_form, pyramid_request, pyramid_config, mocker
     ):
+        mocker.patch("h.views.accounts.get_csrf_token", return_value="test-csrf")
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = invalid_form()
 
@@ -463,8 +486,9 @@ class TestForgotPasswordController:
 
     @pytest.fixture
     def routes(self, pyramid_config):
-        pyramid_config.add_route("index", "/index")
         pyramid_config.add_route("account_reset", "/account/reset")
+        pyramid_config.add_route("index", "/index")
+        pyramid_config.add_route("login", "/login")
 
     @pytest.fixture
     def user(self, factories, db_session):

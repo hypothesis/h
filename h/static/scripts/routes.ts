@@ -18,6 +18,8 @@ export const routes = {
   },
   login: '/login',
   profile: '/account/profile',
+  resetPassword: '/account/reset',
+  resetPasswordWithCode: '/account/reset/:code',
   signup: '/signup',
   signupWithEmail: '/signup/email',
   signupWithFacebook: '/signup/facebook',

@@ -1,14 +1,20 @@
 {% extends "h:templates/accounts/base.html.jinja2" %}
+{% from "h:templates/includes/js_app.html.jinja2" import css_bundle, js_app_container, js_bundle %}
 
 {% block page_title %}New password{% endblock %}
 
-{% set form_message %}
-  {% if not has_code %}
-    {% trans %}
-      Please check your email. We've sent you a reset code that you must enter
-      below in order to set your new password.
-    {% endtrans %}
-  {% endif %}
-{% endset %}
+{% block styles %}
+  {{ super() }}
+  {{ css_bundle('forms_css') }}
+{% endblock %}
 
-{% set login_message = "Already know your password?" %}
+{% block content %}
+  <div class="form-container">
+    {{ js_app_container(js_config) }}
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  {{ js_bundle('login_forms_js') }}
+{% endblock %}

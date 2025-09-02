@@ -192,14 +192,13 @@ class ForgotPasswordController:
     def __init__(self, request):
         self.request = request
         self.schema = ForgotPasswordSchema().bind(request=self.request)
-        self.form = request.create_form(self.schema, buttons=(_("Reset"),))
+        self.form = request.create_form(self.schema)
 
     @view_config(request_method="GET")
     def get(self):  # pragma: no cover
         """Render the forgot password page, including the form."""
         self._redirect_if_logged_in()
-
-        return {"form": self.form.render()}
+        return self._template_data()
 
     @view_config(request_method="POST")
     def post(self):
@@ -215,13 +214,43 @@ class ForgotPasswordController:
 
         try:
             appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure:
-            return {"form": self.form.render()}
+        except deform.ValidationFailure as exc:
+            return self._template_data(
+                items=self.request.POST, errors=exc.error.asdict()
+            )
 
         user = appstruct["user"]
         self._send_forgot_password_email(user)
 
         return httpexceptions.HTTPFound(self.request.route_path("account_reset"))
+
+    def _template_data(self, items=None, errors=None):
+        if items is None:
+            items = {}
+        if errors is None:
+            errors = {}
+
+        csrf_token = get_csrf_token(self.request)
+
+        return {
+            "js_config": {
+                "csrfToken": csrf_token,
+                "features": {},
+                "form": {
+                    "data": {
+                        "email": items.get("email") or None,
+                    },
+                    "errors": {
+                        "email": errors.get("email") or None,
+                    },
+                },
+                "urls": {
+                    "login": {
+                        "username_or_email": self.request.route_url("login"),
+                    },
+                },
+            }
+        }
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
@@ -247,13 +276,12 @@ class ResetController:
         self.form = request.create_form(
             schema=self.schema,
             action=self.request.route_path("account_reset"),
-            buttons=(_("Save"),),
         )
 
     @view_config(request_method="GET")
     def get(self):
         """Render the reset password form."""
-        return {"form": self.form.render(), "has_code": False}
+        return self._template_data()
 
     @view_config(route_name="account_reset_with_code", request_method="GET")
     def get_with_prefilled_code(self):
@@ -263,16 +291,15 @@ class ResetController:
         # If valid, we inject the supplied it into the form as a hidden field.
         # Otherwise, we 404.
         try:
-            user = ResetCode().deserialize(self.schema, code)
+            ResetCode().deserialize(self.schema, code)
         except colander.Invalid as err:
             raise httpexceptions.HTTPNotFound() from err  # noqa: RSE102
 
-        # N.B. the form field for the reset code is called 'user'. See the
-        # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
-        self.form.set_appstruct({"user": user})
-        self.form.set_widgets({"user": deform.widget.HiddenWidget()})
+        # The form field for the reset code is called "user". See comments in
+        # ResetPasswordSchema for the dubious rationale.
+        items = {"user": code}
 
-        return {"form": self.form.render(), "has_code": True}
+        return self._template_data(items=items)
 
     @view_config(request_method="POST")
     def post(self):
@@ -285,11 +312,8 @@ class ResetController:
         """
         try:
             appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure:
-            # If the code is valid, hide the field.
-            if not self.form["user"].error:  # pragma: no cover
-                self.form.set_widgets({"user": deform.widget.HiddenWidget()})
-            return {"form": self.form.render()}
+        except deform.ValidationFailure as e:
+            return self._template_data(items=self.request.POST, errors=e.error)
 
         user = appstruct["user"]
 
@@ -300,6 +324,31 @@ class ResetController:
                 "login", _query={"username": user.username}
             )
         )
+
+    def _template_data(self, items=None, errors=None):
+        if items is None:
+            items = {}
+        if errors is None:
+            errors = {}
+
+        csrf_token = get_csrf_token(self.request)
+
+        return {
+            "js_config": {
+                "csrfToken": csrf_token,
+                "features": {},
+                "form": {
+                    "data": {
+                        "user": items.get("user") or None,
+                        "password": items.get("password") or None,
+                    },
+                    "errors": {
+                        "user": errors.get("user") or None,
+                        "password": errors.get("password") or None,
+                    },
+                },
+            }
+        }
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:  # pragma: no cover

@@ -9,9 +9,11 @@ import { routes } from '../routes';
 import AccountSettingsForms from './AccountSettingsForms';
 import AppContainer from './AppContainer';
 import DeveloperForm from './DeveloperForm';
+import ForgotPasswordForm from './ForgotPasswordForm';
 import LoginForm from './LoginForm';
 import NotificationsForm from './NotificationsForm';
 import ProfileForm from './ProfileForm';
+import ResetPasswordForm from './ResetPasswordForm';
 import Router from './Router';
 import SignupForm from './SignupForm';
 import SignupSelectForm from './SignupSelectForm';
@@ -52,6 +54,15 @@ export default function LoginAppRoot({ config }: AppRootProps) {
           <Switch>
             <Route path={routes.login}>
               <LoginForm enableSocialLogin={enableSocialLogin} />
+            </Route>
+            <Route path={routes.forgotPassword}>
+              <ForgotPasswordForm />
+            </Route>
+            <Route path={routes.resetPassword}>
+              <ResetPasswordForm />
+            </Route>
+            <Route path={routes.resetPasswordWithCode}>
+              <ResetPasswordForm />
             </Route>
             <Route path={routes.signup}>
               {enableSocialLogin && <SignupSelectForm />}
