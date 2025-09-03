@@ -46,15 +46,20 @@ class AnnotationJSONService:
         self._mention_service = mention_service
         self._request = request
 
-    def present(self, annotation: Annotation, with_metadata: bool = False):  # noqa: FBT002, FBT001
+    def present(
+        self,
+        annotation: Annotation,
+        user: User | None = None,
+        with_metadata: bool = False,  # noqa: FBT002, FBT001
+    ):
         """
         Get the JSON presentation of an annotation.
 
-        This representation does not contain any user specific information and
-        has only the data applicable to all users. This does not blank content
-        for moderated annotations.
+        This representation can include data the specific user is privy to
+        and also hides moderated content from users who should not see it.
 
         :param annotation: Annotation to present
+        :param user: User that the annotation is being presented to, if any
         :return: A dict suitable for JSON serialisation
         """
         model: dict = deepcopy(annotation.extra) or {}
@@ -86,12 +91,12 @@ class AnnotationJSONService:
             }
         )
 
-        user = self._user_service.fetch(annotation.userid)
+        author = self._user_service.fetch(annotation.userid)
         model["mentions"] = [
             MentionJSONPresenter(mention, self._request).asdict()
             for mention in annotation.mentions
         ]
-        model.update(user_info(user))
+        model.update(user_info(author))
 
         if annotation.references:
             model["references"] = annotation.references
@@ -99,46 +104,20 @@ class AnnotationJSONService:
         if with_metadata and annotation.slim.meta:
             model["metadata"] = annotation.slim.meta.data
 
-        if self._request.has_permission(
-            Permission.Annotation.MODERATE, context=AnnotationContext(annotation)
-        ):
-            model["actions"].append("moderate")
-
-        return model
-
-    def present_for_user(
-        self,
-        annotation: Annotation,
-        user: User,
-        with_metadata: bool = False,  # noqa: FBT002, FBT001
-    ):
-        """
-        Get the JSON presentation of an annotation for a particular user.
-
-        This representation includes extra data the specific user is privy to
-        and also hides moderated content from users who should not see it.
-
-        :param annotation: Annotation to present
-        :param user: User that the annotation is being presented to
-        :return: A dict suitable for JSON serialisation
-        """
-
-        # Get the basic version which isn't user specific
-        model = self.present(annotation, with_metadata=with_metadata)
-
         # The flagged value depends on whether this particular user has flagged
         model["flagged"] = self._flag_service.flagged(user=user, annotation=annotation)
 
-        # Only moderators see the full flag count
         user_is_moderator = identity_permits(
             identity=Identity.from_models(user=user),
             context=AnnotationContext(annotation),
             permission=Permission.Annotation.MODERATE,
         )
         if user_is_moderator:
+            # Only moderators see the full flag count
             model["moderation"] = {
                 "flagCount": self._flag_service.flag_count(annotation)
             }
+            model["actions"].append("moderate")
 
         # The hidden value depends on whether you are the author
         user_is_author = user and user.userid == annotation.userid
@@ -158,7 +137,7 @@ class AnnotationJSONService:
         Get the JSON presentation of many annotations for a particular user.
 
         This method is more efficient than repeatedly calling
-        `present_for_user` when generating a large number of annotations for
+        `present` when generating a large number of annotations for
         the same user, but returns the same information (but in a list).
 
         :param annotation_ids: Annotation to present
@@ -187,7 +166,7 @@ class AnnotationJSONService:
         # Optimise the user service `fetch()` call
         self._user_service.fetch_all([annotation.userid for annotation in annotations])
 
-        return [self.present_for_user(annotation, user) for annotation in annotations]
+        return [self.present(annotation, user) for annotation in annotations]
 
     @classmethod
     def _get_read_permission(cls, annotation):

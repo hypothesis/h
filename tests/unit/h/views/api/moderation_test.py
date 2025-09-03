@@ -120,10 +120,10 @@ class TestChangeAnnotationModerationStatus:
                 mock.call(events.ModeratedAnnotationEvent.return_value),
             ]
         )
-        annotation_json_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present.assert_called_once_with(
             annotation=annotation, user=pyramid_request.user
         )
-        assert response == annotation_json_service.present_for_user.return_value
+        assert response == annotation_json_service.present.return_value
 
     @pytest.mark.parametrize(
         "annotation_updated,message",

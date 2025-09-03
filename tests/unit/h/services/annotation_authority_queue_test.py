@@ -45,7 +45,7 @@ class TestAnnotationAuthorityQueueService:
         Connection,
     ):
         annotation_presented = {"id": annotation.id}
-        annotation_json_service.present_for_user.return_value = annotation_presented
+        annotation_json_service.present.return_value = annotation_presented
         annotation_read_service.get_annotation_by_id.return_value = annotation
 
         svc.publish("create", sentinel.annotation_id)
@@ -53,7 +53,7 @@ class TestAnnotationAuthorityQueueService:
         annotation_read_service.get_annotation_by_id.assert_called_once_with(
             sentinel.annotation_id
         )
-        annotation_json_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present.assert_called_once_with(
             annotation=annotation_read_service.get_annotation_by_id.return_value,
             user=annotation_read_service.get_annotation_by_id.return_value.slim.user,
             with_metadata=True,

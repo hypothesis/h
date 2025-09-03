@@ -45,7 +45,7 @@ def list_annotations(context: GroupContext, request):
     annotations = request.db.scalars(query)
 
     annotations_dicts = [
-        annotation_json_service.present_for_user(annotation, request.user)
+        annotation_json_service.present(annotation, request.user)
         for annotation in annotations
     ]
 

@@ -13,7 +13,13 @@ from h.traversal import AnnotationContext
 
 class TestAnnotationJSONService:
     def test_present(
-        self, service, annotation, links_service, user_service, DocumentJSONPresenter
+        self,
+        service,
+        annotation,
+        links_service,
+        user_service,
+        flag_service,
+        DocumentJSONPresenter,
     ):
         annotation.created = datetime(2016, 2, 24, 18, 3, 25, 768)  # noqa: DTZ001
         annotation.updated = datetime(2016, 2, 29, 10, 24, 5, 564)  # noqa: DTZ001
@@ -49,6 +55,9 @@ class TestAnnotationJSONService:
             "user_info": {"display_name": user_service.fetch.return_value.display_name},
             "mentions": [],
             "moderation_status": None,
+            "hidden": False,
+            "flagged": flag_service.flagged.return_value,
+            "moderation": {"flagCount": flag_service.flag_count.return_value},
             "actions": ["moderate"],
         }
 
@@ -76,9 +85,9 @@ class TestAnnotationJSONService:
         assert "references" not in result
 
     def test_present_without_moderation_permission(
-        self, service, annotation, pyramid_config
+        self, service, annotation, identity_permits
     ):
-        pyramid_config.testing_securitypolicy(permissive=False)
+        identity_permits.return_value = False
 
         result = service.present(annotation)
 
@@ -119,15 +128,27 @@ class TestAnnotationJSONService:
         permission = permission_template.format(annotation=annotation)
         assert presented["permissions"]["read"] == [permission]
 
+    @pytest.mark.parametrize(
+        "group_id,expected_identity_permits_calls",
+        [
+            ("__world__", 1),
+            ("foo", 2),
+        ],
+    )
     def test_present_skips_the_read_permission_check_if_group_is_world(
-        self, service, annotation, identity_permits
+        self,
+        service,
+        annotation,
+        identity_permits,
+        group_id,
+        expected_identity_permits_calls,
     ):
         annotation.shared = True
-        annotation.groupid = "__world__"
+        annotation.groupid = group_id
 
         presented = service.present(annotation)
 
-        identity_permits.assert_not_called()
+        assert identity_permits.call_count == expected_identity_permits_calls
         assert presented["permissions"]["read"] == ["group:__world__"]
 
     @pytest.mark.parametrize("shared", [True, False])
@@ -151,28 +172,12 @@ class TestAnnotationJSONService:
         elif moderation_status and shared:
             assert result["moderation_status"] == moderation_status.value
 
-    def test_present_for_user(self, service, user, annotation, flag_service):
-        result = service.present_for_user(annotation, user)
-
-        flag_service.flagged.assert_called_once_with(user, annotation)
-        flag_service.flag_count.assert_called_once_with(annotation)
-        assert result == Any.dict.containing(
-            {
-                # At least one thing from normal serialization
-                "id": Any(),
-                # ... and the things this method adds
-                "hidden": False,
-                "flagged": flag_service.flagged.return_value,
-                "moderation": {"flagCount": flag_service.flag_count.return_value},
-            }
-        )
-
-    def test_present_for_user_only_shows_moderation_to_moderators(
+    def test_present_only_shows_moderation_to_moderators(
         self, service, annotation, user, identity_permits, Identity, matchers
     ):
         identity_permits.return_value = False
 
-        result = service.present_for_user(annotation, user)
+        result = service.present(annotation, user)
 
         Identity.from_models.assert_called_once_with(user=user)
         identity_permits.assert_called_once_with(
@@ -184,34 +189,34 @@ class TestAnnotationJSONService:
         assert "moderation" not in result
 
     @pytest.mark.usefixtures("with_hidden_annotation")
-    def test_present_for_user_hidden_status_is_not_shown_to_creator(
+    def test_present_hidden_status_is_not_shown_to_creator(
         self, service, annotation, user
     ):
         annotation.userid = user.userid
 
-        result = service.present_for_user(annotation, user)
+        result = service.present(annotation, user)
 
         assert not result["hidden"]
 
     @pytest.mark.usefixtures("with_hidden_annotation")
-    def test_present_for_user_hidden_censors_content_for_normal_users(
+    def test_present_hidden_censors_content_for_normal_users(
         self, service, annotation, user, identity_permits
     ):
         identity_permits.return_value = False
 
-        result = service.present_for_user(annotation, user)
+        result = service.present(annotation, user)
 
         assert result["hidden"]
         assert not result["text"]
         assert not result["tags"]
 
     @pytest.mark.usefixtures("with_hidden_annotation")
-    def test_present_for_user_hidden_shows_everything_to_moderators(
+    def test_present_hidden_shows_everything_to_moderators(
         self, service, annotation, user, identity_permits
     ):
         identity_permits.return_value = True
 
-        result = service.present_for_user(annotation, user)
+        result = service.present(annotation, user)
 
         assert result["hidden"]
         assert result["text"]

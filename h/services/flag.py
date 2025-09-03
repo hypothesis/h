@@ -27,7 +27,7 @@ class FlagService:
 
         self._session.add(Flag(user=user, annotation=annotation))
 
-    def flagged(self, user: User, annotation: Annotation):
+    def flagged(self, user: User | None, annotation: Annotation):
         """
         Check if a given user has flagged a given annotation.
 
