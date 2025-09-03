@@ -60,7 +60,7 @@ def change_annotation_moderation_status(context, request):
 
     _notify_moderation_change(request, context.annotation.id, moderation_log)
 
-    return request.find_service(name="annotation_json").present_for_user(
+    return request.find_service(name="annotation_json").present(
         annotation=context.annotation, user=request.user
     )
 

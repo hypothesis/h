@@ -113,10 +113,10 @@ class TestCreate:
             AnnotationEvent.return_value
         )
         # Check we present
-        annotation_json_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present.assert_called_once_with(
             annotation=annotation, user=pyramid_request.user
         )
-        assert result == annotation_json_service.present_for_user.return_value
+        assert result == annotation_json_service.present.return_value
 
     @pytest.mark.usefixtures("with_invalid_json_body")
     def test_it_raises_for_invalid_json(self, pyramid_request):
@@ -141,10 +141,10 @@ class TestRead:
     ):
         result = views.read(annotation_context, pyramid_request)
 
-        annotation_json_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present.assert_called_once_with(
             annotation=annotation_context.annotation, user=pyramid_request.user
         )
-        assert result == annotation_json_service.present_for_user.return_value
+        assert result == annotation_json_service.present.return_value
 
 
 @pytest.mark.usefixtures("AnnotationJSONLDPresenter", "links_service")
@@ -222,11 +222,11 @@ class TestUpdate:
             AnnotationEvent.return_value
         )
         # Check it presents the annotation
-        annotation_json_service.present_for_user.assert_called_once_with(
+        annotation_json_service.present.assert_called_once_with(
             annotation=annotation_write_service.update_annotation.return_value,
             user=pyramid_request.user,
         )
-        assert returned == annotation_json_service.present_for_user.return_value
+        assert returned == annotation_json_service.present.return_value
 
     @pytest.mark.usefixtures("with_invalid_json_body")
     def test_it_raises_for_invalid_json(self, pyramid_request, annotation_context):

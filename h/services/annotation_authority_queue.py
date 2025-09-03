@@ -51,7 +51,7 @@ class AnnotationAuthorityQueueService:
             )
             return
 
-        annotation_dict = self._annotation_json_service.present_for_user(
+        annotation_dict = self._annotation_json_service.present(
             annotation=annotation, user=annotation.slim.user, with_metadata=True
         )
         # We already done the work to sanitize the text, send that value to the queue

@@ -41,13 +41,13 @@ class TestListAnnotations:
         sorted_annotations = sorted(
             annotations, key=attrgetter("created"), reverse=True
         )
-        assert annotation_json_service.present_for_user.call_args_list == [
+        assert annotation_json_service.present.call_args_list == [
             call(annotation, pyramid_request.user) for annotation in sorted_annotations
         ]
         assert response == {
             "data": [
                 # It returns the JSON presentation (the result of calling
-                # AnnotationJSONService.present_for_user()) of each annotation.
+                # AnnotationJSONService.present()) of each annotation.
                 getattr(sentinel, f"annotation_json_{annotation.id}")
                 for annotation in sorted_annotations
             ],
@@ -166,7 +166,7 @@ class TestListAnnotations:
 
     @pytest.fixture
     def annotation_json_service(self, annotation_json_service):
-        annotation_json_service.present_for_user.side_effect = (
+        annotation_json_service.present.side_effect = (
             lambda annotation, *_args, **_kwargs: getattr(
                 sentinel, f"annotation_json_{annotation.id}"
             )

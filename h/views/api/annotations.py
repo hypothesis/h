@@ -86,7 +86,7 @@ def create(request):
 
     _publish_annotation_event(request, annotation, "create")
 
-    return request.find_service(name="annotation_json").present_for_user(
+    return request.find_service(name="annotation_json").present(
         annotation=annotation, user=request.user
     )
 
@@ -101,7 +101,7 @@ def create(request):
 )
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    return request.find_service(name="annotation_json").present_for_user(
+    return request.find_service(name="annotation_json").present(
         annotation=context.annotation, user=request.user
     )
 
@@ -145,7 +145,7 @@ def update(context, request):
 
     _publish_annotation_event(request, annotation, "update")
 
-    return request.find_service(name="annotation_json").present_for_user(
+    return request.find_service(name="annotation_json").present(
         annotation=annotation, user=request.user
     )
 
