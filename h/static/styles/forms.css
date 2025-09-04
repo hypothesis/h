@@ -1,0 +1,24 @@
+/*
+CSS entry point for the Preact apps.
+
+Use `source(none)` to restrict scanned source files to specifically configured
+locations.
+ */
+@import 'tailwindcss' source(none);
+
+@import '@hypothesis/annotation-ui/StyledText.css';
+
+@config '../../../tailwind.config.js';
+
+@layer base {
+  /* See https://tailwindcss.com/docs/upgrade-guide#default-border-color. */
+  * {
+    border-color: #dbdbdb;
+  }
+}
+
+/* See https://tailwindcss.com/docs/upgrade-guide#default-ring-width-and-color. */
+@theme {
+  --default-ring-width: 2px;
+  --default-ring-color: #59a7e8;
+}

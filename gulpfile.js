@@ -10,8 +10,6 @@ import changed from 'gulp-changed';
 import gulpIf from 'gulp-if';
 import svgmin from 'gulp-svgmin';
 
-import tailwindConfig from './tailwind.config.js';
-
 const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
 
 gulp.task('build-js', () => buildJS('./rollup.config.js'));
@@ -29,7 +27,7 @@ gulp.task('build-legacy-css', () =>
 );
 
 gulp.task('build-tailwind-css', () =>
-  buildCSS(['./h/static/styles/forms.scss'], { tailwindConfig }),
+  buildCSS(['./h/static/styles/forms.css'], { tailwind: true }),
 );
 
 gulp.task('build-css', gulp.parallel('build-legacy-css', 'build-tailwind-css'));
