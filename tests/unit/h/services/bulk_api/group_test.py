@@ -13,8 +13,8 @@ class TestBulkGroupService:
         group_without_annos = factories.Group()
         group_with_annos_in_other_dates = factories.Group()
         another_group = factories.Group()
-        factories.Annotation(group=group, created=since + timedelta(days=1))
-        factories.Annotation(
+        factories.AnnotationSlim(group=group, created=since + timedelta(days=1))
+        factories.AnnotationSlim(
             group=group_with_annos_in_other_dates, created=since - timedelta(days=1)
         )
 
