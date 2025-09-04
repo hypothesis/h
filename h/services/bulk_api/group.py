@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
-from h.models import Annotation, Group
+from h.models import AnnotationSlim, Group
 from h.services.bulk_api._helpers import date_match
 
 
@@ -35,10 +35,10 @@ class BulkGroupService:
             Group.authority_provided_id.in_(groups),
             sa.exists(
                 sa.select(1)
-                .select_from(Annotation)
+                .select_from(AnnotationSlim)
                 .where(
-                    Annotation.groupid == Group.pubid,
-                    date_match(Annotation.created, annotations_created),
+                    AnnotationSlim.group_id == Group.id,
+                    date_match(AnnotationSlim.created, annotations_created),
                 )
             ),
         )
