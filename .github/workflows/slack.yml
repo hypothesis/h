@@ -6,13 +6,11 @@ on:
     branches: [main]
 jobs:
   on-failure:
-    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - name: Post to Slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: 'C4K6M7P5E'
-          slack-message: "A workflow run failed\n*Repo:* `${{ github.event.repository.full_name }}` (${{ github.event.repository.html_url }})\n*Workflow:* ${{ github.event.workflow.name }} (${{ github.event.workflow.html_url }})\n*Branch:* `${{ github.event.workflow_run.head_branch }}`\n*Commit:* `${{ github.event.workflow_run.head_commit.id }}`\n*Run:* ${{ github.event.workflow_run.html_url }}\n*Conclusion:* ${{ github.event.workflow_run.conclusion }}"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    name: Post to Slack
+    uses: hypothesis/workflows/.github/workflows/slack.yml@main
+    with:
+      payload: |
+        channel: "C4K6M7P5E"
+        markdown_text: "Failed `${{ github.event.workflow_run.path }}` run (attempt ${{ github.event.workflow_run.run_attempt }}) on `${{ github.event.workflow_run.head_branch }}` in `${{ github.event.workflow_run.repository.full_name }}`: ${{ github.event.workflow_run.html_url }}"
+    secrets: inherit
