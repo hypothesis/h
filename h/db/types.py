@@ -1,4 +1,4 @@
-"""Custom SQLAlchemy types for use with the Annotations API database."""  # noqa: A005
+"""Custom SQLAlchemy types for use with the Annotations API database."""
 
 import base64
 import binascii

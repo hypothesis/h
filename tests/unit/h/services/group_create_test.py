@@ -544,7 +544,7 @@ def creator(factories):
     return factories.User(username="group_creator")
 
 
-class GroupScopeWithOrigin(Matcher):
+class GroupScopeWithOrigin(Matcher):  # noqa: PLW1641
     """Matches any GroupScope with the given origin."""
 
     repr_attrs = ("origin",)

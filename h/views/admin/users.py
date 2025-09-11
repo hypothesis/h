@@ -88,7 +88,7 @@ def users_activate(request):
     user.activate()
 
     request.session.flash(
-        Markup(_(f"User {user.username} has been activated!")),  # noqa: INT001
+        _(Markup("User {} has been activated!")).format(user.username),
         "success",
     )
 
@@ -163,7 +163,7 @@ def users_delete(request):
 
 @view_config(context=UserNotFoundError)
 def user_not_found(exc, request):
-    request.session.flash(Markup(_(str(exc))), "error")
+    request.session.flash(Markup("{}").format(_(str(exc))), "error")
     return httpexceptions.HTTPFound(location=request.route_path("admin.users"))
 
 

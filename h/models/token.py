@@ -1,4 +1,4 @@
-import datetime  # noqa: A005
+import datetime
 from typing import TYPE_CHECKING
 
 import sqlalchemy

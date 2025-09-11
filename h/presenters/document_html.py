@@ -226,4 +226,4 @@ def _format_document_link(href, title, link_text, host_or_filename):  # pragma: 
         host_or_filename=markupsafe.escape(host_or_filename),
     )
 
-    return markupsafe.Markup(link)
+    return markupsafe.Markup(f"{link}")  # noqa: S704

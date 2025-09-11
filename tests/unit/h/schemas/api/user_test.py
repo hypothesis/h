@@ -133,20 +133,20 @@ class TestCreateUserAPISchema:
     def test_it_raises_when_identities_not_an_array(self, schema, payload):
         payload["identities"] = "dragnabit"
 
-        with pytest.raises(ValidationError, match=".*identities.*is not of type.*"):
+        with pytest.raises(ValidationError, match=r".*identities.*is not of type.*"):
             schema.validate(payload)
 
     def test_it_raises_when_identities_items_not_objects(self, schema, payload):
         payload["identities"] = ["flerp", "flop"]
 
-        with pytest.raises(ValidationError, match=".*identities.*is not of type.*"):
+        with pytest.raises(ValidationError, match=r".*identities.*is not of type.*"):
             schema.validate(payload)
 
     def test_it_raises_when_provider_missing_in_identity(self, schema, payload):
         payload["identities"] = [{"foo": "bar", "provider_unique_id": "flop"}]
 
         with pytest.raises(
-            ValidationError, match=".*provider'.*is a required property.*"
+            ValidationError, match=r".*provider'.*is a required property.*"
         ):
             schema.validate(payload)
 
@@ -156,7 +156,7 @@ class TestCreateUserAPISchema:
         payload["identities"] = [{"foo": "bar", "provider": "flop"}]
 
         with pytest.raises(
-            ValidationError, match=".*provider_unique_id'.*is a required property.*"
+            ValidationError, match=r".*provider_unique_id'.*is a required property.*"
         ):
             schema.validate(payload)
 
@@ -164,7 +164,7 @@ class TestCreateUserAPISchema:
         payload["identities"] = [{"provider_unique_id": "bar", "provider": 75}]
 
         with pytest.raises(
-            ValidationError, match=".*provider:.*is not of type.*string.*"
+            ValidationError, match=r".*provider:.*is not of type.*string.*"
         ):
             schema.validate(payload)
 
@@ -174,7 +174,7 @@ class TestCreateUserAPISchema:
         payload["identities"] = [{"provider_unique_id": [], "provider": "hithere"}]
 
         with pytest.raises(
-            ValidationError, match=".*provider_unique_id:.*is not of type.*string.*"
+            ValidationError, match=r".*provider_unique_id:.*is not of type.*string.*"
         ):
             schema.validate(payload)
 

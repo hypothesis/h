@@ -6,7 +6,7 @@ PAGE_SIZE = 20
 
 def paginate(request, total, page_size=PAGE_SIZE):
     first = 1
-    page_max = int(math.ceil(total / page_size))
+    page_max = int(math.ceil(total / page_size))  # noqa: RUF046
     page_max = max(1, page_max)  # There's always at least one page.
 
     try:

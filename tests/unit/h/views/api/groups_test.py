@@ -256,7 +256,7 @@ class TestCreate:
         group_service.fetch.return_value = sentinel.duplicate_group
 
         with pytest.raises(
-            HTTPConflict, match="group with groupid 'sentinel.groupid' already exists"
+            HTTPConflict, match=r"group with groupid 'sentinel\.groupid' already exists"
         ):
             views.create(pyramid_request)
 
@@ -402,7 +402,7 @@ class TestUpdate:
         group_service.fetch.return_value = sentinel.duplicate_group
 
         with pytest.raises(
-            HTTPConflict, match="group with groupid 'sentinel.groupid' already exists"
+            HTTPConflict, match=r"group with groupid 'sentinel\.groupid' already exists"
         ):
             views.update(context, pyramid_request)
 

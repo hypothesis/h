@@ -338,7 +338,7 @@ class TestHandleFormSubmission:
             mock.sentinel.on_failure,
         )
 
-        class PostItemsMatcher:
+        class PostItemsMatcher:  # noqa: PLW1641
             """Matches any iterable equal to request.POST.items()."""
 
             def __eq__(self, other):

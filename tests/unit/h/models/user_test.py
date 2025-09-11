@@ -328,7 +328,7 @@ class TestUserMembers:
         new_groups = (factories.Group.build(),)
 
         with pytest.raises(
-            AttributeError, match="^property 'groups' of 'User' object has no setter$"
+            AttributeError, match=r"^property 'groups' of 'User' object has no setter$"
         ):
             user.groups = new_groups
 
@@ -337,7 +337,7 @@ class TestUserMembers:
         new_group = factories.Group.build()
 
         with pytest.raises(
-            AttributeError, match="^'tuple' object has no attribute 'append'$"
+            AttributeError, match=r"^'tuple' object has no attribute 'append'$"
         ):
             user.groups.append(new_group)
 

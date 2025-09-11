@@ -66,7 +66,7 @@ class TestAdminPermissions:
         group,
         method,
         url_template,
-        _,  # noqa: PT019
+        _,
     ):
         url = url_template.format(pubid=group.pubid)
 

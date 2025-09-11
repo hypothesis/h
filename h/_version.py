@@ -13,7 +13,7 @@ VERSION_UNKNOWN = "0+unknown"
 
 
 def fetch_git_ref():
-    return subprocess.check_output(  # noqa: S603
+    return subprocess.check_output(
         ["git", "rev-parse", "--short", "HEAD"],  # noqa: S607
         stderr=DEVNULL,
     ).strip()
@@ -27,10 +27,10 @@ def fetch_git_date(ref):
 def fetch_git_dirty():
     # Ensure git index is up-to-date first. This usually isn't necessary, but
     # can be needed inside a docker container where the index is out of date.
-    subprocess.call(["git", "update-index", "-q", "--refresh"])  # noqa: S603, S607
-    dirty_tree = bool(subprocess.call(["git", "diff-files", "--quiet"]))  # noqa: S603, S607
+    subprocess.call(["git", "update-index", "-q", "--refresh"])  # noqa: S607
+    dirty_tree = bool(subprocess.call(["git", "diff-files", "--quiet"]))  # noqa: S607
     dirty_index = bool(
-        subprocess.call(["git", "diff-index", "--quiet", "--cached", "HEAD"])  # noqa: S603, S607
+        subprocess.call(["git", "diff-index", "--quiet", "--cached", "HEAD"])  # noqa: S607
     )
     return dirty_tree or dirty_index
 

@@ -171,11 +171,9 @@ class GroupSearchController(SearchController):
         result["more_info"] = "more_info" in self.request.params
 
         if not result.get("q"):
-            result["zero_message"] = Markup(
-                _("The group “{name}” has not made any annotations yet.").format(
-                    name=Markup.escape(self.group.name)
-                )
-            )
+            result["zero_message"] = _(
+                Markup("The group “{name}” has not made any annotations yet.")
+            ).format(name=Markup.escape(self.group.name))
 
         result["show_leave_button"] = self.request.user in self.group.members
 

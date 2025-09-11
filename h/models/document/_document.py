@@ -56,13 +56,15 @@ class Document(Base, mixins.Timestamps):
             If no type is given just return this document's first http(s)
             URL, or None.
             """
-            for document_uri in self.document_uris:  # noqa: RET503
+            for document_uri in self.document_uris:
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
                 if urlparse(uri).scheme not in ["http", "https"]:
                     continue
                 return document_uri.uri
+
+            return None
 
         self.web_uri = (
             first_http_url(type_="self-claim")
@@ -155,7 +157,7 @@ def merge_documents(session, documents, updated=None):
         # the purpose of centralized model access in the service.
         # It's pending to move the rest of this functions to a DocumentService that uses DI to get this service.
         # In the meantime we are doing this import here to avoid a circular dependency.
-        from h.services.annotation_write import AnnotationWriteService
+        from h.services.annotation_write import AnnotationWriteService  # noqa: PLC0415
 
         AnnotationWriteService.change_document(session, duplicate_ids, master)
         session.query(Document).filter(Document.id.in_(duplicate_ids)).delete(

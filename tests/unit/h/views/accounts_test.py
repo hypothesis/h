@@ -1607,7 +1607,7 @@ def login(patch):
     return patch("h.views.accounts.login")
 
 
-class PostItemsMatcher:
+class PostItemsMatcher:  # noqa: PLW1641
     def __init__(self, items):
         self.items = items
 

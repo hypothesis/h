@@ -51,7 +51,7 @@ class TestUserUpdate:
         user = factories.User()
 
         with pytest.raises(
-            ValidationError, match="email must be less than.*characters long"
+            ValidationError, match=r"email must be less than.*characters long"
         ):
             svc.update(user, email="o" * 150)
 
@@ -61,7 +61,7 @@ class TestUserUpdate:
         user = factories.User()
 
         with pytest.raises(
-            ValidationError, match="username must be between.*characters long"
+            ValidationError, match=r"username must be between.*characters long"
         ):
             svc.update(user, username="lo")
 

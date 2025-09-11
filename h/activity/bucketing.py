@@ -12,7 +12,7 @@ from h import links, presenters
 _ = i18n.TranslationStringFactory(__package__)
 
 
-class DocumentBucket:
+class DocumentBucket:  # noqa: PLW1641
     def __init__(self, document, annotations=None):
         self.annotations = []
         self.tags = set()

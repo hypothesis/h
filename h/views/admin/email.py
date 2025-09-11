@@ -1,4 +1,4 @@
-from dataclasses import asdict  # noqa: A005
+from dataclasses import asdict
 
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config

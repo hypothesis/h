@@ -28,7 +28,7 @@ class AnnotationHTMLPresenter:
         care of all necessary escaping.
         """
         if self.annotation.text_rendered:
-            return Markup(self.annotation.text_rendered)
+            return Markup(self.annotation.text_rendered)  # noqa: S704
         return Markup("")
 
     @property

@@ -78,7 +78,7 @@ class TestGroupMembershipAPIFactory:
         pyramid_request.method = request_method
         group_service.fetch.return_value = None
 
-        with pytest.raises(HTTPNotFound, match="Group not found: sentinel.pubid"):
+        with pytest.raises(HTTPNotFound, match=r"Group not found: sentinel\.pubid"):
             group_membership_api_factory(pyramid_request)
 
     @pytest.mark.parametrize("request_method", ["GET", "POST", "PATCH", "DELETE"])
@@ -86,7 +86,7 @@ class TestGroupMembershipAPIFactory:
         pyramid_request.method = request_method
         user_service.fetch.return_value = None
 
-        with pytest.raises(HTTPNotFound, match="User not found: sentinel.userid"):
+        with pytest.raises(HTTPNotFound, match=r"User not found: sentinel\.userid"):
             group_membership_api_factory(pyramid_request)
 
     @pytest.mark.parametrize("request_method", ["GET", "POST", "PATCH", "DELETE"])
@@ -94,7 +94,7 @@ class TestGroupMembershipAPIFactory:
         pyramid_request.method = request_method
         user_service.fetch.side_effect = InvalidUserId(sentinel.userid)
 
-        with pytest.raises(HTTPNotFound, match="User not found: sentinel.userid"):
+        with pytest.raises(HTTPNotFound, match=r"User not found: sentinel\.userid"):
             group_membership_api_factory(pyramid_request)
 
     @pytest.mark.parametrize("request_method", ["GET", "PATCH", "DELETE"])

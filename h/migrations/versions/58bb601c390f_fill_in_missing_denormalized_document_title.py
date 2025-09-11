@@ -71,9 +71,11 @@ def downgrade():
 
 
 def _document_title(document):
-    for meta in document.meta_titles:  # noqa: RET503
+    for meta in document.meta_titles:
         if meta.value:
             return meta.value[0]
+
+    return None
 
 
 def _fetch_windows(session, chunksize=100):
