@@ -8,7 +8,7 @@ from h import models, services, tasks
 
 
 def setup(env):
-    from tests.common import factories
+    from tests.common import factories  # noqa: PLC0415
 
     request = env["request"]
 

@@ -116,7 +116,7 @@ class GroupCreateViews:
             self.group_members_svc.add_members(group, member_userids)
 
             self.request.session.flash(
-                Markup(f'Created new group "{group.name}"'),
+                Markup('Created new group "{}"').format(group.name),
                 queue="success",
             )
 

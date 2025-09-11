@@ -68,10 +68,12 @@ def downgrade():
 
 
 def _document_web_uri(document):
-    for docuri in document.document_uris:  # noqa: RET503
+    for docuri in document.document_uris:
         uri = urlparse(docuri.uri)
         if uri.scheme in ["http", "https"]:
             return docuri.uri
+
+    return None
 
 
 def _fetch_windows(session, chunksize=100):

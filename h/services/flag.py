@@ -128,7 +128,7 @@ class FlagService:
 
         flag_counts = {f.annotation_id: f.flag_count for f in query}
         missing_ids = set(annotation_ids) - set(flag_counts.keys())
-        flag_counts.update({id_: 0 for id_ in missing_ids})
+        flag_counts.update(dict.fromkeys(missing_ids, 0))
 
         # Prime the cache for `flag_count()`
         self._flag_count_cache.update(flag_counts)

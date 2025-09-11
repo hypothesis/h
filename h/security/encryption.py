@@ -40,7 +40,7 @@ def derive_key(key_material: str | bytes, salt: bytes, info: bytes) -> bytes:
         key_material = key_material.encode()
 
     return cast(
-        bytes,
+        "bytes",
         HKDF(
             master=key_material,
             key_len=64,

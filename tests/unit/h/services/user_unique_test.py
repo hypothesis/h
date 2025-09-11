@@ -45,7 +45,7 @@ class TestUserUniqueEnsureUnique:
 
         with pytest.raises(
             DuplicateUserError,
-            match=".*provider 'provider_a' and unique id '123' already exists",
+            match=r".*provider 'provider_a' and unique id '123' already exists",
         ):
             svc.ensure_unique(
                 {"identities": [dupe_identity]},
@@ -59,7 +59,7 @@ class TestUserUniqueEnsureUnique:
         dupe_identity = {"provider": "provider_a", "provider_unique_id": "123"}
         with pytest.raises(
             DuplicateUserError,
-            match=".*provider 'provider_a' and unique id '123' already exists",
+            match=r".*provider 'provider_a' and unique id '123' already exists",
         ):
             svc.ensure_unique({"identities": [dupe_identity]}, authority="foo.com")
 
@@ -128,7 +128,7 @@ class TestUserUniqueEnsureUnique:
             "provider": user.identities[0].provider,
             "provider_unique_id": user.identities[0].provider_unique_id,
         }
-        with pytest.raises(DuplicateUserError, match=".*email.*username.*provider"):
+        with pytest.raises(DuplicateUserError, match=r".*email.*username.*provider"):
             svc.ensure_unique(
                 {
                     "email": user.email,

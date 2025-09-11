@@ -87,7 +87,7 @@ class TestOIDCConnectAndLoginViews:
     def test_connect_or_login_with_unexpected_route_name(self, pyramid_request):
         pyramid_request.matched_route.name = "unexpected"
 
-        with pytest.raises(UnexpectedRouteError, match="^unexpected$"):
+        with pytest.raises(UnexpectedRouteError, match=r"^unexpected$"):
             OIDCConnectAndLoginViews(pyramid_request).connect_or_login()
 
     def test_notfound(self, pyramid_request):
@@ -151,7 +151,7 @@ class TestOIDCRedirectViews:
     def test_redirect_with_unexpected_route_name(self, pyramid_request, views):
         pyramid_request.matched_route.name = "unexpected"
 
-        with pytest.raises(UnexpectedRouteError, match="^unexpected$"):
+        with pytest.raises(UnexpectedRouteError, match=r"^unexpected$"):
             views.redirect()
 
     @pytest.mark.usefixtures("with_both_connect_and_login_actions")

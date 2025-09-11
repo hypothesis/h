@@ -29,7 +29,7 @@ class Message(namedtuple("Message", ["socket", "payload"])):  # noqa: PYI024, SL
         """
         reply_to = self.payload.get("id")
         # Short-circuit if message is missing an ID or has a non-numeric ID.
-        if not isinstance(reply_to, (int, float)):  # noqa: UP038
+        if not isinstance(reply_to, (int, float)):
             return
         data = copy.deepcopy(payload)
         data["ok"] = ok

@@ -32,7 +32,7 @@ class TestLogin:
         helpers.remember.assert_called_once_with(pyramid_request, user.userid)
         assert headers == sentinel.headers
 
-    class LoginEventMatcher(Matcher):
+    class LoginEventMatcher(Matcher):  # noqa: PLW1641
         repr_attrs = ("request", "user")
 
         def __init__(self, request, user):

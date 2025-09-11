@@ -69,7 +69,7 @@ class UsernameComparator(Comparator):
         return _normalise_username(self.__clause_element__()).in_(usernames)
 
 
-class UserIDComparator(Comparator):
+class UserIDComparator(Comparator):  # noqa: PLW1641
     """
     Custom comparator for :py:attr:`~h.models.user.User.userid`.
 

@@ -48,4 +48,4 @@ def svg_icon(name, css_class=""):
     if title_el is not None:
         root.remove(title_el)
 
-    return Markup(ElementTree.tostring(root).decode())
+    return Markup(ElementTree.tostring(root).decode())  # noqa: S704

@@ -39,13 +39,15 @@ class Document(Base):
 
     def updated_web_uri(self):
         def first_http_url(type_=None):
-            for document_uri in self.document_uris:  # noqa: RET503
+            for document_uri in self.document_uris:
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
                 if urlparse(uri).scheme not in ["http", "https"]:
                     continue
                 return document_uri.uri
+
+            return None
 
         return (
             first_http_url(type_="self-claim")

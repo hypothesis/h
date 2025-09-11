@@ -204,7 +204,7 @@ class TestAddMember:
             "test_error_message"
         )
 
-        with pytest.raises(HTTPConflict, match="^test_error_message$"):
+        with pytest.raises(HTTPConflict, match=r"^test_error_message$"):
             views.add_member(context, pyramid_request)
 
     def test_it_errors_if_the_request_isnt_valid_JSON(

@@ -835,15 +835,15 @@ class TestURLMigrationSchema:
         )
 
     def test_it_raises_for_invalid_source_url(self, validate):
-        with pytest.raises(ValidationError, match="not-a-url.*does not match"):
+        with pytest.raises(ValidationError, match=r"not-a-url.*does not match"):
             validate({"not-a-url": {"url": "https://foobar.org"}})
 
     def test_it_raises_for_invalid_dest_url(self, validate):
-        with pytest.raises(ValidationError, match="also-not-a-url.*does not match"):
+        with pytest.raises(ValidationError, match=r"also-not-a-url.*does not match"):
             validate({"https://example.com": {"url": "also-not-a-url"}})
 
     def test_it_raises_if_new_url_missing(self, validate):
-        with pytest.raises(ValidationError, match="url.*required"):
+        with pytest.raises(ValidationError, match=r"url.*required"):
             validate({"https://example.com": {}})
 
     @pytest.fixture

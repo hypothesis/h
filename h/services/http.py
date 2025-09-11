@@ -1,4 +1,4 @@
-from requests import RequestException, Response, Session  # noqa: A005
+from requests import RequestException, Response, Session
 
 from h.services.exceptions import ExternalRequestError
 

@@ -12,7 +12,7 @@ from h import search
 
 @pytest.fixture
 def matchers():
-    from tests import matchers
+    from tests import matchers  # noqa: PLC0415
 
     return matchers
 

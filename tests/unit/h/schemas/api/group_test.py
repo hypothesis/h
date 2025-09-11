@@ -238,7 +238,7 @@ class TestFilterGroupAnnotationsSchema:
 
 class TestCreateGroupAPISchema:
     def test_it_raises_if_name_missing(self, schema):
-        with pytest.raises(ValidationError, match="'name' is a required property.*"):
+        with pytest.raises(ValidationError, match=r"'name' is a required property.*"):
             schema.validate({})
 
     @pytest.fixture

@@ -236,7 +236,7 @@ def test_members_is_readonly(factories):
     new_members = (factories.User.build(),)
 
     with pytest.raises(
-        AttributeError, match="^property 'members' of 'Group' object has no setter$"
+        AttributeError, match=r"^property 'members' of 'Group' object has no setter$"
     ):
         group.members = new_members
 
@@ -246,7 +246,7 @@ def test_members_is_immutable(factories):
     new_member = factories.User.build()
 
     with pytest.raises(
-        AttributeError, match="^'tuple' object has no attribute 'append'$"
+        AttributeError, match=r"^'tuple' object has no attribute 'append'$"
     ):
         group.members.append(new_member)
 
