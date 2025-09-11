@@ -16,18 +16,24 @@ gulp.task('build-js', () => buildJS('./rollup.config.js'));
 gulp.task('watch-js', () => watchJS('./rollup.config.js'));
 
 gulp.task('build-legacy-css', () =>
-  buildCSS([
-    './node_modules/bootstrap/dist/css/bootstrap.css',
-    './h/static/styles/admin.scss',
-    './h/static/styles/help-page.scss',
-    './h/static/styles/site.scss',
-    './h/static/styles/vendor/icomoon.css',
-    './h/static/styles/sociallogin.css',
-  ]),
+  buildCSS(
+    [
+      './node_modules/bootstrap/dist/css/bootstrap.css',
+      './h/static/styles/admin.scss',
+      './h/static/styles/help-page.scss',
+      './h/static/styles/site.scss',
+      './h/static/styles/vendor/icomoon.css',
+      './h/static/styles/sociallogin.css',
+    ],
+    { autoprefixer: false },
+  ),
 );
 
 gulp.task('build-tailwind-css', () =>
-  buildCSS(['./h/static/styles/forms.css'], { tailwind: true }),
+  buildCSS(['./h/static/styles/forms.css'], {
+    autoprefixer: false,
+    tailwind: true,
+  }),
 );
 
 gulp.task('build-css', gulp.parallel('build-legacy-css', 'build-tailwind-css'));
