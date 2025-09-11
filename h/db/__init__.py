@@ -122,7 +122,7 @@ def _replica_session(request):  # pragma: no cover
 
 
 def _maybe_create_default_organization(engine, authority):  # pragma: no cover
-    from h.services.organization import OrganizationService
+    from h.services.organization import OrganizationService  # noqa: PLC0415
 
     session = Session(bind=engine)
     default_org = OrganizationService(session).get_default(authority)
@@ -134,8 +134,8 @@ def _maybe_create_default_organization(engine, authority):  # pragma: no cover
 
 
 def _maybe_create_world_group(engine, authority, default_org):  # pragma: no cover
-    from h import models
-    from h.models.group import ReadableBy, WriteableBy
+    from h import models  # noqa: PLC0415
+    from h.models.group import ReadableBy, WriteableBy  # noqa: PLC0415
 
     session = Session(bind=engine)
     world_group = session.query(models.Group).filter_by(pubid="__world__").one_or_none()

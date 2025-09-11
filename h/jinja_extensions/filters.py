@@ -37,4 +37,4 @@ def to_json(value):
         .replace("'", "\\u0027")
     )
 
-    return Markup(result)
+    return Markup(result)  # noqa: S704

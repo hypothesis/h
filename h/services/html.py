@@ -1,5 +1,3 @@
-# noqa: A005
-
 from html.parser import HTMLParser
 
 

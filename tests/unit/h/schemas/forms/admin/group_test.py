@@ -34,27 +34,27 @@ class TestAdminGroupSchema:
         too_short_name = "a" * (GROUP_NAME_MIN_LENGTH - 1)
         group_data["name"] = too_short_name
 
-        with pytest.raises(colander.Invalid, match=".*name.*"):
+        with pytest.raises(colander.Invalid, match=r".*name.*"):
             bound_schema.deserialize(group_data)
 
     def test_it_raises_if_name_too_long(self, group_data, bound_schema):
         too_long_name = "a" * (GROUP_NAME_MAX_LENGTH + 1)
         group_data["name"] = too_long_name
 
-        with pytest.raises(colander.Invalid, match=".*name.*"):
+        with pytest.raises(colander.Invalid, match=r".*name.*"):
             bound_schema.deserialize(group_data)
 
     def test_it_raises_if_description_too_long(self, group_data, bound_schema):
         too_long_description = "a" * (GROUP_DESCRIPTION_MAX_LENGTH + 1)
         group_data["description"] = too_long_description
 
-        with pytest.raises(colander.Invalid, match=".*description.*"):
+        with pytest.raises(colander.Invalid, match=r".*description.*"):
             bound_schema.deserialize(group_data)
 
     def test_it_raises_if_group_type_invalid(self, group_data, bound_schema):
         group_data["group_type"] = "foobarbazding"
 
-        with pytest.raises(colander.Invalid, match=".*group_type.*"):
+        with pytest.raises(colander.Invalid, match=r".*group_type.*"):
             bound_schema.deserialize(group_data)
 
     @pytest.mark.parametrize("required_field", ("name", "group_type", "creator"))
@@ -79,7 +79,7 @@ class TestAdminGroupSchema:
     )
     def test_it_raises_if_origin_invalid(self, group_data, bound_schema, invalid_scope):
         group_data["scopes"] = [invalid_scope]
-        with pytest.raises(colander.Invalid, match="scope.*must be a complete URL"):
+        with pytest.raises(colander.Invalid, match=r"scope.*must be a complete URL"):
             bound_schema.deserialize(group_data)
 
     def test_it_allows_no_scopes(self, group_data, bound_schema):
@@ -120,7 +120,7 @@ class TestAdminGroupSchema:
         user_service.fetch.return_value = None
 
         group_data["members"] = ["valid_user", "invalid_user"]
-        with pytest.raises(colander.Invalid, match="members.1"):
+        with pytest.raises(colander.Invalid, match=r"members\.1"):
             bound_schema.deserialize(group_data)
 
     def test_it_passes_through_the_authority_when_checking_users(

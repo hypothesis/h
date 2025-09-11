@@ -49,7 +49,7 @@ class Jinja2Renderer:
         context = self._system.copy()
         context.update(kwargs)
 
-        return Markup(template.render(context))
+        return Markup(f"{template.render(context)}")  # noqa: S704
 
 
 def create_environment(base):

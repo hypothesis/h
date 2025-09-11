@@ -1036,7 +1036,7 @@ class TestGroupMemberEdit:
 
         with pytest.raises(
             AssertionError,
-            match="^new_roles must be set before checking permissions$",
+            match=r"^new_roles must be set before checking permissions$",
         ):
             predicates.group_member_edit(identity, context)
 

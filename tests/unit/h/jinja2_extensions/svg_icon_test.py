@@ -32,7 +32,7 @@ class TestSVGIcon:
 
         result = svg_icon("test_icon_name", css_class=css_class)
 
-        assert result == Markup(f'<svg class="{expected}" />')
+        assert result == Markup(f'<svg class="{expected}" />')  # noqa: S704
 
     @pytest.fixture
     def icon_file(self, tmpdir):

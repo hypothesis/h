@@ -125,7 +125,7 @@ class TestListAnnotations:
     def test_when_no_context_group(self, context, pyramid_request):
         context.group = None
 
-        with pytest.raises(AssertionError, match="^Group is required$"):
+        with pytest.raises(AssertionError, match=r"^Group is required$"):
             list_annotations(context, pyramid_request)
 
     def test_when_pagination_params_invalid(

@@ -60,7 +60,7 @@ class OrganizationCreateController:
 
             self.request.db.add(organization)
             self.request.session.flash(
-                Markup(_(f"Created new organization {name}")),  # noqa: INT001
+                _(Markup("Created new organization {}")).format(name),
                 "success",
             )
 

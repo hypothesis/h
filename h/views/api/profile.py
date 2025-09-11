@@ -1,4 +1,4 @@
-from pyramid.httpexceptions import HTTPBadRequest  # noqa: A005
+from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session
 from h.presenters import GroupsJSONPresenter

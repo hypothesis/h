@@ -310,8 +310,8 @@ class ResetController:
         svc.update_password(user, password)
 
         self.request.session.flash(
-            Markup(
-                _(
+            _(
+                Markup(
                     "Your password has been reset. You can now log in with "
                     "your new password."
                 )
@@ -346,8 +346,8 @@ class ActivateController:
         activation = models.Activation.get_by_code(self.request.db, code)
         if activation is None:
             self.request.session.flash(
-                Markup(
-                    _(
+                _(
+                    Markup(
                         "We didn't recognize that activation link. "
                         "Have you already activated your account? "
                         "If so, try logging in using the username "
@@ -365,8 +365,8 @@ class ActivateController:
         user.activate()
 
         self.request.session.flash(
-            Markup(
-                _(
+            _(
+                Markup(
                     "Your account has been activated! "
                     "You can now log in using the password you provided."
                 ),
@@ -394,18 +394,18 @@ class ActivateController:
             # The user is already logged in to the account (so the account
             # must already be activated).
             self.request.session.flash(
-                Markup(_("Your account has been activated and you're logged in.")),
+                _(Markup("Your account has been activated and you're logged in.")),
                 "success",
             )
         else:
             self.request.session.flash(
-                Markup(
-                    _(
+                _(
+                    Markup(
                         "You're already logged in to a different account. "
                         '<a href="{url}">Log out</a> and open the activation link '
                         "again."
-                    ).format(url=self.request.route_url("logout"))
-                ),
+                    )
+                ).format(url=self.request.route_url("logout")),
                 "error",
             )
 

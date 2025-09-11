@@ -176,5 +176,5 @@ def user_with_token(db_session, factories):
 
 @pytest.fixture
 def token_auth_header(user_with_token):
-    user, token = user_with_token
+    _, token = user_with_token
     return {"Authorization": f"Bearer {token.value}"}

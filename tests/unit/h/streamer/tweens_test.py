@@ -23,7 +23,7 @@ class TestCloseTheDBSessionTweenFactory:
     ):
         handler.side_effect = RuntimeError("test_error")
 
-        with pytest.raises(RuntimeError, match="^test_error$"):
+        with pytest.raises(RuntimeError, match=r"^test_error$"):
             close_db_session_tween(pyramid_request)
 
         pyramid_request.db.close.assert_called_once_with()

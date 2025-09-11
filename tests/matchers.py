@@ -28,7 +28,7 @@ from pyramid import httpexceptions
 from h.models.helpers import repr_
 
 
-class Matcher:
+class Matcher:  # noqa: PLW1641
     """Base class for matcher classes below."""
 
     repr_attrs = ()
@@ -44,7 +44,7 @@ class Matcher:
         return repr_(self, self.repr_attrs)
 
 
-class InstanceOf(Matcher):
+class InstanceOf(Matcher):  # noqa: PLW1641
     """Matches any instance of the given class with the given attrs.
 
     As with Python's builtin isinstance() `class_` can be either a single class
@@ -91,6 +91,9 @@ class Redirect302To(Matcher):
 
         return other.location == self.location
 
+    def __hash__(self):
+        return hash(self.location)
+
 
 class StringStartingWith(Matcher):
     repr_attrs = ("starting_with",)
@@ -100,3 +103,6 @@ class StringStartingWith(Matcher):
 
     def __eq__(self, other):
         return other.startswith(self.starting_with)
+
+    def __hash__(self):
+        return hash(self.starting_with)

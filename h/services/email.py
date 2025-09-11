@@ -1,5 +1,3 @@
-# noqa: A005
-
 import smtplib
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
