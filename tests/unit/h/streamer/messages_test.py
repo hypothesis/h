@@ -103,7 +103,10 @@ class TestHandleMessage:
 
 
 @pytest.mark.usefixtures(
-    "annotation_json_service", "annotation_read_service", "nipsa_service"
+    "annotation_json_service",
+    "annotation_read_service",
+    "nipsa_service",
+    "user_service",
 )
 class TestHandleAnnotationEvent:
     def test_it(
@@ -114,6 +117,7 @@ class TestHandleAnnotationEvent:
         annotation_read_service,
         annotation_json_service,
         SocketFilter,
+        user_service,
     ):
         handle_annotation_event(
             message=message, sockets=[socket], session=sentinel.session
@@ -128,7 +132,10 @@ class TestHandleAnnotationEvent:
             [socket], annotation, sentinel.session
         )
 
-        annotation_json_service.present.assert_called_once_with(annotation)
+        user_service.fetch.assert_called_once_with(socket.identity.user.userid)
+        annotation_json_service.present.assert_called_once_with(
+            annotation, user=user_service.fetch.return_value
+        )
 
     def test_it_skips_notification_when_fetch_failed(
         self, handle_annotation_event, annotation_read_service
