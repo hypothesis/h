@@ -4,7 +4,46 @@ import pytest
 import ws4py
 from h_pyramid_sentry.event import Event
 
-from h.sentry_filters import is_ws4py_error_logging, is_ws4py_handshake_error
+from h.sentry_filters import (
+    is_ws4py_error_logging,
+    is_ws4py_handshake_error,
+    sentry_before_send_log,
+)
+
+
+class TestSentryBeforeSendLog:
+    @pytest.mark.parametrize(
+        "log,should_be_filtered_out",
+        [
+            (
+                {
+                    "attributes": {
+                        "logger.name": "gunicorn.access",
+                        "sentry.message.parameter.{path_info}e": "/api/badge",
+                    }
+                },
+                True,
+            ),
+            (
+                {
+                    "attributes": {
+                        "logger.name": "gunicorn.access",
+                        "sentry.message.parameter.{request_method}e": "GET",
+                        "sentry.message.parameter.s": "200",
+                    }
+                },
+                True,
+            ),
+            ({"attributes": {}}, False),
+        ],
+    )
+    def test_it(self, log, should_be_filtered_out):
+        result = sentry_before_send_log(log, mock.sentinel.hint)
+
+        if should_be_filtered_out:
+            assert result is None
+        else:
+            assert result == log
 
 
 class TestFilterWS4PYErrorLogging:

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from pyramid.config import Configurator
 
-from h.sentry_filters import SENTRY_FILTERS
+from h.sentry_filters import SENTRY_ERROR_FILTERS
 from h.streamer.app import create_app
 
 
@@ -14,7 +14,7 @@ class TestIncludeMe:
 
         config.add_settings.assert_any_call(
             {
-                "h_pyramid_sentry.filters": SENTRY_FILTERS,
+                "h_pyramid_sentry.filters": SENTRY_ERROR_FILTERS,
                 "h_pyramid_sentry.celery_support": True,
                 "h_pyramid_sentry.init.release": get_version.return_value,
             }
