@@ -5,7 +5,7 @@ from pyramid_jinja2 import Environment as JinjaEnvironment
 
 from h.app import includeme
 from h.assets import Environment
-from h.sentry_filters import SENTRY_FILTERS
+from h.sentry_filters import SENTRY_ERROR_FILTERS
 
 
 class TestIncludeMe:
@@ -16,7 +16,7 @@ class TestIncludeMe:
 
         assert settings["h_pyramid_sentry.retry_support"] is True
         assert settings["h_pyramid_sentry.celery_support"] is True
-        assert settings["h_pyramid_sentry.filters"] == SENTRY_FILTERS
+        assert settings["h_pyramid_sentry.filters"] == SENTRY_ERROR_FILTERS
 
         pyramid_config.include.assert_any_call("h_pyramid_sentry")
 

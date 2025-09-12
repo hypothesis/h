@@ -3,7 +3,7 @@ import pyramid
 from h._version import get_version
 from h.config import configure
 from h.security import StreamerPolicy
-from h.sentry_filters import SENTRY_FILTERS
+from h.sentry_filters import SENTRY_ERROR_FILTERS
 
 
 def create_app(_global_config, **settings):
@@ -44,7 +44,7 @@ def create_app(_global_config, **settings):
     # Configure sentry
     config.add_settings(
         {
-            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.filters": SENTRY_ERROR_FILTERS,
             "h_pyramid_sentry.celery_support": True,
             # Enable Sentry's "Releases" feature, see:
             # https://docs.sentry.io/platforms/python/configuration/options/#release

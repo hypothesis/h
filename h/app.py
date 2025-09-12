@@ -9,7 +9,7 @@ from pyramid.tweens import EXCVIEW
 
 from h._version import get_version
 from h.config import configure
-from h.sentry_filters import SENTRY_FILTERS
+from h.sentry_filters import SENTRY_ERROR_FILTERS, sentry_before_send_log
 from h.views.client import DEFAULT_CLIENT_URL
 
 log = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ def _configure_jinja2_assets(config):
 def _configure_sentry(config):
     config.add_settings(
         {
-            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.filters": SENTRY_ERROR_FILTERS,
             "h_pyramid_sentry.retry_support": True,
             "h_pyramid_sentry.celery_support": True,
             "h_pyramid_sentry.sqlalchemy_support": True,
@@ -130,6 +130,8 @@ def _configure_sentry(config):
             # For the full list of options that sentry_sdk.init() supports see:
             # https://docs.sentry.io/platforms/python/configuration/options/
             "h_pyramid_sentry.init.release": get_version(),
+            "h_pyramid_sentry.init.enable_logs": True,
+            "h_pyramid_sentry.init.before_send_log": sentry_before_send_log,
         }
     )
     config.include("h_pyramid_sentry")
