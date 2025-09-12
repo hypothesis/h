@@ -28,13 +28,20 @@ class EmailData:
     tag: EmailTag
     html: str | None = None
     subaccount: str | None = None
+    reply_to: str | None = None
 
     @property
     def message(self) -> pyramid_mailer.message.Message:
         extra_headers: dict[str, str] = {"X-MC-Tags": self.tag}
+
         if self.subaccount:
             extra_headers["X-MC-Subaccount"] = self.subaccount
+
+        if self.reply_to:  # pragma: nocover
+            extra_headers["Reply-To"] = self.reply_to
+
         subject = " ".join(self.subject.splitlines())
+
         return pyramid_mailer.message.Message(
             subject=subject,
             recipients=self.recipients,

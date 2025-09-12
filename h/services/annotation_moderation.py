@@ -167,7 +167,13 @@ class AnnotationModerationService:
             html=render(f"{template_base}.html.jinja2", context, request=request),
             tag=EmailTag.MODERATION,
             subaccount=self._email_subaccount,
+            reply_to=(
+                "marc-cola-reunite-spilling@mailinator.com"
+                if group.pubid == "yxJdKrLg"
+                else None
+            ),
         )
+
         task_data = TaskData(
             tag=email_data.tag,
             sender_id=author.id,
