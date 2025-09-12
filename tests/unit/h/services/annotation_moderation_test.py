@@ -289,7 +289,6 @@ class TestAnnotationModerationService:
                 "tag": EmailTag.MODERATION,
                 "html": "",
                 "subaccount": sentinel.email_subaccount,
-                "reply_to": None,
             },
             {
                 "tag": EmailTag.MODERATION,
