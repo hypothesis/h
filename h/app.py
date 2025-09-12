@@ -130,7 +130,7 @@ def _configure_sentry(config):
             # For the full list of options that sentry_sdk.init() supports see:
             # https://docs.sentry.io/platforms/python/configuration/options/
             "h_pyramid_sentry.init.release": get_version(),
-            "h_pyramid_sentry.init.enable_logs": True,
+            "h_pyramid_sentry.init.enable_logs": False,
             "h_pyramid_sentry.init.before_send_log": sentry_before_send_log,
         }
     )
