@@ -28,7 +28,7 @@ def sentry_before_send_log(log: Log, _hint: Hint) -> Log | None:
         and request_method == "GET"
         and response_status is not None
         and response_status_int >= 200  # type: ignore[operator]
-        and response_status_int <= 300  # type: ignore[operator]
+        and response_status_int < 400  # type: ignore[operator]
     ):
         return None
 
