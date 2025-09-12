@@ -119,12 +119,14 @@ def handle_annotation_event(message, sockets, request, session):
     # Create a generator which has the first socket back again
     matching_sockets = chain((first_socket,), matching_sockets)
 
-    reply = _generate_annotation_event(request, message, annotation)
-
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
     annotation_context = AnnotationContext(annotation)
 
     for socket in matching_sockets:
+        reply = _generate_annotation_event(
+            request, message, annotation, user=socket.identity.user
+        )
+
         # Don't send notifications back to the person who sent them
         if message["src_client_id"] == socket.client_id:
             continue
@@ -148,7 +150,7 @@ def handle_annotation_event(message, sockets, request, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(request, message, annotation):
+def _generate_annotation_event(request, message, annotation, user):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -161,7 +163,9 @@ def _generate_annotation_event(request, message, annotation):
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
-        payload = request.find_service(name="annotation_json").present(annotation)
+        payload = request.find_service(name="annotation_json").present(
+            annotation, user=request.find_service(name="user").fetch(user.userid)
+        )
 
     return {
         "type": "annotation-notification",
