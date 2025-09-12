@@ -34,6 +34,36 @@ class TestSentryBeforeSendLog:
                 },
                 True,
             ),
+            (
+                {
+                    "attributes": {
+                        "logger.name": "gunicorn.access",
+                        "sentry.message.parameter.{request_method}e": "GET",
+                        "sentry.message.parameter.s": "301",
+                    }
+                },
+                True,
+            ),
+            (
+                {
+                    "attributes": {
+                        "logger.name": "gunicorn.access",
+                        "sentry.message.parameter.{request_method}e": "GET",
+                        "sentry.message.parameter.s": "400",
+                    }
+                },
+                False,
+            ),
+            (
+                {
+                    "attributes": {
+                        "logger.name": "gunicorn.access",
+                        "sentry.message.parameter.{request_method}e": "GET",
+                        "sentry.message.parameter.s": "500",
+                    }
+                },
+                False,
+            ),
             ({"attributes": {}}, False),
         ],
     )
