@@ -2143,16 +2143,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-build@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "@hypothesis/frontend-build@npm:4.1.0"
+"@hypothesis/frontend-build@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@hypothesis/frontend-build@npm:5.0.0"
   dependencies:
     commander: ^14.0.0
     fancy-log: ^2.0.0
     glob: ^11.0.0
   peerDependencies:
     "@tailwindcss/postcss": ^4.1.13
-    autoprefixer: ^10.3.7
     postcss: ^8.3.9
     rollup: ^4.0.2
     sass: ^1.43.2
@@ -2161,15 +2160,13 @@ __metadata:
   peerDependenciesMeta:
     "@tailwindcss/postcss":
       optional: true
-    autoprefixer:
-      optional: true
     postcss:
       optional: true
     sass:
       optional: true
     tailwindcss:
       optional: true
-  checksum: 103d42e087fd232e432c183b61dd7cadb94bf2b8f6c665cc389a0fb1f94ef5bf57f08c8140e610e26c91f3fd7f1e37be5f3ffae2a7d7d055118206bdfeebdca5
+  checksum: 946dbab011df26c8b43e413385ebd916ecc42847647a5a88eeffd8b677a46f6d567b0b7274ba761cb4207d8e6957b57cf432d0e5332d47609e78ac2ced45d473
   languageName: node
   linkType: hard
 
@@ -7264,7 +7261,7 @@ __metadata:
     "@babel/preset-react": ^7.26.3
     "@babel/preset-typescript": ^7.27.0
     "@hypothesis/annotation-ui": ^0.8.2
-    "@hypothesis/frontend-build": ^4.1.0
+    "@hypothesis/frontend-build": ^5.0.0
     "@hypothesis/frontend-shared": ^10.0.0
     "@hypothesis/frontend-testing": ^1.7.1
     "@rollup/plugin-babel": ^6.0.4
