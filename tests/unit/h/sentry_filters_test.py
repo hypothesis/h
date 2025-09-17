@@ -15,56 +15,9 @@ class TestSentryBeforeSendLog:
     @pytest.mark.parametrize(
         "log,should_be_filtered_out",
         [
-            (
-                {
-                    "attributes": {
-                        "logger.name": "gunicorn.access",
-                        "sentry.message.parameter.{path_info}e": "/api/badge",
-                    }
-                },
-                True,
-            ),
-            (
-                {
-                    "attributes": {
-                        "logger.name": "gunicorn.access",
-                        "sentry.message.parameter.{request_method}e": "GET",
-                        "sentry.message.parameter.s": "200",
-                    }
-                },
-                True,
-            ),
-            (
-                {
-                    "attributes": {
-                        "logger.name": "gunicorn.access",
-                        "sentry.message.parameter.{request_method}e": "GET",
-                        "sentry.message.parameter.s": "301",
-                    }
-                },
-                True,
-            ),
-            (
-                {
-                    "attributes": {
-                        "logger.name": "gunicorn.access",
-                        "sentry.message.parameter.{request_method}e": "GET",
-                        "sentry.message.parameter.s": "400",
-                    }
-                },
-                False,
-            ),
-            (
-                {
-                    "attributes": {
-                        "logger.name": "gunicorn.access",
-                        "sentry.message.parameter.{request_method}e": "GET",
-                        "sentry.message.parameter.s": "500",
-                    }
-                },
-                False,
-            ),
-            ({"attributes": {}}, False),
+            ({"attributes": {"logger.name": "gunicorn.access"}}, True),
+            ({"attributes": {"logger.name": "foo"}}, False),
+            ({}, False),
         ],
     )
     def test_it(self, log, should_be_filtered_out):
