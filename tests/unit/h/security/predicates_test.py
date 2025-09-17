@@ -2,6 +2,7 @@ from unittest.mock import sentinel
 
 import pytest
 
+from h.models import ModerationStatus
 from h.models.group import (
     GroupMembership,
     GroupMembershipRoles,
@@ -108,6 +109,42 @@ class TestAnnotationPredicates:
         result = predicates.annotation_not_shared(sentinel.identity, annotation_context)
 
         assert result is not is_shared
+
+    @pytest.mark.parametrize(
+        "moderation_status,expected_result",
+        [
+            [ModerationStatus.PENDING, True],
+            [ModerationStatus.APPROVED, False],
+            [ModerationStatus.DENIED, True],
+            [ModerationStatus.SPAM, True],
+        ],
+    )
+    def test_annotation_hidden(
+        self, annotation_context, moderation_status, expected_result
+    ):
+        annotation_context.annotation.moderation_status = moderation_status
+
+        result = predicates.annotation_hidden(sentinel.identity, annotation_context)
+
+        assert result == expected_result
+
+    @pytest.mark.parametrize(
+        "moderation_status,expected_result",
+        [
+            [ModerationStatus.PENDING, False],
+            [ModerationStatus.APPROVED, True],
+            [ModerationStatus.DENIED, False],
+            [ModerationStatus.SPAM, False],
+        ],
+    )
+    def test_annotation_not_hidden(
+        self, annotation_context, moderation_status, expected_result
+    ):
+        annotation_context.annotation.moderation_status = moderation_status
+
+        result = predicates.annotation_not_hidden(sentinel.identity, annotation_context)
+
+        assert result == expected_result
 
     @pytest.mark.parametrize("is_deleted", (True, False))
     def test_annotation_live(self, annotation_context, is_deleted):

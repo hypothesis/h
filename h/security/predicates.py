@@ -102,6 +102,16 @@ def annotation_not_shared(_identity, context):
 
 
 @requires(annotation_found)
+def annotation_hidden(_identity, context):
+    return context.annotation.is_hidden
+
+
+@requires(annotation_found)
+def annotation_not_hidden(_identity, context):
+    return not context.annotation.is_hidden
+
+
+@requires(annotation_found)
 def annotation_live(_identity, context):
     return not context.annotation.deleted
 
@@ -215,9 +225,9 @@ def group_member_remove(identity, context: GroupMembershipContext):
 
 @requires(authenticated_user, group_found)
 def group_member_edit(identity, context: EditGroupMembershipContext):  # noqa: PLR0911
-    assert context.new_roles is not None, (  # noqa: S101
-        "new_roles must be set before checking permissions"
-    )
+    assert (  # noqa: S101
+        context.new_roles is not None
+    ), "new_roles must be set before checking permissions"
 
     old_roles = context.membership.roles
     new_roles = context.new_roles
