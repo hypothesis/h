@@ -6,9 +6,12 @@ locations.
  */
 @import 'tailwindcss' source(none);
 
-@import '@hypothesis/annotation-ui/StyledText.css';
+@source '../../../node_modules/@hypothesis/frontend-shared/lib/**/*.js';
+@source '../../../node_modules/@hypothesis/annotation-ui/lib/**/*.js';
+@source '../scripts/**/*.{js,ts,tsx}';
 
-@config '../../../tailwind.config.js';
+@import '@hypothesis/frontend-shared/tailwind-config.css';
+@import '@hypothesis/annotation-ui/StyledText.css';
 
 @layer base {
   /* See https://tailwindcss.com/docs/upgrade-guide#default-border-color. */

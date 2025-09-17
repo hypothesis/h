@@ -2130,16 +2130,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/annotation-ui@npm:^0.8.2":
-  version: 0.8.2
-  resolution: "@hypothesis/annotation-ui@npm:0.8.2"
+"@hypothesis/annotation-ui@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@hypothesis/annotation-ui@npm:1.0.0"
   peerDependencies:
     "@hypothesis/frontend-shared": ^9.4.0
     dompurify: ^3.0.0
     escape-html: ^1.0.3
     katex: ^0.16.0
     showdown: ^2.0.0
-  checksum: 3b5756d34c435ce23c5d2853451f17abad75ccefed8e703a775638eec4ab964f68995197aca7d8ff7671b85075500eb0d6fdc364b9839c3c4f41c7e5c4c300ce
+  checksum: 3dbb8d1c0b3dbc1826fe388c659ed036277393c89bd56f5782ff8d76888a07504cd9dd90e7fa743ebbc28e846a5e58d536d699e7a4c183f0358cb5fbf7047f31
   languageName: node
   linkType: hard
 
@@ -2170,15 +2170,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-shared@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@hypothesis/frontend-shared@npm:10.0.0"
+"@hypothesis/frontend-shared@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "@hypothesis/frontend-shared@npm:10.2.0"
   dependencies:
     highlight.js: ^11.6.0
     wouter-preact: ^3.0.0
   peerDependencies:
     preact: ^10.25.1
-  checksum: dfa8e3c137a10ca6ab8e725f7aa9d94766dd24395d60abdc1b3c4c710bbb1996f3d276536a5b3389222b06be7d6a986f4ab95f28b83277d6faec89c7d3a3639b
+  checksum: 1423cfe398a3423b8eafc3e95b0deb6b85c1cd6d216aedc425cabdd2bab50990e93a37ef8228d797c7e2e6d162b88bce3bc024d61431db1834fbde2dc516d063
   languageName: node
   linkType: hard
 
@@ -7260,9 +7260,9 @@ __metadata:
     "@babel/preset-env": ^7.27.1
     "@babel/preset-react": ^7.26.3
     "@babel/preset-typescript": ^7.27.0
-    "@hypothesis/annotation-ui": ^0.8.2
+    "@hypothesis/annotation-ui": ^1.0.0
     "@hypothesis/frontend-build": ^5.0.0
-    "@hypothesis/frontend-shared": ^10.0.0
+    "@hypothesis/frontend-shared": ^10.2.0
     "@hypothesis/frontend-testing": ^1.7.1
     "@rollup/plugin-babel": ^6.0.4
     "@rollup/plugin-commonjs": ^28.0.3
