@@ -7,29 +7,7 @@ from sentry_sdk.types import Hint, Log
 def sentry_before_send_log(log: Log, _hint: Hint) -> Log | None:
     """Filter out log messages that we don't want to send to Sentry Logs."""
 
-    attributes = log["attributes"]
-    logger_name = attributes.get("logger.name")
-    path = attributes.get("sentry.message.parameter.{path_info}e")
-    request_method = attributes.get("sentry.message.parameter.{request_method}e")
-    response_status = attributes.get("sentry.message.parameter.s")
-
-    try:
-        response_status_int = int(response_status)  # type: ignore[arg-type]
-    except TypeError:
-        response_status_int = None
-
-    # Filter out badge endpoint access logs.
-    if logger_name == "gunicorn.access" and path == "/api/badge":
-        return None
-
-    # Filter out all successful GET request access logs.
-    if (
-        logger_name == "gunicorn.access"
-        and request_method == "GET"
-        and response_status is not None
-        and response_status_int >= 200  # type: ignore[operator]
-        and response_status_int < 400  # type: ignore[operator]
-    ):
+    if log.get("attributes", {}).get("logger.name") == "gunicorn.access":
         return None
 
     return log
