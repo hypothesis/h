@@ -80,11 +80,20 @@ PERMISSION_MAP = {
         # of the annotation. We bend the predicate system here a little and
         # put a raw permission in which will cause us to look up that
         # permission.
-        [p.annotation_shared, Permission.Group.READ],
+        [p.annotation_shared, p.annotation_not_hidden, Permission.Group.READ],
+        [p.annotation_hidden, p.annotation_created_by_user],
+        [p.annotation_hidden, Permission.Annotation.MODERATE],
     ],
     Permission.Annotation.READ: [
         [p.annotation_live, p.annotation_not_shared, p.annotation_created_by_user],
-        [p.annotation_live, p.annotation_shared, Permission.Group.READ],
+        [
+            p.annotation_live,
+            p.annotation_shared,
+            p.annotation_not_hidden,
+            Permission.Group.READ,
+        ],
+        [p.annotation_hidden, p.annotation_created_by_user],
+        [p.annotation_hidden, Permission.Annotation.MODERATE],
     ],
     Permission.Annotation.FLAG: [
         [p.annotation_live, p.annotation_not_shared, p.annotation_created_by_user],
