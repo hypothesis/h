@@ -57,6 +57,7 @@ def create_app(_global_config, **settings):
             # For the full list of options that sentry_sdk.init() supports see:
             # https://docs.sentry.io/platforms/python/configuration/options/
             "h_pyramid_sentry.init.release": get_version(),
+            "h_pyramid_sentry.init.enable_logs": True,
         }
     )
 
