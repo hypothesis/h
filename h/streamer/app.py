@@ -1,13 +1,9 @@
-from logging import getLogger
-
 import pyramid
 
 from h._version import get_version
 from h.config import configure
 from h.security import StreamerPolicy
 from h.sentry_filters import SENTRY_ERROR_FILTERS
-
-log = getLogger(__name__)
 
 
 def create_app(_global_config, **settings):
@@ -65,7 +61,6 @@ def create_app(_global_config, **settings):
         }
     )
     config.include("h_pyramid_sentry")
-    log.info("WebSocket app has configured Sentry")
 
     # Add support for logging exceptions whenever they arise
     config.include("pyramid_exclog")
