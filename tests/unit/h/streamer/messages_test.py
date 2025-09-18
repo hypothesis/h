@@ -1,5 +1,5 @@
 from unittest import mock
-from unittest.mock import Mock, sentinel
+from unittest.mock import ANY, Mock, sentinel
 
 import pytest
 from gevent.queue import Queue
@@ -226,6 +226,26 @@ class TestHandleAnnotationEvent:
         )
 
         assert bool(socket.send_json.call_count) == can_see
+
+    def test_with_no_identity(
+        self, handle_annotation_event, socket, user_service, annotation_json_service
+    ):
+        socket.identity = None
+
+        handle_annotation_event(sockets=[socket])
+
+        user_service.fetch.assert_not_called()
+        annotation_json_service.present.assert_called_once_with(ANY, user=None)
+
+    def test_with_no_user(
+        self, handle_annotation_event, socket, user_service, annotation_json_service
+    ):
+        socket.identity.user = None
+
+        handle_annotation_event(sockets=[socket])
+
+        user_service.fetch.assert_not_called()
+        annotation_json_service.present.assert_called_once_with(ANY, user=None)
 
     @pytest.fixture
     def handle_annotation_event(self, message, socket, pyramid_request, session):
