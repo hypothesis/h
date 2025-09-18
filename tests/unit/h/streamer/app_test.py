@@ -16,7 +16,9 @@ class TestIncludeMe:
             {
                 "h_pyramid_sentry.filters": SENTRY_ERROR_FILTERS,
                 "h_pyramid_sentry.celery_support": True,
+                "h_pyramid_sentry.sqlalchemy_support": True,
                 "h_pyramid_sentry.init.release": get_version.return_value,
+                "h_pyramid_sentry.init.enable_logs": True,
             }
         )
 
