@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from pyramid.settings import asbool
 from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 from ws4py.exc import HandshakeError
@@ -5,9 +7,13 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from h.streamer import streamer, websocket
 
+log = getLogger(__name__)
+
 
 @view_config(route_name="ws")
 def websocket_view(request):
+    log.info("websocket_view()")
+
     # Provide environment which the WebSocket handler can use...
     request.environ.update(
         {
