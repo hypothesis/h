@@ -6,7 +6,7 @@ from gevent.queue import Full
 
 from h import realtime
 from h.realtime import Consumer
-from h.security import Permission, identity_permits
+from h.security import Identity, Permission, identity_permits
 from h.services.annotation_read import AnnotationReadService
 from h.streamer import websocket
 from h.streamer.contexts import request_context
@@ -124,7 +124,7 @@ def handle_annotation_event(message, sockets, request, session):
 
     for socket in matching_sockets:
         reply = _generate_annotation_event(
-            request, message, annotation, user=socket.identity.user
+            request, message, annotation, socket.identity
         )
 
         # Don't send notifications back to the person who sent them
@@ -150,7 +150,7 @@ def handle_annotation_event(message, sockets, request, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(request, message, annotation, user):
+def _generate_annotation_event(request, message, annotation, identity: Identity | None):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -163,8 +163,13 @@ def _generate_annotation_event(request, message, annotation, user):
     if message["action"] == "delete":
         payload = {"id": message["annotation_id"]}
     else:
+        if identity and identity.user:
+            user = request.find_service(name="user").fetch(identity.user.userid)
+        else:
+            user = None
+
         payload = request.find_service(name="annotation_json").present(
-            annotation, user=request.find_service(name="user").fetch(user.userid)
+            annotation, user=user
         )
 
     return {
