@@ -46,6 +46,7 @@ def create_app(_global_config, **settings):
         {
             "h_pyramid_sentry.filters": SENTRY_ERROR_FILTERS,
             "h_pyramid_sentry.celery_support": True,
+            "h_pyramid_sentry.sqlalchemy_support": True,
             # Enable Sentry's "Releases" feature, see:
             # https://docs.sentry.io/platforms/python/configuration/options/#release
             #
