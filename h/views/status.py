@@ -11,9 +11,6 @@ log = logging.getLogger(__name__)
 
 @json_view(route_name="status", http_cache=0)
 def status(request):
-    if "crash" in request.params:  # pragma: no cover
-        raise RuntimeError("This is a test crash")  # noqa: EM101,TRY003
-
     try:
         request.db.execute(text("SELECT 1"))
     except Exception as err:
