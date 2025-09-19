@@ -167,6 +167,8 @@ class AnnotationModerationService:
             html=render(f"{template_base}.html.jinja2", context, request=request),
             tag=EmailTag.MODERATION,
             subaccount=self._email_subaccount,
+            reply_to=group.reply_to,
+            from_name=group.email_from_name,
         )
         task_data = TaskData(
             tag=email_data.tag,

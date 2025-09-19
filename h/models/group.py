@@ -159,6 +159,27 @@ class Group(Base, mixins.Timestamps):
 
     pre_moderated: Mapped[bool | None] = mapped_column()
 
+    #: A custom Reply-To email address to be used for emails sent from this
+    #: group, for example: 'My Group Moderators <mygroup@example.com>'.
+    #:
+    #: This is used for example as the Reply-To address when the group's
+    #: moderators approve or decline an annotation in the group and we send
+    #: a notification email to the annotation's author.
+    reply_to = sa.Column(sa.UnicodeText(), nullable=True)
+
+    #: A custom name component to be used in the `From` headers of emails sent
+    #: from this group, for example: "My Group".
+    #:
+    #: This does not affect the `From` email address of the group, only the
+    #: name part. The email `From` header will be:
+    #: `My Group <default_sender@example.com>`
+    #: (where default_sender@example.com is the app's default sender address).
+    #:
+    #: This is used for example in the From address when the group's
+    #: moderators approve or decline an annotation in the group and we send
+    #: a notification email to the annotation's author.
+    email_from_name = sa.Column(sa.UnicodeText(), nullable=True)
+
     @property
     def groupid(self):
         if self.authority_provided_id is None:
