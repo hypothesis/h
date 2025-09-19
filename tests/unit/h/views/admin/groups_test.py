@@ -319,6 +319,8 @@ class TestGroupEditViews:
                     "scopes": ["http://somewhereelse.com", "http://www.gladiolus.org"],
                     "members": [],
                     "enforce_scope": False,
+                    "reply_to": None,
+                    "email_from_name": None,
                 }
             )
 
@@ -338,6 +340,8 @@ class TestGroupEditViews:
                 for scope in ["http://somewhereelse.com", "http://www.gladiolus.org"]
             ],
             enforce_scope=False,
+            reply_to=None,
+            email_from_name=None,
         )
         assert response["form"] == self._expected_form(group)
 
@@ -359,6 +363,8 @@ class TestGroupEditViews:
                     "scopes": [],
                     "members": [],
                     "enforce_scope": False,
+                    "reply_to": None,
+                    "email_from_name": None,
                 }
             )
 
@@ -398,6 +404,8 @@ class TestGroupEditViews:
                     "organization": group.organization.pubid,
                     "scopes": ["http://www.example.com"],
                     "enforce_scope": group.enforce_scope,
+                    "reply_to": None,
+                    "email_from_name": None,
                 }
             )
 
@@ -427,6 +435,8 @@ class TestGroupEditViews:
             "organization": group.organization.pubid,
             "scopes": [s.scope for s in group.scopes],
             "enforce_scope": group.enforce_scope,
+            "reply_to": "",
+            "email_from_name": "",
         }
 
     @pytest.fixture

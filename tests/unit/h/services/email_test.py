@@ -21,11 +21,32 @@ class TestEmailService:
         email_service.send(email_data, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
+            sender="Real Name <email_address@example.com>",
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
             html=None,
             extra_headers={"X-MC-Tags": EmailTag.TEST},
+        )
+
+    def test_reply_to(self, email_data, task_data, email_service, pyramid_mailer):
+        email_data.reply_to = "Reply Name <reply_email@example.com>"
+
+        email_service.send(email_data, task_data)
+
+        assert (
+            pyramid_mailer.message.Message.call_args[1]["extra_headers"]["Reply-To"]
+            == "Reply Name <reply_email@example.com>"
+        )
+
+    def test_sender(self, email_data, task_data, email_service, pyramid_mailer):
+        email_data.from_name = "From Name"
+
+        email_service.send(email_data, task_data)
+
+        assert (
+            pyramid_mailer.message.Message.call_args[1]["sender"]
+            == "From Name <email_address@example.com>"
         )
 
     def test_send_creates_email_message_with_html_body(
@@ -42,6 +63,7 @@ class TestEmailService:
         email_service.send(email_data, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
+            sender="Real Name <email_address@example.com>",
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
@@ -63,6 +85,7 @@ class TestEmailService:
         email_service.send(email, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
+            sender="Real Name <email_address@example.com>",
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
@@ -83,6 +106,7 @@ class TestEmailService:
         email_service.send(email, task_data)
 
         pyramid_mailer.message.Message.assert_called_once_with(
+            sender="Real Name <email_address@example.com>",
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
@@ -108,6 +132,7 @@ class TestEmailService:
             mention_task_data.sender_id, mock.ANY
         )
         pyramid_mailer.message.Message.assert_called_once_with(
+            sender="Real Name <email_address@example.com>",
             recipients=["foo@example.com"],
             subject="My email subject",
             body="Some text body",
@@ -247,6 +272,7 @@ class TestEmailService:
             session=pyramid_request.db,
             mailer=request_mailer,
             task_done_service=task_done_service,
+            default_sender="Real Name <email_address@example.com>",
         )
 
     @pytest.fixture
@@ -257,6 +283,10 @@ class TestEmailService:
 
 class TestFactory:
     def test_it(self, pyramid_request, pyramid_mailer, EmailService, task_done_service):
+        pyramid_request.registry.settings["mail.default_sender"] = (
+            sentinel.default_sender
+        )
+
         service = factory(sentinel.context, pyramid_request)
 
         EmailService.assert_called_once_with(
@@ -264,6 +294,7 @@ class TestFactory:
             session=pyramid_request.db,
             mailer=pyramid_mailer.get_mailer.return_value,
             task_done_service=task_done_service,
+            default_sender=sentinel.default_sender,
         )
 
         assert service == EmailService.return_value

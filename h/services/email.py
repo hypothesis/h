@@ -1,6 +1,7 @@
 import smtplib
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from email.utils import formataddr, parseaddr
 
 import pyramid_mailer
 import pyramid_mailer.message
@@ -18,7 +19,7 @@ logger = get_task_logger(__name__)
 DAILY_SENDER_MENTION_LIMIT = 100
 
 
-@dataclass(frozen=True)
+@dataclass
 class EmailData:
     recipients: list[str]
     subject: str
@@ -26,14 +27,27 @@ class EmailData:
     tag: EmailTag
     html: str | None = None
     subaccount: str | None = None
+    reply_to: str | None = None
+    from_name: str | None = None
 
-    @property
-    def message(self) -> pyramid_mailer.message.Message:
+    def message(self, default_sender: str) -> pyramid_mailer.message.Message:
         extra_headers: dict[str, str] = {"X-MC-Tags": self.tag}
+
         if self.subaccount:
             extra_headers["X-MC-Subaccount"] = self.subaccount
+
+        if self.reply_to:
+            extra_headers["Reply-To"] = self.reply_to
+
         subject = " ".join(self.subject.splitlines())
+
+        if self.from_name:
+            sender = formataddr((self.from_name, parseaddr(default_sender)[1]))
+        else:
+            sender = default_sender
+
         return pyramid_mailer.message.Message(
+            sender=sender,
             subject=subject,
             recipients=self.recipients,
             body=self.body,
@@ -51,11 +65,13 @@ class EmailService:
         session: Session,
         mailer: IMailer,
         task_done_service: TaskDoneService,
+        default_sender: str,
     ) -> None:
         self._debug = debug
         self._session = session
         self._mailer = mailer
         self._task_done_service = task_done_service
+        self._default_sender = default_sender
 
     def send(self, email_data: EmailData, task_data: TaskData) -> None:
         if not self._allow_sending(task_data):
@@ -64,7 +80,7 @@ class EmailService:
         if self._debug:  # pragma: no cover
             logger.info("emailing in debug mode: check the `mail/` directory")
         try:
-            self._mailer.send_immediately(email_data.message)
+            self._mailer.send_immediately(email_data.message(self._default_sender))
         except smtplib.SMTPRecipientsRefused as exc:  # pragma: no cover
             logger.warning(
                 "Recipient was refused when trying to send an email. Does the user have an invalid email address?",
@@ -111,4 +127,5 @@ def factory(_context, request: Request) -> EmailService:
         session=request.db,
         mailer=mailer,
         task_done_service=request.find_service(TaskDoneService),
+        default_sender=request.registry.settings["mail.default_sender"],
     )

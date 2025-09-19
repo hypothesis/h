@@ -195,6 +195,8 @@ class GroupEditViews:
                 name=appstruct["name"],
                 scopes=scopes,
                 enforce_scope=appstruct["enforce_scope"],
+                reply_to=appstruct["reply_to"] or None,
+                email_from_name=appstruct["email_from_name"] or None,
             )
 
             memberids = []
@@ -231,10 +233,14 @@ class GroupEditViews:
                 ),
                 "scopes": [s.scope for s in group.scopes],
                 "enforce_scope": group.enforce_scope,
+                "reply_to": group.reply_to or "",
+                "email_from_name": group.email_from_name or "",
             }
         )
 
-    def _template_context(self):
+    def _template_context(self, errors=None, items=None):
+        del errors, items
+
         num_annotations = (
             self.request.db.query(Annotation)
             .filter_by(groupid=self.group.pubid)

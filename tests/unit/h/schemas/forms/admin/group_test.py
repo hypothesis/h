@@ -182,6 +182,48 @@ class TestAdminGroupSchema:
             ),
         ]
 
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {"reply_to": "email_address@example.com"},
+            {"reply_to": "Real Name <email_address@example.com>"},
+        ],
+    )
+    def test_valid_reply_to(self, bound_schema, data, group_data):
+        group_data.update(data)
+
+        result = bound_schema.deserialize(group_data)
+
+        assert result["reply_to"] == data["reply_to"]
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {"reply_to": "@@"},
+        ],
+    )
+    def test_invalid_reply_to(self, bound_schema, data, group_data):
+        group_data.update(data)
+
+        with pytest.raises(
+            colander.Invalid, match=r"^{'reply_to': 'Invalid email address'}$"
+        ):
+            bound_schema.deserialize(group_data)
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {"email_from_name": "Real Name"},
+            {"email_from_name": None},
+        ],
+    )
+    def test_valid_email_from_name(self, bound_schema, data, group_data):
+        group_data.update(data)
+
+        result = bound_schema.deserialize(group_data)
+
+        assert result["email_from_name"] == data["email_from_name"]
+
 
 @pytest.fixture
 def group_data(org):

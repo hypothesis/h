@@ -1,3 +1,5 @@
+from email.utils import parseaddr
+
 import colander
 from deform.widget import (
     CheckboxWidget,
@@ -137,6 +139,26 @@ def group_organization_select_widget(_node, kwargs):
     return SelectWidget(values=list(zip(org_pubids, org_labels, strict=False)))
 
 
+def reply_to_validator(node, value):
+    """Validate a reply-to email address.
+
+    This will accept strings like the following:
+
+        'Real Name <email_address@example.com>'  # Real name and email address.
+        '<email_address@example.com>'            # Email address only.
+        'email_address@example.com'              # Email address only.
+
+    There *is* a colander.Email validator that validates email addresses using
+    a regex but it only accepts email addresses (email_address@example.com) not
+    full headers (Real Name <email_address@example.com>).
+    """
+    realname, email_address = parseaddr(value, strict=True)
+
+    if not realname and not email_address:
+        # parseaddr() returns ('', '') if parsing fails.
+        raise colander.Invalid(node, "Invalid email address")
+
+
 class AdminGroupSchema(CSRFSchema):
     def __init__(self, *args):
         super().__init__(*args)
@@ -207,6 +229,22 @@ class AdminGroupSchema(CSRFSchema):
             " of the entered scope strings (e.g. 'http://www.example.com')"
         ),
         widget=SequenceWidget(add_subitem_text_template=_("Add scope")),
+    )
+
+    reply_to = colander.SchemaNode(
+        colander.String(),
+        title=_("Email reply-to"),
+        hint=_(
+            "Reply-to address for moderation notification emails, for example: 'My Group <mygroup@example.com'"
+        ),
+        missing=None,
+        validator=reply_to_validator,
+    )
+    email_from_name = colander.SchemaNode(
+        colander.String(),
+        title=_("Email from-name"),
+        hint=_("From name for moderation notification emails, for example: 'My Group'"),
+        missing=None,
     )
 
     members = colander.SequenceSchema(
