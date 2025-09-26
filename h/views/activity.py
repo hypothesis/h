@@ -344,8 +344,15 @@ class UserSearchController(SearchController):
             "location": self.user.location,
             "uri": self.user.uri,
             "domain": domain(self.user),
-            "orcid": self.user.orcid,
         }
+
+        if self.user.show_orcid_id_on_profile:
+            orcid_info = self.user.orcid_info(
+                self.request.registry.settings["orcid_host"]
+            )
+
+            if orcid_info:
+                result["user"]["orcid"] = orcid_info
 
         if not self.request.user and (self.user.nipsa or annotation_count == 0):
             # To avoid linking to potentially spammy or NIPSA'd user profiles

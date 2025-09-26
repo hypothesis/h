@@ -9,6 +9,7 @@ from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
 from h.models import GroupMembership
+from h.models.user_identity import IdentityProvider, UserIdentity
 from h.security import Permission
 from h.traversal import UserContext
 from h.traversal.group import GroupContext
@@ -1020,7 +1021,6 @@ class TestUserSearchController:
         assert user_details["location"] == user.location
         assert user_details["uri"] == user.uri
         assert user_details["domain"] == "www.example.com"
-        assert user_details["orcid"] == user.orcid
 
     def test_search_passes_the_edit_url_to_the_template(self, controller, user):
         # The user whose page we're on is the same user as the authenticated
@@ -1071,6 +1071,55 @@ class TestUserSearchController:
         result = controller.search()
 
         assert result["zero_message"] == "__SHOW_GETTING_STARTED__"
+
+    @pytest.mark.parametrize(
+        ("show_orcid_id_on_profile", "identities", "expected_orcid_info"),
+        [
+            (False, [], None),
+            (True, [], None),
+            (
+                False,
+                [
+                    UserIdentity(
+                        provider=IdentityProvider.ORCID,
+                        provider_unique_id="test_orcid_id",
+                    )
+                ],
+                None,
+            ),
+            (
+                True,
+                [
+                    UserIdentity(
+                        provider=IdentityProvider.ORCID,
+                        provider_unique_id="test_orcid_id",
+                    )
+                ],
+                {
+                    "id": "test_orcid_id",
+                    "url": "https://sandbox.orcid.org/test_orcid_id",
+                },
+            ),
+        ],
+    )
+    def test_search_includes_the_users_orcid_info(
+        self,
+        controller,
+        user,
+        show_orcid_id_on_profile,
+        identities,
+        expected_orcid_info,
+    ):
+        user.show_orcid_id_on_profile = show_orcid_id_on_profile
+        for identity in identities:
+            user.identities.append(identity)
+
+        result = controller.search()
+
+        if expected_orcid_info is None:
+            assert "orcid" not in result["user"]
+        else:
+            assert result["user"]["orcid"] == expected_orcid_info
 
     def test_redirect_to_login_for_nipsaed_users(
         self, controller, user, pyramid_request
@@ -1144,6 +1193,7 @@ class TestUserSearchController:
     def pyramid_request(self, pyramid_request, user):
         pyramid_request.matchdict["username"] = user.username
         pyramid_request.user = user
+        pyramid_request.registry.settings["orcid_host"] = "https://sandbox.orcid.org"
         return pyramid_request
 
     @pytest.fixture
@@ -1151,7 +1201,6 @@ class TestUserSearchController:
         return factories.User(
             registered_date=datetime.datetime(year=2016, month=8, day=1),  # noqa: DTZ001
             uri="http://www.example.com/me",
-            orcid="0000-0000-0000-0000",
         )
 
 

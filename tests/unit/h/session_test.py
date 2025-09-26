@@ -82,6 +82,24 @@ class TestModel:
         else:
             assert preferences["show_sidebar_tutorial"] is True
 
+    def test_anonymous_hides_show_orcid_id_on_profile(self, unauthenticated_request):
+        preferences = session.model(unauthenticated_request)["preferences"]
+
+        assert "show_orcid_id_on_profile" not in preferences
+
+    @pytest.mark.parametrize("show_orcid_id_on_profile", [True, False])
+    def test_authenticated_show_orcid_id_on_profile(
+        self, authenticated_request, show_orcid_id_on_profile
+    ):
+        authenticated_request.user.show_orcid_id_on_profile = show_orcid_id_on_profile
+
+        preferences = session.model(authenticated_request)["preferences"]
+
+        if show_orcid_id_on_profile:
+            assert preferences["show_orcid_id_on_profile"] is True
+        else:
+            assert "show_orcid_id_on_profile" not in preferences
+
 
 class TestProfile:
     def test_userid_unauthenticated(self, unauthenticated_request):

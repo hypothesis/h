@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from typing import Any, TypedDict
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 
 import colander
 import deform
@@ -520,6 +520,9 @@ class AccountController:
         js_config["context"]["user"].setdefault(
             "has_password", bool(self.request.user.password)
         )
+        js_config["context"]["user"]["preferences"] = {
+            "show_orcid_id_on_profile": self.request.user.show_orcid_id_on_profile
+        }
 
         oidc_svc = self.request.find_service(OIDCService)
 
@@ -552,14 +555,19 @@ class AccountController:
             "account_identity"
         )
 
-        orcid_config = js_config["context"].get("identities", {}).get("orcid", {})
-        if orcid_id := orcid_config.get("provider_unique_id"):
-            orcid_host = self.request.registry.settings["orcid_host"]
-            # The URL to the user's public ORCID profile page
-            # (for example: https://orcid.org/0000-0002-6373-1308).
-            orcid_config.setdefault(
-                "url", urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
-            )
+        orcid_info = self.request.user.orcid_info(
+            self.request.registry.settings["orcid_host"]
+        )
+        if orcid_info:
+            js_config["context"]["identities"]["orcid"]["url"] = orcid_info["url"]
+
+        js_config["api"] = {
+            "updateUserPrefs": {
+                "method": "PATCH",
+                "url": self.request.route_url("api.profile"),
+                "headers": {"X-CSRF-Token": get_csrf_token(self.request)},
+            }
+        }
 
         return {"page_title": "Account", "js_config": js_config}
 
@@ -662,7 +670,6 @@ class EditProfileController:
             "description": items.get("description", user.description or ""),
             "location": items.get("location", user.location or ""),
             "link": items.get("link", user.uri or ""),
-            "orcid": items.get("orcid", user.orcid or ""),
         }
 
         return {
@@ -684,7 +691,6 @@ class EditProfileController:
         user.description = appstruct["description"]
         user.location = appstruct["location"]
         user.uri = appstruct["link"]
-        user.orcid = appstruct["orcid"]
 
 
 @view_defaults(

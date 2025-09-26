@@ -93,8 +93,11 @@ def _group_model(route_url, group):
 
 def _user_preferences(user):
     preferences = {}
-    if user and not user.sidebar_tutorial_dismissed:
-        preferences["show_sidebar_tutorial"] = True
+    if user:
+        if not user.sidebar_tutorial_dismissed:
+            preferences["show_sidebar_tutorial"] = True
+        if user.show_orcid_id_on_profile:
+            preferences["show_orcid_id_on_profile"] = True
     return preferences
 
 

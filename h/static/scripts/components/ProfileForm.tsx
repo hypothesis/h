@@ -17,7 +17,6 @@ export default function ProfileForm() {
   const description = useFormValue(form, 'description', '');
   const location = useFormValue(form, 'location', '');
   const link = useFormValue(form, 'link', '');
-  const orcid = useFormValue(form, 'orcid', '');
 
   const textFieldProps = (field: FormValue<string>) => ({
     name: field.name,
@@ -44,7 +43,6 @@ export default function ProfileForm() {
         />
         <TextField label="Location" {...textFieldProps(location)} />
         <TextField label="Link" {...textFieldProps(link)} />
-        <TextField label="ORCID Identifier" {...textFieldProps(orcid)} />
         <FormFooter />
       </Form>
     </>

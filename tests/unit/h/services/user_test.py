@@ -87,19 +87,40 @@ class TestUserService:
 
         assert svc.fetch_for_login(user.email) is None
 
-    def test_update_preferences_tutorial_enable(self, svc, factories):
-        user = factories.User.build(sidebar_tutorial_dismissed=True)
+    @pytest.mark.parametrize(
+        ("initial_attrs", "kwargs", "expected_attrs"),
+        [
+            (
+                {"sidebar_tutorial_dismissed": True},
+                {"show_sidebar_tutorial": True},
+                {"sidebar_tutorial_dismissed": False},
+            ),
+            (
+                {"sidebar_tutorial_dismissed": False},
+                {"show_sidebar_tutorial": False},
+                {"sidebar_tutorial_dismissed": True},
+            ),
+            (
+                {"show_orcid_id_on_profile": False},
+                {"show_orcid_id_on_profile": True},
+                {"show_orcid_id_on_profile": True},
+            ),
+            (
+                {"show_orcid_id_on_profile": True},
+                {"show_orcid_id_on_profile": False},
+                {"show_orcid_id_on_profile": False},
+            ),
+        ],
+    )
+    def test_update_preferences(
+        self, svc, factories, initial_attrs, kwargs, expected_attrs
+    ):
+        user = factories.User.build(**initial_attrs)
 
-        svc.update_preferences(user, show_sidebar_tutorial=True)
+        svc.update_preferences(user, **kwargs)
 
-        assert not user.sidebar_tutorial_dismissed
-
-    def test_update_preferences_tutorial_disable(self, svc, factories):
-        user = factories.User.build(sidebar_tutorial_dismissed=False)
-
-        svc.update_preferences(user, show_sidebar_tutorial=False)
-
-        assert user.sidebar_tutorial_dismissed is True
+        for name, value in expected_attrs.items():
+            assert getattr(user, name) == value
 
     def test_update_preferences_raises_for_unsupported_keys(self, svc, factories):
         user = factories.User.build()

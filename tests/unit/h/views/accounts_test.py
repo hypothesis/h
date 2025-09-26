@@ -773,6 +773,7 @@ class TestAccountController:
                     "user": {
                         "email": current_email_address,
                         "has_password": user_has_password,
+                        "preferences": {"show_orcid_id_on_profile": False},
                     },
                 },
                 "csrfToken": get_csrf_token(pyramid_request),
@@ -797,6 +798,15 @@ class TestAccountController:
                         "oidc.connect.orcid"
                     ),
                     "identity_delete": pyramid_request.route_url("account_identity"),
+                },
+                "api": {
+                    "updateUserPrefs": {
+                        "method": "PATCH",
+                        "url": pyramid_request.route_url("api.profile"),
+                        "headers": {
+                            "X-CSRF-Token": get_csrf_token(pyramid_request),
+                        },
+                    },
                 },
             },
         }
@@ -868,6 +878,20 @@ class TestAccountController:
                 for provider in IdentityProvider
             },
         }
+
+    def test_get_with_orcid_info(self, controller, user):
+        user.identities.append(
+            UserIdentity(
+                provider=IdentityProvider.ORCID, provider_unique_id="test_orcid_id"
+            )
+        )
+
+        response = controller.get()
+
+        assert (
+            response["js_config"]["context"]["identities"]["orcid"]["url"]
+            == "https://sandbox.orcid.org/test_orcid_id"
+        )
 
     @pytest.mark.parametrize(
         "user_has_password,schema",
@@ -1021,6 +1045,7 @@ class TestAccountController:
         pyramid_config.add_route("oidc.connect.orcid", "/oidc/connect/orcid")
         pyramid_config.add_route("account", "/account/settings")
         pyramid_config.add_route("account_identity", "/account/settings/identity")
+        pyramid_config.add_route("api.profile", "/api/profile")
 
     @pytest.fixture(autouse=True)
     def pyramid_settings(self, pyramid_settings):
@@ -1231,7 +1256,6 @@ class TestEditProfileController:
                     "data": {
                         "display_name": "Jim Smith",
                         "description": "Job Description",
-                        "orcid": "ORCID iD",
                         "link": "http://foo.org",
                         "location": "Paris",
                     },
@@ -1258,7 +1282,6 @@ class TestEditProfileController:
 
         assert user.display_name == "Jim Smith"
         assert user.description == "Job Description"
-        assert user.orcid == "ORCID iD"
         assert user.uri == "http://foo.org"
         assert user.location == "Paris"
 
@@ -1292,7 +1315,6 @@ class TestEditProfileController:
                     "data": {
                         "display_name": "invalid",
                         "description": "test",
-                        "orcid": "Original ORCID",
                         "link": "http://original.com",
                         "location": "Original Location",
                     },

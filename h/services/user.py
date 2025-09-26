@@ -4,7 +4,7 @@ from h.models import User, UserIdentity
 from h.util.db import on_transaction_end
 from h.util.user import split_user
 
-UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial"}
+UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial", "show_orcid_id_on_profile"}
 
 
 class UserNotActivated(Exception):  # noqa: N818
@@ -168,8 +168,11 @@ class UserService:
             keys = ", ".join(sorted(invalid_keys))
             raise TypeError(f"settings with keys {keys} are not allowed")  # noqa: EM102, TRY003
 
-        if "show_sidebar_tutorial" in kwargs:  # pragma: no cover
+        if "show_sidebar_tutorial" in kwargs:
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
+
+        if "show_orcid_id_on_profile" in kwargs:
+            user.show_orcid_id_on_profile = kwargs["show_orcid_id_on_profile"]
 
 
 def user_service_factory(_context, request):

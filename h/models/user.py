@@ -2,6 +2,7 @@ import datetime
 import re
 from functools import partial
 from typing import TYPE_CHECKING
+from urllib.parse import urlparse, urlunparse
 
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from h.db import Base
 from h.exceptions import InvalidUserId
 from h.models import helpers
+from h.models.user_identity import IdentityProvider
 from h.pubid import generate
 from h.util.user import format_userid, split_user
 
@@ -197,9 +199,6 @@ class User(Base):
     #: The user's URI/link on the web
     uri = sa.Column(sa.UnicodeText())
 
-    #: The user's ORCID iD
-    orcid = sa.Column(sa.UnicodeText())
-
     #: Is this user an admin member?
     admin: Mapped[bool] = mapped_column(
         sa.Boolean, default=False, server_default=sa.sql.expression.false()
@@ -306,6 +305,11 @@ class User(Base):
         server_default=sa.sql.expression.false(),
     )
 
+    #: Has this user chosen to display their ORCID ID on their profile page?
+    show_orcid_id_on_profile = sa.Column(
+        sa.Boolean, default=False, server_default=(sa.sql.expression.false())
+    )
+
     tokens = sa.orm.relationship("Token", back_populates="user")
 
     memberships = sa.orm.relationship("GroupMembership", back_populates="user")
@@ -333,6 +337,30 @@ class User(Base):
         DB. So this is a read-only property that returns an immutable tuple.
         """
         return tuple(membership.group for membership in self.memberships)
+
+    def orcid_info(self, orcid_host: str) -> dict | None:
+        """Return a dict of info about this user's connected ORCID ID or None."""
+
+        # The user's first connected ORCID identity or None.
+        orcid_identity = next(
+            (
+                identity
+                for identity in self.identities
+                if identity.provider == IdentityProvider.ORCID
+            ),
+            None,
+        )
+
+        if not orcid_identity:
+            return None
+
+        orcid_id = orcid_identity.provider_unique_id
+
+        # The URL to the user's public ORCID profile page
+        # (for example: https://orcid.org/0000-0002-6373-1308).
+        orcid_url = urlunparse(urlparse(orcid_host)._replace(path=orcid_id))
+
+        return {"id": orcid_id, "url": orcid_url}
 
     @sa.orm.validates("email")
     def validate_email(self, _key, email):
