@@ -35,6 +35,7 @@ TEST_SETTINGS = {
     "oidc_clientsecret_facebook": "test_oidcclientid_facebook",
     "oidc_tokenurl_facebook": "test_oidc_tokenurl_facebook",
     "oidc_keyseturl_facebook": "test_oidc_keyseturl_facebook",
+    "orcid_host": "https://sandbox.orcid.org",
 }
 
 TEST_ENVIRONMENT = {

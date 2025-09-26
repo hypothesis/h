@@ -7,6 +7,7 @@ from sqlalchemy.sql.elements import BinaryExpression
 from h.models import Activation
 from h.models.group import GroupMembership
 from h.models.user import User, UserIDComparator
+from h.models.user_identity import IdentityProvider, UserIdentity
 
 
 class TestUserIDComparator:
@@ -214,6 +215,52 @@ class TestUserModel:
         db_session.flush()
 
         return user
+
+
+class TestORCIDInfo:
+    @pytest.mark.parametrize(
+        ("identities", "expected_result"),
+        [
+            # If the user has no ORCID identity it returns None.
+            ([], None),
+            # If ignores non-ORCID identities.
+            (
+                [
+                    UserIdentity(
+                        provider="other_provider", provider_unique_id="test_orcid_id"
+                    )
+                ],
+                None,
+            ),
+            # It returns info from the user's connected ORCID identity.
+            (
+                [
+                    # The user also has a non-ORCID identity, this should be ignored.
+                    UserIdentity(
+                        provider="other_provider", provider_unique_id="other_id"
+                    ),
+                    # The user's ORCID ID, this should be used.
+                    UserIdentity(
+                        provider=IdentityProvider.ORCID,
+                        provider_unique_id="test_orcid_id",
+                    ),
+                    # Further ORCID IDs should be ignored.
+                    UserIdentity(
+                        provider=IdentityProvider.ORCID,
+                        provider_unique_id="other_orcid_id",
+                    ),
+                ],
+                {
+                    "id": "test_orcid_id",
+                    "url": "https://sandbox.orcid.org/test_orcid_id",
+                },
+            ),
+        ],
+    )
+    def test_it(self, identities, expected_result, factories):
+        user = factories.User(identities=identities)
+
+        assert user.orcid_info("https://sandbox.orcid.org/") == expected_result
 
 
 class TestUserGetByEmail:

@@ -1,10 +1,14 @@
 import { checkAccessibility, mount } from '@hypothesis/frontend-testing';
 
 import { LoginFormsConfig } from '../../config';
-import AccountSettingsForms from '../AccountSettingsForms';
+import {
+  $imports,
+  default as AccountSettingsForms,
+} from '../AccountSettingsForms.tsx';
 
 describe('AccountSettingsForms', () => {
   let fakeConfig;
+  let fakeCallAPI;
 
   beforeEach(() => {
     fakeConfig = {
@@ -23,7 +27,12 @@ describe('AccountSettingsForms', () => {
         },
       },
       context: {
-        user: { has_password: true },
+        user: {
+          has_password: true,
+          preferences: {
+            show_orcid_id_on_profile: true,
+          },
+        },
         identities: {
           google: { connected: false },
           facebook: { connected: false },
@@ -36,7 +45,22 @@ describe('AccountSettingsForms', () => {
         'oidc.connect.orcid': 'https://example.com/oidc/connect/orcid',
         identity_delete: 'https://example.com/account/settings/identity',
       },
+      api: {
+        updateUserPrefs: {
+          method: 'PATCH',
+          url: 'https://example.com/api/profile',
+          headers: { foo: 'bar' },
+        },
+      },
     };
+
+    fakeCallAPI = sinon.stub();
+
+    $imports.$mock({
+      '../util/api': {
+        callAPI: fakeCallAPI,
+      },
+    });
   });
 
   const getElements = wrapper => {
@@ -141,6 +165,9 @@ describe('AccountSettingsForms', () => {
           ),
         },
       },
+      showOrcidIdCheckbox: wrapper.find(
+        'Checkbox[data-testid="show-orcid-id-checkbox"]',
+      ),
     };
   };
 
@@ -238,7 +265,7 @@ describe('AccountSettingsForms', () => {
   });
 
   it('shows the current email address', () => {
-    fakeConfig.context.user = { email: 'current_email' };
+    fakeConfig.context.user.email = 'current_email';
 
     const { elements } = createWrapper();
 
@@ -361,6 +388,73 @@ describe('AccountSettingsForms', () => {
     assert.isFalse(elements.connectAccountLinks.google.exists());
     assert.isFalse(elements.connectAccountLinks.facebook.exists());
     assert.isFalse(elements.connectAccountLinks.orcid.exists());
+  });
+
+  it('doesn\t render the show-orcid-id checkbox if no orcid id is connected', () => {
+    fakeConfig.context.identities.orcid.connected = false;
+
+    const { elements } = createWrapper();
+
+    assert.isFalse(elements.showOrcidIdCheckbox.exists());
+  });
+
+  it('doesn\t render the show-orcid-id checkbox if the orcid feature flag is disabled', () => {
+    fakeConfig.context.identities.orcid.connected = true;
+    fakeConfig.features.log_in_with_orcid = false;
+
+    const { elements } = createWrapper();
+
+    assert.isFalse(elements.showOrcidIdCheckbox.exists());
+  });
+
+  [true, false].forEach(showOrcidId => {
+    it('initially renders the show-orcid-id checkbox as checked or un-checked depending on the config', () => {
+      fakeConfig.context.identities.orcid.connected = true;
+      fakeConfig.context.user.preferences.show_orcid_id_on_profile =
+        showOrcidId;
+
+      const { elements } = createWrapper();
+
+      assert.equal(elements.showOrcidIdCheckbox.prop('checked'), showOrcidId);
+    });
+  });
+
+  [true, false].forEach(initialCheckboxValue => {
+    it('sends API request when show-orcid-id checkbox clicked', () => {
+      fakeConfig.context.identities.orcid.connected = true;
+      fakeConfig.context.user.preferences.show_orcid_id_on_profile =
+        initialCheckboxValue;
+      fakeCallAPI.resolves({
+        preferences: { show_orcid_id_on_profile: !initialCheckboxValue },
+      });
+
+      const { elements } = createWrapper();
+
+      elements.showOrcidIdCheckbox.find('input').getDOMNode().checked =
+        !initialCheckboxValue;
+      elements.showOrcidIdCheckbox.find('input').simulate('change');
+
+      assert.calledOnceWithExactly(
+        fakeCallAPI,
+        fakeConfig.api.updateUserPrefs.url,
+        {
+          method: fakeConfig.api.updateUserPrefs.method,
+          headers: fakeConfig.api.updateUserPrefs.headers,
+          json: {
+            preferences: { show_orcid_id_on_profile: !initialCheckboxValue },
+          },
+        },
+      );
+    });
+  });
+
+  it('handles errors from the update-user-prefs APO', () => {
+    fakeConfig.context.identities.orcid.connected = true;
+    fakeCallAPI.rejects();
+
+    const { elements } = createWrapper();
+
+    elements.showOrcidIdCheckbox.find('input').simulate('change');
   });
 
   it(

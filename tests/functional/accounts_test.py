@@ -15,7 +15,15 @@ class TestAccountSettings:
         response = app.get("/account/settings", status=200)
 
         assert js_config_from(response) == {
-            "context": {"user": {"email": user.email, "has_password": True}},
+            "context": {
+                "user": {
+                    "email": user.email,
+                    "has_password": True,
+                    "preferences": {
+                        "show_orcid_id_on_profile": False,
+                    },
+                },
+            },
             "csrfToken": matchers.InstanceOf(str),
             "features": {
                 f"log_in_with_{provider.name.lower()}": False
@@ -28,6 +36,13 @@ class TestAccountSettings:
             },
             "routes": {
                 "identity_delete": "http://localhost/account/settings/identity",
+            },
+            "api": {
+                "updateUserPrefs": {
+                    "method": "PATCH",
+                    "url": "http://localhost/api/profile",
+                    "headers": {"X-CSRF-Token": matchers.InstanceOf(str)},
+                }
             },
         }
 

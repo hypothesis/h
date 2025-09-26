@@ -16,13 +16,6 @@ def validate_url(node, cstruct):
         raise colander.Invalid(node, str(exc))  # noqa: B904
 
 
-def validate_orcid(node, cstruct):
-    try:
-        util.validate_orcid(cstruct)
-    except ValueError as exc:
-        raise colander.Invalid(node, str(exc))  # noqa: B904
-
-
 class EditProfileSchema(CSRFSchema):
     display_name = colander.SchemaNode(
         colander.String(),
@@ -46,14 +39,4 @@ class EditProfileSchema(CSRFSchema):
         colander.String(),
         missing=None,
         validator=colander.All(validators.Length(max=250), validate_url),
-    )
-
-    orcid = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=validate_orcid,
-        title=_("ORCID"),
-        hint=_(
-            "ORCID provides a persistent identifier for researchers (see orcid.org)."
-        ),
     )

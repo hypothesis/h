@@ -124,7 +124,13 @@ export type AccountSettingsConfigObject = LoginFormsConfigBase & {
     }>;
   };
   context: {
-    user: { email: string; has_password: boolean };
+    user: {
+      email: string;
+      has_password: boolean;
+      preferences: {
+        show_orcid_id_on_profile: boolean;
+      };
+    };
     identities?: {
       google: {
         connected: boolean;
@@ -151,6 +157,9 @@ export type AccountSettingsConfigObject = LoginFormsConfigBase & {
     'oidc.connect.facebook'?: string;
     'oidc.connect.orcid'?: string;
     identity_delete: string;
+  };
+  api: {
+    updateUserPrefs: APIConfig;
   };
 };
 

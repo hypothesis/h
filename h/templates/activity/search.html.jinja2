@@ -345,12 +345,9 @@
       {% endif %}
       {%- if user.orcid %}
         <p class="search-result-sidebar__subsection-p">
-          <span class="search-result-sidebar__subsection-key">{% trans %}ORCID:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-key">ORCID:</span>
           <span class="search-result-sidebar__subsection-val">
-            <a href="https://orcid.org/{{ user.orcid }}"
-               class="link--plain">
-              {{ user.orcid }}
-            </a>
+            <a href="{{ user.orcid.url }}" class="link--plain">{{ user.orcid.id }}</a>
           </span>
         </p>
       {% endif %}

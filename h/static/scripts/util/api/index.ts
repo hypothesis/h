@@ -164,6 +164,24 @@ export type APIAnnotationData = Annotation & {
  */
 export type GroupAnnotationsResponse = PaginatedResponse<APIAnnotationData>;
 
+/**
+ * Request to update the authenticated user's preferences.
+ */
+export type UpdateUserPrefsAPIRequest = {
+  preferences: {
+    show_orcid_id_on_profile: boolean;
+  };
+};
+
+/**
+ * A successful response from h's update-user-preferences API.
+ */
+export type UpdateUserPrefsAPIResponse = {
+  preferences: {
+    show_orcid_id_on_profile?: boolean;
+  };
+};
+
 /** An error response from the h API:
  * https://h.readthedocs.io/en/latest/api-reference/v2/#section/Hypothesis-API/Errors
  */

@@ -17,7 +17,6 @@ describe('ProfileForm', () => {
           description: '',
           location: '',
           link: '',
-          orcid: '',
         },
         errors: {},
       },
@@ -32,7 +31,6 @@ describe('ProfileForm', () => {
       descriptionField: wrapper.find('TextField[name="description"]'),
       locationField: wrapper.find('TextField[name="location"]'),
       linkField: wrapper.find('TextField[name="link"]'),
-      orcidField: wrapper.find('TextField[name="orcid"]'),
       submitButton: wrapper.find('Button[data-testid="submit-button"]'),
     };
   };
@@ -53,17 +51,11 @@ describe('ProfileForm', () => {
       description: 'Software Developer',
       location: 'San Francisco, CA',
       link: 'https://johndoe.com',
-      orcid: '0000-0000-0000-0001',
     };
 
     const { elements } = createWrapper();
-    const {
-      displayNameField,
-      descriptionField,
-      locationField,
-      linkField,
-      orcidField,
-    } = elements;
+    const { displayNameField, descriptionField, locationField, linkField } =
+      elements;
 
     assert.equal(
       displayNameField.prop('value'),
@@ -75,7 +67,6 @@ describe('ProfileForm', () => {
     );
     assert.equal(locationField.prop('value'), fakeConfig.form.data.location);
     assert.equal(linkField.prop('value'), fakeConfig.form.data.link);
-    assert.equal(orcidField.prop('value'), fakeConfig.form.data.orcid);
   });
 
   it('displays form errors', () => {
@@ -84,17 +75,11 @@ describe('ProfileForm', () => {
       description: 'Description is required',
       location: 'Invalid location',
       link: 'Must be a valid URL',
-      orcid: 'Invalid ORCID format',
     };
 
     const { elements } = createWrapper();
-    const {
-      displayNameField,
-      descriptionField,
-      locationField,
-      linkField,
-      orcidField,
-    } = elements;
+    const { displayNameField, descriptionField, locationField, linkField } =
+      elements;
 
     assert.equal(
       displayNameField.prop('fieldError'),
@@ -109,7 +94,6 @@ describe('ProfileForm', () => {
       fakeConfig.form.errors.location,
     );
     assert.equal(linkField.prop('fieldError'), fakeConfig.form.errors.link);
-    assert.equal(orcidField.prop('fieldError'), fakeConfig.form.errors.orcid);
   });
 
   [
@@ -117,7 +101,6 @@ describe('ProfileForm', () => {
     { field: 'descriptionField', value: 'Product Manager' },
     { field: 'locationField', value: 'New York, NY' },
     { field: 'linkField', value: 'https://janesmith.dev' },
-    { field: 'orcidField', value: '0000-0000-0000-0002' },
   ].forEach(({ field, value }) => {
     it(`updates ${field} when input changes`, () => {
       const { wrapper, elements } = createWrapper();
