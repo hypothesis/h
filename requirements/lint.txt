@@ -413,7 +413,7 @@ pytest-factoryboy==2.8.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytest-mock==3.14.1
+pytest-mock==3.15.1
     # via -r requirements/tests.txt
 pytest-reverse==1.8.0
     # via -r requirements/functests.txt
