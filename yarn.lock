@@ -7312,7 +7312,7 @@ __metadata:
     typescript: ^5.8.3
     typescript-eslint: ^8.16.0
     vitest: ^3.2.4
-    wouter-preact: ^3.3.5
+    wouter-preact: ^3.7.1
   languageName: unknown
   linkType: soft
 
@@ -12283,15 +12283,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wouter-preact@npm:^3.3.5":
-  version: 3.3.5
-  resolution: "wouter-preact@npm:3.3.5"
+"wouter-preact@npm:^3.7.1":
+  version: 3.7.1
+  resolution: "wouter-preact@npm:3.7.1"
   dependencies:
     mitt: ^3.0.1
     regexparam: ^3.0.0
   peerDependencies:
     preact: ^10.0.0
-  checksum: a3f201b0b21dbd939a19530d99095955e13195976c7a650ed16d9e9e65b23cc952fa2e3158310211c22a2cc40aea0815ada8b43a36ba2bf58427e87317d46063
+  checksum: 3ee97414d48c961f85dc07a54de587ebd194c7e2694709edf3b151e6e2c1ed05ed2a2f510317d5d9d0f90006fece9f0898154ecf5452dae9a87e50d574595c72
   languageName: node
   linkType: hard
 

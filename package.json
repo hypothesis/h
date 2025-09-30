@@ -46,7 +46,7 @@
     "scroll-into-view": "^1.16.2",
     "showdown": "^2.1.0",
     "tailwindcss": "^4.1.0",
-    "wouter-preact": "^3.3.5"
+    "wouter-preact": "^3.7.1"
   },
   "devDependencies": {
     "@hypothesis/frontend-testing": "^1.7.1",
