@@ -22,7 +22,7 @@ pyproject-hooks==1.0.0
     # via
     #   build
     #   pip-tools
-ruff==0.13.0
+ruff==0.13.2
     # via -r requirements/checkformatting.in
 wheel==0.42.0
     # via pip-tools
