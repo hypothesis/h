@@ -31,7 +31,7 @@
     "dompurify": "^3.2.6",
     "escape-html": "^1.0.3",
     "gulp": "^5.0.1",
-    "gulp-changed": "^5.0.2",
+    "gulp-changed": "^5.0.3",
     "gulp-cli": "^3.0.0",
     "gulp-if": "^3.0.0",
     "gulp-svgmin": "^4.1.0",
