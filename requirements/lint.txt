@@ -95,7 +95,7 @@ colander==2.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   deform
-coverage[toml]==7.6.10
+coverage[toml]==7.10.7
     # via
     #   -r requirements/tests.txt
     #   pytest-cov
@@ -311,6 +311,7 @@ pluggy==1.5.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pytest
+    #   pytest-cov
 prompt-toolkit==3.0.50
     # via
     #   -r requirements/functests.txt
@@ -407,7 +408,7 @@ pytest==8.4.1
     #   pytest-mock
     #   pytest-reverse
     #   pytest-xdist
-pytest-cov==6.1.1
+pytest-cov==7.0.0
     # via -r requirements/tests.txt
 pytest-factoryboy==2.8.1
     # via
