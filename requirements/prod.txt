@@ -147,7 +147,7 @@ psycopg2==2.9.10
     #   data-tasks
 pycparser==2.22
     # via cffi
-pycryptodomex==3.21.0
+pycryptodomex==3.23.0
     # via -r requirements/prod.in
 pyjwt[crypto]==2.10.1
     # via -r requirements/prod.in
