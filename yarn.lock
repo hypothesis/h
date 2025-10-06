@@ -3672,9 +3672,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/eslint-plugin@npm:^1.3.13":
-  version: 1.3.13
-  resolution: "@vitest/eslint-plugin@npm:1.3.13"
+"@vitest/eslint-plugin@npm:^1.3.16":
+  version: 1.3.16
+  resolution: "@vitest/eslint-plugin@npm:1.3.16"
   dependencies:
     "@typescript-eslint/scope-manager": ^8.41.0
     "@typescript-eslint/utils": ^8.24.1
@@ -3687,7 +3687,7 @@ __metadata:
       optional: true
     vitest:
       optional: true
-  checksum: 804e9ab4ea5a138aac7ea5c115a37cce072bf8b77e1ee5f4b1ebd19f3f4bec10612bd42e1fb4599a28fb3abeeafe52d71cbd9360070b780336d9d2ad29760b8a
+  checksum: b748c3a61720a7de03104cef07cc747271e4854b6ebe897ca6574add1125c60d228d66dd088a2c745bab76ab88851bc6d5b522afc5eb44ab0c86c18640f997e2
   languageName: node
   linkType: hard
 
@@ -7284,7 +7284,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": ^5.2.2
     "@vitest/browser": ^3.2.4
     "@vitest/coverage-istanbul": ^3.2.4
-    "@vitest/eslint-plugin": ^1.3.13
+    "@vitest/eslint-plugin": ^1.3.16
     babel-plugin-istanbul: ^7.0.1
     babel-plugin-mockable-imports: ^2.0.1
     bootstrap: ^4.6.2
