@@ -267,7 +267,7 @@ rpds-py==0.22.3
     #   -r requirements/prod.txt
     #   jsonschema
     #   referencing
-sentry-sdk==2.37.1
+sentry-sdk==2.40.0
     # via
     #   -r requirements/prod.txt
     #   h-pyramid-sentry
