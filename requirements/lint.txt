@@ -41,7 +41,7 @@ build==1.0.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pip-tools
-celery==5.5.2
+celery==5.5.3
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
