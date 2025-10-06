@@ -371,7 +371,7 @@ zope-event==5.0
     # via
     #   -r requirements/prod.txt
     #   gevent
-zope-interface==7.2
+zope-interface==8.0.1
     # via
     #   -r requirements/prod.txt
     #   gevent
@@ -397,5 +397,4 @@ setuptools==78.1.1
     #   supervisor
     #   zope-deprecation
     #   zope-event
-    #   zope-interface
     #   zope-sqlalchemy
