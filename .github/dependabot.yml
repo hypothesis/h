@@ -15,6 +15,10 @@ updates:
     time: "00:00"
     timezone: "Europe/London"
   groups:
+    tailwind:
+      patterns:
+        - 'tailwindcss'
+        - '@tailwindcss/*'
     vitest:
       patterns:
         - 'vitest'
