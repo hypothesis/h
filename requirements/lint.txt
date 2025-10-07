@@ -464,7 +464,7 @@ rpds-py==0.22.3
     #   referencing
 ruff==0.13.2
     # via -r requirements/lint.in
-sentry-sdk==2.37.1
+sentry-sdk==2.40.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
