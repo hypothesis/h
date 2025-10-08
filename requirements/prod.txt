@@ -282,7 +282,7 @@ zope-deprecation==5.0
     #   pyramid-jinja2
 zope-event==5.0
     # via gevent
-zope-interface==7.2
+zope-interface==8.0.1
     # via
     #   -r requirements/prod.in
     #   gevent
@@ -304,5 +304,4 @@ setuptools==78.1.1
     #   supervisor
     #   zope-deprecation
     #   zope-event
-    #   zope-interface
     #   zope-sqlalchemy
