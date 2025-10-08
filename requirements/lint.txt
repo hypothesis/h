@@ -622,7 +622,7 @@ zope-interface==7.2
     #   transaction
     #   wired
     #   zope-sqlalchemy
-zope-sqlalchemy==3.1
+zope-sqlalchemy==4.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
