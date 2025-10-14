@@ -342,6 +342,7 @@ class TestGroupEditViews:
             enforce_scope=False,
             reply_to=None,
             email_from_name=None,
+            type="open",
         )
         assert response["form"] == self._expected_form(group)
 

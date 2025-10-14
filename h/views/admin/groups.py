@@ -197,6 +197,7 @@ class GroupEditViews:
                 enforce_scope=appstruct["enforce_scope"],
                 reply_to=appstruct["reply_to"] or None,
                 email_from_name=appstruct["email_from_name"] or None,
+                type=appstruct["group_type"],
             )
 
             memberids = []

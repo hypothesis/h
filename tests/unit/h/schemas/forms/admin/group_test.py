@@ -87,21 +87,6 @@ class TestAdminGroupSchema:
 
         bound_schema.deserialize(group_data)
 
-    def test_it_raises_if_group_type_changed(
-        self, group_data, pyramid_csrf_request, org, user_service
-    ):
-        group = mock.Mock(type="open")
-        group_data["group_type"] = "restricted"
-        schema = AdminGroupSchema().bind(
-            request=pyramid_csrf_request,
-            group=group,
-            user_svc=user_service,
-            organizations={org.pubid: org},
-        )
-
-        with pytest.raises(colander.Invalid, match="Changing group type"):
-            schema.deserialize(group_data)
-
     def test_it_does_not_raise_if_group_type_is_same(
         self, group_data, pyramid_csrf_request, org, user_service
     ):

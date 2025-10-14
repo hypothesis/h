@@ -21,7 +21,11 @@ from h.util import group_scope
 
 _ = i18n.TranslationString
 
-VALID_GROUP_TYPES = (("restricted", _("Restricted")), ("open", _("Open")))
+VALID_GROUP_TYPES = (
+    ("private", _("Private")),
+    ("restricted", _("Restricted")),
+    ("open", _("Open")),
+)
 
 
 def username_validator(form, value):
@@ -111,18 +115,8 @@ def url_with_origin_validator(node, val):
 
 
 @colander.deferred
-def group_type_validator(_node, kwargs):
-    group = kwargs.get("group")
-    if not group:
-        return colander.OneOf([key for key, title in VALID_GROUP_TYPES])
-
-    def validate(node, value):
-        if group.type != value:
-            raise colander.Invalid(
-                node, _("Changing group type is currently not supported")
-            )
-
-    return validate
+def group_type_validator(_node, _kwargs):
+    return colander.OneOf([key for key, title in VALID_GROUP_TYPES])
 
 
 @colander.deferred
