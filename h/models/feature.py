@@ -26,6 +26,7 @@ FEATURES = {
     "log_in_with_orcid": "Allow users to log in with ORCID",
     "log_in_with_google": "Allow users to log in with Google",
     "log_in_with_facebook": "Allow users to log in with Facebook",
+    "top_annos_placeholder": "Display a placeholder in Orphans tab, for deleted top-level annotations with replies",
 }
 
 
