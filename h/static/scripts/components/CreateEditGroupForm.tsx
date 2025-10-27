@@ -318,7 +318,7 @@ export default function CreateEditGroupForm({
           </fieldset>
         )}
 
-        <div className="pt-2 border-t border-t-text-grey-6 flex items-center gap-x-4">
+        <div className="pt-2 mt-3 border-t border-t-text-grey-6 flex items-center gap-x-4">
           <span>
             {/* These are in a child span to avoid a gap between them. */}
             <Star />
