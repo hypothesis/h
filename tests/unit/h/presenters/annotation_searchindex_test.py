@@ -1,6 +1,7 @@
 import pytest
 from h_matchers import Any
 
+from h.models import ModerationStatus
 from h.presenters.annotation_searchindex import AnnotationSearchIndexPresenter
 from h.util.datetime import utc_iso8601
 
@@ -43,33 +44,31 @@ class TestAnnotationSearchIndexPresenter:
             "hidden": False,
         }
 
-    @pytest.mark.parametrize("is_moderated", [True, False])
-    @pytest.mark.parametrize("replies_moderated", [True, False])
+    @pytest.mark.parametrize(
+        "moderation_status,should_be_hidden",
+        [
+            (None, False),
+            (ModerationStatus.APPROVED, False),
+            (ModerationStatus.PENDING, True),
+            (ModerationStatus.DENIED, True),
+            (ModerationStatus.SPAM, True),
+        ],
+    )
     def test_it_marks_annotation_hidden_correctly(
         self,
         pyramid_request,
-        moderation_service,
-        is_moderated,
-        replies_moderated,
+        moderation_status,
+        should_be_hidden,
         factories,
     ):
         annotation = factories.Annotation()
-        replies = factories.Annotation.create_batch(2, references=[annotation.id])
-
-        # Configure moderation return value
-        moderated_ids = []
-        if is_moderated:
-            moderated_ids.append(annotation.id)
-        if replies_moderated:
-            moderated_ids.extend([reply.id for reply in replies])
-        moderation_service.all_hidden.return_value = moderated_ids
+        annotation.moderation_status = moderation_status
 
         annotation_dict = AnnotationSearchIndexPresenter(
             annotation, pyramid_request
         ).asdict()
 
-        # We are hidden if both we, and all of our replies are moderated
-        assert annotation_dict["hidden"] == bool(is_moderated and replies_moderated)
+        assert annotation_dict["hidden"] == should_be_hidden
 
     @pytest.mark.parametrize("is_nipsaed", [True, False])
     def test_it_marks_annotation_nipsad_correctly(
