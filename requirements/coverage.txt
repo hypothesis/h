@@ -9,16 +9,16 @@ build==1.0.3
 click==8.1.8
     # via pip-tools
 coverage[toml]==7.9.2
-    # via -r coverage.in
+    # via -r requirements/coverage.in
 importlib-metadata==7.0.1
     # via pip-sync-faster
 packaging==25.0
     # via build
 pip-sync-faster==0.0.5
-    # via -r coverage.in
-pip-tools==7.4.1
+    # via -r requirements/coverage.in
+pip-tools==7.5.1
     # via
-    #   -r coverage.in
+    #   -r requirements/coverage.in
     #   pip-sync-faster
 pyproject-hooks==1.0.0
     # via
