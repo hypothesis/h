@@ -5,48 +5,48 @@
 #    pip-compile --allow-unsafe requirements/typecheck.in
 #
 alembic==1.16.2
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 amqp==5.3.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   kombu
 attrs==24.3.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   jsonschema
     #   referencing
 bcrypt==4.3.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 billiard==4.2.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
 bleach==6.2.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 build==1.2.2.post1
     # via pip-tools
 celery==5.5.3
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 certifi==2025.7.14
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   requests
     #   sentry-sdk
 cffi==1.17.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   cryptography
 chameleon==4.6.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   deform
 charset-normalizer==3.4.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   requests
 click==8.1.8
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
     #   click-didyoumean
     #   click-plugins
@@ -54,170 +54,170 @@ click==8.1.8
     #   pip-tools
 click-didyoumean==0.3.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
 click-plugins==1.1.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
 click-repl==0.3.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
 colander==2.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   deform
 cryptography==44.0.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyjwt
 data-tasks==0.0.5
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 deform==2.0.15
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 elasticsearch==6.8.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 gevent==25.8.2
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 greenlet==3.2.4
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   gevent
     #   sqlalchemy
 gunicorn==23.0.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 h-api==1.1.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 h-assets==1.1.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 h-matchers==1.2.17
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 h-pyramid-sentry==1.2.4
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 hupper==1.12
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid
 idna==3.10
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   requests
 importlib-metadata==8.6.1
     # via pip-sync-faster
 importlib-resources==6.5.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   data-tasks
     #   h-api
 iso8601==2.1.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   colander
     #   deform
 itsdangerous==2.2.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 jinja2==3.1.6
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   data-tasks
     #   pyramid-jinja2
 jsonschema==4.24.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   h-api
 jsonschema-specifications==2024.10.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   jsonschema
 kombu==5.5.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
 mako==1.3.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   alembic
 markdown==3.8.2
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 markupsafe==2.1.5
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   jinja2
     #   mako
     #   pyramid-jinja2
 mypy==1.18.2
-    # via -r typecheck.in
+    # via -r requirements/typecheck.in
 mypy-extensions==1.0.0
     # via mypy
 newrelic==10.5.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 oauthlib==3.3.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 packaging==25.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   build
     #   gunicorn
     #   zope-sqlalchemy
 passlib==1.7.4
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pastedeploy==3.1.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   plaster-pastedeploy
 pathspec==0.12.1
     # via mypy
 peppercorn==0.6
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   deform
 pip-sync-faster==0.0.5
-    # via -r typecheck.in
-pip-tools==7.4.1
+    # via -r requirements/typecheck.in
+pip-tools==7.5.1
     # via
-    #   -r typecheck.in
+    #   -r requirements/typecheck.in
     #   pip-sync-faster
 plaster==1.1.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   plaster-pastedeploy
     #   pyramid
 plaster-pastedeploy==1.0.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid
 prompt-toolkit==3.0.50
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   click-repl
 psycogreen==1.0.2
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 psycopg2==2.9.10
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   data-tasks
 pycparser==2.22
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   cffi
 pycryptodomex==3.23.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyjwt[crypto]==2.10.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyparsing==3.2.3
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
 pyramid==2.0.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   h-assets
     #   h-pyramid-sentry
     #   pyramid-exclog
@@ -228,154 +228,154 @@ pyramid==2.0.2
     #   pyramid-services
     #   pyramid-tm
 pyramid-exclog==1.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyramid-jinja2==2.10.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyramid-mailer==0.15.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyramid-retry==2.1.1
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyramid-sanity==1.0.4
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyramid-services==2.2
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pyramid-tm==2.6
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 python-dateutil==2.9.0.post0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   celery
     #   elasticsearch-dsl
 python-slugify==8.0.4
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 pytz==2025.2
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 referencing==0.36.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   h-api
     #   jsonschema
     #   jsonschema-specifications
 repoze-sendmail==4.4.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid-mailer
 requests==2.32.4
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 rfc3339-validator==0.1.4
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 rpds-py==0.22.3
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   jsonschema
     #   referencing
 sentry-sdk==2.40.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   h-pyramid-sentry
 six==1.17.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   elasticsearch-dsl
     #   python-dateutil
     #   rfc3339-validator
 sqlalchemy==2.0.25
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   alembic
     #   data-tasks
     #   zope-sqlalchemy
 sqlparse==0.5.3
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   data-tasks
 supervisor==4.2.5
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 tabulate==0.9.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   data-tasks
 text-unidecode==1.3
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   python-slugify
 transaction==5.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid-mailer
     #   pyramid-tm
     #   repoze-sendmail
     #   zope-sqlalchemy
 translationstring==1.4
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   colander
     #   deform
     #   pyramid
 typing-extensions==4.13.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   alembic
     #   mypy
     #   referencing
     #   sqlalchemy
 tzdata==2025.2
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   kombu
 urllib3==2.3.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   elasticsearch
     #   requests
     #   sentry-sdk
 venusian==3.1.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid
 vine==5.1.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   amqp
     #   celery
     #   kombu
 wcwidth==0.2.13
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   prompt-toolkit
 webencodings==0.5.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   bleach
 webob==1.8.8
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid
 wheel==0.45.1
     # via pip-tools
 wired==0.4
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pyramid-services
 ws4py==0.6.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 wsaccel==0.6.7
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 zipp==3.21.0
     # via importlib-metadata
 zope-deprecation==5.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   deform
     #   pyramid
     #   pyramid-jinja2
 zope-event==5.0
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   gevent
 zope-interface==8.0.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   gevent
     #   pyramid
     #   pyramid-retry
@@ -385,14 +385,14 @@ zope-interface==8.0.1
     #   wired
     #   zope-sqlalchemy
 zope-sqlalchemy==4.0
-    # via -r prod.txt
+    # via -r requirements/prod.txt
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via pip-tools
 setuptools==78.1.1
     # via
-    #   -r prod.txt
+    #   -r requirements/prod.txt
     #   pip-tools
     #   pyramid
     #   repoze-sendmail
