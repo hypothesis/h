@@ -1,3 +1,4 @@
+pip==25.2
 pip-tools
 pip-sync-faster
 ruff
