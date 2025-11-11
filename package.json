@@ -67,7 +67,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.4.0",
     "playwright": "^1.55.1",
-    "prettier": "^3.4.1",
+    "prettier": "^3.6.2",
     "sinon": "^21.0.0",
     "syn": "^0.2.2",
     "typescript": "^5.9.3",

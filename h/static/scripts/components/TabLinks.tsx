@@ -23,8 +23,7 @@ function TabLink({ children, href, testId, server = false }: TabLinkProps) {
     <Component
       href={href}
       className={classnames({
-        'focus-visible-ring whitespace-nowrap flex items-center font-semibold rounded px-2 py-1 gap-x-2':
-          true,
+        'focus-visible-ring whitespace-nowrap flex items-center font-semibold rounded px-2 py-1 gap-x-2': true,
         'text-grey-1 bg-grey-7': selected,
         'hover:bg-grey-2': !selected,
       })}
