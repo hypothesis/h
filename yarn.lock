@@ -3620,7 +3620,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/browser@npm:^4.0.8":
+"@vitest/browser-playwright@npm:^4.0.8":
+  version: 4.0.8
+  resolution: "@vitest/browser-playwright@npm:4.0.8"
+  dependencies:
+    "@vitest/browser": 4.0.8
+    "@vitest/mocker": 4.0.8
+    tinyrainbow: ^3.0.3
+  peerDependencies:
+    playwright: "*"
+    vitest: 4.0.8
+  peerDependenciesMeta:
+    playwright:
+      optional: false
+  checksum: ae31e1c25b49c8303494bab436ed052f2043b48e60d8c6ea93362797e51aa04e92fd0702926d4221aeb4afab83ac23905a3441b7c8760597cc672680a56294d2
+  languageName: node
+  linkType: hard
+
+"@vitest/browser@npm:4.0.8, @vitest/browser@npm:^4.0.8":
   version: 4.0.8
   resolution: "@vitest/browser@npm:4.0.8"
   dependencies:
@@ -7146,6 +7163,7 @@ __metadata:
     "@tailwindcss/postcss": ^4.1.17
     "@trivago/prettier-plugin-sort-imports": ^5.2.2
     "@vitest/browser": ^4.0.8
+    "@vitest/browser-playwright": ^4.0.8
     "@vitest/coverage-istanbul": ^4.0.8
     "@vitest/eslint-plugin": ^1.4.2
     babel-plugin-istanbul: ^7.0.1

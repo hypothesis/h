@@ -1,4 +1,5 @@
 import { SummaryReporter } from '@hypothesis/frontend-testing/vitest';
+import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 import { excludeFromCoverage } from './rollup-tests.config.js';
@@ -9,7 +10,7 @@ export default defineConfig({
     reporters: [new SummaryReporter()],
 
     browser: {
-      provider: 'playwright',
+      provider: playwright(),
       enabled: true,
       headless: true,
       screenshotFailures: false,
