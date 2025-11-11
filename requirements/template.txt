@@ -10,7 +10,7 @@ binaryornot==0.4.4
     # via cookiecutter
 build==1.2.2.post1
     # via pip-tools
-certifi==2025.7.14
+certifi==2025.10.5
     # via requests
 chardet==5.2.0
     # via binaryornot
