@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/core": "^7.28.3",
     "@babel/preset-env": "^7.27.1",
-    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
     "@hypothesis/annotation-ui": "^1.0.0",
     "@hypothesis/frontend-build": "^5.0.0",
