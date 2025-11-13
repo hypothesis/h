@@ -163,7 +163,9 @@ describe('AnnotationCard', () => {
       );
       assert.equal(
         timestamps.prop('withEditedTimestamp'),
-        fakeAnnotation.created !== fakeAnnotation.updated ? 'prominent' : false,
+        fakeAnnotation.created !== fakeAnnotation.updated
+          ? 'highlighted'
+          : false,
       );
     });
   });
