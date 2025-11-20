@@ -289,7 +289,7 @@ pip-sync-faster==0.0.5
     #   -r functests.txt
     #   -r lint.in
     #   -r tests.txt
-pip-tools==7.5.1
+pip-tools==7.5.2
     # via
     #   -r functests.txt
     #   -r lint.in
