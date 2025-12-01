@@ -15,7 +15,7 @@ attrs==24.3.0
     #   -r requirements/prod.txt
     #   jsonschema
     #   referencing
-bcrypt==4.3.0
+bcrypt==5.0.0
     # via -r requirements/prod.txt
 beautifulsoup4==4.12.2
     # via webtest
