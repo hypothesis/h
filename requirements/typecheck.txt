@@ -373,7 +373,7 @@ zope-event==5.0
     # via
     #   -r requirements/prod.txt
     #   gevent
-zope-interface==8.0.1
+zope-interface==8.1.1
     # via
     #   -r requirements/prod.txt
     #   gevent
