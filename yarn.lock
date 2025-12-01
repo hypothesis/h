@@ -7190,7 +7190,7 @@ __metadata:
     preact: ^10.27.0
     prettier: ^3.6.2
     rollup: ^4.53.3
-    sass: ^1.91.0
+    sass: ^1.94.2
     scroll-into-view: ^1.16.2
     showdown: ^2.1.0
     sinon: ^21.0.0
@@ -10419,9 +10419,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:^1.91.0":
-  version: 1.91.0
-  resolution: "sass@npm:1.91.0"
+"sass@npm:^1.94.2":
+  version: 1.94.2
+  resolution: "sass@npm:1.94.2"
   dependencies:
     "@parcel/watcher": ^2.4.1
     chokidar: ^4.0.0
@@ -10432,7 +10432,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 98113de6a30b4e5c18b25e84aaf2e372995eed3035c172909b281ebf31245b4fd178e790914993ce671e2f73f0697f8120e0fa2143818a0c0d7d7a3a0254a02c
+  checksum: 75460a0d24f0ab1054bb1b88cb71cc51b592b48461ec540be9275fd4010b3b708ed734bfd337399bd8ec9c8a56942482eff6c372a3ffb0154417b6f4494522b5
   languageName: node
   linkType: hard
 
