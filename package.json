@@ -22,7 +22,7 @@
     "@hypothesis/frontend-shared": "^10.3.2",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@sentry/browser": "^9.33.0",
     "@tailwindcss/postcss": "^4.1.17",
