@@ -101,7 +101,7 @@ class TestPreviewModeratedAnnotationNotification:
 
         assert result == {
             "user_display_name": "Jane Doe",
-            "status_change_description": "The following comment has been approved by the moderation team for GROUP NAME.\nIt's now visible to everyone viewing that group.",
+            "status_change_description": "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.\n",
             "annotation_url": "https://example.com/bouncer",
             "annotation": {
                 "text_rendered": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tincidunt malesuada ex, id dictum risus posuere sed. Curabitur risus lectus, aliquam vel tempus ut, tempus non risus. Duis ac nibh lacinia, lacinia leo sit amet, lacinia tortor. Vestibulum dictum maximus lorem, nec lobortis augue ullamcorper nec. Ut ac viverra nisi. Nam congue neque eu mi viverra ultricies. Integer pretium odio nulla, at semper dolor tincidunt quis. Pellentesque suscipit magna nec nunc mollis, a interdum purus aliquam.",
