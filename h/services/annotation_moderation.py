@@ -202,19 +202,17 @@ class AnnotationModerationService:
     ) -> str:
         if new_status == ModerationStatus.DENIED:
             return (
-                "The following comment has been declined by the {group name} moderation team.\n"
+                f"The following comment has been declined by the {group_name} moderation team.\n"
                 "You can edit this comment and it will be reevaluated."
             )
 
         if new_status == ModerationStatus.PENDING:
             return (
-                "The following comment has been resubmitted to the {group name} moderation team and is currently only visible to that group's moderators and yourself.\n"
+                f"The following comment has been resubmitted to the {group_name} moderation team and is currently only visible to that group's moderators and yourself.\n"
                 "You'll receive another email when your comment's moderation status changes."
             )
         if new_status == ModerationStatus.APPROVED:
-            return (
-                "The following comment has been approved by the {group name} moderation team and is now visible to other users.\n"
-            )
+            return f"The following comment has been approved by the {group_name} moderation team and is now visible to other users.\n"
 
         msg = f"Unexpected moderation status change description for {new_status}"
         raise ValueError(msg)
