@@ -212,7 +212,7 @@ class AnnotationModerationService:
                 "You'll receive another email when your comment's moderation status changes."
             )
         if new_status == ModerationStatus.APPROVED:
-            return f"The following comment has been approved by the {group_name} moderation team and is now visible to other users.\n"
+            return f"The following comment has been approved by the {group_name} moderation team and is now visible to other users."
 
         msg = f"Unexpected moderation status change description for {new_status}"
         raise ValueError(msg)

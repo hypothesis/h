@@ -277,7 +277,7 @@ class TestAnnotationModerationService:
                 "unsubscribe",
                 token=subscription_service.get_unsubscribe_token.return_value,
             ),
-            "status_change_description": "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.\n",
+            "status_change_description": "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.",
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
@@ -324,7 +324,7 @@ class TestAnnotationModerationService:
         [
             (
                 ModerationStatus.APPROVED,
-                "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.\n",
+                "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.",
             ),
             (
                 ModerationStatus.PENDING,
