@@ -277,7 +277,7 @@ class TestAnnotationModerationService:
                 "unsubscribe",
                 token=subscription_service.get_unsubscribe_token.return_value,
             ),
-            "status_change_description": "The following comment has been approved by the moderation team for GROUP NAME.\nIt's now visible to everyone viewing that group.",
+            "status_change_description": "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.",
         }
         html_renderer.assert_(**expected_context)  # noqa: PT009
         text_renderer.assert_(**expected_context)  # noqa: PT009
@@ -324,16 +324,16 @@ class TestAnnotationModerationService:
         [
             (
                 ModerationStatus.APPROVED,
-                "The following comment has been approved by the moderation team for GROUP NAME.\nIt's now visible to everyone viewing that group.",
+                "The following comment has been approved by the GROUP NAME moderation team and is now visible to other users.",
             ),
             (
                 ModerationStatus.PENDING,
-                "The following comment has been hidden by the moderation team for GROUP NAME and is only visible to that group's moderators and yourself.\nYou'll receive another email when your comment's moderation status changes.",
+                "The following comment has been resubmitted to the GROUP NAME moderation team and is currently only visible to that group's moderators and yourself.\nYou'll receive another email when your comment's moderation status changes.",
             ),
             (
                 ModerationStatus.DENIED,
-                "The following comment has been declined by the moderation team for GROUP NAME.\n"
-                "You can edit this comment and it will be reevaluated by that group's moderators.",
+                "The following comment has been declined by the GROUP NAME moderation team.\n"
+                "You can edit this comment and it will be reevaluated.",
             ),
         ],
     )
