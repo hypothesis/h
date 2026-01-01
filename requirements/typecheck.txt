@@ -82,7 +82,7 @@ elasticsearch==6.8.2
     #   elasticsearch-dsl
 elasticsearch-dsl==6.4.0
     # via -r requirements/prod.txt
-gevent==25.8.2
+gevent==25.9.1
     # via -r requirements/prod.txt
 greenlet==3.2.4
     # via
