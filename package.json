@@ -28,7 +28,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "bootstrap": "^4.6.2",
     "classnames": "^2.5.1",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.3.1",
     "escape-html": "^1.0.3",
     "gulp": "^5.0.1",
     "gulp-changed": "^5.0.3",
