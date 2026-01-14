@@ -10,7 +10,7 @@ binaryornot==0.4.4
     # via cookiecutter
 build==1.2.2.post1
     # via pip-tools
-certifi==2025.10.5
+certifi==2026.1.4
     # via requests
 chardet==5.2.0
     # via binaryornot
@@ -21,7 +21,7 @@ click==8.1.8
     #   cookiecutter
     #   pip-tools
 cookiecutter==2.6.0
-    # via -r template.in
+    # via -r requirements/template.in
 idna==3.10
     # via requests
 importlib-metadata==8.6.1
@@ -37,10 +37,10 @@ mdurl==0.1.2
 packaging==25.0
     # via build
 pip-sync-faster==0.0.5
-    # via -r template.in
+    # via -r requirements/template.in
 pip-tools==7.5.2
     # via
-    #   -r template.in
+    #   -r requirements/template.in
     #   pip-sync-faster
 pygments==2.19.1
     # via rich
@@ -74,7 +74,7 @@ zipp==3.21.0
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via
-    #   -r template.in
+    #   -r requirements/template.in
     #   pip-tools
 setuptools==78.1.1
     # via pip-tools
