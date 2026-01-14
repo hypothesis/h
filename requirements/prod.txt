@@ -20,7 +20,7 @@ bleach==6.2.0
     # via -r requirements/prod.in
 celery==5.5.3
     # via -r requirements/prod.in
-certifi==2025.10.5
+certifi==2026.1.4
     # via
     #   -r requirements/prod.in
     #   requests
