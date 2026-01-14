@@ -7197,7 +7197,7 @@ __metadata:
     playwright: ^1.55.1
     popper.js: ^1.16.1
     postcss: ^8.5.6
-    preact: ^10.27.0
+    preact: ^10.27.3
     prettier: ^3.6.2
     rollup: ^4.53.3
     sass: ^1.94.2
@@ -9663,10 +9663,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.27.0":
-  version: 10.27.0
-  resolution: "preact@npm:10.27.0"
-  checksum: 84dc26916aae16d7de59b79435491f61e8654824920791e3c47068e0cd08134f646abbd8505f9880a4ff3e1aac20c55400555a126e7eef62c9c6f87c17fbf889
+"preact@npm:^10.27.3":
+  version: 10.28.2
+  resolution: "preact@npm:10.28.2"
+  checksum: 5f65087ab00ab270ca514e43b5aaba79101da92eb2ea3199a2b54776a159032b0ee4749a529f624ccc7d456c71b56ddeed2cbcd92cd1e6a3b4dcecfaa7cacf36
   languageName: node
   linkType: hard
 
