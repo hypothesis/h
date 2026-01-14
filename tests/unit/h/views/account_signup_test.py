@@ -531,11 +531,11 @@ class TestSocialLoginSignupViews:
             ({}, {"comms_opt_in": False}),
         ],
     )
+    @pytest.mark.usefixtures("frozen_time")
     def test_post(
         self,
         views,
         user_signup_service,
-        frozen_time,
         orcid_id,
         pyramid_request,
         login,
@@ -566,7 +566,7 @@ class TestSocialLoginSignupViews:
             email=None,
             display_name=None,
             password=None,
-            privacy_accepted=frozen_time().astimezone(UTC),
+            privacy_accepted=datetime.now(UTC),
             require_activation=False,
             identities=[
                 {
