@@ -138,6 +138,8 @@ kombu==5.5.2
     # via
     #   -r requirements/prod.txt
     #   celery
+librt==0.7.8
+    # via mypy
 mako==1.3.0
     # via
     #   -r requirements/prod.txt
@@ -150,7 +152,7 @@ markupsafe==2.1.5
     #   jinja2
     #   mako
     #   pyramid-jinja2
-mypy==1.18.2
+mypy==1.19.1
     # via -r requirements/typecheck.in
 mypy-extensions==1.0.0
     # via mypy
