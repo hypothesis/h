@@ -90,7 +90,7 @@ factory-boy==3.3.3
     #   pytest-factoryboy
 faker==22.2.0
     # via factory-boy
-gevent==25.8.2
+gevent==25.9.1
     # via -r requirements/prod.txt
 greenlet==3.2.4
     # via
