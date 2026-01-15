@@ -126,7 +126,7 @@ jinja2==3.1.6
     #   -r requirements/prod.txt
     #   data-tasks
     #   pyramid-jinja2
-jsonschema==4.24.0
+jsonschema==4.26.0
     # via
     #   -r requirements/prod.txt
     #   h-api
@@ -266,7 +266,7 @@ requests==2.32.4
     # via -r requirements/prod.txt
 rfc3339-validator==0.1.4
     # via -r requirements/prod.txt
-rpds-py==0.22.3
+rpds-py==0.30.0
     # via
     #   -r requirements/prod.txt
     #   jsonschema
