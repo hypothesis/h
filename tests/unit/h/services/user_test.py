@@ -143,6 +143,29 @@ class TestUserService:
 
         assert "duplicate shortcut values" in str(exc.value)
 
+    def test_update_preferences_allows_repeatable_shortcut_duplicates(
+        self, svc, factories, monkeypatch
+    ):
+        user = factories.User.build()
+
+        monkeypatch.setattr(
+            "h.services.user.REPEATABLE_SHORTCUT_GROUPS",
+            [{"applyUpdates", "openKeyboardShortcuts"}],
+        )
+
+        svc.update_preferences(
+            user,
+            shortcuts_preferences={
+                "applyUpdates": "l",
+                "openKeyboardShortcuts": "l",
+            },
+        )
+
+        assert user.shortcuts_preferences == {
+            "applyUpdates": "l",
+            "openKeyboardShortcuts": "l",
+        }
+
     def test_update_preferences_accepts_valid_shortcuts_preferences(
         self, svc, factories
     ):
