@@ -4,6 +4,7 @@ from functools import partial
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
@@ -230,6 +231,9 @@ class User(Base):
 
     # Has the user opted-in for news etc.
     comms_opt_in = sa.Column(sa.Boolean, nullable=True)
+
+    # A JSON blob with user shortcuts preferences.
+    shortcuts_preferences = sa.Column(JSONB, nullable=True)
 
     identities = sa.orm.relationship(
         "UserIdentity", backref="user", cascade="all, delete-orphan"

@@ -203,6 +203,9 @@ class TestUserModel:
         # nullable
         assert User().privacy_accepted is None
 
+    def test_shortcuts_preferences_defaults_to_None(self):
+        assert User().shortcuts_preferences is None
+
     def test_repr(self, user):
         assert repr(user) == f"User(id={user.id})"
 

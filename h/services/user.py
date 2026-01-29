@@ -1,10 +1,26 @@
+from collections.abc import Mapping
+
 import sqlalchemy as sa
 
 from h.models import User, UserIdentity
 from h.util.db import on_transaction_end
 from h.util.user import split_user
 
-UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial"}
+UPDATE_PREFS_ALLOWED_KEYS = {
+    "show_sidebar_tutorial",
+    "shortcuts_preferences",
+}
+REPEATABLE_SHORTCUT_GROUPS = []
+ALLOWED_SHORTCUT_ACTIONS = {
+    "applyUpdates",
+    "openKeyboardShortcuts",
+    "openSearch",
+    "annotateSelection",
+    "highlightSelection",
+    "toggleHighlights",
+    "showSelection",
+    "hideAdder",
+}
 
 
 class UserNotActivated(Exception):  # noqa: N818
@@ -171,7 +187,43 @@ class UserService:
         if "show_sidebar_tutorial" in kwargs:  # pragma: no cover
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
 
+        if "shortcuts_preferences" in kwargs:
+            updated = kwargs["shortcuts_preferences"]
+            _validate_shortcuts_preferences(updated)
+            user.shortcuts_preferences = updated
 
 def user_service_factory(_context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.default_authority, session=request.db)
+
+
+def _validate_shortcuts_preferences(preferences):
+    if not isinstance(preferences, Mapping):
+        raise TypeError("shortcuts_preferences must be a mapping")
+
+    # Check for invalid keys
+    invalid_keys = set(preferences.keys()) - ALLOWED_SHORTCUT_ACTIONS
+    if invalid_keys:
+        keys = ", ".join(sorted(invalid_keys))
+        raise TypeError(
+            f"shortcuts_preferences with keys {keys} are not allowed"
+        )
+
+    # Check for duplicate shortcut values
+    actions_by_value = {}
+    for action, value in preferences.items():
+        actions_by_value.setdefault(value, set()).add(action)
+
+    for value, actions in actions_by_value.items():
+        if len(actions) <= 1:
+            continue
+        if _allow_duplicate_shortcuts(actions):
+            continue
+        actions_list = ", ".join(sorted(actions))
+        raise TypeError(
+            f"shortcuts_preferences has duplicate shortcut values for actions {actions_list}"
+        )
+
+
+def _allow_duplicate_shortcuts(actions):
+    return any(actions <= group for group in REPEATABLE_SHORTCUT_GROUPS)
