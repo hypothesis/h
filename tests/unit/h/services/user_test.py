@@ -129,9 +129,7 @@ class TestUserService:
 
         assert "keys notAllowed are not allowed" in str(exc.value)
 
-    def test_update_preferences_rejects_shortcut_value_duplicates(
-        self, svc, factories
-    ):
+    def test_update_preferences_rejects_shortcut_value_duplicates(self, svc, factories):
         user = factories.User.build()
 
         with pytest.raises(TypeError) as exc:

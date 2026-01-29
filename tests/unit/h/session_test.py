@@ -82,9 +82,7 @@ class TestModel:
         else:
             assert preferences["show_sidebar_tutorial"] is True
 
-    def test_authenticated_includes_shortcuts_preferences(
-        self, authenticated_request
-    ):
+    def test_authenticated_includes_shortcuts_preferences(self, authenticated_request):
         shortcuts_preferences = {"applyUpdates": "l"}
         authenticated_request.user.shortcuts_preferences = shortcuts_preferences
 
@@ -176,9 +174,7 @@ class TestProfile:
         else:
             assert preferences["show_sidebar_tutorial"] is True
 
-    def test_authenticated_includes_shortcuts_preferences(
-        self, authenticated_request
-    ):
+    def test_authenticated_includes_shortcuts_preferences(self, authenticated_request):
         shortcuts_preferences = {"applyUpdates": "l"}
         authenticated_request.user.shortcuts_preferences = shortcuts_preferences
 
