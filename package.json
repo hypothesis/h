@@ -13,7 +13,7 @@
     "typecheck": "tsc --build h/static/scripts/tsconfig.json"
   },
   "dependencies": {
-    "@babel/core": "^7.28.3",
+    "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.27.1",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
