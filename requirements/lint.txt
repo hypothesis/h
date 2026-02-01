@@ -348,7 +348,7 @@ pyjwt[crypto]==2.10.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pyparsing==3.2.5
+pyparsing==3.3.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
