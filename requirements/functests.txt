@@ -266,7 +266,7 @@ pytest==9.0.1
     #   pytest-reverse
 pytest-factoryboy==2.8.1
     # via -r requirements/functests.in
-pytest-reverse==1.8.0
+pytest-reverse==1.9.0
     # via -r requirements/functests.in
 python-dateutil==2.9.0.post0
     # via
