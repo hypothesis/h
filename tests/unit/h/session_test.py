@@ -90,6 +90,15 @@ class TestModel:
 
         assert preferences["shortcuts_preferences"] == shortcuts_preferences
 
+    def test_authenticated_omits_shortcuts_preferences_when_none(
+        self, authenticated_request
+    ):
+        authenticated_request.user.shortcuts_preferences = None
+
+        preferences = session.model(authenticated_request)["preferences"]
+
+        assert "shortcuts_preferences" not in preferences
+
 
 class TestProfile:
     def test_userid_unauthenticated(self, unauthenticated_request):
@@ -181,6 +190,15 @@ class TestProfile:
         preferences = session.profile(authenticated_request)["preferences"]
 
         assert preferences["shortcuts_preferences"] == shortcuts_preferences
+
+    def test_authenticated_omits_shortcuts_preferences_when_none(
+        self, authenticated_request
+    ):
+        authenticated_request.user.shortcuts_preferences = None
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert "shortcuts_preferences" not in preferences
 
     def test_anonymous_authority(self, unauthenticated_request, authority):
         assert session.profile(unauthenticated_request)["authority"] == authority

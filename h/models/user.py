@@ -233,7 +233,8 @@ class User(Base):
     comms_opt_in = sa.Column(sa.Boolean, nullable=True)
 
     # A JSON blob with user shortcuts preferences.
-    shortcuts_preferences = sa.Column(JSONB, nullable=True)
+    # Use SQL NULL (not JSON null) when clearing the value.
+    shortcuts_preferences = sa.Column(JSONB(none_as_null=True), nullable=True)
 
     identities = sa.orm.relationship(
         "UserIdentity", backref="user", cascade="all, delete-orphan"
