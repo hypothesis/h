@@ -276,7 +276,7 @@ class TestCreateUpdateAnnotationSchema:
         "target_description,expected_error_message",
         [
             (42, "42 is not of type 'string'"),
-            ("a" * 251, f"""'{"a" * 251}' is too long"""),
+            ("a" * 5001, f"""'{"a" * 5001}' is too long"""),
         ],
     )
     def test_target_description_invalid(

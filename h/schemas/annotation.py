@@ -93,7 +93,7 @@ class AnnotationSchema(JSONSchema):
                 "items": {
                     "type": "object",
                     "properties": {
-                        "description": {"type": "string", "maxLength": 250},
+                        "description": {"type": "string", "maxLength": 5000},
                         "selector": copy.deepcopy(SELECTOR_SCHEMA),
                     },
                 },
