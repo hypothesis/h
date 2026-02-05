@@ -1,10 +1,26 @@
+from collections.abc import Mapping
+
 import sqlalchemy as sa
 
 from h.models import User, UserIdentity
 from h.util.db import on_transaction_end
 from h.util.user import split_user
 
-UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial"}
+UPDATE_PREFS_ALLOWED_KEYS = {
+    "show_sidebar_tutorial",
+    "shortcuts_preferences",
+}
+REPEATABLE_SHORTCUT_GROUPS = []
+ALLOWED_SHORTCUT_ACTIONS = {
+    "applyUpdates",
+    "openKeyboardShortcuts",
+    "openSearch",
+    "annotateSelection",
+    "highlightSelection",
+    "toggleHighlights",
+    "showSelection",
+    "hideAdder",
+}
 
 
 class UserNotActivated(Exception):  # noqa: N818
@@ -171,7 +187,61 @@ class UserService:
         if "show_sidebar_tutorial" in kwargs:  # pragma: no cover
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
 
+        if "shortcuts_preferences" in kwargs:
+            updated = kwargs["shortcuts_preferences"]
+            validated = _validate_shortcuts_preferences(updated)
+            user.shortcuts_preferences = validated
+
 
 def user_service_factory(_context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.default_authority, session=request.db)
+
+
+def _validate_shortcuts_preferences(preferences):
+    if preferences is None:
+        return None
+    if not isinstance(preferences, Mapping):
+        message = "shortcuts_preferences must be a mapping"
+        raise TypeError(message)
+
+    # Check for invalid keys
+    invalid_keys = set(preferences.keys()) - ALLOWED_SHORTCUT_ACTIONS
+    if invalid_keys:
+        keys = ", ".join(sorted(invalid_keys))
+        message = f"shortcuts_preferences with keys {keys} are not allowed"
+        raise TypeError(message)
+
+    # Check for invalid shortcut values
+    has_invalid_value = any(
+        not isinstance(value, str) and value is not None
+        for value in preferences.values()
+    )
+    if has_invalid_value:
+        message = "shortcuts_preferences values must be strings or None"
+        raise TypeError(message)
+
+    # Check for duplicate shortcut values
+    actions_by_value = {}
+    for action, value in preferences.items():
+        actions_by_value.setdefault(value, set()).add(action)
+
+    for value, actions in actions_by_value.items():
+        if value is None:
+            continue
+        if len(actions) <= 1:
+            continue
+        if _allow_duplicate_shortcuts(actions):
+            continue
+        actions_list = ", ".join(sorted(actions))
+        message = (
+            "shortcuts_preferences has duplicate shortcut values for actions "
+            f"{actions_list}"
+        )
+        raise TypeError(message)
+
+    return preferences
+
+
+def _allow_duplicate_shortcuts(actions):
+    return any(actions <= group for group in REPEATABLE_SHORTCUT_GROUPS)

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import pytest
+import sqlalchemy as sa
 from sqlalchemy import exc
 from sqlalchemy.sql.elements import BinaryExpression
 
@@ -202,6 +203,21 @@ class TestUserModel:
     def test_privacy_accepted_defaults_to_None(self):
         # nullable
         assert User().privacy_accepted is None
+
+    def test_shortcuts_preferences_defaults_to_None(self):
+        assert User().shortcuts_preferences is None
+
+    def test_shortcuts_preferences_persists_none_as_sql_null(self, db_session, user):
+        user.shortcuts_preferences = {"openSearch": "k"}
+        db_session.flush()
+
+        user.shortcuts_preferences = None
+        db_session.flush()
+
+        is_null = db_session.execute(
+            sa.select(User.shortcuts_preferences.is_(None)).where(User.id == user.id)
+        ).scalar_one()
+        assert is_null is True
 
     def test_repr(self, user):
         assert repr(user) == f"User(id={user.id})"
