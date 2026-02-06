@@ -95,8 +95,6 @@ def _user_preferences(user):
     preferences = {}
     if user and not user.sidebar_tutorial_dismissed:
         preferences["show_sidebar_tutorial"] = True
-    if user and user.shortcuts_preferences is not None:
-        preferences["shortcuts_preferences"] = user.shortcuts_preferences
     return preferences
 
 
