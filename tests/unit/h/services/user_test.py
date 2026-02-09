@@ -109,6 +109,116 @@ class TestUserService:
 
         assert "keys baz, foo are not allowed" in str(exc.value)
 
+    def test_update_preferences_rejects_shortcuts_preferences_non_mapping(
+        self, svc, factories
+    ):
+        user = factories.User.build()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(user, shortcuts_preferences="qux")
+
+        assert "shortcuts_preferences must be a mapping" in str(exc.value)
+
+    def test_update_preferences_rejects_shortcuts_preferences_invalid_keys(
+        self, svc, factories
+    ):
+        user = factories.User.build()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(user, shortcuts_preferences={"notAllowed": "k"})
+
+        assert "keys notAllowed are not allowed" in str(exc.value)
+
+    def test_update_preferences_rejects_shortcuts_preferences_invalid_values(
+        self, svc, factories
+    ):
+        user = factories.User.build()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(user, shortcuts_preferences={"openSearch": 1})
+
+        assert "values must be strings or None" in str(exc.value)
+
+    def test_update_preferences_rejects_shortcut_value_duplicates(self, svc, factories):
+        user = factories.User.build()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(
+                user,
+                shortcuts_preferences={
+                    "applyUpdates": "l",
+                    "openKeyboardShortcuts": "l",
+                },
+            )
+
+        assert "duplicate shortcut values" in str(exc.value)
+
+    def test_update_preferences_allows_repeatable_shortcut_duplicates(
+        self, svc, factories, monkeypatch
+    ):
+        user = factories.User.build()
+
+        monkeypatch.setattr(
+            "h.services.user.REPEATABLE_SHORTCUT_GROUPS",
+            [{"applyUpdates", "openKeyboardShortcuts"}],
+        )
+
+        svc.update_preferences(
+            user,
+            shortcuts_preferences={
+                "applyUpdates": "l",
+                "openKeyboardShortcuts": "l",
+            },
+        )
+
+        assert user.shortcuts_preferences == {
+            "applyUpdates": "l",
+            "openKeyboardShortcuts": "l",
+        }
+
+    def test_update_preferences_allows_none_shortcut_values(self, svc, factories):
+        user = factories.User.build()
+
+        svc.update_preferences(
+            user,
+            shortcuts_preferences={
+                "applyUpdates": None,
+                "openKeyboardShortcuts": None,
+            },
+        )
+
+        assert user.shortcuts_preferences == {
+            "applyUpdates": None,
+            "openKeyboardShortcuts": None,
+        }
+
+    def test_update_preferences_accepts_valid_shortcuts_preferences(
+        self, svc, factories
+    ):
+        user = factories.User.build()
+
+        svc.update_preferences(
+            user,
+            shortcuts_preferences={
+                "openSearch": "k",
+                "applyUpdates": "l",
+                "openKeyboardShortcuts": "?",
+            },
+        )
+
+        assert user.shortcuts_preferences == {
+            "openSearch": "k",
+            "applyUpdates": "l",
+            "openKeyboardShortcuts": "?",
+        }
+
+    def test_update_preferences_allows_none_shortcuts_preferences(self, svc, factories):
+        user = factories.User.build(shortcuts_preferences={"openSearch": "k"})
+
+        svc.update_preferences(user, shortcuts_preferences=None)
+
+        assert user.shortcuts_preferences is None
+
     def test_sets_up_cache_clearing_on_transaction_end(self, patch, db_session):
         decorator = patch("h.services.user.on_transaction_end")
 
