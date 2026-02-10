@@ -89,7 +89,7 @@ greenlet==3.2.4
     #   -r requirements/prod.txt
     #   gevent
     #   sqlalchemy
-gunicorn==23.0.0
+gunicorn==24.1.1
     # via -r requirements/prod.txt
 h-api==1.1.1
     # via -r requirements/prod.txt
