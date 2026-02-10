@@ -416,7 +416,7 @@ pytest-factoryboy==2.8.1
     #   -r requirements/tests.txt
 pytest-mock==3.15.1
     # via -r requirements/tests.txt
-pytest-reverse==1.8.0
+pytest-reverse==1.9.0
     # via -r requirements/functests.txt
 pytest-xdist[psutil]==3.8.0
     # via -r requirements/tests.txt
