@@ -11,7 +11,9 @@ click==8.1.8
 importlib-metadata==7.0.1
     # via pip-sync-faster
 packaging==25.0
-    # via build
+    # via
+    #   build
+    #   wheel
 pip-sync-faster==0.0.5
     # via -r checkformatting.in
 pip-tools==7.5.2
@@ -24,7 +26,7 @@ pyproject-hooks==1.0.0
     #   pip-tools
 ruff==0.13.2
     # via -r checkformatting.in
-wheel==0.42.0
+wheel==0.46.2
     # via pip-tools
 zipp==3.19.1
     # via importlib-metadata

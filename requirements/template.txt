@@ -21,7 +21,7 @@ click==8.1.8
     #   cookiecutter
     #   pip-tools
 cookiecutter==2.6.0
-    # via -r requirements/template.in
+    # via -r template.in
 idna==3.10
     # via requests
 importlib-metadata==8.6.1
@@ -35,12 +35,14 @@ markupsafe==3.0.2
 mdurl==0.1.2
     # via markdown-it-py
 packaging==25.0
-    # via build
+    # via
+    #   build
+    #   wheel
 pip-sync-faster==0.0.5
-    # via -r requirements/template.in
+    # via -r template.in
 pip-tools==7.5.2
     # via
-    #   -r requirements/template.in
+    #   -r template.in
     #   pip-sync-faster
 pygments==2.19.1
     # via rich
@@ -66,7 +68,7 @@ types-python-dateutil==2.9.0.20241206
     # via arrow
 urllib3==2.3.0
     # via requests
-wheel==0.45.1
+wheel==0.46.2
     # via pip-tools
 zipp==3.21.0
     # via importlib-metadata
@@ -74,7 +76,7 @@ zipp==3.21.0
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via
-    #   -r requirements/template.in
+    #   -r template.in
     #   pip-tools
 setuptools==78.1.1
     # via pip-tools
