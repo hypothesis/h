@@ -26,6 +26,7 @@ FEATURES = {
     "log_in_with_orcid": "Allow users to log in with ORCID",
     "log_in_with_google": "Allow users to log in with Google",
     "log_in_with_facebook": "Allow users to log in with Facebook",
+    "vpat_keyboard": "Allow users to use the VPAT keyboard in the client",
 }
 
 
