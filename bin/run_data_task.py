@@ -4,7 +4,7 @@ Task runner for tasks written as SQL files in directories.
 This is a general mechanism for running tasks defined in SQL, however it's
 currently only used to perform the aggregations and mappings required for
 reporting.
-"""
+"""  # noqa: EXE002
 
 from argparse import ArgumentParser
 
