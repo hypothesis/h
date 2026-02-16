@@ -20,6 +20,9 @@ ALLOWED_SHORTCUT_ACTIONS = {
     "toggleHighlights",
     "showSelection",
     "hideAdder",
+    "activateRectMove",
+    "activateRectResize",
+    "activatePoint",
 }
 
 
