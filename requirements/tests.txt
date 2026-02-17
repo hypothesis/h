@@ -235,7 +235,7 @@ pygments==2.19.2
     # via pytest
 pyjwt[crypto]==2.10.1
     # via -r requirements/prod.txt
-pyparsing==3.2.5
+pyparsing==3.3.2
     # via -r requirements/prod.txt
 pyproject-hooks==1.0.0
     # via
