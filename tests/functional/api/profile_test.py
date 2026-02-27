@@ -107,6 +107,33 @@ class TestPatchProfile:
         assert "show_sidebar_tutorial" not in res.json["preferences"]
         assert res.status_code == 200
 
+    def test_it_allows_authenticated_user_youtube_gdpr_banner(self, app, user_with_token):
+        """PATCH profile with show_youtube_gdpr_banner True; GET then includes it."""
+
+        _, token = user_with_token
+        headers = {"Authorization": f"Bearer {token.value}"}
+        profile = {"preferences": {"show_youtube_gdpr_banner": True}}
+
+        res = app.patch_json("/api/profile", profile, headers=headers)
+
+        assert res.status_code == 200
+        res = app.get("/api/profile", headers=headers)
+        assert "show_youtube_gdpr_banner" in res.json["preferences"]
+
+    def test_it_updates_user_profile_youtube_gdpr_banner(self, app, user_with_token):
+        """PATCH profile with show_youtube_gdpr_banner False; GET then omits it."""
+
+        _, token = user_with_token
+        headers = {"Authorization": f"Bearer {token.value}"}
+        profile = {"preferences": {"show_youtube_gdpr_banner": False}}
+
+        res = app.patch_json("/api/profile", profile, headers=headers)
+
+        assert res.status_code == 200
+        assert "show_youtube_gdpr_banner" not in res.json["preferences"]
+        res = app.get("/api/profile", headers=headers)
+        assert "show_youtube_gdpr_banner" not in res.json["preferences"]
+
     def test_it_raises_http_404_if_unauthenticated(self, app):
         # FIXME: This should return a 403  # noqa: FIX001, TD001, TD002, TD003
         profile = {"preferences": {"show_sidebar_tutorial": False}}

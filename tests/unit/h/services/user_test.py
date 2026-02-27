@@ -101,6 +101,20 @@ class TestUserService:
 
         assert user.sidebar_tutorial_dismissed is True
 
+    def test_update_preferences_youtube_gdpr_banner_enable(self, svc, factories):
+        user = factories.User.build(youtube_gdpr_banner_dismissed=True)
+
+        svc.update_preferences(user, show_youtube_gdpr_banner=True)
+
+        assert not user.youtube_gdpr_banner_dismissed
+
+    def test_update_preferences_youtube_gdpr_banner_disable(self, svc, factories):
+        user = factories.User.build(youtube_gdpr_banner_dismissed=False)
+
+        svc.update_preferences(user, show_youtube_gdpr_banner=False)
+
+        assert user.youtube_gdpr_banner_dismissed is True
+
     def test_update_preferences_raises_for_unsupported_keys(self, svc, factories):
         user = factories.User.build()
 
