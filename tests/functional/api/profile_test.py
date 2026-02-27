@@ -107,7 +107,9 @@ class TestPatchProfile:
         assert "show_sidebar_tutorial" not in res.json["preferences"]
         assert res.status_code == 200
 
-    def test_it_allows_authenticated_user_youtube_gdpr_banner(self, app, user_with_token):
+    def test_it_allows_authenticated_user_youtube_gdpr_banner(
+        self, app, user_with_token
+    ):
         """PATCH profile with show_youtube_gdpr_banner True; GET then includes it."""
 
         _, token = user_with_token
