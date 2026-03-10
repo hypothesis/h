@@ -8,6 +8,7 @@ from h.util.user import split_user
 
 UPDATE_PREFS_ALLOWED_KEYS = {
     "show_sidebar_tutorial",
+    "show_youtube_gdpr_banner",
     "shortcuts_preferences",
 }
 REPEATABLE_SHORTCUT_GROUPS = []
@@ -189,6 +190,9 @@ class UserService:
 
         if "show_sidebar_tutorial" in kwargs:  # pragma: no cover
             user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
+
+        if "show_youtube_gdpr_banner" in kwargs:
+            user.youtube_gdpr_banner_dismissed = not kwargs["show_youtube_gdpr_banner"]
 
         if "shortcuts_preferences" in kwargs:
             updated = kwargs["shortcuts_preferences"]
