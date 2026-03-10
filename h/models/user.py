@@ -225,6 +225,13 @@ class User(Base):
         sa.Boolean, default=False, server_default=(sa.sql.expression.false())
     )
 
+    youtube_gdpr_banner_dismissed = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
+
     #: A timestamp representing the last time the user accepted the privacy policy.
     #: A NULL value in this column indicates the user has never accepted a privacy policy.
     privacy_accepted = sa.Column(sa.DateTime, nullable=True)
