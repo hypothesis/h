@@ -34,6 +34,17 @@ class TestUpdatePreferences:
             user, show_sidebar_tutorial=True
         )
 
+    def test_updates_preferences_youtube_gdpr_banner(
+        self, pyramid_request, user, user_service
+    ):
+        pyramid_request.json_body = {"preferences": {"show_youtube_gdpr_banner": False}}
+
+        views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_called_once_with(
+            user, show_youtube_gdpr_banner=False
+        )
+
     def test_handles_invalid_preferences_error(self, pyramid_request, user_service):
         user_service.update_preferences.side_effect = TypeError("uh oh, wrong prefs")
 

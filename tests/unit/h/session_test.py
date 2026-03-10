@@ -82,6 +82,22 @@ class TestModel:
         else:
             assert preferences["show_sidebar_tutorial"] is True
 
+    def test_anonymous_hides_youtube_gdpr_banner(self, unauthenticated_request):
+        preferences = session.model(unauthenticated_request)["preferences"]
+
+        assert "show_youtube_gdpr_banner" not in preferences
+
+    @pytest.mark.parametrize("dismissed", [True, False])
+    def test_authenticated_youtube_gdpr_banner(self, authenticated_request, dismissed):
+        authenticated_request.set_youtube_gdpr_banner_dismissed(dismissed)
+
+        preferences = session.model(authenticated_request)["preferences"]
+
+        if dismissed:
+            assert "show_youtube_gdpr_banner" not in preferences
+        else:
+            assert preferences["show_youtube_gdpr_banner"] is True
+
     def test_authenticated_includes_shortcuts_preferences(self, authenticated_request):
         shortcuts_preferences = {"applyUpdates": "l"}
         authenticated_request.user.shortcuts_preferences = shortcuts_preferences
@@ -182,6 +198,22 @@ class TestProfile:
             assert "show_sidebar_tutorial" not in preferences
         else:
             assert preferences["show_sidebar_tutorial"] is True
+
+    def test_anonymous_hides_youtube_gdpr_banner(self, unauthenticated_request):
+        preferences = session.profile(unauthenticated_request)["preferences"]
+
+        assert "show_youtube_gdpr_banner" not in preferences
+
+    @pytest.mark.parametrize("dismissed", [True, False])
+    def test_authenticated_youtube_gdpr_banner(self, authenticated_request, dismissed):
+        authenticated_request.set_youtube_gdpr_banner_dismissed(dismissed)
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        if dismissed:
+            assert "show_youtube_gdpr_banner" not in preferences
+        else:
+            assert preferences["show_youtube_gdpr_banner"] is True
 
     def test_authenticated_includes_shortcuts_preferences(self, authenticated_request):
         shortcuts_preferences = {"applyUpdates": "l"}
@@ -330,6 +362,9 @@ class FakeRequest:
 
     def set_sidebar_tutorial_dismissed(self, dismissed):
         self.user.sidebar_tutorial_dismissed = dismissed
+
+    def set_youtube_gdpr_banner_dismissed(self, dismissed):
+        self.user.youtube_gdpr_banner_dismissed = dismissed
 
     def find_service(self, **kwargs):
         return {"group_list": self._group_list_service}[kwargs["name"]]
