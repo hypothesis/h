@@ -14,6 +14,7 @@ def upgrade():
             "youtube_gdpr_banner_dismissed",
             sa.Boolean(),
             nullable=False,
+            default=False,
             server_default=sa.sql.expression.false(),
         ),
     )
