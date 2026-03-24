@@ -50,7 +50,8 @@ class AnnotationWriteService:
             `h.schemas.annotation.CreateAnnotationSchema`
         """
 
-        # Set the group to be the same as the root annotation
+        # Set the group and version to be the same as the root annotation
+        root_annotation = None
         if references := data["references"]:
             if root_annotation := self._annotation_read_service.get_annotation_by_id(
                 references[0]
@@ -71,6 +72,12 @@ class AnnotationWriteService:
         self._db.enable_relationship_loading(annotation)
         self._validate_group(annotation)
 
+        version = document_data.get("version")
+        
+        # For replies, inherit the version from the root annotation if not provided
+        if version is None and root_annotation:
+            version = self._get_document_version(root_annotation)
+
         annotation.created = annotation.updated = datetime.utcnow()  # noqa: DTZ003
         annotation.document = update_document_metadata(
             self._db,
@@ -79,7 +86,7 @@ class AnnotationWriteService:
             document_data["document_uri_dicts"],
             created=annotation.created,
             updated=annotation.updated,
-            version=document_data.get("version"),
+            version=version,
         )
         self._moderation_service.update_status("create", annotation)
 
@@ -138,13 +145,17 @@ class AnnotationWriteService:
         if (
             document := data.get("document", {})
         ) or annotation.target_uri != initial_target_uri:
+            version = document.get("version")
+            if version is None:
+                version = self._get_document_version(annotation)
+
             annotation.document = update_document_metadata(
                 self._db,
                 annotation.target_uri,
                 document.get("document_meta_dicts", {}),
                 document.get("document_uri_dicts", {}),
                 updated=annotation.updated,
-                version=document.get("version"),
+                version=version,
             )
         self._moderation_service.update_status("update", annotation)
         self.upsert_annotation_slim(annotation)
@@ -178,6 +189,19 @@ class AnnotationWriteService:
         ).update(
             {AnnotationSlim.document_id: new_document.id}, synchronize_session="fetch"
         )
+
+    @staticmethod
+    def _get_document_version(annotation):
+        """Get the version from the annotation's existing document URIs."""
+        document = annotation.document
+        if not document:
+            return None
+
+        target_uri_normalized = annotation.target_uri_normalized
+        for doc_uri in document.document_uris:
+            if doc_uri.uri_normalized == target_uri_normalized:
+                return doc_uri.version
+        return None
 
     @staticmethod
     def _update_annotation_values(annotation: Annotation, data: dict):

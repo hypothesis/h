@@ -10,6 +10,7 @@ from h.search.util import add_default_scheme, wildcard_uri_is_valid
 from h.security import Identity, Permission, identity_permits
 from h.traversal import GroupContext
 from h.util import uri
+from h.util.uri import build_scope_key, parse_uri_versions
 
 LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
@@ -296,41 +297,60 @@ class UriCombinedWildcardFilter:
         if not ("uri" in params or "url" in params or "wildcard_uri" in params):
             return search
 
+        raw_uris = popall(params, "uri") + popall(params, "url")
+
+        # Parse versions from URIs and separate into versioned/unversioned
+        plain_uris = []
+        versioned_uris = []  # list of (base_uri, [versions])
+        for raw_uri in raw_uris:
+            base_uri, versions = parse_uri_versions(raw_uri)
+            base_uri = add_default_scheme(base_uri)
+            if versions:
+                versioned_uris.append((base_uri, versions))
+            else:
+                plain_uris.append(base_uri)
+
         if self.separate_keys:
-            uris = [
-                add_default_scheme(u)
-                for u in popall(params, "uri") + popall(params, "url")
-            ]
             wildcard_uris = [
                 add_default_scheme(u) for u in popall(params, "wildcard_uri")
             ]
         else:
-            uris = [
-                add_default_scheme(u)
-                for u in popall(params, "uri") + popall(params, "url")
-            ]
-            # Split into wildcard uris and non wildcard uris.
-            wildcard_uris = [u for u in uris if "*" in u or "_" in u]
-            uris = [u for u in uris if "*" not in u and "_" not in u]
+            wildcard_uris = [u for u in plain_uris if "*" in u or "_" in u]
+            plain_uris = [u for u in plain_uris if "*" not in u and "_" not in u]
 
         # Only add valid uri's to the search list.
         wildcard_uris = self._normalize_uris(
             [u for u in wildcard_uris if wildcard_uri_is_valid(u)],
             normalize_method=self._wildcard_uri_normalized,
         )
-        uris = self._normalize_uris(uris)
+        plain_uris = self._normalize_uris(plain_uris)
+
+        # Build versioned scope keys from versioned URIs
+        # Build Elasticsearch scope keys that combine a normalized URI with a version.
+        # e.g. "https://example.com" with version 2 becomes "https://example.com__v2"
+        versioned_scope_keys = set()
+        for base_uri, versions in versioned_uris:
+            for version in versions:
+                normalized_uris = self._normalize_uris([base_uri], version=version)
+                for normalized in normalized_uris:
+                    versioned_scope_keys.add(
+                        build_scope_key(normalized, version)
+                    )
 
         queries = []
         if wildcard_uris:
             queries = [Q("wildcard", **{"target.scope": u}) for u in wildcard_uris]
-        if uris:
-            queries.append(Q("terms", **{"target.scope": uris}))
+        
+        # Combine plain (unversioned) URIs and versioned scope keys
+        uri_scopes = list(plain_uris) + list(versioned_scope_keys)
+        if uri_scopes:
+            queries.append(Q("terms", **{"target.scope": uri_scopes}))
         return search.query("bool", should=queries)
 
-    def _normalize_uris(self, query_uris, normalize_method=uri.normalize):
+    def _normalize_uris(self, query_uris, normalize_method=uri.normalize, version=None):
         uris = set()
         for query_uri in query_uris:
-            expanded = storage.expand_uri(self.request.db, query_uri)
+            expanded = storage.expand_uri(self.request.db, query_uri, version=version)
 
             uris.update([normalize_method(uri) for uri in expanded])
         return list(uris)

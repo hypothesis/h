@@ -142,6 +142,9 @@ UNRESERVED_QUERY_VALUE = "-._~:@!$'()*,="
 # redirect your browser to https://via.hypothes.is/https://example.com.
 VIA_PREFIX = "https://via.hypothes.is/"
 
+# The pattern to match version suffixes in URIs. For example "v1" or "v2".
+VERSION_PATTERN = re.compile(r"^v(\d+)$")
+
 
 def normalize(uristr):
     """
@@ -294,6 +297,54 @@ def _normalize_queryvalue(value):
 def _blacklisted_query_param(string):
     """Return True if the given string matches any BLACKLISTED_QUERY_PARAMS."""
     return any(patt.match(string) for patt in BLACKLISTED_QUERY_PARAMS)
+
+
+def parse_uri_versions(uri_string):
+    """
+    Parse a URI string that may contain version suffixes.
+
+    Format: base_uri:v1:v2:v3
+    Versions are detected by scanning from the right for tokens matching "v<number>".
+
+    Returns (base_uri, versions) where versions is a list of ints.
+    v0 is treated as "no version" (None).
+
+    Examples:
+        "http://example.com:v1:v2" -> ("http://example.com", [1, 2])
+        "http://example.com:8080:v1" -> ("http://example.com:8080", [1])
+        "1.1.1.1:v0:v1:v2" -> ("1.1.1.1", [None, 1, 2])
+        "http://example.com" -> ("http://example.com", [])
+    """
+    parts = uri_string.split(":")
+
+    # Scan from the right, extracting version suffixes (e.g. "v1", "v2")
+    # until we hit a non-version part
+    versions = []
+    while len(parts) > 1:
+        match = VERSION_PATTERN.match(parts[-1])
+        if match:
+            version_num = int(match.group(1))
+            versions.append(None if version_num == 0 else version_num)
+            parts.pop()
+        else:
+            break
+
+    versions.reverse()
+    base_uri = ":".join(parts)
+
+    return base_uri, versions
+
+
+def build_scope_key(uri_normalized, version=None):
+    """
+    Build the Elasticsearch scope key for a URI + version.
+
+    If version is None or 0, returns just the normalized URI.
+    Otherwise returns uri_normalized + "__v<version>"
+    """
+    if not version:
+        return uri_normalized
+    return f"{uri_normalized}__v{version}"
 
 
 def render_url_template(template, example_url):
