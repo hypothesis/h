@@ -73,13 +73,16 @@ class Document(Base, mixins.Timestamps):
         )
 
     @classmethod
-    def find_by_uris(cls, session, uris):
-        """Find documents by a list of uris."""
+    def find_by_uris(cls, session, uris, version=None):
+        """Find documents by a list of uris, filtering by version."""
         query_uris = [uri_normalize(u) for u in uris]
 
         matching_claims = (
             session.query(DocumentURI)
-            .filter(DocumentURI.uri_normalized.in_(query_uris))
+            .filter(
+                DocumentURI.uri_normalized.in_(query_uris),
+                DocumentURI.version == version,
+            )
             .distinct(DocumentURI.document_id)
             .subquery()
         )
@@ -88,7 +91,7 @@ class Document(Base, mixins.Timestamps):
 
     @classmethod
     def find_or_create_by_uris(
-        cls, session, claimant_uri, uris, created=None, updated=None
+        cls, session, claimant_uri, uris, created=None, updated=None, version=None
     ):
         """
         Find or create documents from a claimant uri and a list of uris.
@@ -97,10 +100,13 @@ class Document(Base, mixins.Timestamps):
         If none can be found it will return a new document with the claimant
         uri as its only document uri as a self-claim. It is the callers
         responsibility to create any other document uris.
+
+        When version is provided, only documents whose URIs match
+        the given version are considered equivalent.
         """
 
         finduris = [claimant_uri] + uris  # noqa: RUF005
-        documents = cls.find_by_uris(session, finduris)
+        documents = cls.find_by_uris(session, finduris, version=version)
 
         if not documents.count():
             doc = Document(created=created, updated=updated)
@@ -109,6 +115,7 @@ class Document(Base, mixins.Timestamps):
                 claimant=claimant_uri,
                 uri=claimant_uri,
                 type="self-claim",
+                version=version,
                 created=created,
                 updated=updated,
             )
@@ -177,6 +184,7 @@ def update_document_metadata(  # noqa: PLR0913
     document_uri_dicts,
     created=None,
     updated=None,
+    version=None,
 ):
     """
     Create and update document metadata from the given annotation.
@@ -196,6 +204,8 @@ def update_document_metadata(  # noqa: PLR0913
 
     :param created: Date and time value for the new document records
     :param updated: Date and time value for the new document records
+    :param version: optional document version. When present, only documents
+        with matching version are considered equivalent.
 
     :returns: the matched or created document
     :rtype: h.models.Document
@@ -211,6 +221,7 @@ def update_document_metadata(  # noqa: PLR0913
         [u["uri"] for u in document_uri_dicts],
         created=created,
         updated=updated,
+        version=version,
     )
 
     if documents.count() > 1:
@@ -226,6 +237,7 @@ def update_document_metadata(  # noqa: PLR0913
             document=document,
             created=created,
             updated=updated,
+            version=version,
             **document_uri_dict,
         )
 

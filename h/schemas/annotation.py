@@ -52,6 +52,7 @@ DOCUMENT_SCHEMA = {
                 "required": ["href"],
             },
         },
+        "version": {"type": "integer"},
     },
 }
 
@@ -250,6 +251,7 @@ def transform_document(document, claimant):
 
     """
     document = document or {}
+    version = document.pop("version", None)
     document_uri_dicts = document_claims.document_uris_from_data(
         copy.deepcopy(document), claimant=claimant
     )
@@ -259,6 +261,7 @@ def transform_document(document, claimant):
     return {
         "document_uri_dicts": document_uri_dicts,
         "document_meta_dicts": document_meta_dicts,
+        "version": version,
     }
 
 

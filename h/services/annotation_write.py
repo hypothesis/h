@@ -79,6 +79,7 @@ class AnnotationWriteService:
             document_data["document_uri_dicts"],
             created=annotation.created,
             updated=annotation.updated,
+            version=document_data.get("version"),
         )
         self._moderation_service.update_status("create", annotation)
 
@@ -143,6 +144,7 @@ class AnnotationWriteService:
                 document.get("document_meta_dicts", {}),
                 document.get("document_uri_dicts", {}),
                 updated=annotation.updated,
+                version=document.get("version"),
             )
         self._moderation_service.update_status("update", annotation)
         self.upsert_annotation_slim(annotation)
