@@ -95,6 +95,8 @@ def _user_preferences(user):
     preferences = {}
     if user and not user.sidebar_tutorial_dismissed:
         preferences["show_sidebar_tutorial"] = True
+    if user and not user.youtube_gdpr_banner_dismissed:
+        preferences["show_youtube_gdpr_banner"] = True
     if user and user.shortcuts_preferences is not None:
         preferences["shortcuts_preferences"] = user.shortcuts_preferences
     return preferences
