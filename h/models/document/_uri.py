@@ -30,8 +30,6 @@ class DocumentURI(Base, mixins.Timestamps):
         sa.UnicodeText, nullable=False, default="", server_default=""
     )
 
-    version = sa.Column("version", sa.Integer, nullable=True)
-
     document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
 
     __table_args__ = (
@@ -41,7 +39,6 @@ class DocumentURI(Base, mixins.Timestamps):
             sa.func.md5(_uri_normalized),
             "type",
             "content_type",
-            sa.func.coalesce(version, sa.literal(0)),
             unique=True,
         ),
         sa.Index("ix__document_uri_document_id", "document_id"),
@@ -87,7 +84,6 @@ def create_or_update_document_uri(  # noqa: PLR0913
     document,
     created,
     updated,
-    version=None,
 ):
     """
     Create or update a DocumentURI with the given parameters.
@@ -99,7 +95,7 @@ def create_or_update_document_uri(  # noqa: PLR0913
     created and added to the database.
 
     To be considered "equivalent" an existing DocumentURI must have the same
-    claimant, uri, type, content_type and version. The claimant and uri are
+    claimant, uri, type and content_type. The claimant and uri are
     normalized before comparing.
 
     :param session: the database session
@@ -116,7 +112,6 @@ def create_or_update_document_uri(  # noqa: PLR0913
         DocumentURI, if a new one is created
     :param updated: the time that will be set as the .updated time for the new
         or existing DocumentURI
-    :param version: optional document version for equivalence checking
     """
     docuri = (
         session.query(DocumentURI)
@@ -125,7 +120,6 @@ def create_or_update_document_uri(  # noqa: PLR0913
             DocumentURI.uri_normalized == uri_normalize(uri),
             DocumentURI.type == type,
             DocumentURI.content_type == content_type,
-            DocumentURI.version == version,
         )
         .first()
     )
@@ -136,7 +130,6 @@ def create_or_update_document_uri(  # noqa: PLR0913
             uri=uri,
             type=type,
             content_type=content_type,
-            version=version,
             document=document,
             created=created,
             updated=updated,

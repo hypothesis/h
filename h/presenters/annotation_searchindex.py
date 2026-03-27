@@ -39,7 +39,7 @@ class AnnotationSearchIndexPresenter:
         result["target"][0]["scope"] = [
             build_scope_key(
                 self.annotation.target_uri_normalized,
-                self._get_annotation_version(),
+                self.annotation.version,
             )
         ]
 
@@ -49,18 +49,6 @@ class AnnotationSearchIndexPresenter:
         self._add_nipsa(result, self.annotation.userid)
 
         return result
-
-    def _get_annotation_version(self):
-        """Get the version from the annotation's document URIs."""
-        document = self.annotation.document
-        if not document:
-            return None
-
-        target_uri_normalized = self.annotation.target_uri_normalized
-        for doc_uri in document.document_uris:
-            if doc_uri.uri_normalized == target_uri_normalized:
-                return doc_uri.version
-        return None
 
     def _add_nipsa(self, result, user_id):
         nipsa_service = self.request.find_service(name="nipsa")

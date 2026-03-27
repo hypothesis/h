@@ -166,6 +166,9 @@ class Annotation(Base):
     #: An optional text description of the annotation target.
     target_description = sa.Column(sa.UnicodeText)
 
+    #: Optional document version for this annotation.
+    version = sa.Column(sa.Integer, nullable=True)
+
     @property
     def uuid(self):
         """

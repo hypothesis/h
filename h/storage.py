@@ -14,7 +14,7 @@ from h.util.uri import normalize as normalize_uri
 _ = i18n.TranslationStringFactory(__package__)
 
 
-def expand_uri(session, uri, normalized=False, version=None):  # noqa: FBT002
+def expand_uri(session, uri, normalized=False):  # noqa: FBT002
     """
     Return all URIs which refer to the same underlying document as `uri`.
 
@@ -25,23 +25,15 @@ def expand_uri(session, uri, normalized=False, version=None):  # noqa: FBT002
     :param session: Database session
     :param uri: URI associated with the document
     :param normalized: Return normalized URIs instead of the raw value
-    :param version: filter URIs by this version. When None, filters for URIs
-        with no version.
 
     :returns: a list of equivalent URIs
     """
 
     normalized_uri = normalize_uri(uri)
 
-    if version is None:
-        version_filter = models.DocumentURI.version.is_(None)
-    else:
-        version_filter = models.DocumentURI.version == version
-
     document_id_query = (
         session.query(models.DocumentURI.document_id)
         .filter(models.DocumentURI.uri_normalized == normalized_uri)
-        .filter(version_filter)
     )
 
     document_id = document_id_query.limit(1).scalar_subquery()
@@ -52,7 +44,7 @@ def expand_uri(session, uri, normalized=False, version=None):  # noqa: FBT002
         models.DocumentURI.type,
         models.DocumentURI.uri,
         models.DocumentURI.uri_normalized,
-    ).filter(models.DocumentURI.document_id == document_id).filter(version_filter)
+    ).filter(models.DocumentURI.document_id == document_id)
 
     type_uris = list(query)
 

@@ -578,7 +578,7 @@ class TestUriCombinedWildcardFilter:
 
         q = urifilter(es_dsl_search, params).to_dict()
 
-        assert "should" not in q["query"]["bool"]
+        assert "query" not in q or "should" not in q.get("query", {}).get("bool", {})
 
     @pytest.mark.parametrize(
         "params,separate_keys",
@@ -607,6 +607,36 @@ class TestUriCombinedWildcardFilter:
         assert "uri" not in params
         assert "url" not in params
         assert "wildcard_uri" not in params
+
+    def test_versioned_uri_builds_scope_keys(
+        self, es_dsl_search, pyramid_request, storage
+    ):
+        """URIs with version suffixes produce versioned scope keys in the query."""
+        storage.expand_uri.return_value = ["httpx://example.com"]
+        urifilter = query.UriCombinedWildcardFilter(pyramid_request, True)
+
+        params = MultiDict([("uri", "http://example.com:v1:v2")])
+        q = urifilter(es_dsl_search, params).to_dict()
+
+        terms = q["query"]["bool"]["should"][0]["terms"]["target.scope"]
+        assert "httpx://example.com__v1" in terms
+        assert "httpx://example.com__v2" in terms
+
+    def test_versioned_and_plain_uris_combined(
+        self, es_dsl_search, pyramid_request, storage
+    ):
+        """Versioned and plain URIs are combined in the same terms query."""
+        storage.expand_uri.side_effect = lambda _session, uri, **_kwargs: [
+            f"httpx://{uri.split('//')[1]}" if "//" in uri else uri
+        ]
+        urifilter = query.UriCombinedWildcardFilter(pyramid_request, True)
+
+        params = MultiDict([("uri", "http://example.com:v1"), ("url", "http://other.com")])
+        q = urifilter(es_dsl_search, params).to_dict()
+
+        terms = q["query"]["bool"]["should"][0]["terms"]["target.scope"]
+        assert "httpx://example.com__v1" in terms
+        assert "httpx://other.com" in terms
 
     @pytest.fixture
     def get_search(self, search, pyramid_request):

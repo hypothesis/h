@@ -311,7 +311,7 @@ def parse_uri_versions(uri_string):
 
     Examples:
         "http://example.com:v1:v2" -> ("http://example.com", [1, 2])
-        "http://example.com:8080:v1" -> ("http://example.com:8080", [1])
+        "http://localhost:3000:v1" -> ("http://localhost:3000", [1])
         "1.1.1.1:v0:v1:v2" -> ("1.1.1.1", [None, 1, 2])
         "http://example.com" -> ("http://example.com", [])
     """
@@ -337,7 +337,11 @@ def parse_uri_versions(uri_string):
 
 def build_scope_key(uri_normalized, version=None):
     """
-    Build the Elasticsearch scope key for a URI + version.
+    Build a scope key for a URI + version.
+
+    Used both for Elasticsearch indexing/querying (target.scope field)
+    and for WebSocket streamer filtering (matching annotations to clients).
+    Both systems use the same key format to ensure consistency.
 
     If version is None or 0, returns just the normalized URI.
     Otherwise returns uri_normalized + "__v<version>"

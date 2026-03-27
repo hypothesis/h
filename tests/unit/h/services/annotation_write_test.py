@@ -7,7 +7,11 @@ from h_matchers import Any
 from h.models import Annotation, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
-from h.services.annotation_write import AnnotationWriteService, service_factory
+from h.services.annotation_write import (
+    AnnotationWriteService,
+    _normalize_version,
+    service_factory,
+)
 from h.traversal.group import GroupContext
 
 
@@ -146,6 +150,74 @@ class TestAnnotationWriteService:
         assert anno.updated > then
         assert anno.extra == {"key": "value", "extra_key": "extra_value"}
         self.assert_annotation_slim(db_session, anno)
+
+    def test_update_annotation_sets_version(self, svc, annotation):
+        annotation.version = None
+
+        svc.update_annotation(
+            annotation,
+            {
+                "document": {
+                    "version": 5,
+                    "document_meta_dicts": {},
+                    "document_uri_dicts": {},
+                },
+            },
+            update_timestamp=True,
+        )
+
+        assert annotation.version == 5
+
+    def test_update_annotation_keeps_version_when_not_sent(self, svc, annotation):
+        """If no version is sent in the update, the original version is preserved."""
+        annotation.version = 3
+
+        svc.update_annotation(
+            annotation,
+            {
+                "text": "updated text",
+            },
+            update_timestamp=True,
+        )
+
+        assert annotation.version == 3
+
+    def test_update_annotation_keeps_version_when_document_has_no_version(
+        self, svc, annotation
+    ):
+        """If document is sent but without version, the original version is preserved."""
+        annotation.version = 3
+
+        svc.update_annotation(
+            annotation,
+            {
+                "document": {
+                    "document_meta_dicts": {},
+                    "document_uri_dicts": {},
+                },
+            },
+            update_timestamp=True,
+        )
+
+        assert annotation.version == 3
+
+    def test_update_annotation_normalizes_version_zero_to_none(self, svc, annotation):
+        """Version 0 is normalized to None, actively setting annotation as unversioned."""
+        annotation.version = 3
+
+        svc.update_annotation(
+            annotation,
+            {
+                "document": {
+                    "version": 0,
+                    "document_meta_dicts": {},
+                    "document_uri_dicts": {},
+                },
+            },
+            update_timestamp=True,
+        )
+
+        assert annotation.version is None
 
     def test_update_annotation_with_non_defaults(self, svc, annotation, queue_service):
         then = datetime.now() - timedelta(days=1)  # noqa: DTZ005
@@ -296,6 +368,23 @@ class TestAnnotationWriteService:
         assert slim.group_id == annotation.group.id
         assert slim.document_id == annotation.document_id
         assert slim.deleted == annotation.deleted
+
+
+class TestNormalizeVersion:
+    @pytest.mark.parametrize(
+        "version,expected",
+        [
+            (None, None),
+            (0, None),
+            (-1, None),
+            (-100, None),
+            (1, 1),
+            (5, 5),
+            (100, 100),
+        ],
+    )
+    def test_it(self, version, expected):
+        assert _normalize_version(version) == expected
 
 
 class TestServiceFactory:

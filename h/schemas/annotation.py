@@ -52,7 +52,7 @@ DOCUMENT_SCHEMA = {
                 "required": ["href"],
             },
         },
-        "version": {"type": "integer"},
+        "version": {"type": "integer", "minimum": 0},
     },
 }
 

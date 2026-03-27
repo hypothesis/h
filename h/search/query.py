@@ -326,13 +326,11 @@ class UriCombinedWildcardFilter:
         plain_uris = self._normalize_uris(plain_uris)
 
         # Build versioned scope keys from versioned URIs
-        # Build Elasticsearch scope keys that combine a normalized URI with a version.
-        # e.g. "https://example.com" with version 2 becomes "https://example.com__v2"
         versioned_scope_keys = set()
         for base_uri, versions in versioned_uris:
-            for version in versions:
-                normalized_uris = self._normalize_uris([base_uri], version=version)
-                for normalized in normalized_uris:
+            normalized_uris = self._normalize_uris([base_uri])
+            for normalized in normalized_uris:
+                for version in versions:
                     versioned_scope_keys.add(
                         build_scope_key(normalized, version)
                     )
@@ -340,17 +338,21 @@ class UriCombinedWildcardFilter:
         queries = []
         if wildcard_uris:
             queries = [Q("wildcard", **{"target.scope": u}) for u in wildcard_uris]
-        
+
         # Combine plain (unversioned) URIs and versioned scope keys
         uri_scopes = list(plain_uris) + list(versioned_scope_keys)
         if uri_scopes:
             queries.append(Q("terms", **{"target.scope": uri_scopes}))
+
+        if not queries:
+            return search
+
         return search.query("bool", should=queries)
 
-    def _normalize_uris(self, query_uris, normalize_method=uri.normalize, version=None):
+    def _normalize_uris(self, query_uris, normalize_method=uri.normalize):
         uris = set()
         for query_uri in query_uris:
-            expanded = storage.expand_uri(self.request.db, query_uri, version=version)
+            expanded = storage.expand_uri(self.request.db, query_uri)
 
             uris.update([normalize_method(uri) for uri in expanded])
         return list(uris)

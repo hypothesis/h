@@ -1,5 +1,5 @@
 from h import storage
-from h.util.uri import normalize as normalize_uri
+from h.util.uri import build_scope_key, normalize as normalize_uri, parse_uri_versions
 
 FILTER_SCHEMA = {
     "type": "object",
@@ -43,14 +43,24 @@ class SocketFilter:
         :return: A generator of matching socket objects
         """
 
+        # Expand the URI to ensure we match any variants of it. This should
+        # match the normalization when searching (see `h.search.query`)
+        expanded_uris = set(
+            storage.expand_uri(session, annotation.target_uri, normalized=True)
+        )
+        # Versioned annotations only match clients filtering by that version.
+        # Unversioned annotations only match clients without version filter.
+        if annotation.version:
+            uri_scope_keys = {
+                build_scope_key(uri, annotation.version) for uri in expanded_uris
+            }
+        else:
+            uri_scope_keys = set(expanded_uris)
+
         values = {
             "/id": [annotation.id],
             "/group": [annotation.groupid],
-            # Expand the URI to ensure we match any variants of it. This should
-            # match the normalization when searching (see `h.search.query`)
-            "/uri": set(
-                storage.expand_uri(session, annotation.target_uri, normalized=True)
-            ),
+            "/uri": uri_scope_keys,
             "/references": set(annotation.references),
         }
 
@@ -94,6 +104,11 @@ class SocketFilter:
 
             for value in values:
                 if field == "/uri":
-                    value = normalize_uri(value)  # noqa: PLW2901
+                    base_uri, versions = parse_uri_versions(value)
+                    value = normalize_uri(base_uri)
+                    if versions:
+                        for version in versions:
+                            yield field, build_scope_key(value, version)
+                        continue
 
                 yield field, value
