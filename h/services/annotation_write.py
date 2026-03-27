@@ -25,6 +25,7 @@ def _normalize_version(version):
         return None
     return version
 
+
 _ = i18n.TranslationStringFactory(__package__)
 
 

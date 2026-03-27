@@ -31,9 +31,8 @@ def expand_uri(session, uri, normalized=False):  # noqa: FBT002
 
     normalized_uri = normalize_uri(uri)
 
-    document_id_query = (
-        session.query(models.DocumentURI.document_id)
-        .filter(models.DocumentURI.uri_normalized == normalized_uri)
+    document_id_query = session.query(models.DocumentURI.document_id).filter(
+        models.DocumentURI.uri_normalized == normalized_uri
     )
 
     document_id = document_id_query.limit(1).scalar_subquery()

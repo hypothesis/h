@@ -297,18 +297,7 @@ class UriCombinedWildcardFilter:
         if not ("uri" in params or "url" in params or "wildcard_uri" in params):
             return search
 
-        raw_uris = popall(params, "uri") + popall(params, "url")
-
-        # Parse versions from URIs and separate into versioned/unversioned
-        plain_uris = []
-        versioned_uris = []  # list of (base_uri, [versions])
-        for raw_uri in raw_uris:
-            base_uri, versions = parse_uri_versions(raw_uri)
-            base_uri = add_default_scheme(base_uri)
-            if versions:
-                versioned_uris.append((base_uri, versions))
-            else:
-                plain_uris.append(base_uri)
+        plain_uris, versioned_uris = self._parse_raw_uris(params)
 
         if self.separate_keys:
             wildcard_uris = [
@@ -325,15 +314,7 @@ class UriCombinedWildcardFilter:
         )
         plain_uris = self._normalize_uris(plain_uris)
 
-        # Build versioned scope keys from versioned URIs
-        versioned_scope_keys = set()
-        for base_uri, versions in versioned_uris:
-            normalized_uris = self._normalize_uris([base_uri])
-            for normalized in normalized_uris:
-                for version in versions:
-                    versioned_scope_keys.add(
-                        build_scope_key(normalized, version)
-                    )
+        versioned_scope_keys = self._build_versioned_scope_keys(versioned_uris)
 
         queries = []
         if wildcard_uris:
@@ -348,6 +329,31 @@ class UriCombinedWildcardFilter:
             return search
 
         return search.query("bool", should=queries)
+
+    @staticmethod
+    def _parse_raw_uris(params):
+        """Parse raw URIs from params, separating versioned from plain."""
+        raw_uris = popall(params, "uri") + popall(params, "url")
+        plain_uris = []
+        versioned_uris = []
+        for raw_uri in raw_uris:
+            base_uri, versions = parse_uri_versions(raw_uri)
+            base_uri = add_default_scheme(base_uri)
+            if versions:
+                versioned_uris.append((base_uri, versions))
+            else:
+                plain_uris.append(base_uri)
+        return plain_uris, versioned_uris
+
+    def _build_versioned_scope_keys(self, versioned_uris):
+        """Build versioned scope keys from versioned URIs."""
+        versioned_scope_keys = set()
+        for base_uri, versions in versioned_uris:
+            normalized_uris = self._normalize_uris([base_uri])
+            for normalized in normalized_uris:
+                for version in versions:
+                    versioned_scope_keys.add(build_scope_key(normalized, version))
+        return versioned_scope_keys
 
     def _normalize_uris(self, query_uris, normalize_method=uri.normalize):
         uris = set()

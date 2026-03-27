@@ -1,5 +1,6 @@
 from h import storage
-from h.util.uri import build_scope_key, normalize as normalize_uri, parse_uri_versions
+from h.util.uri import build_scope_key, parse_uri_versions
+from h.util.uri import normalize as normalize_uri
 
 FILTER_SCHEMA = {
     "type": "object",
@@ -105,10 +106,11 @@ class SocketFilter:
             for value in values:
                 if field == "/uri":
                     base_uri, versions = parse_uri_versions(value)
-                    value = normalize_uri(base_uri)
+                    normalized = normalize_uri(base_uri)
                     if versions:
                         for version in versions:
-                            yield field, build_scope_key(value, version)
+                            yield field, build_scope_key(normalized, version)
                         continue
-
-                yield field, value
+                    yield field, normalized
+                else:
+                    yield field, value

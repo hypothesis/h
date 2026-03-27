@@ -613,7 +613,7 @@ class TestUriCombinedWildcardFilter:
     ):
         """URIs with version suffixes produce versioned scope keys in the query."""
         storage.expand_uri.return_value = ["httpx://example.com"]
-        urifilter = query.UriCombinedWildcardFilter(pyramid_request, True)
+        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys=True)
 
         params = MultiDict([("uri", "http://example.com:v1:v2")])
         q = urifilter(es_dsl_search, params).to_dict()
@@ -629,9 +629,11 @@ class TestUriCombinedWildcardFilter:
         storage.expand_uri.side_effect = lambda _session, uri, **_kwargs: [
             f"httpx://{uri.split('//')[1]}" if "//" in uri else uri
         ]
-        urifilter = query.UriCombinedWildcardFilter(pyramid_request, True)
+        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys=True)
 
-        params = MultiDict([("uri", "http://example.com:v1"), ("url", "http://other.com")])
+        params = MultiDict(
+            [("uri", "http://example.com:v1"), ("url", "http://other.com")]
+        )
         q = urifilter(es_dsl_search, params).to_dict()
 
         terms = q["query"]["bool"]["should"][0]["terms"]["target.scope"]

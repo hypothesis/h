@@ -314,6 +314,7 @@ def parse_uri_versions(uri_string):
         "http://localhost:3000:v1" -> ("http://localhost:3000", [1])
         "1.1.1.1:v0:v1:v2" -> ("1.1.1.1", [None, 1, 2])
         "http://example.com" -> ("http://example.com", [])
+
     """
     parts = uri_string.split(":")
 

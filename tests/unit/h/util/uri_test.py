@@ -308,7 +308,11 @@ class TestParseURIVersions:
             # DOI-style URIs
             ("doi:10.1234/5678:v1:v2", "doi:10.1234/5678", [1, 2]),
             # Non-version suffix stops right-to-left parsing (v1 is still found)
-            ("http://example.com:notaversion:v1", "http://example.com:notaversion", [1]),
+            (
+                "http://example.com:notaversion:v1",
+                "http://example.com:notaversion",
+                [1],
+            ),
         ],
     )
     def test_it(self, uri_string, expected_base, expected_versions):

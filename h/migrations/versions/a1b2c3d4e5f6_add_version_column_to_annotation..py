@@ -8,9 +8,7 @@ down_revision = "7c1a3e2b9f20"
 
 
 def upgrade() -> None:
-    op.add_column(
-        "annotation", sa.Column("version", sa.Integer(), nullable=True)
-    )
+    op.add_column("annotation", sa.Column("version", sa.Integer(), nullable=True))
 
 
 def downgrade() -> None:

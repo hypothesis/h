@@ -228,7 +228,11 @@ class TestFilterHandler:
                 "match_policy": "include_any",
                 "actions": {},
                 "clauses": [
-                    {"field": "/uri", "operator": "one_of", "value": ["http://example.com:v3"]}
+                    {
+                        "field": "/uri",
+                        "operator": "one_of",
+                        "value": ["http://example.com:v3"],
+                    }
                 ],
             },
         )
@@ -241,7 +245,11 @@ class TestFilterHandler:
                 "match_policy": "include_any",
                 "actions": {},
                 "clauses": [
-                    {"field": "/uri", "operator": "one_of", "value": ["http://example.com:v1"]}
+                    {
+                        "field": "/uri",
+                        "operator": "one_of",
+                        "value": ["http://example.com:v1"],
+                    }
                 ],
             },
         )
@@ -254,12 +262,18 @@ class TestFilterHandler:
                 "match_policy": "include_any",
                 "actions": {},
                 "clauses": [
-                    {"field": "/uri", "operator": "one_of", "value": ["http://example.com"]}
+                    {
+                        "field": "/uri",
+                        "operator": "one_of",
+                        "value": ["http://example.com"],
+                    }
                 ],
             },
         )
 
-        result = list(SocketFilter.matching([socket_v3, socket_v1, socket_plain], ann, db_session))
+        result = list(
+            SocketFilter.matching([socket_v3, socket_v1, socket_plain], ann, db_session)
+        )
 
         assert socket_v3 in result
         assert socket_v1 not in result
@@ -280,7 +294,11 @@ class TestFilterHandler:
                 "match_policy": "include_any",
                 "actions": {},
                 "clauses": [
-                    {"field": "/uri", "operator": "one_of", "value": ["http://example.com"]}
+                    {
+                        "field": "/uri",
+                        "operator": "one_of",
+                        "value": ["http://example.com"],
+                    }
                 ],
             },
         )
@@ -293,7 +311,11 @@ class TestFilterHandler:
                 "match_policy": "include_any",
                 "actions": {},
                 "clauses": [
-                    {"field": "/uri", "operator": "one_of", "value": ["http://example.com:v1"]}
+                    {
+                        "field": "/uri",
+                        "operator": "one_of",
+                        "value": ["http://example.com:v1"],
+                    }
                 ],
             },
         )
@@ -317,7 +339,11 @@ class TestFilterHandler:
                 "match_policy": "include_any",
                 "actions": {},
                 "clauses": [
-                    {"field": "/uri", "operator": "one_of", "value": ["http://example.com:v0:v1"]}
+                    {
+                        "field": "/uri",
+                        "operator": "one_of",
+                        "value": ["http://example.com:v0:v1"],
+                    }
                 ],
             },
         )
