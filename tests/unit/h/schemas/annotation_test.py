@@ -10,6 +10,7 @@ from h.schemas.annotation import (
     SearchParamsSchema,
     UpdateAnnotationSchema,
     URLMigrationSchema,
+    transform_document,
 )
 from h.schemas.util import validate_query_params
 from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
@@ -849,6 +850,29 @@ class TestURLMigrationSchema:
     @pytest.fixture
     def validate(self):
         return URLMigrationSchema().validate
+
+
+class TestTransformDocument:
+    def test_it_includes_version_when_provided(self):
+        result = transform_document({"version": 3}, claimant="http://example.com")
+
+        assert result["version"] == 3
+
+    def test_it_excludes_version_when_not_provided(self):
+        """Version should not be in the result if not sent in the document.
+
+        This prevents overwriting the annotation's existing version during
+        updates, which would cause versioned annotations to lose their version.
+        """
+        result = transform_document({"foo": "bar"}, claimant="http://example.com")
+
+        assert "version" not in result
+
+    def test_it_includes_version_none_when_explicitly_set(self):
+        result = transform_document({"version": None}, claimant="http://example.com")
+
+        assert "version" in result
+        assert result["version"] is None
 
 
 @pytest.fixture

@@ -87,6 +87,17 @@ class TestAnnotationWriteService:
         annotation_read_service.get_annotation_by_id.assert_not_called()
         assert result.groupid == group.pubid
 
+    def test_create_annotation_sets_version(self, svc, create_data, factories):
+        """When version is explicitly provided, it is set on the annotation."""
+        group = factories.Group()
+        create_data["references"] = None
+        create_data["groupid"] = group.pubid
+        create_data["document"]["version"] = 5
+
+        result = svc.create_annotation(create_data)
+
+        assert result.version == 5
+
     def test_create_annotation_with_invalid_parent(
         self, svc, create_data, annotation_read_service
     ):

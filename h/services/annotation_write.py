@@ -82,11 +82,12 @@ class AnnotationWriteService:
 
         version = _normalize_version(document_data.get("version"))
 
-        # For replies, inherit the version from the root annotation if not provided
+        # If no version was provided and this is a reply, inherit from the root annotation.
+        # If the version was explicitly provided, use it.
         if version is None and root_annotation:
-            version = root_annotation.version
-
-        annotation.version = version
+            annotation.version = root_annotation.version
+        elif version is not None:
+            annotation.version = version
         annotation.created = annotation.updated = datetime.utcnow()  # noqa: DTZ003
         annotation.document = update_document_metadata(
             self._db,

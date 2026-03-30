@@ -251,18 +251,20 @@ def transform_document(document, claimant):
 
     """
     document = document or {}
-    version = document.pop("version", None)
     document_uri_dicts = document_claims.document_uris_from_data(
         copy.deepcopy(document), claimant=claimant
     )
     document_meta_dicts = document_claims.document_metas_from_data(
         copy.deepcopy(document), claimant=claimant
     )
-    return {
+    result = {
         "document_uri_dicts": document_uri_dicts,
         "document_meta_dicts": document_meta_dicts,
-        "version": version,
     }
+    if "version" in document:
+        result["version"] = document["version"]
+
+    return result
 
 
 def _remove_protected_fields(appstruct):
