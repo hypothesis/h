@@ -304,31 +304,38 @@ def parse_uri_versions(uri_string):
     Parse a URI string that may contain version suffixes.
 
     Format: base_uri:v1:v2:v3
-    Versions are detected by scanning from the right for tokens matching "v<number>".
+    Versions are detected by scanning from the right for tokens matching "v<number>"
+    or the special keyword "all".
 
-    Returns (base_uri, versions) where versions is a list of ints.
+    Returns (base_uri, versions) where versions is a list of ints/None/"all".
     v0 is treated as "no version" (None).
+    "all" means all versions (including v0).
 
     Examples:
         "http://example.com:v1:v2" -> ("http://example.com", [1, 2])
         "http://localhost:3000:v1" -> ("http://localhost:3000", [1])
         "1.1.1.1:v0:v1:v2" -> ("1.1.1.1", [None, 1, 2])
+        "http://example.com:all" -> ("http://example.com", ["all"])
         "http://example.com" -> ("http://example.com", [])
 
     """
     parts = uri_string.split(":")
 
-    # Scan from the right, extracting version suffixes (e.g. "v1", "v2")
+    # Scan from the right, extracting version suffixes (e.g. "v1", "v2", "all")
     # until we hit a non-version part
     versions = []
     while len(parts) > 1:
-        match = VERSION_PATTERN.match(parts[-1])
-        if match:
-            version_num = int(match.group(1))
-            versions.append(None if version_num == 0 else version_num)
+        if parts[-1] == "all":
+            versions.append("all")
             parts.pop()
         else:
-            break
+            match = VERSION_PATTERN.match(parts[-1])
+            if match:
+                version_num = int(match.group(1))
+                versions.append(None if version_num == 0 else version_num)
+                parts.pop()
+            else:
+                break
 
     versions.reverse()
     base_uri = ":".join(parts)

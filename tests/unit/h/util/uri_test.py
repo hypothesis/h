@@ -307,6 +307,10 @@ class TestParseURIVersions:
             ("http://localhost:3000", "http://localhost:3000", []),
             # DOI-style URIs
             ("doi:10.1234/5678:v1:v2", "doi:10.1234/5678", [1, 2]),
+            # :all returns all versions
+            ("http://example.com:all", "http://example.com", ["all"]),
+            ("http://localhost:3000:all", "http://localhost:3000", ["all"]),
+            ("doi:10.1234/5678:all", "doi:10.1234/5678", ["all"]),
             # Non-version suffix stops right-to-left parsing (v1 is still found)
             (
                 "http://example.com:notaversion:v1",
