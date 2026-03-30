@@ -18,14 +18,6 @@ from h.services.mention import MentionService
 from h.traversal.group import GroupContext
 from h.util.group_scope import url_in_scope
 
-
-def _normalize_version(version):
-    """Normalize version: treat 0 and negatives as None (unversioned)."""
-    if version is not None and version <= 0:
-        return None
-    return version
-
-
 _ = i18n.TranslationStringFactory(__package__)
 
 
@@ -80,14 +72,13 @@ class AnnotationWriteService:
         self._db.enable_relationship_loading(annotation)
         self._validate_group(annotation)
 
-        version = _normalize_version(document_data.get("version"))
-
+        version_provided = "version" in document_data
         # If no version was provided and this is a reply, inherit from the root annotation.
-        # If the version was explicitly provided, use it.
-        if version is None and root_annotation:
+        # If the version was explicitly provided (even as 0/None), use the normalized value.
+        if not version_provided and root_annotation:
             annotation.version = root_annotation.version
-        elif version is not None:
-            annotation.version = version
+        elif version_provided:
+            annotation.version = document_data["version"]
         annotation.created = annotation.updated = datetime.utcnow()  # noqa: DTZ003
         annotation.document = update_document_metadata(
             self._db,
@@ -155,7 +146,7 @@ class AnnotationWriteService:
             document := data.get("document", {})
         ) or annotation.target_uri != initial_target_uri:
             if "version" in document:
-                annotation.version = _normalize_version(document["version"])
+                annotation.version = document["version"]
 
             annotation.document = update_document_metadata(
                 self._db,

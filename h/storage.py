@@ -31,21 +31,22 @@ def expand_uri(session, uri, normalized=False):  # noqa: FBT002
 
     normalized_uri = normalize_uri(uri)
 
-    document_id_query = session.query(models.DocumentURI.document_id).filter(
-        models.DocumentURI.uri_normalized == normalized_uri
+    document_id = (
+        session.query(models.DocumentURI.document_id)
+        .filter(models.DocumentURI.uri_normalized == normalized_uri)
+        .limit(1)
+        .scalar_subquery()
     )
 
-    document_id = document_id_query.limit(1).scalar_subquery()
-
-    query = session.query(
-        # Using the specific fields we want prevents object creation
-        # which significantly speeds this method up (knocks ~40% off)
-        models.DocumentURI.type,
-        models.DocumentURI.uri,
-        models.DocumentURI.uri_normalized,
-    ).filter(models.DocumentURI.document_id == document_id)
-
-    type_uris = list(query)
+    type_uris = list(
+        session.query(
+            # Using the specific fields we want prevents object creation
+            # which significantly speeds this method up (knocks ~40% off)
+            models.DocumentURI.type,
+            models.DocumentURI.uri,
+            models.DocumentURI.uri_normalized,
+        ).filter(models.DocumentURI.document_id == document_id)
+    )
 
     if not type_uris:
         return [normalized_uri if normalized else uri]

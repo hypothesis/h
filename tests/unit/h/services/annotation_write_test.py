@@ -7,11 +7,7 @@ from h_matchers import Any
 from h.models import Annotation, AnnotationSlim, User
 from h.schemas import ValidationError
 from h.security import Permission
-from h.services.annotation_write import (
-    AnnotationWriteService,
-    _normalize_version,
-    service_factory,
-)
+from h.services.annotation_write import AnnotationWriteService, service_factory
 from h.traversal.group import GroupContext
 
 
@@ -97,6 +93,34 @@ class TestAnnotationWriteService:
         result = svc.create_annotation(create_data)
 
         assert result.version == 5
+
+    def test_create_reply_inherits_version_from_root(
+        self, svc, create_data, factories, annotation_read_service
+    ):
+        """A reply without version inherits the root annotation's version."""
+        root = factories.Annotation(version=3)
+        annotation_read_service.get_annotation_by_id.return_value = root
+        create_data["references"] = [root.id]
+
+        result = svc.create_annotation(create_data)
+
+        assert result.version == 3
+
+    def test_create_reply_with_explicit_version_none_does_not_inherit(
+        self, svc, create_data, factories, annotation_read_service
+    ):
+        """A reply with explicit version=None should be unversioned, not inherit from root.
+
+        version=0 is normalized to None by the schema before reaching the service.
+        """
+        root = factories.Annotation(version=3)
+        annotation_read_service.get_annotation_by_id.return_value = root
+        create_data["references"] = [root.id]
+        create_data["document"]["version"] = None
+
+        result = svc.create_annotation(create_data)
+
+        assert result.version is None
 
     def test_create_annotation_with_invalid_parent(
         self, svc, create_data, annotation_read_service
@@ -212,15 +236,15 @@ class TestAnnotationWriteService:
 
         assert annotation.version == 3
 
-    def test_update_annotation_normalizes_version_zero_to_none(self, svc, annotation):
-        """Version 0 is normalized to None, actively setting annotation as unversioned."""
+    def test_update_annotation_sets_version_to_none(self, svc, annotation):
+        """Setting version to None actively makes the annotation unversioned."""
         annotation.version = 3
 
         svc.update_annotation(
             annotation,
             {
                 "document": {
-                    "version": 0,
+                    "version": None,
                     "document_meta_dicts": {},
                     "document_uri_dicts": {},
                 },
@@ -379,23 +403,6 @@ class TestAnnotationWriteService:
         assert slim.group_id == annotation.group.id
         assert slim.document_id == annotation.document_id
         assert slim.deleted == annotation.deleted
-
-
-class TestNormalizeVersion:
-    @pytest.mark.parametrize(
-        "version,expected",
-        [
-            (None, None),
-            (0, None),
-            (-1, None),
-            (-100, None),
-            (1, 1),
-            (5, 5),
-            (100, 100),
-        ],
-    )
-    def test_it(self, version, expected):
-        assert _normalize_version(version) == expected
 
 
 class TestServiceFactory:

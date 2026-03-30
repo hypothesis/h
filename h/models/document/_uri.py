@@ -95,8 +95,9 @@ def create_or_update_document_uri(  # noqa: PLR0913
     created and added to the database.
 
     To be considered "equivalent" an existing DocumentURI must have the same
-    claimant, uri, type and content_type. The claimant and uri are
-    normalized before comparing.
+    claimant, uri, type and content_type, but the Document object that it
+    belongs to may be different. The claimant and uri are normalized before
+    comparing.
 
     :param session: the database session
     :param claimant: the .claimant property of the DocumentURI

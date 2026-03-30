@@ -10,6 +10,7 @@ from h.schemas.annotation import (
     SearchParamsSchema,
     UpdateAnnotationSchema,
     URLMigrationSchema,
+    _normalize_version,
     transform_document,
 )
 from h.schemas.util import validate_query_params
@@ -873,6 +874,35 @@ class TestTransformDocument:
 
         assert "version" in result
         assert result["version"] is None
+
+    def test_it_normalizes_version_zero_to_none(self):
+        """Version 0 is normalized to None (unversioned)."""
+        result = transform_document({"version": 0}, claimant="http://example.com")
+
+        assert result["version"] is None
+
+    def test_it_normalizes_negative_version_to_none(self):
+        """Negative versions are normalized to None (unversioned)."""
+        result = transform_document({"version": -1}, claimant="http://example.com")
+
+        assert result["version"] is None
+
+
+class TestNormalizeVersion:
+    @pytest.mark.parametrize(
+        "version,expected",
+        [
+            (None, None),
+            (0, None),
+            (-1, None),
+            (-100, None),
+            (1, 1),
+            (5, 5),
+            (100, 100),
+        ],
+    )
+    def test_it(self, version, expected):
+        assert _normalize_version(version) == expected
 
 
 @pytest.fixture
