@@ -358,7 +358,7 @@ pyproject-hooks==1.0.0
     #   -r requirements/tests.txt
     #   build
     #   pip-tools
-pyramid==2.0.2
+pyramid==2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

@@ -241,7 +241,7 @@ pyproject-hooks==1.0.0
     # via
     #   build
     #   pip-tools
-pyramid==2.0.2
+pyramid==2.1
     # via
     #   -r requirements/prod.txt
     #   h-assets
