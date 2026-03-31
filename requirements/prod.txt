@@ -195,7 +195,7 @@ referencing==0.36.1
     #   jsonschema-specifications
 repoze-sendmail==4.4.1
     # via pyramid-mailer
-requests==2.32.4
+requests==2.33.1
     # via -r requirements/prod.in
 rfc3339-validator==0.1.4
     # via -r requirements/prod.in
