@@ -33,7 +33,7 @@ chameleon==4.6.0
     # via deform
 charset-normalizer==3.4.2
     # via requests
-click==8.1.8
+click==8.3.1
     # via
     #   -r requirements/prod.in
     #   celery
