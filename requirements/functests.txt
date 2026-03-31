@@ -152,7 +152,7 @@ jsonschema-specifications==2024.10.1
     # via
     #   -r requirements/prod.txt
     #   jsonschema
-kombu==5.5.2
+kombu==5.5.4
     # via
     #   -r requirements/prod.txt
     #   celery
@@ -177,6 +177,7 @@ packaging==25.0
     #   -r requirements/prod.txt
     #   build
     #   gunicorn
+    #   kombu
     #   pytest
     #   pytest-factoryboy
     #   zope-sqlalchemy

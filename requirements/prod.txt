@@ -102,7 +102,7 @@ jsonschema==4.26.0
     #   h-api
 jsonschema-specifications==2024.10.1
     # via jsonschema
-kombu==5.5.2
+kombu==5.5.4
     # via
     #   -r requirements/prod.in
     #   celery
@@ -124,6 +124,7 @@ packaging==25.0
     # via
     #   -r requirements/prod.in
     #   gunicorn
+    #   kombu
     #   zope-sqlalchemy
 passlib==1.7.4
     # via -r requirements/prod.in

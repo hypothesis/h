@@ -232,7 +232,7 @@ jsonschema-specifications==2024.10.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   jsonschema
-kombu==5.5.2
+kombu==5.5.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -267,6 +267,7 @@ packaging==25.0
     #   -r requirements/tests.txt
     #   build
     #   gunicorn
+    #   kombu
     #   pytest
     #   pytest-factoryboy
     #   zope-sqlalchemy
