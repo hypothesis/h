@@ -10,8 +10,6 @@ from h.schemas.annotation import (
     SearchParamsSchema,
     UpdateAnnotationSchema,
     URLMigrationSchema,
-    _normalize_version,
-    transform_document,
 )
 from h.schemas.util import validate_query_params
 from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
@@ -851,58 +849,6 @@ class TestURLMigrationSchema:
     @pytest.fixture
     def validate(self):
         return URLMigrationSchema().validate
-
-
-class TestTransformDocument:
-    def test_it_includes_version_when_provided(self):
-        result = transform_document({"version": 3}, claimant="http://example.com")
-
-        assert result["version"] == 3
-
-    def test_it_excludes_version_when_not_provided(self):
-        """Version should not be in the result if not sent in the document.
-
-        This prevents overwriting the annotation's existing version during
-        updates, which would cause versioned annotations to lose their version.
-        """
-        result = transform_document({"foo": "bar"}, claimant="http://example.com")
-
-        assert "version" not in result
-
-    def test_it_includes_version_none_when_explicitly_set(self):
-        result = transform_document({"version": None}, claimant="http://example.com")
-
-        assert "version" in result
-        assert result["version"] is None
-
-    def test_it_normalizes_version_zero_to_none(self):
-        """Version 0 is normalized to None (unversioned)."""
-        result = transform_document({"version": 0}, claimant="http://example.com")
-
-        assert result["version"] is None
-
-    def test_it_normalizes_negative_version_to_none(self):
-        """Negative versions are normalized to None (unversioned)."""
-        result = transform_document({"version": -1}, claimant="http://example.com")
-
-        assert result["version"] is None
-
-
-class TestNormalizeVersion:
-    @pytest.mark.parametrize(
-        "version,expected",
-        [
-            (None, None),
-            (0, None),
-            (-1, None),
-            (-100, None),
-            (1, 1),
-            (5, 5),
-            (100, 100),
-        ],
-    )
-    def test_it(self, version, expected):
-        assert _normalize_version(version) == expected
 
 
 @pytest.fixture

@@ -1,6 +1,5 @@
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
 from h.util.datetime import utc_iso8601
-from h.util.uri import build_scope_key
 from h.util.user import split_user
 
 
@@ -36,12 +35,7 @@ class AnnotationSearchIndexPresenter:
             "hidden": self.annotation.is_hidden,
         }
 
-        result["target"][0]["scope"] = [
-            build_scope_key(
-                self.annotation.target_uri_normalized,
-                self.annotation.version,
-            )
-        ]
+        result["target"][0]["scope"] = [self.annotation.target_uri_normalized]
 
         if self.annotation.references:
             result["references"] = self.annotation.references

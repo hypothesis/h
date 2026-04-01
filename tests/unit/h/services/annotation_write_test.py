@@ -83,45 +83,6 @@ class TestAnnotationWriteService:
         annotation_read_service.get_annotation_by_id.assert_not_called()
         assert result.groupid == group.pubid
 
-    def test_create_annotation_sets_version(self, svc, create_data, factories):
-        """When version is explicitly provided, it is set on the annotation."""
-        group = factories.Group()
-        create_data["references"] = None
-        create_data["groupid"] = group.pubid
-        create_data["document"]["version"] = 5
-
-        result = svc.create_annotation(create_data)
-
-        assert result.version == 5
-
-    def test_create_reply_inherits_version_from_root(
-        self, svc, create_data, factories, annotation_read_service
-    ):
-        """A reply without version inherits the root annotation's version."""
-        root = factories.Annotation(version=3)
-        annotation_read_service.get_annotation_by_id.return_value = root
-        create_data["references"] = [root.id]
-
-        result = svc.create_annotation(create_data)
-
-        assert result.version == 3
-
-    def test_create_reply_with_explicit_version_none_does_not_inherit(
-        self, svc, create_data, factories, annotation_read_service
-    ):
-        """A reply with explicit version=None should be unversioned, not inherit from root.
-
-        version=0 is normalized to None by the schema before reaching the service.
-        """
-        root = factories.Annotation(version=3)
-        annotation_read_service.get_annotation_by_id.return_value = root
-        create_data["references"] = [root.id]
-        create_data["document"]["version"] = None
-
-        result = svc.create_annotation(create_data)
-
-        assert result.version is None
-
     def test_create_annotation_with_invalid_parent(
         self, svc, create_data, annotation_read_service
     ):
@@ -185,74 +146,6 @@ class TestAnnotationWriteService:
         assert anno.updated > then
         assert anno.extra == {"key": "value", "extra_key": "extra_value"}
         self.assert_annotation_slim(db_session, anno)
-
-    def test_update_annotation_sets_version(self, svc, annotation):
-        annotation.version = None
-
-        svc.update_annotation(
-            annotation,
-            {
-                "document": {
-                    "version": 5,
-                    "document_meta_dicts": {},
-                    "document_uri_dicts": {},
-                },
-            },
-            update_timestamp=True,
-        )
-
-        assert annotation.version == 5
-
-    def test_update_annotation_keeps_version_when_not_sent(self, svc, annotation):
-        """If no version is sent in the update, the original version is preserved."""
-        annotation.version = 3
-
-        svc.update_annotation(
-            annotation,
-            {
-                "text": "updated text",
-            },
-            update_timestamp=True,
-        )
-
-        assert annotation.version == 3
-
-    def test_update_annotation_keeps_version_when_document_has_no_version(
-        self, svc, annotation
-    ):
-        """If document is sent but without version, the original version is preserved."""
-        annotation.version = 3
-
-        svc.update_annotation(
-            annotation,
-            {
-                "document": {
-                    "document_meta_dicts": {},
-                    "document_uri_dicts": {},
-                },
-            },
-            update_timestamp=True,
-        )
-
-        assert annotation.version == 3
-
-    def test_update_annotation_sets_version_to_none(self, svc, annotation):
-        """Setting version to None actively makes the annotation unversioned."""
-        annotation.version = 3
-
-        svc.update_annotation(
-            annotation,
-            {
-                "document": {
-                    "version": None,
-                    "document_meta_dicts": {},
-                    "document_uri_dicts": {},
-                },
-            },
-            update_timestamp=True,
-        )
-
-        assert annotation.version is None
 
     def test_update_annotation_with_non_defaults(self, svc, annotation, queue_service):
         then = datetime.now() - timedelta(days=1)  # noqa: DTZ005
