@@ -50,7 +50,8 @@ class AnnotationWriteService:
             `h.schemas.annotation.CreateAnnotationSchema`
         """
 
-        # Set the group to be the same as the root annotation
+        # Set the group and version to be the same as the root annotation
+        root_annotation = None
         if references := data["references"]:
             if root_annotation := self._annotation_read_service.get_annotation_by_id(
                 references[0]
@@ -71,6 +72,13 @@ class AnnotationWriteService:
         self._db.enable_relationship_loading(annotation)
         self._validate_group(annotation)
 
+        version_provided = "version" in document_data
+        # If no version was provided and this is a reply, inherit from the root annotation.
+        # If the version was explicitly provided (even as 0/None), use the normalized value.
+        if not version_provided and root_annotation:
+            annotation.version = root_annotation.version
+        elif version_provided:
+            annotation.version = document_data["version"]
         annotation.created = annotation.updated = datetime.utcnow()  # noqa: DTZ003
         annotation.document = update_document_metadata(
             self._db,
@@ -137,6 +145,9 @@ class AnnotationWriteService:
         if (
             document := data.get("document", {})
         ) or annotation.target_uri != initial_target_uri:
+            if "version" in document:
+                annotation.version = document["version"]
+
             annotation.document = update_document_metadata(
                 self._db,
                 annotation.target_uri,

@@ -287,6 +287,66 @@ class TestURINormalise:
         assert uri.normalize(url_in) == url_out
 
 
+class TestParseURIVersions:
+    @pytest.mark.parametrize(
+        "uri_string,expected_base,expected_versions",
+        [
+            # No versions
+            ("http://example.com", "http://example.com", []),
+            ("http://example.com/page", "http://example.com/page", []),
+            # Single version
+            ("http://example.com:v1", "http://example.com", [1]),
+            ("http://example.com:v5", "http://example.com", [5]),
+            # Multiple versions
+            ("http://example.com:v1:v2", "http://example.com", [1, 2]),
+            ("http://example.com:v0:v1:v2", "http://example.com", [None, 1, 2]),
+            # v0 maps to None
+            ("http://example.com:v0", "http://example.com", [None]),
+            # Port numbers are not versions
+            ("http://localhost:3000:v1", "http://localhost:3000", [1]),
+            ("http://localhost:3000", "http://localhost:3000", []),
+            # DOI-style URIs
+            ("doi:10.1234/5678:v1:v2", "doi:10.1234/5678", [1, 2]),
+            # :all returns all versions
+            ("http://example.com:all", "http://example.com", ["all"]),
+            ("http://localhost:3000:all", "http://localhost:3000", ["all"]),
+            ("doi:10.1234/5678:all", "doi:10.1234/5678", ["all"]),
+            # Non-version suffix stops right-to-left parsing (v1 is still found)
+            (
+                "http://example.com:notaversion:v1",
+                "http://example.com:notaversion",
+                [1],
+            ),
+        ],
+    )
+    def test_it(self, uri_string, expected_base, expected_versions):
+        base, versions = uri.parse_uri_versions(uri_string)
+
+        assert base == expected_base
+        assert versions == expected_versions
+
+
+class TestBuildScopeKey:
+    @pytest.mark.parametrize(
+        "uri_normalized,version,expected",
+        [
+            # No version returns plain URI
+            ("httpx://example.com", None, "httpx://example.com"),
+            # Version 0 is falsy, returns plain URI
+            ("httpx://example.com", 0, "httpx://example.com"),
+            # Positive version appends suffix
+            ("httpx://example.com", 1, "httpx://example.com__v1"),
+            ("httpx://example.com", 5, "httpx://example.com__v5"),
+            ("httpx://example.com/path", 3, "httpx://example.com/path__v3"),
+        ],
+    )
+    def test_it(self, uri_normalized, version, expected):
+        assert uri.build_scope_key(uri_normalized, version) == expected
+
+    def test_default_version_is_none(self):
+        assert uri.build_scope_key("httpx://example.com") == "httpx://example.com"
+
+
 class TestURIOrigin:
     @pytest.mark.parametrize(
         "url_in,url_out",
