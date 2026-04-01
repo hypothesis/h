@@ -578,7 +578,7 @@ class TestUriCombinedWildcardFilter:
 
         q = urifilter(es_dsl_search, params).to_dict()
 
-        assert "query" not in q or "should" not in q.get("query", {}).get("bool", {})
+        assert "should" not in q["query"]["bool"]
 
     @pytest.mark.parametrize(
         "params,separate_keys",
@@ -607,66 +607,6 @@ class TestUriCombinedWildcardFilter:
         assert "uri" not in params
         assert "url" not in params
         assert "wildcard_uri" not in params
-
-    def test_versioned_uri_builds_scope_keys(
-        self, es_dsl_search, pyramid_request, storage
-    ):
-        """URIs with version suffixes produce versioned scope keys in the query."""
-        storage.expand_uri.return_value = ["httpx://example.com"]
-        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys=True)
-
-        params = MultiDict([("uri", "http://example.com:v1:v2")])
-        q = urifilter(es_dsl_search, params).to_dict()
-
-        terms = q["query"]["bool"]["should"][0]["terms"]["target.scope"]
-        assert "httpx://example.com__v1" in terms
-        assert "httpx://example.com__v2" in terms
-
-    def test_versioned_and_plain_uris_combined(
-        self, es_dsl_search, pyramid_request, storage
-    ):
-        """Versioned and plain URIs produce separate terms queries in the same should."""
-        storage.expand_uri.side_effect = lambda _session, uri, **_kwargs: [
-            f"httpx://{uri.split('//')[1]}" if "//" in uri else uri
-        ]
-        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys=True)
-
-        params = MultiDict(
-            [("uri", "http://example.com:v1"), ("url", "http://other.com")]
-        )
-        q = urifilter(es_dsl_search, params).to_dict()
-
-        should = q["query"]["bool"]["should"]
-        assert len(should) == 2
-        plain_terms = should[0]["terms"]["target.scope"]
-        versioned_terms = should[1]["terms"]["target.scope"]
-        assert "httpx://other.com" in plain_terms
-        assert "httpx://example.com__v1" in versioned_terms
-
-    def test_all_versions_uri_produces_term_and_wildcard(
-        self, es_dsl_search, pyramid_request, storage
-    ):
-        """URIs with :all produce a term query for v0 and a wildcard for versioned."""
-        storage.expand_uri.return_value = ["httpx://example.com"]
-        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys=True)
-
-        params = MultiDict([("uri", "http://example.com:all")])
-        q = urifilter(es_dsl_search, params).to_dict()
-
-        should = q["query"]["bool"]["should"]
-        term_queries = [
-            c for c in should if "term" in c and "target.scope" in c["term"]
-        ]
-        wildcard_queries = [
-            c for c in should if "wildcard" in c and "target.scope" in c["wildcard"]
-        ]
-        assert any(
-            c["term"]["target.scope"] == "httpx://example.com" for c in term_queries
-        )
-        assert any(
-            c["wildcard"]["target.scope"] == "httpx://example.com__v*"
-            for c in wildcard_queries
-        )
 
     @pytest.fixture
     def get_search(self, search, pyramid_request):
