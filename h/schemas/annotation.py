@@ -52,6 +52,7 @@ DOCUMENT_SCHEMA = {
                 "required": ["href"],
             },
         },
+        "version": {"type": "integer", "minimum": 0},
     },
 }
 
@@ -241,6 +242,13 @@ class UpdateAnnotationSchema:
         return new_appstruct
 
 
+def _normalize_version(version):
+    """Normalize version: treat 0 and negatives as None (unversioned)."""
+    if version is not None and version <= 0:
+        return None
+    return version
+
+
 def transform_document(document, claimant):
     """
     Return document meta and document URI data from the given document dict.
@@ -256,10 +264,14 @@ def transform_document(document, claimant):
     document_meta_dicts = document_claims.document_metas_from_data(
         copy.deepcopy(document), claimant=claimant
     )
-    return {
+    result = {
         "document_uri_dicts": document_uri_dicts,
         "document_meta_dicts": document_meta_dicts,
     }
+    if "version" in document:
+        result["version"] = _normalize_version(document["version"])
+
+    return result
 
 
 def _remove_protected_fields(appstruct):

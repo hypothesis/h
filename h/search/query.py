@@ -10,6 +10,7 @@ from h.search.util import add_default_scheme, wildcard_uri_is_valid
 from h.security import Identity, Permission, identity_permits
 from h.traversal import GroupContext
 from h.util import uri
+from h.util.uri import build_scope_key, parse_uri_versions
 
 LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
@@ -296,36 +297,77 @@ class UriCombinedWildcardFilter:
         if not ("uri" in params or "url" in params or "wildcard_uri" in params):
             return search
 
+        plain_uris, versioned_uris, all_version_uris = self._parse_raw_uris(params)
+
         if self.separate_keys:
-            uris = [
-                add_default_scheme(u)
-                for u in popall(params, "uri") + popall(params, "url")
-            ]
             wildcard_uris = [
                 add_default_scheme(u) for u in popall(params, "wildcard_uri")
             ]
         else:
-            uris = [
-                add_default_scheme(u)
-                for u in popall(params, "uri") + popall(params, "url")
-            ]
-            # Split into wildcard uris and non wildcard uris.
-            wildcard_uris = [u for u in uris if "*" in u or "_" in u]
-            uris = [u for u in uris if "*" not in u and "_" not in u]
+            wildcard_uris = [u for u in plain_uris if "*" in u or "_" in u]
+            plain_uris = [u for u in plain_uris if "*" not in u and "_" not in u]
 
         # Only add valid uri's to the search list.
         wildcard_uris = self._normalize_uris(
             [u for u in wildcard_uris if wildcard_uri_is_valid(u)],
             normalize_method=self._wildcard_uri_normalized,
         )
-        uris = self._normalize_uris(uris)
+        plain_uris = self._normalize_uris(plain_uris)
 
         queries = []
         if wildcard_uris:
-            queries = [Q("wildcard", **{"target.scope": u}) for u in wildcard_uris]
-        if uris:
-            queries.append(Q("terms", **{"target.scope": uris}))
+            queries.extend(Q("wildcard", **{"target.scope": u}) for u in wildcard_uris)
+        if plain_uris:
+            queries.append(Q("terms", **{"target.scope": list(plain_uris)}))
+        if versioned_uris:
+            queries.append(self._build_versioned_query(versioned_uris))
+        if all_version_uris:
+            queries.extend(self._build_all_version_queries(all_version_uris))
+
+        if not queries:
+            return search
+
         return search.query("bool", should=queries)
+
+    @staticmethod
+    def _parse_raw_uris(params):
+        """Parse raw URIs from params, separating versioned, all-version, and plain."""
+        raw_uris = popall(params, "uri") + popall(params, "url")
+        plain_uris = []
+        versioned_uris = []
+        all_version_uris = []
+        for raw_uri in raw_uris:
+            base_uri, versions = parse_uri_versions(raw_uri)
+            base_uri = add_default_scheme(base_uri)
+            if "all" in versions:
+                all_version_uris.append(base_uri)
+            elif versions:
+                versioned_uris.append((base_uri, versions))
+            else:
+                plain_uris.append(base_uri)
+        return plain_uris, versioned_uris, all_version_uris
+
+    def _build_versioned_query(self, versioned_uris):
+        """Build a single exact-match query for URIs with specific version suffixes."""
+        scope_keys = set()
+        for base_uri, versions in versioned_uris:
+            normalized_uris = self._normalize_uris([base_uri])
+            for normalized in normalized_uris:
+                for version in versions:
+                    scope_keys.add(build_scope_key(normalized, version))
+        return Q("terms", **{"target.scope": list(scope_keys)})
+
+    def _build_all_version_queries(self, all_version_uris):
+        """Build queries that match all versions of the given URIs."""
+        queries = []
+        for base_uri in all_version_uris:
+            normalized_uris = self._normalize_uris([base_uri])
+            for normalized in normalized_uris:
+                # Match unversioned (v0) by exact match
+                queries.append(Q("term", **{"target.scope": normalized}))
+                # Match all versioned variants with wildcard
+                queries.append(Q("wildcard", **{"target.scope": f"{normalized}__v*"}))
+        return queries
 
     def _normalize_uris(self, query_uris, normalize_method=uri.normalize):
         uris = set()
