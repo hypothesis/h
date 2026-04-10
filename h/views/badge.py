@@ -117,4 +117,14 @@ def badge(request):
         result = search.Search(request).run(query)
         count = result.total
 
+    # Allow short-lived caching of all badge responses (not just blocked URIs).
+    # Badge counts change infrequently and this reduces load from shared-IP
+    # environments (conferences, universities) where many users request the
+    # same badge count simultaneously.
+    if not Blocklist.is_blocked(uri):
+        cache_control = request.response.cache_control
+        cache_control.prevent_auto = True
+        cache_control.public = True
+        cache_control.max_age = 60
+
     return {"total": count}

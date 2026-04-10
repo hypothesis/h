@@ -64,6 +64,15 @@ def search(request):
             annotation_ids=result.reply_ids, user=request.user
         )
 
+    # Allow short-lived caching of unauthenticated search responses.
+    # This dramatically reduces load when many users behind the same IP
+    # (e.g. conference WiFi) view the same annotated page — identical
+    # queries are served from CloudFlare/browser cache.
+    if not request.authenticated_userid:
+        request.response.cache_control.prevent_auto = True
+        request.response.cache_control.public = True
+        request.response.cache_control.max_age = 60
+
     return out
 
 
