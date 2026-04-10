@@ -93,6 +93,35 @@ class TestBadge:
         )
         assert result == {"total": search_run.return_value.total}
 
+    def test_it_sets_cache_headers_when_not_blocked(
+        self, badge_request, pyramid_request
+    ):
+        badge_request("http://example.com", annotated=True, blocked=False)
+
+        cache_control = pyramid_request.response.cache_control
+        assert cache_control.prevent_auto
+        assert cache_control.public
+        assert cache_control.max_age == 60
+
+    def test_it_sets_cache_headers_when_uri_never_annotated(
+        self, badge_request, pyramid_request
+    ):
+        badge_request("http://example.com", annotated=False, blocked=False)
+
+        cache_control = pyramid_request.response.cache_control
+        assert cache_control.prevent_auto
+        assert cache_control.public
+        assert cache_control.max_age == 60
+
+    def test_it_does_not_override_blocked_cache_headers(
+        self, badge_request, pyramid_request
+    ):
+        badge_request("http://example.com", annotated=True, blocked=True)
+
+        cache_control = pyramid_request.response.cache_control
+        # Blocked URIs get 1-day cache, not the 60s default
+        assert cache_control.max_age == 86400
+
     def test_it_raises_if_no_uri(self):
         with pytest.raises(httpexceptions.HTTPBadRequest):
             badge(mock.Mock(params={}))

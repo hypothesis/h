@@ -76,6 +76,28 @@ class TestSearch:
 
         assert views.search(pyramid_request) == expected
 
+    def test_it_sets_cache_headers_when_unauthenticated(
+        self, pyramid_request, search_lib
+    ):
+        pyramid_request.authenticated_userid = None
+
+        views.search(pyramid_request)
+
+        cache_control = pyramid_request.response.cache_control
+        assert cache_control.prevent_auto
+        assert cache_control.public
+        assert cache_control.max_age == 60
+
+    def test_it_does_not_set_cache_headers_when_authenticated(
+        self, pyramid_request, search_lib
+    ):
+        pyramid_request.authenticated_userid = "acct:user@example.com"
+
+        views.search(pyramid_request)
+
+        cache_control = pyramid_request.response.cache_control
+        assert cache_control.max_age is None
+
     @pytest.fixture
     def search_lib(self, patch):
         return patch("h.views.api.annotations.search_lib")
