@@ -78,7 +78,7 @@ h-pyramid-sentry==1.2.4
     # via -r prod.in
 hupper==1.12
     # via pyramid
-idna==3.10
+idna==3.15
     # via requests
 importlib-resources==6.5.2
     # via

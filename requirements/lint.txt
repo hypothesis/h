@@ -180,7 +180,7 @@ hupper==1.12
     #   -r functests.txt
     #   -r tests.txt
     #   pyramid
-idna==3.10
+idna==3.15
     # via
     #   -r functests.txt
     #   -r tests.txt
