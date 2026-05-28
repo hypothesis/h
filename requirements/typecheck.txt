@@ -207,7 +207,7 @@ pycparser==2.22
     #   cffi
 pycryptodomex==3.23.0
     # via -r prod.txt
-pyjwt[crypto]==2.10.1
+pyjwt[crypto]==2.12.0
     # via -r prod.txt
 pyparsing==3.2.5
     # via -r prod.txt
