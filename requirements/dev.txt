@@ -232,7 +232,7 @@ pycryptodomex==3.23.0
     # via -r prod.txt
 pygments==2.17.2
     # via ipython
-pyjwt[crypto]==2.10.1
+pyjwt[crypto]==2.12.0
     # via -r prod.txt
 pyparsing==3.2.5
     # via -r prod.txt
