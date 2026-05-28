@@ -36,8 +36,6 @@ idna==3.7
     #   requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==7.0.1
-    # via pip-sync-faster
 jinja2==3.1.6
     # via sphinx
 markupsafe==2.1.5
@@ -47,10 +45,10 @@ packaging==25.0
     #   build
     #   sphinx
 pip-sync-faster==0.0.5
-    # via -r requirements/docs.in
+    # via -r docs.in
 pip-tools==7.5.2
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   pip-sync-faster
 pygments==2.17.2
     # via sphinx
@@ -68,7 +66,7 @@ snowballstemmer==2.2.0
     # via sphinx
 sphinx==8.2.3
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
     #   sphinxcontrib-applehelp
@@ -76,9 +74,9 @@ sphinx==8.2.3
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
 sphinx-autobuild==2024.10.3
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinx-rtd-theme==3.0.2
-    # via -r requirements/docs.in
+    # via -r docs.in
 sphinxcontrib-applehelp==1.0.7
     # via sphinx
 sphinxcontrib-devhelp==2.0.0
@@ -97,7 +95,7 @@ starlette==0.49.1
     # via sphinx-autobuild
 typing-extensions==4.15.0
     # via starlette
-urllib3==2.2.2
+urllib3==2.7.0
     # via requests
 uvicorn==0.29.0
     # via sphinx-autobuild
@@ -107,13 +105,11 @@ websockets==12.0
     # via sphinx-autobuild
 wheel==0.42.0
     # via pip-tools
-zipp==3.19.1
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via
-    #   -r requirements/docs.in
+    #   -r docs.in
     #   pip-tools
 setuptools==78.1.1
     # via pip-tools
