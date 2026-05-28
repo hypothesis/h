@@ -22,7 +22,7 @@ click==8.1.8
     #   pip-tools
 cookiecutter==2.6.0
     # via -r template.in
-idna==3.10
+idna==3.15
     # via requests
 jinja2==3.1.6
     # via cookiecutter
