@@ -232,7 +232,7 @@ kombu==5.5.2
     #   -r functests.txt
     #   -r tests.txt
     #   celery
-mako==1.3.0
+mako==1.3.12
     # via
     #   -r functests.txt
     #   -r tests.txt
