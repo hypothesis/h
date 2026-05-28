@@ -48,7 +48,7 @@ click-repl==0.3.0
     # via celery
 colander==2.0
     # via deform
-cryptography==44.0.2
+cryptography==46.0.7
     # via pyjwt
 data-tasks==0.0.5
     # via -r prod.in
