@@ -38,17 +38,17 @@ imagesize==1.4.1
     # via sphinx
 jinja2==3.1.6
     # via sphinx
-markupsafe==2.1.5
+markupsafe==3.0.3
     # via jinja2
 packaging==25.0
     # via
     #   build
     #   sphinx
 pip-sync-faster==0.0.5
-    # via -r checkdocs.in
+    # via -r requirements/checkdocs.in
 pip-tools==7.5.2
     # via
-    #   -r checkdocs.in
+    #   -r requirements/checkdocs.in
     #   pip-sync-faster
 pygments==2.17.2
     # via sphinx
@@ -66,7 +66,7 @@ snowballstemmer==2.2.0
     # via sphinx
 sphinx==8.2.3
     # via
-    #   -r checkdocs.in
+    #   -r requirements/checkdocs.in
     #   sphinx-autobuild
     #   sphinx-rtd-theme
     #   sphinxcontrib-applehelp
@@ -74,9 +74,9 @@ sphinx==8.2.3
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
 sphinx-autobuild==2024.10.3
-    # via -r checkdocs.in
+    # via -r requirements/checkdocs.in
 sphinx-rtd-theme==3.0.2
-    # via -r checkdocs.in
+    # via -r requirements/checkdocs.in
 sphinxcontrib-applehelp==1.0.7
     # via sphinx
 sphinxcontrib-devhelp==2.0.0
@@ -109,7 +109,7 @@ wheel==0.42.0
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via
-    #   -r checkdocs.in
+    #   -r requirements/checkdocs.in
     #   pip-tools
 setuptools==78.1.1
     # via pip-tools
