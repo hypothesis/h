@@ -562,7 +562,7 @@ webencodings==0.5.1
     #   -r functests.txt
     #   -r tests.txt
     #   bleach
-webob==1.8.8
+webob==1.8.10
     # via
     #   -r functests.txt
     #   -r tests.txt
