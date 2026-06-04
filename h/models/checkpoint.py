@@ -51,4 +51,6 @@ class Checkpoint(Base, Timestamps):
     )
 
     def __repr__(self) -> str:
-        return helpers.repr_(self, ["id", "group_id", "document_uri", "reveal_date"])
+        return helpers.repr_(
+            self, ["id", "group_id", "previous_checkpoint_id", "reveal_date"]
+        )
