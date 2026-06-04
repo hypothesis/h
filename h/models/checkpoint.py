@@ -12,9 +12,9 @@ class Checkpoint(Base, Timestamps):
     """A hide/reveal checkpoint, synced from the LMS so h can authorize annotation visibility.
 
     Checkpoints form a per-(group, uri) linked list: a checkpoint's start date
-    is derived from its predecessor's ``reveal_date``, and the first one
-    (``previous_checkpoint_id`` NULL) starts at the assignment creation date.
-    Annotations stay hidden until their checkpoint's ``reveal_date`` passes.
+    is derived from its predecessor's reveal_date, and the first one
+    (previous_checkpoint_id NULL) starts at the assignment creation date.
+    Annotations stay hidden until their checkpoint's reveal_date passes.
     """
 
     __tablename__ = "checkpoint"
