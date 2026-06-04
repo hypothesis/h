@@ -91,7 +91,7 @@ sphinxcontrib-qthelp==1.0.6
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
-starlette==0.49.1
+starlette==1.0.1
     # via sphinx-autobuild
 typing-extensions==4.15.0
     # via starlette
