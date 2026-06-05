@@ -276,6 +276,32 @@ class TestMergeDocuments:
         assert len(survivors) == 1
         assert survivors[0].reveal_date is None
 
+    def test_it_collapses_colliding_checkpoints_to_the_latest_reveal_date(
+        self, db_session, duplicate_docs, factories
+    ):
+        group = factories.Group()
+        factories.Checkpoint(
+            group=group,
+            document=duplicate_docs[0],
+            reveal_date=_datetime(2000, 1, 1),  # noqa: DTZ001
+        )
+        factories.Checkpoint(
+            group=group,
+            document=duplicate_docs[1],
+            reveal_date=_datetime(2030, 1, 1),  # noqa: DTZ001  # hides for longest
+        )
+
+        merge_documents(db_session, duplicate_docs)
+        db_session.flush()
+
+        survivors = (
+            db_session.query(models.Checkpoint)
+            .filter_by(group_id=group.id, document_id=duplicate_docs[0].id)
+            .all()
+        )
+        assert len(survivors) == 1
+        assert survivors[0].reveal_date == _datetime(2030, 1, 1)  # noqa: DTZ001
+
     def test_it_raises_retryable_error_when_flush_fails(
         self, db_session, duplicate_docs, monkeypatch
     ):
