@@ -3,6 +3,7 @@ import factory
 from h import models
 
 from .base import ModelFactory
+from .document import Document
 from .group import Group
 
 
@@ -12,4 +13,4 @@ class Checkpoint(ModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     group = factory.SubFactory(Group)
-    document_uri = factory.Faker("uri")
+    document = factory.SubFactory(Document)

@@ -11,8 +11,8 @@ from h.models import helpers
 class Checkpoint(Base, Timestamps):
     """A hide/reveal checkpoint, synced from the LMS so h can authorize annotation visibility.
 
-    Checkpoints form a per-(group, uri) linked list: a checkpoint's start date
-    is derived from its predecessor's reveal_date, and the first one
+    Checkpoints form a per-(group, document) linked list: a checkpoint's start
+    date is derived from its predecessor's reveal_date, and the first one
     (previous_checkpoint_id NULL) starts at the assignment creation date.
     Annotations stay hidden until their checkpoint's reveal_date passes.
     """
@@ -26,7 +26,10 @@ class Checkpoint(Base, Timestamps):
     )
     group = sa.orm.relationship("Group")
 
-    document_uri: Mapped[str] = mapped_column(sa.UnicodeText, nullable=False)
+    document_id: Mapped[int] = mapped_column(
+        sa.Integer, sa.ForeignKey("document.id", ondelete="CASCADE"), nullable=False
+    )
+    document = sa.orm.relationship("Document")
 
     previous_checkpoint_id: Mapped[int | None] = mapped_column(
         sa.Integer, sa.ForeignKey("checkpoint.id", ondelete="CASCADE"), nullable=True
@@ -43,9 +46,9 @@ class Checkpoint(Base, Timestamps):
         # at most one first checkpoint per (group, uri).
         sa.UniqueConstraint(
             "group_id",
-            "document_uri",
+            "document_id",
             "previous_checkpoint_id",
-            name="uq__checkpoint__group_id__document_uri__previous_checkpoint_id",
+            name="uq__checkpoint__group_id__document_id__previous_checkpoint_id",
             postgresql_nulls_not_distinct=True,
         ),
     )
