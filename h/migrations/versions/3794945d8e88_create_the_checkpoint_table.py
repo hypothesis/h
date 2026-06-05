@@ -12,7 +12,7 @@ def upgrade() -> None:
         "checkpoint",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("group_id", sa.Integer(), nullable=False),
-        sa.Column("document_uri", sa.UnicodeText(), nullable=False),
+        sa.Column("document_id", sa.Integer(), nullable=False),
         sa.Column("previous_checkpoint_id", sa.Integer(), nullable=True),
         sa.Column("reveal_date", sa.DateTime(), nullable=True),
         sa.Column(
@@ -28,6 +28,12 @@ def upgrade() -> None:
             ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
+            ["document_id"],
+            ["document.id"],
+            name=op.f("fk__checkpoint__document_id__document"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
             ["previous_checkpoint_id"],
             ["checkpoint.id"],
             name=op.f("fk__checkpoint__previous_checkpoint_id__checkpoint"),
@@ -36,9 +42,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk__checkpoint")),
         sa.UniqueConstraint(
             "group_id",
-            "document_uri",
+            "document_id",
             "previous_checkpoint_id",
-            name="uq__checkpoint__group_id__document_uri__previous_checkpoint_id",
+            name="uq__checkpoint__group_id__document_id__previous_checkpoint_id",
             postgresql_nulls_not_distinct=True,
         ),
     )
