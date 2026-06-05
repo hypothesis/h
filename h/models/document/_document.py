@@ -160,6 +160,7 @@ def merge_documents(session, documents, updated=None):
         from h.services.annotation_write import AnnotationWriteService  # noqa: PLC0415
 
         AnnotationWriteService.change_document(session, duplicate_ids, master)
+        _merge_checkpoints(session, duplicate_ids, master)
         session.query(Document).filter(Document.id.in_(duplicate_ids)).delete(
             synchronize_session="fetch"
         )
@@ -168,6 +169,57 @@ def merge_documents(session, documents, updated=None):
         raise ConcurrentUpdateError("concurrent document merges") from err  # noqa: EM101, TRY003
 
     return master
+
+
+def _merge_checkpoints(session, duplicate_ids, master):
+    """
+    Re-point Hide & Reveal checkpoints from the duplicate documents to master.
+
+    This mirrors how annotations are re-pointed
+    by AnnotationWriteService.change_document.
+
+    They are collapsed into a single checkpoint that
+    keeps the most restrictive reveal_date (an annotation stays hidden while
+    any of the merged checkpoints would hide it), so a merge can never reveal
+    annotations that should remain hidden.
+    """
+    from h.models import Checkpoint  # noqa: PLC0415
+
+    checkpoints = (
+        session.query(Checkpoint)
+        .filter(Checkpoint.document_id.in_([master.id, *duplicate_ids]))
+        .all()
+    )
+
+    by_key: dict = {}
+    for checkpoint in checkpoints:
+        key = (checkpoint.group_id, checkpoint.previous_checkpoint_id)
+        by_key.setdefault(key, []).append(checkpoint)
+
+    for colliding in by_key.values():
+        # Prefer a checkpoint already on master as the survivor, so we don't
+        # momentarily violate the unique constraint by re-pointing onto it.
+        colliding.sort(key=lambda checkpoint: checkpoint.document_id != master.id)
+        survivor, *losers = colliding
+
+        reveal_date = _most_restrictive_reveal_date(colliding)
+
+        for loser in losers:
+            session.delete(loser)
+        session.flush()
+
+        survivor.document_id = master.id
+        survivor.reveal_date = reveal_date
+
+    session.flush()
+
+
+def _most_restrictive_reveal_date(checkpoints):
+    """Return the reveal_date that keeps annotations hidden the longest."""
+    reveal_dates = [checkpoint.reveal_date for checkpoint in checkpoints]
+    if any(reveal_date is None for reveal_date in reveal_dates):
+        return None
+    return max(reveal_dates)
 
 
 def update_document_metadata(  # noqa: PLR0913
