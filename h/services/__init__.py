@@ -11,6 +11,7 @@ from h.services.bulk_api import (
     BulkGroupService,
     BulkLMSStatsService,
 )
+from h.services.checkpoint import CheckpointService
 from h.services.email import EmailService
 from h.services.http import HTTPService
 from h.services.job_queue import JobQueueService
@@ -50,6 +51,9 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     )
     config.register_service_factory(
         "h.services.annotation_write.service_factory", iface=AnnotationWriteService
+    )
+    config.register_service_factory(
+        "h.services.checkpoint.factory", iface=CheckpointService
     )
     config.register_service_factory("h.services.mention.factory", iface=MentionService)
     config.register_service_factory(
