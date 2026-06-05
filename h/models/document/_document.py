@@ -215,7 +215,7 @@ def _merge_checkpoints(session, duplicate_ids, master):
 
 
 def _most_restrictive_reveal_date(checkpoints):
-    """Returns the reveal_date that keeps annotations hidden the longest."""
+    """Return the reveal_date that keeps annotations hidden the longest."""
     reveal_dates = [checkpoint.reveal_date for checkpoint in checkpoints]
     if any(reveal_date is None for reveal_date in reveal_dates):
         return None
