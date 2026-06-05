@@ -44,6 +44,17 @@ class GroupMembershipRoles(enum.StrEnum):
     OWNER = "owner"
 
 
+class LMSRole(enum.StrEnum):
+    """A member's LMS role within a group, synced from the LMS for hide/reveal authz.
+
+    Deliberately separate from GroupMembershipRoles: these are non-hierarchical
+    and are not surfaced in h's role UI.
+    """
+
+    LMS_INSTRUCTOR = "lms_instructor"
+    LMS_STUDENT = "lms_student"
+
+
 class GroupMembership(Base):
     __tablename__ = "user_group"
 
@@ -74,6 +85,15 @@ class GroupMembership(Base):
         ),
         server_default=sa.text("""'["member"]'::jsonb"""),
         nullable=False,
+    )
+
+    lms_role = sa.Column(
+        sa.UnicodeText,
+        sa.CheckConstraint(
+            " OR ".join(f"lms_role = '{role.value}'" for role in LMSRole),
+            name="validate_lms_role",
+        ),
+        nullable=True,
     )
 
     created = sa.Column(sa.DateTime, default=datetime.datetime.utcnow, index=True)
