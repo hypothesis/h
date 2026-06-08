@@ -53,6 +53,7 @@ class Search:
             query.UserFilter(),
             query.NIPSAFilter(request),
             query.GroupAndModerationFilter(request),
+            query.HideRevealFilter(request),
             query.AnyMatcher(),
             query.TagsMatcher(),
             query.UriCombinedWildcardFilter(

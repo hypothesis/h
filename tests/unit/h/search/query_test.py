@@ -5,7 +5,9 @@ import elasticsearch_dsl
 import pytest
 from webob.multidict import MultiDict
 
+from h.models import GroupMembership
 from h.models.annotation import ModerationStatus
+from h.models.group import LMSRole
 from h.search import Search, query
 from h.security.identity import Identity
 from h.security.permissions import Permission
@@ -1171,6 +1173,145 @@ class TestUsersAggregation:
         result = search.run(MultiDict({}))
 
         assert result.aggregations["users"] == expected
+
+
+class TestHideRevealFilter:
+    def test_a_student_sees_only_their_visible_annotations(
+        self, search, Annotation, make_own, other_student, instructor
+    ):
+        # The student's own annotation is persisted (not just indexed) so the
+        # resolver can find it when matching instructor replies.
+        own = make_own()
+        instructor_note = Annotation(userid=instructor.userid)
+        instructor_reply_to_me = Annotation(
+            userid=instructor.userid, references=[own.id]
+        )
+        peer = Annotation(userid=other_student.userid)
+        Annotation(userid=instructor.userid, references=[peer.id])
+
+        result = search.run(MultiDict({}))
+
+        assert sorted(result.annotation_ids) == sorted(
+            [own.id, instructor_note.id, instructor_reply_to_me.id]
+        )
+
+    def test_it_does_not_hide_annotations_on_other_documents(
+        self, search, Annotation, other_student
+    ):
+        elsewhere = Annotation(
+            userid=other_student.userid, target_uri="http://example.com/other"
+        )
+
+        result = search.run(MultiDict({}))
+
+        assert elsewhere.id in result.annotation_ids
+
+    def test_it_does_not_hide_annotations_in_other_groups(
+        self, search, Annotation, other_student
+    ):
+        other = Annotation(userid=other_student.userid, groupid="__world__")
+
+        result = search.run(MultiDict({}))
+
+        assert other.id in result.annotation_ids
+
+    @pytest.mark.usefixtures("revealed_checkpoint")
+    def test_a_revealed_checkpoint_hides_nothing(
+        self, search, Annotation, other_student
+    ):
+        peer = Annotation(userid=other_student.userid)
+
+        result = search.run(MultiDict({}))
+
+        assert peer.id in result.annotation_ids
+
+    @pytest.mark.usefixtures("as_instructor")
+    def test_an_instructor_sees_everything(self, search, Annotation, other_student):
+        peer = Annotation(userid=other_student.userid)
+
+        result = search.run(MultiDict({}))
+
+        assert peer.id in result.annotation_ids
+
+    def membership(self, db_session, group, user, lms_role):
+        db_session.add(GroupMembership(user=user, group=group, lms_role=lms_role.value))
+        db_session.flush()
+
+    @pytest.fixture
+    def search(self, search, pyramid_request):
+        search.append_modifier(query.HideRevealFilter(pyramid_request))
+        return search
+
+    @pytest.fixture(autouse=True)
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture(autouse=True)
+    def document(self, factories):
+        document = factories.Document()
+        factories.DocumentURI(document=document, uri="http://example.com/page")
+        return document
+
+    @pytest.fixture(autouse=True)
+    def checkpoint(self, factories, group, document):
+        return factories.Checkpoint(group=group, document=document, reveal_date=None)
+
+    @pytest.fixture
+    def revealed_checkpoint(self, checkpoint):
+        checkpoint.reveal_date = datetime.datetime(2000, 1, 1)  # noqa: DTZ001
+        return checkpoint
+
+    @pytest.fixture
+    def student(self, factories, group, db_session):
+        student = factories.User()
+        self.membership(db_session, group, student, LMSRole.LMS_STUDENT)
+        return student
+
+    @pytest.fixture
+    def other_student(self, factories, group, db_session):
+        other_student = factories.User()
+        self.membership(db_session, group, other_student, LMSRole.LMS_STUDENT)
+        return other_student
+
+    @pytest.fixture
+    def instructor(self, factories, group, db_session):
+        instructor = factories.User()
+        self.membership(db_session, group, instructor, LMSRole.LMS_INSTRUCTOR)
+        return instructor
+
+    @pytest.fixture(autouse=True)
+    def as_student(self, pyramid_request, pyramid_config, student):
+        pyramid_request.user = student
+        pyramid_config.testing_securitypolicy(student.userid)
+
+    @pytest.fixture
+    def as_instructor(self, pyramid_request, pyramid_config, instructor):
+        pyramid_request.user = instructor
+        pyramid_config.testing_securitypolicy(instructor.userid)
+
+    @pytest.fixture
+    def Annotation(self, Annotation, group):
+        def HideRevealAnnotation(**kwargs):
+            kwargs.setdefault("groupid", group.pubid)
+            kwargs.setdefault("target_uri", "http://example.com/page")
+            kwargs.setdefault("shared", True)
+            return Annotation(**kwargs)
+
+        return HideRevealAnnotation
+
+    @pytest.fixture
+    def make_own(self, factories, index_annotations, group, student):
+        def make_own():
+            annotation = factories.Annotation(
+                userid=student.userid,
+                groupid=group.pubid,
+                target_uri="http://example.com/page",
+                shared=True,
+            )
+            index_annotations(annotation)
+            return annotation
+
+        return make_own
 
 
 @pytest.fixture
