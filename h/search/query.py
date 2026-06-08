@@ -8,6 +8,7 @@ from h import storage
 from h.models import Group, User
 from h.search.util import add_default_scheme, wildcard_uri_is_valid
 from h.security import Identity, Permission, identity_permits
+from h.services.checkpoint import CheckpointService
 from h.traversal import GroupContext
 from h.util import uri
 from h.util.uri import build_scope_key, parse_uri_versions
@@ -261,6 +262,69 @@ class GroupAndModerationFilter:
                 )
 
         return search.filter(Q("bool", should=query_clauses))
+
+
+class HideRevealFilter:
+    """
+    Hide annotations covered by an active Hide & Reveal checkpoint.
+
+    Until a checkpoint's reveal_date passes, a student must not see their peers'
+    annotations on the checkpointed document. The scope is resolved from the
+    requesting user's own memberships (see CheckpointService.hidden_scopes). An
+    instructor sees everything, while everyone else sees only their own
+    annotations, instructor notes, and instructor replies to them.
+
+    This is a no-op for the common case of a user with no active checkpoints.
+    """
+
+    def __init__(self, request):
+        self.userid = request.authenticated_userid
+        self.checkpoint_service = request.find_service(CheckpointService)
+        self._user = request.user
+
+    def __call__(self, search, params):  # noqa: ARG002
+        for scope in self.checkpoint_service.hidden_scopes(self._user):
+            search = search.exclude(self._hidden_query(scope))
+        return search
+
+    def _hidden_query(self, scope):
+        in_scope = Q(
+            "bool",
+            must=[
+                Q("term", group=scope.group_pubid),
+                Q("bool", should=self._uri_queries(scope.uris), minimum_should_match=1),
+            ],
+        )
+
+        visible = Q(
+            "bool",
+            minimum_should_match=1,
+            should=[
+                # user's own annotations.
+                Q("term", user_raw=self.userid),
+                # Instructor notes and instructor replies to user.
+                Q(
+                    "bool",
+                    must=[Q("terms", user_raw=scope.instructor_userids)],
+                    minimum_should_match=1,
+                    should=[
+                        Q("bool", must_not=[Q("exists", field="references")]),
+                        Q("terms", references=scope.own_annotation_ids),
+                    ],
+                ),
+            ],
+        )
+
+        # Hide annotations that are in scope but not in the visible set.
+        return Q("bool", must=[in_scope], must_not=[visible])
+
+    @staticmethod
+    def _uri_queries(uris):
+        queries = []
+        for normalized in uris:
+            queries.append(Q("term", **{"target.scope": normalized}))
+            queries.append(Q("wildcard", **{"target.scope": f"{normalized}__v*"}))
+        return queries
 
 
 class UriCombinedWildcardFilter:
