@@ -1,8 +1,27 @@
+from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import or_, select
 
-from h.models import Checkpoint, Document
+from h.models import (
+    Annotation,
+    Checkpoint,
+    Document,
+    DocumentURI,
+    GroupMembership,
+    User,
+)
+from h.models.group import LMSRole
+
+
+@dataclass
+class HiddenScope:
+    """A (group, document) under an active checkpoint, with its visibility data."""
+
+    group_pubid: str
+    uris: list[str]
+    instructor_userids: list[str]
+    own_annotation_ids: list[str]
 
 
 class CheckpointService:
@@ -38,6 +57,68 @@ class CheckpointService:
                 )
             )
             .limit(1)
+        )
+
+    def hidden_scopes(self, user: User | None) -> list[HiddenScope]:
+        """
+        Return the scopes whose annotations must be hidden from user.
+
+        An empty list (the common case: a user with no active checkpoints) means
+        search behaves normally.
+        """
+        if user is None:
+            return []
+
+        checkpoints = self.db.scalars(
+            select(Checkpoint)
+            .join(GroupMembership, GroupMembership.group_id == Checkpoint.group_id)
+            .where(GroupMembership.user_id == user.id)
+            .where(
+                or_(
+                    GroupMembership.lms_role.is_(None),
+                    GroupMembership.lms_role != LMSRole.LMS_INSTRUCTOR.value,
+                )
+            )
+            .where(
+                or_(
+                    Checkpoint.reveal_date.is_(None),
+                    Checkpoint.reveal_date > datetime.utcnow(),  # noqa: DTZ003
+                )
+            )
+        ).all()
+
+        return [self._hidden_scope(user, checkpoint) for checkpoint in checkpoints]
+
+    def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
+        group_pubid = checkpoint.group.pubid
+
+        uris = self.db.scalars(
+            select(DocumentURI.uri_normalized).where(
+                DocumentURI.document_id == checkpoint.document_id
+            )
+        ).all()
+
+        # User.userid is a hybrid that compiles to a tuple, so it can't be
+        # SELECTed directly: load the users and read it in Python.
+        instructors = self.db.scalars(
+            select(User)
+            .join(GroupMembership, GroupMembership.user_id == User.id)
+            .where(GroupMembership.group_id == checkpoint.group_id)
+            .where(GroupMembership.lms_role == LMSRole.LMS_INSTRUCTOR.value)
+        ).all()
+        instructor_userids = [instructor.userid for instructor in instructors]
+
+        own_annotation_ids = self.db.scalars(
+            select(Annotation.id)
+            .where(Annotation.userid == user.userid)
+            .where(Annotation.groupid == group_pubid)
+        ).all()
+
+        return HiddenScope(
+            group_pubid=group_pubid,
+            uris=list(uris),
+            instructor_userids=instructor_userids,
+            own_annotation_ids=list(own_annotation_ids),
         )
 
 
