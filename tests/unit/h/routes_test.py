@@ -153,6 +153,7 @@ def test_includeme():
             "/api/bulk/lms/annotations",
             request_method="POST",
         ),
+        call("api.checkpoints", "/api/checkpoints", request_method="POST"),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group",
