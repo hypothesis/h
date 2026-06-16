@@ -8,10 +8,16 @@ from h.models import (
     Checkpoint,
     Document,
     DocumentURI,
+    Group,
     GroupMembership,
     User,
 )
+from h.models.document import merge_documents
 from h.models.group import LMSRole
+
+
+class GroupNotFoundError(LookupError):
+    """Raised when no group matches a given (authority, authority_provided_id)."""
 
 
 @dataclass
@@ -120,6 +126,55 @@ class CheckpointService:
             instructor_userids=instructor_userids,
             own_annotation_ids=list(own_annotation_ids),
         )
+
+    def upsert(
+        self,
+        authority: str,
+        authority_provided_id: str,
+        document_url: str,
+        reveal_date: datetime | None,
+    ) -> Checkpoint:
+        """
+        Create or update the checkpoint for a (group, document), overwriting reveal_date.
+
+        The write is an upsert keyed on (group, document): the most
+        recent write wins, which is what lets an edited or recreated assignment
+        override the previous reveal_date.
+
+        :raises GroupNotFoundError: if no group matches the given identifiers.
+        """
+        group = self.db.scalar(
+            select(Group)
+            .where(Group.authority == authority)
+            .where(Group.authority_provided_id == authority_provided_id)
+        )
+        if group is None:
+            raise GroupNotFoundError(authority_provided_id)
+
+        document = self._find_or_create_document(document_url)
+
+        checkpoint = self.db.scalar(
+            select(Checkpoint)
+            .where(Checkpoint.group_id == group.id)
+            .where(Checkpoint.document_id == document.id)
+            .where(Checkpoint.previous_checkpoint_id.is_(None))
+        )
+        if checkpoint is None:
+            checkpoint = Checkpoint(group_id=group.id, document_id=document.id)
+            self.db.add(checkpoint)
+
+        checkpoint.reveal_date = reveal_date
+        self.db.flush()
+
+        return checkpoint
+
+    def _find_or_create_document(self, document_url: str) -> Document:
+        documents = Document.find_or_create_by_uris(
+            self.db, document_url, [document_url]
+        )
+        if documents.count() > 1:
+            return merge_documents(self.db, documents)
+        return documents.first()
 
 
 def factory(_context, request) -> CheckpointService:

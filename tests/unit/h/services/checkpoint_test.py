@@ -3,9 +3,9 @@ from unittest import mock
 
 import pytest
 
-from h.models import GroupMembership
+from h.models import Checkpoint, GroupMembership
 from h.models.group import LMSRole
-from h.services.checkpoint import CheckpointService, factory
+from h.services.checkpoint import CheckpointService, GroupNotFoundError, factory
 from h.util.uri import normalize as uri_normalize
 
 
@@ -186,6 +186,94 @@ class TestHiddenScopes:
     @pytest.fixture
     def null_role_membership(self, group, user):
         return self.membership(group, user, None)
+
+
+class TestUpsert:
+    def test_it_creates_a_checkpoint(self, svc, group):
+        checkpoint = svc.upsert(
+            authority=group.authority,
+            authority_provided_id=group.authority_provided_id,
+            document_url="http://example.com/page",
+            reveal_date=None,
+        )
+
+        assert checkpoint.group_id == group.id
+        assert checkpoint.reveal_date is None
+        assert checkpoint.previous_checkpoint_id is None
+
+    def test_it_creates_the_document_when_it_does_not_exist(self, svc, group):
+        checkpoint = svc.upsert(
+            authority=group.authority,
+            authority_provided_id=group.authority_provided_id,
+            document_url="http://example.com/brand-new",
+            reveal_date=None,
+        )
+
+        normalized = [uri.uri_normalized for uri in checkpoint.document.document_uris]
+        assert uri_normalize("http://example.com/brand-new") in normalized
+
+    def test_it_reuses_an_existing_document(self, svc, group, factories):
+        document = factories.Document()
+        factories.DocumentURI(document=document, uri="http://example.com/page")
+
+        checkpoint = svc.upsert(
+            authority=group.authority,
+            authority_provided_id=group.authority_provided_id,
+            document_url="http://example.com/page",
+            reveal_date=None,
+        )
+
+        assert checkpoint.document_id == document.id
+
+    def test_it_overrides_the_reveal_date_of_an_existing_checkpoint(
+        self, svc, group, db_session
+    ):
+        first = svc.upsert(
+            authority=group.authority,
+            authority_provided_id=group.authority_provided_id,
+            document_url="http://example.com/page",
+            reveal_date=datetime(2026, 7, 1),  # noqa: DTZ001
+        )
+        second = svc.upsert(
+            authority=group.authority,
+            authority_provided_id=group.authority_provided_id,
+            document_url="http://example.com/page",
+            reveal_date=datetime(2026, 6, 15),  # noqa: DTZ001
+        )
+
+        # Same checkpoint, newest write wins, no duplicate row.
+        assert second.id == first.id
+        assert second.reveal_date == datetime(2026, 6, 15)  # noqa: DTZ001
+        assert db_session.query(Checkpoint).count() == 1
+
+    def test_it_merges_documents_that_share_the_url(self, svc, group, factories):
+        # Two documents claiming the same URL must collapse into one.
+        for _ in range(2):
+            document = factories.Document()
+            factories.DocumentURI(document=document, uri="http://example.com/dup")
+
+        checkpoint = svc.upsert(
+            authority=group.authority,
+            authority_provided_id=group.authority_provided_id,
+            document_url="http://example.com/dup",
+            reveal_date=None,
+        )
+
+        normalized = [uri.uri_normalized for uri in checkpoint.document.document_uris]
+        assert uri_normalize("http://example.com/dup") in normalized
+
+    def test_it_raises_when_the_group_is_not_found(self, svc, group):
+        with pytest.raises(GroupNotFoundError):
+            svc.upsert(
+                authority=group.authority,
+                authority_provided_id="does-not-exist",
+                document_url="http://example.com/page",
+                reveal_date=None,
+            )
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group(authority_provided_id="test-authority-provided-id")
 
 
 class TestFactory:

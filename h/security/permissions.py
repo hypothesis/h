@@ -111,3 +111,6 @@ class Permission:
 
         BULK_ACTION = "api:bulk_action"
         """Calling the /bulk/api end-point. Currently used by LMS."""
+
+        CHECKPOINT_UPSERT = "api:checkpoint_upsert"
+        """Creating or updating a Hide and Reveal checkpoint. Currently used by LMS."""

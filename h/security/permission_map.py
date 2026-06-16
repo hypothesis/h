@@ -38,6 +38,8 @@ PERMISSION_MAP = {
     Permission.User.READ: [[p.user_authority_matches_authenticated_client]],
     # Bulk API - Currently only LMS uses this end-point
     Permission.API.BULK_ACTION: [[p.authenticated_client_is_lms]],
+    # Hide and Reveal checkpoint upsert - Currently only LMS uses this end-point
+    Permission.API.CHECKPOINT_UPSERT: [[p.authenticated_client_is_lms]],
     # A user can always update their own profile
     Permission.Profile.UPDATE: [[p.authenticated_user]],
     # --------------------------------------------------------------------- #

@@ -160,6 +160,8 @@ def includeme(config):  # noqa: PLR0915
         "api.bulk.lms.annotations", "/api/bulk/lms/annotations", request_method="POST"
     )
 
+    config.add_route("api.checkpoints", "/api/checkpoints", request_method="POST")
+
     config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
     config.add_route(
         "api.group",
