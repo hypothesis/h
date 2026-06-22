@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
+from sqlalchemy.dialects.postgresql import insert
 
 from h.models import (
     Annotation,
     Checkpoint,
     Document,
     DocumentURI,
+    Group,
     GroupMembership,
     User,
 )
@@ -88,6 +90,63 @@ class CheckpointService:
         ).all()
 
         return [self._hidden_scope(user, checkpoint) for checkpoint in checkpoints]
+
+    def upsert_checkpoint(
+        self,
+        authority: str,
+        group_authority_provided_id: str,
+        document_uri: str,
+        reveal_date: str | None = None,
+    ) -> Checkpoint | None:
+        """
+        Upsert a checkpoint for a (group, document) pair.
+
+        Resolves the group by authority + authority_provided_id and the
+        document by URI. Creates the document if it doesn't exist yet.
+
+        Returns the upserted Checkpoint, or None if the group or document
+        could not be resolved.
+        """
+        group = self.db.scalar(
+            select(Group).where(
+                Group.authority == authority,
+                Group.authority_provided_id == group_authority_provided_id,
+            )
+        )
+        if not group:
+            return None
+
+        document = Document.find_or_create_by_uris(
+            self.db, claimant_uri=document_uri, uris=[]
+        ).first()
+        if not document:
+            return None
+
+        parsed_reveal_date = None
+        if reveal_date:
+            parsed_reveal_date = datetime.fromisoformat(reveal_date)
+
+        stmt = (
+            insert(Checkpoint)
+            .values(
+                group_id=group.id,
+                document_id=document.id,
+                previous_checkpoint_id=None,
+                reveal_date=parsed_reveal_date,
+            )
+            # If a checkpoint already exists for this (group, document), update the
+            # reveal_date. coalesce keeps the existing date if the new one is NULL.
+            .on_conflict_do_update(
+                constraint="uq__checkpoint__group_id__document_id__previous_checkpoint_id",
+                set_={"reveal_date": func.coalesce(parsed_reveal_date, Checkpoint.reveal_date)},
+            )
+            .returning(Checkpoint.id)
+        )
+        result = self.db.execute(stmt)
+        self.db.flush()
+
+        checkpoint_id = result.scalar()
+        return self.db.get(Checkpoint, checkpoint_id)
 
     def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
         group_pubid = checkpoint.group.pubid
