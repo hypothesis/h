@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
@@ -14,6 +14,7 @@ from h.models import (
     User,
 )
 from h.models.group import LMSRole
+from h.schemas import ValidationError
 
 
 @dataclass
@@ -161,7 +162,16 @@ class CheckpointService:
 
         parsed_reveal_date = None
         if reveal_date:
-            parsed_reveal_date = datetime.fromisoformat(reveal_date)
+            try:
+                parsed_reveal_date = datetime.fromisoformat(reveal_date)
+            except ValueError as err:
+                msg = f"Invalid reveal_date: {reveal_date!r}"
+                raise ValidationError(msg) from err
+            # Store naive UTC to match the column and the utcnow() comparisons.
+            if parsed_reveal_date.tzinfo is not None:
+                parsed_reveal_date = parsed_reveal_date.astimezone(UTC).replace(
+                    tzinfo=None
+                )
 
         stmt = (
             insert(Checkpoint)
@@ -175,7 +185,11 @@ class CheckpointService:
             # reveal_date. coalesce keeps the existing date if the new one is NULL.
             .on_conflict_do_update(
                 constraint="uq__checkpoint__group_id__document_id__previous_checkpoint_id",
-                set_={"reveal_date": func.coalesce(parsed_reveal_date, Checkpoint.reveal_date)},
+                set_={
+                    "reveal_date": func.coalesce(
+                        parsed_reveal_date, Checkpoint.reveal_date
+                    )
+                },
             )
             .returning(Checkpoint.id)
         )
