@@ -162,6 +162,35 @@ class CheckpointService:
         checkpoint_id = result.scalar()
         return self.db.get(Checkpoint, checkpoint_id)
 
+    def set_instructor_role(
+        self, authority: str, username: str, group_authority_provided_ids: list[str]
+    ) -> None:
+        """
+        Mark `username` as the LMS instructor in the given groups.
+
+        Sets `lms_role = LMS_INSTRUCTOR` on the user's existing memberships in the
+        groups identified by `(authority, authority_provided_id)`. This is what
+        excludes an instructor's own annotations from Hide & Reveal hiding.
+
+        Memberships that don't exist yet are left alone (the membership is created
+        by the group sync that precedes the checkpoint sync); a missing user or
+        group is a no-op.
+        """
+        user = User.get_by_username(self.db, username, authority)
+        if user is None:
+            return
+
+        memberships = self.db.scalars(
+            select(GroupMembership)
+            .join(Group, Group.id == GroupMembership.group_id)
+            .where(GroupMembership.user_id == user.id)
+            .where(Group.authority == authority)
+            .where(Group.authority_provided_id.in_(group_authority_provided_ids))
+        ).all()
+
+        for membership in memberships:
+            membership.lms_role = LMSRole.LMS_INSTRUCTOR.value
+
     def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
         group_pubid = checkpoint.group.pubid
 
