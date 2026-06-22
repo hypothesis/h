@@ -36,8 +36,7 @@ def upsert_checkpoints(request):
             authority=authority,
             username=instructor_username,
             group_authority_provided_ids=[
-                item["group_authority_provided_id"]
-                for item in data["checkpoints"]
+                item["group_authority_provided_id"] for item in data["checkpoints"]
             ],
         )
 
