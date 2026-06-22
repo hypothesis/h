@@ -39,6 +39,7 @@ class AuthClientPolicy:
         ("api.bulk.annotation", "POST"),
         ("api.bulk.group", "POST"),
         ("api.bulk.lms.annotations", "POST"),
+        ("api.bulk.checkpoint", "POST"),
     ]
 
     @classmethod
