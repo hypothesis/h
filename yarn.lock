@@ -1799,13 +1799,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blazediff/core@npm:1.9.1":
-  version: 1.9.1
-  resolution: "@blazediff/core@npm:1.9.1"
-  checksum: 3e2998e766bf1aa89ed9e4a33d8de9e000b01248cae7e4735b212fd5def9da2d2797f5faca1358ef7f8b3340c70b1ade5438b27550682371d2f0c10c20f3b51c
-  languageName: node
-  linkType: hard
-
 "@emnapi/core@npm:1.10.0":
   version: 1.10.0
   resolution: "@emnapi/core@npm:1.10.0"
@@ -3523,24 +3516,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/browser@npm:^4.1.9":
-  version: 4.1.9
-  resolution: "@vitest/browser@npm:4.1.9"
-  dependencies:
-    "@blazediff/core": 1.9.1
-    "@vitest/mocker": 4.1.9
-    "@vitest/utils": 4.1.9
-    magic-string: ^0.30.21
-    pngjs: ^7.0.0
-    sirv: ^3.0.2
-    tinyrainbow: ^3.1.0
-    ws: ^8.19.0
-  peerDependencies:
-    vitest: 4.1.9
-  checksum: 72acbf03c3675ddf3075485a60a515a1ab7512bbd02b67044d06f63c1fbda2d42ab31af7094aa987640fcc2cf9d643800359bc475bc920d66c767d16794264d8
-  languageName: node
-  linkType: hard
-
 "@vitest/coverage-istanbul@npm:^4.0.17":
   version: 4.0.17
   resolution: "@vitest/coverage-istanbul@npm:4.0.17"
@@ -3632,25 +3607,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/mocker@npm:4.1.9":
-  version: 4.1.9
-  resolution: "@vitest/mocker@npm:4.1.9"
-  dependencies:
-    "@vitest/spy": 4.1.9
-    estree-walker: ^3.0.3
-    magic-string: ^0.30.21
-  peerDependencies:
-    msw: ^2.4.9
-    vite: ^6.0.0 || ^7.0.0 || ^8.0.0
-  peerDependenciesMeta:
-    msw:
-      optional: true
-    vite:
-      optional: true
-  checksum: 0c3f0a1e369deaea95450802b151d6edfcd795966a17a5c97f36ea7c03231763410d36ae5571042ab089b58a89c9f8ef5d0d6591afea80ac1fb093ae211ae00d
-  languageName: node
-  linkType: hard
-
 "@vitest/pretty-format@npm:4.0.17":
   version: 4.0.17
   resolution: "@vitest/pretty-format@npm:4.0.17"
@@ -3666,15 +3622,6 @@ __metadata:
   dependencies:
     tinyrainbow: ^3.0.3
   checksum: d14f8e4270ad57b21840c11be8ee723dc75071f3b264b961eaa632a82ae5c6b3170721411a9b2142b2debe4f877814b579856e2d7dc06e8b9d0e0b4acb9d458e
-  languageName: node
-  linkType: hard
-
-"@vitest/pretty-format@npm:4.1.9":
-  version: 4.1.9
-  resolution: "@vitest/pretty-format@npm:4.1.9"
-  dependencies:
-    tinyrainbow: ^3.1.0
-  checksum: 36c07a46d1354d76b599deac41783dabeeffc2fd62881da4fcccb25e4b5d2fe9d62950602c1daeecd3a9fa33447fc33986baf89b62655a32b1d1472e57562918
   languageName: node
   linkType: hard
 
@@ -3714,13 +3661,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/spy@npm:4.1.9":
-  version: 4.1.9
-  resolution: "@vitest/spy@npm:4.1.9"
-  checksum: 1450cc1a6863fb67342e043741b1f8fd3a74182b54776770cc3578e33d84e107f8e4254c0a69bce76893c0b511a5ff57af3ab07f953530bbb8dae0e8176e10f6
-  languageName: node
-  linkType: hard
-
 "@vitest/utils@npm:4.0.17":
   version: 4.0.17
   resolution: "@vitest/utils@npm:4.0.17"
@@ -3739,17 +3679,6 @@ __metadata:
     convert-source-map: ^2.0.0
     tinyrainbow: ^3.0.3
   checksum: e755edc51a50c35b1c12eb1d8d884888f30a3f21448ebeb2816f8e86cdc26ff2174a14b0fa9cd555d2fdd38a1f4af89ac1503e1ba17c076763147c75e74c2cf2
-  languageName: node
-  linkType: hard
-
-"@vitest/utils@npm:4.1.9":
-  version: 4.1.9
-  resolution: "@vitest/utils@npm:4.1.9"
-  dependencies:
-    "@vitest/pretty-format": 4.1.9
-    convert-source-map: ^2.0.0
-    tinyrainbow: ^3.1.0
-  checksum: fc18fbbe2e7360f6e518ef30ca237e18be6f99897705046d018606dc22cf9be18fc69b31c778affdaadb336f7fef4de94f6c9bdbf5ac2321a4a034941fe152e7
   languageName: node
   linkType: hard
 
@@ -7056,7 +6985,6 @@ __metadata:
     "@sentry/browser": ^9.33.0
     "@tailwindcss/postcss": ^4.1.18
     "@trivago/prettier-plugin-sort-imports": ^5.2.2
-    "@vitest/browser": ^4.1.9
     "@vitest/browser-playwright": ^4.0.17
     "@vitest/coverage-istanbul": ^4.0.17
     "@vitest/eslint-plugin": ^1.6.6
@@ -11268,13 +11196,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyrainbow@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "tinyrainbow@npm:3.1.0"
-  checksum: dbb16b4aa5dc7398d2501c6ee216471b01f5f1a3c372233113254625d190b08eb2cfb532f1bb46d2cce7deb1bc3d418945949898b7f95e32e09167f5c797cf0a
-  languageName: node
-  linkType: hard
-
 "to-fast-properties@npm:^2.0.0":
   version: 2.0.0
   resolution: "to-fast-properties@npm:2.0.0"
@@ -12134,21 +12055,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: d64ef1631227bd0c5fe21b3eb3646c9c91229402fb963d12d87b49af0a1ef757277083af23a5f85742bae1e520feddfb434cb882ea59249b15673c16dc3f36e0
-  languageName: node
-  linkType: hard
-
-"ws@npm:^8.19.0":
-  version: 8.21.0
-  resolution: "ws@npm:8.21.0"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 83ff89ae011bc5c3c5605a45a0d50e12589143c7500ca4de83a8d43b3cd26e71f422cb3206fd1a9e6d541d666eeb66255c30d095d62d413b3c7afe5d2c5cb928
   languageName: node
   linkType: hard
 
