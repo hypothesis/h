@@ -9,6 +9,7 @@ from tests.common.factories.auth_client import AuthClient, ConfidentialAuthClien
 from tests.common.factories.auth_ticket import AuthTicket
 from tests.common.factories.authz_code import AuthzCode
 from tests.common.factories.base import set_session
+from tests.common.factories.checkpoint import Checkpoint
 from tests.common.factories.document import Document, DocumentMeta, DocumentURI
 from tests.common.factories.feature import Feature
 from tests.common.factories.feature_cohort import FeatureCohort
