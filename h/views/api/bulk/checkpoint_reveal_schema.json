@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema",
   "type": "object",
-  "title": "Bulk checkpoint upsert",
+  "title": "Bulk checkpoint reveal",
   "properties": {
     "authority": {
       "type": "string"
@@ -17,28 +17,11 @@
           },
           "document_uri": {
             "type": "string"
-          },
-          "reveal_date": {
-            "type": ["string", "null"]
           }
         },
         "required": ["group_authority_provided_id", "document_uri"],
         "additionalProperties": false
       }
-    },
-    "user": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string",
-          "enum": ["instructor", "student"]
-        }
-      },
-      "required": ["username", "role"],
-      "additionalProperties": false
     }
   },
   "required": ["authority", "checkpoints"],
