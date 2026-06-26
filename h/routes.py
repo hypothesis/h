@@ -159,6 +159,14 @@ def includeme(config):  # noqa: PLR0915
     config.add_route(
         "api.bulk.lms.annotations", "/api/bulk/lms/annotations", request_method="POST"
     )
+    config.add_route(
+        "api.bulk.checkpoint", "/api/bulk/checkpoint", request_method="POST"
+    )
+    config.add_route(
+        "api.bulk.checkpoint.reveal",
+        "/api/bulk/checkpoint/reveal",
+        request_method="POST",
+    )
 
     config.add_route("api.groups", "/api/groups", factory="h.traversal.GroupRoot")
     config.add_route(

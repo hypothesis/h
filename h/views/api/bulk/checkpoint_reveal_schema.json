@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Bulk checkpoint reveal",
+  "properties": {
+    "authority": {
+      "type": "string"
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "group_authority_provided_id": {
+            "type": "string"
+          },
+          "document_uri": {
+            "type": "string"
+          }
+        },
+        "required": ["group_authority_provided_id", "document_uri"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["authority", "checkpoints"],
+  "additionalProperties": false
+}

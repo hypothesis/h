@@ -1,17 +1,21 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import ClassVar
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
+from sqlalchemy.dialects.postgresql import insert
 
 from h.models import (
     Annotation,
     Checkpoint,
     Document,
     DocumentURI,
+    Group,
     GroupMembership,
     User,
 )
 from h.models.group import LMSRole
+from h.schemas import ValidationError
 
 
 @dataclass
@@ -88,6 +92,153 @@ class CheckpointService:
         ).all()
 
         return [self._hidden_scope(user, checkpoint) for checkpoint in checkpoints]
+
+    _ROLE_MAP: ClassVar[dict[str, LMSRole]] = {
+        "instructor": LMSRole.LMS_INSTRUCTOR,
+        "student": LMSRole.LMS_STUDENT,
+    }
+
+    def set_user_role(
+        self,
+        authority: str,
+        username: str,
+        role: str,
+        group_authority_provided_ids: list[str],
+    ) -> None:
+        """Set the lms_role for a user in the given groups."""
+        lms_role = self._ROLE_MAP.get(role)
+        if not lms_role:
+            return
+
+        user = User.get_by_username(self.db, username, authority)
+        if not user:
+            return
+
+        memberships = self.db.scalars(
+            select(GroupMembership)
+            .join(Group, Group.id == GroupMembership.group_id)
+            .where(GroupMembership.user_id == user.id)
+            .where(Group.authority == authority)
+            .where(Group.authority_provided_id.in_(group_authority_provided_ids))
+        ).all()
+
+        for membership in memberships:
+            membership.lms_role = lms_role.value
+
+    def upsert_checkpoint(
+        self,
+        authority: str,
+        group_authority_provided_id: str,
+        document_uri: str,
+        reveal_date: str | None = None,
+    ) -> Checkpoint | None:
+        """
+        Upsert a checkpoint for a (group, document) pair.
+
+        Resolves the group by authority + authority_provided_id and the
+        document by URI. Creates the document if it doesn't exist yet.
+
+        Returns the upserted Checkpoint, or None if the group or document
+        could not be resolved.
+        """
+        group = self.db.scalar(
+            select(Group).where(
+                Group.authority == authority,
+                Group.authority_provided_id == group_authority_provided_id,
+            )
+        )
+        if not group:
+            return None
+
+        document = Document.find_or_create_by_uris(
+            self.db, claimant_uri=document_uri, uris=[]
+        ).first()
+        if not document:
+            return None
+
+        parsed_reveal_date = None
+        if reveal_date:
+            try:
+                parsed_reveal_date = datetime.fromisoformat(reveal_date)
+            except ValueError as err:
+                msg = f"Invalid reveal_date: {reveal_date!r}"
+                raise ValidationError(msg) from err
+            # Store naive UTC to match the column and the utcnow() comparisons.
+            if parsed_reveal_date.tzinfo is not None:
+                parsed_reveal_date = parsed_reveal_date.astimezone(UTC).replace(
+                    tzinfo=None
+                )
+
+        stmt = (
+            insert(Checkpoint)
+            .values(
+                group_id=group.id,
+                document_id=document.id,
+                previous_checkpoint_id=None,
+                reveal_date=parsed_reveal_date,
+            )
+            # If a checkpoint already exists for this (group, document), update the
+            # reveal_date. coalesce keeps the existing date if the new one is NULL.
+            .on_conflict_do_update(
+                constraint="uq__checkpoint__group_id__document_id__previous_checkpoint_id",
+                set_={
+                    "reveal_date": func.coalesce(
+                        parsed_reveal_date, Checkpoint.reveal_date
+                    )
+                },
+            )
+            .returning(Checkpoint.id)
+        )
+        result = self.db.execute(stmt)
+        self.db.flush()
+
+        checkpoint_id = result.scalar()
+        return self.db.get(Checkpoint, checkpoint_id)
+
+    def reveal_checkpoints(
+        self,
+        authority: str,
+        group_authority_provided_id: str,
+        document_uri: str,
+    ) -> Checkpoint | None:
+        """
+        Reveal a checkpoint by setting its reveal_date to now.
+
+        Returns the updated Checkpoint, or None if not found.
+        """
+        group = self.db.scalar(
+            select(Group).where(
+                Group.authority == authority,
+                Group.authority_provided_id == group_authority_provided_id,
+            )
+        )
+        if not group:
+            return None
+
+        document_ids = [
+            doc.id for doc in Document.find_by_uris(self.db, [document_uri])
+        ]
+        if not document_ids:
+            return None
+
+        checkpoint = self.db.scalar(
+            select(Checkpoint)
+            .where(Checkpoint.group_id == group.id)
+            .where(Checkpoint.document_id.in_(document_ids))
+            .where(
+                or_(
+                    Checkpoint.reveal_date.is_(None),
+                    Checkpoint.reveal_date > datetime.utcnow(),  # noqa: DTZ003
+                )
+            )
+            .limit(1)
+        )
+        if not checkpoint:
+            return None
+
+        checkpoint.reveal_date = datetime.utcnow()  # noqa: DTZ003
+        self.db.flush()
+        return checkpoint
 
     def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
         group_pubid = checkpoint.group.pubid
