@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import ClassVar
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
@@ -129,7 +130,10 @@ class CheckpointService:
 
         return False
 
-    _ROLE_MAP = {"instructor": LMSRole.LMS_INSTRUCTOR, "student": LMSRole.LMS_STUDENT}
+    _ROLE_MAP: ClassVar[dict[str, LMSRole]] = {
+        "instructor": LMSRole.LMS_INSTRUCTOR,
+        "student": LMSRole.LMS_STUDENT,
+    }
 
     def set_user_role(
         self,
@@ -248,7 +252,9 @@ class CheckpointService:
         if not group:
             return None
 
-        document_ids = [doc.id for doc in Document.find_by_uris(self.db, [document_uri])]
+        document_ids = [
+            doc.id for doc in Document.find_by_uris(self.db, [document_uri])
+        ]
         if not document_ids:
             return None
 

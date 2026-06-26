@@ -36,8 +36,7 @@ def upsert_checkpoints(request):
     checkpoint_service = request.find_service(CheckpointService)
 
     group_authority_provided_ids = [
-        item["group_authority_provided_id"]
-        for item in data["checkpoints"]
+        item["group_authority_provided_id"] for item in data["checkpoints"]
     ]
 
     if user_data := data.get("user"):
