@@ -92,6 +92,35 @@ class CheckpointService:
 
         return [self._hidden_scope(user, checkpoint) for checkpoint in checkpoints]
 
+    _ROLE_MAP = {"instructor": LMSRole.LMS_INSTRUCTOR, "student": LMSRole.LMS_STUDENT}
+
+    def set_user_role(
+        self,
+        authority: str,
+        username: str,
+        role: str,
+        group_authority_provided_ids: list[str],
+    ) -> None:
+        """Set the lms_role for a user in the given groups."""
+        lms_role = self._ROLE_MAP.get(role)
+        if not lms_role:
+            return
+
+        user = User.get_by_username(self.db, username, authority)
+        if not user:
+            return
+
+        memberships = self.db.scalars(
+            select(GroupMembership)
+            .join(Group, Group.id == GroupMembership.group_id)
+            .where(GroupMembership.user_id == user.id)
+            .where(Group.authority == authority)
+            .where(Group.authority_provided_id.in_(group_authority_provided_ids))
+        ).all()
+
+        for membership in memberships:
+            membership.lms_role = lms_role.value
+
     def upsert_checkpoint(
         self,
         authority: str,
@@ -162,34 +191,48 @@ class CheckpointService:
         checkpoint_id = result.scalar()
         return self.db.get(Checkpoint, checkpoint_id)
 
-    def set_instructor_role(
-        self, authority: str, username: str, group_authority_provided_ids: list[str]
-    ) -> None:
+    def reveal_checkpoints(
+        self,
+        authority: str,
+        group_authority_provided_id: str,
+        document_uri: str,
+    ) -> Checkpoint | None:
         """
-        Mark `username` as the LMS instructor in the given groups.
+        Reveal a checkpoint by setting its reveal_date to now.
 
-        Sets `lms_role = LMS_INSTRUCTOR` on the user's existing memberships in the
-        groups identified by `(authority, authority_provided_id)`. This is what
-        excludes an instructor's own annotations from Hide & Reveal hiding.
-
-        Memberships that don't exist yet are left alone (the membership is created
-        by the group sync that precedes the checkpoint sync); a missing user or
-        group is a no-op.
+        Returns the updated Checkpoint, or None if not found.
         """
-        user = User.get_by_username(self.db, username, authority)
-        if user is None:
-            return
+        group = self.db.scalar(
+            select(Group).where(
+                Group.authority == authority,
+                Group.authority_provided_id == group_authority_provided_id,
+            )
+        )
+        if not group:
+            return None
 
-        memberships = self.db.scalars(
-            select(GroupMembership)
-            .join(Group, Group.id == GroupMembership.group_id)
-            .where(GroupMembership.user_id == user.id)
-            .where(Group.authority == authority)
-            .where(Group.authority_provided_id.in_(group_authority_provided_ids))
-        ).all()
+        document_ids = [doc.id for doc in Document.find_by_uris(self.db, [document_uri])]
+        if not document_ids:
+            return None
 
-        for membership in memberships:
-            membership.lms_role = LMSRole.LMS_INSTRUCTOR.value
+        checkpoint = self.db.scalar(
+            select(Checkpoint)
+            .where(Checkpoint.group_id == group.id)
+            .where(Checkpoint.document_id.in_(document_ids))
+            .where(
+                or_(
+                    Checkpoint.reveal_date.is_(None),
+                    Checkpoint.reveal_date > datetime.utcnow(),  # noqa: DTZ003
+                )
+            )
+            .limit(1)
+        )
+        if not checkpoint:
+            return None
+
+        checkpoint.reveal_date = datetime.utcnow()  # noqa: DTZ003
+        self.db.flush()
+        return checkpoint
 
     def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
         group_pubid = checkpoint.group.pubid

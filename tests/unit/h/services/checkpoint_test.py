@@ -288,21 +288,26 @@ class TestUpsert:
         )
 
 
-class TestSetInstructorRole:
-    def test_it_sets_the_instructor_role(self, svc, factories, db_session):
+class TestSetUserRole:
+    @pytest.mark.parametrize("role,expected", [
+        ("instructor", LMSRole.LMS_INSTRUCTOR.value),
+        ("student", LMSRole.LMS_STUDENT.value),
+    ])
+    def test_it_sets_the_role(self, svc, factories, db_session, role, expected):
         user = factories.User()
         group = factories.Group()
         membership = GroupMembership(user=user, group=group)
         db_session.add(membership)
         db_session.flush()
 
-        svc.set_instructor_role(
+        svc.set_user_role(
             authority=user.authority,
             username=user.username,
+            role=role,
             group_authority_provided_ids=[group.authority_provided_id],
         )
 
-        assert membership.lms_role == LMSRole.LMS_INSTRUCTOR.value
+        assert membership.lms_role == expected
 
     def test_it_only_sets_the_role_in_the_given_groups(
         self, svc, factories, db_session
@@ -315,9 +320,10 @@ class TestSetInstructorRole:
         db_session.add_all([membership, other_membership])
         db_session.flush()
 
-        svc.set_instructor_role(
+        svc.set_user_role(
             authority=user.authority,
             username=user.username,
+            role="instructor",
             group_authority_provided_ids=[group.authority_provided_id],
         )
 
@@ -325,12 +331,96 @@ class TestSetInstructorRole:
         assert other_membership.lms_role is None
 
     def test_it_does_nothing_when_the_user_is_not_found(self, svc):
-        # A missing user is a no-op and must not raise.
-        svc.set_instructor_role(
+        svc.set_user_role(
             authority="example.com",
             username="nonexistent",
+            role="instructor",
             group_authority_provided_ids=["whatever"],
         )
+
+    def test_it_does_nothing_when_no_groups_match(self, svc, factories):
+        user = factories.User()
+
+        svc.set_user_role(
+            authority=user.authority,
+            username=user.username,
+            role="student",
+            group_authority_provided_ids=["nonexistent"],
+        )
+
+    def test_it_does_nothing_for_unknown_role(self, svc, factories, db_session):
+        user = factories.User()
+        group = factories.Group()
+        membership = GroupMembership(user=user, group=group)
+        db_session.add(membership)
+        db_session.flush()
+
+        svc.set_user_role(
+            authority=user.authority,
+            username=user.username,
+            role="unknown",
+            group_authority_provided_ids=[group.authority_provided_id],
+        )
+
+        assert membership.lms_role is None
+
+
+class TestRevealCheckpoints:
+    def test_it_reveals_an_active_checkpoint(self, svc, factories, db_session):
+        group = factories.Group()
+        document = factories.Document()
+        factories.DocumentURI(document=document, uri="http://example.com/page")
+        checkpoint = factories.Checkpoint(
+            group=group, document=document, reveal_date=None
+        )
+        db_session.flush()
+
+        result = svc.reveal_checkpoints(
+            authority=group.authority,
+            group_authority_provided_id=group.authority_provided_id,
+            document_uri="http://example.com/page",
+        )
+
+        assert result.id == checkpoint.id
+        assert result.reveal_date is not None
+
+    def test_it_returns_None_when_group_not_found(self, svc):
+        result = svc.reveal_checkpoints(
+            authority="example.com",
+            group_authority_provided_id="missing",
+            document_uri="http://example.com/page",
+        )
+
+        assert result is None
+
+    def test_it_returns_None_when_document_not_found(self, svc, factories):
+        group = factories.Group()
+
+        result = svc.reveal_checkpoints(
+            authority=group.authority,
+            group_authority_provided_id=group.authority_provided_id,
+            document_uri="http://example.com/nonexistent",
+        )
+
+        assert result is None
+
+    def test_it_returns_None_when_no_active_checkpoint(self, svc, factories):
+        group = factories.Group()
+        document = factories.Document()
+        factories.DocumentURI(document=document, uri="http://example.com/page")
+        factories.Checkpoint(
+            group=group,
+            document=document,
+            reveal_date=datetime.utcnow() - timedelta(days=1),  # noqa: DTZ003
+        )
+
+        result = svc.reveal_checkpoints(
+            authority=group.authority,
+            group_authority_provided_id=group.authority_provided_id,
+            document_uri="http://example.com/page",
+        )
+
+        assert result is None
 
 
 class TestFactory:
