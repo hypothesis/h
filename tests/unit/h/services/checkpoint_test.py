@@ -417,10 +417,13 @@ class TestUpsert:
 
 
 class TestSetUserRole:
-    @pytest.mark.parametrize("role,expected", [
-        ("instructor", LMSRole.LMS_INSTRUCTOR.value),
-        ("student", LMSRole.LMS_STUDENT.value),
-    ])
+    @pytest.mark.parametrize(
+        "role,expected",
+        [
+            ("instructor", LMSRole.LMS_INSTRUCTOR.value),
+            ("student", LMSRole.LMS_STUDENT.value),
+        ],
+    )
     def test_it_sets_the_role(self, svc, factories, db_session, role, expected):
         user = factories.User()
         group = factories.Group()
