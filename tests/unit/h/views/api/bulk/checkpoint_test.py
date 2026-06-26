@@ -2,7 +2,12 @@ import pytest
 
 from h.schemas import ValidationError
 from h.services.checkpoint import CheckpointService
-from h.views.api.bulk.checkpoint import BulkCheckpointSchema, upsert_checkpoints
+from h.views.api.bulk.checkpoint import (
+    BulkCheckpointRevealSchema,
+    BulkCheckpointSchema,
+    reveal_checkpoints,
+    upsert_checkpoints,
+)
 
 
 class TestBulkCheckpointSchema:
@@ -20,7 +25,7 @@ class TestUpsertCheckpoints:
     def test_it(self, pyramid_request, checkpoint_service):
         pyramid_request.json = {
             "authority": "lms.hypothes.is",
-            "instructor_username": "teacher",
+            "user": {"username": "teacher", "role": "instructor"},
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
@@ -36,9 +41,10 @@ class TestUpsertCheckpoints:
 
         response = upsert_checkpoints(pyramid_request)
 
-        checkpoint_service.set_instructor_role.assert_called_once_with(
+        checkpoint_service.set_user_role.assert_called_once_with(
             authority="lms.hypothes.is",
             username="teacher",
+            role="instructor",
             group_authority_provided_ids=["group1", "group2"],
         )
         checkpoint_service.upsert_checkpoint.assert_any_call(
@@ -67,7 +73,7 @@ class TestUpsertCheckpoints:
             },
         ]
 
-    def test_it_does_not_set_instructor_role_without_an_instructor(
+    def test_it_does_not_set_role_without_user(
         self, pyramid_request, checkpoint_service
     ):
         pyramid_request.json = {
@@ -82,7 +88,28 @@ class TestUpsertCheckpoints:
 
         upsert_checkpoints(pyramid_request)
 
-        checkpoint_service.set_instructor_role.assert_not_called()
+        checkpoint_service.set_user_role.assert_not_called()
+
+    def test_it_sets_student_role(self, pyramid_request, checkpoint_service):
+        pyramid_request.json = {
+            "authority": "lms.hypothes.is",
+            "user": {"username": "student1", "role": "student"},
+            "checkpoints": [
+                {
+                    "group_authority_provided_id": "group1",
+                    "document_uri": "http://example.com/1",
+                },
+            ],
+        }
+
+        upsert_checkpoints(pyramid_request)
+
+        checkpoint_service.set_user_role.assert_called_once_with(
+            authority="lms.hypothes.is",
+            username="student1",
+            role="student",
+            group_authority_provided_ids=["group1"],
+        )
 
     def test_it_reports_unresolved_items_as_not_created(
         self, pyramid_request, checkpoint_service
@@ -113,6 +140,71 @@ class TestUpsertCheckpoints:
 
         with pytest.raises(ValidationError):
             upsert_checkpoints(pyramid_request)
+
+    @pytest.fixture
+    def checkpoint_service(self, mock_service):
+        return mock_service(CheckpointService)
+
+
+class TestBulkCheckpointRevealSchema:
+    def test_it_is_a_valid_schema(self, schema):
+        assert not schema.validator.check_schema(schema.schema)
+
+    @pytest.fixture
+    def schema(self):
+        return BulkCheckpointRevealSchema()
+
+
+@pytest.mark.usefixtures("checkpoint_service", "with_auth_client")
+class TestRevealCheckpoints:
+    def test_it(self, pyramid_request, checkpoint_service):
+        pyramid_request.json = {
+            "authority": "lms.hypothes.is",
+            "checkpoints": [
+                {
+                    "group_authority_provided_id": "group1",
+                    "document_uri": "http://example.com/1",
+                },
+            ],
+        }
+
+        response = reveal_checkpoints(pyramid_request)
+
+        checkpoint_service.reveal_checkpoints.assert_called_once_with(
+            authority="lms.hypothes.is",
+            group_authority_provided_id="group1",
+            document_uri="http://example.com/1",
+        )
+        assert response.status_code == 200
+        assert response.json == [
+            {
+                "group_authority_provided_id": "group1",
+                "document_uri": "http://example.com/1",
+                "revealed": True,
+            },
+        ]
+
+    def test_it_reports_unresolved_items(self, pyramid_request, checkpoint_service):
+        checkpoint_service.reveal_checkpoints.return_value = None
+        pyramid_request.json = {
+            "authority": "lms.hypothes.is",
+            "checkpoints": [
+                {
+                    "group_authority_provided_id": "group1",
+                    "document_uri": "http://example.com/1",
+                },
+            ],
+        }
+
+        response = reveal_checkpoints(pyramid_request)
+
+        assert response.json == [
+            {
+                "group_authority_provided_id": "group1",
+                "document_uri": "http://example.com/1",
+                "revealed": False,
+            },
+        ]
 
     @pytest.fixture
     def checkpoint_service(self, mock_service):
