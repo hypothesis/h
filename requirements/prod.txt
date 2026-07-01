@@ -16,7 +16,7 @@ bcrypt==4.3.0
     # via -r prod.in
 billiard==4.2.1
     # via celery
-bleach==6.2.0
+bleach==6.4.0
     # via -r prod.in
 celery==5.5.3
     # via -r prod.in
