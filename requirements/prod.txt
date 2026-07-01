@@ -149,8 +149,10 @@ pycparser==2.22
     # via cffi
 pycryptodomex==3.23.0
     # via -r prod.in
-pyjwt[crypto]==2.10.1
-    # via -r prod.in
+pyjwt[crypto]==2.13.0
+    # via
+    #   -r prod.in
+    #   pyjwt
 pyparsing==3.2.5
     # via -r prod.in
 pyramid==2.0.2

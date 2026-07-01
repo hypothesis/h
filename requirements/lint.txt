@@ -339,7 +339,7 @@ pygments==2.19.2
     #   -r functests.txt
     #   -r tests.txt
     #   pytest
-pyjwt[crypto]==2.10.1
+pyjwt[crypto]==2.13.0
     # via
     #   -r functests.txt
     #   -r tests.txt
