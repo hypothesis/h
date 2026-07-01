@@ -70,7 +70,7 @@ colander==2.0
     # via
     #   -r prod.txt
     #   deform
-cryptography==44.0.2
+cryptography==46.0.7
     # via
     #   -r prod.txt
     #   pyjwt
