@@ -198,7 +198,7 @@ class TestJWTService:
             expires_in=timedelta(hours=1),
             issuer="test_issuer",
             audience="test_audience",
-            _signing_key="invalid_key",
+            _signing_key="a_wrong_signing_key_at_least_32_bytes",
         )
 
         with pytest.raises(JWTDecodeError) as exc_info:
@@ -293,7 +293,7 @@ class TestJWTService:
 
     @pytest.fixture
     def service(self):
-        return JWTService(jwt_signing_key="test_jwt_signing_key")
+        return JWTService(jwt_signing_key="test_jwt_signing_key_at_least_32_bytes")
 
 
 class TestFactory:
