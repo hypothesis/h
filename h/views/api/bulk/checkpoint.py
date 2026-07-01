@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 
 from importlib_resources import files
 from pyramid.response import Response
@@ -7,6 +8,20 @@ from h.schemas.base import JSONSchema
 from h.security import Permission
 from h.services.checkpoint import CheckpointService
 from h.views.api.config import api_config
+
+
+def _is_revealed(checkpoint):
+    return (
+        checkpoint is not None
+        and checkpoint.reveal_date is not None
+        and checkpoint.reveal_date <= datetime.now(tz=UTC)
+    )
+
+
+def _reveal_date_isoformat(checkpoint):
+    if checkpoint and checkpoint.reveal_date:
+        return checkpoint.reveal_date.isoformat()
+    return None
 
 
 class BulkCheckpointSchema(JSONSchema):
@@ -60,6 +75,8 @@ def upsert_checkpoints(request):
                 "group_authority_provided_id": item["group_authority_provided_id"],
                 "document_uri": item["document_uri"],
                 "created": checkpoint is not None,
+                "revealed": _is_revealed(checkpoint),
+                "reveal_date": _reveal_date_isoformat(checkpoint),
             }
         )
 
@@ -92,6 +109,7 @@ def reveal_checkpoints(request):
                 "group_authority_provided_id": item["group_authority_provided_id"],
                 "document_uri": item["document_uri"],
                 "revealed": checkpoint is not None,
+                "reveal_date": _reveal_date_isoformat(checkpoint),
             }
         )
 
