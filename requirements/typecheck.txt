@@ -347,7 +347,7 @@ webencodings==0.5.1
     # via
     #   -r prod.txt
     #   bleach
-webob==1.8.8
+webob==1.8.10
     # via
     #   -r prod.txt
     #   pyramid
