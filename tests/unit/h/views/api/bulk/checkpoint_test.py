@@ -1,3 +1,6 @@
+from datetime import UTC, datetime
+from unittest.mock import Mock
+
 import pytest
 
 from h.schemas import ValidationError
@@ -65,11 +68,15 @@ class TestUpsertCheckpoints:
                 "group_authority_provided_id": "group1",
                 "document_uri": "http://example.com/1",
                 "created": True,
+                "revealed": False,
+                "reveal_date": None,
             },
             {
                 "group_authority_provided_id": "group2",
                 "document_uri": "http://example.com/2",
                 "created": True,
+                "revealed": False,
+                "reveal_date": None,
             },
         ]
 
@@ -132,6 +139,36 @@ class TestUpsertCheckpoints:
                 "group_authority_provided_id": "group1",
                 "document_uri": "http://example.com/1",
                 "created": False,
+                "revealed": False,
+                "reveal_date": None,
+            },
+        ]
+
+    def test_it_includes_reveal_date(self, pyramid_request, checkpoint_service):
+        reveal_date = datetime(2026, 7, 1, 10, 0, 0, tzinfo=UTC)
+        checkpoint_service.upsert_checkpoint.return_value = Mock(
+            reveal_date=reveal_date
+        )
+        pyramid_request.json = {
+            "authority": "lms.hypothes.is",
+            "checkpoints": [
+                {
+                    "group_authority_provided_id": "group1",
+                    "document_uri": "http://example.com/1",
+                    "reveal_date": "2026-07-01T10:00:00",
+                },
+            ],
+        }
+
+        response = upsert_checkpoints(pyramid_request)
+
+        assert response.json == [
+            {
+                "group_authority_provided_id": "group1",
+                "document_uri": "http://example.com/1",
+                "created": True,
+                "revealed": True,
+                "reveal_date": "2026-07-01T10:00:00+00:00",
             },
         ]
 
@@ -143,7 +180,9 @@ class TestUpsertCheckpoints:
 
     @pytest.fixture
     def checkpoint_service(self, mock_service):
-        return mock_service(CheckpointService)
+        service = mock_service(CheckpointService)
+        service.upsert_checkpoint.return_value.reveal_date = None
+        return service
 
 
 class TestBulkCheckpointRevealSchema:
@@ -181,6 +220,7 @@ class TestRevealCheckpoints:
                 "group_authority_provided_id": "group1",
                 "document_uri": "http://example.com/1",
                 "revealed": True,
+                "reveal_date": None,
             },
         ]
 
@@ -203,9 +243,12 @@ class TestRevealCheckpoints:
                 "group_authority_provided_id": "group1",
                 "document_uri": "http://example.com/1",
                 "revealed": False,
+                "reveal_date": None,
             },
         ]
 
     @pytest.fixture
     def checkpoint_service(self, mock_service):
-        return mock_service(CheckpointService)
+        service = mock_service(CheckpointService)
+        service.reveal_checkpoints.return_value.reveal_date = None
+        return service
