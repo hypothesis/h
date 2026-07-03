@@ -45,19 +45,19 @@ class TestUpsertCheckpoints:
         response = upsert_checkpoints(pyramid_request)
 
         checkpoint_service.set_user_role.assert_called_once_with(
-            authority="lms.hypothes.is",
+            authority=pyramid_request.identity.auth_client.authority,
             username="teacher",
             role="instructor",
             group_authority_provided_ids=["group1", "group2"],
         )
         checkpoint_service.upsert_checkpoint.assert_any_call(
-            authority="lms.hypothes.is",
+            authority=pyramid_request.identity.auth_client.authority,
             group_authority_provided_id="group1",
             document_uri="http://example.com/1",
             reveal_date="2026-07-01T10:00:00",
         )
         checkpoint_service.upsert_checkpoint.assert_any_call(
-            authority="lms.hypothes.is",
+            authority=pyramid_request.identity.auth_client.authority,
             group_authority_provided_id="group2",
             document_uri="http://example.com/2",
             reveal_date=None,
@@ -112,7 +112,7 @@ class TestUpsertCheckpoints:
         upsert_checkpoints(pyramid_request)
 
         checkpoint_service.set_user_role.assert_called_once_with(
-            authority="lms.hypothes.is",
+            authority=pyramid_request.identity.auth_client.authority,
             username="student1",
             role="student",
             group_authority_provided_ids=["group1"],
@@ -244,7 +244,7 @@ class TestRevealCheckpoints:
         response = reveal_checkpoints(pyramid_request)
 
         checkpoint_service.reveal_checkpoints.assert_called_once_with(
-            authority="lms.hypothes.is",
+            authority=pyramid_request.identity.auth_client.authority,
             group_authority_provided_id="group1",
             document_uri="http://example.com/1",
         )
