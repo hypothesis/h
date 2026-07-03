@@ -46,7 +46,7 @@ class BulkCheckpointRevealSchema(JSONSchema):
 )
 def upsert_checkpoints(request):
     data = BulkCheckpointSchema().validate(request.json)
-    authority = data["authority"]
+    authority = request.identity.auth_client.authority
 
     checkpoint_service = request.find_service(CheckpointService)
 
@@ -93,7 +93,7 @@ def upsert_checkpoints(request):
 )
 def reveal_checkpoints(request):
     data = BulkCheckpointRevealSchema().validate(request.json)
-    authority = data["authority"]
+    authority = request.identity.auth_client.authority
 
     checkpoint_service = request.find_service(CheckpointService)
 
