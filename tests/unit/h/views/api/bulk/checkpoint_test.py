@@ -178,6 +178,40 @@ class TestUpsertCheckpoints:
         with pytest.raises(ValidationError):
             upsert_checkpoints(pyramid_request)
 
+    def test_it_ignores_body_authority_and_uses_authenticated_client(
+        self, pyramid_request, checkpoint_service
+    ):
+        # Security: a caller must not be able to act on another tenant's groups
+        # by supplying a different authority in the request body. The authority
+        # must always come from the authenticated auth_client.
+        client_authority = pyramid_request.identity.auth_client.authority
+        assert client_authority != "attacker.hypothes.is"
+        pyramid_request.json = {
+            "authority": "attacker.hypothes.is",
+            "user": {"username": "teacher", "role": "instructor"},
+            "checkpoints": [
+                {
+                    "group_authority_provided_id": "group1",
+                    "document_uri": "http://example.com/1",
+                },
+            ],
+        }
+
+        upsert_checkpoints(pyramid_request)
+
+        checkpoint_service.set_user_role.assert_called_once_with(
+            authority=client_authority,
+            username="teacher",
+            role="instructor",
+            group_authority_provided_ids=["group1"],
+        )
+        checkpoint_service.upsert_checkpoint.assert_called_once_with(
+            authority=client_authority,
+            group_authority_provided_id="group1",
+            document_uri="http://example.com/1",
+            reveal_date=None,
+        )
+
     @pytest.fixture
     def checkpoint_service(self, mock_service):
         service = mock_service(CheckpointService)
@@ -246,6 +280,31 @@ class TestRevealCheckpoints:
                 "reveal_date": None,
             },
         ]
+
+    def test_it_ignores_body_authority_and_uses_authenticated_client(
+        self, pyramid_request, checkpoint_service
+    ):
+        # Security: authority must come from the authenticated auth_client,
+        # never from the request body.
+        client_authority = pyramid_request.identity.auth_client.authority
+        assert client_authority != "attacker.hypothes.is"
+        pyramid_request.json = {
+            "authority": "attacker.hypothes.is",
+            "checkpoints": [
+                {
+                    "group_authority_provided_id": "group1",
+                    "document_uri": "http://example.com/1",
+                },
+            ],
+        }
+
+        reveal_checkpoints(pyramid_request)
+
+        checkpoint_service.reveal_checkpoints.assert_called_once_with(
+            authority=client_authority,
+            group_authority_provided_id="group1",
+            document_uri="http://example.com/1",
+        )
 
     @pytest.fixture
     def checkpoint_service(self, mock_service):
