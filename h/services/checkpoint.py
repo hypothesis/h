@@ -19,6 +19,7 @@ class HiddenScope:
     """A (group, document) under an active checkpoint, with its visibility data."""
 
     group_pubid: str
+    document_id: int
     uris: list[str]
     instructor_userids: list[str]
     own_annotation_ids: list[str]
@@ -89,6 +90,42 @@ class CheckpointService:
 
         return [self._hidden_scope(user, checkpoint) for checkpoint in checkpoints]
 
+    def hides_annotation(self, user: User | None, annotation: Annotation) -> bool:
+        """
+        Return True if `annotation` must be hidden from `user` by a checkpoint.
+
+        This is the per-annotation form of the search-time HideRevealFilter rule,
+        for read paths that handle one annotation at a time (e.g. the realtime
+        streamer). An annotation in an active hidden scope is hidden unless it is
+        the user's own, an instructor note, or an instructor reply to one of the
+        user's own annotations. Instructors and users with no active checkpoints
+        see everything.
+        """
+        if user is None:
+            return False
+
+        for scope in self.hidden_scopes(user):
+            if (
+                annotation.groupid != scope.group_pubid
+                or annotation.document_id != scope.document_id
+            ):
+                continue
+
+            # In scope: hidden unless it is in the visible set (the user's own
+            # annotation, an instructor note, or an instructor reply to one of
+            # the user's own annotations).
+            if annotation.userid == user.userid:
+                return False
+            return not (
+                annotation.userid in scope.instructor_userids
+                and (
+                    not annotation.references
+                    or set(annotation.references) & set(scope.own_annotation_ids)
+                )
+            )
+
+        return False
+
     def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
         group_pubid = checkpoint.group.pubid
 
@@ -116,6 +153,7 @@ class CheckpointService:
 
         return HiddenScope(
             group_pubid=group_pubid,
+            document_id=checkpoint.document_id,
             uris=list(uris),
             instructor_userids=instructor_userids,
             own_annotation_ids=list(own_annotation_ids),
