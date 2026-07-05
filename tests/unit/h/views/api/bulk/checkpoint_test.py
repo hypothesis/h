@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
@@ -145,7 +145,10 @@ class TestUpsertCheckpoints:
         ]
 
     def test_it_includes_reveal_date(self, pyramid_request, checkpoint_service):
-        reveal_date = datetime(2026, 7, 1, 10, 0, 0, tzinfo=UTC)
+        # The reveal_date column is naive UTC, so a checkpoint read back from
+        # the DB has a naive reveal_date. A past one must report revealed=True
+        # and isoformat without an offset — not crash comparing naive vs aware.
+        reveal_date = datetime(2020, 1, 1, 10, 0, 0)  # noqa: DTZ001
         checkpoint_service.upsert_checkpoint.return_value = Mock(
             reveal_date=reveal_date
         )
@@ -155,7 +158,7 @@ class TestUpsertCheckpoints:
                 {
                     "group_authority_provided_id": "group1",
                     "document_uri": "http://example.com/1",
-                    "reveal_date": "2026-07-01T10:00:00",
+                    "reveal_date": "2020-01-01T10:00:00",
                 },
             ],
         }
@@ -168,7 +171,7 @@ class TestUpsertCheckpoints:
                 "document_uri": "http://example.com/1",
                 "created": True,
                 "revealed": True,
-                "reveal_date": "2026-07-01T10:00:00+00:00",
+                "reveal_date": "2020-01-01T10:00:00",
             },
         ]
 

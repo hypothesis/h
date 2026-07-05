@@ -1,5 +1,5 @@
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 
 from importlib_resources import files
 from pyramid.response import Response
@@ -14,7 +14,7 @@ def _is_revealed(checkpoint):
     return (
         checkpoint is not None
         and checkpoint.reveal_date is not None
-        and checkpoint.reveal_date <= datetime.now(tz=UTC)
+        and checkpoint.reveal_date <= datetime.utcnow()  # noqa: DTZ003
     )
 
 
