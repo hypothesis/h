@@ -8,6 +8,7 @@ from h import realtime
 from h.realtime import Consumer
 from h.security import Identity, Permission, identity_permits
 from h.services.annotation_read import AnnotationReadService
+from h.services.checkpoint import CheckpointService
 from h.streamer import websocket
 from h.streamer.contexts import request_context
 from h.streamer.filter import SocketFilter
@@ -121,6 +122,7 @@ def handle_annotation_event(message, sockets, request, session):
 
     annotator_nipsad = request.find_service(name="nipsa").is_flagged(annotation.userid)
     annotation_context = AnnotationContext(annotation)
+    checkpoint_service = request.find_service(CheckpointService)
 
     for socket in matching_sockets:
         reply = _generate_annotation_event(
@@ -145,6 +147,13 @@ def handle_annotation_event(message, sockets, request, session):
             annotation_context,
             Permission.Annotation.READ_REALTIME_UPDATES,
         ):
+            continue
+
+        # Hide & Reveal: don't leak annotations hidden by an active checkpoint
+        # over the live channel. Search filtering is a separate read path, so
+        # the same visibility rule must be enforced here too.
+        user = socket.identity.user if socket.identity else None
+        if checkpoint_service.hides_annotation(user, annotation):
             continue
 
         socket.send_json(reply)
