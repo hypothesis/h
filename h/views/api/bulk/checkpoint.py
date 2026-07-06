@@ -68,7 +68,6 @@ def upsert_checkpoints(request):
             authority=authority,
             group_authority_provided_id=item["group_authority_provided_id"],
             document_uri=item["document_uri"],
-            reveal_date=item.get("reveal_date"),
         )
         results.append(
             {
@@ -99,7 +98,7 @@ def reveal_checkpoints(request):
 
     results = []
     for item in data["checkpoints"]:
-        checkpoint = checkpoint_service.reveal_checkpoints(
+        checkpoint = checkpoint_service.reveal_checkpoint(
             authority=authority,
             group_authority_provided_id=item["group_authority_provided_id"],
             document_uri=item["document_uri"],

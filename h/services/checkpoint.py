@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import ClassVar
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import or_, select
 from sqlalchemy.dialects.postgresql import insert
 
 from h.models import (
@@ -15,7 +15,6 @@ from h.models import (
     User,
 )
 from h.models.group import LMSRole
-from h.schemas import ValidationError
 
 
 @dataclass
@@ -167,15 +166,14 @@ class CheckpointService:
         authority: str,
         group_authority_provided_id: str,
         document_uri: str,
-        reveal_date: str | None = None,
     ) -> Checkpoint | None:
         """
         Upsert a checkpoint for a (group, document) pair.
 
         Resolves the group by authority + authority_provided_id and the
-        document by URI. Creates the document if it doesn't exist yet.
+        document by URI. If the checkpoint already exists, it is not modified.
 
-        Returns the upserted Checkpoint, or None if the group or document
+        Returns the Checkpoint, or None if the group or document
         could not be resolved.
         """
         group = self.db.scalar(
@@ -187,24 +185,9 @@ class CheckpointService:
         if not group:
             return None
 
-        document = Document.find_or_create_by_uris(
-            self.db, claimant_uri=document_uri, uris=[]
-        ).first()
+        document = Document.find_by_uris(self.db, [document_uri]).first()
         if not document:
             return None
-
-        parsed_reveal_date = None
-        if reveal_date:
-            try:
-                parsed_reveal_date = datetime.fromisoformat(reveal_date)
-            except ValueError as err:
-                msg = f"Invalid reveal_date: {reveal_date!r}"
-                raise ValidationError(msg) from err
-            # Store naive UTC to match the column and the utcnow() comparisons.
-            if parsed_reveal_date.tzinfo is not None:
-                parsed_reveal_date = parsed_reveal_date.astimezone(UTC).replace(
-                    tzinfo=None
-                )
 
         stmt = (
             insert(Checkpoint)
@@ -212,17 +195,9 @@ class CheckpointService:
                 group_id=group.id,
                 document_id=document.id,
                 previous_checkpoint_id=None,
-                reveal_date=parsed_reveal_date,
             )
-            # If a checkpoint already exists for this (group, document), update the
-            # reveal_date. coalesce keeps the existing date if the new one is NULL.
-            .on_conflict_do_update(
+            .on_conflict_do_nothing(
                 constraint="uq__checkpoint__group_id__document_id__previous_checkpoint_id",
-                set_={
-                    "reveal_date": func.coalesce(
-                        parsed_reveal_date, Checkpoint.reveal_date
-                    )
-                },
             )
             .returning(Checkpoint.id)
         )
@@ -230,9 +205,20 @@ class CheckpointService:
         self.db.flush()
 
         checkpoint_id = result.scalar()
-        return self.db.get(Checkpoint, checkpoint_id)
+        if checkpoint_id:
+            # New checkpoint was inserted.
+            return self.db.get(Checkpoint, checkpoint_id)
 
-    def reveal_checkpoints(
+        # Checkpoint already existed — on_conflict_do_nothing doesn't return
+        # the existing row, so we need a separate query to fetch it.
+        return self.db.scalar(
+            select(Checkpoint).where(
+                Checkpoint.group_id == group.id,
+                Checkpoint.document_id == document.id,
+            )
+        )
+
+    def reveal_checkpoint(
         self,
         authority: str,
         group_authority_provided_id: str,
