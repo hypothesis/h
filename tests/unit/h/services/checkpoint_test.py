@@ -3,9 +3,8 @@ from unittest import mock
 
 import pytest
 
-from h.models import Document, GroupMembership
+from h.models import GroupMembership
 from h.models.group import LMSRole
-from h.schemas import ValidationError
 from h.services.checkpoint import CheckpointService, factory
 from h.util.uri import normalize as uri_normalize
 
@@ -320,73 +319,34 @@ class TestHidesAnnotation:
 class TestUpsert:
     def test_it_creates_a_new_checkpoint(self, svc, factories):
         group = factories.Group()
+        document = factories.Document()
+        factories.DocumentURI(document=document, uri="http://example.com/page")
 
         checkpoint = svc.upsert_checkpoint(
             authority=group.authority,
             group_authority_provided_id=group.authority_provided_id,
             document_uri="http://example.com/page",
-            reveal_date="2026-07-01T10:00:00",
         )
 
         assert checkpoint.group_id == group.id
+        assert checkpoint.document_id == document.id
         assert checkpoint.previous_checkpoint_id is None
-        assert checkpoint.reveal_date == datetime(2026, 7, 1, 10, 0, 0)  # noqa: DTZ001
 
-    def test_it_creates_a_checkpoint_with_no_reveal_date(self, svc, factories):
-        group = factories.Group()
-
-        checkpoint = svc.upsert_checkpoint(
-            authority=group.authority,
-            group_authority_provided_id=group.authority_provided_id,
-            document_uri="http://example.com/page",
-        )
-
-        assert checkpoint.reveal_date is None
-
-    def test_it_stores_a_timezone_aware_reveal_date_as_naive_utc(self, svc, factories):
-        group = factories.Group()
-
-        checkpoint = svc.upsert_checkpoint(
-            authority=group.authority,
-            group_authority_provided_id=group.authority_provided_id,
-            document_uri="http://example.com/page",
-            reveal_date="2026-07-01T10:00:00+02:00",
-        )
-
-        # 10:00 at +02:00 is 08:00 UTC, stored without tzinfo.
-        assert checkpoint.reveal_date == datetime(2026, 7, 1, 8, 0, 0)  # noqa: DTZ001
-
-    def test_it_updates_an_existing_checkpoint(self, svc, factories, db_session):
+    def test_it_returns_existing_checkpoint(self, svc, factories):
         group = factories.Group()
         document = factories.Document()
         factories.DocumentURI(document=document, uri="http://example.com/page")
         existing = factories.Checkpoint(
             group=group, document=document, reveal_date=None
         )
-        # The bulk endpoint loads the checkpoint fresh; expire the cached instance
-        # so db.get() reloads the row the conflict-update actually wrote.
-        db_session.expire(existing)
 
         checkpoint = svc.upsert_checkpoint(
             authority=group.authority,
             group_authority_provided_id=group.authority_provided_id,
             document_uri="http://example.com/page",
-            reveal_date="2026-07-01T10:00:00",
         )
 
         assert checkpoint.id == existing.id
-        assert checkpoint.reveal_date == datetime(2026, 7, 1, 10, 0, 0)  # noqa: DTZ001
-
-    def test_it_raises_for_an_invalid_reveal_date(self, svc, factories):
-        group = factories.Group()
-
-        with pytest.raises(ValidationError):
-            svc.upsert_checkpoint(
-                authority=group.authority,
-                group_authority_provided_id=group.authority_provided_id,
-                document_uri="http://example.com/page",
-                reveal_date="not-a-date",
-            )
 
     def test_it_returns_None_when_the_group_is_not_found(self, svc):
         assert (
@@ -398,19 +358,14 @@ class TestUpsert:
             is None
         )
 
-    def test_it_returns_None_when_the_document_cannot_be_resolved(
-        self, svc, factories, mocker
-    ):
+    def test_it_returns_None_when_the_document_is_not_found(self, svc, factories):
         group = factories.Group()
-        query = mocker.Mock()
-        query.first.return_value = None
-        mocker.patch.object(Document, "find_or_create_by_uris", return_value=query)
 
         assert (
             svc.upsert_checkpoint(
                 authority=group.authority,
                 group_authority_provided_id=group.authority_provided_id,
-                document_uri="http://example.com/page",
+                document_uri="http://example.com/nonexistent",
             )
             is None
         )
@@ -506,7 +461,7 @@ class TestRevealCheckpoints:
         )
         db_session.flush()
 
-        result = svc.reveal_checkpoints(
+        result = svc.reveal_checkpoint(
             authority=group.authority,
             group_authority_provided_id=group.authority_provided_id,
             document_uri="http://example.com/page",
@@ -516,7 +471,7 @@ class TestRevealCheckpoints:
         assert result.reveal_date is not None
 
     def test_it_returns_None_when_group_not_found(self, svc):
-        result = svc.reveal_checkpoints(
+        result = svc.reveal_checkpoint(
             authority="example.com",
             group_authority_provided_id="missing",
             document_uri="http://example.com/page",
@@ -527,7 +482,7 @@ class TestRevealCheckpoints:
     def test_it_returns_None_when_document_not_found(self, svc, factories):
         group = factories.Group()
 
-        result = svc.reveal_checkpoints(
+        result = svc.reveal_checkpoint(
             authority=group.authority,
             group_authority_provided_id=group.authority_provided_id,
             document_uri="http://example.com/nonexistent",
@@ -545,7 +500,7 @@ class TestRevealCheckpoints:
             reveal_date=datetime.utcnow() - timedelta(days=1),  # noqa: DTZ003
         )
 
-        result = svc.reveal_checkpoints(
+        result = svc.reveal_checkpoint(
             authority=group.authority,
             group_authority_provided_id=group.authority_provided_id,
             document_uri="http://example.com/page",
