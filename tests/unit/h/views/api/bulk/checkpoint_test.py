@@ -27,13 +27,11 @@ class TestBulkCheckpointSchema:
 class TestUpsertCheckpoints:
     def test_it(self, pyramid_request, checkpoint_service):
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "user": {"username": "teacher", "role": "instructor"},
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
                     "document_uri": "http://example.com/1",
-                    "reveal_date": "2026-07-01T10:00:00",
                 },
                 {
                     "group_authority_provided_id": "group2",
@@ -54,13 +52,11 @@ class TestUpsertCheckpoints:
             authority=pyramid_request.identity.auth_client.authority,
             group_authority_provided_id="group1",
             document_uri="http://example.com/1",
-            reveal_date="2026-07-01T10:00:00",
         )
         checkpoint_service.upsert_checkpoint.assert_any_call(
             authority=pyramid_request.identity.auth_client.authority,
             group_authority_provided_id="group2",
             document_uri="http://example.com/2",
-            reveal_date=None,
         )
         assert response.status_code == 200
         assert response.json == [
@@ -84,7 +80,6 @@ class TestUpsertCheckpoints:
         self, pyramid_request, checkpoint_service
     ):
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
@@ -99,7 +94,6 @@ class TestUpsertCheckpoints:
 
     def test_it_sets_student_role(self, pyramid_request, checkpoint_service):
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "user": {"username": "student1", "role": "student"},
             "checkpoints": [
                 {
@@ -123,7 +117,6 @@ class TestUpsertCheckpoints:
     ):
         checkpoint_service.upsert_checkpoint.return_value = None
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
@@ -145,20 +138,14 @@ class TestUpsertCheckpoints:
         ]
 
     def test_it_includes_reveal_date(self, pyramid_request, checkpoint_service):
-        # The reveal_date column is naive UTC, so a checkpoint read back from
-        # the DB has a naive reveal_date. A past one must report revealed=True
-        # and isoformat without an offset — not crash comparing naive vs aware.
-        reveal_date = datetime(2020, 1, 1, 10, 0, 0)  # noqa: DTZ001
         checkpoint_service.upsert_checkpoint.return_value = Mock(
-            reveal_date=reveal_date
+            reveal_date=datetime(2020, 1, 1, 10, 0, 0)  # noqa: DTZ001
         )
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
                     "document_uri": "http://example.com/1",
-                    "reveal_date": "2020-01-01T10:00:00",
                 },
             ],
         }
@@ -181,17 +168,9 @@ class TestUpsertCheckpoints:
         with pytest.raises(ValidationError):
             upsert_checkpoints(pyramid_request)
 
-    def test_it_ignores_body_authority_and_uses_authenticated_client(
-        self, pyramid_request, checkpoint_service
-    ):
-        # Security: a caller must not be able to act on another tenant's groups
-        # by supplying a different authority in the request body. The authority
-        # must always come from the authenticated auth_client.
-        client_authority = pyramid_request.identity.auth_client.authority
-        assert client_authority != "attacker.hypothes.is"
+    def test_it_rejects_authority_in_body(self, pyramid_request):
         pyramid_request.json = {
             "authority": "attacker.hypothes.is",
-            "user": {"username": "teacher", "role": "instructor"},
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
@@ -200,20 +179,8 @@ class TestUpsertCheckpoints:
             ],
         }
 
-        upsert_checkpoints(pyramid_request)
-
-        checkpoint_service.set_user_role.assert_called_once_with(
-            authority=client_authority,
-            username="teacher",
-            role="instructor",
-            group_authority_provided_ids=["group1"],
-        )
-        checkpoint_service.upsert_checkpoint.assert_called_once_with(
-            authority=client_authority,
-            group_authority_provided_id="group1",
-            document_uri="http://example.com/1",
-            reveal_date=None,
-        )
+        with pytest.raises(ValidationError):
+            upsert_checkpoints(pyramid_request)
 
     @pytest.fixture
     def checkpoint_service(self, mock_service):
@@ -235,7 +202,6 @@ class TestBulkCheckpointRevealSchema:
 class TestRevealCheckpoints:
     def test_it(self, pyramid_request, checkpoint_service):
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
@@ -246,7 +212,7 @@ class TestRevealCheckpoints:
 
         response = reveal_checkpoints(pyramid_request)
 
-        checkpoint_service.reveal_checkpoints.assert_called_once_with(
+        checkpoint_service.reveal_checkpoint.assert_called_once_with(
             authority=pyramid_request.identity.auth_client.authority,
             group_authority_provided_id="group1",
             document_uri="http://example.com/1",
@@ -262,9 +228,8 @@ class TestRevealCheckpoints:
         ]
 
     def test_it_reports_unresolved_items(self, pyramid_request, checkpoint_service):
-        checkpoint_service.reveal_checkpoints.return_value = None
+        checkpoint_service.reveal_checkpoint.return_value = None
         pyramid_request.json = {
-            "authority": "lms.hypothes.is",
             "checkpoints": [
                 {
                     "group_authority_provided_id": "group1",
@@ -284,13 +249,7 @@ class TestRevealCheckpoints:
             },
         ]
 
-    def test_it_ignores_body_authority_and_uses_authenticated_client(
-        self, pyramid_request, checkpoint_service
-    ):
-        # Security: authority must come from the authenticated auth_client,
-        # never from the request body.
-        client_authority = pyramid_request.identity.auth_client.authority
-        assert client_authority != "attacker.hypothes.is"
+    def test_it_rejects_authority_in_body(self, pyramid_request):
         pyramid_request.json = {
             "authority": "attacker.hypothes.is",
             "checkpoints": [
@@ -301,16 +260,11 @@ class TestRevealCheckpoints:
             ],
         }
 
-        reveal_checkpoints(pyramid_request)
-
-        checkpoint_service.reveal_checkpoints.assert_called_once_with(
-            authority=client_authority,
-            group_authority_provided_id="group1",
-            document_uri="http://example.com/1",
-        )
+        with pytest.raises(ValidationError):
+            reveal_checkpoints(pyramid_request)
 
     @pytest.fixture
     def checkpoint_service(self, mock_service):
         service = mock_service(CheckpointService)
-        service.reveal_checkpoints.return_value.reveal_date = None
+        service.reveal_checkpoint.return_value.reveal_date = None
         return service

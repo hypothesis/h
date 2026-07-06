@@ -3,9 +3,6 @@
   "type": "object",
   "title": "Bulk checkpoint upsert",
   "properties": {
-    "authority": {
-      "type": "string"
-    },
     "checkpoints": {
       "type": "array",
       "minItems": 1,
@@ -17,9 +14,6 @@
           },
           "document_uri": {
             "type": "string"
-          },
-          "reveal_date": {
-            "type": ["string", "null"]
           }
         },
         "required": ["group_authority_provided_id", "document_uri"],
@@ -41,6 +35,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["authority", "checkpoints"],
+  "required": ["checkpoints"],
   "additionalProperties": false
 }
