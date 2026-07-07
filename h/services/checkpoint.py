@@ -170,11 +170,11 @@ class CheckpointService:
         """
         Upsert a checkpoint for a (group, document) pair.
 
-        Resolves the group by authority + authority_provided_id and the
-        document by URI. If the checkpoint already exists, it is not modified.
+        Resolves the group by authority + authority_provided_id and
+        resolves-or-creates the document by URI. If the checkpoint already
+        exists, it is not modified.
 
-        Returns the Checkpoint, or None if the group or document
-        could not be resolved.
+        Returns the Checkpoint, or None if the group could not be resolved.
         """
         group = self.db.scalar(
             select(Group).where(
@@ -185,9 +185,12 @@ class CheckpointService:
         if not group:
             return None
 
-        document = Document.find_by_uris(self.db, [document_uri]).first()
-        if not document:
-            return None
+        # Resolve-or-create the document. A checkpoint is synced at
+        # assignment-launch time, before anyone has annotated the URL, so its
+        # Document may not exist yet. Creating it (with document_uri as a
+        # self-claim) means a later annotation on that URL resolves onto the
+        # same Document, so the checkpoint hides annotations from the first one.
+        document = Document.find_or_create_by_uris(self.db, document_uri, []).first()
 
         stmt = (
             insert(Checkpoint)

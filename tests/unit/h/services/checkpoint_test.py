@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from h.models import GroupMembership
+from h.models import Document, GroupMembership
 from h.models.group import LMSRole
 from h.services.checkpoint import CheckpointService, factory
 from h.util.uri import normalize as uri_normalize
@@ -358,17 +358,27 @@ class TestUpsert:
             is None
         )
 
-    def test_it_returns_None_when_the_document_is_not_found(self, svc, factories):
+    def test_it_creates_the_document_when_it_does_not_exist(self, svc, factories):
+        # A checkpoint is synced at assignment-launch time, before anyone has
+        # annotated the URL, so no Document exists yet. The checkpoint must
+        # still be created -- otherwise nothing hides the first annotations
+        # until a later sync materialises the Document (a peer-annotation leak).
         group = factories.Group()
 
-        assert (
-            svc.upsert_checkpoint(
-                authority=group.authority,
-                group_authority_provided_id=group.authority_provided_id,
-                document_uri="http://example.com/nonexistent",
-            )
-            is None
+        checkpoint = svc.upsert_checkpoint(
+            authority=group.authority,
+            group_authority_provided_id=group.authority_provided_id,
+            document_uri="http://example.com/not-yet-annotated",
         )
+
+        assert checkpoint is not None
+        assert checkpoint.group_id == group.id
+        # The Document was created and the checkpoint points at it.
+        document = Document.find_by_uris(
+            svc.db, ["http://example.com/not-yet-annotated"]
+        ).first()
+        assert document is not None
+        assert checkpoint.document_id == document.id
 
 
 class TestSetUserRole:
