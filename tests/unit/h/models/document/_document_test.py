@@ -226,6 +226,82 @@ class TestMergeDocuments:
 
             assert count == expected_count
 
+    def test_it_moves_checkpoints_to_the_first(
+        self, db_session, duplicate_docs, factories
+    ):
+        checkpoint = factories.Checkpoint(document=duplicate_docs[1])
+
+        merge_documents(db_session, duplicate_docs)
+        db_session.flush()
+
+        assert checkpoint.document_id == duplicate_docs[0].id
+
+    def test_it_keeps_checkpoints_in_different_groups(
+        self, db_session, duplicate_docs, factories
+    ):
+        checkpoint_1 = factories.Checkpoint(document=duplicate_docs[0])
+        checkpoint_2 = factories.Checkpoint(document=duplicate_docs[1])
+
+        merge_documents(db_session, duplicate_docs)
+        db_session.flush()
+
+        # Different groups don't collide, so both survive on the master.
+        assert checkpoint_1.document_id == duplicate_docs[0].id
+        assert checkpoint_2.document_id == duplicate_docs[0].id
+
+    def test_it_collapses_colliding_checkpoints_to_the_most_restrictive(
+        self, db_session, duplicate_docs, factories
+    ):
+        group = factories.Group()
+        # Same group on two merging documents => the checkpoints collide.
+        factories.Checkpoint(
+            group=group,
+            document=duplicate_docs[0],
+            reveal_date=_datetime(2000, 1, 1),  # noqa: DTZ001  # already revealed
+        )
+        factories.Checkpoint(
+            group=group,
+            document=duplicate_docs[1],
+            reveal_date=None,  # never revealed = most restrictive
+        )
+
+        merge_documents(db_session, duplicate_docs)
+        db_session.flush()
+
+        survivors = (
+            db_session.query(models.Checkpoint)
+            .filter_by(group_id=group.id, document_id=duplicate_docs[0].id)
+            .all()
+        )
+        assert len(survivors) == 1
+        assert survivors[0].reveal_date is None
+
+    def test_it_collapses_colliding_checkpoints_to_the_latest_reveal_date(
+        self, db_session, duplicate_docs, factories
+    ):
+        group = factories.Group()
+        factories.Checkpoint(
+            group=group,
+            document=duplicate_docs[0],
+            reveal_date=_datetime(2000, 1, 1),  # noqa: DTZ001
+        )
+        factories.Checkpoint(
+            group=group,
+            document=duplicate_docs[1],
+            reveal_date=_datetime(2030, 1, 1),  # noqa: DTZ001  # hides for longest
+        )
+
+        merge_documents(db_session, duplicate_docs)
+        db_session.flush()
+
+        survivors = (
+            db_session.query(models.Checkpoint)
+            .filter_by(group_id=group.id, document_id=duplicate_docs[0].id)
+            .all()
+        )
+        assert len(survivors) == 1
+        assert survivors[0].reveal_date == _datetime(2030, 1, 1)  # noqa: DTZ001
+
     def test_it_raises_retryable_error_when_flush_fails(
         self, db_session, duplicate_docs, monkeypatch
     ):

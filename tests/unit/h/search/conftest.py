@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from h.models import Group
+from h.services.checkpoint import CheckpointService
 from h.services.group import GroupService
 from h.services.search_index import SearchIndexService
 
@@ -10,6 +11,13 @@ from h.services.search_index import SearchIndexService
 @pytest.fixture
 def world_group(db_session):
     return db_session.query(Group).filter_by(pubid="__world__").one()
+
+
+@pytest.fixture(autouse=True)
+def checkpoint_service(pyramid_config, db_session):
+    service = CheckpointService(db_session)
+    pyramid_config.register_service(service, iface=CheckpointService)
+    return service
 
 
 @pytest.fixture

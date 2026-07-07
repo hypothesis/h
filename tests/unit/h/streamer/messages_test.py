@@ -7,6 +7,7 @@ from h_matchers import Any
 from pyramid.request import Request
 
 from h.security import Permission
+from h.services.checkpoint import CheckpointService
 from h.streamer import messages
 
 
@@ -227,6 +228,24 @@ class TestHandleAnnotationEvent:
 
         assert bool(socket.send_json.call_count) == can_see
 
+    def test_it_does_not_send_annotations_hidden_by_a_checkpoint(
+        self, handle_annotation_event, socket, checkpoint_service
+    ):
+        checkpoint_service.hides_annotation.return_value = True
+
+        handle_annotation_event(sockets=[socket])
+
+        socket.send_json.assert_not_called()
+
+    def test_it_sends_annotations_not_hidden_by_a_checkpoint(
+        self, handle_annotation_event, socket, checkpoint_service
+    ):
+        checkpoint_service.hides_annotation.return_value = False
+
+        handle_annotation_event(sockets=[socket])
+
+        socket.send_json.assert_called_once()
+
     def test_with_no_identity(
         self, handle_annotation_event, socket, user_service, annotation_json_service
     ):
@@ -291,6 +310,12 @@ class TestHandleAnnotationEvent:
         identity_permits = patch("h.streamer.messages.identity_permits")
         identity_permits.return_value = True
         return identity_permits
+
+    @pytest.fixture(autouse=True)
+    def checkpoint_service(self, mock_service):
+        service = mock_service(CheckpointService)
+        service.hides_annotation.return_value = False
+        return service
 
     @pytest.fixture(autouse=True)
     def SocketFilter(self, patch):
