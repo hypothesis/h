@@ -25,7 +25,6 @@ from h.models.auth_client import AuthClient
 from h.models.auth_ticket import AuthTicket
 from h.models.authz_code import AuthzCode
 from h.models.blocklist import Blocklist
-from h.models.checkpoint import Checkpoint
 from h.models.document import Document, DocumentMeta, DocumentURI
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort, FeatureCohortUser
@@ -55,7 +54,6 @@ __all__ = (
     "AuthTicket",
     "AuthzCode",
     "Blocklist",
-    "Checkpoint",
     "Document",
     "DocumentMeta",
     "DocumentURI",
