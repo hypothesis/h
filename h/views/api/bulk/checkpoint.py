@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 from importlib_resources import files
 from pyramid.response import Response
@@ -19,8 +19,11 @@ def _is_revealed(checkpoint):
 
 
 def _reveal_date_isoformat(checkpoint):
+    # reveal_date is stored naive-UTC; emit it timezone-aware so the LMS
+    # frontend parses it as UTC and renders it in each viewer's local time
+    # (a naive string is misread as local time by JS `new Date`).
     if checkpoint and checkpoint.reveal_date:
-        return checkpoint.reveal_date.isoformat()
+        return checkpoint.reveal_date.replace(tzinfo=UTC).isoformat()
     return None
 
 

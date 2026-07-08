@@ -158,7 +158,7 @@ class TestUpsertCheckpoints:
                 "document_uri": "http://example.com/1",
                 "created": True,
                 "revealed": True,
-                "reveal_date": "2020-01-01T10:00:00",
+                "reveal_date": "2020-01-01T10:00:00+00:00",
             },
         ]
 
