@@ -1233,6 +1233,40 @@ class TestHideRevealFilter:
 
         assert peer.id in result.annotation_ids
 
+    def test_a_student_search_survives_a_document_with_many_uris(
+        self, search, factories, document, make_own
+    ):
+        # A long-lived document (e.g. a heavily annotated page, or a PDF that
+        # has been merged by fingerprint) accumulates many document_uri rows.
+        # The scope must cost a bounded number of Elasticsearch clauses, or the
+        # whole query is rejected and the student's search 500s.
+        for i in range(1200):
+            factories.DocumentURI(document=document, uri=f"http://example.com/p{i}")
+
+        own = make_own()
+
+        result = search.run(MultiDict({}))
+
+        assert own.id in result.annotation_ids
+
+    def test_it_hides_a_peers_versioned_annotation(
+        self, search, factories, index_annotations, group, other_student
+    ):
+        # An annotation on a specific document version indexes its scope as
+        # `<uri>__v<version>`, and must still be hidden from a peer.
+        peer = factories.Annotation(
+            userid=other_student.userid,
+            groupid=group.pubid,
+            target_uri="http://example.com/page",
+            shared=True,
+            version=2,
+        )
+        index_annotations(peer)
+
+        result = search.run(MultiDict({}))
+
+        assert peer.id not in result.annotation_ids
+
     def membership(self, db_session, group, user, lms_role):
         db_session.add(GroupMembership(user=user, group=group, lms_role=lms_role.value))
         db_session.flush()

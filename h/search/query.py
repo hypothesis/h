@@ -288,11 +288,14 @@ class HideRevealFilter:
         return search
 
     def _hidden_query(self, scope):
+        scope_keys = self.checkpoint_service.scope_keys(
+            scope.group_pubid, scope.document_id
+        )
         in_scope = Q(
             "bool",
             must=[
                 Q("term", group=scope.group_pubid),
-                Q("bool", should=self._uri_queries(scope.uris), minimum_should_match=1),
+                Q("terms", **{"target.scope": scope_keys}),
             ],
         )
 
@@ -317,14 +320,6 @@ class HideRevealFilter:
 
         # Hide annotations that are in scope but not in the visible set.
         return Q("bool", must=[in_scope], must_not=[visible])
-
-    @staticmethod
-    def _uri_queries(uris):
-        queries = []
-        for normalized in uris:
-            queries.append(Q("term", **{"target.scope": normalized}))
-            queries.append(Q("wildcard", **{"target.scope": f"{normalized}__v*"}))
-        return queries
 
 
 class UriCombinedWildcardFilter:
