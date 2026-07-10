@@ -1,4 +1,4 @@
-pip==25.3
+pip==26.1.2
 pip-tools
 pip-sync-faster
 coverage[toml]
