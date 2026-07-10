@@ -15,6 +15,7 @@ from h.models import (
     User,
 )
 from h.models.group import LMSRole
+from h.util.uri import build_scope_key
 
 
 @dataclass
@@ -23,7 +24,6 @@ class HiddenScope:
 
     group_pubid: str
     document_id: int
-    uris: list[str]
     instructor_userids: list[str]
     own_annotation_ids: list[str]
 
@@ -266,14 +266,49 @@ class CheckpointService:
         self.db.flush()
         return checkpoint
 
+    def scope_keys(self, group_pubid: str, document_id: int) -> list[str]:
+        """
+        Return every `target.scope` value an in-scope annotation can carry.
+
+        An annotation indexes a single scope key: its normalized target URI,
+        suffixed with `__v<version>` when it annotates a specific document
+        version (see `build_scope_key`). Enumerating them all lets the search
+        filter match with one `terms` clause, which costs one clause against
+        Elasticsearch's 1024-clause budget however many URIs it holds. Matching
+        a wildcard per URI instead exhausts that budget on a document that has
+        accumulated many URIs, and Elasticsearch then rejects the whole query.
+
+        Versions are looked up within `group_pubid`: the filter only ever
+        matches annotations in that group, so a version used nowhere in it
+        cannot match, and `annotation.groupid` is indexed where
+        `annotation.document_id` is not.
+        """
+        # Distinct: a document has one document_uri row per (uri, type,
+        # content_type), so the same uri_normalized repeats many times over.
+        uris = self.db.scalars(
+            select(DocumentURI.uri_normalized)
+            .where(DocumentURI.document_id == document_id)
+            .distinct()
+        ).all()
+
+        versions = self.db.scalars(
+            select(Annotation.version)
+            .where(Annotation.groupid == group_pubid)
+            .where(Annotation.document_id == document_id)
+            .where(Annotation.version.is_not(None))
+            .distinct()
+        ).all()
+
+        keys = [
+            build_scope_key(uri_normalized, version)
+            for uri_normalized in uris
+            for version in [None, *versions]
+        ]
+        # build_scope_key(uri, 0) is just uri, so versions can collide.
+        return list(dict.fromkeys(keys))
+
     def _hidden_scope(self, user: User, checkpoint: Checkpoint) -> HiddenScope:
         group_pubid = checkpoint.group.pubid
-
-        uris = self.db.scalars(
-            select(DocumentURI.uri_normalized).where(
-                DocumentURI.document_id == checkpoint.document_id
-            )
-        ).all()
 
         # User.userid is a hybrid that compiles to a tuple, so it can't be
         # SELECTed directly: load the users and read it in Python.
@@ -294,7 +329,6 @@ class CheckpointService:
         return HiddenScope(
             group_pubid=group_pubid,
             document_id=checkpoint.document_id,
-            uris=list(uris),
             instructor_userids=instructor_userids,
             own_annotation_ids=list(own_annotation_ids),
         )

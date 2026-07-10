@@ -84,6 +84,60 @@ class TestActiveCheckpoint:
         return document
 
 
+class TestScopeKeys:
+    def test_it_returns_the_normalized_uris(self, svc, group, document):
+        assert svc.scope_keys(group.pubid, document.id) == [
+            uri_normalize("http://example.com/page")
+        ]
+
+    def test_it_expands_the_versions_used_in_the_group(
+        self, svc, group, document, annotation
+    ):
+        annotation(groupid=group.pubid, version=2)
+
+        uri = uri_normalize("http://example.com/page")
+        assert svc.scope_keys(group.pubid, document.id) == [uri, f"{uri}__v2"]
+
+    def test_it_ignores_versions_used_only_in_other_groups(
+        self, svc, group, document, factories, annotation
+    ):
+        annotation(groupid=factories.Group().pubid, version=2)
+
+        assert svc.scope_keys(group.pubid, document.id) == [
+            uri_normalize("http://example.com/page")
+        ]
+
+    def test_it_returns_empty_for_a_document_with_no_uris(self, svc, group, factories):
+        # An empty `terms` clause matches nothing, so such a checkpoint hides
+        # nothing rather than hiding the whole group.
+        assert svc.scope_keys(group.pubid, factories.Document().id) == []
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture
+    def document(self, factories, db_session):
+        document = factories.Document()
+        factories.DocumentURI(document=document, uri="http://example.com/page")
+        db_session.flush()
+        return document
+
+    @pytest.fixture
+    def annotation(self, factories, db_session, document):
+        def annotation(groupid, version):
+            # The Annotation factory resolves its own Document from target_uri,
+            # so re-point the relationship (not the FK, which the relationship
+            # would overwrite on flush) at the checkpoint's document.
+            annotation = factories.Annotation(groupid=groupid)
+            annotation.document = document
+            annotation.version = version
+            db_session.flush()
+            return annotation
+
+        return annotation
+
+
 class TestHiddenScopes:
     def test_it_returns_empty_for_a_none_user(self, svc):
         assert svc.hidden_scopes(None) == []
@@ -104,12 +158,11 @@ class TestHiddenScopes:
         assert svc.hidden_scopes(user) == []
 
     @pytest.mark.usefixtures("active_checkpoint", "student_membership")
-    def test_it_returns_a_scope_for_a_student(self, svc, user, group):
+    def test_it_returns_a_scope_for_a_student(self, svc, user, group, document):
         [scope] = svc.hidden_scopes(user)
 
         assert scope.group_pubid == group.pubid
-        # The scope carries the normalized URIs, matching ES `target.scope`.
-        assert scope.uris == [uri_normalize("http://example.com/page")]
+        assert scope.document_id == document.id
 
     @pytest.mark.usefixtures("active_checkpoint", "null_role_membership")
     def test_it_restricts_members_with_no_lms_role(self, svc, user):
