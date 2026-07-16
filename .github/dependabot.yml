@@ -2,15 +2,17 @@ version: 2
 updates:
 - package-ecosystem: "pip"
   directory: "/"
+  open-pull-requests-limit: 20
   schedule:
-    interval: "monthly"
+    interval: "weekly"
     day: "sunday"
     time: "00:00"
     timezone: "Europe/London"
 - package-ecosystem: "npm"
   directory: "/"
+  open-pull-requests-limit: 20
   schedule:
-    interval: "monthly"
+    interval: "weekly"
     day: "sunday"
     time: "00:00"
     timezone: "Europe/London"
@@ -25,8 +27,9 @@ updates:
         - '@vitest/*'
 - package-ecosystem: "docker"
   directory: "/"
+  open-pull-requests-limit: 20
   schedule:
-    interval: "monthly"
+    interval: "weekly"
     day: "sunday"
     time: "00:00"
     timezone: "Europe/London"
