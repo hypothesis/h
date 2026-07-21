@@ -32,7 +32,7 @@ billiard==4.2.1
     #   -r functests.txt
     #   -r tests.txt
     #   celery
-bleach==6.2.0
+bleach==6.4.0
     # via
     #   -r functests.txt
     #   -r tests.txt

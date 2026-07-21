@@ -21,7 +21,7 @@ billiard==4.2.1
     # via
     #   -r prod.txt
     #   celery
-bleach==6.2.0
+bleach==6.4.0
     # via -r prod.txt
 build==1.2.2.post1
     # via pip-tools
