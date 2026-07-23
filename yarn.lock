@@ -3661,7 +3661,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/browser@npm:4.1.9, @vitest/browser@npm:^4.1.9":
+"@vitest/browser@npm:4.1.9":
   version: 4.1.9
   resolution: "@vitest/browser@npm:4.1.9"
   dependencies:
@@ -3676,6 +3676,24 @@ __metadata:
   peerDependencies:
     vitest: 4.1.9
   checksum: 72acbf03c3675ddf3075485a60a515a1ab7512bbd02b67044d06f63c1fbda2d42ab31af7094aa987640fcc2cf9d643800359bc475bc920d66c767d16794264d8
+  languageName: node
+  linkType: hard
+
+"@vitest/browser@npm:^4.1.10":
+  version: 4.1.10
+  resolution: "@vitest/browser@npm:4.1.10"
+  dependencies:
+    "@blazediff/core": 1.9.1
+    "@vitest/mocker": 4.1.10
+    "@vitest/utils": 4.1.10
+    magic-string: ^0.30.21
+    pngjs: ^7.0.0
+    sirv: ^3.0.2
+    tinyrainbow: ^3.1.0
+    ws: ^8.19.0
+  peerDependencies:
+    vitest: 4.1.10
+  checksum: 5243a60a160b031a743dd63462d914fe478b80d7881a19df96dad54951f8506f357a964e69a919dccc5efcd7fb100bd1b04f76ead73187b2d6c582a59796023f
   languageName: node
   linkType: hard
 
@@ -3735,6 +3753,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vitest/mocker@npm:4.1.10":
+  version: 4.1.10
+  resolution: "@vitest/mocker@npm:4.1.10"
+  dependencies:
+    "@vitest/spy": 4.1.10
+    estree-walker: ^3.0.3
+    magic-string: ^0.30.21
+  peerDependencies:
+    msw: ^2.4.9
+    vite: ^6.0.0 || ^7.0.0 || ^8.0.0
+  peerDependenciesMeta:
+    msw:
+      optional: true
+    vite:
+      optional: true
+  checksum: 58e12a9bccd3f362d1a8eaa901243cdf933777aed23bf10e6a1ea6c387287426d7f45f6a79a7f92127bc7e5d5dcd9249c8c1096ea1add6c65e7f32d9c77602bd
+  languageName: node
+  linkType: hard
+
 "@vitest/mocker@npm:4.1.9":
   version: 4.1.9
   resolution: "@vitest/mocker@npm:4.1.9"
@@ -3751,6 +3788,15 @@ __metadata:
     vite:
       optional: true
   checksum: 0c3f0a1e369deaea95450802b151d6edfcd795966a17a5c97f36ea7c03231763410d36ae5571042ab089b58a89c9f8ef5d0d6591afea80ac1fb093ae211ae00d
+  languageName: node
+  linkType: hard
+
+"@vitest/pretty-format@npm:4.1.10":
+  version: 4.1.10
+  resolution: "@vitest/pretty-format@npm:4.1.10"
+  dependencies:
+    tinyrainbow: ^3.1.0
+  checksum: 04f30da78a4e530784ae74a9a511a45115dc9d33e8f5a9a0b8e0deeaa2d9763408774c1e48775f644ff41fdc96c5efaa8f147d062fcfb953656115e6bd1f7016
   languageName: node
   linkType: hard
 
@@ -3785,10 +3831,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vitest/spy@npm:4.1.10":
+  version: 4.1.10
+  resolution: "@vitest/spy@npm:4.1.10"
+  checksum: 758cee54733afd558001b11319ebb285fbd2d456e504be6af77ecd538492320a047dfbe4bbd39759195c0ce34a26e9c978ad647661fb8b1c6b8cbcf370ae0aed
+  languageName: node
+  linkType: hard
+
 "@vitest/spy@npm:4.1.9":
   version: 4.1.9
   resolution: "@vitest/spy@npm:4.1.9"
   checksum: 1450cc1a6863fb67342e043741b1f8fd3a74182b54776770cc3578e33d84e107f8e4254c0a69bce76893c0b511a5ff57af3ab07f953530bbb8dae0e8176e10f6
+  languageName: node
+  linkType: hard
+
+"@vitest/utils@npm:4.1.10":
+  version: 4.1.10
+  resolution: "@vitest/utils@npm:4.1.10"
+  dependencies:
+    "@vitest/pretty-format": 4.1.10
+    convert-source-map: ^2.0.0
+    tinyrainbow: ^3.1.0
+  checksum: 3e23161b8db95f2ddd37978fe9f20b059a6608c9077d2df6930d2ecf8768698100eb95f0485f473af8ee4fa9ecb60218dc96329cb438760480a8f5e83f6994f4
   languageName: node
   linkType: hard
 
@@ -7120,7 +7184,7 @@ __metadata:
     "@sentry/browser": ^9.33.0
     "@tailwindcss/postcss": ^4.1.18
     "@trivago/prettier-plugin-sort-imports": ^5.2.2
-    "@vitest/browser": ^4.1.9
+    "@vitest/browser": ^4.1.10
     "@vitest/browser-playwright": ^4.1.9
     "@vitest/coverage-istanbul": ^4.1.9
     "@vitest/eslint-plugin": ^1.6.20
