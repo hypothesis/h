@@ -618,7 +618,7 @@ zope-sqlalchemy==4.0
     #   -r tests.txt
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==25.3
+pip==26.1.2
     # via
     #   -r functests.txt
     #   -r tests.txt
