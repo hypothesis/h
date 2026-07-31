@@ -47,7 +47,7 @@ python-dateutil
 python-slugify < 8.1.0
 pytz
 rfc3339-validator  # Required for date-time format checking in jsonschema
-supervisor >= 4.0.0
+supervisor >= 4.3.0
 sqlparse
 tabulate
 transaction
