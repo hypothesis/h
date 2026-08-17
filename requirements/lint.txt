@@ -482,7 +482,7 @@ sqlalchemy==2.0.25
     #   alembic
     #   data-tasks
     #   zope-sqlalchemy
-sqlparse==0.5.4
+sqlparse==0.6.0
     # via
     #   -r functests.txt
     #   -r tests.txt
