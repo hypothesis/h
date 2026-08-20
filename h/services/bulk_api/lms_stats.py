@@ -37,6 +37,7 @@ class BulkLMSStatsService:
         groups: list[str],
         h_userids: list[str] | None = None,
         assignment_ids: list[str] | None = None,
+        due_date: datetime | None = None,
     ):
         query = (
             select(
@@ -89,6 +90,11 @@ class BulkLMSStatsService:
                 func.concat("acct:", User.username, "@", User.authority).in_(h_userids)
             )
 
+        if due_date:
+            # Inclusive: a due date is the last moment that counts, not the
+            # first that doesn't.
+            query = query.where(AnnotationSlim.created <= due_date)
+
         return query
 
     def _count_columns(self, counts_query) -> tuple:
@@ -111,6 +117,7 @@ class BulkLMSStatsService:
         group_by: CountsGroupBy,
         h_userids: list[str] | None = None,
         assignment_ids: list[str] | None = None,
+        due_date: datetime | None = None,
     ) -> list[AnnotationCounts]:
         """
         Get basic stats per user for an LMS assignment.
@@ -119,9 +126,15 @@ class BulkLMSStatsService:
         :param group_by: By which column to aggregate the data.
         :param h_userids: List of User.userid to filter annotations by
         :param assignment_ids: ID of the assignment to filter annotations by
+        :param due_date: Count only annotations created at or before this,
+            naive UTC. Annotations made after an assignment's due date exist and
+            stay visible, they just don't count towards its grade.
         """
         annos_query = self._annotation_query(
-            groups, h_userids=h_userids, assignment_ids=assignment_ids
+            groups,
+            h_userids=h_userids,
+            assignment_ids=assignment_ids,
+            due_date=due_date,
         ).cte("annotations")
 
         # Alias some columns

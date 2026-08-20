@@ -1,4 +1,5 @@
-from unittest.mock import sentinel  # noqa: INP001
+from datetime import datetime, timedelta  # noqa: INP001
+from unittest.mock import sentinel
 
 import pytest
 
@@ -8,6 +9,8 @@ from h.services.bulk_api.lms_stats import (
     CountsGroupBy,
     service_factory,
 )
+
+DUE_DATE = datetime(2026, 4, 5, 23, 59)  # noqa: DTZ001
 
 
 class TestBulkLMSStatsService:
@@ -103,6 +106,90 @@ class TestBulkLMSStatsService:
                 last_activity=annotation_reply.created,
             ),
         ]
+
+    def test_get_annotation_counts_filter_by_due_date(
+        self, svc, group, user, early_annotation, late_annotation
+    ):
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER,
+            due_date=DUE_DATE,
+        )
+
+        # The late annotation still exists, it just doesn't count.
+        assert late_annotation.created > DUE_DATE
+        assert stats == [
+            AnnotationCounts(
+                userid=user.userid,
+                display_name=user.display_name,
+                annotations=1,
+                replies=0,
+                page_notes=0,
+                last_activity=early_annotation.created,
+            )
+        ]
+
+    @pytest.mark.usefixtures("early_annotation", "late_annotation")
+    def test_get_annotation_counts_counts_everything_without_a_due_date(
+        self, svc, group
+    ):
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.ASSIGNMENT,
+        )
+
+        assert stats[0].annotations == 2
+
+    def test_get_annotation_counts_counts_an_annotation_made_on_the_due_date(
+        self, svc, group, on_time_annotation
+    ):
+        assert on_time_annotation.created == DUE_DATE
+
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.ASSIGNMENT,
+            due_date=DUE_DATE,
+        )
+
+        assert stats[0].annotations == 1
+
+    @pytest.fixture
+    def early_annotation(self, factories, user, group):
+        return self._assignment_annotation(
+            factories, user, group, created=DUE_DATE - timedelta(days=1)
+        )
+
+    @pytest.fixture
+    def late_annotation(self, factories, user, group):
+        return self._assignment_annotation(
+            factories, user, group, created=DUE_DATE + timedelta(days=1)
+        )
+
+    @pytest.fixture
+    def on_time_annotation(self, factories, user, group):
+        return self._assignment_annotation(factories, user, group, created=DUE_DATE)
+
+    @staticmethod
+    def _assignment_annotation(factories, user, group, created):
+        anno = factories.Annotation(group=group)
+        anno_slim = factories.AnnotationSlim(
+            annotation=anno,
+            user=user,
+            deleted=False,
+            shared=True,
+            moderated=False,
+            group=group,
+            created=created,
+        )
+        factories.AnnotationMetadata(
+            annotation_slim=anno_slim,
+            data={"lms": {"assignment": {"resource_link_id": "ASSIGNMENT_ID"}}},
+        )
+
+        return anno_slim
 
     @pytest.fixture
     def group(self, factories):

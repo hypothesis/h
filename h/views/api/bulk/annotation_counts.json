@@ -40,6 +40,18 @@
               "type": "null"
             }
           ]
+        },
+        "due_date": {
+          "description": "Count only annotations created at or before this. Optional: without it every annotation counts, which is the behaviour of every caller that predates it.",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

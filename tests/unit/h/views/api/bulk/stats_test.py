@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 
+from h.schemas.base import ValidationError
 from h.services.bulk_api.lms_stats import AnnotationCounts, CountsGroupBy
 from h.views.api.bulk.stats import AssignmentStatsSchema, get_annotation_counts
 
@@ -41,6 +42,7 @@ class TestBulkGroup:
             groups=assignment_request["filter"]["groups"],
             assignment_ids=assignment_request["filter"]["assignment_ids"],
             h_userids=assignment_request["filter"]["h_userids"],
+            due_date=None,
         )
         return_data = [
             {
@@ -57,6 +59,47 @@ class TestBulkGroup:
         assert response.json == return_data
         assert response.status_code == 200
         assert response.content_type == "application/x-ndjson"
+
+    @pytest.mark.parametrize(
+        ("due_date", "expected"),
+        [
+            # Offset-aware dates are normalised to the naive UTC the DB stores.
+            ("2026-04-05T23:59:00+00:00", datetime(2026, 4, 5, 23, 59)),  # noqa: DTZ001
+            ("2026-04-05T20:59:00-03:00", datetime(2026, 4, 5, 23, 59)),  # noqa: DTZ001
+            # What the LMS actually sends: JS toISOString().
+            (
+                "2026-04-05T23:59:00.000Z",
+                datetime(2026, 4, 5, 23, 59),  # noqa: DTZ001
+            ),
+            (None, None),
+        ],
+    )
+    def test_get_annotation_counts_passes_the_due_date(
+        self,
+        pyramid_request,
+        assignment_request,
+        bulk_stats_service,
+        due_date,
+        expected,
+    ):
+        assignment_request["filter"]["due_date"] = due_date
+        bulk_stats_service.get_annotation_counts.return_value = []
+
+        get_annotation_counts(pyramid_request)
+
+        assert (
+            bulk_stats_service.get_annotation_counts.call_args.kwargs["due_date"]
+            == expected
+        )
+
+    def test_get_annotation_counts_rejects_a_due_date_without_an_offset(
+        self, pyramid_request, assignment_request
+    ):
+        # An offset is required so there is never a local time to guess at.
+        assignment_request["filter"]["due_date"] = "2026-04-05T23:59:00"
+
+        with pytest.raises(ValidationError):
+            get_annotation_counts(pyramid_request)
 
     @pytest.fixture
     def assignment_request(self, pyramid_request):
