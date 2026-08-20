@@ -27,12 +27,11 @@ class AnnotationCounts:
     display_name: str | None = None
     userid: str | None = None
 
-    # Populated only when the request includes `document_uri` (checkpoint
-    # enabled assignments).
-    checkpoint_annotations: int | None = None
-    checkpoint_replies: int | None = None
-    checkpoint_page_notes: int | None = None
-    checkpoint_last_activity: datetime | None = None
+    # Only set when grouping by USER_PHASE: which grading phase these counts
+    # are for, and when that phase ends. A null `ends_at` means the boundary
+    # isn't known yet -- an unrevealed checkpoint, or no due date.
+    phase: int | None = None
+    ends_at: datetime | None = None
 
 
 class CountsGroupBy(Flag):
@@ -40,6 +39,11 @@ class CountsGroupBy(Flag):
 
     USER = auto()
     ASSIGNMENT = auto()
+    #: One row per (user, grading phase), rather than one per user. Phases are
+    #: delimited by the checkpoint reveals, with the last closing at the due
+    #: date, so the number of them is data rather than part of the response
+    #: shape.
+    USER_PHASE = auto()
 
 
 class BulkLMSStatsService:
@@ -103,6 +107,7 @@ class BulkLMSStatsService:
                 AnnotationSlim,
                 AnnotationMetadata.data,
                 in_checkpoint,
+                Checkpoint.reveal_date.label("reveal_date"),
                 case(
                     # It has parents, it's a reply
                     (func.array_length(Annotation.references, 1) != None, "reply"),  # noqa: E711
@@ -174,19 +179,43 @@ class BulkLMSStatsService:
             .filter(counts_query.c.type == "page_note")
             .label("page_notes"),
             func.max(counts_query.c.created).label("last_activity"),
-            func.count(counts_query.c.id)
-            .filter(counts_query.c.type == "annotation", counts_query.c.in_checkpoint)
-            .label("checkpoint_annotations"),
-            func.count(counts_query.c.id)
-            .filter(counts_query.c.type == "reply", counts_query.c.in_checkpoint)
-            .label("checkpoint_replies"),
-            func.count(counts_query.c.id)
-            .filter(counts_query.c.type == "page_note", counts_query.c.in_checkpoint)
-            .label("checkpoint_page_notes"),
-            func.max(counts_query.c.created)
-            .filter(counts_query.c.in_checkpoint)
-            .label("checkpoint_last_activity"),
         )
+
+    @staticmethod
+    def _phase_count_columns(counts_query) -> tuple:
+        """Aggregate each phase separately, in one pass over the annotations.
+
+        Filtered aggregates rather than a GROUP BY on the phase: a phase nobody
+        annotated in still has to produce a row, and a GROUP BY would emit
+        nothing for it.
+        """
+        columns: list = []
+        for phase, in_phase in (
+            (1, counts_query.c.in_checkpoint),
+            (2, ~counts_query.c.in_checkpoint),
+        ):
+            columns.extend(
+                (
+                    func.count(counts_query.c.id)
+                    .filter(counts_query.c.type == "annotation", in_phase)
+                    .label(f"phase_{phase}_annotations"),
+                    func.count(counts_query.c.id)
+                    .filter(counts_query.c.type == "reply", in_phase)
+                    .label(f"phase_{phase}_replies"),
+                    func.count(counts_query.c.id)
+                    .filter(counts_query.c.type == "page_note", in_phase)
+                    .label(f"phase_{phase}_page_notes"),
+                    func.max(counts_query.c.created)
+                    .filter(in_phase)
+                    .label(f"phase_{phase}_last_activity"),
+                )
+            )
+
+        # The first phase ends at the reveal this user's group saw; the last one
+        # at the due date, which the caller already knows.
+        columns.append(func.max(counts_query.c.reveal_date).label("reveal_date"))
+
+        return tuple(columns)
 
     def get_annotation_counts(  # noqa: PLR0913
         self,
@@ -241,29 +270,35 @@ class BulkLMSStatsService:
         # What to group_by depending on the selection
         group_by_clause = {
             CountsGroupBy.USER: User.id,
+            CountsGroupBy.USER_PHASE: User.id,
             CountsGroupBy.ASSIGNMENT: query_assignment_id,
         }
 
         # What columns to include, depending on the group by
+        user_columns = (query_userid.label("userid"), User.display_name)
         group_by_select_columns = {
-            CountsGroupBy.USER: (
-                query_userid.label("userid"),
-                User.display_name,
-            ),
+            CountsGroupBy.USER: user_columns,
+            CountsGroupBy.USER_PHASE: user_columns,
             CountsGroupBy.ASSIGNMENT: (query_assignment_id.label("assignment_id"),),
         }
 
         # What joins to include, depending on the group by
+        user_joins = ((annos_query, annos_query.c.user_id == User.id),)
         group_by_select_joins = {
-            CountsGroupBy.USER: ((annos_query, annos_query.c.user_id == User.id),),
+            CountsGroupBy.USER: user_joins,
+            CountsGroupBy.USER_PHASE: user_joins,
             CountsGroupBy.ASSIGNMENT: [],
         }
 
+        count_columns = (
+            self._phase_count_columns(annos_query)
+            if group_by == CountsGroupBy.USER_PHASE
+            else self._count_columns(annos_query)
+        )
         query = select(
             # Include the relevant columnns based on group_by
             *group_by_select_columns[group_by],
-            # Always include the counts column
-            *self._count_columns(annos_query),
+            *count_columns,
         )
 
         # Apply relevant joins
@@ -273,28 +308,48 @@ class BulkLMSStatsService:
         # And finally the group by
         query = query.group_by(group_by_clause[group_by])
 
-        results = self._db.execute(query)
+        results = self._db.execute(query).mappings()
+
+        if group_by == CountsGroupBy.USER_PHASE:
+            return [
+                counts
+                for row in results
+                for counts in self._phase_rows(row, due_date=due_date)
+            ]
+
         return [
             AnnotationCounts(
                 assignment_id=row.get("assignment_id"),
                 userid=row.get("userid"),
                 display_name=row.get("display_name"),
-                annotations=row.annotations,
-                replies=row.replies,
-                page_notes=row.page_notes,
-                last_activity=row.last_activity,
-                checkpoint_annotations=(
-                    row.checkpoint_annotations if document_uri else None
-                ),
-                checkpoint_replies=row.checkpoint_replies if document_uri else None,
-                checkpoint_page_notes=(
-                    row.checkpoint_page_notes if document_uri else None
-                ),
-                checkpoint_last_activity=(
-                    row.checkpoint_last_activity if document_uri else None
-                ),
+                annotations=row["annotations"],
+                replies=row["replies"],
+                page_notes=row["page_notes"],
+                last_activity=row["last_activity"],
             )
-            for row in results.mappings()
+            for row in results
+        ]
+
+    @staticmethod
+    def _phase_rows(row, due_date: datetime | None) -> list[AnnotationCounts]:
+        """Turn one aggregated row into one AnnotationCounts per phase."""
+        # The first phase ends where the group's reveal happened, the last at
+        # the due date. Either can be unknown: an unrevealed checkpoint, or an
+        # assignment with no due date.
+        ends_at = {1: row["reveal_date"], 2: due_date}
+
+        return [
+            AnnotationCounts(
+                userid=row.get("userid"),
+                display_name=row.get("display_name"),
+                phase=phase,
+                ends_at=ends_at[phase],
+                annotations=row[f"phase_{phase}_annotations"],
+                replies=row[f"phase_{phase}_replies"],
+                page_notes=row[f"phase_{phase}_page_notes"],
+                last_activity=row[f"phase_{phase}_last_activity"],
+            )
+            for phase in (1, 2)
         ]
 
 

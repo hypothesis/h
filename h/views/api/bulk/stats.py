@@ -29,6 +29,30 @@ def _parse_due_date(due_date: str | None) -> datetime | None:
     return datetime.fromisoformat(due_date).astimezone(UTC).replace(tzinfo=None)
 
 
+def _isoformat(value: datetime | None) -> str | None:
+    return value.isoformat() if value else None
+
+
+def _serialize(row) -> dict:
+    counts = {
+        "assignment_id": row.assignment_id,
+        "userid": row.userid,
+        "display_name": row.display_name,
+        "annotations": row.annotations,
+        "replies": row.replies,
+        "page_notes": row.page_notes,
+        "last_activity": _isoformat(row.last_activity),
+    }
+
+    if row.phase is None:
+        return counts
+
+    # One row per grading phase, with the boundary that closes it. A null
+    # `ends_at` means the boundary isn't known yet: an unrevealed checkpoint,
+    # or an assignment with no due date.
+    return counts | {"phase": row.phase, "ends_at": _isoformat(row.ends_at)}
+
+
 @api_config(
     versions=["v1", "v2"],
     route_name="api.bulk.lms.annotations",
@@ -53,45 +77,8 @@ def get_annotation_counts(request):
         document_uri=document_uri,
         due_date=_parse_due_date(due_date),
     )
-    checkpoint_revealed, checkpoint_reveal_date = (
-        service.get_checkpoint_state(query_filter["groups"], document_uri)
-        if document_uri
-        else (None, None)
-    )
-
     return Response(
-        json=[
-            {
-                "assignment_id": row.assignment_id,
-                "userid": row.userid,
-                "display_name": row.display_name,
-                "annotations": row.annotations,
-                "replies": row.replies,
-                "page_notes": row.page_notes,
-                "last_activity": row.last_activity.isoformat(),
-                **(
-                    {
-                        "checkpoint_annotations": row.checkpoint_annotations,
-                        "checkpoint_replies": row.checkpoint_replies,
-                        "checkpoint_page_notes": row.checkpoint_page_notes,
-                        "checkpoint_last_activity": (
-                            row.checkpoint_last_activity.isoformat()
-                            if row.checkpoint_last_activity
-                            else None
-                        ),
-                        "checkpoint_revealed": checkpoint_revealed,
-                        "checkpoint_reveal_date": (
-                            checkpoint_reveal_date.isoformat()
-                            if checkpoint_reveal_date
-                            else None
-                        ),
-                    }
-                    if document_uri
-                    else {}
-                ),
-            }
-            for row in stats
-        ],
+        json=[_serialize(row) for row in stats],
         status=200,
         content_type="application/x-ndjson",
     )

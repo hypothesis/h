@@ -98,6 +98,83 @@ class TestBulkGroup:
         with pytest.raises(ValidationError):
             get_annotation_counts(pyramid_request)
 
+    def test_get_annotation_counts_by_user_phase(
+        self, pyramid_request, assignment_request, bulk_stats_service
+    ):
+        assignment_request["group_by"] = "user_phase"
+        assignment_request["filter"]["document_uri"] = "http://example.com/reading"
+        reveal_date = datetime(2026, 3, 10, 9, 0)  # noqa: DTZ001
+        bulk_stats_service.get_annotation_counts.return_value = [
+            AnnotationCounts(
+                userid="acct:user@authority",
+                display_name="UserName",
+                phase=1,
+                ends_at=reveal_date,
+                annotations=4,
+                replies=2,
+                page_notes=0,
+                last_activity=reveal_date,
+            ),
+            AnnotationCounts(
+                userid="acct:user@authority",
+                display_name="UserName",
+                phase=2,
+                ends_at=None,
+                annotations=8,
+                replies=1,
+                page_notes=0,
+                last_activity=None,
+            ),
+        ]
+
+        response = get_annotation_counts(pyramid_request)
+
+        assert response.json == [
+            {
+                "assignment_id": None,
+                "userid": "acct:user@authority",
+                "display_name": "UserName",
+                "phase": 1,
+                "ends_at": reveal_date.isoformat(),
+                "annotations": 4,
+                "replies": 2,
+                "page_notes": 0,
+                "last_activity": reveal_date.isoformat(),
+            },
+            {
+                "assignment_id": None,
+                "userid": "acct:user@authority",
+                "display_name": "UserName",
+                "phase": 2,
+                # Not revealed or no due date: the boundary isn't known yet.
+                "ends_at": None,
+                "annotations": 8,
+                "replies": 1,
+                "page_notes": 0,
+                "last_activity": None,
+            },
+        ]
+
+    @pytest.mark.usefixtures("assignment_request")
+    def test_get_annotation_counts_by_user_omits_the_phase_fields(
+        self, pyramid_request, bulk_stats_service
+    ):
+        bulk_stats_service.get_annotation_counts.return_value = [
+            AnnotationCounts(
+                userid="acct:user@authority",
+                display_name="UserName",
+                annotations=4,
+                replies=2,
+                page_notes=0,
+                last_activity=datetime(2026, 3, 10, 9, 0),  # noqa: DTZ001
+            )
+        ]
+
+        response = get_annotation_counts(pyramid_request)
+
+        assert "phase" not in response.json[0]
+        assert "ends_at" not in response.json[0]
+
     @pytest.fixture
     def assignment_request(self, pyramid_request):
         pyramid_request.json = {

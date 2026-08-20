@@ -10,7 +10,8 @@
       "type": "string",
       "enum": [
         "assignment",
-        "user"
+        "user",
+        "user_phase"
       ]
     }
   },

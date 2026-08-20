@@ -218,13 +218,12 @@ class TestBulkLMSStatsServiceCheckpoint:
         stats = svc.get_annotation_counts(
             groups=[group.authority_provided_id],
             assignment_ids=["ASSIGNMENT_ID"],
-            group_by=CountsGroupBy.USER,
+            group_by=CountsGroupBy.USER_PHASE,
             document_uri=document_uri.uri,
         )
 
-        assert len(stats) == 1
-        assert stats[0].annotations == 2
-        assert stats[0].checkpoint_annotations == 1
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 1)]
+        assert stats[0].ends_at == reveal_date
 
     def test_get_annotation_counts_unrevealed_checkpoint_counts_everything_as_checkpoint(
         self, svc, factories, group, user, document_uri
@@ -242,12 +241,13 @@ class TestBulkLMSStatsServiceCheckpoint:
         stats = svc.get_annotation_counts(
             groups=[group.authority_provided_id],
             assignment_ids=["ASSIGNMENT_ID"],
-            group_by=CountsGroupBy.USER,
+            group_by=CountsGroupBy.USER_PHASE,
             document_uri=document_uri.uri,
         )
 
-        assert stats[0].annotations == 1
-        assert stats[0].checkpoint_annotations == 1
+        # Nothing has left the first phase, and its boundary isn't known yet.
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
+        assert stats[0].ends_at is None
 
     def test_get_annotation_counts_document_uri_requires_single_assignment_id(
         self, svc, group, document_uri
@@ -283,7 +283,8 @@ class TestBulkLMSStatsServiceCheckpoint:
             group_by=CountsGroupBy.USER,
         )
 
-        assert stats[0].checkpoint_annotations is None
+        assert stats[0].phase is None
+        assert stats[0].ends_at is None
 
     def test_get_annotation_counts_due_date_bounds_all_counts(
         self, svc, factories, group, user
@@ -382,16 +383,14 @@ class TestBulkLMSStatsServiceCheckpoint:
                 late_group.authority_provided_id,
             ],
             assignment_ids=["ASSIGNMENT_ID"],
-            group_by=CountsGroupBy.USER,
+            group_by=CountsGroupBy.USER_PHASE,
             document_uri=document_uri.uri,
         )
 
         # Only the annotation in the group revealed later is still in its first
-        # phase. Collapsing both groups to one reveal date would count either
-        # both or neither.
-        assert len(stats) == 1
-        assert stats[0].annotations == 2
-        assert stats[0].checkpoint_annotations == 1
+        # phase. Collapsing both groups to one reveal date would put either
+        # both or neither there.
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 1)]
 
     def test_get_annotation_counts_with_a_scheduled_reveal_counts_everything_as_checkpoint(
         self, svc, factories, group, user, document_uri
@@ -408,12 +407,11 @@ class TestBulkLMSStatsServiceCheckpoint:
         stats = svc.get_annotation_counts(
             groups=[group.authority_provided_id],
             assignment_ids=["ASSIGNMENT_ID"],
-            group_by=CountsGroupBy.USER,
+            group_by=CountsGroupBy.USER_PHASE,
             document_uri=document_uri.uri,
         )
 
-        assert stats[0].annotations == 1
-        assert stats[0].checkpoint_annotations == 1
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
 
     def test_get_annotation_counts_with_no_checkpoint_for_the_group(
         self, svc, factories, group, user, document_uri
@@ -425,12 +423,12 @@ class TestBulkLMSStatsServiceCheckpoint:
         stats = svc.get_annotation_counts(
             groups=[group.authority_provided_id],
             assignment_ids=["ASSIGNMENT_ID"],
-            group_by=CountsGroupBy.USER,
+            group_by=CountsGroupBy.USER_PHASE,
             document_uri=document_uri.uri,
         )
 
-        assert stats[0].annotations == 1
-        assert stats[0].checkpoint_annotations == 1
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
+        assert stats[0].ends_at is None
 
     @staticmethod
     def _make_annotation(factories, group, user, created):
