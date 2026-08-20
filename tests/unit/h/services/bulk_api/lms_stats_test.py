@@ -203,10 +203,16 @@ class TestBulkLMSStatsServiceCheckpoint:
             group=group, document=document_uri.document, reveal_date=reveal_date
         )
         self._make_annotation(
-            factories, group, user, datetime(2024, 5, 1)  # noqa: DTZ001
+            factories,
+            group,
+            user,
+            datetime(2024, 5, 1),  # noqa: DTZ001
         )
         self._make_annotation(
-            factories, group, user, datetime(2024, 7, 1)  # noqa: DTZ001
+            factories,
+            group,
+            user,
+            datetime(2024, 7, 1),  # noqa: DTZ001
         )
 
         stats = svc.get_annotation_counts(
@@ -227,7 +233,10 @@ class TestBulkLMSStatsServiceCheckpoint:
             group=group, document=document_uri.document, reveal_date=None
         )
         self._make_annotation(
-            factories, group, user, datetime(2024, 5, 1)  # noqa: DTZ001
+            factories,
+            group,
+            user,
+            datetime(2024, 5, 1),  # noqa: DTZ001
         )
 
         stats = svc.get_annotation_counts(
@@ -263,7 +272,10 @@ class TestBulkLMSStatsServiceCheckpoint:
             )
 
     def test_get_annotation_counts_without_document_uri_leaves_checkpoint_fields_none(
-        self, svc, group, annotation  # noqa: ARG002
+        self,
+        svc,
+        group,
+        annotation,  # noqa: ARG002
     ):
         stats = svc.get_annotation_counts(
             groups=[group.authority_provided_id],
@@ -277,10 +289,16 @@ class TestBulkLMSStatsServiceCheckpoint:
         self, svc, factories, group, user
     ):
         self._make_annotation(
-            factories, group, user, datetime(2024, 1, 1)  # noqa: DTZ001
+            factories,
+            group,
+            user,
+            datetime(2024, 1, 1),  # noqa: DTZ001
         )
         self._make_annotation(
-            factories, group, user, datetime(2024, 3, 1)  # noqa: DTZ001
+            factories,
+            group,
+            user,
+            datetime(2024, 3, 1),  # noqa: DTZ001
         )
 
         stats = svc.get_annotation_counts(

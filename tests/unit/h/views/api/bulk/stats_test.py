@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 
+from h.schemas.base import ValidationError
 from h.services.bulk_api.lms_stats import AnnotationCounts, CountsGroupBy
 from h.views.api.bulk.stats import AssignmentStatsSchema, get_annotation_counts
 
@@ -59,6 +60,43 @@ class TestBulkGroup:
         assert response.json == return_data
         assert response.status_code == 200
         assert response.content_type == "application/x-ndjson"
+
+    @pytest.mark.parametrize(
+        ("due_date", "expected"),
+        [
+            # Whatever the offset, the bound reaches the service as the naive
+            # UTC that AnnotationSlim.created is stored in.
+            ("2026-04-05T23:59:00+00:00", datetime(2026, 4, 5, 23, 59)),  # noqa: DTZ001
+            ("2026-04-05T20:59:00-03:00", datetime(2026, 4, 5, 23, 59)),  # noqa: DTZ001
+            # What the LMS sends: JS toISOString().
+            ("2026-04-05T23:59:00.000Z", datetime(2026, 4, 5, 23, 59)),  # noqa: DTZ001
+        ],
+    )
+    def test_get_annotation_counts_normalises_the_due_date(
+        self,
+        pyramid_request,
+        assignment_request,
+        bulk_stats_service,
+        due_date,
+        expected,
+    ):
+        assignment_request["filter"]["due_date"] = due_date
+        bulk_stats_service.get_annotation_counts.return_value = []
+
+        get_annotation_counts(pyramid_request)
+
+        passed = bulk_stats_service.get_annotation_counts.call_args.kwargs["due_date"]
+        assert passed == expected
+        # Naive, so the comparison can't depend on the DB session's timezone.
+        assert passed.tzinfo is None
+
+    def test_get_annotation_counts_rejects_a_due_date_without_an_offset(
+        self, pyramid_request, assignment_request
+    ):
+        assignment_request["filter"]["due_date"] = "2026-04-05T23:59:00"
+
+        with pytest.raises(ValidationError):
+            get_annotation_counts(pyramid_request)
 
     @pytest.fixture
     def assignment_request(self, pyramid_request):

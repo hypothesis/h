@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 from importlib_resources import files
 from pyramid.response import Response
@@ -14,6 +14,19 @@ class AssignmentStatsSchema(JSONSchema):
     _SCHEMA_FILE = files("h.views.api.bulk") / "annotation_counts.json"
     schema_version = 7
     schema = json.loads(_SCHEMA_FILE.read_text(encoding="utf-8"))
+
+
+def _parse_due_date(due_date: str | None) -> datetime | None:
+    """Normalise an ISO due date to the naive UTC the DB stores.
+
+    `AnnotationSlim.created` is naive UTC, so an offset-aware bound would leave
+    the comparison up to the database session's timezone. The schema's date-time
+    format requires an offset, so there is no local time to guess at here.
+    """
+    if not due_date:
+        return None
+
+    return datetime.fromisoformat(due_date).astimezone(UTC).replace(tzinfo=None)
 
 
 @api_config(
@@ -38,7 +51,7 @@ def get_annotation_counts(request):
         assignment_ids=query_filter.get("assignment_ids"),
         h_userids=query_filter.get("h_userids"),
         document_uri=document_uri,
-        due_date=datetime.fromisoformat(due_date) if due_date else None,
+        due_date=_parse_due_date(due_date),
     )
     checkpoint_revealed, checkpoint_reveal_date = (
         service.get_checkpoint_state(query_filter["groups"], document_uri)

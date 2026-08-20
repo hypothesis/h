@@ -164,9 +164,7 @@ class BulkLMSStatsService:
             .filter(counts_query.c.type == "reply", counts_query.c.in_checkpoint)
             .label("checkpoint_replies"),
             func.count(counts_query.c.id)
-            .filter(
-                counts_query.c.type == "page_note", counts_query.c.in_checkpoint
-            )
+            .filter(counts_query.c.type == "page_note", counts_query.c.in_checkpoint)
             .label("checkpoint_page_notes"),
             func.max(counts_query.c.created)
             .filter(counts_query.c.in_checkpoint)
