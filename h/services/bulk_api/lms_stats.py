@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Flag, auto
 
-from sqlalchemy import case, func, select, true
+from sqlalchemy import and_, case, func, or_, select, true
 from sqlalchemy.orm import Session
 
 from h.models import (
@@ -47,15 +47,17 @@ class BulkLMSStatsService:
         self._db = db
         self._authorized_authority = authorized_authority
 
+    def _document_ids(self, document_uri: str) -> list[int]:
+        """Every document `document_uri` resolves to in h."""
+        return [doc.id for doc in Document.find_by_uris(self._db, [document_uri])]
+
     def get_checkpoint_state(
         self, groups: list[str], document_uri: str
     ) -> tuple[bool, datetime | None]:
         """
         Return (revealed, reveal_date) for `document_uri` across `groups`.
         """
-        document_ids = [
-            doc.id for doc in Document.find_by_uris(self._db, [document_uri])
-        ]
+        document_ids = self._document_ids(document_uri)
         if not document_ids:
             return False, None
 
@@ -80,13 +82,22 @@ class BulkLMSStatsService:
         h_userids: list[str] | None = None,
         assignment_ids: list[str] | None = None,
         due_date: datetime | None = None,
-        checkpoint_reveal_date: datetime | None = None,
+        checkpoint_document_ids: list[int] | None = None,
     ):
-        in_checkpoint = (
-            (AnnotationSlim.created <= checkpoint_reveal_date)
-            if checkpoint_reveal_date
-            else true()
-        ).label("in_checkpoint")
+        if checkpoint_document_ids:
+            # A checkpoint is a (group, document) pair, so each annotation is
+            # judged against the reveal of *its own* group: on a group set the
+            # same assignment is revealed per group, at different times.
+            #
+            # A NULL reveal_date (not revealed, or no checkpoint for the group)
+            # leaves everything in the first phase. A reveal_date in the future
+            # needs no special case: nothing can have been created after it yet.
+            in_checkpoint = or_(
+                Checkpoint.reveal_date.is_(None),
+                AnnotationSlim.created <= Checkpoint.reveal_date,
+            ).label("in_checkpoint")
+        else:
+            in_checkpoint = true().label("in_checkpoint")
 
         query = (
             select(
@@ -113,6 +124,13 @@ class BulkLMSStatsService:
             .join(
                 AnnotationMetadata,
                 AnnotationSlim.id == AnnotationMetadata.annotation_id,
+            )
+            .outerjoin(
+                Checkpoint,
+                and_(
+                    Checkpoint.group_id == AnnotationSlim.group_id,
+                    Checkpoint.document_id.in_(checkpoint_document_ids or []),
+                ),
             )
             .where(
                 # Visible annotations
@@ -204,18 +222,14 @@ class BulkLMSStatsService:
                 " assignments."
             )
 
-        _, checkpoint_reveal_date = (
-            self.get_checkpoint_state(groups, document_uri)
-            if document_uri
-            else (False, None)
-        )
-
         annos_query = self._annotation_query(
             groups,
             h_userids=h_userids,
             assignment_ids=assignment_ids,
             due_date=due_date,
-            checkpoint_reveal_date=checkpoint_reveal_date,
+            checkpoint_document_ids=(
+                self._document_ids(document_uri) if document_uri else None
+            ),
         ).cte("annotations")
 
         # Alias some columns

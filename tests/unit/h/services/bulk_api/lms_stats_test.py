@@ -346,6 +346,92 @@ class TestBulkLMSStatsServiceCheckpoint:
         assert revealed is False
         assert reveal_date is None
 
+    def test_get_checkpoint_state_with_an_unknown_document(self, svc, group):
+        # A document_uri h has never seen: the LMS resolved an identity for the
+        # assignment, but nobody has annotated it, so there is no checkpoint.
+        revealed, reveal_date = svc.get_checkpoint_state(
+            [group.authority_provided_id], "http://example.com/never-annotated"
+        )
+
+        assert revealed is False
+        assert reveal_date is None
+
+    def test_get_annotation_counts_uses_each_groups_own_reveal_date(
+        self, svc, factories, user, document_uri
+    ):
+        # A group set reveals the same assignment per group, at different times.
+        early_group, late_group = factories.Group.create_batch(2)
+        factories.Checkpoint(
+            group=early_group,
+            document=document_uri.document,
+            reveal_date=datetime(2024, 6, 1),  # noqa: DTZ001
+        )
+        factories.Checkpoint(
+            group=late_group,
+            document=document_uri.document,
+            reveal_date=datetime(2024, 8, 1),  # noqa: DTZ001
+        )
+        # The same date, either side of each group's own reveal.
+        annotated = datetime(2024, 7, 1)  # noqa: DTZ001
+        self._make_annotation(factories, early_group, user, annotated)
+        self._make_annotation(factories, late_group, user, annotated)
+
+        stats = svc.get_annotation_counts(
+            groups=[
+                early_group.authority_provided_id,
+                late_group.authority_provided_id,
+            ],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER,
+            document_uri=document_uri.uri,
+        )
+
+        # Only the annotation in the group revealed later is still in its first
+        # phase. Collapsing both groups to one reveal date would count either
+        # both or neither.
+        assert len(stats) == 1
+        assert stats[0].annotations == 2
+        assert stats[0].checkpoint_annotations == 1
+
+    def test_get_annotation_counts_with_a_scheduled_reveal_counts_everything_as_checkpoint(
+        self, svc, factories, group, user, document_uri
+    ):
+        # h supports a reveal_date in the future: the checkpoint is still
+        # hiding, so nothing has left the first phase yet.
+        factories.Checkpoint(
+            group=group,
+            document=document_uri.document,
+            reveal_date=datetime(2099, 1, 1),  # noqa: DTZ001
+        )
+        self._make_annotation(factories, group, user, datetime(2024, 5, 1))  # noqa: DTZ001
+
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER,
+            document_uri=document_uri.uri,
+        )
+
+        assert stats[0].annotations == 1
+        assert stats[0].checkpoint_annotations == 1
+
+    def test_get_annotation_counts_with_no_checkpoint_for_the_group(
+        self, svc, factories, group, user, document_uri
+    ):
+        # No checkpoint at all: nothing has been revealed, so everything is
+        # still in the first phase.
+        self._make_annotation(factories, group, user, datetime(2024, 5, 1))  # noqa: DTZ001
+
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER,
+            document_uri=document_uri.uri,
+        )
+
+        assert stats[0].annotations == 1
+        assert stats[0].checkpoint_annotations == 1
+
     @staticmethod
     def _make_annotation(factories, group, user, created):
         anno = factories.Annotation(group=group, created=created)
