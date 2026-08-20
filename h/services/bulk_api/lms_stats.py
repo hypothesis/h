@@ -2,10 +2,18 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Flag, auto
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, func, select, true
 from sqlalchemy.orm import Session
 
-from h.models import Annotation, AnnotationMetadata, AnnotationSlim, Group, User
+from h.models import (
+    Annotation,
+    AnnotationMetadata,
+    AnnotationSlim,
+    Checkpoint,
+    Document,
+    Group,
+    User,
+)
 
 
 @dataclass
@@ -18,6 +26,13 @@ class AnnotationCounts:
     assignment_id: str | None = None
     display_name: str | None = None
     userid: str | None = None
+
+    # Populated only when the request includes `document_uri` (checkpoint
+    # enabled assignments).
+    checkpoint_annotations: int | None = None
+    checkpoint_replies: int | None = None
+    checkpoint_page_notes: int | None = None
+    checkpoint_last_activity: datetime | None = None
 
 
 class CountsGroupBy(Flag):
@@ -32,16 +47,52 @@ class BulkLMSStatsService:
         self._db = db
         self._authorized_authority = authorized_authority
 
+    def get_checkpoint_state(
+        self, groups: list[str], document_uri: str
+    ) -> tuple[bool, datetime | None]:
+        """
+        Return (revealed, reveal_date) for `document_uri` across `groups`.
+        """
+        document_ids = [
+            doc.id for doc in Document.find_by_uris(self._db, [document_uri])
+        ]
+        if not document_ids:
+            return False, None
+
+        now = datetime.utcnow()  # noqa: DTZ003
+        reveal_dates = self._db.scalars(
+            select(Checkpoint.reveal_date)
+            .join(Group, Group.id == Checkpoint.group_id)
+            .where(Group.authority == self._authorized_authority)
+            .where(Group.authority_provided_id.in_(groups))
+            .where(Checkpoint.document_id.in_(document_ids))
+            .where(Checkpoint.reveal_date.is_not(None))
+            .where(Checkpoint.reveal_date <= now)
+        ).all()
+        if not reveal_dates:
+            return False, None
+
+        return True, min(reveal_dates)
+
     def _annotation_query(
         self,
         groups: list[str],
         h_userids: list[str] | None = None,
         assignment_ids: list[str] | None = None,
+        due_date: datetime | None = None,
+        checkpoint_reveal_date: datetime | None = None,
     ):
+        in_checkpoint = (
+            (AnnotationSlim.created <= checkpoint_reveal_date)
+            if checkpoint_reveal_date
+            else true()
+        ).label("in_checkpoint")
+
         query = (
             select(
                 AnnotationSlim,
                 AnnotationMetadata.data,
+                in_checkpoint,
                 case(
                     # It has parents, it's a reply
                     (func.array_length(Annotation.references, 1) != None, "reply"),  # noqa: E711
@@ -89,6 +140,9 @@ class BulkLMSStatsService:
                 func.concat("acct:", User.username, "@", User.authority).in_(h_userids)
             )
 
+        if due_date:
+            query = query.where(AnnotationSlim.created <= due_date)
+
         return query
 
     def _count_columns(self, counts_query) -> tuple:
@@ -103,14 +157,30 @@ class BulkLMSStatsService:
             .filter(counts_query.c.type == "page_note")
             .label("page_notes"),
             func.max(counts_query.c.created).label("last_activity"),
+            func.count(counts_query.c.id)
+            .filter(counts_query.c.type == "annotation", counts_query.c.in_checkpoint)
+            .label("checkpoint_annotations"),
+            func.count(counts_query.c.id)
+            .filter(counts_query.c.type == "reply", counts_query.c.in_checkpoint)
+            .label("checkpoint_replies"),
+            func.count(counts_query.c.id)
+            .filter(
+                counts_query.c.type == "page_note", counts_query.c.in_checkpoint
+            )
+            .label("checkpoint_page_notes"),
+            func.max(counts_query.c.created)
+            .filter(counts_query.c.in_checkpoint)
+            .label("checkpoint_last_activity"),
         )
 
-    def get_annotation_counts(
+    def get_annotation_counts(  # noqa: PLR0913
         self,
         groups: list[str],
         group_by: CountsGroupBy,
         h_userids: list[str] | None = None,
         assignment_ids: list[str] | None = None,
+        document_uri: str | None = None,
+        due_date: datetime | None = None,
     ) -> list[AnnotationCounts]:
         """
         Get basic stats per user for an LMS assignment.
@@ -119,9 +189,35 @@ class BulkLMSStatsService:
         :param group_by: By which column to aggregate the data.
         :param h_userids: List of User.userid to filter annotations by
         :param assignment_ids: ID of the assignment to filter annotations by
+        :param document_uri: The assignment's document URI. When given, the
+            checkpoint_* fields are also populated on each result. Only
+            meaningful for a single assignment per call — a checkpoint is a
+            (group, document) pair, so mixing several assignments'
+            `assignment_ids` under one `document_uri` would silently produce
+            a bucketing that only makes sense for one of them.
+        :param due_date: Optional upper bound on `created`, applied to every
+            count above (not just the checkpoint_* subset).
         """
+        if document_uri and (not assignment_ids or len(assignment_ids) != 1):
+            raise ValueError(
+                "document_uri requires assignment_ids to identify exactly one"
+                " assignment: a checkpoint's reveal_date is only meaningful"
+                " for a single (group, document) pair, not a mix of"
+                " assignments."
+            )
+
+        _, checkpoint_reveal_date = (
+            self.get_checkpoint_state(groups, document_uri)
+            if document_uri
+            else (False, None)
+        )
+
         annos_query = self._annotation_query(
-            groups, h_userids=h_userids, assignment_ids=assignment_ids
+            groups,
+            h_userids=h_userids,
+            assignment_ids=assignment_ids,
+            due_date=due_date,
+            checkpoint_reveal_date=checkpoint_reveal_date,
         ).cte("annotations")
 
         # Alias some columns
@@ -176,6 +272,16 @@ class BulkLMSStatsService:
                 replies=row.replies,
                 page_notes=row.page_notes,
                 last_activity=row.last_activity,
+                checkpoint_annotations=(
+                    row.checkpoint_annotations if document_uri else None
+                ),
+                checkpoint_replies=row.checkpoint_replies if document_uri else None,
+                checkpoint_page_notes=(
+                    row.checkpoint_page_notes if document_uri else None
+                ),
+                checkpoint_last_activity=(
+                    row.checkpoint_last_activity if document_uri else None
+                ),
             )
             for row in results.mappings()
         ]

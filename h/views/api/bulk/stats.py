@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from importlib_resources import files
 from pyramid.response import Response
@@ -27,12 +28,22 @@ class AssignmentStatsSchema(JSONSchema):
 def get_annotation_counts(request):
     data = AssignmentStatsSchema().validate(request.json)
     query_filter = data["filter"]
+    document_uri = query_filter.get("document_uri")
+    due_date = query_filter.get("due_date")
+    service = request.find_service(BulkLMSStatsService)
 
-    stats = request.find_service(BulkLMSStatsService).get_annotation_counts(
+    stats = service.get_annotation_counts(
         group_by=CountsGroupBy[data["group_by"].upper()],
         groups=query_filter["groups"],
         assignment_ids=query_filter.get("assignment_ids"),
         h_userids=query_filter.get("h_userids"),
+        document_uri=document_uri,
+        due_date=datetime.fromisoformat(due_date) if due_date else None,
+    )
+    checkpoint_revealed, checkpoint_reveal_date = (
+        service.get_checkpoint_state(query_filter["groups"], document_uri)
+        if document_uri
+        else (None, None)
     )
 
     return Response(
@@ -45,6 +56,26 @@ def get_annotation_counts(request):
                 "replies": row.replies,
                 "page_notes": row.page_notes,
                 "last_activity": row.last_activity.isoformat(),
+                **(
+                    {
+                        "checkpoint_annotations": row.checkpoint_annotations,
+                        "checkpoint_replies": row.checkpoint_replies,
+                        "checkpoint_page_notes": row.checkpoint_page_notes,
+                        "checkpoint_last_activity": (
+                            row.checkpoint_last_activity.isoformat()
+                            if row.checkpoint_last_activity
+                            else None
+                        ),
+                        "checkpoint_revealed": checkpoint_revealed,
+                        "checkpoint_reveal_date": (
+                            checkpoint_reveal_date.isoformat()
+                            if checkpoint_reveal_date
+                            else None
+                        ),
+                    }
+                    if document_uri
+                    else {}
+                ),
             }
             for row in stats
         ],

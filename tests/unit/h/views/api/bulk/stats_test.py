@@ -41,6 +41,8 @@ class TestBulkGroup:
             groups=assignment_request["filter"]["groups"],
             assignment_ids=assignment_request["filter"]["assignment_ids"],
             h_userids=assignment_request["filter"]["h_userids"],
+            document_uri=None,
+            due_date=None,
         )
         return_data = [
             {

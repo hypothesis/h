@@ -40,6 +40,15 @@
               "type": "null"
             }
           ]
+        },
+        "document_uri": {
+          "type": "string",
+          "description": "The assignment's document URI. When given, results also include the checkpoint_* breakdown for this (groups, document) checkpoint. Only supported when assignment_ids identifies a single assignment."
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Upper bound on annotation `created`, applied to all counts."
         }
       },
       "required": [
