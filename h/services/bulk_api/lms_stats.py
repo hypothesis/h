@@ -54,27 +54,26 @@ class BulkLMSStatsService:
     def get_checkpoint_state(
         self, groups: list[str], document_uri: str
     ) -> tuple[bool, datetime | None]:
-        """
-        Return (revealed, reveal_date) for `document_uri` across `groups`.
-        """
+        """Return (revealed, reveal_date) for `document_uri` across `groups`."""
         document_ids = self._document_ids(document_uri)
         if not document_ids:
             return False, None
 
-        now = datetime.utcnow()  # noqa: DTZ003
-        reveal_dates = self._db.scalars(
-            select(Checkpoint.reveal_date)
+        # Aggregate in the DB: `reveal_date` is nullable, so reducing a list of
+        # them in Python needs a null check SQL has already done. `<= now` also
+        # drops the NULLs, an unrevealed checkpoint among them.
+        reveal_date = self._db.scalar(
+            select(func.min(Checkpoint.reveal_date))
             .join(Group, Group.id == Checkpoint.group_id)
             .where(Group.authority == self._authorized_authority)
             .where(Group.authority_provided_id.in_(groups))
             .where(Checkpoint.document_id.in_(document_ids))
-            .where(Checkpoint.reveal_date.is_not(None))
-            .where(Checkpoint.reveal_date <= now)
-        ).all()
-        if not reveal_dates:
+            .where(Checkpoint.reveal_date <= datetime.utcnow())  # noqa: DTZ003
+        )
+        if reveal_date is None:
             return False, None
 
-        return True, min(reveal_dates)
+        return True, reveal_date
 
     def _annotation_query(
         self,
@@ -215,8 +214,8 @@ class BulkLMSStatsService:
             count above (not just the checkpoint_* subset).
         """
         if document_uri and (not assignment_ids or len(assignment_ids) != 1):
-            raise ValueError(
-                "document_uri requires assignment_ids to identify exactly one"
+            raise ValueError(  # noqa: TRY003
+                "document_uri requires assignment_ids to identify exactly one"  # noqa: EM101
                 " assignment: a checkpoint's reveal_date is only meaningful"
                 " for a single (group, document) pair, not a mix of"
                 " assignments."
