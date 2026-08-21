@@ -44,7 +44,7 @@
         },
         "document_uri": {
           "type": "string",
-          "description": "The assignment's document URI. When given, results also include the checkpoint_* breakdown for this (groups, document) checkpoint. Only supported when assignment_ids identifies a single assignment."
+          "description": "The assignment's document URI. Identifies the (groups, document) checkpoint whose reveals delimit the grading phases, so it is required for group_by user_phase. Only supported when assignment_ids identifies a single assignment."
         },
         "due_date": {
           "type": "string",

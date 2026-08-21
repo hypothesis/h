@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta  # noqa: INP001
+from datetime import datetime  # noqa: INP001
 from unittest.mock import sentinel
 
 import pytest
@@ -312,51 +312,6 @@ class TestBulkLMSStatsServiceCheckpoint:
         assert len(stats) == 1
         assert stats[0].annotations == 1
 
-    def test_get_checkpoint_state_not_revealed(
-        self, svc, factories, group, document_uri
-    ):
-        factories.Checkpoint(
-            group=group, document=document_uri.document, reveal_date=None
-        )
-
-        revealed, reveal_date = svc.get_checkpoint_state(
-            [group.authority_provided_id], document_uri.uri
-        )
-
-        assert revealed is False
-        assert reveal_date is None
-
-    def test_get_checkpoint_state_revealed(self, svc, factories, group, document_uri):
-        past = datetime.utcnow() - timedelta(days=1)  # noqa: DTZ003
-        factories.Checkpoint(
-            group=group, document=document_uri.document, reveal_date=past
-        )
-
-        revealed, reveal_date = svc.get_checkpoint_state(
-            [group.authority_provided_id], document_uri.uri
-        )
-
-        assert revealed is True
-        assert reveal_date == past
-
-    def test_get_checkpoint_state_no_checkpoint(self, svc, group, document_uri):
-        revealed, reveal_date = svc.get_checkpoint_state(
-            [group.authority_provided_id], document_uri.uri
-        )
-
-        assert revealed is False
-        assert reveal_date is None
-
-    def test_get_checkpoint_state_with_an_unknown_document(self, svc, group):
-        # A document_uri h has never seen: the LMS resolved an identity for the
-        # assignment, but nobody has annotated it, so there is no checkpoint.
-        revealed, reveal_date = svc.get_checkpoint_state(
-            [group.authority_provided_id], "http://example.com/never-annotated"
-        )
-
-        assert revealed is False
-        assert reveal_date is None
-
     def test_get_annotation_counts_uses_each_groups_own_reveal_date(
         self, svc, factories, user, document_uri
     ):
@@ -429,6 +384,14 @@ class TestBulkLMSStatsServiceCheckpoint:
 
         assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
         assert stats[0].ends_at is None
+
+    def test_get_annotation_counts_user_phase_requires_a_document_uri(self, svc, group):
+        with pytest.raises(ValueError, match="USER_PHASE requires document_uri"):
+            svc.get_annotation_counts(
+                groups=[group.authority_provided_id],
+                assignment_ids=["ASSIGNMENT_ID"],
+                group_by=CountsGroupBy.USER_PHASE,
+            )
 
     @staticmethod
     def _make_annotation(factories, group, user, created):

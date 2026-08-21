@@ -55,30 +55,6 @@ class BulkLMSStatsService:
         """Every document `document_uri` resolves to in h."""
         return [doc.id for doc in Document.find_by_uris(self._db, [document_uri])]
 
-    def get_checkpoint_state(
-        self, groups: list[str], document_uri: str
-    ) -> tuple[bool, datetime | None]:
-        """Return (revealed, reveal_date) for `document_uri` across `groups`."""
-        document_ids = self._document_ids(document_uri)
-        if not document_ids:
-            return False, None
-
-        # Aggregate in the DB: `reveal_date` is nullable, so reducing a list of
-        # them in Python needs a null check SQL has already done. `<= now` also
-        # drops the NULLs, an unrevealed checkpoint among them.
-        reveal_date = self._db.scalar(
-            select(func.min(Checkpoint.reveal_date))
-            .join(Group, Group.id == Checkpoint.group_id)
-            .where(Group.authority == self._authorized_authority)
-            .where(Group.authority_provided_id.in_(groups))
-            .where(Checkpoint.document_id.in_(document_ids))
-            .where(Checkpoint.reveal_date <= datetime.utcnow())  # noqa: DTZ003
-        )
-        if reveal_date is None:
-            return False, None
-
-        return True, reveal_date
-
     def _annotation_query(
         self,
         groups: list[str],
@@ -242,6 +218,13 @@ class BulkLMSStatsService:
         :param due_date: Optional upper bound on `created`, applied to every
             count above (not just the checkpoint_* subset).
         """
+        if group_by == CountsGroupBy.USER_PHASE and not document_uri:
+            raise ValueError(  # noqa: TRY003
+                "USER_PHASE requires document_uri: phases are delimited by the"  # noqa: EM101
+                " checkpoint reveals of a (group, document) pair, so without a"
+                " document there is nothing to divide them by."
+            )
+
         if document_uri and (not assignment_ids or len(assignment_ids) != 1):
             raise ValueError(  # noqa: TRY003
                 "document_uri requires assignment_ids to identify exactly one"  # noqa: EM101
