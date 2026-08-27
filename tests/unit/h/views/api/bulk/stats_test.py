@@ -98,6 +98,35 @@ class TestBulkGroup:
         with pytest.raises(ValidationError):
             get_annotation_counts(pyramid_request)
 
+    def test_get_annotation_counts_rejects_user_phase_without_a_document(
+        self, pyramid_request, assignment_request
+    ):
+        assignment_request["group_by"] = "user_phase"
+
+        with pytest.raises(ValidationError):
+            get_annotation_counts(pyramid_request)
+
+    @pytest.mark.parametrize("assignment_ids", [["A", "B"], [], None])
+    def test_get_annotation_counts_rejects_a_document_without_one_assignment(
+        self, pyramid_request, assignment_request, assignment_ids
+    ):
+        # A checkpoint's reveal date is only meaningful for a single
+        # (group, document) pair.
+        assignment_request["group_by"] = "user_phase"
+        assignment_request["filter"]["document_uri"] = "http://example.com/reading"
+        assignment_request["filter"]["assignment_ids"] = assignment_ids
+
+        with pytest.raises(ValidationError):
+            get_annotation_counts(pyramid_request)
+
+    def test_get_annotation_counts_rejects_non_string_assignment_ids(
+        self, pyramid_request, assignment_request
+    ):
+        assignment_request["filter"]["assignment_ids"] = [1, 2]
+
+        with pytest.raises(ValidationError):
+            get_annotation_counts(pyramid_request)
+
     def test_get_annotation_counts_by_user_phase(
         self, pyramid_request, assignment_request, bulk_stats_service
     ):

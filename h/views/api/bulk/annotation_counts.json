@@ -35,7 +35,7 @@
         "assignment_ids": {
           "anyOf": [
             {
-              "ref": "#/$defs/nonEmptyStringArray"
+              "$ref": "#/$defs/nonEmptyStringArray"
             },
             {
               "type": "null"
@@ -66,5 +66,71 @@
         "type": "string"
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "title": "user_phase requires a document",
+      "description": "Grading phases are delimited by the checkpoint reveals of a (group, document) pair, so without a document there is nothing to divide them by.",
+      "if": {
+        "properties": {
+          "group_by": {
+            "const": "user_phase"
+          }
+        },
+        "required": [
+          "group_by"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filter": {
+            "required": [
+              "document_uri"
+            ]
+          }
+        },
+        "required": [
+          "filter"
+        ]
+      }
+    },
+    {
+      "title": "document_uri identifies exactly one assignment",
+      "description": "A checkpoint's reveal_date is only meaningful for a single (group, document) pair, not a mix of assignments.",
+      "if": {
+        "properties": {
+          "filter": {
+            "required": [
+              "document_uri"
+            ]
+          }
+        },
+        "required": [
+          "filter"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filter": {
+            "properties": {
+              "assignment_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "assignment_ids"
+            ]
+          }
+        },
+        "required": [
+          "filter"
+        ]
+      }
+    }
+  ]
 }
