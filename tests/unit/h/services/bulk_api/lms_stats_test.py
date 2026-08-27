@@ -249,6 +249,106 @@ class TestBulkLMSStatsServiceCheckpoint:
         assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
         assert stats[0].ends_at is None
 
+    @pytest.mark.parametrize(
+        "flags",
+        [
+            {"shared": False},
+            {"deleted": True},
+            {"moderated": True},
+        ],
+    )
+    def test_get_annotation_counts_leaves_invisible_annotations_out_of_every_phase(
+        self, svc, factories, group, user, document_uri, flags
+    ):
+        """An annotation the instructor can't see counts nowhere."""
+        reveal_date = datetime(2024, 6, 1)  # noqa: DTZ001
+        factories.Checkpoint(
+            group=group, document=document_uri.document, reveal_date=reveal_date
+        )
+        # One visible annotation, so the user still has rows to inspect.
+        self._make_annotation(
+            factories,
+            group,
+            user,
+            datetime(2024, 5, 1),  # noqa: DTZ001
+        )
+        # One invisible either side of the reveal: neither phase may pick them up.
+        for created in (datetime(2024, 5, 2), datetime(2024, 7, 1)):  # noqa: DTZ001
+            self._make_annotation(factories, group, user, created, **flags)
+
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER_PHASE,
+            document_uri=document_uri.uri,
+        )
+
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
+
+    def test_get_annotation_counts_reports_no_row_for_a_wholly_invisible_user(
+        self, svc, factories, group, user, document_uri
+    ):
+        """A user with nothing visible drops out rather than reporting zeros.
+
+        The visibility filters are in the WHERE clause, so such a user has no
+        row to aggregate. The LMS fills the phases in itself for students the
+        roster knows about.
+        """
+        factories.Checkpoint(
+            group=group,
+            document=document_uri.document,
+            reveal_date=datetime(2024, 6, 1),  # noqa: DTZ001
+        )
+        self._make_annotation(
+            factories,
+            group,
+            user,
+            datetime(2024, 5, 1),  # noqa: DTZ001
+            shared=False,
+        )
+
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER_PHASE,
+            document_uri=document_uri.uri,
+        )
+
+        assert not stats
+
+    def test_get_annotation_counts_phases_a_shared_annotation_by_its_creation_date(
+        self, svc, factories, group, user, document_uri
+    ):
+        """A visible annotation is phased by `created`, whenever it became visible.
+
+        `shared` is current state and nothing records when it changed, so an
+        annotation written before the reveal and only shared afterwards is
+        indistinguishable from one shared all along: both land in the first
+        phase. Same for one written before the due date and shared after it --
+        it still counts. Deferred for 1.5; see the Only Me section of the
+        Kaizen doc.
+        """
+        reveal_date = datetime(2024, 6, 1)  # noqa: DTZ001
+        factories.Checkpoint(
+            group=group, document=document_uri.document, reveal_date=reveal_date
+        )
+        self._make_annotation(
+            factories,
+            group,
+            user,
+            datetime(2024, 5, 1),  # noqa: DTZ001
+        )
+
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            assignment_ids=["ASSIGNMENT_ID"],
+            group_by=CountsGroupBy.USER_PHASE,
+            document_uri=document_uri.uri,
+            due_date=datetime(2024, 5, 15),  # noqa: DTZ001
+        )
+
+        assert [(row.phase, row.annotations) for row in stats] == [(1, 1), (2, 0)]
+
     def test_get_annotation_counts_document_uri_requires_single_assignment_id(
         self, svc, group, document_uri
     ):
@@ -394,15 +494,24 @@ class TestBulkLMSStatsServiceCheckpoint:
             )
 
     @staticmethod
-    def _make_annotation(factories, group, user, created):
+    def _make_annotation(
+        factories,
+        group,
+        user,
+        created,
+        *,
+        shared=True,
+        deleted=False,
+        moderated=False,
+    ):
         anno = factories.Annotation(group=group, created=created)
         anno_slim = factories.AnnotationSlim(
             annotation=anno,
             user=user,
             group=group,
-            deleted=False,
-            shared=True,
-            moderated=False,
+            deleted=deleted,
+            shared=shared,
+            moderated=moderated,
             created=created,
         )
         factories.AnnotationMetadata(
