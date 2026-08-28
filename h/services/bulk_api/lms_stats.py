@@ -143,22 +143,28 @@ class BulkLMSStatsService:
 
         return query
 
-    def _count_columns(self, counts_query) -> tuple:
+    @staticmethod
+    def _count_columns(counts_query, in_phase=None, prefix: str = "") -> tuple:
+        """Count each annotation type, optionally within one phase."""
+        in_phase = true() if in_phase is None else in_phase
+
         return (
             func.count(counts_query.c.id)
-            .filter(counts_query.c.type == "annotation")
-            .label("annotations"),
+            .filter(counts_query.c.type == "annotation", in_phase)
+            .label(f"{prefix}annotations"),
             func.count(counts_query.c.id)
-            .filter(counts_query.c.type == "reply")
-            .label("replies"),
+            .filter(counts_query.c.type == "reply", in_phase)
+            .label(f"{prefix}replies"),
             func.count(counts_query.c.id)
-            .filter(counts_query.c.type == "page_note")
-            .label("page_notes"),
-            func.max(counts_query.c.created).label("last_activity"),
+            .filter(counts_query.c.type == "page_note", in_phase)
+            .label(f"{prefix}page_notes"),
+            func.max(counts_query.c.created)
+            .filter(in_phase)
+            .label(f"{prefix}last_activity"),
         )
 
-    @staticmethod
-    def _phase_count_columns(counts_query) -> tuple:
+    @classmethod
+    def _phase_count_columns(cls, counts_query) -> tuple:
         """Aggregate each phase separately, in one pass over the annotations.
 
         Filtered aggregates rather than a GROUP BY on the phase: a phase nobody
@@ -171,20 +177,7 @@ class BulkLMSStatsService:
             (2, ~counts_query.c.in_checkpoint),
         ):
             columns.extend(
-                (
-                    func.count(counts_query.c.id)
-                    .filter(counts_query.c.type == "annotation", in_phase)
-                    .label(f"phase_{phase}_annotations"),
-                    func.count(counts_query.c.id)
-                    .filter(counts_query.c.type == "reply", in_phase)
-                    .label(f"phase_{phase}_replies"),
-                    func.count(counts_query.c.id)
-                    .filter(counts_query.c.type == "page_note", in_phase)
-                    .label(f"phase_{phase}_page_notes"),
-                    func.max(counts_query.c.created)
-                    .filter(in_phase)
-                    .label(f"phase_{phase}_last_activity"),
-                )
+                cls._count_columns(counts_query, in_phase, f"phase_{phase}_")
             )
 
         # The first phase ends at the reveal this user's group saw; the last one
