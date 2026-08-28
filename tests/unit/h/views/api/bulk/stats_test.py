@@ -127,6 +127,15 @@ class TestBulkGroup:
         with pytest.raises(ValidationError):
             get_annotation_counts(pyramid_request)
 
+    @pytest.mark.usefixtures("assignment_request")
+    def test_get_annotation_counts_turns_a_service_rejection_into_a_400(
+        self, pyramid_request, bulk_stats_service
+    ):
+        bulk_stats_service.get_annotation_counts.side_effect = ValueError("nope")
+
+        with pytest.raises(ValidationError):
+            get_annotation_counts(pyramid_request)
+
     def test_get_annotation_counts_by_user_phase(
         self, pyramid_request, assignment_request, bulk_stats_service
     ):

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from importlib_resources import files
 from pyramid.response import Response
 
-from h.schemas.base import JSONSchema
+from h.schemas.base import JSONSchema, ValidationError
 from h.security import Permission
 from h.services.bulk_api.lms_stats import BulkLMSStatsService, CountsGroupBy
 from h.views.api.config import api_config
@@ -69,14 +69,18 @@ def get_annotation_counts(request):
     due_date = query_filter.get("due_date")
     service = request.find_service(BulkLMSStatsService)
 
-    stats = service.get_annotation_counts(
-        group_by=CountsGroupBy[data["group_by"].upper()],
-        groups=query_filter["groups"],
-        assignment_ids=query_filter.get("assignment_ids"),
-        h_userids=query_filter.get("h_userids"),
-        document_uri=document_uri,
-        due_date=_parse_due_date(due_date),
-    )
+    try:
+        stats = service.get_annotation_counts(
+            group_by=CountsGroupBy[data["group_by"].upper()],
+            groups=query_filter["groups"],
+            assignment_ids=query_filter.get("assignment_ids"),
+            h_userids=query_filter.get("h_userids"),
+            document_uri=document_uri,
+            due_date=_parse_due_date(due_date),
+        )
+    except ValueError as err:
+        # A 400 even if the schema and the service ever disagree.
+        raise ValidationError(str(err)) from err
     return Response(
         json=[_serialize(row) for row in stats],
         status=200,
