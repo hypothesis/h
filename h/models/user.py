@@ -1,4 +1,5 @@
 import datetime
+import enum
 import re
 from functools import partial
 from typing import TYPE_CHECKING
@@ -17,6 +18,19 @@ from h.util.user import format_userid, split_user
 
 if TYPE_CHECKING:
     from h.models.group import Group
+
+
+class EduRoleSurveyResponse(enum.StrEnum):
+    """A user's answer to the EDU role survey shown in the client's sidebar.
+
+    Recorded so we only ask once. "dismissed" is a first-class answer, not an
+    absence of one: the survey has to be dismissable to comply with GDPR, and a
+    dismissal stops us asking again just like a yes or a no does.
+    """
+
+    INSTRUCTOR = "instructor"
+    NOT_INSTRUCTOR = "not_instructor"
+    DISMISSED = "dismissed"
 
 
 USERNAME_MIN_LENGTH = 3
@@ -242,6 +256,24 @@ class User(Base):
     # A JSON blob with user shortcuts preferences.
     # Use SQL NULL (not JSON null) when clearing the value.
     shortcuts_preferences = sa.Column(JSONB(none_as_null=True), nullable=True)
+
+    #: The user's answer to the EDU role survey shown in the client's sidebar.
+    #: A NULL value means they have not answered yet, which is what makes the
+    #: survey appear.
+    edu_role_survey_response = sa.Column(
+        sa.UnicodeText,
+        sa.CheckConstraint(
+            " OR ".join(
+                f"edu_role_survey_response = '{response.value}'"
+                for response in EduRoleSurveyResponse
+            ),
+            name="validate_edu_role_survey_response",
+        ),
+        nullable=True,
+    )
+
+    #: When the user answered the EDU role survey. NULL until they do.
+    edu_role_survey_responded_at = sa.Column(sa.DateTime, nullable=True)
 
     identities = sa.orm.relationship(
         "UserIdentity", backref="user", cascade="all, delete-orphan"

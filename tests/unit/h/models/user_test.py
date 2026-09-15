@@ -32,6 +32,39 @@ class TestUserIDComparator:
 class TestUserModelDataConstraints:
     """Unit tests for :py:module:`h.models.User` data integrity constraints."""
 
+    @pytest.mark.parametrize(
+        "response", ["instructor", "not_instructor", "dismissed", None]
+    )
+    def test_edu_role_survey_response_accepts_valid_answers(self, db_session, response):
+        user = User(
+            authority="example.com",
+            username="surveyvalid",
+            email="surveyvalid@example.com",
+            edu_role_survey_response=response,
+        )
+
+        db_session.add(user)
+        db_session.flush()
+
+        assert user.edu_role_survey_response == response
+
+    @pytest.mark.parametrize("response", ["maybe", "INSTRUCTOR", ""])
+    def test_edu_role_survey_response_rejects_invalid_answers(
+        self, db_session, response
+    ):
+        # The CHECK constraint backs up the validation in UserService: this is
+        # what catches a write that does not go through update_preferences.
+        user = User(
+            authority="example.com",
+            username="surveyinvalid",
+            email="surveyinvalid@example.com",
+            edu_role_survey_response=response,
+        )
+
+        db_session.add(user)
+        with pytest.raises(exc.IntegrityError):
+            db_session.flush()
+
     def test_cannot_create_dot_variant_of_user(self, db_session, fred):
         db_session.add(
             User(authority=fred.authority, username="fred.bloggs", email=fred.email)
