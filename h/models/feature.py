@@ -27,6 +27,12 @@ FEATURES = {
     "log_in_with_google": "Allow users to log in with Google",
     "log_in_with_facebook": "Allow users to log in with Facebook",
     "vpat_keyboard": "Allow users to use the VPAT keyboard in the client",
+    "instructor_survey": (
+        "Show the EDU role survey in the client sidebar. Also the kill switch: "
+        "h stops sending the survey as soon as this is off. First-party only, "
+        "and enabling it for `everyone` will not widen it past the first-party "
+        "authority"
+    ),
 }
 
 
