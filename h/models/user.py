@@ -23,9 +23,15 @@ if TYPE_CHECKING:
 class EduRoleSurveyResponse(enum.StrEnum):
     """A user's answer to the EDU role survey shown in the client's sidebar.
 
-    Recorded so we only ask once. "dismissed" is a first-class answer, not an
-    absence of one: the survey has to be dismissable to comply with GDPR, and a
-    dismissal stops us asking again just like a yes or a no does.
+    Any recorded answer stops the survey being shown. "dismissed" is a
+    first-class answer, not an absence of one: the survey has to be dismissable
+    to comply with GDPR, and a dismissal stops us asking again just like a yes
+    or a no does.
+
+    An answer can be replaced rather than being write-once, because product
+    plans to re-run the survey for the people who dismissed it so they get to
+    answer a second time. That means edu_role_survey_responded_at holds the
+    timestamp of the *latest* answer, not of the first one.
     """
 
     INSTRUCTOR = "instructor"
