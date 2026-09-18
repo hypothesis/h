@@ -2,6 +2,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session
 from h.presenters import GroupsJSONPresenter
+from h.schemas import ValidationError
 from h.security import Permission
 from h.views.api.config import api_config
 
@@ -56,6 +57,24 @@ def update_preferences(request):
     # TODO: The following exception doesn't match convention for validation  # noqa: FIX002, TD002, TD003
     # used in other endpoints
     try:
+        # Enforce first-party authority for the EDU role survey. The survey is
+        # only ever offered to first-party users, so only they can answer it:
+        # without this a third-party account -- an LMS user who could never
+        # have been shown the panel -- can PATCH an answer straight into the
+        # column the HubSpot sync reads. This is only part of the eligibility
+        # the read side applies; the feature flag and the EDU domain check land
+        # with it.
+        #
+        # Inside the try on purpose: `preferences` is unvalidated JSON, so the
+        # `in` raises TypeError for a non-mapping body such as
+        # {"preferences": null}, which has to stay a 400.
+        if (
+            "instructor_survey_response" in preferences
+            and request.user.authority != request.default_authority
+        ):
+            message = "instructor_survey_response is not available to this user"
+            raise ValidationError(message)
+
         svc.update_preferences(request.user, **preferences)
     except TypeError as err:
         raise HTTPBadRequest(str(err)) from err
