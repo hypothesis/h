@@ -32,7 +32,8 @@ class EduRoleSurveyResponse(enum.StrEnum):
     because product plans to re-run the survey for the people who dismissed it
     so they get to answer a second time. Nothing replaces one yet: the API
     drops or rejects a second answer (h.views.api.profile.update_preferences),
-    so today the first answer is the only one.
+    so today the first answer is the only one -- barring two answers sent in
+    the same instant, which that check is not atomic enough to order.
 
     What holds either way is that edu_role_survey_responded_at is written with
     the response beside it, so it is when *this* answer was recorded -- the
