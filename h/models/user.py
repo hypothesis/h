@@ -28,10 +28,16 @@ class EduRoleSurveyResponse(enum.StrEnum):
     to comply with GDPR, and a dismissal stops us asking again just like a yes
     or a no does.
 
-    An answer can be replaced rather than being write-once, because product
-    plans to re-run the survey for the people who dismissed it so they get to
-    answer a second time. That means edu_role_survey_responded_at holds the
-    timestamp of the *latest* answer, not of the first one.
+    The column allows an answer to be replaced rather than being write-once,
+    because product plans to re-run the survey for the people who dismissed it
+    so they get to answer a second time. Nothing replaces one yet: the API
+    drops or rejects a second answer (h.views.api.profile.update_preferences),
+    so today the first answer is the only one.
+
+    What holds either way is that edu_role_survey_responded_at is written with
+    the response beside it, so it is when *this* answer was recorded -- the
+    first one today, the most recent one once the re-ask lands. It is not the
+    date the user was first asked, nor necessarily the first time they replied.
     """
 
     INSTRUCTOR = "instructor"

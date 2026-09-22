@@ -31,7 +31,10 @@ FEATURES = {
         "Show the EDU role survey in the client sidebar. Also the kill switch: "
         "h stops sending the survey as soon as this is off. First-party only, "
         "and enabling it for `everyone` will not widen it past the first-party "
-        "authority"
+        "authority. NOT READY FOR REAL USERS: the list of educational email "
+        "domains it selects on (h/util/edu_domains.py) is still a placeholder "
+        "that matches every *.edu address, and this flag is the only thing "
+        "keeping it from them"
     ),
 }
 
