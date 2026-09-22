@@ -49,6 +49,7 @@ class TestUpdatePreferences:
     def test_updates_instructor_survey_response(
         self, pyramid_request, user, user_service
     ):
+        user.email = "someone@stanford.edu"
         pyramid_request.json_body = {
             "preferences": {"instructor_survey_response": "instructor"}
         }
@@ -62,6 +63,7 @@ class TestUpdatePreferences:
     def test_rejects_instructor_survey_response_from_third_party(
         self, pyramid_request, user, user_service
     ):
+        user.email = "someone@stanford.edu"
         user.authority = "thirdparty.example.org"
         pyramid_request.json_body = {
             "preferences": {"instructor_survey_response": "instructor"}
@@ -71,6 +73,104 @@ class TestUpdatePreferences:
             views.update_preferences(pyramid_request)
 
         assert "not available to this user" in str(exc.value)
+        user_service.update_preferences.assert_not_called()
+
+    def test_rejects_instructor_survey_response_from_non_edu_email(
+        self, pyramid_request, user, user_service
+    ):
+        user.email = "someone@gmail.com"
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        with pytest.raises(ValidationError):
+            views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_not_called()
+
+    def test_rejects_instructor_survey_response_when_flag_is_off(
+        self, pyramid_request, user, user_service
+    ):
+        # The flag is the kill switch: turning it off stops answers being
+        # recorded, not just the panel being offered. Not absolute, though --
+        # the ?__feature__[instructor_survey] override outranks it here as
+        # everywhere else.
+        user.email = "someone@stanford.edu"
+        pyramid_request.feature.flags["instructor_survey"] = False
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        with pytest.raises(ValidationError):
+            views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_not_called()
+
+    def test_ignores_instructor_survey_response_when_already_answered(
+        self, pyramid_request, user, user_service
+    ):
+        # A retry after a lost response, or a dismissal in a second sidebar
+        # whose profile predates the first answer, must not overwrite the
+        # answer -- and must not be an error the user sees either.
+        user.email = "someone@stanford.edu"
+        user.edu_role_survey_response = "instructor"
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "dismissed"}
+        }
+
+        views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_called_once_with(user)
+
+    def test_keeps_other_preferences_when_survey_is_already_answered(
+        self, pyramid_request, user, user_service
+    ):
+        user.email = "someone@stanford.edu"
+        user.edu_role_survey_response = "instructor"
+        pyramid_request.json_body = {
+            "preferences": {
+                "instructor_survey_response": "dismissed",
+                "show_sidebar_tutorial": True,
+            }
+        }
+
+        views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_called_once_with(
+            user, show_sidebar_tutorial=True
+        )
+
+    def test_rejects_instructor_survey_response_when_flag_is_off_and_already_answered(
+        self, pyramid_request, user, user_service
+    ):
+        # Having answered before doesn't earn a pass through the kill switch:
+        # the answer is rejected, not quietly dropped as a stale duplicate
+        # would be. Same for anyone else the survey isn't for any more.
+        user.email = "someone@stanford.edu"
+        user.edu_role_survey_response = "dismissed"
+        pyramid_request.feature.flags["instructor_survey"] = False
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        with pytest.raises(ValidationError):
+            views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_not_called()
+
+    def test_rejects_instructor_survey_response_from_third_party_already_answered(
+        self, pyramid_request, user, user_service
+    ):
+        user.email = "someone@stanford.edu"
+        user.authority = "thirdparty.example.org"
+        user.edu_role_survey_response = "dismissed"
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        with pytest.raises(ValidationError):
+            views.update_preferences(pyramid_request)
+
         user_service.update_preferences.assert_not_called()
 
     def test_allows_other_preferences_from_third_party(
@@ -86,13 +186,19 @@ class TestUpdatePreferences:
         )
 
     @pytest.mark.parametrize("preferences", [None, 5, "instructor_survey_response"])
-    def test_handles_non_mapping_preferences(self, pyramid_request, preferences):
-        # The survey guard tests `in preferences`, so a non-mapping body has to
-        # keep producing a 400 rather than an uncaught TypeError.
+    def test_handles_non_mapping_preferences(self, pyramid_request, user, preferences):
+        # A non-mapping body has to keep producing the generic 400 it always
+        # did, and must not be mistaken for a survey answer -- note the third
+        # case, where `"instructor_survey_response" in preferences` would be
+        # true as a substring test. The user is ineligible here, so routing it
+        # to the survey guard by mistake would raise ValidationError instead.
+        user.email = "someone@gmail.com"
         pyramid_request.json_body = {"preferences": preferences}
 
-        with pytest.raises(HTTPBadRequest):
+        with pytest.raises(HTTPBadRequest) as exc:
             views.update_preferences(pyramid_request)
+
+        assert not isinstance(exc.value, ValidationError)
 
     def test_handles_invalid_preferences_error(self, pyramid_request, user_service):
         user_service.update_preferences.side_effect = TypeError("uh oh, wrong prefs")
