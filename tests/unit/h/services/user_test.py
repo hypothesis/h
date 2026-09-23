@@ -115,6 +115,38 @@ class TestUserService:
 
         assert user.youtube_gdpr_banner_dismissed is True
 
+    @pytest.mark.parametrize("response", ["instructor", "not_instructor", "dismissed"])
+    def test_update_preferences_records_survey_response(self, svc, factories, response):
+        user = factories.User.build()
+
+        svc.update_preferences(user, instructor_survey_response=response)
+
+        assert user.edu_role_survey_response == response
+        assert user.edu_role_survey_responded_at is not None
+
+    @pytest.mark.parametrize(
+        "response", ["maybe", "", None, True, 1, {"a": 1}, ["instructor"]]
+    )
+    def test_update_preferences_rejects_invalid_survey_response(
+        self, svc, factories, response
+    ):
+        user = factories.User.build()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(user, instructor_survey_response=response)
+
+        assert "instructor_survey_response must be one of" in str(exc.value)
+
+    def test_update_preferences_leaves_survey_untouched_when_not_given(
+        self, svc, factories
+    ):
+        user = factories.User.build()
+
+        svc.update_preferences(user, show_sidebar_tutorial=False)
+
+        assert user.edu_role_survey_response is None
+        assert user.edu_role_survey_responded_at is None
+
     def test_update_preferences_raises_for_unsupported_keys(self, svc, factories):
         user = factories.User.build()
 

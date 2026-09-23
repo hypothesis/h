@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from pyramid.httpexceptions import HTTPBadRequest
 
+from h.schemas import ValidationError
 from h.services.group_list import GroupListService
 from h.views.api import profile as views
 
@@ -44,6 +45,54 @@ class TestUpdatePreferences:
         user_service.update_preferences.assert_called_once_with(
             user, show_youtube_gdpr_banner=False
         )
+
+    def test_updates_instructor_survey_response(
+        self, pyramid_request, user, user_service
+    ):
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_called_once_with(
+            user, instructor_survey_response="instructor"
+        )
+
+    def test_rejects_instructor_survey_response_from_third_party(
+        self, pyramid_request, user, user_service
+    ):
+        user.authority = "thirdparty.example.org"
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        with pytest.raises(ValidationError) as exc:
+            views.update_preferences(pyramid_request)
+
+        assert "not available to this user" in str(exc.value)
+        user_service.update_preferences.assert_not_called()
+
+    def test_allows_other_preferences_from_third_party(
+        self, pyramid_request, user, user_service
+    ):
+        user.authority = "thirdparty.example.org"
+        pyramid_request.json_body = {"preferences": {"show_sidebar_tutorial": True}}
+
+        views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_called_once_with(
+            user, show_sidebar_tutorial=True
+        )
+
+    @pytest.mark.parametrize("preferences", [None, 5, "instructor_survey_response"])
+    def test_handles_non_mapping_preferences(self, pyramid_request, preferences):
+        # The survey guard tests `in preferences`, so a non-mapping body has to
+        # keep producing a 400 rather than an uncaught TypeError.
+        pyramid_request.json_body = {"preferences": preferences}
+
+        with pytest.raises(HTTPBadRequest):
+            views.update_preferences(pyramid_request)
 
     def test_handles_invalid_preferences_error(self, pyramid_request, user_service):
         user_service.update_preferences.side_effect = TypeError("uh oh, wrong prefs")

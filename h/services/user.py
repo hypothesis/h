@@ -1,8 +1,10 @@
 from collections.abc import Mapping
+from datetime import datetime
 
 import sqlalchemy as sa
 
 from h.models import User, UserIdentity
+from h.models.user import EduRoleSurveyResponse
 from h.util.db import on_transaction_end
 from h.util.user import split_user
 
@@ -10,6 +12,7 @@ UPDATE_PREFS_ALLOWED_KEYS = {
     "show_sidebar_tutorial",
     "show_youtube_gdpr_banner",
     "shortcuts_preferences",
+    "instructor_survey_response",
 }
 REPEATABLE_SHORTCUT_GROUPS = []
 ALLOWED_SHORTCUT_ACTIONS = {
@@ -199,10 +202,36 @@ class UserService:
             validated = _validate_shortcuts_preferences(updated)
             user.shortcuts_preferences = validated
 
+        if "instructor_survey_response" in kwargs:
+            response = _validate_edu_role_survey_response(
+                kwargs["instructor_survey_response"]
+            )
+            user.edu_role_survey_response = response
+            user.edu_role_survey_responded_at = datetime.utcnow()  # noqa: DTZ003
+
 
 def user_service_factory(_context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.default_authority, session=request.db)
+
+
+def _validate_edu_role_survey_response(response):
+    """Validate an answer to the EDU role survey.
+
+    The column has a matching CHECK constraint, but failing here turns a bad
+    value into a 400 rather than an IntegrityError.
+    """
+    valid = {member.value for member in EduRoleSurveyResponse}
+    # `isinstance` first: an unhashable value (a dict or a list from a JSON
+    # request body) raises TypeError from the set lookup itself, which the view
+    # would turn into a 400 whose body reads "unhashable type: 'dict'" instead
+    # of the message below.
+    if not isinstance(response, str) or response not in valid:
+        options = ", ".join(sorted(valid))
+        message = f"instructor_survey_response must be one of {options}"
+        raise TypeError(message)
+
+    return response
 
 
 def _validate_shortcuts_preferences(preferences):
