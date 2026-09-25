@@ -1,4 +1,3 @@
-pip==25.3
 pip-tools
 pip-sync-faster
 cookiecutter
