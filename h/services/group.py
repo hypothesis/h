@@ -115,7 +115,7 @@ class GroupService:
         if group_ids:
             query = query.where(literal_column("pubid").in_(group_ids))
 
-        return self.session.scalars(query)
+        return self.session.scalars(query).all()
 
     def groupids_created_by(self, user):
         """
