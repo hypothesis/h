@@ -105,6 +105,19 @@ class TestBulkLMSStatsService:
             ),
         ]
 
+    @pytest.mark.parametrize("empty_filter", ["assignment_ids", "h_userids"])
+    @pytest.mark.usefixtures("annotation")
+    def test_get_annotation_counts_with_empty_filter_returns_no_counts(
+        self, svc, group, empty_filter
+    ):
+        stats = svc.get_annotation_counts(
+            groups=[group.authority_provided_id],
+            group_by=CountsGroupBy.USER,
+            **{empty_filter: []},
+        )
+
+        assert stats == []
+
     @pytest.fixture
     def group(self, factories):
         return factories.Group()

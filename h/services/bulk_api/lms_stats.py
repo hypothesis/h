@@ -126,14 +126,14 @@ class BulkLMSStatsService:
                 Group.authority_provided_id.in_(groups),
             )
         )
-        if assignment_ids:
+        if assignment_ids is not None:
             query = query.where(
                 AnnotationMetadata.data["lms"]["assignment"][
                     "resource_link_id"
                 ].astext.in_(assignment_ids)
             )
 
-        if h_userids:
+        if h_userids is not None:
             query = query.where(
                 func.concat("acct:", User.username, "@", User.authority).in_(h_userids)
             )

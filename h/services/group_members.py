@@ -1,7 +1,7 @@
 import logging
 from functools import partial
 
-from sqlalchemy import func, nulls_first, or_, select
+from sqlalchemy import false, func, nulls_first, or_, select
 
 from h import session
 from h.models import Group, GroupMembership, GroupMembershipRoles, User
@@ -60,9 +60,11 @@ class GroupMembersService:
             .order_by(nulls_first(GroupMembership.created), User.username)
         )
 
-        if roles:
+        if roles is not None:
             query = query.where(
                 or_(GroupMembership.roles.contains(role) for role in roles)  # type: ignore[arg-type]
+                if roles
+                else false()
             )
 
         if offset is not None:

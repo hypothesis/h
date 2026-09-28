@@ -112,7 +112,7 @@ class GroupService:
             group_alias = aliased(Group, union_groups)
             query = select(group_alias)
 
-        if group_ids:
+        if group_ids is not None:
             query = query.where(literal_column("pubid").in_(group_ids))
 
         return self.session.scalars(query).all()

@@ -62,6 +62,30 @@ class TestAnnotationReadService:
 
         assert db_session.scalars(query).all() == [annotation]
 
+    def test_annotation_search_by_empty_ids_returns_no_annotations(
+        self, factories, db_session
+    ):
+        factories.Annotation(shared=True)
+        factories.Annotation(shared=False)
+
+        query = AnnotationReadService.annotation_search_query(
+            ids=[], include_private=True
+        )
+
+        assert db_session.scalars(query).all() == []
+
+    def test_annotation_search_by_empty_groupid_returns_no_annotations(
+        self, factories, db_session
+    ):
+        factories.Annotation(shared=True)
+        factories.Annotation(shared=False)
+
+        query = AnnotationReadService.annotation_search_query(
+            groupid="", include_private=True
+        )
+
+        assert db_session.scalars(query).all() == []
+
     def test_annotation_search_by_moderation_status_approved(
         self, factories, db_session
     ):
