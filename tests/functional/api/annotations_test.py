@@ -97,6 +97,28 @@ class TestSearchAnnotations:
 
         assert annotation.id not in response.annotation_ids
 
+    @pytest.mark.parametrize("authenticated", [True, False])
+    @pytest.mark.parametrize("requested_group", ["private_group", "doesnotexist"])
+    def test_users_cant_see_annotations_in_private_groups_by_requesting_a_group(
+        self,
+        factories,
+        make_annotation,
+        other_user,
+        call_search_api,
+        authenticated,
+        requested_group,
+    ):
+        private_group = factories.Group()
+        annotation = make_annotation(user=other_user, group=private_group, shared=True)
+        if requested_group == "private_group":
+            requested_group = private_group.pubid
+
+        response = call_search_api(
+            authenticated=authenticated, params={"group": requested_group}
+        )
+
+        assert annotation.id not in response.annotation_ids
+
     @pytest.mark.parametrize(
         "shared,moderation_status,can_see",
         [
