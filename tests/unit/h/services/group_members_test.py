@@ -73,6 +73,14 @@ class TestGetMemberships:
             key=attrgetter("id"),
         ) == sorted(memberships, key=attrgetter("id"))
 
+    def test_empty_roles_returns_no_memberships(
+        self, group_members_service, db_session, factories
+    ):
+        group = factories.Group.build()
+        db_session.add(GroupMembership(group=group, user=factories.User.build()))
+
+        assert list(group_members_service.get_memberships(group, roles=[])) == []
+
     def test_multiple_roles(self, group_members_service, db_session, factories):
         group = factories.Group.build()
         admin = factories.User.build()

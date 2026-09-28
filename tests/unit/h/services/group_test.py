@@ -158,6 +158,19 @@ class TestGroupServiceGroupIds:
 
         assert list(groups) == [group]
 
+    @pytest.mark.parametrize("with_user", [True, False])
+    def test_readable_by_with_empty_group_ids_returns_no_groups(
+        self, with_user, svc, db_session, factories
+    ):
+        factories.Group(readable_by=ReadableBy.world)
+        user = factories.User() if with_user else None
+        if user:
+            group = factories.Group(readable_by=ReadableBy.members)
+            group.memberships.append(GroupMembership(user=user))
+        db_session.flush()
+
+        assert svc.groups_readable_by(user, group_ids=[]) == []
+
     def test_created_by_includes_created_groups(self, svc, factories):
         user = factories.User()
         group = factories.Group(creator=user)

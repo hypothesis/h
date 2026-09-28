@@ -69,10 +69,10 @@ class AnnotationReadService:
         if not include_private:
             query = query.where(Annotation.shared.is_(True))
 
-        if ids:
+        if ids is not None:
             query = query.where(Annotation.id.in_(ids))
 
-        if groupid:
+        if groupid is not None:
             query = query.where(Annotation.groupid == groupid)
 
         if moderation_status:
