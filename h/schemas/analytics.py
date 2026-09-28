@@ -10,7 +10,10 @@ class EventSchema(JSONSchema):
         "properties": {
             "event": {
                 "type": "string",
-                "enum": ["client.realtime.apply_updates"],
+                "enum": [
+                    "client.realtime.apply_updates",
+                    "client.survey.instructor_role.shown",
+                ],
             },
         },
     }

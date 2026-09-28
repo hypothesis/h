@@ -10,10 +10,10 @@ class TestCreateEventSchema:
         [
             ({}, "'event' is a required property"),
             ({"foo": "bar"}, "'event' is a required property"),
-            (
-                {"event": "invalid"},
-                "event: 'invalid' is not one of \\['client.realtime.apply_updates'\\]",
-            ),
+            # Deliberately not matching the full list of valid events: it grows
+            # every time we add one, and spelling it out here just makes this
+            # test fail for unrelated reasons.
+            ({"event": "invalid"}, "event: 'invalid' is not one of"),
         ],
     )
     def test_error_for_invalid_data(self, payload: dict, expected_error: str):
@@ -21,8 +21,12 @@ class TestCreateEventSchema:
         with pytest.raises(ValidationError, match=expected_error):
             schema.validate(payload)
 
-    def test_valid_data_is_returned(self):
+    @pytest.mark.parametrize(
+        "event",
+        ["client.realtime.apply_updates", "client.survey.instructor_role.shown"],
+    )
+    def test_valid_data_is_returned(self, event: str):
         schema = CreateEventSchema()
-        result = schema.validate({"event": "client.realtime.apply_updates"})
+        result = schema.validate({"event": event})
 
-        assert result == {"event": "client.realtime.apply_updates"}
+        assert result == {"event": event}
