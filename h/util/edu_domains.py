@@ -13,9 +13,7 @@ _HOSTNAME_LABEL = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 #: PLACEHOLDER. The real list is owned by product (see the "Collect EDU user
 #: role information in the web app" PRD). Until it lands this holds only the
 #: handful of entries needed to develop and test against, and "edu" on its own
-#: matches every *.edu address there is. Do not enable the `instructor_survey`
-#: feature flag for real users while this is still the placeholder: that flag
-#: is what keeps this list from reaching them.
+#: matches every *.edu address there is.
 #:
 #: Entries are bare, lower-case domains: no leading dot, no "*." wildcard, no
 #: surrounding whitespace. An entry matches that exact domain and any subdomain
