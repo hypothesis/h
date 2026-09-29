@@ -6,6 +6,7 @@ from pyramid.session import JSONSerializer, SignedCookieSessionFactory
 
 from h.security import derive_key
 from h.security.policy.top_level import HTML_AUTHCOOKIE_MAX_AGE
+from h.util.edu_domains import is_edu_email
 
 
 def model(request):
@@ -13,6 +14,16 @@ def model(request):
     session["userid"] = request.authenticated_userid
     session["groups"] = _current_groups(request, request.default_authority)
     session["features"] = request.feature.all()
+    # `_user_preferences` and not `_preferences`: this model is published to
+    # *other* users. `h.services.group_members._publish` and
+    # `group_create.create_private_group` build it from the acting user's
+    # request and hand it to the streamer keyed by the target's userid, so
+    # h/streamer/messages.py delivers one user's preferences to another's
+    # sidebar, which applies them as its own. That is a pre-existing bug -- it
+    # already misdelivers show_sidebar_tutorial -- but the EDU survey is the
+    # first preference that decides something about who the user *is*, so it
+    # stays out of the one path that crosses users. The survey reaches its own
+    # user through `profile()`, which every client fetches on launch.
     session["preferences"] = _user_preferences(request.user)
     return session
 
@@ -40,7 +51,7 @@ def profile(request, authority=None):
             "authority": authority,
             "groups": _current_groups(request, authority),
             "features": request.feature.all(),
-            "preferences": _user_preferences(user),
+            "preferences": _preferences(request),
         },
         **user_info(user),
     )
@@ -91,6 +102,26 @@ def _group_model(route_url, group):
     return model_
 
 
+def _preferences(request):
+    """
+    Return the `preferences` object for the current user, for `profile()`.
+
+    Split in two on purpose: `_user_preferences` answers what the user's own
+    columns say, and anything that also depends on the request — a feature
+    flag, the first-party authority — is decided here, so the older preferences
+    keep being a plain read of the user.
+
+    Only `profile()` uses this. `model()` deliberately stays on
+    `_user_preferences`; the comment there says why.
+    """
+    preferences = _user_preferences(request.user)
+
+    if show_edu_role_survey(request):
+        preferences["show_instructor_survey"] = True
+
+    return preferences
+
+
 def _user_preferences(user):
     preferences = {}
     if user and not user.sidebar_tutorial_dismissed:
@@ -100,6 +131,74 @@ def _user_preferences(user):
     if user and user.shortcuts_preferences is not None:
         preferences["shortcuts_preferences"] = user.shortcuts_preferences
     return preferences
+
+
+def can_answer_edu_role_survey(request):
+    """
+    Return True if the request's user is in the EDU role survey's audience.
+
+    That is everything deciding who the survey is for -- the kill switch, the
+    first-party authority, an educational email address -- but not whether they
+    have answered it already; `show_edu_role_survey` adds that.
+
+    The two questions are split because the write path needs this one on its
+    own. `h.views.api.profile` rejects an answer from anyone outside the
+    audience, but someone inside it who has already answered isn't writing
+    where they were never asked -- they are sending a stale duplicate, which is
+    dropped rather than rejected. One rule each, so a change to who gets the
+    survey -- the PRD's plan to re-ask the people who dismissed it, say --
+    moves both paths at once, with no second rule to keep in step.
+
+    Note `request.default_authority` below, and not the local `authority` in
+    `profile()`: that one holds the *user's* authority, so comparing against it
+    would compare a value with itself and silently let every third-party user
+    through.
+    """
+    # The `instructor_survey` flag is both the rollout control and the kill
+    # switch. Checking it here rather than leaving it to the client means
+    # turning it off stops the survey from the next profile fetch on, with no
+    # new client bundle to propagate through the CDN and the browser extension.
+    #
+    # Two things it is not. It isn't instant: sidebars that are already open
+    # keep the profile they were handed until they reload or the streamer sends
+    # them a new one. And it isn't absolute: `FeatureService._state` honours the
+    # `?__feature__[instructor_survey]` query param ahead of everything else, on
+    # any request and for any user, so that override turns the survey back on
+    # for whoever passes it -- on the write path as well as this one.
+    if not request.feature("instructor_survey"):
+        return False
+
+    user = request.user
+
+    if not user:
+        return False
+
+    # Restrict the survey to the first-party authority. The flag is configured
+    # as first-party only, but that is not enough on its own: FeatureService
+    # checks a flag's `everyone` column *before* it looks at the user's
+    # authority and returns True without reading it, so widening a rollout with
+    # that checkbox would reach every third-party authority too. Keeping the
+    # check here makes the exclusion structural rather than a checkbox away.
+    if user.authority != request.default_authority:
+        return False
+
+    return is_edu_email(user.email)
+
+
+def show_edu_role_survey(request):
+    """
+    Return True if the request's user should be shown the EDU role survey.
+
+    The survey is for web app users at educational institutions only, and is
+    only ever shown until they answer it.
+    """
+    if not can_answer_edu_role_survey(request):
+        return False
+
+    # Any recorded answer stops us asking again, including a dismissal, so this
+    # must test for NULL and not for falsiness: "not_instructor" and "dismissed"
+    # are answers.
+    return request.user.edu_role_survey_response is None
 
 
 def includeme(config):  # pragma: no cover

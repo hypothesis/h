@@ -87,6 +87,17 @@ class TestModel:
 
         assert "show_youtube_gdpr_banner" not in preferences
 
+    def test_it_never_includes_the_instructor_survey(self, authenticated_request):
+        # Not even for a user who is being shown the survey -- `profile()` is
+        # what tells them, and there is a test for that. This model is
+        # published to *other* users' sidebars (see the comment in
+        # session.model), so the survey has no business travelling in it.
+        authenticated_request.set_edu_role_survey(None)
+
+        preferences = session.model(authenticated_request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
+
     @pytest.mark.parametrize("dismissed", [True, False])
     def test_authenticated_youtube_gdpr_banner(self, authenticated_request, dismissed):
         authenticated_request.set_youtube_gdpr_banner_dismissed(dismissed)
@@ -214,6 +225,65 @@ class TestProfile:
             assert "show_youtube_gdpr_banner" not in preferences
         else:
             assert preferences["show_youtube_gdpr_banner"] is True
+
+    def test_anonymous_hides_instructor_survey(self, unauthenticated_request):
+        preferences = session.profile(unauthenticated_request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
+
+    def test_instructor_survey_shown_when_unanswered(self, authenticated_request):
+        authenticated_request.set_edu_role_survey(None)
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert preferences["show_instructor_survey"] is True
+
+    @pytest.mark.parametrize("response", ["instructor", "not_instructor", "dismissed"])
+    def test_instructor_survey_hidden_once_answered(
+        self, authenticated_request, response
+    ):
+        # All three are answers. "not_instructor" and "dismissed" must stop us
+        # asking again just like "instructor" does, which is why the check is
+        # for NULL rather than for falsiness.
+        authenticated_request.set_edu_role_survey(response)
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
+
+    def test_instructor_survey_hidden_when_flag_is_off(self, authenticated_request):
+        # The flag is the kill switch: with it off, h must stop sending the
+        # preference, rather than leaving it to the client to ignore it.
+        authenticated_request.set_edu_role_survey(None)
+        authenticated_request.set_features({"instructor_survey": False})
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
+
+    def test_instructor_survey_hidden_for_non_edu_email(self, authenticated_request):
+        authenticated_request.set_edu_role_survey(None, email="someone@gmail.com")
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
+
+    def test_instructor_survey_hidden_for_third_party_authority(
+        self, authority, fake_feature
+    ):
+        # The survey is for web app users only, and this holds even with the
+        # flag on for this user — which is what enabling it for `everyone`
+        # amounts to — because the authority is checked here rather than left
+        # to the flag.
+        request = FakeRequest(
+            authority, "acct:someone@thirdparty.com", "thirdparty.com", fake_feature
+        )
+        request.set_features({"instructor_survey": True})
+        request.set_edu_role_survey(None)
+
+        preferences = session.profile(request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
 
     def test_authenticated_includes_shortcuts_preferences(self, authenticated_request):
         shortcuts_preferences = {"applyUpdates": "l"}
@@ -347,7 +417,17 @@ class FakeRequest:
         if userid is None:
             self.user = None
         else:
-            self.user = mock.Mock(groups=[], authority=user_authority)
+            # `email` and `edu_role_survey_response` are spelled out rather
+            # than left to Mock's auto-attributes: the EDU survey reads both,
+            # and a Mock stands in for a real value well enough to hide a
+            # missing one. Defaults say "no email, never answered", so the
+            # survey is off until a test asks for it via set_edu_role_survey.
+            self.user = mock.Mock(
+                groups=[],
+                authority=user_authority,
+                email=None,
+                edu_role_survey_response=None,
+            )
 
         self.feature = fake_feature
         self.route_url = mock.Mock(return_value="/group/a")
@@ -365,6 +445,10 @@ class FakeRequest:
 
     def set_youtube_gdpr_banner_dismissed(self, dismissed):
         self.user.youtube_gdpr_banner_dismissed = dismissed
+
+    def set_edu_role_survey(self, response, email="someone@stanford.edu"):
+        self.user.edu_role_survey_response = response
+        self.user.email = email
 
     def find_service(self, **kwargs):
         return {"group_list": self._group_list_service}[kwargs["name"]]
