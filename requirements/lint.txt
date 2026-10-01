@@ -252,7 +252,7 @@ newrelic==10.5.0
     # via
     #   -r functests.txt
     #   -r tests.txt
-oauthlib==3.3.1
+oauthlib==4.0.0
     # via
     #   -r functests.txt
     #   -r tests.txt
