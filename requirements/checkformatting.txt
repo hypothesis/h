@@ -8,8 +8,6 @@ build==1.0.3
     # via pip-tools
 click==8.1.8
     # via pip-tools
-importlib-metadata==7.0.1
-    # via pip-sync-faster
 packaging==25.0
     # via build
 pip-sync-faster==0.0.5
@@ -26,13 +24,11 @@ ruff==0.13.2
     # via -r checkformatting.in
 wheel==0.42.0
     # via pip-tools
-zipp==3.19.1
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via
     #   -r checkformatting.in
     #   pip-tools
-setuptools==78.1.1
+setuptools==83.0.0
     # via pip-tools

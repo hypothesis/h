@@ -623,7 +623,7 @@ pip==25.3
     #   -r functests.txt
     #   -r tests.txt
     #   pip-tools
-setuptools==78.1.1
+setuptools==83.0.0
     # via
     #   -r functests.txt
     #   -r tests.txt
