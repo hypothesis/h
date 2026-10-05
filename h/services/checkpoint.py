@@ -33,6 +33,11 @@ class CheckpointService:
 
     def __init__(self, db):
         self.db = db
+        # Per-request cache of resolved documents, keyed by URI. A single
+        # Paced Social Annotation launch upserts one checkpoint per group, all
+        # on the same document_uri, so resolving the document once instead of
+        # once per group keeps large group sets from timing out.
+        self._documents: dict[str, Document] = {}
 
     def active_checkpoint(self, group_id: int, uri: str) -> Checkpoint | None:
         """
@@ -185,12 +190,7 @@ class CheckpointService:
         if not group:
             return None
 
-        # Resolve-or-create the document. A checkpoint is synced at
-        # assignment-launch time, before anyone has annotated the URL, so its
-        # Document may not exist yet. Creating it (with document_uri as a
-        # self-claim) means a later annotation on that URL resolves onto the
-        # same Document, so the checkpoint hides annotations from the first one.
-        document = Document.find_or_create_by_uris(self.db, document_uri, []).first()
+        document = self._resolve_document(document_uri)
 
         stmt = (
             insert(Checkpoint)
@@ -220,6 +220,21 @@ class CheckpointService:
                 Checkpoint.document_id == document.id,
             )
         )
+
+    def _resolve_document(self, document_uri: str) -> Document:
+        """Resolve-or-create the document for `document_uri`, cached per request.
+
+        A checkpoint is synced at assignment-launch time, before anyone has
+        annotated the URL, so its Document may not exist yet. Creating it (with
+        document_uri as a self-claim) means a later annotation on that URL
+        resolves onto the same Document, so the checkpoint hides annotations
+        from the first one.
+        """
+        if document_uri not in self._documents:
+            self._documents[document_uri] = Document.find_or_create_by_uris(
+                self.db, document_uri, []
+            ).first()
+        return self._documents[document_uri]
 
     def reveal_checkpoint(
         self,
