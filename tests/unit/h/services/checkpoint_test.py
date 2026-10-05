@@ -433,6 +433,51 @@ class TestUpsert:
         assert document is not None
         assert checkpoint.document_id == document.id
 
+    def test_it_resolves_the_document_once_across_groups_sharing_a_uri(
+        self, svc, factories, mocker
+    ):
+        # A Paced Social Annotation launch syncs one checkpoint per group, all
+        # on the same document_uri. Resolving the document is the expensive step
+        # (a wide scan of a content-addressed fingerprint's document_uris), so
+        # doing it once per group is the O(N) cost that 504s large group sets.
+        groups = factories.Group.create_batch(5)
+        spy = mocker.spy(Document, "find_or_create_by_uris")
+
+        for group in groups:
+            svc.upsert_checkpoint(
+                authority=group.authority,
+                group_authority_provided_id=group.authority_provided_id,
+                document_uri="http://example.com/shared",
+            )
+
+        assert spy.call_count == 1
+
+    def test_it_resolves_distinct_uris_separately(self, svc, factories, mocker):
+        # The cache must key on the URI: distinct documents still resolve
+        # independently and each checkpoint points at the right one.
+        document_a = factories.Document()
+        factories.DocumentURI(document=document_a, uri="http://example.com/a")
+        document_b = factories.Document()
+        factories.DocumentURI(document=document_b, uri="http://example.com/b")
+        group_a = factories.Group()
+        group_b = factories.Group()
+        spy = mocker.spy(Document, "find_or_create_by_uris")
+
+        checkpoint_a = svc.upsert_checkpoint(
+            authority=group_a.authority,
+            group_authority_provided_id=group_a.authority_provided_id,
+            document_uri="http://example.com/a",
+        )
+        checkpoint_b = svc.upsert_checkpoint(
+            authority=group_b.authority,
+            group_authority_provided_id=group_b.authority_provided_id,
+            document_uri="http://example.com/b",
+        )
+
+        assert spy.call_count == 2
+        assert checkpoint_a.document_id == document_a.id
+        assert checkpoint_b.document_id == document_b.id
+
 
 class TestSetUserRole:
     @pytest.mark.parametrize(
