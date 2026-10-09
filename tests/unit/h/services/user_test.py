@@ -1,6 +1,9 @@
-import pytest
+from datetime import datetime
 
-from h.models import User
+import pytest
+from h_matchers import Any
+
+from h.models import User, UserSurveyResponse
 from h.services.user import UserNotActivated, UserService, user_service_factory
 
 
@@ -114,6 +117,82 @@ class TestUserService:
         svc.update_preferences(user, show_youtube_gdpr_banner=False)
 
         assert user.youtube_gdpr_banner_dismissed is True
+
+    @pytest.mark.parametrize("response", ["instructor", "not_instructor", "dismissed"])
+    def test_update_preferences_records_survey_response(
+        self, db_session, svc, factories, response
+    ):
+        user = factories.User()
+        db_session.flush()
+
+        svc.update_preferences(user, instructor_survey_response=response)
+
+        assert user.survey_responses == [
+            Any.instance_of(UserSurveyResponse).with_attrs(
+                {"survey": "edu_role", "response": response}
+            )
+        ]
+        assert user.survey_responses[0].responded_at is not None
+
+    @pytest.mark.parametrize("response", ["instructor", "not_instructor", "dismissed"])
+    def test_update_preferences_replaces_a_dismissal(self, svc, factories, response):
+        user = factories.User()
+        dismissal = factories.UserSurveyResponse(
+            user=user,
+            response="dismissed",
+            responded_at=datetime(2026, 1, 1),  # noqa: DTZ001
+        )
+
+        svc.update_preferences(user, instructor_survey_response=response)
+
+        # `dismissal` is the object the session already held, so this also
+        # checks the upsert refreshed it rather than leaving it stale.
+        assert user.survey_responses == [dismissal]
+        assert dismissal.response == response
+        assert dismissal.responded_at > datetime(2026, 1, 1)  # noqa: DTZ001
+
+    @pytest.mark.parametrize("previous", ["instructor", "not_instructor"])
+    @pytest.mark.parametrize("response", ["instructor", "not_instructor", "dismissed"])
+    def test_update_preferences_doesnt_replace_an_answer(
+        self, svc, factories, previous, response
+    ):
+        user = factories.User()
+        answer = factories.UserSurveyResponse(
+            user=user,
+            response=previous,
+            responded_at=datetime(2026, 1, 1),  # noqa: DTZ001
+        )
+
+        svc.update_preferences(user, instructor_survey_response=response)
+
+        assert user.survey_responses == [answer]
+        assert answer.response == previous
+        assert answer.responded_at == datetime(2026, 1, 1)  # noqa: DTZ001
+
+    @pytest.mark.parametrize(
+        "response", ["maybe", "", None, True, 1, {"a": 1}, ["instructor"]]
+    )
+    def test_update_preferences_rejects_invalid_survey_response(
+        self, db_session, svc, factories, response
+    ):
+        user = factories.User()
+        db_session.flush()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(user, instructor_survey_response=response)
+
+        assert "instructor_survey_response must be one of" in str(exc.value)
+        assert not user.survey_responses
+
+    def test_update_preferences_leaves_survey_untouched_when_not_given(
+        self, db_session, svc, factories
+    ):
+        user = factories.User()
+        db_session.flush()
+
+        svc.update_preferences(user, show_sidebar_tutorial=False)
+
+        assert not user.survey_responses
 
     def test_update_preferences_raises_for_unsupported_keys(self, svc, factories):
         user = factories.User.build()
