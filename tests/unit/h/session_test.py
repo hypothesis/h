@@ -4,7 +4,9 @@ import pytest
 
 from h import session
 from h.models import UserSurveyResponse
+from h.services.edu_domains import EduDomainsService
 from h.services.group_list import GroupListService
+from h.util.edu_domains import is_edu_email
 
 
 class TestModel:
@@ -436,6 +438,12 @@ class FakeRequest:
         self._group_list_service = mock.create_autospec(
             GroupListService, spec_set=True, instance=True
         )
+        self._edu_domains_service = mock.create_autospec(
+            EduDomainsService, spec_set=True, instance=True
+        )
+        self._edu_domains_service.is_edu_email.side_effect = lambda email: is_edu_email(
+            email, frozenset({"stanford.edu"})
+        )
 
     def set_features(self, feature_dict):
         self.feature.flags = feature_dict
@@ -454,8 +462,11 @@ class FakeRequest:
         )
         self.user.email = email
 
-    def find_service(self, **kwargs):
-        return {"group_list": self._group_list_service}[kwargs["name"]]
+    def find_service(self, iface=None, name=None):
+        if iface is EduDomainsService:
+            return self._edu_domains_service
+
+        return {"group_list": self._group_list_service}[name]
 
 
 @pytest.fixture

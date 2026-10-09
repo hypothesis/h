@@ -8,42 +8,43 @@ import re
 #: matches in its punycode ("xn--") form, which this accepts.
 _HOSTNAME_LABEL = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 
-#: Reference list of educational email domains.
-#:
-#: PLACEHOLDER. The real list is owned by product (see the "Collect EDU user
-#: role information in the web app" PRD). Until it lands this holds only the
-#: handful of entries needed to develop and test against, and "edu" on its own
-#: matches every *.edu address there is.
-#:
-#: Entries are bare, lower-case domains: no leading dot, no "*." wildcard, no
-#: surrounding whitespace. An entry matches that exact domain and any subdomain
-#: of it, so a single "edu" covers every *.edu address. The format is enforced
-#: by a test rather than normalized on the way in, because a malformed entry
-#: matches nothing: it would switch the survey off for everyone, silently, and
-#: the most likely moment for that to happen is when the real list replaces
-#: this one.
-#:
-#: It lives here rather than in the database because the PRD says the list is
-#: static and rarely changes, and `is_edu_email` runs while building the user
-#: profile, which the client requests on every launch.
-EDU_DOMAINS = frozenset(
-    {
-        "edu",
-        "ac.uk",
-        "edu.au",
-        # Not an educational domain: our own, so that staff accounts see the
-        # survey while we test it. Goes when the real list lands.
-        "hypothes.is",
-    }
-)
 
-
-def is_edu_email(email: str | None) -> bool:
+def parse_domains(text: str) -> tuple[frozenset[str], list[str]]:
     """
-    Return True if `email` belongs to a known educational institution.
+    Parse the reference list of educational email domains.
 
-    A domain in the reference list matches itself and any of its subdomains, so
-    the entry "edu" matches "someone@cs.stanford.edu" as well as
+    The list is a one-column CSV kept in the private hypothesis/edu-domains
+    repo: "#" comment lines, a "domain" header, then one domain per line.
+
+    Entries must be bare, lower-case domains: no leading dot, no "*." wildcard,
+    no surrounding whitespace. An entry matches that exact domain and any
+    subdomain of it. Entries are checked rather than normalized on the way in,
+    because a malformed entry would otherwise match nothing without a symptom:
+    they are returned apart so that the caller can report them.
+
+    :returns: the valid domains, and the malformed entries in file order
+    """
+    domains = set()
+    malformed = []
+
+    for line in text.splitlines():
+        if not line or line.startswith("#") or line == "domain":
+            continue
+
+        if _is_domain(line):
+            domains.add(line)
+        else:
+            malformed.append(line)
+
+    return frozenset(domains), malformed
+
+
+def is_edu_email(email: str | None, domains: frozenset[str]) -> bool:
+    """
+    Return True if `email` belongs to one of `domains`.
+
+    A domain in the list matches itself and any of its subdomains, so the entry
+    "stanford.edu" matches "someone@cs.stanford.edu" as well as
     "someone@stanford.edu".
     """
     if not email:
@@ -67,10 +68,14 @@ def is_edu_email(email: str | None) -> bool:
     #
     # A trailing-dot FQDN ("stanford.edu.") ends in an empty label and is
     # rejected too, which is the safe direction to be wrong in.
-    if not all(_HOSTNAME_LABEL.fullmatch(label) for label in labels):
+    if not _is_domain(domain):
         return False
 
     # Walk up the domain one label at a time rather than scanning the whole
     # reference list, so the cost is the depth of the domain (3 or 4 lookups)
     # rather than the size of the list.
-    return any(".".join(labels[index:]) in EDU_DOMAINS for index in range(len(labels)))
+    return any(".".join(labels[index:]) in domains for index in range(len(labels)))
+
+
+def _is_domain(value: str) -> bool:
+    return all(_HOSTNAME_LABEL.fullmatch(label) for label in value.split("."))

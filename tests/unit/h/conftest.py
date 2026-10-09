@@ -33,6 +33,7 @@ from h.services.bulk_api import (
     BulkLMSStatsService,
 )
 from h.services.developer_token import DeveloperTokenService
+from h.services.edu_domains import EduDomainsService
 from h.services.email import EmailService
 from h.services.feature import FeatureService
 from h.services.flag import FlagService
@@ -60,6 +61,7 @@ from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService
 from h.services.user_unique import UserUniqueService
 from h.services.user_update import UserUpdateService
+from h.util.edu_domains import is_edu_email
 from tests.common import factories as common_factories
 
 
@@ -478,6 +480,18 @@ def annotation_authority_queue_service(mock_service):
 @pytest.fixture
 def feature_service(mock_service):
     return mock_service(FeatureService, name="feature")
+
+
+@pytest.fixture
+def edu_domains_service(mock_service):
+    edu_domains_service = mock_service(EduDomainsService)
+    edu_domains_service.is_edu_email.side_effect = fake_is_edu_email
+    return edu_domains_service
+
+
+def fake_is_edu_email(email):
+    """Stand in for EduDomainsService.is_edu_email with a one-domain list."""
+    return is_edu_email(email, frozenset({"stanford.edu"}))
 
 
 @pytest.fixture

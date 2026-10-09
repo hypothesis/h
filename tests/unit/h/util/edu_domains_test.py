@@ -1,7 +1,10 @@
 import pytest
 
-from h.util import edu_domains
-from h.util.edu_domains import EDU_DOMAINS, is_edu_email
+from h.util.edu_domains import is_edu_email, parse_domains
+
+# "edu" on its own matches every *.edu address. The real list has no entry that
+# broad, but it is what the malformed-domain cases below have to get past.
+DOMAINS = frozenset({"edu", "stanford.edu", "ox.ac.uk", "unimelb.edu.au"})
 
 
 class TestIsEduEmail:
@@ -16,25 +19,24 @@ class TestIsEduEmail:
             "someone@unimelb.edu.au",
             # The reference list is lower case; addresses in the wild are not.
             "SOMEONE@Stanford.EDU",
-            # Our own domain is in the placeholder list so that staff accounts
-            # see the survey while we test it. This case goes with it.
-            "someone@hypothes.is",
         ],
     )
     def test_it_matches_educational_domains(self, email):
-        assert is_edu_email(email) is True
+        assert is_edu_email(email, DOMAINS) is True
 
     @pytest.mark.parametrize(
         "email",
         [
             "someone@gmail.com",
+            # Not a subdomain of "ox.ac.uk", just a domain ending in it.
+            "someone@fox.ac.uk",
             # Not a subdomain of "edu", just a domain ending in those letters.
             "someone@notedu",
             "someone@fakeedu.com",
         ],
     )
     def test_it_rejects_other_domains(self, email):
-        assert is_edu_email(email) is False
+        assert is_edu_email(email, DOMAINS) is False
 
     @pytest.mark.parametrize(
         "email",
@@ -59,7 +61,7 @@ class TestIsEduEmail:
         ],
     )
     def test_it_rejects_malformed_domains(self, email):
-        assert is_edu_email(email) is False
+        assert is_edu_email(email, DOMAINS) is False
 
     @pytest.mark.parametrize(
         "email",
@@ -72,48 +74,39 @@ class TestIsEduEmail:
         ],
     )
     def test_it_rejects_unusable_values(self, email):
-        assert is_edu_email(email) is False
+        assert is_edu_email(email, DOMAINS) is False
 
 
-class TestEduDomains:
-    """
-    Guard the format of the reference list.
+class TestParseDomains:
+    def test_it_parses_the_list(self):
+        text = "# A comment\n# Another one\ndomain\nox.ac.uk\nstanford.edu\n"
 
-    A malformed entry does not raise: it just never matches, which turns the
-    survey off for everyone with no visible symptom. The two formats these
-    lists usually ship in, ".edu" and "*.stanford.edu", both fail that way, so
-    the most likely moment to introduce one is when the real list replaces the
-    placeholder.
-    """
+        assert parse_domains(text) == (frozenset({"ox.ac.uk", "stanford.edu"}), [])
 
-    def test_it_is_not_empty(self):
-        assert EDU_DOMAINS
-
-    def test_entries_are_bare_lower_case_domains(self):
-        # Checked against `_HOSTNAME_LABEL`, which is what `is_edu_email`
-        # matches with, so the list is held to the same definition of a valid
-        # domain as the addresses it's compared against -- rather than to a
-        # second, looser one that would pass entries like "edu;", "-edu" or
-        # "stanford..edu" while `is_edu_email` can never match them. ".edu",
-        # "*.edu", "EDU" and " edu" fail it too.
-        #
-        # Not parametrized over the list on purpose: that is 3 pytest cases
-        # with the placeholder and 14k once the real list lands.
-        malformed = sorted(
-            domain
-            for domain in EDU_DOMAINS
-            if not all(
-                edu_domains._HOSTNAME_LABEL.fullmatch(label)  # noqa: SLF001
-                for label in domain.split(".")
-            )
+    def test_it_accepts_crlf_line_endings(self):
+        assert parse_domains("domain\r\nstanford.edu\r\n") == (
+            frozenset({"stanford.edu"}),
+            [],
         )
 
-        assert not malformed, f"malformed entries: {malformed}"
+    def test_it_ignores_blank_lines(self):
+        assert parse_domains("domain\n\nstanford.edu\n\n") == (
+            frozenset({"stanford.edu"}),
+            [],
+        )
 
-    @pytest.mark.parametrize("malformed", [".edu", "*.edu", "*.stanford.edu", "EDU"])
-    def test_a_malformed_entry_would_match_nothing(self, malformed, monkeypatch):
-        # Demonstrates why the test above exists rather than normalizing the
-        # entries quietly: none of these raise, they just stop matching.
-        monkeypatch.setattr(edu_domains, "EDU_DOMAINS", frozenset({malformed}))
+    @pytest.mark.parametrize(
+        "malformed",
+        # The formats these lists usually ship in, and the ones a careless edit
+        # produces. None of them could ever match an address, so they are
+        # reported rather than kept, and rather than quietly fixed.
+        [".edu", "*.edu", "*.stanford.edu", "EDU", " stanford.edu", "stanford..edu"],
+    )
+    def test_it_returns_malformed_entries_apart(self, malformed):
+        assert parse_domains(f"domain\nox.ac.uk\n{malformed}\n") == (
+            frozenset({"ox.ac.uk"}),
+            [malformed],
+        )
 
-        assert is_edu_email("someone@stanford.edu") is False
+    def test_it_returns_nothing_for_an_empty_list(self):
+        assert parse_domains("# Only comments\ndomain\n") == (frozenset(), [])
