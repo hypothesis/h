@@ -33,8 +33,9 @@ FEATURES = {
         "and enabling it for `everyone` will not widen it past the first-party "
         "authority. NOT READY FOR REAL USERS: the list of educational email "
         "domains it selects on (h/util/edu_domains.py) is still a placeholder "
-        "that matches every *.edu address, and this flag is the only thing "
-        "keeping it from them"
+        "that matches every *.edu address, and this flag is what keeps it from "
+        "them -- short of ?__feature__[instructor_survey] in the query string, "
+        "which turns any flag on for any user"
     ),
 }
 
