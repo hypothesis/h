@@ -247,6 +247,10 @@ class User(Base):
         "UserIdentity", backref="user", cascade="all, delete-orphan"
     )
 
+    survey_responses = sa.orm.relationship(
+        "UserSurveyResponse", backref="user", cascade="all, delete-orphan"
+    )
+
     @hybrid_property
     def username(self):
         return self._username

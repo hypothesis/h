@@ -46,6 +46,7 @@ from h.models.user import User
 from h.models.user_deletion import UserDeletion
 from h.models.user_identity import UserIdentity
 from h.models.user_rename import UserRename
+from h.models.user_survey_response import UserSurveyResponse
 
 __all__ = (
     "Activation",
@@ -76,4 +77,5 @@ __all__ = (
     "User",
     "UserDeletion",
     "UserIdentity",
+    "UserSurveyResponse",
 )

@@ -27,3 +27,4 @@ from tests.common.factories.token import DeveloperToken, OAuth2Token
 from tests.common.factories.user import User
 from tests.common.factories.user_deletion import UserDeletion
 from tests.common.factories.user_identity import UserIdentity
+from tests.common.factories.user_survey_response import UserSurveyResponse
