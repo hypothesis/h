@@ -21,9 +21,14 @@ class EduRoleSurveyResponse(StrEnum):
 
     A dismissal can be replaced by a later answer, because product plans to
     re-run the survey for the people who dismissed it so they get to answer a
-    second time. An "instructor" or "not_instructor" answer is never replaced.
-    That means `UserSurveyResponse.responded_at` holds the timestamp of the
-    *latest* answer, which is the first one unless it was a dismissal.
+    second time. An "instructor" or "not_instructor" answer is never replaced:
+    `UserService.update_preferences` upserts with a condition that only
+    matches a dismissal.
+
+    `UserSurveyResponse.responded_at` is written with the response beside it,
+    so it is when *this* answer was recorded -- the first one, unless a later
+    answer replaced a dismissal. It is not the date the user was first asked,
+    nor necessarily the first time they replied.
     """
 
     INSTRUCTOR = "instructor"
