@@ -49,6 +49,7 @@ certifi==2026.1.4
     # via
     #   -r functests.txt
     #   -r tests.txt
+    #   hubspot-api-client
     #   requests
     #   sentry-sdk
 cffi==2.0.0
@@ -172,6 +173,10 @@ h-testkit==1.0.1
     #   -r functests.txt
     #   -r tests.txt
 httpretty==1.1.4
+    # via
+    #   -r functests.txt
+    #   -r tests.txt
+hubspot-api-client==12.0.0
     # via
     #   -r functests.txt
     #   -r tests.txt
@@ -423,6 +428,7 @@ python-dateutil==2.9.0.post0
     #   elasticsearch-dsl
     #   faker
     #   freezegun
+    #   hubspot-api-client
 python-slugify==8.0.4
     # via
     #   -r functests.txt
@@ -447,6 +453,7 @@ requests==2.32.4
     # via
     #   -r functests.txt
     #   -r tests.txt
+    #   hubspot-api-client
 rfc3339-validator==0.1.4
     # via
     #   -r functests.txt
@@ -469,6 +476,7 @@ six==1.17.0
     #   -r functests.txt
     #   -r tests.txt
     #   elasticsearch-dsl
+    #   hubspot-api-client
     #   python-dateutil
     #   rfc3339-validator
 soupsieve==2.5
@@ -534,6 +542,7 @@ urllib3==2.7.0
     #   -r functests.txt
     #   -r tests.txt
     #   elasticsearch
+    #   hubspot-api-client
     #   requests
     #   sentry-sdk
 venusian==3.1.1

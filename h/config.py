@@ -128,6 +128,10 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
     )
     settings_manager.set("h.edu_domains_github_token", "EDU_DOMAINS_GITHUB_TOKEN")
 
+    # The token of the HubSpot private app that h sends contacts to. Without it
+    # nothing is sent to HubSpot.
+    settings_manager.set("h.hubspot_api_key", "HUBSPOT_API_KEY")
+
     # Reporting settings
     settings_manager.set("h.report.fdw_users", "REPORT_FDW_USERS", type_=aslist)
 
