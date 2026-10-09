@@ -25,6 +25,12 @@ class EduRoleSurveyResponse(StrEnum):
     `UserService.update_preferences` upserts with a condition that only
     matches a dismissal.
 
+    Nothing replaces a dismissal through the API yet, though. Until the re-ask
+    lands, `h.session.show_edu_role_survey` stops asking once any answer is
+    recorded, so `h.views.api.profile.update_preferences` drops a second
+    answer before it reaches the upsert. Today the upsert's condition only
+    settles two answers sent in the same instant.
+
     `UserSurveyResponse.responded_at` is written with the response beside it,
     so it is when *this* answer was recorded -- the first one, unless a later
     answer replaced a dismissal. It is not the date the user was first asked,
