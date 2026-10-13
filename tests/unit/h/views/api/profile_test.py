@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest import mock
 
 import pytest
@@ -124,6 +125,28 @@ class TestUpdatePreferences:
         views.update_preferences(pyramid_request)
 
         user_service.update_preferences.assert_called_once_with(user)
+
+    def test_takes_a_new_answer_from_a_user_asked_again_after_a_dismissal(
+        self, pyramid_request, user, user_service
+    ):
+        pyramid_request.registry.settings["h.edu_role_survey_ask_again_after_days"] = 30
+        user.email = "someone@stanford.edu"
+        user.survey_responses = [
+            UserSurveyResponse(
+                survey="edu_role",
+                response="dismissed",
+                responded_at=datetime.utcnow() - timedelta(days=31),  # noqa: DTZ003
+            )
+        ]
+        pyramid_request.json_body = {
+            "preferences": {"instructor_survey_response": "instructor"}
+        }
+
+        views.update_preferences(pyramid_request)
+
+        user_service.update_preferences.assert_called_once_with(
+            user, instructor_survey_response="instructor"
+        )
 
     def test_keeps_other_preferences_when_survey_is_already_answered(
         self, pyramid_request, user, user_service

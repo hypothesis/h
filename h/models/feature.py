@@ -33,6 +33,11 @@ FEATURES = {
         "and enabling it for `everyone` will not widen it past the first-party "
         "authority"
     ),
+    "instructor_survey_ask_again": (
+        "Show the EDU role survey again to users who dismissed it, once "
+        "EDU_ROLE_SURVEY_ASK_AGAIN_AFTER_DAYS days have passed. Only has an "
+        "effect while instructor_survey is on"
+    ),
 }
 
 

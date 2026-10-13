@@ -90,9 +90,10 @@ def update_preferences(request):
                 # request: a retry after a lost response, or a dismissal in a
                 # second sidebar still showing a profile from before the first
                 # answer, is a no-op and not an error the user should see. Any
-                # other preference in the same PATCH still applies. Once
-                # show_edu_role_survey starts re-asking the people who dismissed
-                # it, it returns True for them and this is skipped.
+                # other preference in the same PATCH still applies. Someone
+                # being asked again after a dismissal (the
+                # instructor_survey_ask_again flag) gets True from
+                # show_edu_role_survey, so their answer isn't dropped here.
                 #
                 # Note this is second, so it can't stand in for the audience
                 # check above: having answered before doesn't carry an answer
@@ -101,7 +102,8 @@ def update_preferences(request):
                 # The rule is "first answer wins", and that cuts both ways:
                 # answer in one tab and the other tab's stale panel can't
                 # overwrite it, but dismiss first and a later "instructor" from
-                # a stale panel is dropped too, so the sync sees the dismissal.
+                # a stale panel is dropped too, so the sync sees the dismissal,
+                # until the user is asked again.
                 # Preferring a real answer over a dismissal would be a product
                 # call, not a fix.
                 #

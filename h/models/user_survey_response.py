@@ -19,17 +19,12 @@ class EduRoleSurveyResponse(StrEnum):
     to comply with GDPR, and a dismissal stops us asking again just like a yes
     or a no does.
 
-    A dismissal can be replaced by a later answer, because product plans to
-    re-run the survey for the people who dismissed it so they get to answer a
-    second time. An "instructor" or "not_instructor" answer is never replaced:
+    The exception is the `instructor_survey_ask_again` feature flag: with it
+    on, `h.session.show_edu_role_survey` shows the survey again to users whose
+    dismissal is old enough, and their next answer replaces the dismissal. An
+    "instructor" or "not_instructor" answer is never replaced:
     `UserService.update_preferences` upserts with a condition that only
     matches a dismissal.
-
-    Nothing replaces a dismissal through the API yet, though. Until the re-ask
-    lands, `h.session.show_edu_role_survey` stops asking once any answer is
-    recorded, so `h.views.api.profile.update_preferences` drops a second
-    answer before it reaches the upsert. Today the upsert's condition only
-    settles two answers sent in the same instant.
 
     `UserSurveyResponse.responded_at` is written with the response beside it,
     so it is when *this* answer was recorded -- the first one, unless a later

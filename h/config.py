@@ -127,6 +127,14 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
         default="https://api.github.com/repos/hypothesis/edu-domains/contents/edu_domains_hed.csv",
     )
     settings_manager.set("h.edu_domains_github_token", "EDU_DOMAINS_GITHUB_TOKEN")
+    # How long after dismissing the EDU role survey a user is asked again, when
+    # the `instructor_survey_ask_again` feature flag is on.
+    settings_manager.set(
+        "h.edu_role_survey_ask_again_after_days",
+        "EDU_ROLE_SURVEY_ASK_AGAIN_AFTER_DAYS",
+        type_=int,
+        default=30,
+    )
 
     # The token of the HubSpot private app that h sends contacts to. Without it
     # nothing is sent to HubSpot.

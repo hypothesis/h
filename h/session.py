@@ -1,10 +1,10 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 from pyramid.csrf import SessionCSRFStoragePolicy
 from pyramid.session import JSONSerializer, SignedCookieSessionFactory
 
-from h.models.user_survey_response import Survey
+from h.models.user_survey_response import EduRoleSurveyResponse, Survey
 from h.security import derive_key
 from h.security.policy.top_level import HTML_AUTHCOOKIE_MAX_AGE
 from h.services.edu_domains import EduDomainsService
@@ -147,8 +147,7 @@ def can_answer_edu_role_survey(request):
     audience, but someone inside it who has already answered isn't writing
     where they were never asked -- they are sending a stale duplicate, which is
     dropped rather than rejected. One rule each, so a change to who gets the
-    survey -- the PRD's plan to re-ask the people who dismissed it, say --
-    moves both paths at once, with no second rule to keep in step.
+    survey moves both paths at once, with no second rule to keep in step.
 
     Note `request.default_authority` below, and not the local `authority` in
     `profile()`: that one holds the *user's* authority, so comparing against it
@@ -191,17 +190,36 @@ def show_edu_role_survey(request):
     Return True if the request's user should be shown the EDU role survey.
 
     The survey is for web app users at educational institutions only, and is
-    only ever shown until they answer it.
+    shown until they answer it. A dismissal stops it as well, unless the
+    `instructor_survey_ask_again` flag is on: then the survey is shown again
+    once the dismissal is older than `h.edu_role_survey_ask_again_after_days`,
+    and dismissing it again starts that wait over.
     """
     if not can_answer_edu_role_survey(request):
         return False
 
-    # Any recorded answer stops us asking again, including a dismissal: a
-    # "dismissed" row is an answer too.
-    return not any(
-        survey_response.survey == Survey.EDU_ROLE
-        for survey_response in request.user.survey_responses
+    response = next(
+        (
+            survey_response
+            for survey_response in request.user.survey_responses
+            if survey_response.survey == Survey.EDU_ROLE
+        ),
+        None,
     )
+
+    if response is None:
+        return True
+
+    if response.response != EduRoleSurveyResponse.DISMISSED:
+        return False
+
+    if not request.feature("instructor_survey_ask_again"):
+        return False
+
+    ask_again_after = timedelta(
+        days=request.registry.settings["h.edu_role_survey_ask_again_after_days"]
+    )
+    return response.responded_at < datetime.utcnow() - ask_again_after  # noqa: DTZ003
 
 
 def includeme(config):  # pragma: no cover
