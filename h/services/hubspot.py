@@ -53,13 +53,24 @@ class HubSpotClient:
             )
         )
 
-        # Only a response with some contacts rejected has `errors`.
-        for error in getattr(response, "errors", None) or []:
-            log.error(
-                "HubSpot rejected a contact: %s (%s)", error.message, error.context
+        accepted = {result.object_write_trace_id for result in response.results}
+
+        # Only a response with some contacts rejected has `errors`. Their
+        # messages can include the contact's email address, so only the keys
+        # and the error categories are logged.
+        if rejected := set(contacts) - accepted:
+            log.warning(
+                "HubSpot rejected contacts %s: %s",
+                sorted(rejected),
+                sorted(
+                    {
+                        error.category
+                        for error in getattr(response, "errors", None) or []
+                    }
+                ),
             )
 
-        return {result.object_write_trace_id for result in response.results}
+        return accepted
 
 
 class HubSpotService:

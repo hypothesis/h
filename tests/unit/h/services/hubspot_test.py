@@ -51,28 +51,43 @@ class TestHubSpotClient:
 
         assert accepted == {"1"}
 
-    def test_it_logs_the_contacts_HubSpot_rejected(self, client, api_client, caplog):
+    def test_it_logs_nothing_if_HubSpot_accepted_every_contact(
+        self, client, api_client, caplog
+    ):
         api_client.crm.contacts.batch_api.upsert.return_value = SimpleNamespace(
-            results=[],
+            results=[SimpleNamespace(object_write_trace_id="1")]
+        )
+
+        client.upsert_contacts({"1": {"email": "a@example.edu"}})
+
+        assert not caplog.messages
+
+    def test_it_logs_the_contacts_HubSpot_rejected_without_their_details(
+        self, client, api_client, caplog
+    ):
+        api_client.crm.contacts.batch_api.upsert.return_value = SimpleNamespace(
+            results=[SimpleNamespace(object_write_trace_id="1")],
             errors=[
                 SimpleNamespace(
-                    message="Property values were not valid",
-                    context={"objectWriteTraceId": ["1"]},
+                    category="VALIDATION_ERROR",
+                    message="Email address b@example.edu is invalid",
                 )
             ],
         )
 
-        with caplog.at_level(logging.ERROR):
-            client.upsert_contacts({"1": {"email": "a@example.edu"}})
+        with caplog.at_level(logging.WARNING):
+            client.upsert_contacts(
+                {"1": {"email": "a@example.edu"}, "2": {"email": "b@example.edu"}}
+            )
 
         assert caplog.messages == [
-            "HubSpot rejected a contact: Property values were not valid ({'objectWriteTraceId': ['1']})"
+            "HubSpot rejected contacts ['2']: ['VALIDATION_ERROR']"
         ]
 
     @pytest.fixture
     def api_client(self, mocker):
-        # HubSpot builds its API objects on first access, so there's no spec
-        # to check this mock against.
+        # HubSpot builds its API objects each time they're accessed, so
+        # there's no spec to check this mock against.
         api_client = mocker.Mock()
         api_client.crm.contacts.batch_api.upsert.return_value = SimpleNamespace(
             results=[]
