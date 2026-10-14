@@ -479,7 +479,7 @@ six==1.17.0
     #   hubspot-api-client
     #   python-dateutil
     #   rfc3339-validator
-soupsieve==2.5
+soupsieve==2.9
     # via
     #   -r functests.txt
     #   beautifulsoup4
