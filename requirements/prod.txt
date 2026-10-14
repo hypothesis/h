@@ -256,7 +256,7 @@ typing-extensions==4.13.2
     #   sqlalchemy
 tzdata==2025.2
     # via kombu
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   elasticsearch
     #   hubspot-api-client
