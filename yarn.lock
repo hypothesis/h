@@ -7145,7 +7145,7 @@ __metadata:
     gulp-if: ^3.0.0
     gulp-svgmin: ^4.1.0
     jquery: ^3.7.1
-    katex: ^0.16.22
+    katex: ^0.18.2
     normalize.css: ^8.0.0
     playwright: ^1.55.1
     popper.js: ^1.16.1
@@ -8278,14 +8278,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"katex@npm:^0.16.22":
-  version: 0.16.22
-  resolution: "katex@npm:0.16.22"
+"katex@npm:^0.18.2":
+  version: 0.18.2
+  resolution: "katex@npm:0.18.2"
   dependencies:
     commander: ^8.3.0
   bin:
     katex: cli.js
-  checksum: 66a609b6f3e1a3e8634a03228dcd31cb88b7f39d057cfe5271417bc8eb64b85f256accdbd68f453b5714e4e9546192bad554f75c8b9adb91d6b0a7a93505376b
+  checksum: d1bf286456cf2fdc913947f0bbb9c3d38db00cfa3ec0796464b7ca78f054a7bdf92a24fa0934949d788d32da625cd7877d1486da62f1c53b616c36808b36ce2a
   languageName: node
   linkType: hard
 
