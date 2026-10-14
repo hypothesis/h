@@ -1,8 +1,11 @@
 from collections.abc import Mapping
+from datetime import datetime
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import insert
 
-from h.models import User, UserIdentity
+from h.models import User, UserIdentity, UserSurveyResponse
+from h.models.user_survey_response import EduRoleSurveyResponse, Survey
 from h.util.db import on_transaction_end
 from h.util.user import split_user
 
@@ -10,6 +13,7 @@ UPDATE_PREFS_ALLOWED_KEYS = {
     "show_sidebar_tutorial",
     "show_youtube_gdpr_banner",
     "shortcuts_preferences",
+    "instructor_survey_response",
 }
 REPEATABLE_SHORTCUT_GROUPS = []
 ALLOWED_SHORTCUT_ACTIONS = {
@@ -181,8 +185,7 @@ class UserService:
 
         return user
 
-    @staticmethod
-    def update_preferences(user, **kwargs):
+    def update_preferences(self, user, **kwargs):
         invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
         if invalid_keys:
             keys = ", ".join(sorted(invalid_keys))
@@ -199,10 +202,65 @@ class UserService:
             validated = _validate_shortcuts_preferences(updated)
             user.shortcuts_preferences = validated
 
+        if "instructor_survey_response" in kwargs:
+            response = _validate_edu_role_survey_response(
+                kwargs["instructor_survey_response"]
+            )
+            self._record_edu_role_survey_response(user, response)
+
+    def _record_edu_role_survey_response(self, user, response):
+        """Upsert the user's answer to the EDU role survey.
+
+        Only a dismissal is replaced: an "instructor" or "not_instructor" row
+        is left as it is. That is enforced here, in the same statement as the
+        write, so two answers sent at once can't both see a dismissal and
+        replace each other.
+        """
+        stmt = insert(UserSurveyResponse).values(
+            user_id=user.id,
+            survey=Survey.EDU_ROLE,
+            response=response,
+            responded_at=datetime.utcnow(),  # noqa: DTZ003
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[UserSurveyResponse.user_id, UserSurveyResponse.survey],
+            set_={
+                "response": stmt.excluded.response,
+                "responded_at": stmt.excluded.responded_at,
+            },
+            where=UserSurveyResponse.response == EduRoleSurveyResponse.DISMISSED,
+        )
+        # The upsert goes around the session, which may already hold the user's
+        # answers. RETURNING the row with populate_existing refreshes an answer
+        # the session already holds, and expiring the collection picks up a row
+        # the upsert has just inserted.
+        stmt = stmt.returning(UserSurveyResponse)
+        self.session.scalars(stmt, execution_options={"populate_existing": True}).all()
+        self.session.expire(user, ["survey_responses"])
+
 
 def user_service_factory(_context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.default_authority, session=request.db)
+
+
+def _validate_edu_role_survey_response(response):
+    """Validate an answer to the EDU role survey.
+
+    The table has a matching CHECK constraint, but failing here turns a bad
+    value into a 400 rather than an IntegrityError.
+    """
+    valid = {member.value for member in EduRoleSurveyResponse}
+    # `isinstance` first: an unhashable value (a dict or a list from a JSON
+    # request body) raises TypeError from the set lookup itself, which the view
+    # would turn into a 400 whose body reads "unhashable type: 'dict'" instead
+    # of the message below.
+    if not isinstance(response, str) or response not in valid:
+        options = ", ".join(sorted(valid))
+        message = f"instructor_survey_response must be one of {options}"
+        raise TypeError(message)
+
+    return response
 
 
 def _validate_shortcuts_preferences(preferences):
