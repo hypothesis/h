@@ -1,5 +1,6 @@
 """Service definitions that handle business logic."""
 
+from h.services import edu_domains
 from h.services.annotation_authority_queue import AnnotationAuthorityQueueService
 from h.services.annotation_metadata import AnnotationMetadataService
 from h.services.annotation_read import AnnotationReadService
@@ -12,6 +13,7 @@ from h.services.bulk_api import (
     BulkLMSStatsService,
 )
 from h.services.checkpoint import CheckpointService
+from h.services.edu_domains import EduDomainsService
 from h.services.email import EmailService
 from h.services.http import HTTPService
 from h.services.job_queue import JobQueueService
@@ -186,6 +188,11 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     config.register_service_factory("h.services.email.factory", iface=EmailService)
     config.register_service_factory(
         "h.services.task_done.factory", iface=TaskDoneService
+    )
+    # A single instance rather than a factory: it downloads the list of EDU
+    # domains once, here, when the process starts.
+    config.register_service(
+        edu_domains.factory(config.registry.settings), iface=EduDomainsService
     )
 
     # Authentication-related services

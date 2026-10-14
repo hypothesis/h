@@ -25,7 +25,7 @@ class TestProfile:
         assert result == session_profile.return_value
 
 
-@pytest.mark.usefixtures("user_service", "session_profile")
+@pytest.mark.usefixtures("user_service", "session_profile", "edu_domains_service")
 class TestUpdatePreferences:
     def test_updates_preferences(self, pyramid_request, user, user_service):
         pyramid_request.json_body = {"preferences": {"show_sidebar_tutorial": True}}

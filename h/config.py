@@ -118,6 +118,16 @@ def configure(environ=None, settings=None):  # noqa: PLR0915
 
     settings_manager.set("h.websocket_url", "WEBSOCKET_URL")
 
+    # The reference list of EDU domains for the EDU role survey, which lives in
+    # a private repo (see h.services.edu_domains). Without the token the list
+    # is empty and the survey is shown to nobody.
+    settings_manager.set(
+        "h.edu_domains_url",
+        "EDU_DOMAINS_URL",
+        default="https://api.github.com/repos/hypothesis/edu-domains/contents/edu_domains_hed.csv",
+    )
+    settings_manager.set("h.edu_domains_github_token", "EDU_DOMAINS_GITHUB_TOKEN")
+
     # Reporting settings
     settings_manager.set("h.report.fdw_users", "REPORT_FDW_USERS", type_=aslist)
 

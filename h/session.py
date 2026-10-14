@@ -7,7 +7,7 @@ from pyramid.session import JSONSerializer, SignedCookieSessionFactory
 from h.models.user_survey_response import Survey
 from h.security import derive_key
 from h.security.policy.top_level import HTML_AUTHCOOKIE_MAX_AGE
-from h.util.edu_domains import is_edu_email
+from h.services.edu_domains import EduDomainsService
 
 
 def model(request):
@@ -183,7 +183,7 @@ def can_answer_edu_role_survey(request):
     if user.authority != request.default_authority:
         return False
 
-    return is_edu_email(user.email)
+    return request.find_service(EduDomainsService).is_edu_email(user.email)
 
 
 def show_edu_role_survey(request):
