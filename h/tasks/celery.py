@@ -82,6 +82,7 @@ celery.conf.update(
         "h.tasks.indexer",
         "h.tasks.job_queue",
         "h.tasks.email",
+        "h.tasks.hubspot",
         "h.tasks.url_migration",
         "h.tasks.task_done",
     ),

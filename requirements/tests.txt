@@ -30,6 +30,7 @@ celery==5.5.3
 certifi==2026.1.4
     # via
     #   -r prod.txt
+    #   hubspot-api-client
     #   requests
     #   sentry-sdk
 cffi==2.0.0
@@ -117,6 +118,8 @@ h-testkit==1.0.1
     # via -r tests.in
 httpretty==1.1.4
     # via -r tests.in
+hubspot-api-client==12.0.0
+    # via -r prod.txt
 hupper==1.12
     # via
     #   -r prod.txt
@@ -287,6 +290,7 @@ python-dateutil==2.9.0.post0
     #   elasticsearch-dsl
     #   faker
     #   freezegun
+    #   hubspot-api-client
 python-slugify==8.0.4
     # via -r prod.txt
 pytz==2025.2
@@ -302,7 +306,9 @@ repoze-sendmail==4.4.1
     #   -r prod.txt
     #   pyramid-mailer
 requests==2.32.4
-    # via -r prod.txt
+    # via
+    #   -r prod.txt
+    #   hubspot-api-client
 rfc3339-validator==0.1.4
     # via -r prod.txt
 rpds-py==0.30.0
@@ -318,6 +324,7 @@ six==1.17.0
     # via
     #   -r prod.txt
     #   elasticsearch-dsl
+    #   hubspot-api-client
     #   python-dateutil
     #   rfc3339-validator
 sqlalchemy==2.0.25
@@ -368,6 +375,7 @@ urllib3==2.7.0
     # via
     #   -r prod.txt
     #   elasticsearch
+    #   hubspot-api-client
     #   requests
     #   sentry-sdk
 venusian==3.1.1

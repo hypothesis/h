@@ -75,8 +75,8 @@ class UserSurveyResponse(Base):
     #: When the user gave `response`.
     responded_at = sa.Column(sa.DateTime(), nullable=False)
 
-    #: When this answer was last sent to HubSpot. Written by the daily HubSpot
-    #: sync, and NULL until that sync exists.
+    #: When this answer was last sent to HubSpot, by
+    #: `HubSpotService.sync_edu_role_contacts`. NULL if it hasn't been sent.
     hubspot_synced_at = sa.Column(sa.DateTime(), nullable=True)
 
     def __repr__(self):

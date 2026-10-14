@@ -16,6 +16,7 @@ from h.services.checkpoint import CheckpointService
 from h.services.edu_domains import EduDomainsService
 from h.services.email import EmailService
 from h.services.http import HTTPService
+from h.services.hubspot import HubSpotService
 from h.services.job_queue import JobQueueService
 from h.services.jwt import JWTService
 from h.services.mention import MentionService
@@ -189,6 +190,7 @@ def includeme(config):  # pragma: no cover  # noqa: PLR0915
     config.register_service_factory(
         "h.services.task_done.factory", iface=TaskDoneService
     )
+    config.register_service_factory("h.services.hubspot.factory", iface=HubSpotService)
     # A single instance rather than a factory: it downloads the list of EDU
     # domains once, here, when the process starts.
     config.register_service(
