@@ -1,12 +1,16 @@
+from datetime import datetime, timedelta
 from unittest import mock
 
 import pytest
+from freezegun import freeze_time
 
 from h import session
 from h.models import UserSurveyResponse
 from h.services.edu_domains import EduDomainsService
 from h.services.group_list import GroupListService
 from h.util.edu_domains import is_edu_email
+
+NOW = datetime(2026, 10, 13)  # noqa: DTZ001
 
 
 class TestModel:
@@ -245,13 +249,63 @@ class TestProfile:
     def test_instructor_survey_hidden_once_answered(
         self, authenticated_request, response
     ):
-        # All three are answers. "not_instructor" and "dismissed" must stop us
-        # asking again just like "instructor" does.
+        # All three are answers. "not_instructor" and a recent "dismissed"
+        # must stop us asking again just like "instructor" does.
         authenticated_request.set_edu_role_survey(response)
 
         preferences = session.profile(authenticated_request)["preferences"]
 
         assert "show_instructor_survey" not in preferences
+
+    @freeze_time(NOW)
+    @pytest.mark.parametrize(
+        "response,days_ago,shown",
+        [
+            ("dismissed", 31, True),
+            ("dismissed", 29, False),
+            ("instructor", 31, False),
+            ("not_instructor", 31, False),
+        ],
+    )
+    def test_instructor_survey_asked_again_after_a_dismissal(
+        self, authenticated_request, response, days_ago, shown
+    ):
+        authenticated_request.set_edu_role_survey(
+            response, responded_at=NOW - timedelta(days=days_ago)
+        )
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert preferences.get("show_instructor_survey", False) is shown
+
+    @freeze_time(NOW)
+    def test_instructor_survey_not_asked_again_when_flag_is_off(
+        self, authenticated_request
+    ):
+        authenticated_request.set_edu_role_survey(
+            "dismissed", responded_at=NOW - timedelta(days=365)
+        )
+        authenticated_request.set_features({"instructor_survey_ask_again": False})
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert "show_instructor_survey" not in preferences
+
+    @freeze_time(NOW)
+    @pytest.mark.parametrize("days_ago,shown", [(8, True), (6, False)])
+    def test_instructor_survey_asked_again_after_the_configured_days(
+        self, authenticated_request, days_ago, shown
+    ):
+        authenticated_request.registry.settings[
+            "h.edu_role_survey_ask_again_after_days"
+        ] = 7
+        authenticated_request.set_edu_role_survey(
+            "dismissed", responded_at=NOW - timedelta(days=days_ago)
+        )
+
+        preferences = session.profile(authenticated_request)["preferences"]
+
+        assert preferences.get("show_instructor_survey", False) is shown
 
     def test_instructor_survey_hidden_when_flag_is_off(self, authenticated_request):
         # The flag is the kill switch: with it off, h must stop sending the
@@ -432,6 +486,9 @@ class FakeRequest:
             )
 
         self.feature = fake_feature
+        self.registry = mock.Mock(
+            settings={"h.edu_role_survey_ask_again_after_days": 30}
+        )
         self.route_url = mock.Mock(return_value="/group/a")
         self.session = mock.Mock()
 
@@ -454,11 +511,19 @@ class FakeRequest:
     def set_youtube_gdpr_banner_dismissed(self, dismissed):
         self.user.youtube_gdpr_banner_dismissed = dismissed
 
-    def set_edu_role_survey(self, response, email="someone@stanford.edu"):
+    def set_edu_role_survey(
+        self, response, email="someone@stanford.edu", responded_at=None
+    ):
         self.user.survey_responses = (
             []
             if response is None
-            else [UserSurveyResponse(survey="edu_role", response=response)]
+            else [
+                UserSurveyResponse(
+                    survey="edu_role",
+                    response=response,
+                    responded_at=responded_at or datetime.utcnow(),  # noqa: DTZ003
+                )
+            ]
         )
         self.user.email = email
 
