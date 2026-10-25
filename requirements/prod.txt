@@ -20,7 +20,7 @@ bleach==6.2.0
     # via -r prod.in
 celery==5.5.3
     # via -r prod.in
-certifi==2026.1.4
+certifi==2026.10.19
     # via
     #   -r prod.in
     #   hubspot-api-client
