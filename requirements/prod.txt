@@ -307,7 +307,7 @@ zope-sqlalchemy==4.0
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
     # via -r prod.in
-setuptools==78.1.1
+setuptools==84.1.0
     # via
     #   pyramid
     #   repoze-sendmail
