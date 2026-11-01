@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import subprocess
 from subprocess import DEVNULL
 
@@ -21,7 +21,7 @@ def fetch_git_ref():
 
 def fetch_git_date(ref):
     output = subprocess.check_output(["git", "show", "-s", "--format=%ct", ref])  # noqa: S603, S607
-    return datetime.datetime.fromtimestamp(int(output))  # noqa: DTZ006
+    return dt.datetime.fromtimestamp(int(output))  # noqa: DTZ006
 
 
 def fetch_git_dirty():
@@ -44,7 +44,7 @@ def git_version():
 
 def git_archive_version():  # pragma: no cover
     ref = VERSION_GIT_REF
-    date = datetime.datetime.fromtimestamp(int(VERSION_GIT_DATE))  # noqa: DTZ006
+    date = dt.datetime.fromtimestamp(int(VERSION_GIT_DATE))  # noqa: DTZ006
     return pep440_version(date, ref)
 
 
