@@ -115,7 +115,9 @@ class TestJWTAuthorizationGrantValidateTokenRequest:
             grant.validate_token_request(oauth_request)
 
     def test_verifies_grant_token(self, grant, oauth_request):
-        oauth_request.client.authclient.secret = "bogus"  # noqa: S105
+        oauth_request.client.authclient.secret = (
+            "bogus-secret-that-is-at-least-32-bytes-long"  # noqa: S105
+        )
 
         with pytest.raises(errors.InvalidGrantError) as exc:
             grant.validate_token_request(oauth_request)
