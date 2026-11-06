@@ -13,7 +13,7 @@
     "typecheck": "tsc --build h/static/scripts/tsconfig.json"
   },
   "dependencies": {
-    "@babel/core": "^7.28.3",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.27.1",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.27.0",
@@ -28,7 +28,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "bootstrap": "^4.6.2",
     "classnames": "^2.5.1",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.17",
     "escape-html": "^1.0.3",
     "gulp": "^5.0.1",
     "gulp-changed": "^5.0.3",
@@ -36,10 +36,10 @@
     "gulp-if": "^3.0.0",
     "gulp-svgmin": "^4.1.0",
     "jquery": "^3.7.1",
-    "katex": "^0.16.22",
+    "katex": "^0.18.2",
     "normalize.css": "^8.0.0",
     "popper.js": "^1.16.1",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.23",
     "preact": "^10.27.3",
     "rollup": "^4.59.0",
     "sass": "^1.94.2",
@@ -51,9 +51,9 @@
   "devDependencies": {
     "@hypothesis/frontend-testing": "^1.7.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@vitest/browser": "^4.1.9",
-    "@vitest/browser-playwright": "^4.1.9",
-    "@vitest/coverage-istanbul": "^4.1.9",
+    "@vitest/browser": "^4.1.12",
+    "@vitest/browser-playwright": "^4.1.12",
+    "@vitest/coverage-istanbul": "^4.1.12",
     "@vitest/eslint-plugin": "^1.6.20",
     "babel-plugin-istanbul": "^7.0.1",
     "babel-plugin-mockable-imports": "^2.0.1",
@@ -72,7 +72,7 @@
     "syn": "^0.2.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.16.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.12"
   },
   "engines": {
     "node": ">=6"
@@ -100,8 +100,8 @@
   },
   "packageManager": "yarn@3.6.1",
   "resolutions": {
-    "tar": "7.5.16",
-    "serialize-javascript": "7.0.5",
+    "tar": "7.5.22",
+    "serialize-javascript": "7.1.4",
     "lodash": "4.18.0",
     "minimatch@^3.0.3": "3.1.4",
     "minimatch@^3.0.4": "3.1.4",
@@ -116,7 +116,7 @@
     "picomatch@^2.3.1": "2.3.2",
     "picomatch@^4.0.2": "4.0.4",
     "picomatch@^4.0.3": "4.0.4",
-    "brace-expansion@^1.1.7": "1.1.13",
+    "brace-expansion@^1.1.7": "1.1.21",
     "brace-expansion@^2.0.1": "2.0.3"
   }
 }
