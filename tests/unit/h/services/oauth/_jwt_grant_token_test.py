@@ -15,6 +15,11 @@ from h.services.oauth._errors import (
 )
 from h.services.oauth._jwt_grant_token import JWTGrantToken, VerifiedJWTGrantToken
 
+# PyJWT warns about HMAC keys shorter than the hash output size (32 bytes for
+# HS256, 64 bytes for HS512), so use keys that are long enough for HS512.
+SECRET = "top-secret-key-for-tests-that-is-at-least-64-bytes-long-for-hs512"  # noqa: S105
+WRONG_SECRET = "wrong-secret-key-for-tests-that-is-at-least-64-bytes-long-for-hs512"  # noqa: S105
+
 
 class TestJWTGrantToken:
     def test_init_decodes_token_without_verifying(self, patch):
@@ -55,9 +60,9 @@ class TestJWTGrantToken:
         jwttok = jwt_token({"iss": "test-issuer"})
         grant_token = JWTGrantToken(jwttok)
 
-        grant_token.verified("top-secret", "test-audience")
+        grant_token.verified(SECRET, "test-audience")
 
-        verified_token.assert_called_once_with(jwttok, "top-secret", "test-audience")
+        verified_token.assert_called_once_with(jwttok, SECRET, "test-audience")
 
     def test_verified_returns_verified_token(self, patch):
         verified_token = patch(
@@ -67,7 +72,7 @@ class TestJWTGrantToken:
         jwttok = jwt_token({"iss": "test-issuer"})
         grant_token = JWTGrantToken(jwttok)
 
-        actual = grant_token.verified("top-secret", "test-audience")
+        actual = grant_token.verified(SECRET, "test-audience")
         assert actual == verified_token.return_value
 
 
@@ -75,7 +80,7 @@ class TestVerifiedJWTGrantToken:
     def test_init_returns_token_when_valid(self, claims):
         jwttok = jwt_token(claims)
 
-        actual = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        actual = VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
         assert isinstance(actual, VerifiedJWTGrantToken)
 
     def test_init_raises_for_none_key(self, claims):
@@ -94,7 +99,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert exc.value.description == "Grant token lifetime is too long."
 
@@ -102,7 +107,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, "wrong-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, WRONG_SECRET, "test-audience")
 
         assert exc.value.description == "Invalid grant token signature."
 
@@ -110,7 +115,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims, alg="HS512")
 
         with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert exc.value.description == "Invalid grant token signature algorithm."
 
@@ -123,7 +128,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert (
             exc.value.description
@@ -135,7 +140,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidJWTGrantTokenClaimError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert exc.value.description == "Invalid claim 'aud' (audience) in grant token."
 
@@ -147,7 +152,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidJWTGrantTokenClaimError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert (
             exc.value.description
@@ -158,14 +163,14 @@ class TestVerifiedJWTGrantToken:
         claims["exp"] = epoch(delta=timedelta(seconds=-8))
         jwttok = jwt_token(claims)
 
-        VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
     def test_init_raises_when_expired_with_leeway(self, claims):
         claims["exp"] = epoch(delta=timedelta(minutes=-2))
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert exc.value.description == "Grant token is expired."
 
@@ -174,7 +179,7 @@ class TestVerifiedJWTGrantToken:
         jwttok = jwt_token(claims)
 
         with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+            VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert exc.value.description == "Grant token is not yet valid."
 
@@ -185,7 +190,7 @@ class TestVerifiedJWTGrantToken:
         claims["exp"] = epoch(timestamp=now, delta=delta)
         jwttok = jwt_token(claims)
 
-        grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        grant_token = VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert grant_token.expiry == (now + delta)
 
@@ -196,14 +201,14 @@ class TestVerifiedJWTGrantToken:
         claims["nbf"] = epoch(timestamp=now, delta=delta)
         jwttok = jwt_token(claims)
 
-        grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        grant_token = VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert grant_token.not_before == (now + delta)
 
     def test_subject_returns_sub_claim(self, claims):
         jwttok = jwt_token(claims)
 
-        grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        grant_token = VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
 
         assert grant_token.subject == "test-subject"
 
@@ -211,7 +216,7 @@ class TestVerifiedJWTGrantToken:
         del claims["sub"]
         jwttok = jwt_token(claims)
 
-        grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        grant_token = VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
         with pytest.raises(InvalidGrantError) as exc:
             _ = grant_token.subject
 
@@ -223,7 +228,7 @@ class TestVerifiedJWTGrantToken:
         claims["sub"] = ""
         jwttok = jwt_token(claims)
 
-        grant_token = VerifiedJWTGrantToken(jwttok, "top-secret", "test-audience")
+        grant_token = VerifiedJWTGrantToken(jwttok, SECRET, "test-audience")
         with pytest.raises(InvalidGrantError) as exc:
             _ = grant_token.subject
 
@@ -255,4 +260,4 @@ def epoch(timestamp=None, delta=None):
 
 
 def jwt_token(claims, alg="HS256"):
-    return jwt.encode(claims, "top-secret", algorithm=alg)
+    return jwt.encode(claims, SECRET, algorithm=alg)
