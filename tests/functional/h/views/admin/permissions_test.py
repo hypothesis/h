@@ -19,12 +19,12 @@ class TestAdminPermissions:
     )
 
     @pytest.mark.usefixtures("with_logged_in_user")
-    @pytest.mark.parametrize("url", (page[0] for page in PAGES))
+    @pytest.mark.parametrize("url", [page[0] for page in PAGES])
     def test_not_accessible_by_regular_user(self, app, url):
         app.get(url, status=404)
 
     @pytest.mark.usefixtures("with_logged_in_admin")
-    @pytest.mark.parametrize("url", (page[0] for page in PAGES))
+    @pytest.mark.parametrize("url", [page[0] for page in PAGES])
     def test_accessible_by_admin(self, app, url):
         app.get(url)
 
