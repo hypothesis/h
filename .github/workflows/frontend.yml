@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
 jobs:
   Frontend:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest is now Ubuntu 26.04, where the Playwright version we
+    # use cannot install Chromium. Go back to ubuntu-latest after upgrading it.
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@v3
