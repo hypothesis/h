@@ -38,6 +38,10 @@ FEATURES = {
         "EDU_ROLE_SURVEY_ASK_AGAIN_AFTER_DAYS days have passed. Only has an "
         "effect while instructor_survey is on"
     ),
+    "annotation_editor_info": (
+        "Show the 'About the Annotation editor' help link above the annotation "
+        "editor in the client (WCAG 3.3.2)"
+    ),
 }
 
 
